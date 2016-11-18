@@ -1,10 +1,13 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "walletframe.h"
 
-#include "bitcoingui.h"
+#include "darksilkgui.h"
 #include "walletview.h"
 
 #include <cstdio>
@@ -12,7 +15,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-WalletFrame::WalletFrame(const PlatformStyle *platformStyle, BitcoinGUI *_gui) :
+WalletFrame::WalletFrame(const PlatformStyle *platformStyle, DarkSilkGUI *_gui) :
     QFrame(_gui),
     gui(_gui),
     platformStyle(platformStyle)
@@ -44,7 +47,7 @@ bool WalletFrame::addWallet(const QString& name, WalletModel *walletModel)
         return false;
 
     WalletView *walletView = new WalletView(platformStyle, this);
-    walletView->setBitcoinGUI(gui);
+    walletView->setDarkSilkGUI(gui);
     walletView->setClientModel(clientModel);
     walletView->setWalletModel(walletModel);
     walletView->showOutOfSyncWarning(bOutOfSync);
@@ -120,11 +123,11 @@ void WalletFrame::gotoHistoryPage()
         i.value()->gotoHistoryPage();
 }
 
-void WalletFrame::gotoMasternodePage()
+void WalletFrame::gotoStormnodePage()
 {
     QMap<QString, WalletView*>::const_iterator i;
     for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
-        i.value()->gotoMasternodePage();
+        i.value()->gotoStormnodePage();
 }
 
 void WalletFrame::gotoReceiveCoinsPage()

@@ -8,7 +8,7 @@
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
 #include "main.h"
-#include "masternode-payments.h"
+#include "stormnode-payments.h"
 #include "miner.h"
 #include "pubkey.h"
 #include "script/standard.h"
@@ -17,7 +17,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include "test/test_dash.h"
+#include "test/test_darksilk.h"
 
 #include <boost/test/unit_test.hpp>
 

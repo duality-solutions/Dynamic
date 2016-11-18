@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MasternodeList</class>
- <widget class="QWidget" name="MasternodeList">
+ <class>StormnodeList</class>
+ <widget class="QWidget" name="StormnodeList">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -49,9 +49,9 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tabMyMasternodes">
+       <widget class="QWidget" name="tabMyStormnodes">
         <attribute name="title">
-         <string>My Masternodes</string>
+         <string>My Stormnodes</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
@@ -67,14 +67,14 @@
              <item>
               <widget class="QLabel" name="updateNote">
                <property name="text">
-                <string>Note: Status of your masternodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see "MISSING" in "Status" field.</string>
+                <string>Note: Status of your stormnodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see "MISSING" in "Status" field.</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QTableWidget" name="tableWidgetMyMasternodes">
+            <widget class="QTableWidget" name="tableWidgetMyStormnodes">
              <property name="minimumSize">
               <size>
                <width>695</width>
@@ -205,13 +205,13 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tabAllMasternodes">
+       <widget class="QWidget" name="tabAllStormnodes">
         <attribute name="title">
-         <string>All Masternodes</string>
+         <string>All Stormnodes</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout">
          <item row="1" column="0">
-          <widget class="QTableWidget" name="tableWidgetMasternodes">
+          <widget class="QTableWidget" name="tableWidgetStormnodes">
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
@@ -277,7 +277,7 @@
            <item>
             <widget class="QLineEdit" name="filterLineEdit">
              <property name="toolTip">
-              <string>Filter masternode list</string>
+              <string>Filter stormnode list</string>
              </property>
             </widget>
            </item>

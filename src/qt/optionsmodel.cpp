@@ -1,6 +1,8 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
@@ -9,11 +11,11 @@
 
 #include "optionsmodel.h"
 
-#include "bitcoinunits.h"
+#include "darksilkunits.h"
 #include "guiutil.h"
 
 #include "amount.h"
-#include "darksend.h"
+#include "sandstorm.h"
 #include "init.h"
 #include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
@@ -22,7 +24,7 @@
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-#include "masternodeconfig.h"
+#include "stormnodeconfig.h"
 #endif
 
 #include <QNetworkProxy>
@@ -66,7 +68,7 @@ void OptionsModel::Init(bool resetSettings)
 
     // Display
     if (!settings.contains("nDisplayUnit"))
-        settings.setValue("nDisplayUnit", BitcoinUnits::DASH);
+        settings.setValue("nDisplayUnit", DarkSilkUnits::DSLK);
     nDisplayUnit = settings.value("nDisplayUnit").toInt();
 
     if (!settings.contains("strThirdPartyTxUrls"))
@@ -82,8 +84,8 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("theme"))
         settings.setValue("theme", "");
 
-    if (!settings.contains("fShowMasternodesTab"))
-        settings.setValue("fShowMasternodesTab", masternodeConfig.getCount());
+    if (!settings.contains("fShowStormnodesTab"))
+        settings.setValue("fShowStormnodesTab", stormnodeConfig.getCount());
 
     if (!settings.contains("fShowAdvancedPSUI"))
         settings.setValue("fShowAdvancedPSUI", false);
@@ -127,10 +129,10 @@ void OptionsModel::Init(bool resetSettings)
 
     if (!settings.contains("nPrivateSendAmount")) {
         // for migration from old settings
-        if (!settings.contains("nAnonymizeDashAmount"))
+        if (!settings.contains("nAnonymizeDarkSilkAmount"))
             settings.setValue("nPrivateSendAmount", DEFAULT_PRIVATESEND_AMOUNT);
         else
-            settings.setValue("nPrivateSendAmount", settings.value("nAnonymizeDashAmount").toInt());
+            settings.setValue("nPrivateSendAmount", settings.value("nAnonymizeDarkSilkAmount").toInt());
     }
     if (!SoftSetArg("-privatesendamount", settings.value("nPrivateSendAmount").toString().toStdString()))
         addOverriddenOption("-privatesendamount");
@@ -189,7 +191,7 @@ void OptionsModel::Reset()
 
     // Remove all entries from our QSettings object
     settings.clear();
-    resetSettings = true; // Needed in dash.cpp during shotdown to also remove the window positions
+    resetSettings = true; // Needed in darksilk.cpp during shotdown to also remove the window positions
 
     // default setting for OptionsModel::StartAtStartup - disabled
     if (GUIUtil::GetStartOnSystemStartup())
@@ -253,8 +255,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
 #ifdef ENABLE_WALLET
         case SpendZeroConfChange:
             return settings.value("bSpendZeroConfChange");
-        case ShowMasternodesTab:
-            return settings.value("fShowMasternodesTab");
+        case ShowStormnodesTab:
+            return settings.value("fShowStormnodesTab");
         case ShowAdvancedPSUI:
             return fShowAdvancedPSUI;
         case LowKeysWarning:
@@ -387,9 +389,9 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
-        case ShowMasternodesTab:
-            if (settings.value("fShowMasternodesTab") != value) {
-                settings.setValue("fShowMasternodesTab", value);
+        case ShowStormnodesTab:
+            if (settings.value("fShowStormnodesTab") != value) {
+                settings.setValue("fShowStormnodesTab", value);
                 setRestartRequired(true);
             }
             break;

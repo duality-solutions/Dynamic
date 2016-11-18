@@ -470,7 +470,7 @@ public:
         tx = txIn; i = iIn; nDepth = nDepthIn; fSpendable = fSpendableIn;
     }
 
-    //Used with Darksend. Will return largest nondenom, then denominations, then very small inputs
+    //Used with Sandstorm. Will return largest nondenom, then denominations, then very small inputs
     int Priority() const;
 
     std::string ToString() const;

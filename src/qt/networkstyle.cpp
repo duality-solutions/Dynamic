@@ -1,6 +1,8 @@
-// Copyright (c) 2014 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "networkstyle.h"
@@ -42,7 +44,7 @@ void NetworkStyle::rotateColors(QImage& img, const int iconColorHueShift, const 
             col.getHsl(&h,&s,&l);
 
             // rotate color on RGB color circle
-            // 70° should end up with the typical "testnet" green (in bitcoin)
+            // 70° should end up with the typical "testnet" green
             h+=iconColorHueShift;
 
             // change saturation value
@@ -67,7 +69,7 @@ NetworkStyle::NetworkStyle(const QString &appName, const int iconColorHueShift, 
     // Grab theme from settings
     QString theme = GUIUtil::getThemeName();
     // load pixmap
-    QPixmap appIconPixmap(":/icons/bitcoin");
+    QPixmap appIconPixmap(":/icons/darksilk");
     QPixmap splashImagePixmap(":/images/" + theme + "/splash");
 
     if(iconColorHueShift != 0 && iconColorSaturationReduction != 0)

@@ -58,12 +58,12 @@
         <translation>Mottagaradresser</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>De här är dina Dash-adresser för att skicka betalningar. Kontrollera alltid mängden och mottagaradressen innan du skickar mynt.</translation>
+        <source>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>De här är dina DarkSilk-adresser för att skicka betalningar. Kontrollera alltid mängden och mottagaradressen innan du skickar mynt.</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>De här är dina Dash-adresser för betalningsmottagningar. Det rekommenderas att använda en ny mottagaradress för varje transaktion.</translation>
+        <source>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>De här är dina DarkSilk-adresser för betalningsmottagningar. Det rekommenderas att använda en ny mottagaradress för varje transaktion.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -164,8 +164,8 @@
         <translation>Bekräfta plånbokskryptering</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</source>
-        <translation>Varning: Om du krypterar din plånbok och förlorar din lösenfras kommer du att &lt;b&gt;FÖRLORA ALLA DINA DASH&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</source>
+        <translation>Varning: Om du krypterar din plånbok och förlorar din lösenfras kommer du att &lt;b&gt;FÖRLORA ALLA DINA DSLK&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -176,8 +176,8 @@
         <translation>Plånbok krypterad</translation>
     </message>
     <message>
-        <source>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</source>
-        <translation>Dash kommer nu att färdigställa krypteringsprocessen. Kom ihåg att krypteringen av din plånbok inte kan skydda dig helt och hållet från att dina Dash stjäls av skadeprogram som har infekterat din dator.</translation>
+        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilk kommer nu att färdigställa krypteringsprocessen. Kom ihåg att krypteringen av din plånbok inte kan skydda dig helt och hållet från att dina DarkSilk stjäls av skadeprogram som har infekterat din dator.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -217,10 +217,10 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DarkSilkGUI</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core
 </translation>
     </message>
     <message>
@@ -244,16 +244,16 @@
         <translation>&amp;Skicka</translation>
     </message>
     <message>
-        <source>Send coins to a Dash address</source>
-        <translation>Skicka mynt till en Dash-adress</translation>
+        <source>Send coins to a DarkSilk address</source>
+        <translation>Skicka mynt till en DarkSilk-adress</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
         <translation>&amp;Motta</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and dash: URIs)</source>
-        <translation>Begär betalningar (genererar QR-koder och Dash:-URI:s)</translation>
+        <source>Request payments (generates QR codes and darksilk: URIs)</source>
+        <translation>Begär betalningar (genererar QR-koder och DarkSilk:-URI:s)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -272,8 +272,8 @@
         <translation>Avsluta applikationen</translation>
     </message>
     <message>
-        <source>&amp;About Dash Core</source>
-        <translation>&amp;Om Dash Core</translation>
+        <source>&amp;About DarkSilk Core</source>
+        <translation>&amp;Om DarkSilk Core</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -288,8 +288,8 @@
         <translation>&amp;Alternativ...</translation>
     </message>
     <message>
-        <source>Modify configuration options for Dash</source>
-        <translation>Anpassa konfigurationsalternatv för Dash</translation>
+        <source>Modify configuration options for DarkSilk</source>
+        <translation>Anpassa konfigurationsalternatv för DarkSilk</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -340,16 +340,16 @@
         <translation>Signera &amp;meddelande...</translation>
     </message>
     <message>
-        <source>Sign messages with your Dash addresses to prove you own them</source>
-        <translation>Signera meddelanden med dina Dash-adresser för att bevisa att du äger dem</translation>
+        <source>Sign messages with your DarkSilk addresses to prove you own them</source>
+        <translation>Signera meddelanden med dina DarkSilk-adresser för att bevisa att du äger dem</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
         <translation>&amp;Bekräfta meddelande...</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Dash addresses</source>
-        <translation>Bekräfta meddelanden för att garantera att de signerades med de angivna Dash-adresserna</translation>
+        <source>Verify messages to ensure they were signed with specified DarkSilk addresses</source>
+        <translation>Bekräfta meddelanden för att garantera att de signerades med de angivna DarkSilk-adresserna</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -404,16 +404,16 @@
         <translation>Öppna &amp;URI...</translation>
     </message>
     <message>
-        <source>Open a dash: URI or payment request</source>
-        <translation>Öppna en Dash-URI eller betalningsbegäran</translation>
+        <source>Open a darksilk: URI or payment request</source>
+        <translation>Öppna en DarkSilk-URI eller betalningsbegäran</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Kommandoradalternativ</translation>
     </message>
     <message>
-        <source>Show the Dash Core help message to get a list with possible Dash command-line options</source>
-        <translation>Visa Dash Core-hjälpmeddelandet för att få en lista med möjliga Dash-kommandoradalternativ</translation>
+        <source>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</source>
+        <translation>Visa DarkSilk Core-hjälpmeddelandet för att få en lista med möjliga DarkSilk-kommandoradalternativ</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -736,10 +736,10 @@ Adress: %4
     </message>
 </context>
 <context>
-    <name>DarksendConfig</name>
+    <name>SandstormConfig</name>
     <message>
-        <source>Configure Darksend</source>
-        <translation>Konfigurera Darksend</translation>
+        <source>Configure Sandstorm</source>
+        <translation>Konfigurera Sandstorm</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -758,48 +758,48 @@ Adress: %4
         <translation>Vänligen välj en integritetsnivå.</translation>
     </message>
     <message>
-        <source>Use 2 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Använd 2 enskilda masternoder för att mixa medel upp till 1000 DASH</translation>
+        <source>Use 2 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Använd 2 enskilda stormnoder för att mixa medel upp till 1000 DSLK</translation>
     </message>
     <message>
-        <source>Use 8 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Använd 8 enskilda masternoder för att mixa medel upp till 1000 DASH.</translation>
+        <source>Use 8 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Använd 8 enskilda stormnoder för att mixa medel upp till 1000 DSLK.</translation>
     </message>
     <message>
-        <source>Use 16 separate masternodes</source>
-        <translation>Använd 16 enskilda masternoder</translation>
+        <source>Use 16 separate stormnodes</source>
+        <translation>Använd 16 enskilda stormnoder</translation>
     </message>
     <message>
-        <source>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</source>
-        <translation>Detta alternativ är det snabbaste och kommer att kosta omkring ~0,025 DASH för att anonymisera 1000 DASH</translation>
+        <source>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</source>
+        <translation>Detta alternativ är det snabbaste och kommer att kosta omkring ~0,025 DSLK för att anonymisera 1000 DSLK</translation>
     </message>
     <message>
-        <source>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</source>
-        <translation>Detta alternativ är relativt snabbt och kommer att kosta omkring 0,05 DASH för att anonymisera 1000 DASH</translation>
+        <source>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</source>
+        <translation>Detta alternativ är relativt snabbt och kommer att kosta omkring 0,05 DSLK för att anonymisera 1000 DSLK</translation>
     </message>
     <message>
-        <source>0.1 DASH per 1000 DASH you anonymize.</source>
-        <translation>0,1 DASH per 1000 DASH du anonymiserar.</translation>
+        <source>0.1 DSLK per 1000 DSLK you anonymize.</source>
+        <translation>0,1 DSLK per 1000 DSLK du anonymiserar.</translation>
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
         <translation>Detta är det långsammaste och det säkraste alternativet. Användning av maximal anonymitet kommer att kosta</translation>
     </message>
     <message>
-        <source>Darksend Configuration</source>
-        <translation>Darksend-konfiguration</translation>
+        <source>Sandstorm Configuration</source>
+        <translation>Sandstorm-konfiguration</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna Dash:s konfigurationsskärm.</translation>
+        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna Dash:s konfigurationsskärm.</translation>
+        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna Dash:s konfigurationsskärm</translation>
+        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm</translation>
     </message>
 </context>
 <context>
@@ -841,8 +841,8 @@ Adress: %4
         <translation>Redigera avsändaradress</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dash address.</source>
-        <translation>Den angivna adressen "%1" är inte en giltig Dash-adress.</translation>
+        <source>The entered address "%1" is not a valid DarkSilk address.</source>
+        <translation>Den angivna adressen "%1" är inte en giltig DarkSilk-adress.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -883,8 +883,8 @@ Adress: %4
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core
 </translation>
     </message>
     <message>
@@ -931,16 +931,16 @@ Adress: %4
         <translation>Välkommen</translation>
     </message>
     <message>
-        <source>Welcome to Dash Core.</source>
-        <translation>Välkommen till Dash Core.</translation>
+        <source>Welcome to DarkSilk Core.</source>
+        <translation>Välkommen till DarkSilk Core.</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where Dash Core will store its data.</source>
-        <translation>Då detta är första gången programmet startas kan du välja var Dash Core ska lagra sin data.</translation>
+        <source>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</source>
+        <translation>Då detta är första gången programmet startas kan du välja var DarkSilk Core ska lagra sin data.</translation>
     </message>
     <message>
-        <source>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>Dash Core kommer att laddas ned och lagra en kopia av Dash:s blockkedja. Minst %1 GB data kommer att lagras i denna katalog och den kommer att växa med tiden. Plånboken kommer också att lagras i denna katalog.</translation>
+        <source>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>DarkSilk Core kommer att laddas ned och lagra en kopia av DarkSilk:s blockkedja. Minst %1 GB data kommer att lagras i denna katalog och den kommer att växa med tiden. Plånboken kommer också att lagras i denna katalog.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -989,12 +989,12 @@ Adress: %4
         <translation>&amp;Huvud</translation>
     </message>
     <message>
-        <source>Automatically start Dash after logging in to the system.</source>
-        <translation>Starta Dash automatiskt efter systeminloggning.</translation>
+        <source>Automatically start DarkSilk after logging in to the system.</source>
+        <translation>Starta DarkSilk automatiskt efter systeminloggning.</translation>
     </message>
     <message>
-        <source>&amp;Start Dash on system login</source>
-        <translation>&amp;Starta Dash vid systeminloggning</translation>
+        <source>&amp;Start DarkSilk on system login</source>
+        <translation>&amp;Starta DarkSilk vid systeminloggning</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -1013,16 +1013,16 @@ Adress: %4
         <translation>(0 = auto, &lt;0 = lämna så många kärnor lediga)</translation>
     </message>
     <message>
-        <source>Darksend rounds to use</source>
-        <translation>Darksend-omgångar att använda</translation>
+        <source>Sandstorm rounds to use</source>
+        <translation>Sandstorm-omgångar att använda</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Darksend once it's reached.</source>
-        <translation>Denna mängd fungerar som en tröskel att stänga av Darksend då det har uppnåtts.</translation>
+        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <translation>Denna mängd fungerar som en tröskel att stänga av Sandstorm då det har uppnåtts.</translation>
     </message>
     <message>
-        <source>Amount of Dash to keep anonymized</source>
-        <translation>Mängd Dash att bibehålla anonymiserade</translation>
+        <source>Amount of DarkSilk to keep anonymized</source>
+        <translation>Mängd DarkSilk att bibehålla anonymiserade</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -1049,8 +1049,8 @@ Adress: %4
         <translation>&amp;Nätverk</translation>
     </message>
     <message>
-        <source>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Öppna Dash:s klientport automatiskt på routern. Detta fungerar bara om din router stöder UPnP och är aktiverad.</translation>
+        <source>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Öppna DarkSilk:s klientport automatiskt på routern. Detta fungerar bara om din router stöder UPnP och är aktiverad.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1101,14 +1101,14 @@ Adress: %4
         <translation>Användargränssnitt&amp;språk: </translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Dash.</source>
-        <translation>Användargränssnittspråket kan ställas in här. Denna inställning träder i kraft efter att Dash startats om.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</source>
+        <translation>Användargränssnittspråket kan ställas in här. Denna inställning träder i kraft efter att DarkSilk startats om.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</source>
+https://www.transifex.com/projects/p/darksilk/</source>
         <translation>Fattas språk eller är det en ofullständig översättning? Hjälp till att bidra med översättningar här:
-https://www.transifex.com/projects/p/dash/</translation>
+https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
@@ -1182,8 +1182,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Formulär</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</source>
-        <translation>Den visade informationen kan vara utdaterad. Din plånbok synkroniseras automatiskt med Dash-nätverket efter att en anslutning har etablerats men denna process har ännu inte slutförts.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</source>
+        <translation>Den visade informationen kan vara utdaterad. Din plånbok synkroniseras automatiskt med DarkSilk-nätverket efter att en anslutning har etablerats men denna process har ännu inte slutförts.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1230,16 +1230,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Förlopp:</translation>
     </message>
     <message>
-        <source>Darksend Balance:</source>
-        <translation>Darksend-medel:</translation>
+        <source>Sandstorm Balance:</source>
+        <translation>Sandstorm-medel:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
         <translation>Mängd och omgångar:</translation>
     </message>
     <message>
-        <source>0 DASH / 0 Rounds</source>
-        <translation>0 DASH/0 omgångar</translation>
+        <source>0 DSLK / 0 Rounds</source>
+        <translation>0 DSLK/0 omgångar</translation>
     </message>
     <message>
         <source>Submitted Denom:</source>
@@ -1250,8 +1250,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>Start/Stop Mixing</source>
@@ -1262,16 +1262,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>(Senaste meddelande)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Darksend request.</source>
-        <translation>Försök att lämna in en Darksend-begäran manuellt.</translation>
+        <source>Try to manually submit a Sandstorm request.</source>
+        <translation>Försök att lämna in en Sandstorm-begäran manuellt.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Försök att mixa</translation>
     </message>
     <message>
-        <source>Reset the current status of Darksend (can interrupt Darksend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Återställ den nuvarande Darksend-statusen (kan störa Darksend om den håller på att mixa vilket kan kosta dig pengar!)</translation>
+        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Återställ den nuvarande Sandstorm-statusen (kan störa Sandstorm om den håller på att mixa vilket kan kosta dig pengar!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1286,12 +1286,12 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Inaktiverad</translation>
     </message>
     <message>
-        <source>Start Darksend Mixing</source>
-        <translation>Påbörja Darksend-mixning</translation>
+        <source>Start Sandstorm Mixing</source>
+        <translation>Påbörja Sandstorm-mixning</translation>
     </message>
     <message>
-        <source>Stop Darksend Mixing</source>
-        <translation>Stoppa Darksend-mixning</translation>
+        <source>Stop Sandstorm Mixing</source>
+        <translation>Stoppa Sandstorm-mixning</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1302,9 +1302,9 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Aktiverad</translation>
     </message>
     <message>
-        <source>Last Darksend message:
+        <source>Last Sandstorm message:
 </source>
-        <translation>Senaste Darksend-meddelande:
+        <translation>Senaste Sandstorm-meddelande:
 
 
 
@@ -1316,16 +1316,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Darksend was successfully reset.</source>
-        <translation>Darksend återställdes framgångsrikt.</translation>
+        <source>Sandstorm was successfully reset.</source>
+        <translation>Sandstorm återställdes framgångsrikt.</translation>
     </message>
     <message>
-        <source>Darksend requires at least %1 to use.</source>
-        <translation>Darksend kräver åtminstone %1 att använda.</translation>
+        <source>Sandstorm requires at least %1 to use.</source>
+        <translation>Sandstorm kräver åtminstone %1 att använda.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Darksend.</source>
-        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar Darksend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
+        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar Sandstorm.</translation>
     </message>
 </context>
 <context>
@@ -1335,8 +1335,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Fel vid betalningsbegäran</translation>
     </message>
     <message>
-        <source>Cannot start dash: click-to-pay handler</source>
-        <translation>Kan inte starta dash: klicka-för-att-betala hanterare</translation>
+        <source>Cannot start darksilk: click-to-pay handler</source>
+        <translation>Kan inte starta darksilk: klicka-för-att-betala hanterare</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1435,8 +1435,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Antal anslutningar</translation>
     </message>
     <message>
-        <source>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Öppna Dashs avsökningsloggfil från den nuvarande datakatalogen. Detta kan ta ett par sekunder för stora loggfiler.</translation>
+        <source>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Öppna DarkSilks avsökningsloggfil från den nuvarande datakatalogen. Detta kan ta ett par sekunder för stora loggfiler.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -1507,8 +1507,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ut:</translation>
     </message>
     <message>
-        <source>Welcome to the Dash RPC console.</source>
-        <translation>Välkommen till Dashs RPC-konsol.</translation>
+        <source>Welcome to the DarkSilk RPC console.</source>
+        <translation>Välkommen till DarkSilks RPC-konsol.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -1542,8 +1542,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Åt&amp;eranvänd en befintlig mottagaradress (rekommenderas inte)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Ett valfritt meddelande att bifoga betalningsbegärandet vilket kommer att visas när begärandet öppnas. Observera: Meddelandet kommer inte att skickas med betalningen över Dash-nätverket.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Ett valfritt meddelande att bifoga betalningsbegärandet vilket kommer att visas när begärandet öppnas. Observera: Meddelandet kommer inte att skickas med betalningen över DarkSilk-nätverket.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -1791,8 +1791,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Lägg till &amp;mottagare</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -1839,8 +1839,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>anonyma medel</translation>
     </message>
     <message>
-        <source>(darksend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(darksend kräver att denna mängd avrundas uppåt till närmaste %1)</translation>
+        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(sandstorm kräver att denna mängd avrundas uppåt till närmaste %1)</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -1899,8 +1899,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Fel: Plånboken låstes upp enbart för att anonymisera mynt.</translation>
     </message>
     <message>
-        <source>Warning: Invalid Dash address</source>
-        <translation>Varning: Ogiltig Dash-adress</translation>
+        <source>Warning: Invalid DarkSilk address</source>
+        <translation>Varning: Ogiltig DarkSilk-adress</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -1958,8 +1958,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Meddelande:</translation>
     </message>
     <message>
-        <source>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</source>
-        <translation>Ett meddelande som bifogades till Dash: URI vilket kommer att lagras med transaktionen så att du vet. Observera: Meddelandet kommer inte att skickas över Dash-nätverket.</translation>
+        <source>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</source>
+        <translation>Ett meddelande som bifogades till DarkSilk: URI vilket kommer att lagras med transaktionen så att du vet. Observera: Meddelandet kommer inte att skickas över DarkSilk-nätverket.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
@@ -1985,8 +1985,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Dash Core is shutting down...</source>
-        <translation>Dash Core stängs ned...</translation>
+        <source>DarkSilk Core is shutting down...</source>
+        <translation>DarkSilk Core stängs ned...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -2036,8 +2036,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Kopiera den nuvarande valda signaturen till systemurklippet</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Dash address</source>
-        <translation>Signera meddelandet för att bevisa att du äger denna Dash-adress</translation>
+        <source>Sign the message to prove you own this DarkSilk address</source>
+        <translation>Signera meddelandet för att bevisa att du äger denna DarkSilk-adress</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2060,8 +2060,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Skriv in signeringsadressen, meddelandet, (försäkra dig om att du kopierar linjeavbrott, mellanslag, flikar med mera) och signera nedtill för att verifiera meddelandet. Var försiktig med att inte läsa in mer i signaturen än vad som finns i det signerade meddelandet för att undvika att bli lurad av en mellanhandattack.</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Dash address</source>
-        <translation>Bekräfta meddelandet för att försäkra dig om att den signerades med den angivna Dash-adressen</translation>
+        <source>Verify the message to ensure it was signed with the specified DarkSilk address</source>
+        <translation>Bekräfta meddelandet för att försäkra dig om att den signerades med den angivna DarkSilk-adressen</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2127,8 +2127,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core
 </translation>
     </message>
     <message>
@@ -2140,8 +2140,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Bitcoin Core-utvecklarna</translation>
     </message>
     <message>
-        <source>The Dash Core developers</source>
-        <translation>Dash Core-utvecklarna</translation>
+        <source>The DarkSilk Core developers</source>
+        <translation>DarkSilk Core-utvecklarna</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -2384,8 +2384,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Mottagen från</translation>
     </message>
     <message>
-        <source>Received via Darksend</source>
-        <translation>Mottagen genom Darksend</translation>
+        <source>Received via Sandstorm</source>
+        <translation>Mottagen genom Sandstorm</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -2400,24 +2400,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Utvunnen</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Darksend-denomination</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm-denomination</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
+        <source>Sandstorm Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend-skapa säkerhetsinmatningar</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend-skapa denominationer</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm-skapa denominationer</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent-(skickat)</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed-(skickat)</translation>
     </message>
     <message>
         <source>(n/a)</source>
@@ -2483,23 +2483,23 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Skickad till</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent-(skickat)</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed-(skickat)</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend-skapa säkerhetsinmatningar</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend-skapa denominationer</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm-skapa denominationer</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Darksend-denomination</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm-denomination</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
+        <source>Sandstorm Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
@@ -2656,18 +2656,18 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
 </context>
 <context>
-    <name>dash-core</name>
+    <name>darksilk-core</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>Sammanbind till fastställd adress och avlyssna alltid den. Använd [host]:port-notation för IPv6</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</source>
-        <translation>Kan inte erhålla ett lås på datakatalog %s. Dash Core körs förmodligen redan.</translation>
+        <source>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</source>
+        <translation>Kan inte erhålla ett lås på datakatalog %s. DarkSilk Core körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Darksend använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
+        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Sandstorm använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -2718,16 +2718,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Detta är en förhandsutgiven testkompilering - använd på egen risk - använd inte för utvinning eller handlarapplikationer.</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. Dash Core is probably already running.</source>
-        <translation>Det går inte att binda till %s till denna dator. Dash Core körs förmodligen redan.</translation>
+        <source>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</source>
+        <translation>Det går inte att binda till %s till denna dator. DarkSilk Core körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend denominated funds for this transaction.</source>
-        <translation>Kunde inte hitta tillräckliga Darksend-denominationsmedel för denna transaktion.</translation>
+        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
+        <translation>Kunde inte hitta tillräckliga Sandstorm-denominationsmedel för denna transaktion.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Kunde inte hitta tillräckliga Darksend-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DASH.</translation>
+        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Kunde inte hitta tillräckliga Sandstorm-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -2750,8 +2750,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Varning: wallet.dat är korrumperad, data räddad! Den ursprungliga wallet.dat är sparad som wallet.{timestamp}.bak i %s; om ditt saldo eller transaktioner är felaktiga kanske du måste återställa från en säkerhetskopia.</translation>
     </message>
     <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Du måste specificera en masternodepriv-nyckel i konfigurationen. Vänligen se dokumentationen för hjälp.</translation>
+        <source>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</source>
+        <translation>Du måste specificera en stormnodepriv-nyckel i konfigurationen. Vänligen se dokumentationen för hjälp.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -2826,8 +2826,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Korrumperad blockdatabas upptäcktes</translation>
     </message>
     <message>
-        <source>Darksend options:</source>
-        <translation>Darksend-alternativ:</translation>
+        <source>Sandstorm options:</source>
+        <translation>Sandstorm-alternativ:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -2898,8 +2898,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Fel: Plånbok låst, kan inte skapa en transaktion!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Darksend pool</source>
-        <translation>Fel: Du har redan väntande inmatningar i Darksend-poolen</translation>
+        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <translation>Fel: Du har redan väntande inmatningar i Sandstorm-poolen</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -2942,8 +2942,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Information</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. Dash Core is shutting down.</source>
-        <translation>Initialiseringstillståndkontroll misslyckades. Dash Core stängs ned.</translation>
+        <source>Initialization sanity check failed. DarkSilk Core is shutting down.</source>
+        <translation>Initialiseringstillståndkontroll misslyckades. DarkSilk Core stängs ned.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
@@ -2978,8 +2978,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ogiltig mängd för -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Ogiltig masternodepriv-nyckel. Vänligen se dokumentationen.</translation>
+        <source>Invalid stormnodeprivkey. Please see documenation.</source>
+        <translation>Ogiltig stormnodepriv-nyckel. Vänligen se dokumentationen.</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
@@ -3002,8 +3002,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Bibehåll som mest &lt;n&gt; icke-anslutningsbara transaktioner i minnet (standardvärde: %u)</translation>
     </message>
     <message>
-        <source>Last Darksend was too recent.</source>
-        <translation>Senaste Darksend gjordes för inte alltför länge sedan.</translation>
+        <source>Last Sandstorm was too recent.</source>
+        <translation>Senaste Sandstorm gjordes för inte alltför länge sedan.</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
@@ -3022,16 +3022,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Laddar plånbok...</translation>
     </message>
     <message>
-        <source>Masternode options:</source>
-        <translation>Masternode-alternativ:</translation>
+        <source>Stormnode options:</source>
+        <translation>Stormnode-alternativ:</translation>
     </message>
     <message>
-        <source>Masternode queue is full.</source>
-        <translation>Masternode-kön är uppfylld.</translation>
+        <source>Stormnode queue is full.</source>
+        <translation>Stormnode-kön är uppfylld.</translation>
     </message>
     <message>
-        <source>Masternode:</source>
-        <translation>Masternode:</translation>
+        <source>Stormnode:</source>
+        <translation>Stormnode:</translation>
     </message>
     <message>
         <source>Missing input transaction information.</source>
@@ -3110,7 +3110,7 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ställ in maximal blockstorlek i bytes (standardvärde: %d)</translation>
     </message>
     <message>
-        <source>Set the masternode private key</source>
+        <source>Set the stormnode private key</source>
         <translation>Ställ in masternodprivatnyckeln</translation>
     </message>
     <message>
@@ -3206,8 +3206,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Användarnamn för JSON-RPC-anslutningar</translation>
     </message>
     <message>
-        <source>Value more than Darksend pool maximum allows.</source>
-        <translation>Värdera mer än vad Darksends poolmaximum tillåter.</translation>
+        <source>Value more than Sandstorm pool maximum allows.</source>
+        <translation>Värdera mer än vad Sandstorms poolmaximum tillåter.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

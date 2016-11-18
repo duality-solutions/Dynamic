@@ -453,7 +453,7 @@ darksilk_tx_LDADD = \
   $(LIBDARKSILK_CRYPTO) \
   $(LIBSECP256K1)
 
-dash_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+darksilk_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
 # darksilkconsensus library #

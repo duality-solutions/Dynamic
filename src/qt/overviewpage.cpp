@@ -1,15 +1,17 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
-#include "bitcoinunits.h"
+#include "darksilkunits.h"
 #include "clientmodel.h"
-#include "darksend.h"
-#include "darksendconfig.h"
+#include "sandstorm.h"
+#include "sandstormconfig.h"
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -18,7 +20,7 @@
 #include "transactiontablemodel.h"
 #include "walletmodel.h"
 #include "init.h"
-#include "masternode-sync.h"
+#include "stormnode-sync.h"
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
@@ -35,7 +37,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
     TxViewDelegate(const PlatformStyle *platformStyle):
-        QAbstractItemDelegate(), unit(BitcoinUnits::DASH),
+        QAbstractItemDelegate(), unit(DarkSilkUnits::DSLK),
         platformStyle(platformStyle)
     {
 
@@ -94,7 +96,7 @@ public:
             foreground = option.palette.color(QPalette::Text);
         }
         painter->setPen(foreground);
-        QString amountText = BitcoinUnits::floorWithUnit(unit, amount, true, BitcoinUnits::separatorAlways);
+        QString amountText = DarkSilkUnits::floorWithUnit(unit, amount, true, DarkSilkUnits::separatorAlways);
         if(!confirmed)
         {
             amountText = QString("[") + amountText + QString("]");
@@ -158,8 +160,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // that's it for litemode
     if(fLiteMode) return;
 
-    // Disable any PS UI for masternode or when autobackup is disabled or failed for whatever reason
-    if(fMasterNode || nWalletBackups <= 0){
+    // Disable any PS UI for stormnode or when autobackup is disabled or failed for whatever reason
+    if(fStormNode || nWalletBackups <= 0){
         DisablePrivateSendCompletely();
         if (nWalletBackups <= 0) {
             ui->labelPrivateSendEnabled->setToolTip(tr("Automatic backups are disabled, no mixing available!"));
@@ -170,9 +172,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
         } else {
             ui->togglePrivateSend->setText(tr("Stop Mixing"));
         }
-        // Disable darkSendPool builtin support for automatic backups while we are in GUI,
+        // Disable sandStormPool builtin support for automatic backups while we are in GUI,
         // we'll handle automatic backups and user warnings in privateSendStatus()
-        darkSendPool.fCreateAutoBackups = false;
+        sandStormPool.fCreateAutoBackups = false;
 
         timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
@@ -188,7 +190,7 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 
 OverviewPage::~OverviewPage()
 {
-    if(!fLiteMode && !fMasterNode) disconnect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
+    if(!fLiteMode && !fStormNode) disconnect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
     delete ui;
 }
 
@@ -201,15 +203,15 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchOnlyBalance = watchOnlyBalance;
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
-    ui->labelBalance->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, balance, false, BitcoinUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, unconfirmedBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelImmature->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, immatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelAnonymized->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, anonymizedBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelTotal->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchAvailable->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchPending->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchImmature->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchTotal->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelBalance->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, balance, false, DarkSilkUnits::separatorAlways));
+    ui->labelUnconfirmed->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, unconfirmedBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelImmature->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, immatureBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelAnonymized->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, anonymizedBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelTotal->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelWatchAvailable->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelWatchPending->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelWatchImmature->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelWatchTotal->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, DarkSilkUnits::separatorAlways));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
@@ -288,7 +290,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
     }
 
-    // update the display unit, to not use the default ("DASH")
+    // update the display unit, to not use the default ("DSLK")
     updateDisplayUnit();
 }
 
@@ -323,12 +325,12 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 
 void OverviewPage::updatePrivateSendProgress()
 {
-    if(!masternodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
+    if(!stormnodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
 
     if(!pwalletMain) return;
 
     QString strAmountAndRounds;
-    QString strPrivateSendAmount = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, nPrivateSendAmount * COIN, false, BitcoinUnits::separatorAlways);
+    QString strPrivateSendAmount = DarkSilkUnits::formatHtmlWithUnit(nDisplayUnit, nPrivateSendAmount * COIN, false, DarkSilkUnits::separatorAlways);
 
     if(currentBalance == 0)
     {
@@ -336,7 +338,7 @@ void OverviewPage::updatePrivateSendProgress()
         ui->privateSendProgress->setToolTip(tr("No inputs detected"));
 
         // when balance is zero just show info from settings
-        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
+        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", nPrivateSendRounds);
 
         ui->labelAmountRounds->setToolTip(tr("No inputs detected"));
@@ -368,17 +370,17 @@ void OverviewPage::updatePrivateSendProgress()
     if(nMaxToAnonymize >= nPrivateSendAmount * COIN) {
         ui->labelAmountRounds->setToolTip(tr("Found enough compatible inputs to anonymize %1")
                                           .arg(strPrivateSendAmount));
-        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
+        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", nPrivateSendRounds);
     } else {
-        QString strMaxToAnonymize = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, BitcoinUnits::separatorAlways);
+        QString strMaxToAnonymize = DarkSilkUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, DarkSilkUnits::separatorAlways);
         ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:red;'>%1</span>,<br>"
                                              "will anonymize <span style='color:red;'>%2</span> instead")
                                           .arg(strPrivateSendAmount)
                                           .arg(strMaxToAnonymize));
-        strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
+        strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = "<span style='color:red;'>" +
-                QString(BitcoinUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
+                QString(DarkSilkUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
                 " / " + tr("%n Rounds", "", nPrivateSendRounds) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
@@ -448,13 +450,13 @@ void OverviewPage::updateAdvancedPSUI(bool fShowAdvancedPSUI) {
 
 void OverviewPage::privateSendStatus()
 {
-    if(!masternodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
+    if(!stormnodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
 
     static int64_t nLastDSProgressBlockTime = 0;
     int nBestHeight = clientModel->getNumBlocks();
 
     // We are processing more then 1 block per second, we'll just leave
-    if(((nBestHeight - darkSendPool.nCachedNumBlocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
+    if(((nBestHeight - sandStormPool.nCachedNumBlocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
     nLastDSProgressBlockTime = GetTimeMillis();
 
     QString strKeysLeftText(tr("keys left: %1").arg(pwalletMain->nKeysLeftSinceAutoBackup));
@@ -464,8 +466,8 @@ void OverviewPage::privateSendStatus()
     ui->labelPrivateSendEnabled->setToolTip(strKeysLeftText);
 
     if (!fEnablePrivateSend) {
-        if (nBestHeight != darkSendPool.nCachedNumBlocks) {
-            darkSendPool.nCachedNumBlocks = nBestHeight;
+        if (nBestHeight != sandStormPool.nCachedNumBlocks) {
+            sandStormPool.nCachedNumBlocks = nBestHeight;
             updatePrivateSendProgress();
         }
 
@@ -541,14 +543,14 @@ void OverviewPage::privateSendStatus()
         ui->labelPrivateSendEnabled->setToolTip(strWarning);
     }
 
-    // check darksend status and unlock if needed
-    if(nBestHeight != darkSendPool.nCachedNumBlocks) {
+    // check sandstorm status and unlock if needed
+    if(nBestHeight != sandStormPool.nCachedNumBlocks) {
         // Balance and number of transactions might have changed
-        darkSendPool.nCachedNumBlocks = nBestHeight;
+        sandStormPool.nCachedNumBlocks = nBestHeight;
         updatePrivateSendProgress();
     }
 
-    QString strStatus = QString(darkSendPool.GetStatus().c_str());
+    QString strStatus = QString(sandStormPool.GetStatus().c_str());
 
     QString s = tr("Last PrivateSend message:\n") + strStatus;
 
@@ -557,21 +559,21 @@ void OverviewPage::privateSendStatus()
 
     ui->labelPrivateSendLastMessage->setText(s);
 
-    if(darkSendPool.nSessionDenom == 0){
+    if(sandStormPool.nSessionDenom == 0){
         ui->labelSubmittedDenom->setText(tr("N/A"));
     } else {
-        QString strDenom(darkSendPool.GetDenominationsToString(darkSendPool.nSessionDenom).c_str());
+        QString strDenom(sandStormPool.GetDenominationsToString(sandStormPool.nSessionDenom).c_str());
         ui->labelSubmittedDenom->setText(strDenom);
     }
 
 }
 
 void OverviewPage::privateSendAuto(){
-    darkSendPool.DoAutomaticDenominating();
+    sandStormPool.DoAutomaticDenominating();
 }
 
 void OverviewPage::privateSendReset(){
-    darkSendPool.ResetPool();
+    sandStormPool.ResetPool();
 
     QMessageBox::warning(this, tr("PrivateSend"),
         tr("PrivateSend was successfully reset."),
@@ -588,18 +590,18 @@ void OverviewPage::privateSendInfo(){
         tr("\
 <h3>PrivateSend Basics</h3> \
 PrivateSend gives you true financial privacy by obscuring the origins of your funds. \
-All the Dash in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
+All the DarkSilk in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
 PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. \
 You retain control of your money at all times..<hr> \
 <b>The PrivateSend process works like this:</b>\
 <ol type=\"1\"> \
 <li>PrivateSend begins by breaking your transaction inputs down into standard denominations. \
-These denominations are 0.1 DASH, 1 DASH, 10 DASH, and 100 DASH--sort of like the paper money you use every day.</li> \
-<li>Your wallet then sends requests to specially configured software nodes on the network, called \"masternodes.\" \
-These masternodes are informed then that you are interested in mixing a certain denomination. \
-No identifiable information is sent to the masternodes, so they never know \"who\" you are.</li> \
+These denominations are 0.1 DSLK, 1 DSLK, 10 DSLK, and 100 DSLK--sort of like the paper money you use every day.</li> \
+<li>Your wallet then sends requests to specially configured software nodes on the network, called \"stormnodes.\" \
+These stormnodes are informed then that you are interested in mixing a certain denomination. \
+No identifiable information is sent to the stormnodes, so they never know \"who\" you are.</li> \
 <li>When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. \
-The masternode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
+The stormnode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
 Your wallet pays that denomination directly to itself, but in a different address (called a change address).</li> \
 <li>In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. \
 Each time the process is completed, it's called a \"round.\" Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.</li> \
@@ -630,7 +632,7 @@ void OverviewPage::togglePrivateSend(){
         int64_t balance = currentBalance;
         float minAmount = 1.49 * COIN;
         if(balance < minAmount){
-            QString strMinAmount(BitcoinUnits::formatWithUnit(nDisplayUnit, minAmount));
+            QString strMinAmount(DarkSilkUnits::formatWithUnit(nDisplayUnit, minAmount));
             QMessageBox::warning(this, tr("PrivateSend"),
                 tr("PrivateSend requires at least %1 to use.").arg(strMinAmount),
                 QMessageBox::Ok, QMessageBox::Ok);
@@ -644,7 +646,7 @@ void OverviewPage::togglePrivateSend(){
             if(!ctx.isValid())
             {
                 //unlock was cancelled
-                darkSendPool.nCachedNumBlocks = std::numeric_limits<int>::max();
+                sandStormPool.nCachedNumBlocks = std::numeric_limits<int>::max();
                 QMessageBox::warning(this, tr("PrivateSend"),
                     tr("Wallet is locked and user declined to unlock. Disabling PrivateSend."),
                     QMessageBox::Ok, QMessageBox::Ok);
@@ -656,18 +658,18 @@ void OverviewPage::togglePrivateSend(){
     }
 
     fEnablePrivateSend = !fEnablePrivateSend;
-    darkSendPool.nCachedNumBlocks = std::numeric_limits<int>::max();
+    sandStormPool.nCachedNumBlocks = std::numeric_limits<int>::max();
 
     if(!fEnablePrivateSend){
         ui->togglePrivateSend->setText(tr("Start Mixing"));
-        darkSendPool.UnlockCoins();
+        sandStormPool.UnlockCoins();
     } else {
         ui->togglePrivateSend->setText(tr("Stop Mixing"));
 
-        /* show darksend configuration if client has defaults set */
+        /* show sandstorm configuration if client has defaults set */
 
         if(nPrivateSendAmount == 0){
-            DarksendConfig dlg(this);
+            SandstormConfig dlg(this);
             dlg.setModel(walletModel);
             dlg.exec();
         }

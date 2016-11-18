@@ -1,8 +1,15 @@
-#include "darksendconfig.h"
-#include "ui_darksendconfig.h"
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bitcoinunits.h"
-#include "darksend.h"
+#include "sandstormconfig.h"
+#include "ui_sandstormconfig.h"
+
+#include "darksilkunits.h"
+#include "sandstorm.h"
 #include "guiconstants.h"
 #include "optionsmodel.h"
 #include "walletmodel.h"
@@ -12,9 +19,9 @@
 #include <QKeyEvent>
 #include <QSettings>
 
-DarksendConfig::DarksendConfig(QWidget *parent) :
+SandstormConfig::SandstormConfig(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DarksendConfig),
+    ui(new Ui::SandstormConfig),
     model(0)
 {
     ui->setupUi(this);
@@ -24,62 +31,62 @@ DarksendConfig::DarksendConfig(QWidget *parent) :
     connect(ui->buttonMax, SIGNAL(clicked()), this, SLOT(clickMax()));
 }
 
-DarksendConfig::~DarksendConfig()
+SandstormConfig::~SandstormConfig()
 {
     delete ui;
 }
 
-void DarksendConfig::setModel(WalletModel *model)
+void SandstormConfig::setModel(WalletModel *model)
 {
     this->model = model;
 }
 
-void DarksendConfig::clickBasic()
+void SandstormConfig::clickBasic()
 {
     configure(true, 1000, 2);
 
-    QString strAmount(BitcoinUnits::formatWithUnit(
+    QString strAmount(DarkSilkUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
-            "PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash's configuration screen."
+            "PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen."
         ).arg(strAmount)
     );
 
     close();
 }
 
-void DarksendConfig::clickHigh()
+void SandstormConfig::clickHigh()
 {
     configure(true, 1000, 8);
 
-    QString strAmount(BitcoinUnits::formatWithUnit(
+    QString strAmount(DarkSilkUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
-            "PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash's configuration screen."
+            "PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen."
         ).arg(strAmount)
     );
 
     close();
 }
 
-void DarksendConfig::clickMax()
+void SandstormConfig::clickMax()
 {
     configure(true, 1000, 16);
 
-    QString strAmount(BitcoinUnits::formatWithUnit(
+    QString strAmount(DarkSilkUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("PrivateSend Configuration"),
         tr(
-            "PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash's configuration screen."
+            "PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen."
         ).arg(strAmount)
     );
 
     close();
 }
 
-void DarksendConfig::configure(bool enabled, int coins, int rounds) {
+void SandstormConfig::configure(bool enabled, int coins, int rounds) {
 
     QSettings settings;
 

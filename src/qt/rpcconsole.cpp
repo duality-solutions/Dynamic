@@ -1,6 +1,8 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "rpcconsole.h"
@@ -369,8 +371,8 @@ void RPCConsole::setClientModel(ClientModel *model)
         setNumBlocks(model->getNumBlocks(), model->getLastBlockDate(), model->getVerificationProgress(NULL));
         connect(model, SIGNAL(numBlocksChanged(int,QDateTime,double)), this, SLOT(setNumBlocks(int,QDateTime,double)));
 
-        setMasternodeCount(model->getMasternodeCountString());
-        connect(model, SIGNAL(strMasternodesChanged(QString)), this, SLOT(setMasternodeCount(QString)));
+        setStormnodeCount(model->getStormnodeCountString());
+        connect(model, SIGNAL(strStormnodesChanged(QString)), this, SLOT(setStormnodeCount(QString)));
 
         updateTrafficStats(model->getTotalBytesRecv(), model->getTotalBytesSent());
         connect(model, SIGNAL(bytesChanged(quint64,quint64)), this, SLOT(updateTrafficStats(quint64, quint64)));
@@ -543,7 +545,7 @@ void RPCConsole::buildParameterlist(QString arg)
     // Append repair parameter to command line.
     args.append(arg);
 
-    // Send command-line arguments to BitcoinGUI::handleRestart()
+    // Send command-line arguments to DarkSilkGUI::handleRestart()
     Q_EMIT handleRestart(args);
 }
 
@@ -588,7 +590,7 @@ void RPCConsole::clear()
             ).arg(fixedFontInfo.family(), ptSize)
         );
 
-    message(CMD_REPLY, (tr("Welcome to the Dash Core RPC console.") + "<br>" +
+    message(CMD_REPLY, (tr("Welcome to the DarkSilk Core RPC console.") + "<br>" +
                         tr("Use up and down arrows to navigate history, and <b>Ctrl-L</b> to clear screen.") + "<br>" +
                         tr("Type <b>help</b> for an overview of available commands.")), true);
 }
@@ -635,9 +637,9 @@ void RPCConsole::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     ui->lastBlockTime->setText(blockDate.toString());
 }
 
-void RPCConsole::setMasternodeCount(const QString &strMasternodes)
+void RPCConsole::setStormnodeCount(const QString &strStormnodes)
 {
-    ui->masternodeCount->setText(strMasternodes);
+    ui->stormnodeCount->setText(strStormnodes);
 }
 
 void RPCConsole::setMempoolSize(long numberOfTxs, size_t dynUsage)

@@ -1843,7 +1843,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    //lite mode disables all Stormnode and Darksend related functionality
+    //lite mode disables all Stormnode and Sandstorm related functionality
     fLiteMode = GetBoolArg("-litemode", false);
     if(fStormNode && fLiteMode){
         return InitError("You can not start a stormnode in litemode");

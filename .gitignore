@@ -6,13 +6,13 @@ reset-files.bash
 *.tar.gz
 
 *.exe
-src/dash
-src/dashd
-src/dash-cli
-src/dash-tx
-src/test/test_dash
-src/qt/test/test_dash-qt
-src/bench/bench_dash
+src/darksilk
+src/darksilkd
+src/darksilk-cli
+src/darksilk-tx
+src/test/test_darksilk
+src/qt/test/test_darksilk-qt
+src/bench/bench_darksilk
 
 # autoreconf
 Makefile.in
@@ -62,7 +62,7 @@ libconftest.dylib*
 *.o
 *.o-*
 *.patch
-.dash
+.darksilk
 *.a
 *.pb.cc
 *.pb.h
@@ -81,12 +81,12 @@ libconftest.dylib*
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-dash-qt
-Dash-Qt.app
+darksilk-qt
+darksilk-Qt.app
 
 # Unit-tests
 Makefile.test
-dash-qt_test
+darksilk-qt_test
 src/test/buildenv.py
 
 # Resources cpp
@@ -100,7 +100,7 @@ build
 *.gcno
 *.gcda
 /*.info
-test_dash.coverage/
+test_darksilk.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -108,13 +108,13 @@ coverage_percent.txt
 linux-coverage-build
 linux-build
 win32-build
-qa/pull-tester/run-bitcoind-for-test.sh
+qa/pull-tester/run-darksilkd-for-test.sh
 qa/pull-tester/tests_config.py
 qa/pull-tester/cache/*
 qa/pull-tester/test.*/*
 qa/tmp
 cache/
-share/BitcoindComparisonTool.jar
+share/DarkSilkdComparisonTool.jar
 
 !src/leveldb*/Makefile
 
@@ -123,12 +123,12 @@ share/BitcoindComparisonTool.jar
 .autotools
 /doc/doxygen/
 
-libbitcoinconsensus.pc
-src/qt/dash-qt.bash
+libdarksilkconsensus.pc
+src/qt/darksilk-qt.bash
 qa/pull-tester/tests-config.sh
 
 #development symlinks
-dash-cli
-dashd
-dash-qt
+darksilk-cli
+darksilkd
+darksilk-qt
 make

@@ -1,55 +1,57 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bitcoinunits.h"
+#include "darksilkunits.h"
 #include "chainparams.h"
 #include "primitives/transaction.h"
 
 #include <QSettings>
 #include <QStringList>
 
-BitcoinUnits::BitcoinUnits(QObject *parent):
+DarkSilkUnits::DarkSilkUnits(QObject *parent):
         QAbstractListModel(parent),
         unitlist(availableUnits())
 {
 }
 
-QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
+QList<DarkSilkUnits::Unit> DarkSilkUnits::availableUnits()
 {
-    QList<BitcoinUnits::Unit> unitlist;
-    unitlist.append(DASH);
-    unitlist.append(mDASH);
-    unitlist.append(uDASH);
-    unitlist.append(duffs);
+    QList<DarkSilkUnits::Unit> unitlist;
+    unitlist.append(DSLK);
+    unitlist.append(mDSLK);
+    unitlist.append(uDSLK);
+    unitlist.append(satoshis);
     return unitlist;
 }
 
-bool BitcoinUnits::valid(int unit)
+bool DarkSilkUnits::valid(int unit)
 {
     switch(unit)
     {
-    case DASH:
-    case mDASH:
-    case uDASH:
-    case duffs:
+    case DSLK:
+    case mDSLK:
+    case uDSLK:
+    case satoshis:
         return true;
     default:
         return false;
     }
 }
 
-QString BitcoinUnits::name(int unit)
+QString DarkSilkUnits::name(int unit)
 {
     if(Params().NetworkIDString() == CBaseChainParams::MAIN)
     {
         switch(unit)
         {
-            case DASH: return QString("DASH");
-            case mDASH: return QString("mDASH");
-            case uDASH: return QString::fromUtf8("μDASH");
-            case duffs: return QString("duffs");
+            case DSLK: return QString("DSLK");
+            case mDSLK: return QString("mDSLK");
+            case uDSLK: return QString::fromUtf8("μDSLK");
+            case satoshis: return QString("satoshis");
             default: return QString("???");
         }
     }
@@ -57,25 +59,25 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("tDASH");
-            case mDASH: return QString("mtDASH");
-            case uDASH: return QString::fromUtf8("μtDASH");
-            case duffs: return QString("tduffs");
+            case DSLK: return QString("tDSLK");
+            case mDSLK: return QString("mtDSLK");
+            case uDSLK: return QString::fromUtf8("μtDSLK");
+            case satoshis: return QString("tsatoshis");
             default: return QString("???");
         }
     }
 }
 
-QString BitcoinUnits::description(int unit)
+QString DarkSilkUnits::description(int unit)
 {
     if(Params().NetworkIDString() == CBaseChainParams::MAIN)
     {
         switch(unit)
         {
-            case DASH: return QString("Dash");
-            case mDASH: return QString("Milli-Dash (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-Dash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-Dash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case DSLK: return QString("DarkSilk");
+            case mDSLK: return QString("Milli-DarkSilk (1 / 1" THIN_SP_UTF8 "000)");
+            case uDSLK: return QString("Micro-DarkSilk (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case satoshis: return QString("Ten Nano-DarkSilk (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -83,40 +85,40 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("TestDashs");
-            case mDASH: return QString("Milli-TestDash (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-TestDash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-TestDash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case DSLK: return QString("TestDarkSilks");
+            case mDSLK: return QString("Milli-TestDarkSilk (1 / 1" THIN_SP_UTF8 "000)");
+            case uDSLK: return QString("Micro-TestDarkSilk (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case satoshis: return QString("Ten Nano-TestDarkSilk (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
 }
 
-qint64 BitcoinUnits::factor(int unit)
+qint64 DarkSilkUnits::factor(int unit)
 {
     switch(unit)
     {
-    case DASH:  return 100000000;
-    case mDASH: return 100000;
-    case uDASH: return 100;
-    case duffs: return 1;
+    case DSLK:  return 100000000;
+    case mDSLK: return 100000;
+    case uDSLK: return 100;
+    case satoshis: return 1;
     default:   return 100000000;
     }
 }
 
-int BitcoinUnits::decimals(int unit)
+int DarkSilkUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case DASH: return 8;
-    case mDASH: return 5;
-    case uDASH: return 2;
-    case duffs: return 0;
+    case DSLK: return 8;
+    case mDSLK: return 5;
+    case uDSLK: return 2;
+    case satoshis: return 0;
     default: return 0;
     }
 }
 
-QString BitcoinUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators)
+QString DarkSilkUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators)
 {
     // Note: not using straight sprintf here because we do NOT want
     // localized number formatting.
@@ -159,19 +161,19 @@ QString BitcoinUnits::format(int unit, const CAmount& nIn, bool fPlus, Separator
 // Please take care to use formatHtmlWithUnit instead, when
 // appropriate.
 
-QString BitcoinUnits::formatWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString DarkSilkUnits::formatWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     return format(unit, amount, plussign, separators) + QString(" ") + name(unit);
 }
 
-QString BitcoinUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString DarkSilkUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     QString str(formatWithUnit(unit, amount, plussign, separators));
     str.replace(QChar(THIN_SP_CP), QString(THIN_SP_HTML));
     return QString("<span style='white-space: nowrap;'>%1</span>").arg(str);
 }
 
-QString BitcoinUnits::floorWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString DarkSilkUnits::floorWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     QSettings settings;
     int digits = settings.value("digits").toInt();
@@ -182,14 +184,14 @@ QString BitcoinUnits::floorWithUnit(int unit, const CAmount& amount, bool plussi
     return result + QString(" ") + name(unit);
 }
 
-QString BitcoinUnits::floorHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString DarkSilkUnits::floorHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     QString str(floorWithUnit(unit, amount, plussign, separators));
     str.replace(QChar(THIN_SP_CP), QString(THIN_SP_HTML));
     return QString("<span style='white-space: nowrap;'>%1</span>").arg(str);
 }
 
-bool BitcoinUnits::parse(int unit, const QString &value, CAmount *val_out)
+bool DarkSilkUnits::parse(int unit, const QString &value, CAmount *val_out)
 {
     if(!valid(unit) || value.isEmpty())
         return false; // Refuse to parse invalid unit or empty string
@@ -228,23 +230,23 @@ bool BitcoinUnits::parse(int unit, const QString &value, CAmount *val_out)
     return ok;
 }
 
-QString BitcoinUnits::getAmountColumnTitle(int unit)
+QString DarkSilkUnits::getAmountColumnTitle(int unit)
 {
     QString amountTitle = QObject::tr("Amount");
-    if (BitcoinUnits::valid(unit))
+    if (DarkSilkUnits::valid(unit))
     {
-        amountTitle += " ("+BitcoinUnits::name(unit) + ")";
+        amountTitle += " ("+DarkSilkUnits::name(unit) + ")";
     }
     return amountTitle;
 }
 
-int BitcoinUnits::rowCount(const QModelIndex &parent) const
+int DarkSilkUnits::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return unitlist.size();
 }
 
-QVariant BitcoinUnits::data(const QModelIndex &index, int role) const
+QVariant DarkSilkUnits::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
     if(row >= 0 && row < unitlist.size())
@@ -264,7 +266,7 @@ QVariant BitcoinUnits::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-CAmount BitcoinUnits::maxMoney()
+CAmount DarkSilkUnits::maxMoney()
 {
     return MAX_MONEY;
 }

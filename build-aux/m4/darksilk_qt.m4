@@ -3,7 +3,7 @@ dnl Output: If qt version is auto, set darksilk_enable_qt to false. Else, exit.
 AC_DEFUN([DARKSILK_QT_FAIL],[
   if test "x$darksilk_qt_want_version" = "xauto" && test x$darksilk_qt_force != xyes; then
     if test x$darksilk_enable_qt != xno; then
-      AC_MSG_WARN([$1; dash-qt frontend will not be built])
+      AC_MSG_WARN([$1; darksilk-qt frontend will not be built])
     fi
     darksilk_enable_qt=no
     darksilk_enable_qt_test=no
@@ -50,7 +50,7 @@ AC_DEFUN([DARKSILK_QT_INIT],[
   dnl enable qt support
   AC_ARG_WITH([gui],
     [AS_HELP_STRING([--with-gui@<:@=no|qt4|qt5|auto@:>@],
-    [build dash-qt GUI (default=auto, qt5 tried first)])],
+    [build darksilk-qt GUI (default=auto, qt5 tried first)])],
     [
      darksilk_qt_want_version=$withval
      if test x$darksilk_qt_want_version = xyes; then
@@ -220,7 +220,7 @@ AC_DEFUN([DARKSILK_QT_CONFIGURE],[
 
 
   dnl enable qt support
-  AC_MSG_CHECKING(whether to build Dash Core GUI)
+  AC_MSG_CHECKING(whether to build DarkSilk Core GUI)
   DARKSILK_QT_CHECK([
     darksilk_enable_qt=yes
     darksilk_enable_qt_test=yes

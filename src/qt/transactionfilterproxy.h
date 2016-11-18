@@ -1,9 +1,12 @@
-// Copyright (c) 2011-2013 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_TRANSACTIONFILTERPROXY_H
-#define BITCOIN_QT_TRANSACTIONFILTERPROXY_H
+#ifndef DARKSILK_QT_TRANSACTIONFILTERPROXY_H
+#define DARKSILK_QT_TRANSACTIONFILTERPROXY_H
 
 #include "amount.h"
 
@@ -24,7 +27,7 @@ public:
     static const QDateTime MAX_DATE;
     /** Type filter bit field (all types) */
     static const quint32 ALL_TYPES = 0xFFFFFFFF;
-    /** Type filter bit field (all types but Darksend-SPAM) */
+    /** Type filter bit field (all types but Sandstorm-SPAM) */
     static const quint32 COMMON_TYPES = 4223;
 
     static quint32 TYPE(int type) { return 1<<type; }
@@ -67,4 +70,4 @@ private:
     bool showInactive;
 };
 
-#endif // BITCOIN_QT_TRANSACTIONFILTERPROXY_H
+#endif // DARKSILK_QT_TRANSACTIONFILTERPROXY_H

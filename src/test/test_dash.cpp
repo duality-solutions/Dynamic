@@ -4,7 +4,7 @@
 
 #define BOOST_TEST_MODULE Dash Test Suite
 
-#include "test_dash.h"
+#include "test_darksilk.h"
 
 #include "chainparams.h"
 #include "consensus/consensus.h"

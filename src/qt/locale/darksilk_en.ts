@@ -78,13 +78,13 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</translation>
+        <source>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</translation>
+        <source>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -219,8 +219,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</source>
-        <translation>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</source>
+        <translation>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -235,8 +235,8 @@
     </message>
     <message>
         <location line="-57"/>
-        <source>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</source>
-        <translation>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</translation>
+        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</translation>
     </message>
     <message>
         <location line="+4"/>
@@ -292,12 +292,12 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DarkSilkGUI</name>
     <message>
-        <location filename="../bitcoingui.cpp" line="+108"/>
+        <location filename="../darksilkgui.cpp" line="+108"/>
         <location line="+752"/>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <location line="-743"/>
@@ -326,8 +326,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Send coins to a Dash address</source>
-        <translation>Send coins to a Dash address</translation>
+        <source>Send coins to a DarkSilk address</source>
+        <translation>Send coins to a DarkSilk address</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -336,8 +336,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Request payments (generates QR codes and dash: URIs)</source>
-        <translation>Request payments (generates QR codes and dash: URIs)</translation>
+        <source>Request payments (generates QR codes and darksilk: URIs)</source>
+        <translation>Request payments (generates QR codes and darksilk: URIs)</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -361,13 +361,13 @@
     </message>
     <message>
         <location line="+3"/>
-        <source>&amp;About Dash Core</source>
-        <translation>&amp;About Dash Core</translation>
+        <source>&amp;About DarkSilk Core</source>
+        <translation>&amp;About DarkSilk Core</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Show information about Dash Core</source>
-        <translation>Show information about Dash Core</translation>
+        <source>Show information about DarkSilk Core</source>
+        <translation>Show information about DarkSilk Core</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -387,8 +387,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Modify configuration options for Dash</source>
-        <translation>Modify configuration options for Dash</translation>
+        <source>Modify configuration options for DarkSilk</source>
+        <translation>Modify configuration options for DarkSilk</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -452,8 +452,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Sign messages with your Dash addresses to prove you own them</source>
-        <translation>Sign messages with your Dash addresses to prove you own them</translation>
+        <source>Sign messages with your DarkSilk addresses to prove you own them</source>
+        <translation>Sign messages with your DarkSilk addresses to prove you own them</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -462,8 +462,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Verify messages to ensure they were signed with specified Dash addresses</source>
-        <translation>Verify messages to ensure they were signed with specified Dash addresses</translation>
+        <source>Verify messages to ensure they were signed with specified DarkSilk addresses</source>
+        <translation>Verify messages to ensure they were signed with specified DarkSilk addresses</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -562,8 +562,8 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Open a dash: URI or payment request</source>
-        <translation>Open a dash: URI or payment request</translation>
+        <source>Open a darksilk: URI or payment request</source>
+        <translation>Open a darksilk: URI or payment request</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -572,8 +572,8 @@
     </message>
     <message>
         <location line="+196"/>
-        <source>Dash Core client</source>
-        <translation>Dash Core client</translation>
+        <source>DarkSilk Core client</source>
+        <translation>DarkSilk Core client</translation>
     </message>
     <message numerus="yes">
         <location line="+182"/>
@@ -587,8 +587,8 @@
     </message>
     <message>
         <location line="-407"/>
-        <source>Show the Dash Core help message to get a list with possible Dash command-line options</source>
-        <translation>Show the Dash Core help message to get a list with possible Dash command-line options</translation>
+        <source>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</source>
+        <translation>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</translation>
     </message>
     <message>
         <location line="+36"/>
@@ -617,8 +617,8 @@
     </message>
     <message numerus="yes">
         <location line="+256"/>
-        <source>%n active connection(s) to Dash network</source>
-        <translation><numerusform>%n active connection to Dash network</numerusform><numerusform>%n active connections to Dash network</numerusform></translation>
+        <source>%n active connection(s) to DarkSilk network</source>
+        <translation><numerusform>%n active connection to DarkSilk network</numerusform><numerusform>%n active connections to DarkSilk network</numerusform></translation>
     </message>
     <message>
         <location line="+15"/>
@@ -933,8 +933,8 @@ Address: %4
     </message>
     <message>
         <location line="+329"/>
-        <source>Non-anonymized input selected. &lt;b&gt;Darksend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Darksend, please deselect all non-nonymized inputs first and then check Darksend checkbox again.</source>
-        <translation>Non-anonymized input selected. &lt;b&gt;Darksend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Darksend, please deselect all non-nonymized inputs first and then check Darksend checkbox again.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
+        <translation>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</translation>
     </message>
     <message>
         <location line="+32"/>
@@ -1062,11 +1062,11 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>DarksendConfig</name>
+    <name>SandstormConfig</name>
     <message>
-        <location filename="../forms/darksendconfig.ui" line="+14"/>
-        <source>Configure Darksend</source>
-        <translation>Configure Darksend</translation>
+        <location filename="../forms/sandstormconfig.ui" line="+14"/>
+        <source>Configure Sandstorm</source>
+        <translation>Configure Sandstorm</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -1090,33 +1090,33 @@ Address: %4
     </message>
     <message>
         <location line="+13"/>
-        <source>Use 2 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Use 2 separate masternodes to mix funds up to 1000 DASH</translation>
+        <source>Use 2 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Use 2 separate stormnodes to mix funds up to 1000 DSLK</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>Use 8 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Use 8 separate masternodes to mix funds up to 1000 DASH</translation>
+        <source>Use 8 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Use 8 separate stormnodes to mix funds up to 1000 DSLK</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>Use 16 separate masternodes</source>
-        <translation>Use 16 separate masternodes</translation>
+        <source>Use 16 separate stormnodes</source>
+        <translation>Use 16 separate stormnodes</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</source>
-        <translation>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</translation>
+        <source>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</source>
+        <translation>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</source>
-        <translation>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</translation>
+        <source>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</source>
+        <translation>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</translation>
     </message>
     <message>
         <location line="+26"/>
-        <source>0.1 DASH per 1000 DASH you anonymize.</source>
-        <translation>0.1 DASH per 1000 DASH you anonymize.</translation>
+        <source>0.1 DSLK per 1000 DSLK you anonymize.</source>
+        <translation>0.1 DSLK per 1000 DSLK you anonymize.</translation>
     </message>
     <message>
         <location line="-13"/>
@@ -1124,26 +1124,26 @@ Address: %4
         <translation>This is the slowest and most secure option. Using maximum anonymity will cost</translation>
     </message>
     <message>
-        <location filename="../darksendconfig.cpp" line="+43"/>
+        <location filename="../sandstormconfig.cpp" line="+43"/>
         <location line="+15"/>
         <location line="+15"/>
-        <source>Darksend Configuration</source>
-        <translation>Darksend Configuration</translation>
+        <source>Sandstorm Configuration</source>
+        <translation>Sandstorm Configuration</translation>
     </message>
     <message>
         <location line="-29"/>
-        <source>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</source>
-        <translation>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</translation>
+        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</source>
-        <translation>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</translation>
+        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</source>
-        <translation>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash&apos;s configuration screen.</translation>
+        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
 </context>
 <context>
@@ -1195,8 +1195,8 @@ Address: %4
     </message>
     <message>
         <location line="+71"/>
-        <source>The entered address &quot;%1&quot; is not a valid Dash address.</source>
-        <translation>The entered address &quot;%1&quot; is not a valid Dash address.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid DarkSilk address.</source>
+        <translation>The entered address &quot;%1&quot; is not a valid DarkSilk address.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1246,8 +1246,8 @@ Address: %4
     <name>HelpMessageDialog</name>
     <message>
         <location filename="../utilitydialog.cpp" line="+32"/>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -1262,8 +1262,8 @@ Address: %4
     </message>
     <message>
         <location line="+5"/>
-        <source>About Dash Core</source>
-        <translation>About Dash Core</translation>
+        <source>About DarkSilk Core</source>
+        <translation>About DarkSilk Core</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -1320,18 +1320,18 @@ Address: %4
     </message>
     <message>
         <location line="+9"/>
-        <source>Welcome to Dash Core.</source>
-        <translation>Welcome to Dash Core.</translation>
+        <source>Welcome to DarkSilk Core.</source>
+        <translation>Welcome to DarkSilk Core.</translation>
     </message>
     <message>
         <location line="+26"/>
-        <source>As this is the first time the program is launched, you can choose where Dash Core will store its data.</source>
-        <translation>As this is the first time the program is launched, you can choose where Dash Core will store its data.</translation>
+        <source>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</source>
+        <translation>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</translation>
+        <source>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1345,8 +1345,8 @@ Address: %4
     </message>
     <message>
         <location filename="../intro.cpp" line="+82"/>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -1411,13 +1411,13 @@ Address: %4
     </message>
     <message>
         <location line="+6"/>
-        <source>Automatically start Dash after logging in to the system.</source>
-        <translation>Automatically start Dash after logging in to the system.</translation>
+        <source>Automatically start DarkSilk after logging in to the system.</source>
+        <translation>Automatically start DarkSilk after logging in to the system.</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>&amp;Start Dash on system login</source>
-        <translation>&amp;Start Dash on system login</translation>
+        <source>&amp;Start DarkSilk on system login</source>
+        <translation>&amp;Start DarkSilk on system login</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -1441,18 +1441,18 @@ Address: %4
     </message>
     <message>
         <location line="+40"/>
-        <source>Darksend rounds to use</source>
-        <translation>Darksend rounds to use</translation>
+        <source>Sandstorm rounds to use</source>
+        <translation>Sandstorm rounds to use</translation>
     </message>
     <message>
         <location line="+24"/>
-        <source>This amount acts as a threshold to turn off Darksend once it&apos;s reached.</source>
-        <translation>This amount acts as a threshold to turn off Darksend once it&apos;s reached.</translation>
+        <source>This amount acts as a threshold to turn off Sandstorm once it&apos;s reached.</source>
+        <translation>This amount acts as a threshold to turn off Sandstorm once it&apos;s reached.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Amount of Dash to keep anonymized</source>
-        <translation>Amount of Dash to keep anonymized</translation>
+        <source>Amount of DarkSilk to keep anonymized</source>
+        <translation>Amount of DarkSilk to keep anonymized</translation>
     </message>
     <message>
         <location line="+26"/>
@@ -1476,8 +1476,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Connect to the Dash network through a SOCKS5 proxy.</source>
-        <translation>Connect to the Dash network through a SOCKS5 proxy.</translation>
+        <source>Connect to the DarkSilk network through a SOCKS5 proxy.</source>
+        <translation>Connect to the DarkSilk network through a SOCKS5 proxy.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1491,8 +1491,8 @@ Address: %4
     </message>
     <message>
         <location line="-74"/>
-        <source>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</translation>
+        <source>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</translation>
     </message>
     <message>
         <location line="+80"/>
@@ -1516,8 +1516,8 @@ Address: %4
     </message>
     <message>
         <location line="+6"/>
-        <source>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
+        <source>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1581,15 +1581,15 @@ Address: %4
     </message>
     <message>
         <location line="+13"/>
-        <source>The user interface language can be set here. This setting will take effect after restarting Dash.</source>
-        <translation>The user interface language can be set here. This setting will take effect after restarting Dash.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</source>
+        <translation>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</translation>
     </message>
     <message>
         <location line="+21"/>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</source>
+https://www.transifex.com/projects/p/darksilk/</source>
         <translation>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</translation>
+https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -1695,8 +1695,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <location line="+53"/>
         <location line="+1015"/>
         <location line="+77"/>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</source>
-        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</source>
+        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</translation>
     </message>
     <message>
         <location line="-843"/>
@@ -1790,8 +1790,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Darksend Balance:</source>
-        <translation>Darksend Balance:</translation>
+        <source>Sandstorm Balance:</source>
+        <translation>Sandstorm Balance:</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -1800,8 +1800,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>0 DASH / 0 Rounds</source>
-        <translation>0 DASH / 0 Rounds</translation>
+        <source>0 DSLK / 0 Rounds</source>
+        <translation>0 DSLK / 0 Rounds</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1819,8 +1819,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <location line="+10"/>
         <location line="+10"/>
         <location line="+14"/>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <location line="+74"/>
@@ -1834,8 +1834,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="-469"/>
-        <source>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</translation>
+        <source>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</translation>
     </message>
     <message>
         <location line="+501"/>
@@ -1844,8 +1844,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>Try to manually submit a Darksend request.</source>
-        <translation>Try to manually submit a Darksend request.</translation>
+        <source>Try to manually submit a Sandstorm request.</source>
+        <translation>Try to manually submit a Sandstorm request.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1854,8 +1854,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>Reset the current status of Darksend (can interrupt Darksend if it&apos;s in the process of Mixing, which can cost you money!)</source>
-        <translation>Reset the current status of Darksend (can interrupt Darksend if it&apos;s in the process of Mixing, which can cost you money!)</translation>
+        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>Reset the current status of Sandstorm (can interrupt Sandstorm if it&apos;s in the process of Mixing, which can cost you money!)</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -1881,14 +1881,14 @@ https://www.transifex.com/projects/p/dash/</translation>
         <location line="-288"/>
         <location line="+290"/>
         <location line="+91"/>
-        <source>Start Darksend Mixing</source>
-        <translation>Start Darksend Mixing</translation>
+        <source>Start Sandstorm Mixing</source>
+        <translation>Start Sandstorm Mixing</translation>
     </message>
     <message>
         <location line="-379"/>
         <location line="+382"/>
-        <source>Stop Darksend Mixing</source>
-        <translation>Stop Darksend Mixing</translation>
+        <source>Stop Sandstorm Mixing</source>
+        <translation>Stop Sandstorm Mixing</translation>
     </message>
     <message>
         <location line="-211"/>
@@ -1945,9 +1945,9 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Last Darksend message:
+        <source>Last Sandstorm message:
 </source>
-        <translation>Last Darksend message:
+        <translation>Last Sandstorm message:
 </translation>
     </message>
     <message>
@@ -1957,23 +1957,23 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>Darksend was successfully reset.</source>
-        <translation>Darksend was successfully reset.</translation>
+        <source>Sandstorm was successfully reset.</source>
+        <translation>Sandstorm was successfully reset.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>If you don&apos;t want to see internal Darksend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
-        <translation>If you don&apos;t want to see internal Darksend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
+        <source>If you don&apos;t want to see internal Sandstorm fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>If you don&apos;t want to see internal Sandstorm fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Darksend requires at least %1 to use.</source>
-        <translation>Darksend requires at least %1 to use.</translation>
+        <source>Sandstorm requires at least %1 to use.</source>
+        <translation>Sandstorm requires at least %1 to use.</translation>
     </message>
     <message>
         <location line="+14"/>
-        <source>Wallet is locked and user declined to unlock. Disabling Darksend.</source>
-        <translation>Wallet is locked and user declined to unlock. Disabling Darksend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
+        <translation>Wallet is locked and user declined to unlock. Disabling Sandstorm.</translation>
     </message>
 </context>
 <context>
@@ -1990,8 +1990,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="-400"/>
-        <source>Cannot start dash: click-to-pay handler</source>
-        <translation>Cannot start dash: click-to-pay handler</translation>
+        <source>Cannot start darksilk: click-to-pay handler</source>
+        <translation>Cannot start darksilk: click-to-pay handler</translation>
     </message>
     <message>
         <location line="+104"/>
@@ -2017,8 +2017,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+8"/>
-        <source>URI cannot be parsed! This can be caused by an invalid Dash address or malformed URI parameters.</source>
-        <translation>URI cannot be parsed! This can be caused by an invalid Dash address or malformed URI parameters.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid DarkSilk address or malformed URI parameters.</source>
+        <translation>URI cannot be parsed! This can be caused by an invalid DarkSilk address or malformed URI parameters.</translation>
     </message>
     <message>
         <location line="+14"/>
@@ -2119,14 +2119,14 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../bitcoinunits.cpp" line="+252"/>
+        <location filename="../darksilkunits.cpp" line="+252"/>
         <source>Amount</source>
         <translation>Amount</translation>
     </message>
     <message>
         <location filename="../guiutil.cpp" line="+110"/>
-        <source>Enter a Dash address (e.g. %1)</source>
-        <translation>Enter a Dash address (e.g. %1)</translation>
+        <source>Enter a DarkSilk address (e.g. %1)</source>
+        <translation>Enter a DarkSilk address (e.g. %1)</translation>
     </message>
     <message>
         <location line="+760"/>
@@ -2259,8 +2259,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+76"/>
-        <source>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</translation>
+        <source>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2319,8 +2319,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+289"/>
-        <source>Number of Masternodes</source>
-        <translation>Number of Masternodes</translation>
+        <source>Number of Stormnodes</source>
+        <translation>Number of Stormnodes</translation>
     </message>
     <message>
         <location line="+34"/>
@@ -2521,8 +2521,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="-35"/>
-        <source>Welcome to the Dash RPC console.</source>
-        <translation>Welcome to the Dash RPC console.</translation>
+        <source>Welcome to the DarkSilk RPC console.</source>
+        <translation>Welcome to the DarkSilk RPC console.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2601,8 +2601,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+14"/>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2617,8 +2617,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="-14"/>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dash network.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DarkSilk network.</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -2925,8 +2925,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     <message>
         <location line="+33"/>
         <location line="+13"/>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dash transactions than the network can process.</source>
-        <translation>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dash transactions than the network can process.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
+        <translation>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</translation>
     </message>
     <message>
         <location line="-59"/>
@@ -3015,8 +3015,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+38"/>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -3083,8 +3083,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>(darksend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(darksend requires this amount to be rounded up to the nearest %1).</translation>
+        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(sandstorm requires this amount to be rounded up to the nearest %1).</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -3186,8 +3186,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+129"/>
-        <source>Warning: Invalid Dash address</source>
-        <translation>Warning: Invalid Dash address</translation>
+        <source>Warning: Invalid DarkSilk address</source>
+        <translation>Warning: Invalid DarkSilk address</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -3214,8 +3214,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Dash address to send the payment to</source>
-        <translation>The Dash address to send the payment to</translation>
+        <source>The DarkSilk address to send the payment to</source>
+        <translation>The DarkSilk address to send the payment to</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -3268,8 +3268,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</source>
-        <translation>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</translation>
+        <source>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</source>
+        <translation>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</translation>
     </message>
     <message>
         <location line="+426"/>
@@ -3303,8 +3303,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     <name>ShutdownWindow</name>
     <message>
         <location filename="../utilitydialog.cpp" line="+43"/>
-        <source>Dash Core is shutting down...</source>
-        <translation>Dash Core is shutting down...</translation>
+        <source>DarkSilk Core is shutting down...</source>
+        <translation>DarkSilk Core is shutting down...</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -3331,8 +3331,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Dash address to sign the message with</source>
-        <translation>The Dash address to sign the message with</translation>
+        <source>The DarkSilk address to sign the message with</source>
+        <translation>The DarkSilk address to sign the message with</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -3373,8 +3373,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+21"/>
-        <source>Sign the message to prove you own this Dash address</source>
-        <translation>Sign the message to prove you own this Dash address</translation>
+        <source>Sign the message to prove you own this DarkSilk address</source>
+        <translation>Sign the message to prove you own this DarkSilk address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3404,13 +3404,13 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+21"/>
-        <source>The Dash address the message was signed with</source>
-        <translation>The Dash address the message was signed with</translation>
+        <source>The DarkSilk address the message was signed with</source>
+        <translation>The DarkSilk address the message was signed with</translation>
     </message>
     <message>
         <location line="+37"/>
-        <source>Verify the message to ensure it was signed with the specified Dash address</source>
-        <translation>Verify the message to ensure it was signed with the specified Dash address</translation>
+        <source>Verify the message to ensure it was signed with the specified DarkSilk address</source>
+        <translation>Verify the message to ensure it was signed with the specified DarkSilk address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3498,8 +3498,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     <name>SplashScreen</name>
     <message>
         <location filename="../splashscreen.cpp" line="+36"/>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -3513,8 +3513,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>The Dash Core developers</source>
-        <translation>The Dash Core developers</translation>
+        <source>The DarkSilk Core developers</source>
+        <translation>The DarkSilk Core developers</translation>
     </message>
     <message>
         <location filename="../networkstyle.cpp" line="+19"/>
@@ -3868,8 +3868,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Received via Darksend</source>
-        <translation>Received via Darksend</translation>
+        <source>Received via Sandstorm</source>
+        <translation>Received via Sandstorm</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3888,28 +3888,28 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Darksend Denominate</source>
-        <translation>Darksend Denominate</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm Denominate</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksend Collateral Payment</source>
-        <translation>Darksend Collateral Payment</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Sandstorm Collateral Payment</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend Make Collateral Inputs</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend Create Denominations</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm Create Denominations</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
         <location line="+30"/>
@@ -4007,28 +4007,28 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend Make Collateral Inputs</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend Create Denominations</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm Create Denominations</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Darksend Denominate</source>
-        <translation>Darksend Denominate</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm Denominate</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Darksend Collateral Payment</source>
-        <translation>Darksend Collateral Payment</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Sandstorm Collateral Payment</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4164,7 +4164,7 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>UnitDisplayStatusBarControl</name>
     <message>
-        <location filename="../bitcoingui.cpp" line="+115"/>
+        <location filename="../darksilkgui.cpp" line="+115"/>
         <source>Unit to show amounts in. Click to select another unit.</source>
         <translation>Unit to show amounts in. Click to select another unit.</translation>
     </message>
@@ -4189,8 +4189,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     <message>
         <location line="-20"/>
         <location line="+9"/>
-        <source>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DASH.</source>
-        <translation>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DASH.</translation>
+        <source>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -4242,21 +4242,21 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
 </context>
 <context>
-    <name>dash-core</name>
+    <name>darksilk-core</name>
     <message>
-        <location filename="../dashstrings.cpp" line="+22"/>
+        <location filename="../darksilkstrings.cpp" line="+22"/>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>Bind to given address and always listen on it. Use [host]:port notation for IPv6</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</source>
-        <translation>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</translation>
+        <source>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</source>
+        <translation>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</translation>
     </message>
     <message>
         <location line="+12"/>
-        <source>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
+        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -4320,18 +4320,18 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Unable to bind to %s on this computer. Dash Core is probably already running.</source>
-        <translation>Unable to bind to %s on this computer. Dash Core is probably already running.</translation>
+        <source>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</source>
+        <translation>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Darksend denominated funds for this transaction.</source>
-        <translation>Unable to locate enough Darksend denominated funds for this transaction.</translation>
+        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
+        <translation>Unable to locate enough Sandstorm denominated funds for this transaction.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</translation>
+        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -4360,8 +4360,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</translation>
+        <source>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</source>
+        <translation>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -4455,8 +4455,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>Darksend options:</source>
-        <translation>Darksend options:</translation>
+        <source>Sandstorm options:</source>
+        <translation>Sandstorm options:</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4545,8 +4545,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Error: You already have pending entries in the Darksend pool</source>
-        <translation>Error: You already have pending entries in the Darksend pool</translation>
+        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <translation>Error: You already have pending entries in the Sandstorm pool</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4610,8 +4610,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Disable all Dash specific functionality (Masternodes, Darksend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Disable all Dash specific functionality (Masternodes, Darksend, InstantX, Budgeting) (0-1, default: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4625,8 +4625,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Enable use of automated darksend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Enable use of automated darksend for funds stored in this wallet (0-1, default: %u)</translation>
+        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -4635,13 +4635,13 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+12"/>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Fees (in DASH/Kb) smaller than this are considered zero fee for relaying (default: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
+        <translation>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Fees (in DASH/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Fees (in DSLK/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4700,8 +4700,8 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Provide liquidity to Darksend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Provide liquidity to Darksend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
+        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -4730,33 +4730,33 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>To use dashd, or the -server option to dash-qt, you must set an rpcpassword in the configuration file:
+        <source>To use darksilkd, or the -server option to darksilk-qt, you must set an rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo.com
 </source>
-        <translation>To use dashd, or the -server option to dash-qt, you must set an rpcpassword in the configuration file:
+        <translation>To use darksilkd, or the -server option to darksilk-qt, you must set an rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo.com
 </translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Unable to locate enough funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Unable to locate enough funds for this transaction that are not equal 1000 DASH.</translation>
+        <source>Unable to locate enough funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Unable to locate enough funds for this transaction that are not equal 1000 DSLK.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4770,8 +4770,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+6"/>
-        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong Dash Core will not work properly.</source>
-        <translation>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong Dash Core will not work properly.</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong DarkSilk Core will not work properly.</source>
+        <translation>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong DarkSilk Core will not work properly.</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -4837,8 +4837,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Copyright (C) 2014-%i The Dash Core Developers</source>
-        <translation>Copyright (C) 2014-%i The Dash Core Developers</translation>
+        <source>Copyright (C) 2014-%i The DarkSilk Core Developers</source>
+        <translation>Copyright (C) 2014-%i The DarkSilk Core Developers</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -4847,18 +4847,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksend is idle.</source>
-        <translation>Darksend is idle.</translation>
+        <source>Sandstorm is idle.</source>
+        <translation>Sandstorm is idle.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Darksend request complete:</source>
-        <translation>Darksend request complete:</translation>
+        <source>Sandstorm request complete:</source>
+        <translation>Sandstorm request complete:</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Darksend request incomplete:</source>
-        <translation>Darksend request incomplete:</translation>
+        <source>Sandstorm request incomplete:</source>
+        <translation>Sandstorm request incomplete:</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -4867,18 +4867,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+5"/>
-        <source>Enable the client to act as a masternode (0-1, default: %u)</source>
-        <translation>Enable the client to act as a masternode (0-1, default: %u)</translation>
+        <source>Enable the client to act as a stormnode (0-1, default: %u)</source>
+        <translation>Enable the client to act as a stormnode (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Error connecting to Masternode.</source>
-        <translation>Error connecting to Masternode.</translation>
+        <source>Error connecting to Stormnode.</source>
+        <translation>Error connecting to Stormnode.</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>Error loading wallet.dat: Wallet requires newer version of Dash Core</source>
-        <translation>Error loading wallet.dat: Wallet requires newer version of Dash Core</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of DarkSilk Core</source>
+        <translation>Error loading wallet.dat: Wallet requires newer version of DarkSilk Core</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -4897,8 +4897,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+5"/>
-        <source>Fee (in DASH/kB) to add to transactions you send (default: %s)</source>
-        <translation>Fee (in DASH/kB) to add to transactions you send (default: %s)</translation>
+        <source>Fee (in DSLK/kB) to add to transactions you send (default: %s)</source>
+        <translation>Fee (in DSLK/kB) to add to transactions you send (default: %s)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4967,8 +4967,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Initialization sanity check failed. Dash Core is shutting down.</source>
-        <translation>Initialization sanity check failed. Dash Core is shutting down.</translation>
+        <source>Initialization sanity check failed. DarkSilk Core is shutting down.</source>
+        <translation>Initialization sanity check failed. DarkSilk Core is shutting down.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5022,8 +5022,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+11"/>
-        <source>Last successful Darksend action was too recent.</source>
-        <translation>Last successful Darksend action was too recent.</translation>
+        <source>Last successful Sandstorm action was too recent.</source>
+        <translation>Last successful Sandstorm action was too recent.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5047,13 +5047,13 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Loading masternode cache...</source>
-        <translation>Loading masternode cache...</translation>
+        <source>Loading stormnode cache...</source>
+        <translation>Loading stormnode cache...</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Loading masternode payment cache...</source>
-        <translation>Loading masternode payment cache...</translation>
+        <source>Loading stormnode payment cache...</source>
+        <translation>Loading stormnode payment cache...</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5062,8 +5062,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Lock masternodes from masternode configuration file (default: %u)</source>
-        <translation>Lock masternodes from masternode configuration file (default: %u)</translation>
+        <source>Lock stormnodes from stormnode configuration file (default: %u)</source>
+        <translation>Lock stormnodes from stormnode configuration file (default: %u)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5092,18 +5092,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>No Masternodes detected.</source>
-        <translation>No Masternodes detected.</translation>
+        <source>No Stormnodes detected.</source>
+        <translation>No Stormnodes detected.</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>No compatible Masternode found.</source>
-        <translation>No compatible Masternode found.</translation>
+        <source>No compatible Stormnode found.</source>
+        <translation>No compatible Stormnode found.</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Not in the Masternode list.</source>
-        <translation>Not in the Masternode list.</translation>
+        <source>Not in the Stormnode list.</source>
+        <translation>Not in the Stormnode list.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5152,8 +5152,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+4"/>
-        <source>Set external address:port to get to this masternode (example: %s)</source>
-        <translation>Set external address:port to get to this masternode (example: %s)</translation>
+        <source>Set external address:port to get to this stormnode (example: %s)</source>
+        <translation>Set external address:port to get to this stormnode (example: %s)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5192,8 +5192,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+2"/>
-        <source>Specify masternode configuration file (default: %s)</source>
-        <translation>Specify masternode configuration file (default: %s)</translation>
+        <source>Specify stormnode configuration file (default: %s)</source>
+        <translation>Specify stormnode configuration file (default: %s)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5212,18 +5212,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Submitted following entries to masternode: %u / %d</source>
-        <translation>Submitted following entries to masternode: %u / %d</translation>
+        <source>Submitted following entries to stormnode: %u / %d</source>
+        <translation>Submitted following entries to stormnode: %u / %d</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Submitted to masternode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>Submitted to masternode, waiting for more entries ( %u / %d ) %s</translation>
+        <source>Submitted to stormnode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Submitted to stormnode, waiting for more entries ( %u / %d ) %s</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Submitted to masternode, waiting in queue %s</source>
-        <translation>Submitted to masternode, waiting in queue %s</translation>
+        <source>Submitted to stormnode, waiting in queue %s</source>
+        <translation>Submitted to stormnode, waiting in queue %s</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5242,13 +5242,13 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Synchronizing masternode winners...</source>
-        <translation>Synchronizing masternode winners...</translation>
+        <source>Synchronizing stormnode winners...</source>
+        <translation>Synchronizing stormnode winners...</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Synchronizing masternodes...</source>
-        <translation>Synchronizing masternodes...</translation>
+        <source>Synchronizing stormnodes...</source>
+        <translation>Synchronizing stormnodes...</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5257,8 +5257,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+4"/>
-        <source>This is not a Masternode.</source>
-        <translation>This is not a Masternode.</translation>
+        <source>This is not a Stormnode.</source>
+        <translation>This is not a Stormnode.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5272,8 +5272,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Use N separate masternodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>Use N separate masternodes to anonymize funds  (2-8, default: %u)</translation>
+        <source>Use N separate stormnodes to anonymize funds  (2-8, default: %u)</source>
+        <translation>Use N separate stormnodes to anonymize funds  (2-8, default: %u)</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -5282,8 +5282,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+9"/>
-        <source>Wallet needed to be rewritten: restart Dash Core to complete</source>
-        <translation>Wallet needed to be rewritten: restart Dash Core to complete</translation>
+        <source>Wallet needed to be rewritten: restart DarkSilk Core to complete</source>
+        <translation>Wallet needed to be rewritten: restart DarkSilk Core to complete</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -5302,8 +5302,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="-136"/>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Invalid masternodeprivkey. Please see documenation.</translation>
+        <source>Invalid stormnodeprivkey. Please see documenation.</source>
+        <translation>Invalid stormnodeprivkey. Please see documenation.</translation>
     </message>
     <message>
         <location line="-88"/>
@@ -5312,8 +5312,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+13"/>
-        <source>Can&apos;t find random Masternode.</source>
-        <translation>Can&apos;t find random Masternode.</translation>
+        <source>Can&apos;t find random Stormnode.</source>
+        <translation>Can&apos;t find random Stormnode.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5322,8 +5322,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+16"/>
-        <source>Could not parse masternode.conf</source>
-        <translation>Could not parse masternode.conf</translation>
+        <source>Could not parse stormnode.conf</source>
+        <translation>Could not parse stormnode.conf</translation>
     </message>
     <message>
         <location line="+59"/>
@@ -5332,8 +5332,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Invalid port detected in masternode.conf</source>
-        <translation>Invalid port detected in masternode.conf</translation>
+        <source>Invalid port detected in stormnode.conf</source>
+        <translation>Invalid port detected in stormnode.conf</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5357,8 +5357,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Keep N DASH anonymized (default: %u)</source>
-        <translation>Keep N DASH anonymized (default: %u)</translation>
+        <source>Keep N DSLK anonymized (default: %u)</source>
+        <translation>Keep N DSLK anonymized (default: %u)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5367,8 +5367,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Last Darksend was too recent.</source>
-        <translation>Last Darksend was too recent.</translation>
+        <source>Last Sandstorm was too recent.</source>
+        <translation>Last Sandstorm was too recent.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5397,18 +5397,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+4"/>
-        <source>Masternode options:</source>
-        <translation>Masternode options:</translation>
+        <source>Stormnode options:</source>
+        <translation>Stormnode options:</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Masternode queue is full.</source>
-        <translation>Masternode queue is full.</translation>
+        <source>Stormnode queue is full.</source>
+        <translation>Stormnode queue is full.</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Masternode:</source>
-        <translation>Masternode:</translation>
+        <source>Stormnode:</source>
+        <translation>Stormnode:</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5537,8 +5537,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+2"/>
-        <source>Set the masternode private key</source>
-        <translation>Set the masternode private key</translation>
+        <source>Set the stormnode private key</source>
+        <translation>Set the stormnode private key</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5682,8 +5682,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dash Alert&quot; admin@foo.com
     </message>
     <message>
         <location line="+1"/>
-        <source>Value more than Darksend pool maximum allows.</source>
-        <translation>Value more than Darksend pool maximum allows.</translation>
+        <source>Value more than Sandstorm pool maximum allows.</source>
+        <translation>Value more than Sandstorm pool maximum allows.</translation>
     </message>
     <message>
         <location line="+1"/>

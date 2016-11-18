@@ -62,12 +62,12 @@
         <translation>Adresa prijatia</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Toto sú Vaše Dash adresy pre posielanie platieb. Pred poslaním mincí vždy overte sumu a doručovaciu adresu.</translation>
+        <source>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Toto sú Vaše DarkSilk adresy pre posielanie platieb. Pred poslaním mincí vždy overte sumu a doručovaciu adresu.</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Toto sú Vaše Dash adresy pre posielanie platieb. Pre každú transakciu sa doporučuje použiť novú doručovaciu adresu.</translation>
+        <source>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Toto sú Vaše DarkSilk adresy pre posielanie platieb. Pre každú transakciu sa doporučuje použiť novú doručovaciu adresu.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -176,8 +176,8 @@
         <translation>Potvrďte šifrovanie peňaženky</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</source>
-        <translation>Upozornenie: Ak zašifrujete vašu peňaženku a stratíte prístupové heslo, potom &lt;b&gt;prídete o všetky svoje DASH-y&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</source>
+        <translation>Upozornenie: Ak zašifrujete vašu peňaženku a stratíte prístupové heslo, potom &lt;b&gt;prídete o všetky svoje DSLK-y&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -188,8 +188,8 @@
         <translation>Peňaženka zašifrovaná</translation>
     </message>
     <message>
-        <source>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</source>
-        <translation>DashCoin sa teraz ukončí, aby dokončil proces šifrovania. Nezabudnite, že zašifrovanie vašej peňaženky nemôže plne chrániť Vaše mince pred krádežou škodlivým softvérom, ktorý napadol váš počítač.</translation>
+        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilkCoin sa teraz ukončí, aby dokončil proces šifrovania. Nezabudnite, že zašifrovanie vašej peňaženky nemôže plne chrániť Vaše mince pred krádežou škodlivým softvérom, ktorý napadol váš počítač.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -229,10 +229,10 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DarkSilkGUI</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -255,16 +255,16 @@
         <translation>&amp;Odoslať</translation>
     </message>
     <message>
-        <source>Send coins to a Dash address</source>
-        <translation>Poslať mince na Dash adresu</translation>
+        <source>Send coins to a DarkSilk address</source>
+        <translation>Poslať mince na DarkSilk adresu</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
         <translation>&amp;Prijať</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and dash: URIs)</source>
-        <translation>Vyžiadať platby (vygeneruje QR kódy a Dash: URI)</translation>
+        <source>Request payments (generates QR codes and darksilk: URIs)</source>
+        <translation>Vyžiadať platby (vygeneruje QR kódy a DarkSilk: URI)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -283,12 +283,12 @@
         <translation>Ukončiť program</translation>
     </message>
     <message>
-        <source>&amp;About Dash Core</source>
-        <translation>&amp;O Dash Core</translation>
+        <source>&amp;About DarkSilk Core</source>
+        <translation>&amp;O DarkSilk Core</translation>
     </message>
     <message>
-        <source>Show information about Dash Core</source>
-        <translation>Zobraziť informácie o Dash Core</translation>
+        <source>Show information about DarkSilk Core</source>
+        <translation>Zobraziť informácie o DarkSilk Core</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -303,8 +303,8 @@
         <translation>&amp;Možnosti...</translation>
     </message>
     <message>
-        <source>Modify configuration options for Dash</source>
-        <translation>Upraviť možnosti konfigurácie pre Dash</translation>
+        <source>Modify configuration options for DarkSilk</source>
+        <translation>Upraviť možnosti konfigurácie pre DarkSilk</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -355,16 +355,16 @@
         <translation>Podpísať &amp;správu...</translation>
     </message>
     <message>
-        <source>Sign messages with your Dash addresses to prove you own them</source>
-        <translation>Podpísať správy s Vašimi Dash adresami ako dôkaz že ich vlastníte</translation>
+        <source>Sign messages with your DarkSilk addresses to prove you own them</source>
+        <translation>Podpísať správy s Vašimi DarkSilk adresami ako dôkaz že ich vlastníte</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
         <translation>Overiť správu</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Dash addresses</source>
-        <translation>Overiť správy pre uistenie, že boli podpísané zadanými Dash adresami</translation>
+        <source>Verify messages to ensure they were signed with specified DarkSilk addresses</source>
+        <translation>Overiť správy pre uistenie, že boli podpísané zadanými DarkSilk adresami</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -443,16 +443,16 @@
         <translation>Otvoriť &amp;URI...</translation>
     </message>
     <message>
-        <source>Open a dash: URI or payment request</source>
-        <translation>Otvoriť dash: URI alebo žiadosť o platbu </translation>
+        <source>Open a darksilk: URI or payment request</source>
+        <translation>Otvoriť darksilk: URI alebo žiadosť o platbu </translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>Možnosti príkazového riadku</translation>
     </message>
     <message>
-        <source>Dash Core client</source>
-        <translation>Dash Core klient</translation>
+        <source>DarkSilk Core client</source>
+        <translation>DarkSilk Core klient</translation>
     </message>
     <message numerus="yes">
         <source>Processed %n blocks of transaction history.</source>
@@ -463,8 +463,8 @@
         <translation>Synchronizujú sa ďalšie dáta: %p%</translation>
     </message>
     <message>
-        <source>Show the Dash Core help message to get a list with possible Dash command-line options</source>
-        <translation>Zobraziť Dash Core nápovedu k získaniu zoznamu možností príkazového riadku Dash.</translation>
+        <source>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</source>
+        <translation>Zobraziť DarkSilk Core nápovedu k získaniu zoznamu možností príkazového riadku DarkSilk.</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -487,8 +487,8 @@
         <translation>Lišta záložiek</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Dash network</source>
-        <translation><numerusform>%n aktívne spojenie so sieťou Dash</numerusform><numerusform>%n aktívne spojenia so sieťou Dash</numerusform><numerusform>%n aktívnych spojení so sieťou Dash</numerusform></translation>
+        <source>%n active connection(s) to DarkSilk network</source>
+        <translation><numerusform>%n aktívne spojenie so sieťou DarkSilk</numerusform><numerusform>%n aktívne spojenia so sieťou DarkSilk</numerusform><numerusform>%n aktívnych spojení so sieťou DarkSilk</numerusform></translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -740,8 +740,8 @@ Adresa: %4</translation>
         <translation>Kopírovať zmenu</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Darksend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Darksend, please deselect all non-nonymized inputs first and then check Darksend checkbox again.</source>
-        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;Darksend bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť Darksend, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite Darksend začiarkavacie políčko.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
+        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;Sandstorm bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť Sandstorm, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite Sandstorm začiarkavacie políčko.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -841,10 +841,10 @@ Adresa: %4</translation>
     </message>
 </context>
 <context>
-    <name>DarksendConfig</name>
+    <name>SandstormConfig</name>
     <message>
-        <source>Configure Darksend</source>
-        <translation>Konfigurovať Darksend</translation>
+        <source>Configure Sandstorm</source>
+        <translation>Konfigurovať Sandstorm</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -863,48 +863,48 @@ Adresa: %4</translation>
         <translation>Prosím vyberte úroveň súkromia.</translation>
     </message>
     <message>
-        <source>Use 2 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Použiť 2 rozdielne masternode pre fixovanie prostriedkov až do 1000 DASH</translation>
+        <source>Use 2 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Použiť 2 rozdielne stormnode pre fixovanie prostriedkov až do 1000 DSLK</translation>
     </message>
     <message>
-        <source>Use 8 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Použiť 8 rozdielnych masternode pre fixovanie prostriedkov až do 1000 DASH</translation>
+        <source>Use 8 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Použiť 8 rozdielnych stormnode pre fixovanie prostriedkov až do 1000 DSLK</translation>
     </message>
     <message>
-        <source>Use 16 separate masternodes</source>
-        <translation>Použiť 16 rozdielnych masternode</translation>
+        <source>Use 16 separate stormnodes</source>
+        <translation>Použiť 16 rozdielnych stormnode</translation>
     </message>
     <message>
-        <source>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</source>
-        <translation>Táto možnosť je najrýchlejšia a bude stáť približne 0.025 DASH pre anonimizáciu 1000 DASH</translation>
+        <source>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</source>
+        <translation>Táto možnosť je najrýchlejšia a bude stáť približne 0.025 DSLK pre anonimizáciu 1000 DSLK</translation>
     </message>
     <message>
-        <source>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</source>
-        <translation>Táto možnosť je stredne rýchla bude stáť približne 0.05 DASH pre anonimizáciu 1000 DASH</translation>
+        <source>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</source>
+        <translation>Táto možnosť je stredne rýchla bude stáť približne 0.05 DSLK pre anonimizáciu 1000 DSLK</translation>
     </message>
     <message>
-        <source>0.1 DASH per 1000 DASH you anonymize.</source>
-        <translation>0.1 DASH za 1000 DASH ktoré spravíte anonymnými.</translation>
+        <source>0.1 DSLK per 1000 DSLK you anonymize.</source>
+        <translation>0.1 DSLK za 1000 DSLK ktoré spravíte anonymnými.</translation>
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
         <translation>Toto je najpomalšia a najviac bezpečná možnosť. Použitie maximálnej anonymity bude stáť</translation>
     </message>
     <message>
-        <source>Darksend Configuration</source>
-        <translation>Konfigurácia Darksend</translation>
+        <source>Sandstorm Configuration</source>
+        <translation>Konfigurácia Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dash.</translation>
+        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dash.</translation>
+        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dash.</translation>
+        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
 </context>
 <context>
@@ -946,8 +946,8 @@ Adresa: %4</translation>
         <translation>Upraviť odosielaciu adresu</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dash address.</source>
-        <translation>Zadaná adresa "%1" nie je platná Dash adresa.</translation>
+        <source>The entered address "%1" is not a valid DarkSilk address.</source>
+        <translation>Zadaná adresa "%1" nie je platná DarkSilk adresa.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -988,8 +988,8 @@ Adresa: %4</translation>
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>version</source>
@@ -1000,8 +1000,8 @@ Adresa: %4</translation>
         <translation>(%1-bit)</translation>
     </message>
     <message>
-        <source>About Dash Core</source>
-        <translation>O Dash Core</translation>
+        <source>About DarkSilk Core</source>
+        <translation>O DarkSilk Core</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1047,16 +1047,16 @@ Adresa: %4</translation>
         <translation>Vitajte</translation>
     </message>
     <message>
-        <source>Welcome to Dash Core.</source>
-        <translation>Vitajte v Dash Core.</translation>
+        <source>Welcome to DarkSilk Core.</source>
+        <translation>Vitajte v DarkSilk Core.</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where Dash Core will store its data.</source>
-        <translation>Keďže toto je prvý krát čo spúšťate tento program, môžete vybrať kam bude Dash Core ukladať svoje dáta.</translation>
+        <source>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</source>
+        <translation>Keďže toto je prvý krát čo spúšťate tento program, môžete vybrať kam bude DarkSilk Core ukladať svoje dáta.</translation>
     </message>
     <message>
-        <source>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>Dash Core stiahne a uloží kópiu reťazca blokov Dash. Pri najmenej %1GB dát bude uložených v tejto zložke and bude ďalej rásť. Peňaženka bude tiež uložená v tejto zložke.</translation>
+        <source>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>DarkSilk Core stiahne a uloží kópiu reťazca blokov DarkSilk. Pri najmenej %1GB dát bude uložených v tejto zložke and bude ďalej rásť. Peňaženka bude tiež uložená v tejto zložke.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -1067,8 +1067,8 @@ Adresa: %4</translation>
         <translation>Použiť vlastný dátový adresár:</translation>
     </message>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -1121,12 +1121,12 @@ Adresa: %4</translation>
         <translation>&amp;Hlavné</translation>
     </message>
     <message>
-        <source>Automatically start Dash after logging in to the system.</source>
-        <translation>Automaticky spustiť Dash po prihlásení do systému.</translation>
+        <source>Automatically start DarkSilk after logging in to the system.</source>
+        <translation>Automaticky spustiť DarkSilk po prihlásení do systému.</translation>
     </message>
     <message>
-        <source>&amp;Start Dash on system login</source>
-        <translation>&amp;Spusť Dash po prihlásení do systému</translation>
+        <source>&amp;Start DarkSilk on system login</source>
+        <translation>&amp;Spusť DarkSilk po prihlásení do systému</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -1145,16 +1145,16 @@ Adresa: %4</translation>
         <translation>(0 = auto, &lt;0 = nechať toľko jadier voľných)</translation>
     </message>
     <message>
-        <source>Darksend rounds to use</source>
-        <translation>Použiť kôl Darksend</translation>
+        <source>Sandstorm rounds to use</source>
+        <translation>Použiť kôl Sandstorm</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Darksend once it's reached.</source>
-        <translation>Táto suma slúži ako hranica pre vypnutie Darksend akonáhle je dosiahnutá</translation>
+        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <translation>Táto suma slúži ako hranica pre vypnutie Sandstorm akonáhle je dosiahnutá</translation>
     </message>
     <message>
-        <source>Amount of Dash to keep anonymized</source>
-        <translation>Suma Dash ktorú držať anonymne </translation>
+        <source>Amount of DarkSilk to keep anonymized</source>
+        <translation>Suma DarkSilk ktorú držať anonymne </translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -1173,8 +1173,8 @@ Adresa: %4</translation>
         <translation>Povoliť prichádzajúce spojenia</translation>
     </message>
     <message>
-        <source>Connect to the Dash network through a SOCKS5 proxy.</source>
-        <translation>Pripojiť sa do siete Dash cez proxy SOCKS5.</translation>
+        <source>Connect to the DarkSilk network through a SOCKS5 proxy.</source>
+        <translation>Pripojiť sa do siete DarkSilk cez proxy SOCKS5.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1185,8 +1185,8 @@ Adresa: %4</translation>
         <translation>Expert</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>Toto nastavenie určuje množstvo rozličných masternode cez ktoré sa bude anonymizovať vstup.&lt;br/&gt; Viac kôl anonymizácie dáva väčšiu úroveň súkromia, ale tiež stojí viac na poplatkoch.</translation>
+        <source>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>Toto nastavenie určuje množstvo rozličných stormnode cez ktoré sa bude anonymizovať vstup.&lt;br/&gt; Viac kôl anonymizácie dáva väčšiu úroveň súkromia, ale tiež stojí viac na poplatkoch.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -1205,8 +1205,8 @@ Adresa: %4</translation>
         <translation>Sieť</translation>
     </message>
     <message>
-        <source>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automaticky otvoriť na smerovači port pre Dash klient. Toto funguje iba ak Váš smerovač  podporuje UPnP a je povolené</translation>
+        <source>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automaticky otvoriť na smerovači port pre DarkSilk klient. Toto funguje iba ak Váš smerovač  podporuje UPnP a je povolené</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1257,14 +1257,14 @@ Adresa: %4</translation>
         <translation>Jazyk užívateľského rozhrania:</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Dash.</source>
-        <translation>Tu môžete nastaviť jazyk používateľského prostredia. Toto nastavenie sa prejaví po reštartovaní Dash.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</source>
+        <translation>Tu môžete nastaviť jazyk používateľského prostredia. Toto nastavenie sa prejaví po reštartovaní DarkSilk.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</source>
+https://www.transifex.com/projects/p/darksilk/</source>
         <translation>Chýbajúci alebo nekompletný preklad? Pomôžte nám tu:
-https://www.transifex.com/projects/p/dash/</translation>
+https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1276,7 +1276,7 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Zvoľte ako deliť bitcoin pri zobrazovaní pri platbách a užívateľskom rozhraní.</translation>
+        <translation>Zvoľte ako deliť DarkSilk pri zobrazovaní pri platbách a užívateľskom rozhraní.</translation>
     </message>
     <message>
         <source>Decimal digits</source>
@@ -1346,8 +1346,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Forma</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</source>
-        <translation>Zobrazené informácie môžu byť zastaralé. Vaša peňaženka sa automaticky zosynchronizuje so sieťou Dash akonáhle nadviaže spojenie, avšak tento proces ešte nebol dokončený.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</source>
+        <translation>Zobrazené informácie môžu byť zastaralé. Vaša peňaženka sa automaticky zosynchronizuje so sieťou DarkSilk akonáhle nadviaže spojenie, avšak tento proces ešte nebol dokončený.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1422,16 +1422,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Dokončenie:</translation>
     </message>
     <message>
-        <source>Darksend Balance:</source>
-        <translation>Bilancia Darksend:</translation>
+        <source>Sandstorm Balance:</source>
+        <translation>Bilancia Sandstorm:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
         <translation>Čiastka a kolá:</translation>
     </message>
     <message>
-        <source>0 DASH / 0 Rounds</source>
-        <translation>0 DASH / 0 Kôl</translation>
+        <source>0 DSLK / 0 Rounds</source>
+        <translation>0 DSLK / 0 Kôl</translation>
     </message>
     <message>
         <source>Submitted Denom:</source>
@@ -1442,8 +1442,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1454,24 +1454,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Začať/Zastaviť miešanie</translation>
     </message>
     <message>
-        <source>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>Denominácie ktoré ste odoslali na Masternode. &lt;br&gt;Pre miešanie, ostatný používatelia musia odoslať rovnakú sumu denominácií.</translation>
+        <source>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>Denominácie ktoré ste odoslali na Stormnode. &lt;br&gt;Pre miešanie, ostatný používatelia musia odoslať rovnakú sumu denominácií.</translation>
     </message>
     <message>
         <source>(Last Message)</source>
         <translation>(Posledná správa)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Darksend request.</source>
-        <translation>Skúsiť manuálne odoslať Darksend požiadavku.</translation>
+        <source>Try to manually submit a Sandstorm request.</source>
+        <translation>Skúsiť manuálne odoslať Sandstorm požiadavku.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Výskúšať mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Darksend (can interrupt Darksend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Vynulovať súčasný stav Darksend (môže prerušiť Darksend ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
+        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Vynulovať súčasný stav Sandstorm (môže prerušiť Sandstorm ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1486,11 +1486,11 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vypnuté</translation>
     </message>
     <message>
-        <source>Start Darksend Mixing</source>
+        <source>Start Sandstorm Mixing</source>
         <translation>Začať Dasksend miešanie</translation>
     </message>
     <message>
-        <source>Stop Darksend Mixing</source>
+        <source>Stop Sandstorm Mixing</source>
         <translation>Zastaviť Dasksend miešanie</translation>
     </message>
     <message>
@@ -1534,9 +1534,9 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Povolené </translation>
     </message>
     <message>
-        <source>Last Darksend message:
+        <source>Last Sandstorm message:
 </source>
-        <translation>Posledná Darksend správa:
+        <translation>Posledná Sandstorm správa:
 </translation>
     </message>
     <message>
@@ -1544,20 +1544,20 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Darksend was successfully reset.</source>
-        <translation>Darksend bol úspešne obnovený</translation>
+        <source>Sandstorm was successfully reset.</source>
+        <translation>Sandstorm bol úspešne obnovený</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Darksend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Ak nechcete vidieť interné Darksend poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
+        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Ak nechcete vidieť interné Sandstorm poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
     </message>
     <message>
-        <source>Darksend requires at least %1 to use.</source>
-        <translation>Pre použitie vyžaduje Darksend aspoň %1.</translation>
+        <source>Sandstorm requires at least %1 to use.</source>
+        <translation>Pre použitie vyžaduje Sandstorm aspoň %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Darksend.</source>
-        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam Darksend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
+        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam Sandstorm.</translation>
     </message>
 </context>
 <context>
@@ -1567,8 +1567,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Chyba pri vyžiadaní platby</translation>
     </message>
     <message>
-        <source>Cannot start dash: click-to-pay handler</source>
-        <translation>Dash sa nedá spustiť: click-to-pay handler</translation>
+        <source>Cannot start darksilk: click-to-pay handler</source>
+        <translation>DarkSilk sa nedá spustiť: click-to-pay handler</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1587,8 +1587,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Neplatná adresa platby %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Dash address or malformed URI parameters.</source>
-        <translation>URI sa nedá analyzovať! Toto môže byť spôsobené neplatnou Dash adresou, alebo nesprávnym tvarom URI parametrov.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid DarkSilk address or malformed URI parameters.</source>
+        <translation>URI sa nedá analyzovať! Toto môže byť spôsobené neplatnou DarkSilk adresou, alebo nesprávnym tvarom URI parametrov.</translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1673,8 +1673,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Suma</translation>
     </message>
     <message>
-        <source>Enter a Dash address (e.g. %1)</source>
-        <translation>Zadajte Dash adresu (e.g. %1)</translation>
+        <source>Enter a DarkSilk address (e.g. %1)</source>
+        <translation>Zadajte DarkSilk adresu (e.g. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1763,8 +1763,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Počet pripojení</translation>
     </message>
     <message>
-        <source>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Otvoriť denník ladenia Dash zo súčastného adresára. Môže trvať niekoľko sekúnd ak je súbor veľký.</translation>
+        <source>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Otvoriť denník ladenia DarkSilk zo súčastného adresára. Môže trvať niekoľko sekúnd ak je súbor veľký.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -1811,7 +1811,7 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Reťazec blokov</translation>
     </message>
     <message>
-        <source>Number of Masternodes</source>
+        <source>Number of Stormnodes</source>
         <translation>Počet Mastenode</translation>
     </message>
     <message>
@@ -1971,8 +1971,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Von:</translation>
     </message>
     <message>
-        <source>Welcome to the Dash RPC console.</source>
-        <translation>Vitajte v konzole Dash RPC</translation>
+        <source>Welcome to the DarkSilk RPC console.</source>
+        <translation>Vitajte v konzole DarkSilk RPC</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -2034,8 +2034,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Znovu použiť jestvujúcu prijímaciu adresu (neodporúča sa)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Pripojiť ku vyžiadanej platbe voliteľnú správu, ktorá sa zobrazí, keď bude žiadosť otvorená. Poznámka: Správa nebude poslaná spolu s platbou cez sieť Dash.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Pripojiť ku vyžiadanej platbe voliteľnú správu, ktorá sa zobrazí, keď bude žiadosť otvorená. Poznámka: Správa nebude poslaná spolu s platbou cez sieť DarkSilk.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -2046,8 +2046,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Voliteľný popis ktorý sa pridá k tejto novej prijímajúcej adrese.</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Pripojiť ku vyžiadanej platbe voliteľnú správu, ktorá sa zobrazí, keď bude žiadosť otvorená. &lt;br&gt;Poznámka: Správa nebude poslaná spolu s platbou cez sieť Dash.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Pripojiť ku vyžiadanej platbe voliteľnú správu, ktorá sa zobrazí, keď bude žiadosť otvorená. &lt;br&gt;Poznámka: Správa nebude poslaná spolu s platbou cez sieť DarkSilk.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
@@ -2291,8 +2291,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ak je vlastný poplatok nastavený na 1000 duffov a transakcia je len 250 bytov, v tom prípade "za kilobajt" zaplatí iba 250 duffov na poplatkoch, &lt;br /&gt;zatiaľ čo "celkovo pri najmenšom" zaplatí 1000 duffov. Pre transakcie väčšie ako jeden kilobajt, obe zaplatia rovnako za kilobajt. </translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dash transactions than the network can process.</source>
-        <translation>Platenie minimálneho poplatku je v poriadku pokiaľ je objem transakcií menší ako je miesto v bloku. &lt;br /&gt;Buďte opatrný pretože to môže skončiť s nikdy nepotvrdenými transakciami, akonáhle je dopyt po Dash transakciách väčší ako dokáže sieť Dash spracovať.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
+        <translation>Platenie minimálneho poplatku je v poriadku pokiaľ je objem transakcií menší ako je miesto v bloku. &lt;br /&gt;Buďte opatrný pretože to môže skončiť s nikdy nepotvrdenými transakciami, akonáhle je dopyt po DarkSilk transakciách väčší ako dokáže sieť DarkSilk spracovať.</translation>
     </message>
     <message>
         <source>per kilobyte</source>
@@ -2363,8 +2363,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>&amp;Pridať príjemcu</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2415,8 +2415,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>anonymne zdroje</translation>
     </message>
     <message>
-        <source>(darksend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(Darksend vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
+        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(Sandstorm vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2444,7 +2444,7 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
     <message>
         <source>Confirm send coins</source>
-        <translation>Potvrdiť odoslanie bitcoins</translation>
+        <translation>Potvrdiť odoslanie DarkSilks</translation>
     </message>
     <message>
         <source>A fee %1 times higher than %2 per kB is considered an insanely high fee.</source>
@@ -2495,8 +2495,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Platiť iba minimálny poplatok %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Dash address</source>
-        <translation>Upozornenie: Neplatná Dash adresa</translation>
+        <source>Warning: Invalid DarkSilk address</source>
+        <translation>Upozornenie: Neplatná DarkSilk adresa</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2518,8 +2518,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Zapla&amp;tiť:</translation>
     </message>
     <message>
-        <source>The Dash address to send the payment to</source>
-        <translation>Dash adresa pre poslanie platby</translation>
+        <source>The DarkSilk address to send the payment to</source>
+        <translation>DarkSilk adresa pre poslanie platby</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2558,8 +2558,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Správa:</translation>
     </message>
     <message>
-        <source>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</source>
-        <translation>Správa ktorá bola pripojená ku dash: URI ktorá sa uchová spolu s transakciou pre Vašu referenciu. Poznámka: Táto správa nebude poslaná cez sieť Dash.</translation>
+        <source>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</source>
+        <translation>Správa ktorá bola pripojená ku darksilk: URI ktorá sa uchová spolu s transakciou pre Vašu referenciu. Poznámka: Táto správa nebude poslaná cez sieť DarkSilk.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
@@ -2585,8 +2585,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Dash Core is shutting down...</source>
-        <translation>Dash core sa vypína...</translation>
+        <source>DarkSilk Core is shutting down...</source>
+        <translation>DarkSilk core sa vypína...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -2608,8 +2608,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Môžete podpísať správy svojou adresou a dokázať, že ju vlastníte. Buďte opatrní a podpíšte len prehlásenia s ktorými plne súhlasíte, nakoľko útoky typu "phishing" Vás môžu lákať k ich podpísaniu.</translation>
     </message>
     <message>
-        <source>The Dash address to sign the message with</source>
-        <translation>Dash adresa na podpísanie správy</translation>
+        <source>The DarkSilk address to sign the message with</source>
+        <translation>DarkSilk adresa na podpísanie správy</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2640,8 +2640,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Kopírovať práve zvolenú adresu do systémového klipbordu</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Dash address</source>
-        <translation>Podpísať spravu aby ste dokázali, že vlastníte túto Dash adresu</translation>
+        <source>Sign the message to prove you own this DarkSilk address</source>
+        <translation>Podpísať spravu aby ste dokázali, že vlastníte túto DarkSilk adresu</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2664,12 +2664,12 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vložte podpisovaciu adresu, správu (uistite sa, že kopírujete ukončenia riadkov, medzery, odrážky, atď. presne) a podpis pod to na overenie adresy. Buďte opatrní a nečítajte ako podpísané viac než je v samotnej podpísanej správe a môžete sa tak vyhnúť podvodu mitm útokom.</translation>
     </message>
     <message>
-        <source>The Dash address the message was signed with</source>
-        <translation>Adresa Dash s ktorou bola podpísaná správa</translation>
+        <source>The DarkSilk address the message was signed with</source>
+        <translation>Adresa DarkSilk s ktorou bola podpísaná správa</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Dash address</source>
-        <translation>Overiť správu pre uistenie, že bola podpísaná zadanou Dash adresou</translation>
+        <source>Verify the message to ensure it was signed with the specified DarkSilk address</source>
+        <translation>Overiť správu pre uistenie, že bola podpísaná zadanou DarkSilk adresou</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2735,8 +2735,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Version %1</source>
@@ -2747,8 +2747,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vývojári jadra Bitcoin</translation>
     </message>
     <message>
-        <source>The Dash Core developers</source>
-        <translation>Vývojári Dash Core</translation>
+        <source>The DarkSilk Core developers</source>
+        <translation>Vývojári DarkSilk Core</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -3019,8 +3019,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Prijaté od:</translation>
     </message>
     <message>
-        <source>Received via Darksend</source>
-        <translation>Prijaté cez Darksend</translation>
+        <source>Received via Sandstorm</source>
+        <translation>Prijaté cez Sandstorm</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3035,24 +3035,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vyfárané</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Denominácia Darksend</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Denominácia Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Zaisťovacia Darksend platba</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Zaisťovacia Sandstorm platba</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend uskutočnil zaisťovacie vstupy</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Vytvoriť denominácie Darksend</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Vytvoriť denominácie Sandstorm</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3130,24 +3130,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Odoslané na</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend uskutočnil zaisťovacie vstupy</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Vytvoriť denominácie Darksend</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Vytvoriť denominácie Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Denominácia Darksend</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Denominácia Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Zaisťovacia Darksend platba</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Zaisťovacia Sandstorm platba</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3272,11 +3272,11 @@ https://www.transifex.com/projects/p/dash/</translation>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Poslať Bitcoins</translation>
+        <translation>Poslať DarkSilks</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DASH.</source>
-        <translation>InstantX zatiaľ nepodporuje posielanie takto vysokých čiastok. Transakcie sú limitované na %1 DASH.</translation>
+        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantX zatiaľ nepodporuje posielanie takto vysokých čiastok. Transakcie sú limitované na %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3319,18 +3319,18 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
 </context>
 <context>
-    <name>dash-core</name>
+    <name>darksilk-core</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>Spojiť s danou adresou a vždy na nej počúvať. Použite zápis [host]:port pre IPv6</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</source>
-        <translation>Nedá sa zamknúť dátový adresár %s. Dash Core už pravdepodobne beží.</translation>
+        <source>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</source>
+        <translation>Nedá sa zamknúť dátový adresár %s. DarkSilk Core už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Pre poslanie zdrojov používa Darksend presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
+        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Pre poslanie zdrojov používa Sandstorm presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3381,16 +3381,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Toto je predbežná testovacia zostava - používate na vlastné riziko - nepoužívajte na ťaženie alebo obchodné aplikácie</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. Dash Core is probably already running.</source>
-        <translation>Nedá sa viazať ku %s na tomto počítači. Dash Core už pravdepodobne beží.</translation>
+        <source>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</source>
+        <translation>Nedá sa viazať ku %s na tomto počítači. DarkSilk Core už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend denominated funds for this transaction.</source>
-        <translation>Nedá sa nájsť dostatok denominácií Darksend pre túto transakciu. </translation>
+        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
+        <translation>Nedá sa nájsť dostatok denominácií Sandstorm pre túto transakciu. </translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Nedá sa nájsť dostatok ne-denominovaných Darksend zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DASH.</translation>
+        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Nedá sa nájsť dostatok ne-denominovaných Sandstorm zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3413,8 +3413,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Upozornenie: wallet.dat poškodený, údaje zachránené! Pôvodný wallet.dat bol uložený ako wallet.{timestamp}.bak v %s; ak váš zostatok alebo transakcie nie sú správne, mali by ste obnoviť zo zálohy.</translation>
     </message>
     <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>V konfigurácii musíte špecifikovať masternodeprivkey. Pre pomoc sa prosím pozrite do dokumentácie.</translation>
+        <source>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</source>
+        <translation>V konfigurácii musíte špecifikovať stormnodeprivkey. Pre pomoc sa prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -3489,8 +3489,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Zistený poškodený blok databázy</translation>
     </message>
     <message>
-        <source>Darksend options:</source>
-        <translation>Možnosti Darksend:</translation>
+        <source>Sandstorm options:</source>
+        <translation>Možnosti Sandstorm:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3561,8 +3561,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Chyba: Peňaženka je zamknutá, transakcia sa nedá vytvoriť!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Darksend pool</source>
-        <translation>Chyba: Už máte čakajúce položky vo fronte Darksend</translation>
+        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <translation>Chyba: Už máte čakajúce položky vo fronte Sandstorm</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3613,8 +3613,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vymazať všetky transakcie z peňaženky a pri spustení znova získať z reťazca blokov iba tie získané pomocou -rescan</translation>
     </message>
     <message>
-        <source>Disable all Dash specific functionality (Masternodes, Darksend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Vypnúť všetky funkcie špecifické pre Dash (Masternode, Darksend, InstantX, Rozpočty) (0-1, predvolené: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Vypnúť všetky funkcie špecifické pre DarkSilk (Stormnode, Sandstorm, InstantX, Rozpočty) (0-1, predvolené: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3625,20 +3625,20 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Zapnúť InstantX, ukázať potvrdenia pre zamknuté transakcie (bool, predvolené: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated darksend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Povoliť používanie automatického darksend pre zdroje uložené v tejto peňaženke (0-1, predvolené: %u)</translation>
+        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Povoliť používanie automatického sandstorm pre zdroje uložené v tejto peňaženke (0-1, predvolené: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
         <translation>Chyba: Nájdený nepodporovaný argument -socks. Nastavenie SOCKS verzie nie je už možné, podporované sú už iba proxy SOCKS5.</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Poplatky (v DASH za Kb) menšie ako toto, sú považované za nulový poplatok pre prenos (predvolené: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
+        <translation>Poplatky (v DSLK za Kb) menšie ako toto, sú považované za nulový poplatok pre prenos (predvolené: %s)</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Poplatky (v DASH za Kb) menšie ako toto, sú považované za nulový transakčný poplatok (predvolené: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Poplatky (v DSLK za Kb) menšie ako toto, sú považované za nulový transakčný poplatok (predvolené: %s)</translation>
     </message>
     <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
@@ -3685,8 +3685,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Výstupné ladiace informácie (predvolené: %u, dodanie &lt;category&gt; je voliteľné)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Darksend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Poskytnúť likviditu pre Darksend nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
+        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Poskytnúť likviditu pre Sandstorm nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3709,32 +3709,32 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Tento produkt obsahuje softvér vyvinutý projektom OpenSSL pre použitie sady nástrojov OpenSSL &lt;https://www.openssl.org/&gt; a kryptografického softvéru napísaného Eric Young a UPnP softvér napísaný Thomas Bernard.</translation>
     </message>
     <message>
-        <source>To use dashd, or the -server option to dash-qt, you must set an rpcpassword in the configuration file:
+        <source>To use darksilkd, or the -server option to darksilk-qt, you must set an rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "Dash Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
 </source>
-        <translation>Pre použitie možnosti -server pre dash-qt, musíte nastaviť rpcpassword v konfiguračnom súbore:
+        <translation>Pre použitie možnosti -server pre darksilk-qt, musíte nastaviť rpcpassword v konfiguračnom súbore:
 %s
 Doporučuje sa použiť nasledovné náhodné heslo:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (toto heslo si nemusíte pamätať)
 Používateľské meno a heslo NEMÔŽU byť rovnaké.
 Ak súbor neexistuje, vytvoriť na nastaviť práva tak aby ho mohol čítať iba vlastník.
 Tiež sa doporučuje nastaviť alertnotify, aby ste boli upozornený na problém,
-napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
+napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
 </translation>
     </message>
     <message>
-        <source>Unable to locate enough funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Nenašiel sa dostatok prostriedkov pre túto transakciu, ktorú nie sú rovné 1000 DASH.</translation>
+        <source>Unable to locate enough funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Nenašiel sa dostatok prostriedkov pre túto transakciu, ktorú nie sú rovné 1000 DSLK.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
@@ -3745,8 +3745,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Upozornenie: -maxtxfee je nastavené príliš vysoko! Takto vysoké poplatky by mali byť zaplatené za jednu transakciu.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dash Core will not work properly.</source>
-        <translation>Upozornenie: Skontrolujte si prosím či máte správny čas a dátum na Vašom počítači. Ak je Vaše nastavenie zlé, Dash Core nebude pracovať správne.</translation>
+        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong DarkSilk Core will not work properly.</source>
+        <translation>Upozornenie: Skontrolujte si prosím či máte správny čas a dátum na Vašom počítači. Ak je Vaše nastavenie zlé, DarkSilk Core nebude pracovať správne.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
@@ -3799,40 +3799,40 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Autorské práva (C) 2009-%i Vývojári jadra Bitcoin</translation>
     </message>
     <message>
-        <source>Copyright (C) 2014-%i The Dash Core Developers</source>
-        <translation>Autorské práva (C) 2014-%i Vývojári jadra Dash</translation>
+        <source>Copyright (C) 2014-%i The DarkSilk Core Developers</source>
+        <translation>Autorské práva (C) 2014-%i Vývojári jadra DarkSilk</translation>
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
         <translation>Nedá sa analyzovať -rpcbind hodnota %s ako sieťová adresa</translation>
     </message>
     <message>
-        <source>Darksend is idle.</source>
-        <translation>Darksend je nečinný.</translation>
+        <source>Sandstorm is idle.</source>
+        <translation>Sandstorm je nečinný.</translation>
     </message>
     <message>
-        <source>Darksend request complete:</source>
-        <translation>Darksend požiadavok dokončený:</translation>
+        <source>Sandstorm request complete:</source>
+        <translation>Sandstorm požiadavok dokončený:</translation>
     </message>
     <message>
-        <source>Darksend request incomplete:</source>
-        <translation>Darksend požiadavok nedokončený:</translation>
+        <source>Sandstorm request incomplete:</source>
+        <translation>Sandstorm požiadavok nedokončený:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
         <translation>Vypnúť núdzový režim, prepísať skutočnú udalosť núdzového režimu (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a masternode (0-1, default: %u)</source>
-        <translation>Povoliť klientovi aby vystupoval ako masternode (0-1, predvolené: %u)</translation>
+        <source>Enable the client to act as a stormnode (0-1, default: %u)</source>
+        <translation>Povoliť klientovi aby vystupoval ako stormnode (0-1, predvolené: %u)</translation>
     </message>
     <message>
-        <source>Error connecting to Masternode.</source>
-        <translation>Chyba pripojenia k Masternode.</translation>
+        <source>Error connecting to Stormnode.</source>
+        <translation>Chyba pripojenia k Stormnode.</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of Dash Core</source>
-        <translation>Chyba pri načítaní wallet.dat: Peňaženka vyžaduje novšiu verziu Dash Core</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of DarkSilk Core</source>
+        <translation>Chyba pri načítaní wallet.dat: Peňaženka vyžaduje novšiu verziu DarkSilk Core</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
@@ -3847,8 +3847,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Chyba: nájdený nepodporovaný argument -tor, použite -onion.</translation>
     </message>
     <message>
-        <source>Fee (in DASH/kB) to add to transactions you send (default: %s)</source>
-        <translation>Pridať poplatok (v DASH za kB) do transakcií ktoré posielate (predvolené: %s)</translation>
+        <source>Fee (in DSLK/kB) to add to transactions you send (default: %s)</source>
+        <translation>Pridať poplatok (v DSLK za kB) do transakcií ktoré posielate (predvolené: %s)</translation>
     </message>
     <message>
         <source>Finalizing transaction.</source>
@@ -3903,8 +3903,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Informácia</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. Dash Core is shutting down.</source>
-        <translation>Inicializácia kontroly zdravia zlyhala. Dash Core sa vypína.</translation>
+        <source>Initialization sanity check failed. DarkSilk Core is shutting down.</source>
+        <translation>Inicializácia kontroly zdravia zlyhala. DarkSilk Core sa vypína.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
@@ -3947,7 +3947,7 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Neplatná suma pre -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Darksend action was too recent.</source>
+        <source>Last successful Sandstorm action was too recent.</source>
         <translation>Posledná Dasksend akcia bola pred chvíľou.</translation>
     </message>
     <message>
@@ -3967,20 +3967,20 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Načíta sa vyrovnávacia pamäť rozpočtu...</translation>
     </message>
     <message>
-        <source>Loading masternode cache...</source>
-        <translation>Načíta sa vyrovnávacia pamäť masternode...</translation>
+        <source>Loading stormnode cache...</source>
+        <translation>Načíta sa vyrovnávacia pamäť stormnode...</translation>
     </message>
     <message>
-        <source>Loading masternode payment cache...</source>
-        <translation>Načíta sa vyrovnávacia pamäť platieb masternode...</translation>
+        <source>Loading stormnode payment cache...</source>
+        <translation>Načíta sa vyrovnávacia pamäť platieb stormnode...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
         <translation>Zámok je už na mieste.</translation>
     </message>
     <message>
-        <source>Lock masternodes from masternode configuration file (default: %u)</source>
-        <translation>Zamknúť masternody z konfiguračného súboru masternode (predvolené: %u)</translation>
+        <source>Lock stormnodes from stormnode configuration file (default: %u)</source>
+        <translation>Zamknúť masternody z konfiguračného súboru stormnode (predvolené: %u)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
@@ -4003,16 +4003,16 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Je potrebné zadať port s -whitebind: '%s'</translation>
     </message>
     <message>
-        <source>No Masternodes detected.</source>
-        <translation>Nezistený žiadny Masternode.</translation>
+        <source>No Stormnodes detected.</source>
+        <translation>Nezistený žiadny Stormnode.</translation>
     </message>
     <message>
-        <source>No compatible Masternode found.</source>
-        <translation>Nekompatibilný Masternode zdroj.</translation>
+        <source>No compatible Stormnode found.</source>
+        <translation>Nekompatibilný Stormnode zdroj.</translation>
     </message>
     <message>
-        <source>Not in the Masternode list.</source>
-        <translation>Nie je v zozname Masternode.</translation>
+        <source>Not in the Stormnode list.</source>
+        <translation>Nie je v zozname Stormnode.</translation>
     </message>
     <message>
         <source>Number of automatic wallet backups (default: 10)</source>
@@ -4051,8 +4051,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Privátny kľúč servera (predvolené: %s)</translation>
     </message>
     <message>
-        <source>Set external address:port to get to this masternode (example: %s)</source>
-        <translation>Nastaviť externú adresu:port ktorý sa dostane sa k tomuto masternode (príklad: %s)</translation>
+        <source>Set external address:port to get to this stormnode (example: %s)</source>
+        <translation>Nastaviť externú adresu:port ktorý sa dostane sa k tomuto stormnode (príklad: %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
@@ -4083,8 +4083,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Zadajte časový limit pripojenia v milisekundách (minimum: 1, predvolené: %d)</translation>
     </message>
     <message>
-        <source>Specify masternode configuration file (default: %s)</source>
-        <translation>Zadať konfiguračný súbor masternode (predvolené: %s)</translation>
+        <source>Specify stormnode configuration file (default: %s)</source>
+        <translation>Zadať konfiguračný súbor stormnode (predvolené: %s)</translation>
     </message>
     <message>
         <source>Specify pid file (default: %s)</source>
@@ -4099,16 +4099,16 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Ukončiť činnosť po importovaní blokov z disku (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Submitted following entries to masternode: %u / %d</source>
-        <translation>Položky odoslané na masternode: %u / %d</translation>
+        <source>Submitted following entries to stormnode: %u / %d</source>
+        <translation>Položky odoslané na stormnode: %u / %d</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>Odoslané na masternode, čaká na viac položiek ( %u / %d ) %s</translation>
+        <source>Submitted to stormnode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Odoslané na stormnode, čaká na viac položiek ( %u / %d ) %s</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting in queue %s</source>
-        <translation>Odoslané na masternode, čaká vo fronte %s</translation>
+        <source>Submitted to stormnode, waiting in queue %s</source>
+        <translation>Odoslané na stormnode, čaká vo fronte %s</translation>
     </message>
     <message>
         <source>Synchronization failed</source>
@@ -4123,20 +4123,20 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Synchronizujú sa rozpočty...</translation>
     </message>
     <message>
-        <source>Synchronizing masternode winners...</source>
-        <translation>Synchronizujú sa masternode víťazi...</translation>
+        <source>Synchronizing stormnode winners...</source>
+        <translation>Synchronizujú sa stormnode víťazi...</translation>
     </message>
     <message>
-        <source>Synchronizing masternodes...</source>
-        <translation>Synchronizujú sa masternode...</translation>
+        <source>Synchronizing stormnodes...</source>
+        <translation>Synchronizujú sa stormnode...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
         <translation>Synchronizujú sa sporky...</translation>
     </message>
     <message>
-        <source>This is not a Masternode.</source>
-        <translation>Toto nie je Masternode.</translation>
+        <source>This is not a Stormnode.</source>
+        <translation>Toto nie je Stormnode.</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -4147,16 +4147,16 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Použiť integráciu KeePass 2 s využitím doplnku KeePassHttp (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Use N separate masternodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>Použiť N rozdielnych masternode na anonymizovanie zdrojov (2-8, predvolené: %u)</translation>
+        <source>Use N separate stormnodes to anonymize funds  (2-8, default: %u)</source>
+        <translation>Použiť N rozdielnych stormnode na anonymizovanie zdrojov (2-8, predvolené: %u)</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Použiť UPnP pre mapovanie počúvajúceho portu (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart Dash Core to complete</source>
-        <translation>Bolo potrebné prepísať peňaženku: k dokončeniu reštartujte Dash Core</translation>
+        <source>Wallet needed to be rewritten: restart DarkSilk Core to complete</source>
+        <translation>Bolo potrebné prepísať peňaženku: k dokončeniu reštartujte DarkSilk Core</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
@@ -4171,32 +4171,32 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Skúsime znovu...</translation>
     </message>
     <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Neplatný masternodeprivkey. Prosím pozrite do dokumentácie.</translation>
+        <source>Invalid stormnodeprivkey. Please see documenation.</source>
+        <translation>Neplatný stormnodeprivkey. Prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
         <source>(must be 9999 for mainnet)</source>
         <translation>(pre hlavnú sieť musí byť 9999)</translation>
     </message>
     <message>
-        <source>Can't find random Masternode.</source>
-        <translation>Nedá sa nájsť náhodný Masternode.</translation>
+        <source>Can't find random Stormnode.</source>
+        <translation>Nedá sa nájsť náhodný Stormnode.</translation>
     </message>
     <message>
         <source>Can't mix while sync in progress.</source>
         <translation>Miešanie nefunguje počas synchronizácie.</translation>
     </message>
     <message>
-        <source>Could not parse masternode.conf</source>
-        <translation>Nedá sa analyzovať masternode.conf</translation>
+        <source>Could not parse stormnode.conf</source>
+        <translation>Nedá sa analyzovať stormnode.conf</translation>
     </message>
     <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Nadaná neplatná netmask vo -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Invalid port detected in masternode.conf</source>
-        <translation>Zistený neplatný port v masternode.conf</translation>
+        <source>Invalid port detected in stormnode.conf</source>
+        <translation>Zistený neplatný port v stormnode.conf</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
@@ -4215,15 +4215,15 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Kľúč KeePassHttp pre šifrovanú AES komunikáciu s KeePass</translation>
     </message>
     <message>
-        <source>Keep N DASH anonymized (default: %u)</source>
-        <translation>Udržiavať N DASH anonymizovaných (predvolené: %u)</translation>
+        <source>Keep N DSLK anonymized (default: %u)</source>
+        <translation>Udržiavať N DSLK anonymizovaných (predvolené: %u)</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
         <translation>V pamäti udržiavať najviac &lt;n&gt; nepotvrdených transakcií (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Last Darksend was too recent.</source>
+        <source>Last Sandstorm was too recent.</source>
         <translation>Posledný Dasksend bol pred chvíľou.</translation>
     </message>
     <message>
@@ -4247,16 +4247,16 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Načítavanie peňaženky...</translation>
     </message>
     <message>
-        <source>Masternode options:</source>
-        <translation>Možnosti Masternode:</translation>
+        <source>Stormnode options:</source>
+        <translation>Možnosti Stormnode:</translation>
     </message>
     <message>
-        <source>Masternode queue is full.</source>
-        <translation>Fronta Masternode je plná</translation>
+        <source>Stormnode queue is full.</source>
+        <translation>Fronta Stormnode je plná</translation>
     </message>
     <message>
-        <source>Masternode:</source>
-        <translation>Masternode:</translation>
+        <source>Stormnode:</source>
+        <translation>Stormnode:</translation>
     </message>
     <message>
         <source>Missing input transaction information.</source>
@@ -4359,8 +4359,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Nastaviť maximálnu veľkosť v bajtoch (predvolené: %d)</translation>
     </message>
     <message>
-        <source>Set the masternode private key</source>
-        <translation>Nastaviť súkromný kľúč masternode</translation>
+        <source>Set the stormnode private key</source>
+        <translation>Nastaviť súkromný kľúč stormnode</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -4475,8 +4475,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dash Upozornenie" admin@foo.com
         <translation>Užívateľské meno pre JSON-RPC spojenia</translation>
     </message>
     <message>
-        <source>Value more than Darksend pool maximum allows.</source>
-        <translation>Väčšia hodnota ako dovoľuje fronta Darksend.</translation>
+        <source>Value more than Sandstorm pool maximum allows.</source>
+        <translation>Väčšia hodnota ako dovoľuje fronta Sandstorm.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

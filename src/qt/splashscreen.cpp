@@ -1,6 +1,8 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "splashscreen.h"
@@ -26,79 +28,26 @@
 SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) :
     QWidget(0, f), curAlignment(0)
 {
-    // set reference point, paddings
-    int paddingLeft             = 14;
-    int paddingTop              = 470;
-    int titleVersionVSpace      = 17;
-    int titleCopyrightVSpace    = 32;
 
-    float fontFactor            = 1.0;
-    float devicePixelRatio      = 1.0;
-#if QT_VERSION > 0x050100
-    devicePixelRatio = ((QGuiApplication*)QCoreApplication::instance())->devicePixelRatio();
-#endif
+    // transparent background
+    setAttribute(Qt::WA_TranslucentBackground);
+    setStyleSheet("background:transparent;");
 
-    // define text to place
-    QString titleText       = tr("Dash Core");
-    QString versionText     = QString(tr("Version %1")).arg(QString::fromStdString(FormatFullVersion()));
-    QString copyrightTextBtc   = QChar(0xA9)+QString(" 2009-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bitcoin Core developers"));
-    QString copyrightTextDash   = QChar(0xA9)+QString(" 2014-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Dash Core developers"));
-    QString titleAddText    = networkStyle->getTitleAddText();
+    // no window decorations
+    setWindowFlags(Qt::FramelessWindowHint);
 
     QString font            = QApplication::font().toString();
 
-    // networkstyle.cpp can't (yet) read themes, so we do it here to get the correct Splash-screen
-    QString splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash";
-    if(GetBoolArg("-regtest", false))
-        splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
-    if(GetBoolArg("-testnet", false))
-        splashScreenPath = ":/images/" + GUIUtil::getThemeName() + "/splash_testnet";
-
     // load the bitmap for writing some text over it
-    pixmap = QPixmap(splashScreenPath);
+    pixmap     = networkStyle->getSplashImage();
 
     QPainter pixPaint(&pixmap);
     pixPaint.setPen(QColor(100,100,100));
 
-    // check font size and drawing with
-    pixPaint.setFont(QFont(font, 28*fontFactor));
-    QFontMetrics fm = pixPaint.fontMetrics();
-    int titleTextWidth  = fm.width(titleText);
-    if(titleTextWidth > 160) {
-        // strange font rendering, Arial probably not found
-        fontFactor = 0.75;
-    }
-
-    pixPaint.setFont(QFont(font, 28*fontFactor));
-    fm = pixPaint.fontMetrics();
-    titleTextWidth  = fm.width(titleText);
-    pixPaint.drawText(paddingLeft,paddingTop,titleText);
-
-    pixPaint.setFont(QFont(font, 15*fontFactor));
-    pixPaint.drawText(paddingLeft,paddingTop+titleVersionVSpace,versionText);
-
-    // draw copyright stuff
-    pixPaint.setFont(QFont(font, 10*fontFactor));
-    pixPaint.drawText(paddingLeft,paddingTop+titleCopyrightVSpace,copyrightTextBtc);
-    pixPaint.drawText(paddingLeft,paddingTop+titleCopyrightVSpace+12,copyrightTextDash);
-
-    // draw additional text if special network
-    if(!titleAddText.isEmpty()) {
-        QFont boldFont = QFont(font, 10*fontFactor);
-        boldFont.setWeight(QFont::Bold);
-        pixPaint.setFont(boldFont);
-        fm = pixPaint.fontMetrics();
-        int titleAddTextWidth  = fm.width(titleAddText);
-        pixPaint.drawText(pixmap.width()-titleAddTextWidth-10,pixmap.height()-25,titleAddText);
-    }
-
     pixPaint.end();
 
-    // Set window title
-    setWindowTitle(titleText + " " + titleAddText);
-
     // Resize window and move to center of desktop, disallow resizing
-    QRect r(QPoint(), QSize(pixmap.size().width()/devicePixelRatio,pixmap.size().height()/devicePixelRatio));
+    QRect r(QPoint(), pixmap.size());
     resize(r.size());
     setFixedSize(r.size());
     move(QApplication::desktop()->screenGeometry().center() - r.center());

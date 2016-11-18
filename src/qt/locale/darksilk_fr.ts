@@ -62,12 +62,12 @@
         <translation>Adresses de réception</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ce sont vos adresses Dash pour l'envoi de paiements. Vérifiez toujours le montant et l'adresse de réception avant l'envoi de monnaies.</translation>
+        <source>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Ce sont vos adresses DarkSilk pour l'envoi de paiements. Vérifiez toujours le montant et l'adresse de réception avant l'envoi de monnaies.</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ce sont vos adresses Dash pour la réception de paiements. Il est recommandé d'utiliser une nouvelle adresse de réception pour chaque transaction.</translation>
+        <source>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Ce sont vos adresses DarkSilk pour la réception de paiements. Il est recommandé d'utiliser une nouvelle adresse de réception pour chaque transaction.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -176,8 +176,8 @@
         <translation>Confirmer le chiffrement du portefeuille</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</source>
-        <translation>Attention : Si vous chiffrez votre portefeuille et perdez votre phrase de passe, vous &lt;b&gt;PERDREZ TOUS VOS DASH&lt;/b&gt; !</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</source>
+        <translation>Attention : Si vous chiffrez votre portefeuille et perdez votre phrase de passe, vous &lt;b&gt;PERDREZ TOUS VOS DSLK&lt;/b&gt; !</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -188,8 +188,8 @@
         <translation>Portefeuille chiffré</translation>
     </message>
     <message>
-        <source>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</source>
-        <translation>Dash va à présent se fermer pour terminer le chiffrement. N'oubliez pas que le chiffrement de votre portefeuille n'est pas une protection totale contre le vol par des logiciels malveillants qui infecteraient votre ordinateur.</translation>
+        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilk va à présent se fermer pour terminer le chiffrement. N'oubliez pas que le chiffrement de votre portefeuille n'est pas une protection totale contre le vol par des logiciels malveillants qui infecteraient votre ordinateur.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -229,10 +229,10 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DarkSilkGUI</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -255,16 +255,16 @@
         <translation>&amp;Envoyer</translation>
     </message>
     <message>
-        <source>Send coins to a Dash address</source>
-        <translation>Envoyer des pièces sur une adresse Dash</translation>
+        <source>Send coins to a DarkSilk address</source>
+        <translation>Envoyer des pièces sur une adresse DarkSilk</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
         <translation>&amp;Recevoir</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and dash: URIs)</source>
-        <translation>Demande de paiements (Générer des QR code et des URIs dash)</translation>
+        <source>Request payments (generates QR codes and darksilk: URIs)</source>
+        <translation>Demande de paiements (Générer des QR code et des URIs darksilk)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -283,12 +283,12 @@
         <translation>Quitter l’application</translation>
     </message>
     <message>
-        <source>&amp;About Dash Core</source>
-        <translation>À propos du noyau Dash</translation>
+        <source>&amp;About DarkSilk Core</source>
+        <translation>À propos du noyau DarkSilk</translation>
     </message>
     <message>
-        <source>Show information about Dash Core</source>
-        <translation>Affichez des informations à propos de  Dash Core</translation>
+        <source>Show information about DarkSilk Core</source>
+        <translation>Affichez des informations à propos de  DarkSilk Core</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -303,8 +303,8 @@
         <translation>&amp;Options...</translation>
     </message>
     <message>
-        <source>Modify configuration options for Dash</source>
-        <translation>Modifier les options de configuration pour Dash</translation>
+        <source>Modify configuration options for DarkSilk</source>
+        <translation>Modifier les options de configuration pour DarkSilk</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -355,16 +355,16 @@
         <translation>&amp;Signer le message...</translation>
     </message>
     <message>
-        <source>Sign messages with your Dash addresses to prove you own them</source>
-        <translation>Signer les messages avec votre adresses Dash pour prouver que vous êtes le propriétaire</translation>
+        <source>Sign messages with your DarkSilk addresses to prove you own them</source>
+        <translation>Signer les messages avec votre adresses DarkSilk pour prouver que vous êtes le propriétaire</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
         <translation>&amp;Vérifier un message...</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Dash addresses</source>
-        <translation>Vérifier les messages pour vous assurer qu'ils ont été signés avec les adresses Dash spécifiées</translation>
+        <source>Verify messages to ensure they were signed with specified DarkSilk addresses</source>
+        <translation>Vérifier les messages pour vous assurer qu'ils ont été signés avec les adresses DarkSilk spécifiées</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -443,16 +443,16 @@
         <translation>Ouvrir un &amp;URI...</translation>
     </message>
     <message>
-        <source>Open a dash: URI or payment request</source>
-        <translation>Ouvrir une URI ou demande de paiement dash</translation>
+        <source>Open a darksilk: URI or payment request</source>
+        <translation>Ouvrir une URI ou demande de paiement darksilk</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>Options de ligne de &amp;commande</translation>
     </message>
     <message>
-        <source>Dash Core client</source>
-        <translation>Client Dash Core </translation>
+        <source>DarkSilk Core client</source>
+        <translation>Client DarkSilk Core </translation>
     </message>
     <message numerus="yes">
         <source>Processed %n blocks of transaction history.</source>
@@ -463,8 +463,8 @@
         <translation>Synchronisation des données additionnelles: %p%</translation>
     </message>
     <message>
-        <source>Show the Dash Core help message to get a list with possible Dash command-line options</source>
-        <translation>Afficher le message d'aide de Dash Core pour obtenir une liste des options de ligne de commande Bitcoin possibles.</translation>
+        <source>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</source>
+        <translation>Afficher le message d'aide de DarkSilk Core pour obtenir une liste des options de ligne de commande Bitcoin possibles.</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -487,8 +487,8 @@
         <translation>Barre d'outils des onglets</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Dash network</source>
-        <translation><numerusform>%n connexion active au réseau Dash </numerusform><numerusform>%n connexions actives au réseau Dash </numerusform></translation>
+        <source>%n active connection(s) to DarkSilk network</source>
+        <translation><numerusform>%n connexion active au réseau DarkSilk </numerusform><numerusform>%n connexions actives au réseau DarkSilk </numerusform></translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -741,8 +741,8 @@ Adresse : %4
         <translation>Copier la monnaie</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Darksend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Darksend, please deselect all non-nonymized inputs first and then check Darksend checkbox again.</source>
-        <translation>Entrée non-anonymisées sélectionnée. &lt;b&gt; Darksend sera désactivé. &lt;/ b&gt; &lt;br&gt; Si vous voulez continuer à utiliser Darksend, veuillez désélectionner toutes les entrées non-anonymisées d'abord, puis vérifier à nouveau la case Darksend.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
+        <translation>Entrée non-anonymisées sélectionnée. &lt;b&gt; Sandstorm sera désactivé. &lt;/ b&gt; &lt;br&gt; Si vous voulez continuer à utiliser Sandstorm, veuillez désélectionner toutes les entrées non-anonymisées d'abord, puis vérifier à nouveau la case Sandstorm.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Adresse : %4
     </message>
 </context>
 <context>
-    <name>DarksendConfig</name>
+    <name>SandstormConfig</name>
     <message>
-        <source>Configure Darksend</source>
-        <translation>Configurer Darksend</translation>
+        <source>Configure Sandstorm</source>
+        <translation>Configurer Sandstorm</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -864,48 +864,48 @@ Adresse : %4
         <translation>Veuillez choisir un niveau de confidentialité.</translation>
     </message>
     <message>
-        <source>Use 2 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Utiliser 2 masternodes pour mélanger jusqu'à 1000 DASH</translation>
+        <source>Use 2 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Utiliser 2 stormnodes pour mélanger jusqu'à 1000 DSLK</translation>
     </message>
     <message>
-        <source>Use 8 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Utiliser 8 masternodes pour mélanger jusqu'à 1000 DASH</translation>
+        <source>Use 8 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Utiliser 8 stormnodes pour mélanger jusqu'à 1000 DSLK</translation>
     </message>
     <message>
-        <source>Use 16 separate masternodes</source>
-        <translation>Utiliser 16 masternodes</translation>
+        <source>Use 16 separate stormnodes</source>
+        <translation>Utiliser 16 stormnodes</translation>
     </message>
     <message>
-        <source>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</source>
-        <translation>Cette option est la plus rapide et coûtera environ 0,025 DASH pour anonymiser 1000 DASH</translation>
+        <source>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</source>
+        <translation>Cette option est la plus rapide et coûtera environ 0,025 DSLK pour anonymiser 1000 DSLK</translation>
     </message>
     <message>
-        <source>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</source>
-        <translation>Cette option est un peu moins rapide et coûtera environ 0,05 DASH pour anonymiser 1000 DASH</translation>
+        <source>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</source>
+        <translation>Cette option est un peu moins rapide et coûtera environ 0,05 DSLK pour anonymiser 1000 DSLK</translation>
     </message>
     <message>
-        <source>0.1 DASH per 1000 DASH you anonymize.</source>
-        <translation>0,1 DASH par 1000 DASH anonymisés.</translation>
+        <source>0.1 DSLK per 1000 DSLK you anonymize.</source>
+        <translation>0,1 DSLK par 1000 DSLK anonymisés.</translation>
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
         <translation>Cette option est le plus lente et la plus sécurisée. Utiliser l'anonymisation maximale coûtera</translation>
     </message>
     <message>
-        <source>Darksend Configuration</source>
-        <translation>Configuration de Darksend</translation>
+        <source>Sandstorm Configuration</source>
+        <translation>Configuration de Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend est réglé avec succès sur normal (%1 and 2 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du Dash.</translation>
+        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm est réglé avec succès sur normal (%1 and 2 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du DarkSilk.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend est réglé avec succès sur haut (%1 and 8 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du Dash.</translation>
+        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm est réglé avec succès sur haut (%1 and 8 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du DarkSilk.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend est réglé avec succès sur maximum (%1 and 16 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du Dash.</translation>
+        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm est réglé avec succès sur maximum (%1 and 16 rounds). Vous pouvez changer cela à tout moment en ouvrant la fenêtre de configuration du DarkSilk.</translation>
     </message>
 </context>
 <context>
@@ -947,8 +947,8 @@ Adresse : %4
         <translation>Modifier l’adresse d'envoi</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dash address.</source>
-        <translation>L'adresse entrée "%1" est pas une adresse Dash valide</translation>
+        <source>The entered address "%1" is not a valid DarkSilk address.</source>
+        <translation>L'adresse entrée "%1" est pas une adresse DarkSilk valide</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -989,8 +989,8 @@ Adresse : %4
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>version</source>
@@ -1001,8 +1001,8 @@ Adresse : %4
         <translation>(%1-bit)</translation>
     </message>
     <message>
-        <source>About Dash Core</source>
-        <translation>A propos de Dash Core</translation>
+        <source>About DarkSilk Core</source>
+        <translation>A propos de DarkSilk Core</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1048,16 +1048,16 @@ Adresse : %4
         <translation>Bienvenue</translation>
     </message>
     <message>
-        <source>Welcome to Dash Core.</source>
-        <translation>Bienvenue à Dash Core</translation>
+        <source>Welcome to DarkSilk Core.</source>
+        <translation>Bienvenue à DarkSilk Core</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where Dash Core will store its data.</source>
-        <translation>Comme il s'agit du premier lancement du logiciel, vous pouvez choisir l'emplacement où Dash Core sauvegardera ses données.</translation>
+        <source>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</source>
+        <translation>Comme il s'agit du premier lancement du logiciel, vous pouvez choisir l'emplacement où DarkSilk Core sauvegardera ses données.</translation>
     </message>
     <message>
-        <source>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>Dash Core téléchargera et sauvegardera une copie de la chaîne de blocs Dash. Au moins %1Go de données seront sauvegardées dans ce répertoire, et cette taille augmentera avec le temps. Le portefeuille sera aussi sauvegardé dans ce répertoire.</translation>
+        <source>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>DarkSilk Core téléchargera et sauvegardera une copie de la chaîne de blocs DarkSilk. Au moins %1Go de données seront sauvegardées dans ce répertoire, et cette taille augmentera avec le temps. Le portefeuille sera aussi sauvegardé dans ce répertoire.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -1068,8 +1068,8 @@ Adresse : %4
         <translation>Utiliser un répertoire de données personnalisé :</translation>
     </message>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -1122,12 +1122,12 @@ Adresse : %4
         <translation>Réglages &amp;principaux</translation>
     </message>
     <message>
-        <source>Automatically start Dash after logging in to the system.</source>
-        <translation>Démarrer Dash automatiquement au démarrage du système.</translation>
+        <source>Automatically start DarkSilk after logging in to the system.</source>
+        <translation>Démarrer DarkSilk automatiquement au démarrage du système.</translation>
     </message>
     <message>
-        <source>&amp;Start Dash on system login</source>
-        <translation>&amp;Démarrer Dash au démarrage du système</translation>
+        <source>&amp;Start DarkSilk on system login</source>
+        <translation>&amp;Démarrer DarkSilk au démarrage du système</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -1146,16 +1146,16 @@ Adresse : %4
         <translation>(0 = auto, &lt; 0 = laisser ce nombre de cœurs inutilisés)</translation>
     </message>
     <message>
-        <source>Darksend rounds to use</source>
-        <translation>Nombre de cycles Darksend à effectuer</translation>
+        <source>Sandstorm rounds to use</source>
+        <translation>Nombre de cycles Sandstorm à effectuer</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Darksend once it's reached.</source>
-        <translation>Ce montant est le seuil pour désactiver Darksend dès qu'il est atteint.</translation>
+        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <translation>Ce montant est le seuil pour désactiver Sandstorm dès qu'il est atteint.</translation>
     </message>
     <message>
-        <source>Amount of Dash to keep anonymized</source>
-        <translation>Nombre de Dash à conserver anonymisés</translation>
+        <source>Amount of DarkSilk to keep anonymized</source>
+        <translation>Nombre de DarkSilk à conserver anonymisés</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -1174,8 +1174,8 @@ Adresse : %4
         <translation>Autoriser les connexions entrantes</translation>
     </message>
     <message>
-        <source>Connect to the Dash network through a SOCKS5 proxy.</source>
-        <translation>Se connecter au réseau Dash à travers un proxy SOCKS5.</translation>
+        <source>Connect to the DarkSilk network through a SOCKS5 proxy.</source>
+        <translation>Se connecter au réseau DarkSilk à travers un proxy SOCKS5.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1186,8 +1186,8 @@ Adresse : %4
         <translation>Expert</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>Ce paramètre détermine le nombre de masternodes uniques par lesquels l'anonymisation sera effectuée.&lt;br/&gt;Plus le nombre de cycles d'anonymisation est important, plus le degré de confidentialité est élevé, mais les frais associés sont d'autant plus importants.</translation>
+        <source>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>Ce paramètre détermine le nombre de stormnodes uniques par lesquels l'anonymisation sera effectuée.&lt;br/&gt;Plus le nombre de cycles d'anonymisation est important, plus le degré de confidentialité est élevé, mais les frais associés sont d'autant plus importants.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -1206,8 +1206,8 @@ Adresse : %4
         <translation>&amp;Réseau</translation>
     </message>
     <message>
-        <source>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Ouvrir automatiquement le port client Dash sur le routeur. Cela ne fonctionne que sur les routeurs supportant et ayant activé UPnP.</translation>
+        <source>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Ouvrir automatiquement le port client DarkSilk sur le routeur. Cela ne fonctionne que sur les routeurs supportant et ayant activé UPnP.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1258,14 +1258,14 @@ Adresse : %4
         <translation>&amp;Langue de l'interface utilisateur :</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Dash.</source>
-        <translation>La langue de l'interface utilisateur peut être modifiée ici. Ce paramètre sera pris en compte au redémarrage de Dash.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</source>
+        <translation>La langue de l'interface utilisateur peut être modifiée ici. Ce paramètre sera pris en compte au redémarrage de DarkSilk.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</source>
+https://www.transifex.com/projects/p/darksilk/</source>
         <translation>Langage manquant ou traduction incomplète ? Participez aux traductions ici :
-https://www.transifex.com/projects/p/dash/</translation>
+https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1347,8 +1347,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Formulaire</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</source>
-        <translation>L'information affichée peut être obsolète. Votre portefeuille se synchronise automatiquement avec le réseau Dash lorsque la connection est établie, mais le process n'est pas encore terminé.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</source>
+        <translation>L'information affichée peut être obsolète. Votre portefeuille se synchronise automatiquement avec le réseau DarkSilk lorsque la connection est établie, mais le process n'est pas encore terminé.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1423,16 +1423,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Complétude :</translation>
     </message>
     <message>
-        <source>Darksend Balance:</source>
-        <translation>Balance Darksend :</translation>
+        <source>Sandstorm Balance:</source>
+        <translation>Balance Sandstorm :</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
         <translation>Montant et Cycles</translation>
     </message>
     <message>
-        <source>0 DASH / 0 Rounds</source>
-        <translation>0 DASH / 0 Cycles</translation>
+        <source>0 DSLK / 0 Rounds</source>
+        <translation>0 DSLK / 0 Cycles</translation>
     </message>
     <message>
         <source>Submitted Denom:</source>
@@ -1443,8 +1443,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>n/a</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1455,24 +1455,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Démarrer/Arrêtér le mélange</translation>
     </message>
     <message>
-        <source>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>Les dénominations que vous avez soumises à la Masternode.&lt;br&gt;Pour mélanger, d'autres utilisateurs doivent soumettre les mêmes dénominations.</translation>
+        <source>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>Les dénominations que vous avez soumises à la Stormnode.&lt;br&gt;Pour mélanger, d'autres utilisateurs doivent soumettre les mêmes dénominations.</translation>
     </message>
     <message>
         <source>(Last Message)</source>
         <translation>(Dernier Message)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Darksend request.</source>
-        <translation>Essayer de soumettre manuellement une requête Darksend.</translation>
+        <source>Try to manually submit a Sandstorm request.</source>
+        <translation>Essayer de soumettre manuellement une requête Sandstorm.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Essayer le mélange</translation>
     </message>
     <message>
-        <source>Reset the current status of Darksend (can interrupt Darksend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Réinitialiser le statut de Darksend (peut interrompre Darksend si le process de mélange est en cours, ce qui peut vous coûter de l'argent !)</translation>
+        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Réinitialiser le statut de Sandstorm (peut interrompre Sandstorm si le process de mélange est en cours, ce qui peut vous coûter de l'argent !)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1487,12 +1487,12 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Désactivé</translation>
     </message>
     <message>
-        <source>Start Darksend Mixing</source>
-        <translation>Démarrer le mélange Darksend</translation>
+        <source>Start Sandstorm Mixing</source>
+        <translation>Démarrer le mélange Sandstorm</translation>
     </message>
     <message>
-        <source>Stop Darksend Mixing</source>
-        <translation>Arrêter le mélange Darksend</translation>
+        <source>Stop Sandstorm Mixing</source>
+        <translation>Arrêter le mélange Sandstorm</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1535,9 +1535,9 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Activé</translation>
     </message>
     <message>
-        <source>Last Darksend message:
+        <source>Last Sandstorm message:
 </source>
-        <translation>Dernier message de Darksend:
+        <translation>Dernier message de Sandstorm:
 </translation>
     </message>
     <message>
@@ -1545,20 +1545,20 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>N.D.</translation>
     </message>
     <message>
-        <source>Darksend was successfully reset.</source>
-        <translation>Darksend est réinitialisé avec succès</translation>
+        <source>Sandstorm was successfully reset.</source>
+        <translation>Sandstorm est réinitialisé avec succès</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Darksend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Pour ne pas voir les transactions/frais Darksend internes sélectionnez "Les plus Communes" comme Type dans l'onglet "Transactions"</translation>
+        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Pour ne pas voir les transactions/frais Sandstorm internes sélectionnez "Les plus Communes" comme Type dans l'onglet "Transactions"</translation>
     </message>
     <message>
-        <source>Darksend requires at least %1 to use.</source>
-        <translation>Darksend nécessite au moins %1 pour l'utiliser</translation>
+        <source>Sandstorm requires at least %1 to use.</source>
+        <translation>Sandstorm nécessite au moins %1 pour l'utiliser</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Darksend.</source>
-        <translation>Le portefeuille est vérouillé et l'utilisateur a refusé de le débloquer. Désactivation de Darksend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
+        <translation>Le portefeuille est vérouillé et l'utilisateur a refusé de le débloquer. Désactivation de Sandstorm.</translation>
     </message>
 </context>
 <context>
@@ -1568,8 +1568,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Erreur de demande de paiement</translation>
     </message>
     <message>
-        <source>Cannot start dash: click-to-pay handler</source>
-        <translation>Impossible de démarrer dash: click-to-pay le gestionnaire</translation>
+        <source>Cannot start darksilk: click-to-pay handler</source>
+        <translation>Impossible de démarrer darksilk: click-to-pay le gestionnaire</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1588,8 +1588,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Adresse de paiement %1 invalide</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Dash address or malformed URI parameters.</source>
-        <translation>L'URI ne peut être analysé ! Ceci peut être causé par une adresse Dash invalide ou par des paramètres d'URI mal composé.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid DarkSilk address or malformed URI parameters.</source>
+        <translation>L'URI ne peut être analysé ! Ceci peut être causé par une adresse DarkSilk invalide ou par des paramètres d'URI mal composé.</translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1674,8 +1674,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Montant</translation>
     </message>
     <message>
-        <source>Enter a Dash address (e.g. %1)</source>
-        <translation>Entrez une adresse Dash (e.g. %1)</translation>
+        <source>Enter a DarkSilk address (e.g. %1)</source>
+        <translation>Entrez une adresse DarkSilk (e.g. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1764,8 +1764,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Nombre de connexions</translation>
     </message>
     <message>
-        <source>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Ouvrir le fichier de debug Dash depuis le répertoire de données actuel. Ceci peut prendre plusieurs secondes pour un fichier de debug imposant.</translation>
+        <source>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Ouvrir le fichier de debug DarkSilk depuis le répertoire de données actuel. Ceci peut prendre plusieurs secondes pour un fichier de debug imposant.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -1812,8 +1812,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Chaîne de blocs</translation>
     </message>
     <message>
-        <source>Number of Masternodes</source>
-        <translation>Nombre de Masternodes</translation>
+        <source>Number of Stormnodes</source>
+        <translation>Nombre de Stormnodes</translation>
     </message>
     <message>
         <source>&amp;Console</source>
@@ -1972,8 +1972,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Sortant :</translation>
     </message>
     <message>
-        <source>Welcome to the Dash RPC console.</source>
-        <translation>Bienvenue sur la console RPC de Dash.</translation>
+        <source>Welcome to the DarkSilk RPC console.</source>
+        <translation>Bienvenue sur la console RPC de DarkSilk.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -2035,8 +2035,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ré&amp;utiliser une adresse de réception existante (non recommandé)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Un message optionnel à joindre à la demande de paiement, qui sera affiché quand la demande sera ouverte. Note : Ce message ne sera pas envoyé avec le paiement à travers le réseau Dash.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Un message optionnel à joindre à la demande de paiement, qui sera affiché quand la demande sera ouverte. Note : Ce message ne sera pas envoyé avec le paiement à travers le réseau DarkSilk.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -2047,8 +2047,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Un étiquette optionnelle à associer à la nouvelle adresse de réception</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Un message optionnel à joindre à la demande de paiement, qui sera affiché quand la demande sera ouverte.&lt;br&gt;Note : Ce message ne sera pas envoyé avec le paiement à travers le réseau Dash.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Un message optionnel à joindre à la demande de paiement, qui sera affiché quand la demande sera ouverte.&lt;br&gt;Note : Ce message ne sera pas envoyé avec le paiement à travers le réseau DarkSilk.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
@@ -2292,7 +2292,7 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Si les frais personnalisés sont à 1000 duffs et que la transaction fait seulement 250 octets, alors "par kilooctet" payera seulement 250 duffs de frais,&lt;br /&gt;alors que "total au moins" payera 1000 duffs. Pour les transactions de plus d'un kilooctet les deux payeront par kilooctet.</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dash transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
         <translation>Payer les frais minimums fonctionne tant qu'il y a moins de volume de transactions que de place dans les blocs.&lt;br/&gt;Mais soyez conscients que ceci peut amener a des transactions qui ne seront jamais confirmées lorsqu'il y aura plus de demande que la capacité du réseau.</translation>
     </message>
     <message>
@@ -2364,8 +2364,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ajouter un &amp;destinataire</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2416,8 +2416,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>fonds anonymisés</translation>
     </message>
     <message>
-        <source>(darksend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(darksend nécessite que ce montant soit arrondi au plus proche de %1).</translation>
+        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(sandstorm nécessite que ce montant soit arrondi au plus proche de %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2496,8 +2496,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Payer seulement les frais minimum de %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Dash address</source>
-        <translation>Attention: adresse Dash invalide</translation>
+        <source>Warning: Invalid DarkSilk address</source>
+        <translation>Attention: adresse DarkSilk invalide</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2519,8 +2519,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>&amp;Payer à :</translation>
     </message>
     <message>
-        <source>The Dash address to send the payment to</source>
-        <translation>L'adresse Dash à laquelle envoyer de la monnaie</translation>
+        <source>The DarkSilk address to send the payment to</source>
+        <translation>L'adresse DarkSilk à laquelle envoyer de la monnaie</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2559,8 +2559,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Message :</translation>
     </message>
     <message>
-        <source>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</source>
-        <translation>Un message qui était joint au Dash : URI qui sera sauvegardée avec la transaction pour référence. Note : Ce message ne sera pas envoyé à travers le réseau Dash.</translation>
+        <source>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</source>
+        <translation>Un message qui était joint au DarkSilk : URI qui sera sauvegardée avec la transaction pour référence. Note : Ce message ne sera pas envoyé à travers le réseau DarkSilk.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
@@ -2586,8 +2586,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Dash Core is shutting down...</source>
-        <translation>Arrêt de Dash Core...</translation>
+        <source>DarkSilk Core is shutting down...</source>
+        <translation>Arrêt de DarkSilk Core...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -2609,8 +2609,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Vous pouvez signer des messages avec vos adresses pour prouver que vous les détenez. Faites attention de ne pas signer de vague car des attaques d'hameçonnage peuvent essayer d'usurper votre identité par votre signature. Ne signez que des déclarations entièrement détaillées et avec lesquelles vous serez d'accord.</translation>
     </message>
     <message>
-        <source>The Dash address to sign the message with</source>
-        <translation>L'adresse Dash avec laquelle signer le message</translation>
+        <source>The DarkSilk address to sign the message with</source>
+        <translation>L'adresse DarkSilk avec laquelle signer le message</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2641,8 +2641,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Copier la signature actuelle dans le presse-papier</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Dash address</source>
-        <translation>Signer le message pour prouver que vous possédez cette adresse Dash</translation>
+        <source>Sign the message to prove you own this DarkSilk address</source>
+        <translation>Signer le message pour prouver que vous possédez cette adresse DarkSilk</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2665,12 +2665,12 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Saisir ci-dessous l'adresse de signature, le message (assurez-vous d'avoir copié exactement les retours à la ligne, les espaces, tabulations etc.) et la signature pour vérifier le message. Faire attention à ne pas déduire davantage de la signature que ce qui est contenu dans le message signé lui-même pour éviter d'être trompé par une attaque d'homme du milieu.</translation>
     </message>
     <message>
-        <source>The Dash address the message was signed with</source>
-        <translation>L'adresse Dash avec laquelle le message a été signé</translation>
+        <source>The DarkSilk address the message was signed with</source>
+        <translation>L'adresse DarkSilk avec laquelle le message a été signé</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Dash address</source>
-        <translation>Vérifier le message pour s'assurer qu'il a été signé avec l'adresse Dash spécifiée</translation>
+        <source>Verify the message to ensure it was signed with the specified DarkSilk address</source>
+        <translation>Vérifier le message pour s'assurer qu'il a été signé avec l'adresse DarkSilk spécifiée</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2736,8 +2736,8 @@ https://www.transifex.com/projects/p/dash/</translation>
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Version %1</source>
@@ -2748,8 +2748,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Les développeurs Bitcoin Core</translation>
     </message>
     <message>
-        <source>The Dash Core developers</source>
-        <translation>Les développeurs Dash Core</translation>
+        <source>The DarkSilk Core developers</source>
+        <translation>Les développeurs DarkSilk Core</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Reçue de</translation>
     </message>
     <message>
-        <source>Received via Darksend</source>
-        <translation>Reçu par Darksend</translation>
+        <source>Received via Sandstorm</source>
+        <translation>Reçu par Sandstorm</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3036,24 +3036,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Miné</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Dénomination Darksend</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Dénomination Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Paiement Darksend Collatéral</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Paiement Sandstorm Collatéral</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend Création d'Entrées Collatérales</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm Création d'Entrées Collatérales</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend Création de Dénominations</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm Création de Dénominations</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3131,24 +3131,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Envoyée à</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksent</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstormed</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend Création d'Entrées Collatérales</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm Création d'Entrées Collatérales</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend Création de Dénominations</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm Création de Dénominations</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Dénomination Darksend</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Dénomination Sandstorm</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Paiement Darksend Collatéral</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Paiement Sandstorm Collatéral</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Envoyer des pièces</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DASH.</source>
-        <translation>InstantX ne supporte pas des transferts aussi élevés. Les transactions sont pour le moment limitées à %11 DASH.</translation>
+        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantX ne supporte pas des transferts aussi élevés. Les transactions sont pour le moment limitées à %11 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3320,18 +3320,18 @@ https://www.transifex.com/projects/p/dash/</translation>
     </message>
 </context>
 <context>
-    <name>dash-core</name>
+    <name>darksilk-core</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>Se lier à l'adresse donnée et toujours l'écouter. Utilisez la notation [host]:port pour l'IPv6</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</source>
-        <translation>Impossible d’obtenir un verrou sur le répertoire de données %s. Dash Core fonctionne probablement déjà.</translation>
+        <source>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</source>
+        <translation>Impossible d’obtenir un verrou sur le répertoire de données %s. DarkSilk Core fonctionne probablement déjà.</translation>
     </message>
     <message>
-        <source>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Darksend utilise les montants dénominés exacts pour envoyer des fonds, vous pourriez simplement avoir besoin d'anonymiser plus de pièces.</translation>
+        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Sandstorm utilise les montants dénominés exacts pour envoyer des fonds, vous pourriez simplement avoir besoin d'anonymiser plus de pièces.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3382,16 +3382,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ceci est une pré-version de test - l'utiliser à vos risques et périls - ne pas l'utiliser pour miner ou pour des applications marchandes</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. Dash Core is probably already running.</source>
-        <translation>Impossible de se lier à %s sur cet ordinateur. Dash Core fonctionne probablement déjà.</translation>
+        <source>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</source>
+        <translation>Impossible de se lier à %s sur cet ordinateur. DarkSilk Core fonctionne probablement déjà.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend denominated funds for this transaction.</source>
-        <translation>Impossible de localiser suffisamment de fonds Darksend dénominés pour cette transaction.</translation>
+        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
+        <translation>Impossible de localiser suffisamment de fonds Sandstorm dénominés pour cette transaction.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Impossible de localiser suffisamment de fonds non-dénominés Darksend pour cette transaction qui ne sont pas égaux à 1000 DASH.</translation>
+        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Impossible de localiser suffisamment de fonds non-dénominés Sandstorm pour cette transaction qui ne sont pas égaux à 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3414,8 +3414,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Avertissement : wallet.dat corrompu, données récupérées ! Le fichier wallet.dat original a été enregistré en tant que wallet.{timestamp}.bak dans %s ; si votre solde ou transactions sont incorrects vous devriez effectuer une restauration depuis une sauvegarde.</translation>
     </message>
     <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Vous devez définir masternodeprivkey dans la configuration. Veuillez consulter la documentation pour plus d'aide.</translation>
+        <source>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</source>
+        <translation>Vous devez définir stormnodeprivkey dans la configuration. Veuillez consulter la documentation pour plus d'aide.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -3490,8 +3490,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Base corrompue de données des blocs détectée</translation>
     </message>
     <message>
-        <source>Darksend options:</source>
-        <translation>Options Darksend :</translation>
+        <source>Sandstorm options:</source>
+        <translation>Options Sandstorm :</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3562,8 +3562,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Erreur : Portefeuille verrouillé, impossible de créer la transaction !</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Darksend pool</source>
-        <translation>Erreur : Vous avez déjà des entrées en attente dans la pool Darksend</translation>
+        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <translation>Erreur : Vous avez déjà des entrées en attente dans la pool Sandstorm</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3614,8 +3614,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Effacer toutes les transactions du portefeuille et récupère celle qui font partie de la chaine de blocs via -rescan au démarrage</translation>
     </message>
     <message>
-        <source>Disable all Dash specific functionality (Masternodes, Darksend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Désactivez toutes les fonctionnalités liées à Dash (Masternode, Darksend, InstantX, Budgetisation) (0-1, par défaut: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Désactivez toutes les fonctionnalités liées à DarkSilk (Stormnode, Sandstorm, InstantX, Budgetisation) (0-1, par défaut: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3626,20 +3626,20 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Activer instantx, montrer les confirmations pour les transactions verrouillées (bool, par defaut: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated darksend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Activer l'utilisation automatique de Darksend pour les fonds stockés dans ce portefeuille (0-1, défaut: %u)</translation>
+        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Activer l'utilisation automatique de Sandstorm pour les fonds stockés dans ce portefeuille (0-1, défaut: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
         <translation>Erreur: Paramètre obsolète -socks. Il n'est plus possible d'indiquer la version SOCKS, seul les proxy SOCKS5 sont supportés.</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Les frais (en DASH/ko) inférieurs à ce seuil sont considérés comme nuls pour le relayage (par défaut : %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
+        <translation>Les frais (en DSLK/ko) inférieurs à ce seuil sont considérés comme nuls pour le relayage (par défaut : %s)</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Les frais (en DASH/ko) inférieurs à ce seuil sont considérés comme nuls pour la création de transactions (par défaut : %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Les frais (en DSLK/ko) inférieurs à ce seuil sont considérés comme nuls pour la création de transactions (par défaut : %s)</translation>
     </message>
     <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
@@ -3686,8 +3686,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Extraire les informations de débogage (par défaut : %u, fournir &lt;category&gt; est optionnel)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Darksend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Fournir des liquidités à Darksend en mélangeant occasionnellement mais régulièrement des pièces (0-100, par défaut : %u, 1=très fréquent, frais élevés, 100=très rare, frais bas)</translation>
+        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Fournir des liquidités à Sandstorm en mélangeant occasionnellement mais régulièrement des pièces (0-100, par défaut : %u, 1=très fréquent, frais élevés, 100=très rare, frais bas)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3710,32 +3710,32 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ce produit comprend des logiciels développés par le projet OpenSSL afin d'être utilisés dans la boîte à outils OpenSSL &lt;https://www.openssl.org/&gt;, un logiciel de chiffrement écrit par Eric Young et un logiciel UPnP développé par Thomas Bernard.</translation>
     </message>
     <message>
-        <source>To use dashd, or the -server option to dash-qt, you must set an rpcpassword in the configuration file:
+        <source>To use darksilkd, or the -server option to darksilk-qt, you must set an rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "Dash Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
 </source>
-        <translation>Pour utiliser dashd, ou le paramètre -server de dash-qt, vous devez définir un rpc mot de passe dans le fichier de configuration:
+        <translation>Pour utiliser darksilkd, ou le paramètre -server de darksilk-qt, vous devez définir un rpc mot de passe dans le fichier de configuration:
 %s
 Il est recommandé que vous utilisiez ce mot de passe aléatoire:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (Vous ne devez pas vous souvenir de ce mot de passe)
 Le nom d'utilisateur et le mot de passe NE DOIVENT PAS être équivalent.
 Si le fichier n'existe pas, créé le avec les permissions de lecture uniquement pour le propriétaire.
 Il est recommandé de régler alertnotify pour que vous soyez averti des problèmes;
-Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
+Pour exemple: alertnotify=echo %%s | mail -s "Alerte DarkSilk" admin@foo.com
 </translation>
     </message>
     <message>
-        <source>Unable to locate enough funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Impossible de localiser suffisamment de fonds pour cette transaction qui ne sont pas égaux à 1000 DASH.</translation>
+        <source>Unable to locate enough funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Impossible de localiser suffisamment de fonds pour cette transaction qui ne sont pas égaux à 1000 DSLK.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
@@ -3746,8 +3746,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Attention : -maxtxfee est réglée sur un montant très élevé ! Il s'agit des frais de transaction que vous payerez si vous envoyez une transaction.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dash Core will not work properly.</source>
-        <translation>Attention : Veuillez vérifier que la date et l'heure de votre ordinateur sont justes ! Si votre horloge n'est pas à l'heure, Dash Core ne fonctionnera pas correctement.</translation>
+        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong DarkSilk Core will not work properly.</source>
+        <translation>Attention : Veuillez vérifier que la date et l'heure de votre ordinateur sont justes ! Si votre horloge n'est pas à l'heure, DarkSilk Core ne fonctionnera pas correctement.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
@@ -3800,40 +3800,40 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Copyright (C) 2009-%i The Bitcoin Core Developers</translation>
     </message>
     <message>
-        <source>Copyright (C) 2014-%i The Dash Core Developers</source>
-        <translation>Copyright (C) 2014-%i The Dash Core Developers</translation>
+        <source>Copyright (C) 2014-%i The DarkSilk Core Developers</source>
+        <translation>Copyright (C) 2014-%i The DarkSilk Core Developers</translation>
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
         <translation>Impossible d'analyser la valeur -rpcbind %s en tant qu'adresse réseau</translation>
     </message>
     <message>
-        <source>Darksend is idle.</source>
-        <translation>Darksend est inactif.</translation>
+        <source>Sandstorm is idle.</source>
+        <translation>Sandstorm est inactif.</translation>
     </message>
     <message>
-        <source>Darksend request complete:</source>
-        <translation>Requête Darksend complète :</translation>
+        <source>Sandstorm request complete:</source>
+        <translation>Requête Sandstorm complète :</translation>
     </message>
     <message>
-        <source>Darksend request incomplete:</source>
-        <translation>Requête Darksend incomplète.</translation>
+        <source>Sandstorm request incomplete:</source>
+        <translation>Requête Sandstorm incomplète.</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
         <translation>Désactiver le mode sans échec, passer outre un événement sans échec réel (par défaut : %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a masternode (0-1, default: %u)</source>
-        <translation>Autoriser le client à agir en tant que masternode (0-1, par défaut : %u)</translation>
+        <source>Enable the client to act as a stormnode (0-1, default: %u)</source>
+        <translation>Autoriser le client à agir en tant que stormnode (0-1, par défaut : %u)</translation>
     </message>
     <message>
-        <source>Error connecting to Masternode.</source>
-        <translation>Erreur de connexion au masternode.</translation>
+        <source>Error connecting to Stormnode.</source>
+        <translation>Erreur de connexion au stormnode.</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of Dash Core</source>
-        <translation>Erreur au chargement de wallet.dat : le Portefeuille nécessite une nouvelle version de Dash Core</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of DarkSilk Core</source>
+        <translation>Erreur au chargement de wallet.dat : le Portefeuille nécessite une nouvelle version de DarkSilk Core</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
@@ -3848,8 +3848,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Erreur: Paramètre -tor non supporté, utilisez -onion.</translation>
     </message>
     <message>
-        <source>Fee (in DASH/kB) to add to transactions you send (default: %s)</source>
-        <translation>Frais (en DASH/ko) à ajouter aux transactions que vous envoyez (par défaut: %s)</translation>
+        <source>Fee (in DSLK/kB) to add to transactions you send (default: %s)</source>
+        <translation>Frais (en DSLK/ko) à ajouter aux transactions que vous envoyez (par défaut: %s)</translation>
     </message>
     <message>
         <source>Finalizing transaction.</source>
@@ -3904,8 +3904,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Informations</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. Dash Core is shutting down.</source>
-        <translation>Les tests de cohérences lors de l'initialisation ont échoués. Dash Core est en cours de fermeture.</translation>
+        <source>Initialization sanity check failed. DarkSilk Core is shutting down.</source>
+        <translation>Les tests de cohérences lors de l'initialisation ont échoués. DarkSilk Core est en cours de fermeture.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
@@ -3948,8 +3948,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Montant invalide pour -paytxfee=&lt;montant&gt; : « %s »</translation>
     </message>
     <message>
-        <source>Last successful Darksend action was too recent.</source>
-        <translation>La dernière action Darksend réussie est trop récente.</translation>
+        <source>Last successful Sandstorm action was too recent.</source>
+        <translation>La dernière action Sandstorm réussie est trop récente.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -3968,20 +3968,20 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Chargement du cache de budget...</translation>
     </message>
     <message>
-        <source>Loading masternode cache...</source>
-        <translation>Chargement du cache de masternode...</translation>
+        <source>Loading stormnode cache...</source>
+        <translation>Chargement du cache de stormnode...</translation>
     </message>
     <message>
-        <source>Loading masternode payment cache...</source>
-        <translation>Chargement du cache de paiement masternode...</translation>
+        <source>Loading stormnode payment cache...</source>
+        <translation>Chargement du cache de paiement stormnode...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
         <translation>Verrou déjà en place.</translation>
     </message>
     <message>
-        <source>Lock masternodes from masternode configuration file (default: %u)</source>
-        <translation>Vérouiller les masternodes depuis le fichier de configuration masternode (par défaut : %u)</translation>
+        <source>Lock stormnodes from stormnode configuration file (default: %u)</source>
+        <translation>Vérouiller les stormnodes depuis le fichier de configuration stormnode (par défaut : %u)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
@@ -4004,16 +4004,16 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Un port doit être spécifié avec -whitebind: '%s'</translation>
     </message>
     <message>
-        <source>No Masternodes detected.</source>
-        <translation>Aucun Masternode détecté.</translation>
+        <source>No Stormnodes detected.</source>
+        <translation>Aucun Stormnode détecté.</translation>
     </message>
     <message>
-        <source>No compatible Masternode found.</source>
-        <translation>Aucun Masternode compatible trouvé.</translation>
+        <source>No compatible Stormnode found.</source>
+        <translation>Aucun Stormnode compatible trouvé.</translation>
     </message>
     <message>
-        <source>Not in the Masternode list.</source>
-        <translation>Absent de la liste des Masternodes.</translation>
+        <source>Not in the Stormnode list.</source>
+        <translation>Absent de la liste des Stormnodes.</translation>
     </message>
     <message>
         <source>Number of automatic wallet backups (default: 10)</source>
@@ -4052,8 +4052,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Clef privée du serveur (par défaut : %s)</translation>
     </message>
     <message>
-        <source>Set external address:port to get to this masternode (example: %s)</source>
-        <translation>Définir une adresse:port externe pour accéder à ce masternode (exemple : %s)</translation>
+        <source>Set external address:port to get to this stormnode (example: %s)</source>
+        <translation>Définir une adresse:port externe pour accéder à ce stormnode (exemple : %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
@@ -4084,8 +4084,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Spécifier le délai d'expiration de la connexion en millisecondes (minimum : 1, par défaut : %d)</translation>
     </message>
     <message>
-        <source>Specify masternode configuration file (default: %s)</source>
-        <translation>Définir le fichier de configuration du masternode (par défaut : %s)</translation>
+        <source>Specify stormnode configuration file (default: %s)</source>
+        <translation>Définir le fichier de configuration du stormnode (par défaut : %s)</translation>
     </message>
     <message>
         <source>Specify pid file (default: %s)</source>
@@ -4100,16 +4100,16 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Arrêter après l'importation des blocs du disque (par défaut : %u)</translation>
     </message>
     <message>
-        <source>Submitted following entries to masternode: %u / %d</source>
-        <translation>Les entrées suivantes ont été envoyées au masternode: %u / %d</translation>
+        <source>Submitted following entries to stormnode: %u / %d</source>
+        <translation>Les entrées suivantes ont été envoyées au stormnode: %u / %d</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>Envoyé au masternode, en attente d'entrées supplémentaires ( %u / %d ) %s</translation>
+        <source>Submitted to stormnode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Envoyé au stormnode, en attente d'entrées supplémentaires ( %u / %d ) %s</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting in queue %s</source>
-        <translation>Soumis au masternode, dans la file d'attente %s</translation>
+        <source>Submitted to stormnode, waiting in queue %s</source>
+        <translation>Soumis au stormnode, dans la file d'attente %s</translation>
     </message>
     <message>
         <source>Synchronization failed</source>
@@ -4124,20 +4124,20 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Synchronisation des budgets...</translation>
     </message>
     <message>
-        <source>Synchronizing masternode winners...</source>
-        <translation>Synchronisation des masternodes vainqueurs...</translation>
+        <source>Synchronizing stormnode winners...</source>
+        <translation>Synchronisation des stormnodes vainqueurs...</translation>
     </message>
     <message>
-        <source>Synchronizing masternodes...</source>
-        <translation>Synchronisation des masternodes...</translation>
+        <source>Synchronizing stormnodes...</source>
+        <translation>Synchronisation des stormnodes...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
         <translation>Synchronisation des sporks...</translation>
     </message>
     <message>
-        <source>This is not a Masternode.</source>
-        <translation>Ceci n'est pas un masternode.</translation>
+        <source>This is not a Stormnode.</source>
+        <translation>Ceci n'est pas un stormnode.</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -4148,16 +4148,16 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Utiliser l'intégration KeePass 2 en utilisant le greffon KeePassHttp (par défaut : %u)</translation>
     </message>
     <message>
-        <source>Use N separate masternodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>Utiliser N masternodes différents pour anonymiser les fonds (2-8, par défaut : %u)</translation>
+        <source>Use N separate stormnodes to anonymize funds  (2-8, default: %u)</source>
+        <translation>Utiliser N stormnodes différents pour anonymiser les fonds (2-8, par défaut : %u)</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Utiliser l'UPnP pour mapper le port d'écoute (par défaut : %u)</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart Dash Core to complete</source>
-        <translation>Le portefeuille devait être réécrit : redémarrer Dash Core pour terminer l'opération.</translation>
+        <source>Wallet needed to be rewritten: restart DarkSilk Core to complete</source>
+        <translation>Le portefeuille devait être réécrit : redémarrer DarkSilk Core pour terminer l'opération.</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
@@ -4172,32 +4172,32 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Va réessayer ...</translation>
     </message>
     <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>masternodeprivkey invalide. Veuillez vous référer à la documentation.</translation>
+        <source>Invalid stormnodeprivkey. Please see documenation.</source>
+        <translation>stormnodeprivkey invalide. Veuillez vous référer à la documentation.</translation>
     </message>
     <message>
         <source>(must be 9999 for mainnet)</source>
         <translation>(doit être 9999 pour mainnet)</translation>
     </message>
     <message>
-        <source>Can't find random Masternode.</source>
-        <translation>Masternode aléatoire introuvable.</translation>
+        <source>Can't find random Stormnode.</source>
+        <translation>Stormnode aléatoire introuvable.</translation>
     </message>
     <message>
         <source>Can't mix while sync in progress.</source>
         <translation>Ne peux pas mélanger pendant la synchronisation.</translation>
     </message>
     <message>
-        <source>Could not parse masternode.conf</source>
-        <translation>Impossible d'analyser masternode.conf</translation>
+        <source>Could not parse stormnode.conf</source>
+        <translation>Impossible d'analyser stormnode.conf</translation>
     </message>
     <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Masque de réseau inconnu spécifié sur -whitelist : « %s »</translation>
     </message>
     <message>
-        <source>Invalid port detected in masternode.conf</source>
-        <translation>Port non valide détecté dans masternode.conf</translation>
+        <source>Invalid port detected in stormnode.conf</source>
+        <translation>Port non valide détecté dans stormnode.conf</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
@@ -4216,16 +4216,16 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Clé KeePassHttp pour la communication chiffrée AES avec KeePass</translation>
     </message>
     <message>
-        <source>Keep N DASH anonymized (default: %u)</source>
-        <translation>Maintenir N dash anonymisé en permanence (défaut: %u)</translation>
+        <source>Keep N DSLK anonymized (default: %u)</source>
+        <translation>Maintenir N darksilk anonymisé en permanence (défaut: %u)</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
         <translation>Garder au plus &lt;n&gt; transactions sans connexion en mémoire (par défaut : %u)</translation>
     </message>
     <message>
-        <source>Last Darksend was too recent.</source>
-        <translation>Le dernier Darksend est trop récent.</translation>
+        <source>Last Sandstorm was too recent.</source>
+        <translation>Le dernier Sandstorm est trop récent.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4248,16 +4248,16 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Chargement du portefeuille...</translation>
     </message>
     <message>
-        <source>Masternode options:</source>
-        <translation>Options Masternode :</translation>
+        <source>Stormnode options:</source>
+        <translation>Options Stormnode :</translation>
     </message>
     <message>
-        <source>Masternode queue is full.</source>
-        <translation>La file d'attente du masternode est pleine.</translation>
+        <source>Stormnode queue is full.</source>
+        <translation>La file d'attente du stormnode est pleine.</translation>
     </message>
     <message>
-        <source>Masternode:</source>
-        <translation>Masternode :</translation>
+        <source>Stormnode:</source>
+        <translation>Stormnode :</translation>
     </message>
     <message>
         <source>Missing input transaction information.</source>
@@ -4360,8 +4360,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Définir la taille minimale de bloc en octets (par défaut : %d)</translation>
     </message>
     <message>
-        <source>Set the masternode private key</source>
-        <translation>Définir la clé privée du masternode</translation>
+        <source>Set the stormnode private key</source>
+        <translation>Définir la clé privée du stormnode</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -4476,7 +4476,7 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dash" admin@foo.com
         <translation>Nom d'utilisateur pour les connexions JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Darksend pool maximum allows.</source>
+        <source>Value more than Sandstorm pool maximum allows.</source>
         <translation>Valeur supérieure au maximum autorisé par le pool.</translation>
     </message>
     <message>

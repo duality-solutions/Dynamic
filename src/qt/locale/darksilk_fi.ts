@@ -62,12 +62,12 @@
         <translation>Vastaanottava osoite</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Nämä ovat Dash osoitteesi maksujen lähetykseen. Tarkista aina lähetettävä määrä ja vastaanottajan osoite ennen kuin lähetät varoja.</translation>
+        <source>These are your DarkSilk addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Nämä ovat DarkSilk osoitteesi maksujen lähetykseen. Tarkista aina lähetettävä määrä ja vastaanottajan osoite ennen kuin lähetät varoja.</translation>
     </message>
     <message>
-        <source>These are your Dash addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Nämä ovat Dash osoitteesi suoritusten vastaanottamiseen. Suositellaan että annat uuden osoitteen kullekin siirtotapahtumalle.</translation>
+        <source>These are your DarkSilk addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Nämä ovat DarkSilk osoitteesi suoritusten vastaanottamiseen. Suositellaan että annat uuden osoitteen kullekin siirtotapahtumalle.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -176,8 +176,8 @@
         <translation>Vahvista lompakon salaus</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DASH&lt;/b&gt;!</source>
-        <translation>Varoitus: Jos salaat lompakon ja unohdat salasanan, &lt;b&gt;MENETÄT KAIKKI DASHisi&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DSLK&lt;/b&gt;!</source>
+        <translation>Varoitus: Jos salaat lompakon ja unohdat salasanan, &lt;b&gt;MENETÄT KAIKKI DSLKisi&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -188,8 +188,8 @@
         <translation>Lompakko salattu</translation>
     </message>
     <message>
-        <source>Dash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your dashs from being stolen by malware infecting your computer.</source>
-        <translation>Dash sulkeutuu nyt salauksen viimeistelyä varten. Muista että salaus pelkästään ei voi estää Dashiesi varastamista jos koneesi saastuu haittaohjelmilla tai viruksilla.</translation>
+        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilk sulkeutuu nyt salauksen viimeistelyä varten. Muista että salaus pelkästään ei voi estää DarkSilkiesi varastamista jos koneesi saastuu haittaohjelmilla tai viruksilla.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -229,10 +229,10 @@
     </message>
 </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DarkSilkGUI</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -255,16 +255,16 @@
         <translation>L&amp;ähetä</translation>
     </message>
     <message>
-        <source>Send coins to a Dash address</source>
-        <translation>Lähetä varoja Dash osoitteeseen</translation>
+        <source>Send coins to a DarkSilk address</source>
+        <translation>Lähetä varoja DarkSilk osoitteeseen</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
         <translation>&amp;Vastaanota</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and dash: URIs)</source>
-        <translation>Pyydä maksuja (Luo QR koodit ja Dash: URIt)</translation>
+        <source>Request payments (generates QR codes and darksilk: URIs)</source>
+        <translation>Pyydä maksuja (Luo QR koodit ja DarkSilk: URIt)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -283,12 +283,12 @@
         <translation>Sulje ohjelma</translation>
     </message>
     <message>
-        <source>&amp;About Dash Core</source>
-        <translation>Tietoja &amp;Dash Core:sta</translation>
+        <source>&amp;About DarkSilk Core</source>
+        <translation>Tietoja &amp;DarkSilk Core:sta</translation>
     </message>
     <message>
-        <source>Show information about Dash Core</source>
-        <translation>Näytä tietoja Dash Core:sta</translation>
+        <source>Show information about DarkSilk Core</source>
+        <translation>Näytä tietoja DarkSilk Core:sta</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -303,8 +303,8 @@
         <translation>&amp;Asetukset...</translation>
     </message>
     <message>
-        <source>Modify configuration options for Dash</source>
-        <translation>Muuta Dash asetuksia</translation>
+        <source>Modify configuration options for DarkSilk</source>
+        <translation>Muuta DarkSilk asetuksia</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -312,7 +312,7 @@
     </message>
     <message>
         <source>Show or hide the main Window</source>
-        <translation>Näytä tai piilota Dash pääikkuna</translation>
+        <translation>Näytä tai piilota DarkSilk pääikkuna</translation>
     </message>
     <message>
         <source>&amp;Encrypt Wallet...</source>
@@ -355,16 +355,16 @@
         <translation>&amp;Allekirjoita Viesti...</translation>
     </message>
     <message>
-        <source>Sign messages with your Dash addresses to prove you own them</source>
-        <translation>Allekirjoita viestit Dash osoitteillasi todistaaksesi että omistat ne</translation>
+        <source>Sign messages with your DarkSilk addresses to prove you own them</source>
+        <translation>Allekirjoita viestit DarkSilk osoitteillasi todistaaksesi että omistat ne</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
         <translation>&amp;Tarkista Viesti...</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Dash addresses</source>
-        <translation>Tarkista viestit ollaksesi varma että ne on allekirjoitettu määritetyillä Dash osoitteilla</translation>
+        <source>Verify messages to ensure they were signed with specified DarkSilk addresses</source>
+        <translation>Tarkista viestit ollaksesi varma että ne on allekirjoitettu määritetyillä DarkSilk osoitteilla</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -443,16 +443,16 @@
         <translation>Avaa &amp;URI...</translation>
     </message>
     <message>
-        <source>Open a dash: URI or payment request</source>
-        <translation>Avaa Dash: URI tai maksupyyntö</translation>
+        <source>Open a darksilk: URI or payment request</source>
+        <translation>Avaa DarkSilk: URI tai maksupyyntö</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Komentorivin valinnat</translation>
     </message>
     <message>
-        <source>Dash Core client</source>
-        <translation>Dash Core asiakasohjelma</translation>
+        <source>DarkSilk Core client</source>
+        <translation>DarkSilk Core asiakasohjelma</translation>
     </message>
     <message numerus="yes">
         <source>Processed %n blocks of transaction history.</source>
@@ -463,8 +463,8 @@
         <translation>Synkronoidaan lisätietoja: %p%</translation>
     </message>
     <message>
-        <source>Show the Dash Core help message to get a list with possible Dash command-line options</source>
-        <translation>Näytä Dash Core ohjelista komentorivin valinnoista</translation>
+        <source>Show the DarkSilk Core help message to get a list with possible DarkSilk command-line options</source>
+        <translation>Näytä DarkSilk Core ohjelista komentorivin valinnoista</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -487,8 +487,8 @@
         <translation>Välilehtipalkki</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Dash network</source>
-        <translation><numerusform>%n aktiivinen yhteys Dash verkkoon</numerusform><numerusform>%n aktiivista yhteyttä Dash verkkoon</numerusform></translation>
+        <source>%n active connection(s) to DarkSilk network</source>
+        <translation><numerusform>%n aktiivinen yhteys DarkSilk verkkoon</numerusform><numerusform>%n aktiivista yhteyttä DarkSilk verkkoon</numerusform></translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -741,8 +741,8 @@ Osoite: %4
         <translation>Kopioi vaihtoraha</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Darksend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Darksend, please deselect all non-nonymized inputs first and then check Darksend checkbox again.</source>
-        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;Darksend poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää Darksend:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen Darksend optio.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
+        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;Sandstorm poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää Sandstorm:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen Sandstorm optio.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Osoite: %4
     </message>
 </context>
 <context>
-    <name>DarksendConfig</name>
+    <name>SandstormConfig</name>
     <message>
-        <source>Configure Darksend</source>
-        <translation>Darksend Asetukset</translation>
+        <source>Configure Sandstorm</source>
+        <translation>Sandstorm Asetukset</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -864,48 +864,48 @@ Osoite: %4
         <translation>Valitse yksityisyyden taso.</translation>
     </message>
     <message>
-        <source>Use 2 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Käytä 2 erillistä masternodea sekoittaaksesi varoja</translation>
+        <source>Use 2 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Käytä 2 erillistä stormnodea sekoittaaksesi varoja</translation>
     </message>
     <message>
-        <source>Use 8 separate masternodes to mix funds up to 1000 DASH</source>
-        <translation>Käytä 8 erillistä masternodea sekoittaaksesi varoja</translation>
+        <source>Use 8 separate stormnodes to mix funds up to 1000 DSLK</source>
+        <translation>Käytä 8 erillistä stormnodea sekoittaaksesi varoja</translation>
     </message>
     <message>
-        <source>Use 16 separate masternodes</source>
-        <translation>Käytä 16 erillistä masternodea</translation>
+        <source>Use 16 separate stormnodes</source>
+        <translation>Käytä 16 erillistä stormnodea</translation>
     </message>
     <message>
-        <source>This option is the quickest and will cost about ~0.025 DASH to anonymize 1000 DASH</source>
-        <translation>Tämä vaihtoehto on nopein ja maksaa noin ~0.025 DASH kun anonymisoidaan 1000 DASH</translation>
+        <source>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</source>
+        <translation>Tämä vaihtoehto on nopein ja maksaa noin ~0.025 DSLK kun anonymisoidaan 1000 DSLK</translation>
     </message>
     <message>
-        <source>This option is moderately fast and will cost about 0.05 DASH to anonymize 1000 DASH</source>
-        <translation>Tämä vaihtoehto on keskinopea ja maksaa noin ~0.05 DASH kun anonymisoidaan 1000 DASH</translation>
+        <source>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</source>
+        <translation>Tämä vaihtoehto on keskinopea ja maksaa noin ~0.05 DSLK kun anonymisoidaan 1000 DSLK</translation>
     </message>
     <message>
-        <source>0.1 DASH per 1000 DASH you anonymize.</source>
-        <translation>0.1 DASH maksu per 1000 DASH jonka anonymisoit.</translation>
+        <source>0.1 DSLK per 1000 DSLK you anonymize.</source>
+        <translation>0.1 DSLK maksu per 1000 DSLK jonka anonymisoit.</translation>
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
         <translation>Tämä vaihtoehto on hitain ja kaikkein anonyymi. Suurimman yksityisyyden käyttö maksaa</translation>
     </message>
     <message>
-        <source>Darksend Configuration</source>
-        <translation>Darksend Asetukset</translation>
+        <source>Sandstorm Configuration</source>
+        <translation>Sandstorm Asetukset</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain Dash asetuksista.</translation>
+        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain Dash asetuksista.</translation>
+        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
     <message>
-        <source>Darksend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dash's configuration screen.</source>
-        <translation>Darksend on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain Dash asetuksista.</translation>
+        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Sandstorm on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
 </context>
 <context>
@@ -947,8 +947,8 @@ Osoite: %4
         <translation>Muokkaa lähettävää osoitetta</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dash address.</source>
-        <translation>Annettu osoite "%1" ei ole pätevä Dash osoite.</translation>
+        <source>The entered address "%1" is not a valid DarkSilk address.</source>
+        <translation>Annettu osoite "%1" ei ole pätevä DarkSilk osoite.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -989,8 +989,8 @@ Osoite: %4
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>version</source>
@@ -1001,8 +1001,8 @@ Osoite: %4
         <translation>(%1-bittinen)</translation>
     </message>
     <message>
-        <source>About Dash Core</source>
-        <translation>Tietoja Dash Core:sta</translation>
+        <source>About DarkSilk Core</source>
+        <translation>Tietoja DarkSilk Core:sta</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1048,17 +1048,17 @@ Osoite: %4
         <translation>Tervetuloa</translation>
     </message>
     <message>
-        <source>Welcome to Dash Core.</source>
-        <translation>Dash Core - Tervetuloa.</translation>
+        <source>Welcome to DarkSilk Core.</source>
+        <translation>DarkSilk Core - Tervetuloa.</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where Dash Core will store its data.</source>
-        <translation>Koska tämä on ensimmäinen kerta kun ohjelma käynnistetään, voit valita minne Dash Core tallettaa datansa.
+        <source>As this is the first time the program is launched, you can choose where DarkSilk Core will store its data.</source>
+        <translation>Koska tämä on ensimmäinen kerta kun ohjelma käynnistetään, voit valita minne DarkSilk Core tallettaa datansa.
 Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd levyltä, ohjaa talletettava data eri levyasemalle turvalliseen paikkaan.</translation>
     </message>
     <message>
-        <source>Dash Core will download and store a copy of the Dash block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>Dash Core lataa ja tallettaa kopion lohkoketjusta. Vähintään %1GB dataa talletetaan tähän hakemistoon, ja se myös kasvaa ajan myötä. Myös lompakko talletetaan tähän hakemistoon.</translation>
+        <source>DarkSilk Core will download and store a copy of the DarkSilk block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>DarkSilk Core lataa ja tallettaa kopion lohkoketjusta. Vähintään %1GB dataa talletetaan tähän hakemistoon, ja se myös kasvaa ajan myötä. Myös lompakko talletetaan tähän hakemistoon.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -1069,8 +1069,8 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>Määritä oma hakemisto:</translation>
     </message>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -1123,12 +1123,12 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>&amp;Yleiset</translation>
     </message>
     <message>
-        <source>Automatically start Dash after logging in to the system.</source>
-        <translation>Käynnistä Dash automaattisesti kun järjestelmään kirjaudutaan.</translation>
+        <source>Automatically start DarkSilk after logging in to the system.</source>
+        <translation>Käynnistä DarkSilk automaattisesti kun järjestelmään kirjaudutaan.</translation>
     </message>
     <message>
-        <source>&amp;Start Dash on system login</source>
-        <translation>&amp;Käynnistä Dash järjestelmään kirjauduttaessa</translation>
+        <source>&amp;Start DarkSilk on system login</source>
+        <translation>&amp;Käynnistä DarkSilk järjestelmään kirjauduttaessa</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -1147,16 +1147,16 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>(0 = auto, &lt;0 = jätä näin monta prosessorin ydintä vapaaksi)</translation>
     </message>
     <message>
-        <source>Darksend rounds to use</source>
-        <translation>Kuinka montaa Darksend kierrosta käytetään</translation>
+        <source>Sandstorm rounds to use</source>
+        <translation>Kuinka montaa Sandstorm kierrosta käytetään</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Darksend once it's reached.</source>
-        <translation>Tämä määrä toimii rajana keskeytykselle kun Darksend anonymisointi sen saavuttaa.</translation>
+        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <translation>Tämä määrä toimii rajana keskeytykselle kun Sandstorm anonymisointi sen saavuttaa.</translation>
     </message>
     <message>
-        <source>Amount of Dash to keep anonymized</source>
-        <translation>Dash määrä joka pidetään anonymisoituna</translation>
+        <source>Amount of DarkSilk to keep anonymized</source>
+        <translation>DarkSilk määrä joka pidetään anonymisoituna</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -1175,8 +1175,8 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>Salli sisään tulevat yhteydet</translation>
     </message>
     <message>
-        <source>Connect to the Dash network through a SOCKS5 proxy.</source>
-        <translation>Kytkeydy Dash verkkoon käyttäen SOCKS5 proxy:a.</translation>
+        <source>Connect to the DarkSilk network through a SOCKS5 proxy.</source>
+        <translation>Kytkeydy DarkSilk verkkoon käyttäen SOCKS5 proxy:a.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1187,8 +1187,8 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>Expertti</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>Tämä asetus määrittää kuinka monen erillisen masternoden kautta syötteen anonymisointi tehdään.&lt;br/&gt;Mitä enemmän anonymisoinnin kierroksia, sen parempi yksityisyys, mutta se myös maksaa enemmän siirtomaksuina.</translation>
+        <source>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>Tämä asetus määrittää kuinka monen erillisen stormnoden kautta syötteen anonymisointi tehdään.&lt;br/&gt;Mitä enemmän anonymisoinnin kierroksia, sen parempi yksityisyys, mutta se myös maksaa enemmän siirtomaksuina.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -1207,8 +1207,8 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>&amp;Verkko</translation>
     </message>
     <message>
-        <source>Automatically open the Dash client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Avaa automaattisesti Dash asiakasohjelmalle portti reitittimeen. Tämä toimii vain jos reitittimesi tukee UPnP:tä ja se on käytössä.</translation>
+        <source>Automatically open the DarkSilk client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Avaa automaattisesti DarkSilk asiakasohjelmalle portti reitittimeen. Tämä toimii vain jos reitittimesi tukee UPnP:tä ja se on käytössä.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1244,7 +1244,7 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>Ikkunaa suljettaessa pienennä Dash asiakasohjelman ikkuna lopettamatta itse ohjelmaa. Kun tämä asetus on valittuna, ohjelman voi sulkea vain valitsemalla Lopeta ohjelman valikosta.</translation>
+        <translation>Ikkunaa suljettaessa pienennä DarkSilk asiakasohjelman ikkuna lopettamatta itse ohjelmaa. Kun tämä asetus on valittuna, ohjelman voi sulkea vain valitsemalla Lopeta ohjelman valikosta.</translation>
     </message>
     <message>
         <source>M&amp;inimize on close</source>
@@ -1259,14 +1259,14 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>&amp;Käyttöliittymän kieli</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Dash.</source>
-        <translation>Käyttöliittymän kieli asetetaan tässä, Asetus tulee voimaan kun Dash asiakasohjelma käynnistetään uudelleen.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting DarkSilk.</source>
+        <translation>Käyttöliittymän kieli asetetaan tässä, Asetus tulee voimaan kun DarkSilk asiakasohjelma käynnistetään uudelleen.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dash/</source>
+https://www.transifex.com/projects/p/darksilk/</source>
         <translation>Puuttuuko sopiva kieli tai käännös on kesken? Auta käännöstyössä täällä:
-https://www.transifex.com/projects/p/dash/</translation>
+https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1348,8 +1348,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Lomake</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</source>
-        <translation>Näytetyt tiedot eivät välttämättä ole ajan tasalla.&lt;br&gt;Lompakkosi synkronoituu automaattisesti Dash verkkoon kun&lt;br&gt;yhteys on muodostettu, mutta tämä prosessi ei vielä ole valmis.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</source>
+        <translation>Näytetyt tiedot eivät välttämättä ole ajan tasalla.&lt;br&gt;Lompakkosi synkronoituu automaattisesti DarkSilk verkkoon kun&lt;br&gt;yhteys on muodostettu, mutta tämä prosessi ei vielä ole valmis.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1424,16 +1424,16 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Valmiina:</translation>
     </message>
     <message>
-        <source>Darksend Balance:</source>
-        <translation>Darksend Saldo:</translation>
+        <source>Sandstorm Balance:</source>
+        <translation>Sandstorm Saldo:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
         <translation>Määrä ja Kierrokset:</translation>
     </message>
     <message>
-        <source>0 DASH / 0 Rounds</source>
-        <translation>0 DASH / 0 Kierrosta</translation>
+        <source>0 DSLK / 0 Rounds</source>
+        <translation>0 DSLK / 0 Kierrosta</translation>
     </message>
     <message>
         <source>Submitted Denom:</source>
@@ -1444,8 +1444,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1456,24 +1456,24 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Käynnistä/Lopeta Sekoitus</translation>
     </message>
     <message>
-        <source>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>Masternodelle lähetetyt denominoinnit.&lt;br&gt;Jotta sekoitus onnistuisi, täytyy muiden käyttäjien käyttää saman arvoisia denominointeja.</translation>
+        <source>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <translation>Stormnodelle lähetetyt denominoinnit.&lt;br&gt;Jotta sekoitus onnistuisi, täytyy muiden käyttäjien käyttää saman arvoisia denominointeja.</translation>
     </message>
     <message>
         <source>(Last Message)</source>
         <translation>(Viimeisin Viesti)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Darksend request.</source>
-        <translation>Yritä manuaalisesti esittää Darksend sekoituspyyntö.</translation>
+        <source>Try to manually submit a Sandstorm request.</source>
+        <translation>Yritä manuaalisesti esittää Sandstorm sekoituspyyntö.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Yritä Sekoittaa</translation>
     </message>
     <message>
-        <source>Reset the current status of Darksend (can interrupt Darksend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Nollaa nykyinen Darksend tila (voi keskeyttää Darksend sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
+        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Nollaa nykyinen Sandstorm tila (voi keskeyttää Sandstorm sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1488,12 +1488,12 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Ei käytössä</translation>
     </message>
     <message>
-        <source>Start Darksend Mixing</source>
-        <translation>Käynnistä Darksend Sekoitus</translation>
+        <source>Start Sandstorm Mixing</source>
+        <translation>Käynnistä Sandstorm Sekoitus</translation>
     </message>
     <message>
-        <source>Stop Darksend Mixing</source>
-        <translation>Lopeta Darksend Sekoitus</translation>
+        <source>Stop Sandstorm Mixing</source>
+        <translation>Lopeta Sandstorm Sekoitus</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1536,9 +1536,9 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Käytössä</translation>
     </message>
     <message>
-        <source>Last Darksend message:
+        <source>Last Sandstorm message:
 </source>
-        <translation>Viimeisin Darksend viesti:
+        <translation>Viimeisin Sandstorm viesti:
 </translation>
     </message>
     <message>
@@ -1546,20 +1546,20 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Darksend was successfully reset.</source>
-        <translation>Darksend nollattu onnistuneesti.</translation>
+        <source>Sandstorm was successfully reset.</source>
+        <translation>Sandstorm nollattu onnistuneesti.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Darksend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Jos et halua nähdä sisäisiä Darksend sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
+        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Jos et halua nähdä sisäisiä Sandstorm sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
     </message>
     <message>
-        <source>Darksend requires at least %1 to use.</source>
-        <translation>Darksendin käyttö vaatii vähintään %1.</translation>
+        <source>Sandstorm requires at least %1 to use.</source>
+        <translation>Sandstormin käyttö vaatii vähintään %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Darksend.</source>
-        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. Darksend asetetaan pois käytöstä.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
+        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. Sandstorm asetetaan pois käytöstä.</translation>
     </message>
 </context>
 <context>
@@ -1569,8 +1569,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Maksupyyntövirhe</translation>
     </message>
     <message>
-        <source>Cannot start dash: click-to-pay handler</source>
-        <translation>Ei voi käynnistää Dashia: click-to-pay handler</translation>
+        <source>Cannot start darksilk: click-to-pay handler</source>
+        <translation>Ei voi käynnistää DarkSilkia: click-to-pay handler</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1589,8 +1589,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Virheellinen maksuosoite %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Dash address or malformed URI parameters.</source>
-        <translation>URI:a ei voida jäsentää! Tämä voi johtua virheellisestä Dash osoitteesta tai virheellisestä URI:n muuttujasta. </translation>
+        <source>URI cannot be parsed! This can be caused by an invalid DarkSilk address or malformed URI parameters.</source>
+        <translation>URI:a ei voida jäsentää! Tämä voi johtua virheellisestä DarkSilk osoitteesta tai virheellisestä URI:n muuttujasta. </translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1675,8 +1675,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Määrä</translation>
     </message>
     <message>
-        <source>Enter a Dash address (e.g. %1)</source>
-        <translation>Syötä Dash osoite (esim. %1)</translation>
+        <source>Enter a DarkSilk address (e.g. %1)</source>
+        <translation>Syötä DarkSilk osoite (esim. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1765,8 +1765,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Yhteyksien määrä</translation>
     </message>
     <message>
-        <source>Open the Dash debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Avaa Dash debug lokitiedosto nykyisestä datahakemistosta. Tämä saattaa kestää muutaman sekunnin isoilla tiedostoilla.</translation>
+        <source>Open the DarkSilk debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Avaa DarkSilk debug lokitiedosto nykyisestä datahakemistosta. Tämä saattaa kestää muutaman sekunnin isoilla tiedostoilla.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -1813,8 +1813,8 @@ https://www.transifex.com/projects/p/dash/</translation>
         <translation>Lohkoketju</translation>
     </message>
     <message>
-        <source>Number of Masternodes</source>
-        <translation>Masternodet määrä</translation>
+        <source>Number of Stormnodes</source>
+        <translation>Stormnodet määrä</translation>
     </message>
     <message>
         <source>&amp;Console</source>
@@ -1977,8 +1977,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ulos:</translation>
     </message>
     <message>
-        <source>Welcome to the Dash RPC console.</source>
-        <translation>Tervetuloa Dash RPC konsoliin.</translation>
+        <source>Welcome to the DarkSilk RPC console.</source>
+        <translation>Tervetuloa DarkSilk RPC konsoliin.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -2040,8 +2040,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>&amp;Uudelleenkäytä vastaanottavaa osoitetta (ei suositella)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Valinnainen viesti liitettäväksi maksupyyntöön, joka näytetään kun pyyntö on avattu.&lt;br&gt;Huomio: Viestiä ei lähetetä maksun mukana Dash verkkoon.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Valinnainen viesti liitettäväksi maksupyyntöön, joka näytetään kun pyyntö on avattu.&lt;br&gt;Huomio: Viestiä ei lähetetä maksun mukana DarkSilk verkkoon.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -2052,8 +2052,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Valinnainen nimi liitetään uuteen vastaanottavaan osoitteeseen.</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dash network.</source>
-        <translation>Valinnainen viesti liitettäväksi maksupyyntöön, joka näytetään kun pyyntö on avattu.&lt;br&gt;Huomio: Viestiä ei lähetetä maksun mukana Dash verkkoon.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DarkSilk network.</source>
+        <translation>Valinnainen viesti liitettäväksi maksupyyntöön, joka näytetään kun pyyntö on avattu.&lt;br&gt;Huomio: Viestiä ei lähetetä maksun mukana DarkSilk verkkoon.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
@@ -2297,7 +2297,7 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Jos mukautettu siirtomaksu on asetettu 1000 duff ja siirtotapahtuma on vain 250 tavua,&lt;br /&gt;tällöin "per kilotavu" maksaa vain 250 duffs siirtomaksun, kun taas "yhteensä vähintään" maksaa 1000 duffs.&lt;br /&gt;Siirtotapahtumat jotka ovat isompia kuin kilotavu, molemmat maksaa "per kilotavu".</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dash transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
         <translation>Minimi siirtomaksun maksaminen on ok niin kauan kun siirtotapahtumien määrä on pienempi kuin tila lohkoissa.&lt;br /&gt;Mutta ota huomioon että tämä voi johtaa siirtotapahtumaan jota ei vahvisteta koskaan, jos siirtotapahtumia on enemmän kuin verkko voi käsitellä.</translation>
     </message>
     <message>
@@ -2369,8 +2369,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lisää &amp;Vastaanottaja</translation>
     </message>
     <message>
-        <source>Darksend</source>
-        <translation>Darksend</translation>
+        <source>Sandstorm</source>
+        <translation>Sandstorm</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2421,8 +2421,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>anonymisoituja varoja</translation>
     </message>
     <message>
-        <source>(darksend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(darksend pyöristää tämän lähimpään %1).</translation>
+        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(sandstorm pyöristää tämän lähimpään %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2501,8 +2501,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Maksa vain minimi siirtomaksu %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Dash address</source>
-        <translation>Varoitus: Virheellinen Dash osoite</translation>
+        <source>Warning: Invalid DarkSilk address</source>
+        <translation>Varoitus: Virheellinen DarkSilk osoite</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2524,8 +2524,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Maksun &amp;saaja:</translation>
     </message>
     <message>
-        <source>The Dash address to send the payment to</source>
-        <translation>Dash osoite johon maksu lähetetään</translation>
+        <source>The DarkSilk address to send the payment to</source>
+        <translation>DarkSilk osoite johon maksu lähetetään</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2564,8 +2564,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Viesti:</translation>
     </message>
     <message>
-        <source>A message that was attached to the dash: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dash network.</source>
-        <translation>Viesti joka liitettiin Dash: URI joka talletetaan siirtotapahtuman kanssa viitteeksi sinulle. Huomio: Tätä viestiä ei lähetetä Dash verkkoon.</translation>
+        <source>A message that was attached to the darksilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</source>
+        <translation>Viesti joka liitettiin DarkSilk: URI joka talletetaan siirtotapahtuman kanssa viitteeksi sinulle. Huomio: Tätä viestiä ei lähetetä DarkSilk verkkoon.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
@@ -2591,8 +2591,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Dash Core is shutting down...</source>
-        <translation>Dash Core sulkeutuu...</translation>
+        <source>DarkSilk Core is shutting down...</source>
+        <translation>DarkSilk Core sulkeutuu...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -2614,8 +2614,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Voit allekirjoittaa viestit omilla osoitteillasi todistaaksesi että omistat ne. Ole huolellinen että et allekirjoita mitään epämääräistä, phishing-hyökkäjä voi huijata sinua allekirjoittamaan henkilöllisyytesi omasta puolestaan. Allekirjoita vain yksityiskohtaisesti täytetty selvitys johon sitoudut.</translation>
     </message>
     <message>
-        <source>The Dash address to sign the message with</source>
-        <translation>Dash osoite jolla viesti allekirjoitetaan</translation>
+        <source>The DarkSilk address to sign the message with</source>
+        <translation>DarkSilk osoite jolla viesti allekirjoitetaan</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2646,8 +2646,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Kopioi tämän hetkinen allekirjoitus leikepöydälle</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Dash address</source>
-        <translation>Allekirjoita viesti todistaaksesi että omistat tämän Dash osoitteen</translation>
+        <source>Sign the message to prove you own this DarkSilk address</source>
+        <translation>Allekirjoita viesti todistaaksesi että omistat tämän DarkSilk osoitteen</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2670,12 +2670,12 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Syötä allekirjoittava osoite, viesti ja allekirjoitus alla oleviin kenttiin varmistaaksesi allekirjoituksen aitouden. Varmista että kopioit kaikki kentät täsmälleen oikein, myös rivinvaihdot, välilyönnit, tabulaattorit, jne.</translation>
     </message>
     <message>
-        <source>The Dash address the message was signed with</source>
-        <translation>Dash osoite jolla viesti on allekirjoitettu</translation>
+        <source>The DarkSilk address the message was signed with</source>
+        <translation>DarkSilk osoite jolla viesti on allekirjoitettu</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Dash address</source>
-        <translation>Tarkista että viesti on allekirjoitettu määritetyllä Dash osoitteella</translation>
+        <source>Verify the message to ensure it was signed with the specified DarkSilk address</source>
+        <translation>Tarkista että viesti on allekirjoitettu määritetyllä DarkSilk osoitteella</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2741,8 +2741,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Dash Core</source>
-        <translation>Dash Core</translation>
+        <source>DarkSilk Core</source>
+        <translation>DarkSilk Core</translation>
     </message>
     <message>
         <source>Version %1</source>
@@ -2753,8 +2753,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Bitcoin Core kehittäjät</translation>
     </message>
     <message>
-        <source>The Dash Core developers</source>
-        <translation>Dash Core kehittäjät</translation>
+        <source>The DarkSilk Core developers</source>
+        <translation>DarkSilk Core kehittäjät</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -3025,8 +3025,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vastaanotettu osoitteesta</translation>
     </message>
     <message>
-        <source>Received via Darksend</source>
-        <translation>Darksend vastaanotettu</translation>
+        <source>Received via Sandstorm</source>
+        <translation>Sandstorm vastaanotettu</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3041,24 +3041,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Louhittu</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Darksend denominointi</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm denominointi</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Darksend vakuus maksu</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Sandstorm vakuus maksu</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend luo vakuus syötteet</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend denominointien luonti</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm denominointien luonti</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksend lähetetty</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstorm lähetetty</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3086,7 +3086,7 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     </message>
     <message>
         <source>Destination address of transaction.</source>
-        <translation>Siirtotapahtuman Dash kohdeosoite</translation>
+        <translation>Siirtotapahtuman DarkSilk kohdeosoite</translation>
     </message>
     <message>
         <source>Amount removed from or added to balance.</source>
@@ -3136,24 +3136,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lähetetty</translation>
     </message>
     <message>
-        <source>Darksent</source>
-        <translation>Darksend lähetetty</translation>
+        <source>Sandstormed</source>
+        <translation>Sandstorm lähetetty</translation>
     </message>
     <message>
-        <source>Darksend Make Collateral Inputs</source>
-        <translation>Darksend luo vakuus syötteet</translation>
+        <source>Sandstorm Make Collateral Inputs</source>
+        <translation>Sandstorm luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Darksend Create Denominations</source>
-        <translation>Darksend denominointien luonti</translation>
+        <source>Sandstorm Create Denominations</source>
+        <translation>Sandstorm denominointien luonti</translation>
     </message>
     <message>
-        <source>Darksend Denominate</source>
-        <translation>Darksend denominointi</translation>
+        <source>Sandstorm Denominate</source>
+        <translation>Sandstorm denominointi</translation>
     </message>
     <message>
-        <source>Darksend Collateral Payment</source>
-        <translation>Darksend vakuus maksu</translation>
+        <source>Sandstorm Collateral Payment</source>
+        <translation>Sandstorm vakuus maksu</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3278,11 +3278,11 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Lähetä Dasheja</translation>
+        <translation>Lähetä DarkSilkeja</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DASH.</source>
-        <translation>InstantX ei tue näin korkeaa lähetysmäärää vielä. Siirtotapahtumat on tällä hetkellä rajoitettu %1 DASH.</translation>
+        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantX ei tue näin korkeaa lähetysmäärää vielä. Siirtotapahtumat on tällä hetkellä rajoitettu %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3325,18 +3325,18 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     </message>
 </context>
 <context>
-    <name>dash-core</name>
+    <name>darksilk-core</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>Kytkeydy annettuun osoitteeseen ja pidä linja aina auki. Käytä [host]:port merkintätapaa IPv6:lle.</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. Dash Core is probably already running.</source>
-        <translation>Ei voida lukita data hakemistoa %s. Dash Core on luultavasti jo käynnissä.</translation>
+        <source>Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.</source>
+        <translation>Ei voida lukita data hakemistoa %s. DarkSilk Core on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Darksend käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
+        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Sandstorm käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3387,16 +3387,16 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tämä on esi-julkaistu testiversio - Käytä omalla vastuulla - Älä käytä louhimiseen tai kauppasovelluksiin.</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. Dash Core is probably already running.</source>
-        <translation>Ei voida yhdistää %s tässä tietokoneessa. Dash Core on luultavasti jo käynnissä.</translation>
+        <source>Unable to bind to %s on this computer. DarkSilk Core is probably already running.</source>
+        <translation>Ei voida yhdistää %s tässä tietokoneessa. DarkSilk Core on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend denominated funds for this transaction.</source>
-        <translation>Ei tarpeeksi Darksend anonymisoituja varoja tälle siirtotapahtumalle.</translation>
+        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
+        <translation>Ei tarpeeksi Sandstorm anonymisoituja varoja tälle siirtotapahtumalle.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Ei tarpeeksi Darksend ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DASH.</translation>
+        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Ei tarpeeksi Sandstorm ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3404,7 +3404,7 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
-        <translation>Varoitus: Dash verkossa on ristiriitoja! Louhijat näyttävät kokevan virhetilanteita.</translation>
+        <translation>Varoitus: DarkSilk verkossa on ristiriitoja! Louhijat näyttävät kokevan virhetilanteita.</translation>
     </message>
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
@@ -3419,8 +3419,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Varoitus: Wallet.dat lompakkotiedosto on vioittunut, tiedot pelastettu. Alkuperäinen wallet.dat lompakkotiedosto on tallennettu wallet.{timestamp}.bak kansioon %s, jos saldosi tai siirtohistoria on virheellinen, sinun tulisi palauttaa lompakkotiedosto varmuuskopiosta.</translation>
     </message>
     <message>
-        <source>You must specify a masternodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Sinun täytyy määritellä masternodeprivkey asetustiedostoon. Katso lisätietoja dokumentaatiosta.</translation>
+        <source>You must specify a stormnodeprivkey in the configuration. Please see documentation for help.</source>
+        <translation>Sinun täytyy määritellä stormnodeprivkey asetustiedostoon. Katso lisätietoja dokumentaatiosta.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -3495,8 +3495,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vioittunut lohkotietokanta havaittu</translation>
     </message>
     <message>
-        <source>Darksend options:</source>
-        <translation>Darksend valinnat:</translation>
+        <source>Sandstorm options:</source>
+        <translation>Sandstorm valinnat:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3567,8 +3567,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Virhe: Lompakko on lukittu, siirtotapahtumaa ei voida luoda!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Darksend pool</source>
-        <translation>Virhe: Sinulla on jo odottavia merkintöjä Darksend varannossa</translation>
+        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <translation>Virhe: Sinulla on jo odottavia merkintöjä Sandstorm varannossa</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3619,8 +3619,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Poista kaikki lompakon siirtotapahtumat ja palauta vain nuo osat lohkoketjusta -rescan valinnan avulla käynnistyksessä</translation>
     </message>
     <message>
-        <source>Disable all Dash specific functionality (Masternodes, Darksend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Kytke pois käytöstä kaikki Dash:in erityistoiminnot (Masternodet, Darksend, InstantX, Budjetointi) (0-1, oletus: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Kytke pois käytöstä kaikki DarkSilk:in erityistoiminnot (Stormnodet, Sandstorm, InstantX, Budjetointi) (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3631,20 +3631,20 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ota instantx käyttöön, näytä lukittujen siirtojen vahvistukset (bool, oletus: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated darksend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Ota käyttöön automaattinen Darksend rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
+        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Ota käyttöön automaattinen Sandstorm rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
         <translation>Virhe: Ei tuettu argumentti -socks. SOCKS version asettaminen ei ole enää mahdollista, vain SOCKS5 proxyt ovat tuettuja.</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Siirtomaksut (DASH/Kb) jotka ovat pienempiä kuin tämä, tulkitaan nollamaksuksi välityksessä (oletus: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
+        <translation>Siirtomaksut (DSLK/Kb) jotka ovat pienempiä kuin tämä, tulkitaan nollamaksuksi välityksessä (oletus: %s)</translation>
     </message>
     <message>
-        <source>Fees (in DASH/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Siirtomaksut (DASH/Kb) jotka ovat pienempiä kuin tämä, tulkitaan nollamaksuksi siirtotapahtuman luonnissa (oletus: %s)</translation>
+        <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Siirtomaksut (DSLK/Kb) jotka ovat pienempiä kuin tämä, tulkitaan nollamaksuksi siirtotapahtuman luonnissa (oletus: %s)</translation>
     </message>
     <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
@@ -3691,8 +3691,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tulosta debuggaustieto (oletus: %u, tarjottava &lt;category&gt; on valinnainen)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Darksend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Tarjoa Darksend:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
+        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Tarjoa Sandstorm:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3717,32 +3717,32 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
 Käännös päivitetty: 1.9.2015 by AjM.</translation>
     </message>
     <message>
-        <source>To use dashd, or the -server option to dash-qt, you must set an rpcpassword in the configuration file:
+        <source>To use darksilkd, or the -server option to darksilk-qt, you must set an rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "Dash Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
 </source>
-        <translation>Käyttääksesi dashd:ia tai -server valintaa dash-qt:lle, sinun tulee asettaa rpc salasana asetustiedostossa:
+        <translation>Käyttääksesi darksilkd:ia tai -server valintaa darksilk-qt:lle, sinun tulee asettaa rpc salasana asetustiedostossa:
 %s
 Suositellaan että käytät allaolevaa satunnaista salasanaa:
-rpcuser=dashrpc
+rpcuser=darksilkrpc
 rpcpassword=%s
 (sinun ei tarvitse muistaa tätä salasanaa)
 Käyttäjätunnus ja salasana on oltava ERILAISET.
 Jos tiedostoa ei ole, luo se vain omistajan-luku-oikeudella.
 Suositellaan asetettavaksi alertnotify jotta saat tietoa ongelmista,
-esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
+esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
 </translation>
     </message>
     <message>
-        <source>Unable to locate enough funds for this transaction that are not equal 1000 DASH.</source>
-        <translation>Ei tarpeeksi varoja tälle siirtotapahtumalle, joka ei ole 1000 DASH.</translation>
+        <source>Unable to locate enough funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Ei tarpeeksi varoja tälle siirtotapahtumalle, joka ei ole 1000 DSLK.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
@@ -3753,8 +3753,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Varoitus: -maxtxfee on asetettu erittäin korkeaksi! Näin isot siirtomaksut voitaisiin maksaa yhdessä siirtotapahtumassa.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dash Core will not work properly.</source>
-        <translation>Varoitus: Tarkista että tietokoneesi kellonaika ja päivämäärä ovat oikein! Dash ei toimi oikein väärällä päivämäärällä ja/tai kellonajalla.</translation>
+        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong DarkSilk Core will not work properly.</source>
+        <translation>Varoitus: Tarkista että tietokoneesi kellonaika ja päivämäärä ovat oikein! DarkSilk ei toimi oikein väärällä päivämäärällä ja/tai kellonajalla.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
@@ -3807,40 +3807,40 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Copyright (C) 2009-%i Bitcoin Core Kehittäjät</translation>
     </message>
     <message>
-        <source>Copyright (C) 2014-%i The Dash Core Developers</source>
-        <translation>Copyright (C) 2014-%i Dash Core Kehittäjät</translation>
+        <source>Copyright (C) 2014-%i The DarkSilk Core Developers</source>
+        <translation>Copyright (C) 2014-%i DarkSilk Core Kehittäjät</translation>
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
         <translation>Ei voida jäsentää -rpcbind arvoa %s verkko-osoitteena</translation>
     </message>
     <message>
-        <source>Darksend is idle.</source>
-        <translation>Darksend odottaa.</translation>
+        <source>Sandstorm is idle.</source>
+        <translation>Sandstorm odottaa.</translation>
     </message>
     <message>
-        <source>Darksend request complete:</source>
-        <translation>Darksend pyyntö valmis:</translation>
+        <source>Sandstorm request complete:</source>
+        <translation>Sandstorm pyyntö valmis:</translation>
     </message>
     <message>
-        <source>Darksend request incomplete:</source>
-        <translation>Darksend pyyntö kesken:</translation>
+        <source>Sandstorm request incomplete:</source>
+        <translation>Sandstorm pyyntö kesken:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
         <translation>Poista turvatila käytöstä, ohita todellinen turvatila tapahtuma (oletus: %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a masternode (0-1, default: %u)</source>
-        <translation>Aktivoi asiakasohjelman käyttö masternode:na (0-1, oletus: %u)</translation>
+        <source>Enable the client to act as a stormnode (0-1, default: %u)</source>
+        <translation>Aktivoi asiakasohjelman käyttö stormnode:na (0-1, oletus: %u)</translation>
     </message>
     <message>
-        <source>Error connecting to Masternode.</source>
-        <translation>Virhe masternode:en kytkeytymisessä.</translation>
+        <source>Error connecting to Stormnode.</source>
+        <translation>Virhe stormnode:en kytkeytymisessä.</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of Dash Core</source>
-        <translation>Virhe ladattaessa wallet.dat: Lompakko vaatii uudemman version Dash Core:sta</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of DarkSilk Core</source>
+        <translation>Virhe ladattaessa wallet.dat: Lompakko vaatii uudemman version DarkSilk Core:sta</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
@@ -3855,8 +3855,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Virhe: Ei tuettu argumentti -tor löytyi, käytä -onion.</translation>
     </message>
     <message>
-        <source>Fee (in DASH/kB) to add to transactions you send (default: %s)</source>
-        <translation>Lisättävä siirtomaksu (DASH/Kb) siirtotapahtumaan jonka lähetät (oletus: %s)</translation>
+        <source>Fee (in DSLK/kB) to add to transactions you send (default: %s)</source>
+        <translation>Lisättävä siirtomaksu (DSLK/Kb) siirtotapahtumaan jonka lähetät (oletus: %s)</translation>
     </message>
     <message>
         <source>Finalizing transaction.</source>
@@ -3911,8 +3911,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Tietoa</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. Dash Core is shutting down.</source>
-        <translation>Alkuperäisyyden tarkistus epäonnistui. Dash Core sulkeutuu.</translation>
+        <source>Initialization sanity check failed. DarkSilk Core is shutting down.</source>
+        <translation>Alkuperäisyyden tarkistus epäonnistui. DarkSilk Core sulkeutuu.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
@@ -3955,8 +3955,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Virheellinen määrä -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Darksend action was too recent.</source>
-        <translation>Viimeinen onnistunut Darksend tapahtuma oli liian äskettäin.</translation>
+        <source>Last successful Sandstorm action was too recent.</source>
+        <translation>Viimeinen onnistunut Sandstorm tapahtuma oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -3975,20 +3975,20 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Ladataan budjetti välimuistia...</translation>
     </message>
     <message>
-        <source>Loading masternode cache...</source>
-        <translation>Ladataan masternode välimuistia...</translation>
+        <source>Loading stormnode cache...</source>
+        <translation>Ladataan stormnode välimuistia...</translation>
     </message>
     <message>
-        <source>Loading masternode payment cache...</source>
-        <translation>Ladataan masternode maksuvälimuistia...</translation>
+        <source>Loading stormnode payment cache...</source>
+        <translation>Ladataan stormnode maksuvälimuistia...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
         <translation>On jo lukittu.</translation>
     </message>
     <message>
-        <source>Lock masternodes from masternode configuration file (default: %u)</source>
-        <translation>Lukitse masternodet niiden asetustiedoston kautta (oletus: %u)</translation>
+        <source>Lock stormnodes from stormnode configuration file (default: %u)</source>
+        <translation>Lukitse stormnodet niiden asetustiedoston kautta (oletus: %u)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
@@ -4011,16 +4011,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Tarvitaan määritellä portti -whitebind: '%s'</translation>
     </message>
     <message>
-        <source>No Masternodes detected.</source>
-        <translation>Masternodeja ei havaittu.</translation>
+        <source>No Stormnodes detected.</source>
+        <translation>Stormnodeja ei havaittu.</translation>
     </message>
     <message>
-        <source>No compatible Masternode found.</source>
-        <translation>Yhteensopivaa Masternodea ei löytynyt.</translation>
+        <source>No compatible Stormnode found.</source>
+        <translation>Yhteensopivaa Stormnodea ei löytynyt.</translation>
     </message>
     <message>
-        <source>Not in the Masternode list.</source>
-        <translation>Ei ole Masternode listassa.</translation>
+        <source>Not in the Stormnode list.</source>
+        <translation>Ei ole Stormnode listassa.</translation>
     </message>
     <message>
         <source>Number of automatic wallet backups (default: 10)</source>
@@ -4059,8 +4059,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Serverin yksityisavain (oletus: %s)</translation>
     </message>
     <message>
-        <source>Set external address:port to get to this masternode (example: %s)</source>
-        <translation>Aseta ulkoinen osoite:portti tälle masternodelle (esim: %s)</translation>
+        <source>Set external address:port to get to this stormnode (example: %s)</source>
+        <translation>Aseta ulkoinen osoite:portti tälle stormnodelle (esim: %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
@@ -4091,8 +4091,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Määritä yhteyden aikakatkaisu millisekunneissa (minimi: 1, oletus: %d)</translation>
     </message>
     <message>
-        <source>Specify masternode configuration file (default: %s)</source>
-        <translation>Määritä masternoden asetustiedosto (oletus: %s)</translation>
+        <source>Specify stormnode configuration file (default: %s)</source>
+        <translation>Määritä stormnoden asetustiedosto (oletus: %s)</translation>
     </message>
     <message>
         <source>Specify pid file (default: %s)</source>
@@ -4107,16 +4107,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Keskeytä kun kaikki lohkot tuotu levyltä (oletus: %u)</translation>
     </message>
     <message>
-        <source>Submitted following entries to masternode: %u / %d</source>
-        <translation>Esitetty seuraavat merkinnät masternodelle: %u / %d</translation>
+        <source>Submitted following entries to stormnode: %u / %d</source>
+        <translation>Esitetty seuraavat merkinnät stormnodelle: %u / %d</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>Esitetty masternodelle, odotetaan lisää merkintöjä ( %u / %d ) %s</translation>
+        <source>Submitted to stormnode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Esitetty stormnodelle, odotetaan lisää merkintöjä ( %u / %d ) %s</translation>
     </message>
     <message>
-        <source>Submitted to masternode, waiting in queue %s</source>
-        <translation>Esitetty masternodelle, odotetaan jonossa %s</translation>
+        <source>Submitted to stormnode, waiting in queue %s</source>
+        <translation>Esitetty stormnodelle, odotetaan jonossa %s</translation>
     </message>
     <message>
         <source>Synchronization failed</source>
@@ -4131,20 +4131,20 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Synkronoidaan budjetit...</translation>
     </message>
     <message>
-        <source>Synchronizing masternode winners...</source>
-        <translation>Synkronoidaan masternode voittajat...</translation>
+        <source>Synchronizing stormnode winners...</source>
+        <translation>Synkronoidaan stormnode voittajat...</translation>
     </message>
     <message>
-        <source>Synchronizing masternodes...</source>
-        <translation>Synkronoidaan masternodet...</translation>
+        <source>Synchronizing stormnodes...</source>
+        <translation>Synkronoidaan stormnodet...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
         <translation>Synkronoidaan sporkit...</translation>
     </message>
     <message>
-        <source>This is not a Masternode.</source>
-        <translation>Tämä ei ole Masternode.</translation>
+        <source>This is not a Stormnode.</source>
+        <translation>Tämä ei ole Stormnode.</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
@@ -4155,16 +4155,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Käytä KeePass 2 integraatiota käyttäen KeePassHttp liitännäistä (oletus: %u)</translation>
     </message>
     <message>
-        <source>Use N separate masternodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>Käytä N erillistä masternodea varojen anonymisointiin (2-8, oletus: %u)</translation>
+        <source>Use N separate stormnodes to anonymize funds  (2-8, default: %u)</source>
+        <translation>Käytä N erillistä stormnodea varojen anonymisointiin (2-8, oletus: %u)</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Käytä UPnP:tä kuunneltavan portin kartoitukseen (oletus: %u)</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart Dash Core to complete</source>
-        <translation>Lompakko on kirjoitettava uudelleen: käynnistä Dash Core uudestaan viimeistelyä varten</translation>
+        <source>Wallet needed to be rewritten: restart DarkSilk Core to complete</source>
+        <translation>Lompakko on kirjoitettava uudelleen: käynnistä DarkSilk Core uudestaan viimeistelyä varten</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
@@ -4179,32 +4179,32 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Yritetään uudelleen...</translation>
     </message>
     <message>
-        <source>Invalid masternodeprivkey. Please see documenation.</source>
-        <translation>Virheellinen masternoden yksityisavain (masternodeprivkey). Katso lisätietoja dokumentaatiosta.</translation>
+        <source>Invalid stormnodeprivkey. Please see documenation.</source>
+        <translation>Virheellinen stormnoden yksityisavain (stormnodeprivkey). Katso lisätietoja dokumentaatiosta.</translation>
     </message>
     <message>
         <source>(must be 9999 for mainnet)</source>
         <translation>(oltava 9999 pääverkossa)</translation>
     </message>
     <message>
-        <source>Can't find random Masternode.</source>
-        <translation>Satunnaista Masternodea ei löydy.</translation>
+        <source>Can't find random Stormnode.</source>
+        <translation>Satunnaista Stormnodea ei löydy.</translation>
     </message>
     <message>
         <source>Can't mix while sync in progress.</source>
         <translation>Ei voida sekoittaa synkronoinnin aikana.</translation>
     </message>
     <message>
-        <source>Could not parse masternode.conf</source>
-        <translation> Ei voitu jäsentää masternode.conf</translation>
+        <source>Could not parse stormnode.conf</source>
+        <translation> Ei voitu jäsentää stormnode.conf</translation>
     </message>
     <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
         <translation>Virheellinen verkkomaski määritelty -whitelist: '%s'</translation>
     </message>
     <message>
-        <source>Invalid port detected in masternode.conf</source>
-        <translation>Virheellinen portti löytyi masternode.conf :sta</translation>
+        <source>Invalid port detected in stormnode.conf</source>
+        <translation>Virheellinen portti löytyi stormnode.conf :sta</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
@@ -4223,16 +4223,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>KeePassHttp avain AES salattuun viestintään</translation>
     </message>
     <message>
-        <source>Keep N DASH anonymized (default: %u)</source>
-        <translation>Pidä N DASH anonymisoituna (oletus: %u)</translation>
+        <source>Keep N DSLK anonymized (default: %u)</source>
+        <translation>Pidä N DSLK anonymisoituna (oletus: %u)</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
         <translation>Pidä enintään &lt;n&gt; ei yhdistettyä siirtotapahtumaa muistissa (oletus: %u)</translation>
     </message>
     <message>
-        <source>Last Darksend was too recent.</source>
-        <translation>Viimeisin Darksend oli liian äskettäin.</translation>
+        <source>Last Sandstorm was too recent.</source>
+        <translation>Viimeisin Sandstorm oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4255,16 +4255,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Ladataan lompakkoa...</translation>
     </message>
     <message>
-        <source>Masternode options:</source>
-        <translation>Masternode valinnat:</translation>
+        <source>Stormnode options:</source>
+        <translation>Stormnode valinnat:</translation>
     </message>
     <message>
-        <source>Masternode queue is full.</source>
-        <translation>Masternode jono on täysi.</translation>
+        <source>Stormnode queue is full.</source>
+        <translation>Stormnode jono on täysi.</translation>
     </message>
     <message>
-        <source>Masternode:</source>
-        <translation>Masternode:</translation>
+        <source>Stormnode:</source>
+        <translation>Stormnode:</translation>
     </message>
     <message>
         <source>Missing input transaction information.</source>
@@ -4367,8 +4367,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Aseta lohkon maksimikoko tavuissa (oletus: %d)</translation>
     </message>
     <message>
-        <source>Set the masternode private key</source>
-        <translation>Aseta masternoden yksityisavain.</translation>
+        <source>Set the stormnode private key</source>
+        <translation>Aseta stormnoden yksityisavain.</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -4483,8 +4483,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dash Hälytys" admin@foo.com
         <translation>Käyttäjätunnus JSON-RPC yhteyksille</translation>
     </message>
     <message>
-        <source>Value more than Darksend pool maximum allows.</source>
-        <translation>Määrä on enemmän kuin Darksend varannon maksimi sallii.</translation>
+        <source>Value more than Sandstorm pool maximum allows.</source>
+        <translation>Määrä on enemmän kuin Sandstorm varannon maksimi sallii.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
