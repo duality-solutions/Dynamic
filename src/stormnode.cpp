@@ -83,7 +83,7 @@ CStormnode::CStormnode(const CStormnode& other) :
     fUnitTest(other.fUnitTest)
 {}
 
-CStormnode::CStormnode(const CStormnodeBroadcast& mnb) :
+CStormnode::CStormnode(const CStormnodeBroadcast& snb) :
     vin(snb.vin),
     addr(snb.addr),
     pubKeyCollateralAddress(snb.pubKeyCollateralAddress),
@@ -108,9 +108,9 @@ CStormnode::CStormnode(const CStormnodeBroadcast& mnb) :
 //
 // When a new stormnode broadcast is sent, update our information
 //
-bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& mnb)
+bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
 {
-    if(mnb.sigTime <= sigTime) return false;
+    if(snb.sigTime <= sigTime) return false;
 
     pubKeyStormnode = snb.pubKeyStormnode;
     sigTime = snb.sigTime;
@@ -200,7 +200,7 @@ void CStormnode::Check(bool fForce)
     if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
     bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
 
-    if(nActiveState == MASTERNODE_POSE_BAN) {
+    if(nActiveState == STORMNODE_POSE_BAN) {
         if(nHeight < nPoSeBanHeight) return; // too early?
         // Otherwise give it a chance to proceed further to do all the usual checks and to change its state.
         // Stormnode still will be on the edge and can be banned back easily if it keeps ignoring snverify
@@ -336,7 +336,7 @@ void CStormnode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanB
     CScript snpayee = GetScriptForDestination(pubKeyCollateralAddress.GetID());
     // LogPrint("stormnode", "CStormnode::UpdateLastPaidBlock -- searching for block with payment to %s\n", vin.prevout.ToStringShort());
 
-    LOCK(cs_mapMasternodeBlocks);
+    LOCK(cs_mapStormnodeBlocks);
 
     for (int i = 0; BlockReading && BlockReading->nHeight > nBlockLastPaid && i < nMaxBlocksToScanBack; i++) {
         if(snpayments.mapStormnodeBlocks.count(BlockReading->nHeight) &&
@@ -410,7 +410,7 @@ bool CStormnodeBroadcast::Create(std::string strService, std::string strKeyStorm
     return Create(txin, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyStormnodeNew, pubKeyStormnodeNew, strErrorRet, snbRet);
 }
 
-bool CStormnodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyStormnodeNew, CPubKey pubKeyStormnodeNew, std::string &strErrorRet, CStormnodeBroadcast &mnbRet)
+bool CStormnodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyStormnodeNew, CPubKey pubKeyStormnodeNew, std::string &strErrorRet, CStormnodeBroadcast &snbRet)
 {
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
@@ -486,7 +486,7 @@ bool CStormnodeBroadcast::SimpleCheck(int& nDos)
     }
 
     CScript pubkeyScript2;
-    pubkeyScript2 = GetScriptForDestination(pubKeyMasternode.GetID());
+    pubkeyScript2 = GetScriptForDestination(pubKeyStormnode.GetID());
 
     if(pubkeyScript2.size() != 25) {
         LogPrintf("CStormnodeBroadcast::SimpleCheck -- pubKeyStormnode has the wrong size\n");
@@ -528,7 +528,7 @@ bool CStormnodeBroadcast::Update(CStormnode* psn, int& nDos)
         return false;
     }
 
-    pmn->Check();
+    psn->Check();
 
     // stormnode is banned by PoSe
     if(psn->IsPoSeBanned()) {
@@ -544,7 +544,7 @@ bool CStormnodeBroadcast::Update(CStormnode* psn, int& nDos)
     }
 
     // if ther was no stormnode broadcast recently or if it matches our Stormnode privkey...
-    if(!psn->IsBroadcastedWithin(STORMNODE_MIN_MNB_SECONDS) || (fStormNode && pubKeyStormnode == activeStormnode.pubKeyStormnode)) {
+    if(!psn->IsBroadcastedWithin(STORMNODE_MIN_SNB_SECONDS) || (fStormNode && pubKeyStormnode == activeStormnode.pubKeyStormnode)) {
         // take the newest entry
         LogPrintf("CStormnodeBroadcast::Update -- Got UPDATED Stormnode entry: addr=%s\n", addr.ToString());
         if(psn->UpdateFromNewBroadcast((*this))) {
@@ -559,7 +559,7 @@ bool CStormnodeBroadcast::Update(CStormnode* psn, int& nDos)
 
 bool CStormnodeBroadcast::CheckOutpoint(int& nDos)
 {
-    // we are a stormnode with the same vin (i.e. already activated) and this mnb is ours (matches our Stormnodes privkey)
+    // we are a stormnode with the same vin (i.e. already activated) and this snb is ours (matches our Stormnodes privkey)
     // so nothing to do here for us
     if(fStormNode && vin.prevout == activeStormnode.vin.prevout && pubKeyStormnode == activeStormnode.pubKeyStormnode) {
         return false;
@@ -588,8 +588,8 @@ bool CStormnodeBroadcast::CheckOutpoint(int& nDos)
         if(chainActive.Height() - coins.nHeight + 1 < Params().GetConsensus().nStormnodeMinimumConfirmations) {
             LogPrintf("CStormnodeBroadcast::CheckOutpoint -- Stormnode UTXO must have at least %d confirmations, stormnode=%s\n",
                     Params().GetConsensus().nStormnodeMinimumConfirmations, vin.prevout.ToStringShort());
-            // maybe we miss few blocks, let this mnb to be checked again later
-            mnodeman.mapSeenMasternodeBroadcast.erase(GetHash());
+            // maybe we miss few blocks, let this snb to be checked again later
+            snodeman.mapSeenStormnodeBroadcast.erase(GetHash());
             return false;
         }
     }
@@ -661,7 +661,7 @@ bool CStormnodeBroadcast::CheckSignature(int& nDos)
     //
     if(nProtocolVersion < 70201) {
         std::string vchPubkeyCollateralAddress(pubKeyCollateralAddress.begin(), pubKeyCollateralAddress.end());
-        std::string vchPubkeyMasternode(pubKeyStormnode.begin(), pubKeyStormnode.end());
+        std::string vchPubkeyStormnode(pubKeyStormnode.begin(), pubKeyStormnode.end());
         strMessage = addr.ToString(false) + boost::lexical_cast<std::string>(sigTime) +
                         vchPubkeyCollateralAddress + vchPubkeyStormnode + boost::lexical_cast<std::string>(nProtocolVersion);
 
@@ -675,7 +675,7 @@ bool CStormnodeBroadcast::CheckSignature(int& nDos)
                 strMessage = addr.ToString() + boost::lexical_cast<std::string>(sigTime) +
                                 vchPubkeyCollateralAddress + vchPubkeyStormnode + boost::lexical_cast<std::string>(nProtocolVersion);
 
-                LogPrint("masternode", "CStormnodeBroadcast::CheckSignature -- second try, sanitized strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n",
+                LogPrint("stormnode", "CStormnodeBroadcast::CheckSignature -- second try, sanitized strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n",
                     SanitizeString(strMessage), CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(),
                     EncodeBase64(&vchSig[0], vchSig.size()));
 
@@ -827,7 +827,7 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpl
 
     // so, ping seems to be ok, let's store it
     LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- Stormnode ping accepted, stormnode=%s\n", vin.prevout.ToStringShort());
-    pmn->lastPing = *this;
+    psn->lastPing = *this;
 
     // and update snodeman.mapSeenStormnodeBroadcast.lastPing which is probably outdated
     CStormnodeBroadcast snb(*psn);
@@ -900,6 +900,6 @@ void CStormnode::FlagGovernanceItemsAsDirty()
         }
     }
     for(size_t i = 0; i < vecDirty.size(); ++i) {
-        mnodeman.AddDirtyGovernanceObjectHash(vecDirty[i]);
+        snodeman.AddDirtyGovernanceObjectHash(vecDirty[i]);
     }
 }

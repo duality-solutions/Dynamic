@@ -103,7 +103,7 @@ void CStormnodeSync::SwitchToNextAsset()
             LogPrintf("CStormnodeSync::SwitchToNextAsset -- Sync has finished\n");
             nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
-            //try to activate our masternode if possible
+            //try to activate our stormnode if possible
             activeStormnode.ManageState();
 
             TRY_LOCK(cs_vNodes, lockRecv);
@@ -170,7 +170,7 @@ void CStormnodeSync::ProcessTick()
     if(!pCurrentBlockIndex) return;
 
     //the actual count of stormnodes we have currently
-    int nSnCount = snodeman.CountMasternodes();
+    int nSnCount = snodeman.CountStormnodes();
 
     if(fDebug) LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d\n", nTick, nSnCount);
 
@@ -224,13 +224,13 @@ void CStormnodeSync::ProcessTick()
         // QUICK MODE (REGTEST ONLY!)
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {
-            if(nRequestedMasternodeAttempt <= 2) {
+            if(nRequestedStormnodeAttempt <= 2) {
                 pnode->PushMessage(NetMsgType::GETSPORKS); //get current network sporks
             } else if(nRequestedStormnodeAttempt < 4) {
                 snodeman.SsegUpdate(pnode);
             } else if(nRequestedStormnodeAttempt < 6) {
                 int nSnCount = snodeman.CountStormnodes();
-                pnode->PushMessage(NetMsgType::STORMNODEPAYMENTSYNC, nMnCount); //sync payment votes
+                pnode->PushMessage(NetMsgType::STORMNODEPAYMENTSYNC, nSnCount); //sync payment votes
                 uint256 n = uint256();
                 pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync stormnode votes
             } else {
@@ -270,7 +270,7 @@ void CStormnodeSync::ProcessTick()
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- timeout\n", nTick, nRequestedStormnodeAssets);
                     if (nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
-                        // there is no way we can continue without masternode list, fail here and try later
+                        // there is no way we can continue without stormnode list, fail here and try later
                         Fail();
                         return;
                     }

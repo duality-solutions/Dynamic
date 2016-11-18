@@ -75,7 +75,7 @@
 #include "zmq/zmqnotificationinterface.h"
 #endif
 
-#include "dsnotificationinterface.h"
+#include "ssnotificationinterface.h"
 
 using namespace std;
 
@@ -93,7 +93,7 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 static CZMQNotificationInterface* pzmqNotificationInterface = NULL;
 #endif
 
-static CDSNotificationInterface* pdsNotificationInterface = NULL;
+static CSSNotificationInterface* pssNotificationInterface = NULL;
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -268,10 +268,10 @@ void PrepareShutdown()
     }
 #endif
 
-    if (pdsNotificationInterface) {
-        UnregisterValidationInterface(pdsNotificationInterface);
-        delete pdsNotificationInterface;
-        pdsNotificationInterface = NULL;
+    if (pssNotificationInterface) {
+        UnregisterValidationInterface(pssNotificationInterface);
+        delete pssNotificationInterface;
+        pssNotificationInterface = NULL;
     }
 
 #ifndef WIN32
@@ -558,8 +558,8 @@ std::string HelpMessage(HelpMessageMode mode)
 
     strUsage += HelpMessageGroup(_("Stormnode options:"));
     strUsage += HelpMessageOpt("-stormnode=<n>", strprintf(_("Enable the client to act as a stormnode (0-1, default: %u)"), 0));
-    strUsage += HelpMessageOpt("-mnconf=<file>", strprintf(_("Specify stormnode configuration file (default: %s)"), "stormnode.conf"));
-    strUsage += HelpMessageOpt("-mnconflock=<n>", strprintf(_("Lock stormnodes from stormnode configuration file (default: %u)"), 1));
+    strUsage += HelpMessageOpt("-snconf=<file>", strprintf(_("Specify stormnode configuration file (default: %s)"), "stormnode.conf"));
+    strUsage += HelpMessageOpt("-snconflock=<n>", strprintf(_("Lock stormnodes from stormnode configuration file (default: %u)"), 1));
     strUsage += HelpMessageOpt("-stormnodeprivkey=<n>", _("Set the stormnode private key"));
 
     strUsage += HelpMessageGroup(_("PrivateSend options:"));
@@ -1398,8 +1398,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 #endif
 
-    pdsNotificationInterface = new CDSNotificationInterface();
-    RegisterValidationInterface(pdsNotificationInterface);
+    pssNotificationInterface = new CSSNotificationInterface();
+    RegisterValidationInterface(pssNotificationInterface);
 
     if (mapArgs.count("-maxuploadtarget")) {
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET)*1024*1024);
@@ -1778,20 +1778,20 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // ********************************************************* Step 11a: setup PrivateSend
-    fStormnode = GetBoolArg("-stormnode", false);
+    fStormNode = GetBoolArg("-stormnode", false);
 
-    if((fStormnode || stormnodeConfig.getCount() > -1) && fTxIndex == false) {
+    if((fStormNode || stormnodeConfig.getCount() > -1) && fTxIndex == false) {
         return InitError("Enabling Stormnode support requires turning on transaction indexing."
                   "Please add txindex=1 to your configuration and start with -reindex");
     }
 
-    if(fStormnode) {
+    if(fStormNode) {
         LogPrintf("STORMNODE:\n");
 
         if(!GetArg("-stormnodeaddr", "").empty()) {
             // Hot stormnode (either local or remote) should get its address in
             // CActiveStormnode::ManageState() automatically and no longer relies on stormnodeaddr.
-            return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote masterndodes."));
+            return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote stormnodes."));
         }
 
         std::string strStormnodePrivKey = GetArg("-stormnodeprivkey", "");
@@ -1829,7 +1829,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     nLiquidityProvider = GetArg("-liquidityprovider", nLiquidityProvider);
     nLiquidityProvider = std::min(std::max(nLiquidityProvider, 0), 100);
-    darkSendPool.SetMinBlockSpacing(nLiquidityProvider * 15);
+    sandStormPool.SetMinBlockSpacing(nLiquidityProvider * 15);
 
     fEnablePrivateSend = GetBoolArg("-enableprivatesend", 0);
     fPrivateSendMultiSession = GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
@@ -1844,7 +1844,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     //lite mode disables all Stormnode and Darksend related functionality
     fLiteMode = GetBoolArg("-litemode", false);
-    if(fStormnode && fLiteMode){
+    if(fStormNode && fLiteMode){
         return InitError("You can not start a stormnode in litemode");
     }
 
@@ -1853,7 +1853,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("PrivateSend rounds %d\n", nPrivateSendRounds);
     LogPrintf("PrivateSend amount %d\n", nPrivateSendAmount);
 
-    darkSendPool.InitDenominations();
+    sandStormPool.InitDenominations();
 
     // ********************************************************* Step 11b: Load cache data
 

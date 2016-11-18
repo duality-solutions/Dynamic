@@ -93,7 +93,7 @@ std::string CActiveStormnode::GetTypeString() const
     return strType;
 }
 
-bool CActiveStormnode::SendMasternodePing()
+bool CActiveStormnode::SendStormnodePing()
 {
     if(!fPingerEnabled) {
         LogPrint("stormnode", "CActiveStormnode::SendStormnodePing -- %s: stormnode ping service is disabled, skipping...\n", GetStateString());
@@ -113,7 +113,7 @@ bool CActiveStormnode::SendMasternodePing()
         return false;
     }
 
-    // Update lastPing for our masternode in Stormnode list
+    // Update lastPing for our stormnode in Stormnode list
     if(snodeman.IsStormnodePingedWithin(vin, STORMNODE_MIN_SNP_SECONDS, snp.sigTime)) {
         LogPrintf("CActiveStormnode::SendStormnodePing -- Too early to send Stormnode Ping\n");
         return false;
@@ -253,7 +253,7 @@ void CActiveStormnode::ManageStateLocal()
         if(nInputAge < Params().GetConsensus().nStormnodeMinimumConfirmations){
             nState = ACTIVE_STORMNODE_INPUT_TOO_NEW;
             strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nInputAge);
-            LogPrintf("CActiveMasternode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
+            LogPrintf("CActiveStormnode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
 
@@ -271,7 +271,7 @@ void CActiveStormnode::ManageStateLocal()
             return;
         }
 
-        //update to masternode list
+        //update to stormnode list
         LogPrintf("CActiveStormnode::ManageStateLocal -- Update Stormnode List\n");
         snodeman.UpdateStormnodeList(snb);
         snodeman.NotifyStormnodeUpdates();

@@ -49,7 +49,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
     if(fLiteMode) return; // disable all DarkSilk specific functionality
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
-    // Ignore any InstantSend messages until masternode list is synced
+    // Ignore any InstantSend messages until stormnode list is synced
     if(!stormnodeSync.IsStormnodeListSynced()) return;
 
     if (strCommand == NetMsgType::TXLOCKREQUEST) // InstantSend Transaction Lock Request
@@ -101,7 +101,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
                 tx.GetHash().ToString()
             );
 
-            // Masternodes will sometimes propagate votes before the transaction is known to the client.
+            // Stormnodes will sometimes propagate votes before the transaction is known to the client.
             // If this just happened - update transaction status, try forcing external script notification,
             // lock inputs and resolve conflicting locks
             if(IsLockedInstandSendTransaction(tx.GetHash())) {
@@ -142,13 +142,13 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
         if(ProcessTxLockVote(pfrom, vote)) {
             //Spam/Dos protection
             /*
-                Masternodes will sometimes propagate votes before the transaction is known to the client.
+                Stormnodes will sometimes propagate votes before the transaction is known to the client.
                 This tracks those messages and allows it at the same rate of the rest of the network, if
                 a peer violates it, it will simply be ignored
             */
             if(!mapLockRequestAccepted.count(vote.txHash) && !mapLockRequestRejected.count(vote.txHash)) {
                 if(!mapUnknownVotes.count(vote.vinStormnode.prevout.hash))
-                    mapUnknownVotes[vote.vinMasternode.prevout.hash] = GetTime()+(60*10);
+                    mapUnknownVotes[vote.vinStormnode.prevout.hash] = GetTime()+(60*10);
 
                 if(mapUnknownVotes[vote.vinStormnode.prevout.hash] > GetTime() &&
                     mapUnknownVotes[vote.vinStormnode.prevout.hash] - GetAverageUnknownVoteTime() > 60*10) {
@@ -328,7 +328,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
     LogPrint("instantsend", "ProcessTxLockVote -- Stormnode %s, rank=%d\n", vote.vinStormnode.prevout.ToStringShort(), n);
 
     if(n > INSTANTSEND_SIGNATURES_TOTAL) {
-        LogPrint("instantsend", "ProcessTxLockVote -- Masternode %s is not in the top %d (%d), vote hash %s\n",
+        LogPrint("instantsend", "ProcessTxLockVote -- Stormnode %s is not in the top %d (%d), vote hash %s\n",
                 vote.vinStormnode.prevout.ToStringShort(), INSTANTSEND_SIGNATURES_TOTAL, n, vote.GetHash().ToString());
         return false;
     }
@@ -336,7 +336,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
     if(!vote.CheckSignature()) {
         LogPrintf("ProcessTxLockVote -- Signature invalid\n");
         // don't ban, it could just be a non-synced stormnode
-        snodeman.AskForSN(pnode, vote.vinMasternode);
+        snodeman.AskForSN(pnode, vote.vinStormnode);
         return false;
     }
 
@@ -365,7 +365,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
         if(nSignatures >= INSTANTSEND_SIGNATURES_REQUIRED) {
             LogPrint("instantsend", "ProcessTxLockVote -- Transaction Lock Is Complete! txid=%s\n", vote.txHash.ToString());
 
-            // Masternodes will sometimes propagate votes before the transaction is known to the client,
+            // Stormnodes will sometimes propagate votes before the transaction is known to the client,
             // will check for conflicting locks and update transaction status on a new vote message
             // only after the lock itself has arrived
             if(!mapLockRequestAccepted.count(vote.txHash) && !mapLockRequestRejected.count(vote.txHash)) return true;

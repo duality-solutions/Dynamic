@@ -128,7 +128,7 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
     NetMsgType::STORMNODEPAYMENTVOTE,
-    // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
+    // NetMsgType::STORMNODEPAYMENTBLOCK, // there is no message for this, only inventory
     NetMsgType::STORMNODEPAYMENTSYNC,
     NetMsgType::SNANNOUNCE,
     NetMsgType::SNPING,

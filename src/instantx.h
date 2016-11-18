@@ -18,7 +18,7 @@ class CTxLockVote;
 class CTxLockCandidate;
 
 /*
-    At 15 signatures, 1/2 of the masternode network can be owned by
+    At 15 signatures, 1/2 of the stormnode network can be owned by
     one party without comprimising the security of InstantSend
     (1000/2150.0)**10 = 0.00047382219560689856
     (1000/2900.0)**10 = 2.3769498616783657e-05

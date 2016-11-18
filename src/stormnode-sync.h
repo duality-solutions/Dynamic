@@ -59,7 +59,7 @@ private:
     void ClearFulfilledRequests();
 
 public:
-    CMasternodeSync() { Reset(); }
+    CStormnodeSync() { Reset(); }
 
     void AddedStormnodeList() { nTimeLastStormnodeList = GetTime(); }
     void AddedPaymentVote() { nTimeLastPaymentVote = GetTime(); }
@@ -67,7 +67,7 @@ public:
 
     bool IsFailed() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FAILED; }
     bool IsBlockchainSynced();
-    bool IsMasternodeListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_LIST; }
+    bool IsStormnodeListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_LIST; }
     bool IsWinnersListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_SNW; }
     bool IsSynced() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FINISHED; }
 

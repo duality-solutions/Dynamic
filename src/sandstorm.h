@@ -312,7 +312,7 @@ private:
     // Mixing uses collateral transactions to trust parties entering the pool
     // to behave honestly. If they don't it takes their money.
     std::vector<CTransaction> vecSessionCollaterals;
-    std::vector<CDarkSendEntry> vecEntries; // Stormnodes/clients entries
+    std::vector<CSandStormEntry> vecEntries; // Stormnodes/clients entries
 
     PoolState nState; // should be one of the POOL_STATE_XXX values
     int64_t nTimeLastSuccessfulStep; // the time when last successful mixing step was performed, in UTC milliseconds
@@ -407,7 +407,7 @@ private:
     void RelayFinalTransaction(const CTransaction& txFinal);
     void RelaySignaturesAnon(std::vector<CTxIn>& vin);
     void RelayInAnon(std::vector<CTxIn>& vin, std::vector<CTxOut>& vout);
-    void RelayIn(const CDarkSendEntry& entry);
+    void RelayIn(const CSandStormEntry& entry);
     void PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID);
     void RelayStatus(PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID = MSG_NOERR);
     void RelayCompletedTransaction(PoolMessage nMessageID);
@@ -420,7 +420,7 @@ public:
     int nCachedNumBlocks; //used for the overview screen
     bool fCreateAutoBackups; //builtin support for automatic backups
 
-    CDarksendPool() :
+    CSandstormPool() :
         nCachedLastSuccessBlock(0),
         nMinBlockSpacing(0),
         fUnitTest(false),

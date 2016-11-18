@@ -104,7 +104,7 @@ namespace boost {
 using namespace std;
 
 //Dash only features
-bool fMasterNode = false;
+bool fStormNode = false;
 bool fLiteMode = false;
 /**
     nWalletBackups:

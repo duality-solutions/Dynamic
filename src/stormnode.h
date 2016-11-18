@@ -15,8 +15,8 @@ class CStormnode;
 class CStormnodeBroadcast;
 class CStormnodePing;
 
-static const int STORMNODE_MIN_MNP_SECONDS         = 10 * 60;
-static const int STORMNODE_MIN_MNB_SECONDS         =  5 * 60;
+static const int STORMNODE_MIN_SNP_SECONDS         = 10 * 60;
+static const int STORMNODE_MIN_SNB_SECONDS         =  5 * 60;
 static const int STORMNODE_EXPIRATION_SECONDS      = 65 * 60;
 static const int STORMNODE_REMOVAL_SECONDS         = 75 * 60;
 static const int STORMNODE_CHECK_SECONDS           = 5;
@@ -32,7 +32,7 @@ class CStormnodePing
 public:
     CTxIn vin;
     uint256 blockHash;
-    int64_t sigTime; //mnb message times
+    int64_t sigTime; //snb message times
     std::vector<unsigned char> vchSig;
     //removed stop
 
@@ -118,7 +118,7 @@ struct stormnode_info_t {
     CService addr;
     CPubKey pubKeyCollateralAddress;
     CPubKey pubKeyStormnode;
-    int64_t sigTime; //mnb message time
+    int64_t sigTime; //snb message time
     int64_t nLastSsq; //the ssq count from the last ssq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
@@ -174,7 +174,7 @@ public:
 
     CStormnode();
     CStormnode(const CStormnode& other);
-    CStormnode(const CStormnodeBroadcast& mnb);
+    CStormnode(const CStormnodeBroadcast& snb);
     CStormnode(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyStormnodeNew, int nProtocolVersionIn);
 
     ADD_SERIALIZE_METHODS;
@@ -236,7 +236,7 @@ public:
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
     arith_uint256 CalculateScore(const uint256& blockHash);
 
-    bool UpdateFromNewBroadcast(CStormnodeBroadcast& mnb);
+    bool UpdateFromNewBroadcast(CStormnodeBroadcast& snb);
 
     void Check(bool fForce = false);
 
@@ -264,7 +264,7 @@ public:
     void IncreasePoSeBanScore() { if(nPoSeBanScore < STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
 
-    masternode_info_t GetInfo();
+    stormnode_info_t GetInfo();
 
     static std::string StateToString(int nStateIn);
     std::string GetStateString() const;
@@ -327,7 +327,7 @@ public:
         READWRITE(sigTime);
         READWRITE(nProtocolVersion);
         READWRITE(lastPing);
-        READWRITE(nLastDsq);
+        READWRITE(nLastSsq);
     }
 
     uint256 GetHash() const
@@ -350,9 +350,9 @@ public:
         return ss.GetHash();
     }
 
-    /// Create Masternode broadcast, needs to be relayed manually after that
+    /// Create Stormnode broadcast, needs to be relayed manually after that
     static bool Create(CTxIn vin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyStormnodeNew, CPubKey pubKeyStormnodeNew, std::string &strErrorRet, CStormnodeBroadcast &snbRet);
-    static bool Create(std::string strService, std::string strKey, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CStormnodeBroadcast &mnbRet, bool fOffline = false);
+    static bool Create(std::string strService, std::string strKey, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CStormnodeBroadcast &snbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
     bool Update(CStormnode* psn, int& nDos);

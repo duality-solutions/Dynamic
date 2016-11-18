@@ -14,7 +14,7 @@
 class CSandStormRelay
 {
 public:
-    CTxIn vinMasternode;
+    CTxIn vinStormnode;
     vector<unsigned char> vchSig;
     vector<unsigned char> vchSig2;
     int nBlockHeight;

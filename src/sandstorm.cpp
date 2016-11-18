@@ -1537,7 +1537,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
             } else {
                 LogPrintf("CSandstormPool::DoAutomaticDenominating -- can't connect, addr=%s\n", psn->addr.ToString());
                 strAutoDenomResult = _("Error connecting to Stormnode.");
-                pmn->IncreasePoSeBanScore();
+                psn->IncreasePoSeBanScore();
                 continue;
             }
         }

@@ -7,7 +7,7 @@
 #define STORMNODECONFIG_H
 
 class CStormnodeConfig;
-extern CMasternodeConfig masternodeConfig;
+extern CStormnodeConfig stormnodeConfig;
 
 class CStormnodeConfig
 {

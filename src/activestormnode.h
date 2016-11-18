@@ -55,7 +55,7 @@ public:
     int nState; // should be one of ACTIVE_STORMNODE_XXXX
     std::string strNotCapableReason;
 
-    CActiveMasternode()
+    CActiveStormnode()
         : eType(STORMNODE_UNKNOWN),
           fPingerEnabled(false),
           nState(ACTIVE_STORMNODE_INITIAL)

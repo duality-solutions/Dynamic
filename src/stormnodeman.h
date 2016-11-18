@@ -173,7 +173,7 @@ public:
         READWRITE(mWeAskedForStormnodeList);
         READWRITE(mWeAskedForStormnodeListEntry);
         READWRITE(nLastWatchdogVoteTime);
-        READWRITE(nDsqCount);
+        READWRITE(nSsqCount);
 
         READWRITE(mapSeenStormnodeBroadcast);
         READWRITE(mapSeenStormnodePing);

@@ -37,9 +37,9 @@ struct BIP9Deployment {
 struct Params {
     uint256 hashGenesisBlock;
     int nSubsidyHalvingInterval;
-    int nMasternodePaymentsStartBlock;
-    int nMasternodePaymentsIncreaseBlock;
-    int nMasternodePaymentsIncreasePeriod; // in blocks
+    int nStormnodePaymentsStartBlock;
+    int nStormnodePaymentsIncreaseBlock;
+    int nStormnodePaymentsIncreasePeriod; // in blocks
     int nInstantSendKeepLock; // in blocks
     int nInstantSendReprocessBlocks;
     int nBudgetPaymentsStartBlock;
@@ -49,7 +49,7 @@ struct Params {
     int nSuperblockStartBlock;
     int nSuperblockCycle; // in blocks
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action 
-    int nMasternodeMinimumConfirmations;
+    int nStormMinimumConfirmations;
     /** Used to check majorities for block version upgrade */
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;

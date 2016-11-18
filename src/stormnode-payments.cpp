@@ -207,7 +207,7 @@ std::string GetRequiredPaymentsString(int nBlockHeight)
     }
 
     // OTHERWISE, PAY STORMNODE
-    return mnpayments.GetRequiredPaymentsString(nBlockHeight);
+    return snpayments.GetRequiredPaymentsString(nBlockHeight);
 }
 
 void CStormnodePayments::Clear()
@@ -651,7 +651,7 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
     // if we have not enough data about stormnodes.
     if(!stormnodeSync.IsStormnodeListSynced()) return false;
 
-    int nRank = mnodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight - 101, GetMinStormnodePaymentsProto());
+    int nRank = snodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight - 101, GetMinStormnodePaymentsProto());
 
     if (nRank == -1) {
         LogPrint("snpayments", "CStormnodePayments::ProcessBlock -- Unknown Stormnode\n");

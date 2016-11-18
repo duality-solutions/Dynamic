@@ -30,7 +30,7 @@ std::string CSandStormRelay::ToString()
 {
     std::ostringstream info;
 
-    info << "vin: " << vinMasternode.ToString() <<
+    info << "vin: " << vinStormnode.ToString() <<
         " nBlockHeight: " << (int)nBlockHeight <<
         " nRelayType: "  << (int)nRelayType <<
         " in " << in.ToString() <<

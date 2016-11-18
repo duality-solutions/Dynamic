@@ -5128,7 +5128,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                                 if(snpayments.mapStormnodePaymentVotes.count(hash)) {
                                     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                                     ss.reserve(1000);
-                                    ss << mnpayments.mapStormnodePaymentVotes[hash];
+                                    ss << snpayments.mapStormnodePaymentVotes[hash];
                                     pfrom->PushMessage(NetMsgType::STORMNODEPAYMENTVOTE, ss);
                                 }
                             }

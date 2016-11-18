@@ -13,7 +13,7 @@
 #include "governance-classes.h"
 #include "stormnode.h"
 #include "governance.h"
-#include "darksend.h"
+#include "sandstorm.h"
 #include "stormnodeman.h"
 #include "stormnode-sync.h"
 #include "netfulfilledman.h"

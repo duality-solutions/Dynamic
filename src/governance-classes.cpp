@@ -19,8 +19,7 @@
 #include "consensus/validation.h"
 
 #include "governance.h"
-#include "masternode.h"
-#include "governance.h"
+#include "stormnode.h"
 #include <boost/lexical_cast.hpp>
 #include <univalue.h>
 
