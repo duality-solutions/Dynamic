@@ -60,7 +60,7 @@ namespace Checkpoints {
 
     int GetTotalBlocksEstimate(const CCheckpointData& data)
     {
-        const MapCheckpoints& checkpoints = data.mapCheckpoints;
+        const MapCheckpoints& checkpoints = *Params().Checkpoints().mapCheckpoints;
 
         if (checkpoints.empty())
             return 0;
@@ -70,7 +70,7 @@ namespace Checkpoints {
 
     CBlockIndex* GetLastCheckpoint(const CCheckpointData& data)
     {
-        const MapCheckpoints& checkpoints = data.mapCheckpoints;
+        const MapCheckpoints& checkpoints = *Params().Checkpoints().mapCheckpoints;
 
         BOOST_REVERSE_FOREACH(const MapCheckpoints::value_type& i, checkpoints)
         {

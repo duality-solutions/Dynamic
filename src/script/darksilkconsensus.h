@@ -6,7 +6,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DARKSILK_DARKSILKCONSENSUS_H
-#define DARKSILK_dARKSILKCONSENSUS_H
+#define DARKSILK_DARKSILKCONSENSUS_H
 
 #if defined(BUILD_DARKSILK_INTERNAL) && defined(HAVE_CONFIG_H)
 #include "config/darksilk-config.h"

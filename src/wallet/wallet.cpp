@@ -2496,7 +2496,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     // bit 3 - .1DSLK+1
 
     std::vector<int> vecBits;
-    if (!darkSendPool.GetDenominationsBits(nDenom, vecBits)) {
+    if (!sandStormPool.GetDenominationsBits(nDenom, vecBits)) {
         return false;
     }
 
@@ -3045,7 +3045,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                         nFeeRet += nChange;
                         wtxNew.mapValue["SS"] = "1";
                         // recheck skipped denominations during next mixing
-                        darkSendPool.ClearSkippedDenominations();
+                        sandStormPool.ClearSkippedDenominations();
                     } else {
 
                         // Fill a vout to ourself

@@ -38,6 +38,7 @@
 #include "activestormnode.h"
 #include "instantx.h"
 #include "sandstorm.h"
+#include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
 #include "stormnodeconfig.h"
@@ -1794,7 +1795,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote stormnodes."));
         }
 
-        std::string strStormnodePrivKey = GetArg("-stormnodeprivkey", "");
+        std::string strStormNodePrivKey = GetArg("-stormnodeprivkey", "");
         if(!strStormNodePrivKey.empty()) {
             if(!sandStormSigner.GetKeysFromSecret(strStormNodePrivKey, activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode))
                 return InitError(_("Invalid stormnodeprivkey. Please see documenation."));

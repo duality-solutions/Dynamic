@@ -34,7 +34,7 @@ private:
 public:
 	CGovernanceKey::CGovernanceKey(SecureString& strKeyIn, SecureString& strNameIn) {strName = strNameIn; strKey = strKeyIn;}
 
-	bool GetKey(CBitcoinSecret& secret)
+	bool GetKey(CDarkSilkSecret& secret)
 	{
 	    return secret.SetString(vecTokenized[0]);
 	}

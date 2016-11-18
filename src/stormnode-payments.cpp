@@ -849,7 +849,7 @@ std::string CStormnodePayments::ToString() const
 
 bool CStormnodePayments::IsEnoughData()
 {
-    float nAverageVotes = (SNPAYMENTS_SIGNATURES_TOTAL + SeNPAYMENTS_SIGNATURES_REQUIRED) / 2;
+    float nAverageVotes = (SNPAYMENTS_SIGNATURES_TOTAL + SNPAYMENTS_SIGNATURES_REQUIRED) / 2;
     int nStorageLimit = GetStorageLimit();
     return GetBlockCount() > nStorageLimit && GetVoteCount() > nStorageLimit * nAverageVotes;
 }

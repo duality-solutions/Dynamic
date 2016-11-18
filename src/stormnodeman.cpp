@@ -31,7 +31,7 @@ struct CompareLastPaidBlock
     }
 };
 
-struct CompareScoreMN
+struct CompareScoreSN
 {
     bool operator()(const std::pair<int64_t, CStormnode*>& t1,
                     const std::pair<int64_t, CStormnode*>& t2) const
@@ -56,7 +56,7 @@ bool CStormnodeIndex::Get(int nIndex, CTxIn& vinStormnode) const
     return true;
 }
 
-int CStormnodeIndex::CStormnodeIndex(const CTxIn& vinStormnode) const
+int CStormnodeIndex::GetStormnodeIndex(const CTxIn& vinStormnode) const
 {
     index_m_cit it = mapIndex.find(vinStormnode);
     if(it == mapIndex.end()) {
@@ -150,7 +150,7 @@ void CStormnodeMan::AskForSN(CNode* pnode, const CTxIn &vin)
         return;
     }
 
-    // ask for the snb info once from the node that sent mnp
+    // ask for the snb info once from the node that sent snp
 
     LogPrintf("CStormnodeMan::AskForSN -- Asking node for missing stormnode entry: %s\n", vin.prevout.ToStringShort());
     pnode->PushMessage(NetMsgType::SSEG, vin);
@@ -587,7 +587,7 @@ int CStormnodeMan::GetStormnodeRank(const CTxIn& vin, int nBlockHeight, int nMin
         }
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
 
-        vecStormnodeScores.push_back(std::make_pair(nScore, &mn));
+        vecStormnodeScores.push_back(std::make_pair(nScore, &sn));
     }
 
     sort(vecStormnodeScores.rbegin(), vecStormnodeScores.rend(), CompareScoreSN());
@@ -624,7 +624,7 @@ std::vector<std::pair<int, CStormnode> > CStormnodeMan::GetStormnodeRanks(int nB
         vecStormnodeScores.push_back(std::make_pair(nScore, &sn));
     }
 
-    sort(vecStormnodeScores.rbegin(), vecStormnodeScores.rend(), CompareScoreMN());
+    sort(vecStormnodeScores.rbegin(), vecStormnodeScores.rend(), CompareScoreSN());
 
     int nRank = 0;
     BOOST_FOREACH (PAIRTYPE(int64_t, CStormnode*)& s, vecStormnodeScores) {
@@ -661,7 +661,7 @@ CStormnode* CStormnodeMan::GetStormnodeByRank(int nRank, int nBlockHeight, int n
         vecStormnodeScores.push_back(std::make_pair(nScore, &sn));
     }
 
-    sort(vecStormnodeScores.rbegin(), vecStormnodeScores.rend(), CompareScoreMN());
+    sort(vecStormnodeScores.rbegin(), vecStormnodeScores.rend(), CompareScoreSN());
 
     int rank = 0;
     BOOST_FOREACH (PAIRTYPE(int64_t, CStormnode*)& s, vecStormnodeScores){
@@ -787,7 +787,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
             if (!sn.IsEnabled()) continue;
 
             LogPrint("stormnode", "SSEG -- Sending Stormnode entry: stormnode=%s  addr=%s\n", sn.vin.prevout.ToStringShort(), sn.addr.ToString());
-            CStormnodeBroadcast snb = CStormnodeBroadcast(mn);
+            CStormnodeBroadcast snb = CStormnodeBroadcast(sn);
             uint256 hash = snb.GetHash();
             pfrom->PushInventory(CInv(MSG_STORMNODE_ANNOUNCE, hash));
             nInvCount++;
@@ -1036,7 +1036,7 @@ void CStormnodeMan::ProcessVerifyReply(CNode* pnode, CStormnodeVerification& snv
     std::string strError;
 
     // did we even ask for it? if that's the case we should have matching fulfilled request
-    if(!netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::MSVERIFY)+"-request")) {
+    if(!netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request")) {
         LogPrintf("CStormnodeMan::ProcessVerifyReply -- ERROR: we didn't ask for verification of %s, peer=%d\n", pnode->addr.ToString(), pnode->id);
         Misbehaving(pnode->id, 20);
         return;
@@ -1321,9 +1321,9 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
             Add(snb);
             stormnodeSync.AddedStormnodeList();
             // if it matches our Stormnode privkey...
-            if(fStormnode && snb.pubKeyStormnode == activeStormnode.pubKeyStormnode) {
+            if(fStormNode && snb.pubKeyStormnode == activeStormnode.pubKeyStormnode) {
                 snb.nPoSeBanScore = -STORMNODE_POSE_BAN_MAX_SCORE;
-                if(Snb.nProtocolVersion == PROTOCOL_VERSION) {
+                if(snb.nProtocolVersion == PROTOCOL_VERSION) {
                     // ... and PROTOCOL_VERSION, then we've been remotely activated ...
                     LogPrintf("CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Got NEW Stormnode entry: stormnode=%s  sigTime=%lld  addr=%s\n",
                                 snb.vin.prevout.ToStringShort(), snb.sigTime, snb.addr.ToString());
@@ -1425,7 +1425,7 @@ void CStormnodeMan::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
 {
     LOCK(cs);
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-        mn.RemoveGovernanceObject(nGovernanceObjectHash);
+        sn.RemoveGovernanceObject(nGovernanceObjectHash);
     }
 }
 
@@ -1479,7 +1479,7 @@ bool CStormnodeMan::IsStormnodePingedWithin(const CTxIn& vin, int nSeconds, int6
     return pSN->IsPingedWithin(nSeconds, nTimeToCheckAt);
 }
 
-void CStormnodeMan::SetStormnodeLastPing(const CTxIn& vin, const CStormnodePing& mnp)
+void CStormnodeMan::SetStormnodeLastPing(const CTxIn& vin, const CStormnodePing& snp)
 {
     LOCK(cs);
     CStormnode* pSN = Find(vin);
@@ -1503,7 +1503,7 @@ void CStormnodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
 
     CheckSameAddr();
 
-    if(fStormnode) {
+    if(fStormNode) {
         DoFullVerificationStep();
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
         UpdateLastPaid(pindex);

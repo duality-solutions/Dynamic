@@ -1,8 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2010 Satoshi Nakamoto
+// Copyright (c) 2009-2014 The Bitcoin Core developers
+// Copyright (c) 2014-2016 The Dash Core developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "chainparams.h"
@@ -18,46 +17,15 @@
 
 #include "chainparamsseeds.h"
 
-
-/**
- * Main network
- */
-
-void MineGenesis(CBlock genesis, uint256 bnProofOfWorkLimit){
-    // This will figure out a valid hash and Nonce if you're creating a different genesis block:
-    uint256 hashTarget = bnProofOfWorkLimit;
-    printf("Target: %s\n", hashTarget.GetHex().c_str());
-    uint256 newhash = genesis.GetHash();
-    uint256 besthash;
-    memset(&besthash,0xFF,32);
-    while (newhash > hashTarget) {
-        ++genesis.nNonce;
-        if (genesis.nNonce == 0){
-            printf("NONCE WRAPPED, incrementing time");
-            ++genesis.nTime;
-        }
-    newhash = genesis.GetHash();
-    if(newhash < besthash){
-        besthash=newhash;
-        printf("New best: %s\n", newhash.GetHex().c_str());
-    }
-    }
-    printf("Genesis Hash: %s\n", genesis.GetHash().ToString().c_str());
-    printf("Genesis Hash Merkle: %s\n", genesis.hashMerkleRoot.ToString().c_str());
-    printf("Genesis nTime: %u\n", genesis.nTime);
-    printf("Genesis nBits: %08x\n", genesis.nBits);
-    printf("Genesis Nonce: %u\n\n\n", genesis.nNonce);
-}
-
 static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    std::vector<CTxIn> vin;
-    vin.resize(1);
-    vin[0].scriptSig = CScript() << 1478568500 << CScriptNum(4) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
-    std::vector<CTxOut> vout;
-    vout.resize(1);
-    vout[0].SetEmpty();
-    CMutableTransaction txNew(1, nTime, vin, vout, 0);
+    CMutableTransaction txNew;
+    txNew.nVersion = 1;
+    txNew.vin.resize(1);
+    txNew.vout.resize(1);
+    txNew.vin[0].scriptSig = CScript() << 486604799 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vout[0].nValue = genesisReward;
+    txNew.vout[0].scriptPubKey = genesisOutputScript;
 
     CBlock genesis;
     genesis.nTime    = nTime;
@@ -65,8 +33,8 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     genesis.nNonce   = nNonce;
     genesis.nVersion = nVersion;
     genesis.vtx.push_back(txNew);
-    genesis.hashPrevBlock = 0;
-    genesis.hashMerkleRoot = genesis.BuildMerkleTree();
+    genesis.hashPrevBlock.SetNull();
+    genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
     return genesis;
 }
 
@@ -83,8 +51,8 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "NYTimes 11/6/2016: Inside Donald J. Trump’s Last Stand:";
-    const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
+    const char* pszTimestamp = "Wired 09/Jan/2014 The Grand Experiment Goes Live: Overstock.com Is Now Accepting Bitcoins";
+    const CScript genesisOutputScript = CScript() << ParseHex("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
@@ -99,6 +67,42 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
  * + Contains no strange transactions
  */
 
+static Checkpoints::MapCheckpoints mapCheckpoints =
+        boost::assign::map_list_of
+        ( 0, uint256S("0x00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6"))
+        ;
+
+static const Checkpoints::CCheckpointData data = {
+        &mapCheckpoints,
+        1390095618 , // * UNIX timestamp of last checkpoint block
+        0,    // * total number of transactions between genesis and last checkpoint
+                    //   (the tx=... number in the SetBestChain debug.log lines)
+        2000       // * estimated number of transactions per day after checkpoint
+    };
+
+static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
+        boost::assign::map_list_of
+        ( 0, uint256S("0x00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c"))
+        ;
+
+static const Checkpoints::CCheckpointData dataTestnet = {
+        &mapCheckpointsTestnet,
+        1390666206 ,
+        0,
+        1000
+    };
+
+static Checkpoints::MapCheckpoints mapCheckpointsRegtest =
+        boost::assign::map_list_of
+        ( 0, uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"))
+        ;
+
+static const Checkpoints::CCheckpointData dataRegtest = {
+        &mapCheckpointsRegtest,
+        1417713337 ,
+        0,
+        500
+    };
 
 class CMainParams : public CChainParams {
 public:
@@ -121,8 +125,8 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.BIP34Height = 227931;
-        consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
+        consensus.BIP34Height = 0;
+        consensus.BIP34Hash = uint256S("0x00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6");
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // DarkSilk: 1 day
         consensus.nPowTargetSpacing = 1 * 64; // DarkSilk: 64 seconds
@@ -150,15 +154,13 @@ public:
         pchMessageStart[3] = 0x31;
         vAlertPubKey = ParseHex("");
         nDefaultPort = 31000;
-        bnProofOfWorkLimit = ~uint256S(0) >> 19;
         nMaxTipAge = 6 * 60 * 60; // ~337 blocks behind
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1478568500, 424119, bnProofOfWorkLimit.GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1390095618, 28917698, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00001b9db6919133083b5600c615fb2a129dc65f3a7c82616ad9ed29212d39cc"));
-        assert(genesis.hashMerkleRoot == uint256S("0x84e54390fd4ad96d096d47b91fca800b1c830dcc4296eaf3032c5fd2001fc8e9"));
-
+        assert(consensus.hashGenesisBlock == uint256S("0x00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6"));
+        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -190,15 +192,11 @@ public:
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
         strSporkPubKey = "";
         strStormnodePaymentsPubKey = "";
+    }
 
-        checkpointData = (CCheckpointData) {
-            boost::assign::map_list_of
-            (  0, uint256S("0x00001b9db6919133083b5600c615fb2a129dc65f3a7c82616ad9ed29212d39cc"))
-            1478568500, // * UNIX timestamp of last checkpoint block
-            0,    // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
-            2000        // * estimated number of transactions per day after checkpoint
-        };
+    const Checkpoints::CCheckpointData& Checkpoints() const 
+    {
+        return data;
     }
 };
 static CMainParams mainParams;
@@ -227,8 +225,8 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 51;
         consensus.nMajorityRejectBlockOutdated = 75;
         consensus.nMajorityWindow = 100;
-        consensus.BIP34Height = 21111;
-        consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
+        consensus.BIP34Height = 0;
+        consensus.BIP34Hash = uint256S("0x00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c");
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // DarkSilk: 1 day
         consensus.nPowTargetSpacing = 2.5 * 60; // DarkSilk: 2.5 minutes
@@ -251,23 +249,19 @@ public:
         pchMessageStart[3] = 0x30;
         vAlertPubKey = ParseHex("");
         nDefaultPort = 31750;
-        bnProofOfWorkLimit = ~uint256S(0) >> 17;  // Testnet starting difficulty
         nMaxTipAge = 0x7fffffff; // allow mining on top of old blocks for testnet
         nPruneAfterHeight = 1000;
-        startNewChain = false;
 
-        genesis = CreateGenesisBlock(1478568500, 37405, bnProofOfWorkLimit.GetCompact(), 1, (0.001 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, bnProofOfWorkLimit); }
-
+        genesis = CreateGenesisBlock(1390666206, 3861367235, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //assert(consensus.hashGenesisBlock == uint256S("0x00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c"));
-        assert(genesis.hashMerkleRoot == uint256S("0x84e54390fd4ad96d096d47b91fca800b1c830dcc4296eaf3032c5fd2001fc8e9"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c"));
+        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
         //vSeeds.push_back(CDNSSeedData("",  ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
-
+        
         // Testnet DarkSilk addresses start with 'y'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,30);
         // Testnet DarkSilk script addresses start with '8' or '9'
@@ -293,17 +287,10 @@ public:
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
         strSporkPubKey = "";
         strStormnodePaymentsPubKey = "";
-
-        checkpointData = (CCheckpointData) {
-            boost::assign::map_list_of
-            (   0, uint256S("0x"))
-
-            1478568500, // * UNIX timestamp of last checkpoint block
-            0,      // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
-            1000         // * estimated number of transactions per day after checkpoint
-        };
-
+    }
+    const Checkpoints::CCheckpointData& Checkpoints() const 
+    {
+        return dataTestnet;
     }
 };
 static CTestNetParams testNetParams;
@@ -332,8 +319,8 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
-        consensus.BIP34Hash = uint256();
+        consensus.BIP34Height = 0; // BIP34 has not necessarily activated on regtest
+        consensus.BIP34Hash = uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e");
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // DarkSilk: 1 day
         consensus.nPowTargetSpacing = 2.5 * 60; // DarkSilk: 2.5 minutes
@@ -355,14 +342,11 @@ public:
         nMaxTipAge = 6 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
         nDefaultPort = 31800;
         nPruneAfterHeight = 1000;
-        startNewChain = false;
 
-        genesis = CreateGenesisBlock(1478568500, 71709, bnProofOfWorkLimit.GetCompact(), 1, (0.001 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, bnProofOfWorkLimit); }
-
+        genesis = CreateGenesisBlock(1417713337, 1096447, 0x207fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //assert(consensus.hashGenesisBlock == uint256S(""));
-        assert(genesis.hashMerkleRoot == uint256S("0x84e54390fd4ad96d096d47b91fca800b1c830dcc4296eaf3032c5fd2001fc8e9"));
+        assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
+        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
@@ -375,13 +359,6 @@ public:
 
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        checkpointData = (CCheckpointData){
-            boost::assign::map_list_of
-            ( 0, uint256S("0x")),
-            1478568500,
-            0,
-            500
-        };
         // Regtest DarkSilk addresses start with 'y'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,140);
         // Regtest DarkSilk script addresses start with '8' or '9'
@@ -394,7 +371,11 @@ public:
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
         // Regtest DarkSilk BIP44 coin type is '1' (All coin's testnet default)
         base58Prefixes[EXT_COIN_TYPE]  = boost::assign::list_of(0x80)(0x00)(0x00)(0x01).convert_to_container<std::vector<unsigned char> >();
-   }
+    }
+    const Checkpoints::CCheckpointData& Checkpoints() const 
+    {
+        return dataRegtest;
+    }
 };
 static CRegTestParams regTestParams;
 

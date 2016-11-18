@@ -44,8 +44,8 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             return "Mixing is not supported from stormnodes";
 
         fEnablePrivateSend = true;
-        bool result = darkSendPool.DoAutomaticDenominating();
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + darkSendPool.GetStatus() + ", will retry"));
+        bool result = sandStormPool.DoAutomaticDenominating();
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + sandStormPool.GetStatus() + ", will retry"));
     }
 
     if(params[0].get_str() == "stop") {
@@ -54,13 +54,13 @@ UniValue privatesend(const UniValue& params, bool fHelp)
     }
 
     if(params[0].get_str() == "reset") {
-        darkSendPool.ResetPool();
+        sandStormPool.ResetPool();
         return "Mixing was reset";
     }
 
     if(params[0].get_str() == "status") {
         UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("status",            darkSendPool.GetStatus()));
+        obj.push_back(Pair("status",            sandStormPool.GetStatus()));
         obj.push_back(Pair("keys_left",     pwalletMain->nKeysLeftSinceAutoBackup));
         obj.push_back(Pair("warnings",      (pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
                                                 ? "WARNING: keypool is almost depleted!" : "")));
@@ -78,11 +78,11 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "Returns an object containing anonymous pool-related information.");
 
     UniValue obj(UniValue::VOBJ);
-    if (darkSendPool.pSubmittedToStormnode)
-        obj.push_back(Pair("stormnode",        darkSendPool.pSubmittedToStormnode->addr.ToString()));
-    obj.push_back(Pair("queue",                 darkSendPool.GetQueueSize()));
-    obj.push_back(Pair("state",                 darkSendPool.GetState()));
-    obj.push_back(Pair("entries",               darkSendPool.GetEntriesCount()));
+    if (sandStormPool.pSubmittedToStormnode)
+        obj.push_back(Pair("stormnode",        sandStormPool.pSubmittedToStormnode->addr.ToString()));
+    obj.push_back(Pair("queue",                 sandStormPool.GetQueueSize()));
+    obj.push_back(Pair("state",                 sandStormPool.GetState()));
+    obj.push_back(Pair("entries",               sandStormPool.GetEntriesCount()));
     return obj;
 }
 
@@ -344,7 +344,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         CKey secret;
         secret.MakeNewKey(false);
 
-        return CBitcoinSecret(secret).ToString();
+        return CDarkSilkSecret(secret).ToString();
     }
 
     if (strCommand == "list-conf")
@@ -727,7 +727,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
                 resultObj.push_back(Pair("vchSig", EncodeBase64(&snb.vchSig[0], snb.vchSig.size())));
                 resultObj.push_back(Pair("sigTime", snb.sigTime));
                 resultObj.push_back(Pair("protocolVersion", snb.nProtocolVersion));
-                resultObj.push_back(Pair("nLastDsq", snb.nLastDsq));
+                resultObj.push_back(Pair("nLastSsq", snb.nLastSsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
                 lastPingObj.push_back(Pair("vin", snb.lastPing.vin.ToString()));

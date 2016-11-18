@@ -285,7 +285,7 @@ void CStormnodeSync::ProcessTick()
                 // try to fetch data from at least two peers though
                 int nSnCountEstimated = snodeman.GetEstimatedStormnodes(pCurrentBlockIndex->nHeight)*0.9;
                 LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d nSnCountEstimated %d\n",
-                          nTick, nMnCount, nSnCountEstimated);
+                          nTick, nSnCount, nSnCountEstimated);
                 if(nRequestedStormnodeAttempt > 1 && nSnCount > nSnCountEstimated) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
@@ -381,7 +381,7 @@ void CStormnodeSync::ProcessTick()
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "governance-sync");
 
                 if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
-                nRequestedStormnodenodeAttempt++;
+                nRequestedStormnodeAttempt++;
 
                 pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync stormnode votes
 

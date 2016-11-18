@@ -247,7 +247,7 @@ void CStormnode::Check(bool fForce)
         return;
     }
 
-    if(lastPing.sigTime - sigTime < STORMNODE_MIN_MNP_SECONDS) {
+    if(lastPing.sigTime - sigTime < STORMNODE_MIN_SNP_SECONDS) {
         nActiveState = STORMNODE_PRE_ENABLED;
         return;
     }

@@ -25,7 +25,7 @@ int nLiquidityProvider = 0;
 bool fEnablePrivateSend = false;
 bool fPrivateSendMultiSession = DEFAULT_PRIVATESEND_MULTISESSION;
 
-CSandstormPool darkSendPool;
+CSandstormPool sandStormPool;
 CSandStormSigner sandStormSigner;
 std::map<uint256, CSandstormBroadcastTx> mapSandstormBroadcastTxes;
 std::vector<CAmount> vecPrivateSendDenominations;
@@ -102,7 +102,7 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         CSandstormQueue ssq;
         vRecv >> ssq;
 
-        // process every dsq only once
+        // process every ssq only once
         BOOST_FOREACH(CSandstormQueue q, vecSandstormQueue) {
             if(q == ssq) {
                 // LogPrint("privatesend", "SSQUEUE -- %s seen\n", ssq.ToString());
@@ -572,7 +572,7 @@ void CSandstormPool::CheckPool()
     }
 }
 
-void CDarksendPool::CreateFinalTransaction()
+void CSandstormPool::CreateFinalTransaction()
 {
     LogPrint("privatesend", "CSandstormPool::CreateFinalTransaction -- FINALIZE TRANSACTIONS\n");
 
@@ -615,7 +615,7 @@ void CSandstormPool::CommitFinalTransaction()
         mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
         if(!lockMain || !AcceptToMemoryPool(mempool, validationState, finalTransaction, false, NULL, false, true, true))
         {
-            LogPrintf("CDarksendPool::CommitFinalTransaction -- AcceptToMemoryPool() error: Transaction not valid\n");
+            LogPrintf("CSandstormPool::CommitFinalTransaction -- AcceptToMemoryPool() error: Transaction not valid\n");
             SetNull();
             // not much we can do in this case, just notify clients
             RelayCompletedTransaction(ERR_INVALID_TX);
@@ -629,7 +629,7 @@ void CSandstormPool::CommitFinalTransaction()
     if(!mapSandstormBroadcastTxes.count(hashTx)) {
         CSandstormBroadcastTx sstx(finalTransaction, activeStormnode.vin, GetAdjustedTime());
         sstx.Sign();
-        mapStormnodeBroadcastTxes.insert(std::make_pair(hashTx, sstx));
+        mapSandstormBroadcastTxes.insert(std::make_pair(hashTx, sstx));
     }
 
     LogPrintf("CSandstormPool::CommitFinalTransaction -- TRANSMITTING SSTX\n");
@@ -1472,7 +1472,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
     int nSnCountEnabled = snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
     // If we've used 90% of the Stormnode list then drop the oldest first ~30%
-    int nThreshold_high = nMnCountEnabled * 0.9;
+    int nThreshold_high = nSnCountEnabled * 0.9;
     int nThreshold_low = nThreshold_high * 0.7;
     LogPrint("privatesend", "Checking vecStormnodesUsed: size: %d, threshold: %d\n", (int)vecStormnodesUsed.size(), nThreshold_high);
 
@@ -1486,7 +1486,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
     if(nLiquidityProvider || fUseQueue) {
 
         // Look through the queues and see if anything matches
-        BOOST_FOREACH(CSandstormQueue& dsq, vecDarksendQueue) {
+        BOOST_FOREACH(CSandstormQueue& ssq, vecSandstormQueue) {
             // only try each queue once
             if(ssq.fTried) continue;
             ssq.fTried = true;
@@ -1505,7 +1505,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
             if(ssq.nDenom >= (1 << vecPrivateSendDenominations.size())) continue;
 
             // mixing rate limit i.e. nLastSsq check should already pass in SSQUEUE ProcessMessage
-            // in order for dsq to get into vecSandstormQueue, so we should be safe to mix already,
+            // in order for ssq to get into vecSandstormQueue, so we should be safe to mix already,
             // no need for additional verification here
 
             LogPrint("privatesend", "CSandstormPool::DoAutomaticDenominating -- found valid queue: %s\n", ssq.ToString());
@@ -1609,7 +1609,7 @@ bool CSandstormPool::SubmitDenominate()
     // Try to use only inputs with the same number of rounds starting from lowest number of rounds possible
     for(int i = 0; i < nPrivateSendRounds; i++) {
         if(PrepareDenominate(i, i+1, strError, vecTxInRet, vecTxOutRet)) {
-            LogPrintf("CDarksendPool::SubmitDenominate -- Running PrivateSend denominate for %d rounds, success\n", i);
+            LogPrintf("CSandstormPool::SubmitDenominate -- Running PrivateSend denominate for %d rounds, success\n", i);
             return SendDenominate(vecTxInRet, vecTxOutRet);
         }
         LogPrintf("CSandstormPool::SubmitDenominate -- Running PrivateSend denominate for %d rounds, error: %s\n", i, strError);
@@ -2023,11 +2023,11 @@ bool CSandstormPool::CreateNewSession(int nDenom, CTransaction txCollateral, Poo
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CSandstormQueue dsq(nDenom, activeStormnode.vin, GetTime(), false);
+        CSandstormQueue ssq(nDenom, activeStormnode.vin, GetTime(), false);
         LogPrint("privatesend", "CSandstormPool::CreateNewSession -- signing and relaying new queue: %s\n", ssq.ToString());
         ssq.Sign();
         ssq.Relay();
-        vecSandstormQueue.push_back(dsq);
+        vecSandstormQueue.push_back(ssq);
     }
 
     vecSessionCollaterals.push_back(txCollateral);
@@ -2203,10 +2203,10 @@ std::string CSandstormPool::GetMessageByID(PoolMessage nMessageID)
         case ERR_INVALID_SCRIPT:        return _("Invalid script detected.");
         case ERR_INVALID_TX:            return _("Transaction not valid.");
         case ERR_MAXIMUM:               return _("Value more than PrivateSend pool maximum allows.");
-        case ERR_MN_LIST:               return _("Not in the Stormnode list.");
+        case ERR_SN_LIST:               return _("Not in the Stormnode list.");
         case ERR_MODE:                  return _("Incompatible mode.");
         case ERR_NON_STANDARD_PUBKEY:   return _("Non-standard public key detected.");
-        case ERR_NOT_A_MN:              return _("This is not a Stormnode.");
+        case ERR_NOT_A_SN:              return _("This is not a Stormnode.");
         case ERR_QUEUE_FULL:            return _("Stormnode queue is full.");
         case ERR_RECENT:                return _("Last PrivateSend was too recent.");
         case ERR_SESSION:               return _("Session not complete!");
@@ -2277,7 +2277,7 @@ bool CSandStormSigner::VerifyMessage(CPubKey pubkey, const std::vector<unsigned 
     return true;
 }
 
-bool CSandStormSigner::AddScriptSig(const CTxIn& txin)
+bool CSandStormEntry::AddScriptSig(const CTxIn& txin)
 {
     BOOST_FOREACH(CTxSSIn& txssin, vecTxSSIn) {
         if(txssin.prevout == txin.prevout && txssin.nSequence == txin.nSequence) {
@@ -2366,7 +2366,7 @@ void CSandstormPool::RelayFinalTransaction(const CTransaction& txFinal)
             pnode->PushMessage(NetMsgType::SSFINALTX, nSessionID, txFinal);
 }
 
-void CSandstormPool::RelayIn(const CDarkSendEntry& entry)
+void CSandstormPool::RelayIn(const CSandStormEntry& entry)
 {
     if(!pSubmittedToStormnode) return;
 
