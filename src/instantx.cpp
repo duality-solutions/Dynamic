@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,10 +11,10 @@
 #include "base58.h"
 #include "protocol.h"
 #include "instantx.h"
-#include "activemasternode.h"
-#include "darksend.h"
-#include "masternode-sync.h"
-#include "masternodeman.h"
+#include "activestormnode.h"
+#include "sandstorm.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
 #include "spork.h"
 
 #include <boost/algorithm/string/replace.hpp>
@@ -39,17 +40,17 @@ CCriticalSection cs_instantsend;
 //txlock - Locks transaction
 //
 //step 1.) Broadcast intention to lock transaction inputs, "txlreg", CTransaction
-//step 2.) Top INSTANTSEND_SIGNATURES_TOTAL masternodes, open connect to top 1 masternode.
+//step 2.) Top INSTANTSEND_SIGNATURES_TOTAL stormnodes, open connect to top 1 stormnode.
 //         Send "txvote", CTransaction, Signature, Approve
-//step 3.) Top 1 masternode, waits for INSTANTSEND_SIGNATURES_REQUIRED messages. Upon success, sends "txlock'
+//step 3.) Top 1 stormnode, waits for INSTANTSEND_SIGNATURES_REQUIRED messages. Upon success, sends "txlock'
 
 void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if(fLiteMode) return; // disable all Dash specific functionality
+    if(fLiteMode) return; // disable all DarkSilk specific functionality
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
     // Ignore any InstantSend messages until masternode list is synced
-    if(!masternodeSync.IsMasternodeListSynced()) return;
+    if(!stormnodeSync.IsStormnodeListSynced()) return;
 
     if (strCommand == NetMsgType::TXLOCKREQUEST) // InstantSend Transaction Lock Request
     {
@@ -146,18 +147,18 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
                 a peer violates it, it will simply be ignored
             */
             if(!mapLockRequestAccepted.count(vote.txHash) && !mapLockRequestRejected.count(vote.txHash)) {
-                if(!mapUnknownVotes.count(vote.vinMasternode.prevout.hash))
+                if(!mapUnknownVotes.count(vote.vinStormnode.prevout.hash))
                     mapUnknownVotes[vote.vinMasternode.prevout.hash] = GetTime()+(60*10);
 
-                if(mapUnknownVotes[vote.vinMasternode.prevout.hash] > GetTime() &&
-                    mapUnknownVotes[vote.vinMasternode.prevout.hash] - GetAverageUnknownVoteTime() > 60*10) {
-                        LogPrintf("ProcessMessageInstantSend -- masternode is spamming transaction votes: %s %s\n",
-                            vote.vinMasternode.ToString(),
+                if(mapUnknownVotes[vote.vinStormnode.prevout.hash] > GetTime() &&
+                    mapUnknownVotes[vote.vinStormnode.prevout.hash] - GetAverageUnknownVoteTime() > 60*10) {
+                        LogPrintf("ProcessMessageInstantSend -- stormnode is spamming transaction votes: %s %s\n",
+                            vote.vinStormnode.ToString(),
                             vote.txHash.ToString()
                         );
                         return;
                 } else {
-                    mapUnknownVotes[vote.vinMasternode.prevout.hash] = GetTime()+(60*10);
+                    mapUnknownVotes[vote.vinStormnode.prevout.hash] = GetTime()+(60*10);
                 }
             }
             RelayInv(inv);
@@ -224,7 +225,7 @@ int64_t CreateTxLockCandidate(CTransaction tx)
     int64_t nTxAge = 0;
     BOOST_REVERSE_FOREACH(CTxIn txin, tx.vin) {
         nTxAge = GetInputAge(txin);
-        if(nTxAge < 5) { //1 less than the "send IX" gui requires, incase of a block propagating the network at the time
+        if(nTxAge < 9) { //1 less than the "send IX" gui requires, incase of a block propagating the network at the time
             LogPrintf("CreateTxLockCandidate -- Transaction not found / too new: nTxAge=%d, txid=%s\n", nTxAge, tx.GetHash().ToString());
             return 0;
         }
@@ -232,7 +233,7 @@ int64_t CreateTxLockCandidate(CTransaction tx)
 
     /*
         Use a blockheight newer than the input.
-        This prevents attackers from using transaction mallibility to predict which masternodes
+        This prevents attackers from using transaction mallibility to predict which stormnodes
         they'll use.
     */
     int nBlockHeight = 0;
@@ -268,17 +269,17 @@ int64_t CreateTxLockCandidate(CTransaction tx)
 // check if we need to vote on this transaction
 void CreateTxLockVote(CTransaction& tx, int64_t nBlockHeight)
 {
-    if(!fMasterNode) return;
+    if(!fStormNode) return;
 
-    int n = mnodeman.GetMasternodeRank(activeMasternode.vin, nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
+    int n = snodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
     if(n == -1) {
-        LogPrint("instantsend", "CreateTxLockVote -- Unknown Masternode %s\n", activeMasternode.vin.prevout.ToStringShort());
+        LogPrint("instantsend", "CreateTxLockVote -- Unknown Stormnode %s\n", activeStormnode.vin.prevout.ToStringShort());
         return;
     }
 
     if(n > INSTANTSEND_SIGNATURES_TOTAL) {
-        LogPrint("instantsend", "CreateTxLockVote -- Masternode not in the top %d (%d)\n", INSTANTSEND_SIGNATURES_TOTAL, n);
+        LogPrint("instantsend", "CreateTxLockVote -- Stormnode not in the top %d (%d)\n", INSTANTSEND_SIGNATURES_TOTAL, n);
         return;
     }
     /*
@@ -288,7 +289,7 @@ void CreateTxLockVote(CTransaction& tx, int64_t nBlockHeight)
     LogPrint("instantsend", "CreateTxLockVote -- In the top %d (%d)\n", INSTANTSEND_SIGNATURES_TOTAL, n);
 
     CTxLockVote vote;
-    vote.vinMasternode = activeMasternode.vin;
+    vote.vinStormnode = activeStormnode.vin;
     vote.txHash = tx.GetHash();
     vote.nBlockHeight = nBlockHeight;
     if(!vote.Sign()) {
@@ -312,30 +313,30 @@ void CreateTxLockVote(CTransaction& tx, int64_t nBlockHeight)
 //received a consensus vote
 bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 {
-    int n = mnodeman.GetMasternodeRank(vote.vinMasternode, vote.nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
+    int n = snodeman.GetStormnodeRank(vote.vinStormnode, vote.nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
-    CMasternode* pmn = mnodeman.Find(vote.vinMasternode);
-    if(pmn != NULL)
-        LogPrint("instantsend", "ProcessTxLockVote -- Masternode addr=%s, rank: %d\n", pmn->addr.ToString(), n);
+    CStormnode* psn = snodeman.Find(vote.vinStormnode);
+    if(psn != NULL)
+        LogPrint("instantsend", "ProcessTxLockVote -- Stormnode addr=%s, rank: %d\n", psn->addr.ToString(), n);
 
     if(n == -1) {
         //can be caused by past versions trying to vote with an invalid protocol
-        LogPrint("instantsend", "ProcessTxLockVote -- Unknown Masternode: txin=%s\n", vote.vinMasternode.ToString());
-        mnodeman.AskForMN(pnode, vote.vinMasternode);
+        LogPrint("instantsend", "ProcessTxLockVote -- Unknown Stormnode: txin=%s\n", vote.vinStormnode.ToString());
+        snodeman.AskForSN(pnode, vote.vinStormnode);
         return false;
     }
-    LogPrint("instantsend", "ProcessTxLockVote -- Masternode %s, rank=%d\n", vote.vinMasternode.prevout.ToStringShort(), n);
+    LogPrint("instantsend", "ProcessTxLockVote -- Stormnode %s, rank=%d\n", vote.vinStormnode.prevout.ToStringShort(), n);
 
     if(n > INSTANTSEND_SIGNATURES_TOTAL) {
         LogPrint("instantsend", "ProcessTxLockVote -- Masternode %s is not in the top %d (%d), vote hash %s\n",
-                vote.vinMasternode.prevout.ToStringShort(), INSTANTSEND_SIGNATURES_TOTAL, n, vote.GetHash().ToString());
+                vote.vinStormnode.prevout.ToStringShort(), INSTANTSEND_SIGNATURES_TOTAL, n, vote.GetHash().ToString());
         return false;
     }
 
     if(!vote.CheckSignature()) {
         LogPrintf("ProcessTxLockVote -- Signature invalid\n");
-        // don't ban, it could just be a non-synced masternode
-        mnodeman.AskForMN(pnode, vote.vinMasternode);
+        // don't ban, it could just be a non-synced stormnode
+        snodeman.AskForSN(pnode, vote.vinMasternode);
         return false;
     }
 
@@ -547,7 +548,7 @@ bool IsTransactionLockTimedOut(uint256 txHash)
 
 uint256 CTxLockVote::GetHash() const
 {
-    return ArithToUint256(UintToArith256(vinMasternode.prevout.hash) + vinMasternode.prevout.n + UintToArith256(txHash));
+    return ArithToUint256(UintToArith256(vinStormnode.prevout.hash) + vinStormnode.prevout.n + UintToArith256(txHash));
 }
 
 
@@ -556,14 +557,14 @@ bool CTxLockVote::CheckSignature()
     std::string strError;
     std::string strMessage = txHash.ToString().c_str() + boost::lexical_cast<std::string>(nBlockHeight);
 
-    CMasternode* pmn = mnodeman.Find(vinMasternode);
+    CStormnode* psn = snodeman.Find(vinStormnode);
 
-    if(pmn == NULL) {
-        LogPrintf("CTxLockVote::CheckSignature -- Unknown Masternode: txin=%s\n", vinMasternode.ToString());
+    if(psn == NULL) {
+        LogPrintf("CTxLockVote::CheckSignature -- Unknown Stormnode: txin=%s\n", vinStormnode.ToString());
         return false;
     }
 
-    if(!darkSendSigner.VerifyMessage(pmn->pubKeyMasternode, vchMasterNodeSignature, strMessage, strError)) {
+    if(!sandStormSigner.VerifyMessage(psn->pubKeyStormnode, vchStormNodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -577,12 +578,12 @@ bool CTxLockVote::Sign()
 
     std::string strMessage = txHash.ToString().c_str() + boost::lexical_cast<std::string>(nBlockHeight);
 
-    if(!darkSendSigner.SignMessage(strMessage, vchMasterNodeSignature, activeMasternode.keyMasternode)) {
+    if(!sandStormSigner.SignMessage(strMessage, vchStormNodeSignature, activeStormnode.keyStormnode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!darkSendSigner.VerifyMessage(activeMasternode.pubKeyMasternode, vchMasterNodeSignature, strMessage, strError)) {
+    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchStormNodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -596,15 +597,15 @@ bool CTxLockCandidate::IsAllVotesValid()
 
     BOOST_FOREACH(CTxLockVote vote, vecTxLockVotes)
     {
-        int n = mnodeman.GetMasternodeRank(vote.vinMasternode, vote.nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
+        int n = snodeman.GetStormnodeRank(vote.vinStormnode, vote.nBlockHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
         if(n == -1) {
-            LogPrintf("CTxLockCandidate::IsAllVotesValid -- Unknown Masternode, txin=%s\n", vote.vinMasternode.ToString());
+            LogPrintf("CTxLockCandidate::IsAllVotesValid -- Unknown Stormnode, txin=%s\n", vote.vinStormnode.ToString());
             return false;
         }
 
         if(n > INSTANTSEND_SIGNATURES_TOTAL) {
-            LogPrintf("CTxLockCandidate::IsAllVotesValid -- Masternode not in the top %s\n", INSTANTSEND_SIGNATURES_TOTAL);
+            LogPrintf("CTxLockCandidate::IsAllVotesValid -- Stormnode not in the top %s\n", INSTANTSEND_SIGNATURES_TOTAL);
             return false;
         }
 

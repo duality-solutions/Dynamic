@@ -1,11 +1,12 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef GOVERNANCE_H
 #define GOVERNANCE_H
 
-//#define ENABLE_DASH_DEBUG
+//#define ENABLE_DARKSILK_DEBUG
 
 #include "util.h"
 #include "main.h"
@@ -14,11 +15,11 @@
 #include "key.h"
 #include "util.h"
 #include "base58.h"
-#include "masternode.h"
+#include "stormnode.h"
 #include "governance-exceptions.h"
 #include "governance-vote.h"
 #include "governance-votedb.h"
-#include "masternodeman.h"
+#include "stormnodeman.h"
 #include <boost/lexical_cast.hpp>
 #include "init.h"
 #include <univalue.h>
@@ -120,7 +121,7 @@ private:
 
     count_m_t mapSeenGovernanceObjects;
 
-    object_m_t mapMasternodeOrphanObjects;
+    object_m_t mapStormnodeOrphanObjects;
 
     object_ref_cache_t mapVoteToObject;
 
@@ -128,7 +129,7 @@ private:
 
     vote_mcache_t mapOrphanVotes;
 
-    txout_m_t mapLastMasternodeTrigger;
+    txout_m_t mapLastStormnodeTrigger;
 
     hash_s_t setRequestedObjects;
 
@@ -194,7 +195,7 @@ public:
         mapVoteToObject.Clear();
         mapInvalidVotes.Clear();
         mapOrphanVotes.Clear();
-        mapLastMasternodeTrigger.clear();
+        mapLastStormnodeTrigger.clear();
     }
 
     std::string ToString() const;
@@ -216,7 +217,7 @@ public:
         READWRITE(mapInvalidVotes);
         READWRITE(mapOrphanVotes);
         READWRITE(mapObjects);
-        READWRITE(mapLastMasternodeTrigger);
+        READWRITE(mapLastStormnodeTrigger);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
             return;
@@ -246,15 +247,15 @@ public:
 
     void AddSeenVote(uint256 nHash, int status);
 
-    bool MasternodeRateCheck(const CTxIn& vin, int nObjectType);
+    bool StormnodeRateCheck(const CTxIn& vin, int nObjectType);
 
     bool ProcessVote(const CGovernanceVote& vote, CGovernanceException& exception) {
         return ProcessVote(NULL, vote, exception);
     }
 
-    void CheckMasternodeOrphanVotes();
+    void CheckStormnodeOrphanVotes();
 
-    void CheckMasternodeOrphanObjects();
+    void CheckStormnodeOrphanObjects();
 
 private:
     void RequestGovernanceObject(CNode* pfrom, const uint256& nHash);
@@ -283,8 +284,8 @@ private:
 
     void RebuildIndexes();
 
-    /// Returns MN index, handling the case of index rebuilds
-    int GetMasternodeIndex(const CTxIn& masternodeVin);
+    /// Returns SN index, handling the case of index rebuilds
+    int GetStormnodeIndex(const CTxIn& stormnodeVin);
 
     void RebuildVoteMaps();
 
@@ -376,15 +377,15 @@ private:
     /// Data field - can be used for anything
     std::string strData;
 
-    /// Masternode info for signed objects
-    CTxIn vinMasternode;
+    /// Stormnode info for signed objects
+    CTxIn vinStormnode;
     std::vector<unsigned char> vchSig;
 
     /// is valid by blockchain
     bool fCachedLocalValidity;
     std::string strLocalValidityError;
 
-    // VARIOUS FLAGS FOR OBJECT / SET VIA MASTERNODE VOTING
+    // VARIOUS FLAGS FOR OBJECT / SET VIA STORMNODE VOTING
 
     /// true == minimum network support has been reached for this object to be funded (doesn't mean it will for sure though)
     bool fCachedFunding;
@@ -409,9 +410,9 @@ private:
     /// Failed to parse object data
     bool fUnparsable;
 
-    vote_m_t mapCurrentMNVotes;
+    vote_m_t mapCurrentSNVotes;
 
-    /// Limited map of votes orphaned by MN
+    /// Limited map of votes orphaned by SN
     vote_mcache_t mapOrphanVotes;
 
     CGovernanceObjectVoteFile fileVotes;
@@ -439,8 +440,8 @@ public:
         return nCollateralHash;
     }
 
-    const CTxIn& GetMasternodeVin() const {
-        return vinMasternode;
+    const CTxIn& GetStormnodeVin() const {
+        return vinStormnode;
     }
 
     bool IsSetCachedFunding() const {
@@ -477,15 +478,15 @@ public:
 
     // Signature related functions
 
-    void SetMasternodeInfo(const CTxIn& vin);
-    bool Sign(CKey& keyMasternode, CPubKey& pubKeyMasternode);
-    bool CheckSignature(CPubKey& pubKeyMasternode);
+    void SetStormnodeInfo(const CTxIn& vin);
+    bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
+    bool CheckSignature(CPubKey& pubKeyStormnode);
 
     // CORE OBJECT FUNCTIONS
 
     bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool fCheckCollateral);
 
-    bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool& fMissingMasternode, bool fCheckCollateral);
+    bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool& fMissingStormnode, bool fCheckCollateral);
 
     /// Check the collateral transaction for the budget proposal/finalized budget
     bool IsCollateralValid(std::string& strError);
@@ -534,12 +535,12 @@ public:
         READWRITE(nCollateralHash);
         READWRITE(LIMITED_STRING(strData, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
         READWRITE(nObjectType);
-        READWRITE(vinMasternode);
+        READWRITE(vinStormnode);
         READWRITE(vchSig);
         if(nType & SER_DISK) {
             // Only include these for the disk file format
             LogPrint("gobject", "CGovernanceObject::SerializationOp Reading/writing votes from/to disk\n");
-            READWRITE(mapCurrentMNVotes);
+            READWRITE(mapCurrentSNVotes);
             READWRITE(fileVotes);
             LogPrint("gobject", "CGovernanceObject::SerializationOp hash = %s, vote count = %d\n", GetHash().ToString(), fileVotes.GetVoteCount());
         }
@@ -558,8 +559,8 @@ private:
 
     void RebuildVoteMap();
 
-    /// Called when MN's which have voted on this object have been removed
-    void ClearMasternodeVotes();
+    /// Called when SN's which have voted on this object have been removed
+    void ClearStormnodeVotes();
 
     void CheckOrphanVotes();
 

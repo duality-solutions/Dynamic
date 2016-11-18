@@ -1,21 +1,24 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-//#define ENABLE_DASH_DEBUG
+//#define ENABLE_DARKSILK_DEBUG
 
 #include "util.h"
 #include "main.h"
 #include "db.h"
 #include "init.h"
-#include "activemasternode.h"
-#include "darksend.h"
+#include "activestormnode.h"
+#include "sandstorm.h"
 #include "governance.h"
-#include "masternode.h"
-#include "masternode-payments.h"
-#include "masternode-sync.h"
-#include "masternodeconfig.h"
-#include "masternodeman.h"
+#include "stormnode.h"
+#include "stormnode-payments.h"
+#include "stormnode-sync.h"
+#include "stormnodeconfig.h"
+#include "stormnodeman.h"
 #include "rpcserver.h"
 #include "utilmoneystr.h"
 #include "governance-vote.h"
@@ -47,9 +50,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 "  getvotes           - Get votes for a governance object hash\n"
                 "  list               - List all governance objects\n"
                 "  diff               - List differences since last diff\n"
-                "  vote-alias         - Vote on a governance object by masternode alias (using masternode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by masternode configured in dash.conf\n"
-                "  vote-many          - Vote on a governance object by all masternodes (using masternode.conf setup)\n"
+                "  vote-alias         - Vote on a governance object by stormnode alias (using stormnode.conf setup)\n"
+                "  vote-conf          - Vote on a governance object by stormnode configured in darksilk.conf\n"
+                "  vote-many          - Vote on a governance object by all stormnodes (using stormnode.conf setup)\n"
                 );
 
 
@@ -88,8 +91,8 @@ UniValue gobject(const UniValue& params, bool fHelp)
             pindex = chainActive.Tip();
         }
 
-        std::vector<CMasternodeConfig::CMasternodeEntry> mnEntries;
-        mnEntries = masternodeConfig.getEntries();
+        std::vector<CStormnodeConfig::CStormnodeEntry> snEntries;
+        snEntries = stormnodeConfig.getEntries();
 
         uint256 hashParent;
 
@@ -112,7 +115,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only masternodes can create them)");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only stormnodes can create them)");
         }
 
         std::string strError = "";
@@ -145,17 +148,17 @@ UniValue gobject(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject submit <parent-hash> <revision> <time> <data-hex> <fee-txid>'");
         }
 
-        if(!masternodeSync.IsBlockchainSynced()) {
-            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with masternode network. Try again in a minute or so.");
+        if(!stormnodeSync.IsBlockchainSynced()) {
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with stormnode network. Try again in a minute or so.");
         }
 
-        CMasternode mn;
-        bool mnFound = mnodeman.Get(activeMasternode.vin, mn);
+        CStormnode sn;
+        bool snFound = snodeman.Get(activeStormnode.vin, sn);
 
-        DBG( cout << "gobject: submit activeMasternode.pubKeyMasternode = " << activeMasternode.pubKeyMasternode.GetHash().ToString()
-             << ", vin = " << activeMasternode.vin.prevout.ToStringShort()
+        DBG( cout << "gobject: submit activeStormnode.pubKeyStormnode = " << activeStormnode.pubKeyStormnode.GetHash().ToString()
+             << ", vin = " << activeStormnode.vin.prevout.ToStringShort()
              << ", params.size() = " << params.size()
-             << ", mnFound = " << mnFound << endl; );
+             << ", snFound = " << snFound << endl; );
 
         // ASSEMBLE NEW GOVERNANCE OBJECT FROM USER PARAMETERS
 
@@ -193,15 +196,15 @@ UniValue gobject(const UniValue& params, bool fHelp)
              << ", txidFee = " << txidFee.GetHex()
              << endl; );
 
-        // Attempt to sign triggers if we are a MN
+        // Attempt to sign triggers if we are a SN
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
-            if(mnFound) {
-                govobj.SetMasternodeInfo(mn.vin);
-                govobj.Sign(activeMasternode.keyMasternode, activeMasternode.pubKeyMasternode);
+            if(snFound) {
+                govobj.SetStormnodeInfo(sn.vin);
+                govobj.Sign(activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode);
             }
             else {
-                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid masternodes can submit this type of object");
+                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid stormnodes can submit this type of object");
             }
         }
         else {
@@ -252,27 +255,27 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         UniValue resultsObj(UniValue::VOBJ);
 
-        std::vector<unsigned char> vchMasterNodeSignature;
-        std::string strMasterNodeSignMessage;
+        std::vector<unsigned char> vchStormNodeSignature;
+        std::string strStormNodeSignMessage;
 
         UniValue statusObj(UniValue::VOBJ);
         UniValue returnObj(UniValue::VOBJ);
 
-        CMasternode mn;
-        bool mnFound = mnodeman.Get(activeMasternode.vin, mn);
+        CStormnode sn;
+        bool snFound = snodeman.Get(activeStormnode.vin, sn);
 
-        if(!mnFound) {
+        if(!snFound) {
             failed++;
             statusObj.push_back(Pair("result", "failed"));
-            statusObj.push_back(Pair("errorMessage", "Can't find masternode by collateral output"));
+            statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
             resultsObj.push_back(Pair("dash.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", success, failed)));
             returnObj.push_back(Pair("detail", resultsObj));
             return returnObj;
         }
 
-        CGovernanceVote vote(mn.vin, hash, eVoteSignal, eVoteOutcome);
-        if(!vote.Sign(activeMasternode.keyMasternode, activeMasternode.pubKeyMasternode)) {
+        CGovernanceVote vote(sn.vin, hash, eVoteSignal, eVoteOutcome);
+        if(!vote.Sign(activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode)) {
             failed++;
             statusObj.push_back(Pair("result", "failed"));
             statusObj.push_back(Pair("errorMessage", "Failure to sign."));
@@ -329,58 +332,58 @@ UniValue gobject(const UniValue& params, bool fHelp)
         int success = 0;
         int failed = 0;
 
-        std::vector<CMasternodeConfig::CMasternodeEntry> mnEntries;
-        mnEntries = masternodeConfig.getEntries();
+        std::vector<CStormnodeConfig::CStormnodeEntry> snEntries;
+        snEntries = stormnodeConfig.getEntries();
 
         UniValue resultsObj(UniValue::VOBJ);
 
-        BOOST_FOREACH(CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries()) {
+        BOOST_FOREACH(CStormnodeConfig::CStormnodeEntry sne, stormnodeConfig.getEntries()) {
             std::string strError;
-            std::vector<unsigned char> vchMasterNodeSignature;
-            std::string strMasterNodeSignMessage;
+            std::vector<unsigned char> vchStormNodeSignature;
+            std::string strStormNodeSignMessage;
 
             CPubKey pubKeyCollateralAddress;
             CKey keyCollateralAddress;
-            CPubKey pubKeyMasternode;
-            CKey keyMasternode;
+            CPubKey pubKeyStormnode;
+            CKey keyStormnode;
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!darkSendSigner.GetKeysFromSecret(mne.getPrivKey(), keyMasternode, pubKeyMasternode)){
+            if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)){
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Masternode signing error, could not set key correctly"));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                statusObj.push_back(Pair("errorMessage", "Stormnode signing error, could not set key correctly"));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
             uint256 nTxHash;
-            nTxHash.SetHex(mne.getTxHash());
+            nTxHash.SetHex(sne.getTxHash());
 
             int nOutputIndex = 0;
-            if(!ParseInt32(mne.getOutputIndex(), &nOutputIndex)) {
+            if(!ParseInt32(sne.getOutputIndex(), &nOutputIndex)) {
                 continue;
             }
 
             CTxIn vin(COutPoint(nTxHash, nOutputIndex));
 
-            CMasternode mn;
-            bool mnFound = mnodeman.Get(vin, mn);
+            CStormnode sn;
+            bool snFound = snodeman.Get(vin, sn);
 
-            if(!mnFound) {
+            if(!snFound) {
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Can't find masternode by collateral output"));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
-            CGovernanceVote vote(mn.vin, hash, eVoteSignal, eVoteOutcome);
-            if(!vote.Sign(keyMasternode, pubKeyMasternode)){
+            CGovernanceVote vote(sn.vin, hash, eVoteSignal, eVoteOutcome);
+            if(!vote.Sign(keyStormnode, pubKeyStormnode)){
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", "Failure to sign."));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
@@ -395,7 +398,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 statusObj.push_back(Pair("errorMessage", exception.GetMessage()));
             }
 
-            resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+            resultsObj.push_back(Pair(sne.getAlias(), statusObj));
         }
 
         UniValue returnObj(UniValue::VOBJ);
@@ -406,7 +409,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
     }
 
 
-    // MASTERNODES CAN VOTE ON GOVERNANCE OBJECTS ON THE NETWORK FOR VARIOUS SIGNALS AND OUTCOMES
+    // STORMNODES CAN VOTE ON GOVERNANCE OBJECTS ON THE NETWORK FOR VARIOUS SIGNALS AND OUTCOMES
     if(strCommand == "vote-alias")
     {
         if(params.size() != 5)
@@ -436,74 +439,74 @@ UniValue gobject(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid vote outcome. Please use one of the following: 'yes', 'no' or 'abstain'");
         }
 
-        // EXECUTE VOTE FOR EACH MASTERNODE, COUNT SUCCESSES VS FAILURES
+        // EXECUTE VOTE FOR EACH STORMNODE, COUNT SUCCESSES VS FAILURES
 
         int success = 0;
         int failed = 0;
 
-        std::vector<CMasternodeConfig::CMasternodeEntry> mnEntries;
-        mnEntries = masternodeConfig.getEntries();
+        std::vector<CStormnodeConfig::CStormnodeEntry> snEntries;
+        snEntries = stormnodeConfig.getEntries();
 
         UniValue resultsObj(UniValue::VOBJ);
 
-        BOOST_FOREACH(CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries())
+        BOOST_FOREACH(CStormnodeConfig::CStormnodeEntry sne, stormnodeConfig.getEntries())
         {
             // IF WE HAVE A SPECIFIC NODE REQUESTED TO VOTE, DO THAT
-            if(strAlias != mne.getAlias()) continue;
+            if(strAlias != sne.getAlias()) continue;
 
             // INIT OUR NEEDED VARIABLES TO EXECUTE THE VOTE
             std::string strError;
-            std::vector<unsigned char> vchMasterNodeSignature;
-            std::string strMasterNodeSignMessage;
+            std::vector<unsigned char> vchStormNodeSignature;
+            std::string strStormNodeSignMessage;
 
             CPubKey pubKeyCollateralAddress;
             CKey keyCollateralAddress;
-            CPubKey pubKeyMasternode;
-            CKey keyMasternode;
+            CPubKey pubKeyStormnode;
+            CKey keyStormnode;
 
-            // SETUP THE SIGNING KEY FROM MASTERNODE.CONF ENTRY
+            // SETUP THE SIGNING KEY FROM STORMNODE.CONF ENTRY
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!darkSendSigner.GetKeysFromSecret(mne.getPrivKey(), keyMasternode, pubKeyMasternode)) {
+            if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)) {
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", strprintf("Invalid masternode key %s.", mne.getPrivKey())));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                statusObj.push_back(Pair("errorMessage", strprintf("Invalid stormnode key %s.", sne.getPrivKey())));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
-            // SEARCH FOR THIS MASTERNODE ON THE NETWORK, THE NODE MUST BE ACTIVE TO VOTE
+            // SEARCH FOR THIS STORMNODE ON THE NETWORK, THE NODE MUST BE ACTIVE TO VOTE
 
             uint256 nTxHash;
-            nTxHash.SetHex(mne.getTxHash());
+            nTxHash.SetHex(sne.getTxHash());
 
             int nOutputIndex = 0;
-            if(!ParseInt32(mne.getOutputIndex(), &nOutputIndex)) {
+            if(!ParseInt32(sne.getOutputIndex(), &nOutputIndex)) {
                 continue;
             }
 
             CTxIn vin(COutPoint(nTxHash, nOutputIndex));
 
-            CMasternode mn;
-            bool mnFound = mnodeman.Get(vin, mn);
+            CStormnode sn;
+            bool snFound = snodeman.Get(vin, sn);
 
-            if(!mnFound) {
+            if(!snFound) {
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Masternode must be publically available on network to vote. Masternode not found."));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                statusObj.push_back(Pair("errorMessage", "Stormnode must be publically available on network to vote. Stormnode not found."));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
             // CREATE NEW GOVERNANCE OBJECT VOTE WITH OUTCOME/SIGNAL
 
             CGovernanceVote vote(vin, hash, eVoteSignal, eVoteOutcome);
-            if(!vote.Sign(keyMasternode, pubKeyMasternode)) {
+            if(!vote.Sign(keyStormnode, pubKeyStormnode)) {
                 failed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", "Failure to sign."));
-                resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+                resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
 
@@ -520,7 +523,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 statusObj.push_back(Pair("errorMessage", exception.GetMessage()));
             }
 
-            resultsObj.push_back(Pair(mne.getAlias(), statusObj));
+            resultsObj.push_back(Pair(sne.getAlias(), statusObj));
         }
 
         // REPORT STATS TO THE USER
@@ -651,7 +654,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         objDelete.push_back(Pair("AbstainCount",  pGovObj->GetAbstainCount(VOTE_SIGNAL_DELETE)));
         objResult.push_back(Pair("DeleteResult", objDelete));
 
-        // -- ENDORSED VIA MASTERNODE-ELECTED BOARD
+        // -- ENDORSED VIA STORMNODE-ELECTED BOARD
         UniValue objEndorsed(UniValue::VOBJ);
         objEndorsed.push_back(Pair("AbsoluteYesCount",  pGovObj->GetAbsoluteYesCount(VOTE_SIGNAL_ENDORSED)));
         objEndorsed.push_back(Pair("YesCount",  pGovObj->GetYesCount(VOTE_SIGNAL_ENDORSED)));
@@ -713,13 +716,13 @@ UniValue voteraw(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 6)
         throw std::runtime_error(
-                "voteraw <masternode-tx-hash> <masternode-tx-index> <governance-hash> <vote-signal> [yes|no|abstain] <time> <vote-sig>\n"
+                "voteraw <stormnode-tx-hash> <stormnode-tx-index> <governance-hash> <vote-signal> [yes|no|abstain] <time> <vote-sig>\n"
                 "Compile and relay a governance vote with provided external signature instead of signing vote internally\n"
                 );
 
-    uint256 hashMnTx = ParseHashV(params[0], "mn tx hash");
-    int nMnTxIndex = params[1].get_int();
-    CTxIn vin = CTxIn(hashMnTx, nMnTxIndex);
+    uint256 hashSnTx = ParseHashV(params[0], "sn tx hash");
+    int nSnTxIndex = params[1].get_int();
+    CTxIn vin = CTxIn(hashSnTx, nSnTxIndex);
 
     uint256 hashGovObj = ParseHashV(params[2], "Governance hash");
     std::string strVoteSignal = params[3].get_str();
@@ -746,11 +749,11 @@ UniValue voteraw(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
     }
 
-    CMasternode mn;
-    bool mnFound = mnodeman.Get(vin, mn);
+    CStormnode sn;
+    bool snFound = snodeman.Get(vin, sn);
 
-    if(!mnFound) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find masternode in list : " + vin.ToString());
+    if(!snFound) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find stormnode in list : " + vin.ToString());
     }
 
     CGovernanceVote vote(vin, hashGovObj, eVoteSignal, eVoteOutcome);
@@ -779,7 +782,7 @@ UniValue getgovernanceinfo(const UniValue& params, bool fHelp)
             "\nResult:\n"
             "{\n"
             "  \"governanceminquorum\": xxxxx,           (numeric) the absolute minimum number of votes needed to trigger a governance action\n"
-            "  \"masternodewatchdogmaxseconds\": xxxxx,  (numeric) sentinel watchdog expiration time in seconds\n"
+            "  \"stormnodewatchdogmaxseconds\": xxxxx,  (numeric) sentinel watchdog expiration time in seconds\n"
             "  \"proposalfee\": xxx.xx,                  (numeric) the collateral transaction fee which must be paid to create a proposal in " + CURRENCY_UNIT + "\n"
             "  \"superblockcycle\": xxxxx,               (numeric) the number of blocks between superblocks\n"
             "  \"lastsuperblock\": xxxxx,                (numeric) the block number of the last superblock\n"
@@ -819,7 +822,7 @@ UniValue getgovernanceinfo(const UniValue& params, bool fHelp)
 
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("governanceminquorum", Params().GetConsensus().nGovernanceMinQuorum));
-    obj.push_back(Pair("masternodewatchdogmaxseconds", MASTERNODE_WATCHDOG_MAX_SECONDS));
+    obj.push_back(Pair("stormnodewatchdogmaxseconds", STORMNODE_WATCHDOG_MAX_SECONDS));
     obj.push_back(Pair("proposalfee", ValueFromAmount(GOVERNANCE_PROPOSAL_FEE_TX)));
     obj.push_back(Pair("superblockcycle", Params().GetConsensus().nSuperblockCycle));
     obj.push_back(Pair("lastsuperblock", nLastSuperblock));

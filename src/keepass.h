@@ -1,9 +1,12 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef _KEEPASS_H_
-#define _KEEPASS_H_
+#ifndef DARKSILK_KEEPASS_H
+#define DARKSILK_KEEPASS_H
 
 #include "support/allocators/secure.h"
 
@@ -130,4 +133,4 @@ public:
 
 };
 
-#endif
+#endif // DARKSILK_KEEPASS_H

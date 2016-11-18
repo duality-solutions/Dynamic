@@ -1,20 +1,20 @@
-
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SRC_MASTERNODECONFIG_H_
-#define SRC_MASTERNODECONFIG_H_
+#ifndef STORMNODECONFIG_H
+#define STORMNODECONFIG_H
 
-class CMasternodeConfig;
+class CStormnodeConfig;
 extern CMasternodeConfig masternodeConfig;
 
-class CMasternodeConfig
+class CStormnodeConfig
 {
 
 public:
 
-    class CMasternodeEntry {
+    class CStormnodeEntry {
 
     private:
         std::string alias;
@@ -24,7 +24,7 @@ public:
         std::string outputIndex;
     public:
 
-        CMasternodeEntry(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex) {
+        CStormnodeEntry(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex) {
             this->alias = alias;
             this->ip = ip;
             this->privKey = privKey;
@@ -73,15 +73,15 @@ public:
         }
     };
 
-    CMasternodeConfig() {
-        entries = std::vector<CMasternodeEntry>();
+    CStormnodeConfig() {
+        entries = std::vector<CStormnodeEntry>();
     }
 
     void clear();
     bool read(std::string& strErr);
     void add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex);
 
-    std::vector<CMasternodeEntry>& getEntries() {
+    std::vector<CStormnodeEntry>& getEntries() {
         return entries;
     }
 
@@ -90,10 +90,10 @@ public:
     }
 
 private:
-    std::vector<CMasternodeEntry> entries;
+    std::vector<CStormnodeEntry> entries;
 
 
 };
 
 
-#endif /* SRC_MASTERNODECONFIG_H_ */
+#endif // STORMNODECONFIG_H

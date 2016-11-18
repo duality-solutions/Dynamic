@@ -1,9 +1,13 @@
 // Copyright (c) 2012 Pieter Wuille
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_ADDRMAN_H
-#define BITCOIN_ADDRMAN_H
+#ifndef DARKSILK_ADDRMAN_H
+#define DARKSILK_ADDRMAN_H
 
 #include "netbase.h"
 #include "protocol.h"
@@ -577,4 +581,4 @@ public:
 
 };
 
-#endif // BITCOIN_ADDRMAN_H
+#endif // DARKSILK_ADDRMAN_H

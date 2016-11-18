@@ -1,13 +1,15 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash CoreDevelopers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_SUPPORT_CLEANSE_H
-#define BITCOIN_SUPPORT_CLEANSE_H
+#ifndef DARKSILK_SUPPORT_CLEANSE_H
+#define DARKSILK_SUPPORT_CLEANSE_H
 
 #include <stdlib.h>
 
 void memory_cleanse(void *ptr, size_t len);
 
-#endif // BITCOIN_SUPPORT_CLEANSE_H
+#endif // DARKSILK_SUPPORT_CLEANSE_H

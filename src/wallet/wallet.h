@@ -1,11 +1,12 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash CoreDevelopers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_WALLET_WALLET_H
-#define BITCOIN_WALLET_WALLET_H
+#ifndef DARKSILK_WALLET_WALLET_H
+#define DARKSILK_WALLET_WALLET_H
 
 #include "amount.h"
 #include "base58.h"
@@ -95,14 +96,14 @@ enum AvailableCoinsType
 {
     ALL_COINS = 1,
     ONLY_DENOMINATED = 2,
-    ONLY_NOT1000IFMN = 3,
-    ONLY_NONDENOMINATED_NOT1000IFMN = 4,
-    ONLY_1000 = 5 // find masternode outputs including locked ones (use with caution)
+    ONLY_NOT1000IFSN = 3,
+    ONLY_NONDENOMINATED_NOT1000IFSN = 4,
+    ONLY_1000 = 5 // find stormnode outputs including locked ones (use with caution)
 };
 
 struct CompactTallyItem
 {
-    CBitcoinAddress address;
+    CDarkSilkAddress address;
     CAmount nAmount;
     std::vector<CTxIn> vecTxIn;
     CompactTallyItem()
@@ -651,8 +652,8 @@ public:
     bool SelectCoinsDark(CAmount nValueMin, CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax) const;
     bool SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true, bool fAnonymizable = true) const;
 
-    /// Get 1000DASH output and keys which can be used for the Masternode
-    bool GetMasternodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& keyRet, std::string strTxHash = "", std::string strOutputIndex = "");
+    /// Get 1000DSLK output and keys which can be used for the Stormnode
+    bool GetStormnodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& keyRet, std::string strTxHash = "", std::string strOutputIndex = "");
     /// Extract txin information and keys from output
     bool GetVinAndKeysFromOutput(COutput out, CTxIn& txinRet, CPubKey& pubKeyRet, CKey& keyRet);
 
@@ -1030,4 +1031,4 @@ private:
     std::vector<char> _ssExtra;
 };
 
-#endif // BITCOIN_WALLET_WALLET_H
+#endif // DARKSILK_WALLET_WALLET_H

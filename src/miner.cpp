@@ -1,7 +1,8 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "miner.h"
@@ -24,7 +25,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
-#include "masternode-payments.h"
+#include "stormnode-payments.h"
 #include "validationinterface.h"
 
 #include <boost/thread.hpp>
@@ -35,7 +36,7 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// DashMiner
+// DarkSilkMiner
 //
 
 //
@@ -282,11 +283,11 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
         txNew.vout[0].nValue = blockReward;
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
-        // Update coinbase transaction with additional info about masternode and governace payments,
+        // Update coinbase transaction with additional info about stormnode and governace payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutMasternode, pblock->voutSuperblock);
-        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s txNew %s",
-        //             nHeight, blockReward, pblock->txoutMasternode.ToString(), txNew.ToString());
+        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutStormnode, pblock->voutSuperblock);
+        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutStormnode %s txNew %s",
+        //             nHeight, blockReward, pblock->txoutStormnode.ToString(), txNew.ToString());
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -336,7 +337,7 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 // Internal miner
 //
 
-// ***TODO*** ScanHash is not yet used in Dash
+// ***TODO*** ScanHash is not yet used in DarkSilk
 //
 // ScanHash scans nonces looking for a hash with at least some zero bits.
 // The nonce is usually preserved between calls, but periodically or if the
@@ -394,11 +395,11 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 }
 
 // ***TODO*** that part changed in bitcoin, we are using a mix with old one here for now
-void static BitcoinMiner(const CChainParams& chainparams)
+void static DarkSilkMiner(const CChainParams& chainparams)
 {
-    LogPrintf("DashMiner -- started\n");
+    LogPrintf("DarkSilkMiner -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("dash-miner");
+    RenameThread("darksilk-miner");
 
     unsigned int nExtraNonce = 0;
 
@@ -439,13 +440,13 @@ void static BitcoinMiner(const CChainParams& chainparams)
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
             if (!pblocktemplate.get())
             {
-                LogPrintf("DashMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                LogPrintf("DarkSilkMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
                 return;
             }
             CBlock *pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-            LogPrintf("DashMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            LogPrintf("DarkSilkMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
             //
@@ -465,7 +466,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
                     {
                         // Found a solution
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                        LogPrintf("DashMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("DarkSilkMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
                         ProcessBlockFound(pblock, chainparams);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
@@ -509,17 +510,17 @@ void static BitcoinMiner(const CChainParams& chainparams)
     }
     catch (const boost::thread_interrupted&)
     {
-        LogPrintf("DashMiner -- terminated\n");
+        LogPrintf("DarkSilkMiner -- terminated\n");
         throw;
     }
     catch (const std::runtime_error &e)
     {
-        LogPrintf("DashMiner -- runtime error: %s\n", e.what());
+        LogPrintf("DarkSilkMiner -- runtime error: %s\n", e.what());
         return;
     }
 }
 
-void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainparams)
+void GenerateDarkSilks(bool fGenerate, int nThreads, const CChainParams& chainparams)
 {
     static boost::thread_group* minerThreads = NULL;
 
@@ -538,5 +539,5 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
 
     minerThreads = new boost::thread_group();
     for (int i = 0; i < nThreads; i++)
-        minerThreads->create_thread(boost::bind(&BitcoinMiner, boost::cref(chainparams)));
+        minerThreads->create_thread(boost::bind(&DarkSilkMiner, boost::cref(chainparams)));
 }

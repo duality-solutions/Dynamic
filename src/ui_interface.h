@@ -1,10 +1,12 @@
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2012-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_UI_INTERFACE_H
-#define BITCOIN_UI_INTERFACE_H
+#ifndef DARKSILK_UI_INTERFACE_H
+#define DARKSILK_UI_INTERFACE_H
 
 #include <stdint.h>
 #include <string>
@@ -82,8 +84,8 @@ public:
     /** Number of network connections changed. */
     boost::signals2::signal<void (int newNumConnections)> NotifyNumConnectionsChanged;
 
-    /** Number of masternodes changed. */
-    boost::signals2::signal<void (int newNumMasternodes)> NotifyStrMasternodeCountChanged;
+    /** Number of stormnodes changed. */
+    boost::signals2::signal<void (int newNumStormnodes)> NotifyStrStormnodeCountChanged;
 
     /**
      * New, updated or cancelled alert.
@@ -109,4 +111,4 @@ public:
 
 extern CClientUIInterface uiInterface;
 
-#endif // BITCOIN_UI_INTERFACE_H
+#endif // DARKSILK_UI_INTERFACE_H

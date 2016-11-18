@@ -1,10 +1,12 @@
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_RPCSERVER_H
-#define BITCOIN_RPCSERVER_H
+#ifndef DARKSILK_RPCSERVER_H
+#define DARKSILK_RPCSERVER_H
 
 #include "amount.h"
 #include "rpcprotocol.h"
@@ -267,14 +269,14 @@ extern UniValue verifytxoutproof(const UniValue& params, bool fHelp);
 extern UniValue privatesend(const UniValue& params, bool fHelp);
 extern UniValue getpoolinfo(const UniValue& params, bool fHelp);
 extern UniValue spork(const UniValue& params, bool fHelp);
-extern UniValue masternode(const UniValue& params, bool fHelp);
-extern UniValue masternodelist(const UniValue& params, bool fHelp);
-extern UniValue masternodebroadcast(const UniValue& params, bool fHelp);
+extern UniValue stormnode(const UniValue& params, bool fHelp);
+extern UniValue stormnodelist(const UniValue& params, bool fHelp);
+extern UniValue stormnodebroadcast(const UniValue& params, bool fHelp);
 extern UniValue gobject(const UniValue& params, bool fHelp);
 extern UniValue getgovernanceinfo(const UniValue& params, bool fHelp);
 extern UniValue getsuperblockbudget(const UniValue& params, bool fHelp);
 extern UniValue voteraw(const UniValue& params, bool fHelp);
-extern UniValue mnsync(const UniValue& params, bool fHelp);
+extern UniValue snsync(const UniValue& params, bool fHelp);
 
 extern UniValue getblockcount(const UniValue& params, bool fHelp); // in rpcblockchain.cpp
 extern UniValue getbestblockhash(const UniValue& params, bool fHelp);
@@ -300,4 +302,4 @@ void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
 
-#endif // BITCOIN_RPCSERVER_H
+#endif // DARKSILK_RPCSERVER_H

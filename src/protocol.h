@@ -1,14 +1,16 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef __cplusplus
 #error This header can only be compiled as C++.
 #endif
 
-#ifndef BITCOIN_PROTOCOL_H
-#define BITCOIN_PROTOCOL_H
+#ifndef DARKSILK_PROTOCOL_H
+#define DARKSILK_PROTOCOL_H
 
 #include "netbase.h"
 #include "serialize.h"
@@ -226,24 +228,24 @@ extern const char *TXLOCKREQUEST;
 extern const char *TXLOCKVOTE;
 extern const char *SPORK;
 extern const char *GETSPORKS;
-extern const char *MASTERNODEPAYMENTVOTE;
-extern const char *MASTERNODEPAYMENTSYNC;
-extern const char *MNANNOUNCE;
-extern const char *MNPING;
-extern const char *DSACCEPT;
-extern const char *DSVIN;
-extern const char *DSFINALTX;
-extern const char *DSSIGNFINALTX;
-extern const char *DSCOMPLETE;
-extern const char *DSSTATUSUPDATE;
-extern const char *DSTX;
-extern const char *DSQUEUE;
-extern const char *DSEG;
+extern const char *STORMNODEPAYMENTVOTE;
+extern const char *STORMNODEPAYMENTSYNC;
+extern const char *SNANNOUNCE;
+extern const char *SNPING;
+extern const char *SSACCEPT;
+extern const char *SSVIN;
+extern const char *SSFINALTX;
+extern const char *SSSIGNFINALTX;
+extern const char *SSCOMPLETE;
+extern const char *SSSTATUSUPDATE;
+extern const char *SSTX;
+extern const char *SSQUEUE;
+extern const char *SSEG;
 extern const char *SYNCSTATUSCOUNT;
-extern const char *MNGOVERNANCESYNC;
-extern const char *MNGOVERNANCEOBJECT;
-extern const char *MNGOVERNANCEOBJECTVOTE;
-extern const char *MNVERIFY;
+extern const char *SNGOVERNANCESYNC;
+extern const char *SNGOVERNANCEOBJECT;
+extern const char *SNGOVERNANCEOBJECTVOTE;
+extern const char *SNVERIFY;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -346,19 +348,19 @@ enum {
     MSG_TXLOCK_REQUEST,
     MSG_TXLOCK_VOTE,
     MSG_SPORK,
-    MSG_MASTERNODE_PAYMENT_VOTE,
-    MSG_MASTERNODE_PAYMENT_BLOCK, // reusing, was MSG_MASTERNODE_SCANNING_ERROR previousely, was NOT used in 12.0
+    MSG_STORMNODE_PAYMENT_VOTE,
+    MSG_STORMNODE_PAYMENT_BLOCK, // reusing, was MSG_STORMNODE_SCANNING_ERROR previousely, was NOT used in 12.0
     MSG_BUDGET_VOTE, // depreciated since 12.1
     MSG_BUDGET_PROPOSAL, // depreciated since 12.1
     MSG_BUDGET_FINALIZED, // depreciated since 12.1
     MSG_BUDGET_FINALIZED_VOTE, // depreciated since 12.1
-    MSG_MASTERNODE_QUORUM, // not implemented
-    MSG_MASTERNODE_ANNOUNCE,
-    MSG_MASTERNODE_PING,
-    MSG_DSTX,
+    MSG_STORMNODE_QUORUM, // not implemented
+    MSG_STORMNODE_ANNOUNCE,
+    MSG_STORMNODE_PING,
+    MSG_SSTX,
     MSG_GOVERNANCE_OBJECT,
     MSG_GOVERNANCE_OBJECT_VOTE,
-    MSG_MASTERNODE_VERIFY,
+    MSG_STORMNODE_VERIFY,
 };
 
-#endif // BITCOIN_PROTOCOL_H
+#endif // DARKSILK_PROTOCOL_H

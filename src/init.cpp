@@ -1,11 +1,12 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/dash-config.h"
+#include "config/darksilk-config.h"
 #endif
 
 #include "init.h"
@@ -34,13 +35,12 @@
 #include "torcontrol.h"
 #include "ui_interface.h"
 #include "util.h"
-#include "activemasternode.h"
+#include "activestormnode.h"
 #include "instantx.h"
-#include "darksend.h"
-#include "masternode-payments.h"
-#include "masternode-sync.h"
-#include "masternodeman.h"
-#include "masternodeconfig.h"
+#include "sandstorm.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
+#include "stormnodeconfig.h"
 #include "flat-database.h"
 #include "governance.h"
 #include "spork.h"
@@ -205,7 +205,7 @@ void PrepareShutdown()
     /// for example if the data directory was found to be locked.
     /// Be sure that anything that writes files or flushes caches only does this if the respective
     /// module was initialized.
-    RenameThread("dash-shutoff");
+    RenameThread("darksilk-shutoff");
     mempool.AddTransactionsUpdated(1);
     StopHTTPRPC();
     StopREST();
@@ -215,14 +215,14 @@ void PrepareShutdown()
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
-    GenerateBitcoins(false, 0, Params());
+    GenerateDarkSilks(false, 0, Params());
     StopNode();
 
     // STORE DATA CACHES INTO SERIALIZED DAT FILES
-    CFlatDB<CMasternodeMan> flatdb1("mncache.dat", "magicMasternodeCache");
-    flatdb1.Dump(mnodeman);
-    CFlatDB<CMasternodePayments> flatdb2("mnpayments.dat", "magicMasternodePaymentsCache");
-    flatdb2.Dump(mnpayments);
+    CFlatDB<CStormnodeMan> flatdb1("sncache.dat", "magicStormnodeCache");
+    flatdb1.Dump(snodeman);
+    CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
+    flatdb2.Dump(snpayments);
     CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
     flatdb3.Dump(governance);
     CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
@@ -378,8 +378,8 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-blocksonly", strprintf(_("Whether to operate in a blocks only mode (default: %u)"), DEFAULT_BLOCKSONLY));
     strUsage += HelpMessageOpt("-checkblocks=<n>", strprintf(_("How many blocks to check at startup (default: %u, 0 = all)"), DEFAULT_CHECKBLOCKS));
     strUsage += HelpMessageOpt("-checklevel=<n>", strprintf(_("How thorough the block verification of -checkblocks is (0-4, default: %u)"), DEFAULT_CHECKLEVEL));
-    strUsage += HelpMessageOpt("-conf=<file>", strprintf(_("Specify configuration file (default: %s)"), BITCOIN_CONF_FILENAME));
-    if (mode == HMM_BITCOIND)
+    strUsage += HelpMessageOpt("-conf=<file>", strprintf(_("Specify configuration file (default: %s)"), DARKSILK_CONF_FILENAME));
+    if (mode == HMM_DARKSILKD)
     {
 #ifndef WIN32
         strUsage += HelpMessageOpt("-daemon", _("Run in the background as a daemon and accept commands"));
@@ -394,7 +394,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-par=<n>", strprintf(_("Set the number of script verification threads (%u to %d, 0 = auto, <0 = leave that many cores free, default: %d)"),
         -GetNumCores(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS));
 #ifndef WIN32
-    strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), BITCOIN_PID_FILENAME));
+    strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), DARKSILK_PID_FILENAME));
 #endif
     strUsage += HelpMessageOpt("-prune=<n>", strprintf(_("Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. "
             "Warning: Reverting this setting requires re-downloading the entire blockchain. "
@@ -482,7 +482,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-keepasskey=<key>", _("KeePassHttp key for AES encrypted communication with KeePass"));
     strUsage += HelpMessageOpt("-keepassid=<name>", _("KeePassHttp id for the established association"));
     strUsage += HelpMessageOpt("-keepassname=<name>", _("Name to construct url for KeePass entry that stores the wallet passphrase"));
-    if (mode == HMM_BITCOIN_QT)
+    if (mode == HMM_DARKSILK_QT)
         strUsage += HelpMessageOpt("-windowtitle=<name>", _("Wallet window title"));
 #endif
 
@@ -520,8 +520,8 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-limitdescendantsize=<n>", strprintf("Do not accept transactions if any ancestor would have more than <n> kilobytes of in-mempool descendants (default: %u).", DEFAULT_DESCENDANT_SIZE_LIMIT));
     }
     string debugCategories = "addrman, alert, bench, coindb, db, lock, rand, rpc, selectcoins, mempool, mempoolrej, net, proxy, prune, http, libevent, tor, zmq, "
-                             "dash (or specifically: privatesend, instantsend, masternode, spork, keepass, mnpayments, gobject)"; // Don't translate these and qt below
-    if (mode == HMM_BITCOIN_QT)
+                             "darksilk (or specifically: privatesend, instantsend, stormnode, spork, keepass, snpayments, gobject)"; // Don't translate these and qt below
+    if (mode == HMM_DARKSILK_QT)
         debugCategories += ", qt";
     strUsage += HelpMessageOpt("-debug=<category>", strprintf(_("Output debugging information (default: %u, supplying <category> is optional)"), 0) + ". " +
         _("If <category> is not supplied or if <category> = 1, output all debugging information.") + _("<category> can be:") + " " + debugCategories + ".");
@@ -554,19 +554,19 @@ std::string HelpMessage(HelpMessageMode mode)
     }
     strUsage += HelpMessageOpt("-shrinkdebugfile", _("Shrink debug.log file on client startup (default: 1 when no -debug)"));
     AppendParamsHelpMessages(strUsage, showDebug);
-    strUsage += HelpMessageOpt("-litemode=<n>", strprintf(_("Disable all Dash specific functionality (Masternodes, PrivateSend, InstantSend, Governance) (0-1, default: %u)"), 0));
+    strUsage += HelpMessageOpt("-litemode=<n>", strprintf(_("Disable all DarkSilk specific functionality (Stormnodes, PrivateSend, InstantSend, Governance) (0-1, default: %u)"), 0));
 
-    strUsage += HelpMessageGroup(_("Masternode options:"));
-    strUsage += HelpMessageOpt("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0));
-    strUsage += HelpMessageOpt("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"));
-    strUsage += HelpMessageOpt("-mnconflock=<n>", strprintf(_("Lock masternodes from masternode configuration file (default: %u)"), 1));
-    strUsage += HelpMessageOpt("-masternodeprivkey=<n>", _("Set the masternode private key"));
+    strUsage += HelpMessageGroup(_("Stormnode options:"));
+    strUsage += HelpMessageOpt("-stormnode=<n>", strprintf(_("Enable the client to act as a stormnode (0-1, default: %u)"), 0));
+    strUsage += HelpMessageOpt("-mnconf=<file>", strprintf(_("Specify stormnode configuration file (default: %s)"), "stormnode.conf"));
+    strUsage += HelpMessageOpt("-mnconflock=<n>", strprintf(_("Lock stormnodes from stormnode configuration file (default: %u)"), 1));
+    strUsage += HelpMessageOpt("-stormnodeprivkey=<n>", _("Set the stormnode private key"));
 
     strUsage += HelpMessageGroup(_("PrivateSend options:"));
     strUsage += HelpMessageOpt("-enableprivatesend=<n>", strprintf(_("Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)"), 0));
     strUsage += HelpMessageOpt("-privatesendmultisession=<n>", strprintf(_("Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)"), DEFAULT_PRIVATESEND_MULTISESSION));
-    strUsage += HelpMessageOpt("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes to anonymize funds  (2-8, default: %u)"), DEFAULT_PRIVATESEND_ROUNDS));
-    strUsage += HelpMessageOpt("-privatesendamount=<n>", strprintf(_("Keep N DASH anonymized (default: %u)"), DEFAULT_PRIVATESEND_AMOUNT));
+    strUsage += HelpMessageOpt("-privatesendrounds=<n>", strprintf(_("Use N separate stormnodes to anonymize funds  (2-8, default: %u)"), DEFAULT_PRIVATESEND_ROUNDS));
+    strUsage += HelpMessageOpt("-privatesendamount=<n>", strprintf(_("Keep N DSLK anonymized (default: %u)"), DEFAULT_PRIVATESEND_AMOUNT));
     strUsage += HelpMessageOpt("-liquidityprovider=<n>", strprintf(_("Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)"), nLiquidityProvider));
 
     strUsage += HelpMessageGroup(_("InstantSend options:"));
@@ -611,10 +611,11 @@ std::string HelpMessage(HelpMessageMode mode)
 
 std::string LicenseInfo()
 {
-    // todo: remove urls from translations on next change
     return FormatParagraph(strprintf(_("Copyright (C) 2009-%i The Bitcoin Core Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
-           FormatParagraph(strprintf(_("Copyright (C) 2014-%i The Dash Core Developers"), COPYRIGHT_YEAR)) + "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2014-%i The Dash Developers"), COPYRIGHT_YEAR)) + "\n" +
+           "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2015-%i Silk Network Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(_("This is experimental software.")) + "\n" +
            "\n" +
@@ -694,7 +695,7 @@ void CleanupBlockRevFiles()
 void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
 {
     const CChainParams& chainparams = Params();
-    RenameThread("dash-loadblk");
+    RenameThread("darksilk-loadblk");
     // -reindex
     if (fReindex) {
         CImportingNow imp;
@@ -751,7 +752,7 @@ void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
 }
 
 /** Sanity checks
- *  Ensure that Dash Core is running in a usable environment with all
+ *  Ensure that DarkSilk Core is running in a usable environment with all
  *  necessary library support.
  */
 bool InitSanityCheck(void)
@@ -890,10 +891,10 @@ void InitLogging()
     fLogIPs = GetBoolArg("-logips", DEFAULT_LOGIPS);
 
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Dash Core version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
+    LogPrintf("DarkSilk Core version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
 }
 
-/** Initialize Dash Core.
+/** Initialize DarkSilk Core.
  *  @pre Parameters should be parsed and config file should be read.
  */
 bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
@@ -1161,7 +1162,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Sanity check
     if (!InitSanityCheck())
-        return InitError(_("Initialization sanity check failed. Dash Core is shutting down."));
+        return InitError(_("Initialization sanity check failed. DarkSilk Core is shutting down."));
 
     std::string strDataDir = GetDataDir().string();
 #ifdef ENABLE_WALLET
@@ -1169,7 +1170,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (strWalletFile != boost::filesystem::basename(strWalletFile) + boost::filesystem::extension(strWalletFile))
         return InitError(strprintf(_("Wallet %s resides outside data directory %s"), strWalletFile, strDataDir));
 #endif
-    // Make sure only a single Dash Core process is using the data directory.
+    // Make sure only a single DarkSilk Core process is using the data directory.
     boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
     if (file) fclose(file);
@@ -1178,9 +1179,9 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         static boost::interprocess::file_lock lock(pathLockFile.string().c_str());
         // Wait maximum 10 seconds if an old wallet is still running. Avoids lockup during restart
         if (!lock.timed_lock(boost::get_system_time() + boost::posix_time::seconds(10)))
-            return InitError(strprintf(_("Cannot obtain a lock on data directory %s. Dash Core is probably already running."), strDataDir));
+            return InitError(strprintf(_("Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running."), strDataDir));
     } catch(const boost::interprocess::interprocess_exception& e) {
-        return InitError(strprintf(_("Cannot obtain a lock on data directory %s. Dash Core is probably already running.") + " %s.", strDataDir, e.what()));
+        return InitError(strprintf(_("Cannot obtain a lock on data directory %s. DarkSilk Core is probably already running.") + " %s.", strDataDir, e.what()));
     }
 
 #ifndef WIN32
@@ -1615,10 +1616,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                              " or address book entries might be missing or incorrect."));
             }
             else if (nLoadWalletRet == DB_TOO_NEW)
-                strErrors << _("Error loading wallet.dat: Wallet requires newer version of Dash Core") << "\n";
+                strErrors << _("Error loading wallet.dat: Wallet requires newer version of DarkSilk Core") << "\n";
             else if (nLoadWalletRet == DB_NEED_REWRITE)
             {
-                strErrors << _("Wallet needed to be rewritten: restart Dash Core to complete") << "\n";
+                strErrors << _("Wallet needed to be rewritten: restart DarkSilk Core to complete") << "\n";
                 LogPrintf("%s", strErrors.str());
                 return InitError(strErrors.str());
             }
@@ -1777,51 +1778,51 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // ********************************************************* Step 11a: setup PrivateSend
-    fMasterNode = GetBoolArg("-masternode", false);
+    fStormnode = GetBoolArg("-stormnode", false);
 
-    if((fMasterNode || masternodeConfig.getCount() > -1) && fTxIndex == false) {
-        return InitError("Enabling Masternode support requires turning on transaction indexing."
+    if((fStormnode || stormnodeConfig.getCount() > -1) && fTxIndex == false) {
+        return InitError("Enabling Stormnode support requires turning on transaction indexing."
                   "Please add txindex=1 to your configuration and start with -reindex");
     }
 
-    if(fMasterNode) {
-        LogPrintf("MASTERNODE:\n");
+    if(fStormnode) {
+        LogPrintf("STORMNODE:\n");
 
-        if(!GetArg("-masternodeaddr", "").empty()) {
-            // Hot masternode (either local or remote) should get its address in
-            // CActiveMasternode::ManageState() automatically and no longer relies on masternodeaddr.
-            return InitError(_("masternodeaddr option is deprecated. Please use masternode.conf to manage your remote masterndodes."));
+        if(!GetArg("-stormnodeaddr", "").empty()) {
+            // Hot stormnode (either local or remote) should get its address in
+            // CActiveStormnode::ManageState() automatically and no longer relies on stormnodeaddr.
+            return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote masterndodes."));
         }
 
-        std::string strMasterNodePrivKey = GetArg("-masternodeprivkey", "");
-        if(!strMasterNodePrivKey.empty()) {
-            if(!darkSendSigner.GetKeysFromSecret(strMasterNodePrivKey, activeMasternode.keyMasternode, activeMasternode.pubKeyMasternode))
-                return InitError(_("Invalid masternodeprivkey. Please see documenation."));
+        std::string strStormnodePrivKey = GetArg("-stormnodeprivkey", "");
+        if(!strStormNodePrivKey.empty()) {
+            if(!sandStormSigner.GetKeysFromSecret(strStormNodePrivKey, activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode))
+                return InitError(_("Invalid stormnodeprivkey. Please see documenation."));
 
-            LogPrintf("  pubKeyMasternode: %s\n", CBitcoinAddress(activeMasternode.pubKeyMasternode.GetID()).ToString());
+            LogPrintf("  pubKeyStormnode: %s\n", CDarkSilkAddress(activeStormnode.pubKeyStormnode.GetID()).ToString());
         } else {
-            return InitError(_("You must specify a masternodeprivkey in the configuration. Please see documentation for help."));
+            return InitError(_("You must specify a stormnodeprivkey in the configuration. Please see documentation for help."));
         }
     }
 
-    LogPrintf("Using masternode config file %s\n", GetMasternodeConfigFile().string());
+    LogPrintf("Using stormnode config file %s\n", GetStormnodeConfigFile().string());
 
-    if(GetBoolArg("-mnconflock", true) && pwalletMain && (masternodeConfig.getCount() > 0)) {
+    if(GetBoolArg("-snconflock", true) && pwalletMain && (stormnodeConfig.getCount() > 0)) {
         LOCK(pwalletMain->cs_wallet);
-        LogPrintf("Locking Masternodes:\n");
-        uint256 mnTxHash;
+        LogPrintf("Locking Stormnodes:\n");
+        uint256 snTxHash;
         int outputIndex;
-        BOOST_FOREACH(CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries()) {
-            mnTxHash.SetHex(mne.getTxHash());
-            outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());
-            COutPoint outpoint = COutPoint(mnTxHash, outputIndex);
+        BOOST_FOREACH(CStormnodeConfig::CStormnodeEntry sne, stormnodeConfig.getEntries()) {
+            snTxHash.SetHex(sne.getTxHash());
+            outputIndex = boost::lexical_cast<unsigned int>(sne.getOutputIndex());
+            COutPoint outpoint = COutPoint(snTxHash, outputIndex);
             // don't lock non-spendable outpoint (i.e. it's already spent or it's not from this wallet at all)
             if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE) {
-                LogPrintf("  %s %s - IS NOT SPENDABLE, was not locked\n", mne.getTxHash(), mne.getOutputIndex());
+                LogPrintf("  %s %s - IS NOT SPENDABLE, was not locked\n", sne.getTxHash(), sne.getOutputIndex());
                 continue;
             }
             pwalletMain->LockCoin(outpoint);
-            LogPrintf("  %s %s - locked successfully\n", mne.getTxHash(), mne.getOutputIndex());
+            LogPrintf("  %s %s - locked successfully\n", sne.getTxHash(), sne.getOutputIndex());
         }
     }
 
@@ -1841,10 +1842,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    //lite mode disables all Masternode and Darksend related functionality
+    //lite mode disables all Stormnode and Darksend related functionality
     fLiteMode = GetBoolArg("-litemode", false);
-    if(fMasterNode && fLiteMode){
-        return InitError("You can not start a masternode in litemode");
+    if(fStormnode && fLiteMode){
+        return InitError("You can not start a stormnode in litemode");
     }
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
@@ -1858,16 +1859,16 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
 
-    uiInterface.InitMessage(_("Loading masternode cache..."));
-    CFlatDB<CMasternodeMan> flatdb1("mncache.dat", "magicMasternodeCache");
-    if(!flatdb1.Load(mnodeman)) {
-        return InitError("Failed to load masternode cache from mncache.dat");
+    uiInterface.InitMessage(_("Loading stormnode cache..."));
+    CFlatDB<CStormnodeMan> flatdb1("sncache.dat", "magicStormnodeCache");
+    if(!flatdb1.Load(snodeman)) {
+        return InitError("Failed to load stormnode cache from sncache.dat");
     }
 
-    uiInterface.InitMessage(_("Loading masternode payment cache..."));
-    CFlatDB<CMasternodePayments> flatdb2("mnpayments.dat", "magicMasternodePaymentsCache");
-    if(!flatdb2.Load(mnpayments)) {
-        return InitError("Failed to load masternode payments cache from mnpayments.dat");
+    uiInterface.InitMessage(_("Loading stormnode payment cache..."));
+    CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
+    if(!flatdb2.Load(snpayments)) {
+        return InitError("Failed to load Stormnode payments cache from snpayments.dat");
     }
 
     CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
@@ -1882,20 +1883,20 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError("Failed to load fulfilled requests cache from netfulfilled.dat");
     }
 
-    // ********************************************************* Step 11c: update block tip in Dash modules
+    // ********************************************************* Step 11c: update block tip in DarkSilk modules
 
-    // force UpdatedBlockTip to initialize pCurrentBlockIndex for DS, MN payments and budgets
+    // force UpdatedBlockTip to initialize pCurrentBlockIndex for SS, SN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
     // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
-    mnodeman.UpdatedBlockTip(chainActive.Tip());
-    darkSendPool.UpdatedBlockTip(chainActive.Tip());
-    mnpayments.UpdatedBlockTip(chainActive.Tip());
-    masternodeSync.UpdatedBlockTip(chainActive.Tip());
+    snodeman.UpdatedBlockTip(chainActive.Tip());
+    sandStormPool.UpdatedBlockTip(chainActive.Tip());
+    snpayments.UpdatedBlockTip(chainActive.Tip());
+    stormnodeSync.UpdatedBlockTip(chainActive.Tip());
     governance.UpdatedBlockTip(chainActive.Tip());
 
-    // ********************************************************* Step 11d: start dash-privatesend thread
+    // ********************************************************* Step 11d: start darksilk-privatesend thread
 
-    threadGroup.create_thread(boost::bind(&ThreadCheckDarkSendPool));
+    threadGroup.create_thread(boost::bind(&ThreadCheckSandStormPool));
 
     // ********************************************************* Step 12: start node
 
@@ -1935,7 +1936,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // --- end disabled ---
 
     // Generate coins in the background
-    GenerateBitcoins(GetBoolArg("-gen", DEFAULT_GENERATE), GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams);
+    GenerateDarkSilks(GetBoolArg("-gen", DEFAULT_GENERATE), GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams);
 
     // ********************************************************* Step 13: finished
 

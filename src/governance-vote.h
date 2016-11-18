@@ -1,7 +1,8 @@
-// Copyright (c) 2014-2016 The Dash Core developers
-
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef GOVERNANCE_VOTE_H
 #define GOVERNANCE_VOTE_H
 
@@ -11,7 +12,7 @@
 #include "key.h"
 #include "util.h"
 #include "base58.h"
-#include "masternode.h"
+#include "stormnode.h"
 #include <boost/lexical_cast.hpp>
 #include "init.h"
 
@@ -19,7 +20,7 @@ using namespace std;
 
 class CGovernanceVote;
 
-// INTENTION OF MASTERNODES REGARDING ITEM
+// INTENTION OF STORMNODES REGARDING ITEM
 enum vote_outcome_enum_t  {
     VOTE_OUTCOME_NONE      = 0,
     VOTE_OUTCOME_YES       = 1,
@@ -86,7 +87,7 @@ public:
 };
 
 //
-// CGovernanceVote - Allow a masternode node to vote and broadcast throughout the network
+// CGovernanceVote - Allow a stormnode node to vote and broadcast throughout the network
 //
 
 class CGovernanceVote
@@ -99,7 +100,7 @@ private:
     bool fValid; //if the vote is currently valid / counted
     bool fSynced; //if we've sent this to our peers
     int nVoteSignal; // see VOTE_ACTIONS above
-    CTxIn vinMasternode;
+    CTxIn vinStormnode;
     uint256 nParentHash;
     int nVoteOutcome; // see VOTE_OUTCOMES above
     int64_t nTime;
@@ -107,7 +108,7 @@ private:
 
 public:
     CGovernanceVote();
-    CGovernanceVote(CTxIn vinMasternodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
+    CGovernanceVote(CTxIn vinStormnodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
 
     bool IsValid() const { return fValid; }
 
@@ -125,7 +126,7 @@ public:
 
     void SetSignature(const std::vector<unsigned char>& vchSigIn) { vchSig = vchSigIn; }
 
-    bool Sign(CKey& keyMasternode, CPubKey& pubKeyMasternode);
+    bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
     bool IsValid(bool fSignatureCheck) const;
     void Relay() const;
 
@@ -133,9 +134,9 @@ public:
         return CGovernanceVoting::ConvertOutcomeToString(GetOutcome());
     }
 
-    CTxIn& GetVinMasternode() { return vinMasternode; }
+    CTxIn& GetVinStormnode() { return vinStormnode; }
 
-    const CTxIn& GetVinMasternode() const { return vinMasternode; }
+    const CTxIn& GetVinStormnode() const { return vinStormnode; }
 
     /**
     *   GetHash()
@@ -146,7 +147,7 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinMasternode;
+        ss << vinStormnode;
         ss << nParentHash;
         ss << nVoteSignal;
         ss << nVoteOutcome;
@@ -157,7 +158,7 @@ public:
     std::string ToString() const
     {
         std::ostringstream ostr;
-        ostr << vinMasternode.ToString() << ":"
+        ostr << vinStormnode.ToString() << ":"
              << nTime << ":"
              << CGovernanceVoting::ConvertOutcomeToString(GetOutcome()) << ":"
              << CGovernanceVoting::ConvertSignalToString(GetSignal());
@@ -167,15 +168,15 @@ public:
     /**
     *   GetTypeHash()
     *
-    *   GET HASH WITH DETERMINISTIC VALUE OF MASTERNODE-VIN/PARENT-HASH/VOTE-SIGNAL
+    *   GET HASH WITH DETERMINISTIC VALUE OF STORMNODE-VIN/PARENT-HASH/VOTE-SIGNAL
     *
-    *   This hash collides with previous masternode votes when they update their votes on governance objects.
+    *   This hash collides with previous stormnode votes when they update their votes on governance objects.
     *   With 12.1 there's various types of votes (funding, valid, delete, etc), so this is the deterministic hash
     *   that will collide with the previous vote and allow the system to update.
     *
     *   --
     *
-    *   We do not include an outcome, because that can change when a masternode updates their vote from yes to no
+    *   We do not include an outcome, because that can change when a stormnode updates their vote from yes to no
     *   on funding a specific project for example.
     *   We do not include a time because it will be updated each time the vote is updated, changing the hash
     */
@@ -184,7 +185,7 @@ public:
         // CALCULATE HOW TO STORE VOTE IN governance.mapVotes
 
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinMasternode;
+        ss << vinStormnode;
         ss << nParentHash;
         ss << nVoteSignal;
         //  -- no outcome
@@ -196,7 +197,7 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(vinMasternode);
+        READWRITE(vinStormnode);
         READWRITE(nParentHash);
         READWRITE(nVoteOutcome);
         READWRITE(nVoteSignal);

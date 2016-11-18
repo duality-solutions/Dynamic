@@ -2,8 +2,8 @@
 // Copyright (c) 2009-2015 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef BITCOIN_POLICYESTIMATOR_H
-#define BITCOIN_POLICYESTIMATOR_H
+#ifndef DARKSILK_POLICYESTIMATOR_H
+#define DARKSILK_POLICYESTIMATOR_H
 
 #include "amount.h"
 #include "uint256.h"
@@ -286,4 +286,4 @@ private:
     CFeeRate feeLikely, feeUnlikely;
     double priLikely, priUnlikely;
 };
-#endif /*BITCOIN_POLICYESTIMATOR_H */
+#endif /*DARKSILK_POLICYESTIMATOR_H */

@@ -1,5 +1,12 @@
-#ifndef _BITCOIN_PREVECTOR_H_
-#define _BITCOIN_PREVECTOR_H_
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#ifndef DARKSILK_PREVECTOR_H
+#define DARKSILK_PREVECTOR_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -474,4 +481,4 @@ public:
 };
 #pragma pack(pop)
 
-#endif
+#endif // DARKSILK_PREVECTOR_H

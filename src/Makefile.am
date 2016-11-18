@@ -5,19 +5,19 @@ AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
 AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
-BITCOIN_CONFIG_INCLUDES=-I$(builddir)/config
-BITCOIN_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+DARKSILK_CONFIG_INCLUDES=-I$(builddir)/config
+DARKSILK_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
-BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include
-BITCOIN_INCLUDES += -I$(srcdir)/univalue/include
+DARKSILK_INCLUDES += -I$(srcdir)/secp256k1/include
+DARKSILK_INCLUDES += -I$(srcdir)/univalue/include
 
-LIBBITCOIN_SERVER=libbitcoin_server.a
-LIBBITCOIN_WALLET=libbitcoin_wallet.a
-LIBBITCOIN_COMMON=libbitcoin_common.a
-LIBBITCOIN_CLI=libbitcoin_cli.a
-LIBBITCOIN_UTIL=libbitcoin_util.a
-LIBBITCOIN_CRYPTO=crypto/libbitcoin_crypto.a
-LIBBITCOINQT=qt/libbitcoinqt.a
+LIBDARKSILK_SERVER=libdarksilk_server.a
+LIBDARKSILK_WALLET=libdarksilk_wallet.a
+LIBDARKSILK_COMMON=libdarksilk_common.a
+LIBDARKSILK_CLI=libdarksilk_cli.a
+LIBDARKSILK_UTIL=libdarksilk_util.a
+LIBDARKSILK_CRYPTO=crypto/libdarksilk_crypto.a
+LIBDARKSILKQT=qt/libdarksilkqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
 
@@ -30,42 +30,42 @@ $(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
 EXTRA_LIBRARIES += \
-  crypto/libbitcoin_crypto.a \
-  libbitcoin_util.a \
-  libbitcoin_common.a \
-  libbitcoin_server.a \
-  libbitcoin_cli.a
+  crypto/libdarksilk_crypto.a \
+  libdarksilk_util.a \
+  libdarksilk_common.a \
+  libdarksilk_server.a \
+  libdarksilk_cli.a
 if ENABLE_WALLET
-BITCOIN_INCLUDES += $(BDB_CPPFLAGS)
-EXTRA_LIBRARIES += libbitcoin_wallet.a
+DARKSILK_INCLUDES += $(BDB_CPPFLAGS)
+EXTRA_LIBRARIES += libdarksilk_wallet.a
 endif
 if ENABLE_ZMQ
-EXTRA_LIBRARIES += libbitcoin_zmq.a
+EXTRA_LIBRARIES += libdarksilk_zmq.a
 endif
 
-if BUILD_BITCOIN_LIBS
-lib_LTLIBRARIES = libbitcoinconsensus.la
-LIBBITCOIN_CONSENSUS=libbitcoinconsensus.la
+if BUILD_DARKSILK_LIBS
+lib_LTLIBRARIES = libdarksilkconsensus.la
+LIBDARKSILK_CONSENSUS=libdarksilkconsensus.la
 else
-LIBBITCOIN_CONSENSUS=
+LIBDARKSILK_CONSENSUS=
 endif
 
 bin_PROGRAMS =
 TESTS =
 BENCHMARKS =
 
-if BUILD_BITCOIND
-  bin_PROGRAMS += dashd
+if BUILD_DARKSILKD
+  bin_PROGRAMS += darksilkd
 endif
 
-if BUILD_BITCOIN_UTILS
-  bin_PROGRAMS += dash-cli dash-tx
+if BUILD_DARKSILK_UTILS
+  bin_PROGRAMS += darksilk-cli darksilk-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
-# dash core #
-BITCOIN_CORE_H = \
-  activemasternode.h \
+# darksilk core #
+DARKSILK_CORE_H = \
+  activestormnode.h \
   addressindex.h \
   spentindex.h \
   addrman.h \
@@ -96,9 +96,9 @@ BITCOIN_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  darksend.h \
-  dsnotificationinterface.h \
-  darksend-relay.h \
+  sandstorm.h \
+  ssnotificationinterface.h \
+  sandstorm-relay.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -116,11 +116,11 @@ BITCOIN_CORE_H = \
   dbwrapper.h \
   limitedmap.h \
   main.h \
-  masternode.h \
-  masternode-payments.h \
-  masternode-sync.h \
-  masternodeman.h \
-  masternodeconfig.h \
+  stormnode.h \
+  stormnode-payments.h \
+  stormnode-sync.h \
+  stormnodeman.h \
+  stormnodeconfig.h \
   memusage.h \
   merkleblock.h \
   miner.h \
@@ -188,12 +188,12 @@ obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
 	@$(top_srcdir)/share/genbuild.sh $(abs_top_builddir)/src/obj/build.h \
 	  $(abs_top_srcdir)
-libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
+libdarksilk_util_a-clientversion.$(OBJEXT): obj/build.h
 
-# server: shared between dashd and dash-qt
-libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
-libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_server_a_SOURCES = \
+# server: shared between darksilkd and darksilk-qt
+libdarksilk_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+libdarksilk_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_server_a_SOURCES = \
   addrman.cpp \
   alert.cpp \
   bloom.cpp \
@@ -218,7 +218,7 @@ libbitcoin_server_a_SOURCES = \
   pow.cpp \
   rest.cpp \
   rpcblockchain.cpp \
-  rpcmasternode.cpp \
+  rpcstormnode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
   rpcmisc.cpp \
@@ -232,35 +232,35 @@ libbitcoin_server_a_SOURCES = \
   txmempool.cpp \
   validationinterface.cpp \
   versionbits.cpp \
-  $(BITCOIN_CORE_H)
+  $(DARKSILK_CORE_H)
 
 if ENABLE_ZMQ
-LIBBITCOIN_ZMQ=libbitcoin_zmq.a
+LIBDARKSILK_ZMQ=libdarksilk_zmq.a
 
-libbitcoin_zmq_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(ZMQ_CFLAGS)
-libbitcoin_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_zmq_a_SOURCES = \
+libdarksilk_zmq_a_CPPFLAGS = $(DARKSILK_INCLUDES) $(ZMQ_CFLAGS)
+libdarksilk_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_zmq_a_SOURCES = \
   zmq/zmqabstractnotifier.cpp \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp
 endif
 
 
-# wallet: shared between dashd and dash-qt, but only linked
+# wallet: shared between darksilkd and darksilk-qt, but only linked
 # when wallet enabled
-libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_wallet_a_SOURCES = \
-  activemasternode.cpp \
-  darksend.cpp \
-  dsnotificationinterface.cpp \
-  darksend-relay.cpp \
+libdarksilk_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+libdarksilk_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_wallet_a_SOURCES = \
+  activestormnode.cpp \
+  sandstorm.cpp \
+  ssnotificationinterface.cpp \
+  sandstorm-relay.cpp \
   instantx.cpp \
-  masternode.cpp \
-  masternode-payments.cpp \
-  masternode-sync.cpp \
-  masternodeconfig.cpp \
-  masternodeman.cpp \
+  stormnode.cpp \
+  stormnode-payments.cpp \
+  stormnode-sync.cpp \
+  stormnodeconfig.cpp \
+  stormnodeman.cpp \
   keepass.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
@@ -270,12 +270,12 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
   policy/rbf.cpp \
-  $(BITCOIN_CORE_H)
+  $(DARKSILK_CORE_H)
 
 # crypto primitives library
-crypto_libbitcoin_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_CONFIG_INCLUDES) $(PIC_FLAGS)
-crypto_libbitcoin_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
-crypto_libbitcoin_crypto_a_SOURCES = \
+crypto_libdarksilk_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_CONFIG_INCLUDES) $(PIC_FLAGS)
+crypto_libdarksilk_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
+crypto_libdarksilk_crypto_a_SOURCES = \
   crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
@@ -315,10 +315,10 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/sha512.cpp \
   crypto/sha512.h
 
-# common: shared between dashd, and dash-qt and non-server tools
-libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_common_a_SOURCES = \
+# common: shared between darksilkd, and darksilk-qt and non-server tools
+libdarksilk_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+libdarksilk_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_common_a_SOURCES = \
   amount.cpp \
   arith_uint256.cpp \
   base58.cpp \
@@ -343,14 +343,14 @@ libbitcoin_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   spork.cpp \
-  $(BITCOIN_CORE_H)
+  $(DARKSILK_CORE_H)
 
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc
 # backward-compatibility objects and their sanity checks are linked.
-libbitcoin_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libbitcoin_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_util_a_SOURCES = \
+libdarksilk_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+libdarksilk_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_util_a_SOURCES = \
   support/pagelocker.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
@@ -366,93 +366,93 @@ libbitcoin_util_a_SOURCES = \
   utilmoneystr.cpp \
   utilstrencodings.cpp \
   utiltime.cpp \
-  $(BITCOIN_CORE_H)
+  $(DARKSILK_CORE_H)
 
 if GLIBC_BACK_COMPAT
-libbitcoin_util_a_SOURCES += compat/glibc_compat.cpp
+libdarksilk_util_a_SOURCES += compat/glibc_compat.cpp
 endif
 
-# cli: shared between dash-cli and dash-qt
-libbitcoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libbitcoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_cli_a_SOURCES = \
+# cli: shared between darksilk-cli and darksilk-qt
+libdarksilk_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+libdarksilk_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilk_cli_a_SOURCES = \
   rpcclient.cpp \
-  $(BITCOIN_CORE_H)
+  $(DARKSILK_CORE_H)
 
-nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
+nodist_libdarksilk_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# bitcoind binary #
-dashd_SOURCES = dashd.cpp
-dashd_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-dashd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dashd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# darksilkd binary #
+darksilkd_SOURCES = darksilkd.cpp
+darksilkd_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+darksilkd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+darksilkd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-dashd_SOURCES += dashd-res.rc
+darksilkd_SOURCES += darksilkd-res.rc
 endif
 
-dashd_LDADD = \
-  $(LIBBITCOIN_SERVER) \
-  $(LIBBITCOIN_COMMON) \
+darksilkd_LDADD = \
+  $(LIBDARKSILK_SERVER) \
+  $(LIBDARKSILK_COMMON) \
   $(LIBUNIVALUE) \
-  $(LIBBITCOIN_UTIL) \
-  $(LIBBITCOIN_CRYPTO) \
+  $(LIBDARKSILK_UTIL) \
+  $(LIBDARKSILK_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
 if ENABLE_ZMQ
-dashd_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+darksilkd_LDADD += $(LIBDARKSILK_ZMQ) $(ZMQ_LIBS)
 endif
 
 if ENABLE_WALLET
-dashd_LDADD += libbitcoin_wallet.a
+darksilkd_LDADD += libdarksilk_wallet.a
 endif
 
-dashd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+darksilkd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 
-# dash-cli binary #
-dash_cli_SOURCES = dash-cli.cpp
-dash_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-dash_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dash_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# darksilk-cli binary #
+darksilk_cli_SOURCES = darksilk-cli.cpp
+darksilk_cli_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES) $(EVENT_CFLAGS)
+darksilk_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+darksilk_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-dash_cli_SOURCES += dash-cli-res.rc
+darksilk_cli_SOURCES += darksilk-cli-res.rc
 endif
 
-dash_cli_LDADD = \
-  $(LIBBITCOIN_CLI) \
+darksilk_cli_LDADD = \
+  $(LIBDARKSILK_CLI) \
   $(LIBUNIVALUE) \
-  $(LIBBITCOIN_UTIL)
-dash_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+  $(LIBDARKSILK_UTIL)
+darksilk_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# dash-tx binary #
-dash_tx_SOURCES = dash-tx.cpp
-dash_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-dash_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dash_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# darksilk-tx binary #
+darksilk_tx_SOURCES = darksilk-tx.cpp
+darksilk_tx_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
+darksilk_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+darksilk_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-dash_tx_SOURCES += dash-tx-res.rc
+darksilk_tx_SOURCES += darksilk-tx-res.rc
 endif
 
-dash_tx_LDADD = \
+darksilk_tx_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBBITCOIN_COMMON) \
-  $(LIBBITCOIN_UTIL) \
-  $(LIBBITCOIN_CRYPTO) \
+  $(LIBDARKSILK_COMMON) \
+  $(LIBDARKSILK_UTIL) \
+  $(LIBDARKSILK_CRYPTO) \
   $(LIBSECP256K1)
 
-dash_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+darksilk_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-# bitcoinconsensus library #
-if BUILD_BITCOIN_LIBS
-include_HEADERS = script/bitcoinconsensus.h
-libbitcoinconsensus_la_SOURCES = \
+# darksilkconsensus library #
+if BUILD_DARKSILK_LIBS
+include_HEADERS = script/darksilkconsensus.h
+libdarksilkconsensus_la_SOURCES = \
   crypto/hmac_sha512.cpp \
   crypto/ripemd160.cpp \
   crypto/sha1.cpp \
@@ -461,20 +461,20 @@ libbitcoinconsensus_la_SOURCES = \
   hash.cpp \
   primitives/transaction.cpp \
   pubkey.cpp \
-  script/bitcoinconsensus.cpp \
+  script/darksilkconsensus.cpp \
   script/interpreter.cpp \
   script/script.cpp \
   uint256.cpp \
   utilstrencodings.cpp
 
 if GLIBC_BACK_COMPAT
-  libbitcoinconsensus_la_SOURCES += compat/glibc_compat.cpp
+  libdarksilkconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libbitcoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libbitcoinconsensus_la_LIBADD = $(LIBSECP256K1)
-libbitcoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
-libbitcoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libdarksilkconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
+libdarksilkconsensus_la_LIBADD = $(LIBSECP256K1)
+libdarksilkconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_DARKSILK_INTERNAL
+libdarksilkconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #

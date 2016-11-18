@@ -1,6 +1,8 @@
-// Copyright (c) 2009-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef INSTANTX_H
 #define INSTANTX_H
 
@@ -24,11 +26,11 @@ class CTxLockCandidate;
     ### getting 5 of 10 signatures w/ 1000 nodes of 2900
     (1000/2900.0)**5 = 0.004875397277841433
 */
-static const int INSTANTSEND_SIGNATURES_REQUIRED    = 6;
-static const int INSTANTSEND_SIGNATURES_TOTAL       = 10;
-static const int DEFAULT_INSTANTSEND_DEPTH          = 5;
+static const int INSTANTSEND_SIGNATURES_REQUIRED    = 10;
+static const int INSTANTSEND_SIGNATURES_TOTAL       = 20;
+static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70202;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 60800;
 static const CAmount INSTANTSEND_MIN_FEE            = 0.1 * CENT;
 
 extern bool fEnableInstantSend;
@@ -81,18 +83,18 @@ int64_t GetAverageUnknownVoteTime();
 class CTxLockVote
 {
 public:
-    CTxIn vinMasternode;
+    CTxIn vinStormnode;
     uint256 txHash;
     int nBlockHeight;
-    std::vector<unsigned char> vchMasterNodeSignature;
+    std::vector<unsigned char> vchStormNodeSignature;
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(txHash);
-        READWRITE(vinMasternode);
-        READWRITE(vchMasterNodeSignature);
+        READWRITE(vinStormnode);
+        READWRITE(vchStormNodeSignature);
         READWRITE(nBlockHeight);
     }
 
@@ -119,4 +121,4 @@ public:
 };
 
 
-#endif
+#endif // INSTANTX_H

@@ -1,7 +1,8 @@
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
@@ -17,7 +18,7 @@
 #include "spork.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
-#include "masternode-sync.h"
+#include "stormnode-sync.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
@@ -121,11 +122,11 @@ UniValue debug(const UniValue& params, bool fHelp)
         throw runtime_error(
             "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
             "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
-            "dash|privatesend|instantsend|masternode|spork|keepass|mnpayments|gobject )\n"
+            "darksilk|privatesend|instantsend|stormnode|spork|keepass|snpayments|gobject )\n"
             "Change debug category on the fly. Specify single category or use comma to specify many.\n"
             "\nExamples:\n"
-            + HelpExampleCli("debug", "dash")
-            + HelpExampleRpc("debug", "dash,net")
+            + HelpExampleCli("debug", "darksilk")
+            + HelpExampleRpc("debug", "darksilk,net")
         );
 
     std::string strMode = params[0].get_str();
@@ -139,11 +140,11 @@ UniValue debug(const UniValue& params, bool fHelp)
     return "Debug mode: " + (fDebug ? strMode : "off");
 }
 
-UniValue mnsync(const UniValue& params, bool fHelp)
+UniValue snsync(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "mnsync [status|next|reset]\n"
+            "snsync [status|next|reset]\n"
             "Returns the sync status, updates to the next step or resets it entirely.\n"
         );
 
@@ -151,26 +152,26 @@ UniValue mnsync(const UniValue& params, bool fHelp)
 
     if(strMode == "status") {
         UniValue objStatus(UniValue::VOBJ);
-        objStatus.push_back(Pair("AssetID", masternodeSync.GetAssetID()));
-        objStatus.push_back(Pair("AssetName", masternodeSync.GetAssetName()));
-        objStatus.push_back(Pair("Attempt", masternodeSync.GetAttempt()));
-        objStatus.push_back(Pair("IsBlockchainSynced", masternodeSync.IsBlockchainSynced()));
-        objStatus.push_back(Pair("IsMasternodeListSynced", masternodeSync.IsMasternodeListSynced()));
-        objStatus.push_back(Pair("IsWinnersListSynced", masternodeSync.IsWinnersListSynced()));
-        objStatus.push_back(Pair("IsSynced", masternodeSync.IsSynced()));
-        objStatus.push_back(Pair("IsFailed", masternodeSync.IsFailed()));
+        objStatus.push_back(Pair("AssetID", stormnodeSync.GetAssetID()));
+        objStatus.push_back(Pair("AssetName", stormnodeSync.GetAssetName()));
+        objStatus.push_back(Pair("Attempt", stormnodeSync.GetAttempt()));
+        objStatus.push_back(Pair("IsBlockchainSynced", stormnodeSync.IsBlockchainSynced()));
+        objStatus.push_back(Pair("IsStormnodeListSynced", stormnodeSync.IsStormnodeListSynced()));
+        objStatus.push_back(Pair("IsWinnersListSynced", stormnodeSync.IsWinnersListSynced()));
+        objStatus.push_back(Pair("IsSynced", stormnodeSync.IsSynced()));
+        objStatus.push_back(Pair("IsFailed", stormnodeSync.IsFailed()));
         return objStatus;
     }
 
     if(strMode == "next")
     {
-        masternodeSync.SwitchToNextAsset();
-        return "sync updated to " + masternodeSync.GetAssetName();
+        stormnodeSync.SwitchToNextAsset();
+        return "sync updated to " + stormnodeSync.GetAssetName();
     }
 
     if(strMode == "reset")
     {
-        masternodeSync.Reset();
+        stormnodeSync.Reset();
         return "success";
     }
     return "failure";
@@ -206,7 +207,7 @@ public:
             obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
             UniValue a(UniValue::VARR);
             BOOST_FOREACH(const CTxDestination& addr, addresses)
-                a.push_back(CBitcoinAddress(addr).ToString());
+                a.push_back(CDarkSilkAddress(addr).ToString());
             obj.push_back(Pair("addresses", a));
             if (whichType == TX_MULTISIG)
                 obj.push_back(Pair("sigsrequired", nRequired));
@@ -292,7 +293,7 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
     LOCK(cs_main);
 #endif
 
-    CBitcoinAddress address(params[0].get_str());
+    CDarkSilkAddress address(params[0].get_str());
     bool isValid = address.IsValid();
 
     UniValue ret(UniValue::VOBJ);
@@ -343,7 +344,7 @@ CScript _createmultisig_redeemScript(const UniValue& params)
         const std::string& ks = keys[i].get_str();
 #ifdef ENABLE_WALLET
         // Case 1: Dash address and we have full public key:
-        CBitcoinAddress address(ks);
+        CDarkSilkAddress address(ks);
         if (pwalletMain && address.IsValid())
         {
             CKeyID keyID;
@@ -417,7 +418,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
     // Construct using pay-to-script-hash:
     CScript inner = _createmultisig_redeemScript(params);
     CScriptID innerID(inner);
-    CBitcoinAddress address(innerID);
+    CDarkSilkAddress address(innerID);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("address", address.ToString()));
@@ -455,7 +456,7 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
     string strSign     = params[1].get_str();
     string strMessage  = params[2].get_str();
 
-    CBitcoinAddress addr(strAddress);
+    CDarkSilkAddress addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -514,9 +515,9 @@ UniValue setmocktime(const UniValue& params, bool fHelp)
 bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &address)
 {
     if (type == 2) {
-        address = CBitcoinAddress(CScriptID(hash)).ToString();
+        address = CDarkSilkAddress(CScriptID(hash)).ToString();
     } else if (type == 1) {
-        address = CBitcoinAddress(CKeyID(hash)).ToString();
+        address = CDarkSilkAddress(CKeyID(hash)).ToString();
     } else {
         return false;
     }
@@ -526,7 +527,7 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
 bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint160, int> > &addresses)
 {
     if (params[0].isStr()) {
-        CBitcoinAddress address(params[0].get_str());
+        CDarkSilkAddress address(params[0].get_str());
         uint160 hashBytes;
         int type = 0;
         if (!address.GetIndexKey(hashBytes, type)) {
@@ -544,7 +545,7 @@ bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint16
 
         for (std::vector<UniValue>::iterator it = values.begin(); it != values.end(); ++it) {
 
-            CBitcoinAddress address(it->get_str());
+            CDarkSilkAddress address(it->get_str());
             uint160 hashBytes;
             int type = 0;
             if (!address.GetIndexKey(hashBytes, type)) {

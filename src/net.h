@@ -1,10 +1,12 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_NET_H
-#define BITCOIN_NET_H
+#ifndef DARKSILK_NET_H
+#define DARKSILK_NET_H
 
 #include "bloom.h"
 #include "compat.h"
@@ -82,9 +84,9 @@ CNode* FindNode(const CNetAddr& ip);
 CNode* FindNode(const CSubNet& subNet);
 CNode* FindNode(const std::string& addrName);
 CNode* FindNode(const CService& ip);
-// fConnectToMasternode should be 'true' only if you want this node to allow to connect to itself
-// and/or you want it to be disconnected on CMasternodeMan::ProcessMasternodeConnections()
-CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToMasternode = false);
+// fConnectToStormnode should be 'true' only if you want this node to allow to connect to itself
+// and/or you want it to be disconnected on CStormnodeMan::ProcessStormnodeConnections()
+CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToStormnode = false);
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false);
 void MapPort(bool fUseUPnP);
 unsigned short GetListenPort();
@@ -356,8 +358,8 @@ public:
     // b) the peer may tell us in its version message that we should not relay tx invs
     //    unless it loads a bloom filter.
     bool fRelayTxes;
-    // If 'true' this node will be disconnected on CMasternodeMan::ProcessMasternodeConnections()
-    bool fMasternode;
+    // If 'true' this node will be disconnected on CStormnodeMan::ProcessStormnodeConnections()
+    bool fStormnode;
     CSemaphoreGrant grantOutbound;
     CCriticalSection cs_filter;
     CBloomFilter* pfilter;
@@ -847,4 +849,4 @@ void DumpBanlist();
 /** Return a timestamp in the future (in microseconds) for exponentially distributed events. */
 int64_t PoissonNextSend(int64_t nNow, int average_interval_seconds);
 
-#endif // BITCOIN_NET_H
+#endif // DARKSILK_NET_H

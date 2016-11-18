@@ -1,17 +1,17 @@
-
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSEND_RELAY_H
-#define DARKSEND_RELAY_H
+#ifndef SANDSTORM_RELAY_H
+#define SANDSTORM_RELAY_H
 
 #include "main.h"
-#include "activemasternode.h"
-#include "masternodeman.h"
+#include "activestormnode.h"
+#include "stormnodeman.h"
 
 
-class CDarkSendRelay
+class CSandStormRelay
 {
 public:
     CTxIn vinMasternode;
@@ -22,14 +22,14 @@ public:
     CTxIn in;
     CTxOut out;
 
-    CDarkSendRelay();
-    CDarkSendRelay(CTxIn& vinMasternodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
+    CSandStormRelay();
+    CSandStormRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
     
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(vinMasternode);
+        READWRITE(vinStormnode);
         READWRITE(vchSig);
         READWRITE(vchSig2);
         READWRITE(nBlockHeight);
@@ -48,4 +48,4 @@ public:
 
 
 
-#endif
+#endif // SANDSTORM_RELAY_H

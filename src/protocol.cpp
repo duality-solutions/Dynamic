@@ -1,6 +1,8 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "protocol.h"
@@ -35,36 +37,36 @@ const char *FILTERADD="filteradd";
 const char *FILTERCLEAR="filterclear";
 const char *REJECT="reject";
 const char *SENDHEADERS="sendheaders";
-// Dash message types
+// DarkSilk message types
 const char *TXLOCKREQUEST="ix";
 const char *TXLOCKVOTE="txlvote";
 const char *SPORK="spork";
 const char *GETSPORKS="getsporks";
-const char *MASTERNODEPAYMENTVOTE="mnw";
-const char *MASTERNODEPAYMENTBLOCK="mnwb";
-const char *MASTERNODEPAYMENTSYNC="mnget";
-const char *MNBUDGETSYNC="mnvs"; // depreciated since 12.1
-const char *MNBUDGETVOTE="mvote"; // depreciated since 12.1
-const char *MNBUDGETPROPOSAL="mprop"; // depreciated since 12.1
-const char *MNBUDGETFINAL="fbs"; // depreciated since 12.1
-const char *MNBUDGETFINALVOTE="fbvote"; // depreciated since 12.1
-const char *MNQUORUM="mn quorum"; // not implemented
-const char *MNANNOUNCE="mnb";
-const char *MNPING="mnp";
-const char *DSACCEPT="dsa";
-const char *DSVIN="dsi";
-const char *DSFINALTX="dsf";
-const char *DSSIGNFINALTX="dss";
-const char *DSCOMPLETE="dsc";
-const char *DSSTATUSUPDATE="dssu";
-const char *DSTX="dstx";
-const char *DSQUEUE="dsq";
-const char *DSEG="dseg";
+const char *STORMNODEPAYMENTVOTE="snw";
+const char *STORMNODEPAYMENTBLOCK="snwb";
+const char *STORMNODEPAYMENTSYNC="snget";
+const char *SNBUDGETSYNC="snvs"; // depreciated since 12.1
+const char *SNBUDGETVOTE="svote"; // depreciated since 12.1
+const char *SNBUDGETPROPOSAL="sprop"; // depreciated since 12.1
+const char *SNBUDGETFINAL="fbs"; // depreciated since 12.1
+const char *SNBUDGETFINALVOTE="fbvote"; // depreciated since 12.1
+const char *SNQUORUM="sn quorum"; // not implemented
+const char *SNANNOUNCE="snb";
+const char *SNPING="snp";
+const char *SSACCEPT="ssa";
+const char *SSVIN="ssi";
+const char *SSFINALTX="ssf";
+const char *SSSIGNFINALTX="sss";
+const char *SSCOMPLETE="ssc";
+const char *SSSTATUSUPDATE="sssu";
+const char *SSTX="sstx";
+const char *SSQUEUE="ssq";
+const char *SSEG="sseg";
 const char *SYNCSTATUSCOUNT="ssc";
-const char *MNGOVERNANCESYNC="govsync";
-const char *MNGOVERNANCEOBJECT="govobj";
-const char *MNGOVERNANCEOBJECTVOTE="govobjvote";
-const char *MNVERIFY="mnv";
+const char *SNGOVERNANCESYNC="govsync";
+const char *SNGOVERNANCEOBJECT="govobj";
+const char *SNGOVERNANCEOBJECTVOTE="govobjvote";
+const char *SNVERIFY="snv";
 };
 
 static const char* ppszTypeName[] =
@@ -73,24 +75,24 @@ static const char* ppszTypeName[] =
     NetMsgType::TX,
     NetMsgType::BLOCK,
     "filtered block", // Should never occur
-    // Dash message types
+    // DarkSilk message types
     // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
     NetMsgType::TXLOCKREQUEST,
     NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
-    NetMsgType::MASTERNODEPAYMENTVOTE,
-    NetMsgType::MASTERNODEPAYMENTBLOCK, // reusing, was MNSCANERROR previousely, was NOT used in 12.0, we need this for inv
-    NetMsgType::MNBUDGETVOTE, // depreciated since 12.1
-    NetMsgType::MNBUDGETPROPOSAL, // depreciated since 12.1
-    NetMsgType::MNBUDGETFINAL, // depreciated since 12.1
-    NetMsgType::MNBUDGETFINALVOTE, // depreciated since 12.1
-    NetMsgType::MNQUORUM, // not implemented
-    NetMsgType::MNANNOUNCE,
-    NetMsgType::MNPING,
-    NetMsgType::DSTX,
-    NetMsgType::MNGOVERNANCEOBJECT,
-    NetMsgType::MNGOVERNANCEOBJECTVOTE,
-    NetMsgType::MNVERIFY,
+    NetMsgType::STORMNODEPAYMENTVOTE,
+    NetMsgType::STORMNODEPAYMENTBLOCK, // reusing, was SNSCANERROR previousely, was NOT used in 12.0, we need this for inv
+    NetMsgType::SNBUDGETVOTE, // depreciated since 12.1
+    NetMsgType::SNBUDGETPROPOSAL, // depreciated since 12.1
+    NetMsgType::SNBUDGETFINAL, // depreciated since 12.1
+    NetMsgType::SNBUDGETFINALVOTE, // depreciated since 12.1
+    NetMsgType::SNQUORUM, // not implemented
+    NetMsgType::SNANNOUNCE,
+    NetMsgType::SNPING,
+    NetMsgType::SSTX,
+    NetMsgType::SNGOVERNANCEOBJECT,
+    NetMsgType::SNGOVERNANCEOBJECTVOTE,
+    NetMsgType::SNVERIFY,
 };
 
 /** All known message types. Keep this in the same order as the list of
@@ -125,25 +127,25 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
-    NetMsgType::MASTERNODEPAYMENTVOTE,
+    NetMsgType::STORMNODEPAYMENTVOTE,
     // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
-    NetMsgType::MASTERNODEPAYMENTSYNC,
-    NetMsgType::MNANNOUNCE,
-    NetMsgType::MNPING,
-    NetMsgType::DSACCEPT,
-    NetMsgType::DSVIN,
-    NetMsgType::DSFINALTX,
-    NetMsgType::DSSIGNFINALTX,
-    NetMsgType::DSCOMPLETE,
-    NetMsgType::DSSTATUSUPDATE,
-    NetMsgType::DSTX,
-    NetMsgType::DSQUEUE,
-    NetMsgType::DSEG,
+    NetMsgType::STORMNODEPAYMENTSYNC,
+    NetMsgType::SNANNOUNCE,
+    NetMsgType::SNPING,
+    NetMsgType::SSACCEPT,
+    NetMsgType::SSVIN,
+    NetMsgType::SSFINALTX,
+    NetMsgType::SSSIGNFINALTX,
+    NetMsgType::SSCOMPLETE,
+    NetMsgType::SSSTATUSUPDATE,
+    NetMsgType::SSTX,
+    NetMsgType::SSQUEUE,
+    NetMsgType::SSEG,
     NetMsgType::SYNCSTATUSCOUNT,
-    NetMsgType::MNGOVERNANCESYNC,
-    NetMsgType::MNGOVERNANCEOBJECT,
-    NetMsgType::MNGOVERNANCEOBJECTVOTE,
-    NetMsgType::MNVERIFY,
+    NetMsgType::SNGOVERNANCESYNC,
+    NetMsgType::SNGOVERNANCEOBJECT,
+    NetMsgType::SNGOVERNANCEOBJECTVOTE,
+    NetMsgType::SNVERIFY,
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 

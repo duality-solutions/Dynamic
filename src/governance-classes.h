@@ -1,10 +1,14 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef GOVERNANCE_CLASSES_H
 #define GOVERNANCE_CLASSES_H
 
-//#define ENABLE_DASH_DEBUG
+//#define ENABLE_DARKSILK_DEBUG
 
 #include "util.h"
 #include "main.h"
@@ -13,7 +17,7 @@
 #include "key.h"
 #include "util.h"
 #include "base58.h"
-#include "masternode.h"
+#include "stormnode.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include "init.h"
@@ -104,7 +108,7 @@ public:
          nAmount(0)
     {}
 
-    CGovernancePayment(CBitcoinAddress addrIn, CAmount nAmountIn)
+    CGovernancePayment(CDarkSilkAddress addrIn, CAmount nAmountIn)
         :fValid(false),
          script(),
          nAmount(0)

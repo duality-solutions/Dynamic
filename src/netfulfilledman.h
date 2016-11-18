@@ -1,9 +1,12 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef NETFULFILLEDMAN_H
-#define NETFULFILLEDMAN_H
+#ifndef DARKSILK_NETFULFILLEDMAN_H
+#define DARKSILK_NETFULFILLEDMAN_H
 
 #include "netbase.h"
 #include "protocol.h"
@@ -46,4 +49,4 @@ public:
     std::string ToString() const;
 };
 
-#endif
+#endif // DARKSILK_NETFULFILLEDMAN_H

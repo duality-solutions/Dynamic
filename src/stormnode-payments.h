@@ -1,56 +1,57 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef MASTERNODE_PAYMENTS_H
-#define MASTERNODE_PAYMENTS_H
+#ifndef STORMNODE_PAYMENTS_H
+#define STORMNODE_PAYMENTS_H
 
 #include "util.h"
 #include "core_io.h"
 #include "key.h"
 #include "main.h"
-#include "masternode.h"
+#include "stormnode.h"
 #include "utilstrencodings.h"
 
-class CMasternodePayments;
-class CMasternodePaymentVote;
-class CMasternodeBlockPayees;
+class CStormnodePayments;
+class CStormnodePaymentVote;
+class CStormnodeBlockPayees;
 
-static const int MNPAYMENTS_SIGNATURES_REQUIRED         = 6;
-static const int MNPAYMENTS_SIGNATURES_TOTAL            = 10;
+static const int SNPAYMENTS_SIGNATURES_REQUIRED         = 10;
+static const int SNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
-//! minimum peer version that can receive and send masternode payment messages,
-//  vote for masternode and be elected as a payment winner
+//! minimum peer version that can receive and send stormnode payment messages,
+//  vote for stormnode and be elected as a payment winner
 // V1 - Last protocol version before update
 // V2 - Newest protocol version
-static const int MIN_MASTERNODE_PAYMENT_PROTO_VERSION_1 = 70103;
-static const int MIN_MASTERNODE_PAYMENT_PROTO_VERSION_2 = 70202;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_1 = 70103;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_2 = 70202;
 
 extern CCriticalSection cs_vecPayees;
-extern CCriticalSection cs_mapMasternodeBlocks;
-extern CCriticalSection cs_mapMasternodePayeeVotes;
+extern CCriticalSection cs_mapStormnodeBlocks;
+extern CCriticalSection cs_mapStormnodePayeeVotes;
 
-extern CMasternodePayments mnpayments;
+extern CStormnodePayments snpayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
 bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward);
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
-void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutMasternodeRet, std::vector<CTxOut>& voutSuperblockRet);
+void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutStormnodeRet, std::vector<CTxOut>& voutSuperblockRet);
 std::string GetRequiredPaymentsString(int nBlockHeight);
 
-class CMasternodePayee
+class CStormnodePayee
 {
 private:
     CScript scriptPubKey;
     std::vector<uint256> vecVoteHashes;
 
 public:
-    CMasternodePayee() :
+    CStormnodePayee() :
         scriptPubKey(),
         vecVoteHashes()
         {}
 
-    CMasternodePayee(CScript payee, uint256 hashIn) :
+    CStormnodePayee(CScript payee, uint256 hashIn) :
         scriptPubKey(payee),
         vecVoteHashes()
     {
@@ -72,15 +73,15 @@ public:
     int GetVoteCount() { return vecVoteHashes.size(); }
 };
 
-// Keep track of votes for payees from masternodes
-class CMasternodeBlockPayees
+// Keep track of votes for payees from stormnodes
+class CStormnodeBlockPayees
 {
 public:
     int nBlockHeight;
-    std::vector<CMasternodePayee> vecPayees;
+    std::vector<CStormnodePayee> vecPayees;
 
-    CMasternodeBlockPayees() : nBlockHeight(0) {}
-    CMasternodeBlockPayees(int nBlockHeightIn) : nBlockHeight(nBlockHeightIn) {}
+    CStormnodeBlockPayees() : nBlockHeight(0) {}
+    CStormnodeBlockPayees(int nBlockHeightIn) : nBlockHeight(nBlockHeightIn) {}
 
     ADD_SERIALIZE_METHODS;
 
@@ -90,7 +91,7 @@ public:
         READWRITE(vecPayees);
     }
 
-    void AddPayee(const CMasternodePaymentVote& vote);
+    void AddPayee(const CStormnodePaymentVote& vote);
     bool GetBestPayee(CScript& payeeRet);
     bool HasPayeeWithVotes(CScript payeeIn, int nVotesReq);
 
@@ -100,24 +101,24 @@ public:
 };
 
 // vote for the winning payment
-class CMasternodePaymentVote
+class CStormnodePaymentVote
 {
 public:
-    CTxIn vinMasternode;
+    CTxIn vinStormnode;
 
     int nBlockHeight;
     CScript payee;
     std::vector<unsigned char> vchSig;
 
-    CMasternodePaymentVote() :
-        vinMasternode(),
+    CStormnodePaymentVote() :
+        vinStormnode(),
         nBlockHeight(0),
         payee(),
         vchSig()
         {}
 
-    CMasternodePaymentVote(CTxIn vinMasternode, int nBlockHeight, CScript payee) :
-        vinMasternode(vinMasternode),
+    CStormnodePaymentVote(CTxIn vinStormnode, int nBlockHeight, CScript payee) :
+        vinStormnode(vinStormnode),
         nBlockHeight(nBlockHeight),
         payee(payee),
         vchSig()
@@ -127,7 +128,7 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(vinMasternode);
+        READWRITE(vinStormnode);
         READWRITE(nBlockHeight);
         READWRITE(*(CScriptBase*)(&payee));
         READWRITE(vchSig);
@@ -137,7 +138,7 @@ public:
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
         ss << *(CScriptBase*)(&payee);
         ss << nBlockHeight;
-        ss << vinMasternode.prevout;
+        ss << vinStormnode.prevout;
         return ss.GetHash();
     }
 
@@ -151,14 +152,14 @@ public:
 };
 
 //
-// Masternode Payments Class
+// Stormnode Payments Class
 // Keeps track of who should get paid for which blocks
 //
 
-class CMasternodePayments
+class CStormnodePayments
 {
 private:
-    // masternode count times nStorageCoeff payments blocks should be stored ...
+    // stormnode count times nStorageCoeff payments blocks should be stored ...
     const float nStorageCoeff;
     // ... but at least nMinBlocksToStore (payments blocks)
     const int nMinBlocksToStore;
@@ -167,23 +168,23 @@ private:
     const CBlockIndex *pCurrentBlockIndex;
 
 public:
-    std::map<uint256, CMasternodePaymentVote> mapMasternodePaymentVotes;
-    std::map<int, CMasternodeBlockPayees> mapMasternodeBlocks;
-    std::map<COutPoint, int> mapMasternodesLastVote;
+    std::map<uint256, CStormnodePaymentVote> mapStormnodePaymentVotes;
+    std::map<int, CStormnodeBlockPayees> mapStormnodeBlocks;
+    std::map<COutPoint, int> mapStormnodesLastVote;
 
-    CMasternodePayments() : nStorageCoeff(1.25), nMinBlocksToStore(4000) {}
+    CStormnodePayments() : nStorageCoeff(1.25), nMinBlocksToStore(4000) {}
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(mapMasternodePaymentVotes);
-        READWRITE(mapMasternodeBlocks);
+        READWRITE(mapStormnodePaymentVotes);
+        READWRITE(mapStormnodeBlocks);
     }
 
     void Clear();
 
-    bool AddPaymentVote(const CMasternodePaymentVote& vote);
+    bool AddPaymentVote(const CStormnodePaymentVote& vote);
     bool ProcessBlock(int nBlockHeight);
 
     void Sync(CNode* node, int nCountNeeded);
@@ -192,18 +193,18 @@ public:
 
     bool GetBlockPayee(int nBlockHeight, CScript& payee);
     bool IsTransactionValid(const CTransaction& txNew, int nBlockHeight);
-    bool IsScheduled(CMasternode& mn, int nNotBlockHeight);
+    bool IsScheduled(CStormnode& sn, int nNotBlockHeight);
 
-    bool CanVote(COutPoint outMasternode, int nBlockHeight);
+    bool CanVote(COutPoint outStormnode, int nBlockHeight);
 
-    int GetMinMasternodePaymentsProto();
+    int GetMinStormnodePaymentsProto();
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutMasternodeRet);
+    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutStormnodeRet);
     std::string ToString() const;
 
-    int GetBlockCount() { return mapMasternodeBlocks.size(); }
-    int GetVoteCount() { return mapMasternodePaymentVotes.size(); }
+    int GetBlockCount() { return mapStormnodeBlocks.size(); }
+    int GetVoteCount() { return mapStormnodePaymentVotes.size(); }
 
     bool IsEnoughData();
     int GetStorageLimit();
@@ -211,4 +212,4 @@ public:
     void UpdatedBlockTip(const CBlockIndex *pindex);
 };
 
-#endif
+#endif // STORMNODE_PAYMENTS_H

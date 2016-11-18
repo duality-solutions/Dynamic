@@ -1,11 +1,12 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/dash-config.h"
+#include "config/darksilk-config.h"
 #endif
 
 #include "net.h"
@@ -19,7 +20,7 @@
 #include "primitives/transaction.h"
 #include "scheduler.h"
 #include "ui_interface.h"
-#include "darksend.h"
+#include "sandstorm.h"
 #include "instantx.h"
 #include "wallet/wallet.h"
 #include "utilstrencodings.h"
@@ -380,22 +381,22 @@ CNode* FindNode(const CService& addr)
     return NULL;
 }
 
-CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToMasternode)
+CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToStormnode)
 {
     if (pszDest == NULL) {
-        // we clean masternode connections in CMasternodeMan::ProcessMasternodeConnections()
-        // so should be safe to skip this and connect to local Hot MN on CActiveMasternode::ManageState()
-        if (IsLocal(addrConnect) && !fConnectToMasternode)
+        // we clean stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
+        // so should be safe to skip this and connect to local Hot SN on CActiveStormnode::ManageState()
+        if (IsLocal(addrConnect) && !fConnectToStormnode)
             return NULL;
 
         // Look for an existing connection
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
         {
-            // we have existing connection to this node but it was not a connection to masternode,
+            // we have existing connection to this node but it was not a connection to stormnodes,
             // change flag and add reference so that we can correctly clear it later
-            if(fConnectToMasternode && !pnode->fMasternode) {
-                pnode->fMasternode = true;
+            if(fConnectToStormnode && !pnode->fStormnode) {
+                pnode->fStormnode = true;
                 pnode->AddRef();
             }
             return pnode;
@@ -430,8 +431,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToMas
         }
 
         pnode->nTimeConnected = GetTime();
-        if(fConnectToMasternode) {
-            pnode->fMasternode = true;
+        if(fConnectToStormnode) {
+            pnode->fStormnode = true;
             pnode->AddRef();
         }
 
@@ -1059,7 +1060,7 @@ void ThreadSocketHandler()
                     // hold in disconnected pool until all refs are released
                     if (pnode->fNetworkNode || pnode->fInbound)
                         pnode->Release();
-                    if (pnode->fMasternode)
+                    if (pnode->fStormnode)
                         pnode->Release();
                     vNodesDisconnected.push_back(pnode);
                 }
@@ -2066,8 +2067,8 @@ void RelayTransaction(const CTransaction& tx)
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss.reserve(10000);
     uint256 hash = tx.GetHash();
-    if(mapDarksendBroadcastTxes.count(hash)) { // MSG_DSTX
-        ss << mapDarksendBroadcastTxes[hash];
+    if(mapSandstormBroadcastTxes.count(hash)) { // MSG_SSTX
+        ss << mapSandstormBroadcastTxes[hash];
     } else if(mapLockRequestAccepted.count(hash)) { // MSG_TXLOCK_REQUEST
         ss << mapLockRequestAccepted[hash];
     } else { // MSG_TX
@@ -2079,7 +2080,7 @@ void RelayTransaction(const CTransaction& tx)
 void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
     uint256 hash = tx.GetHash();
-    int nInv = mapDarksendBroadcastTxes.count(hash) ? MSG_DSTX :
+    int nInv = mapSandstormBroadcastTxes.count(hash) ? MSG_SSTX :
                 (mapLockRequestAccepted.count(hash) ? MSG_TXLOCK_REQUEST : MSG_TX);
     CInv inv(nInv, hash);
     {
@@ -2409,7 +2410,7 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     nPingUsecStart = 0;
     nPingUsecTime = 0;
     fPingQueued = false;
-    fMasternode = false;
+    fStormnode = false;
     nMinPingUsecTime = std::numeric_limits<int64_t>::max();
 
     {

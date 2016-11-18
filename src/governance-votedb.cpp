@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -53,11 +54,11 @@ std::vector<CGovernanceVote> CGovernanceObjectVoteFile::GetVotes() const
     return vecResult;
 }
 
-void CGovernanceObjectVoteFile::RemoveVotesFromMasternode(const CTxIn& vinMasternode)
+void CGovernanceObjectVoteFile::RemoveVotesFromStormnode(const CTxIn& vinStormnode)
 {
     vote_l_it it = listVotes.begin();
     while(it != listVotes.end()) {
-        if(it->GetVinMasternode() == vinMasternode) {
+        if(it->GetVinStormnode() == vinStormnode) {
             listVotes.erase(it++);
         }
         else {

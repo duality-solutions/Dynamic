@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_COMPAT_SANITY_H
-#define BITCOIN_COMPAT_SANITY_H
+#ifndef DARKSILK_COMPAT_SANITY_H
+#define DARKSILK_COMPAT_SANITY_H
 
 bool glibc_sanity_test();
 bool glibcxx_sanity_test();
 
-#endif // BITCOIN_COMPAT_SANITY_H
+#endif // DARKSILK_COMPAT_SANITY_H
