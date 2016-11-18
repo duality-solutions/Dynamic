@@ -1,15 +1,18 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "walletview.h"
 
 #include "addressbookpage.h"
 #include "askpassphrasedialog.h"
-#include "bitcoingui.h"
+#include "darksilkgui.h"
 #include "clientmodel.h"
 #include "guiutil.h"
-#include "masternodeconfig.h"
+#include "stormnodeconfig.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
 #include "platformstyle.h"
@@ -82,9 +85,9 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     addWidget(sendCoinsPage);
 
     QSettings settings;
-    if (settings.value("fShowMasternodesTab").toBool()) {
-        masternodeListPage = new MasternodeList(platformStyle);
-        addWidget(masternodeListPage);
+    if (settings.value("fShowStormnodesTab").toBool()) {
+        stormnodeListPage = new StormnodeList(platformStyle);
+        addWidget(stormnodeListPage);
     }
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
@@ -110,7 +113,7 @@ WalletView::~WalletView()
 {
 }
 
-void WalletView::setBitcoinGUI(BitcoinGUI *gui)
+void WalletView::setDarkSilkGUI(DarkSilkGUI *gui)
 {
     if (gui)
     {
@@ -135,8 +138,8 @@ void WalletView::setClientModel(ClientModel *clientModel)
     overviewPage->setClientModel(clientModel);
     sendCoinsPage->setClientModel(clientModel);
     QSettings settings;
-    if (settings.value("fShowMasternodesTab").toBool()) {
-        masternodeListPage->setClientModel(clientModel);
+    if (settings.value("fShowStormnodesTab").toBool()) {
+        stormnodeListPage->setClientModel(clientModel);
     }
 }
 
@@ -148,8 +151,8 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     transactionView->setModel(walletModel);
     overviewPage->setWalletModel(walletModel);
     QSettings settings;
-    if (settings.value("fShowMasternodesTab").toBool()) {
-        masternodeListPage->setWalletModel(walletModel);
+    if (settings.value("fShowStormnodesTab").toBool()) {
+        stormnodeListPage->setWalletModel(walletModel);
     }
     receiveCoinsPage->setModel(walletModel);
     sendCoinsPage->setModel(walletModel);
@@ -207,11 +210,11 @@ void WalletView::gotoHistoryPage()
     setCurrentWidget(transactionsPage);
 }
 
-void WalletView::gotoMasternodePage()
+void WalletView::gotoStormnodePage()
 {
     QSettings settings;
-    if (settings.value("fShowMasternodesTab").toBool()) {
-        setCurrentWidget(masternodeListPage);
+    if (settings.value("fShowStormnodesTab").toBool()) {
+        setCurrentWidget(stormnodeListPage);
     }
 }
 

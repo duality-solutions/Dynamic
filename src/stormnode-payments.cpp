@@ -283,7 +283,7 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     // Ignore any payments messages until stormnode list is synced
     if(!stormnodeSync.IsStormnodeListSynced()) return;
 
-    if(fLiteMode) return; // disable all Dash specific functionality
+    if(fLiteMode) return; // disable all DarkSilk specific functionality
 
     if (strCommand == NetMsgType::STORMNODEPAYMENTSYNC) { //Stormnode Payments Request Sync
 

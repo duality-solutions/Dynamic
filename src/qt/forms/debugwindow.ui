@@ -244,14 +244,14 @@
         </widget>
        </item>
        <item row="10" column="0">
-        <widget class="QLabel" name="masternodeCountLabel">
+        <widget class="QLabel" name="stormnodeCountLabel">
          <property name="text">
-          <string>Number of Masternodes</string>
+          <string>Number of Stormnodes</string>
          </property>
         </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QLabel" name="masternodeCount">
+        <widget class="QLabel" name="stormnodeCount">
          <property name="text">
           <string>N/A</string>
          </property>
@@ -403,7 +403,7 @@
          <item>
           <widget class="QPushButton" name="openDebugLogfileButton">
            <property name="toolTip">
-            <string>Open the Dash Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
+            <string>Open the DarkSilk Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
            </property>
            <property name="text">
             <string>&amp;Open</string>
@@ -487,8 +487,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../dash.qrc">
-             <normaloff>:/icons/drkblue/remove</normaloff>:/icons/drkblue/remove</iconset>
+            <iconset resource="../darksilk.qrc">
+             <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
            </property>
            <property name="shortcut">
             <string notr="true">Ctrl+L</string>
@@ -1583,7 +1583,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../dash.qrc"/>
+  <include location="../darksilk.qrc"/>
  </resources>
  <connections/>
 </ui>

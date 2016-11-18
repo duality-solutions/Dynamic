@@ -125,7 +125,7 @@ public:
 };
 
 /**
- * Dash RPC command dispatcher.
+ * DarkSilk RPC command dispatcher.
  */
 class CRPCTable
 {

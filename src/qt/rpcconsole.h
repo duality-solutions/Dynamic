@@ -1,9 +1,12 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_RPCCONSOLE_H
-#define BITCOIN_QT_RPCCONSOLE_H
+#ifndef DARKSILK_QT_RPCCONSOLE_H
+#define DARKSILK_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
@@ -26,7 +29,7 @@ class QMenu;
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local Bitcoin RPC console. */
+/** Local DarkSilk RPC console. */
 class RPCConsole: public QWidget
 {
     Q_OBJECT
@@ -93,8 +96,8 @@ public Q_SLOTS:
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of masternodes shown in the UI */
-    void setMasternodeCount(const QString &strMasternodes);
+    /** Set number of stormnodes shown in the UI */
+    void setStormnodeCount(const QString &strStormnodes);
     /** Set number of blocks and last block date shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);
     /** Set size (number of transactions and memory usage) of the mempool in the UI */
@@ -154,4 +157,4 @@ private:
     QCompleter *autoCompleter;
 };
 
-#endif // BITCOIN_QT_RPCCONSOLE_H
+#endif // DARKSILK_QT_RPCCONSOLE_H

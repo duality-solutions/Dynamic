@@ -1,10 +1,12 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_CLIENTMODEL_H
-#define BITCOIN_QT_CLIENTMODEL_H
+#ifndef DARKSILK_QT_CLIENTMODEL_H
+#define DARKSILK_QT_CLIENTMODEL_H
 
 #include <QObject>
 #include <QDateTime>
@@ -36,7 +38,7 @@ enum NumConnections {
     CONNECTIONS_ALL  = (CONNECTIONS_IN | CONNECTIONS_OUT),
 };
 
-/** Model for Dash network client. */
+/** Model for DarkSilk network client. */
 class ClientModel : public QObject
 {
     Q_OBJECT
@@ -51,7 +53,7 @@ public:
 
     //! Return number of connections, default is in- and outbound (total)
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
-    QString getMasternodeCountString() const;
+    QString getStormnodeCountString() const;
     int getNumBlocks() const;
 
     //! Return number of transactions in the mempool
@@ -82,18 +84,18 @@ public:
 private:
     OptionsModel *optionsModel;
     PeerTableModel *peerTableModel;
-    QString cachedMasternodeCountString;
+    QString cachedStormnodeCountString;
     BanTableModel *banTableModel;
 
     QTimer *pollTimer;
-    QTimer *pollMnTimer;
+    QTimer *pollSnTimer;
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
 
 Q_SIGNALS:
     void numConnectionsChanged(int count);
-    void strMasternodesChanged(const QString &strMasternodes);
+    void strStormnodesChanged(const QString &strStormnodes);
     void numBlocksChanged(int count, const QDateTime& blockDate, double nVerificationProgress);
     void additionalDataSyncProgressChanged(double nSyncProgress);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);
@@ -108,10 +110,10 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void updateTimer();
-    void updateMnTimer();
+    void updateSnTimer();
     void updateNumConnections(int numConnections);
     void updateAlert(const QString &hash, int status);
     void updateBanlist();
 };
 
-#endif // BITCOIN_QT_CLIENTMODEL_H
+#endif // DARKSILK_QT_CLIENTMODEL_H

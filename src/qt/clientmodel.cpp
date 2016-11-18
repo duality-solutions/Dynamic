@@ -1,6 +1,8 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2016 The Dash Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "clientmodel.h"
@@ -13,12 +15,12 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "clientversion.h"
-#include "darksend.h"
+#include "sandstorm.h"
 #include "net.h"
 #include "txmempool.h"
 #include "ui_interface.h"
-#include "masternodeman.h"
-#include "masternode-sync.h"
+#include "stormnodeman.h"
+#include "stormnode-sync.h"
 #include "util.h"
 
 #include <stdint.h>
@@ -35,7 +37,7 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     QObject(parent),
     optionsModel(optionsModel),
     peerTableModel(0),
-    cachedMasternodeCountString(""),
+    cachedStormnodeCountString(""),
     banTableModel(0),
     pollTimer(0)
 {
@@ -45,10 +47,10 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     pollTimer->start(MODEL_UPDATE_DELAY);
 
-    pollMnTimer = new QTimer(this);
-    connect(pollMnTimer, SIGNAL(timeout()), this, SLOT(updateMnTimer()));
+    pollSnTimer = new QTimer(this);
+    connect(pollSnTimer, SIGNAL(timeout()), this, SLOT(updateSnTimer()));
     // no need to update as frequent as data for balances/txes/blocks
-    pollMnTimer->start(MODEL_UPDATE_DELAY * 4);
+    pollSnTimer->start(MODEL_UPDATE_DELAY * 4);
 
     subscribeToCoreSignals();
 }
@@ -72,16 +74,16 @@ int ClientModel::getNumConnections(unsigned int flags) const
     return nNum;
 }
 
-QString ClientModel::getMasternodeCountString() const
+QString ClientModel::getStormnodeCountString() const
 {
-    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)mnodeman.size()))
+    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)snodeman.size()))
     return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
-            .arg(QString::number((int)mnodeman.size()))
-            .arg(QString::number((int)mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
-            .arg(QString::number((int)mnodeman.CountEnabled()));
-            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV4)))
-            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV6)))
-            // .arg(QString::number((int)mnodeman.CountByIP(NET_TOR)));
+            .arg(QString::number((int)snodeman.size()))
+            .arg(QString::number((int)snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+            .arg(QString::number((int)snodeman.CountEnabled()));
+            // .arg(QString::number((int)snodeman.CountByIP(NET_IPV4)))
+            // .arg(QString::number((int)snodeman.CountByIP(NET_IPV6)))
+            // .arg(QString::number((int)snodeman.CountByIP(NET_TOR)));
 }
 
 int ClientModel::getNumBlocks() const
@@ -139,15 +141,15 @@ void ClientModel::updateTimer()
     Q_EMIT bytesChanged(getTotalBytesRecv(), getTotalBytesSent());
 }
 
-void ClientModel::updateMnTimer()
+void ClientModel::updateSnTimer()
 {
-    QString newMasternodeCountString = getMasternodeCountString();
+    QString newStormnodeCountString = getStormnodeCountString();
 
-    if (cachedMasternodeCountString != newMasternodeCountString)
+    if (cachedStormnodeCountString != newStormnodeCountString)
     {
-        cachedMasternodeCountString = newMasternodeCountString;
+        cachedStormnodeCountString = newStormnodeCountString;
 
-        Q_EMIT strMasternodesChanged(cachedMasternodeCountString);
+        Q_EMIT strStormnodesChanged(cachedStormnodeCountString);
     }
 }
 

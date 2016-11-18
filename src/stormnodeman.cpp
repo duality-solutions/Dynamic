@@ -691,7 +691,7 @@ void CStormnodeMan::ProcessStormnodeConnections()
 
 void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if(fLiteMode) return; // disable all Dash specific functionality
+    if(fLiteMode) return; // disable all DarkSilk specific functionality
     if(!stormnodeSync.IsBlockchainSynced()) return;
 
     if (strCommand == NetMsgType::SNANNOUNCE) { //Stormnode Broadcast

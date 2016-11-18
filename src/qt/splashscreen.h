@@ -1,9 +1,12 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2015-2017 Silk Network Developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_SPLASHSCREEN_H
-#define BITCOIN_QT_SPLASHSCREEN_H
+#ifndef DARKSILK_QT_SPLASHSCREEN_H
+#define DARKSILK_QT_SPLASHSCREEN_H
 
 #include <QSplashScreen>
 
@@ -11,7 +14,7 @@ class NetworkStyle;
 
 /** Class for the splashscreen with information of the running client.
  *
- * @note this is intentionally not a QSplashScreen. Bitcoin Core initialization
+ * @note this is intentionally not a QSplashScreen. DarkSilk Core initialization
  * can take a long time, and in that case a progress window that cannot be
  * moved around and minimized has turned out to be frustrating to the user.
  */
@@ -46,4 +49,4 @@ private:
     int curAlignment;
 };
 
-#endif // BITCOIN_QT_SPLASHSCREEN_H
+#endif // DARKSILK_QT_SPLASHSCREEN_H
