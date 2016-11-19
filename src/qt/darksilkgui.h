@@ -223,7 +223,7 @@ private Q_SLOTS:
     /** Show about dialog */
     void aboutClicked();
     /** Show debug window */
-    void showDebugWindow();
+    void showRPCConsole();
 
     /** Show debug window and set focus to the appropriate tab */
     void showInfo();

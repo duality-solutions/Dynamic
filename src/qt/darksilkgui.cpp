@@ -746,7 +746,7 @@ void DarkSilkGUI::aboutClicked()
     dlg.exec();
 }
 
-void DarkSilkGUI::showDebugWindow()
+void DarkSilkGUI::showRPCConsole()
 {
     rpcConsole->showNormal();
     rpcConsole->show();
@@ -757,31 +757,31 @@ void DarkSilkGUI::showDebugWindow()
 void DarkSilkGUI::showInfo()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_INFO);
-    showDebugWindow();
+    showRPCConsole();
 }
 
 void DarkSilkGUI::showConsole()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_CONSOLE);
-    showDebugWindow();
+    showRPCConsole();
 }
 
 void DarkSilkGUI::showGraph()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_GRAPH);
-    showDebugWindow();
+    showRPCConsole();
 }
 
 void DarkSilkGUI::showPeers()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_PEERS);
-    showDebugWindow();
+    showRPCConsole();
 }
 
 void DarkSilkGUI::showRepair()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_REPAIR);
-    showDebugWindow();
+    showRPCConsole();
 }
 
 void DarkSilkGUI::showConfEditor()
