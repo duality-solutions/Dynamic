@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef GOVERNANCE_EXCEPTIONS_H
-#define GOVERNANCE_EXCEPTIONS_H
+#ifndef DARKSILK_GOVERNANCE_EXCEPTIONS_H
+#define DARKSILK_GOVERNANCE_EXCEPTIONS_H
 
 #include <exception>
 #include <string>
@@ -98,4 +98,4 @@ public:
     }
 };
 
-#endif
+#endif // DARKSILK_GOVERNANCE_EXCEPTIONS_H

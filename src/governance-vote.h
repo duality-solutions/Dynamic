@@ -3,8 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef GOVERNANCE_VOTE_H
-#define GOVERNANCE_VOTE_H
+#ifndef DARKSILK_GOVERNANCE_VOTE_H
+#define DARKSILK_GOVERNANCE_VOTE_H
 
 #include "main.h"
 #include "sync.h"
@@ -226,4 +226,4 @@ public:
 
 */
 
-#endif
+#endif // DARKSILK_GOVERNANCE_VOTE_H
