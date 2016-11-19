@@ -749,14 +749,7 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
 
     if(!pCurrentBlockIndex) return;
 
-    if(pnode->nVersion < 70202) {
-        // Old nodes can only sync via heavy method
-        int nLimit = GetStorageLimit();
-        if(nCountNeeded > nLimit) nCountNeeded = nLimit;
-    } else {
-        // New nodes request missing payment blocks themselves, push only votes for future blocks to them
-        nCountNeeded = 0;
-    }
+    nCountNeeded = 0;
 
     int nInvCount = 0;
 
