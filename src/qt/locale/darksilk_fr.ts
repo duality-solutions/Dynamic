@@ -3758,8 +3758,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte DarkSilk" admin@foo.com
         <translation>Pairs en liste blanche ne peuvent être bannis pour DoS et leurs transactions sont toujours relayées, même si elles sont déjà en mémoire, utile par ex. pour une passerelle</translation>
     </message>
     <message>
-        <source>(9999 could be used only on mainnet)</source>
-        <translation>(9999 n'est utilisable que sur mainnet)</translation>
+        <source>(31000 could be used only on mainnet)</source>
+        <translation>(31000 n'est utilisable que sur mainnet)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4176,8 +4176,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte DarkSilk" admin@foo.com
         <translation>stormnodeprivkey invalide. Veuillez vous référer à la documentation.</translation>
     </message>
     <message>
-        <source>(must be 9999 for mainnet)</source>
-        <translation>(doit être 9999 pour mainnet)</translation>
+        <source>(must be 31000 for mainnet)</source>
+        <translation>(doit être 31000 pour mainnet)</translation>
     </message>
     <message>
         <source>Can't find random Stormnode.</source>
