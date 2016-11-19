@@ -3358,8 +3358,8 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>In diesem Modus legt -genproclimit fest, wie viele Blöcke sofort erzeugt werden.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX benötigt Zahlungseingänge mit mindestens 6 Bestätigungen, warten Sie also ein paar Minuten und versuchen Sie es dann erneut.</translation>
+        <source>InstantX requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantX benötigt Zahlungseingänge mit mindestens 10 Bestätigungen, warten Sie also ein paar Minuten und versuchen Sie es dann erneut.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3757,8 +3757,8 @@ zum Beispiel: alertnotify=echo %%s | mail -s \"DSLK Alert\" admin@foo.com</trans
         <translation>Erlaubte Gegenstellen können nicht wegen DoS ausgeschlossen werden und ihre Transaktionen werden immer weitergeleitet, sogar wenn sie schon im Memory-Pool sind. Dies ist z.B. für Gateways nützlich.</translation>
     </message>
     <message>
-        <source>(9999 could be used only on mainnet)</source>
-        <translation>(9999 kann nur im Standardnetz benutzt werden)</translation>
+        <source>(31000 could be used only on mainnet)</source>
+        <translation>(31000 kann nur im Standardnetz benutzt werden)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4176,8 +4176,8 @@ DSLK Core wird heruntergefahren.</translation>
         <translation>stormnode-Geheimschlüssel (stormnodeprivkey) ist ungültig. Siehe Dokumentation. </translation>
     </message>
     <message>
-        <source>(must be 9999 for mainnet)</source>
-        <translation>(muss für Standardnetz 9999 sein)</translation>
+        <source>(must be 31000 for mainnet)</source>
+        <translation>(muss für Standardnetz 31000 sein)</translation>
     </message>
     <message>
         <source>Can't find random stormnode.</source>

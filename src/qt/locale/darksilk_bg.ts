@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>В този режим -genproclimit се контролира колко блока са генерирани моментално.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX изисква средства с поне 6 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
+        <source>InstantX requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantX изисква средства с поне 10 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3749,8 +3749,8 @@ for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Whitelisted не могат да бъдат DoS забранени и техните транзакции ще бъдат винаги предадени, дори ако вече са в  mempool, полезно напр. за gateway</translation>
     </message>
     <message>
-        <source>(9999 could be used only on mainnet)</source>
-        <translation>(9999 може да бъде използван в основната мрежа)</translation>
+        <source>(31000 could be used only on mainnet)</source>
+        <translation>(31000 може да бъде използван в основната мрежа)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4167,8 +4167,8 @@ for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Невалиден частен ключ на Stormnode. Моля вижте документацията.</translation>
     </message>
     <message>
-        <source>(must be 9999 for mainnet)</source>
-        <translation>(трябва да е 9999 за основната мрежа)</translation>
+        <source>(must be 31000 for mainnet)</source>
+        <translation>(трябва да е 31000 за основната мрежа)</translation>
     </message>
     <message>
         <source>Can't find random Stormnode.</source>

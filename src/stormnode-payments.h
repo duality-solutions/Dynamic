@@ -24,8 +24,8 @@ static const int SNPAYMENTS_SIGNATURES_TOTAL            = 20;
 //  vote for stormnode and be elected as a payment winner
 // V1 - Last protocol version before update
 // V2 - Newest protocol version
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_1 = 70103;
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_2 = 70202;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_1 = 60700;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_2 = 60800;
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapStormnodeBlocks;

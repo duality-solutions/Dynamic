@@ -665,7 +665,7 @@ void SendCoinsDialog::minimizeFeeSection(bool fMinimize)
     ui->buttonChooseFee  ->setVisible(fMinimize);
     ui->buttonMinimizeFee->setVisible(!fMinimize);
     ui->frameFeeSelection->setVisible(!fMinimize);
-    ui->horizontalLayoutSmartFee->setContentsMargins(0, (fMinimize ? 0 : 6), 0, 0);
+    ui->horizontalLayoutSmartFee->setContentsMargins(0, (fMinimize ? 0 : 10), 0, 0);
     fFeeMinimized = fMinimize;
 }
 

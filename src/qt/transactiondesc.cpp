@@ -45,7 +45,7 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
 
         if (fOffline) {
             strTxStatus = tr("%1/offline").arg(nDepth);
-        } else if (nDepth < 6) {
+        } else if (nDepth < 10) {
             strTxStatus = tr("%1/unconfirmed").arg(nDepth);
         } else {
             strTxStatus = tr("%1 confirmations").arg(nDepth);
