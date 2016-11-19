@@ -3,7 +3,7 @@
 <plist version="0.9">
 <dict>
   <key>LSMinimumSystemVersion</key>
-  <string>10.7.0</string>
+  <string>10.6.0</string>
 
   <key>LSArchitecturePriority</key>
   <array>
@@ -17,7 +17,7 @@
   <string>APPL</string>
 
   <key>CFBundleGetInfoString</key>
-  <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@, Copyright © 2009-@COPYRIGHT_YEAR@ The Bitcoin Core developers, 2014-@COPYRIGHT_YEAR@ The Dash Core developers</string>
+  <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@, Copyright © 2009-@COPYRIGHT_YEAR@ The Bitcoin Core developers, 2015-@COPYRIGHT_YEAR@ Silk Network</string>
 
   <key>CFBundleShortVersionString</key>
   <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@</string>
@@ -30,15 +30,9 @@
 
   <key>CFBundleExecutable</key>
   <string>DarkSilk-Qt</string>
-  
-  <key>CFBundleName</key>
-  <string>DarkSilk-Qt</string>
-
-  <key>LSHasLocalizedDisplayName</key>
-  <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>org.darksilk.DarkSilk-Qt</string>
+  <string>io.darksilkpay.DarkSilk-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>
@@ -46,7 +40,7 @@
       <key>CFBundleTypeRole</key>
       <string>Editor</string>
       <key>CFBundleURLName</key>
-      <string>org.darksilk.DarkSilkPayment</string>
+      <string>io.darksilk.DarkSilkPayment</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>darksilk</string>
@@ -58,7 +52,7 @@
   <array>
     <dict>
       <key>UTTypeIdentifier</key>
-      <string>org.darksilk.paymentrequest</string>
+      <string>io.darksilk.paymentrequest</string>
       <key>UTTypeDescription</key>
       <string>DarkSilk payment request</string>
       <key>UTTypeConformsTo</key>
@@ -84,7 +78,7 @@
       <string>Editor</string>
       <key>LSItemContentTypes</key>
       <array>
-        <string>org.darksilk.paymentrequest</string>
+        <string>io.darksilk.paymentrequest</string>
       </array>
       <key>LSHandlerRank</key>
       <string>Owner</string>
