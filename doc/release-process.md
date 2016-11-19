@@ -1,129 +1,83 @@
 Release Process
 ====================
 
-* Update translations, see [translation_process.md](https://github.com/dashpay/dash/blob/master/doc/translation_process.md#syncing-with-transifex)
-* Update hardcoded [seeds](/contrib/seeds)
+* update translations (ping wumpus, Diapolo or tcatm on IRC)
+* see https://github.com/silknetwork/darksilk-core/blob/master/doc/translation_process.md#syncing-with-transifex
 
 * * *
 
-###First time / New builders
-Check out the source code in the following directory hierarchy.
+###update (commit) version in sources
 
-	cd /path/to/your/toplevel/build
-	git clone https://github.com/dashpay/gitian.sigs.git
-	git clone https://github.com/dashpay/dash-detached-sigs.git
-	git clone https://github.com/devrandom/gitian-builder.git
-	git clone https://github.com/dashpay/dash.git
-
-###Dash Core maintainers/release engineers, update (commit) version in sources
-
-	pushd ./dash
 	contrib/verifysfbinaries/verify.sh
-	configure.ac
 	doc/README*
-	doc/Doxyfile
-	contrib/gitian-descriptors/*.yml
+	share/setup.nsi
 	src/clientversion.h (change CLIENT_VERSION_IS_RELEASE to true)
 
-	# tag version in git
+###tag version in git
 
-	git tag -s v(new version, e.g. 0.8.0)
+	git tag -s v(new version, e.g. 1.1.0.0)
 
-	# write release notes. git shortlog helps a lot, for example:
+###write release notes. git shortlog helps a lot, for example:
 
-	git shortlog --no-merges v(current version, e.g. 0.7.2)..v(new version, e.g. 0.8.0)
-	popd
+	git shortlog --no-merges v(current version, e.g. 1.0.0.0)..v(new version, e.g. 1.1.0.0)
 
 * * *
 
-###Setup and perform Gitian builds
+###update gitian
 
- Setup Gitian descriptors:
+ In order to take advantage of the new caching features in gitian, be sure to update to a recent version (e9741525c or higher is recommended)
 
-	pushd ./dash
-	export SIGNER=(your Gitian key, ie bluematt, sipa, etc)
-	export VERSION=(new version, e.g. 0.8.0)
-	git fetch
+###perform gitian builds
+
+ From a directory containing the darksilk source, gitian-builder and gitian.sigs
+
+	export SIGNER=(your gitian key, ie bluematt, sipa, etc)
+	export VERSION=(new version, e.g. 1.1.0.0)
+	pushd ./darksilk
 	git checkout v${VERSION}
 	popd
-
-  Ensure your gitian.sigs are up-to-date if you wish to gverify your builds against other Gitian signatures.
-
-	pushd ./gitian.sigs
-	git pull
-	popd
-
-  Ensure gitian-builder is up-to-date to take advantage of new caching features (`e9741525c` or later is recommended).
-
 	pushd ./gitian-builder
-	git pull
 
-###Fetch and create inputs: (first time, or when dependency versions change)
-
+###fetch and build inputs: (first time, or when dependency versions change)
+ 
 	mkdir -p inputs
-	wget -P inputs https://bitcoincore.org/cfields/osslsigncode-Backports-to-1.7.1.patch
-	wget -P inputs http://downloads.sourceforge.net/project/osslsigncode/osslsigncode/osslsigncode-1.7.1.tar.gz
 
- Register and download the Apple SDK: see [OS X readme](README_osx.txt) for details.
+ Register and download the Apple SDK: (see OSX Readme for details)
+ 
+ https://developer.apple.com/downloads/download.action?path=Developer_Tools/xcode_4.6.3/xcode4630916281a.dmg
+ 
+ Using a Mac, create a tarball for the 10.7 SDK and copy it to the inputs directory:
+ 
+	tar -C /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/ -czf MacOSX10.7.sdk.tar.gz MacOSX10.7.sdk
 
- https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/xcode_6.1.1/xcode_6.1.1.dmg
+###Optional: Seed the Gitian sources cache
 
- Using a Mac, create a tarball for the 10.9 SDK and copy it to the inputs directory:
+  By default, gitian will fetch source files as needed. For offline builds, they can be fetched ahead of time:
 
-	tar -C /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/ -czf MacOSX10.9.sdk.tar.gz MacOSX10.9.sdk
+	make -C ../darksilk/depends download SOURCES_PATH=`pwd`/cache/common
 
-###Optional: Seed the Gitian sources cache and offline git repositories
+  Only missing files will be fetched, so this is safe to re-run for each build.
 
-By default, Gitian will fetch source files as needed. To cache them ahead of time:
+###Build DarkSilk Core for Linux, Windows, and OS X:
 
-	make -C ../dash/depends download SOURCES_PATH=`pwd`/cache/common
-
-Only missing files will be fetched, so this is safe to re-run for each build.
-
-NOTE: Offline builds must use the --url flag to ensure Gitian fetches only from local URLs. For example:
-```
-./bin/gbuild --url dash=/path/to/dash,signature=/path/to/sigs {rest of arguments}
-```
-The gbuild invocations below <b>DO NOT DO THIS</b> by default.
-
-###Build and sign Dash Core for Linux, Windows, and OS X:
-
-	./bin/gbuild --commit dash=v${VERSION} ../dash/contrib/gitian-descriptors/gitian-linux.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../dash/contrib/gitian-descriptors/gitian-linux.yml
-	mv build/out/dash-*.tar.gz build/out/src/dash-*.tar.gz ../
-
-	./bin/gbuild --commit dash=v${VERSION} ../dash/contrib/gitian-descriptors/gitian-win.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../dash/contrib/gitian-descriptors/gitian-win.yml
-	mv build/out/dash-*-win-unsigned.tar.gz inputs/dash-win-unsigned.tar.gz
-	mv build/out/dash-*.zip build/out/dash-*.exe ../
-
-	./bin/gbuild --commit dash=v${VERSION} ../dash/contrib/gitian-descriptors/gitian-osx.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../dash/contrib/gitian-descriptors/gitian-osx.yml
-	mv build/out/dash-*-osx-unsigned.tar.gz inputs/dash-osx-unsigned.tar.gz
-	mv build/out/dash-*.tar.gz build/out/dash-*.dmg ../
+	./bin/gbuild --commit darksilk=v${VERSION} ../darksilk/contrib/gitian-descriptors/gitian-linux.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../darksilk/contrib/gitian-descriptors/gitian-linux.yml
+	mv build/out/darksilk-*.tar.gz build/out/src/darksilk-*.tar.gz ../
+	./bin/gbuild --commit darksilk=v${VERSION} ../darksilk/contrib/gitian-descriptors/gitian-win.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-win --destination ../gitian.sigs/ ../darksilk/contrib/gitian-descriptors/gitian-win.yml
+	mv build/out/darksilk-*.zip build/out/darksilk-*.exe ../
+	./bin/gbuild --commit darksilk=v${VERSION} ../darksilk/contrib/gitian-descriptors/gitian-osx.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../darksilk/contrib/gitian-descriptors/gitian-osx.yml
+	mv build/out/darksilk-*-unsigned.tar.gz inputs/darksilk-osx-unsigned.tar.gz
+	mv build/out/darksilk-*.tar.gz build/out/darksilk-*.dmg ../
 	popd
-
   Build output expected:
 
-  1. source tarball (dash-${VERSION}.tar.gz)
-  2. linux 32-bit and 64-bit dist tarballs (dash-${VERSION}-linux[32|64].tar.gz)
-  3. windows 32-bit and 64-bit unsigned installers and dist zips (dash-${VERSION}-win[32|64]-setup-unsigned.exe, dash-${VERSION}-win[32|64].zip)
-  4. OS X unsigned installer and dist tarball (dash-${VERSION}-osx-unsigned.dmg, dash-${VERSION}-osx64.tar.gz)
-  5. Gitian signatures (in gitian.sigs/${VERSION}-<linux|{win,osx}-unsigned>/(your Gitian key)/
-
-###Verify other gitian builders signatures to your own. (Optional)
-
-  Add other gitian builders keys to your gpg keyring
-
-	gpg --import ../dash/contrib/gitian-downloader/*.pgp
-
-  Verify the signatures
-
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../dash/contrib/gitian-descriptors/gitian-linux.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../dash/contrib/gitian-descriptors/gitian-win.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../dash/contrib/gitian-descriptors/gitian-osx.yml
-
-	popd
+  1. source tarball (darksilk-${VERSION}.tar.gz)
+  2. linux 32-bit and 64-bit binaries dist tarballs (darksilk-${VERSION}-linux[32|64].tar.gz)
+  3. windows 32-bit and 64-bit installers and dist zips (darksilk-${VERSION}-win[32|64]-setup.exe, darksilk-${VERSION}-win[32|64].zip)
+  4. OSX unsigned installer (darksilk-${VERSION}-osx-unsigned.dmg)
+  5. Gitian signatures (in gitian.sigs/${VERSION}-<linux|win|osx-unsigned>/(your gitian key)/
 
 ###Next steps:
 
@@ -131,40 +85,30 @@ Commit your signature to gitian.sigs:
 
 	pushd gitian.sigs
 	git add ${VERSION}-linux/${SIGNER}
-	git add ${VERSION}-win-unsigned/${SIGNER}
+	git add ${VERSION}-win/${SIGNER}
 	git add ${VERSION}-osx-unsigned/${SIGNER}
 	git commit -a
 	git push  # Assuming you can push to the gitian.sigs tree
 	popd
 
-  Wait for Windows/OS X detached signatures:
-	Once the Windows/OS X builds each have 3 matching signatures, they will be signed with their respective release keys.
-	Detached signatures will then be committed to the [dash-detached-sigs](https://github.com/dashpay/dash-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
+  Wait for OSX detached signature:
+	Once the OSX build has 3 matching signatures, Evan(?) ***TODO*** will sign it with the apple App-Store key.
+	He will then upload a detached signature to be combined with the unsigned app to create a signed binary.
 
-  Create (and optionally verify) the signed OS X binary:
-
-	pushd ./gitian-builder
-	./bin/gbuild -i --commit signature=v${VERSION} ../dash/contrib/gitian-descriptors/gitian-osx-signer.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../dash/contrib/gitian-descriptors/gitian-osx-signer.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../dash/contrib/gitian-descriptors/gitian-osx-signer.yml
-	mv build/out/dash-osx-signed.dmg ../dash-${VERSION}-osx.dmg
-	popd
-
-  Create (and optionally verify) the signed Windows binaries:
+  Create the signed OSX binary:
 
 	pushd ./gitian-builder
-	./bin/gbuild -i --commit signature=v${VERSION} ../dash/contrib/gitian-descriptors/gitian-win-signer.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../dash/contrib/gitian-descriptors/gitian-win-signer.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../dash/contrib/gitian-descriptors/gitian-win-signer.yml
-	mv build/out/dash-*win64-setup.exe ../dash-${VERSION}-win64-setup.exe
-	mv build/out/dash-*win32-setup.exe ../dash-${VERSION}-win32-setup.exe
+	# Fetch the signature as instructed by Evan
+	cp signature.tar.gz inputs/
+	./bin/gbuild -i ../darksilk/contrib/gitian-descriptors/gitian-osx-signer.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../darksilk/contrib/gitian-descriptors/gitian-osx-signer.yml
+	mv build/out/darksilk-osx-signed.dmg ../darksilk-${VERSION}-osx.dmg
 	popd
 
-Commit your signature for the signed OS X/Windows binaries:
+Commit your signature for the signed OSX binary:
 
 	pushd gitian.sigs
 	git add ${VERSION}-osx-signed/${SIGNER}
-	git add ${VERSION}-win-signed/${SIGNER}
 	git commit -a
 	git push  # Assuming you can push to the gitian.sigs tree
 	popd
@@ -173,6 +117,12 @@ Commit your signature for the signed OS X/Windows binaries:
 
 ### After 3 or more people have gitian-built and their results match:
 
+- Perform code-signing.
+
+    - Code-sign Windows -setup.exe (in a Windows virtual machine using signtool)
+
+  Note: only Evan has the code-signing keys currently.
+
 - Create `SHA256SUMS.asc` for the builds, and GPG-sign it:
 ```bash
 sha256sum * > SHA256SUMS
@@ -180,23 +130,24 @@ gpg --digest-algo sha256 --clearsign SHA256SUMS # outputs SHA256SUMS.asc
 rm SHA256SUMS
 ```
 (the digest algorithm is forced to sha256 to avoid confusion of the `Hash:` header that GPG adds with the SHA256 used for the files)
-Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spurious/nonsensical entry.
 
-- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the dash.org server
+- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the darksilk.org server
+  into `/var/www/bin/darksilk-core-${VERSION}`
 
-- Update dash.org
+- Update darksilkpay.io version ***TODO***
 
-- Announce the release:
+  - First, check to see if the darksilkpay.io maintainers have prepared a
+    release: https://github.com/silknetwork/darksilk-core/labels/Releases
 
-  - Release on Dash forum: https://www.dash.org/forum/topic/official-announcements.54/
+      - If they have, it will have previously failed their Travis CI
+        checks because the final release files weren't uploaded.
+        Trigger a Travis CI rebuild---if it passes, merge.
 
-  - Dash-development mailing list
+  - If they have not prepared a release, follow the DarkSilk.org release
+    instructions: https://github.com/silknetwork/darksilk-core#release-notes
 
-  - Update title of #dashpay on Freenode IRC
-
-  - Optionally reddit /r/Dashpay, ... but this will usually sort out itself
-
-- Notify flare so that he can start building [the PPAs](https://launchpad.net/~dash.org/+archive/ubuntu/dash)
+  - After the pull request is merged, the website will automatically show the newest version within 15 minutes, as well
+    as update the OS download links. Ping @saivann/@harding (saivann/harding on Freenode) in case anything goes wrong
 
 - Add release notes for the new version to the directory `doc/release-notes` in git master
 

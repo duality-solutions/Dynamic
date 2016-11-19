@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The Bitcoin Core developers
+# Copyright (c) 2014-2015 The DarkSilk Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,11 +13,11 @@
 # but less mature coinbase spends are NOT.
 #
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import DarkSilkTestFramework
 from test_framework.util import *
 
 # Create one-input, one-output, no-fee transaction:
-class MempoolSpendCoinbaseTest(BitcoinTestFramework):
+class MempoolSpendCoinbaseTest(DarkSilkTestFramework):
 
     def setup_network(self):
         # Just need one node for this test

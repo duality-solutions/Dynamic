@@ -19,7 +19,7 @@ class PreviousSpendableOutput(object):
         self.n = n  # the output we're spending
 
 '''
-This reimplements tests from the bitcoinj/FullBlockTestGenerator used
+This reimplements tests from the darksilkj/FullBlockTestGenerator used
 by the pull-tester.
 
 We use the testing framework in which we expect a particular answer from
@@ -370,7 +370,7 @@ class FullBlockTest(ComparisonTestFramework):
         b26 = update_block(26, [])
         yield rejected(RejectResult(16, b'bad-cb-length'))
 
-        # Extend the b26 chain to make sure bitcoind isn't accepting b26
+        # Extend the b26 chain to make sure darksilkd isn't accepting b26
         b27 = block(27, spend=out7)
         yield rejected()
 
@@ -382,7 +382,7 @@ class FullBlockTest(ComparisonTestFramework):
         b28 = update_block(28, [])
         yield rejected(RejectResult(16, b'bad-cb-length'))
 
-        # Extend the b28 chain to make sure bitcoind isn't accepted b28
+        # Extend the b28 chain to make sure darksilkd isn't accepted b28
         b29 = block(29, spend=out7)
         # TODO: Should get a reject message back with "bad-prevblk", except
         # there's a bug that prevents this from being detected.  Just note

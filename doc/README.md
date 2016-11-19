@@ -1,73 +1,313 @@
-Dash Core 0.12.1
-=====================
+# **DarkSilk (DSLK) v1.0**
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-This is the official reference wallet for Dash digital currency and comprises the backbone of the Dash peer-to-peer network. You can [download Dash Core](https://www.dash.org/downloads/) or [build it yourself](#building) using the guides below.
 
-Running
+[![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
+[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/SilkNetwork/DarkSilk-Core)
+
+
+Graph on Pull Request History
+====================================
+
+[![Throughput Graph](https://graphs.waffle.io/SilkNetwork/DarkSilk-Core/throughput.svg)](https://waffle.io/SilkNetwork/DarkSilk-Core/metrics/throughput)  
+DarkSilk Integration/Staging Tree
+================================
+![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/icons/darksilk-80.png)
+
+**Copyright (c) 2015-2016 Silk Network**
+
+What is DarkSilk?
+----------------
+* Coin Suffix: DSLK
+* PoW Algorithm: Argon2d
+* PoW Period: Unlimited
+* PoW Target Spacing: 64 Seconds
+* PoW Reward per Block: 1 DSLK
+* Maturity: 10 Blocks
+* PoW Blocks: ~1350 per day
+* Stormnode Collateral Amount: 1000 DSLK
+* Stormnode Min Confirmation: 10 Blocks
+* Stormnode Reward: 0.382 DSLK Static Reward (38.2% of a PoW reward)
+* Budget Reward: 10,000 DSLK Static Reward Every 41,089 blocks (~30 days)
+* Budget Proposal Fee: 100 DSLK, 20 confirmations (~30 minutes)
+* Total Coins: 90,000,000 DSLK
+* Min TX Fee: 0.0001 DSLK
+
+
+DarkSilk is a new digital currency that enables instant payments to anyone, anywhere in the world. DarkSilk uses peer-to-peer technology over Tor/ClearNet to operate securly with no central authority (centralisation): managing transactions and issuing currency (DSLK) are carried out collectively by the DarkSilk network. DarkSilk is the name of open source software which enables the use of the currency DSLK.
+
+DarkSilk utilises Stormnodes, Sandstorm and InstantX to provide anonymous and near instant transaction confirmations.
+
+DarkSilk implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
+
+DarkSilk uses ShadowChat from Shadowcash based upon Bitmessage for encrypted, anonymous and secure messaging via the DarkSilk wallet network.
+
+Darksilk includes a completely decentralised marketplace, providing anonymity and escrow services for safe and fast trades.
+
+DarkSilk includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the DarkSilk codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
+
+
+**Stormnode/Sandstorm Network Information**
+Ported Masternodes from Dash, rebranded as Stormnodes and modified to use stealth addresses.
+Darksend ported and rebranded as Sandstorm.
+Utilisation of InstantX for instant transaction confirmation.
+
+**MainNet Parameters**
+P2P Port/Stormnodes = 31000
+RPC Port = 31500
+Magic Bytes: 0x42 0x04 0x20 0x24
+
+
+**TestNet Parameters**
+P2P Port/Stormnodes = 31750
+RPC Port = 31800
+Magic Bytes: 0x24 0x20 0x04 0x42
+
+
+UNIX BUILD NOTES
+====================
+Some notes on how to build DarkSilk in Unix. 
+
+Note
 ---------------------
-The following are some helpful notes on how to run Dash on your native platform.
+Always use absolute paths to configure and compile DarkSilk and the dependencies,
+for example, when specifying the the path of the dependency:
 
-### Unix
+	../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
 
-Unpack the files into a directory and run:
+Here BDB_PREFIX must absolute path - it is defined using $(pwd) which ensures
+the usage of the absolute path.
 
-- `bin/bitcoin-qt` (GUI) or
-- `bin/bitcoind` (headless)
-
-### Windows
-
-Unpack the files into a directory, and then run dash-qt.exe.
-
-### OS X
-
-Drag Dash-Qt to your applications folder, and then run Dash-Qt.
-
-### Need Help?
-
-* See the [Dash documentation](https://dashpay.atlassian.net/wiki/display/DOC)
-for help and more information.
-* Ask for help on [#dashpay](http://webchat.freenode.net?channels=dashpay) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=dashpay).
-* Ask for help on the [DashTalk](https://dashtalk.org/) forums.
-
-Building
+To Build
 ---------------------
-The following are developer notes on how to build Dash Core on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
-- [OS X Build Notes](build-osx.md)
-- [Unix Build Notes](build-unix.md)
-- [Windows Build Notes](build-windows.md)
-- [OpenBSD Build Notes](build-openbsd.md)
-- [Gitian Building Guide](gitian-building.md)
+```bash
+./autogen.sh
+./configure
+make
+make install # optional
+```
 
-Development
+This will build darksilk-qt as well if the dependencies are met.
+
+Dependencies
 ---------------------
-The Dash Core repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
-- [Developer Notes](developer-notes.md)
-- [Multiwallet Qt Development](multiwallet-qt.md)
-- [Release Notes](release-notes.md)
-- [Release Process](release-process.md)
-- Source Code Documentation ***TODO***
-- [Translation Process](translation_process.md)
-- [Translation Strings Policy](translation_strings_policy.md)
-- [Unit Tests](unit-tests.md)
-- [Unauthenticated REST Interface](REST-interface.md)
-- [Shared Libraries](shared-libraries.md)
-- [BIPS](bips.md)
-- [Dnsseed Policy](dnsseed-policy.md)
+These dependencies are required:
 
-### Resources
-* Discuss on the [DashTalk](https://dashtalk.org/) forums, in the Development & Technical Discussion board.
-* Discuss on [#dashpay](http://webchat.freenode.net/?channels=dashpay) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=dashpay).
+ Library     | Purpose          | Description
+ ------------|------------------|----------------------
+ libssl      | SSL Support      | Secure communications
+ libboost    | Boost            | C++ Library
 
-### Miscellaneous
-- [Assets Attribution](assets-attribution.md)
-- [Files](files.md)
-- [Tor Support](tor.md)
-- [Init Scripts (systemd/upstart/openrc)](init.md)
+Optional dependencies:
 
-License
----------------------
-Distributed under the [MIT software license](http://www.opensource.org/licenses/mit-license.php).
-This product includes software developed by the OpenSSL Project for use in the [OpenSSL Toolkit](https://www.openssl.org/). This product includes
-cryptographic software written by Eric Young ([eay@cryptsoft.com](mailto:eay@cryptsoft.com)), and UPnP software written by Thomas Bernard.
+ Library     | Purpose          | Description
+ ------------|------------------|----------------------
+ miniupnpc   | UPnP Support     | Firewall-jumping support
+ libdb4.8    | Berkeley DB      | Wallet storage (only needed when wallet enabled)
+ qt          | GUI              | GUI toolkit (only needed when GUI enabled)
+ protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
+ libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
+
+For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
+
+System requirements
+--------------------
+
+C++ compilers are memory-hungry. It is recommended to have at least 1 GB of
+memory available when compiling DarkSilk Core. With 512MB of memory or less
+compilation will take much longer due to swap thrashing.
+
+Dependency Build Instructions: Ubuntu & Debian
+----------------------------------------------
+Build requirements:
+
+	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev
+	
+for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
+
+	sudo apt-get install libboost-all-dev
+
+ db4.8 packages are available [here](https://launchpad.net/~silknetwork/+archive/silknetwork).
+ You can add the repository using the following command:
+
+        sudo add-apt-repository ppa:silknetwork/silknetwork
+        sudo apt-get update
+
+ Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
+ but using these will break binary wallet compatibility, and is not recommended.
+
+for Debian 7 (Wheezy) and later:
+ The oldstable repository contains db4.8 packages.
+ Add the following line to /etc/apt/sources.list,
+ replacing [mirror] with any official debian mirror.
+
+	deb http://[mirror]/debian/ oldstable main
+
+To enable the change run
+
+	sudo apt-get update
+
+for other Debian & Ubuntu (with ppa):
+
+	sudo apt-get install libdb4.8-dev libdb4.8++-dev
+
+Optional:
+
+	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
+
+Dependencies for the GUI: Ubuntu & Debian
+-----------------------------------------
+
+If you want to build DarkSilk-Qt, make sure that the required packages for Qt development
+are installed. Qt 5 is necessary to build the GUI.
+If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
+To build without GUI pass `--without-gui`.
+
+For Qt 5 you need the following:
+
+    sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libcrypto++-dev
+
+libqrencode (optional) can be installed with:
+
+    sudo apt-get install libqrencode-dev
+
+Once these are installed, they will be found by configure and a darksilk-qt executable will be
+built by default.
+
+Notes
+-----
+The release is built with GCC and then "strip darksilkd" to strip the debug
+symbols, which reduces the executable size by about 90%.
+
+
+miniupnpc
+---------
+
+[miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
+http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
+turned off by default.  See the configure options for upnp behavior desired:
+
+	--without-miniupnpc      No UPnP support miniupnp not required
+	--disable-upnp-default   (the default) UPnP support turned off by default at runtime
+	--enable-upnp-default    UPnP support turned on by default at runtime
+
+To build:
+
+	tar -xzvf miniupnpc-1.6.tar.gz
+	cd miniupnpc-1.6
+	make
+	sudo su
+	make install
+
+
+Berkeley DB
+-----------
+It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+
+```bash
+DARKSILK_ROOT=$(pwd)
+
+# Pick some path to install BDB to, here we create a directory within the darksilk directory
+BDB_PREFIX="${DARKSILK_ROOT}/db4"
+mkdir -p $BDB_PREFIX
+
+# Fetch the source and verify that it is not tampered with
+wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+# -> db-4.8.30.NC.tar.gz: OK
+tar -xzvf db-4.8.30.NC.tar.gz
+
+# Build the library and install to our prefix
+cd db-4.8.30.NC/build_unix/
+#  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
+../dist/configure --prefix=/usr/local --enable-cxx
+make 
+sudo make install
+
+# Configure DarkSilk Core to use our own-built instance of BDB
+cd $DARKSILK_ROOT
+./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
+```
+
+**Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
+
+Boost
+-----
+If you need to build Boost yourself:
+
+	sudo su
+	./bootstrap.sh
+	./bjam install
+
+
+Security
+--------
+To help make your DarkSilk installation more secure by making certain attacks impossible to
+exploit even if a vulnerability is found, binaries are hardened by default.
+This can be disabled with:
+
+Hardening Flags:
+
+	./configure --enable-hardening
+	./configure --disable-hardening
+
+
+Hardening enables the following features:
+
+* Position Independent Executable
+    Build position independent code to take advantage of Address Space Layout Randomization
+    offered by some kernels. An attacker who is able to cause execution of code at an arbitrary
+    memory location is thwarted if he doesn't know where anything useful is located.
+    The stack and heap are randomly located by default but this allows the code section to be
+    randomly located as well.
+
+    On an Amd64 processor where a library was not compiled with -fPIC, this will cause an error
+    such as: "relocation R_X86_64_32 against `......' can not be used when making a shared object;"
+
+    To test that you have built PIE executable, install scanelf, part of paxutils, and use:
+
+    	scanelf -e ./darksilkd
+
+    The output should contain:
+     TYPE
+    ET_DYN
+
+* Non-executable Stack
+    If the stack is executable then trivial stack based buffer overflow exploits are possible if
+    vulnerable buffers are found. By default, darksilk should be built with a non-executable stack
+    but if one of the libraries it uses asks for an executable stack or someone makes a mistake
+    and uses a compiler extension which requires an executable stack, it will silently build an
+    executable without the non-executable stack protection.
+
+    To verify that the stack is non-executable after compiling use:
+    `scanelf -e ./darksilkd`
+
+    the output should contain:
+	STK/REL/PTL
+	RW- R-- RW-
+
+    The STK RW- means that the stack is readable and writeable but not executable.
+
+Disable-wallet mode
+--------------------
+When the intention is to run only a P2P node without a wallet, darksilk may be compiled in
+disable-wallet mode with:
+
+    ./configure --disable-wallet
+
+In this case there is no dependency on Berkeley DB 4.8.
+
+Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
+call not `getwork`.
+
+Example Build Command
+--------------------
+Qt Wallet and Deamon, CLI version build:
+
+    ./autogen.sh && ./configure --with-gui && make
+
+CLI and Deamon Only Buld:
+
+    ./autogen.sh && ./configure --without-gui && make

@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The Bitcoin Core developers
+# Copyright (c) 2014-2015 The DarkSilk Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,10 +7,10 @@
 # Test -alertnotify 
 #
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import DarkSilkTestFramework
 from test_framework.util import *
 
-class ForkNotifyTest(BitcoinTestFramework):
+class ForkNotifyTest(DarkSilkTestFramework):
 
     alert_filename = None  # Set by setup_network
 

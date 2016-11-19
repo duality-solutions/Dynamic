@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The Bitcoin Core developers
+# Copyright (c) 2014-2015 The DarkSilk Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,7 +10,7 @@
 
 from decimal import Decimal
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import DarkSilkTestFramework
 from test_framework.authproxy import JSONRPCException
 from test_framework.util import (
     initialize_chain,
@@ -23,7 +23,7 @@ from test_framework.util import (
 )
 
 
-class BlockchainTest(BitcoinTestFramework):
+class BlockchainTest(DarkSilkTestFramework):
     """
     Test blockchain-related RPC calls:
 

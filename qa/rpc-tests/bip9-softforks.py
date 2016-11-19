@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2015 The Bitcoin Core developers
+# Copyright (c) 2015 The DarkSilk Core developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
@@ -173,7 +173,7 @@ class BIP9SoftForksTest(ComparisonTestFramework):
 
         # Restart all
         stop_nodes(self.nodes)
-        wait_bitcoinds()
+        wait_darksilkds()
         shutil.rmtree(self.options.tmpdir)
         self.setup_chain()
         self.setup_network()
