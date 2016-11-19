@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>В този режим -genproclimit се контролира колко блока са генерирани моментално.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX изисква средства с поне 6 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
+        <source>InstantX requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantX изисква средства с поне 10 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>

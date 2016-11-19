@@ -2098,8 +2098,8 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
                 continue;
 
             int nDepth = pcoin->GetDepthInMainChain(false);
-            // do not use IX for inputs that have less then 6 blockchain confirmations
-            if (fUseInstantSend && nDepth < 6)
+            // do not use IX for inputs that have less then 10 blockchain confirmations
+            if (fUseInstantSend && nDepth < 10)
                 continue;
 
             // We should not consider coins which aren't at least in our mempool
@@ -2412,7 +2412,7 @@ bool CWallet::SelectCoins(const CAmount& nTargetValue, set<pair<const CWalletTx*
     }
 
     bool res = nTargetValue <= nValueFromPresetInputs ||
-        SelectCoinsMinConf(nTargetValue - nValueFromPresetInputs, 1, 6, vCoins, setCoinsRet, nValueRet) ||
+        SelectCoinsMinConf(nTargetValue - nValueFromPresetInputs, 1, 10, vCoins, setCoinsRet, nValueRet) ||
         SelectCoinsMinConf(nTargetValue - nValueFromPresetInputs, 1, 1, vCoins, setCoinsRet, nValueRet) ||
         (bSpendZeroConfChange && SelectCoinsMinConf(nTargetValue - nValueFromPresetInputs, 0, 1, vCoins, setCoinsRet, nValueRet));
 
@@ -3013,7 +3013,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     }
 
                     if(fUseInstantSend){
-                        strFailReason += " " + _("InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.");
+                        strFailReason += " " + _("InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.");
                     }
 
                     return false;
@@ -4046,7 +4046,7 @@ int CMerkleTx::GetDepthInMainChain(const CBlockIndex* &pindexRet, bool enableIX)
         }
     }
 
-    if(enableIX && nResult < 6 && IsLockedInstandSendTransaction(GetHash()))
+    if(enableIX && nResult < 10 && IsLockedInstandSendTransaction(GetHash()))
         return nInstantSendDepth + nResult;
 
     return nResult;
