@@ -1,7 +1,7 @@
-Protocol Documentation - 0.12.1
+Protocol Documentation - 1.0.0.0
 =====================================
 
-This document describes the protocol extensions for all additional functionality build into the Dash protocol. This doesn't include any of the Bitcoin procotol, which has been left in tact in the Dash project. For more information about the core protocol, please see https://en.bitcoin.it/w/index.php?title#Protocol_documentation&action#edit
+This document describes the protocol extensions for all additional functionality build into the DarkSilk protocol. This doesn't include any of the Bitcoin procotol, which has been left in tact in the DarkSilk project. For more information about the core protocol, please see https://en.bitcoin.it/w/index.php?title#Protocol_documentation&action#edit
 
 ## Common Structures
 
@@ -51,64 +51,64 @@ Bitcoin Public Key https://bitcoin.org/en/glossary/public-key
 
 ## Message Types
 
-### MNANNOUNCE - "mnb"
+### SNANNOUNCE - "snb"
 
-CMasternodeBroadcast
+CStormnodeBroadcast
 
-Whenever a masternode comes online or a client is syncing, they will send this message which describes the masternode entry and how to validate messages from it.
+Whenever a Stormnode comes online or a client is syncing, they will send this message which describes the Stormnode entry and how to validate messages from it.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| 41 | vin | CTxIn | The unspent output which is holding 1000 DASH
-| # | addr | CService | Address of the main 1000 DASH unspent output
-| 33-65 | pubKeyCollateralAddress | CPubKey | CPubKey of the main 1000 DASH unspent output
-| 33-65 | pubKeyMasternode | CPubKey | CPubKey of the secondary signing key (For all other messaging other than announce message)
+| 41 | vin | CTxIn | The unspent output which is holding 1000 DarkSilk
+| # | addr | CService | Address of the main 1000 DarkSilk unspent output
+| 33-65 | pubKeyCollateralAddress | CPubKey | CPubKey of the main 1000 DarkSilk unspent output
+| 33-65 | pubKeyStormnode | CPubKey | CPubKey of the secondary signing key (For all other messaging other than announce message)
 | 71-73 | sig | char[] | Signature of this message
 | 8 | sigTime | int64_t | Time which the signature was created
-| 4 | nProtocolVersion | int | The protocol version of the masternode
-| # | lastPing | CMasternodePing | The last known ping of the masternode
-| 8 | nLastDsq | int64_t | The last time the masternode sent a DSQ message (for mixing)
+| 4 | nProtocolVersion | int | The protocol version of the Stormnode
+| # | lastPing | CStormnodePing | The last known ping of the Stormnode
+| 8 | nLastSsq | int64_t | The last time the Stormnode sent a SSQ message (for mixing)
 
-### MNPING - "mnp"
+### SNPING - "snp"
 
-CMasternodePing
+CStormnodePing
 
-Every few minutes, masternodes ping the network with a message that propagates the whole network.
+Every few minutes, Stormnodes ping the network with a message that propagates the whole network.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| 41 | vin | CTxIn | The unspent output of the masternode which is signing the message
+| 41 | vin | CTxIn | The unspent output of the Stormnode which is signing the message
 | 32 | blockHash | uint256 | Current chaintip blockhash minus 12
 | 8 | sigTime | int64_t | Signature time for this ping
-| 71-73 | vchSig | char[] | Signature of this message by masternode (verifiable via pubKeyMasternode)
+| 71-73 | vchSig | char[] | Signature of this message by Stormnode (verifiable via pubKeyStormnode)
 
-### MASTERNODEPAYMENTVOTE - "mnw"
+### StormnodePAYMENTVOTE - "snw"
 
-CMasternodePaymentVote
+CStormnodePaymentVote
 
-When a new block is found on the network, a masternode quorum will be determined and those 10 selected masternodes will issue a masternode payment vote message to pick the next winning node.
+When a new block is found on the network, a Stormnode quorum will be determined and those 10 selected Stormnodes will issue a Stormnode payment vote message to pick the next winning node.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| 41 | vinMasternode | CTxIn | The unspent output of the masternode which is signing the message
+| 41 | vinStormnode | CTxIn | The unspent output of the Stormnode which is signing the message
 | 4 | nBlockHeight | int | The blockheight which the payee should be paid
 | ? | payeeAddress | CScript | The address to pay to
-| 71-73 | sig | char[] | Signature of the masternode which is signing the message
+| 71-73 | sig | char[] | Signature of the Stormnode which is signing the message
 
-### DSTX - "dstx"
+### SSTX - "sstx"
 
-CDarksendBroadcastTx
+CSandstormBroadcastTx
 
-Masternodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the DSTX message.
+Stormnodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the SSTX message.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | # | tx | CTransaction | The transaction
-| 41 | vin | CTxIn | Masternode unspent output
-| 71-73 | vchSig | char[] | Signature of this message by masternode (verifiable via pubKeyMasternode)
+| 41 | vin | CTxIn | Stormnode unspent output
+| 71-73 | vchSig | char[] | Signature of this message by Stormnode (verifiable via pubKeyStormnode)
 | 8 | sigTime | int64_t | Time this message was signed
 
-### DSSTATUSUPDATE - "dssu"
+### SSSTATUSUPDATE - "sssu"
 
 Mixing pool status update
 
@@ -118,45 +118,45 @@ Mixing pool status update
 | 4 | nMsgState | int | Current state of mixing process
 | 4 | nMsgEntriesCount | int | Number of entries in the mixing pool
 | 4 | nMsgStatusUpdate | int | Update state and/or signal if entry was accepted or not
-| 4 | nMsgMessageID | int | ID of the typical masternode reply message
+| 4 | nMsgMessageID | int | ID of the typical Stormnode reply message
 
-### DSQUEUE - "dsq"
+### SSQUEUE - "ssq"
 
-CDarksendQueue
+CSandstormQueue
 
 Asks users to sign final mixing tx message.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | 4 | nDenom | int | Which denomination is allowed in this mixing session
-| 41 | vin | CTxIn | unspend output from masternode which is hosting this session
-| 4 | nTime | int | the time this DSQ was created
+| 41 | vin | CTxIn | unspend output from Stormnode which is hosting this session
+| 4 | nTime | int | the time this SSQ was created
 | 4 | fReady | int | if the mixing pool is ready to be executed
-| 71-73 | vchSig | char[] | Signature of this message by masternode (verifiable via pubKeyMasternode)
+| 71-73 | vchSig | char[] | Signature of this message by Stormnode (verifiable via pubKeyStormnode)
 
-### DSACCEPT - "dsa"
+### SSACCEPT - "ssa"
 
-Response to DSQ message which allows the user to join a mixing pool
+Response to SSQ message which allows the user to join a mixing pool
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | 4 | nDenom | int | denomination that will be exclusively used when submitting inputs into the pool
 | 41+ | txCollateral | int | collateral tx that will be charged if this client acts maliciousely
 
-### DSVIN - "dsi"
+### SSVIN - "ssi"
 
-CDarkSendEntry
+CSandstormEntry
 
 When queue is ready user is expected to send his entry to start actual mixing
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| ? | vecTxDSIn | CTxDSIn[] | vector of users inputs (CTxDSIn serialization is equal to CTxIn serialization)
+| ? | vecTxSSIn | CTxSSIn[] | vector of users inputs (CTxSSIn serialization is equal to CTxIn serialization)
 | 8 | nAmount | int64_t | depreciated since 12.1, it's used for backwards compatibility only and can be removed with future protocol bump
 | ? | txCollateral | CTransaction | Collateral transaction which is used to prevent misbehavior and also to charge fees randomly
-| ? | vecTxDSOut | CTxDSOut[] | vector of user outputs (CTxDSOut serialization is equal to CTxOut serialization)
+| ? | vecTxSSOut | CTxSSOut[] | vector of user outputs (CTxSSOut serialization is equal to CTxOut serialization)
 
-### DSSIGNFINALTX - "dss"
+### SSSIGNFINALTX - "sss"
 
 User's signed inputs for a group transaction in a mixing session
 
@@ -164,7 +164,7 @@ User's signed inputs for a group transaction in a mixing session
 | ---------- | ----------- | --------- | -------- |
 | # | inputs | CTxIn[] | signed inputs for mixing session
 
-### MNGOVERNANCEOBJECT - "govobj"
+### SNGOVERNANCEOBJECT - "govobj"
 
 Governance Object
 
@@ -178,20 +178,20 @@ A proposal, contract or setting.
 | 32 | nCollateralHash | uint256 | Hash of the collateral fee transaction
 | 0-16384 | strData | string | Data field - can be used for anything
 | 4 | nObjectType | int | ????
-| 41 | vinMasternode | CTxIn | Unspent output for the masternode which is signing this object
-| 71-73 | vchSig | char[] | Signature of the masternode
+| 41 | vinStormnode | CTxIn | Unspent output for the Stormnode which is signing this object
+| 71-73 | vchSig | char[] | Signature of the Stormnode
 
-### MNGOVERNANCEOBJECTVOTE - "govobjvote"
+### SNGOVERNANCEOBJECTVOTE - "govobjvote"
 
 Governance Vote
 
-Masternodes use governance voting in response to new proposals, contracts, settings or finalized budgets.
+Stormnodes use governance voting in response to new proposals, contracts, settings or finalized budgets.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | 4 | nVoteSignal | int | ???
-| 41+ | vinMasternode | CTxIn | Unspent output for the masternode which is voting
+| 41+ | vinStormnode | CTxIn | Unspent output for the Stormnode which is voting
 | 32 | nParentHash | uint256 | Object which we're voting on (proposal, contract, setting or final budget)
 | 4 | nVoteOutcome | int | ???
 | 8 | nTime | int64_t | Time which the vote was created
-| 71-73 | vchSig | char[] | Signature of the masternode
+| 71-73 | vchSig | char[] | Signature of the Stormnode
