@@ -283,8 +283,8 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
             "  \"account\" : \"account\"         (string) DEPRECATED. The account associated with the address, \"\" is the default account\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("validateaddress", "\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"")
-            + HelpExampleRpc("validateaddress", "\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"")
+            + HelpExampleCli("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
+            + HelpExampleRpc("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
         );
 
 #ifdef ENABLE_WALLET
@@ -408,9 +408,9 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
 
             "\nExamples:\n"
             "\nCreate a multisig address from 2 addresses\n"
-            + HelpExampleCli("createmultisig", "2 \"[\\\"Xt4qk9uKvQYAonVGSZNXqxeDmtjaEWgfrs\\\",\\\"XoSoWQkpgLpppPoyyzbUFh1fq2RBvW6UK1\\\"]\"") +
+            + HelpExampleCli("createmultisig", "2 \"[\\\"D8RHNF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\",\\\"D2sMrF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\"]\"") +
             "\nAs a json rpc call\n"
-            + HelpExampleRpc("createmultisig", "2, \"[\\\"Xt4qk9uKvQYAonVGSZNXqxeDmtjaEWgfrs\\\",\\\"XoSoWQkpgLpppPoyyzbUFh1fq2RBvW6UK1\\\"]\"")
+            + HelpExampleRpc("createmultisig", "2, \"[\\\"D8RHNF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\",\\\"D2sMrF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\"]\"")
         ;
         throw runtime_error(msg);
     }
@@ -443,11 +443,11 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
             "\nUnlock the wallet for 30 seconds\n"
             + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
             "\nCreate the signature\n"
-            + HelpExampleCli("signmessage", "\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\" \"my message\"") +
+            + HelpExampleCli("signmessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"my message\"") +
             "\nVerify the signature\n"
-            + HelpExampleCli("verifymessage", "\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\" \"signature\" \"my message\"") +
+            + HelpExampleCli("verifymessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"signature\" \"my message\"") +
             "\nAs json rpc\n"
-            + HelpExampleRpc("verifymessage", "\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\", \"signature\", \"my message\"")
+            + HelpExampleRpc("verifymessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", \"signature\", \"my message\"")
         );
 
     LOCK(cs_main);
@@ -597,8 +597,8 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}'")
-            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}")
+            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -667,8 +667,8 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}'")
-            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}")
+            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -735,8 +735,8 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}'")
-            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}")
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
 
@@ -815,8 +815,8 @@ UniValue getaddressbalance(const UniValue& params, bool fHelp)
             "  \"received\"  (string) The total number of satoshis received (including change)\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}'")
-            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}")
+            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -873,8 +873,8 @@ UniValue getaddresstxids(const UniValue& params, bool fHelp)
             "  ,...\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}'")
-            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"XwnLY9Tf7Zsef8gMGL2fhWA9ZmMjt4KPwg\"]}")
+            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;

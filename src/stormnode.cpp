@@ -656,59 +656,16 @@ bool CStormnodeBroadcast::CheckSignature(int& nDos)
     std::string strError = "";
     nDos = 0;
 
-    //
-    // REMOVE AFTER MIGRATION TO 12.1
-    //
-    if(nProtocolVersion < 70201) {
-        std::string vchPubkeyCollateralAddress(pubKeyCollateralAddress.begin(), pubKeyCollateralAddress.end());
-        std::string vchPubkeyStormnode(pubKeyStormnode.begin(), pubKeyStormnode.end());
-        strMessage = addr.ToString(false) + boost::lexical_cast<std::string>(sigTime) +
-                        vchPubkeyCollateralAddress + vchPubkeyStormnode + boost::lexical_cast<std::string>(nProtocolVersion);
+    strMessage = addr.ToString(false) + boost::lexical_cast<std::string>(sigTime) +
+                    pubKeyCollateralAddress.GetID().ToString() + pubKeyStormnode.GetID().ToString() +
+                    boost::lexical_cast<std::string>(nProtocolVersion);
 
-        LogPrint("stormnode", "CStormnodeBroadcast::CheckSignature -- sanitized strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n",
-            SanitizeString(strMessage), CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(),
-            EncodeBase64(&vchSig[0], vchSig.size()));
+    LogPrint("stormnode", "CStormnodeBroadcast::CheckSignature -- strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n", strMessage, CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(), EncodeBase64(&vchSig[0], vchSig.size()));
 
-        if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
-            if(addr.ToString() != addr.ToString(false)) {
-                // maybe it's wrong format, try again with the old one
-                strMessage = addr.ToString() + boost::lexical_cast<std::string>(sigTime) +
-                                vchPubkeyCollateralAddress + vchPubkeyStormnode + boost::lexical_cast<std::string>(nProtocolVersion);
-
-                LogPrint("stormnode", "CStormnodeBroadcast::CheckSignature -- second try, sanitized strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n",
-                    SanitizeString(strMessage), CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(),
-                    EncodeBase64(&vchSig[0], vchSig.size()));
-
-                if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
-                    // didn't work either
-                    LogPrintf("CStormnodeBroadcast::CheckSignature -- Got bad Stormnode announce signature, second try, sanitized error: %s\n",
-                        SanitizeString(strError));
-                    // don't ban for old stormnodes, their sigs could be broken because of the bug
-                    return false;
-                }
-            } else {
-                // nope, sig is actually wrong
-                LogPrintf("CStormnodeBroadcast::CheckSignature -- Got bad Stormnode announce signature, sanitized error: %s\n",
-                    SanitizeString(strError));
-                // don't ban for old stormnodes, their sigs could be broken because of the bug
-                return false;
-            }
-        }
-    } else {
-    //
-    // END REMOVE
-    //
-        strMessage = addr.ToString(false) + boost::lexical_cast<std::string>(sigTime) +
-                        pubKeyCollateralAddress.GetID().ToString() + pubKeyStormnode.GetID().ToString() +
-                        boost::lexical_cast<std::string>(nProtocolVersion);
-
-        LogPrint("stormnode", "CStormnodeBroadcast::CheckSignature -- strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n", strMessage, CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(), EncodeBase64(&vchSig[0], vchSig.size()));
-
-        if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
-            LogPrintf("CStormnodeBroadcast::CheckSignature -- Got bad Stormnode announce signature, error: %s\n", strError);
-            nDos = 100;
-            return false;
-        }
+    if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
+        LogPrintf("CStormnodeBroadcast::CheckSignature -- Got bad Stormnode announce signature, error: %s\n", strError);
+        nDos = 100;
+        return false;
     }
 
     return true;
