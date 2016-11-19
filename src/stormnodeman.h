@@ -3,8 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef STORMNODEMAN_H
-#define STORMNODEMAN_H
+#ifndef DARKSILK_STORMNODEMAN_H
+#define DARKSILK_STORMNODEMAN_H
 
 #include "stormnode.h"
 #include "sync.h"
@@ -347,4 +347,4 @@ public:
 
 };
 
-#endif // STORMNODEMAN_H
+#endif // DARKSILK_STORMNODEMAN_H

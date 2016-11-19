@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef ACTIVESTORMNODE_H
-#define ACTIVESTORMNODE_H
+#ifndef DARKSILK_ACTIVESTORMNODE_H
+#define DARKSILK_ACTIVESTORMNODE_H
 
 #include "net.h"
 #include "key.h"
@@ -74,4 +74,4 @@ private:
     void ManageStateLocal();
 };
 
-#endif
+#endif // DARKSILK_ACTIVESTORMNODE_H

@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef GOVERNANCE_CLASSES_H
-#define GOVERNANCE_CLASSES_H
+#ifndef DARKSILK_GOVERNANCE_CLASSES_H
+#define DARKSILK_GOVERNANCE_CLASSES_H
 
 //#define ENABLE_DARKSILK_DEBUG
 
@@ -216,4 +216,4 @@ public:
     bool IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
 };
 
-#endif
+#endif // DARKSILK_GOVERNANCE_CLASSES_H
