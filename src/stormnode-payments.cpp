@@ -772,8 +772,6 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
 // Request low data payment blocks in batches directly from some node instead of/after preliminary Sync.
 void CStormnodePayments::RequestLowDataPaymentBlocks(CNode* pnode)
 {
-    // Old nodes can't process this
-    if(pnode->nVersion < 70202) return;
 
     LOCK(cs_mapStormnodeBlocks);
 
