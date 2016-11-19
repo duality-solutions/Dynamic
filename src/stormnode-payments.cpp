@@ -749,14 +749,7 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
 
     if(!pCurrentBlockIndex) return;
 
-    if(pnode->nVersion < 70202) {
-        // Old nodes can only sync via heavy method
-        int nLimit = GetStorageLimit();
-        if(nCountNeeded > nLimit) nCountNeeded = nLimit;
-    } else {
-        // New nodes request missing payment blocks themselves, push only votes for future blocks to them
-        nCountNeeded = 0;
-    }
+    nCountNeeded = 0;
 
     int nInvCount = 0;
 
@@ -779,8 +772,6 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
 // Request low data payment blocks in batches directly from some node instead of/after preliminary Sync.
 void CStormnodePayments::RequestLowDataPaymentBlocks(CNode* pnode)
 {
-    // Old nodes can't process this
-    if(pnode->nVersion < 70202) return;
 
     LOCK(cs_mapStormnodeBlocks);
 

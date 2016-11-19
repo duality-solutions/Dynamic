@@ -313,7 +313,6 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
 
         if(nMsgMessageID < MSG_POOL_MIN || nMsgMessageID > MSG_POOL_MAX) {
             LogPrint("privatesend", "SSSTATUSUPDATE -- nMsgMessageID is out of bounds: %d\n", nMsgMessageID);
-            if(pfrom->nVersion < 70203) nMsgMessageID = MSG_NOERR;
             return;
         }
 
