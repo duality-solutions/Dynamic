@@ -738,7 +738,7 @@ UniValue estimatefee(const UniValue& params, bool fHelp)
             "A negative value is returned if not enough transactions and blocks\n"
             "have been observed to make an estimate.\n"
             "\nExample:\n"
-            + HelpExampleCli("estimatefee", "6")
+            + HelpExampleCli("estimatefee", "10")
             );
 
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VNUM));
@@ -769,7 +769,7 @@ UniValue estimatepriority(const UniValue& params, bool fHelp)
             "A negative value is returned if not enough transactions and blocks\n"
             "have been observed to make an estimate.\n"
             "\nExample:\n"
-            + HelpExampleCli("estimatepriority", "6")
+            + HelpExampleCli("estimatepriority", "10")
             );
 
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VNUM));
@@ -802,7 +802,7 @@ UniValue estimatesmartfee(const UniValue& params, bool fHelp)
             "have been observed to make an estimate for any number of blocks.\n"
             "However it will not return a value below the mempool reject fee.\n"
             "\nExample:\n"
-            + HelpExampleCli("estimatesmartfee", "6")
+            + HelpExampleCli("estimatesmartfee", "10")
             );
 
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VNUM));
@@ -838,7 +838,7 @@ UniValue estimatesmartpriority(const UniValue& params, bool fHelp)
             "have been observed to make an estimate for any number of blocks.\n"
             "However if the mempool reject fee is set it will return 1e9 * MAX_MONEY.\n"
             "\nExample:\n"
-            + HelpExampleCli("estimatesmartpriority", "6")
+            + HelpExampleCli("estimatesmartpriority", "10")
             );
 
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VNUM));

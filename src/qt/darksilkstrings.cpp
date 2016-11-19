@@ -102,7 +102,7 @@ QT_TRANSLATE_NOOP("darksilk-core", ""
 "In this mode -genproclimit controls how many blocks are generated "
 "immediately."),
 QT_TRANSLATE_NOOP("darksilk-core", ""
-"InstantSend requires inputs with at least 6 confirmations, you might need to "
+"InstantSend requires inputs with at least 10 confirmations, you might need to "
 "wait a few minutes and try again."),
 QT_TRANSLATE_NOOP("darksilk-core", ""
 "Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay "
@@ -210,10 +210,10 @@ QT_TRANSLATE_NOOP("darksilk-core", ""
 QT_TRANSLATE_NOOP("darksilk-core", ""
 "You must specify a stormnodeprivkey in the configuration. Please see "
 "documentation for help."),
-QT_TRANSLATE_NOOP("darksilk-core", "(9999 could be used only on mainnet)"),
+QT_TRANSLATE_NOOP("darksilk-core", "(31000 could be used only on mainnet)"),
 QT_TRANSLATE_NOOP("darksilk-core", "(default: %s)"),
 QT_TRANSLATE_NOOP("darksilk-core", "(default: 1)"),
-QT_TRANSLATE_NOOP("darksilk-core", "(must be 9999 for mainnet)"),
+QT_TRANSLATE_NOOP("darksilk-core", "(must be 31000 for mainnet)"),
 QT_TRANSLATE_NOOP("darksilk-core", "<category> can be:\n"),
 QT_TRANSLATE_NOOP("darksilk-core", "Accept command line and JSON-RPC commands"),
 QT_TRANSLATE_NOOP("darksilk-core", "Accept connections from outside (default: 1 if no -proxy or -connect)"),

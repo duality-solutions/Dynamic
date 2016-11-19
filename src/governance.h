@@ -36,7 +36,7 @@ class CGovernanceObject;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
-static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70202;
+static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 60800;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
 static const int GOVERNANCE_OBJECT_PROPOSAL = 1;
@@ -45,7 +45,7 @@ static const int GOVERNANCE_OBJECT_WATCHDOG = 3;
 
 static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (0.33*COIN);
 
-static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 6;
+static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 10;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
 
 // FOR SEEN MAP ARRAYS - GOVERNANCE OBJECTS AND VOTES

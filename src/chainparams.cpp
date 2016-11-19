@@ -69,8 +69,8 @@ public:
         consensus.nStormnodePaymentsStartBlock = 20000; // not true, but it's ok as long as it's less then nStormnodePaymentsIncreaseBlock
         consensus.nStormnodePaymentsIncreaseBlock = 30000; // actual historical value
         consensus.nStormnodePaymentsIncreasePeriod = 576*30; // 17280 - actual historical value
-        consensus.nInstantSendKeepLock = 24;
-        consensus.nInstantSendReprocessBlocks = 15;
+        consensus.nInstantSendKeepLock = 40;
+        consensus.nInstantSendReprocessBlocks = 24;
         consensus.nBudgetPaymentsStartBlock = 20000; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 41091; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
         consensus.nBudgetPaymentsWindowBlocks = 100;
@@ -173,8 +173,8 @@ public:
         consensus.nStormnodePaymentsStartBlock = 200; // not true, but it's ok as long as it's less then nStormnodePaymentsIncreaseBlock
         consensus.nStormnodePaymentsIncreaseBlock = 100;
         consensus.nStormnodePaymentsIncreasePeriod = 576;
-        consensus.nInstantSendKeepLock = 6;
-        consensus.nInstantSendReprocessBlocks = 4;
+        consensus.nInstantSendKeepLock = 24;
+        consensus.nInstantSendReprocessBlocks = 15;
         consensus.nBudgetPaymentsStartBlock = 60000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
@@ -272,8 +272,8 @@ public:
         consensus.nStormnodePaymentsStartBlock = 240;
         consensus.nStormnodePaymentsIncreaseBlock = 350;
         consensus.nStormnodePaymentsIncreasePeriod = 10;
-        consensus.nInstantSendKeepLock = 6;
-        consensus.nInstantSendReprocessBlocks = 4;
+        consensus.nInstantSendKeepLock = 24;
+        consensus.nInstantSendReprocessBlocks = 15;
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
