@@ -1,5 +1,5 @@
-#ifndef BITCOIN_TEST_TEST_DASH_H
-#define BITCOIN_TEST_TEST_DASH_H
+#ifndef DARKSILK_TEST_TEST_DARKSILK_H
+#define DARKSILK_TEST_TEST_DARKSILK_H
 
 #include "chainparamsbase.h"
 #include "key.h"
@@ -85,4 +85,4 @@ struct TestMemPoolEntryHelper
     TestMemPoolEntryHelper &SpendsCoinbase(bool _flag) { spendsCoinbase = _flag; return *this; }
     TestMemPoolEntryHelper &SigOps(unsigned int _sigops) { sigOpCount = _sigops; return *this; }
 };
-#endif
+#endif // DARKSILK_TEST_TEST_DARKSILK_H
