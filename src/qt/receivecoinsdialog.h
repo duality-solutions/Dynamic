@@ -38,9 +38,10 @@ class ReceiveCoinsDialog : public QDialog
 public:
     enum ColumnWidths {
         DATE_COLUMN_WIDTH = 130,
+        ADDRESS_COLUMN_WIDTH = 160,
         LABEL_COLUMN_WIDTH = 120,
         AMOUNT_MINIMUM_COLUMN_WIDTH = 160,
-        MINIMUM_COLUMN_WIDTH = 130
+        MINIMUM_COLUMN_WIDTH = 120
     };
 
     explicit ReceiveCoinsDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
@@ -74,6 +75,7 @@ private Q_SLOTS:
     void recentRequestsView_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void updateDisplayUnit();
     void showMenu(const QPoint &point);
+    void copyAddress();
     void copyLabel();
     void copyMessage();
     void copyAmount();
