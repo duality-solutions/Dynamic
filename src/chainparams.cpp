@@ -126,8 +126,8 @@ public:
         consensus.nPowTargetSpacing = 1 * 64; // DarkSilk: 64 seconds
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 12830; // 95% of 1350
-        consensus.nMinerConfirmationWindow = 13500; // (nPowTargetTimespan / nPowTargetSpacing) * 10
+        consensus.nRuleChangeActivationThreshold = 1283; // 95% of 1350
+        consensus.nMinerConfirmationWindow = 1350; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -152,7 +152,7 @@ public:
         nPruneAfterHeight = 10000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1478568500, 424119, 0x1e0ffff0, 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1478568500, 424119, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, &consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -170,10 +170,10 @@ public:
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,10);
         // DarkSilk private keys start with 'y'
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,140);
-        // DarkSilk BIP32 pubkeys start with 'drks'
-        base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x02)(0xFE)(0x52)(0x7D).convert_to_container<std::vector<unsigned char> >();
-        // DarkSilk BIP32 prvkeys start with 'drky'
-        base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x02)(0xFE)(0x52)(0x8C).convert_to_container<std::vector<unsigned char> >();
+        // DarkSilk BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
+        base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
+        // DarkSilk BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
+        base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
         // DarkSilk BIP44 coin type is '5'
         base58Prefixes[EXT_COIN_TYPE]  = boost::assign::list_of(0x80)(0x00)(0x00)(0x05).convert_to_container<std::vector<unsigned char> >();
 
@@ -249,7 +249,7 @@ public:
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1478568500, 424119, 0x1e0ffff0, 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1478568500, 424119, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, &consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -343,7 +343,7 @@ public:
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1478568500, 424119, 0x207fffff, 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1478568500, 424119, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, &consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
