@@ -27,7 +27,6 @@ What is DarkSilk?
 * Stormnode Reward: 0.382 DSLK Static Reward (38.2% of a PoW reward)
 * Budget Reward: 10,000 DSLK Static Reward Every 41,089 blocks (~30 days)
 * Budget Proposal Fee: 100 DSLK, 20 confirmations (~30 minutes)
-* Total Coins: 90,000,000 DSLK
 * Min TX Fee: 0.0001 DSLK
 
 
