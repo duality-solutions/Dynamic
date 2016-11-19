@@ -256,7 +256,6 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 
-double ConvertBitsToDouble(unsigned int nBits);
 int64_t GetTotalCoinEstimate(int nHeight);
 CAmount GetPoWBlockPayment(const int& nHeight);
 CAmount GetStormnodePayment(bool fStormnode = true);
