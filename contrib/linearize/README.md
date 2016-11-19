@@ -1,7 +1,7 @@
 # Linearize
 Construct a linear, no-fork, best version of the blockchain.
 
-## Step 0: Install dash_hash
+## Step 0: Install darksilk_hash
 
 https://github.com/darksilk/darksilk_hash
 
