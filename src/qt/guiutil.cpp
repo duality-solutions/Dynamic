@@ -909,13 +909,8 @@ QString loadStyleSheet()
     QString cssName;
     QString theme = settings.value("theme", "").toString();
 
-    if(!theme.isEmpty()){
-        cssName = QString(":/css/drk"); 
-    }
-    else {
-        cssName = QString(":/css/drk");  
-        settings.setValue("theme", "drk");
-    }
+    cssName = QString(":/css/drk");  
+    settings.setValue("theme", "drk");
     
     QFile qFile(cssName);      
     if (qFile.open(QFile::ReadOnly)) {
