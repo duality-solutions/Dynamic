@@ -129,6 +129,11 @@ static const bool DEFAULT_ENABLE_REPLACEMENT = false;
 /** Maximum number of headers to announce when relaying blocks with headers message.*/
 static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
 
+//DarkSilk Constants
+static const CAmount STATIC_POW_REWARD = COIN * 1;
+static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
+static const CAmount STATIC_STORMNODE_PAYMENT = COIN * 0.382;
+
 struct BlockHasher
 {
     size_t operator()(const uint256& hash) const { return hash.GetCheapHash(); }
@@ -253,8 +258,8 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 
 double ConvertBitsToDouble(unsigned int nBits);
 int64_t GetTotalCoinEstimate(int nHeight);
-CAmount GetBlockSubsidy(int nBits, int nHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly = false);
-CAmount GetStormnodePayment(int nHeight, CAmount blockValue);
+CAmount GetPoWBlockPayment(const int& nHeight);
+CAmount GetStormnodePayment(bool fStormnode = true);
 
 /**
  * Prune block and undo files (blk???.dat and undo???.dat) so that the disk space used is less than a user-defined target.

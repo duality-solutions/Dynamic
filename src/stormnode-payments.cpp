@@ -257,7 +257,7 @@ void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHe
     }
 
     // GET STORMNODE PAYMENT VARIABLES SETUP
-    CAmount stormnodePayment = GetStormnodePayment(nBlockHeight, blockReward);
+    CAmount stormnodePayment = GetStormnodePayment(true);
 
     // split reward between miner ...
     txNew.vout[0].nValue -= stormnodePayment;
@@ -488,7 +488,7 @@ bool CStormnodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
-    CAmount nStormnodePayment = GetStormnodePayment(nBlockHeight, txNew.GetValueOut());
+    CAmount nStormnodePayment = GetStormnodePayment(true);
 
     //require at least SNPAYMENTS_SIGNATURES_REQUIRED signatures
 

@@ -277,7 +277,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
         }
 
         // NOTE: unlike in bitcoin, we need to pass PREVIOUS block height here
-        CAmount blockReward = nFees + GetBlockSubsidy(pindexPrev->nBits, pindexPrev->nHeight, Params().GetConsensus());
+        CAmount blockReward = nFees + GetPoWBlockPayment(nHeight);
 
         // Compute regular coinbase transaction.
         txNew.vout[0].nValue = blockReward;
