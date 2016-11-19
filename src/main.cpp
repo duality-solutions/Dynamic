@@ -1770,9 +1770,9 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     CAmount nSubsidy = nSubsidyBase * COIN;
 
     // yearly decline of production by ~7.1% per year, projected ~18M coins max by year 2050+.
-    for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
+    /*for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
         nSubsidy -= nSubsidy/14;
-    }
+    }*/
 
     // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
     CAmount nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
@@ -1784,11 +1784,11 @@ CAmount GetStormnodePayment(int nHeight, CAmount blockValue)
 {
     CAmount ret = blockValue/5; // start at 20%
 
-    int nSNPIBlock = Params().GetConsensus().nStormnodePaymentsIncreaseBlock;
-    int nSNPIPeriod = Params().GetConsensus().nStormnodePaymentsIncreasePeriod;
+//    int nSNPIBlock = Params().GetConsensus().nStormnodePaymentsIncreaseBlock;
+//    int nSNPIPeriod = Params().GetConsensus().nStormnodePaymentsIncreasePeriod;
 
                                                                       // mainnet:
-    if(nHeight > nSNPIBlock)                  ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
+    /*if(nHeight > nSNPIBlock)                  ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 1)) ret += blockValue / 20; // 175280 - 30.0% - 2014-11-25
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 2)) ret += blockValue / 20; // 192560 - 35.0% - 2014-12-26
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 3)) ret += blockValue / 40; // 209840 - 37.5% - 2015-01-26
@@ -1796,7 +1796,7 @@ CAmount GetStormnodePayment(int nHeight, CAmount blockValue)
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 5)) ret += blockValue / 40; // 244400 - 42.5% - 2015-03-30
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
     if(nHeight > nSNPIBlock+(nSNPIPeriod* 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
+    if(nHeight > nSNPIBlock+(nSNPIPeriod* 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03*/
 
     return ret;
 }
@@ -2576,7 +2576,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     // Now that the whole chain is irreversibly beyond that time it is applied to all blocks except the
     // two in the chain that violate it. This prevents exploiting the issue against nodes during their
     // initial block download.
-    bool fEnforceBIP30 = (!pindex->phashBlock) || // Enforce on CreateNewBlock invocations which don't have a hash.
+    /*bool fEnforceBIP30 = (!pindex->phashBlock) || // Enforce on CreateNewBlock invocations which don't have a hash.
                           !((pindex->nHeight==91842 && pindex->GetBlockHash() == uint256S("0x00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec")) ||
                            (pindex->nHeight==91880 && pindex->GetBlockHash() == uint256S("0x00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721")));
 
@@ -2597,7 +2597,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
                 return state.DoS(100, error("ConnectBlock(): tried to overwrite transaction"),
                                  REJECT_INVALID, "bad-txns-BIP30");
         }
-    }
+    }*/
 
     // BIP16 didn't become active until Apr 1 2012
     int64_t nBIP16SwitchTime = 1333238400;

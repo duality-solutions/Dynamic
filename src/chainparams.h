@@ -103,6 +103,7 @@ protected:
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
     bool fTestnetToBeDeprecatedFieldRPC;
+    bool startNewChain;
     CCheckpointData checkpointData;
     int nPoolMaxTransactions;
     int nFulfilledRequestExpireTime;
