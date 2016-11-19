@@ -313,7 +313,22 @@ crypto_libdarksilk_crypto_a_SOURCES = \
   crypto/sph_skein.h \
   crypto/sph_types.h \
   crypto/sha512.cpp \
-  crypto/sha512.h
+  crypto/sha512.h \
+  crypto/argon2d/argon2.h \
+  crypto/argon2d/core.h \
+  crypto/argon2d/encoding.h \
+  crypto/argon2d/thread.h \
+  crypto/argon2d/opt.h \
+  crypto/argon2d/argon2.c \
+  crypto/argon2d/core.c \
+  crypto/argon2d/encoding.c \
+  crypto/argon2d/thread.c \
+  crypto/argon2d/opt.c \
+  crypto/blake2/blake2b.c \
+  crypto/blake2/blake2-impl.h \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blamka-round-opt.h \
+  crypto/blake2/blamka-round-ref.h
 
 # common: shared between darksilkd, and darksilk-qt and non-server tools
 libdarksilk_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
