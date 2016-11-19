@@ -1,21 +1,18 @@
 # **DarkSilk (DSLK) v1.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-
-[![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
-[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/SilkNetwork/DarkSilk-Core)
-
+[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
+[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/SilkNetwork/DarkSilk-Core/throughput.svg)](https://waffle.io/SilkNetwork/DarkSilk-Core/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 DarkSilk Integration/Staging Tree
 ================================
-![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/icons/darksilk-80.png)
+![DSLK logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
 **Copyright (c) 2015-2016 Silk Network**
-
 What is DarkSilk?
 ----------------
 * Coin Suffix: DSLK
