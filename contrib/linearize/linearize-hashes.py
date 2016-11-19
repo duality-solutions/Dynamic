@@ -17,7 +17,7 @@ import sys
 
 settings = {}
 
-class BitcoinRPC:
+class DarkSilkRPC:
 	def __init__(self, host, port, username, password):
 		authpair = "%s:%s" % (username, password)
 		self.authhdr = "Basic %s" % (base64.b64encode(authpair))
@@ -53,7 +53,7 @@ class BitcoinRPC:
 		return 'error' in resp_obj and resp_obj['error'] is not None
 
 def get_block_hashes(settings, max_blocks_per_call=10000):
-	rpc = BitcoinRPC(settings['host'], settings['port'],
+	rpc = DarkSilkRPC(settings['host'], settings['port'],
 			 settings['rpcuser'], settings['rpcpassword'])
 
 	height = settings['min_height']
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 	if 'host' not in settings:
 		settings['host'] = '127.0.0.1'
 	if 'port' not in settings:
-		settings['port'] = 9998
+		settings['port'] = 31000
 	if 'min_height' not in settings:
 		settings['min_height'] = 0
 	if 'max_height' not in settings:

@@ -1,12 +1,12 @@
 #!/usr/bin/make -f
 # -*- mode: makefile; coding: utf-8 -*-
 
-#DEB_MAKE_CHECK_TARGET = test_dash
-#build/dashd::
-#	$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),,src/test_dash)
+#DEB_MAKE_CHECK_TARGET = test_darksilk
+#build/darksilkd::
+#	$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),,src/test_darksilk)
 
-DEB_INSTALL_EXAMPLES_dashd += debian/examples/*
-DEB_INSTALL_MANPAGES_dashd += debian/manpages/*
+DEB_INSTALL_EXAMPLES_darksilkd += debian/examples/*
+DEB_INSTALL_MANPAGES_darksilkd += debian/manpages/*
 
 %:
 	dh --with bash-completion $@

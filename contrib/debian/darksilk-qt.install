@@ -1,0 +1,6 @@
+usr/local/bin/darksilk-qt usr/bin
+share/pixmaps/darksilk32.xpm usr/share/pixmaps
+share/pixmaps/darksilk16.xpm usr/share/pixmaps
+share/pixmaps/darksilk128.png usr/share/pixmaps
+debian/darksilk-qt.desktop usr/share/applications
+debian/darksilk-qt.protocol usr/share/kde4/services/

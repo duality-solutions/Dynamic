@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+#  darksilkd The DarkSilk Core server.
+#
+#
+# chkconfig: 345 80 20
+# description: darksilkd
+# processname: darksilkd
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/darksilkd, see below
+if [ -f /etc/sysconfig/darksilkd ]; then
+        . /etc/sysconfig/darksilkd
+fi
+
+RETVAL=0
+
+prog=darksilkd
+# you can override the lockfile via DARKSILKD_LOCKFILE in /etc/sysconfig/darksilkd
+lockfile=${DARKSILKD_LOCKFILE-/var/lock/subsys/darksilkd}
+
+# darksilkd defaults to /usr/bin/darksilkd, override with DARKSILKD_BIN
+darksilkd=${DARKSILKD_BIN-/usr/bin/darksilkd}
+
+# darksilkd opts default to -disablewallet, override with DARKSILKD_OPTS
+darksilkd_opts=${DARKSILKD_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $darksilkd $darksilkd_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
