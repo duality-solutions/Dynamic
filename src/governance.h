@@ -47,6 +47,7 @@ static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (0.33*COIN);
 
 static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 10;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
+static const int64_t GOVERNANCE_DELETION_DELAY = 10*60;
 
 // FOR SEEN MAP ARRAYS - GOVERNANCE OBJECTS AND VOTES
 static const int SEEN_OBJECT_IS_VALID = 0;
@@ -135,6 +136,8 @@ private:
 
     hash_s_t setRequestedVotes;
 
+    bool fRateChecksEnabled;
+
 public:
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
@@ -164,8 +167,6 @@ public:
     bool ConfirmInventoryRequest(const CInv& inv);
 
     void Sync(CNode* node, uint256 nProp);
-
-    void SyncParentObjectByVote(CNode* pfrom, const CGovernanceVote& vote);
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 
@@ -256,6 +257,11 @@ public:
     void CheckStormnodeOrphanVotes();
 
     void CheckStormnodeOrphanObjects();
+
+    bool AreRateChecksEnabled() const {
+        LOCK(cs);
+        return fRateChecksEnabled;
+    }
 
 private:
     void RequestGovernanceObject(CNode* pfrom, const uint256& nHash);
@@ -371,6 +377,9 @@ private:
     /// time this object was created
     int64_t nTime;
 
+    /// time this object was marked for deletion
+    int64_t nDeletionTime;
+
     /// fee-tx
     uint256 nCollateralHash;
 
@@ -430,6 +439,11 @@ public:
 
     int64_t GetCreationTime() const {
         return nTime;
+    }
+
+
+    int64_t GetDeletionTime() const {
+        return nDeletionTime;
     }
 
     int GetObjectType() const {
