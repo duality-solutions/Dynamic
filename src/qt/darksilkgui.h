@@ -126,6 +126,7 @@ private:
     QAction *showBackupsAction;
     QAction *openAction;
     QAction *showHelpMessageAction;
+    QAction *showPrivateSendHelpAction;
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -241,6 +242,9 @@ private Q_SLOTS:
 
     /** Show help message dialog */
     void showHelpMessageClicked();
+    /** Show PrivateSend help message dialog */
+    void showPrivateSendHelpClicked();
+
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

@@ -42,6 +42,7 @@ CGovernanceManager::CGovernanceManager()
       mapOrphanVotes(MAX_CACHE_SIZE),
       mapLastStormnodeTrigger(),
       setRequestedObjects(),
+      fRateChecksEnabled(true),
       cs()
 {}
 
@@ -366,8 +367,9 @@ void CGovernanceManager::UpdateCachesAndClean()
         }
 
         // IF DELETE=TRUE, THEN CLEAN THE MESS UP!
-
-        if(pObj->IsSetCachedDelete() || pObj->IsSetExpired()) {
+        int64_t nTimeSinceDeletion = GetAdjustedTime() - pObj->GetDeletionTime();
+        if((pObj->IsSetCachedDelete() || pObj->IsSetExpired()) &&
+           (nTimeSinceDeletion >= GOVERNANCE_DELETION_DELAY)) {
             LogPrintf("CGovernanceManager::UpdateCachesAndClean -- erase obj %s\n", (*it).first.ToString());
             snodeman.RemoveGovernanceObject(pObj->GetHash());
 
@@ -576,17 +578,13 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
     LogPrintf("CGovernanceManager::Sync -- sent %d items, peer=%d\n", nInvCount, pfrom->id);
 }
 
-void CGovernanceManager::SyncParentObjectByVote(CNode* pfrom, const CGovernanceVote& vote)
-{
-    if(!mapAskedForGovernanceObject.count(vote.GetParentHash())){
-        pfrom->PushMessage(NetMsgType::SNGOVERNANCESYNC, vote.GetParentHash());
-        mapAskedForGovernanceObject[vote.GetParentHash()] = GetTime();
-    }
-}
-
 bool CGovernanceManager::StormnodeRateCheck(const CTxIn& vin, int nObjectType)
 {
     LOCK(cs);
+
+    if(!fRateChecksEnabled) {
+        return true;
+    }
 
     int mindiff = 0;
     switch(nObjectType) {
@@ -663,14 +661,17 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
 void CGovernanceManager::CheckStormnodeOrphanVotes()
 {
     LOCK(cs);
+    fRateChecksEnabled = false;
     for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
         it->second.CheckOrphanVotes();
     }
+    fRateChecksEnabled = true;
 }
 
 void CGovernanceManager::CheckStormnodeOrphanObjects()
 {
     LOCK(cs);
+    fRateChecksEnabled = false;
     object_m_it it = mapStormnodeOrphanObjects.begin();
     while(it != mapStormnodeOrphanObjects.end()) {
         CGovernanceObject& govobj = it->second;
@@ -697,6 +698,7 @@ void CGovernanceManager::CheckStormnodeOrphanObjects()
             ++it;
         }
     }
+    fRateChecksEnabled = true;
 }
 
 void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nHash)
@@ -784,6 +786,7 @@ CGovernanceObject::CGovernanceObject()
   nHashParent(),
   nRevision(0),
   nTime(0),
+  nDeletionTime(0),
   nCollateralHash(),
   strData(),
   vinStormnode(),
@@ -811,6 +814,7 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
   nHashParent(nHashParentIn),
   nRevision(nRevisionIn),
   nTime(nTimeIn),
+  nDeletionTime(0),
   nCollateralHash(nCollateralHashIn),
   strData(strDataIn),
   vinStormnode(),
@@ -838,6 +842,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
   nHashParent(other.nHashParent),
   nRevision(other.nRevision),
   nTime(other.nTime),
+  nDeletionTime(other.nDeletionTime),
   nCollateralHash(other.nCollateralHash),
   strData(other.strData),
   vinStormnode(other.vinStormnode),
@@ -903,16 +908,18 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     }
     vote_instance_t& voteInstance = it2->second;
     int64_t nNow = GetTime();
-    int64_t nTimeDelta = nNow - voteInstance.nTime;
-    if(nTimeDelta < GOVERNANCE_UPDATE_MIN) {
-        std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Stormnode voting too often "
-                << ", SN outpoint = " << vote.GetVinStormnode().prevout.ToStringShort()
-                << ", governance object hash = " << GetHash().ToString()
-                << ", time delta = " << nTimeDelta << "\n";
-        LogPrint("gobject", ostr.str().c_str());
-        exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_TEMPORARY_ERROR);
-        return false;
+    if(governance.AreRateChecksEnabled()) {
+        int64_t nTimeDelta = nNow - voteInstance.nTime;
+        if(nTimeDelta < GOVERNANCE_UPDATE_MIN) {
+            std::ostringstream ostr;
+            ostr << "CGovernanceObject::ProcessVote -- Stormnode voting too often "
+                 << ", SN outpoint = " << vote.GetVinStormnode().prevout.ToStringShort()
+                 << ", governance object hash = " << GetHash().ToString()
+                 << ", time delta = " << nTimeDelta << "\n";
+            LogPrint("gobject", ostr.str().c_str());
+            exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_TEMPORARY_ERROR);
+            return false;
+        }
     }
     // Finally check that the vote is actually valid (done last because of cost of signature verification)
     if(!vote.IsValid(true)) {
@@ -1455,7 +1462,10 @@ void CGovernanceObject::UpdateSentinelVariables(const CBlockIndex *pCurrentBlock
 
     if(GetAbsoluteYesCount(VOTE_SIGNAL_FUNDING) >= nAbsVoteReq) fCachedFunding = true;
     if(GetAbsoluteYesCount(VOTE_SIGNAL_VALID) >= nAbsVoteReq) fCachedValid = true;
-    if(GetAbsoluteYesCount(VOTE_SIGNAL_DELETE) >= nAbsVoteReq) fCachedDelete = true;
+    if(GetAbsoluteYesCount(VOTE_SIGNAL_DELETE) >= nAbsVoteReq) {
+        fCachedDelete = true;
+        nDeletionTime = GetAdjustedTime();
+    }
     if(GetAbsoluteYesCount(VOTE_SIGNAL_ENDORSED) >= nAbsVoteReq) fCachedEndorsed = true;
 
     // ARE ANY OF THE VOTING FLAGS NEGATIVELY SET BY THE NETWORK?
@@ -1477,6 +1487,7 @@ void CGovernanceObject::swap(CGovernanceObject& first, CGovernanceObject& second
     swap(first.nHashParent, second.nHashParent);
     swap(first.nRevision, second.nRevision);
     swap(first.nTime, second.nTime);
+    swap(first.nDeletionTime, second.nDeletionTime);
     swap(first.nCollateralHash, second.nCollateralHash);
     swap(first.strData, second.strData);
     swap(first.nObjectType, second.nObjectType);

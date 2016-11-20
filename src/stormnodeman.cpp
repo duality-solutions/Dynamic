@@ -544,8 +544,10 @@ CStormnode* CStormnodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExc
         vpStormnodesShuffled.push_back(&sn);
     }
 
+    InsecureRand insecureRand;
+
     // shuffle pointers
-    std::random_shuffle(vpStormnodesShuffled.begin(), vpStormnodesShuffled.end(), GetInsecureRand);
+    std::random_shuffle(vpStormnodesShuffled.begin(), vpStormnodesShuffled.end(), insecureRand);
     bool fExclude;
 
     // loop through
@@ -784,7 +786,6 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         BOOST_FOREACH(CStormnode& sn, vStormnodes) {
             if (vin != CTxIn() && vin != sn.vin) continue; // asked for specific vin but we are not there yet
             if (sn.addr.IsRFC1918() || sn.addr.IsLocal()) continue; // do not send local network stormnode
-            if (!sn.IsEnabled()) continue;
 
             LogPrint("stormnode", "SSEG -- Sending Stormnode entry: stormnode=%s  addr=%s\n", sn.vin.prevout.ToStringShort(), sn.addr.ToString());
             CStormnodeBroadcast snb = CStormnodeBroadcast(sn);
@@ -971,7 +972,7 @@ bool CStormnodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CS
     if(pnode != NULL) {
         netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request");
         // use random nonce, store it and require node to reply with correct one later
-        CStormnodeVerification snv(addr, GetInsecureRand(999999), pCurrentBlockIndex->nHeight - 1);
+        CStormnodeVerification snv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
         mWeAskedForVerification[addr] = snv;
         LogPrintf("CStormnodeMan::SendVerifyRequest -- verifying using nonce %d addr=%s\n", snv.nonce, addr.ToString());
         pnode->PushMessage(NetMsgType::SNVERIFY, snv);
