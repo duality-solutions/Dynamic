@@ -547,17 +547,16 @@ bool CSuperblock::IsValidBlockHeight(int nBlockHeight)
 
 CAmount CSuperblock::GetPaymentsLimit(int nBlockHeight)
 {
-    const Consensus::Params& consensusParams = Params().GetConsensus();
 
     if(!IsValidBlockHeight(nBlockHeight)) {
         return 0;
     }
 
     // min subsidy for high diff networks and vice versa
-    int nBits = consensusParams.fPowAllowMinDifficultyBlocks ? UintToArith256(consensusParams.powLimit).GetCompact() : 1;
+    //int nBits = consensusParams.fPowAllowMinDifficultyBlocks ? UintToArith256(consensusParams.powLimit).GetCompact() : 1;
     // some part of all blocks issued during the cycle goes to superblock, see GetBlockSubsidy
-    CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBits, nBlockHeight, consensusParams, true);
-    CAmount nPaymentsLimit = nSuperblockPartOfSubsidy * consensusParams.nSuperblockCycle;
+    //CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBits, nBlockHeight, consensusParams, true);
+    CAmount nPaymentsLimit = STATIC_SUPERBLOCK_AMOUNT;
     LogPrint("gobject", "CSuperblock::GetPaymentsLimit -- Valid superblock height %d, payments max %lld\n", nBlockHeight, nPaymentsLimit);
 
     return nPaymentsLimit;
@@ -652,6 +651,7 @@ CAmount CSuperblock::GetPaymentsTotalAmount()
 
     return nPaymentsTotalAmount;
 }
+
 
 /**
 *   Is Transaction Valid

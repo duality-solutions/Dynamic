@@ -36,10 +36,7 @@ struct BIP9Deployment {
  */
 struct Params {
     uint256 hashGenesisBlock;
-    int nSubsidyHalvingInterval;
     int nStormnodePaymentsStartBlock;
-    int nStormnodePaymentsIncreaseBlock;
-    int nStormnodePaymentsIncreasePeriod; // in blocks
     int nInstantSendKeepLock; // in blocks
     int nInstantSendReprocessBlocks;
     int nBudgetPaymentsStartBlock;
@@ -54,9 +51,6 @@ struct Params {
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
-    /** Block height and hash at which BIP34 becomes active */
-    int BIP34Height;
-    uint256 BIP34Hash;
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.

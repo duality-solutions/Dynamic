@@ -277,7 +277,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
         }
 
         // NOTE: unlike in bitcoin, we need to pass PREVIOUS block height here
-        CAmount blockReward = nFees + GetBlockSubsidy(pindexPrev->nBits, pindexPrev->nHeight, Params().GetConsensus());
+        CAmount blockReward = nFees + GetPoWBlockPayment(nHeight);
 
         // Compute regular coinbase transaction.
         txNew.vout[0].nValue = blockReward;
@@ -336,8 +336,6 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 //
 // Internal miner
 //
-
-// ***TODO*** ScanHash is not yet used in DarkSilk
 //
 // ScanHash scans nonces looking for a hash with at least some zero bits.
 // The nonce is usually preserved between calls, but periodically or if the
@@ -346,7 +344,7 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 //
 //bool static ScanHash(const CBlockHeader *pblock, uint32_t& nNonce, uint256 *phash)
 //{
-//    // Write the first 76 bytes of the block header to a double-SHA256 state.
+    // Write the first 76 bytes of the block header to a double-SHA256 state.
 //    CHash256 hasher;
 //    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
 //    ss << *pblock;
@@ -356,19 +354,19 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 //    while (true) {
 //        nNonce++;
 
-//        // Write the last 4 bytes of the block header (the nonce) to a copy of
-//        // the double-SHA256 state, and compute the result.
+        // Write the last 4 bytes of the block header (the nonce) to a copy of
+        // the double-SHA256 state, and compute the result.
 //        CHash256(hasher).Write((unsigned char*)&nNonce, 4).Finalize((unsigned char*)phash);
 
-//        // Return the nonce if the hash has at least some zero bits,
-//        // caller will check if it has enough to reach the target
+        // Return the nonce if the hash has at least some zero bits,
+        // caller will check if it has enough to reach the target
 //        if (((uint16_t*)phash)[15] == 0)
 //            return true;
 
-//        // If nothing found after trying for a while, return -1
+        // If nothing found after trying for a while, return -1
 //        if ((nNonce & 0xfff) == 0)
 //            return false;
-//    }
+//    }/
 //}
 
 static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams)
@@ -448,12 +446,14 @@ void static DarkSilkMiner(const CChainParams& chainparams)
 
             LogPrintf("DarkSilkMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
-
+            
             //
             // Search
             //
             int64_t nStart = GetTime();
             arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
+            uint256 hash;
+            uint32_t nNonce = 0;
             while (true)
             {
                 unsigned int nHashesDone = 0;
@@ -465,14 +465,17 @@ void static DarkSilkMiner(const CChainParams& chainparams)
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
+                        //pblock->nNonce = nNonce;
+                        //assert(hash == pblock->GetHash());
+
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                        LogPrintf("DarkSilkMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("DarkSilkMiner:\n");
+                        LogPrintf("proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
                         ProcessBlockFound(pblock, chainparams);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
 
-                        // In regression test mode, stop mining after a block is found. This
-                        // allows developers to controllably generate a block on demand.
+                        // In regression test mode, stop mining after a block is found.
                         if (chainparams.MineBlocksOnDemand())
                             throw boost::thread_interrupted();
 

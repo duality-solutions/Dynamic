@@ -83,6 +83,7 @@ public:
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     std::string SporkPubKey() const { return strSporkPubKey; }
     std::string StormnodePaymentPubKey() const { return strStormnodePaymentsPubKey; }
+    int64_t StartStormnodePayments() const { return nStartStormnodePayments; }
 protected:
     CChainParams() {}
 
@@ -103,11 +104,13 @@ protected:
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
     bool fTestnetToBeDeprecatedFieldRPC;
+    bool startNewChain;
     CCheckpointData checkpointData;
     int nPoolMaxTransactions;
     int nFulfilledRequestExpireTime;
     std::string strSporkPubKey;
     std::string strStormnodePaymentsPubKey;
+    int64_t nStartStormnodePayments;
 };
 
 /**
