@@ -3,8 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef STORMNODECONFIG_H
-#define STORMNODECONFIG_H
+#ifndef DARKSILK_STORMNODECONFIG_H
+#define DARKSILK_STORMNODECONFIG_H
 
 class CStormnodeConfig;
 extern CStormnodeConfig stormnodeConfig;
@@ -96,4 +96,4 @@ private:
 };
 
 
-#endif // STORMNODECONFIG_H
+#endif // DARKSILK_STORMNODECONFIG_H

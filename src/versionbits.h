@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_CONSENSUS_VERSIONBITS
-#define DARKSILK_CONSENSUS_VERSIONBITS
+#ifndef DARKSILK_VERSIONBITS_H
+#define DARKSILK_VERSIONBITS_H
 
 #include "chain.h"
 #include <map>
@@ -59,4 +59,4 @@ struct VersionBitsCache
 ThresholdState VersionBitsState(const CBlockIndex* pindexPrev, const Consensus::Params& params, Consensus::DeploymentPos pos, VersionBitsCache& cache);
 uint32_t VersionBitsMask(const Consensus::Params& params, Consensus::DeploymentPos pos);
 
-#endif // DARKSILK_CONSENSUS_VERSIONBITS
+#endif // DARKSILK_VERSIONBITS_H

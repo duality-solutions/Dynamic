@@ -20,4 +20,4 @@ void StartTorControl(boost::thread_group& threadGroup, CScheduler& scheduler);
 void InterruptTorControl();
 void StopTorControl();
 
-#endif /* DARKSILK_TORCONTROL_H */
+#endif // DARKSILK_TORCONTROL_H

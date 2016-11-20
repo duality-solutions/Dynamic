@@ -3,8 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SANDSTORM_H
-#define SANDSTORM_H
+#ifndef DARKSILK_SANDSTORM_H
+#define DARKSILK_SANDSTORM_H
 
 #include "stormnode.h"
 #include "wallet/wallet.h"
@@ -479,4 +479,4 @@ public:
 
 void ThreadCheckSandStormPool();
 
-#endif // SANDSTORM_H
+#endif // DARKSILK_SANDSTORM_H

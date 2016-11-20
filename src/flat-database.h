@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef FLAT_DATABASE_H
-#define FLAT_DATABASE_H
+#ifndef DARKSILK_FLAT_DATABASE_H
+#define DARKSILK_FLAT_DATABASE_H
 
 #include "chainparams.h"
 #include "clientversion.h"
@@ -229,4 +229,4 @@ public:
 };
 
 
-#endif
+#endif // DARKSILK_FLAT_DATABASE_H

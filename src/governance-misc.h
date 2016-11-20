@@ -5,8 +5,8 @@
 
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef GOVERNANCE_MISC_H
-#define GOVERNANCE_MISC_H
+#ifndef DARKSILK_GOVERNANCE_MISC_H
+#define DARKSILK_GOVERNANCE_MISC_H
 
 #include "main.h"
 #include "governance.h"
@@ -54,4 +54,4 @@ class CGovernanceVote;
 // 	}
 // };
 
-#endif
+#endif // DARKSILK_GOVERNANCE_MISC_H
