@@ -65,6 +65,11 @@ bool CStormnodeConfig::read(std::string& strErr) {
             if(CService(ip).GetPort() != mainnetDefaultPort) {
                 strErr = _("Invalid port detected in stormnode.conf") + "\n" +
                         strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +
+                        strprintf(_("Port Used: %d"), CService(ip).GetPort()) + "\n" +
+                        strprintf(_("IP Address Used: %s"), ip) + "\n" +
+                        strprintf(_("Private Key Used: %s"), privKey) + "\n" +
+                        strprintf(_("Tx Hash Used: %s"), txHash) + "\n" +
+                        strprintf(_("Tx Output Index Used: %s"), outputIndex) + "\n" +
                         strprintf(_("(must be %d for mainnet)"), mainnetDefaultPort);
                 streamConfig.close();
                 return false;
@@ -72,6 +77,11 @@ bool CStormnodeConfig::read(std::string& strErr) {
         } else if(CService(ip).GetPort() == mainnetDefaultPort) {
             strErr = _("Invalid port detected in stormnode.conf") + "\n" +
                     strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +
+                    strprintf(_("Port Used: %d"), CService(ip).GetPort()) + "\n" +
+                    strprintf(_("IP Address Used: %s"), ip) + "\n" +
+                    strprintf(_("Private Key Used: %s"), privKey) + "\n" +
+                    strprintf(_("Tx Hash Used: %s"), txHash) + "\n" +
+                    strprintf(_("Tx Output Index Used: %s"), outputIndex) + "\n" +
                     strprintf(_("(%d could be used only on mainnet)"), mainnetDefaultPort);
             streamConfig.close();
             return false;
