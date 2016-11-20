@@ -40,6 +40,10 @@ enum SafeChars
 * @return           A new string without unsafe chars
 */
 std::string SanitizeString(const std::string& str, int rule = SAFE_CHARS_DEFAULT);
+/// Formats the network peer user agent text (or subversion)
+/// by removing the begining and ending charactors(/).
+/// example: /DarkSilk Core:1.0.0/ --> DarkSilk Core:1.0.0
+std::string SanitizeSubVersionString(const std::string& str);
 std::vector<unsigned char> ParseHex(const char* psz);
 std::vector<unsigned char> ParseHex(const std::string& str);
 signed char HexDigit(char c);
