@@ -28,7 +28,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1479603286 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1479637502 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -146,12 +146,12 @@ public:
         nPruneAfterHeight = 10000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1479620500, 358857, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1479637502 , 145771, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320"));
-        assert(genesis.hashMerkleRoot == uint256S("0x8a9d2135f35d04239d2bea0f2d0c7aaa1be71f0ae519addba1524281214bcb1a"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000ee939b4c59426b633d885d299762dced5d4aa8c83b1cd23f5f811b503d7"));
+        assert(genesis.hashMerkleRoot == uint256S("0x2efd0e539bdbc0f2d558ab801c17f4917167bdb7582da1fd8bf387105ed73d2e"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -186,8 +186,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320")),
-            1479620500, // * UNIX timestamp of last checkpoint block
+            (  0, uint256S("0x00000ee939b4c59426b633d885d299762dced5d4aa8c83b1cd23f5f811b503d7")),
+            1479637502 , // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
@@ -243,7 +243,7 @@ public:
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1479637502 , 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -337,7 +337,7 @@ public:
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1479637502 , 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
