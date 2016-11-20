@@ -32,7 +32,7 @@ StormnodeList::StormnodeList(const PlatformStyle *platformStyle, QWidget *parent
 {
     ui->setupUi(this);
 
-    ui->startButton->setEnabled(false);
+    ui->startButton->setEnabled(true);
 
     int columnAliasWidth = 100;
     int columnAddressWidth = 200;

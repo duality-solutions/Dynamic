@@ -327,21 +327,16 @@ void DarkSilkGUI::createActions()
     tabGroup->addAction(historyAction);
 
 #ifdef ENABLE_WALLET
-    QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeAction = new QAction(QIcon(":/icons/" + theme + "/stormnodes"), tr("&Stormnodes"), this);
-        stormnodeAction->setStatusTip(tr("Browse stormnodes"));
-        stormnodeAction->setToolTip(stormnodeAction->statusTip());
-        stormnodeAction->setCheckable(true);
+    stormnodeAction = new QAction(QIcon(":/icons/" + theme + "/stormnodes"), tr("&Stormnodes"), this);
+    stormnodeAction->setStatusTip(tr("Browse stormnodes"));
+    stormnodeAction->setToolTip(stormnodeAction->statusTip());
+    stormnodeAction->setCheckable(true);
 #ifdef Q_OS_MAC
-        stormnodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
+    stormnodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
 #else
-        stormnodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    stormnodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
 #endif
-        tabGroup->addAction(stormnodeAction);
-        connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-        connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(gotoStormnodePage()));
-    }
+    tabGroup->addAction(stormnodeAction);    
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
@@ -357,6 +352,8 @@ void DarkSilkGUI::createActions()
     connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
+    connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(gotoStormnodePage()));
 #endif // ENABLE_WALLET
 
     quitAction = new QAction(QIcon(":/icons/" + theme + "/quit"), tr("E&xit"), this);
@@ -542,13 +539,7 @@ void DarkSilkGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
-        QSettings settings;
-        if (settings.value("fShowStormnodesTab").toBool())
-        {
-            toolbar->addAction(stormnodeAction);
-        }
-        toolbar->setMovable(false); // remove unused icon in upper left corner
-        overviewAction->setChecked(true);
+        toolbar->addAction(stormnodeAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -665,10 +656,7 @@ void DarkSilkGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
-    QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool() && stormnodeAction) {
-        stormnodeAction->setEnabled(enabled);
-    }
+    stormnodeAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -828,11 +816,8 @@ void DarkSilkGUI::gotoHistoryPage()
 
 void DarkSilkGUI::gotoStormnodePage()
 {
-    QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeAction->setChecked(true);
-        if (walletFrame) walletFrame->gotoStormnodePage();
-    }
+    stormnodeAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoStormnodePage();
 }
 
 void DarkSilkGUI::gotoReceiveCoinsPage()
