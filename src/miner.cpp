@@ -453,7 +453,6 @@ void static DarkSilkMiner(const CChainParams& chainparams)
             int64_t nStart = GetTime();
             arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
             uint256 hash;
-            uint32_t nNonce = 0;
             while (true)
             {
                 unsigned int nHashesDone = 0;
