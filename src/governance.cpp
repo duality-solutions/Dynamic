@@ -1211,7 +1211,7 @@ bool CGovernanceObject::IsValidLocally(const CBlockIndex* pindex, std::string& s
                 return false;
             }
 
-            // Check that we have a valid MN signature
+            // Check that we have a valid SN signature
             if(!CheckSignature(infoSn.pubKeyStormnode)) {
                 strError = "Invalid stormnode signature for: " + strOutpoint + ", pubkey id = " + infoSn.pubKeyStormnode.GetID().ToString();
                 return false;

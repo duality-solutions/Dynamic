@@ -204,7 +204,7 @@ void CStormnode::Check(bool fForce)
         if(nHeight < nPoSeBanHeight) return; // too early?
         // Otherwise give it a chance to proceed further to do all the usual checks and to change its state.
         // Stormnode still will be on the edge and can be banned back easily if it keeps ignoring snverify
-        // or connect attempts. Will require few snverify messages to strengthen its position in mn list.
+        // or connect attempts. Will require few snverify messages to strengthen its position in sn list.
         LogPrintf("CStormnode::Check -- Stormnode %s is unbanned and back in list now\n", vin.prevout.ToStringShort());
         DecreasePoSeBanScore();
     } else if(nPoSeBanScore >= STORMNODE_POSE_BAN_MAX_SCORE) {
@@ -771,7 +771,7 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpl
 
     if (fRequireEnabled && !psn->IsEnabled() && !psn->IsPreEnabled() && !psn->IsWatchdogExpired()) return false;
 
-    // LogPrintf("snping - Found corresponding mn for vin: %s\n", vin.prevout.ToStringShort());
+    // LogPrintf("snping - Found corresponding sn for vin: %s\n", vin.prevout.ToStringShort());
     // update only if there is no known ping for this stormnode or
     // last ping was more then STORMNODE_MIN_SNP_SECONDS-60 ago comparing to this one
     if (psn->IsPingedWithin(STORMNODE_MIN_SNP_SECONDS - 60, sigTime)) {
