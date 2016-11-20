@@ -60,7 +60,7 @@ public:
         unsigned char buf[sha.OUTPUT_SIZE];
         sha.Finalize(buf);
         CRIPEMD160().Write(buf, sha.OUTPUT_SIZE).Finalize(hash);
-    }AmirAbrams-patch-1
+    }
 
     CHash160& Write(const unsigned char *data, size_t len) {
         sha.Write(data, len);
@@ -153,7 +153,7 @@ inline uint256 Hash(const T1 p1begin, const T1 p1end,
                     const T5 p5begin, const T5 p5end,
                     const T6 p6begin, const T6 p6end) {
     static const unsigned char pblank[1] = {};
-    uint256 result;DEFAULT_ARGON2__FLAG
+    uint256 result;
     CHash256().Write(p1begin == p1end ? pblank : (const unsigned char*)&p1begin[0], (p1end - p1begin) * sizeof(p1begin[0]))
               .Write(p2begin == p2end ? pblank : (const unsigned char*)&p2begin[0], (p2end - p2begin) * sizeof(p2begin[0]))
               .Write(p3begin == p3end ? pblank : (const unsigned char*)&p3begin[0], (p3end - p3begin) * sizeof(p3begin[0]))
