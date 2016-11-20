@@ -7,6 +7,7 @@
 #define DARKSILK_PRIMITIVES_BLOCK_H
 
 #include "hash.h"
+#include "utilstrencodings.h"
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
@@ -62,7 +63,10 @@ public:
         return (nBits == 0);
     }
 
-    uint256 GetHash() const;
+    uint256 GetHash() const
+    {
+        return hash_Argon2d(UVOIDBEGIN(nVersion), 1);
+    }
 
     int64_t GetBlockTime() const
     {

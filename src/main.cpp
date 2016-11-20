@@ -1684,26 +1684,6 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-double ConvertBitsToDouble(unsigned int nBits)
-{
-    int nShift = (nBits >> 24) & 0xff;
-
-    double dDiff = (double)0x0000ffff / (double)(nBits & 0x00ffffff);
-
-    while (nShift < 29)
-    {
-        dDiff *= 256.0;
-        nShift++;
-    }
-    while (nShift > 29)
-    {
-        dDiff /= 256.0;
-        nShift--;
-    }
-
-    return dDiff;
-}
-
 int64_t GetTotalCoinEstimate(int nHeight)
 {
     int64_t nTotalCoins = 0;
@@ -1711,94 +1691,46 @@ int64_t GetTotalCoinEstimate(int nHeight)
     // TODO: This could be vastly improved, look at GetBlockValue for a better method
     
     /* these values are taken from the block explorer */
-    if(nHeight > 5076) nTotalCoins += 2021642;
-    if(nHeight > 17000) nTotalCoins += 3267692-2021642;
-    if(nHeight > 34000) nTotalCoins += 3688775-3267692;
-    if(nHeight > 68000) nTotalCoins += 4277615-3688775;
-
-    if(nHeight > 68000*2) {
-        nTotalCoins += 4649913.99999995-4277615;
-    } else {
-        return nTotalCoins;
+    /*if(nHeight > 1) {
+        nTotalCoins += 4000000;
     }
+    if(nHeight => 10001) {
+        nTotalCoins += (1.382 * (nHeight - 10000));
+    }*/
 
-    //5.383754730451325 per block average after this
-    nTotalCoins += ((nHeight-68000*2)*((5382104.64334133-4649913.99999995)/(68000*2)));
-
-    // TODO: this should include the 7.1% decline too
     return nTotalCoins;
 }
 
-/*
-NOTE:   unlike bitcoin we are using PREVIOUS block height here,
-        might be a good idea to change this to use prev bits
-        but current height to avoid confusion.
-*/
-CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
+CAmount GetPoWBlockPayment(const int& nHeight)
 {
-    double dDiff;
-    CAmount nSubsidyBase;
-
-    if (nPrevHeight <= 4500 && Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        /* a bug which caused diff to not be correctly calculated */
-        dDiff = (double)0x0000ffff / (double)(nPrevBits & 0x00ffffff);
-    } else {
-        dDiff = ConvertBitsToDouble(nPrevBits);
+    if (chainActive.Height() == 0) {
+        CAmount nSubsidy = 4000000 * COIN;
+        LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
+        return nSubsidy;
     }
-
-    if (nPrevHeight < 5465) {
-        // Early ages...
-        // 1111/((x+1)^2)
-        nSubsidyBase = (1111.0 / (pow((dDiff+1.0),2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 1) nSubsidyBase = 1;
-    } else if (nPrevHeight < 17000 || (dDiff <= 75 && nPrevHeight < 24000)) {
-        // CPU mining era
-        // 11111/(((x+51)/6)^2)
-        nSubsidyBase = (11111.0 / (pow((dDiff+51.0)/6.0,2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 25) nSubsidyBase = 25;
-    } else {
-        // GPU/ASIC mining era
-        // 2222222/(((x+2600)/9)^2)
-        nSubsidyBase = (2222222.0 / (pow((dDiff+2600.0)/9.0,2.0)));
-        if(nSubsidyBase > 25) nSubsidyBase = 25;
-        else if(nSubsidyBase < 5) nSubsidyBase = 5;
+    else if (chainActive.Height() > 0 && chainActive.Height() <= Params().StartStormnodePayments()) {
+        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+        return BLOCKCHAIN_INIT_REWARD;
     }
-
-    // LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
-    CAmount nSubsidy = nSubsidyBase * COIN;
-
-    // yearly decline of production by ~7.1% per year, projected ~18M coins max by year 2050+.
-    for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
-        nSubsidy -= nSubsidy/14;
+    else if (chainActive.Height() > Params().StartStormnodePayments()) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
+        return STATIC_POW_REWARD; // 1 DSLK + fees
     }
-
-    // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
-    CAmount nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
-
-    return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
+    else {
+        return STATIC_POW_REWARD;
+    }
 }
 
-CAmount GetStormnodePayment(int nHeight, CAmount blockValue)
+CAmount GetStormnodePayment(bool fStormnode)
 {
-    CAmount ret = blockValue/5; // start at 20%
-
-    int nSNPIBlock = Params().GetConsensus().nStormnodePaymentsIncreaseBlock;
-    int nSNPIPeriod = Params().GetConsensus().nStormnodePaymentsIncreasePeriod;
-
-                                                                      // mainnet:
-    if(nHeight > nSNPIBlock)                  ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 1)) ret += blockValue / 20; // 175280 - 30.0% - 2014-11-25
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 2)) ret += blockValue / 20; // 192560 - 35.0% - 2014-12-26
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 3)) ret += blockValue / 40; // 209840 - 37.5% - 2015-01-26
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 4)) ret += blockValue / 40; // 227120 - 40.0% - 2015-02-27
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 5)) ret += blockValue / 40; // 244400 - 42.5% - 2015-03-30
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
-    if(nHeight > nSNPIBlock+(nSNPIPeriod* 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
-
-    return ret;
+    if (fStormnode) {
+        LogPrint("creation", "GetStormnodePayment() : create=%s SN Payment=%d\n", FormatMoney(STATIC_STORMNODE_PAYMENT), STATIC_STORMNODE_PAYMENT);
+        return STATIC_STORMNODE_PAYMENT; // 0.382 DSLK
+    }
+    else {
+        LogPrint("creation", "GetStormnodePayment() : create=%s SN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+        return BLOCKCHAIN_INIT_REWARD;
+    }
 }
 
 bool IsInitialBlockDownload()
@@ -2576,7 +2508,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     // Now that the whole chain is irreversibly beyond that time it is applied to all blocks except the
     // two in the chain that violate it. This prevents exploiting the issue against nodes during their
     // initial block download.
-    bool fEnforceBIP30 = (!pindex->phashBlock) || // Enforce on CreateNewBlock invocations which don't have a hash.
+    /*bool fEnforceBIP30 = (!pindex->phashBlock) || // Enforce on CreateNewBlock invocations which don't have a hash.
                           !((pindex->nHeight==91842 && pindex->GetBlockHash() == uint256S("0x00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec")) ||
                            (pindex->nHeight==91880 && pindex->GetBlockHash() == uint256S("0x00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721")));
 
@@ -2597,7 +2529,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
                 return state.DoS(100, error("ConnectBlock(): tried to overwrite transaction"),
                                  REJECT_INVALID, "bad-txns-BIP30");
         }
-    }
+    }*/
 
     // BIP16 didn't become active until Apr 1 2012
     int64_t nBIP16SwitchTime = 1333238400;
@@ -2760,14 +2692,25 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
     // DARKSILK : MODIFYED TO CHECK STORMNODE PAYMENTS AND SUPERBLOCKS
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev->nBits, pindex->pprev->nHeight, chainparams.GetConsensus());
-    if (!IsBlockValueValid(block, pindex->nHeight, blockReward))
-        // TODO: handle error here more accurate - this could actually fail for different reasons
-        return state.DoS(100, error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
-                                block.vtx[0].GetValueOut(), blockReward),
-                                REJECT_INVALID, "bad-cb-amount");
+   bool fStormnodePaid = false;
 
-    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, blockReward)) {
+    if(chainActive.Height() > Params().StartStormnodePayments()) {
+        fStormnodePaid = true;
+    }
+    else if (chainActive.Height() <= Params().StartStormnodePayments()) {
+        fStormnodePaid = false;
+    }
+
+    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight);
+   
+    if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue)){
+        return state.DoS(100,
+                         error("ConnectBlock() : coinbase pays too much (actual=%d vs limit=%d)",
+                               block.vtx[0].GetValueOut(), nExpectedBlockValue,
+                               REJECT_INVALID, "bad-cb-amount"));
+    }
+
+    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
         mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
         return state.DoS(100, error("ConnectBlock(DSLK): couldn't find stormnode or superblock payments"),
                                 REJECT_INVALID, "bad-cb-payee");
@@ -3772,22 +3715,10 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    int nHeight = pindexPrev->nHeight + 1;
     // Check proof of work
-    if(Params().NetworkIDString() == CBaseChainParams::MAIN && nHeight <= 68589){
-        // architecture issues with DGW v1 and v2)
-        unsigned int nBitsNext = GetNextWorkRequired(pindexPrev, &block, consensusParams);
-        double n1 = ConvertBitsToDouble(block.nBits);
-        double n2 = ConvertBitsToDouble(nBitsNext);
-
-        if (abs(n1-n2) > n1*0.5)
-            return state.DoS(100, error("%s : incorrect proof of work (DGW pre-fork) - %f %f %f at %d", __func__, abs(n1-n2), n1, n2, nHeight),
-                            REJECT_INVALID, "bad-diffbits");
-    } else {
-        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                            REJECT_INVALID, "bad-diffbits");
-    }
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        return state.DoS(100, error("%s: incorrect proof of work", __func__),
+                         REJECT_INVALID, "bad-diffbits");
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
