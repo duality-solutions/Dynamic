@@ -101,15 +101,15 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nStormnodePaymentsStartBlock = 10000; // Stormnode payments start at block 10,000
+        consensus.nStormnodePaymentsStartBlock = 100; // TODO: SWITCH BACK: Stormnode payments start at block 10,000
         consensus.nInstantSendKeepLock = 24;
         consensus.nInstantSendReprocessBlocks = 15;
-        consensus.nBudgetPaymentsStartBlock = 20000; // actual historical value
-        consensus.nBudgetPaymentsCycleBlocks = 41091; //Blocks per month
+        consensus.nBudgetPaymentsStartBlock = 500; // actual historical value
+        consensus.nBudgetPaymentsCycleBlocks = 500; //Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
-        consensus.nBudgetProposalEstablishingTime = 60*60*24;
-        consensus.nSuperblockStartBlock = 41091; // TODO, the block at which 12.1 goes live.
-        consensus.nSuperblockCycle = 41091; // 56.25 (Blocks per day) x 365.25 (Days per Year) / 12 = 41090
+        consensus.nBudgetProposalEstablishingTime = 4*60*60;//TODO: 60*60*24;
+        consensus.nSuperblockStartBlock = 500; // TODO, the block at which 12.1 goes live.
+        consensus.nSuperblockCycle = 500; // 56.25 (Blocks per day) x 365.25 (Days per Year) / 12 = 41090
         consensus.nGovernanceMinQuorum = 10;
         consensus.nStormnodeMinimumConfirmations = 15;
         consensus.nMajorityEnforceBlockUpgrade = 750;
