@@ -33,6 +33,15 @@ enum ThresholdState {
 // will either be NULL or a block with (height + 1) % Period() == 0.
 typedef std::map<const CBlockIndex*, ThresholdState> ThresholdConditionCache;
 
+struct BIP9DeploymentInfo {
+    /** Deployment name */
+    const char *name;
+    /** Whether GBT clients can safely ignore this rule in simplified usage */
+    bool gbt_force;
+};
+
+extern const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[];
+
 /**
  * Abstract class that implements BIP9-style threshold logic, and caches results.
  */
@@ -47,6 +56,7 @@ protected:
 public:
     // Note that the function below takes a pindexPrev as input: they compute information for block B based on its parent.
     ThresholdState GetStateFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const;
+    int GetStateSinceHeightFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const;
 };
 
 struct VersionBitsCache
@@ -57,6 +67,7 @@ struct VersionBitsCache
 };
 
 ThresholdState VersionBitsState(const CBlockIndex* pindexPrev, const Consensus::Params& params, Consensus::DeploymentPos pos, VersionBitsCache& cache);
+int VersionBitsStateSinceHeight(const CBlockIndex* pindexPrev, const Consensus::Params& params, Consensus::DeploymentPos pos, VersionBitsCache& cache);
 uint32_t VersionBitsMask(const Consensus::Params& params, Consensus::DeploymentPos pos);
 
 #endif // DARKSILK_VERSIONBITS_H
