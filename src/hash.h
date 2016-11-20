@@ -23,7 +23,7 @@ typedef uint256 ChainCode;
 
 static const size_t INPUT_BYTES = 80;  // Lenth of a block header in bytes. Input Length = Salt Length (salt = input)
 static const size_t OUTPUT_BYTES = 32; // Length of output needed for a 256-bit hash
-
+static const unsigned int DEFAULT_ARGON2_FLAG = 2; //Same as ARGON2_DEFAULT_FLAGS
 /* ----------- Bitcoin Hash ------------------------------------------------- */
 /** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
 class CHash256 {
@@ -60,7 +60,7 @@ public:
         unsigned char buf[sha.OUTPUT_SIZE];
         sha.Finalize(buf);
         CRIPEMD160().Write(buf, sha.OUTPUT_SIZE).Finalize(hash);
-    }
+    }AmirAbrams-patch-1
 
     CHash160& Write(const unsigned char *data, size_t len) {
         sha.Write(data, len);
@@ -153,7 +153,7 @@ inline uint256 Hash(const T1 p1begin, const T1 p1end,
                     const T5 p5begin, const T5 p5end,
                     const T6 p6begin, const T6 p6end) {
     static const unsigned char pblank[1] = {};
-    uint256 result;
+    uint256 result;DEFAULT_ARGON2__FLAG
     CHash256().Write(p1begin == p1end ? pblank : (const unsigned char*)&p1begin[0], (p1end - p1begin) * sizeof(p1begin[0]))
               .Write(p2begin == p2end ? pblank : (const unsigned char*)&p2begin[0], (p2end - p2begin) * sizeof(p2begin[0]))
               .Write(p3begin == p3end ? pblank : (const unsigned char*)&p3begin[0], (p3end - p3begin) * sizeof(p3begin[0]))
@@ -269,7 +269,7 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     context.adlen = 0;
     context.allocate_cbk = NULL;
     context.free_cbk = NULL;
-    context.flags = ARGON2_DEFAULT_FLAGS;
+    context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
     context.m_cost = 1024; // Memory in KB
     context.lanes = 2;    // Degree of Parallelism
@@ -308,7 +308,7 @@ inline int Argon2d_Phase2_Hash(const void *in, void *out) {
     context.adlen = 0;
     context.allocate_cbk = NULL;
     context.free_cbk = NULL;
-    context.flags = ARGON2_DEFAULT_FLAGS;
+    context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
     context.m_cost = 1024; // Memory in KB
     context.lanes = 64;    // Degree of Parallelism
