@@ -22,7 +22,7 @@
 
 #include "chainparamsseeds.h"
 
-static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
+static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, const uint32_t nTime, const uint32_t nNonce, const uint32_t nBits, const int32_t nVersion, const CAmount& genesisReward)
 {
     CMutableTransaction txNew;
     txNew.nVersion = 1;
@@ -43,41 +43,35 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     return genesis;
 }
 
-void MineGenesis(CBlockHeader &genesisBlock, uint256 *phash)
+static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit)
 {
-    // Write the first 76 bytes of the block header to a double-SHA256 state.
-    genesisBlock.nTime    = time(NULL);
-    CHash256 hasher;
-    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-    ss << genesisBlock;
-    assert(ss.size() == 80);
-    hasher.Write((unsigned char*)&ss[0], 76);
-    arith_uint256 hashTarget = arith_uint256().SetCompact(genesisBlock.nBits);
-    while (true) {
-        
-
-        // Write the last 4 bytes of the block header (the nonce) to a copy of
-        // the double-SHA256 state, and compute the result.
-        CHash256(hasher).Write((unsigned char*)&genesisBlock.nNonce, 4).Finalize((unsigned char*)phash);
-
-        // Return the nonce if the hash has at least some zero bits,
-        // check if it has enough to reach the target
-        if (((uint16_t*)phash)[15] == 0 && UintToArith256(*phash) <= hashTarget)
-            break;
+    arith_uint256 besthash;
+    memset(&besthash,0xFF,32);
+    arith_uint256 hashTarget = UintToArith256(powLimit);
+    printf("Target: %s\n", hashTarget.GetHex().c_str());
+    arith_uint256 newhash = UintToArith256(genesisBlock.GetHash());
+    while (newhash > hashTarget){
         genesisBlock.nNonce++;
         if (genesisBlock.nNonce == 0) {
             printf("NONCE WRAPPED, incrementing time\n");
             ++genesisBlock.nTime;
         }
-        // If nothing found after trying for a while, return -1
+        // If nothing found after trying for a while, print status
         if ((genesisBlock.nNonce & 0xfff) == 0)
             printf("nonce %08X: hash = %s (target = %s)\n",
-                    genesisBlock.nNonce, (*phash).ToString().c_str(),
+                    genesisBlock.nNonce, newhash.ToString().c_str(),
                     hashTarget.ToString().c_str());
+
+        if(newhash < besthash){
+            besthash = newhash;
+            printf("New best: %s\n", newhash.GetHex().c_str());
+        }
+        newhash = UintToArith256(genesisBlock.GetHash());
     }
     printf("Genesis nTime = %u \n", genesisBlock.nTime);
     printf("Genesis nNonce = %u \n", genesisBlock.nNonce);
-    printf("Genesis Hash = %s\n", (*phash).ToString().c_str());
+    printf("Genesis nBits: %08x\n", genesisBlock.nBits);
+    printf("Genesis Hash = %s\n", newhash.ToString().c_str());
     printf("Genesis Hash Merkle Root = %s\n", genesisBlock.hashMerkleRoot.ToString().c_str());
 }
 
@@ -146,18 +140,18 @@ public:
         pchMessageStart[1] = 0x22;
         pchMessageStart[2] = 0x05;
         pchMessageStart[3] = 0x31;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex(""); //TODO: Add alert key before release.
         nDefaultPort = 31000;
         nMaxTipAge = 6 * 60 * 60; // ~337 blocks behind
         nPruneAfterHeight = 10000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1479603286, 17520, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, &consensus.powLimit); }
+        genesis = CreateGenesisBlock(1479620500, 358857, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x0000068f13d10267c375457667e4323689e5a55251607ceb467bacf00c8e62a6"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe375cd46e5815e1128021cef59c889a98540ab8a4e410719374cd3e99969e3e7"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320"));
+        assert(genesis.hashMerkleRoot == uint256S("0x8a9d2135f35d04239d2bea0f2d0c7aaa1be71f0ae519addba1524281214bcb1a"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -192,9 +186,9 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x0000068f13d10267c375457667e4323689e5a55251607ceb467bacf00c8e62a6")),
-            1479601084, // * UNIX timestamp of last checkpoint block
-            0,    // * total number of transactions between genesis and last checkpoint
+            (  0, uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320")),
+            1479620500, // * UNIX timestamp of last checkpoint block
+            0,          // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
         };
@@ -250,7 +244,7 @@ public:
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == false) { MineGenesis(genesis, &consensus.powLimit); }
+        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         //assert(consensus.hashGenesisBlock == uint256S("0x"));
@@ -344,7 +338,7 @@ public:
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == false) { MineGenesis(genesis, &consensus.powLimit); }
+        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         //assert(consensus.hashGenesisBlock == uint256S("0x"));
