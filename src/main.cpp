@@ -3713,12 +3713,24 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 }
 
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
-{
+{   
+    uint256 hash = block.GetHash();
+    
+    if (hash == Params().GetConsensus().hashGenesisBlock)
+        return true;
+
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    // Check proof of work
+    int nHeight = pindexPrev->nHeight + 1;
+    
+    if(Params().NetworkIDString() == CBaseChainParams::TESTNET) {
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, error("%s: incorrect proof of work", __func__),
-                         REJECT_INVALID, "bad-diffbits");
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                            REJECT_INVALID, "bad-diffbits");
+    } else {
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                        REJECT_INVALID, "bad-diffbits");
+    }
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
