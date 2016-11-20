@@ -140,18 +140,18 @@ public:
         pchMessageStart[1] = 0x22;
         pchMessageStart[2] = 0x05;
         pchMessageStart[3] = 0x31;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex(""); //TODO: Add alert key before release.
         nDefaultPort = 31000;
         nMaxTipAge = 6 * 60 * 60; // ~337 blocks behind
         nPruneAfterHeight = 10000;
-        startNewChain = true;
+        startNewChain = false;
 
-        genesis = CreateGenesisBlock(1479620500, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1479620500, 358857, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x0000068f13d10267c375457667e4323689e5a55251607ceb467bacf00c8e62a6"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe375cd46e5815e1128021cef59c889a98540ab8a4e410719374cd3e99969e3e7"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320"));
+        assert(genesis.hashMerkleRoot == uint256S("0x8a9d2135f35d04239d2bea0f2d0c7aaa1be71f0ae519addba1524281214bcb1a"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -186,9 +186,9 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x0000068f13d10267c375457667e4323689e5a55251607ceb467bacf00c8e62a6")),
-            1479601084, // * UNIX timestamp of last checkpoint block
-            0,    // * total number of transactions between genesis and last checkpoint
+            (  0, uint256S("0x0000013f7692488b7ebcea6a1dc1db8dd93e503aa6e40bb17346e876e889d320")),
+            1479620500, // * UNIX timestamp of last checkpoint block
+            0,          // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
         };
@@ -244,7 +244,7 @@ public:
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == false) { MineGenesis(genesis, consensus.powLimit); }
+        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         //assert(consensus.hashGenesisBlock == uint256S("0x"));
@@ -338,7 +338,7 @@ public:
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1479603286, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == false) { MineGenesis(genesis, consensus.powLimit); }
+        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         //assert(consensus.hashGenesisBlock == uint256S("0x"));
