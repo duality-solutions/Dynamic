@@ -60,7 +60,7 @@ public:
         unsigned char buf[sha.OUTPUT_SIZE];
         sha.Finalize(buf);
         CRIPEMD160().Write(buf, sha.OUTPUT_SIZE).Finalize(hash);
-    }AmirAbrams-patch-1
+    }
 
     CHash160& Write(const unsigned char *data, size_t len) {
         sha.Write(data, len);
