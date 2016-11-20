@@ -457,7 +457,7 @@ void CSandstormPool::ResetPool()
 
 void CSandstormPool::SetNull()
 {
-    // MN side
+    // SN side
     vecSessionCollaterals.clear();
 
     // Client side
@@ -1784,7 +1784,7 @@ bool CSandstormPool::MakeCollateralAmounts(const CompactTallyItem& tallyItem)
 
     vecSend.push_back((CRecipient){scriptCollateral, PRIVATESEND_COLLATERAL*4, false});
 
-    // try to use non-denominated and not mn-like funds first, select them explicitly
+    // try to use non-denominated and not sn-like funds first, select them explicitly
     CCoinControl coinControl;
     coinControl.fAllowOtherInputs = false;
     coinControl.fAllowWatchOnly = false;

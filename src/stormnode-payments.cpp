@@ -160,7 +160,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             // should NOT allow such superblocks, when superblocks are enabled
             return false;
         }
-        // continue validation, should pay MN
+        // continue validation, should pay SN
         LogPrint("gobject", "IsBlockPayeeValid -- No triggered superblock detected at height %d\n", nBlockHeight);
     } else {
         // should NOT allow superblocks at all, when superblocks are disabled
