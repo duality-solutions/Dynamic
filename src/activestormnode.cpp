@@ -142,6 +142,7 @@ void CActiveStormnode::ManageStateInitial()
     
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
+            nState = ACTIVE_STORMNODE_NOT_CAPABLE;
             strNotCapableReason = strprintf("Invalid port: %u - only 31000 is supported on mainnet.", service.GetPort());
             LogPrintf("CActiveStormnode::ManageStatus() - not capable: %s\n", strNotCapableReason);
             return;
@@ -150,6 +151,7 @@ void CActiveStormnode::ManageStateInitial()
 
     if(Params().NetworkIDString() != CBaseChainParams::MAIN) {
         if(service.GetPort() == mainnetDefaultPort) {
+            nState = ACTIVE_STORMNODE_NOT_CAPABLE;
             strNotCapableReason = strprintf("Invalid port: %u - 31000 is only supported on mainnet.", service.GetPort());
             LogPrintf("CActiveStormnode::ManageStatus() - not capable: %s\n", strNotCapableReason);
             return;
