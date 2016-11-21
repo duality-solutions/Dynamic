@@ -7,6 +7,7 @@
 #include "addrman.h"
 #include "sandstorm.h"
 #include "governance-classes.h"
+#include "policy/fees.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
@@ -194,7 +195,7 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
     }
 
     // FILL BLOCK PAYEE WITH STORMNODE PAYMENT OTHERWISE
-    snpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutStormnodeRet);
+    snpayments.FillBlockPayee(txNew);
     LogPrint("snpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutStormnodeRet %s txNew %s",
                             nBlockHeight, blockReward, txoutStormnodeRet.ToString(), txNew.ToString());
 }
@@ -236,40 +237,53 @@ bool CStormnodePayments::CanVote(COutPoint outStormnode, int nBlockHeight)
 *   Fill Stormnode ONLY payment block
 */
 
-void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutStormnodeRet)
+void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew /*CAmount nFees*/)  // TODO GB : Add fees
 {
-    // make sure it's not filled yet
-    txoutStormnodeRet = CTxOut();
+    CBlockIndex* pindexPrev = chainActive.Tip();       
+    if(!pindexPrev) return;        
 
+    bool hasPayment = true;
     CScript payee;
 
-    if(!snpayments.GetBlockPayee(nBlockHeight, payee)) {
-        // no stormnode detected...
-        int nCount = 0;
-        CStormnode *winningNode = snodeman.GetNextStormnodeInQueueForPayment(nBlockHeight, true, nCount);
-        if(!winningNode) {
-            // ...and we can't calculate it on our own
-            LogPrintf("CStormnodePayments::FillBlockPayee -- Failed to detect stormnode to pay\n");
-            return;
+    //spork
+    if(!snpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
+        //no stormnode detected
+        CStormnode* winningNode = snodeman.Find(payee);
+        if(winningNode){
+            payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
+        } else {
+            if (fDebug)
+                LogPrintf("CreateNewBlock: Failed to detect stormnode to pay\n");
+            hasPayment = false;
         }
-        // fill payee with locally calculated winner and hope for the best
-        payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
     }
 
-    // GET STORMNODE PAYMENT VARIABLES SETUP
-    CAmount stormnodePayment = GetStormnodePayment(true);
+    CAmount blockValue;
+    CAmount stormnodePayment;
 
-    // split reward between miner ...
-    txNew.vout[0].nValue -= stormnodePayment;
-    // ... and stormnode
-    txoutStormnodeRet = CTxOut(stormnodePayment, payee);
-    txNew.vout.push_back(txoutStormnodeRet);
+    if (chainActive.Height() == 0) { blockValue = 4000000 * COIN; }
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().StartStormnodePayments()) { blockValue = BLOCKCHAIN_INIT_REWARD; }
+    else { blockValue = STATIC_POW_REWARD; }
 
-    CTxDestination address1;
-    ExtractDestination(payee, address1);
-    CDarkSilkAddress address2(address1);
+    if (!hasPayment && chainActive.Height() < Params().StartStormnodePayments()) { stormnodePayment = BLOCKCHAIN_INIT_REWARD; }
+    else { stormnodePayment = STATIC_STORMNODE_PAYMENT; }
 
-    LogPrintf("CStormnodePayments::FillBlockPayee -- Stormnode payment %lld to %s\n", stormnodePayment, address2.ToString());
+    txNew.vout[0].nValue = blockValue;
+
+    if(hasPayment){
+        txNew.vout.resize(2);
+
+        txNew.vout[1].scriptPubKey = payee;
+        txNew.vout[1].nValue = stormnodePayment;
+
+        txNew.vout[0].nValue = STATIC_POW_REWARD;
+
+        CTxDestination address1;
+        ExtractDestination(payee, address1);
+        CDarkSilkAddress address2(address1);
+
+        LogPrintf("Stormnode payment to %s\n", address2.ToString().c_str());
+    }
 }
 
 int CStormnodePayments::GetMinStormnodePaymentsProto() {
@@ -488,7 +502,7 @@ bool CStormnodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
-    CAmount nStormnodePayment = GetStormnodePayment(true);
+    CAmount nStormnodePayment = STATIC_STORMNODE_PAYMENT;
 
     //require at least SNPAYMENTS_SIGNATURES_REQUIRED signatures
 

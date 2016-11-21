@@ -346,7 +346,7 @@ void CStormnode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanB
             if(!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
 
-            CAmount nStormnodePayment = GetStormnodePayment(true);
+            CAmount nStormnodePayment = STATIC_STORMNODE_PAYMENT;
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
                 if(snpayee == txout.scriptPubKey && nStormnodePayment == txout.nValue) {
