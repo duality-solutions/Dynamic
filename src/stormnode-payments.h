@@ -200,7 +200,7 @@ public:
     int GetMinStormnodePaymentsProto();
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutStormnodeRet);
+    void FillBlockPayee(CMutableTransaction& txNew);
     std::string ToString() const;
 
     int GetBlockCount() { return mapStormnodeBlocks.size(); }
