@@ -262,8 +262,7 @@ enum {
     // See BIP 64 for details on how this is implemented.
     NODE_GETUTXO = (1 << 1),
     // NODE_BLOOM means the node is capable and willing to handle bloom-filtered connections.
-    // DarkSilk Core nodes used to support this by default, without advertising this bit,
-    // but no longer do as of protocol version 70201 (= NO_BLOOM_VERSION)
+    // DarkSilk Core nodes used to support this by default, without advertising this bit.
     NODE_BLOOM = (1 << 2),
 
     // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
