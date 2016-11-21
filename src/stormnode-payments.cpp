@@ -282,7 +282,7 @@ void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew /*CAmount nFe
         ExtractDestination(payee, address1);
         CDarkSilkAddress address2(address1);
 
-        LogPrintf("Stormnode payment to %s\n", address2.ToString().c_str());
+        LogPrintf("CStormnodePayments::FillBlockPayee -- Stormnode payment %lld to %s\n", stormnodePayment, address2.ToString());
     }
 }
 
