@@ -1708,7 +1708,7 @@ CAmount GetPoWBlockPayment(const int& nHeight, const Consensus::Params& consensu
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() > 0 && chainActive.Height() <= consensusParams.nWorkSubsidyStartHeight)) {
+    else if (chainActive.Height() > 0 && chainActive.Height() <= consensusParams.nWorkSubsidyStartHeight) {
         LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD;
     }
@@ -2701,7 +2701,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fStormnodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight);
+    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, chainparams.GetConsensus());
    
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue)){
         return state.DoS(100,
