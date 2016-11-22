@@ -101,6 +101,7 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
+        consensus.nWorkSubsidyStartHeight = 10000; // Proof-Of-Work Reward after height
         consensus.nStormnodePaymentsStartBlock = 100; // TODO: SWITCH BACK: Stormnode payments start at block 10,000
         consensus.nInstantSendKeepLock = 24;
         consensus.nInstantSendReprocessBlocks = 15;
@@ -203,6 +204,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
+        consensus.nWorkSubsidyStartHeight = 10000; // Proof-Of-Work Reward after height
         consensus.nStormnodePaymentsStartBlock = 200; // not true, but it's ok as long as it's less then nStormnodePaymentsIncreaseBlock
         consensus.nInstantSendKeepLock = 24;
         consensus.nInstantSendReprocessBlocks = 15;
@@ -300,6 +302,7 @@ class CRegTestParams : public CChainParams {
 public:
     CRegTestParams() {
         strNetworkID = "regtest";
+        consensus.nWorkSubsidyStartHeight = 10000; // Proof-Of-Work Reward after height
         consensus.nStormnodePaymentsStartBlock = 240;
         consensus.nInstantSendKeepLock = 24;
         consensus.nInstantSendReprocessBlocks = 15;

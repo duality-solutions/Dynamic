@@ -257,7 +257,7 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 
 int64_t GetTotalCoinEstimate(int nHeight);
-CAmount GetPoWBlockPayment(const int& nHeight);
+CAmount GetPoWBlockPayment(const int& nHeight, const Consensus::Params& consensusParams);
 CAmount GetStormnodePayment(bool fStormnode = true);
 
 /**
