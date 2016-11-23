@@ -422,47 +422,42 @@ UniValue getwork(const UniValue& params, bool fHelp)
     {
         // Update block
         static unsigned int nTransactionsUpdatedLast;
-        static CBlockIndex* pindexPrev;
-        static int64_t nStart;
-        static CBlockTemplate* pblocktemplate;
-        if (pindexPrev != chainActive.Tip() ||
-            (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 60))
+		static CBlockIndex* pindexPrev;
+		static int64_t nStart;
+		static CBlockTemplate* pblocktemplate;
+		
+    if (pindexPrev != chainActive.Tip() ||
+        (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
+    {
+        // Clear pindexPrev so future calls make a new block, despite any failures from here on
+        pindexPrev = NULL;
+
+        // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
+        nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+        CBlockIndex* pindexPrevNew = chainActive.Tip();
+        nStart = GetTime();
+
+        // Create new block
+        if(pblocktemplate)
         {
-            if (pindexPrev != chainActive.Tip())
-            {
-                // Deallocate old blocks since they're obsolete now
-                mapNewBlock.clear();
-                BOOST_FOREACH(CBlockTemplate* pblocktemplate, vNewBlockTemplate)
-                    delete pblocktemplate;
-                vNewBlockTemplate.clear();
-            }
+            delete pblocktemplate;
+            pblocktemplate = NULL;
+        }
+        CScript scriptDummy = CScript() << OP_TRUE;
+        pblocktemplate = CreateNewBlock(Params(), scriptDummy);
+        if (!pblocktemplate)
+            throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
 
-            // Clear pindexPrev so future getworks make a new block, despite any failures from here on
-            pindexPrev = NULL;
+        // Need to update only after we know CreateNewBlock succeeded
+        pindexPrev = pindexPrevNew;
+    }
+    CBlock* pblock = &pblocktemplate->block; // pointer for convenience
+    const Consensus::Params& consensusParams = Params().GetConsensus();
 
-            // Store the pindexBest used before CreateNewBlock, to avoid races
-            nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
-            CBlockIndex* pindexPrevNew = chainActive.Tip();
-            nStart = GetTime();
-
-            // Create new block
-            pblocktemplate = CreateNewBlockWithKey(*pMiningKey);
-            if (!pblocktemplate)
-                throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
-            vNewBlockTemplate.push_back(pblocktemplate);
-
-            // Need to update only after we know CreateNewBlock succeeded
-            pindexPrev = pindexPrevNew;
-        }    // Create new block
-
-	   CBlock* pblock = &pblocktemplate->block; // pointer for convenience
-	   const Consensus::Params& consensusParams = Params().GetConsensus();
-
-		// Update nTime
-		UpdateTime(*pblock, consensusParams, pindexPrev);
-
-        pblock->nNonce = 0;
-
+    // Update nTime
+    UpdateTime(pblock, consensusParams, pindexPrev);
+    pblock->nNonce = 0;
+    
         // Update nExtraNonce
         static unsigned int nExtraNonce = 0;
         IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
@@ -505,7 +500,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
         pblock->nTime = pdata->nTime;
         pblock->nNonce = pdata->nNonce;
         pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
-        pblock->hashMerkleRoot = pblock->BuildMerkleTree();
+        pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
         assert(pwalletMain != NULL);
         return CheckWork(pblock, *pwalletMain, *pMiningKey);

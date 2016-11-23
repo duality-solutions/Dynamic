@@ -32,6 +32,8 @@ struct CBlockTemplate
     std::vector<int64_t> vTxSigOps;
 };
 
+/** ByteReverse Function used by GetWork */ // TODO: Shift to util
+uint32_t ByteReverse(uint32_t value);
 /** Do mining precalculation */
 void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1);
 /** Check mined block */
