@@ -95,7 +95,7 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
-
+ libevent    | Networking 	| OS independent asynchronous networking
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -105,7 +105,8 @@ Optional dependencies:
  qt          | GUI              | GUI toolkit (only needed when GUI enabled)
  protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
-
+ libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.x)
+ 
 For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
 
 System requirements
@@ -119,7 +120,7 @@ Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 Build requirements:
 
-	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev
+	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev
 	
 for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
@@ -151,8 +152,12 @@ for other Debian & Ubuntu (with ppa):
 
 Optional:
 
-	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
+	sudo apt-get install libminiupnpc-dev # (see --with-miniupnpc and --enable-upnp-default)
 
+ZMQ dependencies:
+
+    	sudo apt-get install libzmq3-dev # (provides ZMQ API 4.x)
+    
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
@@ -168,7 +173,7 @@ For Qt 5 you need the following:
 libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
-
+    
 Once these are installed, they will be found by configure and a darksilk-qt executable will be
 built by default.
 
@@ -176,7 +181,6 @@ Notes
 -----
 The release is built with GCC and then "strip darksilkd" to strip the debug
 symbols, which reduces the executable size by about 90%.
-
 
 miniupnpc
 ---------
@@ -196,7 +200,6 @@ To build:
 	make
 	sudo su
 	make install
-
 
 Berkeley DB
 -----------
