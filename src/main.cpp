@@ -1701,7 +1701,7 @@ int64_t GetTotalCoinEstimate(int nHeight)
     return nTotalCoins;
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight)
+CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 4000000 * COIN;
@@ -1714,10 +1714,10 @@ CAmount GetPoWBlockPayment(const int& nHeight)
     }
     else if (chainActive.Height() > Params().StartStormnodePayments()) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
-        return STATIC_POW_REWARD; // 1 DSLK + fees
+        return STATIC_POW_REWARD + nFees; // 1 DSLK + fees
     }
     else {
-        return STATIC_POW_REWARD;
+        return STATIC_POW_REWARD + nFees;
     }
 }
 
@@ -2701,7 +2701,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fStormnodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight);
+    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
    
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue)){
         return state.DoS(100,
