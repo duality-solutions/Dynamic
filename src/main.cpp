@@ -5600,7 +5600,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     }
 
 
-    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::SSTX)
+    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::SSTX || strCommand == NetMsgType::TXLOCKREQUEST)
     {
         // Stop processing the transaction early if
         // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
@@ -5650,6 +5650,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrintf("SSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
             psn->fAllowMixingTx = false;
+        } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
+            vRecv >> tx;
+            nInvType = MSG_TXLOCK_REQUEST;
         }
 
         CInv inv(nInvType, tx.GetHash());
@@ -5665,8 +5668,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))
         {
+            // Process custom txes
             if (strCommand == NetMsgType::SSTX) {
                 mapSandstormBroadcastTxes.insert(make_pair(tx.GetHash(), sstx));
+            } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
+                if(!ProcessTxLockRequest(pfrom, tx)) return false;
             }
 
             mempool.check(pcoinsTip);
@@ -5744,6 +5750,20 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         } else {
             assert(recentRejects);
             recentRejects->insert(tx.GetHash());
+
+            if (strCommand == NetMsgType::TXLOCKREQUEST && !AlreadyHave(inv)) { // i.e. AcceptToMemoryPool failed
+                mapLockRequestRejected.insert(std::make_pair(tx.GetHash(), tx));
+
+                // can we get the conflicting transaction as proof?
+
+                LogPrintf("TXLOCKREQUEST -- Transaction Lock Request: %s %s : rejected %s\n",
+                    pfrom->addr.ToString(), pfrom->cleanSubVer,
+                    tx.GetHash().ToString()
+                );
+
+                LockTransactionInputs(tx);
+                ResolveConflicts(tx);
+            }
 
             if (pfrom->fWhitelisted && GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY)) {
                 // Always relay transactions received from whitelisted peers, even
