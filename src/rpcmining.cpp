@@ -427,31 +427,31 @@ UniValue getwork(const UniValue& params, bool fHelp)
 		static int64_t nStart;
 		static CBlockTemplate* pblocktemplate;
 		
-    if (pindexPrev != chainActive.Tip() ||
-        (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
-    {
-        // Clear pindexPrev so future calls make a new block, despite any failures from here on
-        pindexPrev = NULL;
-
-        // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
-        nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
-        CBlockIndex* pindexPrevNew = chainActive.Tip();
-        nStart = GetTime();
-
-        // Create new block
-        if(pblocktemplate)
+        if (pindexPrev != chainActive.Tip() ||
+            (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
         {
-            delete pblocktemplate;
-            pblocktemplate = NULL;
-        }
-        CScript scriptDummy = CScript() << OP_TRUE;
-        pblocktemplate = CreateNewBlock(Params(), scriptDummy);
-        if (!pblocktemplate)
-            throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
+            // Clear pindexPrev so future calls make a new block, despite any failures from here on
+            pindexPrev = NULL;
 
-        // Need to update only after we know CreateNewBlock succeeded
-        pindexPrev = pindexPrevNew;
-    }
+            // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
+            nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+            CBlockIndex* pindexPrevNew = chainActive.Tip();
+            nStart = GetTime();
+
+            // Create new block
+            if(pblocktemplate)
+            {
+                delete pblocktemplate;
+                pblocktemplate = NULL;
+            }
+            CScript scriptDummy = CScript() << OP_TRUE;
+            pblocktemplate = CreateNewBlock(Params(), scriptDummy);
+            if (!pblocktemplate)
+                throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
+
+            // Need to update only after we know CreateNewBlock succeeded
+            pindexPrev = pindexPrevNew;
+        }
     
 		CBlock* pblock = &pblocktemplate->block; // pointer for convenience
 		const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -501,11 +501,15 @@ UniValue getwork(const UniValue& params, bool fHelp)
 
         pblock->nTime = pdata->nTime;
         pblock->nNonce = pdata->nNonce;
-        pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second; // Oh, why the f*ck?
+        CMutableTransaction newTx;
+        // Use CMutableTransaction when creating a new transaction instead of CTransaction.  CTransaction public variables are all const now.
+        newTx.vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second; // Oh, why? because vin is const in CTransaction now.  
+        pblock->vtx[0] = newTx;
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
         assert(pwalletMain != NULL);
-        return CheckWork(pblock, *pwalletMain, *pMiningKey);
+        const CChainParams& chainParams = Params();
+        return CheckWork(chainParams, pblock, *pwalletMain, *pMiningKey);
     }
 }
 
