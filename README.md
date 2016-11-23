@@ -1,16 +1,16 @@
 # **DarkSilk (DSLK) v1.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
-[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
+[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/SilkNetwork/DarkSilk-Core/throughput.svg)](https://waffle.io/SilkNetwork/DarkSilk-Core/metrics/throughput)  
 DarkSilk Integration/Staging Tree
 ================================
-![DSLK logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
+![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
 **Copyright (c) 2015-2016 Silk Network**
 What is DarkSilk?
@@ -150,13 +150,13 @@ for other Debian & Ubuntu (with ppa):
 
 	sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
-Optional:
+Optional (see --with-miniupnpc and --enable-upnp-default):
 
-	sudo apt-get install libminiupnpc-dev # (see --with-miniupnpc and --enable-upnp-default)
+	sudo apt-get install libminiupnpc-dev
 
-ZMQ dependencies:
+ZMQ dependencies (provides ZMQ API 4.x):
 
-    	sudo apt-get install libzmq3-dev # (provides ZMQ API 4.x)
+    	sudo apt-get install libzmq3-dev
     
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
