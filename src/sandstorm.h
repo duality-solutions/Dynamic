@@ -463,6 +463,7 @@ public:
     int GetQueueSize() const { return vecSandstormQueue.size(); }
     int GetState() const { return nState; }
     std::string GetStatus();
+    std::string GetStateString() const;
 
     int GetEntriesCount() const { return vecEntries.size(); }
 

@@ -31,7 +31,7 @@ static const int INSTANTSEND_SIGNATURES_TOTAL       = 20;
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
 static const int MIN_INSTANTSEND_PROTO_VERSION      = 60800;
-static const CAmount INSTANTSEND_MIN_FEE            = 0.1 * CENT;
+static const CAmount INSTANTSEND_MIN_FEE            = 0.001 * COIN;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -43,40 +43,40 @@ extern std::map<uint256, CTxLockVote> mapTxLockVotes;
 extern std::map<COutPoint, uint256> mapLockedInputs;
 
 
-int64_t CreateTxLockCandidate(CTransaction tx);
+void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 
 bool IsInstantSendTxValid(const CTransaction& txCandidate);
 
-void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
+int64_t CreateTxLockCandidate(const CTransaction &tx);
 
 //check if we need to vote on this transaction
-void CreateTxLockVote(CTransaction& tx, int64_t nBlockHeight);
+void CreateTxLockVote(const CTransaction& tx, int nBlockHeight);
 
 //process consensus vote message
 bool ProcessTxLockVote(CNode *pnode, CTxLockVote& vote);
 
 //update UI and notify external script if any
-void UpdateLockedTransaction(CTransaction& tx, bool fForceNotification = false);
+void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification = false);
 
-void LockTransactionInputs(CTransaction& tx);
+void LockTransactionInputs(const CTransaction& tx);
 
 // if two conflicting locks are approved by the network, they will cancel out
-bool FindConflictingLocks(CTransaction& tx);
+bool FindConflictingLocks(const CTransaction& tx);
 
 //try to resolve conflicting locks
-void ResolveConflicts(CTransaction& tx);
+void ResolveConflicts(const CTransaction& tx);
 
 // keep transaction locks in memory for an hour
 void CleanTxLockCandidates();
 
 // verify if transaction is currently locked
-bool IsLockedInstandSendTransaction(uint256 txHash);
+bool IsLockedInstandSendTransaction(const uint256 &txHash);
 
 // get the actual uber og accepted lock signatures
-int GetTransactionLockSignatures(uint256 txHash);
+int GetTransactionLockSignatures(const uint256 &txHash);
 
 // verify if transaction lock timed out
-bool IsTransactionLockTimedOut(uint256 txHash);
+bool IsTransactionLockTimedOut(const uint256 &txHash);
 
 int64_t GetAverageUnknownVoteTime();
 
@@ -101,7 +101,7 @@ public:
     uint256 GetHash() const;
 
     bool Sign();
-    bool CheckSignature();
+    bool CheckSignature() const;
 };
 
 class CTxLockCandidate
@@ -116,7 +116,7 @@ public:
     uint256 GetHash() const { return txHash; }
 
     bool IsAllVotesValid();
-    void AddVote(CTxLockVote& vote);
+    void AddVote(const CTxLockVote& vote);
     int CountVotes();
 };
 

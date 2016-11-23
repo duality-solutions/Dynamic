@@ -33,7 +33,6 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             "  start       - Start mixing\n"
             "  stop        - Stop mixing\n"
             "  reset       - Reset mixing\n"
-            "  status      - Print mixing status\n"
             + HelpRequiringPassphrase());
 
     if(params[0].get_str() == "start") {
@@ -58,15 +57,6 @@ UniValue privatesend(const UniValue& params, bool fHelp)
         return "Mixing was reset";
     }
 
-    if(params[0].get_str() == "status") {
-        UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("status",            sandStormPool.GetStatus()));
-        obj.push_back(Pair("keys_left",     pwalletMain->nKeysLeftSinceAutoBackup));
-        obj.push_back(Pair("warnings",      (pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
-                                                ? "WARNING: keypool is almost depleted!" : "")));
-        return obj;
-    }
-
     return "Unknown command, please see \"help privatesend\"";
 }
 
@@ -75,14 +65,25 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 0)
         throw std::runtime_error(
             "getpoolinfo\n"
-            "Returns an object containing anonymous pool-related information.");
+            "Returns an object containing mixing pool related information.\n");
 
     UniValue obj(UniValue::VOBJ);
-    if (sandStormPool.pSubmittedToStormnode)
-        obj.push_back(Pair("stormnode",        sandStormPool.pSubmittedToStormnode->addr.ToString()));
-    obj.push_back(Pair("queue",                 sandStormPool.GetQueueSize()));
-    obj.push_back(Pair("state",                 sandStormPool.GetState()));
-    obj.push_back(Pair("entries",               sandStormPool.GetEntriesCount()));
+    obj.push_back(Pair("state",             sandStormPool.GetStateString()));
+    obj.push_back(Pair("mixing_mode",       fPrivateSendMultiSession ? "multi-session" : "normal"));
+    obj.push_back(Pair("queue",             sandStormPool.GetQueueSize()));
+    obj.push_back(Pair("entries",           sandStormPool.GetEntriesCount()));
+    obj.push_back(Pair("status",            sandStormPool.GetStatus()));
+
+    if (sandStormPool.pSubmittedToStormnode) {
+        obj.push_back(Pair("outpoint",      sandStormPool.pSubmittedToStormnode->vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          sandStormPool.pSubmittedToStormnode->addr.ToString()));
+    }
+
+    if (pwalletMain) {
+        obj.push_back(Pair("keys_left",     pwalletMain->nKeysLeftSinceAutoBackup));
+        obj.push_back(Pair("warnings",      pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
+                                                ? "WARNING: keypool is almost depleted!" : ""));
+    }
     return obj;
 }
 
