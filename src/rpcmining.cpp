@@ -10,6 +10,7 @@
 #include "amount.h"
 #include "chain.h"
 #include "chainparams.h"
+#include "consensus/merkle.h"
 #include "consensus/consensus.h"
 #include "consensus/params.h"
 #include "consensus/validation.h"
@@ -409,10 +410,10 @@ UniValue getwork(const UniValue& params, bool fHelp)
         );
 
     if (vNodes.empty())
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Bitcoin is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "DarkSilk is not connected!");
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Bitcoin is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
     static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
@@ -451,12 +452,13 @@ UniValue getwork(const UniValue& params, bool fHelp)
         // Need to update only after we know CreateNewBlock succeeded
         pindexPrev = pindexPrevNew;
     }
-    CBlock* pblock = &pblocktemplate->block; // pointer for convenience
-    const Consensus::Params& consensusParams = Params().GetConsensus();
+    
+		CBlock* pblock = &pblocktemplate->block; // pointer for convenience
+		const Consensus::Params& consensusParams = Params().GetConsensus();
 
-    // Update nTime
-    UpdateTime(pblock, consensusParams, pindexPrev);
-    pblock->nNonce = 0;
+		// Update nTime
+		UpdateTime(pblock, consensusParams, pindexPrev);
+		pblock->nNonce = 0;
     
         // Update nExtraNonce
         static unsigned int nExtraNonce = 0;
@@ -471,7 +473,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
         char phash1[64];
         FormatHashBuffers(pblock, pmidstate, pdata, phash1);
 
-        uint256 hashTarget = uint256().SetCompact(pblock->nBits);
+        arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
 
         UniValue result(UniValue::VOBJ);
         result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
@@ -499,7 +501,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
 
         pblock->nTime = pdata->nTime;
         pblock->nNonce = pdata->nNonce;
-        pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
+        pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second; // Oh, why the f*ck?
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
         assert(pwalletMain != NULL);
