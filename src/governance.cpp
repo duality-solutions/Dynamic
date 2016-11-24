@@ -418,6 +418,53 @@ std::vector<CGovernanceVote> CGovernanceManager::GetMatchingVotes(const uint256&
     return govobj.GetVoteFile().GetVotes();
 }
 
+std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& nParentHash, const CTxIn& snCollateralOutpointFilter)
+{
+    LOCK(cs);
+    std::vector<CGovernanceVote> vecResult;
+
+    // Find the governance object or short-circuit.
+    object_m_it it = mapObjects.find(nParentHash);
+    if(it == mapObjects.end()) return vecResult;
+    CGovernanceObject& govobj = it->second;
+
+    // Compile a list of Stormnode collateral outpoints for which to get votes
+    std::vector<CTxIn> vecSNTxIn;
+    if (snCollateralOutpointFilter == CTxIn()) {
+        std::vector<CStormnode> snlist = snodeman.GetFullStormnodeVector();
+        for (std::vector<CStormnode>::iterator it = snlist.begin(); it != snlist.end(); ++it)
+        {
+           vecSNTxIn.push_back(it->vin);
+        }
+    }
+    else {
+        vecSNTxIn.push_back(snCollateralOutpointFilter);
+    }
+
+    // Loop thru each SN collateral outpoint and get the votes for the `nParentHash` governance object
+    for (std::vector<CTxIn>::iterator it = vecSNTxIn.begin(); it != vecSNTxIn.end(); ++it)
+    {
+        CTxIn &snCollateralOutpoint = *it;
+
+        // get a vote_rec_t from the govobj
+        vote_rec_t voteRecord;
+        if (!govobj.GetCurrentSNVotes(snCollateralOutpoint, voteRecord)) continue;
+
+        for (vote_instance_m_it it3 = voteRecord.mapInstances.begin(); it3 != voteRecord.mapInstances.end(); ++it3) {
+            int signal = (it3->first);
+            int outcome = ((it3->second).eOutcome);
+            int64_t nTime = ((it3->second).nTime);
+
+            CGovernanceVote vote = CGovernanceVote(snCollateralOutpoint, nParentHash, (vote_signal_enum_t)signal, (vote_outcome_enum_t)outcome);
+            vote.SetTime(nTime);
+
+            vecResult.push_back(vote);
+        }
+    }
+
+    return vecResult;
+}
+
 std::vector<CGovernanceObject*> CGovernanceManager::GetAllNewerThan(int64_t nMoreThanTime)
 {
     LOCK(cs);
@@ -1394,6 +1441,17 @@ int CGovernanceObject::GetNoCount(vote_signal_enum_t eVoteSignalIn) const
 int CGovernanceObject::GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const
 {
     return CountMatchingVotes(eVoteSignalIn, VOTE_OUTCOME_ABSTAIN);
+}
+
+bool CGovernanceObject::GetCurrentSNVotes(const CTxIn& snCollateralOutpoint, vote_rec_t& voteRecord)
+{
+    int nSNIndex = governance.GetStormnodeIndex(snCollateralOutpoint);
+    vote_m_it it = mapCurrentSNVotes.find(nSNIndex);
+    if (it == mapCurrentSNVotes.end()) {
+        return false;
+    }
+    voteRecord = it->second;
+    return  true;
 }
 
 void CGovernanceObject::Relay()
