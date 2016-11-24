@@ -635,7 +635,7 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
         return false;
     }
 
-    int nRank = snodeman.GetStormnodeRank(vinStormnode, nBlockHeight - 101, nMinRequiredProtocol);
+    int nRank = snodeman.GetStormnodeRank(vinStormnode, nBlockHeight - 101, nMinRequiredProtocol, false);
 
     if(nRank > SNPAYMENTS_SIGNATURES_TOTAL) {
         // It's common to have stormnodes mistakenly think they are in the top 10
@@ -665,7 +665,7 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
     // if we have not enough data about stormnodes.
     if(!stormnodeSync.IsStormnodeListSynced()) return false;
 
-    int nRank = snodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight - 101, GetMinStormnodePaymentsProto());
+    int nRank = snodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight - 101, GetMinStormnodePaymentsProto(), false);
 
     if (nRank == -1) {
         LogPrint("snpayments", "CStormnodePayments::ProcessBlock -- Unknown Stormnode\n");
