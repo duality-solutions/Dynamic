@@ -1,16 +1,16 @@
 # **DarkSilk (DSLK) v1.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
-[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
+[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/SilkNetwork/DarkSilk-Core/throughput.svg)](https://waffle.io/SilkNetwork/DarkSilk-Core/metrics/throughput)  
 DarkSilk Integration/Staging Tree
 ================================
-![DSLK logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
+![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
 **Copyright (c) 2015-2016 Silk Network**
 What is DarkSilk?
@@ -95,7 +95,7 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
-
+ libevent    | Networking 	| OS independent asynchronous networking
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -105,7 +105,8 @@ Optional dependencies:
  qt          | GUI              | GUI toolkit (only needed when GUI enabled)
  protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
-
+ libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.x)
+ 
 For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
 
 System requirements
@@ -119,7 +120,7 @@ Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 Build requirements:
 
-	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev
+	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
 	
 for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
@@ -149,10 +150,14 @@ for other Debian & Ubuntu (with ppa):
 
 	sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
-Optional:
+Optional (see --with-miniupnpc and --enable-upnp-default):
 
-	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
+	sudo apt-get install libminiupnpc-dev
 
+ZMQ dependencies (provides ZMQ API 4.x):
+
+    	sudo apt-get install libzmq3-dev
+    
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
@@ -168,7 +173,7 @@ For Qt 5 you need the following:
 libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
-
+    
 Once these are installed, they will be found by configure and a darksilk-qt executable will be
 built by default.
 
@@ -176,7 +181,6 @@ Notes
 -----
 The release is built with GCC and then "strip darksilkd" to strip the debug
 symbols, which reduces the executable size by about 90%.
-
 
 miniupnpc
 ---------
@@ -196,7 +200,6 @@ To build:
 	make
 	sudo su
 	make install
-
 
 Berkeley DB
 -----------

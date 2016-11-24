@@ -32,6 +32,15 @@ struct CBlockTemplate
     std::vector<int64_t> vTxSigOps;
 };
 
+/** ByteReverse Function used by GetWork */ // TODO: Shift to util
+uint32_t ByteReverse(uint32_t value);
+/** Do mining precalculation */
+void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1);
+/** Check mined block */
+bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey);
+/** Base sha256 mining transform */
+void SHA256Transform(void* pstate, void* pinput, const void* pinit);
+
 /** Run the miner threads */
 void GenerateDarkSilks(bool fGenerate, int nThreads, const CChainParams& chainparams);
 /** Generate a new block, without valid proof-of-work */
