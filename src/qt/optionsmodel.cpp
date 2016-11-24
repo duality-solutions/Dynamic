@@ -85,7 +85,7 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("theme", "");
 
     if (!settings.contains("fShowStormnodesTab"))
-        settings.setValue("fShowStormnodesTab", stormnodeConfig.getCount());
+        settings.setValue("fShowStormnodesTab", true);
 
     if (!settings.contains("fShowAdvancedPSUI"))
         settings.setValue("fShowAdvancedPSUI", false);
