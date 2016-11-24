@@ -9,6 +9,7 @@
 #include "key.h"
 #include "main.h"
 #include "net.h"
+#include "spork.h"
 #include "timedata.h"
 
 class CStormnode;
@@ -258,6 +259,19 @@ public:
     bool IsPoSeVerified() { return nPoSeBanScore <= -STORMNODE_POSE_BAN_MAX_SCORE; }
 
     bool IsWatchdogExpired() { return nActiveState == STORMNODE_WATCHDOG_EXPIRED; }
+
+   bool IsValidForPayment()
+    {
+        if(nActiveState == STORMNODE_ENABLED) {
+            return true;
+        }
+        if(!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
+           (nActiveState == STORMNODE_WATCHDOG_EXPIRED)) {
+            return true;
+        }
+
+        return false;
+    }
 
     bool IsValidNetAddr();
 

@@ -477,7 +477,7 @@ CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, b
     BOOST_FOREACH(CStormnode &sn, vStormnodes)
     {
         sn.Check();
-        if(!sn.IsEnabled()) continue;
+        if(!sn.IsValidForPayment()) continue;
 
         // //check protocol version
         if(sn.nProtocolVersion < snpayments.GetMinStormnodePaymentsProto()) continue;
@@ -583,9 +583,12 @@ int CStormnodeMan::GetStormnodeRank(const CTxIn& vin, int nBlockHeight, int nMin
     // scan for winner
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
         if(sn.nProtocolVersion < nMinProtocol) continue;
+        sn.Check();
         if(fOnlyActive) {
-            sn.Check();
             if(!sn.IsEnabled()) continue;
+        }
+        else {
+            if(!sn.IsValidForPayment()) continue;
         }
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
 
