@@ -18,7 +18,10 @@
 #include "primitives/transaction.h"
 #include "sync.h"
 
-#undef foreach
+#if !defined(QT_PROJECT_BUILD)
+    #undef foreach
+#endif
+
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 
