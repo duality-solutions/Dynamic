@@ -455,6 +455,7 @@ HEADERS += \
     src/governance-classes.h \
     src/governance-exceptions.h \
     src/governance-misc.h \
+    src/governance-object.h \
     src/governance-vote.h \
     src/governance-votedb.h \
     src/governance.h \
@@ -624,6 +625,7 @@ SOURCES += \
     src/core_read.cpp \
     src/core_write.cpp \
     src/dbwrapper.cpp \
+    src/governance-classes.cpp \
     src/governance-classes.cpp \
     src/governance-vote.cpp \
     src/governance-votedb.cpp \
