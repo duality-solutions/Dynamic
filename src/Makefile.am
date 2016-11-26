@@ -102,6 +102,7 @@ DARKSILK_CORE_H = \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
+  governance-object.h \
   governance-vote.h \
   governance-votedb.h \
   flat-database.h \
@@ -205,6 +206,7 @@ libdarksilk_server_a_SOURCES = \
   dbwrapper.cpp \
   governance.cpp \
   governance-classes.cpp \
+  governance-object.cpp \
   governance-vote.cpp \
   governance-votedb.cpp \
   main.cpp \
