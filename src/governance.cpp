@@ -38,6 +38,7 @@ CGovernanceManager::CGovernanceManager()
       mapObjects(),
       mapSeenGovernanceObjects(),
       mapStormnodeOrphanObjects(),
+      mapWatchdogObjects(),
       mapVoteToObject(MAX_CACHE_SIZE),
       mapInvalidVotes(MAX_CACHE_SIZE),
       mapOrphanVotes(MAX_CACHE_SIZE),
@@ -284,6 +285,8 @@ bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
 
     DBG( cout << "CGovernanceManager::AddGovernanceObject START" << endl; );
 
+    uint256 nHash = govobj.GetHash();
+
     // MAKE SURE THIS OBJECT IS OK
 
     if(!govobj.IsValidLocally(pCurrentBlockIndex, strError, true)) {
@@ -293,7 +296,7 @@ bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
 
     // IF WE HAVE THIS OBJECT ALREADY, WE DON'T WANT ANOTHER COPY
 
-    if(mapObjects.count(govobj.GetHash())) {
+    if(mapObjects.count(nHash)) {
         LogPrintf("CGovernanceManager::AddGovernanceObject -- already have governance object - %s\n", strError);
         return false;
     }
@@ -316,8 +319,11 @@ bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
     case GOVERNANCE_OBJECT_TRIGGER:
         mapLastStormnodeTrigger[govobj.vinStormnode.prevout] = nCachedBlockHeight;
         DBG( cout << "CGovernanceManager::AddGovernanceObject Before AddNewTrigger" << endl; );
-        triggerman.AddNewTrigger(govobj.GetHash());
+        triggerman.AddNewTrigger(nHash);
         DBG( cout << "CGovernanceManager::AddGovernanceObject After AddNewTrigger" << endl; );
+        break;
+    case GOVERNANCE_OBJECT_WATCHDOG:
+        mapWatchdogObjects[nHash] = GetAdjustedTime() + GOVERNANCE_WATCHDOG_EXPIRATION_TIME;
         break;
     default:
         break;
@@ -335,6 +341,25 @@ void CGovernanceManager::UpdateCachesAndClean()
     std::vector<uint256> vecDirtyHashes = snodeman.GetAndClearDirtyGovernanceObjectHashes();
 
     LOCK(cs);
+
+    // Flag expired watchdogs for removal
+    int64_t nNow = GetAdjustedTime();
+    if(mapWatchdogObjects.size() > 1) {
+        hash_time_m_it it = mapWatchdogObjects.begin();
+        while(it != mapWatchdogObjects.end()) {
+            if(it->second < nNow) {
+                object_m_it it2 = mapObjects.find(it->first);
+                if(it2 != mapObjects.end()) {
+                    it2->second.fExpired = true;
+                    it2->second.nDeletionTime = nNow;
+                }
+                mapWatchdogObjects.erase(it++);
+            }
+            else {
+                ++it;
+            }
+        }
+    }
 
     for(size_t i = 0; i < vecDirtyHashes.size(); ++i) {
         object_m_it it = mapObjects.find(vecDirtyHashes[i]);
