@@ -28,7 +28,7 @@ class CTxLockCandidate;
 */
 static const int INSTANTSEND_SIGNATURES_REQUIRED    = 10;
 static const int INSTANTSEND_SIGNATURES_TOTAL       = 20;
-static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
+static const int DEFAULT_INSTANTSEND_DEPTH          = 10;
 
 static const int MIN_INSTANTSEND_PROTO_VERSION      = 60800;
 static const CAmount INSTANTSEND_MIN_FEE            = 0.001 * COIN;
