@@ -431,7 +431,7 @@ bool CStormnodePayments::AddPaymentVote(const CStormnodePaymentVote& vote)
     uint256 blockHash = uint256();
     if(!GetBlockHash(blockHash, vote.nBlockHeight - 101)) return false;
 
-    LOCK2(cs_mapStormnodePaymentVotes, cs_mapStormnodeBlocks);
+    LOCK2(cs_mapStormnodeBlocks, cs_mapStormnodePaymentVotes);
 
     if(mapStormnodePaymentVotes.count(vote.GetHash())) return false;
 
@@ -588,7 +588,7 @@ void CStormnodePayments::CheckAndRemove()
 {
     if(!pCurrentBlockIndex) return;
 
-    LOCK2(cs_mapStormnodePaymentVotes, cs_mapStormnodeBlocks);
+    LOCK2(cs_mapStormnodeBlocks, cs_mapStormnodePaymentVotes);
 
     int nLimit = GetStorageLimit();
 
@@ -787,7 +787,7 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
 void CStormnodePayments::RequestLowDataPaymentBlocks(CNode* pnode)
 {
 
-    LOCK(cs_mapStormnodeBlocks);
+    LOCK2(cs_main, cs_mapStormnodeBlocks);
 
     std::vector<CInv> vToFetch;
     std::map<int, CStormnodeBlockPayees>::iterator it = mapStormnodeBlocks.begin();

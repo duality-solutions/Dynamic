@@ -163,6 +163,13 @@ void CStormnodeSync::ClearFulfilledRequests()
     }
 }
 
+void ReleaseNodes(const std::vector<CNode*> &vNodesCopy)
+{
+    LOCK(cs_vNodes);
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        pnode->Release();
+}
+
 void CStormnodeSync::ProcessTick()
 {
     static int nTick = 0;
@@ -211,16 +218,21 @@ void CStormnodeSync::ProcessTick()
         return;
     }
 
-    LOCK2(snodeman.cs, cs_vNodes);
-
     if(nRequestedStormnodeAssets == STORMNODE_SYNC_INITIAL ||
         (nRequestedStormnodeAssets == STORMNODE_SYNC_SPORKS && IsBlockchainSynced()))
     {
         SwitchToNextAsset();
     }
 
-    BOOST_FOREACH(CNode* pnode, vNodes)
+    std::vector<CNode*> vNodesCopy;
     {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->AddRef();
+    }
+
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)    {
         // QUICK MODE (REGTEST ONLY!)
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {
@@ -237,6 +249,7 @@ void CStormnodeSync::ProcessTick()
                 nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             }
             nRequestedStormnodeAttempt++;
+            ReleaseNodes(vNodesCopy);
             return;
         }
 
@@ -272,9 +285,11 @@ void CStormnodeSync::ProcessTick()
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // there is no way we can continue without stormnode list, fail here and try later
                         Fail();
+                        ReleaseNodes(vNodesCopy);
                         return;
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -301,6 +316,7 @@ void CStormnodeSync::ProcessTick()
 
                 snodeman.SsegUpdate(pnode);
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
@@ -317,9 +333,11 @@ void CStormnodeSync::ProcessTick()
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // probably not a good idea to proceed without winner list
                         Fail();
+                        ReleaseNodes(vNodesCopy);
                         return;
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -329,6 +347,7 @@ void CStormnodeSync::ProcessTick()
                 if(nRequestedStormnodeAttempt > 1 && snpayments.IsEnoughData()) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -344,6 +363,7 @@ void CStormnodeSync::ProcessTick()
                 // ask node for missing pieces only (old nodes will not be asked)
                 snpayments.RequestLowDataPaymentBlocks(pnode);
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
@@ -360,6 +380,7 @@ void CStormnodeSync::ProcessTick()
                         // it's kind of ok to skip this for now, hopefully we'll catch up later?
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -385,6 +406,7 @@ void CStormnodeSync::ProcessTick()
 
                 pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync stormnode votes
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
         }

@@ -724,6 +724,8 @@ void CSandstormPool::ChargeFees()
         LogPrintf("CSandstormPool::ChargeFees -- found uncooperative node (didn't %s transaction), charging fees: %s\n",
                 (nState == POOL_STATE_SIGNING) ? "sign" : "send", vecOffendersCollaterals[0].ToString());
 
+        LOCK(cs_main);
+
         CValidationState state;
         bool fMissingInputs;
         if(!AcceptToMemoryPool(mempool, state, vecOffendersCollaterals[0], false, &fMissingInputs, false, true)) {
@@ -751,6 +753,8 @@ void CSandstormPool::ChargeRandomFees()
 {
     if(!fStormNode) return;
 
+    LOCK(cs_main);
+
     BOOST_FOREACH(const CTransaction& txCollateral, vecSessionCollaterals) {
 
         if(GetRandInt(100) > 10) return;
@@ -773,13 +777,19 @@ void CSandstormPool::ChargeRandomFees()
 //
 void CSandstormPool::CheckTimeout()
 {
-    // check mixing queue objects for timeouts
-    std::vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
-    while(it != vecSandstormQueue.end()) {
-        if((*it).IsExpired()) {
-            LogPrint("privatesend", "CSandstormPool::CheckTimeout -- Removing expired queue (%s)\n", (*it).ToString());
+    {
+        TRY_LOCK(cs_sandstorm, lockSS);
+        if(!lockSS) return; // it's ok to fail here, we run this quite frequently
+
+        // check mixing queue objects for timeouts
+        std::vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
             it = vecSandstormQueue.erase(it);
-        } else ++it;
+        while(it != vecSandstormQueue.end()) {
+            if((*it).IsExpired()) {
+                LogPrint("privatesend", "CSandstormPool::CheckTimeout -- Removing expired queue (%s)\n", (*it).ToString());
+                it = vecSandstormQueue.erase(it);
+            } else ++it;
+        }
     }
 
     if(!fEnablePrivateSend && !fStormNode) return;
@@ -2335,11 +2345,21 @@ bool CSandstormQueue::CheckSignature(const CPubKey& pubKeyStormnode)
 
 bool CSandstormQueue::Relay()
 {
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes)
+    std::vector<CNode*> vNodesCopy;
+    {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->AddRef();
+    }
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
             pnode->PushMessage(NetMsgType::SSQUEUE, (*this));
-
+    {
+        LOCK(cs_vNodes);
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->Release();
+    }
     return true;
 }
 
@@ -2462,6 +2482,8 @@ void ThreadCheckSandStormPool()
             // start right after sync is considered to be done
             if(nTick % STORMNODE_MIN_SNP_SECONDS == 1)
                 activeStormnode.ManageState();
+
+            snodeman.Check();
 
             if(nTick % 60 == 0) {
                 snodeman.CheckAndRemove();

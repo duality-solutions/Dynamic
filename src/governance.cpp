@@ -112,8 +112,6 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
     if(pfrom->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) return;
 
-    LOCK(cs);
-
     // ANOTHER USER IS ASKING US TO HELP THEM SYNC GOVERNANCE OBJECT DATA
     if (strCommand == NetMsgType::SNGOVERNANCESYNC)
     {
@@ -165,6 +163,8 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             Misbehaving(pfrom->GetId(), 20);
             return;
         }
+
+        LOCK(cs);
 
         if(mapSeenGovernanceObjects.count(nHash)) {
             // TODO - print error code? what if it's GOVOBJ_ERROR_IMMATURE?
@@ -867,6 +867,14 @@ void CGovernanceManager::AddCachedTriggers()
 
         triggerman.AddNewTrigger(govobj.GetHash());
     }
+}
+
+void CGovernanceManager::InitOnLoad()
+{
+    LOCK(cs);
+    RebuildIndexes();
+    AddCachedTriggers();
+    ClearSeen();
 }
 
 std::string CGovernanceManager::ToString() const

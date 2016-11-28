@@ -167,9 +167,8 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         if (strMode == "enabled")
             return snodeman.CountEnabled();
 
-        LOCK(cs_main);
         int nCount;
-        snodeman.GetNextStormnodeInQueueForPayment(chainActive.Height(), true, nCount);
+        snodeman.GetNextStormnodeInQueueForPayment(true, nCount);
 
         if (strMode == "qualify")
             return nCount;
@@ -184,14 +183,12 @@ UniValue stormnode(const UniValue& params, bool fHelp)
     {
         int nCount;
         int nHeight;
-        CBlockIndex* pindex;
         CStormnode* winner = NULL;
         {
             LOCK(cs_main);
             nHeight = chainActive.Height() + (strCommand == "current" ? 1 : 10);
-            pindex = chainActive.Tip();
         }
-        snodeman.UpdateLastPaid(pindex);
+        snodeman.UpdateLastPaid();
         winner = snodeman.GetNextStormnodeInQueueForPayment(nHeight, true, nCount);
         if(!winner) return "unknown";
 
@@ -482,22 +479,12 @@ UniValue stormnodelist(const UniValue& params, bool fHelp)
     }
 
     if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-        CBlockIndex* pindex;
-        {
-            LOCK(cs_main);
-            pindex = chainActive.Tip();
-        }
-        snodeman.UpdateLastPaid(pindex);
+       snodeman.UpdateLastPaid();
     }
 
     UniValue obj(UniValue::VOBJ);
     if (strMode == "rank") {
-        int nHeight;
-        {
-            LOCK(cs_main);
-            nHeight = chainActive.Height();
-        }
-        std::vector<std::pair<int, CStormnode> > vStormnodeRanks = snodeman.GetStormnodeRanks(nHeight);
+        std::vector<std::pair<int, CStormnode> > vStormnodeRanks = snodeman.GetStormnodeRanks();
         BOOST_FOREACH(PAIRTYPE(int, CStormnode)& s, vStormnodeRanks) {
             std::string strOutpoint = s.second.vin.prevout.ToStringShort();
             if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;

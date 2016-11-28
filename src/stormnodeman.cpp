@@ -321,7 +321,6 @@ int CStormnodeMan::CountEnabled(int nProtocolVersion)
     nProtocolVersion = nProtocolVersion == -1 ? snpayments.GetMinStormnodePaymentsProto() : nProtocolVersion;
 
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-        sn.Check();
         if(sn.nProtocolVersion < nProtocolVersion || !sn.IsEnabled()) continue;
         nCount++;
     }
@@ -461,6 +460,15 @@ bool CStormnodeMan::Has(const CTxIn& vin)
 //
 // Deterministically select the oldest/best stormnode to pay on the network
 //
+CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(bool fFilterSigTime, int& nCount)
+{
+    if(!pCurrentBlockIndex) {
+        nCount = 0;
+        return NULL;
+    }
+    return GetNextStormnodeInQueueForPayment(pCurrentBlockIndex->nHeight, fFilterSigTime, nCount);
+}
+
 CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount)
 {
     // Need LOCK2 here to ensure consistent locking order because the GetBlockHash call below locks cs_main
@@ -476,7 +484,6 @@ CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, b
     int nSnCount = CountEnabled();
     BOOST_FOREACH(CStormnode &sn, vStormnodes)
     {
-        sn.Check();
         if(!sn.IsValidForPayment()) continue;
 
         // //check protocol version
@@ -583,7 +590,6 @@ int CStormnodeMan::GetStormnodeRank(const CTxIn& vin, int nBlockHeight, int nMin
     // scan for winner
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
         if(sn.nProtocolVersion < nMinProtocol) continue;
-        sn.Check();
         if(fOnlyActive) {
             if(!sn.IsEnabled()) continue;
         }
@@ -620,8 +626,6 @@ std::vector<std::pair<int, CStormnode> > CStormnodeMan::GetStormnodeRanks(int nB
     // scan for winner
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
 
-        sn.Check();
-
         if(sn.nProtocolVersion < nMinProtocol || !sn.IsEnabled()) continue;
 
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
@@ -656,10 +660,7 @@ CStormnode* CStormnodeMan::GetStormnodeByRank(int nRank, int nBlockHeight, int n
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
 
         if(sn.nProtocolVersion < nMinProtocol) continue;
-        if(fOnlyActive) {
-            sn.Check();
-            if(!sn.IsEnabled()) continue;
-        }
+        if(fOnlyActive && !sn.IsEnabled()) continue;
 
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
 
@@ -701,11 +702,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
     if (strCommand == NetMsgType::SNANNOUNCE) { //Stormnode Broadcast
 
-        {
-            LOCK(cs);
-
-            CStormnodeBroadcast snb;
-            vRecv >> snb;
+        CStormnodeBroadcast snb;
+        vRecv >> snb;
 
             int nDos = 0;
 
@@ -714,7 +712,6 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
                 addrman.Add(CAddress(snb.addr), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
                 Misbehaving(pfrom->GetId(), nDos);
-            }
         }
         if(fStormnodesAdded) {
             NotifyStormnodeUpdates();
@@ -728,7 +725,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s\n", snp.vin.prevout.ToStringShort());
 
-        LOCK(cs);
+        // Need LOCK2 here to ensure consistent locking order because the CheckAndUpdate call below locks cs_main
+        LOCK2(cs_main, cs);
 
         if(mapSeenStormnodePing.count(snp.GetHash())) return; //seen
         mapSeenStormnodePing.insert(std::make_pair(snp.GetHash(), snp));
@@ -842,7 +840,9 @@ void CStormnodeMan::DoFullVerificationStep()
 
     std::vector<std::pair<int, CStormnode> > vecStormnodeRanks = GetStormnodeRanks(pCurrentBlockIndex->nHeight - 1, MIN_POSE_PROTO_VERSION);
 
-    LOCK(cs);
+    // Need LOCK2 here to ensure consistent locking order because the SendVerifyRequest call below locks cs_main
+    // through GetHeight() signal in ConnectNode
+    LOCK2(cs_main, cs);
 
     int nCount = 0;
     int nCountMax = std::max(10, (int)vStormnodes.size() / 100); // verify at least 10 stormnode at once but at most 1% of all known stormnodes
@@ -1296,7 +1296,8 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
 
 bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos)
 {
-    LOCK(cs);
+    // Need LOCK2 here to ensure consistent locking order because the SimpleCheck call below locks cs_main
+    LOCK2(cs_main, cs);
 
     nDos = 0;
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s\n", snb.vin.prevout.ToStringShort());
@@ -1349,22 +1350,22 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     return true;
 }
 
-void CStormnodeMan::UpdateLastPaid(const CBlockIndex *pindex)
+void CStormnodeMan::UpdateLastPaid()
 {
     LOCK(cs);
 
     if(fLiteMode) return;
+    if(!pCurrentBlockIndex) return;
 
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a stormnode
     // (MNs should update this info on every block, so limited scan should be enough for them)
     int nMaxBlocksToScanBack = (IsFirstRun || !fStormNode) ? snpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
-    // LogPrint("snpayments", "CStormnodeMan::UpdateLastPaid -- nHeight=%d, nMaxBlocksToScanBack=%d, IsFirstRun=%s\n",
-    //                         pindex->nHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
+    // pCurrentBlockIndex->nHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
 
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-        sn.UpdateLastPaid(pindex, nMaxBlocksToScanBack);
+        sn.UpdateLastPaid(pCurrentBlockIndex, nMaxBlocksToScanBack);
     }
 
     // every time is like the first time if winners list is not synced
@@ -1510,7 +1511,7 @@ void CStormnodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
     if(fStormNode) {
         DoFullVerificationStep();
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
-        UpdateLastPaid(pindex);
+        UpdateLastPaid();
     }
 }
 
