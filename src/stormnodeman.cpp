@@ -811,7 +811,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
     } else if (strCommand == NetMsgType::SNVERIFY) { // Stormnode Verify
 
-        LOCK(cs);
+        // Need LOCK2 here to ensure consistent locking order because the all functions below call GetBlockHash which locks cs_main
+        LOCK2(cs_main, cs);
 
         CStormnodeVerification snv;
         vRecv >> snv;

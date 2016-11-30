@@ -142,12 +142,6 @@ public:
 
     virtual ~CGovernanceManager() {}
 
-    void ClearSeen()
-    {
-        LOCK(cs);
-        mapSeenGovernanceObjects.clear();
-    }
-
     int CountProposalInventoryItems()
     {
         // TODO What is this for ?
@@ -189,6 +183,7 @@ public:
         LogPrint("gobject", "Governance object manager was cleared\n");
         mapObjects.clear();
         mapSeenGovernanceObjects.clear();
+        mapWatchdogObjects.clear();
         mapVoteToObject.Clear();
         mapInvalidVotes.Clear();
         mapOrphanVotes.Clear();
@@ -214,6 +209,7 @@ public:
         READWRITE(mapInvalidVotes);
         READWRITE(mapOrphanVotes);
         READWRITE(mapObjects);
+        READWRITE(mapWatchdogObjects);
         READWRITE(mapLastStormnodeTrigger);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
