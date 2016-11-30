@@ -122,7 +122,7 @@ bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
     nTimeLastChecked = 0;
     nTimeLastWatchdogVote = snb.sigTime;
     int nDos = 0;
-    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(nDos, false))) {
+    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(nDos))) {
         lastPing = snb.lastPing;
         snodeman.mapSeenStormnodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
@@ -467,7 +467,7 @@ bool CStormnodeBroadcast::SimpleCheck(int& nDos)
     }
 
     // empty ping or incorrect sigTime/blockhash
-    if(lastPing == CStormnodePing() || !lastPing.CheckAndUpdate(nDos, false, true)) {
+    if(lastPing == CStormnodePing() || !lastPing.CheckAndUpdate(nDos, true)) {
         return false;
     }
 
@@ -723,16 +723,10 @@ bool CStormnodePing::CheckSignature(CPubKey& pubKeyStormnode, int &nDos)
     return true;
 }
 
-bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpleCheck)
+bool CStormnodePing::CheckAndUpdate(int& nDos, bool fSimpleCheck)
 {
     if (sigTime > GetAdjustedTime() + 60 * 60) {
         LogPrintf("CStormnodePing::CheckAndUpdate -- Signature rejected, too far into the future, stormnode=%s\n", vin.prevout.ToStringShort());
-        nDos = 1;
-        return false;
-    }
-
-    if (sigTime <= GetAdjustedTime() - 60 * 60) {
-        LogPrintf("CStormnodePing::CheckAndUpdate -- Signature rejected, too far into the past: stormnode=%s  sigTime=%d  GetAdjustedTime()=%d\n", vin.prevout.ToStringShort(), sigTime, GetAdjustedTime());
         nDos = 1;
         return false;
     }
@@ -768,8 +762,6 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpl
         LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- Couldn't find compatible Stormnode entry, stormnode=%s\n", vin.prevout.ToStringShort());
         return false;
     }
-
-    if (fRequireEnabled && !psn->IsEnabled() && !psn->IsPreEnabled() && !psn->IsWatchdogExpired()) return false;
 
     // LogPrintf("snping - Found corresponding sn for vin: %s\n", vin.prevout.ToStringShort());
     // update only if there is no known ping for this stormnode or

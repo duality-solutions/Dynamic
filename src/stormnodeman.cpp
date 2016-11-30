@@ -124,9 +124,6 @@ bool CStormnodeMan::Add(CStormnode &sn)
 {
     LOCK(cs);
 
-    if (!sn.IsEnabled() && !sn.IsPreEnabled())
-        return false;
-
     CStormnode *psn = Find(sn.vin);
     if (psn == NULL) {
         LogPrint("stormnode", "CStormnodeMan::Add -- Adding new Stormnode: addr=%s, %i now\n", sn.addr.ToString(), size() + 1);
@@ -734,7 +731,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s new\n", snp.vin.prevout.ToStringShort());
 
         int nDos = 0;
-        if(snp.CheckAndUpdate(nDos, false)) return;
+        if(snp.CheckAndUpdate(nDos)) return;
 
         if(nDos > 0) {
             // if anything significant failed, mark that node
