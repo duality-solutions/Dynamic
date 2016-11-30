@@ -182,7 +182,7 @@ void CActiveStormnode::ManageStateInitial()
     }
 
     if(pwalletMain->GetBalance() < 1000*COIN) {
-        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: Wallet balance is < 1000 DSLK", GetStateString());
+        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: Wallet balance is < 1000 DSLK\n", GetStateString());
         return;
     }
 
