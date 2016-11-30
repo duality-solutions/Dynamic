@@ -169,15 +169,15 @@ void CStormnode::Check(bool fForce)
 
     static int64_t nTimeStart = GetTime();
 
-    LogPrint("stormnode", "CStormnode::Check start -- vin %s\n", vin.prevout.ToStringShort());
-
-    //once spent, stop doing the checks
-    if(nActiveState == STORMNODE_OUTPOINT_SPENT) return;
-
     if(ShutdownRequested()) return;
 
     if(!fForce && (GetTime() - nTimeLastChecked < STORMNODE_CHECK_SECONDS)) return;
     nTimeLastChecked = GetTime();
+
+   LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state\n", vin.prevout.ToStringShort(), GetStateString());
+
+    //once spent, stop doing the checks
+    if(nActiveState == STORMNODE_OUTPOINT_SPENT) return;
 
     int nHeight = 0;
     if(!fUnitTest) {

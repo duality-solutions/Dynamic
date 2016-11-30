@@ -1136,7 +1136,7 @@ void CStormnodeMan::ProcessVerifyReply(CNode* pnode, CStormnodeVerification& snv
             LogPrint("stormnode", "CStormnodeMan::ProcessVerifyBroadcast -- increased PoSe ban score for %s addr %s, new score %d\n",
                         prealStormnode->vin.prevout.ToStringShort(), pnode->addr.ToString(), psn->nPoSeBanScore);
         }
-        LogPrintf("CStormnodeMan::ProcessVerifyBroadcast -- PoSe score incresed for %d fake Stormnodes, addr %s\n",
+        LogPrintf("CStormnodeMan::ProcessVerifyBroadcast -- PoSe score increased for %d fake stormnodes, addr %s\n",
                     (int)vpStormnodesToBan.size(), pnode->addr.ToString());
     }
 }
