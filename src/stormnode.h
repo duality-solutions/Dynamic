@@ -79,7 +79,7 @@ public:
 
     bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
     bool CheckSignature(CPubKey& pubKeyStormnode, int &nDos);
-    bool CheckAndUpdate(int& nDos, bool fRequireEnabled = true, bool fSimpleCheck = false);
+    bool CheckAndUpdate(int& nDos, bool fSimpleCheck = false);
     void Relay();
 
     CStormnodePing& operator=(CStormnodePing from)
