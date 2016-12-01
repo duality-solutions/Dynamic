@@ -316,7 +316,6 @@ void CStormnodeSync::ProcessTick()
 
                 snodeman.SsegUpdate(pnode);
 
-                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
@@ -332,8 +331,8 @@ void CStormnodeSync::ProcessTick()
                     if (nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // probably not a good idea to proceed without winner list
-                        Fail();
                         ReleaseNodes(vNodesCopy);
+                        Fail();
                         return;
                     }
                     SwitchToNextAsset();
