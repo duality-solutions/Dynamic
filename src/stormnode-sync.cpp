@@ -316,7 +316,6 @@ void CStormnodeSync::ProcessTick()
 
                 snodeman.SsegUpdate(pnode);
 
-                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
