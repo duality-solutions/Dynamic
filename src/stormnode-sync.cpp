@@ -331,8 +331,8 @@ void CStormnodeSync::ProcessTick()
                     if (nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // probably not a good idea to proceed without winner list
-                        ReleaseNodes(vNodesCopy);
                         Fail();
+                        ReleaseNodes(vNodesCopy);
                         return;
                     }
                     SwitchToNextAsset();
