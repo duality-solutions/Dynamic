@@ -125,6 +125,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
         if(!isNormalBlockValueMet) {
             strErrorRet = strprintf("coinbase pays too much at height %d (actual=%d vs limit=%d), exceeded normal block payment limit, superblocks are disabled",
                                     nBlockHeight, block.vtx[0].GetValueOut(), blockReward);
+        }
     }
 
     // it MUST be a regular block

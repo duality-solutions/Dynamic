@@ -304,6 +304,7 @@ void CStormnodeSync::ProcessTick()
                 if(nRequestedStormnodeAttempt > 1 && nSnCount > nSnCountEstimated) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -316,6 +317,7 @@ void CStormnodeSync::ProcessTick()
 
                 snodeman.SsegUpdate(pnode);
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
