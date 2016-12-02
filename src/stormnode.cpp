@@ -466,8 +466,8 @@ bool CStormnodeBroadcast::SimpleCheck(int& nDos)
         return false;
     }
 
-    // empty ping or incorrect sigTime/blockhash
-    if(lastPing == CStormnodePing() || !lastPing.CheckAndUpdate(nDos, true)) {
+    // empty ping or incorrect sigTime/unknown blockhash
+    if(lastPing == CStormnodePing() || !lastPing.SimpleCheck(nDos)) {
         return false;
     }
 
@@ -723,10 +723,14 @@ bool CStormnodePing::CheckSignature(CPubKey& pubKeyStormnode, int &nDos)
     return true;
 }
 
-bool CStormnodePing::CheckAndUpdate(int& nDos, bool fSimpleCheck)
+bool CStormnodePing::SimpleCheck(int& nDos)
 {
+
+    // don't ban by default
+    nDos = 0;
+
     if (sigTime > GetAdjustedTime() + 60 * 60) {
-        LogPrintf("CStormnodePing::CheckAndUpdate -- Signature rejected, too far into the future, stormnode=%s\n", vin.prevout.ToStringShort());
+        LogPrintf("CStormnodePing::SimpleCheck -- Signature rejected, too far into the future, stormnode=%s\n", vin.prevout.ToStringShort());
         nDos = 1;
         return false;
     }
@@ -735,22 +739,32 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fSimpleCheck)
         LOCK(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if (mi == mapBlockIndex.end()) {
-            LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, unknown block hash: stormnode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
+            LogPrint("stormnode", "StormnodePing::SimpleCheck -- Stormnode ping is invalid, unknown block hash: stormnode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
             // maybe we stuck or forked so we shouldn't ban this node, just fail to accept this ping
             // TODO: or should we also request this block?
             return false;
         }
-        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
-            // Do nothing here (no Stormnode update, no snping relay)
-            // Let this node to be visible but fail to accept snping
-            return false;
-        }
+    }
+     LogPrint("stormnode", "CStormnodePing::SimpleCheck -- Stormnode ping verified: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
+     return true;
+ }
+ 
+ bool CStormnodePing::CheckAndUpdate(int& nDos)
+ {
+     // don't ban by default
+     nDos = 0;
+ 
+     if (!SimpleCheck(nDos)) {
+        return false;
     }
 
-    if (fSimpleCheck) {
-        LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- ping verified in fSimpleCheck mode: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
-        return true;
+    {
+        LOCK(cs_main);
+        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
+        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
+            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
+            return false;
+        }
     }
 
     LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- New ping: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
