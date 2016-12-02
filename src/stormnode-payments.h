@@ -22,10 +22,7 @@ static const int SNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
 //! minimum peer version that can receive and send stormnode payment messages,
 //  vote for stormnode and be elected as a payment winner
-// V1 - Last protocol version before update
-// V2 - Newest protocol version
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_1 = 60700;
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_2 = 60800;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION = 60800;
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapStormnodeBlocks;

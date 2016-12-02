@@ -314,9 +314,7 @@ void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew /*CAmount nFe
 }
 
 int CStormnodePayments::GetMinStormnodePaymentsProto() {
-    return sporkManager.IsSporkActive(SPORK_10_STORMNODE_PAY_UPDATED_NODES)
-            ? MIN_STORMNODE_PAYMENT_PROTO_VERSION_2
-            : MIN_STORMNODE_PAYMENT_PROTO_VERSION_1;
+    return sporkManager.IsSporkActive(SPORK_10_STORMNODE_PAY_UPDATED_NODES);
 }
 
 void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
@@ -654,7 +652,7 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
         nMinRequiredProtocol = snpayments.GetMinStormnodePaymentsProto();
     } else {
         // allow non-updated stormnodes for old blocks
-        nMinRequiredProtocol = MIN_STORMNODE_PAYMENT_PROTO_VERSION_1;
+        nMinRequiredProtocol = MIN_STORMNODE_PAYMENT_PROTO_VERSION;
     }
 
     if(psn->nProtocolVersion < nMinRequiredProtocol) {
