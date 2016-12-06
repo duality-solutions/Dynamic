@@ -1319,6 +1319,11 @@ bool CWallet::SetHDChain(const CHDChain& chain, bool memonly)
     return true;
 }
 
+bool CWallet::IsHDEnabled()
+{
+    return !hdChain.masterKeyID.IsNull();
+}
+
 bool CWallet::IsMine(const CTransaction& tx) const
 {
     BOOST_FOREACH(const CTxOut& txout, tx.vout)

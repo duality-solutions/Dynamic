@@ -901,14 +901,16 @@ public:
     /* Initializes the wallet, returns a new CWallet instance or a null pointer in case of an error */
     static bool InitLoadWallet();
 
+    /**
+     * HD Wallet Functions
+     */
     const CHDChain& GetHDChain() { return hdChain; }
-
+    /* Returns true if HD is enabled */
+    bool IsHDEnabled();
     /* Set the HD chain model (chain child index counters) */
     bool SetHDChain(const CHDChain& chain, bool memonly);
-
     /* Generates a new HD master key (will not be activated) */
     CPubKey GenerateNewHDMasterKey();
-
     /* Set the current HD master key (will reset the chain child index counters) */
     bool SetHDMasterKey(const CPubKey& key);
 };
