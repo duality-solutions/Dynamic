@@ -324,13 +324,13 @@ void HandleSIGHUP(int)
     fReopenDebugLog = true;
 }
 
-bool static InitError(const std::string &str)
+bool InitError(const std::string &str)
 {
     uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_ERROR);
     return false;
 }
 
-bool static InitWarning(const std::string &str)
+bool InitWarning(const std::string &str)
 {
     uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_WARNING);
     return true;
@@ -1258,7 +1258,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         // reset warning string
         strWarning = "";
 
-        if (!CWallet::Verify(strWalletFile, strWarning, strError))
+        if (!CWallet::Verify())
             return false;
 
         if (!strWarning.empty())
@@ -1580,26 +1580,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
-    if (fDisableWallet) {
-        pwalletMain = NULL;
-        LogPrintf("Wallet disabled!\n");
-    } else {
-        std::string warningString;
-        std::string errorString;
-        pwalletMain = CWallet::InitLoadWallet(fDisableWallet, strWalletFile, warningString, errorString);
-        if (!warningString.empty())
-            InitWarning(warningString);
-        if (!errorString.empty())        
-        {
-            LogPrintf("%s", errorString);
-            return InitError(errorString);          
-        }
-    if (!pwalletMain)
+    if (!CWallet::InitLoadWallet())
         return false;
-    }
-#else // ENABLE_WALLET
+#else
     LogPrintf("No wallet support compiled in!\n");
-#endif // !ENABLE_WALLET
+#endif
 
     // ********************************************************* Step 9: data directory maintenance
 
