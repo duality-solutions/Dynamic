@@ -115,6 +115,12 @@ struct CompactTallyItem
     }
 };
 
+/** Show warning message **/
+void InitWarning(const std::string& str);
+
+/** Show error message **/
+bool InitError(const std::string& str);
+
 /** A key pool entry */
 class CKeyPool
 {

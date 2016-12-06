@@ -27,7 +27,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-CClientUIInterface uiInterface; // Declared but not defined in ui_interface.h
 CWallet* pwalletMain;
 
 extern bool fPrintToConsole;
