@@ -4105,7 +4105,7 @@ bool CWallet::GetDestData(const CTxDestination &dest, const std::string &key, st
 
 bool CWallet::InitLoadWallet()
 {
-    if (GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
+    if (GetBoolArg("-disablewallet", false)) {
         pwalletMain = NULL;
         LogPrintf("Wallet disabled!\n");
         return true;
