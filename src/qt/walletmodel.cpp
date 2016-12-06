@@ -121,6 +121,7 @@ void WalletModel::updateStatus()
         Q_EMIT encryptionStatusChanged(newEncryptionStatus);
 }
 
+
 void WalletModel::pollBalanceChanged()
 {
     // Get required locks upfront. This avoids the GUI from getting stuck on
@@ -727,4 +728,9 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
         return wallet->EraseDestData(dest, key);
     else
         return wallet->AddDestData(dest, key, sRequest);
+}
+
+bool WalletModel::hdEnabled() const
+{
+    return wallet->IsHDEnabled();
 }

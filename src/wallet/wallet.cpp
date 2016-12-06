@@ -117,7 +117,7 @@ CPubKey CWallet::GenerateNewKey()
     CKeyMetadata metadata(nCreationTime);
 
     // use HD key derivation if HD was enabled during wallet creation
-    if (!hdChain.masterKeyID.IsNull()) {
+    if (IsHDEnabled()) {
         // for now we use a fixed keypath scheme of m/0'/0'/k
         CKey key;                      //master key seed (256bit)
         CExtKey masterKey;             //hd master key
@@ -704,7 +704,7 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
         Unlock(strWalletPassphrase);
 
         // if we are using HD, replace the HD master key (seed) with a new one
-        if (!hdChain.masterKeyID.IsNull()) {
+        if (IsHDEnabled()) {
             CKey key;
             CPubKey masterPubKey = GenerateNewHDMasterKey();
             if (!SetHDMasterKey(masterPubKey))
