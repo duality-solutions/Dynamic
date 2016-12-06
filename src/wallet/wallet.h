@@ -898,6 +898,9 @@ public:
     /* Mark a transaction (and it in-wallet descendants) as abandoned so its inputs may be respent. */
     bool AbandonTransaction(const uint256& hashTx);
 
+    /* initializes the wallet, returns a new CWallet instance or a null pointer in case of an error */
+    static CWallet* InitLoadWallet(bool fDisableWallet, const std::string& strWalletFile, std::string& warningString, std::string& errorString);
+
     /* Set the hd chain model (chain child index counters) */
     bool SetHDChain(const CHDChain& chain, bool memonly);
 
