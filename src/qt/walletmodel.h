@@ -102,7 +102,7 @@ public:
     }
 };
 
-/** Interface to DarkSilk wallet from Qt view code. */
+/** Interface to DarkDarkSilk wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -133,6 +133,7 @@ public:
         Unlocked,               // wallet->IsCrypted() && !wallet->IsLocked()
     };
 
+    CWallet* getWallet();
     OptionsModel *getOptionsModel();
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();

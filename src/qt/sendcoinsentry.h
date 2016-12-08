@@ -51,6 +51,7 @@ public:
 
 public Q_SLOTS:
     void clear();
+    void setRemoveEnabled(bool enabled);
 
 Q_SIGNALS:
     void removeEntry(SendCoinsEntry *entry);
