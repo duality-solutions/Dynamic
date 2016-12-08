@@ -128,7 +128,8 @@ private:
     QAction *openAction;
     QAction *showHelpMessageAction;
     QAction *showPrivateSendHelpAction;
-
+	QAction *multiSigAction;
+	
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     QMenu *dockIconMenu;
@@ -211,6 +212,8 @@ private Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
+    /** Switch to MultiSig page */
+	void gotoMultiSigPage();
     /** Switch to stormnode page */
     void gotoStormnodePage();
     /** Switch to receive coins page */

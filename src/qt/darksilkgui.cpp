@@ -19,6 +19,7 @@
 #include "platformstyle.h"
 #include "rpcconsole.h"
 #include "utilitydialog.h"
+#include "multisigdialog.h"
 
 #ifdef ENABLE_WALLET
 #include "walletframe.h"
@@ -119,6 +120,7 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     rpcConsole(0),
     helpMessageDialog(0),
     prevBlocks(0),
+    multiSigAction(0),
     spinnerFrame(0),
     platformStyle(platformStyle)
 {
@@ -342,6 +344,17 @@ void DarkSilkGUI::createActions()
 #endif
     tabGroup->addAction(stormnodeAction);    
 
+    multiSigAction = new QAction(QIcon(":/icons/multisig"), tr("&MultiSig"), this);
+    multiSigAction->setStatusTip(tr("Generate and Utilize Multiple Signature Addresses"));
+    multiSigAction->setToolTip(multiSigAction->statusTip());
+    multiSigAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
+#else
+    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+#endif
+    tabGroup->addAction(multiSigAction);
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -358,6 +371,9 @@ void DarkSilkGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(gotoStormnodePage()));
+    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(gotoMultiSigPage()));
+	connect(multiSigAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+
 #endif // ENABLE_WALLET
 
     quitAction = new QAction(QIcon(":/icons/" + theme + "/quit"), tr("E&xit"), this);
@@ -550,6 +566,7 @@ void DarkSilkGUI::createToolBars()
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
         toolbar->addAction(stormnodeAction);
+		toolbar->addAction(multiSigAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -667,6 +684,7 @@ void DarkSilkGUI::setWalletActionsEnabled(bool enabled)
     sendCoinsMenuAction->setEnabled(enabled);
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
+	multiSigAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     stormnodeAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
@@ -700,6 +718,8 @@ void DarkSilkGUI::createIconMenu(QMenu *pmenu)
     pmenu->addAction(signMessageAction);
     pmenu->addAction(verifyMessageAction);
     pmenu->addSeparator();
+    pmenu->addAction(multiSigAction);
+	pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
     pmenu->addAction(openRPCConsoleAction);
@@ -851,6 +871,13 @@ void DarkSilkGUI::gotoSendCoinsPage(QString addr)
 {
     sendCoinsAction->setChecked(true);
     if (walletFrame) walletFrame->gotoSendCoinsPage(addr);
+}
+
+
+void DarkSilkGUI::gotoMultiSigPage()
+{
+    multiSigAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoMultiSigPage();
 }
 
 void DarkSilkGUI::gotoSignMessageTab(QString addr)
