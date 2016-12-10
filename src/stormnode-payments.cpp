@@ -354,9 +354,18 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(!pCurrentBlockIndex) return;
 
-        if(mapStormnodePaymentVotes.count(vote.GetHash())) {
-            LogPrint("snpayments", "STORMNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", vote.GetHash().ToString(), pCurrentBlockIndex->nHeight);
-            return;
+        {
+            LOCK(cs_mapStormnodePaymentVotes);
+            if(mapStormnodePaymentVotes.count(vote.GetHash())) {
+                LogPrint("snpayments", "STORMNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", vote.GetHash().ToString(), pCurrentBlockIndex->nHeight);
+                return;
+            }
+
+            // Avoid processing same vote multiple times
+            mapStormnodePaymentVotes[vote.GetHash()] = vote;
+            // but first mark vote as non-verified,
+            // AddPaymentVote() below should take care of it if vote is actually ok
+            mapStormnodePaymentVotes[vote.GetHash()].MarkAsNotVerified();
         }
 
         int nFirstBlock = pCurrentBlockIndex->nHeight - GetStorageLimit();
@@ -376,14 +385,29 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
-        if(!vote.CheckSignature()) {
-            // do not ban for old snw, SN simply might be not active anymore
-            if(stormnodeSync.IsSynced() && vote.nBlockHeight > pCurrentBlockIndex->nHeight) {
-                LogPrintf("STORMNODEPAYMENTVOTE -- invalid signature\n");
-                Misbehaving(pfrom->GetId(), 20);
-            }
-            // it could just be a non-synced stormnode
+        stormnode_info_t snInfo = snodeman.GetStormnodeInfo(vote.vinStormnode);
+        if(!snInfo.fInfoValid) {
+            // sn was not found, so we can't check vote, some info is probably missing
+            LogPrintf("STORMNODEPAYMENTVOTE -- stormnode is missing %s\n", vote.vinStormnode.prevout.ToStringShort());
             snodeman.AskForSN(pfrom, vote.vinStormnode);
+            return;
+        }
+
+        int nDos = 0;
+        if(!vote.CheckSignature(snInfo.pubKeyStormnode, pCurrentBlockIndex->nHeight, nDos)) {
+            if(nDos) {
+                LogPrintf("STORMNODEPAYMENTVOTE -- ERROR: invalid signature\n");
+                Misbehaving(pfrom->GetId(), nDos);
+            } else {
+                // only warn about anything non-critical (i.e. nDos == 0) in debug mode
+                LogPrint("snpayments", "STORMNODEPAYMENTVOTE -- WARNING: invalid signature\n");
+            }
+            // Either our info or vote info could be outdated.
+            // In case our info is outdated, ask for an update,
+            snodeman.AskForSN(pfrom, vote.vinStormnode);
+            // but there is nothing we can do if vote info itself is outdated
+            // (i.e. it was signed by a mn which changed its key),
+            // so just quit here.
             return;
         }
 
@@ -456,9 +480,9 @@ bool CStormnodePayments::AddPaymentVote(const CStormnodePaymentVote& vote)
     uint256 blockHash = uint256();
     if(!GetBlockHash(blockHash, vote.nBlockHeight - 101)) return false;
 
-    LOCK2(cs_mapStormnodeBlocks, cs_mapStormnodePaymentVotes);
+    if(HasVerifiedPaymentVote(vote.GetHash())) return false;
 
-    if(mapStormnodePaymentVotes.count(vote.GetHash())) return false;
+    LOCK2(cs_mapStormnodeBlocks, cs_mapStormnodePaymentVotes);
 
     mapStormnodePaymentVotes[vote.GetHash()] = vote;
 
@@ -470,6 +494,13 @@ bool CStormnodePayments::AddPaymentVote(const CStormnodePaymentVote& vote)
     mapStormnodeBlocks[vote.nBlockHeight].AddPayee(vote);
 
     return true;
+}
+
+bool CStormnodePayments::HasVerifiedPaymentVote(uint256 hashIn)
+{
+    LOCK(cs_mapStormnodePaymentVotes);
+    std::map<uint256, CStormnodePaymentVote>::iterator it = mapStormnodePaymentVotes.find(hashIn);
+    return it != mapStormnodePaymentVotes.end() && it->second.IsVerified();
 }
 
 void CStormnodeBlockPayees::AddPayee(const CStormnodePaymentVote& vote)
@@ -647,7 +678,7 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
     }
 
     int nMinRequiredProtocol;
-    if(nBlockHeight > nValidationHeight) {
+    if(nBlockHeight >= nValidationHeight) {
         // new votes must comply SPORK_10_STORMNODE_PAY_UPDATED_NODES rules
         nMinRequiredProtocol = snpayments.GetMinStormnodePaymentsProto();
     } else {
@@ -659,6 +690,10 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
         strError = strprintf("Stormnode protocol is too old: nProtocolVersion=%d, nMinRequiredProtocol=%d", psn->nProtocolVersion, nMinRequiredProtocol);
         return false;
     }
+
+    // Only stormnodes should try to check stormnode rank for old votes - they need to pick the right winner for future blocks.
+    // Regular clients (miners included) need to verify stormnode rank for future block votes only.
+    if(!fStormNode && nBlockHeight < nValidationHeight) return true;
 
     int nRank = snodeman.GetStormnodeRank(vinStormnode, nBlockHeight - 101, nMinRequiredProtocol, false);
 
@@ -746,23 +781,29 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
 
 void CStormnodePaymentVote::Relay()
 {
+    // do not relay until synced
+    if (!stormnodeSync.IsSynced()) return;
     CInv inv(MSG_STORMNODE_PAYMENT_VOTE, GetHash());
     RelayInv(inv);
 }
 
-bool CStormnodePaymentVote::CheckSignature()
+bool CStormnodePaymentVote::CheckSignature(const CPubKey& pubKeyStormnode, int nValidationHeight, int &nDos)
 {
-
-    CStormnode* psn = snodeman.Find(vinStormnode);
-
-    if (!psn) return false;
+    // do not ban by default
+    nDos = 0;
 
     std::string strMessage = vinStormnode.prevout.ToStringShort() +
                 boost::lexical_cast<std::string>(nBlockHeight) +
                 ScriptToAsmStr(payee);
 
     std::string strError = "";
-    if (!sandStormSigner.VerifyMessage(psn->pubKeyStormnode, vchSig, strMessage, strError)) {
+    if (!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+        // Only ban for future block vote when we are already synced.
+        // Otherwise it could be the case when SN which signed this vote is using another key now
+        // and we have no idea about the old one.
+        if(stormnodeSync.IsSynced() && nBlockHeight > nValidationHeight) {
+            nDos = 20;
+        }
         return error("CStormnodePaymentVote::CheckSignature -- Got bad Stormnode payment signature, stormnode=%s, error: %s", vinStormnode.prevout.ToStringShort().c_str(), strError);
     }
 
@@ -797,6 +838,7 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
             BOOST_FOREACH(CStormnodePayee& payee, mapStormnodeBlocks[h].vecPayees) {
                 std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                 BOOST_FOREACH(uint256& hash, vecVoteHashes) {
+                    if(!HasVerifiedPaymentVote(hash)) continue;
                     pnode->PushInventory(CInv(MSG_STORMNODE_PAYMENT_VOTE, hash));
                     nInvCount++;
                 }

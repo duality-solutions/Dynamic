@@ -5027,7 +5027,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 }
 
                 if (!pushed && inv.type == MSG_STORMNODE_PAYMENT_VOTE) {
-                    if(snpayments.mapStormnodePaymentVotes.count(inv.hash)) {
+                    if(snpayments.HasVerifiedPaymentVote(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
                         ss << snpayments.mapStormnodePaymentVotes[inv.hash];
@@ -5043,7 +5043,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         BOOST_FOREACH(CStormnodePayee& payee, snpayments.mapStormnodeBlocks[mi->second->nHeight].vecPayees) {
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             BOOST_FOREACH(uint256& hash, vecVoteHashes) {
-                                if(snpayments.mapStormnodePaymentVotes.count(hash)) {
+                                if(snpayments.HasVerifiedPaymentVote(hash)) {
                                     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                                     ss.reserve(1000);
                                     ss << snpayments.mapStormnodePaymentVotes[hash];
