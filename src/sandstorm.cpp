@@ -1856,8 +1856,10 @@ bool CSandstormPool::CreateDenominated()
         return false;
     }
 
+    bool fCreateMixingCollaterals = !pwalletMain->HasCollateralInputs();
+
     BOOST_FOREACH(CompactTallyItem& item, vecTally) {
-        if(!CreateDenominated(item)) continue;
+        if(!CreateDenominated(item, fCreateMixingCollaterals)) continue;
         return true;
     }
 
@@ -1866,7 +1868,7 @@ bool CSandstormPool::CreateDenominated()
 }
 
 // Create denominations
-bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem)
+bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals)
 {
     std::vector<CRecipient> vecSend;
     CAmount nValueLeft = tallyItem.nAmount;
@@ -1883,7 +1885,7 @@ bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem)
 
     // ****** Add collateral outputs ************ /
 
-    if(!pwalletMain->HasCollateralInputs()) {
+    if(fCreateMixingCollaterals) {
         vecSend.push_back((CRecipient){scriptCollateral, PRIVATESEND_COLLATERAL*4, false});
         nValueLeft -= PRIVATESEND_COLLATERAL*4;
     }
