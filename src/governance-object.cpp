@@ -651,6 +651,7 @@ bool CGovernanceObject::GetCurrentSNVotes(const CTxIn& snCollateralOutpoint, vot
 
 void CGovernanceObject::Relay()
 {
+    if(!stormnodeSync.IsSynced()) return;
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
     RelayInv(inv, PROTOCOL_VERSION);
 }

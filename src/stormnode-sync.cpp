@@ -56,7 +56,7 @@ void CStormnodeSync::Reset()
     nTimeAssetSyncStarted = GetTime();
     nTimeLastStormnodeList = GetTime();
     nTimeLastPaymentVote = GetTime();
-    nTimeLastBudgetItem = GetTime();
+    nTimeLastGovernanceItem = GetTime();
     nTimeLastFailure = 0;
     nCountFailures = 0;
 }
@@ -96,7 +96,7 @@ void CStormnodeSync::SwitchToNextAsset()
             nRequestedStormnodeAssets = STORMNODE_SYNC_SNW;
             break;
         case(STORMNODE_SYNC_SNW):
-            nTimeLastBudgetItem = GetTime();
+            nTimeLastGovernanceItem = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_GOVERNANCE;
             break;
         case(STORMNODE_SYNC_GOVERNANCE):
@@ -374,7 +374,7 @@ void CStormnodeSync::ProcessTick()
                 LogPrint("snpayments", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastPaymentVote %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastPaymentVote, GetTime(), GetTime() - nTimeLastPaymentVote);
 
                 // check for timeout first
-                if(nTimeLastBudgetItem < GetTime() - STORMNODE_SYNC_TIMEOUT_SECONDS){
+                if(GetTime() - nTimeLastGovernanceItem > STORMNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- timeout\n", nTick, nRequestedStormnodeAssets);
                     if(nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
@@ -419,11 +419,4 @@ void CStormnodeSync::ProcessTick()
 void CStormnodeSync::UpdatedBlockTip(const CBlockIndex *pindex)
 {
     pCurrentBlockIndex = pindex;
-}
-
-
-void CStormnodeSync::AddedBudgetItem(uint256 hash)
-{
-    // skip this for now
-    return;
 }

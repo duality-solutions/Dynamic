@@ -20,7 +20,7 @@ static const int STORMNODE_SYNC_LIST            = 2;
 static const int STORMNODE_SYNC_SNW             = 3;
 static const int STORMNODE_SYNC_GOVERNANCE      = 4;
 static const int STORMNODE_SYNC_GOVOBJ          = 10;
-static const int STORMNODE_SYNC_GOVERNANCE_FIN  = 11;
+static const int STORMNODE_SYNC_GOVOBJ_VOTE     = 11;
 static const int STORMNODE_SYNC_FINISHED        = 999;
 
 static const int STORMNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
@@ -45,7 +45,7 @@ private:
     // Last time when we received some stormnode asset ...
     int64_t nTimeLastStormnodeList;
     int64_t nTimeLastPaymentVote;
-    int64_t nTimeLastBudgetItem;
+    int64_t nTimeLastGovernanceItem;
     // ... or failed
     int64_t nTimeLastFailure;
 
@@ -63,7 +63,7 @@ public:
 
     void AddedStormnodeList() { nTimeLastStormnodeList = GetTime(); }
     void AddedPaymentVote() { nTimeLastPaymentVote = GetTime(); }
-    void AddedBudgetItem(uint256 hash);
+    void AddedGovernanceItem() { nTimeLastGovernanceItem = GetTime(); };
 
     bool IsFailed() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FAILED; }
     bool IsBlockchainSynced();
