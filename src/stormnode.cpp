@@ -196,10 +196,6 @@ void CStormnode::Check(bool fForce)
         nHeight = chainActive.Height();
     }
 
-    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
-    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
-    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
-
     if(nActiveState == STORMNODE_POSE_BAN) {
         if(nHeight < nPoSeBanHeight) return; // too early?
         // Otherwise give it a chance to proceed further to do all the usual checks and to change its state.
@@ -239,6 +235,12 @@ void CStormnode::Check(bool fForce)
         nActiveState = STORMNODE_WATCHDOG_EXPIRED;
         return;
     }
+
+    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
+    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
+    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
+    // but if it was already expired before the check - don't wait, check it again now
+    if(nActiveState == STORMNODE_EXPIRED) fWaitForPing = false;
 
     if(!fWaitForPing && !IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
         nActiveState = STORMNODE_EXPIRED;
