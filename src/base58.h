@@ -167,7 +167,7 @@ public:
     CDarkSilkExtKeyBase() {}
 };
 
-typedef CDarkSilkExtKeyBase<CExtKey, 74, CChainParams::EXT_SECRET_KEY> CDarkSilkExtKey;
-typedef CDarkSilkExtKeyBase<CExtPubKey, 74, CChainParams::EXT_PUBLIC_KEY> CDarkSilkExtPubKey;
+typedef CDarkSilkExtKeyBase<CExtKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_SECRET_KEY> CDarkSilkExtKey;
+typedef CDarkSilkExtKeyBase<CExtPubKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_PUBLIC_KEY> CDarkSilkExtPubKey;
 
 #endif // DARKSILK_BASE58_H
