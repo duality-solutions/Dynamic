@@ -412,6 +412,8 @@ void CStormnodeSync::ProcessTick()
             }
         }
     }
+    // looped through all nodes, release them
+    ReleaseNodes(vNodesCopy);
 }
 
 void CStormnodeSync::UpdatedBlockTip(const CBlockIndex *pindex)
