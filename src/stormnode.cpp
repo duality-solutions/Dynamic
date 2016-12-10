@@ -211,6 +211,8 @@ void CStormnode::Check(bool fForce)
         return;
     }
 
+    int nActiveStatePrev = nActiveState;
+
                    // stormnode doesn't meet payment protocol requirements ...
     bool fRemove = nProtocolVersion < snpayments.GetMinStormnodePaymentsProto() ||
                    // or it's our own node and we just updated it to the new protocol but we are still waiting for activation ...
@@ -219,9 +221,11 @@ void CStormnode::Check(bool fForce)
     if(fRemove) {
         // it should be removed from the list
         nActiveState = STORMNODE_REMOVE;
-
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+            // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
@@ -233,6 +237,9 @@ void CStormnode::Check(bool fForce)
 
     if(fWatchdogExpired) {
         nActiveState = STORMNODE_WATCHDOG_EXPIRED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
@@ -244,17 +251,26 @@ void CStormnode::Check(bool fForce)
 
     if(!fWaitForPing && !IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
         nActiveState = STORMNODE_EXPIRED;
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+           // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
     if(lastPing.sigTime - sigTime < STORMNODE_MIN_SNP_SECONDS) {
         nActiveState = STORMNODE_PRE_ENABLED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
     nActiveState = STORMNODE_ENABLED; // OK
+    if(nActiveStatePrev != nActiveState) {
+        LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+    }
 }
 
 bool CStormnode::IsValidNetAddr()
