@@ -970,27 +970,19 @@ bool CStormnodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CS
     }
 
     CNode* pnode = ConnectNode(addr, NULL, true);
-    if(pnode != NULL) {
-        netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request");
-        // use random nonce, store it and require node to reply with correct one later
-        CStormnodeVerification snv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
-        mWeAskedForVerification[addr] = snv;
-        LogPrintf("CStormnodeMan::SendVerifyRequest -- verifying using nonce %d addr=%s\n", snv.nonce, addr.ToString());
-        pnode->PushMessage(NetMsgType::SNVERIFY, snv);
-        return true;
-    } else {
-        // can't connect, add some PoSe "ban score" to all stormnodes with given addr
-        bool fFound = false;
-        BOOST_FOREACH(CStormnode* psn, vSortedByAddr) {
-            if(psn->addr != addr) {
-                if(fFound) break;
-                continue;
-            }
-            fFound = true;
-            psn->IncreasePoSeBanScore();
-        }
+    if(pnode == NULL) {
+        LogPrintf("CStormnodeMan::SendVerifyRequest -- can't connect to node to verify it, addr=%s\n", addr.ToString());
         return false;
     }
+
+    netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request");
+    // use random nonce, store it and require node to reply with correct one later
+    CStormnodeVerification snv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
+    mWeAskedForVerification[addr] = snv;
+    LogPrintf("CStormnodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", snv.nonce, addr.ToString());
+    pnode->PushMessage(NetMsgType::SNVERIFY, snv);
+
+    return true;
 }
 
 void CStormnodeMan::SendVerifyReply(CNode* pnode, CStormnodeVerification& snv)

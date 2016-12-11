@@ -274,7 +274,7 @@ public:
 
     void UpdateLocalValidity(const CBlockIndex *pCurrentBlockIndex);
 
-    void UpdateSentinelVariables(const CBlockIndex *pCurrentBlockIndex);
+    void UpdateSentinelVariables();
 
     int GetObjectSubtype();
 
@@ -284,7 +284,7 @@ public:
 
     void Relay();
 
-    uint256 GetHash();
+    uint256 GetHash() const;
 
     // GET VOTE COUNT FOR SIGNAL
 
