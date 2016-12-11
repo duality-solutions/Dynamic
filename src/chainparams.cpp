@@ -116,7 +116,7 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("0000ffffff000000000000000000000000000000000000000000000000000000");
-        consensus.nPowTargetTimespan = 10 * 64; // DarkSilk: 12 hours
+        consensus.nPowTargetTimespan = 12 * 60 * 60; // DarkSilk: 12 hours
         consensus.nPowTargetSpacing = 1 * 64; // DarkSilk: 64 seconds
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
