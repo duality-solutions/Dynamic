@@ -42,7 +42,7 @@ CGovernanceManager::CGovernanceManager()
       mapVoteToObject(MAX_CACHE_SIZE),
       mapInvalidVotes(MAX_CACHE_SIZE),
       mapOrphanVotes(MAX_CACHE_SIZE),
-      mapLastStormnodeTrigger(),
+      mapLastStormnodeObject(),
       setRequestedObjects(),
       fRateChecksEnabled(true),
       cs()
@@ -172,6 +172,11 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
+        if(!StormnodeRateCheck(govobj, true)) {
+            LogPrintf("SNGOVERNANCEOBJECT -- stormnode rate check failed - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
+            return;
+        }
+
         std::string strError = "";
         // CHECK OBJECT AGAINST LOCAL BLOCKCHAIN
 
@@ -257,6 +262,7 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
     std::vector<vote_time_pair_t> vecVotePairs;
     mapOrphanVotes.GetAll(nHash, vecVotePairs);
 
+    fRateChecksEnabled = false;
     int64_t nNow = GetAdjustedTime();
     for(size_t i = 0; i < vecVotePairs.size(); ++i) {
         bool fRemove = false;
@@ -273,6 +279,7 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
             mapOrphanVotes.Erase(nHash, pairVote);
         }
     }
+    fRateChecksEnabled = true;
 }
 
 bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
@@ -308,13 +315,8 @@ bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
               << ", nObjectType = " << govobj.nObjectType
               << endl; );
 
-    if(govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) {
-        mapLastStormnodeTrigger[govobj.GetStormnodeVin().prevout] = nCachedBlockHeight;
-    }
-
     switch(govobj.nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
-        mapLastStormnodeTrigger[govobj.vinStormnode.prevout] = nCachedBlockHeight;
         DBG( cout << "CGovernanceManager::AddGovernanceObject Before AddNewTrigger" << endl; );
         triggerman.AddNewTrigger(nHash);
         DBG( cout << "CGovernanceManager::AddGovernanceObject After AddNewTrigger" << endl; );
@@ -684,32 +686,67 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
     LogPrintf("CGovernanceManager::Sync -- sent %d objects and %d votes to peer=%d\n", nObjCount, nVoteCount, pfrom->id);
 }
 
-bool CGovernanceManager::StormnodeRateCheck(const CTxIn& vin, int nObjectType)
+bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast)
 {
     LOCK(cs);
+
+    if(!stormnodeSync.IsSynced()) {
+        return true;
+    }
 
     if(!fRateChecksEnabled) {
         return true;
     }
 
-    int mindiff = 0;
+    int nObjectType = govobj.GetObjectType();
+    if((nObjectType != GOVERNANCE_OBJECT_TRIGGER) && (nObjectType != GOVERNANCE_OBJECT_WATCHDOG)) {
+        return true;
+    }
+
+    const CTxIn& vin = govobj.GetMasternodeVin();
+
+    txout_m_it it  = mapLastStormnodeObject.find(vin.prevout);
+
+    if(it == mapLastStormnodeObject.end()) {
+        if(fUpdateLast) {
+            it = mapLastStormnodeObject.insert(txout_m_t::value_type(vin.prevout, last_object_rec(0, 0))).first;
+            switch(nObjectType) {
+            case GOVERNANCE_OBJECT_TRIGGER:
+                it->second.nLastTriggerBlockHeight = nCachedBlockHeight;
+                break;
+            case GOVERNANCE_OBJECT_WATCHDOG:
+                it->second.nLastWatchdogBlockHeight = nCachedBlockHeight;
+                break;
+            default:
+                break;
+            }
+        }
+        return true;
+    }
+
+    int nMinDiff = 0;
+    int nObjectBlock = 0;
     switch(nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
-        mindiff = Params().GetConsensus().nSuperblockCycle - Params().GetConsensus().nSuperblockCycle / 10;
+        // Allow 1 trigger per mn per cycle, with a small fudge factor
+        nMinDiff = Params().GetConsensus().nSuperblockCycle - Params().GetConsensus().nSuperblockCycle / 10;
+        nObjectBlock = it->second.nLastTriggerBlockHeight;
+        if(fUpdateLast) {
+            it->second.nLastTriggerBlockHeight = nCachedBlockHeight;
+        }
         break;
     case GOVERNANCE_OBJECT_WATCHDOG:
-        mindiff = 1;
+        nMinDiff = 1;
+        nObjectBlock = it->second.nLastWatchdogBlockHeight;
+        if(fUpdateLast) {
+            it->second.nLastWatchdogBlockHeight = nCachedBlockHeight;
+        } 
         break;
     default:
         break;
     }
 
-    txout_m_it it  = mapLastStormnodeTrigger.find(vin.prevout);
-    if(it == mapLastStormnodeTrigger.end()) {
-        return true;
-    }
-    // Allow 1 trigger per sn per cycle, with a small fudge factor
-    if((nCachedBlockHeight - it->second) > mindiff) {
+    if((nCachedBlockHeight - nObjectBlock) > nMinDiff) {
         return true;
     }
 
