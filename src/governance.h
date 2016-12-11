@@ -50,6 +50,25 @@ class CGovernanceManager
 
 public: // Types
 
+    struct last_object_rec {
+        last_object_rec(int nLastTriggerBlockHeightIn = 0, int nLastWatchdogBlockHeightIn = 0)
+            : nLastTriggerBlockHeight(nLastTriggerBlockHeightIn),
+              nLastWatchdogBlockHeight(nLastWatchdogBlockHeightIn)
+            {}
+
+        ADD_SERIALIZE_METHODS;
+
+        template <typename Stream, typename Operation>
+        inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
+        {
+            READWRITE(nLastTriggerBlockHeight);
+            READWRITE(nLastWatchdogBlockHeight);
+        }
+
+        int nLastTriggerBlockHeight;
+        int nLastWatchdogBlockHeight;
+    };
+
     typedef std::map<uint256, CGovernanceObject> object_m_t;
 
     typedef object_m_t::iterator object_m_it;
@@ -76,7 +95,7 @@ public: // Types
 
     typedef object_m_t::size_type size_type;
 
-    typedef std::map<COutPoint, int> txout_m_t;
+    typedef std::map<COutPoint, last_object_rec > txout_m_t;
 
     typedef txout_m_t::iterator txout_m_it;
 
@@ -126,7 +145,7 @@ private:
 
     vote_mcache_t mapOrphanVotes;
 
-    txout_m_t mapLastStormnodeTrigger;
+    txout_m_t mapLastStormnodeObject;
 
     hash_s_t setRequestedObjects;
 
@@ -187,7 +206,7 @@ public:
         mapVoteToObject.Clear();
         mapInvalidVotes.Clear();
         mapOrphanVotes.Clear();
-        mapLastStormnodeTrigger.clear();
+        mapLastStormnodeObject.clear();
     }
 
     std::string ToString() const;
@@ -210,7 +229,7 @@ public:
         READWRITE(mapOrphanVotes);
         READWRITE(mapObjects);
         READWRITE(mapWatchdogObjects);
-        READWRITE(mapLastStormnodeTrigger);
+        READWRITE(mapLastStormnodeObject);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
             return;
@@ -236,10 +255,14 @@ public:
 
     void AddSeenVote(uint256 nHash, int status);
 
-    bool StormnodeRateCheck(const CTxIn& vin, int nObjectType);
+    bool StormnodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast = false);
 
-    bool ProcessVote(const CGovernanceVote& vote, CGovernanceException& exception) {
-        return ProcessVote(NULL, vote, exception);
+    bool ProcessVoteAndRelay(const CGovernanceVote& vote, CGovernanceException& exception) {
+        bool fOK = ProcessVote(NULL, vote, exception);
+        if(fOK) {
+            vote.Relay();
+        }
+        return fOK;
     }
 
     void CheckStormnodeOrphanVotes();

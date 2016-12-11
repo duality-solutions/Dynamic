@@ -196,10 +196,6 @@ void CStormnode::Check(bool fForce)
         nHeight = chainActive.Height();
     }
 
-    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
-    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
-    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
-
     if(nActiveState == STORMNODE_POSE_BAN) {
         if(nHeight < nPoSeBanHeight) return; // too early?
         // Otherwise give it a chance to proceed further to do all the usual checks and to change its state.
@@ -215,6 +211,8 @@ void CStormnode::Check(bool fForce)
         return;
     }
 
+    int nActiveStatePrev = nActiveState;
+
                    // stormnode doesn't meet payment protocol requirements ...
     bool fRemove = nProtocolVersion < snpayments.GetMinStormnodePaymentsProto() ||
                    // or it's our own node and we just updated it to the new protocol but we are still waiting for activation ...
@@ -223,9 +221,11 @@ void CStormnode::Check(bool fForce)
     if(fRemove) {
         // it should be removed from the list
         nActiveState = STORMNODE_REMOVE;
-
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+            // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
@@ -237,22 +237,40 @@ void CStormnode::Check(bool fForce)
 
     if(fWatchdogExpired) {
         nActiveState = STORMNODE_WATCHDOG_EXPIRED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
+    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
+    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
+    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
+    // but if it was already expired before the check - don't wait, check it again now
+    if(nActiveState == STORMNODE_EXPIRED) fWaitForPing = false;
+
     if(!fWaitForPing && !IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
         nActiveState = STORMNODE_EXPIRED;
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+           // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
     if(lastPing.sigTime - sigTime < STORMNODE_MIN_SNP_SECONDS) {
         nActiveState = STORMNODE_PRE_ENABLED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
     nActiveState = STORMNODE_ENABLED; // OK
+    if(nActiveStatePrev != nActiveState) {
+        LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+    }
 }
 
 bool CStormnode::IsValidNetAddr()

@@ -207,24 +207,13 @@ void CGovernanceTriggerManager::CleanAndRemove()
                 LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- Unknown or invalid trigger found\n");
                 remove = true;
                 break;
-            case SEEN_OBJECT_EXECUTED:
-                {
-                    LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- Executed trigger found\n");
-                    CGovernanceObject* pgovobj = pSuperblock->GetGovernanceObject();
-                    if(pgovobj) {
-                        LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- Expiring executed object: %s\n", pgovobj->GetHash().ToString());
-                        pgovobj->fExpired = true;
-                        pgovobj->nDeletionTime = GetAdjustedTime();
-                    }
-                }
-                remove = true;
-                break;
             case SEEN_OBJECT_IS_VALID:
+            case SEEN_OBJECT_EXECUTED:
                 {
                     int nTriggerBlock = pSuperblock->GetBlockStart();
                     // Rough approximation: a cycle of superblock ++
-                    int nExpirationBlock = nTriggerBlock + Params().GetConsensus().nSuperblockCycle + GOVERNANCE_FEE_CONFIRMATIONS; 
-                    LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- nTriggerBlock = %d, nExpriartionBlock = %d\n");
+                    int nExpirationBlock = nTriggerBlock + GOVERNANCE_TRIGGER_EXPIRATION_BLOCKS;
+                    LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- nTriggerBlock = %d, nExpirationBlock = %d\n", nTriggerBlock, nExpirationBlock);
                     if(governance.GetCachedBlockHeight() > nExpirationBlock) {
                         LogPrint("gobject", "CGovernanceTriggerManager::CleanAndRemove -- Outdated trigger found\n");
                         remove = true;
@@ -462,7 +451,6 @@ void CSuperblockManager::CreateSuperblock(CMutableTransaction& txNewRet, int nBl
             DBG( cout << "CSuperblockManager::CreateSuperblock Before LogPrintf call, nAmount = " << payment.nAmount << endl; );
             LogPrintf("NEW Superblock : output %d (addr %s, amount %d)\n", i, address2.ToString(), payment.nAmount);
             DBG( cout << "CSuperblockManager::CreateSuperblock After LogPrintf call " << endl; );
-            pSuperblock->SetExecuted();
         } else {
             DBG( cout << "CSuperblockManager::CreateSuperblock Payment not found " << endl; );
         }
@@ -685,8 +673,7 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount b
              nOutputs, nPayments, GetGovernanceObject()->GetDataAsHex());
 
     // We require an exact match (including order) between the expected
-    // superblock payments and the payments actually in the block, after
-    // skipping any initial miner payments.
+    // superblock payments and the payments actually in the block.
 
     if(nMinerPayments < 0) {
         // This means the block cannot have all the superblock payments
@@ -711,6 +698,7 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount b
         return false;
     }
 
+    int nVoutIndex = 0;
     for(int i = 0; i < nPayments; i++) {
         CGovernancePayment payment;
         if(!GetPayment(i, payment)) {
@@ -719,18 +707,26 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount b
             continue;
         }
 
-        int nVoutIndex = nMinerPayments + i;
+        bool fPaymentMatch = false;
 
-        bool fPaymentMatch = ((payment.script == txNew.vout[nVoutIndex].scriptPubKey) &&
-                              (payment.nAmount == txNew.vout[nVoutIndex].nValue));
+        for (int j = nVoutIndex; j < nOutputs; j++) {
+            // Find superblock payment
+            fPaymentMatch = ((payment.script == txNew.vout[j].scriptPubKey) &&
+                             (payment.nAmount == txNew.vout[j].nValue));
+
+            if (fPaymentMatch) {
+                nVoutIndex = j;
+                break;
+            }
+        }
 
         if(!fPaymentMatch) {
-            // MISMATCHED SUPERBLOCK OUTPUT!
+            // Superblock payment not found!
 
             CTxDestination address1;
             ExtractDestination(payment.script, address1);
             CDarkSilkAddress address2(address1);
-            LogPrintf("CSuperblock::IsValid -- ERROR: Block invalid: output n %d payment %d to %s\n", nVoutIndex, payment.nAmount, address2.ToString());
+            LogPrintf("CSuperblock::IsValid -- ERROR: Block invalid: %d payment %d to %s not found\n", i, payment.nAmount, address2.ToString());
 
             return false;
         }
