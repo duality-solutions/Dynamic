@@ -6666,7 +6666,8 @@ bool SendMessages(CNode* pto)
         if(!pto->mapAskFor.empty()) {
             nFirst = (*pto->mapAskFor.begin()).first;
         }
-        LogPrint("net", "SendMessages (mapAskFor) -- before loop: nNow = %d, nFirst = %d\n", nNow, nFirst);
+        // debug=1, seems to produce mostly this message
+        //LogPrint("net", "SendMessages (mapAskFor) -- before loop: nNow = %d, nFirst = %d\n", nNow, nFirst);
         while (!pto->fDisconnect && !pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
         {
             const CInv& inv = (*pto->mapAskFor.begin()).second;
