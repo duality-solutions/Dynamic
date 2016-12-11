@@ -703,7 +703,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         return true;
     }
 
-    const CTxIn& vin = govobj.GetMasternodeVin();
+    const CTxIn& vin = govobj.GetStormnodeVin();
 
     txout_m_it it  = mapLastStormnodeObject.find(vin.prevout);
 
@@ -751,7 +751,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
     }
 
     LogPrintf("CGovernanceManager::StormnodeRateCheck -- Rate too high: vin = %s, current height = %d, last SN height = %d, minimum difference = %d\n",
-              vin.prevout.ToStringShort(), nCachedBlockHeight, it->second, mindiff);
+              vin.prevout.ToStringShort(), nCachedBlockHeight, nObjectBlock, nMinDiff);
     return false;
 }
 
