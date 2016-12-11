@@ -59,7 +59,7 @@ CAmount MultisigInputEntry::getAmount()
     CAmount amount = 0;
     unsigned int nOutput = ui->transactionOutput->currentIndex();
     CTransaction tx;
-    uint256 blockHash = 0;
+    uint256 blockHash = uint256S("0");
 
     if(GetTransaction(txHash, tx, Params().GetConsensus(), blockHash))
     {
@@ -117,7 +117,7 @@ void MultisigInputEntry::on_transactionId_textChanged(const QString &transaction
     // Make list of transaction outputs
     txHash.SetHex(transactionId.toStdString().c_str());
     CTransaction tx;
-    uint256 blockHash = 0;
+    uint256 blockHash = uint256S("0");
     if(!GetTransaction(txHash, tx, Params().GetConsensus(), blockHash))
         return;
     for(unsigned int i = 0; i < tx.vout.size(); i++)
@@ -147,7 +147,7 @@ void MultisigInputEntry::on_transactionOutput_currentIndexChanged(int index)
         return;
 
     CTransaction tx;
-    uint256 blockHash = 0;
+    uint256 blockHash = uint256S("0");
     if(!GetTransaction(txHash, tx, Params().GetConsensus(), blockHash))
         return;
     const CTxOut& txOut = tx.vout[index];

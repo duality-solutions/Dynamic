@@ -593,7 +593,7 @@ void MultisigDialog::on_sendTransactionButton_clicked()
 
     // Check if the transaction is already in the blockchain
     CTransaction existingTx;
-    uint256 blockHash = 0;
+uint256 blockHash = uint256S("0");
     if(GetTransaction(txHash, existingTx, Params().GetConsensus(), blockHash))
     {
         if(blockHash != 0)
