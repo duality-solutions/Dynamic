@@ -1,15 +1,21 @@
 // Copyright (c) 2009-2016 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Developers
-// Copyright (c) 2015-2016 Silk Network Developers
+// Copyright (c) 2011-2016 Namecoin Developers
+// Copyright (c) 2013-2016 Emercoin Developers
+// Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+
 #include "dns.h"
+#include "keystore.h"
 #include "script/interpreter.h"
 #include "script/script.h"
 #include "script/sign.h"
-#include "wallet.h"
+#include "policy/policy.h"
+#include "wallet/wallet.h"
 #include "rpcserver.h"
+#include "txmempool.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -225,7 +231,7 @@ CHooks* InitHook()
 bool IsNameFeeEnough(const CTransaction& tx, const NameTxInfo& nti, const CBlockIndex* pindexBlock, const CAmount& txFee)
 {
     // scan last 10 PoW block for tx fee that matches the one specified in tx
-    const CBlockIndex* lastPoW = GetLastBlockIndex(pindexBlock, false);
+    const CBlockIndex* lastPoW = GetLastBlockIndex(pindexBlock);
     //LogPrintf("IsNameFeeEnough(): pindexBlock->nHeight = %d, op = %s, nameSize = %lu, valueSize = %lu, nRentalDays = %d, txFee = %"PRI64d"\n",
     //       lastPoW->nHeight, nameFromOp(nti.op), nti.name.size(), nti.value.size(), nti.nRentalDays, txFee);
     bool txFeePass = false;
@@ -238,7 +244,7 @@ bool IsNameFeeEnough(const CTransaction& tx, const NameTxInfo& nti, const CBlock
             txFeePass = true;
             break;
         }
-        lastPoW = GetLastBlockIndex(lastPoW->pprev, false);
+        lastPoW = GetLastBlockIndex(lastPoW->pprev);
     }
     return txFeePass;
 }
@@ -298,7 +304,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     CNameVal name = nameValFromValue(params[0]);
     CAmount nAmount = AmountFromValue(params[1]);
@@ -311,7 +317,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
         wtx.mapValue["to"]      = params[3].get_str();
 
     string error;
-    CSilkAddress address;
+    CDarkSilkAddress address;
     if (!GetNameCurrentAddress(name, address, error))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, error);
 
@@ -323,7 +329,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
     return res;
 }
 
-bool GetNameCurrentAddress(const CNameVal& name, CSilkAddress& address, string& error)
+bool GetNameCurrentAddress(const CNameVal& name, CDarkSilkAddress& address, string& error)
 {
     CNameDB dbName("r");
     if (!dbName.ExistsName(name))
@@ -373,7 +379,7 @@ UniValue name_list(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     CNameVal nameUniq;
     if (params.size() == 1)
@@ -445,6 +451,7 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
         if (!item.second.size())
             continue;
 
+        // TODO (Amir) DDNS, test to see if we can use nLockTime instead of nTime.
         // if there is a set of pending op on a single name - select last one, by nTime
         CTransaction tx;
         uint32_t nTime = 0;
@@ -453,10 +460,10 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
         {
             if (!mempool.exists(hash))
                 continue;
-            if (mempool.mapTx.find(hash)->GetTx().nTime > nTime)
+            if (mempool.mapTx.find(hash)->GetTx().nLockTime > nTime)
             {
                 tx = mempool.mapTx.find(hash)->GetTx();
-                nTime = tx.nTime;
+                nTime = tx.nLockTime;
                 found = true;
             }
         }
@@ -514,7 +521,7 @@ UniValue name_show(const UniValue& params, bool fHelp)
             );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     UniValue oName(UniValue::VOBJ);
     CNameVal name = nameValFromValue(params[0]);
@@ -544,7 +551,7 @@ UniValue name_show(const UniValue& params, bool fHelp)
         oName.push_back(Pair("address", nti.strAddress));
         oName.push_back(Pair("expires_in", nameRec.nExpiresAt - chainActive.Height()));
         oName.push_back(Pair("expires_at", nameRec.nExpiresAt));
-        oName.push_back(Pair("time", (boost::int64_t)tx.nTime));
+        oName.push_back(Pair("time", (boost::int64_t)tx.nLockTime));
         if (nameRec.deleted())
             oName.push_back(Pair("deleted", true));
         else
@@ -595,7 +602,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
         );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     CNameVal name = nameValFromValue(params[0]);
     bool fFullHistory = false;
@@ -629,7 +636,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
 
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("txid",             tx.GetHash().ToString()));
-        obj.push_back(Pair("time",             (boost::int64_t)tx.nTime));
+        obj.push_back(Pair("time",             (boost::int64_t)tx.nLockTime));
         obj.push_back(Pair("height",           nameRec.vtxPos[i].nHeight));
         obj.push_back(Pair("address",          nti.strAddress));
         if (nti.fIsMine)
@@ -687,7 +694,7 @@ UniValue name_mempool (const UniValue& params, bool fHelp)
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("name",             sName));
             obj.push_back(Pair("txid",             hash.ToString()));
-            obj.push_back(Pair("time",             (boost::int64_t)tx.nTime));
+            obj.push_back(Pair("time",             (boost::int64_t)tx.nLockTime));
             obj.push_back(Pair("address",          nti.strAddress));
             if (nti.fIsMine)
                 obj.push_back(Pair("address_is_mine",  "true"));
@@ -727,7 +734,7 @@ UniValue name_filter(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     string strRegexp;
     int nFrom = 0;
@@ -850,7 +857,7 @@ UniValue name_scan(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Silk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     CNameVal name;
     string strSearchName = "";
@@ -950,12 +957,6 @@ bool IsWalletLocked(NameTxReturn& ret)
     {
         ret.err_code = RPC_WALLET_UNLOCK_NEEDED;
         ret.err_msg = "Error: Please enter the wallet passphrase with walletpassphrase first.";
-        return true;
-    }
-    if (fWalletUnlockMintOnly)
-    {
-        ret.err_code = RPC_WALLET_UNLOCK_NEEDED;
-        ret.err_msg = "Error: Wallet unlocked for block staking only, unable to create transaction.";
         return true;
     }
     return false;
@@ -1096,7 +1097,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     if (IsInitialBlockDownload())
     {
         ret.err_code = RPC_CLIENT_IN_INITIAL_DOWNLOAD;
-        ret.err_msg = "Silk is downloading blocks...";
+        ret.err_msg = "DarkSilk is downloading blocks...";
         return ret;
     }
 
@@ -1191,11 +1192,11 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         // add destination to namescript
         if ((op == OP_NAME_UPDATE || op == OP_NAME_NEW || op == OP_NAME_MULTISIG) && strAddress != "")
         {
-            CSilkAddress address(strAddress);
+            CDarkSilkAddress address(strAddress);
             if (!address.IsValid())
             {
                 ret.err_code = RPC_INVALID_ADDRESS_OR_KEY;
-                ret.err_msg = "Silk address is invalid";
+                ret.err_msg = "DarkSilk address is invalid";
                 return ret;
             }
             scriptPubKey = GetScriptForDestination(address.Get());
@@ -1233,7 +1234,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     CTxDestination address;
     if (ExtractDestination(scriptPubKey, address))
     {
-        ret.address = CSilkAddress(address).ToString();
+        ret.address = CDarkSilkAddress(address).ToString();
     }
 
     ret.hex = wtx.GetHash();
@@ -1245,7 +1246,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
 bool createNameIndexFile()
 {
     LogPrintf("Scanning blockchain for names to create fast index...\n");
-    CNameDB dbName("cr+");
+    CNameDB dbName("ddns.dat");
 
     if (!fTxIndex)
         return error("createNameIndexFile() : transaction index not available");
@@ -1264,7 +1265,7 @@ bool createNameIndexFile()
         for (unsigned int i=0; i<block.vtx.size(); i++)
         {
             const CTransaction& tx = block.vtx[i];
-            if (tx.IsCoinStake() || tx.IsCoinBase())
+            if (tx.IsCoinBase())
             {
                 pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);  // set next tx position
                 continue;
@@ -1275,8 +1276,8 @@ bool createNameIndexFile()
             BOOST_FOREACH(const CTxIn& txin, tx.vin)
             {
                 CTransaction txPrev;
-                uint256 hashBlock = 0;
-                if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock))
+                uint256 hashBlock = uint256S("0");
+                if (!GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true))
                     return error("createNameIndexFile() : prev transaction not found");
 
                 input += txPrev.vout[txin.prevout.n].nValue;
@@ -1301,12 +1302,11 @@ bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndI
         return false;
 
     bool found = false;
-    CScript::const_iterator pc;
     for (unsigned int i = 0; i < tx.vout.size(); i++)
     {
         const CTxOut& out = tx.vout[i];
         NameTxInfo ntiTmp;
-        pc = out.scriptPubKey.begin();
+        CScript::const_iterator pc = out.scriptPubKey.begin();
         if (DecodeNameScript(out.scriptPubKey, ntiTmp, pc))
         {
             // If more than one name op, fail
@@ -1323,7 +1323,7 @@ bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndI
                 CScript scriptPubKey(pc, out.scriptPubKey.end());
                 if (!ExtractDestination(scriptPubKey, address))
                     nti.strAddress = "";
-                nti.strAddress = CSilkAddress(address).ToString();
+                nti.strAddress = CDarkSilkAddress(address).ToString();
 
                 // check if this is mine destination
                 nti.fIsMine = IsMine(*pwalletMain, address) == ISMINE_SPENDABLE;
@@ -1499,7 +1499,7 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     txPos2.txPos = pos;
 
     nameTempProxy tmp;
-    tmp.nTime = tx.nTime;
+    tmp.nTime = tx.nLockTime;
     tmp.name = name;
     tmp.op = nti.op;
     tmp.hash = tx.GetHash();

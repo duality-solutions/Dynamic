@@ -64,6 +64,7 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
             return ISMINE_SPENDABLE;
         break;
     case TX_SCRIPTHASH:
+    case TX_NAME:
     {
         CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
         CScript subscript;

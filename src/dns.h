@@ -5,18 +5,19 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef NAMECOIN_H
-#define NAMECOIN_H
+#ifndef DNS_H
+#define DNS_H
 
-#include "db.h"
+#include "amount.h"
 #include "base58.h"
 #include "hooks.h"
 #include "main.h"
 #include "rpcprotocol.h"
+#include "wallet/db.h"
 
 static const unsigned int NAMEINDEX_CHAIN_SIZE = 1000;
 static const int RELEASE_HEIGHT = 1<<16;
-static const unsigned int NAME_REGISTRATION_DAILY_FEE = 1000000; // Current set to 0.3 SLK per month or 3.65 SLK per year.
+static const unsigned int NAME_REGISTRATION_DAILY_FEE = 100000; //  Current set to 0.03 DSLK per month or .36525 DSLK per year.
 
 class CNameIndex
 {
@@ -71,7 +72,9 @@ public:
 class CNameDB : public CDB
 {
 public:
-    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode) {}
+    CNameDB(const char* pszMode = "r+") : CDB(pszMode, "ddns.dat")
+    {
+    }
 
     bool WriteName(const CNameVal& name, const CNameRecord& rec)
     {
@@ -104,15 +107,17 @@ public:
 extern std::map<CNameVal, std::set<uint256> > mapNamePending;
 
 int IndexOfNameOutput(const CTransaction& tx);
-bool GetNameCurrentAddress(const CNameVal& name, CSilkAddress& address, std::string& error);
+bool GetNameCurrentAddress(const CNameVal& name, CDarkSilkAddress& address, std::string& error);
 CNameVal nameValFromString(const std::string& str);
 std::string stringFromOp(int op);
 
 CAmount GetNameOpFee(const unsigned int& nRentalDays, const int& op);
 
+
 bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndIfIsMine = false);
 void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNames, std::map<CNameVal, NameTxInfo>& mapPending);
 bool GetNameValue(const CNameVal& name, CNameVal& value);
+class CKeyStore;
 bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType=SIGHASH_ALL);
 std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress);
 
@@ -136,4 +141,4 @@ struct nameTempProxy
     CNameIndex ind;
 };
 
-#endif
+#endif //DNS_H

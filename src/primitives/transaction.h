@@ -20,8 +20,7 @@
 static const int NAMECOIN_TX_VERSION = 0x1030; //0x1035 is rfc1035, our initial version is 1030.
 typedef std::vector<unsigned char> CNameVal;
 struct NameTxInfo
-{
-    // TODO (Amir) Add type to NameTxInfo.  
+{ 
     CNameVal name;
     CNameVal value;
     int nRentalDays;
@@ -238,7 +237,7 @@ public:
 };
 
 struct CMutableTransaction;
-
+struct CDiskTxPos;
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
@@ -308,7 +307,9 @@ public:
 
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-
+    // Used for DDNS
+    bool ReadFromDisk(const CDiskTxPos& postx);
+    
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
