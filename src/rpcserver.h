@@ -304,4 +304,5 @@ void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
 
+CAmount AmountFromValue(const UniValue& value);
 #endif // DARKSILK_RPCSERVER_H

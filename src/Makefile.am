@@ -182,7 +182,10 @@ DARKSILK_CORE_H = \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
-  zmq/zmqpublishnotifier.h
+  zmq/zmqpublishnotifier.h \
+  dns.h \
+  hooks.h \
+  dslkdns.h 
 
 
 obj/build.h: FORCE
@@ -234,6 +237,8 @@ libdarksilk_server_a_SOURCES = \
   txmempool.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  dns.cpp \
+  dslkdns.cpp \
   $(DARKSILK_CORE_H)
 
 if ENABLE_ZMQ

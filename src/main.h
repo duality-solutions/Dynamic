@@ -133,6 +133,7 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
 static const CAmount STATIC_POW_REWARD = COIN * 1;
 static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
 static const CAmount STATIC_STORMNODE_PAYMENT = COIN * 0.382;
+static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 struct BlockHasher
 {
@@ -729,6 +730,7 @@ bool GetAddressUnspent(uint160 addressHash, int type,
 bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
+bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex);
 
 /** Functions for validating blocks and updating the block tree */
 

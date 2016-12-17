@@ -5,13 +5,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SLKDNS_H
-#define SLKDNS_H
+#ifndef DSLKDNS_H
+#define DSLKDNS_H
 
 #include <boost/thread.hpp>
 
-#define SLKDNS_DAPSIZE     (8 * 1024)
-#define SLKDNS_DAPTRESHOLD 300 // 20K/min limit answer
+#define DSLKDNS_DAPSIZE     (8 * 1024)
+#define DSLKDNS_DAPTRESHOLD 300 // 20K/min limit answer
 
 struct DNSHeader {
   static const uint32_t QR_MASK = 0x8000;
@@ -41,11 +41,11 @@ struct DNSAP {		// DNS Amplifier Protector ExpDecay structure
   uint16_t ed_size;	// ExpDecay output size in 64-byte units
 } __attribute__((packed));
 
-class SlkDns {
+class DslkDns {
   public:
-     SlkDns(const char *bind_ip, uint16_t port_no,
+     DslkDns(const char *bind_ip, uint16_t port_no,
 	    const char *gw_suffix, const char *allowed_suff, const char *local_fname, uint8_t verbose);
-    ~SlkDns();
+    ~DslkDns();
 
     void Run();
 
@@ -90,7 +90,7 @@ class SlkDns {
     socklen_t m_addrLen;
 
     boost::thread m_thread;
-}; // class SlkDns
+}; // class DslkDns
 
-#endif // SLKDNS_H
+#endif // DSLKDNS_H
 

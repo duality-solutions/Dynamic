@@ -1240,10 +1240,13 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror, const bool fDDNS)
 {
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 
+    // DarkSilk: for backward compatability ddns script should not be checked for minimaldata
+    if (fDDNS)
+        flags &= ~SCRIPT_VERIFY_MINIMALDATA;
     if ((flags & SCRIPT_VERIFY_SIGPUSHONLY) != 0 && !scriptSig.IsPushOnly()) {
         return set_error(serror, SCRIPT_ERR_SIG_PUSHONLY);
     }
