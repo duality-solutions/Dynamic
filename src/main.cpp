@@ -44,7 +44,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
-#include "dns.h"
+#include "dns/dns.h"
 
 #include <sstream>
 

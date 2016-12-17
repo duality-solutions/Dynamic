@@ -54,8 +54,8 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
-#include "dslkdns.h"
-#include "hooks.h"
+#include "dns/dslkdns.h"
+#include "dns/hooks.h"
 #include <stdint.h>
 #include <stdio.h>
 

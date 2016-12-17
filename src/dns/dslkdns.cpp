@@ -42,10 +42,10 @@
 
 #include <ctype.h>
 
-#include "dns.h"
+#include "dns/dns.h"
 #include "util.h"
-#include "dslkdns.h"
-#include "hooks.h"
+#include "dns/dslkdns.h"
+#include "dns/hooks.h"
 
 /*---------------------------------------------------*/
 

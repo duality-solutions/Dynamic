@@ -10,7 +10,7 @@
 
 #include "walletmodel.h"
 #include "nametablemodel.h"
-#include "../dns.h"
+#include "../dns/dns.h"
 #include "csvmodelwriter.h"
 #include "guiutil.h"
 #include "../base58.h"
