@@ -1246,8 +1246,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
 bool createNameIndexFile()
 {
     LogPrintf("Scanning blockchain for names to create fast index...\n");
-    CNameDB dbName("ddns.dat");
-
+    CNameDB dbName();
     if (!fTxIndex)
         return error("createNameIndexFile() : transaction index not available");
 
