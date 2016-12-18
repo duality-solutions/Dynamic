@@ -197,6 +197,17 @@ extern UniValue importpubkey(const UniValue& params, bool fHelp);
 extern UniValue dumpwallet(const UniValue& params, bool fHelp);
 extern UniValue importwallet(const UniValue& params, bool fHelp);
 
+extern UniValue name_scan(const UniValue& params, bool fHelp); // for DDNS
+extern UniValue name_filter(const UniValue& params, bool fHelp);
+extern UniValue name_show(const UniValue& params, bool fHelp);
+extern UniValue name_history(const UniValue& params, bool fHelp);
+extern UniValue name_mempool(const UniValue& params, bool fHelp);
+extern UniValue name_new(const UniValue& params, bool fHelp);
+extern UniValue name_update(const UniValue& params, bool fHelp);
+extern UniValue name_delete(const UniValue& params, bool fHelp);
+extern UniValue name_list(const UniValue& params, bool fHelp);
+extern UniValue name_debug(const UniValue& params, bool fHelp);
+
 extern UniValue getgenerate(const UniValue& params, bool fHelp); // in rpcmining.cpp
 extern UniValue setgenerate(const UniValue& params, bool fHelp);
 extern UniValue getwork(const UniValue& params, bool fHelp);
