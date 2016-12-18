@@ -9,13 +9,13 @@
 #include "ui_dnspage.h"
 
 #include "walletmodel.h"
-#include "nametablemodel.h"
-#include "../dns.h"
+#include "dnstablemodel.h"
+#include "../dns/dns.h"
 #include "csvmodelwriter.h"
 #include "guiutil.h"
 #include "../base58.h"
 #include "../main.h"
-#include "../wallet.h"
+#include "../wallet/wallet.h"
 #include "guiconstants.h"
 #include "ui_interface.h"
 
@@ -24,7 +24,9 @@
 #include <QMenu>
 #include <QScrollBar>
 #include <QFileDialog>
-
+#include <QAbstractItemDelegate>
+#include <QPainter>
+#include <QSettings>
 //
 // NameFilterProxyModel
 //
