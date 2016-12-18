@@ -10,7 +10,7 @@
 
 #include "amount.h"
 #include "base58.h"
-#include "hooks.h"
+#include "dns/hooks.h"
 #include "main.h"
 #include "rpcprotocol.h"
 #include "wallet/db.h"
@@ -43,7 +43,7 @@ public:
     }
 };
 
-// CNameRecord is all the data that is saved (in nameindex.dat) with associated name
+// CNameRecord is all the data that is saved (in ddns.dat) with associated name
 class CNameRecord
 {
 public:
