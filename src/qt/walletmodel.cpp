@@ -17,6 +17,7 @@
 #include "base58.h"
 #include "sandstorm.h"
 #include "keystore.h"
+#include "dnstablemodel.h"
 #include "main.h"
 #include "sync.h"
 #include "ui_interface.h"
@@ -733,4 +734,9 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
 bool WalletModel::hdEnabled() const
 {
     return wallet->IsHDEnabled();
+}
+
+NameTableModel *WalletModel::getNameTableModel()
+{
+    return nameTableModel;
 }

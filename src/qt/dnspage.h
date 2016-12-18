@@ -63,14 +63,14 @@ private:
     NameFilterProxyModel *proxyModel;
     QMenu *contextMenu;
 
-public slots:
+public Q_SLOTS:
     void exportClicked();
 
     void changedNameFilter(const QString &filter);
     void changedValueFilter(const QString &filter);
     void changedAddressFilter(const QString &filter);
 
-private slots:
+private Q_SLOTS:
     void on_submitNameButton_clicked();
 
     bool eventFilter(QObject *object, QEvent *event);

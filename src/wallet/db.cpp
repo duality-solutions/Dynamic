@@ -315,7 +315,7 @@ CDB::CDB(const std::string& strFilename, const char* pszMode, bool fFlushOnClose
                 DbMpoolFile* mpf = pdb->get_mpf();
                 ret = mpf->set_flags(DB_MPOOL_NOFILE, 1);
                 if (ret != 0)
-                    throw runtime_error(strprintf("CDB: Failed to configure for no temp file backing for database %s", strFile));
+                    throw runtime_error(strprintf("CDB: Failed to configure for no temp file bScanNamesacking for database %s", strFile));
             }
 
             ret = pdb->open(NULL,                               // Txn pointer
