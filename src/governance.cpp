@@ -3,25 +3,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "core_io.h"
-#include "main.h"
-#include "init.h"
-
-#include "flat-database.h"
+#include "sandstorm.h"
 #include "governance.h"
 #include "governance-vote.h"
 #include "governance-classes.h"
+#include "main.h"
 #include "stormnode.h"
 #include "governance.h"
-#include "governance-object.h"
-#include "sandstorm.h"
-#include "stormnodeman.h"
 #include "stormnode-sync.h"
+#include "stormnodeman.h"
 #include "netfulfilledman.h"
 #include "util.h"
-#include "addrman.h"
-#include <boost/lexical_cast.hpp>
-#include <univalue.h>
 
 CGovernanceManager governance;
 

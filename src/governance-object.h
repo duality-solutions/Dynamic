@@ -8,27 +8,17 @@
 
 //#define ENABLE_DARKSILK_DEBUG
 
-#include "util.h"
-#include "main.h"
-#include "sync.h"
-#include "net.h"
-#include "key.h"
-#include "util.h"
-#include "base58.h"
-#include "stormnode.h"
+#include "cachemultimap.h"
+
 #include "governance-exceptions.h"
 #include "governance-vote.h"
 #include "governance-votedb.h"
-#include "stormnodeman.h"
-#include <boost/lexical_cast.hpp>
-#include "init.h"
-#include <univalue.h>
-#include "utilstrencodings.h"
-#include "cachemap.h"
-#include "cachemultimap.h"
+#include "key.h"
+#include "net.h"
+#include "sync.h"
+#include "util.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <univalue.h>
 
 class CGovernanceManager;
 class CGovernanceTriggerManager;

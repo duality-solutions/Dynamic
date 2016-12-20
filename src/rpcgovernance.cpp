@@ -7,29 +7,22 @@
 
 //#define ENABLE_DARKSILK_DEBUG
 
-#include "util.h"
-#include "main.h"
-#include "db.h"
-#include "init.h"
 #include "activestormnode.h"
 #include "sandstorm.h"
 #include "governance.h"
+#include "governance-vote.h"
+#include "governance-classes.h"
+#include "init.h"
+#include "main.h"
 #include "stormnode.h"
-#include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
 #include "rpcserver.h"
+#include "util.h"
 #include "utilmoneystr.h"
-#include "governance-vote.h"
-#include "governance-classes.h"
+
 #include <boost/lexical_cast.hpp>
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-
-using namespace std;
 
 UniValue gobject(const UniValue& params, bool fHelp)
 {
