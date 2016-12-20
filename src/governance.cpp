@@ -744,13 +744,13 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
 
     if(it == mapLastStormnodeObject.end()) {
         if(fUpdateLast) {
-            it = mapLastStormnodeObject.insert(txout_m_t::value_type(vin.prevout, last_object_rec(0, 0, true))).first;
+            it = mapLastStormnodeObject.insert(txout_m_t::value_type(vin.prevout, last_object_rec(true))).first;
             switch(nObjectType) {
             case GOVERNANCE_OBJECT_TRIGGER:
-                it->second.nLastTriggerTime = std::max(it->second.nLastTriggerTime, nTimestamp);
+                it->second.triggerBuffer.AddTimestamp(nTimestamp);
                 break;
             case GOVERNANCE_OBJECT_WATCHDOG:
-                it->second.nLastWatchdogTime = std::max(it->second.nLastWatchdogTime, nTimestamp);
+                it->second.watchdogBuffer.AddTimestamp(nTimestamp);
                 break;
             default:
                 break;
@@ -772,35 +772,38 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         return false;
     }
 
-    if(nTimestamp > nNow + 2 * nSuperblockCycleSeconds) {
+    if(nTimestamp > nNow + 60*60) {
         LogPrintf("CGovernanceManager::StormnodeRateCheck -- object %s rejected due to too new (future) timestamp, stormnode vin = %s, timestamp = %d, current time = %d\n",
                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
         return false;
     }
 
-    int64_t nMinDiff = 0;
-    int64_t nLastObjectTime = 0;
-    switch(nObjectType) {
+    double dMaxRate = 1.1 / nSuperblockCycleSeconds;
+    double dRate = 0.0;
+    CRateCheckBuffer buffer;    switch(nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
         // Allow 1 trigger per mn per cycle, with a small fudge factor
-        nMinDiff = int64_t(0.9 * nSuperblockCycleSeconds);
-        nLastObjectTime = it->second.nLastTriggerTime;
-        if(fUpdateLast) {
-            it->second.nLastTriggerTime = std::max(it->second.nLastTriggerTime, nTimestamp);
+        dMaxRate = 1.1 / nSuperblockCycleSeconds;
+        buffer = it->second.triggerBuffer;
+        buffer.AddTimestamp(nTimestamp);
+        dRate = buffer.GetRate();        if(fUpdateLast) {
+            it->second.triggerBuffer.AddTimestamp(nTimestamp);
         }
         break;
     case GOVERNANCE_OBJECT_WATCHDOG:
-        nMinDiff = Params().GetConsensus().nPowTargetSpacing;
-        nLastObjectTime = it->second.nLastWatchdogTime;
+        dMaxRate = 1.1 / 3600.;
+        buffer = it->second.watchdogBuffer;
+        buffer.AddTimestamp(nTimestamp);
+        dRate = buffer.GetRate();
         if(fUpdateLast) {
-            it->second.nLastWatchdogTime = std::max(it->second.nLastWatchdogTime, nTimestamp);
+            it->second.watchdogBuffer.AddTimestamp(nTimestamp);
         } 
         break;
     default:
         break;
     }
 
-    if((nTimestamp - nLastObjectTime) > nMinDiff) {
+    if(dRate < dMaxRate) {
         if(fUpdateLast) {
             it->second.fStatusOK = true;
         }
@@ -812,8 +815,8 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         }
     }
 
-    LogPrintf("CGovernanceManager::StormnodeRateCheck -- Rate too high: object hash = %s, stormnode vin = %s, object timestamp = %d, last timestamp = %d, minimum difference = %d\n",
-              strHash, vin.prevout.ToStringShort(), nTimestamp, nLastObjectTime, nMinDiff);
+    LogPrintf("CGovernanceManager::StormnodeRateCheck -- Rate too high: object hash = %s, stormnode vin = %s, object timestamp = %d, rate = %f, max rate = %f\n",
+              strHash, vin.prevout.ToStringShort(), nTimestamp, dRate, dMaxRate);
     return false;
 }
 
