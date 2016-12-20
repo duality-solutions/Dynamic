@@ -781,15 +781,15 @@ void CSandstormPool::CheckTimeout()
         TRY_LOCK(cs_sandstorm, lockSS);
         if(!lockSS) return; // it's ok to fail here, we run this quite frequently
 
-        // check mixing queue objects for timeouts
-        std::vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
-            it = vecSandstormQueue.erase(it);
-        while(it != vecSandstormQueue.end()) {
-            if((*it).IsExpired()) {
-                LogPrint("privatesend", "CSandstormPool::CheckTimeout -- Removing expired queue (%s)\n", (*it).ToString());
-                it = vecSandstormQueue.erase(it);
-            } else ++it;
-        }
+       int c = 0;
+       vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
+       while(it != vecSandstormQueue.end()){
+           if((*it).IsExpired()){
+               LogPrint("privatesend", "CSandstormPool::CheckTimeout() : Removing expired queue entry - %d\n", c);
+               it = vecSandstormQueue.erase(it);
+           } else ++it;
+           c++;
+       }
     }
 
     if(!fEnablePrivateSend && !fStormNode) return;
