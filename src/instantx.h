@@ -6,26 +6,13 @@
 #ifndef INSTANTX_H
 #define INSTANTX_H
 
-#include "sync.h"
 #include "net.h"
-#include "key.h"
-#include "util.h"
-#include "base58.h"
-#include "main.h"
+#include "primitives/transaction.h"
 
 class CTransaction;
 class CTxLockVote;
 class CTxLockCandidate;
 
-/*
-    At 15 signatures, 1/2 of the stormnode network can be owned by
-    one party without comprimising the security of InstantSend
-    (1000/2150.0)**10 = 0.00047382219560689856
-    (1000/2900.0)**10 = 2.3769498616783657e-05
-
-    ### getting 5 of 10 signatures w/ 1000 nodes of 2900
-    (1000/2900.0)**5 = 0.004875397277841433
-*/
 static const int INSTANTSEND_SIGNATURES_REQUIRED    = 10;
 static const int INSTANTSEND_SIGNATURES_TOTAL       = 20;
 static const int DEFAULT_INSTANTSEND_DEPTH          = 10;

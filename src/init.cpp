@@ -35,27 +35,34 @@
 #include "torcontrol.h"
 #include "ui_interface.h"
 #include "util.h"
-#include "activestormnode.h"
-#include "instantx.h"
-#include "sandstorm.h"
-#include "stormnode-payments.h"
-#include "stormnode-sync.h"
-#include "stormnodeman.h"
-#include "stormnodeconfig.h"
-#include "flat-database.h"
-#include "governance.h"
-#include "spork.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #ifdef ENABLE_WALLET
-#include "keepass.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
+
+#include "activestormnode.h"
+#include "sandstorm.h"
+#include "ssnotificationinterface.h"
+#include "flat-database.h"
+#include "governance.h"
+#include "instantx.h"
+#ifdef ENABLE_WALLET
+#include "keepass.h"
+#endif
+#include "stormnode-payments.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
+#include "stormnodeconfig.h"
+#include "netfulfilledman.h"
+#include "spork.h"
+
 #include "dns/dslkdns.h"
 #include "dns/hooks.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -77,8 +84,6 @@
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
 #endif
-
-#include "ssnotificationinterface.h"
 
 using namespace std;
 
@@ -793,6 +798,12 @@ void InitParameterInteraction()
     if (mapArgs.count("-whitebind")) {
         if (SoftSetBoolArg("-listen", true))
             LogPrintf("%s: parameter interaction: -whitebind set -> setting -listen=1\n", __func__);
+    }
+
+    if (GetBoolArg("-stormnode", false)) {
+        // stormnodes must accept connections from outside
+        if (SoftSetBoolArg("-listen", true))
+            LogPrintf("%s: parameter interaction: -stormnode=1 -> setting -listen=1\n", __func__);
     }
 
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0) {

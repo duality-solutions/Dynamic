@@ -18,12 +18,6 @@
 #include "consensus/validation.h"
 #include "hash.h"
 #include "init.h"
-#include "instantx.h"
-#include "sandstorm.h"
-#include "governance.h"
-#include "stormnode-payments.h"
-#include "stormnode-sync.h"
-#include "stormnodeman.h"
 #include "merkleblock.h"
 #include "net.h"
 #include "policy/policy.h"
@@ -45,6 +39,13 @@
 #include "validationinterface.h"
 #include "versionbits.h"
 #include "dns/dns.h"
+
+#include "sandstorm.h"
+#include "governance.h"
+#include "instantx.h"
+#include "stormnode-payments.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
 
 #include <sstream>
 

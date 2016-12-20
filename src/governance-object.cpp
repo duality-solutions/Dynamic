@@ -3,23 +3,14 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "core_io.h"
-#include "main.h"
-#include "init.h"
-
-#include "flat-database.h"
+#include "sandstorm.h"
 #include "governance.h"
+#include "governance-classes.h"
 #include "governance-object.h"
 #include "governance-vote.h"
-#include "governance-classes.h"
-#include "stormnode.h"
-#include "governance.h"
-#include "sandstorm.h"
 #include "stormnodeman.h"
-#include "stormnode-sync.h"
-#include "netfulfilledman.h"
 #include "util.h"
-#include "addrman.h"
-#include <boost/lexical_cast.hpp>
+
 #include <univalue.h>
 
 CGovernanceObject::CGovernanceObject()
@@ -223,6 +214,19 @@ void CGovernanceObject::ClearStormnodeVotes()
     }
 }
 
+std::string CGovernanceObject::GetSignatureMessage() const
+{
+    LOCK(cs);
+    std::string strMessage = nHashParent.ToString() + "|" +
+        boost::lexical_cast<std::string>(nRevision) + "|" +
+        boost::lexical_cast<std::string>(nTime) + "|" +
+        strData + "|" +
+        vinStormnode.prevout.ToStringShort() + "|" +
+        nCollateralHash.ToString();
+
+    return strMessage;
+}
+
 void CGovernanceObject::SetStormnodeInfo(const CTxIn& vin)
 {
     vinStormnode = vin;
@@ -230,11 +234,10 @@ void CGovernanceObject::SetStormnodeInfo(const CTxIn& vin)
 
 bool CGovernanceObject::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
 {
-    LOCK(cs);
-
     std::string strError;
-    uint256 nHash = GetHash();
-    std::string strMessage = nHash.ToString();
+    std::string strMessage = GetSignatureMessage();
+
+    LOCK(cs);
 
     if(!sandStormSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
         LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
@@ -255,11 +258,11 @@ bool CGovernanceObject::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
 
 bool CGovernanceObject::CheckSignature(CPubKey& pubKeyStormnode)
 {
-    LOCK(cs);
     std::string strError;
-    uint256 nHash = GetHash();
-    std::string strMessage = nHash.ToString();
 
+    std::string strMessage = GetSignatureMessage();
+
+    LOCK(cs);
     if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
@@ -643,7 +646,6 @@ bool CGovernanceObject::GetCurrentSNVotes(const CTxIn& snCollateralOutpoint, vot
 
 void CGovernanceObject::Relay()
 {
-    if(!stormnodeSync.IsSynced()) return;
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
     RelayInv(inv, PROTOCOL_VERSION);
 }
@@ -667,7 +669,7 @@ void CGovernanceObject::UpdateSentinelVariables()
 
     fCachedFunding = false;
     fCachedValid = true; //default to valid
-    fCachedDelete = false;
+
     fCachedEndorsed = false;
     fDirtyCache = false;
 
@@ -675,9 +677,11 @@ void CGovernanceObject::UpdateSentinelVariables()
     // ARE ANY OF THESE FLAGS CURRENTLY ACTIVATED?
 
     if(GetAbsoluteYesCount(VOTE_SIGNAL_FUNDING) >= nAbsVoteReq) fCachedFunding = true;
-    if(GetAbsoluteYesCount(VOTE_SIGNAL_DELETE) >= nAbsDeleteReq) {
+    if((GetAbsoluteYesCount(VOTE_SIGNAL_DELETE) >= nAbsDeleteReq) && !fCachedDelete) {
         fCachedDelete = true;
-        nDeletionTime = GetAdjustedTime();
+        if(nDeletionTime == 0) {
+            nDeletionTime = GetAdjustedTime();
+        }
     }
     if(GetAbsoluteYesCount(VOTE_SIGNAL_ENDORSED) >= nAbsVoteReq) fCachedEndorsed = true;
 
@@ -730,6 +734,7 @@ void CGovernanceObject::CheckOrphanVotes()
             LogPrintf("CGovernanceObject::CheckOrphanVotes -- Failed to add orphan vote: %s\n", exception.what());
         }
         else {
+            vote.Relay();
             fRemove = true;
         }
         ++it;

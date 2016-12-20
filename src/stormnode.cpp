@@ -91,7 +91,7 @@ CStormnode::CStormnode(const CStormnodeBroadcast& snb) :
     lastPing(snb.lastPing),
     vchSig(snb.vchSig),
     sigTime(snb.sigTime),
-    nLastSsq(snb.nLastSsq),
+    nLastSsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(snb.sigTime),
@@ -275,10 +275,15 @@ void CStormnode::Check(bool fForce)
 
 bool CStormnode::IsValidNetAddr()
 {
+    return IsValidNetAddr(addr);
+}
+
+bool CStormnode::IsValidNetAddr(CService addrIn)
+{
     // TODO: regtest is fine with any addresses for now,
     // should probably be a bit smarter if one day we start to implement tests for this
     return Params().NetworkIDString() == CBaseChainParams::REGTEST ||
-            (addr.IsIPv4() && IsReachable(addr) && addr.IsRoutable());
+            (addrIn.IsIPv4() && IsReachable(addrIn) && addrIn.IsRoutable());
 }
 
 stormnode_info_t CStormnode::GetInfo()

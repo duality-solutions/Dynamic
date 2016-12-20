@@ -15,15 +15,17 @@
 #include "transactiontablemodel.h"
 
 #include "base58.h"
-#include "sandstorm.h"
 #include "keystore.h"
 #include "dnstablemodel.h"
 #include "main.h"
 #include "sync.h"
 #include "ui_interface.h"
-#include "spork.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
+
+#include "sandstorm.h"
+#include "instantx.h"
+#include "spork.h"
 
 #include <stdint.h>
 
