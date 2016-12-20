@@ -3,22 +3,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "core_io.h"
-#include "main.h"
-#include "init.h"
-
-#include "flat-database.h"
-#include "governance.h"
-#include "stormnode.h"
-#include "governance.h"
 #include "sandstorm.h"
+#include "governance-vote.h"
 #include "stormnodeman.h"
 #include "stormnode-sync.h"
 #include "util.h"
-#include "addrman.h"
+
 #include <boost/lexical_cast.hpp>
-
-
 
 std::string CGovernanceVoting::ConvertOutcomeToString(vote_outcome_enum_t nOutcome)
 {
@@ -236,7 +227,6 @@ CGovernanceVote::CGovernanceVote(CTxIn vinStormnodeIn, uint256 nParentHashIn, vo
 
 void CGovernanceVote::Relay() const
 {
-    if(!stormnodeSync.IsSynced()) return;
     CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, GetHash());
     RelayInv(inv, PROTOCOL_VERSION);
 }

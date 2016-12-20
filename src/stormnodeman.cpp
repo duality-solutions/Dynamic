@@ -3,19 +3,15 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "stormnodeman.h"
 #include "activestormnode.h"
+#include "addrman.h"
 #include "sandstorm.h"
 #include "governance.h"
-#include "stormnode.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
+#include "stormnodeman.h"
 #include "netfulfilledman.h"
 #include "util.h"
-#include "addrman.h"
-#include "spork.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
 
 /** Stormnode manager */
 CStormnodeMan snodeman;

@@ -13,25 +13,26 @@
 #include "coincontrol.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
-#include "sandstorm.h"
 #include "init.h"
 #include "key.h"
 #include "keystore.h"
 #include "main.h"
 #include "net.h"
-#include "governance.h"
-#include "keepass.h"
-#include "instantx.h"
 #include "policy/policy.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "script/script.h"
 #include "script/sign.h"
-#include "spork.h"
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
+
+#include "sandstorm.h"
+#include "governance.h"
+#include "instantx.h"
+#include "keepass.h"
+#include "spork.h"
 
 #include <assert.h>
 
@@ -2989,7 +2990,7 @@ bool CWallet::GetBudgetSystemCollateralTX(CTransaction& tx, uint256 hash, CAmoun
 bool CWallet::GetBudgetSystemCollateralTX(CWalletTx& tx, uint256 hash, CAmount amount, bool fUseInstantSend)
 {
     // make our change address
-    CReserveKey reservekey(pwalletMain);
+    CReserveKey reservekey(this);
 
     CScript scriptChange;
     scriptChange << OP_RETURN << ToByteVector(hash);

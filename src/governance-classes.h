@@ -10,19 +10,13 @@
 
 //#define ENABLE_DARKSILK_DEBUG
 
-#include "util.h"
-#include "main.h"
-#include "sync.h"
-#include "net.h"
-#include "key.h"
-#include "util.h"
 #include "base58.h"
-#include "stormnode.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include "init.h"
 #include "governance.h"
+#include "key.h"
+#include "script/standard.h"
+#include "util.h"
 
+#include <boost/shared_ptr.hpp>
 
 class CSuperblock;
 class CGovernanceTrigger;

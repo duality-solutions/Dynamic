@@ -7,26 +7,18 @@
 
 //#define ENABLE_DARKSILK_DEBUG
 
-#include "governance-classes.h"
-
 #include "core_io.h"
-#include "main.h"
+#include "governance-classes.h"
 #include "init.h"
 #include "chainparams.h"
 
-#include "consensus/consensus.h"
-#include "consensus/merkle.h"
-#include "consensus/validation.h"
+#include "main.h"
+#include "utilstrencodings.h"
 
-#include "governance.h"
-#include "stormnode.h"
-#include <boost/lexical_cast.hpp>
-#include <univalue.h>
-
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
+#include <univalue.h>
 
 // DECLARE GLOBAL VARIABLES FOR GOVERNANCE CLASSES
 CGovernanceTriggerManager triggerman;
