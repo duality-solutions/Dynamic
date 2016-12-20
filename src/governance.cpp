@@ -778,7 +778,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         return false;
     }
 
-    double dMaxRate = 1.1 / nSuperblockCycleSeconds;
+    double dMaxRate = 2 * 1.1 / double(nSuperblockCycleSeconds);
     double dRate = 0.0;
     CRateCheckBuffer buffer;    switch(nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
@@ -791,7 +791,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         }
         break;
     case GOVERNANCE_OBJECT_WATCHDOG:
-        dMaxRate = 1.1 / 3600.;
+        dMaxRate = 2 * 1.1 / 3600.;
         buffer = it->second.watchdogBuffer;
         buffer.AddTimestamp(nTimestamp);
         dRate = buffer.GetRate();
@@ -904,6 +904,7 @@ void CGovernanceManager::CheckStormnodeOrphanObjects()
 
         if(AddGovernanceObject(govobj)) {
             LogPrintf("CGovernanceManager::CheckStormnodeOrphanObjects -- %s new\n", govobj.GetHash().ToString());
+            govobj.Relay();
             mapStormnodeOrphanObjects.erase(it++);
         }
         else {
