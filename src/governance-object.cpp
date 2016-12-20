@@ -223,6 +223,19 @@ void CGovernanceObject::ClearStormnodeVotes()
     }
 }
 
+std::string CGovernanceObject::GetSignatureMessage() const
+{
+    LOCK(cs);
+    std::string strMessage = nHashParent.ToString() + "|" +
+        boost::lexical_cast<std::string>(nRevision) + "|" +
+        boost::lexical_cast<std::string>(nTime) + "|" +
+        strData + "|" +
+        vinStormnode.prevout.ToStringShort() + "|" +
+        nCollateralHash.ToString();
+
+    return strMessage;
+}
+
 void CGovernanceObject::SetStormnodeInfo(const CTxIn& vin)
 {
     vinStormnode = vin;
@@ -230,11 +243,10 @@ void CGovernanceObject::SetStormnodeInfo(const CTxIn& vin)
 
 bool CGovernanceObject::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
 {
-    LOCK(cs);
-
     std::string strError;
-    uint256 nHash = GetHash();
-    std::string strMessage = nHash.ToString();
+    std::string strMessage = GetSignatureMessage();
+
+    LOCK(cs);
 
     if(!sandStormSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
         LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
@@ -255,11 +267,11 @@ bool CGovernanceObject::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
 
 bool CGovernanceObject::CheckSignature(CPubKey& pubKeyStormnode)
 {
-    LOCK(cs);
     std::string strError;
-    uint256 nHash = GetHash();
-    std::string strMessage = nHash.ToString();
 
+    std::string strMessage = GetSignatureMessage();
+
+    LOCK(cs);
     if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;

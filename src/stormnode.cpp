@@ -91,7 +91,7 @@ CStormnode::CStormnode(const CStormnodeBroadcast& snb) :
     lastPing(snb.lastPing),
     vchSig(snb.vchSig),
     sigTime(snb.sigTime),
-    nLastSsq(snb.nLastSsq),
+    nLastSsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(snb.sigTime),

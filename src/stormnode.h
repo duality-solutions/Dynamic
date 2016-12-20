@@ -343,7 +343,6 @@ public:
         READWRITE(sigTime);
         READWRITE(nProtocolVersion);
         READWRITE(lastPing);
-        READWRITE(nLastSsq);
     }
 
     uint256 GetHash() const

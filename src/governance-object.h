@@ -263,6 +263,8 @@ public:
     bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
     bool CheckSignature(CPubKey& pubKeyStormnode);
 
+    std::string GetSignatureMessage() const;
+
     // CORE OBJECT FUNCTIONS
 
     bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool fCheckCollateral);
