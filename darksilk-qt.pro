@@ -23,9 +23,10 @@ CONFIG += thread
 
 lessThan(QT_MAJOR_VERSION, 5) {
     # stop build
-
+    error( "Qt 5 or greater is required." )
 }
 
+DEFINES += PACKAGE_NAME=\\\"DarkSilk-Core\\\"
 DEFINES += QT_PROJECT_BUILD=1
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 DEFINES += HAVE_WORKING_BOOST_SLEEP_FOR=1
