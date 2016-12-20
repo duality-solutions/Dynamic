@@ -60,6 +60,9 @@
 #include "netfulfilledman.h"
 #include "spork.h"
 
+#include "dns/dslkdns.h"
+#include "dns/hooks.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -89,6 +92,9 @@ CWallet* pwalletMain = NULL;
 #endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false;  // true: restart false: shutdown
+
+DslkDns* dslkdns = NULL; //DDNS
+
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
 static const bool DEFAULT_DISABLE_SAFEMODE = false;
@@ -199,6 +205,9 @@ void PrepareShutdown()
 {
     fRequestShutdown = true; // Needed when we shutdown the wallet
     fRestartRequested = true; // Needed when we restart the wallet
+    if (dslkdns)
+        delete dslkdns;
+
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
     TRY_LOCK(cs_Shutdown, lockShutdown);
@@ -1567,6 +1576,15 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return false;
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+
+    // DarkSilk: check in nameindex need to be created or recreated
+    // we should have block index fully loaded by now
+    extern bool createNameIndexFile();
+    if (!boost::filesystem::exists(GetDataDir() / "ddns.dat") && !createNameIndexFile())
+    {
+        LogPrintf("Fatal error: Failed to create nameindex (ddns.dat) file.\n");
+        return false;
+    }
 
     boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
     CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);

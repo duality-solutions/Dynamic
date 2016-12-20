@@ -33,6 +33,7 @@ class COutput;
 class CPubKey;
 class CWallet;
 class uint256;
+class NameTableModel;
 
 QT_BEGIN_NAMESPACE
 class QTimer;
@@ -136,6 +137,7 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
+    NameTableModel *getNameTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
     CAmount getUnconfirmedBalance() const;
@@ -224,6 +226,7 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
+    NameTableModel *nameTableModel;
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;

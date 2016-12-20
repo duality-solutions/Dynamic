@@ -431,8 +431,12 @@ HEADERS += \
     src/version.h \
     src/versionbits.h \
     src/compat/endian.h \
-    src/crypto/common.h
-
+    src/crypto/common.h \
+    src/dns/dns.h \
+    src/dns/hooks.h \
+    src/dns/dslkdns.h \
+    src/qt/dnspage.h \
+    src/qt/dnstablemodel.h
 
 SOURCES += \
     src/compat/glibcxx_sanity.cpp \
@@ -598,7 +602,11 @@ SOURCES += \
     src/validationinterface.cpp \
     src/versionbits.cpp \
     src/compat/strnlen.cpp \
-    src/qt/paymentrequest.pb.cc
+    src/qt/paymentrequest.pb.cc \
+    src/dns/dns.cpp \
+    src/dns/dslkdns.cpp \
+    src/qt/dnspage.cpp \
+    src/qt/dnstablemodel.cpp
 
 
 OTHER_FILES += \
@@ -614,6 +622,7 @@ FORMS += \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/coincontroldialog.ui \
+    src/qt/forms/dnspage.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/helpmessagedialog.ui \
     src/qt/forms/intro.ui \

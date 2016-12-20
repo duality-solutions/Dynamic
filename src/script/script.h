@@ -186,6 +186,11 @@ enum opcodetype
 
 const char* GetOpName(opcodetype opcode);
 
+static const int OP_NAME_NEW = 0x01;
+static const int OP_NAME_UPDATE = 0x02;
+static const int OP_NAME_DELETE = 0x03;
+static const int OP_NAME_MULTISIG = 0x04;
+
 class scriptnum_error : public std::runtime_error
 {
 public:

@@ -6,6 +6,7 @@
 #include "interpreter.h"
 
 #include "primitives/transaction.h"
+#include "base58.h"
 #include "crypto/ripemd160.h"
 #include "crypto/sha1.h"
 #include "crypto/sha256.h"
@@ -1239,10 +1240,13 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror, const bool fDDNS)
 {
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 
+    // DarkSilk: for backward compatability ddns script should not be checked for minimaldata
+    if (fDDNS)
+        flags &= ~SCRIPT_VERIFY_MINIMALDATA;
     if ((flags & SCRIPT_VERIFY_SIGPUSHONLY) != 0 && !scriptSig.IsPushOnly()) {
         return set_error(serror, SCRIPT_ERR_SIG_PUSHONLY);
     }
@@ -1302,4 +1306,193 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigne
     }
 
     return set_success(serror);
+}
+
+// ddns stuff
+
+bool checkNameValues(NameTxInfo& ret)
+{
+    ret.err_msg = "";
+    if (ret.name.size() > MAX_NAME_LENGTH)
+        ret.err_msg.append("name is too long.\n");
+
+    if (ret.value.size() > MAX_VALUE_LENGTH)
+        ret.err_msg.append("value is too long.\n");
+
+    if (ret.op == OP_NAME_NEW && ret.nRentalDays < 1)
+        ret.err_msg.append("rental days must be greater than 0.\n");
+
+    if (ret.op == OP_NAME_UPDATE && ret.nRentalDays < 0)
+        ret.err_msg.append("rental days must be greater or equal 0.\n");
+
+    if (ret.nRentalDays > MAX_RENTAL_DAYS)
+        ret.err_msg.append("rental days value is too large.\n");
+
+    if (ret.op == OP_NAME_MULTISIG && !(AddressMatchesPubKey(ret.name, ret.value, ret.err_msg)))
+        ret.err_msg.append("invalid multisig name or value.\n");
+
+    if (ret.err_msg != "")
+        return false;
+
+    return true;
+}
+
+bool AddressMatchesPubKey(const CNameVal& name, const CNameVal& value, std::string& strError)
+{
+    std::string strAddress = stringFromNameVal(name);
+
+    if (strAddress.size() >= 8)
+        strAddress = strAddress.replace(0, 8, "");
+
+    std::string strPubKey = stringFromNameVal(value);
+    CPubKey vchPubKey(ParseHex(strPubKey));
+    if (!vchPubKey.IsFullyValid())
+    {
+        strError = strPubKey + " is not a valid public key hex.";
+        return false;
+    }
+
+    CKeyID keyID = vchPubKey.GetID();
+    if (CDarkSilkAddress(keyID).ToString() != strAddress)
+    {
+        strError = CDarkSilkAddress(keyID).ToString() + " != Base58(SHA256(" + strAddress + "))";
+        return false;
+    }
+    return true;
+}
+
+// read name script and extract name, value and rentalDays
+// returns true/false if script is correct/incorrect
+bool DecodeNameScript(const CScript& script, NameTxInfo& ret, CScript::const_iterator& pc)
+{
+    // script structure:
+    // (name_new | name_update) << OP_DROP << name << days << OP_2DROP << val1 << val2 << .. << valn << OP_DROP2 << OP_DROP2 << ..<< (OP_DROP2 | OP_DROP) << paytoscripthash
+    // or
+    // name_delete << OP_DROP << name << OP_DROP << paytoscripthash
+
+    // NOTE: script structure is strict - it must not contain anything else in the midle of it to be a valid name script. It can, however, contain anything else after the correct structure have been read.
+
+    // read op
+    ret.err_msg = "failed to read op";
+    opcodetype opcode;
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+    ret.op = opcode - OP_1 + 1;
+
+    if (ret.op != OP_NAME_NEW && ret.op != OP_NAME_UPDATE && ret.op != OP_NAME_DELETE && ret.op != OP_NAME_MULTISIG)
+        return false;
+
+    ret.err_msg = "failed to read OP_DROP after op_type";
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode != OP_DROP)
+        return false;
+
+    vector<unsigned char> vch;
+
+    // read name
+    ret.err_msg = "failed to read name";
+    if (!script.GetOp(pc, opcode, vch))
+        return false;
+    if ((opcode == OP_DROP || opcode == OP_2DROP) || !(opcode >= 0 && opcode <= OP_PUSHDATA4))
+        return false;
+    ret.name = vch;
+
+    // if name_delete - read OP_DROP after name and exit.
+    if (ret.op == OP_NAME_DELETE)
+    {
+        ret.err_msg = "failed to read OP2_DROP in name_delete";
+        if (!script.GetOp(pc, opcode))
+            return false;
+        if (opcode != OP_DROP)
+            return false;
+        ret.err_msg = "";
+
+        return true;
+    }
+
+    // read rental days
+    ret.err_msg = "failed to read rental days";
+    if (!script.GetOp(pc, opcode, vch))
+        return false;
+    if ((opcode == OP_DROP || opcode == OP_2DROP) || !(opcode >= 0 && opcode <= OP_PUSHDATA4))
+        return false;
+    ret.nRentalDays = CScriptNum(vch, false).getint();
+
+    // read OP_2DROP after name and rentalDays
+    ret.err_msg = "failed to read delimeter d in: name << rental << d << value";
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode != OP_2DROP)
+        return false;
+
+    // read value
+    ret.err_msg = "failed to read value";
+    int valueSize = 0;
+    for (;;)
+    {
+        if (!script.GetOp(pc, opcode, vch))
+            return false;
+        if (opcode == OP_DROP || opcode == OP_2DROP)
+            break;
+        if (!(opcode >= 0 && opcode <= OP_PUSHDATA4))
+            return false;
+        ret.value.insert(ret.value.end(), vch.begin(), vch.end());
+        valueSize++;
+    }
+    pc--;
+
+    // read next delimiter and move the pc after it
+    ret.err_msg = "failed to read correct number of DROP operations after value"; //sucess! we have read name script structure
+    int delimiterSize = 0;
+    while (opcode == OP_DROP || opcode == OP_2DROP)
+    {
+        if (!script.GetOp(pc, opcode))
+            break;
+        if (opcode == OP_2DROP)
+            delimiterSize += 2;
+        if (opcode == OP_DROP)
+            delimiterSize += 1;
+    }
+    pc--;
+
+    if (valueSize != delimiterSize)
+        return false;
+
+
+    ret.err_msg = "";     //sucess! we have read name script structure without errors!
+    if (!checkNameValues(ret))
+        return false;
+
+    return true;
+}
+
+bool DecodeNameScript(const CScript& script, NameTxInfo& ret)
+{
+    CScript::const_iterator pc = script.begin();
+    return DecodeNameScript(script, ret, pc);
+}
+
+bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut)
+{
+    NameTxInfo nti;
+    CScript::const_iterator pc = scriptIn.begin();
+
+    if (!DecodeNameScript(scriptIn, nti, pc))
+        return false;
+
+    scriptOut = CScript(pc, scriptIn.end());
+    return true;
+}
+
+string stringFromNameVal(const CNameVal& nameVal) {
+    string res;
+    CNameVal::const_iterator vi = nameVal.begin();
+    while (vi != nameVal.end()) {
+        res += (char)(*vi);
+        vi++;
+    }
+    return res;
 }

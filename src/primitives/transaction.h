@@ -14,6 +14,32 @@
 #include "serialize.h"
 #include "uint256.h"
 
+// DNS standard information released in 1987.
+// https://tools.ietf.org/html/rfc1035
+// Our Current implementation is missing Type, Class, and TTL (cache time)
+static const int NAMECOIN_TX_VERSION = 0x1030; //0x1035 is rfc1035, our initial version is 1030.
+typedef std::vector<unsigned char> CNameVal;
+struct NameTxInfo
+{ 
+    CNameVal name;
+    CNameVal value;
+    int nRentalDays;
+    int op;
+    int nOut;
+    std::string err_msg; //in case function that takes this as argument have something to say about it
+
+    //used only by DecodeNameScript()
+    std::string strAddress;
+    bool fIsMine;
+
+    //used only by GetNameList()
+    int nExpiresAt;
+
+    NameTxInfo(): nRentalDays(-1), op(-1), nOut(-1), fIsMine(false), nExpiresAt(-1) {}
+    NameTxInfo(CNameVal name, CNameVal value, int nRentalDays, int op, int nOut, std::string err_msg):
+        name(name), value(value), nRentalDays(nRentalDays), op(op), nOut(nOut), err_msg(err_msg), fIsMine(false), nExpiresAt(-1) {}
+};
+
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
 {
@@ -211,7 +237,7 @@ public:
 };
 
 struct CMutableTransaction;
-
+struct CDiskTxPos;
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
@@ -281,7 +307,9 @@ public:
 
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-
+    // Used for DDNS
+    bool ReadFromDisk(const CDiskTxPos& postx);
+    
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
