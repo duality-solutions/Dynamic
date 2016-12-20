@@ -540,7 +540,7 @@ SOURCES += \
     src/core_write.cpp \
     src/dbwrapper.cpp \
     src/governance-classes.cpp \
-    src/governance-classes.cpp \
+    src/governance-object.cpp \
     src/governance-vote.cpp \
     src/governance-votedb.cpp \
     src/governance.cpp \
