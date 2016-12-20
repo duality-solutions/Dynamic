@@ -2479,8 +2479,8 @@ void ThreadCheckSandStormPool()
             nTick++;
 
             // check if we should activate or ping every few minutes,
-            // start right after sync is considered to be done
-            if(nTick % STORMNODE_MIN_SNP_SECONDS == 1)
+            // slightly postpone first run to give net thread a chance to connect to some peers
+            if(nTick % STORMNODE_MIN_SNP_SECONDS == 15)
                 activeStormnode.ManageState();
 
             snodeman.Check();

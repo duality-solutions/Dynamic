@@ -275,6 +275,7 @@ public:
     }
 
     bool IsValidNetAddr();
+    static bool IsValidNetAddr(CService addrIn);
 
     void IncreasePoSeBanScore() { if(nPoSeBanScore < STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
