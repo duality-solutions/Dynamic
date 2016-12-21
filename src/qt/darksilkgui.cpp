@@ -344,7 +344,7 @@ void DarkSilkGUI::createActions()
 #endif
     tabGroup->addAction(stormnodeAction);    
 
-    multiSigAction = new QAction(QIcon(":/icons/multisig"), tr("&MultiSig"), this);
+    multiSigAction = new QAction(QIcon(":/icons/" + theme + "/multisig"), tr("&MultiSig"), this);
     multiSigAction->setStatusTip(tr("Generate and Utilize Multiple Signature Addresses"));
     multiSigAction->setToolTip(multiSigAction->statusTip());
     multiSigAction->setCheckable(true);

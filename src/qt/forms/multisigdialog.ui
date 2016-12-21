@@ -96,7 +96,7 @@ QTabBar { alignment: left; }</string>
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+             <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
            </property>
           </widget>
          </item>
@@ -116,7 +116,7 @@ QTabBar { alignment: left; }</string>
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+             <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
            </property>
            <property name="autoRepeatDelay">
             <number>300</number>
@@ -250,7 +250,7 @@ QTabBar { alignment: left; }</string>
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>:/icons/editcopy</normaloff>:/icons/editcopy</iconset>
+             <normaloff>:/icons/drk/editcopy</normaloff>:/icons/drk/editcopy</iconset>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
@@ -285,7 +285,7 @@ QTabBar { alignment: left; }</string>
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>:/icons/editcopy</normaloff>:/icons/editcopy</iconset>
+             <normaloff>:/icons/drk/editcopy</normaloff>:/icons/drk/editcopy</iconset>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
@@ -439,7 +439,7 @@ QTabBar { alignment: left; }</string>
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+                    <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
                   </property>
                  </widget>
                 </item>
@@ -596,7 +596,7 @@ QTabBar { alignment: left; }</string>
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+                    <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
                   </property>
                  </widget>
                 </item>
@@ -673,7 +673,7 @@ QTabBar { alignment: left; }</string>
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>:/icons/editcopy</normaloff>:/icons/editcopy</iconset>
+               <normaloff>:/icons/drk/editcopy</normaloff>:/icons/drk/editcopy</iconset>
              </property>
              <property name="autoDefault">
               <bool>false</bool>
@@ -690,7 +690,7 @@ QTabBar { alignment: left; }</string>
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>:/icons/editpaste</normaloff>:/icons/editpaste</iconset>
+               <normaloff>:/icons/drk/editpaste</normaloff>:/icons/drk/editpaste</iconset>
              </property>
              <property name="shortcut">
               <string>Alt+P</string>
@@ -711,7 +711,7 @@ QTabBar { alignment: left; }</string>
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
+               <normaloff>:/icons/drk/edit</normaloff>:/icons/drk/edit</iconset>
              </property>
             </widget>
            </item>
@@ -759,7 +759,7 @@ QTabBar { alignment: left; }</string>
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>:/icons/editcopy</normaloff>:/icons/editcopy</iconset>
+               <normaloff>:/icons/drk/editcopy</normaloff>:/icons/drk/editcopy</iconset>
              </property>
              <property name="autoDefault">
               <bool>false</bool>
@@ -797,7 +797,7 @@ QTabBar { alignment: left; }</string>
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>:/icons/send</normaloff>:/icons/send</iconset>
+               <normaloff>:/icons/drk/send</normaloff>:/icons/drk/send</iconset>
              </property>
             </widget>
            </item>

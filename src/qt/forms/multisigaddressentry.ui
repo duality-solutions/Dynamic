@@ -58,8 +58,8 @@
               </property>
               <property name="icon">
                 <iconset resource="../silk.qrc">
-                  <normaloff>:/icons/editpaste</normaloff>
-                  :/icons/editpaste
+                  <normaloff>:/icons/drk/editpaste</normaloff>
+                  :/icons/drk/editpaste
                 </iconset>
               </property>
               <property name="shortcut">
@@ -77,8 +77,8 @@
               </property>
               <property name="icon">
                 <iconset resource="../silk.qrc">
-                  <normaloff>:/icons/address-book</normaloff>
-                  :/icons/address-book
+                  <normaloff>:/icons/drk/address-book</normaloff>
+                  :/icons/drk/address-book
                 </iconset>
               </property>
               <property name="shortcut">
@@ -96,8 +96,8 @@
               </property>
               <property name="icon">
                 <iconset resource="../silk.qrc">
-                  <normaloff>:/icons/remove</normaloff>
-                  :/icons/remove
+                  <normaloff>:/icons/drk/remove</normaloff>
+                  :/icons/drk/remove
                 </iconset>
               </property>
             </widget>

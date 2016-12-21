@@ -210,6 +210,7 @@ RES_ICONS = \
   qt/res/icons/drk/key.png \
   qt/res/icons/drk/lock_closed.png \
   qt/res/icons/drk/lock_open.png \
+  qt/res/icons/drk/multisig.png \
   qt/res/icons/drk/stormnode_network.png \
   qt/res/icons/drk/overview.png \
   qt/res/icons/drk/quit.png \
