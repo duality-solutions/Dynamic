@@ -139,6 +139,18 @@ public:
 };
 
 bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& script, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* error = NULL);
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* error = NULL);
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror = NULL, const bool fDDNS = false);
+
+// dns stuff
+static const unsigned int MAX_NAME_LENGTH = 1024; // 1 kbytes
+static const unsigned int MAX_VALUE_LENGTH = 64*1024; // 64 kbytes
+static const int MAX_RENTAL_DAYS = 36525;  // 100 years.
+
+std::string stringFromNameVal(const CNameVal& nameVal);
+bool AddressMatchesPubKey(const CNameVal& name, const CNameVal& value, std::string& strError);
+bool checkNameValues(NameTxInfo& ret);
+bool DecodeNameScript(const CScript& script, NameTxInfo& ret, CScript::const_iterator& pc);
+bool DecodeNameScript(const CScript& script, NameTxInfo& ret);
+bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
 
 #endif // DARKSILK_SCRIPT_INTERPRETER_H

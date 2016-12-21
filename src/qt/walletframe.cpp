@@ -219,3 +219,9 @@ WalletView *WalletFrame::currentWalletView()
     return qobject_cast<WalletView*>(walletStack->currentWidget());
 }
 
+void WalletFrame::gotoDNSPage()
+{
+    QMap<QString, WalletView*>::const_iterator i;
+    for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
+        i.value()->gotoDNSPage();
+} 

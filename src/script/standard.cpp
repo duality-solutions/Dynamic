@@ -31,6 +31,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_SCRIPTHASH: return "scripthash";
     case TX_MULTISIG: return "multisig";
     case TX_NULL_DATA: return "nulldata";
+    case TX_NAME: return "name";
     }
     return NULL;
 }
@@ -52,6 +53,10 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, vector<vector<unsi
 
         // Sender provides N pubkeys, receivers provides M signatures
         mTemplates.insert(make_pair(TX_MULTISIG, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_CHECKMULTISIG));
+
+        // Sender provides N pubkeys, receivers provides M signatures
+        // TODO (amir): Is this correct???
+        mTemplates.insert(make_pair(TX_NAME, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_NAME_NEW));
     }
 
     vSolutionsRet.clear();

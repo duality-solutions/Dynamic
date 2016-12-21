@@ -95,6 +95,17 @@ QString dateTimeStr(qint64 nTime)
     return dateTimeStr(QDateTime::fromTime_t((qint32)nTime));
 }
 
+QFont DarkSilkAddressFont()
+{
+    QFont font("Monospace");
+#if QT_VERSION >= 0x040800
+    font.setStyleHint(QFont::Monospace);
+#else
+    font.setStyleHint(QFont::TypeWriter);
+#endif
+    return font;
+}
+
 QFont fixedPitchFont()
 {
 #if QT_VERSION >= 0x50200

@@ -16,6 +16,7 @@
 
 #include "base58.h"
 #include "keystore.h"
+#include "dnstablemodel.h"
 #include "main.h"
 #include "sync.h"
 #include "ui_interface.h"
@@ -48,6 +49,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *wallet, Op
     addressTableModel = new AddressTableModel(wallet, this);
     transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
+    nameTableModel = new NameTableModel(wallet, this);
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
@@ -740,4 +742,9 @@ bool WalletModel::hdEnabled() const
 CWallet* WalletModel::getWallet()
 {
     return wallet;
+}
+
+NameTableModel *WalletModel::getNameTableModel()
+{
+    return nameTableModel;
 }

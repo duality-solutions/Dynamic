@@ -12,6 +12,7 @@
 #include "darksilkgui.h"
 #include "clientmodel.h"
 #include "guiutil.h"
+#include "dnspage.h"
 #include "stormnodeconfig.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
@@ -76,8 +77,10 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
 
     receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
     sendCoinsPage = new SendCoinsDialog(platformStyle);
+    
+    dnsPage = new DNSPage();
+	  multiSigPage = new MultisigDialog(platformStyle);
 
-	multiSigPage = new MultisigDialog(platformStyle);
 
     usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
     usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
@@ -86,7 +89,9 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
-	addWidget(multiSigPage);
+    addWidget(dnsPage);
+	  addWidget(multiSigPage);
+
 
     QSettings settings;
     if (settings.value("fShowStormnodesTab").toBool()) {
@@ -165,7 +170,8 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     sendCoinsPage->setModel(walletModel);
     usedReceivingAddressesPage->setModel(walletModel->getAddressTableModel());
     usedSendingAddressesPage->setModel(walletModel->getAddressTableModel());
-	multiSigPage->setModel(walletModel);
+    dnsPage->setModel(walletModel);
+  	multiSigPage->setModel(walletModel);
 
     if (walletModel)
     {
@@ -392,4 +398,9 @@ void WalletView::showProgress(const QString &title, int nProgress)
 void WalletView::trxAmount(QString amount)
 {
     transactionSum->setText(amount);
+}
+
+void WalletView::gotoDNSPage()
+{
+    setCurrentWidget(dnsPage);
 }
