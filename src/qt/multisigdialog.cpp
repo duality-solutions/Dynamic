@@ -151,11 +151,13 @@ void MultisigDialog::on_createAddressButton_clicked()
 		{
 		    bool fError = false;
             CPubKey vchPubKey(ParseHex(strAddressEntered));
+            
             if (!vchPubKey.IsFullyValid())
             {
                 QMessageBox::critical(this, tr("Multisig: Invalid Public Key Entered!"), tr("Invalid public key: %1").arg(strAddressEntered.c_str()));
                 fError = true;
             }
+            
             if (fError)
                 return;
             else
