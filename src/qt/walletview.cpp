@@ -23,6 +23,7 @@
 #include "transactiontablemodel.h"
 #include "transactionview.h"
 #include "walletmodel.h"
+#include "multisigdialog.h"
 
 #include "ui_interface.h"
 
@@ -76,8 +77,10 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
 
     receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
     sendCoinsPage = new SendCoinsDialog(platformStyle);
-
+    
     dnsPage = new DNSPage();
+	  multiSigPage = new MultisigDialog(platformStyle);
+
 
     usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
     usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
@@ -87,6 +90,8 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
     addWidget(dnsPage);
+	  addWidget(multiSigPage);
+
 
     QSettings settings;
     if (settings.value("fShowStormnodesTab").toBool()) {
@@ -166,6 +171,7 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     usedReceivingAddressesPage->setModel(walletModel->getAddressTableModel());
     usedSendingAddressesPage->setModel(walletModel->getAddressTableModel());
     dnsPage->setModel(walletModel);
+  	multiSigPage->setModel(walletModel);
 
     if (walletModel)
     {
@@ -240,6 +246,11 @@ void WalletView::gotoSendCoinsPage(QString addr)
 
     if (!addr.isEmpty())
         sendCoinsPage->setAddress(addr);
+}
+
+void WalletView::gotoMultiSigPage()
+{
+    setCurrentWidget(multiSigPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

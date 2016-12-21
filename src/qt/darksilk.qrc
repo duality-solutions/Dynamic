@@ -27,6 +27,7 @@
         <file alias="editpaste">res/icons/drk/editpaste.png</file>
         <file alias="editcopy">res/icons/drk/editcopy.png</file>
         <file alias="add">res/icons/drk/add.png</file>
+        <file alias="multisig">res/icons/drk/multisig.png</file>
         <file alias="edit">res/icons/drk/edit.png</file>
         <file alias="history">res/icons/drk/history.png</file>
         <file alias="stormnodes">res/icons/drk/stormnode_network.png</file>

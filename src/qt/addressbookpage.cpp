@@ -33,17 +33,13 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode mode, 
 {
     QString theme = GUIUtil::getThemeName();
     ui->setupUi(this);
-    if (!platformStyle->getImagesOnButtons()) {
+    
+#ifdef Q_OS_MAC
         ui->newAddress->setIcon(QIcon());
         ui->copyAddress->setIcon(QIcon());
         ui->deleteAddress->setIcon(QIcon());
         ui->exportButton->setIcon(QIcon());
-    } else {
-        ui->newAddress->setIcon(QIcon(":/icons/" + theme + "/add"));
-        ui->copyAddress->setIcon(QIcon(":/icons/" + theme + "/editcopy"));
-        ui->deleteAddress->setIcon(QIcon(":/icons/" + theme + "/remove"));
-        ui->exportButton->setIcon(QIcon(":/icons/" + theme + "/export"));
-    }
+#endif
 
     switch(mode)
     {

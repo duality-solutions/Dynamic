@@ -151,6 +151,13 @@ void WalletFrame::gotoSignMessageTab(QString addr)
         walletView->gotoSignMessageTab(addr);
 }
 
+void WalletFrame::gotoMultiSigPage()
+{
+    QMap<QString, WalletView*>::const_iterator i;
+    for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
+        i.value()->gotoMultiSigPage();
+}
+
 void WalletFrame::gotoVerifyMessageTab(QString addr)
 {
     WalletView *walletView = currentWalletView();

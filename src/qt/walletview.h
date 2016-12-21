@@ -24,6 +24,8 @@ class TransactionView;
 class WalletModel;
 class AddressBookPage;
 class DNSPage;
+class MultisigDialog;
+
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -71,6 +73,7 @@ private:
     AddressBookPage *usedSendingAddressesPage;
     AddressBookPage *usedReceivingAddressesPage;
     StormnodeList *stormnodeListPage;
+	MultisigDialog *multiSigPage;
 
     TransactionView *transactionView;
     DNSPage *dnsPage;
@@ -92,6 +95,10 @@ public Q_SLOTS:
     void gotoSendCoinsPage(QString addr = "");
     /** Switch to DNS page */
     void gotoDNSPage();
+    /** Switch to MultiSig page */
+	  void gotoMultiSigPage();
+
+
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
