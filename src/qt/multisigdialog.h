@@ -33,6 +33,7 @@ class MultisigDialog : public QDialog
     bool AdvertisePublicKeyForMultiSig(const std::string& address, const std::string& publickey);
 
     typedef std::vector<CScript> redeemScripts;
+    CPubKey SearchForPubKeyByAddress(const std::string& address);
 
   public Q_SLOTS:
     MultisigAddressEntry * addPubKey();

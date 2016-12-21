@@ -25,8 +25,15 @@
 #include "txmempool.h"
 #include "core_io.h"
 #include "chainparamsbase.h"
+#include "dns/dns.h"
 
 #include "dbwrapper.h"
+
+#include <QClipboard>
+#include <QWidget>
+#include <QMessageBox>
+#include <QScrollBar>
+#include <vector>
 
 MultisigDialog::MultisigDialog(const PlatformStyle *platformStyle, QWidget *parent) :
     QDialog(parent),
@@ -60,12 +67,63 @@ MultisigDialog::MultisigDialog(const PlatformStyle *platformStyle, QWidget *pare
 
     ui->signTransactionButton->setEnabled(false);
     ui->sendTransactionButton->setEnabled(false);
+	fSetTxString = false;
 }
 
 MultisigDialog::~MultisigDialog()
 {
     delete ui;
 }
+
+
+bool MultisigDialog::AdvertisePublicKeyForMultiSig(const std::string& address, const std::string& publickey)
+{
+    std::string strQuestion = "<p>Do you want to announce the public key for your " + address + " address?</p><p>You will be charged the minimun transaction fee.</p>";
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Advertise Public Key For MultiSig");
+    msgBox.setText(strQuestion.c_str());
+    msgBox.setStandardButtons(QMessageBox::Yes);
+    msgBox.addButton(QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    if(msgBox.exec() == QMessageBox::Yes)
+    {
+        string strAddress = ""; 
+        CNameVal name = nameValFromString("address:" + address);
+        CNameVal value = nameValFromString(publickey);
+        int nRentalDays = 35;
+        
+        NameTxReturn ret = name_operation(OP_NAME_MULTISIG, name, value, nRentalDays, address);
+        if (!ret.ok)
+        {
+            QMessageBox::critical(this, tr("Multisig Dialog: Advertise PublicKey Error!"), tr("%1: %2").arg(ret.err_code).arg(ret.err_msg.c_str()));
+            return false;
+        }
+    }
+    return true;
+}
+
+CPubKey MultisigDialog::SearchForPubKeyByAddress(const std::string& address)
+{
+    CPubKey emptyPubKey;
+    std::string strFindPubKey = MultiSigGetPubKeyFromAddress(address);
+    if (strFindPubKey.size() > 0)
+    {
+        if (IsHex(strFindPubKey))
+        {
+            CPubKey vchPubKey(ParseHex(strFindPubKey));
+            if (!vchPubKey.IsFullyValid())
+            {
+                QMessageBox::critical(this, tr("Multisig: SearchForPubKeyByAddress!"), tr("Invalid public key found in DDNS chain: %1").arg(strFindPubKey.c_str()));
+                return emptyPubKey;
+            }
+            else
+                return vchPubKey;
+        }
+    }
+    return emptyPubKey;
+}
+
 
 void MultisigDialog::setModel(WalletModel *model)
 {
@@ -133,48 +191,122 @@ void MultisigDialog::on_createAddressButton_clicked()
 {
     ui->multisigAddress->clear();
     ui->redeemScript->clear();
-
     if(!model)
         return;
 
+    if (IsInitialBlockDownload())
+    {
+        QMessageBox::critical(this, tr("Multisig: Chain Download Incomplete!"), tr("Darksilk is downloading blocks..."));
+        return;
+    }
+
+    unsigned int countPublicKeyEntered = ui->pubkeyEntries->count();
+    if (countPublicKeyEntered > 20)
+    {
+        QMessageBox::critical(this, tr("Multisig: Less than 20 required."), tr("Number of addresses involved in the multisignature creation > 20.  Reduce the number!"));
+        return;
+    }
+    // Two or more public keys are required to create a multisig address
+    if (countPublicKeyEntered < 2)
+    {
+        QMessageBox::critical(this, tr("Multisig: 2 or more public keys required!"), tr("Current number of public keys entered is %1.").arg(countPublicKeyEntered));
+        return;
+    }
+
+    CWallet *pwalletMain = model->getWallet();
+
     std::vector<CPubKey> pubkeys;
-    pubkeys.resize(ui->pubkeyEntries->count());
+    pubkeys.resize(countPublicKeyEntered);
+
     unsigned int required = ui->requiredSignatures->text().toUInt();
-    
-    for(int i = 0; i < ui->pubkeyEntries->count(); i++)
+    if (required < 1)
+    {
+        // Multisignature address requires 1 or more signatures.
+        QMessageBox::critical(this, tr("Multisig: Required Signatures Error!"), 
+            tr("A multisignature address requires at least one key to redeem. Currently set to %1.").arg(required));
+        return;
+    }
+
+    if((required > countPublicKeyEntered))
+    {
+        QMessageBox::critical(this, tr("Multisig: Required Signatures Too High"), 
+            tr("Required signatures(%1) can not be greater than the total amount of public key addresses(%2)").arg(required).arg(countPublicKeyEntered));
+        return;
+    }
+
+    unsigned int unknownAddressCount = 0;
+    std::map<string, string> myAddressList;
+    for(unsigned int i = 0; i < countPublicKeyEntered; i++)
     {
         MultisigAddressEntry *entry = qobject_cast<MultisigAddressEntry *>(ui->pubkeyEntries->itemAt(i)->widget());
-		std::string strAddressEntered = entry->getWalletAddress().toUtf8().constData();
 
         if(!entry->validate())
             return;
-		{
-		    bool fError = false;
+
+        std::string strAddressEntered = entry->getWalletAddress().toUtf8().constData();
+        if (IsHex(strAddressEntered))
+        {
+            bool fError = false;
             CPubKey vchPubKey(ParseHex(strAddressEntered));
-            
             if (!vchPubKey.IsFullyValid())
             {
                 QMessageBox::critical(this, tr("Multisig: Invalid Public Key Entered!"), tr("Invalid public key: %1").arg(strAddressEntered.c_str()));
                 fError = true;
             }
-            
             if (fError)
-                return;
+                unknownAddressCount++;
             else
-                pubkeys[i] = vchPubKey;	
-		}
+                pubkeys[i] = vchPubKey;
+        }
+        else
+        {
+            CDarkSilkAddress address(strAddressEntered);
+            if (pwalletMain && address.IsValid())
+            {
+                bool fError = false;
+                CKeyID keyID;
+                if (!address.GetKeyID(keyID))
+                {
+                    QMessageBox::critical(this, tr("Multisig: Invalid Public Key Entered!"), tr("%1  does not refer to a key").arg(strAddressEntered.c_str()));
+                    fError = true;
+                }
+                
+                CPubKey vchPubKey;
+                if ((fError == false) && (!pwalletMain->GetPubKey(keyID, vchPubKey)))
+                    vchPubKey = SearchForPubKeyByAddress(strAddressEntered);
+
+                if ((fError == false) && !vchPubKey.IsFullyValid())
+                    fError = true;
+
+                if (fError)
+                {
+                    unknownAddressCount = unknownAddressCount + 1;
+                }
+                else
+                {
+                    myAddressList.insert(pair<string, string>(strAddressEntered, HexStr(vchPubKey.begin(), vchPubKey.end())));
+                    pubkeys[i] = vchPubKey;
+                }
+            }
+        }
     }
 
-    if((required == 0) || (required > pubkeys.size()))
-        return;
-
-    CScript script = GetScriptForMultisig(required, pubkeys);
-	CScriptID scriptID = GetScriptID(script);
-	CDarkSilkAddress address(scriptID);
-    
-
-    ui->multisigAddress->setText(address.ToString().c_str());
-    ui->redeemScript->setText(HexStr(script.begin(), script.end()).c_str());
+    if (unknownAddressCount == 0)
+    {
+        CScript script = GetScriptForMultisig(required, pubkeys);
+        CScriptID scriptID = GetScriptID(script);
+        CDarkSilkAddress multiSigAddress(scriptID);
+        ui->multisigAddress->setText(multiSigAddress.ToString().c_str());
+        ui->redeemScript->setText(HexStr(script.begin(), script.end()).c_str());
+    }
+    else
+    {
+        for(std::map<string,string>::iterator iter = myAddressList.begin(); iter != myAddressList.end(); ++iter)
+        {
+            // TODO (Amir): If user agrees to advertise their public key using DDNS as a multisig name (fee = 0.001 SLK)
+            AdvertisePublicKeyForMultiSig(iter->first, iter->second);
+        }
+    }
 }
 
 void MultisigDialog::on_copyMultisigAddressButton_clicked()
@@ -305,16 +437,21 @@ void MultisigDialog::on_createTransactionButton_clicked()
     }
 
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    fSetTxString = true;
     ss << transaction;
     ui->transaction->setText(HexStr(ss.begin(), ss.end()).c_str());
     if(ui->transaction->text().size() > 0)
         ui->signTransactionButton->setEnabled(true);
     else
         ui->signTransactionButton->setEnabled(false);
+    fSetTxString = false;
 }
 
 void MultisigDialog::on_transaction_textChanged()
-{
+{ 
+	if (fSetTxString)		
+	        return;
+	        
     while(ui->inputs->count())
         delete ui->inputs->takeAt(0)->widget();
     while(ui->outputs->count())
@@ -418,20 +555,6 @@ void MultisigDialog::on_signTransactionButton_clicked()
     if (txVariants.empty())
 		QMessageBox::critical(this, tr("Multisig: Sign Button failed!"), tr("Missing transaction"));
 		
-	/**
-	 * 
-	 * Patch by Empinel:
-	 * 
-	 * TODO: Remove this tag, although this is the explanation incase it doesn't work out
-	 * 
-	 * I have derived this fuctionality from rpcrawtransaction.cpp, more specifically from
-	 * signrawtransaction's function which handles a similar situation, the commits will be
-	 * a bit messy as testing and changing will be evident
-	 * 
-	 * 09431c45193a85fa347c117d4add5150496272ffe28fab74c18822e8a4e58783, so - yeah
-	 * 
-	 **/
-
     // mergedTx will end up with all the signatures; it
     // starts as a clone of the rawtx:
     CMutableTransaction mergedTx(txVariants[0]);
@@ -468,27 +591,9 @@ void MultisigDialog::on_signTransactionButton_clicked()
 
         view.SetBackend(viewDummy); // switch back to avoid locking mempool for too long
     }
-/*
-    // Sign what we can
-    const CKeyStore& keystore = *pwalletMain;
-	bool fComplete = true;
-
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-    ssTx << mergedTx;
-    ui->signedTransaction->setText(HexStr(ssTx.begin(), ssTx.end()).c_str());
-
-    if(fComplete)
-    {
-        ui->statusLabel->setText(tr("Transaction signature is complete"));
-        ui->sendTransactionButton->setEnabled(true);
-    }
-    else
-    {
-        ui->statusLabel->setText(tr("Transaction is NOT completely signed"));
-        ui->sendTransactionButton->setEnabled(false);
-    }
-*/
-
+    
+	EnsureWalletIsUnlocked();
+	
     // Sign what we can
     const CKeyStore& keystore = *pwalletMain;
     int nHashType = SIGHASH_ALL;

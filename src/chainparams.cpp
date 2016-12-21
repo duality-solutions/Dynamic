@@ -149,17 +149,17 @@ public:
         pchMessageStart[3] = 0x31;
         vAlertPubKey = ParseHex(""); //TODO: Add alert key before release.
         nDefaultPort = 31000;
-        nMaxTipAge = 1 * 60 * 64;
+        nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 10000;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1482255823, 41639, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1482346100, 23798, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         
         if(!startNewChain)
-			assert(consensus.hashGenesisBlock == uint256S("0x0000a65ae4ea0c71cb974c5c49df0bde20aa68e79177d372a32e234470199c20"));
+			assert(consensus.hashGenesisBlock == uint256S("0x00002beac3a2ae47e99e4809ac4881b011f6f272fe03d0e7e9659cc8d7a51b2b"));
 			assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -185,7 +185,7 @@ public:
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
-        fMineBlocksOnDemand = false;
+        fMineBlocksOnDemand = true; // This is only temporary
         fTestnetToBeDeprecatedFieldRPC = false;
 
         nPoolMaxTransactions = 3;
