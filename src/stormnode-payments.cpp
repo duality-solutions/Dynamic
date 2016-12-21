@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "addrman.h"
 #include "sandstorm.h"
 #include "governance-classes.h"
 #include "policy/fees.h"

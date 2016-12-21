@@ -3,17 +3,16 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "main.h"
-#include "db.h"
-#include "init.h"
 #include "activestormnode.h"
 #include "sandstorm.h"
-#include "governance.h"
+#include "init.h"
+#include "main.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
 #include "rpcserver.h"
+#include "util.h"
 #include "utilmoneystr.h"
 
 #include <fstream>

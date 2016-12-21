@@ -20,10 +20,11 @@
 #include "primitives/transaction.h"
 #include "scheduler.h"
 #include "ui_interface.h"
-#include "sandstorm.h"
-#include "instantx.h"
 #include "wallet/wallet.h"
 #include "utilstrencodings.h"
+
+#include "sandstorm.h"
+#include "instantx.h"
 
 #ifdef WIN32
 #include <string.h>

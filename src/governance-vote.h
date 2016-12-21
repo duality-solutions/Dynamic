@@ -6,15 +6,10 @@
 #ifndef DARKSILK_GOVERNANCE_VOTE_H
 #define DARKSILK_GOVERNANCE_VOTE_H
 
-#include "main.h"
-#include "sync.h"
-#include "net.h"
 #include "key.h"
-#include "util.h"
-#include "base58.h"
-#include "stormnode.h"
+#include "primitives/transaction.h"
+
 #include <boost/lexical_cast.hpp>
-#include "init.h"
 
 using namespace std;
 
