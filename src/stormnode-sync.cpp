@@ -37,8 +37,7 @@ bool CStormnodeSync::IsBlockchainSynced()
 
     // same as !IsInitialBlockDownload() but no cs_main needed here
     int64_t nMaxBlockTime = std::max(pCurrentBlockIndex->GetBlockTime(), pindexBestHeader->GetBlockTime());
-    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight &&
-                        GetTime() - nMaxBlockTime < Params().MaxTipAge();
+    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight;
 
     return fBlockchainSynced;
 }
