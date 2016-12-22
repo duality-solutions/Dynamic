@@ -45,19 +45,19 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
 
 static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, bool noProduction)
 {
-	if(noProduction)
-		genesisBlock.nTime = std::time(0);
-		genesisBlock.nNonce = 0;
-	
-	printf("NOTE: Genesis nTime = %u \n", genesisBlock.nTime);
-	printf("WARN: Genesis nNonce (BLANK!) = %u \n", genesisBlock.nNonce);
-	
+    if(noProduction)
+        genesisBlock.nTime = std::time(0);
+    genesisBlock.nNonce = 0;
+
+    printf("NOTE: Genesis nTime = %u \n", genesisBlock.nTime);
+    printf("WARN: Genesis nNonce (BLANK!) = %u \n", genesisBlock.nNonce);
+
     arith_uint256 besthash;
     memset(&besthash,0xFF,32);
     arith_uint256 hashTarget = UintToArith256(powLimit);
     printf("Target: %s\n", hashTarget.GetHex().c_str());
     arith_uint256 newhash = UintToArith256(genesisBlock.GetHash());
-    while (newhash > hashTarget){
+    while (newhash > hashTarget) {
         genesisBlock.nNonce++;
         if (genesisBlock.nNonce == 0) {
             printf("NONCE WRAPPED, incrementing time\n");
@@ -66,10 +66,10 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
         // If nothing found after trying for a while, print status
         if ((genesisBlock.nNonce & 0xfff) == 0)
             printf("nonce %08X: hash = %s (target = %s)\n",
-                    genesisBlock.nNonce, newhash.ToString().c_str(),
-                    hashTarget.ToString().c_str());
+                   genesisBlock.nNonce, newhash.ToString().c_str(),
+                   hashTarget.ToString().c_str());
 
-        if(newhash < besthash){
+        if(newhash < besthash) {
             besthash = newhash;
             printf("New best: %s\n", newhash.GetHex().c_str());
         }
@@ -149,18 +149,19 @@ public:
         pchMessageStart[3] = 0x31;
         vAlertPubKey = ParseHex(""); //TODO: Add alert key before release.
         nDefaultPort = 31000;
-        nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 10000;
-        startNewChain = false;
+        startNewChain = true;
 
         genesis = CreateGenesisBlock(1482346100, 23798, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
+        if(startNewChain == true) {
+            MineGenesis(genesis, consensus.powLimit, true);
+        }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        
+
         if(!startNewChain)
-			assert(consensus.hashGenesisBlock == uint256S("0x00002beac3a2ae47e99e4809ac4881b011f6f272fe03d0e7e9659cc8d7a51b2b"));
-			assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
+            assert(consensus.hashGenesisBlock == uint256S("0x00002beac3a2ae47e99e4809ac4881b011f6f272fe03d0e7e9659cc8d7a51b2b"));
+            assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
 
         //vSeeds.push_back(CDNSSeedData("", ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
@@ -198,7 +199,7 @@ public:
             (  0, uint256S("0x0000a65ae4ea0c71cb974c5c49df0bde20aa68e79177d372a32e234470199c20")),
             1482255823, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
+            //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
         };
     }
@@ -248,24 +249,25 @@ public:
         pchMessageStart[3] = 0x30;
         vAlertPubKey = ParseHex("");
         nDefaultPort = 31750;
-        nMaxTipAge = 10 * 60;
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1482255823, 1395, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
+        if(startNewChain == true) {
+            MineGenesis(genesis, consensus.powLimit, true);
+        }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        
+
         if(!startNewChain)
-			assert(consensus.hashGenesisBlock == uint256S("0x00010f25a412d2046430854790c8ce9a928956f6260d1b63160539a3051c5dc1"));
-			assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
+            assert(consensus.hashGenesisBlock == uint256S("0x00010f25a412d2046430854790c8ce9a928956f6260d1b63160539a3051c5dc1"));
+        assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
         //vSeeds.push_back(CDNSSeedData("",  ""));
         //vSeeds.push_back(CDNSSeedData("", ""));
-        
+
         // Testnet DarkSilk addresses start with 'y'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,30);
         // Testnet DarkSilk script addresses start with '8' or '9'
@@ -297,7 +299,7 @@ public:
             (  0, uint256S("0x00010f25a412d2046430854790c8ce9a928956f6260d1b63160539a3051c5dc1")),
             1482255823, // * UNIX timestamp of last checkpoint block
             0,    // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
+            //   (the tx=... number in the SetBestChain debug.log lines)
             1000        // * estimated number of transactions per day after checkpoint
         };
     }
@@ -343,19 +345,20 @@ public:
         pchMessageStart[1] = 0xc1;
         pchMessageStart[2] = 0xb7;
         pchMessageStart[3] = 0xdc;
-        nMaxTipAge = 10 * 60;
         nDefaultPort = 31800;
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
         genesis = CreateGenesisBlock(1482255823 , 445, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
-        if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
+        if(startNewChain == true) {
+            MineGenesis(genesis, consensus.powLimit, true);
+        }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        
+
         if(!startNewChain)
-			assert(consensus.hashGenesisBlock == uint256S("0x0003431610d5cfe20fc9ab0f9d965f439c3f00921b1416e1a8b0b43008dd32e1"));
-			assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0003431610d5cfe20fc9ab0f9d965f439c3f00921b1416e1a8b0b43008dd32e1"));
+        assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
@@ -372,7 +375,7 @@ public:
             (  0, uint256S("0x0003431610d5cfe20fc9ab0f9d965f439c3f00921b1416e1a8b0b43008dd32e1")),
             1482255823, // * UNIX timestamp of last checkpoint block
             0,    // * total number of transactions between genesis and last checkpoint
-                        //   (the tx=... number in the SetBestChain debug.log lines)
+            //   (the tx=... number in the SetBestChain debug.log lines)
             500        // * estimated number of transactions per day after checkpoint
         };
         // Regtest DarkSilk addresses start with 'y'
@@ -401,11 +404,11 @@ const CChainParams &Params() {
 CChainParams& Params(const std::string& chain)
 {
     if (chain == CBaseChainParams::MAIN)
-            return mainParams;
+        return mainParams;
     else if (chain == CBaseChainParams::TESTNET)
-            return testNetParams;
+        return testNetParams;
     else if (chain == CBaseChainParams::REGTEST)
-            return regTestParams;
+        return regTestParams;
     else
         throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }
