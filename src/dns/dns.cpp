@@ -717,6 +717,7 @@ bool mycompare2 (const UniValue& lhs, const UniValue& rhs)
 
     return lhs[pos].get_int() < rhs[pos].get_int();
 }
+
 UniValue name_filter(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 5)
@@ -1246,7 +1247,9 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
 bool createNameIndexFile()
 {
     LogPrintf("Scanning blockchain for names to create fast index...\n");
-    CNameDB dbName();
+    
+    CNameDB dbName("cr+");
+    
     if (!fTxIndex)
         return error("createNameIndexFile() : transaction index not available");
 
