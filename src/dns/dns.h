@@ -72,7 +72,7 @@ public:
 class CNameDB : public CDB
 {
 public:
-    CNameDB(const char* pszMode = "r+") : CDB(pszMode, "ddns.dat")
+    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode)
     {
     }
 
