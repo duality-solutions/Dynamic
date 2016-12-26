@@ -150,6 +150,7 @@ public:
         pchMessageStart[3] = 0x31;
         vAlertPubKey = ParseHex(""); //TODO: Add alert key before release.
         nDefaultPort = 31000;
+        nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 10000;
         startNewChain = false;
 
@@ -157,7 +158,7 @@ public:
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        
+
         if(!startNewChain)
 			assert(consensus.hashGenesisBlock == uint256S("0x0000e5a948c5faaf47c3d6893f4a3ed0628f2cee7161979a03b2c08a5ea8723a"));
 			assert(genesis.hashMerkleRoot == uint256S("0x519b329dfc272ac355f0c254df4c5a4abd4cf535cc2b3dc88f0432f6e73fc815"));
@@ -249,6 +250,7 @@ public:
         pchMessageStart[3] = 0x30;
         vAlertPubKey = ParseHex("");
         nDefaultPort = 31750;
+        nMaxTipAge = 10 * 60;
         nPruneAfterHeight = 1000;
         startNewChain = false;
 
@@ -344,6 +346,7 @@ public:
         pchMessageStart[1] = 0xc1;
         pchMessageStart[2] = 0xb7;
         pchMessageStart[3] = 0xdc;
+        nMaxTipAge = 10 * 60;
         nDefaultPort = 31800;
         nPruneAfterHeight = 1000;
         startNewChain = false;

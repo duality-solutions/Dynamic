@@ -55,76 +55,35 @@ public:
         MAX_BASE58_TYPES
     };
 
-    const Consensus::Params& GetConsensus() const {
-        return consensus;
-    }
-    const CMessageHeader::MessageStartChars& MessageStart() const {
-        return pchMessageStart;
-    }
-    const std::vector<unsigned char>& AlertKey() const {
-        return vAlertPubKey;
-    }
-    int GetDefaultPort() const {
-        return nDefaultPort;
-    }
+    const Consensus::Params& GetConsensus() const { return consensus; }
+    const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
+    const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
+    int GetDefaultPort() const { return nDefaultPort; }
 
-    const CBlock& GenesisBlock() const {
-        return genesis;
-    }
+    const CBlock& GenesisBlock() const { return genesis; }
     /** Make miner wait to have peers to avoid wasting work */
-    bool MiningRequiresPeers() const {
-        return fMiningRequiresPeers;
-    }
+    bool MiningRequiresPeers() const { return fMiningRequiresPeers; }
     /** Default value for -checkmempool and -checkblockindex argument */
-    bool DefaultConsistencyChecks() const {
-        return fDefaultConsistencyChecks;
-    }
+    bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** Policy: Filter transactions that do not match well-defined patterns */
-    bool RequireStandard() const {
-        return fRequireStandard;
-    }
-    uint64_t PruneAfterHeight() const {
-        return nPruneAfterHeight;
-    }
+    bool RequireStandard() const { return fRequireStandard; }
+    int64_t MaxTipAge() const { return nMaxTipAge; }
+    uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
     /** Make miner stop after a block is found. In RPC, don't return until nGenProcLimit blocks are generated */
-    bool MineBlocksOnDemand() const {
-        return fMineBlocksOnDemand;
-    }
+    bool MineBlocksOnDemand() const { return fMineBlocksOnDemand; }
     /** In the future use NetworkIDString() for RPC fields */
-    bool TestnetToBeDeprecatedFieldRPC() const {
-        return fTestnetToBeDeprecatedFieldRPC;
-    }
+    bool TestnetToBeDeprecatedFieldRPC() const { return fTestnetToBeDeprecatedFieldRPC; }
     /** Return the BIP70 network string (main, test or regtest) */
-    std::string NetworkIDString() const {
-        return strNetworkID;
-    }
-    const std::vector<CDNSSeedData>& DNSSeeds() const {
-        return vSeeds;
-    }
-    const std::vector<unsigned char>& Base58Prefix(Base58Type type) const {
-        return base58Prefixes[type];
-    }
-    const std::vector<SeedSpec6>& FixedSeeds() const {
-        return vFixedSeeds;
-    }
-    const CCheckpointData& Checkpoints() const {
-        return checkpointData;
-    }
-    int PoolMaxTransactions() const {
-        return nPoolMaxTransactions;
-    }
-    int FulfilledRequestExpireTime() const {
-        return nFulfilledRequestExpireTime;
-    }
-    std::string SporkPubKey() const {
-        return strSporkPubKey;
-    }
-    std::string StormnodePaymentPubKey() const {
-        return strStormnodePaymentsPubKey;
-    }
-    int64_t StartStormnodePayments() const {
-        return nStartStormnodePayments;
-    }
+    std::string NetworkIDString() const { return strNetworkID; }
+    const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
+    const std::vector<unsigned char>& Base58Prefix(Base58Type type) const { return base58Prefixes[type]; }
+    const std::vector<SeedSpec6>& FixedSeeds() const { return vFixedSeeds; }
+    const CCheckpointData& Checkpoints() const { return checkpointData; }
+    int PoolMaxTransactions() const { return nPoolMaxTransactions; }
+    int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
+    std::string SporkPubKey() const { return strSporkPubKey; }
+    std::string StormnodePaymentPubKey() const { return strStormnodePaymentsPubKey; }
+    int64_t StartStormnodePayments() const { return nStartStormnodePayments; }
 protected:
     CChainParams() {}
 
@@ -133,6 +92,7 @@ protected:
     //! Raw pub key bytes for the broadcast alert signing key.
     std::vector<unsigned char> vAlertPubKey;
     int nDefaultPort;
+    long nMaxTipAge;
     uint64_t nPruneAfterHeight;
     std::vector<CDNSSeedData> vSeeds;
     std::vector<unsigned char> base58Prefixes[MAX_BASE58_TYPES];
