@@ -1808,7 +1808,7 @@ bool IsInitialBlockDownload()
         return true;
 //    if (chainActive.Tip()->nChainWork < UintToArith256(chainParams.GetConsensus().nMinimumChainWork))
 //        return true;
-    if (chainActive.Tip()->GetBlockTime() < (GetTime() - 1 * 60 * 60)) // Value derived from BlackCoin: 8 hours
+    if (chainActive.Tip()->GetBlockTime() < (GetTime() - 24 * 60 * 60)) // Value derived from BitCoin: 24 hours
         return true;
 //    latchToFalse.store(true, std::memory_order_relaxed);
     return false;
