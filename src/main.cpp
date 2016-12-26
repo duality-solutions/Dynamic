@@ -1788,30 +1788,20 @@ CAmount GetStormnodePayment(bool fStormnode)
 
 bool IsInitialBlockDownload()
 {
-    const CChainParams& chainParams = Params();
-/*
-    // Once this function has returned false, it must remain false.
-    static std::atomic<bool> latchToFalse{false};
-    // Optimization: pre-test latch before taking the lock.
-    if (latchToFalse.load(std::memory_order_relaxed))
+    static bool lockIBDState = false;
+    if (lockIBDState)
         return false;
-*/
-
-    LOCK(cs_main);
-/*
-     if (latchToFalse.load(std::memory_order_relaxed))
-        return false;
-*/
     if (fImporting || fReindex)
         return true;
     if (chainActive.Tip() == NULL)
         return true;
 //    if (chainActive.Tip()->nChainWork < UintToArith256(chainParams.GetConsensus().nMinimumChainWork))
 //        return true;
-    if (chainActive.Tip()->GetBlockTime() < (GetTime() - 24 * 60 * 60)) // Value derived from BitCoin: 24 hours
-        return true;
-//    latchToFalse.store(true, std::memory_order_relaxed);
-    return false;
+    bool state = (chainActive.Height() < pindexBestHeader->nHeight ||
+            std::max(chainActive.Tip()->GetBlockTime(), pindexBestHeader->GetBlockTime()) < GetTime() - chainParams.MaxTipAge());
+    if (!state)
+        lockIBDState = true;
+    return state;
 }
 
 bool fLargeWorkForkFound = false;
