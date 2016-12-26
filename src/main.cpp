@@ -1795,13 +1795,15 @@ bool IsInitialBlockDownload()
         return true;
     if (chainActive.Tip() == NULL)
         return true;
-//    if (chainActive.Tip()->nChainWork < UintToArith256(chainParams.GetConsensus().nMinimumChainWork))
-//        return true;
+    LOCK(cs_main);
+    const CChainParams& chainParams = Params();
+    if (fCheckpointsEnabled && chainActive.Height() < Checkpoints::GetTotalBlocksEstimate(chainParams.Checkpoints()))
+        return true;
     bool state = (chainActive.Height() < pindexBestHeader->nHeight ||
             std::max(chainActive.Tip()->GetBlockTime(), pindexBestHeader->GetBlockTime()) < GetTime() - chainParams.MaxTipAge());
     if (!state)
         lockIBDState = true;
-    return state;
+     return state;
 }
 
 bool fLargeWorkForkFound = false;
