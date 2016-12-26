@@ -1754,14 +1754,14 @@ int64_t GetTotalCoinEstimate(int nHeight)
     return nTotalCoins;
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees, const Consensus::Params& consensusParams)
+CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 4000000 * COIN;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() > 0 && chainActive.Height() <= consensusParams.nWorkSubsidyStartHeight) {
+    else if (chainActive.Height() > 0 && chainActive.Height() <= Params().StartStormnodePayments()) {
         LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD;
     }

@@ -259,7 +259,7 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 
 int64_t GetTotalCoinEstimate(int nHeight);
 
-CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees, const Consensus::Params& consensusParams);
+CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees);
 CAmount GetStormnodePayment(bool fStormnode = true);
 
 /**
