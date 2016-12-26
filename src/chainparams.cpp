@@ -152,7 +152,7 @@ public:
         nDefaultPort = 31000;
         nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 10000;
-        startNewChain = true;
+        startNewChain = false;
 
         genesis = CreateGenesisBlock(1482780545, 19143, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
