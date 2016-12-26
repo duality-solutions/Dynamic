@@ -11,7 +11,6 @@
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
 
-#include "instantx.h"
 #include "wallet/wallet.h"
 #include "support/allocators/secure.h"
 
@@ -211,6 +210,8 @@ public:
     void loadReceiveRequests(std::vector<std::string>& vReceiveRequests);
     bool saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest);
 
+    bool hdEnabled() const;
+    
 private:
     CWallet *wallet;
     bool fHaveWatchOnly;

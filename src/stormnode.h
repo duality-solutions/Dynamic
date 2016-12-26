@@ -9,6 +9,7 @@
 #include "key.h"
 #include "main.h"
 #include "net.h"
+#include "spork.h"
 #include "timedata.h"
 
 class CStormnode;
@@ -78,7 +79,8 @@ public:
 
     bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
     bool CheckSignature(CPubKey& pubKeyStormnode, int &nDos);
-    bool CheckAndUpdate(int& nDos, bool fRequireEnabled = true, bool fSimpleCheck = false);
+    bool SimpleCheck(int& nDos);
+    bool CheckAndUpdate(int& nDos);
     void Relay();
 
     CStormnodePing& operator=(CStormnodePing from)
@@ -259,7 +261,21 @@ public:
 
     bool IsWatchdogExpired() { return nActiveState == STORMNODE_WATCHDOG_EXPIRED; }
 
+   bool IsValidForPayment()
+    {
+        if(nActiveState == STORMNODE_ENABLED) {
+            return true;
+        }
+        if(!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
+           (nActiveState == STORMNODE_WATCHDOG_EXPIRED)) {
+            return true;
+        }
+
+        return false;
+    }
+
     bool IsValidNetAddr();
+    static bool IsValidNetAddr(CService addrIn);
 
     void IncreasePoSeBanScore() { if(nPoSeBanScore < STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -STORMNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
@@ -327,7 +343,6 @@ public:
         READWRITE(sigTime);
         READWRITE(nProtocolVersion);
         READWRITE(lastPing);
-        READWRITE(nLastSsq);
     }
 
     uint256 GetHash() const

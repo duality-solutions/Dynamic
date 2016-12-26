@@ -15,14 +15,16 @@
 #include "transactiontablemodel.h"
 
 #include "base58.h"
-#include "sandstorm.h"
 #include "keystore.h"
 #include "main.h"
 #include "sync.h"
 #include "ui_interface.h"
-#include "spork.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
+
+#include "sandstorm.h"
+#include "instantx.h"
+#include "spork.h"
 
 #include <stdint.h>
 
@@ -120,6 +122,7 @@ void WalletModel::updateStatus()
     if(cachedEncryptionStatus != newEncryptionStatus)
         Q_EMIT encryptionStatusChanged(newEncryptionStatus);
 }
+
 
 void WalletModel::pollBalanceChanged()
 {
@@ -727,4 +730,9 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
         return wallet->EraseDestData(dest, key);
     else
         return wallet->AddDestData(dest, key, sRequest);
+}
+
+bool WalletModel::hdEnabled() const
+{
+    return wallet->IsHDEnabled();
 }

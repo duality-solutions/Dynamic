@@ -131,9 +131,41 @@ void CActiveStormnode::ManageStateInitial()
 {
     LogPrint("stormnode", "CActiveStormnode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
-    if(!GetLocal(service)) {
+    if (!fListen) {
+        // listen option is probably overwritten by smth else, no good
         nState = ACTIVE_STORMNODE_NOT_CAPABLE;
-        strNotCapableReason = "Can't detect external address. Please consider using the externalip configuration option if problem persists.";
+        strNotCapableReason = "Stormnode must accept connections from outside. Make sure listen configuration option is not overwritten by some another parameter.";
+        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+        return;
+    }
+
+    bool fFoundLocal = false;
+    {
+        LOCK(cs_vNodes);
+
+        // First try to find whatever local address is specified by externalip option
+        fFoundLocal = GetLocal(service) && CStormnode::IsValidNetAddr(service);
+        if(!fFoundLocal) {
+            // nothing and no live connections, can't do anything for now
+            if (vNodes.empty()) {
+                nState = ACTIVE_STORMNODE_NOT_CAPABLE;
+                strNotCapableReason = "Can't detect valid external address. Will retry when there are some connections available.";
+                LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+                return;
+            }
+            // We have some peers, let's try to find our local address from one of them
+            BOOST_FOREACH(CNode* pnode, vNodes) {
+                if (pnode->fSuccessfullyConnected && pnode->addr.IsIPv4()) {
+                    fFoundLocal = GetLocal(service, &pnode->addr) && CStormnode::IsValidNetAddr(service);
+                    if(fFoundLocal) break;
+                }
+            }
+        }
+    }
+
+    if(!fFoundLocal) {
+        nState = ACTIVE_STORMNODE_NOT_CAPABLE;
+        strNotCapableReason = "Can't detect valid external address. Please consider using the externalip configuration option if problem persists. Make sure to use IPv4 address only.";
         LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
         return;
     }
@@ -158,7 +190,7 @@ void CActiveStormnode::ManageStateInitial()
         }
     }
 
-    LogPrintf("CActiveStormnode::ManageState -- Checking inbound connection to '%s'\n", service.ToString());
+    LogPrintf("CActiveStormnode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
     if(!ConnectNode((CAddress)service, NULL, true)) {
         nState = ACTIVE_STORMNODE_NOT_CAPABLE;
@@ -182,7 +214,7 @@ void CActiveStormnode::ManageStateInitial()
     }
 
     if(pwalletMain->GetBalance() < 1000*COIN) {
-        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: Wallet balance is < 1000 DSLK", GetStateString());
+        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: Wallet balance is < 1000 DSLK\n", GetStateString());
         return;
     }
 

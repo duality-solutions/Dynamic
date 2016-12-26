@@ -491,6 +491,19 @@ void CSandstormPool::UnlockCoins()
     vecOutPointLocked.clear();
 }
 
+std::string CSandstormPool::GetStateString() const
+{
+    switch(nState) {
+        case POOL_STATE_IDLE:                   return "IDLE";
+        case POOL_STATE_QUEUE:                  return "QUEUE";
+        case POOL_STATE_ACCEPTING_ENTRIES:      return "ACCEPTING_ENTRIES";
+        case POOL_STATE_SIGNING:                return "SIGNING";
+        case POOL_STATE_ERROR:                  return "ERROR";
+        case POOL_STATE_SUCCESS:                return "SUCCESS";
+        default:                                return "UNKNOWN";
+    }
+}
+
 std::string CSandstormPool::GetStatus()
 {
     static int nStatusMessageProgress = 0;
@@ -711,6 +724,8 @@ void CSandstormPool::ChargeFees()
         LogPrintf("CSandstormPool::ChargeFees -- found uncooperative node (didn't %s transaction), charging fees: %s\n",
                 (nState == POOL_STATE_SIGNING) ? "sign" : "send", vecOffendersCollaterals[0].ToString());
 
+        LOCK(cs_main);
+
         CValidationState state;
         bool fMissingInputs;
         if(!AcceptToMemoryPool(mempool, state, vecOffendersCollaterals[0], false, &fMissingInputs, false, true)) {
@@ -738,6 +753,8 @@ void CSandstormPool::ChargeRandomFees()
 {
     if(!fStormNode) return;
 
+    LOCK(cs_main);
+
     BOOST_FOREACH(const CTransaction& txCollateral, vecSessionCollaterals) {
 
         if(GetRandInt(100) > 10) return;
@@ -760,13 +777,19 @@ void CSandstormPool::ChargeRandomFees()
 //
 void CSandstormPool::CheckTimeout()
 {
-    // check mixing queue objects for timeouts
-    std::vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
-    while(it != vecSandstormQueue.end()) {
-        if((*it).IsExpired()) {
-            LogPrint("privatesend", "CSandstormPool::CheckTimeout -- Removing expired queue (%s)\n", (*it).ToString());
-            it = vecSandstormQueue.erase(it);
-        } else ++it;
+    {
+        TRY_LOCK(cs_sandstorm, lockSS);
+        if(!lockSS) return; // it's ok to fail here, we run this quite frequently
+
+       int c = 0;
+       vector<CSandstormQueue>::iterator it = vecSandstormQueue.begin();
+       while(it != vecSandstormQueue.end()){
+           if((*it).IsExpired()){
+               LogPrint("privatesend", "CSandstormPool::CheckTimeout() : Removing expired queue entry - %d\n", c);
+               it = vecSandstormQueue.erase(it);
+           } else ++it;
+           c++;
+       }
     }
 
     if(!fEnablePrivateSend && !fStormNode) return;
@@ -1536,7 +1559,6 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
             } else {
                 LogPrintf("CSandstormPool::DoAutomaticDenominating -- can't connect, addr=%s\n", psn->addr.ToString());
                 strAutoDenomResult = _("Error connecting to Stormnode.");
-                psn->IncreasePoSeBanScore();
                 continue;
             }
         }
@@ -1589,7 +1611,6 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
         } else {
             LogPrintf("CSandstormPool::DoAutomaticDenominating -- can't connect, addr=%s\n", psn->addr.ToString());
             nTries++;
-            psn->IncreasePoSeBanScore();
             continue;
         }
     }
@@ -1833,8 +1854,10 @@ bool CSandstormPool::CreateDenominated()
         return false;
     }
 
+    bool fCreateMixingCollaterals = !pwalletMain->HasCollateralInputs();
+
     BOOST_FOREACH(CompactTallyItem& item, vecTally) {
-        if(!CreateDenominated(item)) continue;
+        if(!CreateDenominated(item, fCreateMixingCollaterals)) continue;
         return true;
     }
 
@@ -1843,7 +1866,7 @@ bool CSandstormPool::CreateDenominated()
 }
 
 // Create denominations
-bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem)
+bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals)
 {
     std::vector<CRecipient> vecSend;
     CAmount nValueLeft = tallyItem.nAmount;
@@ -1860,7 +1883,7 @@ bool CSandstormPool::CreateDenominated(const CompactTallyItem& tallyItem)
 
     // ****** Add collateral outputs ************ /
 
-    if(!pwalletMain->HasCollateralInputs()) {
+    if(fCreateMixingCollaterals) {
         vecSend.push_back((CRecipient){scriptCollateral, PRIVATESEND_COLLATERAL*4, false});
         nValueLeft -= PRIVATESEND_COLLATERAL*4;
     }
@@ -2322,11 +2345,21 @@ bool CSandstormQueue::CheckSignature(const CPubKey& pubKeyStormnode)
 
 bool CSandstormQueue::Relay()
 {
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes)
+    std::vector<CNode*> vNodesCopy;
+    {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->AddRef();
+    }
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
             pnode->PushMessage(NetMsgType::SSQUEUE, (*this));
-
+    {
+        LOCK(cs_vNodes);
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->Release();
+    }
     return true;
 }
 
@@ -2446,9 +2479,11 @@ void ThreadCheckSandStormPool()
             nTick++;
 
             // check if we should activate or ping every few minutes,
-            // start right after sync is considered to be done
-            if(nTick % STORMNODE_MIN_SNP_SECONDS == 1)
+            // slightly postpone first run to give net thread a chance to connect to some peers
+            if(nTick % STORMNODE_MIN_SNP_SECONDS == 15)
                 activeStormnode.ManageState();
+
+            snodeman.Check();
 
             if(nTick % 60 == 0) {
                 snodeman.CheckAndRemove();

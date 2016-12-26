@@ -383,7 +383,7 @@ private:
 
     /// Create denominations
     bool CreateDenominated();
-    bool CreateDenominated(const CompactTallyItem& tallyItem);
+    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals);
 
     /// Split up large inputs or make fee sized inputs
     bool MakeCollateralAmounts();
@@ -463,6 +463,7 @@ public:
     int GetQueueSize() const { return vecSandstormQueue.size(); }
     int GetState() const { return nState; }
     std::string GetStatus();
+    std::string GetStateString() const;
 
     int GetEntriesCount() const { return vecEntries.size(); }
 

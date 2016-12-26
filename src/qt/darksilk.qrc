@@ -51,6 +51,8 @@
         <file alias="about">res/icons/drk/about.png</file>
         <file alias="about_qt">res/icons/drk/about_qt.png</file>
         <file alias="verify">res/icons/drk/verify.png</file>
+        <file alias="hd_enabled">res/icons/drk/hd_enabled.png</file>
+        <file alias="hd_disabled">res/icons/drk/hd_disabled.png</file>
     </qresource>
     <qresource prefix="/css">
         <file alias="drk">res/css/drk.css</file>

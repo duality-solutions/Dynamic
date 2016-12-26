@@ -18,12 +18,6 @@
 #include "consensus/validation.h"
 #include "hash.h"
 #include "init.h"
-#include "instantx.h"
-#include "sandstorm.h"
-#include "governance.h"
-#include "stormnode-payments.h"
-#include "stormnode-sync.h"
-#include "stormnodeman.h"
 #include "merkleblock.h"
 #include "net.h"
 #include "policy/policy.h"
@@ -44,6 +38,13 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+
+#include "sandstorm.h"
+#include "governance.h"
+#include "instantx.h"
+#include "stormnode-payments.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
 
 #include <sstream>
 
@@ -941,7 +942,7 @@ unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& in
     return nSigOps;
 }
 
-int GetInputAge(CTxIn& txin)
+int GetInputAge(const CTxIn &txin)
 {
     CCoinsView viewDummy;
     CCoinsViewCache view(&viewDummy);
@@ -961,7 +962,7 @@ int GetInputAge(CTxIn& txin)
     }
 }
 
-int GetInputAgeIX(uint256 nTXHash, CTxIn& txin)
+int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin)
 {
     int nResult = GetInputAge(txin);
     if(nResult < 0) return -1;
@@ -972,7 +973,7 @@ int GetInputAgeIX(uint256 nTXHash, CTxIn& txin)
     return nResult;
 }
 
-int GetIXConfirmations(uint256 nTXHash)
+int GetIXConfirmations(const uint256 &nTXHash)
 {
     if (IsLockedInstandSendTransaction(nTXHash))
         return nInstantSendDepth;
@@ -1701,7 +1702,7 @@ int64_t GetTotalCoinEstimate(int nHeight)
     return nTotalCoins;
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight, const Consensus::Params& consensusParams)
+CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees, const Consensus::Params& consensusParams)
 {
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 4000000 * COIN;
@@ -1714,10 +1715,10 @@ CAmount GetPoWBlockPayment(const int& nHeight, const Consensus::Params& consensu
     }
     else if (chainActive.Height() > Params().StartStormnodePayments()) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
-        return STATIC_POW_REWARD; // 1 DSLK + fees
+        return STATIC_POW_REWARD + nFees; // 1 DSLK + fees
     }
     else {
-        return STATIC_POW_REWARD;
+        return STATIC_POW_REWARD + nFees;
     }
 }
 
@@ -1744,7 +1745,7 @@ bool IsInitialBlockDownload()
     const CChainParams& chainParams = Params();
     if (fCheckpointsEnabled && chainActive.Height() < Checkpoints::GetTotalBlocksEstimate(chainParams.Checkpoints()))
         return true;
-    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
+    bool state = (chainActive.Height() < pindexBestHeader->nHeight ||
             std::max(chainActive.Tip()->GetBlockTime(), pindexBestHeader->GetBlockTime()) < GetTime() - chainParams.MaxTipAge());
     if (!state)
         lockIBDState = true;
@@ -2691,7 +2692,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
-    // DARKSILK : MODIFYED TO CHECK STORMNODE PAYMENTS AND SUPERBLOCKS
+    // DARKSILK : MODIFIED TO CHECK STORMNODE PAYMENTS AND SUPERBLOCKS
    bool fStormnodePaid = false;
 
     if(chainActive.Height() > Params().StartStormnodePayments()) {
@@ -2701,13 +2702,11 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fStormnodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, chainparams.GetConsensus());
-   
-    if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue)){
-        return state.DoS(100,
-                         error("ConnectBlock() : coinbase pays too much (actual=%d vs limit=%d)",
-                               block.vtx[0].GetValueOut(), nExpectedBlockValue,
-                               REJECT_INVALID, "bad-cb-amount"));
+    CAmount nExpectedBlockValue = GetStormnodePayment(fStormnodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees, chainparams.GetConsensus());
+    std::string strError = "";
+
+    if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
+        return state.DoS(100, error("ConnectBlock(): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
     if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
@@ -4972,13 +4971,19 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
             {
                 // Send stream from relay memory
                 bool pushed = false;
+
                 {
-                    LOCK(cs_mapRelay);
-                    map<CInv, CDataStream>::iterator mi = mapRelay.find(inv);
-                    if (mi != mapRelay.end()) {
-                        pfrom->PushMessage(inv.GetCommand(), (*mi).second);
-                        pushed = true;
+                    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+                    {
+                        LOCK(cs_mapRelay);
+                        map<CInv, CDataStream>::iterator mi = mapRelay.find(inv);
+                        if (mi != mapRelay.end()) {
+                            ss += (*mi).second;
+                            pushed = true;
+                        }
                     }
+                    if(pushed)
+                        pfrom->PushMessage(inv.GetCommand(), ss);
                 }
 
                 if (!pushed && inv.type == MSG_TX) {
@@ -5023,7 +5028,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 }
 
                 if (!pushed && inv.type == MSG_STORMNODE_PAYMENT_VOTE) {
-                    if(snpayments.mapStormnodePaymentVotes.count(inv.hash)) {
+                    if(snpayments.HasVerifiedPaymentVote(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
                         ss << snpayments.mapStormnodePaymentVotes[inv.hash];
@@ -5039,7 +5044,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         BOOST_FOREACH(CStormnodePayee& payee, snpayments.mapStormnodeBlocks[mi->second->nHeight].vecPayees) {
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             BOOST_FOREACH(uint256& hash, vecVoteHashes) {
-                                if(snpayments.mapStormnodePaymentVotes.count(hash)) {
+                                if(snpayments.HasVerifiedPaymentVote(hash)) {
                                     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                                     ss.reserve(1000);
                                     ss << snpayments.mapStormnodePaymentVotes[hash];
@@ -5600,7 +5605,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     }
 
 
-    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::SSTX)
+    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::SSTX || strCommand == NetMsgType::TXLOCKREQUEST)
     {
         // Stop processing the transaction early if
         // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
@@ -5650,6 +5655,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrintf("SSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
             psn->fAllowMixingTx = false;
+        } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
+            vRecv >> tx;
+            nInvType = MSG_TXLOCK_REQUEST;
         }
 
         CInv inv(nInvType, tx.GetHash());
@@ -5665,8 +5673,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))
         {
+            // Process custom txes
             if (strCommand == NetMsgType::SSTX) {
                 mapSandstormBroadcastTxes.insert(make_pair(tx.GetHash(), sstx));
+            } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
+                if(!ProcessTxLockRequest(pfrom, tx)) return false;
             }
 
             mempool.check(pcoinsTip);
@@ -5744,6 +5755,20 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         } else {
             assert(recentRejects);
             recentRejects->insert(tx.GetHash());
+
+            if (strCommand == NetMsgType::TXLOCKREQUEST && !AlreadyHave(inv)) { // i.e. AcceptToMemoryPool failed
+                mapLockRequestRejected.insert(std::make_pair(tx.GetHash(), tx));
+
+                // can we get the conflicting transaction as proof?
+
+                LogPrintf("TXLOCKREQUEST -- Transaction Lock Request: %s %s : rejected %s\n",
+                    pfrom->addr.ToString(), pfrom->cleanSubVer,
+                    tx.GetHash().ToString()
+                );
+
+                LockTransactionInputs(tx);
+                ResolveConflicts(tx);
+            }
 
             if (pfrom->fWhitelisted && GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY)) {
                 // Always relay transactions received from whitelisted peers, even
@@ -6565,6 +6590,7 @@ bool SendMessages(CNode* pto)
 
                     if (fTrickleWait)
                     {
+                        LogPrint("net", "SendMessages -- queued inv(vInvWait): %s  index=%d peer=%d\n", inv.ToString(), vInvWait.size(), pto->id);
                         vInvWait.push_back(inv);
                         continue;
                     }
@@ -6572,17 +6598,22 @@ bool SendMessages(CNode* pto)
 
                 pto->filterInventoryKnown.insert(inv.hash);
 
+                LogPrint("net", "SendMessages -- queued inv: %s  index=%d peer=%d\n", inv.ToString(), vInv.size(), pto->id);
+
                 vInv.push_back(inv);
                 if (vInv.size() >= 1000)
                 {
+                    LogPrint("net", "SendMessages -- pushing inv's: count=%d peer=%d\n", vInv.size(), pto->id);
                     pto->PushMessage(NetMsgType::INV, vInv);
                     vInv.clear();
                 }
             }
             pto->vInventoryToSend = vInvWait;
         }
-        if (!vInv.empty())
+        if (!vInv.empty()) {
+            LogPrint("net", "SendMessages -- pushing tailing inv's: count=%d peer=%d\n", vInv.size(), pto->id);
             pto->PushMessage(NetMsgType::INV, vInv);
+        }
 
         // Detect whether we're stalling
         nNow = GetTimeMicros();
@@ -6636,7 +6667,8 @@ bool SendMessages(CNode* pto)
         if(!pto->mapAskFor.empty()) {
             nFirst = (*pto->mapAskFor.begin()).first;
         }
-        LogPrint("net", "SendMessages (mapAskFor) -- before loop: nNow = %d, nFirst = %d\n", nNow, nFirst);
+        // debug=1, seems to produce mostly this message
+        //LogPrint("net", "SendMessages (mapAskFor) -- before loop: nNow = %d, nFirst = %d\n", nNow, nFirst);
         while (!pto->fDisconnect && !pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
         {
             const CInv& inv = (*pto->mapAskFor.begin()).second;

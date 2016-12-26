@@ -3,17 +3,16 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "main.h"
-#include "db.h"
-#include "init.h"
 #include "activestormnode.h"
 #include "sandstorm.h"
-#include "governance.h"
+#include "init.h"
+#include "main.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
 #include "rpcserver.h"
+#include "util.h"
 #include "utilmoneystr.h"
 
 #include <fstream>
@@ -33,7 +32,6 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             "  start       - Start mixing\n"
             "  stop        - Stop mixing\n"
             "  reset       - Reset mixing\n"
-            "  status      - Print mixing status\n"
             + HelpRequiringPassphrase());
 
     if(params[0].get_str() == "start") {
@@ -58,15 +56,6 @@ UniValue privatesend(const UniValue& params, bool fHelp)
         return "Mixing was reset";
     }
 
-    if(params[0].get_str() == "status") {
-        UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("status",            sandStormPool.GetStatus()));
-        obj.push_back(Pair("keys_left",     pwalletMain->nKeysLeftSinceAutoBackup));
-        obj.push_back(Pair("warnings",      (pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
-                                                ? "WARNING: keypool is almost depleted!" : "")));
-        return obj;
-    }
-
     return "Unknown command, please see \"help privatesend\"";
 }
 
@@ -75,14 +64,25 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 0)
         throw std::runtime_error(
             "getpoolinfo\n"
-            "Returns an object containing anonymous pool-related information.");
+            "Returns an object containing mixing pool related information.\n");
 
     UniValue obj(UniValue::VOBJ);
-    if (sandStormPool.pSubmittedToStormnode)
-        obj.push_back(Pair("stormnode",        sandStormPool.pSubmittedToStormnode->addr.ToString()));
-    obj.push_back(Pair("queue",                 sandStormPool.GetQueueSize()));
-    obj.push_back(Pair("state",                 sandStormPool.GetState()));
-    obj.push_back(Pair("entries",               sandStormPool.GetEntriesCount()));
+    obj.push_back(Pair("state",             sandStormPool.GetStateString()));
+    obj.push_back(Pair("mixing_mode",       fPrivateSendMultiSession ? "multi-session" : "normal"));
+    obj.push_back(Pair("queue",             sandStormPool.GetQueueSize()));
+    obj.push_back(Pair("entries",           sandStormPool.GetEntriesCount()));
+    obj.push_back(Pair("status",            sandStormPool.GetStatus()));
+
+    if (sandStormPool.pSubmittedToStormnode) {
+        obj.push_back(Pair("outpoint",      sandStormPool.pSubmittedToStormnode->vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          sandStormPool.pSubmittedToStormnode->addr.ToString()));
+    }
+
+    if (pwalletMain) {
+        obj.push_back(Pair("keys_left",     pwalletMain->nKeysLeftSinceAutoBackup));
+        obj.push_back(Pair("warnings",      pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
+                                                ? "WARNING: keypool is almost depleted!" : ""));
+    }
     return obj;
 }
 
@@ -166,9 +166,8 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         if (strMode == "enabled")
             return snodeman.CountEnabled();
 
-        LOCK(cs_main);
         int nCount;
-        snodeman.GetNextStormnodeInQueueForPayment(chainActive.Height(), true, nCount);
+        snodeman.GetNextStormnodeInQueueForPayment(true, nCount);
 
         if (strMode == "qualify")
             return nCount;
@@ -183,14 +182,12 @@ UniValue stormnode(const UniValue& params, bool fHelp)
     {
         int nCount;
         int nHeight;
-        CBlockIndex* pindex;
         CStormnode* winner = NULL;
         {
             LOCK(cs_main);
             nHeight = chainActive.Height() + (strCommand == "current" ? 1 : 10);
-            pindex = chainActive.Tip();
         }
-        snodeman.UpdateLastPaid(pindex);
+        snodeman.UpdateLastPaid();
         winner = snodeman.GetNextStormnodeInQueueForPayment(nHeight, true, nCount);
         if(!winner) return "unknown";
 
@@ -481,22 +478,12 @@ UniValue stormnodelist(const UniValue& params, bool fHelp)
     }
 
     if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-        CBlockIndex* pindex;
-        {
-            LOCK(cs_main);
-            pindex = chainActive.Tip();
-        }
-        snodeman.UpdateLastPaid(pindex);
+       snodeman.UpdateLastPaid();
     }
 
     UniValue obj(UniValue::VOBJ);
     if (strMode == "rank") {
-        int nHeight;
-        {
-            LOCK(cs_main);
-            nHeight = chainActive.Height();
-        }
-        std::vector<std::pair<int, CStormnode> > vStormnodeRanks = snodeman.GetStormnodeRanks(nHeight);
+        std::vector<std::pair<int, CStormnode> > vStormnodeRanks = snodeman.GetStormnodeRanks();
         BOOST_FOREACH(PAIRTYPE(int, CStormnode)& s, vStormnodeRanks) {
             std::string strOutpoint = s.second.vin.prevout.ToStringShort();
             if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;

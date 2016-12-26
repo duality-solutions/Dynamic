@@ -272,11 +272,13 @@ public:
 
     /// Find an entry in the stormnode list that is next to be paid
     CStormnode* GetNextStormnodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount);
+    /// Same as above but use current block height
+    CStormnode* GetNextStormnodeInQueueForPayment(bool fFilterSigTime, int& nCount);
 
     /// Find a random entry
     CStormnode* FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion = -1);
 
-    std::vector<CStormnode> GetFullStormnodeVector() { Check(); return vStormnodes; }
+    std::vector<CStormnode> GetFullStormnodeVector() { return vStormnodes; }
 
     std::vector<std::pair<int, CStormnode> > GetStormnodeRanks(int nBlockHeight = -1, int nMinProtocol=0);
     int GetStormnodeRank(const CTxIn &vin, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
@@ -305,7 +307,7 @@ public:
     /// Perform complete check and only then update list and maps
     bool CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos);
 
-    void UpdateLastPaid(const CBlockIndex *pindex);
+    void UpdateLastPaid();
 
     void CheckAndRebuildStormnodeIndex();
 

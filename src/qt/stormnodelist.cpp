@@ -8,16 +8,16 @@
 #include "stormnodelist.h"
 #include "ui_stormnodelist.h"
 
-#include "sync.h"
-#include "clientmodel.h"
-#include "walletmodel.h"
 #include "activestormnode.h"
+#include "clientmodel.h"
+#include "init.h"
+#include "guiutil.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
+#include "sync.h"
 #include "wallet/wallet.h"
-#include "init.h"
-#include "guiutil.h"
+#include "walletmodel.h"
 
 #include <QTimer>
 #include <QMessageBox>

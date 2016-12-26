@@ -6,32 +6,19 @@
 #ifndef INSTANTX_H
 #define INSTANTX_H
 
-#include "sync.h"
 #include "net.h"
-#include "key.h"
-#include "util.h"
-#include "base58.h"
-#include "main.h"
+#include "primitives/transaction.h"
 
 class CTransaction;
 class CTxLockVote;
 class CTxLockCandidate;
 
-/*
-    At 15 signatures, 1/2 of the stormnode network can be owned by
-    one party without comprimising the security of InstantSend
-    (1000/2150.0)**10 = 0.00047382219560689856
-    (1000/2900.0)**10 = 2.3769498616783657e-05
-
-    ### getting 5 of 10 signatures w/ 1000 nodes of 2900
-    (1000/2900.0)**5 = 0.004875397277841433
-*/
 static const int INSTANTSEND_SIGNATURES_REQUIRED    = 10;
 static const int INSTANTSEND_SIGNATURES_TOTAL       = 20;
-static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
+static const int DEFAULT_INSTANTSEND_DEPTH          = 10;
 
 static const int MIN_INSTANTSEND_PROTO_VERSION      = 60800;
-static const CAmount INSTANTSEND_MIN_FEE            = 0.1 * CENT;
+static const CAmount INSTANTSEND_MIN_FEE            = 0.001 * COIN;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -43,42 +30,46 @@ extern std::map<uint256, CTxLockVote> mapTxLockVotes;
 extern std::map<COutPoint, uint256> mapLockedInputs;
 
 
-int64_t CreateTxLockCandidate(CTransaction tx);
+void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 
 bool IsInstantSendTxValid(const CTransaction& txCandidate);
 
-void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
+bool ProcessTxLockRequest(CNode* pfrom, const CTransaction &tx);
+
+int64_t CreateTxLockCandidate(const CTransaction &tx);
 
 //check if we need to vote on this transaction
-void CreateTxLockVote(CTransaction& tx, int64_t nBlockHeight);
+void CreateTxLockVote(const CTransaction& tx, int nBlockHeight);
 
 //process consensus vote message
 bool ProcessTxLockVote(CNode *pnode, CTxLockVote& vote);
 
-//update UI and notify external script if any
-void UpdateLockedTransaction(CTransaction& tx, bool fForceNotification = false);
+void ProcessOrphanTxLockVotes();
 
-void LockTransactionInputs(CTransaction& tx);
+//update UI and notify external script if any
+void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification = false);
+
+void LockTransactionInputs(const CTransaction& tx);
 
 // if two conflicting locks are approved by the network, they will cancel out
-bool FindConflictingLocks(CTransaction& tx);
+bool FindConflictingLocks(const CTransaction& tx);
 
 //try to resolve conflicting locks
-void ResolveConflicts(CTransaction& tx);
+void ResolveConflicts(const CTransaction& tx);
 
 // keep transaction locks in memory for an hour
 void CleanTxLockCandidates();
 
 // verify if transaction is currently locked
-bool IsLockedInstandSendTransaction(uint256 txHash);
+bool IsLockedInstandSendTransaction(const uint256 &txHash);
 
 // get the actual uber og accepted lock signatures
-int GetTransactionLockSignatures(uint256 txHash);
+int GetTransactionLockSignatures(const uint256 &txHash);
 
 // verify if transaction lock timed out
-bool IsTransactionLockTimedOut(uint256 txHash);
+bool IsTransactionLockTimedOut(const uint256 &txHash);
 
-int64_t GetAverageUnknownVoteTime();
+int64_t GetAverageStormnodeOrphanVoteTime();
 
 class CTxLockVote
 {
@@ -87,6 +78,9 @@ public:
     uint256 txHash;
     int nBlockHeight;
     std::vector<unsigned char> vchStormNodeSignature;
+
+    // local memory only
+    int64_t nOrphanExpireTime;
 
     ADD_SERIALIZE_METHODS;
 
@@ -101,7 +95,7 @@ public:
     uint256 GetHash() const;
 
     bool Sign();
-    bool CheckSignature();
+    bool CheckSignature() const;
 };
 
 class CTxLockCandidate
@@ -116,7 +110,7 @@ public:
     uint256 GetHash() const { return txHash; }
 
     bool IsAllVotesValid();
-    void AddVote(CTxLockVote& vote);
+    void AddVote(const CTxLockVote& vote);
     int CountVotes();
 };
 

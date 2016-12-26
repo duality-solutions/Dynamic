@@ -257,7 +257,8 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 
 int64_t GetTotalCoinEstimate(int nHeight);
-CAmount GetPoWBlockPayment(const int& nHeight, const Consensus::Params& consensusParams);
+
+CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees, const Consensus::Params& consensusParams);
 CAmount GetStormnodePayment(bool fStormnode = true);
 
 /**
@@ -297,9 +298,9 @@ void PruneAndFlush();
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                         bool* pfMissingInputs, bool fOverrideMempoolLimit=false, bool fRejectAbsurdFee=false, bool fDryRun=false);
 
-int GetInputAge(CTxIn& txin);
-int GetInputAgeIX(uint256 nTXHash, CTxIn& txin);
-int GetIXConfirmations(uint256 nTXHash);
+int GetInputAge(const CTxIn &txin);
+int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin);
+int GetIXConfirmations(const uint256 &nTXHash);
 
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);

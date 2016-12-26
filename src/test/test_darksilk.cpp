@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#define BOOST_TEST_MODULE Dash Test Suite
+#define BOOST_TEST_MODULE DarkSilk Test Suite
 
 #include "test_darksilk.h"
 
@@ -27,7 +27,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-CClientUIInterface uiInterface; // Declared but not defined in ui_interface.h
 CWallet* pwalletMain;
 
 extern bool fPrintToConsole;

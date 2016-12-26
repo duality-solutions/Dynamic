@@ -15,7 +15,6 @@
 #include "guiutil.h"
 
 #include "amount.h"
-#include "sandstorm.h"
 #include "init.h"
 #include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
@@ -24,6 +23,10 @@
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
+#endif
+
+#include "sandstorm.h"
+#ifdef ENABLED_WALLET
 #include "stormnodeconfig.h"
 #endif
 
@@ -85,7 +88,7 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("theme", "");
 
     if (!settings.contains("fShowStormnodesTab"))
-        settings.setValue("fShowStormnodesTab", stormnodeConfig.getCount());
+        settings.setValue("fShowStormnodesTab", true);
 
     if (!settings.contains("fShowAdvancedPSUI"))
         settings.setValue("fShowAdvancedPSUI", false);

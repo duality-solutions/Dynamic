@@ -193,6 +193,8 @@ RES_ICONS = \
   qt/res/icons/drk/eye_minus.png \
   qt/res/icons/drk/eye_plus.png \
   qt/res/icons/drk/filesave.png \
+  qt/res/icons/drk/hd_disabled.png \
+  qt/res/icons/drk/hd_enabled.png \
   qt/res/icons/drk/history.png \
   qt/res/icons/drk/key.png \
   qt/res/icons/drk/lock_closed.png \

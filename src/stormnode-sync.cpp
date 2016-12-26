@@ -36,8 +36,8 @@ bool CStormnodeSync::IsBlockchainSynced()
         return false;
 
     // same as !IsInitialBlockDownload() but no cs_main needed here
-    int nMaxBlockTime = std::max(pCurrentBlockIndex->GetBlockTime(), pindexBestHeader->GetBlockTime());
-    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight < 24 * 6 &&
+    int64_t nMaxBlockTime = std::max(pCurrentBlockIndex->GetBlockTime(), pindexBestHeader->GetBlockTime());
+    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight &&
                         GetTime() - nMaxBlockTime < Params().MaxTipAge();
 
     return fBlockchainSynced;
@@ -56,7 +56,7 @@ void CStormnodeSync::Reset()
     nTimeAssetSyncStarted = GetTime();
     nTimeLastStormnodeList = GetTime();
     nTimeLastPaymentVote = GetTime();
-    nTimeLastBudgetItem = GetTime();
+    nTimeLastGovernanceItem = GetTime();
     nTimeLastFailure = 0;
     nCountFailures = 0;
 }
@@ -96,7 +96,7 @@ void CStormnodeSync::SwitchToNextAsset()
             nRequestedStormnodeAssets = STORMNODE_SYNC_SNW;
             break;
         case(STORMNODE_SYNC_SNW):
-            nTimeLastBudgetItem = GetTime();
+            nTimeLastGovernanceItem = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_GOVERNANCE;
             break;
         case(STORMNODE_SYNC_GOVERNANCE):
@@ -163,6 +163,13 @@ void CStormnodeSync::ClearFulfilledRequests()
     }
 }
 
+void ReleaseNodes(const std::vector<CNode*> &vNodesCopy)
+{
+    LOCK(cs_vNodes);
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        pnode->Release();
+}
+
 void CStormnodeSync::ProcessTick()
 {
     static int nTick = 0;
@@ -211,16 +218,21 @@ void CStormnodeSync::ProcessTick()
         return;
     }
 
-    LOCK2(snodeman.cs, cs_vNodes);
-
     if(nRequestedStormnodeAssets == STORMNODE_SYNC_INITIAL ||
         (nRequestedStormnodeAssets == STORMNODE_SYNC_SPORKS && IsBlockchainSynced()))
     {
         SwitchToNextAsset();
     }
 
-    BOOST_FOREACH(CNode* pnode, vNodes)
+    std::vector<CNode*> vNodesCopy;
     {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->AddRef();
+    }
+
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)    {
         // QUICK MODE (REGTEST ONLY!)
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {
@@ -237,6 +249,7 @@ void CStormnodeSync::ProcessTick()
                 nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             }
             nRequestedStormnodeAttempt++;
+            ReleaseNodes(vNodesCopy);
             return;
         }
 
@@ -272,9 +285,11 @@ void CStormnodeSync::ProcessTick()
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // there is no way we can continue without stormnode list, fail here and try later
                         Fail();
+                        ReleaseNodes(vNodesCopy);
                         return;
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -289,6 +304,7 @@ void CStormnodeSync::ProcessTick()
                 if(nRequestedStormnodeAttempt > 1 && nSnCount > nSnCountEstimated) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -301,6 +317,7 @@ void CStormnodeSync::ProcessTick()
 
                 snodeman.SsegUpdate(pnode);
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
@@ -317,9 +334,11 @@ void CStormnodeSync::ProcessTick()
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // probably not a good idea to proceed without winner list
                         Fail();
+                        ReleaseNodes(vNodesCopy);
                         return;
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -329,6 +348,7 @@ void CStormnodeSync::ProcessTick()
                 if(nRequestedStormnodeAttempt > 1 && snpayments.IsEnoughData()) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -344,6 +364,7 @@ void CStormnodeSync::ProcessTick()
                 // ask node for missing pieces only (old nodes will not be asked)
                 snpayments.RequestLowDataPaymentBlocks(pnode);
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
 
@@ -353,13 +374,14 @@ void CStormnodeSync::ProcessTick()
                 LogPrint("snpayments", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastPaymentVote %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastPaymentVote, GetTime(), GetTime() - nTimeLastPaymentVote);
 
                 // check for timeout first
-                if(nTimeLastBudgetItem < GetTime() - STORMNODE_SYNC_TIMEOUT_SECONDS){
+                if(GetTime() - nTimeLastGovernanceItem > STORMNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- timeout\n", nTick, nRequestedStormnodeAssets);
                     if(nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
                         // it's kind of ok to skip this for now, hopefully we'll catch up later?
                     }
                     SwitchToNextAsset();
+                    ReleaseNodes(vNodesCopy);
                     return;
                 }
 
@@ -385,20 +407,16 @@ void CStormnodeSync::ProcessTick()
 
                 pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync stormnode votes
 
+                ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
             }
         }
     }
+    // looped through all nodes, release them
+    ReleaseNodes(vNodesCopy);
 }
 
 void CStormnodeSync::UpdatedBlockTip(const CBlockIndex *pindex)
 {
     pCurrentBlockIndex = pindex;
-}
-
-
-void CStormnodeSync::AddedBudgetItem(uint256 hash)
-{
-    // skip this for now
-    return;
 }

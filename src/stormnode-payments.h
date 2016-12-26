@@ -22,10 +22,7 @@ static const int SNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
 //! minimum peer version that can receive and send stormnode payment messages,
 //  vote for stormnode and be elected as a payment winner
-// V1 - Last protocol version before update
-// V2 - Newest protocol version
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_1 = 60700;
-static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION_2 = 60800;
+static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION = 60800;
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapStormnodeBlocks;
@@ -34,7 +31,7 @@ extern CCriticalSection cs_mapStormnodePayeeVotes;
 extern CStormnodePayments snpayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward);
+bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward, std::string &strErrorRet);
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
 void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutStormnodeRet, std::vector<CTxOut>& voutSuperblockRet);
 std::string GetRequiredPaymentsString(int nBlockHeight);
@@ -80,8 +77,14 @@ public:
     int nBlockHeight;
     std::vector<CStormnodePayee> vecPayees;
 
-    CStormnodeBlockPayees() : nBlockHeight(0) {}
-    CStormnodeBlockPayees(int nBlockHeightIn) : nBlockHeight(nBlockHeightIn) {}
+    CStormnodeBlockPayees() :
+        nBlockHeight(0),
+        vecPayees()
+        {}
+    CStormnodeBlockPayees(int nBlockHeightIn) :
+        nBlockHeight(nBlockHeightIn),
+        vecPayees()
+        {}
 
     ADD_SERIALIZE_METHODS;
 
@@ -143,10 +146,13 @@ public:
     }
 
     bool Sign();
-    bool CheckSignature();
+    bool CheckSignature(const CPubKey& pubKeyStormnode, int nValidationHeight, int &nDos);
 
     bool IsValid(CNode* pnode, int nValidationHeight, std::string& strError);
     void Relay();
+
+    bool IsVerified() { return !vchSig.empty(); }
+    void MarkAsNotVerified() { vchSig.clear(); }
 
     std::string ToString() const;
 };
@@ -185,6 +191,7 @@ public:
     void Clear();
 
     bool AddPaymentVote(const CStormnodePaymentVote& vote);
+    bool HasVerifiedPaymentVote(uint256 hashIn);
     bool ProcessBlock(int nBlockHeight);
 
     void Sync(CNode* node, int nCountNeeded);

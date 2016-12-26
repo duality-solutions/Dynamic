@@ -3,19 +3,15 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "stormnodeman.h"
 #include "activestormnode.h"
+#include "addrman.h"
 #include "sandstorm.h"
 #include "governance.h"
-#include "stormnode.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
+#include "stormnodeman.h"
 #include "netfulfilledman.h"
 #include "util.h"
-#include "addrman.h"
-#include "spork.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
 
 /** Stormnode manager */
 CStormnodeMan snodeman;
@@ -123,9 +119,6 @@ CStormnodeMan::CStormnodeMan()
 bool CStormnodeMan::Add(CStormnode &sn)
 {
     LOCK(cs);
-
-    if (!sn.IsEnabled() && !sn.IsPreEnabled())
-        return false;
 
     CStormnode *psn = Find(sn.vin);
     if (psn == NULL) {
@@ -321,7 +314,6 @@ int CStormnodeMan::CountEnabled(int nProtocolVersion)
     nProtocolVersion = nProtocolVersion == -1 ? snpayments.GetMinStormnodePaymentsProto() : nProtocolVersion;
 
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-        sn.Check();
         if(sn.nProtocolVersion < nProtocolVersion || !sn.IsEnabled()) continue;
         nCount++;
     }
@@ -461,6 +453,15 @@ bool CStormnodeMan::Has(const CTxIn& vin)
 //
 // Deterministically select the oldest/best stormnode to pay on the network
 //
+CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(bool fFilterSigTime, int& nCount)
+{
+    if(!pCurrentBlockIndex) {
+        nCount = 0;
+        return NULL;
+    }
+    return GetNextStormnodeInQueueForPayment(pCurrentBlockIndex->nHeight, fFilterSigTime, nCount);
+}
+
 CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount)
 {
     // Need LOCK2 here to ensure consistent locking order because the GetBlockHash call below locks cs_main
@@ -476,8 +477,7 @@ CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, b
     int nSnCount = CountEnabled();
     BOOST_FOREACH(CStormnode &sn, vStormnodes)
     {
-        sn.Check();
-        if(!sn.IsEnabled()) continue;
+        if(!sn.IsValidForPayment()) continue;
 
         // //check protocol version
         if(sn.nProtocolVersion < snpayments.GetMinStormnodePaymentsProto()) continue;
@@ -584,8 +584,10 @@ int CStormnodeMan::GetStormnodeRank(const CTxIn& vin, int nBlockHeight, int nMin
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
         if(sn.nProtocolVersion < nMinProtocol) continue;
         if(fOnlyActive) {
-            sn.Check();
             if(!sn.IsEnabled()) continue;
+        }
+        else {
+            if(!sn.IsValidForPayment()) continue;
         }
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
 
@@ -616,8 +618,6 @@ std::vector<std::pair<int, CStormnode> > CStormnodeMan::GetStormnodeRanks(int nB
 
     // scan for winner
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-
-        sn.Check();
 
         if(sn.nProtocolVersion < nMinProtocol || !sn.IsEnabled()) continue;
 
@@ -653,10 +653,7 @@ CStormnode* CStormnodeMan::GetStormnodeByRank(int nRank, int nBlockHeight, int n
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
 
         if(sn.nProtocolVersion < nMinProtocol) continue;
-        if(fOnlyActive) {
-            sn.Check();
-            if(!sn.IsEnabled()) continue;
-        }
+        if(fOnlyActive && !sn.IsEnabled()) continue;
 
         int64_t nScore = sn.CalculateScore(blockHash).GetCompact(false);
 
@@ -698,11 +695,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
     if (strCommand == NetMsgType::SNANNOUNCE) { //Stormnode Broadcast
 
-        {
-            LOCK(cs);
-
-            CStormnodeBroadcast snb;
-            vRecv >> snb;
+        CStormnodeBroadcast snb;
+        vRecv >> snb;
 
             int nDos = 0;
 
@@ -711,7 +705,6 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
                 addrman.Add(CAddress(snb.addr), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
                 Misbehaving(pfrom->GetId(), nDos);
-            }
         }
         if(fStormnodesAdded) {
             NotifyStormnodeUpdates();
@@ -725,7 +718,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s\n", snp.vin.prevout.ToStringShort());
 
-        LOCK(cs);
+        // Need LOCK2 here to ensure consistent locking order because the CheckAndUpdate call below locks cs_main
+        LOCK2(cs_main, cs);
 
         if(mapSeenStormnodePing.count(snp.GetHash())) return; //seen
         mapSeenStormnodePing.insert(std::make_pair(snp.GetHash(), snp));
@@ -733,7 +727,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s new\n", snp.vin.prevout.ToStringShort());
 
         int nDos = 0;
-        if(snp.CheckAndUpdate(nDos, false)) return;
+        if(snp.CheckAndUpdate(nDos)) return;
 
         if(nDos > 0) {
             // if anything significant failed, mark that node
@@ -813,7 +807,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
     } else if (strCommand == NetMsgType::SNVERIFY) { // Stormnode Verify
 
-        LOCK(cs);
+        // Need LOCK2 here to ensure consistent locking order because the all functions below call GetBlockHash which locks cs_main
+        LOCK2(cs_main, cs);
 
         CStormnodeVerification snv;
         vRecv >> snv;
@@ -839,7 +834,9 @@ void CStormnodeMan::DoFullVerificationStep()
 
     std::vector<std::pair<int, CStormnode> > vecStormnodeRanks = GetStormnodeRanks(pCurrentBlockIndex->nHeight - 1, MIN_POSE_PROTO_VERSION);
 
-    LOCK(cs);
+    // Need LOCK2 here to ensure consistent locking order because the SendVerifyRequest call below locks cs_main
+    // through GetHeight() signal in ConnectNode
+    LOCK2(cs_main, cs);
 
     int nCount = 0;
     int nCountMax = std::max(10, (int)vStormnodes.size() / 100); // verify at least 10 stormnode at once but at most 1% of all known stormnodes
@@ -969,27 +966,19 @@ bool CStormnodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CS
     }
 
     CNode* pnode = ConnectNode(addr, NULL, true);
-    if(pnode != NULL) {
-        netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request");
-        // use random nonce, store it and require node to reply with correct one later
-        CStormnodeVerification snv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
-        mWeAskedForVerification[addr] = snv;
-        LogPrintf("CStormnodeMan::SendVerifyRequest -- verifying using nonce %d addr=%s\n", snv.nonce, addr.ToString());
-        pnode->PushMessage(NetMsgType::SNVERIFY, snv);
-        return true;
-    } else {
-        // can't connect, add some PoSe "ban score" to all stormnodes with given addr
-        bool fFound = false;
-        BOOST_FOREACH(CStormnode* psn, vSortedByAddr) {
-            if(psn->addr != addr) {
-                if(fFound) break;
-                continue;
-            }
-            fFound = true;
-            psn->IncreasePoSeBanScore();
-        }
+    if(pnode == NULL) {
+        LogPrintf("CStormnodeMan::SendVerifyRequest -- can't connect to node to verify it, addr=%s\n", addr.ToString());
         return false;
     }
+
+    netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::SNVERIFY)+"-request");
+    // use random nonce, store it and require node to reply with correct one later
+    CStormnodeVerification snv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
+    mWeAskedForVerification[addr] = snv;
+    LogPrintf("CStormnodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", snv.nonce, addr.ToString());
+    pnode->PushMessage(NetMsgType::SNVERIFY, snv);
+
+    return true;
 }
 
 void CStormnodeMan::SendVerifyReply(CNode* pnode, CStormnodeVerification& snv)
@@ -1136,7 +1125,7 @@ void CStormnodeMan::ProcessVerifyReply(CNode* pnode, CStormnodeVerification& snv
             LogPrint("stormnode", "CStormnodeMan::ProcessVerifyBroadcast -- increased PoSe ban score for %s addr %s, new score %d\n",
                         prealStormnode->vin.prevout.ToStringShort(), pnode->addr.ToString(), psn->nPoSeBanScore);
         }
-        LogPrintf("CStormnodeMan::ProcessVerifyBroadcast -- PoSe score incresed for %d fake Stormnodes, addr %s\n",
+        LogPrintf("CStormnodeMan::ProcessVerifyBroadcast -- PoSe score increased for %d fake stormnodes, addr %s\n",
                     (int)vpStormnodesToBan.size(), pnode->addr.ToString());
     }
 }
@@ -1293,7 +1282,8 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
 
 bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos)
 {
-    LOCK(cs);
+    // Need LOCK2 here to ensure consistent locking order because the SimpleCheck call below locks cs_main
+    LOCK2(cs_main, cs);
 
     nDos = 0;
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s\n", snb.vin.prevout.ToStringShort());
@@ -1346,22 +1336,22 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     return true;
 }
 
-void CStormnodeMan::UpdateLastPaid(const CBlockIndex *pindex)
+void CStormnodeMan::UpdateLastPaid()
 {
     LOCK(cs);
 
     if(fLiteMode) return;
+    if(!pCurrentBlockIndex) return;
 
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a stormnode
     // (MNs should update this info on every block, so limited scan should be enough for them)
     int nMaxBlocksToScanBack = (IsFirstRun || !fStormNode) ? snpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
-    // LogPrint("snpayments", "CStormnodeMan::UpdateLastPaid -- nHeight=%d, nMaxBlocksToScanBack=%d, IsFirstRun=%s\n",
-    //                         pindex->nHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
+    // pCurrentBlockIndex->nHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
 
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
-        sn.UpdateLastPaid(pindex, nMaxBlocksToScanBack);
+        sn.UpdateLastPaid(pCurrentBlockIndex, nMaxBlocksToScanBack);
     }
 
     // every time is like the first time if winners list is not synced
@@ -1507,7 +1497,7 @@ void CStormnodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
     if(fStormNode) {
         DoFullVerificationStep();
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
-        UpdateLastPaid(pindex);
+        UpdateLastPaid();
     }
 }
 

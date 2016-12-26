@@ -91,7 +91,7 @@ CStormnode::CStormnode(const CStormnodeBroadcast& snb) :
     lastPing(snb.lastPing),
     vchSig(snb.vchSig),
     sigTime(snb.sigTime),
-    nLastSsq(snb.nLastSsq),
+    nLastSsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(snb.sigTime),
@@ -122,7 +122,7 @@ bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
     nTimeLastChecked = 0;
     nTimeLastWatchdogVote = snb.sigTime;
     int nDos = 0;
-    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(nDos, false))) {
+    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(nDos))) {
         lastPing = snb.lastPing;
         snodeman.mapSeenStormnodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
@@ -169,15 +169,15 @@ void CStormnode::Check(bool fForce)
 
     static int64_t nTimeStart = GetTime();
 
-    LogPrint("stormnode", "CStormnode::Check start -- vin %s\n", vin.prevout.ToStringShort());
-
-    //once spent, stop doing the checks
-    if(nActiveState == STORMNODE_OUTPOINT_SPENT) return;
-
     if(ShutdownRequested()) return;
 
     if(!fForce && (GetTime() - nTimeLastChecked < STORMNODE_CHECK_SECONDS)) return;
     nTimeLastChecked = GetTime();
+
+   LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state\n", vin.prevout.ToStringShort(), GetStateString());
+
+    //once spent, stop doing the checks
+    if(nActiveState == STORMNODE_OUTPOINT_SPENT) return;
 
     int nHeight = 0;
     if(!fUnitTest) {
@@ -196,10 +196,6 @@ void CStormnode::Check(bool fForce)
         nHeight = chainActive.Height();
     }
 
-    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
-    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
-    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
-
     if(nActiveState == STORMNODE_POSE_BAN) {
         if(nHeight < nPoSeBanHeight) return; // too early?
         // Otherwise give it a chance to proceed further to do all the usual checks and to change its state.
@@ -215,6 +211,8 @@ void CStormnode::Check(bool fForce)
         return;
     }
 
+    int nActiveStatePrev = nActiveState;
+
                    // stormnode doesn't meet payment protocol requirements ...
     bool fRemove = nProtocolVersion < snpayments.GetMinStormnodePaymentsProto() ||
                    // or it's our own node and we just updated it to the new protocol but we are still waiting for activation ...
@@ -223,9 +221,11 @@ void CStormnode::Check(bool fForce)
     if(fRemove) {
         // it should be removed from the list
         nActiveState = STORMNODE_REMOVE;
-
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+            // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
@@ -237,30 +237,53 @@ void CStormnode::Check(bool fForce)
 
     if(fWatchdogExpired) {
         nActiveState = STORMNODE_WATCHDOG_EXPIRED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
+    // keep old stormnodes on start, give them a chance to receive an updated ping without removal/expiry
+    if(!stormnodeSync.IsStormnodeListSynced()) nTimeStart = GetTime();
+    bool fWaitForPing = (GetTime() - nTimeStart < STORMNODE_MIN_SNP_SECONDS);
+    // but if it was already expired before the check - don't wait, check it again now
+    if(nActiveState == STORMNODE_EXPIRED) fWaitForPing = false;
+
     if(!fWaitForPing && !IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
         nActiveState = STORMNODE_EXPIRED;
-        // RESCAN AFFECTED VOTES
-        FlagGovernanceItemsAsDirty();
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+           // RESCAN AFFECTED VOTES
+            FlagGovernanceItemsAsDirty();
+        }
         return;
     }
 
     if(lastPing.sigTime - sigTime < STORMNODE_MIN_SNP_SECONDS) {
         nActiveState = STORMNODE_PRE_ENABLED;
+        if(nActiveStatePrev != nActiveState) {
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        }
         return;
     }
 
     nActiveState = STORMNODE_ENABLED; // OK
+    if(nActiveStatePrev != nActiveState) {
+        LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+    }
 }
 
 bool CStormnode::IsValidNetAddr()
 {
+    return IsValidNetAddr(addr);
+}
+
+bool CStormnode::IsValidNetAddr(CService addrIn)
+{
     // TODO: regtest is fine with any addresses for now,
     // should probably be a bit smarter if one day we start to implement tests for this
     return Params().NetworkIDString() == CBaseChainParams::REGTEST ||
-            (addr.IsIPv4() && IsReachable(addr) && addr.IsRoutable());
+            (addrIn.IsIPv4() && IsReachable(addrIn) && addrIn.IsRoutable());
 }
 
 stormnode_info_t CStormnode::GetInfo()
@@ -466,8 +489,8 @@ bool CStormnodeBroadcast::SimpleCheck(int& nDos)
         return false;
     }
 
-    // empty ping or incorrect sigTime/blockhash
-    if(lastPing == CStormnodePing() || !lastPing.CheckAndUpdate(nDos, false, true)) {
+    // empty ping or incorrect sigTime/unknown blockhash
+    if(lastPing == CStormnodePing() || !lastPing.SimpleCheck(nDos)) {
         return false;
     }
 
@@ -723,16 +746,14 @@ bool CStormnodePing::CheckSignature(CPubKey& pubKeyStormnode, int &nDos)
     return true;
 }
 
-bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpleCheck)
+bool CStormnodePing::SimpleCheck(int& nDos)
 {
-    if (sigTime > GetAdjustedTime() + 60 * 60) {
-        LogPrintf("CStormnodePing::CheckAndUpdate -- Signature rejected, too far into the future, stormnode=%s\n", vin.prevout.ToStringShort());
-        nDos = 1;
-        return false;
-    }
 
-    if (sigTime <= GetAdjustedTime() - 60 * 60) {
-        LogPrintf("CStormnodePing::CheckAndUpdate -- Signature rejected, too far into the past: stormnode=%s  sigTime=%d  GetAdjustedTime()=%d\n", vin.prevout.ToStringShort(), sigTime, GetAdjustedTime());
+    // don't ban by default
+    nDos = 0;
+
+    if (sigTime > GetAdjustedTime() + 60 * 60) {
+        LogPrintf("CStormnodePing::SimpleCheck -- Signature rejected, too far into the future, stormnode=%s\n", vin.prevout.ToStringShort());
         nDos = 1;
         return false;
     }
@@ -741,22 +762,32 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpl
         LOCK(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if (mi == mapBlockIndex.end()) {
-            LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, unknown block hash: stormnode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
+            LogPrint("stormnode", "StormnodePing::SimpleCheck -- Stormnode ping is invalid, unknown block hash: stormnode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
             // maybe we stuck or forked so we shouldn't ban this node, just fail to accept this ping
             // TODO: or should we also request this block?
             return false;
         }
-        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
-            // Do nothing here (no Stormnode update, no snping relay)
-            // Let this node to be visible but fail to accept snping
-            return false;
-        }
+    }
+     LogPrint("stormnode", "CStormnodePing::SimpleCheck -- Stormnode ping verified: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
+     return true;
+ }
+ 
+ bool CStormnodePing::CheckAndUpdate(int& nDos)
+ {
+     // don't ban by default
+     nDos = 0;
+ 
+     if (!SimpleCheck(nDos)) {
+        return false;
     }
 
-    if (fSimpleCheck) {
-        LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- ping verified in fSimpleCheck mode: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
-        return true;
+    {
+        LOCK(cs_main);
+        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
+        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
+            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
+            return false;
+        }
     }
 
     LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- New ping: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
@@ -768,8 +799,6 @@ bool CStormnodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled, bool fSimpl
         LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- Couldn't find compatible Stormnode entry, stormnode=%s\n", vin.prevout.ToStringShort());
         return false;
     }
-
-    if (fRequireEnabled && !psn->IsEnabled() && !psn->IsPreEnabled() && !psn->IsWatchdogExpired()) return false;
 
     // LogPrintf("snping - Found corresponding sn for vin: %s\n", vin.prevout.ToStringShort());
     // update only if there is no known ping for this stormnode or
