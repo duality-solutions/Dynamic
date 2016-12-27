@@ -145,7 +145,7 @@ private:
 
 public:
     // Keep track of all broadcasts I've seen
-    std::map<uint256, CStormnodeBroadcast> mapSeenStormnodeBroadcast;
+    std::map<uint256, std::pair<int64_t, CStormnodeBroadcast> > mapSeenStormnodeBroadcast;
     // Keep track of all pings I've seen
     std::map<uint256, CStormnodePing> mapSeenStormnodePing;
     // Keep track of all verifications I've seen

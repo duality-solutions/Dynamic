@@ -122,7 +122,7 @@ bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
     nTimeLastChecked = 0;
     nTimeLastWatchdogVote = snb.sigTime;
     int nDos = 0;
-    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(this, nDos))) {
+    if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(this, true, nDos))) {
         lastPing = snb.lastPing;
         snodeman.mapSeenStormnodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
@@ -798,7 +798,7 @@ bool CStormnodePing::SimpleCheck(int& nDos)
      return true;
  }
  
- bool CStormnodePing::CheckAndUpdate(CStormnode* psn, int& nDos)
+ bool CStormnodePing::CheckAndUpdate(CStormnode* psn, bool fFromNewBroadcast, int& nDos)
  {
      // don't ban by default
      nDos = 0;
@@ -812,6 +812,18 @@ bool CStormnodePing::SimpleCheck(int& nDos)
         return false;
     }
 
+    if(!fFromNewBroadcast) {
+        if (psn->IsUpdateRequired()) {
+            LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- stormnode protocol is outdated, stormnode=%s\n", vin.prevout.ToStringShort());
+            return false;
+        }
+
+        if (psn->IsNewStartRequired()) {
+            LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- stormnode is completely expired, new start is required, stormnode=%s\n", vin.prevout.ToStringShort());
+            return false;
+       }
+    }
+
     {
         LOCK(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
@@ -823,16 +835,6 @@ bool CStormnodePing::SimpleCheck(int& nDos)
     }
 
     LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- New ping: stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
-
-    if (psn->IsUpdateRequired()) {
-        LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- stormnode protocol is outdated, stormnode=%s\n", vin.prevout.ToStringShort());
-        return false;
-    }
-
-    if (psn->IsNewStartRequired()) {
-        LogPrint("stormnode", "CStormnodePing::CheckAndUpdate -- stormnode is completely expired, new start is required, stormnode=%s\n", vin.prevout.ToStringShort());
-        return false;
-    }
 
     // LogPrintf("snping - Found corresponding sn for vin: %s\n", vin.prevout.ToStringShort());
     // update only if there is no known ping for this stormnode or
@@ -853,7 +855,7 @@ bool CStormnodePing::SimpleCheck(int& nDos)
     CStormnodeBroadcast snb(*psn);
     uint256 hash = snb.GetHash();
     if (snodeman.mapSeenStormnodeBroadcast.count(hash)) {
-        snodeman.mapSeenStormnodeBroadcast[hash].lastPing = *this;
+        snodeman.mapSeenStormnodeBroadcast[hash].second.lastPing = *this;
     }
 
     psn->Check(true); // force update, ignoring cache

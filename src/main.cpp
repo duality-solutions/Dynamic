@@ -4004,6 +4004,8 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
 
+    stormnodeSync.IsBlockchainSynced(true);
+
     LogPrintf("%s : ACCEPTED\n", __func__);
     return true;
 }
@@ -5137,6 +5139,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     if(snodeman.mapSeenStormnodeBroadcast.count(inv.hash)){
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
+                        ss << snodeman.mapSeenStormnodeBroadcast[inv.hash].second;
                         ss << snodeman.mapSeenStormnodeBroadcast[inv.hash];
                         pfrom->PushMessage(NetMsgType::SNANNOUNCE, ss);
                         pushed = true;

@@ -1726,16 +1726,21 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError("Failed to load stormnode cache from sncache.dat");
     }
 
-    uiInterface.InitMessage(_("Loading stormnode payment cache..."));
-    CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
-    if(!flatdb2.Load(snpayments)) {
-        return InitError("Failed to load Stormnode payments cache from snpayments.dat");
-    }
+    if(snodeman.size()) {
+        uiInterface.InitMessage(_("Loading stormnode payment cache..."));
+        CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
+        if(!flatdb2.Load(snpayments)) {
+            return InitError("Failed to load stormnode payments cache from snpayments.dat");
+        }
 
-    uiInterface.InitMessage(_("Loading governance cache..."));
-    CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
-    if(!flatdb3.Load(governance)) {
-        return InitError("Failed to load governance cache from governance.dat");
+        uiInterface.InitMessage(_("Loading governance cache..."));
+        CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
+        if(!flatdb3.Load(governance)) {
+            return InitError("Failed to load governance cache from governance.dat");
+        }
+        governance.InitOnLoad();
+    } else {
+        uiInterface.InitMessage(_("Stormnode cache is empty, skipping payments and governance cache..."));
     }
     governance.InitOnLoad();
 

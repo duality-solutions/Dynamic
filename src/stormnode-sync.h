@@ -23,6 +23,7 @@ static const int STORMNODE_SYNC_GOVOBJ          = 10;
 static const int STORMNODE_SYNC_GOVOBJ_VOTE     = 11;
 static const int STORMNODE_SYNC_FINISHED        = 999;
 
+static const int STORMNODE_SYNC_TICK_SECONDS    = 6;
 static const int STORMNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
 
 extern CStormnodeSync stormnodeSync;
@@ -66,7 +67,7 @@ public:
     void AddedGovernanceItem() { nTimeLastGovernanceItem = GetTime(); };
 
     bool IsFailed() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FAILED; }
-    bool IsBlockchainSynced();
+    bool IsBlockchainSynced(bool fBlockAccepted = false);
     bool IsStormnodeListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_LIST; }
     bool IsWinnersListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_SNW; }
     bool IsSynced() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FINISHED; }

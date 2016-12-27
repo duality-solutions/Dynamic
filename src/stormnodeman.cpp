@@ -735,7 +735,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         if(psn && psn->IsNewStartRequired()) return;
 
         int nDos = 0;
-        if(snp.CheckAndUpdate(psn, nDos)) return;
+        if(snp.CheckAndUpdate(psn, false, nDos)) return;
 
         if(nDos > 0) {
             // if anything significant failed, mark that node
@@ -795,7 +795,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
             nInvCount++;
 
             if (!mapSeenStormnodeBroadcast.count(hash)) {
-                mapSeenStormnodeBroadcast.insert(std::make_pair(hash, snb));
+                mapSeenStormnodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), snb)));
             }
 
             if (vin == sn.vin) {
@@ -1272,7 +1272,7 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
 {
     LOCK(cs);
     mapSeenStormnodePing.insert(std::make_pair(snb.lastPing.GetHash(), snb.lastPing));
-    mapSeenStormnodeBroadcast.insert(std::make_pair(snb.GetHash(), snb));
+    mapSeenStormnodeBroadcast.insert(std::make_pair(snb.GetHash(), std::make_pair(GetTime(), snb)));
 
     LogPrintf("CStormnodeMan::UpdateStormnodeList -- stormnode=%s  addr=%s\n", snb.vin.prevout.ToStringShort(), snb.addr.ToString());
 
@@ -1283,7 +1283,7 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
             stormnodeSync.AddedStormnodeList();
         }
     } else {
-        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()];
+        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()].second;
         if(psn->UpdateFromNewBroadcast(snb)) {
             stormnodeSync.AddedStormnodeList();
             mapSeenStormnodeBroadcast.erase(snbOld.GetHash());
@@ -1299,11 +1299,18 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     nDos = 0;
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s\n", snb.vin.prevout.ToStringShort());
 
-    if(mapSeenStormnodeBroadcast.count(snb.GetHash())) { //seen
+    uint256 hash = snb.GetHash();
+    if(mapSeenStormnodeBroadcast.count(hash)) { //seen
         LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen\n", snb.vin.prevout.ToStringShort());
+        // less then 2 pings left before this SN goes into non-recoverable state, bump sync timeout
+        if(GetTime() - mapSeenStormnodeBroadcast[hash].first > STORMNODE_NEW_START_REQUIRED_SECONDS - STORMNODE_MIN_SNP_SECONDS * 2) {
+            LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen update\n", snb.vin.prevout.ToStringShort());
+            mapSeenStormnodeBroadcast[hash].first = GetTime();
+            stormnodeSync.AddedStormnodeList();
+        }
         return true;
     }
-    mapSeenStormnodeBroadcast.insert(std::make_pair(snb.GetHash(), snb));
+    mapSeenStormnodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), snb)));
 
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s new\n", snb.vin.prevout.ToStringShort());
 
@@ -1315,12 +1322,12 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     // search Stormnode list
     CStormnode* psn = Find(snb.vin);
     if(psn) {
-        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()];
+        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()].second;
         if(!snb.Update(psn, nDos)) {
             LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Update() failed, stormnode=%s\n", snb.vin.prevout.ToStringShort());
             return false;
         }
-        if(snb.GetHash() != snbOld.GetHash()) {
+        if(hash != snbOld.GetHash()) {
             mapSeenStormnodeBroadcast.erase(snbOld.GetHash());
         }
     } else {
@@ -1499,7 +1506,7 @@ void CStormnodeMan::SetStormnodeLastPing(const CTxIn& vin, const CStormnodePing&
     CStormnodeBroadcast snb(*pSN);
     uint256 hash = snb.GetHash();
     if(mapSeenStormnodeBroadcast.count(hash)) {
-        mapSeenStormnodeBroadcast[hash].lastPing = snp;
+        mapSeenStormnodeBroadcast[hash].second.lastPing = snp;
     }
 }
 
