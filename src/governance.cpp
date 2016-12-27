@@ -178,7 +178,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(fStormnodeMissing) {
             mapStormnodeOrphanObjects.insert(std::make_pair(nHash, object_time_pair_t(govobj, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME)));
-            LogPrint("gobject", "SNGOVERNANCEOBJECT -- Missing stormnode for: %s\n", strHash);
+            LogPrintf("SNGOVERNANCEOBJECT -- Missing stormnode for: %s, strError = %s\n", strHash, strError);
             // fIsValid must also be false here so we will return early in the next if block
         }
         if(!fIsValid) {
