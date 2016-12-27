@@ -137,17 +137,27 @@ void CStormnodeMan::AskForSN(CNode* pnode, const CTxIn &vin)
 {
     if(!pnode) return;
 
-    std::map<COutPoint, int64_t>::iterator it = mWeAskedForStormnodeListEntry.find(vin.prevout);
-    if (it != mWeAskedForStormnodeListEntry.end() && GetTime() < (*it).second) {
-        // we've asked recently, should not repeat too often or we could get banned
-        return;
+    std::map<COutPoint, std::map<CNetAddr, int64_t> >::iterator it1 = mWeAskedForStormnodeListEntry.find(vin.prevout);
+    if (it1 != mWeAskedForStormnodeListEntry.end()) {
+        std::map<CNetAddr, int64_t>::iterator it2 = it1->second.find(pnode->addr);
+        if (it2 != it1->second.end()) {
+            if (GetTime() < it2->second) {
+                // we've asked recently, should not repeat too often or we could get banned
+                return;
+            }
+            // we asked this node for this outpoint but it's ok to ask again already
+            LogPrintf("CStormnodeMan::AskForSN -- Asking same peer %s for missing stormnode entry again: %s\n", pnode->addr.ToString(), vin.prevout.ToStringShort());
+        } else {
+            // we already asked for this outpoint but not this node
+            LogPrintf("CStormnodeMan::AskForSN -- Asking new peer %s for missing stormnode entry: %s\n", pnode->addr.ToString(), vin.prevout.ToStringShort());
+        }
+    } else {
+        // we never asked any node for this outpoint
+        LogPrintf("CStormnodeMan::AskForSN -- Asking peer %s for missing stormnode entry for the first time: %s\n", pnode->addr.ToString(), vin.prevout.ToStringShort());
     }
+    mWeAskedForStormnodeListEntry[vin.prevout][pnode->addr] = GetTime() + SSEG_UPDATE_SECONDS;
 
-    // ask for the snb info once from the node that sent snp
-
-    LogPrintf("CStormnodeMan::AskForSN -- Asking node for missing stormnode entry: %s\n", vin.prevout.ToStringShort());
     pnode->PushMessage(NetMsgType::SSEG, vin);
-    mWeAskedForStormnodeListEntry[vin.prevout] = GetTime() + SSEG_UPDATE_SECONDS;;
 }
 
 void CStormnodeMan::Check()
@@ -215,9 +225,17 @@ void CStormnodeMan::CheckAndRemove()
         }
 
         // check which Stormnodes we've asked for
-        std::map<COutPoint, int64_t>::iterator it2 = mWeAskedForStormnodeListEntry.begin();
+        std::map<COutPoint, std::map<CNetAddr, int64_t> >::iterator it2 = mWeAskedForStormnodeListEntry.begin();
         while(it2 != mWeAskedForStormnodeListEntry.end()){
-            if((*it2).second < GetTime()){
+            std::map<CNetAddr, int64_t>::iterator it3 = it2->second.begin();
+            while(it3 != it2->second.end()){
+                if(it3->second < GetTime()){
+                    it2->second.erase(it3++);
+                } else {
+                    ++it3;
+                }
+            }
+            if(it2->second.empty()) {
                 mWeAskedForStormnodeListEntry.erase(it2++);
             } else {
                 ++it2;

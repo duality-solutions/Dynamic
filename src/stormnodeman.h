@@ -118,7 +118,7 @@ private:
     // who we asked for the Stormnode list and the last time
     std::map<CNetAddr, int64_t> mWeAskedForStormnodeList;
     // which Stormnodes we've asked for
-    std::map<COutPoint, int64_t> mWeAskedForStormnodeListEntry;
+    std::map<COutPoint, std::map<CNetAddr, int64_t> > mWeAskedForStormnodeListEntry;
     // who we asked for the Stormnode verification
     std::map<CNetAddr, CStormnodeVerification> mWeAskedForVerification;
 
