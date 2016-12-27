@@ -164,7 +164,7 @@ void CStormnodeMan::Check()
 {
     LOCK(cs);
 
-    LogPrint("stormnode", "CStormnodeMan::Check nLastWatchdogVoteTime = %d, IsWatchdogActive() = %d\n", nLastWatchdogVoteTime, IsWatchdogActive());
+    LogPrint("stormnode", "CStormnodeMan::Check -- nLastWatchdogVoteTime=%d, IsWatchdogActive()=%d\n", nLastWatchdogVoteTime, IsWatchdogActive());
 
     BOOST_FOREACH(CStormnode& sn, vStormnodes) {
         sn.Check();
@@ -183,19 +183,12 @@ void CStormnodeMan::CheckAndRemove()
         // Remove inactive and outdated stormnodes
         std::vector<CStormnode>::iterator it = vStormnodes.begin();
         while(it != vStormnodes.end()) {
-            bool fRemove =  // If it's marked to be removed from the list by CStormnode::Check for whatever reason ...
-                    (*it).nActiveState == CStormnode::STORMNODE_REMOVE ||
-                    // or collateral was spent ...
-                    (*it).nActiveState == CStormnode::STORMNODE_OUTPOINT_SPENT;
-
-            if (fRemove) {
-                LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- Removing Stormnode: %s  addr=%s  %i now\n", (*it).GetStatus(), (*it).addr.ToString(), size() - 1);
-
+            // If collateral was spent ...
+            if ((*it).IsOutpointSpent()) {
+                LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- Removing Stormnode: %s  addr=%s  %i now\n", (*it).GetStateString(), (*it).addr.ToString(), size() - 1);
                 // erase all of the broadcasts we've seen from this txin, ...
                 mapSeenStormnodeBroadcast.erase(CStormnodeBroadcast(*it).GetHash());
-                // allow us to ask for this stormnode again if we see another ping ...
                 mWeAskedForStormnodeListEntry.erase((*it).vin.prevout);
-
                 // and finally remove it from the list
                 it = vStormnodes.erase(it);
                 fStormnodesRemoved = true;
@@ -242,30 +235,21 @@ void CStormnodeMan::CheckAndRemove()
             }
         }
 
-        std::map<CNetAddr, CStormnodeVerification>::iterator itv1 = mWeAskedForVerification.begin();
-        while(itv1 != mWeAskedForVerification.end()){
-            if(itv1->second.nBlockHeight < pCurrentBlockIndex->nHeight - MAX_POSE_BLOCKS) {
-                mWeAskedForVerification.erase(itv1++);
-            } else {
-                ++itv1;
-            }
-        }
-
-        // remove expired mapSeenStormnodeBroadcast
-        std::map<uint256, CStormnodeBroadcast>::iterator it3 = mapSeenStormnodeBroadcast.begin();
-        while(it3 != mapSeenStormnodeBroadcast.end()){
-            if((*it3).second.lastPing.sigTime < GetTime() - STORMNODE_REMOVAL_SECONDS*2){
-                LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- Removing expired Stormnode broadcast: hash=%s\n", (*it3).second.GetHash().ToString());
-                mapSeenStormnodeBroadcast.erase(it3++);
+        std::map<CNetAddr, CStormnodeVerification>::iterator it3 = mWeAskedForVerification.begin();
+        while(it3 != mWeAskedForVerification.end()){
+            if(it3->second.nBlockHeight < pCurrentBlockIndex->nHeight - MAX_POSE_BLOCKS) {
+                mWeAskedForVerification.erase(it3++);
             } else {
                 ++it3;
             }
         }
 
+        // NOTE: do not expire mapSeenStormnodeBroadcast entries here, clean them on snb updates!
+
         // remove expired mapSeenStormnodePing
         std::map<uint256, CStormnodePing>::iterator it4 = mapSeenStormnodePing.begin();
         while(it4 != mapSeenStormnodePing.end()){
-            if((*it4).second.sigTime < GetTime() - STORMNODE_REMOVAL_SECONDS*2){
+            if((*it4).second.IsExpired()) {
                 LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- Removing expired Stormnode ping: hash=%s\n", (*it4).second.GetHash().ToString());
                 mapSeenStormnodePing.erase(it4++);
             } else {
@@ -529,7 +513,7 @@ CStormnode* CStormnodeMan::GetNextStormnodeInQueueForPayment(int nBlockHeight, b
     //  -- This doesn't look at who is being paid in the +8-10 blocks, allowing for double payments very rarely
     //  -- 1/100 payments should be a double payment on mainnet - (1/(3000/10))*2
     //  -- (chance per block * chances before IsScheduled will fire)
-    int nTenthNetwork = CountEnabled()/10;
+    int nTenthNetwork = nSnCount/10;
     int nCountTenth = 0;
     arith_uint256 nHighest = 0;
     BOOST_FOREACH (PAIRTYPE(int, CStormnode*)& s, vecStormnodeLastPaid){
@@ -716,6 +700,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         CStormnodeBroadcast snb;
         vRecv >> snb;
 
+        LogPrint("stormnode", "SNANNOUNCE -- Stormnode announce, stormnode=%s\n", snb.vin.prevout.ToStringShort());
+
             int nDos = 0;
 
             if (CheckSnbAndUpdateStormnodeList(snb, nDos)) {
@@ -728,8 +714,6 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
             NotifyStormnodeUpdates();
         }
     } else if (strCommand == NetMsgType::SNPING) { //Stormnode Ping
-        // ignore stormnode pings until stormnode list is synced
-        if (!stormnodeSync.IsStormnodeListSynced()) return;
 
         CStormnodePing snp;
         vRecv >> snp;
@@ -744,17 +728,21 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s new\n", snp.vin.prevout.ToStringShort());
 
+        // see if we have this Stormnode
+        CStormnode* psn = snodeman.Find(snp.vin);
+
+        // too late, new SNANNOUNCE is required
+        if(psn && psn->IsNewStartRequired()) return;
+
         int nDos = 0;
-        if(snp.CheckAndUpdate(nDos)) return;
+        if(snp.CheckAndUpdate(psn, nDos)) return;
 
         if(nDos > 0) {
             // if anything significant failed, mark that node
             Misbehaving(pfrom->GetId(), nDos);
-        } else {
-            // if nothing significant failed, search existing Stormnode list
-            CStormnode* psn = Find(snp.vin);
-            // if it's known, don't ask for the snb, just return
-            if(psn != NULL) return;
+        } else if(psn != NULL) {
+            // nothing significant failed, mn is a known one too
+            return;
         }
 
         // something significant is broken or sn is unknown,
@@ -803,6 +791,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
             CStormnodeBroadcast snb = CStormnodeBroadcast(sn);
             uint256 hash = snb.GetHash();
             pfrom->PushInventory(CInv(MSG_STORMNODE_ANNOUNCE, hash));
+            pfrom->PushInventory(CInv(MSG_STORMNODE_PING, sn.lastPing.GetHash()));
             nInvCount++;
 
             if (!mapSeenStormnodeBroadcast.count(hash)) {
@@ -1293,8 +1282,12 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
         if(Add(sn)) {
             stormnodeSync.AddedStormnodeList();
         }
-    } else if(psn->UpdateFromNewBroadcast(snb)) {
-        stormnodeSync.AddedStormnodeList();
+    } else {
+        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()];
+        if(psn->UpdateFromNewBroadcast(snb)) {
+            stormnodeSync.AddedStormnodeList();
+            mapSeenStormnodeBroadcast.erase(snbOld.GetHash());
+        }
     }
 }
 
@@ -1307,6 +1300,7 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s\n", snb.vin.prevout.ToStringShort());
 
     if(mapSeenStormnodeBroadcast.count(snb.GetHash())) { //seen
+        LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen\n", snb.vin.prevout.ToStringShort());
         return true;
     }
     mapSeenStormnodeBroadcast.insert(std::make_pair(snb.GetHash(), snb));
@@ -1321,9 +1315,13 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     // search Stormnode list
     CStormnode* psn = Find(snb.vin);
     if(psn) {
+        CStormnodeBroadcast snbOld = mapSeenStormnodeBroadcast[CStormnodeBroadcast(*psn).GetHash()];
         if(!snb.Update(psn, nDos)) {
             LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Update() failed, stormnode=%s\n", snb.vin.prevout.ToStringShort());
             return false;
+        }
+        if(snb.GetHash() != snbOld.GetHash()) {
+            mapSeenStormnodeBroadcast.erase(snbOld.GetHash());
         }
     } else {
         if(snb.CheckOutpoint(nDos)) {
@@ -1463,7 +1461,7 @@ int CStormnodeMan::GetStormnodeState(const CTxIn& vin)
     LOCK(cs);
     CStormnode* pSN = Find(vin);
     if(!pSN)  {
-        return CStormnode::STORMNODE_REMOVE;
+        return CStormnode::STORMNODE_NEW_START_REQUIRED;
     }
     return pSN->nActiveState;
 }
@@ -1473,7 +1471,7 @@ int CStormnodeMan::GetStormnodeState(const CPubKey& pubKeyStormnode)
     LOCK(cs);
     CStormnode* pSN = Find(pubKeyStormnode);
     if(!pSN)  {
-        return CStormnode::STORMNODE_REMOVE;
+        return CStormnode::STORMNODE_NEW_START_REQUIRED;
     }
     return pSN->nActiveState;
 }

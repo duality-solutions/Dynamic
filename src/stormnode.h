@@ -16,13 +16,13 @@ class CStormnode;
 class CStormnodeBroadcast;
 class CStormnodePing;
 
-static const int STORMNODE_MIN_SNP_SECONDS         = 10 * 60;
-static const int STORMNODE_MIN_SNB_SECONDS         =  5 * 60;
-static const int STORMNODE_EXPIRATION_SECONDS      = 65 * 60;
-static const int STORMNODE_REMOVAL_SECONDS         = 75 * 60;
-static const int STORMNODE_CHECK_SECONDS           = 5;
-static const int STORMNODE_WATCHDOG_MAX_SECONDS    = 2 * 60 * 60;
-
+static const int STORMNODE_MIN_SNP_SECONDS         = 5;
+static const int STORMNODE_MIN_SNB_SECONDS         = 5 * 60;
+static const int STORMNODE_EXPIRATION_SECONDS      = 10 * 60;
+static const int STORMNODE_REMOVAL_SECONDS         = 65 * 60;
+static const int STORMNODE_CHECK_SECONDS           = 120 * 60;
+static const int STORMNODE_WATCHDOG_MAX_SECONDS    = 180 * 60;
+static const int STORMNODE_NEW_START_REQUIRED_SECONDS  = 180 * 60;
 static const int STORMNODE_POSE_BAN_MAX_SCORE      = 5;
 //
 // The Stormnode Ping Class : Contains a different serialize method for sending pings from stormnodes throughout the network
@@ -77,10 +77,11 @@ public:
         return ss.GetHash();
     }
 
+    bool IsExpired() { return GetTime() - sigTime > STORMNODE_NEW_START_REQUIRED_SECONDS; }
     bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
     bool CheckSignature(CPubKey& pubKeyStormnode, int &nDos);
     bool SimpleCheck(int& nDos);
-    bool CheckAndUpdate(int& nDos);
+    bool CheckAndUpdate(CStormnode* psn, int& nDos);
     void Relay();
 
     CStormnodePing& operator=(CStormnodePing from)
@@ -99,8 +100,8 @@ public:
 
 };
 
-struct stormnode_info_t {
-
+struct stormnode_info_t 
+{
     stormnode_info_t()
         : vin(),
           addr(),
@@ -146,8 +147,9 @@ public:
         STORMNODE_ENABLED,
         STORMNODE_EXPIRED,
         STORMNODE_OUTPOINT_SPENT,
-        STORMNODE_REMOVE,
+        STORMNODE_UPDATE_REQUIRED,
         STORMNODE_WATCHDOG_EXPIRED,
+        STORMNODE_NEW_START_REQUIRED,
         STORMNODE_POSE_BAN
     };
 
@@ -257,9 +259,21 @@ public:
     bool IsEnabled() { return nActiveState == STORMNODE_ENABLED; }
     bool IsPreEnabled() { return nActiveState == STORMNODE_PRE_ENABLED; }
     bool IsPoSeBanned() { return nActiveState == STORMNODE_POSE_BAN; }
+    // NOTE: this one relies on nPoSeBanScore, not on nActiveState as everything else here
     bool IsPoSeVerified() { return nPoSeBanScore <= -STORMNODE_POSE_BAN_MAX_SCORE; }
-
+    bool IsExpired() { return nActiveState == STORMNODE_EXPIRED; }
+    bool IsOutpointSpent() { return nActiveState == STORMNODE_OUTPOINT_SPENT; }
+    bool IsUpdateRequired() { return nActiveState == STORMNODE_UPDATE_REQUIRED; }
     bool IsWatchdogExpired() { return nActiveState == STORMNODE_WATCHDOG_EXPIRED; }
+    bool IsNewStartRequired() { return nActiveState == STORMNODE_NEW_START_REQUIRED; }
+
+    static bool IsValidStateForAutoStart(int nActiveStateIn)
+    {
+        return  nActiveStateIn == STORMNODE_ENABLED ||
+                nActiveStateIn == STORMNODE_PRE_ENABLED ||
+                nActiveStateIn == STORMNODE_EXPIRED ||
+                nActiveStateIn == STORMNODE_WATCHDOG_EXPIRED;
+    }
 
    bool IsValidForPayment()
     {
