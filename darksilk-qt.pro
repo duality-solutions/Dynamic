@@ -436,7 +436,10 @@ HEADERS += \
     src/dns/hooks.h \
     src/dns/dslkdns.h \
     src/qt/dnspage.h \
-    src/qt/dnstablemodel.h
+    src/qt/dnstablemodel.h \
+    src/qt/multisigaddressentry.h \
+    src/qt/multisigdialog.h \
+    src/qt/multisiginputentry.h
 
 SOURCES += \
     src/compat/glibcxx_sanity.cpp \
@@ -606,7 +609,10 @@ SOURCES += \
     src/dns/dns.cpp \
     src/dns/dslkdns.cpp \
     src/qt/dnspage.cpp \
-    src/qt/dnstablemodel.cpp
+    src/qt/dnstablemodel.cpp \
+    src/qt/multisigaddressentry.cpp \
+    src/qt/multisigdialog.cpp \
+    src/qt/multisiginputentry.cpp
 
 
 OTHER_FILES += \
@@ -637,4 +643,7 @@ FORMS += \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/signverifymessagedialog.ui \
     src/qt/forms/stormnodelist.ui \
-    src/qt/forms/transactiondescdialog.ui
+    src/qt/forms/transactiondescdialog.ui \
+    src/qt/forms/multisigaddressentry.ui \
+    src/qt/forms/multisigdialog.ui \
+    src/qt/forms/multisiginputentry.ui
