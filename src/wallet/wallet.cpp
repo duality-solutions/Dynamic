@@ -4417,7 +4417,7 @@ void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew)
 {
     SendMoneyCheck(nValue);
 
-    // Parse Silk address
+    // Parse DarkSilk address
     CScript scriptPubKey = GetScriptForDestination(address);
 
     // Create and send the transaction
