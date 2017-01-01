@@ -403,7 +403,19 @@ static const CRPCCommand vRPCCommands[] =
     { "wallet",             "walletlock",             &walletlock,             true  },
     { "wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
     { "wallet",             "walletpassphrase",       &walletpassphrase,       true  },
+     /* Decentralised DNS */
+    { "ddns",               "name_scan",              &name_scan,              true  },
+    { "ddns",               "name_filter",            &name_filter,            true  },
+    { "ddns",               "name_show",              &name_show,              true  },
+    { "ddns",               "name_history",           &name_history,           true  },
+    { "ddns",               "name_mempool",           &name_mempool,           true  },
+    { "ddns",               "name_new",               &name_new,               true  },
+    { "ddns",               "name_update",            &name_update,            true  },
+    { "ddns",               "name_delete",            &name_delete,            true  },
+    { "ddns",               "name_list",              &name_list,              true  },
 #endif // ENABLE_WALLET
+    /* Not shown in help */
+    { "hidden", "name_debug", &name_debug, false },
 };
 
 CRPCTable::CRPCTable()
