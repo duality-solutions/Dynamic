@@ -774,7 +774,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
     double dRate = 0.0;
     CRateCheckBuffer buffer;    switch(nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
-        // Allow 1 trigger per mn per cycle, with a small fudge factor
+        // Allow 1 trigger per sn per cycle, with a small fudge factor
         dMaxRate = 1.1 / nSuperblockCycleSeconds;
         buffer = it->second.triggerBuffer;
         buffer.AddTimestamp(nTimestamp);

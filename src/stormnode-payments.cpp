@@ -411,7 +411,7 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             // In case our info is outdated, ask for an update,
             snodeman.AskForSN(pfrom, vote.vinStormnode);
             // but there is nothing we can do if vote info itself is outdated
-            // (i.e. it was signed by a mn which changed its key),
+            // (i.e. it was signed by a sn which changed its key),
             // so just quit here.
             return;
         }

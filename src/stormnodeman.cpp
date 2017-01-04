@@ -257,14 +257,14 @@ void CStormnodeMan::CheckAndRemove()
         // no need for cm_main below
         LOCK(cs);
 
-        std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > >::iterator itMnbRequest = mMnbRecoveryRequests.begin();
-        while(itMnbRequest != mMnbRecoveryRequests.end()){
-            // Allow this mnb to be re-verified again after MNB_RECOVERY_RETRY_SECONDS seconds
-            // if mn is still in STORMNODE_NEW_START_REQUIRED state.
-            if(GetTime() - itMnbRequest->second.first > MNB_RECOVERY_RETRY_SECONDS) {
-                mMnbRecoveryRequests.erase(itMnbRequest++);
+        std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > >::iterator itSnbRequest = mSnbRecoveryRequests.begin();
+        while(itSnbRequest != mSnbRecoveryRequests.end()){
+            // Allow this snb to be re-verified again after SNB_RECOVERY_RETRY_SECONDS seconds
+            // if sn is still in STORMNODE_NEW_START_REQUIRED state.
+            if(GetTime() - itSnbRequest->second.first > SNB_RECOVERY_RETRY_SECONDS) {
+                mSnbRecoveryRequests.erase(itSnbRequest++);
             } else {
-                ++itMnbRequest;
+                ++itSnbRequest;
             }
         }
 
@@ -812,7 +812,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
             // if anything significant failed, mark that node
             Misbehaving(pfrom->GetId(), nDos);
         } else if(psn != NULL) {
-            // nothing significant failed, mn is a known one too
+            // nothing significant failed, sn is a known one too
             return;
         }
 
@@ -1391,7 +1391,7 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroad
                     // simulate Check
                     CStormnode snTemp = CStormnode(snb);
                     snTemp.Check();
-                    LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- snb=%s seen request, addr=%s, better lastPing: %d min ago, projected mn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - snb.lastPing.sigTime)/60, snTemp.GetStateString());
+                    LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- snb=%s seen request, addr=%s, better lastPing: %d min ago, projected sn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - snb.lastPing.sigTime)/60, snTemp.GetStateString());
                     if(snTemp.IsValidStateForAutoStart(snTemp.nActiveState)) {
                         // this node thinks it's a good one
                         LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen good\n", snb.vin.prevout.ToStringShort());
