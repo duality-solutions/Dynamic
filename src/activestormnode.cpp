@@ -43,7 +43,10 @@ void CActiveStormnode::ManageState()
     if(eType == STORMNODE_REMOTE) {
         ManageStateRemote();
     } else if(eType == STORMNODE_LOCAL) {
-        ManageStateLocal();
+        // Try Remote Start first so the started local stormnode can be restarted without recreate stormnode broadcast.
+        ManageStateRemote();
+        if(nState != ACTIVE_STORMNODE_STARTED)
+            ManageStateLocal();
     }
 
     SendStormnodePing();
@@ -307,9 +310,6 @@ void CActiveStormnode::ManageStateLocal()
 
         fPingerEnabled = true;
         nState = ACTIVE_STORMNODE_STARTED;
-
-        stormnode_info_t infoSn = snodeman.GetStormnodeInfo(pubKeyStormnode);
-        if(infoSn.fInfoValid && CStormnode::IsValidStateForAutoStart(infoSn.nActiveState)) return; // sending ping should be enough
 
         //update to stormnode list
         LogPrintf("CActiveStormnode::ManageStateLocal -- Update Stormnode List\n");
