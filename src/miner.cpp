@@ -27,6 +27,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "stormnode-payments.h"
+#include "stormnode-sync.h"
 #include "validationinterface.h"
 
 #include <boost/thread.hpp>
@@ -547,7 +548,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                    if (!fvNodesEmpty && !IsInitialBlockDownload() && stormnodeSync.IsSynced())
                         break;
                     MilliSleep(1000);
                 } while (true);
