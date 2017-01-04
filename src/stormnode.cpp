@@ -110,7 +110,7 @@ CStormnode::CStormnode(const CStormnodeBroadcast& snb) :
 //
 bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
 {
-    if(snb.sigTime <= sigTime) return false;
+    if(snb.sigTime <= sigTime && !snb.fRecovery) return false;
 
     pubKeyStormnode = snb.pubKeyStormnode;
     sigTime = snb.sigTime;
@@ -120,7 +120,6 @@ bool CStormnode::UpdateFromNewBroadcast(CStormnodeBroadcast& snb)
     nPoSeBanScore = 0;
     nPoSeBanHeight = 0;
     nTimeLastChecked = 0;
-    nTimeLastWatchdogVote = snb.sigTime;
     int nDos = 0;
     if(snb.lastPing == CStormnodePing() || (snb.lastPing != CStormnodePing() && snb.lastPing.CheckAndUpdate(this, true, nDos))) {
         lastPing = snb.lastPing;
@@ -553,7 +552,7 @@ bool CStormnodeBroadcast::Update(CStormnode* psn, int& nDos)
 {
     nDos = 0;
 
-    if(psn->sigTime == sigTime) {
+    if(psn->sigTime == sigTime && !fRecovery) {
         // mapSeenStormnodeBroadcast in CStormnodeMan::CheckSnbAndUpdateStormnodeList should filter legit duplicates
         // but this still can happen if we just started, which is ok, just do nothing here.
         return false;

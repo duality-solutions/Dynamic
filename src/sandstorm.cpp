@@ -2478,16 +2478,17 @@ void ThreadCheckSandStormPool()
 
             nTick++;
 
+            // make sure to check all stormnodes first
+            snodeman.Check();
+
             // check if we should activate or ping every few minutes,
             // slightly postpone first run to give net thread a chance to connect to some peers
             if(nTick % STORMNODE_MIN_SNP_SECONDS == 15)
                 activeStormnode.ManageState();
 
-            snodeman.Check();
-
             if(nTick % 60 == 0) {
-                snodeman.CheckAndRemove();
                 snodeman.ProcessStormnodeConnections();
+                snodeman.CheckAndRemove();
                 snpayments.CheckAndRemove();
                 CleanTxLockCandidates();
             }

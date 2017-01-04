@@ -175,25 +175,96 @@ void CStormnodeMan::CheckAndRemove()
 {
     LogPrintf("CStormnodeMan::CheckAndRemove\n");
 
-    Check();
-
     {
-        LOCK(cs);
+        // Need LOCK2 here to ensure consistent locking order because code below locks cs_main
+        // through GetHeight() signal in ConnectNode and in CheckSnbAndUpdateMasternodeList()
+        LOCK2(cs_main, cs);
 
-        // Remove inactive and outdated stormnodes
+        Check();
+
+        // Remove spent stormnodes, prepare structures and make requests to reasure the state of inactive ones
         std::vector<CStormnode>::iterator it = vStormnodes.begin();
+        std::vector<std::pair<int, CStormnode> > vecStormnodeRanks;
+        bool fAskedForSnbRecovery = false; // ask for one sn at a time
         while(it != vStormnodes.end()) {
+            CStormnodeBroadcast snb = CStormnodeBroadcast(*it);
+            uint256 hash = snb.GetHash();
             // If collateral was spent ...
             if ((*it).IsOutpointSpent()) {
                 LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- Removing Stormnode: %s  addr=%s  %i now\n", (*it).GetStateString(), (*it).addr.ToString(), size() - 1);
                 // erase all of the broadcasts we've seen from this txin, ...
-                mapSeenStormnodeBroadcast.erase(CStormnodeBroadcast(*it).GetHash());
+                mapSeenStormnodeBroadcast.erase(hash);
                 mWeAskedForStormnodeListEntry.erase((*it).vin.prevout);
                 // and finally remove it from the list
                 it = vStormnodes.erase(it);
                 fStormnodesRemoved = true;
             } else {
+                if(pCurrentBlockIndex && !fAskedForSnbRecovery && it->IsNewStartRequired() && !IsSnbRecoveryRequested(hash)) {
+                    // this sn is in a non-recoverable state and we haven't asked other nodes yet
+                    std::set<CNetAddr> setRequested;
+                    // calulate only once and only when it's needed
+                    if(vecStormnodeRanks.empty()) {
+                        int nRandomBlockHeight = GetRandInt(pCurrentBlockIndex->nHeight);
+                        vecStormnodeRanks = GetStormnodeRanks(nRandomBlockHeight);
+                    }
+                    // ask first SNB_RECOVERY_QUORUM_TOTAL sn's we can connect to and we haven't asked recently
+                    for(int i = 0; setRequested.size() < SNB_RECOVERY_QUORUM_TOTAL && i < (int)vecStormnodeRanks.size(); i++) {
+                        // avoid banning
+                        if(mWeAskedForStormnodeListEntry.count(it->vin.prevout) && mWeAskedForStormnodeListEntry[it->vin.prevout].count(vecStormnodeRanks[i].second.addr)) continue;
+                        // didn't ask recently, ok to ask now
+                        CService addr = vecStormnodeRanks[i].second.addr;
+                        CNode* pnode = ConnectNode(CAddress(addr), NULL, true);
+                        if(pnode) {
+                            LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- asking for snb of %s, addr=%s\n", it->vin.prevout.ToStringShort(), addr.ToString());
+                            setRequested.insert(addr);
+                            // can't use AskForSN here, inv system is way too smart, request data directly instead
+                            std::vector<CInv> vToFetch;
+                            vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, hash));
+                            pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
+                            fAskedForSnbRecovery = true;
+                        } else {
+                            LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- can't connect to node to ask for snb, addr=%s\n", addr.ToString());
+                        }
+                    }
+                    // wait for snb recovery replies for SNB_RECOVERY_WAIT_SECONDS seconds
+                    mSnbRecoveryRequests[hash] = std::make_pair(GetTime() + SNB_RECOVERY_WAIT_SECONDS, setRequested);
+                }
                 ++it;
+            }
+        }
+        // proces replies for STORMNODE_NEW_START_REQUIRED stormnodes
+        LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- mSnbRecoveryGoodReplies size=%d\n", (int)mSnbRecoveryGoodReplies.size());
+        std::map<uint256, std::vector<CStormnodeBroadcast> >::iterator itSnbReplies = mSnbRecoveryGoodReplies.begin();
+        while(itSnbReplies != mSnbRecoveryGoodReplies.end()){
+            if(mSnbRecoveryRequests[itSnbReplies->first].first < GetTime()) {
+                // all nodes we asked should have replied now
+                if(itSnbReplies->second.size() >= SNB_RECOVERY_QUORUM_REQUIRED) {
+                    // majority of nodes we asked agrees that this sn doesn't require new snb, reprocess one of new snbs
+                    LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- reprocessing snb, stormnode=%s\n", itSnbReplies->second[0].vin.prevout.ToStringShort());
+                    // mapSeenStormnodeBroadcast.erase(itSnbReplies->first);
+                    int nDos;
+                    itSnbReplies->second[0].fRecovery = true;
+                    CheckSnbAndUpdateStormnodeList(NULL, itSnbReplies->second[0], nDos);
+                }
+                LogPrint("stormnode", "CStormnodeMan::CheckAndRemove -- removing snb recovery reply, stormnode=%s, size=%d\n", itSnbReplies->second[0].vin.prevout.ToStringShort(), (int)itSnbReplies->second.size());
+                mSnbRecoveryGoodReplies.erase(itSnbReplies++);
+            } else {
+                ++itSnbReplies;
+            }
+        }
+    }
+    {
+        // no need for cm_main below
+        LOCK(cs);
+
+        std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > >::iterator itMnbRequest = mMnbRecoveryRequests.begin();
+        while(itMnbRequest != mMnbRecoveryRequests.end()){
+            // Allow this mnb to be re-verified again after MNB_RECOVERY_RETRY_SECONDS seconds
+            // if mn is still in MASTERNODE_NEW_START_REQUIRED state.
+            if(GetTime() - itMnbRequest->second.first > MNB_RECOVERY_RETRY_SECONDS) {
+                mMnbRecoveryRequests.erase(itMnbRequest++);
+            } else {
+                ++itMnbRequest;
             }
         }
 
@@ -704,7 +775,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 
             int nDos = 0;
 
-            if (CheckSnbAndUpdateStormnodeList(snb, nDos)) {
+        if (CheckSnbAndUpdateStormnodeList(pfrom, snb, nDos)) {
                 // use announced Stormnode as a peer
                 addrman.Add(CAddress(snb.addr), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
@@ -1291,7 +1362,7 @@ void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
     }
 }
 
-bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos)
+bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroadcast snb, int& nDos)
 {
     // Need LOCK2 here to ensure consistent locking order because the SimpleCheck call below locks cs_main
     LOCK2(cs_main, cs);
@@ -1300,13 +1371,34 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int&
     LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s\n", snb.vin.prevout.ToStringShort());
 
     uint256 hash = snb.GetHash();
-    if(mapSeenStormnodeBroadcast.count(hash)) { //seen
+    if(mapSeenStormnodeBroadcast.count(hash) && !snb.fRecovery) { //seen
         LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen\n", snb.vin.prevout.ToStringShort());
         // less then 2 pings left before this SN goes into non-recoverable state, bump sync timeout
         if(GetTime() - mapSeenStormnodeBroadcast[hash].first > STORMNODE_NEW_START_REQUIRED_SECONDS - STORMNODE_MIN_SNP_SECONDS * 2) {
             LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen update\n", snb.vin.prevout.ToStringShort());
             mapSeenStormnodeBroadcast[hash].first = GetTime();
             stormnodeSync.AddedStormnodeList();
+        }
+        // did we ask this node for it?
+        if(pfrom && IsSnbRecoveryRequested(hash) && GetTime() < mSnbRecoveryRequests[hash].first) {
+            LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- snb=%s seen request\n", hash.ToString());
+            if(mSnbRecoveryRequests[hash].second.count(pfrom->addr)) {
+                LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- snb=%s seen request, addr=%s\n", hash.ToString(), pfrom->addr.ToString());
+                // do not allow node to send same snb multiple times in recovery mode
+                mSnbRecoveryRequests[hash].second.erase(pfrom->addr);
+                // does it have newer lastPing?
+                if(snb.lastPing.sigTime > mapSeenStormnodeBroadcast[hash].second.lastPing.sigTime) {
+                    // simulate Check
+                    CStormnode snTemp = CStormnode(snb);
+                    snTemp.Check();
+                    LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- snb=%s seen request, addr=%s, better lastPing: %d min ago, projected mn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - snb.lastPing.sigTime)/60, snTemp.GetStateString());
+                    if(snTemp.IsValidStateForAutoStart(snTemp.nActiveState)) {
+                        // this node thinks it's a good one
+                        LogPrint("stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- stormnode=%s seen good\n", snb.vin.prevout.ToStringShort());
+                        mSnbRecoveryGoodReplies[hash].push_back(snb);
+                    }
+                }
+            }
         }
         return true;
     }

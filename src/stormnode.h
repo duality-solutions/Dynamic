@@ -340,10 +340,11 @@ class CStormnodeBroadcast : public CStormnode
 {
 public:
 
-    CStormnodeBroadcast() : CStormnode() {}
-    CStormnodeBroadcast(const CStormnode& sn) : CStormnode(sn) {}
+    bool fRecovery;
+    CStormnodeBroadcast() : CStormnode(), fRecovery(false) {}
+    CStormnodeBroadcast(const CStormnode& sn) : CStormnode(sn), fRecovery(false) {}
     CStormnodeBroadcast(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyStormnodeNew, int nProtocolVersionIn) :
-        CStormnode(addrNew, vinNew, pubKeyCollateralAddressNew, pubKeyStormnodeNew, nProtocolVersionIn) {}
+        CStormnode(addrNew, vinNew, pubKeyCollateralAddressNew, pubKeyMasternodeNew, nProtocolVersionIn), fRecovery(false) {}
 
     ADD_SERIALIZE_METHODS;
 

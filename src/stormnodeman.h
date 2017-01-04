@@ -104,6 +104,10 @@ private:
     static const int MAX_POSE_RANK              = 10;
     static const int MAX_POSE_BLOCKS            = 10;
 
+    static const int SNB_RECOVERY_QUORUM_TOTAL      = 10;
+    static const int SNB_RECOVERY_QUORUM_REQUIRED   = 10;
+    static const int SNB_RECOVERY_WAIT_SECONDS      = 60;
+    static const int SNB_RECOVERY_RETRY_SECONDS     = 3 * 60 * 60;
 
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
@@ -121,6 +125,10 @@ private:
     std::map<COutPoint, std::map<CNetAddr, int64_t> > mWeAskedForStormnodeListEntry;
     // who we asked for the Stormnode verification
     std::map<CNetAddr, CStormnodeVerification> mWeAskedForVerification;
+
+    // these maps are used for Stormnode recovery from STORMNODE_NEW_START_REQUIRED state
+    std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > > mSnbRecoveryRequests;
+    std::map<uint256, std::vector<CStormnodeBroadcast> > mSnbRecoveryGoodReplies;
 
     int64_t nLastIndexRebuildTime;
 
@@ -172,6 +180,8 @@ public:
         READWRITE(mAskedUsForStormnodeList);
         READWRITE(mWeAskedForStormnodeList);
         READWRITE(mWeAskedForStormnodeListEntry);
+        READWRITE(mSnbRecoveryRequests);
+        READWRITE(mSnbRecoveryGoodReplies);
         READWRITE(nLastWatchdogVoteTime);
         READWRITE(nSsqCount);
 
@@ -305,7 +315,8 @@ public:
     /// Update stormnode list and maps using provided CStormnodeBroadcast
     void UpdateStormnodeList(CStormnodeBroadcast snb);
     /// Perform complete check and only then update list and maps
-    bool CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos);
+    bool CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroadcast snb, int& nDos);
+    bool IsSnbRecoveryRequested(const uint256& hash) { return mSnbRecoveryRequests.count(hash); }
 
     void UpdateLastPaid();
 

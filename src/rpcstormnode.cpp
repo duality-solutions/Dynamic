@@ -765,7 +765,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
             bool fResult;
             if (snb.CheckSignature(nDos)) {
                 if (fSafe) {
-                    fResult = snodeman.CheckSnbAndUpdateStormnodeList(snb, nDos);
+                    fResult = snodeman.CheckSnbAndUpdateStormnodeList(NULL, snb, nDos);
                 } else {
                     snodeman.UpdateStormnodeList(snb);
                     snb.Relay();
