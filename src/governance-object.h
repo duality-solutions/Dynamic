@@ -257,14 +257,14 @@ public:
 
     // CORE OBJECT FUNCTIONS
 
-    bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool fCheckCollateral);
+    bool IsValidLocally(std::string& strError, bool fCheckCollateral);
 
-    bool IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool& fMissingStormnode, bool fCheckCollateral);
+    bool IsValidLocally(std::string& strError, bool& fMissingStormnode, bool fCheckCollateral);
 
     /// Check the collateral transaction for the budget proposal/finalized budget
     bool IsCollateralValid(std::string& strError);
 
-    void UpdateLocalValidity(const CBlockIndex *pCurrentBlockIndex);
+    void UpdateLocalValidity();
 
     void UpdateSentinelVariables();
 
