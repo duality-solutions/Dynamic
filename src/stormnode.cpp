@@ -231,7 +231,7 @@ void CStormnode::Check(bool fForce)
     if(fWaitForPing && !fOurStormnode) {
         // ...but if it was already expired before the initial check - return right away
         if(IsExpired() || IsWatchdogExpired() || IsNewStartRequired()) {
-            LogPrint("stormnode", "CMasternode::Check -- Stormnode %s is in %s state, waiting for ping\n", vin.prevout.ToStringShort(), GetStateString());
+            LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state, waiting for ping\n", vin.prevout.ToStringShort(), GetStateString());
             return;
         }
     }
@@ -258,7 +258,7 @@ void CStormnode::Check(bool fForce)
         if(fWatchdogExpired) {
             nActiveState = STORMNODE_WATCHDOG_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
-                LogPrint("masternode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+                LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
             }
             return;
         }

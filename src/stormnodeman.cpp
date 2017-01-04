@@ -177,7 +177,7 @@ void CStormnodeMan::CheckAndRemove()
 
     {
         // Need LOCK2 here to ensure consistent locking order because code below locks cs_main
-        // through GetHeight() signal in ConnectNode and in CheckSnbAndUpdateMasternodeList()
+        // through GetHeight() signal in ConnectNode and in CheckSnbAndUpdateStormnodeList()
         LOCK2(cs_main, cs);
 
         Check();
@@ -260,7 +260,7 @@ void CStormnodeMan::CheckAndRemove()
         std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > >::iterator itMnbRequest = mMnbRecoveryRequests.begin();
         while(itMnbRequest != mMnbRecoveryRequests.end()){
             // Allow this mnb to be re-verified again after MNB_RECOVERY_RETRY_SECONDS seconds
-            // if mn is still in MASTERNODE_NEW_START_REQUIRED state.
+            // if mn is still in STORMNODE_NEW_START_REQUIRED state.
             if(GetTime() - itMnbRequest->second.first > MNB_RECOVERY_RETRY_SECONDS) {
                 mMnbRecoveryRequests.erase(itMnbRequest++);
             } else {
