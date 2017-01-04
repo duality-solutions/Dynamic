@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2016 The DarkSilk Core developers
+# Copyright (c) 2015-2017 Silk Network developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #

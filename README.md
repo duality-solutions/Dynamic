@@ -12,7 +12,7 @@ DarkSilk Integration/Staging Tree
 ================================
 ![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
-**Copyright (c) 2015-2016 Silk Network**
+**Copyright (c) 2015-2017 Silk Network**
 What is DarkSilk?
 ----------------
 * Coin Suffix: DSLK

@@ -5,7 +5,7 @@ Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
 Source: https://github.com/silknetwork/darksilk-core
 
 Files: *
-Copyright: 2015-2016, Silk Network
+Copyright: 2015-2017, Silk Network
 License: Expat
 Comment: The Silk Network Developers encompasses the current developers listed on darksilk.silknetwork.org & silk.silknetwork.org,
          as well as the numerous contributors to the project.

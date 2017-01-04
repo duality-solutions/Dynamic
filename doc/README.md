@@ -14,7 +14,7 @@ DarkSilk Integration/Staging Tree
 ================================
 ![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/icons/darksilk-80.png)
 
-**Copyright (c) 2015-2016 Silk Network**
+**Copyright (c) 2015-2017 Silk Network**
 
 What is DarkSilk?
 ----------------
