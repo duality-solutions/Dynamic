@@ -178,7 +178,7 @@ public:
     std::map<int, CStormnodeBlockPayees> mapStormnodeBlocks;
     std::map<COutPoint, int> mapStormnodesLastVote;
 
-    CStormnodePayments() : nStorageCoeff(1.25), nMinBlocksToStore(4000) {}
+    CStormnodePayments() : nStorageCoeff(1.25), nMinBlocksToStore(5000) {}
 
     ADD_SERIALIZE_METHODS;
 
