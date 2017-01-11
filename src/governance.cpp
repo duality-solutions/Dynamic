@@ -156,7 +156,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
-        LOCK(cs);
+        LOCK2(cs_main, cs);
 
         if(mapSeenGovernanceObjects.count(nHash)) {
             // TODO - print error code? what if it's GOVOBJ_ERROR_IMMATURE?
@@ -284,7 +284,7 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
 
 bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj)
 {
-    LOCK(cs);
+    LOCK2(cs_main, cs);
     std::string strError = "";
 
     DBG( cout << "CGovernanceManager::AddGovernanceObject START" << endl; );
@@ -563,8 +563,8 @@ void CGovernanceManager::NewBlock()
     // IF WE'RE NOT SYNCED, EXIT
     if(!stormnodeSync.IsSynced()) return;
 
-    TRY_LOCK(cs, fBudgetNewBlock);
-    if(!fBudgetNewBlock || !pCurrentBlockIndex) return;
+    if(!pCurrentBlockIndex) return;
+    LOCK(cs);
 
     // CHECK OBJECTS WE'VE ASKED FOR, REMOVE OLD ENTRIES
 
@@ -651,7 +651,7 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
     LogPrint("gobject", "CGovernanceManager::Sync -- syncing to peer=%d, nProp = %s\n", pfrom->id, nProp.ToString());
 
     {
-        LOCK(cs);
+        LOCK2(cs_main, cs);
         fRateChecksEnabled = false;
         for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
             uint256 h = it->first;
