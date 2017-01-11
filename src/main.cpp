@@ -1737,23 +1737,6 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
     return ReadBlockFromDisk(block, pindex, Params().GetConsensus());
 }
 
-int64_t GetTotalCoinEstimate(int nHeight)
-{
-    int64_t nTotalCoins = 0;
-
-    // TODO: This could be vastly improved, look at GetBlockValue for a better method
-    
-    /* these values are taken from the block explorer */
-    /*if(nHeight > 1) {
-        nTotalCoins += 4000000;
-    }
-    if(nHeight => 10001) {
-        nTotalCoins += (1.382 * (nHeight - 10000));
-    }*/
-
-    return nTotalCoins;
-}
-
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
     if (chainActive.Height() == 0) {

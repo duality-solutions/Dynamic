@@ -1317,28 +1317,6 @@ std::string CStormnodeMan::ToString() const
     return info.str();
 }
 
-int CStormnodeMan::GetEstimatedStormnodes(int nBlock)
-{
-    /*
-        Stormnodes = (Coins/1000)*X on average
-
-        *X = nPercentage, starting at 0.52
-        nPercentage goes up 0.01 each period
-        Period starts at 35040, which has exponential slowing growth
-
-    */
-
-    int nPercentage = 52; //0.52
-    int nPeriod = 35040;
-    int nCollateral = 1000;
-
-    for (int i = nPeriod; i <= nBlock; i += nPeriod) {
-        nPercentage++;
-        nPeriod*=2;
-    }
-    return (GetTotalCoinEstimate(nBlock)/100*nPercentage/nCollateral);
-}
-
 void CStormnodeMan::UpdateStormnodeList(CStormnodeBroadcast snb)
 {
     LOCK(cs);

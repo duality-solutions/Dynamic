@@ -347,21 +347,6 @@ void CStormnodeSync::ProcessTick()
                     return;
                 }
 
-                // check for data
-                // if we have enough stormnodes in our list, switch to the next asset
-                /* Note: Is this activing up? It's probably related to int CStormnodeMan::GetEstimatedStormnodes(int nBlock)
-                   Surely doesn't work right for testnet currently */
-                // try to fetch data from at least two peers though
-                int nSnCountEstimated = snodeman.GetEstimatedStormnodes(pCurrentBlockIndex->nHeight)*0.9;
-                LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d nSnCountEstimated %d\n",
-                          nTick, nSnCount, nSnCountEstimated);
-                if(nRequestedStormnodeAttempt > 1 && nSnCount > nSnCountEstimated) {
-                    LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
-                    SwitchToNextAsset();
-                    ReleaseNodes(vNodesCopy);
-                    return;
-                }
-
                 // only request once from each peer
                 if(netfulfilledman.HasFulfilledRequest(pnode->addr, "stormnode-list-sync")) continue;
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "stormnode-list-sync");

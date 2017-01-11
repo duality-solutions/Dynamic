@@ -310,8 +310,6 @@ public:
 
     std::string ToString() const;
 
-    int GetEstimatedStormnodes(int nBlock);
-
     /// Update stormnode list and maps using provided CStormnodeBroadcast
     void UpdateStormnodeList(CStormnodeBroadcast snb);
     /// Perform complete check and only then update list and maps
