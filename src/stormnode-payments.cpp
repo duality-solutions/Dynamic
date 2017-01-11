@@ -855,13 +855,34 @@ void CStormnodePayments::Sync(CNode* pnode, int nCountNeeded)
     pnode->PushMessage(NetMsgType::SYNCSTATUSCOUNT, STORMNODE_SYNC_SNW, nInvCount);
 }
 
-// Request low data payment blocks in batches directly from some node instead of/after preliminary Sync.
+// Request low data/unknown payment blocks in batches directly from some node instead of/after preliminary Sync.
 void CStormnodePayments::RequestLowDataPaymentBlocks(CNode* pnode)
 {
+    if(!pCurrentBlockIndex) return;
 
     LOCK2(cs_main, cs_mapStormnodeBlocks);
 
     std::vector<CInv> vToFetch;
+    int nLimit = GetStorageLimit();
+
+    const CBlockIndex *pindex = pCurrentBlockIndex;
+
+    while(pCurrentBlockIndex->nHeight - pindex->nHeight < nLimit) {
+        if(!mapStormnodeBlocks.count(pindex->nHeight)) {
+            // We have no idea about this block height, let's ask
+            vToFetch.push_back(CInv(MSG_STORMNODE_PAYMENT_BLOCK, pindex->GetBlockHash()));
+            // We should not violate GETDATA rules
+            if(vToFetch.size() == MAX_INV_SZ) {
+                LogPrintf("CStormnodePayments::SyncLowDataPaymentBlocks -- asking peer %d for %d blocks\n", pnode->id, MAX_INV_SZ);
+                pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
+                // Start filling new batch
+                vToFetch.clear();
+            }
+        }
+        if(!pindex->pprev) break;
+        pindex = pindex->pprev;
+    }
+
     std::map<int, CStormnodeBlockPayees>::iterator it = mapStormnodeBlocks.begin();
 
     while(it != mapStormnodeBlocks.end()) {
