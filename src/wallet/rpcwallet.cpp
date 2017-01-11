@@ -2508,11 +2508,13 @@ UniValue listunspent(const UniValue& params, bool fHelp)
             "  {\n"
             "    \"txid\" : \"txid\",        (string) the transaction id \n"
             "    \"vout\" : n,               (numeric) the vout value\n"
-            "    \"address\" : \"address\",  (string) the darksilk address\n"
+            "    \"address\" : \"address\",  (string) the DarkSilk address\n"
             "    \"account\" : \"account\",  (string) DEPRECATED. The associated account, or \"\" for the default account\n"
             "    \"scriptPubKey\" : \"key\", (string) the script key\n"
             "    \"amount\" : x.xxx,         (numeric) the transaction amount in " + CURRENCY_UNIT + "\n"
             "    \"confirmations\" : n       (numeric) The number of confirmations\n"
+            "    \"ps_rounds\" : n           (numeric) The number of PS round\n"
+            "    \"spendable\" : true|false  (boolean) True if spendable\n"
             "  }\n"
             "  ,...\n"
             "]\n"
@@ -2588,6 +2590,7 @@ UniValue listunspent(const UniValue& params, bool fHelp)
         }
         entry.push_back(Pair("amount",ValueFromAmount(nValue)));
         entry.push_back(Pair("confirmations",out.nDepth));
+        entry.push_back(Pair("ps_rounds", pwalletMain->GetInputPrivateSendRounds(CTxIn(out.tx->GetHash(), out.i))));
         entry.push_back(Pair("spendable", out.fSpendable));
         results.push_back(entry);
     }
