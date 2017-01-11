@@ -26,6 +26,8 @@ static const int STORMNODE_SYNC_FINISHED        = 999;
 static const int STORMNODE_SYNC_TICK_SECONDS    = 6;
 static const int STORMNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
 
+static const int STORMNODE_SYNC_ENOUGH_PEERS    = 10;
+
 extern CStormnodeSync stormnodeSync;
 
 //
@@ -56,6 +58,7 @@ private:
     // Keep track of current block index
     const CBlockIndex *pCurrentBlockIndex;
 
+    bool CheckNodeHeight(CNode* pnode, bool fDisconnectStuckNodes = false);
     void Fail();
     void ClearFulfilledRequests();
 
