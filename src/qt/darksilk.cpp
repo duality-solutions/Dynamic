@@ -413,6 +413,7 @@ void DarkSilkApplication::createSplashScreen(const NetworkStyle *networkStyle)
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
     connect(this, SIGNAL(splashFinished(QWidget*)), splash, SLOT(slotFinish(QWidget*)));
+    connect(this, SIGNAL(requestedShutdown()), splash, SLOT(close()));
 }
 
 void DarkSilkApplication::startThread()
