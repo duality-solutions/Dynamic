@@ -173,6 +173,8 @@ void CStormnodeMan::Check()
 
 void CStormnodeMan::CheckAndRemove()
 {
+    if(!stormnodeSync.IsStormnodeListSynced()) return;
+
     LogPrintf("CStormnodeMan::CheckAndRemove\n");
 
     {
@@ -199,7 +201,12 @@ void CStormnodeMan::CheckAndRemove()
                 it = vStormnodes.erase(it);
                 fStormnodesRemoved = true;
             } else {
-                if(pCurrentBlockIndex && !fAskedForSnbRecovery && it->IsNewStartRequired() && !IsSnbRecoveryRequested(hash)) {
+                bool fAsk = pCurrentBlockIndex &&
+                            !fAskedForSnbRecovery &&
+                            stormnodeSync.IsSynced() &&
+                            it->IsNewStartRequired() &&
+                            !IsSnbRecoveryRequested(hash);
+                if(fAsk) {
                     // this sn is in a non-recoverable state and we haven't asked other nodes yet
                     std::set<CNetAddr> setRequested;
                     // calulate only once and only when it's needed
@@ -909,6 +916,7 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
 void CStormnodeMan::DoFullVerificationStep()
 {
     if(activeStormnode.vin == CTxIn()) return;
+    if(!stormnodeSync.IsSynced()) return;
 
     std::vector<std::pair<int, CStormnode> > vecStormnodeRanks = GetStormnodeRanks(pCurrentBlockIndex->nHeight - 1, MIN_POSE_PROTO_VERSION);
 
