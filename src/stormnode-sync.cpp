@@ -178,18 +178,22 @@ void CStormnodeSync::SwitchToNextAsset()
         case(STORMNODE_SYNC_INITIAL):
             ClearFulfilledRequests();
             nRequestedStormnodeAssets = STORMNODE_SYNC_SPORKS;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_SPORKS):
             nTimeLastStormnodeList = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_LIST;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_LIST):
             nTimeLastPaymentVote = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_SNW;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_SNW):
             nTimeLastGovernanceItem = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_GOVERNANCE;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_GOVERNANCE):
             LogPrintf("CStormnodeSync::SwitchToNextAsset -- Sync has finished\n");
