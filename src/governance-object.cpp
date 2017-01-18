@@ -437,11 +437,6 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingStor
 
     // IF ABSOLUTE NO COUNT (NO-YES VALID VOTES) IS MORE THAN 10% OF THE NETWORK STORMNODES, OBJ IS INVALID
 
-    if(GetAbsoluteNoCount(VOTE_SIGNAL_VALID) > snodeman.CountEnabled(MIN_GOVERNANCE_PEER_PROTO_VERSION)/10) {
-        strError = "Voted invalid";
-        return false;
-    }
-
     // CHECK COLLATERAL IF REQUIRED (HIGH CPU USAGE)
 
     if(fCheckCollateral) { 

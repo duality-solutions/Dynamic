@@ -58,7 +58,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
         CTxLockVote vote;
         vRecv >> vote;
 
-        LOCK2(cs_main, cs_instantsend)
+        LOCK2(cs_main, cs_instantsend);
         if(mapTxLockVotes.count(vote.GetHash())) return;
         mapTxLockVotes.insert(std::make_pair(vote.GetHash(), vote));
 
@@ -138,7 +138,7 @@ bool ProcessTxLockRequest(CNode* pfrom, const CTransaction &tx)
      return false;
  }
 
- LOCK2(cs_main, cs_instantsend)
+ LOCK2(cs_main, cs_instantsend);
  uint256 txHash = tx.GetHash();
  mapLockRequestAccepted.insert(std::make_pair(txHash, tx));
 

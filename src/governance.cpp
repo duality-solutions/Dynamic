@@ -152,7 +152,6 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(!AcceptObjectMessage(nHash)) {
             LogPrintf("SNGOVERNANCEOBJECT -- Received unrequested object: %s\n", strHash);
-            Misbehaving(pfrom->GetId(), 20);
             return;
         }
 
@@ -235,7 +234,6 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if(!AcceptVoteMessage(nHash)) {
             LogPrint("gobject", "SNGOVERNANCEOBJECTVOTE -- Received unrequested vote object: %s, hash: %s, peer = %d\n",
                       vote.ToString(), strHash, pfrom->GetId());
-            //Misbehaving(pfrom->GetId(), 20);
             return;
         }
 
@@ -652,36 +650,47 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
 
     {
         LOCK2(cs_main, cs);
-        fRateChecksEnabled = false;
-        for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
-            uint256 h = it->first;
 
-            CGovernanceObject& govobj = it->second;
+        if(nProp == uint256()) {
+            // all valid objects, no votes
+            for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
+                CGovernanceObject& govobj = it->second;
+                std::string strHash = it->first.ToString();
 
-            if((nProp != uint256()) && (h != nProp)) {
-                continue;
+                LogPrint("gobject", "CGovernanceManager::Sync -- attempting to sync govobj: %s, peer=%d\n", strHash, pfrom->id);
+
+                if(govobj.IsSetCachedDelete()) {
+                    LogPrintf("CGovernanceManager::Sync -- not syncing deleted govobj: %s, peer=%d\n",
+                              strHash, pfrom->id);
+                    continue;
+                }
+
+                // Push the inventory budget proposal message over to the other client
+                LogPrint("gobject", "CGovernanceManager::Sync -- syncing govobj: %s, peer=%d\n", strHash, pfrom->id);
+                pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT, it->first));
+                ++nObjCount;
             }
-
-            std::string strHash = h.ToString();
+        } else {
+            // single valid object and its valid votes
+            object_m_it it = mapObjects.find(nProp);
+            if(it == mapObjects.end()) {
+                LogPrint("gobject", "CGovernanceManager::Sync -- no matching object for hash %s, peer=%d\n", nProp.ToString(), pfrom->id);
+                return;
+            }
+            CGovernanceObject& govobj = it->second;
+            std::string strHash = it->first.ToString();
 
             LogPrint("gobject", "CGovernanceManager::Sync -- attempting to sync govobj: %s, peer=%d\n", strHash, pfrom->id);
 
-            std::string strError;
-            bool fIsValid = govobj.IsValidLocally(strError, true);
-            if(!fIsValid) {
-                LogPrintf("CGovernanceManager::Sync -- not syncing invalid govobj: %s, strError = %s, fCachedValid = %d, peer=%d\n", 
-                         strHash, strError, govobj.IsSetCachedValid(), pfrom->id);
-                continue;
+            if(govobj.IsSetCachedDelete()) {
+                LogPrintf("CGovernanceManager::Sync -- not syncing deleted govobj: %s, peer=%d\n",
+                          strHash, pfrom->id);
+                return;
             }
 
-            if(!govobj.IsSetCachedValid()) {
-                LogPrintf("CGovernanceManager::Sync -- invalid flag cached, not syncing govobj: %s, fCachedValid = %d, peer=%d\n", 
-                          strHash, govobj.IsSetCachedValid(), pfrom->id);
-                continue;
-            }
             // Push the inventory budget proposal message over to the other client
             LogPrint("gobject", "CGovernanceManager::Sync -- syncing govobj: %s, peer=%d\n", strHash, pfrom->id);
-            pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT, h));
+            pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT, it->first));
             ++nObjCount;
 
             std::vector<CGovernanceVote> vecVotes = govobj.GetVoteFile().GetVotes();
@@ -693,7 +702,6 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
                 ++nVoteCount;
             }
         }
-        fRateChecksEnabled = true;
     }
 
     pfrom->PushMessage(NetMsgType::SYNCSTATUSCOUNT, STORMNODE_SYNC_GOVOBJ, nObjCount);
