@@ -58,6 +58,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
         CTxLockVote vote;
         vRecv >> vote;
 
+        LOCK2(cs_main, cs_instantsend)
         if(mapTxLockVotes.count(vote.GetHash())) return;
         mapTxLockVotes.insert(std::make_pair(vote.GetHash(), vote));
 
@@ -137,6 +138,7 @@ bool ProcessTxLockRequest(CNode* pfrom, const CTransaction &tx)
      return false;
  }
 
+ LOCK2(cs_main, cs_instantsend)
  uint256 txHash = tx.GetHash();
  mapLockRequestAccepted.insert(std::make_pair(txHash, tx));
 
@@ -186,6 +188,7 @@ int64_t CreateTxLockCandidate(const CTransaction& tx)
 
     uint256 txHash = tx.GetHash();
 
+    LOCK(cs_instantsend);
     if(!mapTxLockCandidates.count(txHash)) {
         LogPrintf("CreateTxLockCandidate -- New Transaction Lock Candidate! txid=%s\n", txHash.ToString());
 
@@ -251,6 +254,7 @@ void CreateTxLockVote(const CTransaction& tx, int nBlockHeight)
 //received a consensus vote
 bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 {
+    LOCK(cs_instantsend);
     // Stormnodes will sometimes propagate votes before the transaction is known to the client,
     // will actually process only after the lock request itself has arrived
     if(!mapLockRequestAccepted.count(vote.txHash)) {
@@ -349,6 +353,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 
 void ProcessOrphanTxLockVotes()
 {
+    LOCK2(cs_main, cs_instantsend);
     std::map<uint256, CTxLockVote>::iterator it = mapTxLockVotesOrphan.begin();
     while(it != mapTxLockVotesOrphan.end()) {
         if(ProcessTxLockVote(NULL, it->second)) {
@@ -361,6 +366,7 @@ void ProcessOrphanTxLockVotes()
 
 void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification)
 {
+    LOCK(cs_instantsend);
     // there should be no conflicting locks
     if(FindConflictingLocks(tx)) return;
     uint256 txHash = tx.GetHash();
@@ -390,6 +396,7 @@ void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification)
 }
 
 void LockTransactionInputs(const CTransaction& tx) {
+    LOCK(cs_instantsend);
     if(!mapLockRequestAccepted.count(tx.GetHash())) return;
 
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
@@ -399,6 +406,7 @@ void LockTransactionInputs(const CTransaction& tx) {
 
 bool FindConflictingLocks(const CTransaction& tx)
 {
+    LOCK(cs_instantsend);
     /*
         It's possible (very unlikely though) to get 2 conflicting transaction locks approved by the network.
         In that case, they will cancel each other out.
@@ -428,6 +436,7 @@ bool FindConflictingLocks(const CTransaction& tx)
 
 void ResolveConflicts(const CTransaction& tx)
 {
+    LOCK(cs_instantsend);
     uint256 txHash = tx.GetHash();
     // resolve conflicts
     if (IsLockedInstandSendTransaction(txHash) && !FindConflictingLocks(tx)) { //?????
@@ -442,6 +451,7 @@ void ResolveConflicts(const CTransaction& tx)
 
 int64_t GetAverageStormnodeOrphanVoteTime()
 {
+    LOCK(cs_instantsend);
     // NOTE: should never actually call this function when mapStormnodeOrphanVotes is empty
     if(mapStormnodeOrphanVotes.empty()) return 0;
 
@@ -518,6 +528,7 @@ void CleanTxLockCandidates()
 
 bool IsLockedInstandSendTransaction(const uint256 &txHash)
 {
+    LOCK(cs_instantsend);
     // there must be a successfully verified lock request...
     if (!mapLockRequestAccepted.count(txHash)) return false;
     // ...and corresponding lock must have enough signatures
@@ -530,6 +541,7 @@ int GetTransactionLockSignatures(const uint256 &txHash)
     if(fLargeWorkForkFound || fLargeWorkInvalidChainFound) return -2;
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return -3;
 
+    LOCK(cs_instantsend);
     std::map<uint256, CTxLockCandidate>::iterator it = mapTxLockCandidates.find(txHash);
     if(it != mapTxLockCandidates.end()) return it->second.CountVotes();
 
@@ -540,6 +552,7 @@ bool IsTransactionLockTimedOut(const uint256 &txHash)
 {
     if(!fEnableInstantSend) return 0;
 
+    LOCK(cs_instantsend);
     std::map<uint256, CTxLockCandidate>::iterator i = mapTxLockCandidates.find(txHash);
     if (i != mapTxLockCandidates.end()) return GetTime() > (*i).second.nTimeout;
 
