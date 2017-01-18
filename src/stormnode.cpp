@@ -219,8 +219,6 @@ void CStormnode::Check(bool fForce)
         nActiveState = STORMNODE_UPDATE_REQUIRED;
         if(nActiveStatePrev != nActiveState) {
             LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
-            // RESCAN AFFECTED VOTES
-            FlagGovernanceItemsAsDirty();
         }
         return;
     }
@@ -243,8 +241,6 @@ void CStormnode::Check(bool fForce)
             nActiveState = STORMNODE_NEW_START_REQUIRED;
             if(nActiveStatePrev != nActiveState) {
                 LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
-           // RESCAN AFFECTED VOTES
-            FlagGovernanceItemsAsDirty();
             }
             return;
         }
@@ -267,8 +263,6 @@ void CStormnode::Check(bool fForce)
             nActiveState = STORMNODE_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
                 LogPrint("stormnode", "CStormnode::Check -- Stormnode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
-                // RESCAN AFFECTED VOTES
-                FlagGovernanceItemsAsDirty();
             }
             return;
         }
@@ -904,14 +898,6 @@ void CStormnode::UpdateWatchdogVoteTime()
 */
 void CStormnode::FlagGovernanceItemsAsDirty()
 {
-    std::map<uint256, int>::iterator it = mapGovernanceObjectsVotedOn.begin();
-    while(it != mapGovernanceObjectsVotedOn.end()){
-        CGovernanceObject *pObj = governance.FindGovernanceObject((*it).first);
-
-        if(pObj) pObj->InvalidateVoteCache();
-        ++it;
-    }
-
     std::vector<uint256> vecDirty;
     {
         std::map<uint256, int>::iterator it = mapGovernanceObjectsVotedOn.begin();

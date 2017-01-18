@@ -198,6 +198,7 @@ void CStormnodeMan::CheckAndRemove()
                 mapSeenStormnodeBroadcast.erase(hash);
                 mWeAskedForStormnodeListEntry.erase((*it).vin.prevout);
                 // and finally remove it from the list
+                it->FlagGovernanceItemsAsDirty();
                 it = vStormnodes.erase(it);
                 fStormnodesRemoved = true;
             } else {

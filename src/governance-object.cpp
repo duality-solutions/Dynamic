@@ -170,6 +170,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     }
     voteInstance = vote_instance_t(vote.GetOutcome(), nVoteTimeUpdate);
     fileVotes.AddVote(vote);
+    snodeman.AddGovernanceVote(vote.GetVinStormnode(), vote.GetParentHash());
     fDirtyCache = true;
     return true;
 }
