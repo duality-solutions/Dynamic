@@ -142,11 +142,18 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
+        if(!stormnodeSync.IsStormnodeListSynced()) {
+            LogPrint("gobject", "SNGOVERNANCEOBJECT -- stormnode list not synced\n");
+            return;
+        }
+
         CGovernanceObject govobj;
         vRecv >> govobj;
 
         uint256 nHash = govobj.GetHash();
         std::string strHash = nHash.ToString();
+
+        pfrom->setAskFor.erase(nHash);
 
         LogPrint("gobject", "SNGOVERNANCEOBJECT -- Received object: %s\n", strHash);
 
@@ -230,6 +237,8 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         uint256 nHash = vote.GetHash();
         std::string strHash = nHash.ToString();
+
+        pfrom->setAskFor.erase(nHash);
 
         if(!AcceptVoteMessage(nHash)) {
             LogPrint("gobject", "SNGOVERNANCEOBJECTVOTE -- Received unrequested vote object: %s, hash: %s, peer = %d\n",
@@ -921,6 +930,54 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     }
 
     pfrom->PushMessage(NetMsgType::SNGOVERNANCESYNC, nHash);
+}
+
+void CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
+{
+    if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) return;
+    std::vector<CNode*> vNodesCopy;
+    vNodesCopy.push_back(pnode);
+    RequestGovernanceObjectVotes(vNodesCopy);
+}
+
+void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy)
+{
+    static std::map<uint256, int64_t> mapAskedRecently;
+    LOCK2(cs_main, cs);
+    std::vector<CGovernanceObject*> vpGovObjsTmp;
+    std::vector<CGovernanceObject*> vpGovObjsTriggersTmp;
+    int64_t nNow = GetTime();
+    for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
+        if(mapAskedRecently.count(it->first) && mapAskedRecently[it->first] > nNow) continue;
+        if(it->second.nObjectType == GOVERNANCE_OBJECT_TRIGGER)
+            vpGovObjsTriggersTmp.push_back(&(it->second));
+        else
+            vpGovObjsTmp.push_back(&(it->second));
+    }
+    BOOST_FOREACH(CNode* pnode, vNodesCopy) {
+        // only use reqular peers, don't try to ask from temporary nodes we connected to -
+        // they stay connected for a short period of time and it's possible that we won't get everything we should
+        if(pnode->fStormnode) continue;
+        // only use up to date peers
+        if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
+        // stop early to prevent setAskFor overflow
+        if(pnode->setAskFor.size() > SETASKFOR_MAX_SZ/2) continue;
+        uint256 nHashGovobj;
+        // ask for triggers first
+        if(vpGovObjsTriggersTmp.size()) {
+            int r = GetRandInt(vpGovObjsTriggersTmp.size());
+            nHashGovobj = vpGovObjsTriggersTmp[r]->GetHash();
+            vpGovObjsTriggersTmp.erase(vpGovObjsTriggersTmp.begin() + r);
+        } else {
+            if(vpGovObjsTmp.empty()) return;
+            int r = GetRandInt(vpGovObjsTmp.size());
+            nHashGovobj = vpGovObjsTmp[r]->GetHash();
+            vpGovObjsTmp.erase(vpGovObjsTmp.begin() + r);
+        }
+        LogPrintf("CGovernanceManager::RequestGovernanceObjectVotes -- Requesting votes for %s, peer=%d\n", nHashGovobj.ToString(), pnode->id);
+        RequestGovernanceObject(pnode, nHashGovobj);
+        mapAskedRecently[nHashGovobj] = nNow + mapObjects.size() * 60; // ask again after full cycle
+    }
 }
 
 bool CGovernanceManager::AcceptObjectMessage(const uint256& nHash)

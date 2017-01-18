@@ -359,18 +359,22 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(!pCurrentBlockIndex) return;
 
+        uint256 nHash = vote.GetHash();
+
+        pfrom->setAskFor.erase(nHash);
+
         {
             LOCK(cs_mapStormnodePaymentVotes);
-            if(mapStormnodePaymentVotes.count(vote.GetHash())) {
-                LogPrint("snpayments", "STORMNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", vote.GetHash().ToString(), pCurrentBlockIndex->nHeight);
+            if(mapStormnodePaymentVotes.count(nHash)) {
+                LogPrint("snpayments", "STORMNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", nHash.ToString(), pCurrentBlockIndex->nHeight);
                 return;
             }
 
             // Avoid processing same vote multiple times
-            mapStormnodePaymentVotes[vote.GetHash()] = vote;
+            mapStormnodePaymentVotes[nHash] = vote;
             // but first mark vote as non-verified,
             // AddPaymentVote() below should take care of it if vote is actually ok
-            mapStormnodePaymentVotes[vote.GetHash()].MarkAsNotVerified();
+            mapStormnodePaymentVotes[nHash].MarkAsNotVerified();
         }
 
         int nFirstBlock = pCurrentBlockIndex->nHeight - GetStorageLimit();

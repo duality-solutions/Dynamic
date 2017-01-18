@@ -280,7 +280,15 @@ void CStormnodeSync::ProcessTick()
                 LogPrintf("CStormnodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
                 Reset();
             } else {
-                //if syncing is complete and we have stormnodes, return
+                std::vector<CNode*> vNodesCopy;
+                {
+                    LOCK(cs_vNodes);
+                    vNodesCopy = vNodes;
+                    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+                        pnode->AddRef();
+                }
+                governance.RequestGovernanceObjectVotes(vNodesCopy);
+                ReleaseNodes(vNodesCopy);
                 return;
             }
         }
@@ -432,8 +440,12 @@ void CStormnodeSync::ProcessTick()
                     return;
                 }
 
-                // only request once from each peer
-                if(netfulfilledman.HasFulfilledRequest(pnode->addr, "stormnode-payment-sync")) continue;
+                // only request obj sync once from each peer, then request votes on per-obj basis
+                if(netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) {
+                    governance.RequestGovernanceObjectVotes(pnode);
+                    continue;
+                }
+
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "stormnode-payment-sync");
 
                 if(pnode->nVersion < snpayments.GetMinStormnodePaymentsProto()) continue;

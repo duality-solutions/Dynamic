@@ -779,6 +779,8 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         CStormnodeBroadcast snb;
         vRecv >> snb;
 
+        pfrom->setAskFor.erase(snb.GetHash());
+
         LogPrint("stormnode", "SNANNOUNCE -- Stormnode announce, stormnode=%s\n", snb.vin.prevout.ToStringShort());
 
             int nDos = 0;
@@ -797,13 +799,17 @@ void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataS
         CStormnodePing snp;
         vRecv >> snp;
 
+        uint256 nHash = snp.GetHash();
+
+        pfrom->setAskFor.erase(nHash);
+
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s\n", snp.vin.prevout.ToStringShort());
 
         // Need LOCK2 here to ensure consistent locking order because the CheckAndUpdate call below locks cs_main
         LOCK2(cs_main, cs);
 
-        if(mapSeenStormnodePing.count(snp.GetHash())) return; //seen
-        mapSeenStormnodePing.insert(std::make_pair(snp.GetHash(), snp));
+        if(mapSeenStormnodePing.count(nHash)) return; //seen
+        mapSeenStormnodePing.insert(std::make_pair(nHash, snp));
 
         LogPrint("stormnode", "SNPING -- Stormnode ping, stormnode=%s new\n", snp.vin.prevout.ToStringShort());
 

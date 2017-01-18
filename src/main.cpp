@@ -5689,11 +5689,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         if(strCommand == NetMsgType::TX) {
             vRecv >> tx;
+        } else if(strCommand == NetMsgType::TXLOCKREQUEST) {
+            vRecv >> tx;
+            nInvType = MSG_TXLOCK_REQUEST;
         } else if (strCommand == NetMsgType::SSTX) {
             vRecv >> sstx;
             tx = sstx.tx;
-            uint256 hashTx = tx.GetHash();
             nInvType = MSG_SSTX;
+        }
+
+        CInv inv(nInvType, tx.GetHash());
+        pfrom->AddInventoryKnown(inv);
+        pfrom->setAskFor.erase(inv.hash);
+
+        if (strCommand == NetMsgType::SSTX) {
+            uint256 hashTx = tx.GetHash();
 
             if(mapSandstormBroadcastTxes.count(hashTx)) {
                 LogPrint("privatesend", "SSTX -- Already have %s, skipping...\n", hashTx.ToString());
@@ -5721,20 +5731,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrintf("SSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
             psn->fAllowMixingTx = false;
-        } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
-            vRecv >> tx;
-            nInvType = MSG_TXLOCK_REQUEST;
         }
-
-        CInv inv(nInvType, tx.GetHash());
-        pfrom->AddInventoryKnown(inv);
 
         LOCK(cs_main);
 
         bool fMissingInputs = false;
         CValidationState state;
 
-        pfrom->setAskFor.erase(inv.hash);
         mapAlreadyAskedFor.erase(inv.hash);
 
         if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))
