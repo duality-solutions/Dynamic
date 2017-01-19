@@ -226,6 +226,10 @@ color: rgb(255, 255, 255);</string>
         <layout class="QGridLayout" name="gridLayout">
          <item row="1" column="0">
           <widget class="QTableWidget" name="tableWidgetStormnodes">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);
+background-color:(255,255,255);</string>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
