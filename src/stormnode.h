@@ -16,14 +16,14 @@ class CStormnode;
 class CStormnodeBroadcast;
 class CStormnodePing;
 
-static const int STORMNODE_MIN_SNP_SECONDS         = 5;
-static const int STORMNODE_MIN_SNB_SECONDS         = 5 * 60;
-static const int STORMNODE_EXPIRATION_SECONDS      = 10 * 60;
-static const int STORMNODE_REMOVAL_SECONDS         = 65 * 60;
-static const int STORMNODE_CHECK_SECONDS           = 120 * 60;
-static const int STORMNODE_WATCHDOG_MAX_SECONDS    = 180 * 60;
-static const int STORMNODE_NEW_START_REQUIRED_SECONDS  = 180 * 60;
-static const int STORMNODE_POSE_BAN_MAX_SCORE      = 5;
+static const int STORMNODE_CHECK_SECONDS                = 5;
+static const int STORMNODE_MIN_SNB_SECONDS              = 5 * 60;
+static const int STORMNODE_MIN_SNP_SECONDS              = 10 * 60;
+static const int STORMNODE_EXPIRATION_SECONDS           = 65 * 60;
+static const int STORMNODE_WATCHDOG_MAX_SECONDS         = 120 * 60;
+static const int STORMNODE_NEW_START_REQUIRED_SECONDS   = 180 * 60;
+
+static const int STORMNODE_POSE_BAN_MAX_SCORE           = 5;
 //
 // The Stormnode Ping Class : Contains a different serialize method for sending pings from stormnodes throughout the network
 //
