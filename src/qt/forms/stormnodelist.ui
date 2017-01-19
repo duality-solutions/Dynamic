@@ -47,8 +47,8 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="styleSheet">
-        <string notr="true">QTabWidget:tab-bar { alignment: left; background-color: 0,0,0;}
-QTabBar { alignment: left; background-color: 0,0,0;}
+        <string notr="true">QTabWidget:tab-bar { alignment: left; background-color: 0,0,0; color: 255,255,255;}
+QTabBar { alignment: left; background-color: 0,0,0; color: 255,255,255;}
 </string>
        </property>
        <property name="currentIndex">
@@ -71,6 +71,10 @@ QTabBar { alignment: left; background-color: 0,0,0;}
              </property>
              <item>
               <widget class="QLabel" name="updateNote">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+               </property>
                <property name="text">
                 <string>Note: Status of your stormnodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see &quot;MISSING&quot; in &quot;Status&quot; field.</string>
                </property>
@@ -268,6 +272,11 @@ QTabBar { alignment: left; background-color: 0,0,0;}
            </property>
            <item>
             <widget class="QLabel" name="label_filter">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);
+</string>
+             </property>
              <property name="text">
               <string>Filter List:</string>
              </property>
@@ -295,6 +304,10 @@ QTabBar { alignment: left; background-color: 0,0,0;}
            </item>
            <item>
             <widget class="QLabel" name="label_count">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);</string>
+             </property>
              <property name="text">
               <string>Node Count:</string>
              </property>
@@ -302,6 +315,10 @@ QTabBar { alignment: left; background-color: 0,0,0;}
            </item>
            <item>
             <widget class="QLabel" name="countLabel">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);</string>
+             </property>
              <property name="text">
               <string>0</string>
              </property>
