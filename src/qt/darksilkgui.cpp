@@ -1454,7 +1454,7 @@ void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel *optionsModel)
 /** When Display Units are changed on OptionsModel it will refresh the display text of the control on the status bar */
 void UnitDisplayStatusBarControl::updateDisplayUnit(int newUnits)
 {
-    setText(DarkSilkUnits::name(newUnits));
+    setPixmap(QIcon(":/icons/drk/unit_" + DarkSilkUnits::id(newUnits)).pixmap(33,STATUSBAR_ICONSIZE));
 }
 
 /** Shows context menu with Display Unit options by the mouse coordinates */

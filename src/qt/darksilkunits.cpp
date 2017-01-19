@@ -42,6 +42,18 @@ bool DarkSilkUnits::valid(int unit)
     }
 }
 
+QString DarkSilkUnits::id(int unit)
+{
+    switch(unit)
+    {
+    case DSLK: return QString("dslk");
+    case mDSLK: return QString("mdslk");
+    case uDSLK: return QString("udslk");
+    case satoshis: return QString("satoshis");
+    default: return QString("???");
+    }
+}
+
 QString DarkSilkUnits::name(int unit)
 {
     if(Params().NetworkIDString() == CBaseChainParams::MAIN)

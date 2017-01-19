@@ -39,6 +39,10 @@
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>
+        <file alias="unit_dslk">res/icons/drk/unit_dslk.png</file>
+        <file alias="unit_mdslk">res/icons/drk/unit_mdslk.png</file>
+        <file alias="unit_udslk">res/icons/drk/unit_udslk.png</file>
+        <file alias="unit_satoshis">res/icons/drk/unit_satoshis.png</file>
         <file alias="lock_closed">res/icons/drk/lock_closed.png</file>
         <file alias="lock_open">res/icons/drk/lock_open.png</file>
         <file alias="key">res/icons/drk/key.png</file>

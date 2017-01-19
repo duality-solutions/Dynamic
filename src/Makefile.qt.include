@@ -233,8 +233,11 @@ RES_ICONS = \
   qt/res/icons/drk/tx_mined.png \
   qt/res/icons/drk/about.png \
   qt/res/icons/drk/about_qt.png \
-  qt/res/icons/drk/verify.png 
-
+  qt/res/icons/drk/verify.png \
+  qt/res/icons/drk/unit_dslk.png \
+  qt/res/icons/drk/unit_mdslk.png \
+  qt/res/icons/drk/unit_udslk.png \
+  qt/res/icons/drk/unit_satoshis.png
 
 DARKSILK_QT_CPP = \
   qt/bantablemodel.cpp \
