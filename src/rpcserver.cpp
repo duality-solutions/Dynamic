@@ -348,7 +348,7 @@ static const CRPCCommand vRPCCommands[] =
     /* DarkSilk features */
     { "darksilk",               "stormnode",              &stormnode,              true  },
     { "darksilk",               "stormnodelist",          &stormnodelist,          true  },
-    { "darksilk",               "stormnodebroadcast",     &stormnodebroadcast,    true  },
+    { "darksilk",               "stormnodebroadcast",     &stormnodebroadcast,     true  },
     { "darksilk",               "gobject",                &gobject,                true  },
     { "darksilk",               "getgovernanceinfo",      &getgovernanceinfo,      true  },
     { "darksilk",               "getsuperblockbudget",    &getsuperblockbudget,    true  },

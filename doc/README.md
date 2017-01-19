@@ -41,7 +41,7 @@ DarkSilk implements Gavin Andresens signature cache optimisation from Bitcoin fo
 
 DarkSilk uses ShadowChat from Shadowcash based upon Bitmessage for encrypted, anonymous and secure messaging via the DarkSilk wallet network.
 
-Darksilk includes a completely decentralised marketplace, providing anonymity and escrow services for safe and fast trades.
+DarkSilk includes a completely decentralised marketplace, providing anonymity and escrow services for safe and fast trades.
 
 DarkSilk includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the DarkSilk codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
 

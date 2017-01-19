@@ -196,7 +196,7 @@ void MultisigDialog::on_createAddressButton_clicked()
 
     if (IsInitialBlockDownload())
     {
-        QMessageBox::critical(this, tr("Multisig: Chain Download Incomplete!"), tr("Darksilk is downloading blocks..."));
+        QMessageBox::critical(this, tr("Multisig: Chain Download Incomplete!"), tr("DarkSilk is downloading blocks..."));
         return;
     }
 

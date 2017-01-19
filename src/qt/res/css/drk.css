@@ -1817,3 +1817,162 @@ min-height:15px;
 QWidget#StormnodeManager QWidget { /* Remove Annoying Focus Rectangle */
 outline: 0;
 }
+
+/* StormnodeListUI */
+
+QWidget#StormnodeList .QPushButton#startAllButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startAllButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startAllButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startMissingButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startMissingButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startMissingButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#UpdateButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#UpdateButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#UpdateButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
