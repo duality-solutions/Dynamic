@@ -47,8 +47,9 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="styleSheet">
-        <string notr="true">QTabWidget:tab-bar { alignment: left }
-QTabBar { alignment: left; }</string>
+        <string notr="true">QTabWidget:tab-bar { alignment: left; background-color: 0,0,0;}
+QTabBar { alignment: left; background-color: 0,0,0;}
+</string>
        </property>
        <property name="currentIndex">
         <number>0</number>
