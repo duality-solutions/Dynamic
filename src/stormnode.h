@@ -24,10 +24,10 @@ static const int STORMNODE_WATCHDOG_MAX_SECONDS         = 120 * 60;
 static const int STORMNODE_NEW_START_REQUIRED_SECONDS   = 180 * 60;
 
 static const int STORMNODE_POSE_BAN_MAX_SCORE           = 5;
+
 //
 // The Stormnode Ping Class : Contains a different serialize method for sending pings from stormnodes throughout the network
 //
-
 class CStormnodePing
 {
 public:
