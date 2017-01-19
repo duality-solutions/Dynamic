@@ -52,9 +52,13 @@ QTabBar { alignment: left; background-color: 0,0,0; color: 255,255,255;}
 </string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabMyStormnodes">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+        </property>
         <attribute name="title">
          <string>My Stormnodes</string>
         </attribute>
@@ -212,6 +216,10 @@ color: rgb(255, 255, 255);</string>
         </layout>
        </widget>
        <widget class="QWidget" name="tabAllStormnodes">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+        </property>
         <attribute name="title">
          <string>All Stormnodes</string>
         </attribute>
