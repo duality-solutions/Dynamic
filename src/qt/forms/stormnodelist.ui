@@ -130,7 +130,7 @@ QTabBar { alignment: left; }</string>
              </column>
              <column>
               <property name="text">
-               <string>Last Seen (UTC)</string>
+               <string>Last Seen</string>
               </property>
              </column>
              <column>
@@ -250,7 +250,7 @@ QTabBar { alignment: left; }</string>
            </column>
            <column>
             <property name="text">
-             <string>Last Seen (UTC)</string>
+             <string>Last Seen</string>
             </property>
            </column>
            <column>
