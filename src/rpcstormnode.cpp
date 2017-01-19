@@ -472,8 +472,8 @@ UniValue stormnodelist(const UniValue& params, bool fHelp)
                 "                   partial match)\n"
                 "  protocol       - Print protocol of a stormnode (can be additionally filtered, exact match))\n"
                 "  rank           - Print rank of a stormnode based on current block\n"
-                "  status         - Print stormnode status: PRE_ENABLED / ENABLED / EXPIRED / OUTPOINT_SPENT / REMOVE\n"
-                "                   (can be additionally filtered, partial match)\n"
+                "  status         - Print stormnode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
+                "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
                 );
     }
 
