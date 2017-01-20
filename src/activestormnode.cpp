@@ -172,7 +172,8 @@ void CActiveStormnode::ManageStateInitial()
         LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
         return;
     }
-
+    
+    /*
     int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
     
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
@@ -191,7 +192,7 @@ void CActiveStormnode::ManageStateInitial()
             LogPrintf("CActiveStormnode::ManageStatus() - not capable: %s\n", strNotCapableReason);
             return;
         }
-    }
+    }*/
 
     LogPrintf("CActiveStormnode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
