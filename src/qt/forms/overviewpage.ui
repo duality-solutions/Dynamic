@@ -461,13 +461,6 @@
             <property name="verticalSpacing">
              <number>12</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelPrivateSendEnabledText">
-              <property name="text">
-               <string>Status:</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="1">
              <widget class="QLabel" name="labelPrivateSendEnabled">
               <property name="text">
@@ -490,8 +483,16 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">border-width:1px;
+border-color:rgb(82,0,114);
+border-style:solid;</string>
+              </property>
               <property name="value">
                <number>0</number>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -534,6 +535,9 @@
               <property name="text">
                <string>Submitted Denom:</string>
               </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item row="4" column="1">
@@ -543,6 +547,16 @@
               </property>
               <property name="text">
                <string>n/a</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelPrivateSendEnabledText">
+              <property name="text">
+               <string>Status:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
