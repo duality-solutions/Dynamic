@@ -2757,7 +2757,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
         mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
-        return state.DoS(100, error("ConnectBlock(DSLK): couldn't find stormnode or superblock payments"),
+        return state.DoS(100, error("ConnectBlock(DSLK): couldn't find Stormnode or superblock payments"),
                                 REJECT_INVALID, "bad-cb-payee");
     }
     // END DARKSILK
@@ -5712,7 +5712,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
             CStormnode* psn = snodeman.Find(sstx.vin);
             if(psn == NULL) {
-                LogPrint("privatesend", "SSTX -- Can't find stormnode %s to verify %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
+                LogPrint("privatesend", "SSTX -- Can't find Stormnode %s to verify %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return false;
             }
 

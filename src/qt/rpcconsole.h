@@ -96,7 +96,7 @@ public Q_SLOTS:
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of stormnodes shown in the UI */
+    /** Set number of Stormnodes shown in the UI */
     void setStormnodeCount(const QString &strStormnodes);
     /** Set number of blocks and last block date shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);

@@ -199,7 +199,7 @@ void CStormnodeSync::SwitchToNextAsset()
             LogPrintf("CStormnodeSync::SwitchToNextAsset -- Sync has finished\n");
             nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
-            //try to activate our stormnode if possible
+            //try to activate our Stormnode if possible
             activeStormnode.ManageState();
 
             TRY_LOCK(cs_vNodes, lockRecv);
@@ -220,8 +220,8 @@ std::string CStormnodeSync::GetSyncStatus()
     switch (stormnodeSync.nRequestedStormnodeAssets) {
         case STORMNODE_SYNC_INITIAL:       return _("Synchronization pending...");
         case STORMNODE_SYNC_SPORKS:        return _("Synchronizing sporks...");
-        case STORMNODE_SYNC_LIST:          return _("Synchronizing stormnodes...");
-        case STORMNODE_SYNC_SNW:           return _("Synchronizing stormnode payments...");
+        case STORMNODE_SYNC_LIST:          return _("Synchronizing Stormnodes...");
+        case STORMNODE_SYNC_SNW:           return _("Synchronizing Stormnode payments...");
         case STORMNODE_SYNC_GOVERNANCE:    return _("Synchronizing governance objects...");
         case STORMNODE_SYNC_FAILED:        return _("Synchronization failed");
         case STORMNODE_SYNC_FINISHED:      return _("Synchronization finished");
@@ -265,7 +265,7 @@ void CStormnodeSync::ProcessTick()
     if(nTick++ % STORMNODE_SYNC_TICK_SECONDS != 0) return;
     if(!pCurrentBlockIndex) return;
 
-    //the actual count of stormnodes we have currently
+    //the actual count of Stormnodes we have currently
     int nSnCount = snodeman.CountStormnodes();
 
     if(fDebug) LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d\n", nTick, nSnCount);
@@ -274,7 +274,7 @@ void CStormnodeSync::ProcessTick()
     {
         if(IsSynced()) {
             /*
-                Resync if we lose all stormnodes from sleep/wake or failure to sync originally
+                Resync if we lose all Stormnodes from sleep/wake or failure to sync originally
             */
             if(nSnCount == 0) {
                 LogPrintf("CStormnodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
@@ -344,7 +344,7 @@ void CStormnodeSync::ProcessTick()
                 int nSnCount = snodeman.CountStormnodes();
                 pnode->PushMessage(NetMsgType::STORMNODEPAYMENTSYNC, nSnCount); //sync payment votes
                 uint256 n = uint256();
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync stormnode votes
+                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync Stormnode votes
             } else {
                 nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             }
@@ -380,13 +380,13 @@ void CStormnodeSync::ProcessTick()
             // MNLIST : SYNC STORMNODE LIST FROM OTHER CONNECTED CLIENTS
 
             if(nRequestedStormnodeAssets == STORMNODE_SYNC_LIST) {
-                LogPrint("stormnode", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastStormnodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastStormnodeList, GetTime(), GetTime() - nTimeLastStormnodeList);
+                LogPrint("Stormnode", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastStormnodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastStormnodeList, GetTime(), GetTime() - nTimeLastStormnodeList);
                 // check for timeout first
                 if(nTimeLastStormnodeList < GetTime() - STORMNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- timeout\n", nTick, nRequestedStormnodeAssets);
                     if (nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
-                        // there is no way we can continue without stormnode list, fail here and try later
+                        // there is no way we can continue without Stormnode list, fail here and try later
                         Fail();
                         ReleaseNodes(vNodesCopy);
                         return;
@@ -497,7 +497,7 @@ void CStormnodeSync::ProcessTick()
                 if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
                 nRequestedStormnodeAttempt++;
 
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync stormnode votes
+                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync Stormnode votes
 
                 ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need

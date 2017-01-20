@@ -132,7 +132,7 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
             }
 
             if(nState == POOL_STATE_QUEUE) {
-                LogPrint("privatesend", "SSQUEUE -- PrivateSend queue (%s) is ready on stormnode %s\n", ssq.ToString(), psn->addr.ToString());
+                LogPrint("privatesend", "SSQUEUE -- PrivateSend queue (%s) is ready on Stormnode %s\n", ssq.ToString(), psn->addr.ToString());
                 SubmitDenominate();
             }
         } else {
@@ -155,7 +155,7 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
             psn->nLastSsq = snodeman.nSsqCount;
             psn->fAllowMixingTx = true;
 
-            LogPrint("privatesend", "SSQUEUE -- new PrivateSend queue (%s) from stormnode %s\n", ssq.ToString(), psn->addr.ToString());
+            LogPrint("privatesend", "SSQUEUE -- new PrivateSend queue (%s) from Stormnode %s\n", ssq.ToString(), psn->addr.ToString());
             if(pSubmittedToStormnode && pSubmittedToStormnode->vin.prevout == ssq.vin.prevout) {
                 ssq.fTried = true;
             }
@@ -520,7 +520,7 @@ std::string CSandstormPool::GetStatus()
             if(     nStatusMessageProgress % 70 <= 30) strSuffix = ".";
             else if(nStatusMessageProgress % 70 <= 50) strSuffix = "..";
             else if(nStatusMessageProgress % 70 <= 70) strSuffix = "...";
-            return strprintf(_("Submitted to stormnode, waiting in queue %s"), strSuffix);;
+            return strprintf(_("Submitted to Stormnode, waiting in queue %s"), strSuffix);;
         case POOL_STATE_ACCEPTING_ENTRIES:
             if(nEntriesCount == 0) {
                 nStatusMessageProgress = 0;
@@ -532,11 +532,11 @@ std::string CSandstormPool::GetStatus()
                 }
                 return _("PrivateSend request complete:") + " " + _("Your transaction was accepted into the pool!");
             } else {
-                if(     nStatusMessageProgress % 70 <= 40) return strprintf(_("Submitted following entries to stormnode: %u / %d"), nEntriesCount, GetMaxPoolTransactions());
+                if(     nStatusMessageProgress % 70 <= 40) return strprintf(_("Submitted following entries to Stormnode: %u / %d"), nEntriesCount, GetMaxPoolTransactions());
                 else if(nStatusMessageProgress % 70 <= 50) strSuffix = ".";
                 else if(nStatusMessageProgress % 70 <= 60) strSuffix = "..";
                 else if(nStatusMessageProgress % 70 <= 70) strSuffix = "...";
-                return strprintf(_("Submitted to stormnode, waiting for more entries ( %u / %d ) %s"), nEntriesCount, GetMaxPoolTransactions(), strSuffix);
+                return strprintf(_("Submitted to Stormnode, waiting for more entries ( %u / %d ) %s"), nEntriesCount, GetMaxPoolTransactions(), strSuffix);
             }
         case POOL_STATE_SIGNING:
             if(     nStatusMessageProgress % 70 <= 40) return _("Found enough users, signing ...");
@@ -613,7 +613,7 @@ void CSandstormPool::CreateFinalTransaction()
 
 void CSandstormPool::CommitFinalTransaction()
 {
-    if(!fStormNode) return; // check and relay final tx only on stormnode
+    if(!fStormNode) return; // check and relay final tx only on Stormnode
 
     CTransaction finalTransaction = CTransaction(finalMutableTransaction);
     uint256 hashTx = finalTransaction.GetHash();
@@ -637,7 +637,7 @@ void CSandstormPool::CommitFinalTransaction()
 
     LogPrintf("CSandstormPool::CommitFinalTransaction -- CREATING SSTX\n");
 
-    // create and sign stormnode sstx transaction
+    // create and sign Stormnode sstx transaction
     if(!mapSandstormBroadcastTxes.count(hashTx)) {
         CSandstormBroadcastTx sstx(finalTransaction, activeStormnode.vin, GetAdjustedTime());
         sstx.Sign();
@@ -1242,7 +1242,7 @@ bool CSandstormPool::SignFinalTransaction(const CTransaction& finalTransactionNe
     }
 
     // push all of our signatures to the Stormnode
-    LogPrintf("CSandstormPool::SignFinalTransaction -- pushing sigs to the stormnode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
+    LogPrintf("CSandstormPool::SignFinalTransaction -- pushing sigs to the Stormnode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
     pnode->PushMessage(NetMsgType::SSSIGNFINALTX, sigs);
     SetState(POOL_STATE_SIGNING);
     nTimeLastSuccessfulStep = GetTimeMillis();
@@ -1517,7 +1517,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
 
             CStormnode* psn = snodeman.Find(ssq.vin);
             if(psn == NULL) {
-                LogPrintf("CSandstormPool::DoAutomaticDenominating -- ssq stormnode is not in stormnode list, stormnode=%s\n", ssq.vin.prevout.ToStringShort());
+                LogPrintf("CSandstormPool::DoAutomaticDenominating -- ssq Stormnode is not in Stormnode list, Stormnode=%s\n", ssq.vin.prevout.ToStringShort());
                 continue;
             }
 
@@ -1542,7 +1542,7 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
 
             vecStormnodesUsed.push_back(ssq.vin);
 
-            LogPrintf("CSandstormPool::DoAutomaticDenominating -- attempt to connect to stormnode from queue, addr=%s\n", psn->addr.ToString());
+            LogPrintf("CSandstormPool::DoAutomaticDenominating -- attempt to connect to Stormnode from queue, addr=%s\n", psn->addr.ToString());
             // connect to Stormnode and submit the queue request
             CNode* pnode = ConnectNode((CAddress)psn->addr, NULL, true);
             if(pnode) {
@@ -1573,15 +1573,15 @@ bool CSandstormPool::DoAutomaticDenominating(bool fDryRun)
     while(nTries < 10) {
         CStormnode* psn = snodeman.FindRandomNotInVec(vecStormnodesUsed, MIN_PRIVATESEND_PEER_PROTO_VERSION);
         if(psn == NULL) {
-            LogPrintf("CSandstormPool::DoAutomaticDenominating -- Can't find random stormnode!\n");
+            LogPrintf("CSandstormPool::DoAutomaticDenominating -- Can't find random Stormnode!\n");
             strAutoDenomResult = _("Can't find random Stormnode.");
             return false;
         }
         vecStormnodesUsed.push_back(psn->vin);
 
         if(psn->nLastSsq != 0 && psn->nLastSsq + nSnCountEnabled/5 > snodeman.nSsqCount) {
-            LogPrintf("CSandstormPool::DoAutomaticDenominating -- Too early to mix on this stormnode!"
-                        " stormnode=%s  addr=%s  nLastSsq=%d  CountEnabled/5=%d  nSsqCount=%d\n",
+            LogPrintf("CSandstormPool::DoAutomaticDenominating -- Too early to mix on this Stormnode!"
+                        " Stormnode=%s  addr=%s  nLastSsq=%d  CountEnabled/5=%d  nSsqCount=%d\n",
                         psn->vin.prevout.ToStringShort(), psn->addr.ToString(), psn->nLastSsq,
                         nSnCountEnabled/5, snodeman.nSsqCount);
             nTries++;
@@ -2404,7 +2404,7 @@ void CSandstormPool::RelayIn(const CSandStormEntry& entry)
 
     CNode* pnode = FindNode(pSubmittedToStormnode->addr);
     if(pnode != NULL) {
-        LogPrintf("CSandstormPool::RelayIn -- found stormnode, relaying message to %s\n", pnode->addr.ToString());
+        LogPrintf("CSandstormPool::RelayIn -- found Stormnode, relaying message to %s\n", pnode->addr.ToString());
         pnode->PushMessage(NetMsgType::SSVIN, entry);
     }
 }
@@ -2478,7 +2478,7 @@ void ThreadCheckSandStormPool()
 
             nTick++;
 
-            // make sure to check all stormnodes first
+            // make sure to check all Stormnodes first
             snodeman.Check();
 
             // check if we should activate or ping every few minutes,

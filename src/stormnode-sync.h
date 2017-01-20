@@ -31,7 +31,7 @@ static const int STORMNODE_SYNC_ENOUGH_PEERS    = 10;
 extern CStormnodeSync stormnodeSync;
 
 //
-// CStormnodeSync : Sync stormnode assets in stages
+// CStormnodeSync : Sync Stormnode assets in stages
 //
 
 class CStormnodeSync
@@ -42,10 +42,10 @@ private:
     // Count peers we've requested the asset from
     int nRequestedStormnodeAttempt;
 
-    // Time when current stormnode asset sync started
+    // Time when current Stormnode asset sync started
     int64_t nTimeAssetSyncStarted;
 
-    // Last time when we received some stormnode asset ...
+    // Last time when we received some Stormnode asset ...
     int64_t nTimeLastStormnodeList;
     int64_t nTimeLastPaymentVote;
     int64_t nTimeLastGovernanceItem;

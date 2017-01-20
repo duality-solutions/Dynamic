@@ -2652,7 +2652,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     InsecureRand insecureRand;
     BOOST_FOREACH(const COutput& out, vCoins)
     {
-        // stormnode-like input should not be selected by AvailableCoins now anyway
+        // Stormnode-like input should not be selected by AvailableCoins now anyway
         //if(out.tx->vout[out.i].nValue == 1000*COIN) continue;
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
 
@@ -2800,7 +2800,7 @@ bool CWallet::SelectCoinsDark(CAmount nValueMin, CAmount nValueMax, std::vector<
         if(out.tx->vout[out.i].nValue < CENT) continue;
         //do not allow collaterals to be selected
         if(IsCollateralAmount(out.tx->vout[out.i].nValue)) continue;
-        if(fStormNode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //stormnode input
+        if(fStormNode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //Stormnode input
 
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
             CTxIn txin = CTxIn(out.tx->GetHash(),out.i);
@@ -2850,7 +2850,7 @@ bool CWallet::GetStormnodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& k
     std::vector<COutput> vPossibleCoins;
     AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
     if(vPossibleCoins.empty()) {
-        LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate any valid stormnode vin\n");
+        LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate any valid Stormnode vin\n");
         return false;
     }
 
@@ -2865,7 +2865,7 @@ bool CWallet::GetStormnodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& k
         if(out.tx->GetHash() == txHash && out.i == nOutputIndex) // found it!
             return GetVinAndKeysFromOutput(out, txinRet, pubKeyRet, keyRet);
 
-    LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate specified stormnode vin\n");
+    LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate specified Stormnode vin\n");
     return false;
 }
 

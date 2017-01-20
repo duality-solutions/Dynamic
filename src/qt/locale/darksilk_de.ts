@@ -1454,7 +1454,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Starte/Stoppe das Mixen</translation>
     </message>
     <message>
-        <source>The denominations you submitted to the stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
+        <source>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
         <translation>Die gestückelten Beträge, die Sie zu dem stormnode gesendet haben.&lt;br&gt; Zum Erfolgreichen Mixen müssen andere Benutzer exakt gleich gestückelte Beträge senden.</translation>
     </message>
     <message>

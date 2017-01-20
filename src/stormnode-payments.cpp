@@ -146,13 +146,13 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
     }
 
     // we are still using budgets, but we have no data about them anymore,
-    // we can only check stormnode payments
+    // we can only check Stormnode payments
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
 
     if(nBlockHeight < consensusParams.nSuperblockStartBlock) {
         if(snpayments.IsTransactionValid(txNew, nBlockHeight)) {
-            LogPrint("snpayments", "IsBlockPayeeValid -- Valid stormnode payment at height %d: %s", nBlockHeight, txNew.ToString());
+            LogPrint("snpayments", "IsBlockPayeeValid -- Valid Stormnode payment at height %d: %s", nBlockHeight, txNew.ToString());
             return true;
         }
 
@@ -161,7 +161,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             nOffset < consensusParams.nBudgetPaymentsWindowBlocks) {
             if(!sporkManager.IsSporkActive(SPORK_13_OLD_SUPERBLOCK_FLAG)) {
                 // no budget blocks should be accepted here, if SPORK_13_OLD_SUPERBLOCK_FLAG is disabled
-                LogPrint("gobject", "IsBlockPayeeValid -- ERROR: Client synced but budget spork is disabled and stormnode payment is invalid\n");
+                LogPrint("gobject", "IsBlockPayeeValid -- ERROR: Client synced but budget spork is disabled and Stormnode payment is invalid\n");
                 return false;
             }
             // NOTE: this should never happen in real, SPORK_13_OLD_SUPERBLOCK_FLAG MUST be disabled when 12.1 starts to go live
@@ -171,7 +171,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
         }
 
         if(sporkManager.IsSporkActive(SPORK_8_STORMNODE_PAYMENT_ENFORCEMENT)) {
-            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid stormnode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Stormnode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
             return false;
         }
 
@@ -202,12 +202,12 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
 
     // IF THIS ISN'T A SUPERBLOCK OR SUPERBLOCK IS INVALID, IT SHOULD PAY A STORMNODE DIRECTLY
     if(snpayments.IsTransactionValid(txNew, nBlockHeight)) {
-        LogPrint("snpayments", "IsBlockPayeeValid -- Valid stormnode payment at height %d: %s", nBlockHeight, txNew.ToString());
+        LogPrint("snpayments", "IsBlockPayeeValid -- Valid Stormnode payment at height %d: %s", nBlockHeight, txNew.ToString());
         return true;
     }
 
     if(sporkManager.IsSporkActive(SPORK_8_STORMNODE_PAYMENT_ENFORCEMENT)) {
-        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid stormnode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Stormnode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
         return false;
     }
 
@@ -258,7 +258,7 @@ bool CStormnodePayments::CanVote(COutPoint outStormnode, int nBlockHeight)
         return false;
     }
 
-    //record this stormnode voted
+    //record this Stormnode voted
     mapStormnodesLastVote[outStormnode] = nBlockHeight;
     return true;
 }
@@ -279,13 +279,13 @@ void CStormnodePayments::FillBlockPayee(CMutableTransaction& txNew /*CAmount nFe
 
     //spork
     if(!snpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
-        //no stormnode detected
+        //no Stormnode detected
         CStormnode* winningNode = snodeman.Find(payee);
         if(winningNode){
             payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
         } else {
             if (fDebug)
-                LogPrintf("CreateNewBlock: Failed to detect stormnode to pay\n");
+                LogPrintf("CreateNewBlock: Failed to detect Stormnode to pay\n");
             hasPayment = false;
         }
     }
@@ -324,7 +324,7 @@ int CStormnodePayments::GetMinStormnodePaymentsProto() {
 
 void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    // Ignore any payments messages until stormnode list is synced
+    // Ignore any payments messages until Stormnode list is synced
     if(!stormnodeSync.IsStormnodeListSynced()) return;
 
     if(fLiteMode) return; // disable all DarkSilk specific functionality
@@ -332,7 +332,7 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     if (strCommand == NetMsgType::STORMNODEPAYMENTSYNC) { //Stormnode Payments Request Sync
 
         // Ignore such requests until we are fully synced.
-        // We could start processing this after stormnode list is synced
+        // We could start processing this after Stormnode list is synced
         // but this is a heavy one so it's better to finish sync first.
         if (!stormnodeSync.IsSynced()) return;
 
@@ -390,14 +390,14 @@ void CStormnodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         if(!CanVote(vote.vinStormnode.prevout, vote.nBlockHeight)) {
-            LogPrintf("STORMNODEPAYMENTVOTE -- stormnode already voted, stormnode=%s\n", vote.vinStormnode.prevout.ToStringShort());
+            LogPrintf("STORMNODEPAYMENTVOTE -- Stormnode already voted, Stormnode=%s\n", vote.vinStormnode.prevout.ToStringShort());
             return;
         }
 
         stormnode_info_t snInfo = snodeman.GetStormnodeInfo(vote.vinStormnode);
         if(!snInfo.fInfoValid) {
             // sn was not found, so we can't check vote, some info is probably missing
-            LogPrintf("STORMNODEPAYMENTVOTE -- stormnode is missing %s\n", vote.vinStormnode.prevout.ToStringShort());
+            LogPrintf("STORMNODEPAYMENTVOTE -- Stormnode is missing %s\n", vote.vinStormnode.prevout.ToStringShort());
             snodeman.AskForSN(pfrom, vote.vinStormnode);
             return;
         }
@@ -462,7 +462,7 @@ bool CStormnodePayments::GetBlockPayee(int nBlockHeight, CScript& payee)
     return false;
 }
 
-// Is this stormnode scheduled to get paid soon?
+// Is this Stormnode scheduled to get paid soon?
 // -- Only look ahead up to 8 blocks to allow for propagation of the latest 2 blocks of votes
 bool CStormnodePayments::IsScheduled(CStormnode& sn, int nNotBlockHeight)
 {
@@ -691,7 +691,7 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
         // new votes must comply SPORK_10_STORMNODE_PAY_UPDATED_NODES rules
         nMinRequiredProtocol = snpayments.GetMinStormnodePaymentsProto();
     } else {
-        // allow non-updated stormnodes for old blocks
+        // allow non-updated Stormnodes for old blocks
         nMinRequiredProtocol = MIN_STORMNODE_PAYMENT_PROTO_VERSION;
     }
 
@@ -700,14 +700,14 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
         return false;
     }
 
-    // Only stormnodes should try to check stormnode rank for old votes - they need to pick the right winner for future blocks.
-    // Regular clients (miners included) need to verify stormnode rank for future block votes only.
+    // Only Stormnodes should try to check Stormnode rank for old votes - they need to pick the right winner for future blocks.
+    // Regular clients (miners included) need to verify Stormnode rank for future block votes only.
     if(!fStormNode && nBlockHeight < nValidationHeight) return true;
 
     int nRank = snodeman.GetStormnodeRank(vinStormnode, nBlockHeight - 101, nMinRequiredProtocol, false);
 
     if(nRank > SNPAYMENTS_SIGNATURES_TOTAL) {
-        // It's common to have stormnodes mistakenly think they are in the top 10
+        // It's common to have Stormnodes mistakenly think they are in the top 10
         // We don't want to print all of these messages in normal mode, debug mode should print though
         strError = strprintf("Stormnode is not in the top %d (%d)", SNPAYMENTS_SIGNATURES_TOTAL, nRank);
         // Only ban for new snw which is out of bounds, for old snw SN list itself might be way too much off
@@ -731,7 +731,7 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
 
     // We have little chances to pick the right winner if winners list is out of sync
     // but we have no choice, so we'll try. However it doesn't make sense to even try to do so
-    // if we have not enough data about stormnodes.
+    // if we have not enough data about Stormnodes.
     if(!stormnodeSync.IsStormnodeListSynced()) return false;
 
     int nRank = snodeman.GetStormnodeRank(activeStormnode.vin, nBlockHeight - 101, GetMinStormnodePaymentsProto(), false);
@@ -749,14 +749,14 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
 
     // LOCATE THE NEXT STORMNODE WHICH SHOULD BE PAID
 
-    LogPrintf("CStormnodePayments::ProcessBlock -- Start: nBlockHeight=%d, stormnode=%s\n", nBlockHeight, activeStormnode.vin.prevout.ToStringShort());
+    LogPrintf("CStormnodePayments::ProcessBlock -- Start: nBlockHeight=%d, Stormnode=%s\n", nBlockHeight, activeStormnode.vin.prevout.ToStringShort());
 
     // pay to the oldest SN that still had no payment but its input is old enough and it was active long enough
     int nCount = 0;
     CStormnode *psn = snodeman.GetNextStormnodeInQueueForPayment(nBlockHeight, true, nCount);
 
     if (psn == NULL) {
-        LogPrintf("CStormnodePayments::ProcessBlock -- ERROR: Failed to find stormnode to pay\n");
+        LogPrintf("CStormnodePayments::ProcessBlock -- ERROR: Failed to find Stormnode to pay\n");
         return false;
     }
 
@@ -813,7 +813,7 @@ bool CStormnodePaymentVote::CheckSignature(const CPubKey& pubKeyStormnode, int n
         if(stormnodeSync.IsSynced() && nBlockHeight > nValidationHeight) {
             nDos = 20;
         }
-        return error("CStormnodePaymentVote::CheckSignature -- Got bad Stormnode payment signature, stormnode=%s, error: %s", vinStormnode.prevout.ToStringShort().c_str(), strError);
+        return error("CStormnodePaymentVote::CheckSignature -- Got bad Stormnode payment signature, Stormnode=%s, error: %s", vinStormnode.prevout.ToStringShort().c_str(), strError);
     }
 
     return true;

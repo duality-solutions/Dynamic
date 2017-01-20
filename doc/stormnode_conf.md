@@ -1,7 +1,7 @@
 Stormnode config
 =======================
 
-DarkSilk Core allows controlling multiple remote stormnodes from a single wallet. The wallet needs to have a valid collateral output of 1000 coins for each stormnode and uses a configuration file named `stormnode.conf` which can be found in the following data directory (depending on your operating system):
+DarkSilk Core allows controlling multiple remote Stormnodes from a single wallet. The wallet needs to have a valid collateral output of 1000 coins for each Stormnode and uses a configuration file named `stormnode.conf` which can be found in the following data directory (depending on your operating system):
  * Windows: %APPDATA%\DarkSilk\
  * Mac OS: ~/Library/Application Support/DarkSilk/
  * Unix/Linux: ~/.darksilk/

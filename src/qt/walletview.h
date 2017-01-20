@@ -87,7 +87,7 @@ public Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to stormnode page */
+    /** Switch to Stormnode page */
     void gotoStormnodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();

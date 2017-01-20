@@ -385,7 +385,7 @@ CNode* FindNode(const CService& addr)
 CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToStormnode)
 {
     if (pszDest == NULL) {
-        // we clean stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
+        // we clean Stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
         // so should be safe to skip this and connect to local Hot SN on CActiveStormnode::ManageState()
         if (IsLocal(addrConnect) && !fConnectToStormnode)
             return NULL;
@@ -394,7 +394,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
         {
-            // we have existing connection to this node but it was not a connection to stormnodes,
+            // we have existing connection to this node but it was not a connection to Stormnodes,
             // change flag and add reference so that we can correctly clear it later
             if(fConnectToStormnode && !pnode->fStormnode) {
                 pnode->fStormnode = true;

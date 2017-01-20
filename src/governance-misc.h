@@ -47,7 +47,7 @@ class CGovernanceVote;
 // 	static &T GetSetting(std::string strName, &T networkDefault)
 // 	{
 // 		/*
-// 			- get setting from stormnode network
+// 			- get setting from Stormnode network
 // 		*/
 
 // 		return networkDefault;

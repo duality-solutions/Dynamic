@@ -26,7 +26,7 @@ static const int STORMNODE_NEW_START_REQUIRED_SECONDS   = 180 * 60;
 static const int STORMNODE_POSE_BAN_MAX_SCORE           = 5;
 
 //
-// The Stormnode Ping Class : Contains a different serialize method for sending pings from stormnodes throughout the network
+// The Stormnode Ping Class : Contains a different serialize method for sending pings from Stormnodes throughout the network
 //
 class CStormnodePing
 {
@@ -333,7 +333,7 @@ public:
 
 
 //
-// The Stormnode Broadcast Class : Contains a different serialize method for sending stormnodes through the network
+// The Stormnode Broadcast Class : Contains a different serialize method for sending Stormnodes through the network
 //
 
 class CStormnodeBroadcast : public CStormnode

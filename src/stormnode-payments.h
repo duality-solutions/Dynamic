@@ -20,8 +20,8 @@ class CStormnodeBlockPayees;
 static const int SNPAYMENTS_SIGNATURES_REQUIRED         = 10;
 static const int SNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
-//! minimum peer version that can receive and send stormnode payment messages,
-//  vote for stormnode and be elected as a payment winner
+//! minimum peer version that can receive and send Stormnode payment messages,
+//  vote for Stormnode and be elected as a payment winner
 static const int MIN_STORMNODE_PAYMENT_PROTO_VERSION = 60800;
 
 extern CCriticalSection cs_vecPayees;
@@ -70,7 +70,7 @@ public:
     int GetVoteCount() { return vecVoteHashes.size(); }
 };
 
-// Keep track of votes for payees from stormnodes
+// Keep track of votes for payees from Stormnodes
 class CStormnodeBlockPayees
 {
 public:
@@ -165,7 +165,7 @@ public:
 class CStormnodePayments
 {
 private:
-    // stormnode count times nStorageCoeff payments blocks should be stored ...
+    // Stormnode count times nStorageCoeff payments blocks should be stored ...
     const float nStorageCoeff;
     // ... but at least nMinBlocksToStore (payments blocks)
     const int nMinBlocksToStore;

@@ -216,7 +216,7 @@ private Q_SLOTS:
     void gotoHistoryPage();
     /** Switch to MultiSig page */
 	void gotoMultiSigPage();
-    /** Switch to stormnode page */
+    /** Switch to Stormnode page */
     void gotoStormnodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();

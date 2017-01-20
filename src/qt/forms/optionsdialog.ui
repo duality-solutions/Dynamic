@@ -160,7 +160,7 @@ QTabBar { alignment: left; }</string>
           <item>
            <widget class="QCheckBox" name="showStormnodesTab">
             <property name="toolTip">
-             <string>Show additional tab listing all your stormnodes in first sub-tab&lt;br/&gt;and all stormnodes on the network in second sub-tab.</string>
+             <string>Show additional tab listing all your Stormnodes in first sub-tab&lt;br/&gt;and all Stormnodes on the network in second sub-tab.</string>
             </property>
             <property name="text">
              <string>Show Stormnodes Tab</string>
@@ -215,7 +215,7 @@ QTabBar { alignment: left; }</string>
          <item>
           <widget class="QLabel" name="label">
            <property name="toolTip">
-            <string>This setting determines the amount of individual stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</string>
+            <string>This setting determines the amount of individual Stormnodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</string>
            </property>
            <property name="text">
             <string>PrivateSend rounds to use</string>

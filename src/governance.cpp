@@ -109,7 +109,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     {
 
         // Ignore such requests until we are fully synced.
-        // We could start processing this after stormnode list is synced
+        // We could start processing this after Stormnode list is synced
         // but this is a heavy one so it's better to finish sync first.
         if (!stormnodeSync.IsSynced()) return;
 
@@ -143,7 +143,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         if(!stormnodeSync.IsStormnodeListSynced()) {
-            LogPrint("gobject", "SNGOVERNANCEOBJECT -- stormnode list not synced\n");
+            LogPrint("gobject", "SNGOVERNANCEOBJECT -- Stormnode list not synced\n");
             return;
         }
 
@@ -172,7 +172,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         bool fRateCheckBypassed = false;
         if(!StormnodeRateCheck(govobj, true, false, fRateCheckBypassed)) {
-            LogPrintf("SNGOVERNANCEOBJECT -- stormnode rate check failed - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
+            LogPrintf("SNGOVERNANCEOBJECT -- Stormnode rate check failed - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
             return;
         }
 
@@ -184,7 +184,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(fStormnodeMissing) {
             mapStormnodeOrphanObjects.insert(std::make_pair(nHash, object_time_pair_t(govobj, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME)));
-            LogPrintf("SNGOVERNANCEOBJECT -- Missing stormnode for: %s, strError = %s\n", strHash, strError);
+            LogPrintf("SNGOVERNANCEOBJECT -- Missing Stormnode for: %s, strError = %s\n", strHash, strError);
             // fIsValid must also be false here so we will return early in the next if block
         }
         if(!fIsValid) {
@@ -195,7 +195,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(fRateCheckBypassed) {
             if(!StormnodeRateCheck(govobj, true, true, fRateCheckBypassed)) {
-                LogPrintf("SNGOVERNANCEOBJECT -- stormnode rate check failed (after signature verification) - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
+                LogPrintf("SNGOVERNANCEOBJECT -- Stormnode rate check failed (after signature verification) - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
                 return;
             }
         }
@@ -224,9 +224,9 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     // A NEW GOVERNANCE OBJECT VOTE HAS ARRIVED
     else if (strCommand == NetMsgType::SNGOVERNANCEOBJECTVOTE)
     {
-        // Ignore such messages until stormnode list is synced
+        // Ignore such messages until Stormnode list is synced
         if(!stormnodeSync.IsStormnodeListSynced()) {
-            LogPrint("gobject", "SNGOVERNANCEOBJECTVOTE -- stormnode list not synced\n");
+            LogPrint("gobject", "SNGOVERNANCEOBJECTVOTE -- Stormnode list not synced\n");
             return;
         }
 
@@ -776,13 +776,13 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
     std::string strHash = govobj.GetHash().ToString();
 
     if(nTimestamp < nNow - 2 * nSuperblockCycleSeconds) {
-        LogPrintf("CGovernanceManager::StormnodeRateCheck -- object %s rejected due to too old timestamp, stormnode vin = %s, timestamp = %d, current time = %d\n",
+        LogPrintf("CGovernanceManager::StormnodeRateCheck -- object %s rejected due to too old timestamp, Stormnode vin = %s, timestamp = %d, current time = %d\n",
                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
         return false;
     }
 
     if(nTimestamp > nNow + 60*60) {
-        LogPrintf("CGovernanceManager::StormnodeRateCheck -- object %s rejected due to too new (future) timestamp, stormnode vin = %s, timestamp = %d, current time = %d\n",
+        LogPrintf("CGovernanceManager::StormnodeRateCheck -- object %s rejected due to too new (future) timestamp, Stormnode vin = %s, timestamp = %d, current time = %d\n",
                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
         return false;
     }
@@ -824,7 +824,7 @@ bool CGovernanceManager::StormnodeRateCheck(const CGovernanceObject& govobj, boo
         }
     }
 
-    LogPrintf("CGovernanceManager::StormnodeRateCheck -- Rate too high: object hash = %s, stormnode vin = %s, object timestamp = %d, rate = %f, max rate = %f\n",
+    LogPrintf("CGovernanceManager::StormnodeRateCheck -- Rate too high: object hash = %s, Stormnode vin = %s, object timestamp = %d, rate = %f, max rate = %f\n",
               strHash, vin.prevout.ToStringShort(), nTimestamp, dRate, dMaxRate);
     return false;
 }
@@ -1054,7 +1054,7 @@ void CGovernanceManager::InitOnLoad()
 {
     LOCK(cs);
     int64_t nStart = GetTimeMillis();
-    LogPrintf("Preparing stormnode indexes and governance triggers...\n");
+    LogPrintf("Preparing Stormnode indexes and governance triggers...\n");
     RebuildIndexes();
     AddCachedTriggers();
     LogPrintf("Stormnode indexes and governance triggers prepared  %dms\n", GetTimeMillis() - nStart);

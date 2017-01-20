@@ -187,7 +187,7 @@ public:
 
     std::string ToString()
     {
-        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, stormnode=%s",
+        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, Stormnode=%s",
                         nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
     }
 
@@ -240,7 +240,7 @@ public:
 class CSandStormSigner
 {
 public:
-    /// Is the input associated with this public key? (and there is 1000 DSLK - checking if valid stormnode)
+    /// Is the input associated with this public key? (and there is 1000 DSLK - checking if valid Stormnode)
     bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
     /// Set the private/public key values, returns true if successful
     bool GetKeysFromSecret(std::string strSecret, CKey& keyRet, CPubKey& pubkeyRet);

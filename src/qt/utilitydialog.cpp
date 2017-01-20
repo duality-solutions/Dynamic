@@ -144,11 +144,11 @@ You retain control of your money at all times..<hr> \
 <ol type=\"1\"> \
 <li>PrivateSend begins by breaking your transaction inputs down into standard denominations. \
 These denominations are 0.1 DSLK, 1 DSLK, 10 DSLK, and 100 DSLK--sort of like the paper money you use every day.</li> \
-<li>Your wallet then sends requests to specially configured software nodes on the network, called \"stormnodes.\" \
-These stormnodes are informed then that you are interested in mixing a certain denomination. \
-No identifiable information is sent to the stormnodes, so they never know \"who\" you are.</li> \
+<li>Your wallet then sends requests to specially configured software nodes on the network, called \"Stormnodes.\" \
+These Stormnodes are informed then that you are interested in mixing a certain denomination. \
+No identifiable information is sent to the Stormnodes, so they never know \"who\" you are.</li> \
 <li>When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. \
-The stormnode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
+The Stormnode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
 Your wallet pays that denomination directly to itself, but in a different address (called a change address).</li> \
 <li>In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. \
 Each time the process is completed, it's called a \"round.\" Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.</li> \

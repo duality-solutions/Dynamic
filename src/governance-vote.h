@@ -82,7 +82,7 @@ public:
 };
 
 //
-// CGovernanceVote - Allow a stormnode node to vote and broadcast throughout the network
+// CGovernanceVote - Allow a Stormnode node to vote and broadcast throughout the network
 //
 
 class CGovernanceVote
@@ -165,13 +165,13 @@ public:
     *
     *   GET HASH WITH DETERMINISTIC VALUE OF STORMNODE-VIN/PARENT-HASH/VOTE-SIGNAL
     *
-    *   This hash collides with previous stormnode votes when they update their votes on governance objects.
+    *   This hash collides with previous Stormnode votes when they update their votes on governance objects.
     *   With 12.1 there's various types of votes (funding, valid, delete, etc), so this is the deterministic hash
     *   that will collide with the previous vote and allow the system to update.
     *
     *   --
     *
-    *   We do not include an outcome, because that can change when a stormnode updates their vote from yes to no
+    *   We do not include an outcome, because that can change when a Stormnode updates their vote from yes to no
     *   on funding a specific project for example.
     *   We do not include a time because it will be updated each time the vote is updated, changing the hash
     */

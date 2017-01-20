@@ -335,7 +335,7 @@ void DarkSilkGUI::createActions()
 
 #ifdef ENABLE_WALLET
     stormnodeAction = new QAction(QIcon(":/icons/" + theme + "/stormnodes"), tr("&Stormnodes"), this);
-    stormnodeAction->setStatusTip(tr("Browse stormnodes"));
+    stormnodeAction->setStatusTip(tr("Browse Stormnodes"));
     stormnodeAction->setToolTip(stormnodeAction->statusTip());
     stormnodeAction->setCheckable(true);
 #ifdef Q_OS_MAC

@@ -46,9 +46,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 "  getcurrentvotes    - Get only current (tallying) votes for a governance object hash (does not include old votes)\n"
                 "  list               - List governance objects (can be filtered by validity and/or object type)\n"
                 "  diff               - List differences since last diff\n"
-                "  vote-alias         - Vote on a governance object by stormnode alias (using stormnode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by stormnode configured in darksilk.conf\n"
-                "  vote-many          - Vote on a governance object by all stormnodes (using stormnode.conf setup)\n"
+                "  vote-alias         - Vote on a governance object by Stormnode alias (using stormnode.conf setup)\n"
+                "  vote-conf          - Vote on a governance object by Stormnode configured in darksilk.conf\n"
+                "  vote-many          - Vote on a governance object by all Stormnodes (using stormnode.conf setup)\n"
                 );
 
     if(strCommand == "count")
@@ -107,7 +107,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only stormnodes can create them)");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only Stormnodes can create them)");
         }
 
         std::string strError = "";
@@ -141,7 +141,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         }
 
         if(!stormnodeSync.IsBlockchainSynced()) {
-            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with stormnode network. Try again in a minute or so.");
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with Stormnode network. Try again in a minute or so.");
         }
 
         CStormnode sn;
@@ -190,8 +190,8 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 govobj.Sign(activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode);
             }
             else {
-                LogPrintf("gobject(submit) -- Object submission rejected because node is not a stormnode\n");
-                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid stormnodes can submit this type of object");
+                LogPrintf("gobject(submit) -- Object submission rejected because node is not a Stormnode\n");
+                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid Stormnodes can submit this type of object");
             }
         }
         else {
@@ -270,7 +270,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         if(!fSnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
-            statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
+            statusObj.push_back(Pair("errorMessage", "Can't find Stormnode by collateral output"));
             resultsObj.push_back(Pair("darksilk.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
@@ -376,7 +376,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!fSnFound) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
+                statusObj.push_back(Pair("errorMessage", "Can't find Stormnode by collateral output"));
                 resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
@@ -474,7 +474,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", strprintf("Invalid stormnode key %s.", sne.getPrivKey())));
+                statusObj.push_back(Pair("errorMessage", strprintf("Invalid Stormnode key %s.", sne.getPrivKey())));
                 resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
@@ -813,7 +813,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     bool fSnFound = snodeman.Get(vin, sn);
 
     if(!fSnFound) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find stormnode in list : " + vin.prevout.ToStringShort());
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find Stormnode in list : " + vin.prevout.ToStringShort());
     }
 
     CGovernanceVote vote(vin, hashGovObj, eVoteSignal, eVoteOutcome);
