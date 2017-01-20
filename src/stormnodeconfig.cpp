@@ -60,6 +60,7 @@ bool CStormnodeConfig::read(std::string& strErr) {
             }
         }
 
+        /*
         int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
         if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
             if(CService(ip).GetPort() != mainnetDefaultPort) {
@@ -86,7 +87,7 @@ bool CStormnodeConfig::read(std::string& strErr) {
             streamConfig.close();
             return false;
         }
-
+        */
 
         add(alias, ip, privKey, txHash, outputIndex);
     }
