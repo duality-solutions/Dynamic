@@ -16,6 +16,7 @@
 
 #include "base58.h"
 #include "keystore.h"
+#include "dnstablemodel.h"
 #include "main.h"
 #include "sync.h"
 #include "ui_interface.h"
@@ -48,6 +49,7 @@ WalletModel::WalletModel(const PlatformStyle *platformStyle, CWallet *wallet, Op
     addressTableModel = new AddressTableModel(wallet, this);
     transactionTableModel = new TransactionTableModel(platformStyle, wallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(wallet, this);
+    nameTableModel = new NameTableModel(wallet, this);
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
@@ -300,7 +302,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         CReserveKey *keyChange = transaction.getPossibleKeyChange();
 
         if(recipients[0].fUseInstantSend && total > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN){
-            Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.").arg(sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)),
+            Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to 999.90000000 DSLK."),
                          CClientUIInterface::MSG_ERROR);
             return TransactionCreationFailed;
         }
@@ -311,7 +313,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             transaction.reassignAmounts(nChangePosRet);
 
         if(recipients[0].fUseInstantSend && newTx->GetValueOut() > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN){
-            Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.").arg(sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)),
+            Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to 999.90000000 DSLK."),
                          CClientUIInterface::MSG_ERROR);
             return TransactionCreationFailed;
         }
@@ -735,4 +737,14 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
 bool WalletModel::hdEnabled() const
 {
     return wallet->IsHDEnabled();
+}
+
+CWallet* WalletModel::getWallet()
+{
+    return wallet;
+}
+
+NameTableModel *WalletModel::getNameTableModel()
+{
+    return nameTableModel;
 }

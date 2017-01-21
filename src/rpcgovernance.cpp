@@ -46,9 +46,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 "  getcurrentvotes    - Get only current (tallying) votes for a governance object hash (does not include old votes)\n"
                 "  list               - List governance objects (can be filtered by validity and/or object type)\n"
                 "  diff               - List differences since last diff\n"
-                "  vote-alias         - Vote on a governance object by stormnode alias (using stormnode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by stormnode configured in darksilk.conf\n"
-                "  vote-many          - Vote on a governance object by all stormnodes (using stormnode.conf setup)\n"
+                "  vote-alias         - Vote on a governance object by Stormnode alias (using stormnode.conf setup)\n"
+                "  vote-conf          - Vote on a governance object by Stormnode configured in darksilk.conf\n"
+                "  vote-many          - Vote on a governance object by all Stormnodes (using stormnode.conf setup)\n"
                 );
 
     if(strCommand == "count")
@@ -86,15 +86,6 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         // ASSEMBLE NEW GOVERNANCE OBJECT FROM USER PARAMETERS
 
-        CBlockIndex* pindex = NULL;
-        {
-            LOCK(cs_main);
-            pindex = chainActive.Tip();
-        }
-
-        std::vector<CStormnodeConfig::CStormnodeEntry> snEntries;
-        snEntries = stormnodeConfig.getEntries();
-
         uint256 hashParent;
 
         // -- attach to root node (root node doesn't really exist, but has a hash of zero)
@@ -116,11 +107,11 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only stormnodes can create them)");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only Stormnodes can create them)");
         }
 
         std::string strError = "";
-        if(!govobj.IsValidLocally(pindex, strError, false))
+        if(!govobj.IsValidLocally(strError, false))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + govobj.GetHash().ToString() + " - " + strError);
 
         CWalletTx wtx;
@@ -150,7 +141,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         }
 
         if(!stormnodeSync.IsBlockchainSynced()) {
-            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with stormnode network. Try again in a minute or so.");
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with Stormnode network. Try again in a minute or so.");
         }
 
         CStormnode sn;
@@ -162,12 +153,6 @@ UniValue gobject(const UniValue& params, bool fHelp)
              << ", fSnFound = " << fSnFound << endl; );
 
         // ASSEMBLE NEW GOVERNANCE OBJECT FROM USER PARAMETERS
-
-        CBlockIndex* pindex = NULL;
-        {
-            LOCK(cs_main);
-            pindex = chainActive.Tip();
-        }
 
         uint256 txidFee;
 
@@ -205,27 +190,40 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 govobj.Sign(activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode);
             }
             else {
-                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid stormnodes can submit this type of object");
+                LogPrintf("gobject(submit) -- Object submission rejected because node is not a Stormnode\n");
+                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid Stormnodes can submit this type of object");
             }
         }
         else {
             if(params.size() != 6) {
+                LogPrintf("gobject(submit) -- Object submission rejected because fee tx not provided\n");
                 throw JSONRPCError(RPC_INVALID_PARAMETER, "The fee-txid parameter must be included to submit this type of object");
             }
         }
 
+        std::string strHash = govobj.GetHash().ToString();
+
         std::string strError = "";
-        if(!govobj.IsValidLocally(pindex, strError, true)) {
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + govobj.GetHash().ToString() + " - " + strError);
+        if(!govobj.IsValidLocally(strError, true)) {
+            LogPrintf("gobject(submit) -- Object submission rejected because object is not valid - hash = %s, strError = %s\n", strHash, strError);
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + strHash + " - " + strError);
         }
 
         // RELAY THIS OBJECT
+        // Reject if rate check fails but don't update buffer
         if(!governance.StormnodeRateCheck(govobj)) {
+            LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure - hash = %s\n", strHash);
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
+        }
+        // This check should always pass, update buffer
+        if(!governance.StormnodeRateCheck(govobj, true)) {
+            LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure (buffer updated) - hash = %s\n", strHash);
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
         }
 
         governance.AddSeenGovernanceObject(govobj.GetHash(), SEEN_OBJECT_IS_VALID);
         govobj.Relay();
+        LogPrintf("gobject(submit) -- Adding locally created governance object - %s\n", strHash);
         governance.AddGovernanceObject(govobj);
 
         return govobj.GetHash().ToString();
@@ -272,7 +270,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         if(!fSnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
-            statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
+            statusObj.push_back(Pair("errorMessage", "Can't find Stormnode by collateral output"));
             resultsObj.push_back(Pair("darksilk.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
@@ -378,7 +376,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!fSnFound) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Can't find stormnode by collateral output"));
+                statusObj.push_back(Pair("errorMessage", "Can't find Stormnode by collateral output"));
                 resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
@@ -476,7 +474,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", strprintf("Invalid stormnode key %s.", sne.getPrivKey())));
+                statusObj.push_back(Pair("errorMessage", strprintf("Invalid Stormnode key %s.", sne.getPrivKey())));
                 resultsObj.push_back(Pair(sne.getAlias(), statusObj));
                 continue;
             }
@@ -565,17 +563,11 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         // SETUP BLOCK INDEX VARIABLE / RESULTS VARIABLE
 
-        CBlockIndex* pindex = NULL;
-        {
-            LOCK(cs_main);
-            pindex = chainActive.Tip();
-        }
-
         UniValue objResult(UniValue::VOBJ);
 
         // GET MATCHING GOVERNANCE OBJECTS
 
-        LOCK(governance.cs);
+        LOCK2(cs_main, governance.cs);
 
         std::vector<CGovernanceObject*> objs = governance.GetAllNewerThan(nStartTime);
         governance.UpdateLastDiffTime(GetTime());
@@ -595,6 +587,11 @@ UniValue gobject(const UniValue& params, bool fHelp)
             bObj.push_back(Pair("DataString",  pGovObj->GetDataAsString()));
             bObj.push_back(Pair("Hash",  pGovObj->GetHash().ToString()));
             bObj.push_back(Pair("CollateralHash",  pGovObj->GetCollateralHash().ToString()));
+            bObj.push_back(Pair("CreationTime", pGovObj->GetCreationTime()));
+            const CTxIn& stormnodeVin = pGovObj->GetStormnodeVin();
+            if(stormnodeVin != CTxIn()) {
+                bObj.push_back(Pair("SigningStormnode", stormnodeVin.prevout.ToStringShort()));
+            }
 
             // REPORT STATUS FOR FUNDING VOTES SPECIFICALLY
             bObj.push_back(Pair("AbsoluteYesCount",  pGovObj->GetAbsoluteYesCount(VOTE_SIGNAL_FUNDING)));
@@ -604,7 +601,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             // REPORT VALIDITY AND CACHING FLAGS FOR VARIOUS SETTINGS
             std::string strError = "";
-            bObj.push_back(Pair("fBlockchainValidity",  pGovObj->IsValidLocally(pindex , strError, false)));
+            bObj.push_back(Pair("fBlockchainValidity",  pGovObj->IsValidLocally(strError, false)));
             bObj.push_back(Pair("IsValidReason",  strError.c_str()));
             bObj.push_back(Pair("fCachedValid",  pGovObj->IsSetCachedValid()));
             bObj.push_back(Pair("fCachedFunding",  pGovObj->IsSetCachedFunding()));
@@ -641,6 +638,11 @@ UniValue gobject(const UniValue& params, bool fHelp)
         objResult.push_back(Pair("DataString",  pGovObj->GetDataAsString()));
         objResult.push_back(Pair("Hash",  pGovObj->GetHash().ToString()));
         objResult.push_back(Pair("CollateralHash",  pGovObj->GetCollateralHash().ToString()));
+        objResult.push_back(Pair("CreationTime", pGovObj->GetCreationTime()));
+        const CTxIn& stormnodeVin = pGovObj->GetStormnodeVin();
+        if(stormnodeVin != CTxIn()) {
+            objResult.push_back(Pair("SigningStormnode", stormnodeVin.prevout.ToStringShort()));
+        }
 
         // SHOW (MUCH MORE) INFORMATION ABOUT VOTES FOR GOVERNANCE OBJECT (THAN LIST/DIFF ABOVE)
         // -- FUNDING VOTING RESULTS
@@ -678,7 +680,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         // --
         std::string strError = "";
-        objResult.push_back(Pair("fLocalValidity",  pGovObj->IsValidLocally(chainActive.Tip(), strError, false)));
+        objResult.push_back(Pair("fLocalValidity",  pGovObj->IsValidLocally(strError, false)));
         objResult.push_back(Pair("IsValidReason",  strError.c_str()));
         objResult.push_back(Pair("fCachedValid",  pGovObj->IsSetCachedValid()));
         objResult.push_back(Pair("fCachedFunding",  pGovObj->IsSetCachedFunding()));
@@ -772,7 +774,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
 UniValue voteraw(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() != 6)
+    if (fHelp || params.size() != 7)
         throw std::runtime_error(
                 "voteraw <stormnode-tx-hash> <stormnode-tx-index> <governance-hash> <vote-signal> [yes|no|abstain] <time> <vote-sig>\n"
                 "Compile and relay a governance vote with provided external signature instead of signing vote internally\n"
@@ -811,7 +813,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     bool fSnFound = snodeman.Get(vin, sn);
 
     if(!fSnFound) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find stormnode in list : " + vin.prevout.ToStringShort());
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find Stormnode in list : " + vin.prevout.ToStringShort());
     }
 
     CGovernanceVote vote(vin, hashGovObj, eVoteSignal, eVoteOutcome);

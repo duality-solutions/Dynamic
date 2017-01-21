@@ -33,6 +33,7 @@ class COutput;
 class CPubKey;
 class CWallet;
 class uint256;
+class NameTableModel;
 
 QT_BEGIN_NAMESPACE
 class QTimer;
@@ -101,7 +102,7 @@ public:
     }
 };
 
-/** Interface to DarkSilk wallet from Qt view code. */
+/** Interface to DarkDarkSilk wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -132,10 +133,12 @@ public:
         Unlocked,               // wallet->IsCrypted() && !wallet->IsLocked()
     };
 
+    CWallet* getWallet();
     OptionsModel *getOptionsModel();
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
+    NameTableModel *getNameTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
     CAmount getUnconfirmedBalance() const;
@@ -224,6 +227,7 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
+    NameTableModel *nameTableModel;
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;

@@ -53,10 +53,10 @@ public:
         return nSize;
     }
 
-    /// Retrieve stormnode vin by index
+    /// Retrieve Stormnode vin by index
     bool Get(int nIndex, CTxIn& vinStormnode) const;
 
-    /// Get index of a stormnode vin
+    /// Get index of a Stormnode vin
     int GetStormnodeIndex(const CTxIn& vinStormnode) const;
 
     void AddStormnodeVIN(const CTxIn& vinStormnode);
@@ -104,6 +104,10 @@ private:
     static const int MAX_POSE_RANK              = 10;
     static const int MAX_POSE_BLOCKS            = 10;
 
+    static const int SNB_RECOVERY_QUORUM_TOTAL      = 10;
+    static const int SNB_RECOVERY_QUORUM_REQUIRED   = 10;
+    static const int SNB_RECOVERY_WAIT_SECONDS      = 60;
+    static const int SNB_RECOVERY_RETRY_SECONDS     = 3 * 60 * 60;
 
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
@@ -118,9 +122,13 @@ private:
     // who we asked for the Stormnode list and the last time
     std::map<CNetAddr, int64_t> mWeAskedForStormnodeList;
     // which Stormnodes we've asked for
-    std::map<COutPoint, int64_t> mWeAskedForStormnodeListEntry;
+    std::map<COutPoint, std::map<CNetAddr, int64_t> > mWeAskedForStormnodeListEntry;
     // who we asked for the Stormnode verification
     std::map<CNetAddr, CStormnodeVerification> mWeAskedForVerification;
+
+    // these maps are used for Stormnode recovery from STORMNODE_NEW_START_REQUIRED state
+    std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > > mSnbRecoveryRequests;
+    std::map<uint256, std::vector<CStormnodeBroadcast> > mSnbRecoveryGoodReplies;
 
     int64_t nLastIndexRebuildTime;
 
@@ -145,7 +153,7 @@ private:
 
 public:
     // Keep track of all broadcasts I've seen
-    std::map<uint256, CStormnodeBroadcast> mapSeenStormnodeBroadcast;
+    std::map<uint256, std::pair<int64_t, CStormnodeBroadcast> > mapSeenStormnodeBroadcast;
     // Keep track of all pings I've seen
     std::map<uint256, CStormnodePing> mapSeenStormnodePing;
     // Keep track of all verifications I've seen
@@ -172,6 +180,8 @@ public:
         READWRITE(mAskedUsForStormnodeList);
         READWRITE(mWeAskedForStormnodeList);
         READWRITE(mWeAskedForStormnodeListEntry);
+        READWRITE(mSnbRecoveryRequests);
+        READWRITE(mSnbRecoveryGoodReplies);
         READWRITE(nLastWatchdogVoteTime);
         READWRITE(nSsqCount);
 
@@ -221,7 +231,7 @@ public:
     bool Get(const CPubKey& pubKeyStormnode, CStormnode& stormnode);
     bool Get(const CTxIn& vin, CStormnode& stormnode);
 
-    /// Retrieve stormnode vin by index
+    /// Retrieve Stormnode vin by index
     bool Get(int nIndex, CTxIn& vinStormnode, bool& fIndexRebuiltOut) {
         LOCK(cs);
         fIndexRebuiltOut = fIndexRebuilt;
@@ -233,25 +243,25 @@ public:
         return fIndexRebuilt;
     }
 
-    /// Get index of a stormnode vin
+    /// Get index of a Stormnode vin
     int GetStormnodeIndex(const CTxIn& vinStormnode) {
         LOCK(cs);
         return indexStormnodes.GetStormnodeIndex(vinStormnode);
     }
 
-    /// Get old index of a stormnode vin
+    /// Get old index of a Stormnode vin
     int GetStormnodeIndexOld(const CTxIn& vinStormnode) {
         LOCK(cs);
         return indexStormnodesOld.GetStormnodeIndex(vinStormnode);
     }
 
-    /// Get stormnode VIN for an old index value
+    /// Get Stormnode VIN for an old index value
     bool GetStormnodeVinForIndexOld(int nStormnodeIndex, CTxIn& vinStormnodeOut) {
         LOCK(cs);
         return indexStormnodesOld.Get(nStormnodeIndex, vinStormnodeOut);
     }
 
-    /// Get index of a stormnode vin, returning rebuild flag
+    /// Get index of a Stormnode vin, returning rebuild flag
     int GetStormnodeIndex(const CTxIn& vinStormnode, bool& fIndexRebuiltOut) {
         LOCK(cs);
         fIndexRebuiltOut = fIndexRebuilt;
@@ -270,7 +280,7 @@ public:
 
     stormnode_info_t GetStormnodeInfo(const CPubKey& pubKeyStormnode);
 
-    /// Find an entry in the stormnode list that is next to be paid
+    /// Find an entry in the Stormnode list that is next to be paid
     CStormnode* GetNextStormnodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount);
     /// Same as above but use current block height
     CStormnode* GetNextStormnodeInQueueForPayment(bool fFilterSigTime, int& nCount);
@@ -300,12 +310,11 @@ public:
 
     std::string ToString() const;
 
-    int GetEstimatedStormnodes(int nBlock);
-
-    /// Update stormnode list and maps using provided CStormnodeBroadcast
+    /// Update Stormnode list and maps using provided CStormnodeBroadcast
     void UpdateStormnodeList(CStormnodeBroadcast snb);
     /// Perform complete check and only then update list and maps
-    bool CheckSnbAndUpdateStormnodeList(CStormnodeBroadcast snb, int& nDos);
+    bool CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroadcast snb, int& nDos);
+    bool IsSnbRecoveryRequested(const uint256& hash) { return mSnbRecoveryRequests.count(hash); }
 
     void UpdateLastPaid();
 

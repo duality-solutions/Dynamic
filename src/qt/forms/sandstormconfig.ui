@@ -75,7 +75,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 2 separate stormnodes to mix funds up to 1000 DSLK</string>
+    <string>Use 2 separate Stormnodes to mix funds up to 1000 DSLK</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -88,7 +88,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 8 separate stormnodes to mix funds up to 1000 DSLK</string>
+    <string>Use 8 separate Stormnodes to mix funds up to 1000 DSLK</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -101,7 +101,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 16 separate stormnodes</string>
+    <string>Use 16 separate Stormnodes</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">

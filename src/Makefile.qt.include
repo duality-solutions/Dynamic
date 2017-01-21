@@ -24,6 +24,7 @@ QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/coincontroldialog.ui \
+  qt/forms/dnspage.ui \
   qt/forms/sandstormconfig.ui \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
@@ -38,7 +39,11 @@ QT_FORMS_UI = \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
-  qt/forms/transactiondescdialog.ui
+  qt/forms/transactiondescdialog.ui \
+  qt/forms/multisigaddressentry.ui \
+  qt/forms/multisigdialog.ui \
+  qt/forms/multisiginputentry.ui
+
 
 QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
@@ -49,6 +54,8 @@ QT_MOC_CPP = \
   qt/moc_darksilkamountfield.cpp \
   qt/moc_darksilkgui.cpp \
   qt/moc_darksilkunits.cpp \
+  qt/moc_dnspage.cpp \
+  qt/moc_dnstablemodel.cpp \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
@@ -86,7 +93,11 @@ QT_MOC_CPP = \
   qt/moc_utilitydialog.cpp \
   qt/moc_walletframe.cpp \
   qt/moc_walletmodel.cpp \
-  qt/moc_walletview.cpp
+  qt/moc_walletview.cpp \
+  qt/moc_multisigaddressentry.cpp \
+  qt/moc_multisigdialog.cpp \
+  qt/moc_multisiginputentry.cpp 
+
 
 DARKSILK_MM = \
   qt/macdockiconhandler.mm \
@@ -117,6 +128,8 @@ DARKSILK_QT_H = \
   qt/darksilkamountfield.h \
   qt/darksilkgui.h \
   qt/darksilkunits.h \
+  qt/dnspage.h \
+  qt/dnstablemodel.h \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
@@ -161,8 +174,11 @@ DARKSILK_QT_H = \
   qt/walletmodel.h \
   qt/walletmodeltransaction.h \
   qt/walletview.h \
-  qt/winshutdownmonitor.h
-
+  qt/winshutdownmonitor.h \
+  qt/multisigaddressentry.h \
+  qt/multisigdialog.h \
+  qt/multisiginputentry.h
+  
 RES_ICONS = \
   qt/res/icons/darksilk.ico \
   qt/res/icons/darksilk.png \
@@ -180,6 +196,7 @@ RES_ICONS = \
   qt/res/icons/drk/connect2_16.png \
   qt/res/icons/drk/connect3_16.png \
   qt/res/icons/drk/connect4_16.png \
+  qt/res/icons/drk/decentralised.png \
   qt/res/icons/drk/debugwindow.png \
   qt/res/icons/drk/drkpurple_editpaste.png \
   qt/res/icons/drk/drkpurple_address-book.png \
@@ -199,6 +216,7 @@ RES_ICONS = \
   qt/res/icons/drk/key.png \
   qt/res/icons/drk/lock_closed.png \
   qt/res/icons/drk/lock_open.png \
+  qt/res/icons/drk/multisig.png \
   qt/res/icons/drk/stormnode_network.png \
   qt/res/icons/drk/overview.png \
   qt/res/icons/drk/quit.png \
@@ -215,8 +233,11 @@ RES_ICONS = \
   qt/res/icons/drk/tx_mined.png \
   qt/res/icons/drk/about.png \
   qt/res/icons/drk/about_qt.png \
-  qt/res/icons/drk/verify.png 
-
+  qt/res/icons/drk/verify.png \
+  qt/res/icons/drk/unit_dslk.png \
+  qt/res/icons/drk/unit_mdslk.png \
+  qt/res/icons/drk/unit_udslk.png \
+  qt/res/icons/drk/unit_satoshis.png
 
 DARKSILK_QT_CPP = \
   qt/bantablemodel.cpp \
@@ -226,6 +247,8 @@ DARKSILK_QT_CPP = \
   qt/darksilkunits.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
+  qt/dnspage.cpp \
+  qt/dnstablemodel.cpp \
   qt/guiutil.cpp \
   qt/intro.cpp \
   qt/networkstyle.cpp \
@@ -247,6 +270,9 @@ endif
 
 if ENABLE_WALLET
 DARKSILK_QT_CPP += \
+  qt/multisigaddressentry.cpp \
+  qt/multisigdialog.cpp \
+  qt/multisiginputentry.cpp \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \

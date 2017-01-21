@@ -128,6 +128,9 @@ private:
     QAction *openAction;
     QAction *showHelpMessageAction;
     QAction *showPrivateSendHelpAction;
+    QAction *dnsAction;
+	  QAction *multiSigAction;
+	
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -211,12 +214,16 @@ private Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to stormnode page */
+    /** Switch to MultiSig page */
+	void gotoMultiSigPage();
+    /** Switch to Stormnode page */
     void gotoStormnodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    /** Switch to DNS page */
+    void gotoDNSPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

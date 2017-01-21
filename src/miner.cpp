@@ -27,6 +27,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "stormnode-payments.h"
+#include "stormnode-sync.h"
 #include "validationinterface.h"
 
 #include <boost/thread.hpp>
@@ -400,13 +401,13 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
         }
 
         // NOTE: unlike in bitcoin, we need to pass PREVIOUS block height here
-        CAmount blockReward = nFees + GetPoWBlockPayment(nHeight, nFees);
+        CAmount blockReward = GetPoWBlockPayment(nHeight, nFees);
 
         // Compute regular coinbase transaction.
         txNew.vout[0].nValue = blockReward;
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
-        // Update coinbase transaction with additional info about stormnode and governace payments,
+        // Update coinbase transaction with additional info about Stormnode and governace payments,
         // get some info back to pass to getblocktemplate
         FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutStormnode, pblock->voutSuperblock);
         // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutStormnode %s txNew %s",
@@ -547,7 +548,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                    if (!fvNodesEmpty && !IsInitialBlockDownload() && stormnodeSync.IsSynced())
                         break;
                     MilliSleep(1000);
                 } while (true);

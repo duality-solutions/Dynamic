@@ -27,6 +27,7 @@
         <file alias="editpaste">res/icons/drk/editpaste.png</file>
         <file alias="editcopy">res/icons/drk/editcopy.png</file>
         <file alias="add">res/icons/drk/add.png</file>
+        <file alias="multisig">res/icons/drk/multisig.png</file>
         <file alias="edit">res/icons/drk/edit.png</file>
         <file alias="history">res/icons/drk/history.png</file>
         <file alias="stormnodes">res/icons/drk/stormnode_network.png</file>
@@ -38,6 +39,10 @@
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>
+        <file alias="unit_dslk">res/icons/drk/unit_dslk.png</file>
+        <file alias="unit_mdslk">res/icons/drk/unit_mdslk.png</file>
+        <file alias="unit_udslk">res/icons/drk/unit_udslk.png</file>
+        <file alias="unit_satoshis">res/icons/drk/unit_satoshis.png</file>
         <file alias="lock_closed">res/icons/drk/lock_closed.png</file>
         <file alias="lock_open">res/icons/drk/lock_open.png</file>
         <file alias="key">res/icons/drk/key.png</file>
@@ -53,6 +58,7 @@
         <file alias="verify">res/icons/drk/verify.png</file>
         <file alias="hd_enabled">res/icons/drk/hd_enabled.png</file>
         <file alias="hd_disabled">res/icons/drk/hd_disabled.png</file>
+        <file alias="decentralised">res/icons/drk/decentralised.png</file>
     </qresource>
     <qresource prefix="/css">
         <file alias="drk">res/css/drk.css</file>

@@ -38,6 +38,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "dns/dns.h"
 
 #include "sandstorm.h"
 #include "governance.h"
@@ -112,6 +113,8 @@ void EraseOrphansFor(NodeId peer) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
  */
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
+
+CHooks* hooks = InitHook(); //this adds ddns hooks which allow splicing of code inside standard darksilk functions.
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
@@ -1050,6 +1053,36 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+// Added for DDNS
+static CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowFree)
+{
+    {
+        LOCK(mempool.cs);
+        uint256 hash = tx.GetHash();
+        double dPriorityDelta = 0;
+        CAmount nFeeDelta = 0;
+        mempool.ApplyDeltas(hash, dPriorityDelta, nFeeDelta);
+        if (dPriorityDelta > 0 || nFeeDelta > 0)
+            return 0;
+    }
+
+    CAmount nMinFee = ::minRelayTxFee.GetFee(nBytes);
+
+    if (fAllowFree)
+    {
+        // There is a free transaction area in blocks created by most miners,
+        // * If we are relaying we allow transactions up to DEFAULT_BLOCK_PRIORITY_SIZE - 1000
+        //   to be considered to fall into this category. We don't want to encourage sending
+        //   multiple transactions instead of one big transaction to avoid fees.
+        if (nBytes < (DEFAULT_BLOCK_PRIORITY_SIZE - 1000))
+            nMinFee = 0;
+    }
+
+    if (!MoneyRange(nMinFee))
+        nMinFee = MAX_MONEY;
+    return nMinFee;
+}
+
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                               bool* pfMissingInputs, bool fOverrideMempoolLimit, bool fRejectAbsurdFee,
                               std::vector<uint256>& vHashTxnToUncache, bool fDryRun)
@@ -1065,9 +1098,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
     if (tx.IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
 
+    // Added for DDNS
+    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason))
+    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
         return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Don't relay version 2 transactions until CSV is active, and we can be
@@ -1197,7 +1232,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         }
 
         // Check for non-standard pay-to-script-hash in inputs
-        if (fRequireStandard && !AreInputsStandard(tx, view))
+        if (fRequireStandard && !AreInputsStandard(tx, view) && !isNameTx)
             return state.Invalid(false, REJECT_NONSTANDARD, "bad-txns-nonstandard-inputs");
 
         unsigned int nSigOps = GetLegacySigOpCount(tx);
@@ -1226,6 +1261,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
         CTxMemPoolEntry entry(tx, nFees, GetTime(), dPriority, chainActive.Height(), pool.HasNoInputsOf(tx), inChainInputValue, fSpendsCoinbase, nSigOps, lp);
         unsigned int nSize = entry.GetTxSize();
+        // Added for DDNS
+        // Don't accept it if it can't get into a block
+        CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
+        if ((fLimitFree && nFees < txMinFee) || (isNameTx && !hooks->IsNameFeeEnough(tx, nFees)))
+            return state.DoS(0, error("AcceptToMemoryPool : not enough fees %s, %d < %d",
+                                      hash.ToString(), nFees, txMinFee),
+                             REJECT_INSUFFICIENTFEE, "insufficient fee");
 
         // Check that the transaction doesn't have an excessive number of
         // sigops, making it impossible to mine. Since the coinbase transaction
@@ -1266,6 +1308,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
             LogPrint("mempool", "Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount+nSize);
             dFreeCount += nSize;
         }
+        // Added for DDNS
+        if (!isNameTx && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
+                        return error("AcceptToMemoryPool: : insane fees %s, %d > %d",
+                                 hash.ToString(),
+                                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
         if (fRejectAbsurdFee && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
             return state.Invalid(false,
@@ -1685,21 +1732,9 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-int64_t GetTotalCoinEstimate(int nHeight)
+bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 {
-    int64_t nTotalCoins = 0;
-
-    // TODO: This could be vastly improved, look at GetBlockValue for a better method
-    
-    /* these values are taken from the block explorer */
-    /*if(nHeight > 1) {
-        nTotalCoins += 4000000;
-    }
-    if(nHeight => 10001) {
-        nTotalCoins += (1.382 * (nHeight - 10000));
-    }*/
-
-    return nTotalCoins;
+    return ReadBlockFromDisk(block, pindex, Params().GetConsensus());
 }
 
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
@@ -1741,15 +1776,17 @@ bool IsInitialBlockDownload()
         return false;
     if (fImporting || fReindex)
         return true;
+    if (chainActive.Tip() == NULL)
+        return true;
     LOCK(cs_main);
     const CChainParams& chainParams = Params();
     if (fCheckpointsEnabled && chainActive.Height() < Checkpoints::GetTotalBlocksEstimate(chainParams.Checkpoints()))
         return true;
-    bool state = (chainActive.Height() < pindexBestHeader->nHeight ||
+    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
             std::max(chainActive.Tip()->GetBlockTime(), pindexBestHeader->GetBlockTime()) < GetTime() - chainParams.MaxTipAge());
     if (!state)
         lockIBDState = true;
-    return state;
+     return state;
 }
 
 bool fLargeWorkForkFound = false;
@@ -1790,7 +1827,10 @@ void CheckForkWarningConditions()
         }
         else
         {
-            LogPrintf("%s: Warning: Found invalid chain at least ~6 blocks longer than our best chain.\nChain state database corruption likely.\n", __func__);
+            if(pindexBestInvalid->nHeight > chainActive.Height() + 10)
+                LogPrintf("%s: Warning: Found invalid chain at least ~10 blocks longer than our best chain.\nChain state database corruption likely.\n", __func__);
+            else
+                LogPrintf("%s: Warning: Found invalid chain which has higher work (at least ~10 blocks worth of work) than our best chain.\nChain state database corruption likely.\n", __func__);
             fLargeWorkInvalidChainFound = true;
         }
     }
@@ -1933,7 +1973,7 @@ void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCach
 
 bool CScriptCheck::operator()() {
     const CScript &scriptSig = ptxTo->vin[nIn].scriptSig;
-    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error)) {
+    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error, ptxTo->nVersion == NAMECOIN_TX_VERSION)) {
         return false;
     }
     return true;
@@ -2158,7 +2198,7 @@ static bool ApplyTxInUndo(const CTxInUndo& undo, CCoinsViewCache& view, const CO
     return fClean;
 }
 
-bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, bool* pfClean)
+bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, bool* pfClean, const bool fWriteNames)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
 
@@ -2281,6 +2321,12 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
                 }
 
             }
+
+            // DarkSilk: undo name transactions in reverse order
+            if (fWriteNames)
+                for (int i = block.vtx.size() - 1; i >= 0; i--)
+                    hooks->DisconnectInputs(block.vtx[i]);
+
         }
     }
 
@@ -2462,7 +2508,7 @@ static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
-bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck)
+bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck, const bool fWriteNames)
 {
     const CChainParams& chainparams = Params();
     AssertLockHeld(cs_main);
@@ -2711,7 +2757,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
         mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
-        return state.DoS(100, error("ConnectBlock(DSLK): couldn't find stormnode or superblock payments"),
+        return state.DoS(100, error("ConnectBlock(DSLK): couldn't find Stormnode or superblock payments"),
                                 REJECT_INVALID, "bad-cb-payee");
     }
     // END DARKSILK
@@ -2723,6 +2769,19 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (fJustCheck)
         return true;
+
+    // Added for DDNS
+    // DarkSilk: collect valid name tx
+    // NOTE: tx.UpdateCoins should not affect this loop, probably...
+    std::vector<CAmount> vFees (block.vtx.size(), 0);
+    vector<nameTempProxy> vName;
+    if (fWriteNames)
+        for (unsigned int i=0; i<block.vtx.size(); i++)
+        {
+            const CTransaction &tx = block.vtx[i];
+            if (!tx.IsCoinBase())
+                hooks->CheckInputs(tx, pindex, vName, vPos[i].second, vFees[i]); // collect valid name tx to vName
+        }
 
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
@@ -2778,6 +2837,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime6 - nTime5), nTimeCallbacks * 0.000001);
+
+    // DarkSilk DDNS: add names to ddns.dat
+    if (fWriteNames)
+        hooks->ConnectBlock(pindex, vName);
 
     return true;
 }
@@ -3927,6 +3990,8 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
 
+    stormnodeSync.IsBlockchainSynced(true);
+
     LogPrintf("%s : ACCEPTED\n", __func__);
     return true;
 }
@@ -4853,7 +4918,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         }
 
     case MSG_STORMNODE_ANNOUNCE:
-        return snodeman.mapSeenStormnodeBroadcast.count(inv.hash);
+        return snodeman.mapSeenStormnodeBroadcast.count(inv.hash) && !snodeman.IsSnbRecoveryRequested(inv.hash);
 
     case MSG_STORMNODE_PING:
         return snodeman.mapSeenStormnodePing.count(inv.hash);
@@ -5060,6 +5125,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     if(snodeman.mapSeenStormnodeBroadcast.count(inv.hash)){
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
+                        ss << snodeman.mapSeenStormnodeBroadcast[inv.hash].second;
                         ss << snodeman.mapSeenStormnodeBroadcast[inv.hash];
                         pfrom->PushMessage(NetMsgType::SNANNOUNCE, ss);
                         pushed = true;
@@ -5623,11 +5689,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         if(strCommand == NetMsgType::TX) {
             vRecv >> tx;
+        } else if(strCommand == NetMsgType::TXLOCKREQUEST) {
+            vRecv >> tx;
+            nInvType = MSG_TXLOCK_REQUEST;
         } else if (strCommand == NetMsgType::SSTX) {
             vRecv >> sstx;
             tx = sstx.tx;
-            uint256 hashTx = tx.GetHash();
             nInvType = MSG_SSTX;
+        }
+
+        CInv inv(nInvType, tx.GetHash());
+        pfrom->AddInventoryKnown(inv);
+        pfrom->setAskFor.erase(inv.hash);
+
+        if (strCommand == NetMsgType::SSTX) {
+            uint256 hashTx = tx.GetHash();
 
             if(mapSandstormBroadcastTxes.count(hashTx)) {
                 LogPrint("privatesend", "SSTX -- Already have %s, skipping...\n", hashTx.ToString());
@@ -5636,7 +5712,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
             CStormnode* psn = snodeman.Find(sstx.vin);
             if(psn == NULL) {
-                LogPrint("privatesend", "SSTX -- Can't find stormnode %s to verify %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
+                LogPrint("privatesend", "SSTX -- Can't find Stormnode %s to verify %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return false;
             }
 
@@ -5655,20 +5731,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrintf("SSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
             psn->fAllowMixingTx = false;
-        } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
-            vRecv >> tx;
-            nInvType = MSG_TXLOCK_REQUEST;
         }
-
-        CInv inv(nInvType, tx.GetHash());
-        pfrom->AddInventoryKnown(inv);
 
         LOCK(cs_main);
 
         bool fMissingInputs = false;
         CValidationState state;
 
-        pfrom->setAskFor.erase(inv.hash);
         mapAlreadyAskedFor.erase(inv.hash);
 
         if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))

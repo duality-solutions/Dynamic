@@ -81,7 +81,7 @@ void StormnodeList::setClientModel(ClientModel *model)
 {
     this->clientModel = model;
     if(model) {
-        // try to update list when stormnode count changes
+        // try to update list when Stormnode count changes
         connect(clientModel, SIGNAL(strStormnodesChanged(QString)), this, SLOT(updateNodeList()));
     }
 }
@@ -110,12 +110,12 @@ void StormnodeList::StartAlias(std::string strAlias)
             bool fSuccess = CStormnodeBroadcast::Create(sne.getIp(), sne.getPrivKey(), sne.getTxHash(), sne.getOutputIndex(), strError, snb);
 
             if(fSuccess) {
-                strStatusHtml += "<br>Successfully started stormnode.";
+                strStatusHtml += "<br>Successfully started Stormnode.";
                 snodeman.UpdateStormnodeList(snb);
                 snb.Relay();
                 snodeman.NotifyStormnodeUpdates();
             } else {
-                strStatusHtml += "<br>Failed to start stormnode.<br>Error: " + strError;
+                strStatusHtml += "<br>Failed to start Stormnode.<br>Error: " + strError;
             }
             break;
         }
@@ -159,7 +159,7 @@ void StormnodeList::StartAll(std::string strCommand)
     pwalletMain->Lock();
 
     std::string returnObj;
-    returnObj = strprintf("Successfully started %d stormnodes, failed to start %d, total %d", nCountSuccessful, nCountFailed, nCountFailed + nCountSuccessful);
+    returnObj = strprintf("Successfully started %d Stormnodes, failed to start %d, total %d", nCountSuccessful, nCountFailed, nCountFailed + nCountSuccessful);
     if (nCountFailed > 0) {
         returnObj += strFailedHtml;
     }
@@ -195,7 +195,7 @@ void StormnodeList::updateMyStormnodeInfo(QString strAlias, QString strAddr, CSt
     QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(psn ? psn->nProtocolVersion : -1));
     QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(psn ? psn->GetStatus() : "MISSING"));
     QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(psn ? (psn->lastPing.sigTime - psn->sigTime) : 0)));
-    QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", psn ? psn->lastPing.sigTime : 0)));
+    QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", psn ? psn->lastPing.sigTime + QDateTime::currentDateTime().offsetFromUtc() : 0)));
     QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(psn ? CDarkSilkAddress(psn->pubKeyCollateralAddress.GetID()).ToString() : ""));
 
     ui->tableWidgetMyStormnodes->setItem(nNewRow, 0, aliasItem);
@@ -211,7 +211,7 @@ void StormnodeList::updateMyNodeList(bool fForce)
 {
     static int64_t nTimeMyListUpdated = 0;
 
-    // automatically update my stormnode list only once in MY_STORMNODELIST_UPDATE_SECONDS seconds,
+    // automatically update my Stormnode list only once in MY_STORMNODELIST_UPDATE_SECONDS seconds,
     // this update still can be triggered manually at any time via button click
     int64_t nSecondsTillUpdate = nTimeMyListUpdated + MY_STORMNODELIST_UPDATE_SECONDS - GetTime();
     ui->secondsLabel->setText(QString::number(nSecondsTillUpdate));
@@ -266,7 +266,7 @@ void StormnodeList::updateNodeList()
         QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(sn.nProtocolVersion));
         QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(sn.GetStatus()));
         QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(sn.lastPing.sigTime - sn.sigTime)));
-        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", sn.lastPing.sigTime)));
+        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", sn.lastPing.sigTime + QDateTime::currentDateTime().offsetFromUtc())));
         QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(CDarkSilkAddress(sn.pubKeyCollateralAddress.GetID()).ToString()));
 
         if (strCurrentFilter != "")
@@ -314,8 +314,8 @@ void StormnodeList::on_startButton_clicked()
     std::string strAlias = ui->tableWidgetMyStormnodes->item(nSelectedRow, 0)->text().toStdString();
 
     // Display message box
-    QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm stormnode start"),
-        tr("Are you sure you want to start stormnode %1?").arg(QString::fromStdString(strAlias)),
+    QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm Stormnode start"),
+        tr("Are you sure you want to start Stormnode %1?").arg(QString::fromStdString(strAlias)),
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 
@@ -338,8 +338,8 @@ void StormnodeList::on_startButton_clicked()
 void StormnodeList::on_startAllButton_clicked()
 {
     // Display message box
-    QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm all stormnodes start"),
-        tr("Are you sure you want to start ALL stormnodes?"),
+    QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm all Stormnodes start"),
+        tr("Are you sure you want to start ALL Stormnodes?"),
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 
@@ -364,14 +364,14 @@ void StormnodeList::on_startMissingButton_clicked()
 
     if(!stormnodeSync.IsStormnodeListSynced()) {
         QMessageBox::critical(this, tr("Command is not available right now"),
-            tr("You can't use this command until stormnode list is synced"));
+            tr("You can't use this command until Stormnode list is synced"));
         return;
     }
 
     // Display message box
     QMessageBox::StandardButton retval = QMessageBox::question(this,
-        tr("Confirm missing stormnodes start"),
-        tr("Are you sure you want to start MISSING stormnodes?"),
+        tr("Confirm missing Stormnodes start"),
+        tr("Are you sure you want to start MISSING Stormnodes?"),
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 

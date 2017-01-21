@@ -413,6 +413,7 @@ void DarkSilkApplication::createSplashScreen(const NetworkStyle *networkStyle)
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
     connect(this, SIGNAL(splashFinished(QWidget*)), splash, SLOT(slotFinish(QWidget*)));
+    connect(this, SIGNAL(requestedShutdown()), splash, SLOT(close()));
 }
 
 void DarkSilkApplication::startThread()
@@ -666,7 +667,7 @@ int main(int argc, char *argv[])
     std::string strErr;
     if(!stormnodeConfig.read(strErr)) {
         QMessageBox::critical(0, QObject::tr("DarkSilk Core"),
-                              QObject::tr("Error reading stormnode configuration file: %1").arg(strErr.c_str()));
+                              QObject::tr("Error reading Stormnode configuration file: %1").arg(strErr.c_str()));
         return EXIT_FAILURE;
     }
 

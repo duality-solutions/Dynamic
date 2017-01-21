@@ -87,7 +87,6 @@ bool CStormnodeConfig::read(std::string& strErr) {
             return false;
         }
 
-
         add(alias, ip, privKey, txHash, outputIndex);
     }
 

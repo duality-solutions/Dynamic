@@ -18,9 +18,9 @@ CActiveStormnode activeStormnode;
 
 void CActiveStormnode::ManageState()
 {
-    LogPrint("stormnode", "CActiveStormnode::ManageState -- Start\n");
+    LogPrint("Stormnode", "CActiveStormnode::ManageState -- Start\n");
     if(!fStormNode) {
-        LogPrint("stormnode", "CActiveStormnode::ManageState -- Not a stormnode, returning\n");
+        LogPrint("Stormnode", "CActiveStormnode::ManageState -- Not a Stormnode, returning\n");
         return;
     }
 
@@ -34,7 +34,7 @@ void CActiveStormnode::ManageState()
         nState = ACTIVE_STORMNODE_INITIAL;
     }
 
-    LogPrint("stormnode", "CActiveStormnode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("Stormnode", "CActiveStormnode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 
     if(eType == STORMNODE_UNKNOWN) {
         ManageStateInitial();
@@ -43,7 +43,10 @@ void CActiveStormnode::ManageState()
     if(eType == STORMNODE_REMOTE) {
         ManageStateRemote();
     } else if(eType == STORMNODE_LOCAL) {
-        ManageStateLocal();
+        // Try Remote Start first so the started local Stormnode can be restarted without recreate Stormnode broadcast.
+        ManageStateRemote();
+        if(nState != ACTIVE_STORMNODE_STARTED)
+            ManageStateLocal();
     }
 
     SendStormnodePing();
@@ -67,7 +70,7 @@ std::string CActiveStormnode::GetStatus() const
         case ACTIVE_STORMNODE_INITIAL:         return "Node just started, not yet activated";
         case ACTIVE_STORMNODE_SYNC_IN_PROCESS: return "Sync in progress. Must wait until sync is complete to start Stormnode";
         case ACTIVE_STORMNODE_INPUT_TOO_NEW:   return strprintf("Stormnode input must have at least %d confirmations", Params().GetConsensus().nStormnodeMinimumConfirmations);
-        case ACTIVE_STORMNODE_NOT_CAPABLE:     return "Not capable stormnode: " + strNotCapableReason;
+        case ACTIVE_STORMNODE_NOT_CAPABLE:     return "Not capable Stormnode: " + strNotCapableReason;
         case ACTIVE_STORMNODE_STARTED:         return "Stormnode successfully started";
         default:                                return "Unknown";
     }
@@ -96,12 +99,12 @@ std::string CActiveStormnode::GetTypeString() const
 bool CActiveStormnode::SendStormnodePing()
 {
     if(!fPingerEnabled) {
-        LogPrint("stormnode", "CActiveStormnode::SendStormnodePing -- %s: stormnode ping service is disabled, skipping...\n", GetStateString());
+        LogPrint("Stormnode", "CActiveStormnode::SendStormnodePing -- %s: Stormnode ping service is disabled, skipping...\n", GetStateString());
         return false;
     }
 
     if(!snodeman.Has(vin)) {
-        strNotCapableReason = "Stormnode not in stormnode list";
+        strNotCapableReason = "Stormnode not in Stormnode list";
         nState = ACTIVE_STORMNODE_NOT_CAPABLE;
         LogPrintf("CActiveStormnode::SendStormnodePing -- %s: %s\n", GetStateString(), strNotCapableReason);
         return false;
@@ -113,7 +116,7 @@ bool CActiveStormnode::SendStormnodePing()
         return false;
     }
 
-    // Update lastPing for our stormnode in Stormnode list
+    // Update lastPing for our Stormnode in Stormnode list
     if(snodeman.IsStormnodePingedWithin(vin, STORMNODE_MIN_SNP_SECONDS, snp.sigTime)) {
         LogPrintf("CActiveStormnode::SendStormnodePing -- Too early to send Stormnode Ping\n");
         return false;
@@ -129,7 +132,7 @@ bool CActiveStormnode::SendStormnodePing()
 
 void CActiveStormnode::ManageStateInitial()
 {
-    LogPrint("stormnode", "CActiveStormnode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("Stormnode", "CActiveStormnode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
     if (!fListen) {
         // listen option is probably overwritten by smth else, no good
@@ -169,7 +172,7 @@ void CActiveStormnode::ManageStateInitial()
         LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
         return;
     }
-
+    
     int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
     
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
@@ -227,12 +230,12 @@ void CActiveStormnode::ManageStateInitial()
         eType = STORMNODE_LOCAL;
     }
 
-    LogPrint("stormnode", "CActiveStormnode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("Stormnode", "CActiveStormnode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 }
 
 void CActiveStormnode::ManageStateRemote()
 {
-    LogPrint("stormnode", "CActiveStormnode::ManageStateRemote -- Start status = %s, type = %s, pinger enabled = %d, pubKeyStormnode.GetID() = %s\n", 
+    LogPrint("Stormnode", "CActiveStormnode::ManageStateRemote -- Start status = %s, type = %s, pinger enabled = %d, pubKeyStormnode.GetID() = %s\n", 
              GetStatus(), fPingerEnabled, GetTypeString(), pubKeyStormnode.GetID().ToString());
 
     snodeman.CheckStormnode(pubKeyStormnode);
@@ -250,33 +253,30 @@ void CActiveStormnode::ManageStateRemote()
             LogPrintf("CActiveStormnode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
-        vin = infoSn.vin;
-        service = infoSn.addr;
-        fPingerEnabled = true;
-        if(((infoSn.nActiveState == CStormnode::STORMNODE_ENABLED) ||
-            (infoSn.nActiveState == CStormnode::STORMNODE_PRE_ENABLED) ||
-            (infoSn.nActiveState == CStormnode::STORMNODE_WATCHDOG_EXPIRED))) {
-            if(nState != ACTIVE_STORMNODE_STARTED) {
-                LogPrintf("CActiveStormnode::ManageStateRemote -- STARTED!\n");
-            }
-            nState = ACTIVE_STORMNODE_STARTED;
-        }
-        else {
+        if(!CStormnode::IsValidStateForAutoStart(infoSn.nActiveState)) {
             nState = ACTIVE_STORMNODE_NOT_CAPABLE;
             strNotCapableReason = strprintf("Stormnode in %s state", CStormnode::StateToString(infoSn.nActiveState));
             LogPrintf("CActiveStormnode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);
+            return;
+        }
+        if(nState != ACTIVE_STORMNODE_STARTED) {
+            LogPrintf("CActiveStormnode::ManageStateRemote -- STARTED!\n");
+            vin = infoSn.vin;
+            service = infoSn.addr;
+            fPingerEnabled = true;
+            nState = ACTIVE_STORMNODE_STARTED;
         }
     }
     else {
         nState = ACTIVE_STORMNODE_NOT_CAPABLE;
-        strNotCapableReason = "Stormnode not in stormnode list";
+        strNotCapableReason = "Stormnode not in Stormnode list";
         LogPrintf("CActiveStormnode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);
     }
 }
 
 void CActiveStormnode::ManageStateLocal()
 {
-    LogPrint("stormnode", "CActiveStormnode::ManageStateLocal -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("Stormnode", "CActiveStormnode::ManageStateLocal -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     if(nState == ACTIVE_STORMNODE_STARTED) {
         return;
     }
@@ -303,12 +303,15 @@ void CActiveStormnode::ManageStateLocal()
         std::string strError;
         if(!CStormnodeBroadcast::Create(vin, service, keyCollateral, pubKeyCollateral, keyStormnode, pubKeyStormnode, strError, snb)) {
             nState = ACTIVE_STORMNODE_NOT_CAPABLE;
-            strNotCapableReason = "Error creating stormnode broadcast: " + strError;
+            strNotCapableReason = "Error creating Stormnode broadcast: " + strError;
             LogPrintf("CActiveStormnode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
 
-        //update to stormnode list
+        fPingerEnabled = true;
+        nState = ACTIVE_STORMNODE_STARTED;
+
+        //update to Stormnode list
         LogPrintf("CActiveStormnode::ManageStateLocal -- Update Stormnode List\n");
         snodeman.UpdateStormnodeList(snb);
         snodeman.NotifyStormnodeUpdates();
@@ -316,7 +319,5 @@ void CActiveStormnode::ManageStateLocal()
         //send to all peers
         LogPrintf("CActiveStormnode::ManageStateLocal -- Relay broadcast, vin=%s\n", vin.ToString());
         snb.Relay();
-        fPingerEnabled = true;
-        nState = ACTIVE_STORMNODE_STARTED;
     }
 }

@@ -385,7 +385,7 @@ CNode* FindNode(const CService& addr)
 CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToStormnode)
 {
     if (pszDest == NULL) {
-        // we clean stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
+        // we clean Stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
         // so should be safe to skip this and connect to local Hot SN on CActiveStormnode::ManageState()
         if (IsLocal(addrConnect) && !fConnectToStormnode)
             return NULL;
@@ -394,7 +394,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
         {
-            // we have existing connection to this node but it was not a connection to stormnodes,
+            // we have existing connection to this node but it was not a connection to Stormnodes,
             // change flag and add reference so that we can correctly clear it later
             if(fConnectToStormnode && !pnode->fStormnode) {
                 pnode->fStormnode = true;
@@ -789,7 +789,7 @@ void SocketSendData(CNode *pnode)
                 if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS)
                 {
                     LogPrintf("socket send error %s\n", NetworkErrorString(nErr));
-                    pnode->CloseSocketDisconnect();
+                    pnode->fDisconnect = true;
                 }
             }
             // couldn't send anything at all
@@ -1750,7 +1750,7 @@ void ThreadMessageHandler()
                 if (lockRecv)
                 {
                     if (!g_signals.ProcessMessages(pnode))
-                        pnode->CloseSocketDisconnect();
+                        pnode->fDisconnect = true;
 
                     if (pnode->nSendSize < SendBufferSize())
                     {
@@ -2387,6 +2387,8 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     addr = addrIn;
     addrName = addrNameIn == "" ? addr.ToStringIPPort() : addrNameIn;
     nVersion = 0;
+    nNumWarningsSkipped = 0;
+    nLastWarningTime = 0;
     strSubVer = "";
     fWhitelisted = false;
     fOneShot = false;
@@ -2446,8 +2448,19 @@ CNode::~CNode()
 
 void CNode::AskFor(const CInv& inv)
 {
-    if (mapAskFor.size() > MAPASKFOR_MAX_SZ || setAskFor.size() > SETASKFOR_MAX_SZ)
+    if (mapAskFor.size() > MAPASKFOR_MAX_SZ || setAskFor.size() > SETASKFOR_MAX_SZ) {
+        int64_t nNow = GetTime();
+        if(nNow - nLastWarningTime > WARNING_INTERVAL) {
+            LogPrintf("CNode::AskFor -- WARNING: inventory message dropped: mapAskFor.size = %d, setAskFor.size = %d, MAPASKFOR_MAX_SZ = %d, SETASKFOR_MAX_SZ = %d, nSkipped = %d, peer=%d\n",
+                      mapAskFor.size(), setAskFor.size(), MAPASKFOR_MAX_SZ, SETASKFOR_MAX_SZ, nNumWarningsSkipped, id);
+            nLastWarningTime = nNow;
+            nNumWarningsSkipped = 0;
+        }
+        else {
+            ++nNumWarningsSkipped;
+        }
         return;
+    }
     // a peer may not have multiple non-responded queue positions for a single inv item
     if (!setAskFor.insert(inv.hash).second)
         return;

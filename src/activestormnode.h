@@ -58,6 +58,10 @@ public:
     CActiveStormnode()
         : eType(STORMNODE_UNKNOWN),
           fPingerEnabled(false),
+          pubKeyStormnode(),
+          keyStormnode(),
+          vin(),
+          service(),
           nState(ACTIVE_STORMNODE_INITIAL)
     {}
 

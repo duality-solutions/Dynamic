@@ -186,6 +186,11 @@ enum opcodetype
 
 const char* GetOpName(opcodetype opcode);
 
+static const int OP_NAME_NEW = 0x01;
+static const int OP_NAME_UPDATE = 0x02;
+static const int OP_NAME_DELETE = 0x03;
+static const int OP_NAME_MULTISIG = 0x04;
+
 class scriptnum_error : public std::runtime_error
 {
 public:
@@ -570,17 +575,26 @@ public:
         int nFound = 0;
         if (b.empty())
             return nFound;
-        iterator pc = begin();
+        CScript result;
+        iterator pc = begin(), pc2 = begin();
         opcodetype opcode;
         do
         {
-            while (end() - pc >= (long)b.size() && memcmp(&pc[0], &b[0], b.size()) == 0)
+            result.insert(result.end(), pc2, pc);
+            while (static_cast<size_t>(end() - pc) >= b.size() && std::equal(b.begin(), b.end(), pc))
             {
-                pc = erase(pc, pc + b.size());
+                pc = pc + b.size();
                 ++nFound;
             }
+            pc2 = pc;
         }
         while (GetOp(pc, opcode));
+
+        if (nFound > 0) {
+            result.insert(result.end(), pc2, end());
+            *this = result;
+        }
+
         return nFound;
     }
     int Find(opcodetype op) const

@@ -163,7 +163,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // that's it for litemode
     if(fLiteMode) return;
 
-    // Disable any PS UI for stormnode or when autobackup is disabled or failed for whatever reason
+    // Disable any PS UI for Stormnode or when autobackup is disabled or failed for whatever reason
     if(fStormNode || nWalletBackups <= 0){
         DisablePrivateSendCompletely();
         if (nWalletBackups <= 0) {

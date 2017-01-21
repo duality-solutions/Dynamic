@@ -44,9 +44,17 @@ public:
         memset(data, 0, sizeof(data));
     }
 
+    int CompareTo(const base_blob& b) const;
+    bool EqualTo(uint64_t b) const;
+
     friend inline bool operator==(const base_blob& a, const base_blob& b) { return memcmp(a.data, b.data, sizeof(a.data)) == 0; }
     friend inline bool operator!=(const base_blob& a, const base_blob& b) { return memcmp(a.data, b.data, sizeof(a.data)) != 0; }
     friend inline bool operator<(const base_blob& a, const base_blob& b) { return memcmp(a.data, b.data, sizeof(a.data)) < 0; }
+    friend inline bool operator>(const base_blob& a, const base_blob& b) { return a.CompareTo(b) > 0; }
+    friend inline bool operator>=(const base_blob& a, const base_blob& b) { return a.CompareTo(b) >= 0; }
+    friend inline bool operator<=(const base_blob& a, const base_blob& b) { return a.CompareTo(b) <= 0; }
+    friend inline bool operator==(const base_blob& a, uint64_t b) { return a.EqualTo(b); }
+    friend inline bool operator!=(const base_blob& a, uint64_t b) { return !a.EqualTo(b); }
 
     std::string GetHex() const;
     void SetHex(const char* psz);

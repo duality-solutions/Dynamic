@@ -68,7 +68,7 @@ Issue the following:
 
 ```stormnode genkey```
 
-*Note: A Stormnode private key will need to be created for each Stormnode you run. You should not use the same Stormnode private key for multiple stormnodes.*
+*Note: A Stormnode private key will need to be created for each Stormnode you run. You should not use the same Stormnode private key for multiple Stormnodes.*
 
 Close your QT Wallet.
 

@@ -133,6 +133,7 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
 static const CAmount STATIC_POW_REWARD = COIN * 1;
 static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
 static const CAmount STATIC_STORMNODE_PAYMENT = COIN * 0.382;
+static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 struct BlockHasher
 {
@@ -256,7 +257,6 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 
-int64_t GetTotalCoinEstimate(int nHeight);
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees);
 CAmount GetStormnodePayment(bool fStormnode = true);
 
@@ -729,6 +729,7 @@ bool GetAddressUnspent(uint160 addressHash, int type,
 bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
+bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex);
 
 /** Functions for validating blocks and updating the block tree */
 
@@ -736,14 +737,14 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
  *  In case pfClean is provided, operation will try to be tolerant about errors, and *pfClean
  *  will be true if no problems were found. Otherwise, the return value will be false in case
  *  of problems. Note that in any case, coins may be modified. */
-bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
+bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL, const bool fWriteNames = false);
 
 /** Reprocess a number of blocks to try and get on the correct chain again **/
 bool DisconnectBlocks(int blocks);
 void ReprocessBlocks(int nBlocks);
 
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins */
-bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false);
+bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false, const bool fWriteNames = false);
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW = true);

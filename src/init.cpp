@@ -60,6 +60,9 @@
 #include "netfulfilledman.h"
 #include "spork.h"
 
+#include "dns/dslkdns.h"
+#include "dns/hooks.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -89,6 +92,9 @@ CWallet* pwalletMain = NULL;
 #endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false;  // true: restart false: shutdown
+
+DslkDns* dslkdns = NULL; //DDNS
+
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
 static const bool DEFAULT_DISABLE_SAFEMODE = false;
@@ -199,6 +205,9 @@ void PrepareShutdown()
 {
     fRequestShutdown = true; // Needed when we shutdown the wallet
     fRestartRequested = true; // Needed when we restart the wallet
+    if (dslkdns)
+        delete dslkdns;
+
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
     TRY_LOCK(cs_Shutdown, lockShutdown);
@@ -513,7 +522,7 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-limitdescendantsize=<n>", strprintf("Do not accept transactions if any ancestor would have more than <n> kilobytes of in-mempool descendants (default: %u).", DEFAULT_DESCENDANT_SIZE_LIMIT));
     }
     string debugCategories = "addrman, alert, bench, coindb, db, lock, rand, rpc, selectcoins, mempool, mempoolrej, net, proxy, prune, http, libevent, tor, zmq, "
-                             "darksilk (or specifically: privatesend, instantsend, stormnode, spork, keepass, snpayments, gobject)"; // Don't translate these and qt below
+                             "DarkSilk (or specifically: privatesend, instantsend, stormnode, spork, keepass, snpayments, gobject)"; // Don't translate these and qt below
     if (mode == HMM_DARKSILK_QT)
         debugCategories += ", qt";
     strUsage += HelpMessageOpt("-debug=<category>", strprintf(_("Output debugging information (default: %u, supplying <category> is optional)"), 0) + ". " +
@@ -550,15 +559,15 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-litemode=<n>", strprintf(_("Disable all DarkSilk specific functionality (Stormnodes, PrivateSend, InstantSend, Governance) (0-1, default: %u)"), 0));
 
     strUsage += HelpMessageGroup(_("Stormnode options:"));
-    strUsage += HelpMessageOpt("-stormnode=<n>", strprintf(_("Enable the client to act as a stormnode (0-1, default: %u)"), 0));
-    strUsage += HelpMessageOpt("-snconf=<file>", strprintf(_("Specify stormnode configuration file (default: %s)"), "stormnode.conf"));
-    strUsage += HelpMessageOpt("-snconflock=<n>", strprintf(_("Lock stormnodes from stormnode configuration file (default: %u)"), 1));
-    strUsage += HelpMessageOpt("-stormnodeprivkey=<n>", _("Set the stormnode private key"));
+    strUsage += HelpMessageOpt("-stormnode=<n>", strprintf(_("Enable the client to act as a Stormnode (0-1, default: %u)"), 0));
+    strUsage += HelpMessageOpt("-snconf=<file>", strprintf(_("Specify Stormnode configuration file (default: %s)"), "stormnode.conf"));
+    strUsage += HelpMessageOpt("-snconflock=<n>", strprintf(_("Lock Stormnodes from Stormnode configuration file (default: %u)"), 1));
+    strUsage += HelpMessageOpt("-stormnodeprivkey=<n>", _("Set the Stormnode private key"));
 
     strUsage += HelpMessageGroup(_("PrivateSend options:"));
     strUsage += HelpMessageOpt("-enableprivatesend=<n>", strprintf(_("Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)"), 0));
     strUsage += HelpMessageOpt("-privatesendmultisession=<n>", strprintf(_("Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)"), DEFAULT_PRIVATESEND_MULTISESSION));
-    strUsage += HelpMessageOpt("-privatesendrounds=<n>", strprintf(_("Use N separate stormnodes for each denominated input to mix funds (2-16, default: %u)"), DEFAULT_PRIVATESEND_ROUNDS));
+    strUsage += HelpMessageOpt("-privatesendrounds=<n>", strprintf(_("Use N separate Stormnodes for each denominated input to mix funds (2-16, default: %u)"), DEFAULT_PRIVATESEND_ROUNDS));
     strUsage += HelpMessageOpt("-privatesendamount=<n>", strprintf(_("Keep N DSLK anonymized (default: %u)"), DEFAULT_PRIVATESEND_AMOUNT));
     strUsage += HelpMessageOpt("-liquidityprovider=<n>", strprintf(_("Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)"), DEFAULT_PRIVATESEND_LIQUIDITY));
 
@@ -792,7 +801,7 @@ void InitParameterInteraction()
     }
 
     if (GetBoolArg("-stormnode", false)) {
-        // stormnodes must accept connections from outside
+        // Stormnodes must accept connections from outside
         if (SoftSetBoolArg("-listen", true))
             LogPrintf("%s: parameter interaction: -stormnode=1 -> setting -listen=1\n", __func__);
     }
@@ -1568,6 +1577,15 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
 
+    // DarkSilk: check in nameindex need to be created or recreated
+    // we should have block index fully loaded by now
+    extern bool createNameIndexFile();
+    if (!boost::filesystem::exists(GetDataDir() / "ddns.dat") && !createNameIndexFile())
+    {
+        LogPrintf("Fatal error: Failed to create nameindex (ddns.dat) file.\n");
+        return false;
+    }
+
     boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
     CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
     // Allowed to fail as this file IS missing on first startup.
@@ -1632,9 +1650,9 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         LogPrintf("STORMNODE:\n");
 
         if(!GetArg("-stormnodeaddr", "").empty()) {
-            // Hot stormnode (either local or remote) should get its address in
+            // Hot Stormnode (either local or remote) should get its address in
             // CActiveStormnode::ManageState() automatically and no longer relies on stormnodeaddr.
-            return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote stormnodes."));
+            return InitError(_("stormnodeaddr option is deprecated. Please use stormnode.conf to manage your remote Stormnodes."));
         }
 
         std::string strStormNodePrivKey = GetArg("-stormnodeprivkey", "");
@@ -1648,7 +1666,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         }
     }
 
-    LogPrintf("Using stormnode config file %s\n", GetStormnodeConfigFile().string());
+    LogPrintf("Using Stormnode config file %s\n", GetStormnodeConfigFile().string());
 
     if(GetBoolArg("-snconflock", true) && pwalletMain && (stormnodeConfig.getCount() > 0)) {
         LOCK(pwalletMain->cs_wallet);
@@ -1688,7 +1706,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     //lite mode disables all Stormnode and Sandstorm related functionality
     fLiteMode = GetBoolArg("-litemode", false);
     if(fStormNode && fLiteMode){
-        return InitError("You can not start a stormnode in litemode");
+        return InitError("You can not start a Stormnode in litemode");
     }
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
@@ -1702,22 +1720,27 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
 
-    uiInterface.InitMessage(_("Loading stormnode cache..."));
+    uiInterface.InitMessage(_("Loading Stormnode cache..."));
     CFlatDB<CStormnodeMan> flatdb1("sncache.dat", "magicStormnodeCache");
     if(!flatdb1.Load(snodeman)) {
-        return InitError("Failed to load stormnode cache from sncache.dat");
+        return InitError("Failed to load Stormnode cache from sncache.dat");
     }
 
-    uiInterface.InitMessage(_("Loading stormnode payment cache..."));
-    CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
-    if(!flatdb2.Load(snpayments)) {
-        return InitError("Failed to load Stormnode payments cache from snpayments.dat");
-    }
+    if(snodeman.size()) {
+        uiInterface.InitMessage(_("Loading Stormnode payment cache..."));
+        CFlatDB<CStormnodePayments> flatdb2("snpayments.dat", "magicStormnodePaymentsCache");
+        if(!flatdb2.Load(snpayments)) {
+            return InitError("Failed to load Stormnode payments cache from snpayments.dat");
+        }
 
-    uiInterface.InitMessage(_("Loading governance cache..."));
-    CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
-    if(!flatdb3.Load(governance)) {
-        return InitError("Failed to load governance cache from governance.dat");
+        uiInterface.InitMessage(_("Loading governance cache..."));
+        CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
+        if(!flatdb3.Load(governance)) {
+            return InitError("Failed to load governance cache from governance.dat");
+        }
+        governance.InitOnLoad();
+    } else {
+        uiInterface.InitMessage(_("Stormnode cache is empty, skipping payments and governance cache..."));
     }
     governance.InitOnLoad();
 

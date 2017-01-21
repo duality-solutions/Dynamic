@@ -101,7 +101,7 @@ enum AvailableCoinsType
     ONLY_DENOMINATED = 2,
     ONLY_NOT1000IFSN = 3,
     ONLY_NONDENOMINATED_NOT1000IFSN = 4,
-    ONLY_1000 = 5, // find stormnode outputs including locked ones (use with caution)
+    ONLY_1000 = 5, // find Stormnode outputs including locked ones (use with caution)
     ONLY_PRIVATESEND_COLLATERAL = 6
 };
 
@@ -777,6 +777,9 @@ public:
                            std::string& strFailReason, const CCoinControl *coinControl = NULL, bool sign = true, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend=false);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std::string strCommand="tx");
 
+    bool CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletTx wtxNameIn, CAmount nFeeInput,
+                       CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int nSplitBlock, std::string& strFailReason, const CCoinControl *coinControl = NULL);
+        
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
     bool ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecAmounts);
 
@@ -1059,5 +1062,9 @@ public:
 private:
     std::vector<char> _ssExtra;
 };
+
+// Needed for DDNS
+void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew);
+void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWalletTx& wtxNameIn, CAmount nFeeInput);
 
 #endif // DARKSILK_WALLET_WALLET_H

@@ -23,12 +23,15 @@ static const int STORMNODE_SYNC_GOVOBJ          = 10;
 static const int STORMNODE_SYNC_GOVOBJ_VOTE     = 11;
 static const int STORMNODE_SYNC_FINISHED        = 999;
 
+static const int STORMNODE_SYNC_TICK_SECONDS    = 6;
 static const int STORMNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
+
+static const int STORMNODE_SYNC_ENOUGH_PEERS    = 10;
 
 extern CStormnodeSync stormnodeSync;
 
 //
-// CStormnodeSync : Sync stormnode assets in stages
+// CStormnodeSync : Sync Stormnode assets in stages
 //
 
 class CStormnodeSync
@@ -39,10 +42,10 @@ private:
     // Count peers we've requested the asset from
     int nRequestedStormnodeAttempt;
 
-    // Time when current stormnode asset sync started
+    // Time when current Stormnode asset sync started
     int64_t nTimeAssetSyncStarted;
 
-    // Last time when we received some stormnode asset ...
+    // Last time when we received some Stormnode asset ...
     int64_t nTimeLastStormnodeList;
     int64_t nTimeLastPaymentVote;
     int64_t nTimeLastGovernanceItem;
@@ -55,6 +58,7 @@ private:
     // Keep track of current block index
     const CBlockIndex *pCurrentBlockIndex;
 
+    bool CheckNodeHeight(CNode* pnode, bool fDisconnectStuckNodes = false);
     void Fail();
     void ClearFulfilledRequests();
 
@@ -66,7 +70,7 @@ public:
     void AddedGovernanceItem() { nTimeLastGovernanceItem = GetTime(); };
 
     bool IsFailed() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FAILED; }
-    bool IsBlockchainSynced();
+    bool IsBlockchainSynced(bool fBlockAccepted = false);
     bool IsStormnodeListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_LIST; }
     bool IsWinnersListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_SNW; }
     bool IsSynced() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FINISHED; }

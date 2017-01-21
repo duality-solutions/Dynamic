@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>854</width>
-    <height>613</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -617,7 +617,7 @@
         <x>0</x>
         <y>0</y>
         <width>828</width>
-        <height>77</height>
+        <height>81</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
@@ -1089,6 +1089,64 @@
                    </property>
                    <item>
                     <widget class="QSlider" name="sliderSmartFee">
+                     <property name="styleSheet">
+                      <string notr="true">QSlider::groove:horizontal {
+border: 1px solid #bbb;
+background: white;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal {
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,
+    stop: 0 #520072, stop: 1 #66008e);
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,
+    stop: 0 #66008e, stop: 1 #7f00b1);
+border: 1px solid #777;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::add-page:horizontal {
+background: #fff;
+border: 1px solid #777;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #eee, stop:1 #ccc);
+border: 1px solid #777;
+width: 13px;
+margin-top: -2px;
+margin-bottom: -2px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal:hover {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #fff, stop:1 #ddd);
+border: 1px solid #444;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal:disabled {
+background: #bbb;
+border-color: #999;
+}
+
+QSlider::add-page:horizontal:disabled {
+background: #eee;
+border-color: #999;
+}
+
+QSlider::handle:horizontal:disabled {
+background: #eee;
+border: 1px solid #aaa;
+border-radius: 4px;
+}</string>
+                     </property>
                      <property name="minimum">
                       <number>0</number>
                      </property>

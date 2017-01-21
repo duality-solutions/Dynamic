@@ -19,6 +19,33 @@ base_blob<BITS>::base_blob(const std::vector<unsigned char>& vch)
     memcpy(data, &vch[0], sizeof(data));
 }
 
+
+template <unsigned int BITS>
+int base_blob<BITS>::CompareTo(const base_blob<BITS>& b) const
+{
+    for (int i = WIDTH - 1; i >= 0; i--) {
+        if (data[i] < b.data[i])
+            return -1;
+        if (data[i] > b.data[i])
+            return 1;
+    }
+    return 0;
+}
+
+template <unsigned int BITS>
+bool base_blob<BITS>::EqualTo(uint64_t b) const
+{
+    for (int i = WIDTH - 1; i >= 2; i--) {
+        if (data[i])
+            return false;
+    }
+    if (data[1] != (b >> 32))
+        return false;
+    if (data[0] != (b & 0xfffffffful))
+        return false;
+    return true;
+}
+
 template <unsigned int BITS>
 std::string base_blob<BITS>::GetHex() const
 {
@@ -75,6 +102,8 @@ template std::string base_blob<160>::GetHex() const;
 template std::string base_blob<160>::ToString() const;
 template void base_blob<160>::SetHex(const char*);
 template void base_blob<160>::SetHex(const std::string&);
+template int base_blob<160>::CompareTo(const base_blob<160>&) const;
+template bool base_blob<160>::EqualTo(uint64_t) const;
 
 // Explicit instantiations for base_blob<256>
 template base_blob<256>::base_blob(const std::vector<unsigned char>&);
@@ -82,6 +111,8 @@ template std::string base_blob<256>::GetHex() const;
 template std::string base_blob<256>::ToString() const;
 template void base_blob<256>::SetHex(const char*);
 template void base_blob<256>::SetHex(const std::string&);
+template int base_blob<256>::CompareTo(const base_blob<256>&) const;
+template bool base_blob<256>::EqualTo(uint64_t) const;
 
 static void inline HashMix(uint32_t& a, uint32_t& b, uint32_t& c)
 {

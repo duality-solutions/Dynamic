@@ -33,14 +33,14 @@ std::map<uint256, CTxLockVote> mapTxLockVotesOrphan;
 std::map<COutPoint, uint256> mapLockedInputs;
 
 std::map<uint256, CTxLockCandidate> mapTxLockCandidates;
-std::map<COutPoint, int64_t> mapStormnodeOrphanVotes; //track stormnodes who voted with no txreq (for DOS protection)
+std::map<COutPoint, int64_t> mapStormnodeOrphanVotes; //track Stormnodes who voted with no txreq (for DOS protection)
 
 CCriticalSection cs_instantsend;
 
 // Transaction Locks
 //
-// step 2) Top INSTANTSEND_SIGNATURES_TOTAL stormnodes push "txvote" message
-// step 2) Top INSTANTSEND_SIGNATURES_TOTAL stormnodes push "txvote" message
+// step 2) Top INSTANTSEND_SIGNATURES_TOTAL Stormnodes push "txvote" message
+// step 2) Top INSTANTSEND_SIGNATURES_TOTAL Stormnodes push "txvote" message
 // step 3) Once there are INSTANTSEND_SIGNATURES_REQUIRED valid "txvote" messages
 //         for a corresponding "txlreg" message, all inputs from that tx are treated as locked
 
@@ -49,7 +49,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
     if(fLiteMode) return; // disable all DarkSilk specific functionality
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
-    // Ignore any InstantSend messages until stormnode list is synced
+    // Ignore any InstantSend messages until Stormnode list is synced
     if(!stormnodeSync.IsStormnodeListSynced()) return;
 
     // NOTE: NetMsgType::TXLOCKREQUEST is handled via ProcessMessage() in main.cpp
@@ -58,6 +58,7 @@ void ProcessMessageInstantSend(CNode* pfrom, std::string& strCommand, CDataStrea
         CTxLockVote vote;
         vRecv >> vote;
 
+        LOCK2(cs_main, cs_instantsend);
         if(mapTxLockVotes.count(vote.GetHash())) return;
         mapTxLockVotes.insert(std::make_pair(vote.GetHash(), vote));
 
@@ -137,6 +138,7 @@ bool ProcessTxLockRequest(CNode* pfrom, const CTransaction &tx)
      return false;
  }
 
+ LOCK2(cs_main, cs_instantsend);
  uint256 txHash = tx.GetHash();
  mapLockRequestAccepted.insert(std::make_pair(txHash, tx));
 
@@ -172,7 +174,7 @@ int64_t CreateTxLockCandidate(const CTransaction& tx)
 
     /*
         Use a blockheight newer than the input.
-        This prevents attackers from using transaction mallibility to predict which stormnodes
+        This prevents attackers from using transaction mallibility to predict which Stormnodes
         they'll use.
     */
     int nCurrentHeight = 0;
@@ -186,6 +188,7 @@ int64_t CreateTxLockCandidate(const CTransaction& tx)
 
     uint256 txHash = tx.GetHash();
 
+    LOCK(cs_instantsend);
     if(!mapTxLockCandidates.count(txHash)) {
         LogPrintf("CreateTxLockCandidate -- New Transaction Lock Candidate! txid=%s\n", txHash.ToString());
 
@@ -251,15 +254,16 @@ void CreateTxLockVote(const CTransaction& tx, int nBlockHeight)
 //received a consensus vote
 bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 {
+    LOCK(cs_instantsend);
     // Stormnodes will sometimes propagate votes before the transaction is known to the client,
     // will actually process only after the lock request itself has arrived
     if(!mapLockRequestAccepted.count(vote.txHash)) {
         if(!mapTxLockVotesOrphan.count(vote.GetHash())) {
-            LogPrint("instantsend", "ProcessTxLockVote -- Orphan vote: txid=%s  stormnode=%s new\n", vote.txHash.ToString(), vote.vinStormnode.prevout.ToStringShort());
+            LogPrint("instantsend", "ProcessTxLockVote -- Orphan vote: txid=%s  Stormnode=%s new\n", vote.txHash.ToString(), vote.vinStormnode.prevout.ToStringShort());
             vote.nOrphanExpireTime = GetTime() + 60; // keep orphan votes for 1 minute
             mapTxLockVotesOrphan[vote.GetHash()] = vote;
         } else {
-            LogPrint("instantsend", "ProcessTxLockVote -- Orphan vote: txid=%s  stormnode=%s seen\n", vote.txHash.ToString(), vote.vinStormnode.prevout.ToStringShort());
+            LogPrint("instantsend", "ProcessTxLockVote -- Orphan vote: txid=%s  Stormnode=%s seen\n", vote.txHash.ToString(), vote.vinStormnode.prevout.ToStringShort());
         }
 
         // This tracks those messages and allows only the same rate as of the rest of the network
@@ -270,7 +274,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
         } else {
             int64_t nPrevOrphanVote = mapStormnodeOrphanVotes[vote.vinStormnode.prevout];
             if(nPrevOrphanVote > GetTime() && nPrevOrphanVote > GetAverageStormnodeOrphanVoteTime()) {
-                LogPrint("instantsend", "ProcessTxLockVote -- stormnode is spamming orphan Transaction Lock Votes: txid=%s  stormnode=%s\n",
+                LogPrint("instantsend", "ProcessTxLockVote -- Stormnode is spamming orphan Transaction Lock Votes: txid=%s  Stormnode=%s\n",
                         vote.vinStormnode.prevout.ToStringShort(), vote.txHash.ToString());
                 // Misbehaving(pfrom->id, 1);
                 return false;
@@ -307,7 +311,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 
     if(!vote.CheckSignature()) {
         LogPrintf("ProcessTxLockVote -- Signature invalid\n");
-        // don't ban, it could just be a non-synced stormnode
+        // don't ban, it could just be a non-synced Stormnode
         if(pnode) {
             snodeman.AskForSN(pnode, vote.vinStormnode);
         }        return false;
@@ -349,6 +353,7 @@ bool ProcessTxLockVote(CNode* pnode, CTxLockVote& vote)
 
 void ProcessOrphanTxLockVotes()
 {
+    LOCK2(cs_main, cs_instantsend);
     std::map<uint256, CTxLockVote>::iterator it = mapTxLockVotesOrphan.begin();
     while(it != mapTxLockVotesOrphan.end()) {
         if(ProcessTxLockVote(NULL, it->second)) {
@@ -361,6 +366,7 @@ void ProcessOrphanTxLockVotes()
 
 void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification)
 {
+    LOCK(cs_instantsend);
     // there should be no conflicting locks
     if(FindConflictingLocks(tx)) return;
     uint256 txHash = tx.GetHash();
@@ -390,6 +396,7 @@ void UpdateLockedTransaction(const CTransaction& tx, bool fForceNotification)
 }
 
 void LockTransactionInputs(const CTransaction& tx) {
+    LOCK(cs_instantsend);
     if(!mapLockRequestAccepted.count(tx.GetHash())) return;
 
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
@@ -399,6 +406,7 @@ void LockTransactionInputs(const CTransaction& tx) {
 
 bool FindConflictingLocks(const CTransaction& tx)
 {
+    LOCK(cs_instantsend);
     /*
         It's possible (very unlikely though) to get 2 conflicting transaction locks approved by the network.
         In that case, they will cancel each other out.
@@ -428,6 +436,7 @@ bool FindConflictingLocks(const CTransaction& tx)
 
 void ResolveConflicts(const CTransaction& tx)
 {
+    LOCK(cs_instantsend);
     uint256 txHash = tx.GetHash();
     // resolve conflicts
     if (IsLockedInstandSendTransaction(txHash) && !FindConflictingLocks(tx)) { //?????
@@ -442,6 +451,7 @@ void ResolveConflicts(const CTransaction& tx)
 
 int64_t GetAverageStormnodeOrphanVoteTime()
 {
+    LOCK(cs_instantsend);
     // NOTE: should never actually call this function when mapStormnodeOrphanVotes is empty
     if(mapStormnodeOrphanVotes.empty()) return 0;
 
@@ -497,18 +507,18 @@ void CleanTxLockCandidates()
     std::map<uint256, CTxLockVote>::iterator it1 = mapTxLockVotesOrphan.begin();
     while(it1 != mapTxLockVotesOrphan.end()) {
         if(it1->second.nOrphanExpireTime < GetTime()) {
-            LogPrint("instantsend", "CleanTxLockCandidates -- Removing expired orphan vote: txid=%s  stormnode=%s\n", it1->second.txHash.ToString(), it1->second.vinStormnode.prevout.ToStringShort());
+            LogPrint("instantsend", "CleanTxLockCandidates -- Removing expired orphan vote: txid=%s  Stormnode=%s\n", it1->second.txHash.ToString(), it1->second.vinStormnode.prevout.ToStringShort());
             mapTxLockVotesOrphan.erase(it1++);
         } else {
             ++it1;
         }
     }
 
-    // clean expired stormnode orphan vote times
+    // clean expired Stormnode orphan vote times
     std::map<COutPoint, int64_t>::iterator it2 = mapStormnodeOrphanVotes.begin();
     while(it2 != mapStormnodeOrphanVotes.end()) {
         if(it2->second < GetTime()) {
-            LogPrint("instantsend", "CleanTxLockCandidates -- Removing expired orphan stormnode vote time: stormnode=%s\n", it2->first.ToStringShort());
+            LogPrint("instantsend", "CleanTxLockCandidates -- Removing expired orphan Stormnode vote time: Stormnode=%s\n", it2->first.ToStringShort());
             mapStormnodeOrphanVotes.erase(it2++);
         } else {
             ++it2;
@@ -518,6 +528,7 @@ void CleanTxLockCandidates()
 
 bool IsLockedInstandSendTransaction(const uint256 &txHash)
 {
+    LOCK(cs_instantsend);
     // there must be a successfully verified lock request...
     if (!mapLockRequestAccepted.count(txHash)) return false;
     // ...and corresponding lock must have enough signatures
@@ -530,6 +541,7 @@ int GetTransactionLockSignatures(const uint256 &txHash)
     if(fLargeWorkForkFound || fLargeWorkInvalidChainFound) return -2;
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return -3;
 
+    LOCK(cs_instantsend);
     std::map<uint256, CTxLockCandidate>::iterator it = mapTxLockCandidates.find(txHash);
     if(it != mapTxLockCandidates.end()) return it->second.CountVotes();
 
@@ -540,6 +552,7 @@ bool IsTransactionLockTimedOut(const uint256 &txHash)
 {
     if(!fEnableInstantSend) return 0;
 
+    LOCK(cs_instantsend);
     std::map<uint256, CTxLockCandidate>::iterator i = mapTxLockCandidates.find(txHash);
     if (i != mapTxLockCandidates.end()) return GetTime() > (*i).second.nTimeout;
 

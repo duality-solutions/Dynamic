@@ -21,6 +21,7 @@
 #include "policy/policy.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
+#include "rpcprotocol.h"
 #include "script/script.h"
 #include "script/sign.h"
 #include "timedata.h"
@@ -2651,7 +2652,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     InsecureRand insecureRand;
     BOOST_FOREACH(const COutput& out, vCoins)
     {
-        // stormnode-like input should not be selected by AvailableCoins now anyway
+        // Stormnode-like input should not be selected by AvailableCoins now anyway
         //if(out.tx->vout[out.i].nValue == 1000*COIN) continue;
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
 
@@ -2799,7 +2800,7 @@ bool CWallet::SelectCoinsDark(CAmount nValueMin, CAmount nValueMax, std::vector<
         if(out.tx->vout[out.i].nValue < CENT) continue;
         //do not allow collaterals to be selected
         if(IsCollateralAmount(out.tx->vout[out.i].nValue)) continue;
-        if(fStormNode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //stormnode input
+        if(fStormNode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //Stormnode input
 
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
             CTxIn txin = CTxIn(out.tx->GetHash(),out.i);
@@ -2849,7 +2850,7 @@ bool CWallet::GetStormnodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& k
     std::vector<COutput> vPossibleCoins;
     AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
     if(vPossibleCoins.empty()) {
-        LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate any valid stormnode vin\n");
+        LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate any valid Stormnode vin\n");
         return false;
     }
 
@@ -2864,7 +2865,7 @@ bool CWallet::GetStormnodeVinAndKeys(CTxIn& txinRet, CPubKey& pubKeyRet, CKey& k
         if(out.tx->GetHash() == txHash && out.i == nOutputIndex) // found it!
             return GetVinAndKeysFromOutput(out, txinRet, pubKeyRet, keyRet);
 
-    LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate specified stormnode vin\n");
+    LogPrintf("CWallet::GetStormnodeVinAndKeys -- Could not locate specified Stormnode vin\n");
     return false;
 }
 
@@ -3370,6 +3371,14 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
     }
 
     return true;
+}
+
+bool CWallet::CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletTx wtxNameIn, CAmount nFeeInput,
+                                CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int nSplitBlock, std::string& strFailReason, const CCoinControl* coinControl)
+{
+    std::vector<CRecipient> vecSend;
+    vecSend.push_back((CRecipient){scriptPubKey, nValue, false});
+    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeInput, nSplitBlock, strFailReason, coinControl);
 }
 
 /**
@@ -4383,4 +4392,69 @@ bool CMerkleTx::AcceptToMemoryPool(bool fLimitFree, bool fRejectAbsurdFee)
 {
     CValidationState state;
     return ::AcceptToMemoryPool(mempool, state, *this, fLimitFree, NULL, false, fRejectAbsurdFee);
+}
+
+extern CWallet* pwalletMain;
+static void SendMoneyCheck(const CAmount& nValue)
+{
+    // Check amount
+    if (nValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount");
+
+    if (nValue > pwalletMain->GetBalance())
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    string strError;
+    if (pwalletMain->IsLocked())
+    {
+        strError = "Error: Wallet locked, unable to create transaction!";
+        LogPrintf("SendMoney() : %s", strError);
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+}
+
+void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew)
+{
+    SendMoneyCheck(nValue);
+
+    // Parse DarkSilk address
+    CScript scriptPubKey = GetScriptForDestination(address);
+
+    // Create and send the transaction
+    int nSplitBlock = 0;
+    string strError;
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    vector<CRecipient> vecSend;
+    CRecipient recipient = {scriptPubKey, nValue, false};
+    vecSend.push_back(recipient);
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nSplitBlock, strError))
+    {
+        if (nValue + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        LogPrintf("SendMoney() : %s\n", strError);
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
+}
+
+void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWalletTx& wtxNameIn, CAmount nFeeInput)
+{
+    SendMoneyCheck(nValue);
+
+    // Create and send the transaction
+    int nSplitBlock = 0;
+    string strError;
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    if (!pwalletMain->CreateNameTx(scriptPubKey, nValue, wtxNameIn, nFeeInput, wtxNew, reservekey, nFeeRequired, nSplitBlock, strError))
+    {
+        if (nValue + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        LogPrintf("SendMoney() : %s\n", strError);
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }

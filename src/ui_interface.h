@@ -84,7 +84,7 @@ public:
     /** Number of network connections changed. */
     boost::signals2::signal<void (int newNumConnections)> NotifyNumConnectionsChanged;
 
-    /** Number of stormnodes changed. */
+    /** Number of Stormnodes changed. */
     boost::signals2::signal<void (int newNumStormnodes)> NotifyStrStormnodeCountChanged;
 
     /**

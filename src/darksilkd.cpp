@@ -120,7 +120,7 @@ bool AppInit(int argc, char* argv[])
         // parse stormnode.conf
         std::string strErr;
         if(!stormnodeConfig.read(strErr)) {
-            fprintf(stderr,"Error reading stormnode configuration file: %s\n", strErr.c_str());
+            fprintf(stderr,"Error reading Stormnode configuration file: %s\n", strErr.c_str());
             return false;
         }
 

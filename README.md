@@ -12,7 +12,8 @@ DarkSilk Integration/Staging Tree
 ================================
 ![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
-**Copyright (c) 2015-2016 Silk Network**
+**Copyright (c) 2015-2017 Silk Network**
+
 What is DarkSilk?
 ----------------
 * Coin Suffix: DSLK
@@ -38,25 +39,27 @@ DarkSilk implements Gavin Andresens signature cache optimisation from Bitcoin fo
 
 DarkSilk uses ShadowChat from Shadowcash based upon Bitmessage for encrypted, anonymous and secure messaging via the DarkSilk wallet network.
 
-Darksilk includes a completely decentralised marketplace, providing anonymity and escrow services for safe and fast trades.
+DarkSilk includes a completely decentralised marketplace, providing anonymity and escrow services for safe and fast trades.
 
 DarkSilk includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the DarkSilk codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
 
 
 **Stormnode/Sandstorm Network Information**
-Ported Masternodes from Dash, rebranded as Stormnodes and modified to use stealth addresses.
-Darksend ported and rebranded as Sandstorm.
-Utilisation of InstantX for instant transaction confirmation.
+Ported Masternodes from Dash, rebranded as Stormnodes.
+Darksend/PrivateSend ported and rebranded as Sandstorm/PrivateSend.
+Utilisation of InstantX/InstantSend for instant transaction confirmation(s).
 
 **MainNet Parameters**
-P2P Port/Stormnodes = 31000
+P2P Port = 31000
 RPC Port = 31500
+Stormnodes = 31000
 Magic Bytes: 0x42 0x04 0x20 0x24
 
 
 **TestNet Parameters**
-P2P Port/Stormnodes = 31750
+P2P Port = 31750
 RPC Port = 31800
+Stormnodes = 31750
 Magic Bytes: 0x24 0x20 0x04 0x42
 
 

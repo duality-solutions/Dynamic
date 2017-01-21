@@ -18,26 +18,118 @@
 class CStormnodeSync;
 CStormnodeSync stormnodeSync;
 
-bool CStormnodeSync::IsBlockchainSynced()
+void ReleaseNodes(const std::vector<CNode*> &vNodesCopy)
+{
+    LOCK(cs_vNodes);
+    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        pnode->Release();
+}
+
+bool CStormnodeSync::CheckNodeHeight(CNode* pnode, bool fDisconnectStuckNodes)
+{
+    CNodeStateStats stats;
+    if(!GetNodeStateStats(pnode->id, stats) || stats.nCommonHeight == -1 || stats.nSyncHeight == -1) return false; // not enough info about this peer
+
+    // Check blocks and headers, allow a small error margin of 1 block
+    if(pCurrentBlockIndex->nHeight - 1 > stats.nCommonHeight) {
+        // This peer probably stuck, don't sync any additional data from it
+        if(fDisconnectStuckNodes) {
+            // Disconnect to free this connection slot for another peer.
+            pnode->fDisconnect = true;
+            LogPrintf("CStormnodeSync::CheckNodeHeight -- disconnecting from stuck peer, nHeight=%d, nCommonHeight=%d, peer=%d\n",
+                        pCurrentBlockIndex->nHeight, stats.nCommonHeight, pnode->id);
+        } else {
+            LogPrintf("CStormnodeSync::CheckNodeHeight -- skipping stuck peer, nHeight=%d, nCommonHeight=%d, peer=%d\n",
+                        pCurrentBlockIndex->nHeight, stats.nCommonHeight, pnode->id);
+        }
+        return false;
+    }
+    else if(pCurrentBlockIndex->nHeight < stats.nSyncHeight - 1) {
+        // This peer announced more headers than we have blocks currently
+        LogPrintf("CStormnodeSync::CheckNodeHeight -- skipping peer, who announced more headers than we have blocks currently, nHeight=%d, nSyncHeight=%d, peer=%d\n",
+                    pCurrentBlockIndex->nHeight, stats.nSyncHeight, pnode->id);
+        return false;
+    }
+
+    return true;
+}
+
+bool CStormnodeSync::IsBlockchainSynced(bool fBlockAccepted)
 {
     static bool fBlockchainSynced = false;
     static int64_t nTimeLastProcess = GetTime();
+    static int nSkipped = 0;
+    static bool fFirstBlockAccepted = false;
 
     // if the last call to this function was more than 60 minutes ago (client was in sleep mode) reset the sync process
     if(GetTime() - nTimeLastProcess > 60*60) {
         Reset();
         fBlockchainSynced = false;
     }
+
+    if(!pCurrentBlockIndex || !pindexBestHeader || fImporting || fReindex) return false;
+
+    if(fBlockAccepted) {
+        // this should be only triggered while we are still syncing
+        if(!IsSynced()) {
+            // we are trying to download smth, reset blockchain sync status
+            if(fDebug) LogPrintf("CStormnodeSync::IsBlockchainSynced -- reset\n");
+            fFirstBlockAccepted = true;
+            fBlockchainSynced = false;
+            nTimeLastProcess = GetTime();
+            return false;
+        }
+    } else {
+        // skip if we already checked less than 1 tick ago
+        if(GetTime() - nTimeLastProcess < STORMNODE_SYNC_TICK_SECONDS) {
+            nSkipped++;
+            return fBlockchainSynced;
+       }
+    }
+
+    if(fDebug) LogPrintf("CStormnodeSync::IsBlockchainSynced -- state before check: %ssynced, skipped %d times\n", fBlockchainSynced ? "" : "not ", nSkipped);
+
     nTimeLastProcess = GetTime();
+    nSkipped = 0;
 
     if(fBlockchainSynced) return true;
-    if(!pCurrentBlockIndex || !pindexBestHeader || fImporting || fReindex) return false;
     if(fCheckpointsEnabled && pCurrentBlockIndex->nHeight < Checkpoints::GetTotalBlocksEstimate(Params().Checkpoints()))
         return false;
 
+    std::vector<CNode*> vNodesCopy;
+    {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+            pnode->AddRef();
+    }
+
+    // We have enough peers and assume most of them are synced
+    if(vNodes.size() >= STORMNODE_SYNC_ENOUGH_PEERS) {
+        // Check to see how many of our peers are (almost) at the same height as we are
+        int nNodesAtSameHeight = 0;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        {
+            // Make sure this peer is presumably at the same height
+            if(!CheckNodeHeight(pnode)) continue;
+            nNodesAtSameHeight++;
+            // if we have decent number of such peers, most likely we are synced now
+            if(nNodesAtSameHeight >= STORMNODE_SYNC_ENOUGH_PEERS) {
+                LogPrintf("CStormnodeSync::IsBlockchainSynced -- found enough peers on the same height as we are, done\n");
+                fBlockchainSynced = true;
+                ReleaseNodes(vNodesCopy);
+                return true;
+            }
+        }
+    }
+    ReleaseNodes(vNodesCopy);
+
+    // wait for at least one new block to be accepted
+    if(!fFirstBlockAccepted) return false;
+
     // same as !IsInitialBlockDownload() but no cs_main needed here
     int64_t nMaxBlockTime = std::max(pCurrentBlockIndex->GetBlockTime(), pindexBestHeader->GetBlockTime());
-    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight &&
+    fBlockchainSynced = pindexBestHeader->nHeight - pCurrentBlockIndex->nHeight < 24*6 &&
                         GetTime() - nMaxBlockTime < Params().MaxTipAge();
 
     return fBlockchainSynced;
@@ -86,24 +178,28 @@ void CStormnodeSync::SwitchToNextAsset()
         case(STORMNODE_SYNC_INITIAL):
             ClearFulfilledRequests();
             nRequestedStormnodeAssets = STORMNODE_SYNC_SPORKS;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_SPORKS):
             nTimeLastStormnodeList = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_LIST;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_LIST):
             nTimeLastPaymentVote = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_SNW;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_SNW):
             nTimeLastGovernanceItem = GetTime();
             nRequestedStormnodeAssets = STORMNODE_SYNC_GOVERNANCE;
+            LogPrintf("CStormnodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
         case(STORMNODE_SYNC_GOVERNANCE):
             LogPrintf("CStormnodeSync::SwitchToNextAsset -- Sync has finished\n");
             nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
-            //try to activate our stormnode if possible
+            //try to activate our Stormnode if possible
             activeStormnode.ManageState();
 
             TRY_LOCK(cs_vNodes, lockRecv);
@@ -124,8 +220,8 @@ std::string CStormnodeSync::GetSyncStatus()
     switch (stormnodeSync.nRequestedStormnodeAssets) {
         case STORMNODE_SYNC_INITIAL:       return _("Synchronization pending...");
         case STORMNODE_SYNC_SPORKS:        return _("Synchronizing sporks...");
-        case STORMNODE_SYNC_LIST:          return _("Synchronizing stormnodes...");
-        case STORMNODE_SYNC_SNW:           return _("Synchronizing stormnode payments...");
+        case STORMNODE_SYNC_LIST:          return _("Synchronizing Stormnodes...");
+        case STORMNODE_SYNC_SNW:           return _("Synchronizing Stormnode payments...");
         case STORMNODE_SYNC_GOVERNANCE:    return _("Synchronizing governance objects...");
         case STORMNODE_SYNC_FAILED:        return _("Synchronization failed");
         case STORMNODE_SYNC_FINISHED:      return _("Synchronization finished");
@@ -163,20 +259,13 @@ void CStormnodeSync::ClearFulfilledRequests()
     }
 }
 
-void ReleaseNodes(const std::vector<CNode*> &vNodesCopy)
-{
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodesCopy)
-        pnode->Release();
-}
-
 void CStormnodeSync::ProcessTick()
 {
     static int nTick = 0;
-    if(nTick++ % 6 != 0) return;
+    if(nTick++ % STORMNODE_SYNC_TICK_SECONDS != 0) return;
     if(!pCurrentBlockIndex) return;
 
-    //the actual count of stormnodes we have currently
+    //the actual count of Stormnodes we have currently
     int nSnCount = snodeman.CountStormnodes();
 
     if(fDebug) LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d\n", nTick, nSnCount);
@@ -185,13 +274,21 @@ void CStormnodeSync::ProcessTick()
     {
         if(IsSynced()) {
             /*
-                Resync if we lose all stormnodes from sleep/wake or failure to sync originally
+                Resync if we lose all Stormnodes from sleep/wake or failure to sync originally
             */
             if(nSnCount == 0) {
                 LogPrintf("CStormnodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
                 Reset();
             } else {
-                //if syncing is complete and we have stormnodes, return
+                std::vector<CNode*> vNodesCopy;
+                {
+                    LOCK(cs_vNodes);
+                    vNodesCopy = vNodes;
+                    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+                        pnode->AddRef();
+                }
+                governance.RequestGovernanceObjectVotes(vNodesCopy);
+                ReleaseNodes(vNodesCopy);
                 return;
             }
         }
@@ -215,6 +312,9 @@ void CStormnodeSync::ProcessTick()
             !IsBlockchainSynced() && nRequestedStormnodeAssets > STORMNODE_SYNC_SPORKS)
     {
         LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nRequestedStormnodeAttempt %d -- blockchain is not synced yet\n", nTick, nRequestedStormnodeAssets, nRequestedStormnodeAttempt);
+        nTimeLastStormnodeList = GetTime();
+        nTimeLastPaymentVote = GetTime();
+        nTimeLastGovernanceItem = GetTime();
         return;
     }
 
@@ -244,7 +344,7 @@ void CStormnodeSync::ProcessTick()
                 int nSnCount = snodeman.CountStormnodes();
                 pnode->PushMessage(NetMsgType::STORMNODEPAYMENTSYNC, nSnCount); //sync payment votes
                 uint256 n = uint256();
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync stormnode votes
+                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync Stormnode votes
             } else {
                 nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             }
@@ -263,6 +363,9 @@ void CStormnodeSync::ProcessTick()
                 continue;
             }
 
+            // Make sure this peer is presumably at the same height
+            if(!CheckNodeHeight(pnode, true)) continue;
+
             // SPORK : ALWAYS ASK FOR SPORKS AS WE SYNC (we skip this mode now)
 
             if(!netfulfilledman.HasFulfilledRequest(pnode->addr, "spork-sync")) {
@@ -277,32 +380,17 @@ void CStormnodeSync::ProcessTick()
             // MNLIST : SYNC STORMNODE LIST FROM OTHER CONNECTED CLIENTS
 
             if(nRequestedStormnodeAssets == STORMNODE_SYNC_LIST) {
-                LogPrint("stormnode", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastStormnodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastStormnodeList, GetTime(), GetTime() - nTimeLastStormnodeList);
+                LogPrint("Stormnode", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastStormnodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastStormnodeList, GetTime(), GetTime() - nTimeLastStormnodeList);
                 // check for timeout first
                 if(nTimeLastStormnodeList < GetTime() - STORMNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- timeout\n", nTick, nRequestedStormnodeAssets);
                     if (nRequestedStormnodeAttempt == 0) {
                         LogPrintf("CStormnodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
-                        // there is no way we can continue without stormnode list, fail here and try later
+                        // there is no way we can continue without Stormnode list, fail here and try later
                         Fail();
                         ReleaseNodes(vNodesCopy);
                         return;
                     }
-                    SwitchToNextAsset();
-                    ReleaseNodes(vNodesCopy);
-                    return;
-                }
-
-                // check for data
-                // if we have enough stormnodes in our list, switch to the next asset
-                /* Note: Is this activing up? It's probably related to int CStormnodeMan::GetEstimatedStormnodes(int nBlock)
-                   Surely doesn't work right for testnet currently */
-                // try to fetch data from at least two peers though
-                int nSnCountEstimated = snodeman.GetEstimatedStormnodes(pCurrentBlockIndex->nHeight)*0.9;
-                LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nSnCount %d nSnCountEstimated %d\n",
-                          nTick, nSnCount, nSnCountEstimated);
-                if(nRequestedStormnodeAttempt > 1 && nSnCount > nSnCountEstimated) {
-                    LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- found enough data\n", nTick, nRequestedStormnodeAssets);
                     SwitchToNextAsset();
                     ReleaseNodes(vNodesCopy);
                     return;
@@ -352,8 +440,12 @@ void CStormnodeSync::ProcessTick()
                     return;
                 }
 
-                // only request once from each peer
-                if(netfulfilledman.HasFulfilledRequest(pnode->addr, "stormnode-payment-sync")) continue;
+                // only request obj sync once from each peer, then request votes on per-obj basis
+                if(netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) {
+                    governance.RequestGovernanceObjectVotes(pnode);
+                    continue;
+                }
+
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "stormnode-payment-sync");
 
                 if(pnode->nVersion < snpayments.GetMinStormnodePaymentsProto()) continue;
@@ -405,7 +497,7 @@ void CStormnodeSync::ProcessTick()
                 if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
                 nRequestedStormnodeAttempt++;
 
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync stormnode votes
+                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync Stormnode votes
 
                 ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need

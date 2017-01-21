@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
+    <width>887</width>
     <height>457</height>
    </rect>
   </property>
@@ -47,13 +47,18 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="styleSheet">
-        <string notr="true">QTabWidget:tab-bar { alignment: left }
-QTabBar { alignment: left; }</string>
+        <string notr="true">QTabWidget:tab-bar { alignment: left; }
+QTabBar { alignment: left; }
+</string>
        </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
        <widget class="QWidget" name="tabMyStormnodes">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+        </property>
         <attribute name="title">
          <string>My Stormnodes</string>
         </attribute>
@@ -70,8 +75,12 @@ QTabBar { alignment: left; }</string>
              </property>
              <item>
               <widget class="QLabel" name="updateNote">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+               </property>
                <property name="text">
-                <string>Note: Status of your stormnodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see &quot;MISSING&quot; in &quot;Status&quot; field.</string>
+                <string>Note: Status of your Stormnodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see &quot;MISSING&quot; in &quot;Status&quot; field.</string>
                </property>
               </widget>
              </item>
@@ -84,6 +93,10 @@ QTabBar { alignment: left; }</string>
                <width>695</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: rgb(0, 0, 0);
+background-color:(255,255,255);</string>
              </property>
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
@@ -130,7 +143,7 @@ QTabBar { alignment: left; }</string>
              </column>
              <column>
               <property name="text">
-               <string>Last Seen (UTC)</string>
+               <string>Last Seen</string>
               </property>
              </column>
              <column>
@@ -146,21 +159,141 @@ QTabBar { alignment: left; }</string>
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="startButton">
-               <property name="text">
-                <string>S&amp;tart alias</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QPushButton" name="startAllButton">
+               <property name="styleSheet">
+                <string notr="true">QWidget#StormnodeList .QPushButton#startAllButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startAllButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startAllButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+               </property>
                <property name="text">
                 <string>Start &amp;all</string>
                </property>
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="startButton">
+               <property name="styleSheet">
+                <string notr="true">QWidget#StormnodeList .QPushButton#startButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+               </property>
+               <property name="text">
+                <string>S&amp;tart alias</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="startMissingButton">
+               <property name="styleSheet">
+                <string notr="true">QWidget#StormnodeList .QPushButton#startMissingButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startMissingButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#startMissingButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+               </property>
                <property name="text">
                 <string>Start &amp;MISSING</string>
                </property>
@@ -168,6 +301,46 @@ QTabBar { alignment: left; }</string>
              </item>
              <item>
               <widget class="QPushButton" name="UpdateButton">
+               <property name="styleSheet">
+                <string notr="true">QWidget#StormnodeList .QPushButton#UpdateButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#UpdateButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#StormnodeList .QPushButton#UpdateButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+               </property>
                <property name="text">
                 <string>&amp;Update status</string>
                </property>
@@ -207,12 +380,20 @@ QTabBar { alignment: left; }</string>
         </layout>
        </widget>
        <widget class="QWidget" name="tabAllStormnodes">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);</string>
+        </property>
         <attribute name="title">
          <string>All Stormnodes</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout">
          <item row="1" column="0">
           <widget class="QTableWidget" name="tableWidgetStormnodes">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);
+background-color:(255,255,255);</string>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
@@ -250,7 +431,7 @@ QTabBar { alignment: left; }</string>
            </column>
            <column>
             <property name="text">
-             <string>Last Seen (UTC)</string>
+             <string>Last Seen</string>
             </property>
            </column>
            <column>
@@ -267,6 +448,11 @@ QTabBar { alignment: left; }</string>
            </property>
            <item>
             <widget class="QLabel" name="label_filter">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);
+</string>
+             </property>
              <property name="text">
               <string>Filter List:</string>
              </property>
@@ -275,7 +461,11 @@ QTabBar { alignment: left; }</string>
            <item>
             <widget class="QLineEdit" name="filterLineEdit">
              <property name="toolTip">
-              <string>Filter stormnode list</string>
+              <string>Filter Stormnode list</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
@@ -294,6 +484,10 @@ QTabBar { alignment: left; }</string>
            </item>
            <item>
             <widget class="QLabel" name="label_count">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);</string>
+             </property>
              <property name="text">
               <string>Node Count:</string>
              </property>
@@ -301,6 +495,10 @@ QTabBar { alignment: left; }</string>
            </item>
            <item>
             <widget class="QLabel" name="countLabel">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 0, 0);</string>
+             </property>
              <property name="text">
               <string>0</string>
              </property>

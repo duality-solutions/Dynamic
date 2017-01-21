@@ -410,10 +410,13 @@ UniValue getwork(const UniValue& params, bool fHelp)
         );
 
     if (vNodes.empty())
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "DarkSilk is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "DarkSilk Core is not connected!");
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk Core is downloading blocks...");
+
+    if (!stormnodeSync.IsSynced())
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk Core is syncing with network...");
 
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
     static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
@@ -576,13 +579,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             "  \"curtime\" : ttt,                  (numeric) current timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"bits\" : \"xxx\",                 (string) compressed target of next block\n"
             "  \"height\" : n                      (numeric) The height of the next block\n"
-            "  \"stormnode\" : {                   (json object) required stormnode payee that must be included in the next block\n"
+            "  \"stormnode\" : {                   (json object) required Stormnode payee that must be included in the next block\n"
             "      \"payee\" : \"xxxx\",             (string) payee address\n"
             "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
             "      \"amount\": n                   (numeric) required amount to pay\n"
             "  },\n"
-            "  \"stormnode_payments_started\" :  true|false, (boolean) true, if stormnode payments started\n"
-            "  \"stormnode_payments_enforced\" : true|false, (boolean) true, if stormnode payments are enforced\n"
+            "  \"stormnode_payments_started\" :  true|false, (boolean) true, if Stormnode payments started\n"
+            "  \"stormnode_payments_enforced\" : true|false, (boolean) true, if Stormnode payments are enforced\n"
             "  \"superblock\" : [                  (array) required superblock payees that must be included in the next block\n"
             "      {\n"
             "         \"payee\" : \"xxxx\",          (string) payee address\n"
@@ -673,6 +676,9 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk Core is downloading blocks...");
+
+    if (!stormnodeSync.IsSynced())
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk Core is syncing with network...");
 
     static unsigned int nTransactionsUpdatedLast;
 

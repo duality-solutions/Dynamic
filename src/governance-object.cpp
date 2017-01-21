@@ -170,6 +170,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     }
     voteInstance = vote_instance_t(vote.GetOutcome(), nVoteTimeUpdate);
     fileVotes.AddVote(vote);
+    snodeman.AddGovernanceVote(vote.GetVinStormnode(), vote.GetParentHash());
     fDirtyCache = true;
     return true;
 }
@@ -402,27 +403,23 @@ std::string CGovernanceObject::GetDataAsString()
     return s;
 }
 
-void CGovernanceObject::UpdateLocalValidity(const CBlockIndex *pCurrentBlockIndex)
+void CGovernanceObject::UpdateLocalValidity()
 {
     // THIS DOES NOT CHECK COLLATERAL, THIS IS CHECKED UPON ORIGINAL ARRIVAL
-    fCachedLocalValidity = IsValidLocally(pCurrentBlockIndex, strLocalValidityError, false);
+    fCachedLocalValidity = IsValidLocally(strLocalValidityError, false);
 };
 
 
-bool CGovernanceObject::IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool fCheckCollateral)
+bool CGovernanceObject::IsValidLocally(std::string& strError, bool fCheckCollateral)
 {
     bool fMissingStormnode = false;
 
-    return IsValidLocally(pindex, strError, fMissingStormnode, fCheckCollateral);
+    return IsValidLocally(strError, fMissingStormnode, fCheckCollateral);
 }
 
-bool CGovernanceObject::IsValidLocally(const CBlockIndex* pindex, std::string& strError, bool& fMissingStormnode, bool fCheckCollateral)
+bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingStormnode, bool fCheckCollateral)
 {
     fMissingStormnode = false;
-    if(!pindex) {
-        strError = "Tip is NULL";
-        return true;
-    }
 
     if(fUnparsable) {
         strError = "Object data unparseable";
@@ -440,11 +437,6 @@ bool CGovernanceObject::IsValidLocally(const CBlockIndex* pindex, std::string& s
     }
 
     // IF ABSOLUTE NO COUNT (NO-YES VALID VOTES) IS MORE THAN 10% OF THE NETWORK STORMNODES, OBJ IS INVALID
-
-    if(GetAbsoluteNoCount(VOTE_SIGNAL_VALID) > snodeman.CountEnabled(MIN_GOVERNANCE_PEER_PROTO_VERSION)/10) {
-        strError = "Voted invalid";
-        return false;
-    }
 
     // CHECK COLLATERAL IF REQUIRED (HIGH CPU USAGE)
 

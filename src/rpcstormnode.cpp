@@ -39,7 +39,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
         if(fStormNode)
-            return "Mixing is not supported from stormnodes";
+            return "Mixing is not supported from Stormnodes";
 
         fEnablePrivateSend = true;
         bool result = sandStormPool.DoAutomaticDenominating();
@@ -109,19 +109,19 @@ UniValue stormnode(const UniValue& params, bool fHelp)
                 "1. \"command\"        (string or set of strings, required) The command to execute\n"
                 "2. \"passphrase\"     (string, optional) The wallet passphrase\n"
                 "\nAvailable commands:\n"
-                "  count        - Print number of all known stormnodes (optional: 'ps', 'enabled', 'all', 'qualify')\n"
-                "  current      - Print info on current stormnode winner to be paid the next block (calculated locally)\n"
-                "  debug        - Print stormnode status\n"
+                "  count        - Print number of all known Stormnodes (optional: 'ps', 'enabled', 'all', 'qualify')\n"
+                "  current      - Print info on current Stormnode winner to be paid the next block (calculated locally)\n"
+                "  debug        - Print Stormnode status\n"
                 "  genkey       - Generate new stormnodeprivkey\n"
-                "  outputs      - Print stormnode compatible outputs\n"
-                "  start        - Start local Hot stormnode configured in darksilk.conf\n"
-                "  start-alias  - Start single remote stormnode by assigned alias configured in stormnode.conf\n"
-                "  start-<mode> - Start remote stormnodes configured in stormnode.conf (<mode>: 'all', 'missing', 'disabled')\n"
-                "  status       - Print stormnode status information\n"
-                "  list         - Print list of all known stormnodes (see stormnodelist for more info)\n"
+                "  outputs      - Print Stormnode compatible outputs\n"
+                "  start        - Start local Hot Stormnode configured in darksilk.conf\n"
+                "  start-alias  - Start single remote Stormnode by assigned alias configured in stormnode.conf\n"
+                "  start-<mode> - Start remote Stormnodes configured in stormnode.conf (<mode>: 'all', 'missing', 'disabled')\n"
+                "  status       - Print Stormnode status information\n"
+                "  list         - Print list of all known Stormnodes (see stormnodelist for more info)\n"
                 "  list-conf    - Print stormnode.conf in JSON format\n"
-                "  winner       - Print info on next stormnode winner to vote for\n"
-                "  winners      - Print list of stormnode winners\n"
+                "  winner       - Print info on next Stormnode winner to vote for\n"
+                "  winners      - Print list of Stormnode winners\n"
                 );
 
     if (strCommand == "list")
@@ -145,7 +145,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
 
         CNode *pnode = ConnectNode((CAddress)addr, NULL);
         if(!pnode)
-            throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to stormnode %s", strAddress));
+            throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Stormnode %s", strAddress));
 
         return "successfully connected";
     }
@@ -215,7 +215,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         CKey key;
 
         if(!pwalletMain || !pwalletMain->GetStormnodeVinAndKeys(vin, pubkey, key))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Missing stormnode input, please look at the documentation for instructions on stormnode creation");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Missing Stormnode input, please look at the documentation for instructions on Stormnode creation");
 
         return activeStormnode.GetStatus();
     }
@@ -292,7 +292,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         }
 
         if((strCommand == "start-missing" || strCommand == "start-disabled") && !stormnodeSync.IsStormnodeListSynced()) {
-            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "You can't use this command until stormnode list is synced");
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "You can't use this command until Stormnode list is synced");
         }
 
         int nSuccessful = 0;
@@ -330,7 +330,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
         snodeman.NotifyStormnodeUpdates();
 
         UniValue returnObj(UniValue::VOBJ);
-        returnObj.push_back(Pair("overall", strprintf("Successfully started %d stormnodes, failed to start %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
+        returnObj.push_back(Pair("overall", strprintf("Successfully started %d Stormnodes, failed to start %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
         returnObj.push_back(Pair("detail", resultsObj));
 
         return returnObj;
@@ -384,7 +384,7 @@ UniValue stormnode(const UniValue& params, bool fHelp)
     if (strCommand == "status")
     {
         if (!fStormNode)
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "This is not a stormnode");
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "This is not a Stormnode");
 
         UniValue snObj(UniValue::VOBJ);
 
@@ -454,26 +454,26 @@ UniValue stormnodelist(const UniValue& params, bool fHelp)
     {
         throw std::runtime_error(
                 "stormnodelist ( \"mode\" \"filter\" )\n"
-                "Get a list of stormnodes in different modes\n"
+                "Get a list of Stormnodes in different modes\n"
                 "\nArguments:\n"
                 "1. \"mode\"      (string, optional/required to use filter, defaults = status) The mode to run list in\n"
                 "2. \"filter\"    (string, optional) Filter results. Partial match by outpoint by default in all modes,\n"
                 "                                    additional matches in some modes are also available\n"
                 "\nAvailable modes:\n"
-                "  activeseconds  - Print number of seconds stormnode recognized by the network as enabled\n"
+                "  activeseconds  - Print number of seconds Stormnode recognized by the network as enabled\n"
                 "                   (since latest issued \"stormnode start/start-many/start-alias\")\n"
-                "  addr           - Print ip address associated with a stormnode (can be additionally filtered, partial match)\n"
+                "  addr           - Print ip address associated with a Stormnode (can be additionally filtered, partial match)\n"
                 "  full           - Print info in format 'status protocol payee lastseen activeseconds lastpaidtime lastpaidblock IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
                 "  lastpaidblock  - Print the last block height a node was paid on the network\n"
                 "  lastpaidtime   - Print the last time a node was paid on the network\n"
-                "  lastseen       - Print timestamp of when a stormnode was last seen on the network\n"
-                "  payee          - Print DarkSilk address associated with a stormnode (can be additionally filtered,\n"
+                "  lastseen       - Print timestamp of when a Stormnode was last seen on the network\n"
+                "  payee          - Print DarkSilk address associated with a Stormnode (can be additionally filtered,\n"
                 "                   partial match)\n"
-                "  protocol       - Print protocol of a stormnode (can be additionally filtered, exact match))\n"
-                "  rank           - Print rank of a stormnode based on current block\n"
-                "  status         - Print stormnode status: PRE_ENABLED / ENABLED / EXPIRED / OUTPOINT_SPENT / REMOVE\n"
-                "                   (can be additionally filtered, partial match)\n"
+                "  protocol       - Print protocol of a Stormnode (can be additionally filtered, exact match))\n"
+                "  rank           - Print rank of a Stormnode based on current block\n"
+                "  status         - Print Stormnode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
+                "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
                 );
     }
 
@@ -573,15 +573,15 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
         (strCommand != "create-alias" && strCommand != "create-all" && strCommand != "decode" && strCommand != "relay"))
         throw std::runtime_error(
                 "stormnodebroadcast \"command\"... ( \"passphrase\" )\n"
-                "Set of commands to create and relay stormnode broadcast messages\n"
+                "Set of commands to create and relay Stormnode broadcast messages\n"
                 "\nArguments:\n"
                 "1. \"command\"        (string or set of strings, required) The command to execute\n"
                 "2. \"passphrase\"     (string, optional) The wallet passphrase\n"
                 "\nAvailable commands:\n"
-                "  create-alias  - Create single remote stormnode broadcast message by assigned alias configured in stormnode.conf\n"
-                "  create-all    - Create remote stormnode broadcast messages for all stormnodes configured in stormnode.conf\n"
-                "  decode        - Decode stormnode broadcast message\n"
-                "  relay         - Relay stormnode broadcast message to the network\n"
+                "  create-alias  - Create single remote Stormnode broadcast message by assigned alias configured in stormnode.conf\n"
+                "  create-all    - Create remote Stormnode broadcast messages for all Stormnodes configured in stormnode.conf\n"
+                "  decode        - Decode Stormnode broadcast message\n"
+                "  relay         - Relay Stormnode broadcast message to the network\n"
                 + HelpRequiringPassphrase());
 
     if (strCommand == "create-alias")
@@ -680,7 +680,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
         CDataStream ssVecSnb(SER_NETWORK, PROTOCOL_VERSION);
         ssVecSnb << vecSnb;
         UniValue returnObj(UniValue::VOBJ);
-        returnObj.push_back(Pair("overall", strprintf("Successfully created broadcast messages for %d stormnodes, failed to create %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
+        returnObj.push_back(Pair("overall", strprintf("Successfully created broadcast messages for %d Stormnodes, failed to create %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
         returnObj.push_back(Pair("detail", resultsObj));
         returnObj.push_back(Pair("hex", HexStr(ssVecSnb.begin(), ssVecSnb.end())));
 
@@ -731,7 +731,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
             returnObj.push_back(Pair(snb.GetHash().ToString(), resultObj));
         }
 
-        returnObj.push_back(Pair("overall", strprintf("Successfully decoded broadcast messages for %d stormnodes, failed to decode %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
+        returnObj.push_back(Pair("overall", strprintf("Successfully decoded broadcast messages for %d Stormnodes, failed to decode %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
 
         return returnObj;
     }
@@ -765,7 +765,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
             bool fResult;
             if (snb.CheckSignature(nDos)) {
                 if (fSafe) {
-                    fResult = snodeman.CheckSnbAndUpdateStormnodeList(snb, nDos);
+                    fResult = snodeman.CheckSnbAndUpdateStormnodeList(NULL, snb, nDos);
                 } else {
                     snodeman.UpdateStormnodeList(snb);
                     snb.Relay();
@@ -785,7 +785,7 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
             returnObj.push_back(Pair(snb.GetHash().ToString(), resultObj));
         }
 
-        returnObj.push_back(Pair("overall", strprintf("Successfully relayed broadcast messages for %d stormnodes, failed to relay %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
+        returnObj.push_back(Pair("overall", strprintf("Successfully relayed broadcast messages for %d Stormnodes, failed to relay %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
 
         return returnObj;
     }
