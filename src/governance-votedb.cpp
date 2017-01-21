@@ -59,6 +59,7 @@ void CGovernanceObjectVoteFile::RemoveVotesFromStormnode(const CTxIn& vinStormno
     vote_l_it it = listVotes.begin();
     while(it != listVotes.end()) {
         if(it->GetVinStormnode() == vinStormnode) {
+            mapVoteIndex.erase(it->GetHash());
             listVotes.erase(it++);
         }
         else {
