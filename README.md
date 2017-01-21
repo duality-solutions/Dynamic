@@ -13,6 +13,7 @@ DarkSilk Integration/Staging Tree
 ![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
 **Copyright (c) 2015-2017 Silk Network**
+
 What is DarkSilk?
 ----------------
 * Coin Suffix: DSLK
@@ -44,19 +45,21 @@ DarkSilk includes an Address Index feature, based on the address index API (sear
 
 
 **Stormnode/Sandstorm Network Information**
-Ported Masternodes from Dash, rebranded as Stormnodes and modified to use stealth addresses.
-Darksend ported and rebranded as Sandstorm.
-Utilisation of InstantX for instant transaction confirmation.
+Ported Masternodes from Dash, rebranded as Stormnodes.
+Darksend/PrivateSend ported and rebranded as Sandstorm/PrivateSend.
+Utilisation of InstantX/InstantSend for instant transaction confirmation(s).
 
 **MainNet Parameters**
-P2P Port/Stormnodes = 31000
+P2P Port = 31000
 RPC Port = 31500
+Stormnodes = 31000 suggested, however, there is no port limitation
 Magic Bytes: 0x42 0x04 0x20 0x24
 
 
 **TestNet Parameters**
-P2P Port/Stormnodes = 31750
+P2P Port = 31750
 RPC Port = 31800
+Stormnodes = 31750 suggested, however, there is no port limitation
 Magic Bytes: 0x24 0x20 0x04 0x42
 
 
