@@ -426,7 +426,6 @@ bool CStormnodeBroadcast::Create(std::string strService, std::string strKeyStorm
         return false;
     }
 
-    /*
     CService service = CService(strService);
     int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
@@ -440,7 +439,6 @@ bool CStormnodeBroadcast::Create(std::string strService, std::string strKeyStorm
         LogPrintf("CStormnodeBroadcast::Create -- %s\n", strErrorRet);
         return false;
     }
-    */
 
     return Create(txin, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyStormnodeNew, pubKeyStormnodeNew, strErrorRet, snbRet);
 }
