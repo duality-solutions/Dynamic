@@ -52,14 +52,14 @@ Utilisation of InstantX/InstantSend for instant transaction confirmation(s).
 **MainNet Parameters**
 P2P Port = 31000
 RPC Port = 31500
-Stormnodes = 31000 suggested, however, there is no port limitation
+Stormnodes = 31000
 Magic Bytes: 0x42 0x04 0x20 0x24
 
 
 **TestNet Parameters**
 P2P Port = 31750
 RPC Port = 31800
-Stormnodes = 31750 suggested, however, there is no port limitation
+Stormnodes = 31750
 Magic Bytes: 0x24 0x20 0x04 0x42
 
 
