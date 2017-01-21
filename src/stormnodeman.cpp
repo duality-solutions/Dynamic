@@ -423,16 +423,14 @@ void CStormnodeMan::SsegUpdate(CNode* pnode)
 {
     LOCK(cs);
 
-    if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        if(!(pnode->addr.IsRFC1918() || pnode->addr.IsLocal())) {
-            std::map<CNetAddr, int64_t>::iterator it = mWeAskedForStormnodeList.find(pnode->addr);
-            if(it != mWeAskedForStormnodeList.end() && GetTime() < (*it).second) {
-                LogPrintf("CStormnodeMan::SsegUpdate -- we already asked %s for the list; skipping...\n", pnode->addr.ToString());
-                return;
-            }
+    if(!(pnode->addr.IsRFC1918() || pnode->addr.IsLocal())) {
+        std::map<CNetAddr, int64_t>::iterator it = mWeAskedForStormnodeList.find(pnode->addr);
+        if(it != mWeAskedForStormnodeList.end() && GetTime() < (*it).second) {
+            LogPrintf("CStormnodeMan::SsegUpdate -- we already asked %s for the list; skipping...\n", pnode->addr.ToString());
+            return;
         }
     }
-    
+
     pnode->PushMessage(NetMsgType::SSEG, CTxIn());
     int64_t askAgain = GetTime() + SSEG_UPDATE_SECONDS;
     mWeAskedForStormnodeList[pnode->addr] = askAgain;
