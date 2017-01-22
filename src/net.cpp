@@ -25,6 +25,7 @@
 
 #include "sandstorm.h"
 #include "instantx.h"
+#include "stormnodeman.h"
 
 #ifdef WIN32
 #include <string.h>
@@ -66,6 +67,7 @@ using namespace std;
 
 namespace {
     const int MAX_OUTBOUND_CONNECTIONS = 8;
+    const int MAX_OUTBOUND_STORMNODE_CONNECTIONS = 20;
 
     struct ListenSocket {
         SOCKET socket;
@@ -112,6 +114,7 @@ NodeId nLastNodeId = 0;
 CCriticalSection cs_nLastNodeId;
 
 static CSemaphore *semOutbound = NULL;
+static CSemaphore *semStormnodeOutbound = NULL;
 boost::condition_variable messageHandlerCondition;
 
 // Signals for message handling
@@ -1054,6 +1057,7 @@ void ThreadSocketHandler()
 
                     // release outbound grant (if any)
                     pnode->grantOutbound.Release();
+                    pnode->grantStormnodeOutbound.Release();
 
                     // close socket and cleanup
                     pnode->CloseSocketDisconnect();
@@ -1691,6 +1695,32 @@ void ThreadOpenAddedConnections()
     }
 }
 
+void ThreadSnbRequestConnections()
+{
+    // Connecting to specific addresses, no stormnode connections available
+    if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
+        return;
+
+    int nTick = 0;
+    while (true)
+    {
+        MilliSleep(1000);
+        nTick++;
+
+        CSemaphoreGrant grant(*semStormnodeOutbound);
+        boost::this_thread::interruption_point();
+
+        std::pair<CService, uint256> p = snodeman.PopScheduledSnbRequestConnection();
+        if(p.first == CService()) continue;
+        CNode* pnode = ConnectNode(CAddress(p.first), NULL, true);
+        if(pnode) {
+            grant.MoveTo(pnode->grantStormnodeOutbound);
+            if(p.second != uint256())
+                snodeman.AskForSnb(pnode, p.second);
+        }
+    }
+}
+
 // if successful, this moves the passed grant to the constructed node
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound, const char *pszDest, bool fOneShot)
 {
@@ -1968,6 +1998,11 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
         semOutbound = new CSemaphore(nMaxOutbound);
     }
 
+    if (semStormnodeOutbound == NULL) {
+        // initialize semaphore
+        semStormnodeOutbound = new CSemaphore(MAX_OUTBOUND_STORMNODE_CONNECTIONS);
+    }
+
     if (pnodeLocalHost == NULL)
         pnodeLocalHost = new CNode(INVALID_SOCKET, CAddress(CService("127.0.0.1", 0), nLocalServices));
 
@@ -1994,6 +2029,9 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     // Initiate outbound connections
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "opencon", &ThreadOpenConnections));
 
+    // Initiate stormnode connections
+    threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "snbcon", &ThreadSnbRequestConnections));
+
     // Process messages
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "msghand", &ThreadMessageHandler));
 
@@ -2008,6 +2046,10 @@ bool StopNode()
     if (semOutbound)
         for (int i=0; i<MAX_OUTBOUND_CONNECTIONS; i++)
             semOutbound->post();
+
+    if (semStormnodeOutbound)
+        for (int i=0; i<MAX_OUTBOUND_STORMNODE_CONNECTIONS; i++)
+            semStormnodeOutbound->post();
 
     if (fAddressesInitialized)
     {
@@ -2044,6 +2086,8 @@ public:
         vhListenSocket.clear();
         delete semOutbound;
         semOutbound = NULL;
+        delete semStormnodeOutbound;
+        semStormnodeOutbound = NULL;
         delete pnodeLocalHost;
         pnodeLocalHost = NULL;
 
