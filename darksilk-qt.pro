@@ -604,7 +604,6 @@ SOURCES += \
     src/utiltime.cpp \
     src/validationinterface.cpp \
     src/versionbits.cpp \
-    src/compat/strnlen.cpp \
     src/qt/paymentrequest.pb.cc \
     src/dns/dns.cpp \
     src/dns/dslkdns.cpp \
