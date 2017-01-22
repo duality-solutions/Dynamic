@@ -60,6 +60,8 @@ bool CStormnodeConfig::read(std::string& strErr) {
             }
         }
 
+        //This check has been temporarily removed as it seems to prevent Windows Stormnodes from starting
+        /*
         int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
         if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
             if(CService(ip).GetPort() != mainnetDefaultPort) {
@@ -88,7 +90,7 @@ bool CStormnodeConfig::read(std::string& strErr) {
         }
 
         add(alias, ip, privKey, txHash, outputIndex);
-    }
+    }*/
 
     streamConfig.close();
     return true;
