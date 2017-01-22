@@ -103,6 +103,7 @@ CStormnodeMan::CStormnodeMan()
   mAskedUsForStormnodeList(),
   mWeAskedForStormnodeList(),
   mWeAskedForStormnodeListEntry(),
+  listScheduledSnbRequestConnections(),
   nLastIndexRebuildTime(0),
   indexStormnodes(),
   indexStormnodesOld(),
@@ -160,6 +161,16 @@ void CStormnodeMan::AskForSN(CNode* pnode, const CTxIn &vin)
     pnode->PushMessage(NetMsgType::SSEG, vin);
 }
 
+void CStormnodeMan::AskForMnb(CNode* pnode, const uint256 &hash)
+{
+    if(!pnode || hash == uint256()) return;
+
+    LogPrint("stormnode", "CStormnodeMan::AskForSnb -- asking for snb %s from addr=%s\n", hash.ToString(), pnode->addr.ToString());
+    std::vector<CInv> vToFetch;
+    vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, hash));
+    pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
+}
+
 void CStormnodeMan::Check()
 {
     LOCK(cs);
@@ -179,7 +190,7 @@ void CStormnodeMan::CheckAndRemove()
 
     {
         // Need LOCK2 here to ensure consistent locking order because code below locks cs_main
-        // through GetHeight() signal in ConnectNode and in CheckSnbAndUpdateStormnodeList()
+        // in CheckSnbAndUpdateStormnodeList()
         LOCK2(cs_main, cs);
 
         Check();
@@ -221,18 +232,9 @@ void CStormnodeMan::CheckAndRemove()
                         if(mWeAskedForStormnodeListEntry.count(it->vin.prevout) && mWeAskedForStormnodeListEntry[it->vin.prevout].count(vecStormnodeRanks[i].second.addr)) continue;
                         // didn't ask recently, ok to ask now
                         CService addr = vecStormnodeRanks[i].second.addr;
-                        CNode* pnode = ConnectNode(CAddress(addr), NULL, true);
-                        if(pnode) {
-                            LogPrint("Stormnode", "CStormnodeMan::CheckAndRemove -- asking for snb of %s, addr=%s\n", it->vin.prevout.ToStringShort(), addr.ToString());
-                            setRequested.insert(addr);
-                            // can't use AskForSN here, inv system is way too smart, request data directly instead
-                            std::vector<CInv> vToFetch;
-                            vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, hash));
-                            pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
-                            fAskedForSnbRecovery = true;
-                        } else {
-                            LogPrint("Stormnode", "CStormnodeMan::CheckAndRemove -- can't connect to node to ask for snb, addr=%s\n", addr.ToString());
-                        }
+                        setRequested.insert(addr);
+                        listScheduledSnbRequestConnections.push_back(std::make_pair(addr, hash));
+                        fAskedForSnbRecovery = true;
                     }
                     // wait for snb recovery replies for SNB_RECOVERY_WAIT_SECONDS seconds
                     mSnbRecoveryRequests[hash] = std::make_pair(GetTime() + SNB_RECOVERY_WAIT_SECONDS, setRequested);
@@ -767,6 +769,15 @@ void CStormnodeMan::ProcessStormnodeConnections()
             pnode->fDisconnect = true;
         }
     }
+}
+
+std::pair<CService, uint256> CStormnodeMan::PopScheduledSnbRequestConnection()
+{
+    LOCK(cs);
+    if(listScheduledSnbRequestConnections.empty()) return make_pair(CService(), uint256());
+    std::pair<CService, uint256> p = listScheduledSnbRequestConnections.front();
+    listScheduledSnbRequestConnections.pop_front();
+    return p;
 }
 
 void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)

@@ -366,6 +366,7 @@ public:
     // If 'true' this node will be disconnected on CStormnodeMan::ProcessStormnodeConnections()
     bool fStormnode;
     CSemaphoreGrant grantOutbound;
+    CSemaphoreGrant grantStormnodeOutbound;
     CCriticalSection cs_filter;
     CBloomFilter* pfilter;
     int nRefCount;

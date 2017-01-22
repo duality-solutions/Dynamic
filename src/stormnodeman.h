@@ -129,6 +129,8 @@ private:
     // these maps are used for Stormnode recovery from STORMNODE_NEW_START_REQUIRED state
     std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > > mSnbRecoveryRequests;
     std::map<uint256, std::vector<CStormnodeBroadcast> > mSnbRecoveryGoodReplies;
+    std::list< std::pair<CService, uint256> > listScheduledSnbRequestConnections;
+
 
     int64_t nLastIndexRebuildTime;
 
@@ -200,6 +202,7 @@ public:
 
     /// Ask (source) node for snb
     void AskForSN(CNode *pnode, const CTxIn &vin);
+    void AskForSnb(CNode *pnode, const uint256 &hash);
 
     /// Check all Stormnodes
     void Check();
@@ -295,6 +298,7 @@ public:
     CStormnode* GetStormnodeByRank(int nRank, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
 
     void ProcessStormnodeConnections();
+    std::pair<CService, uint256> PopScheduledSnbRequestConnection();
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 
