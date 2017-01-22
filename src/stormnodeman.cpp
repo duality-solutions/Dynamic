@@ -161,7 +161,7 @@ void CStormnodeMan::AskForSN(CNode* pnode, const CTxIn &vin)
     pnode->PushMessage(NetMsgType::SSEG, vin);
 }
 
-void CStormnodeMan::AskForMnb(CNode* pnode, const uint256 &hash)
+void CStormnodeMan::AskForSnb(CNode* pnode, const uint256 &hash)
 {
     if(!pnode || hash == uint256()) return;
 
