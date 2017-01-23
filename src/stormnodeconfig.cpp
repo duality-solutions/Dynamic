@@ -29,7 +29,7 @@ bool CStormnodeConfig::read(std::string& strErr) {
         if (configFile != NULL) {
             std::string strHeader = "# Stormnode config file\n"
                           "# Format: alias IP:port stormnodeprivkey collateral_output_txid collateral_output_index\n"
-                          "# Example: sn1 127.0.0.2:31000 93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0\n";
+                          "# Example: sn1 127.0.0.2:31600 93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0\n";
             fwrite(strHeader.c_str(), std::strlen(strHeader.c_str()), 1, configFile);
             fclose(configFile);
         }

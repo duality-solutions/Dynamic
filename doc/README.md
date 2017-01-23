@@ -1,10 +1,8 @@
 # **DarkSilk (DSLK) v1.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-
 [![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
-[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/SilkNetwork/DarkSilk-Core)
-
+[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
@@ -12,7 +10,7 @@ Graph on Pull Request History
 [![Throughput Graph](https://graphs.waffle.io/SilkNetwork/DarkSilk-Core/throughput.svg)](https://waffle.io/SilkNetwork/DarkSilk-Core/metrics/throughput)  
 DarkSilk Integration/Staging Tree
 ================================
-![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/icons/darksilk-80.png)
+![DSLK logo](https://github.com/SilkNetwork/DarkSilk-Core/blob/master/src/qt/res/images/drk/darksilk_logo_horizontal.png)
 
 **Copyright (c) 2015-2017 Silk Network**
 
@@ -21,14 +19,14 @@ What is DarkSilk?
 * Coin Suffix: DSLK
 * PoW Algorithm: Argon2d
 * PoW Period: Unlimited
-* PoW Target Spacing: 64 Seconds
+* PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: 1 DSLK
 * Maturity: 10 Blocks
-* PoW Blocks: ~1350 per day
+* PoW Blocks: ~675 per day
 * Stormnode Collateral Amount: 1000 DSLK
 * Stormnode Min Confirmation: 10 Blocks
 * Stormnode Reward: 0.382 DSLK Static Reward (38.2% of a PoW reward)
-* Budget Reward: 10,000 DSLK Static Reward Every 41,089 blocks (~30 days)
+* Budget Reward: 10,000 DSLK Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DSLK, 20 confirmations (~30 minutes)
 * Min TX Fee: 0.0001 DSLK
 
@@ -47,20 +45,27 @@ DarkSilk includes an Address Index feature, based on the address index API (sear
 
 
 **Stormnode/Sandstorm Network Information**
-Ported Masternodes from Dash, rebranded as Stormnodes and modified to use stealth addresses.
-Darksend ported and rebranded as Sandstorm.
-Utilisation of InstantX for instant transaction confirmation.
+Ported Masternodes from Dash, rebranded as Stormnodes.
+Darksend/PrivateSend ported and rebranded as Sandstorm/PrivateSend.
+Utilisation of InstantX/InstantSend for instant transaction confirmation(s).
 
 **MainNet Parameters**
-P2P Port/Stormnodes = 31000
-RPC Port = 31500
-Magic Bytes: 0x42 0x04 0x20 0x24
-
+P2P Port = 31600
+RPC Port = 31650
+Stormnodes = 31600
+Magic Bytes: 0x2f 0x32 0x15 0x41
 
 **TestNet Parameters**
-P2P Port/Stormnodes = 31750
-RPC Port = 31800
-Magic Bytes: 0x24 0x20 0x04 0x42
+P2P Port = 31700
+RPC Port = 31750
+Stormnodes = 31700
+Magic Bytes: 0x2f 0x32 0x15 0x40
+
+**RegTest Parameters**
+P2P Port = 31800
+RPC Port = 31850
+Stormnodes = 31800
+Magic Bytes: 0x2f 0x32 0x15 0x3f
 
 
 UNIX BUILD NOTES
@@ -72,7 +77,7 @@ Note
 Always use absolute paths to configure and compile DarkSilk and the dependencies,
 for example, when specifying the the path of the dependency:
 
-	../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
+    ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
 
 Here BDB_PREFIX must absolute path - it is defined using $(pwd) which ensures
 the usage of the absolute path.
@@ -98,7 +103,7 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
-
+ libevent    | Networking   | OS independent asynchronous networking
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -108,7 +113,8 @@ Optional dependencies:
  qt          | GUI              | GUI toolkit (only needed when GUI enabled)
  protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
-
+ libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.x)
+ 
 For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
 
 System requirements
@@ -122,11 +128,11 @@ Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 Build requirements:
 
-	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev
-	
+    sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
+    
 for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
-	sudo apt-get install libboost-all-dev
+    sudo apt-get install libboost-all-dev
 
  db4.8 packages are available [here](https://launchpad.net/~silknetwork/+archive/silknetwork).
  You can add the repository using the following command:
@@ -142,20 +148,24 @@ for Debian 7 (Wheezy) and later:
  Add the following line to /etc/apt/sources.list,
  replacing [mirror] with any official debian mirror.
 
-	deb http://[mirror]/debian/ oldstable main
+    deb http://[mirror]/debian/ oldstable main
 
 To enable the change run
 
-	sudo apt-get update
+    sudo apt-get update
 
 for other Debian & Ubuntu (with ppa):
 
-	sudo apt-get install libdb4.8-dev libdb4.8++-dev
+    sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
-Optional:
+Optional (see --with-miniupnpc and --enable-upnp-default):
 
-	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
+    sudo apt-get install libminiupnpc-dev
 
+ZMQ dependencies (provides ZMQ API 4.x):
+
+        sudo apt-get install libzmq3-dev
+    
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
@@ -171,7 +181,7 @@ For Qt 5 you need the following:
 libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
-
+    
 Once these are installed, they will be found by configure and a darksilk-qt executable will be
 built by default.
 
@@ -180,7 +190,6 @@ Notes
 The release is built with GCC and then "strip darksilkd" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
-
 miniupnpc
 ---------
 
@@ -188,18 +197,17 @@ miniupnpc
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  See the configure options for upnp behavior desired:
 
-	--without-miniupnpc      No UPnP support miniupnp not required
-	--disable-upnp-default   (the default) UPnP support turned off by default at runtime
-	--enable-upnp-default    UPnP support turned on by default at runtime
+    --without-miniupnpc      No UPnP support miniupnp not required
+    --disable-upnp-default   (the default) UPnP support turned off by default at runtime
+    --enable-upnp-default    UPnP support turned on by default at runtime
 
 To build:
 
-	tar -xzvf miniupnpc-1.6.tar.gz
-	cd miniupnpc-1.6
-	make
-	sudo su
-	make install
-
+    tar -xzvf miniupnpc-1.6.tar.gz
+    cd miniupnpc-1.6
+    make
+    sudo su
+    make install
 
 Berkeley DB
 -----------
@@ -236,9 +244,9 @@ Boost
 -----
 If you need to build Boost yourself:
 
-	sudo su
-	./bootstrap.sh
-	./bjam install
+    sudo su
+    ./bootstrap.sh
+    ./bjam install
 
 
 Security
@@ -249,8 +257,8 @@ This can be disabled with:
 
 Hardening Flags:
 
-	./configure --enable-hardening
-	./configure --disable-hardening
+    ./configure --enable-hardening
+    ./configure --disable-hardening
 
 
 Hardening enables the following features:
@@ -267,7 +275,7 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-    	scanelf -e ./darksilkd
+        scanelf -e ./darksilkd
 
     The output should contain:
      TYPE
@@ -284,8 +292,8 @@ Hardening enables the following features:
     `scanelf -e ./darksilkd`
 
     the output should contain:
-	STK/REL/PTL
-	RW- R-- RW-
+    STK/REL/PTL
+    RW- R-- RW-
 
     The STK RW- means that the stack is readable and writeable but not executable.
 
