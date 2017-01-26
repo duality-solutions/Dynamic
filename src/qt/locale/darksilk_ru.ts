@@ -3758,8 +3758,8 @@ rpcpassword=%s
         <translation>Пиры, внесенные в белый список, не будут подвергаться DoS блокировкам и их транзакции будут ретранслироваться, даже если они уже есть в пуле памяти, что полезно, например, для работы в качестве шлюза</translation>
     </message>
     <message>
-        <source>(31000 could be used only on mainnet)</source>
-        <translation>(31000 можно использовать только в главной сети)</translation>
+        <source>(31600 could be used only on mainnet)</source>
+        <translation>(31600 можно использовать только в главной сети)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4176,8 +4176,8 @@ rpcpassword=%s
         <translation>Неправильное значение stormnodeprivkey. Пожалуйста, ознакомьтесь с документацией.</translation>
     </message>
     <message>
-        <source>(must be 31000 for mainnet)</source>
-        <translation>(должно быть 31000 в главной сети)</translation>
+        <source>(must be 31600 for mainnet)</source>
+        <translation>(должно быть 31600 в главной сети)</translation>
     </message>
     <message>
         <source>Can't find random Stormnode.</source>

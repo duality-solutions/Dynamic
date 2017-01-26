@@ -3757,8 +3757,8 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>Uzle na zoznam povolených nemôžu byť DoS zakázané a ich transakcie vždy postúpené ďalej, aj v prípade, ak sú už pamäťovej fronte. Užitočné napr. pre brány</translation>
     </message>
     <message>
-        <source>(31000 could be used only on mainnet)</source>
-        <translation>(31000 nemôže byť použité pre hlavnú sieť)</translation>
+        <source>(31600 could be used only on mainnet)</source>
+        <translation>(31600 nemôže byť použité pre hlavnú sieť)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4175,8 +4175,8 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>Neplatný stormnodeprivkey. Prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
-        <source>(must be 31000 for mainnet)</source>
-        <translation>(pre hlavnú sieť musí byť 31000)</translation>
+        <source>(must be 31600 for mainnet)</source>
+        <translation>(pre hlavnú sieť musí byť 31600)</translation>
     </message>
     <message>
         <source>Can't find random Stormnode.</source>

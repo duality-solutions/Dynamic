@@ -3758,8 +3758,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Cái điểm ngang hàng trong danh sách trắng không thể bị cấm DoS và các giao dịch của nó luôn được chuyển tiếp, thậm chí cả khi nó đã có trong mempool, hữu ích ví dụ như cho một cửa ngõ</translation>
     </message>
     <message>
-        <source>(31000 could be used only on mainnet)</source>
-        <translation>(31000 chỉ được sử dụng trên mạng chính thức)</translation>
+        <source>(31600 could be used only on mainnet)</source>
+        <translation>(31600 chỉ được sử dụng trên mạng chính thức)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4175,8 +4175,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Stormnodeprivkey không hợp lệ. Hãy xem lại tài liệu.</translation>
     </message>
     <message>
-        <source>(must be 31000 for mainnet)</source>
-        <translation>(phải là 31000 cho mạng chính thức)</translation>
+        <source>(must be 31600 for mainnet)</source>
+        <translation>(phải là 31600 cho mạng chính thức)</translation>
     </message>
     <message>
         <source>Can't find random Stormnode.</source>
