@@ -2490,7 +2490,7 @@ void ThreadCheckSandStormPool()
                 snodeman.ProcessStormnodeConnections();
                 snodeman.CheckAndRemove();
                 snpayments.CheckAndRemove();
-                CleanTxLockCandidates();
+                instantsend.CheckAndRemove();
             }
 
             sandStormPool.CheckTimeout();

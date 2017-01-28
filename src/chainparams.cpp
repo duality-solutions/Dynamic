@@ -110,7 +110,6 @@ public:
         strNetworkID = "main";
         consensus.nStormnodePaymentsStartBlock = 20545;
         consensus.nInstantSendKeepLock = 24;
-        consensus.nInstantSendReprocessBlocks = 15;
         consensus.nBudgetPaymentsStartBlock = 0; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
@@ -214,7 +213,6 @@ public:
         strNetworkID = "test";
         consensus.nStormnodePaymentsStartBlock = 240; // not true, but it's ok as long as it's less then nStormnodePaymentsIncreaseBlock
         consensus.nInstantSendKeepLock = 24;
-        consensus.nInstantSendReprocessBlocks = 15;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
@@ -315,7 +313,6 @@ public:
         strNetworkID = "regtest";
         consensus.nStormnodePaymentsStartBlock = 200;
         consensus.nInstantSendKeepLock = 24;
-        consensus.nInstantSendReprocessBlocks = 15;
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
