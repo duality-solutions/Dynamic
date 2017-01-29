@@ -1520,7 +1520,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
         // Store transaction in memory
         pool.addUnchecked(hash, entry, setAncestors, !IsInitialBlockDownload());
-
+        hooks->AddToPendingNames(tx);
         // Add memory address index
         if (fAddressIndex) {
             pool.addAddressIndex(entry, view);
