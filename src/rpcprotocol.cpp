@@ -34,7 +34,7 @@ string JSONRPCRequest(const string& strMethod, const UniValue& params, const Uni
     request.push_back(Pair("method", strMethod));
     request.push_back(Pair("params", params));
     request.push_back(Pair("id", id));
-    return request.write() + "\n";
+    return request.write(0, 0, GetBoolArg("-legacyrpc", true)) + "\n";
 }
 
 UniValue JSONRPCReplyObj(const UniValue& result, const UniValue& error, const UniValue& id)
@@ -52,7 +52,8 @@ UniValue JSONRPCReplyObj(const UniValue& result, const UniValue& error, const Un
 string JSONRPCReply(const UniValue& result, const UniValue& error, const UniValue& id)
 {
     UniValue reply = JSONRPCReplyObj(result, error, id);
-    return reply.write() + "\n";
+    static bool legacy = GetBoolArg("-legacyrpc", true);
+    return reply.write(0, 0, legacy) + "\n";
 }
 
 UniValue JSONRPCError(int code, const string& message)

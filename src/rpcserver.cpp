@@ -546,7 +546,8 @@ std::string JSONRPCExecBatch(const UniValue& vReq)
     for (unsigned int reqIdx = 0; reqIdx < vReq.size(); reqIdx++)
         ret.push_back(JSONRPCExecOne(vReq[reqIdx]));
 
-    return ret.write() + "\n";
+    static bool legacy = GetBoolArg("-legacyrpc", true);
+    return ret.write(0, 0, legacy) + "\n";
 }
 
 UniValue CRPCTable::execute(const std::string &strMethod, const UniValue &params) const

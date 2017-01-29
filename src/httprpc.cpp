@@ -179,7 +179,8 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     try {
         // Parse request
         UniValue valRequest;
-        if (!valRequest.read(req->ReadBody()))
+        static bool legacy = GetBoolArg("-legacyrpc", true);
+        if (!valRequest.read(req->ReadBody(), legacy ? 2 : 0))
             throw JSONRPCError(RPC_PARSE_ERROR, "Parse error");
 
         std::string strReply;
