@@ -3030,7 +3030,7 @@ bool CWallet::ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecA
 }
 
 bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
-                                int& nChangePosRet, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend)
+                                int& nChangePosRet, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fDDNS)
 {
     CAmount nFeePay = fUseInstantSend ? INSTANTSEND_MIN_FEE : 0;
 
@@ -3056,52 +3056,52 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
     // DarkSilk: define some values used in case of namecoin tx creation
     CAmount nNameTxInCredit = 0;
     unsigned int nNameTxOut = 0;
-    bool fDDNS = !(wtxNew.IsNull());
-    if (fDDNS)
+    bool fDDNSUpdateOperation = false;
+    if (!wtxNew.IsNull()) // DarkSilk DDNS update or delete operation
     {
         nNameTxOut = IndexOfNameOutput(wtxNew);
         nNameTxInCredit = wtxNew.vout[nNameTxOut].nValue;
+        fDDNSUpdateOperation = true;
 
     }
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.BindWallet(this);
     CMutableTransaction txNew;
     txNew.nVersion = wtxNew.nVersion; // DarkSilk: important for name transactions
-    if (!fDDNS) {
-        // Discourage fee sniping.
-        //
-        // For a large miner the value of the transactions in the best block and
-        // the mempool can exceed the cost of deliberately attempting to mine two
-        // blocks to orphan the current best block. By setting nLockTime such that
-        // only the next block can include the transaction, we discourage this
-        // practice as the height restricted and limited blocksize gives miners
-        // considering fee sniping fewer options for pulling off this attack.
-        //
-        // A simple way to think about this is from the wallet's point of view we
-        // always want the blockchain to move forward. By setting nLockTime this
-        // way we're basically making the statement that we only want this
-        // transaction to appear in the next block; we don't want to potentially
-        // encourage reorgs by allowing transactions to appear at lower heights
-        // than the next block in forks of the best chain.
-        //
-        // Of course, the subsidy is high enough, and transaction volume low
-        // enough, that fee sniping isn't a problem yet, but by implementing a fix
-        // now we ensure code won't be written that makes assumptions about
-        // nLockTime that preclude a fix later.
+    
+    // Discourage fee sniping.
+    //
+    // For a large miner the value of the transactions in the best block and
+    // the mempool can exceed the cost of deliberately attempting to mine two
+    // blocks to orphan the current best block. By setting nLockTime such that
+    // only the next block can include the transaction, we discourage this
+    // practice as the height restricted and limited blocksize gives miners
+    // considering fee sniping fewer options for pulling off this attack.
+    //
+    // A simple way to think about this is from the wallet's point of view we
+    // always want the blockchain to move forward. By setting nLockTime this
+    // way we're basically making the statement that we only want this
+    // transaction to appear in the next block; we don't want to potentially
+    // encourage reorgs by allowing transactions to appear at lower heights
+    // than the next block in forks of the best chain.
+    //
+    // Of course, the subsidy is high enough, and transaction volume low
+    // enough, that fee sniping isn't a problem yet, but by implementing a fix
+    // now we ensure code won't be written that makes assumptions about
+    // nLockTime that preclude a fix later.
 
-        txNew.nLockTime = chainActive.Height();
+    txNew.nLockTime = chainActive.Height();
 
-        // Secondly occasionally randomly pick a nLockTime even further back, so
-        // that transactions that are delayed after signing for whatever reason,
-        // e.g. high-latency mix networks and some CoinJoin implementations, have
-        // better privacy.
-        if (GetRandInt(10) == 0)
-            txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
+    // Secondly occasionally randomly pick a nLockTime even further back, so
+    // that transactions that are delayed after signing for whatever reason,
+    // e.g. high-latency mix networks and some CoinJoin implementations, have
+    // better privacy.
+    if (GetRandInt(10) == 0)
+        txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
 
-        assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
-        assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-    }
-
+    assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
+    assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
+    
     {
         LOCK2(cs_main, cs_wallet);
         {
@@ -3158,7 +3158,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
 
                 // DarkSilk: in case of ddns tx we have already supplied input.
                 // If we have enough money: skip coin selection, unless we have ordered it with coinControl.
-                if (fDDNS)
+                if (fDDNSUpdateOperation)
                  {
                     if ( (nTotalValue - nNameTxInCredit > 0 || (coinControl && coinControl->HasSelected()))
                         && !SelectCoins(nTotalValue - nNameTxInCredit, setCoins, nValueIn, coinControl, nCoinType, false) )
@@ -3188,7 +3188,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     return false;
                 }
                 // DarkSilk: name tx always at first position
-                if (fDDNS)
+                if (fDDNSUpdateOperation)
                 {
                     setCoins.insert(setCoins.begin(), make_pair(&wtxNew, nNameTxOut));
                     nValueIn += nNameTxInCredit;
@@ -3428,7 +3428,7 @@ bool CWallet::CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletT
 {
     std::vector<CRecipient> vecSend;
     vecSend.push_back((CRecipient){scriptPubKey, nValue, false});
-    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeInput, nSplitBlock, strFailReason, coinControl);
+    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeInput, nSplitBlock, strFailReason, coinControl, true, ALL_COINS, false, true);
 }
 
 /**
