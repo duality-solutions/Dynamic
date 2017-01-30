@@ -345,7 +345,7 @@ void DarkSilkGUI::createActions()
 #endif
     tabGroup->addAction(stormnodeAction);    
 
-    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&DNS"), this);
+    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&dDNS"), this);
     dnsAction->setStatusTip(tr("Manage values registered via DarkSilk"));
     dnsAction->setToolTip(dnsAction->statusTip());
     dnsAction->setCheckable(true);
