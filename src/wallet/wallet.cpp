@@ -3312,7 +3312,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
                 sort(txNew.vin.begin(), txNew.vin.end());
                 sort(txNew.vout.begin(), txNew.vout.end());
-
+                
                 // If there was change output added before, we must update its position now
                 if (nChangePosRet != -1) {
                     int i = 0;
@@ -3335,7 +3335,8 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
                     {
                         // DarkSilk: we sign name tx differently.
-                        if (coin.first == &wtxNew && coin.second == nNameTxOut)
+                        // TODO: put back if.  needs wtxPrevDDNS
+                        //if (coin.first == &wtxPrevDDNS && coin.second == nNameTxOut)
                         {
                             if (!SignNameSignature(*this, *coin.first, txNew, nIn++))
                             {
@@ -3428,7 +3429,7 @@ bool CWallet::CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletT
 {
     std::vector<CRecipient> vecSend;
     vecSend.push_back((CRecipient){scriptPubKey, nValue, false});
-    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeInput, nSplitBlock, strFailReason, coinControl, true, ALL_COINS, false, true);
+    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeRet, nSplitBlock, strFailReason, coinControl, true, ALL_COINS, false, true);
 }
 
 /**
@@ -4502,7 +4503,7 @@ void SendName(CScript scriptPubKey, CAmount nValue, const CWalletTx& wtxNew, CWa
     {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
-        LogPrintf("SendMoney() : %s\n", strError);
+        LogPrintf("SendName() : %s\n", strError);
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     if (!pwalletMain->CommitTransaction(wtxNameIn, reservekey))

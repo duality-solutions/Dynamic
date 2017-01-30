@@ -1395,7 +1395,7 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     string info = str( boost::format("name %s, tx=%s, block=%d, value=%s") %
         sName % tx.GetHash().GetHex() % pindexBlock->nHeight % stringFromNameVal(nti.value));
 
-//check if last known tx on this name matches any of inputs of this tx
+    //check if last known tx on this name matches any of inputs of this tx
     CNameDB dbName("r");
     CNameRecord nameRec;
     if (dbName.ExistsName(name) && !dbName.ReadName(name, nameRec))
