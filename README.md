@@ -1,4 +1,4 @@
-# **DarkSilk (DSLK) v1.0**
+# **DarkSilk (DSLK) v1.0.0.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 [![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
