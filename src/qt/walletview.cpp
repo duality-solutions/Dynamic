@@ -46,6 +46,14 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     // Create tabs
     overviewPage = new OverviewPage(platformStyle);
 
+
+    sendCoinsPage = new SendCoinsDialog(platformStyle);
+
+    receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
+
+    usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
+    usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
+
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
     QHBoxLayout *hbox_buttons = new QHBoxLayout();
@@ -75,27 +83,23 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     vbox->addLayout(hbox_buttons);
     transactionsPage->setLayout(vbox);
 
-    receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
-    sendCoinsPage = new SendCoinsDialog(platformStyle);
-    
-    dnsPage = new DNSPage();
-	  multiSigPage = new MultisigDialog(platformStyle);
 
-
-    usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
-    usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
-
-    addWidget(overviewPage);
-    addWidget(transactionsPage);
-    addWidget(receiveCoinsPage);
-    addWidget(sendCoinsPage);
-    addWidget(dnsPage);
-	addWidget(multiSigPage);
-
+    multiSigPage = new MultisigDialog(platformStyle);
 
     QSettings settings;
     if (settings.value("fShowStormnodesTab").toBool()) {
         stormnodeListPage = new StormnodeList(platformStyle);
+    }
+
+    dnsPage = new DNSPage();
+
+    addWidget(overviewPage);
+    addWidget(sendCoinsPage);
+    addWidget(receiveCoinsPage);
+    addWidget(transactionsPage);
+    addWidget(multiSigPage);
+    addWidget(dnsPage);
+    if (settings.value("fShowStormnodesTab").toBool()) {
         addWidget(stormnodeListPage);
     }
 
@@ -158,20 +162,19 @@ void WalletView::setClientModel(ClientModel *clientModel)
 void WalletView::setWalletModel(WalletModel *walletModel)
 {
     this->walletModel = walletModel;
-
     // Put transaction list in tabs
-    transactionView->setModel(walletModel);
     overviewPage->setWalletModel(walletModel);
-    QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeListPage->setWalletModel(walletModel);
-    }
     receiveCoinsPage->setModel(walletModel);
     sendCoinsPage->setModel(walletModel);
     usedReceivingAddressesPage->setModel(walletModel->getAddressTableModel());
     usedSendingAddressesPage->setModel(walletModel->getAddressTableModel());
+    transactionView->setModel(walletModel);
+    multiSigPage->setModel(walletModel);
+    QSettings settings;
+    if (settings.value("fShowStormnodesTab").toBool()) {
+        stormnodeListPage->setWalletModel(walletModel);
+    }
     dnsPage->setModel(walletModel);
-  	multiSigPage->setModel(walletModel);
 
     if (walletModel)
     {
@@ -222,9 +225,27 @@ void WalletView::gotoOverviewPage()
     setCurrentWidget(overviewPage);
 }
 
+void WalletView::gotoSendCoinsPage(QString addr)
+{
+    setCurrentWidget(sendCoinsPage);
+
+    if (!addr.isEmpty())
+        sendCoinsPage->setAddress(addr);
+}
+
+void WalletView::gotoReceiveCoinsPage()
+{
+    setCurrentWidget(receiveCoinsPage);
+}
+
 void WalletView::gotoHistoryPage()
 {
     setCurrentWidget(transactionsPage);
+}
+
+void WalletView::gotoMultiSigPage()
+{
+    setCurrentWidget(multiSigPage);
 }
 
 void WalletView::gotoStormnodePage()
@@ -235,22 +256,9 @@ void WalletView::gotoStormnodePage()
     }
 }
 
-void WalletView::gotoReceiveCoinsPage()
+void WalletView::gotoDNSPage()
 {
-    setCurrentWidget(receiveCoinsPage);
-}
-
-void WalletView::gotoSendCoinsPage(QString addr)
-{
-    setCurrentWidget(sendCoinsPage);
-
-    if (!addr.isEmpty())
-        sendCoinsPage->setAddress(addr);
-}
-
-void WalletView::gotoMultiSigPage()
-{
-    setCurrentWidget(multiSigPage);
+    setCurrentWidget(dnsPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)
@@ -398,9 +406,4 @@ void WalletView::showProgress(const QString &title, int nProgress)
 void WalletView::trxAmount(QString amount)
 {
     transactionSum->setText(amount);
-}
-
-void WalletView::gotoDNSPage()
-{
-    setCurrentWidget(dnsPage);
 }

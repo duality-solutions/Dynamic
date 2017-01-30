@@ -97,18 +97,20 @@ private:
 
     QMenuBar *appMenuBar;
     QAction *overviewAction;
-    QAction *historyAction;
-    QAction *stormnodeAction;
-    QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *sendCoinsMenuAction;
+    QAction *receiveCoinsAction;
+    QAction *receiveCoinsMenuAction;
+    QAction *historyAction;
+    QAction *multiSigAction;
+    QAction *stormnodeAction;
+    QAction *dnsAction;
+    QAction *quitAction;
     QAction *usedSendingAddressesAction;
     QAction *usedReceivingAddressesAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
-    QAction *receiveCoinsAction;
-    QAction *receiveCoinsMenuAction;
     QAction *optionsAction;
     QAction *toggleHideAction;
     QAction *encryptWalletAction;
@@ -128,9 +130,6 @@ private:
     QAction *openAction;
     QAction *showHelpMessageAction;
     QAction *showPrivateSendHelpAction;
-    QAction *dnsAction;
-	QAction *multiSigAction;
-	
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -212,16 +211,16 @@ private Q_SLOTS:
 #ifdef ENABLE_WALLET
     /** Switch to overview (home) page */
     void gotoOverviewPage();
+    /** Switch to send coins page */
+    void gotoSendCoinsPage(QString addr = "");
+    /** Switch to receive coins page */
+    void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
     /** Switch to MultiSig page */
 	void gotoMultiSigPage();
     /** Switch to Stormnode page */
     void gotoStormnodePage();
-    /** Switch to receive coins page */
-    void gotoReceiveCoinsPage();
-    /** Switch to send coins page */
-    void gotoSendCoinsPage(QString addr = "");
     /** Switch to DNS page */
     void gotoDNSPage();
 
