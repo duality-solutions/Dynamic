@@ -67,6 +67,8 @@ UNIX BUILD NOTES
 ====================
 Some notes on how to build DarkSilk in Unix. 
 
+Building requirements for Unix based Systems :  3GB
+
 Note
 ---------------------
 Always use absolute paths to configure and compile DarkSilk and the dependencies,
