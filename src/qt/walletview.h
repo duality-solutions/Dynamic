@@ -17,15 +17,14 @@ class DarkSilkGUI;
 class ClientModel;
 class OverviewPage;
 class PlatformStyle;
-class ReceiveCoinsDialog;
 class SendCoinsDialog;
 class SendCoinsRecipient;
-class TransactionView;
-class WalletModel;
+class ReceiveCoinsDialog;
 class AddressBookPage;
-class DNSPage;
+class TransactionView;
 class MultisigDialog;
-
+class DNSPage;
+class WalletModel;
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -67,15 +66,14 @@ private:
     WalletModel *walletModel;
 
     OverviewPage *overviewPage;
-    QWidget *transactionsPage;
-    ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
+    ReceiveCoinsDialog *receiveCoinsPage;
     AddressBookPage *usedSendingAddressesPage;
     AddressBookPage *usedReceivingAddressesPage;
-    StormnodeList *stormnodeListPage;
-	MultisigDialog *multiSigPage;
-
+    QWidget *transactionsPage;
     TransactionView *transactionView;
+    MultisigDialog *multiSigPage;
+    StormnodeList *stormnodeListPage;
     DNSPage *dnsPage;
 
     QProgressDialog *progressDialog;
@@ -85,19 +83,18 @@ private:
 public Q_SLOTS:
     /** Switch to overview (home) page */
     void gotoOverviewPage();
-    /** Switch to history (transactions) page */
-    void gotoHistoryPage();
-    /** Switch to Stormnode page */
-    void gotoStormnodePage();
-    /** Switch to receive coins page */
-    void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    /** Switch to receive coins page */
+    void gotoReceiveCoinsPage();
+    /** Switch to history (transactions) page */
+    void gotoHistoryPage();
+    /** Switch to MultiSig page */
+    void gotoMultiSigPage();
+    /** Switch to Stormnode page */
+    void gotoStormnodePage();
     /** Switch to DNS page */
     void gotoDNSPage();
-    /** Switch to MultiSig page */
-	  void gotoMultiSigPage();
-
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
