@@ -1,8 +1,8 @@
 # **DarkSilk (DSLK) v1.0.0.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/SilkNetwork/DarkSilk-Core)
 [![Stories in Ready](https://badge.waffle.io/SilkNetwork/DarkSilk-Core.png?label=ready&title=Ready)](https://waffle.io/SilkNetwork/DarkSilk-Core)
-[![Build Status](https://travis-ci.org/SilkNetwork/DarkSilk-Core.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
@@ -71,6 +71,8 @@ Magic Bytes = 0x2f 0x32 0x15 0x3f
 UNIX BUILD NOTES
 ====================
 Some notes on how to build DarkSilk in Unix. 
+
+Building requirements for Unix based Systems :  3GB
 
 Note
 ---------------------
