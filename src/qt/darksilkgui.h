@@ -129,7 +129,7 @@ private:
     QAction *showHelpMessageAction;
     QAction *showPrivateSendHelpAction;
     QAction *dnsAction;
-	  QAction *multiSigAction;
+	QAction *multiSigAction;
 	
 
     QSystemTrayIcon *trayIcon;

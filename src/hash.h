@@ -234,27 +234,27 @@ unsigned int MurmurHash3(unsigned int nHashSeed, const std::vector<unsigned char
 void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char header, const unsigned char data[32], unsigned char output[64]);
 
 
-/* ----------- Dynamic Hash ------------------------------------------------ */
-/// Argon2i, Argon2d, and Argon2id are parametrized by:
-/// A time cost, which defines the amount of computation realized and therefore the execution time, given in number of iterations
-/// A memory cost, which defines the memory usage, given in kibibytes (1 kibibytes = kilobytes 1.024)
-/// A parallelism degree, which defines the number of parallel threads
+    /* ----------- Dynamic Hash ------------------------------------------------ */
+    /// Argon2i, Argon2d, and Argon2id are parametrized by:
+    /// A time cost, which defines the amount of computation realized and therefore the execution time, given in number of iterations
+    /// A memory cost, which defines the memory usage, given in kibibytes (1 kibibytes = kilobytes 1.024)
+    /// A parallelism degree, which defines the number of parallel threads
 
-/// Argon2d Phase 1 Hash parameters for the first 9 months - 12 month
-/// Salt and password are the block header.
-/// Output length: 32 bytes.
-/// Input length (in the case of a block header): 80 bytes.
-/// Salt length (same note as input length): 80 bytes.
-/// Input: Block header
-/// Salt: Block header (SAME AS INPUT)
-/// Secret data: None
-/// Secret length: 0
-/// Associated data: None
-/// Associated data length: 0
-/// Memory cost: 1 MB
-/// Lanes: 2 parallel threads
-/// Threads: 2 threads
-/// Time Constraint: 1 iteration
+    /// Argon2d Phase 1 Hash parameters for the first 9 months - 12 month
+    /// Salt and password are the block header.
+    /// Output length: 32 bytes.
+    /// Input length (in the case of a block header): 80 bytes.
+    /// Salt length (same note as input length): 80 bytes.
+    /// Input: Block header
+    /// Salt: Block header (SAME AS INPUT)
+    /// Secret data: None
+    /// Secret length: 0
+    /// Associated data: None
+    /// Associated data length: 0
+    /// Memory cost: 1 MB
+    /// Lanes: 2 parallel threads
+    /// Threads: 2 threads
+    /// Time Constraint: 1 iteration
 inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;
@@ -279,21 +279,21 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     return argon2_core(&context, Argon2_d);
 }
 
-/// Argon2d Phase 2 Hash parameters for the next 5 years after phase 1
-/// Salt and password are the block header.
-/// Output length: 32 bytes.
-/// Input length (in the case of a block header): 80 bytes.
-/// Salt length (same note as input length): 80 bytes.
-/// Input: Block header
-/// Salt: Block header (SAME AS INPUT)
-/// Secret data: None
-/// Secret length: 0
-/// Associated data: None
-/// Associated data length: 0
-/// Memory cost: 1024 kibibytes
-/// Lanes: 16 parallel threads
-/// Threads: 16 threads
-/// Time Constraint: 8 iterations
+    /// Argon2d Phase 2 Hash parameters for the next 5 years after phase 1
+    /// Salt and password are the block header.
+    /// Output length: 32 bytes.
+    /// Input length (in the case of a block header): 80 bytes.
+    /// Salt length (same note as input length): 80 bytes.
+    /// Input: Block header
+    /// Salt: Block header (SAME AS INPUT)
+    /// Secret data: None
+    /// Secret length: 0
+    /// Associated data: None
+    /// Associated data length: 0
+    /// Memory cost: 1024 kibibytes
+    /// Lanes: 16 parallel threads
+    /// Threads: 16 threads
+    /// Time Constraint: 8 iterations
 inline int Argon2d_Phase2_Hash(const void *in, void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;

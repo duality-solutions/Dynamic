@@ -90,7 +90,7 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
     addWidget(dnsPage);
-	  addWidget(multiSigPage);
+	addWidget(multiSigPage);
 
 
     QSettings settings;
