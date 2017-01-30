@@ -43,7 +43,6 @@ public:
     virtual bool ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy>& vName);
     virtual bool ExtractAddress(const CScript& script, string& address);
     virtual void AddToPendingNames(const CTransaction& tx);
-    virtual bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
     virtual bool IsNameScript(CScript scr);
     virtual bool getNameValue(const string& sName, string& sValue);
     virtual bool DumpToTextFile();
@@ -363,11 +362,6 @@ bool GetNameCurrentAddress(const CNameVal& name, CDarkSilkAddress& address, stri
     }
 
     return true;
-}
-
-bool CNamecoinHooks::RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut)
-{
-    return ::RemoveNameScriptPrefix(scriptIn, scriptOut);
 }
 
 UniValue name_list(const UniValue& params, bool fHelp)
@@ -1381,7 +1375,7 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     if (tx.nVersion != NAMECOIN_TX_VERSION)
         return true;
 
-//read name tx
+    //read name tx
     NameTxInfo nti;
     if (!DecodeNameTx(tx, nti))
     {
@@ -1783,13 +1777,13 @@ bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CM
 
     uint256 hash = SignatureHash(txout.scriptPubKey, txTo, nIn, nHashType);
 
-    CScript scriptPubKey;
-    if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
-        return error("SignNameSignature(): failed to remove name script prefix");
+    //CScript scriptPubKey;
+    //if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
+    //    return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
 
     txnouttype whichType;
-    if (!Solver(keystore, scriptPubKey, hash, nHashType, txin.scriptSig, whichType))
-        return false;
+    if (!Solver(keystore, txout.scriptPubKey, hash, nHashType, txin.scriptSig, whichType))
+        return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
 
     // Test solution
     return VerifyScript(txin.scriptSig, txout.scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&txTo, nIn), NULL, txTo.nVersion == NAMECOIN_TX_VERSION);
