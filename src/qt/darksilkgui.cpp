@@ -114,6 +114,7 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     showHelpMessageAction(0),
     showPrivateSendHelpAction(0),
     dnsAction(0),
+    multiSigAction(0),
     trayIcon(0),
     trayIconMenu(0),
     dockIconMenu(0),
@@ -121,7 +122,6 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     rpcConsole(0),
     helpMessageDialog(0),
     prevBlocks(0),
-    multiSigAction(0),
     spinnerFrame(0),
     platformStyle(platformStyle)
 {
@@ -345,14 +345,14 @@ void DarkSilkGUI::createActions()
 #endif
     tabGroup->addAction(stormnodeAction);    
 
-    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&DNS"), this);
+    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&dDNS"), this);
     dnsAction->setStatusTip(tr("Manage values registered via DarkSilk"));
     dnsAction->setToolTip(dnsAction->statusTip());
     dnsAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    dnsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
+    dnsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
 #else
-    dnsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    dnsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
 #endif
     tabGroup->addAction(dnsAction);
 
@@ -361,9 +361,9 @@ void DarkSilkGUI::createActions()
     multiSigAction->setToolTip(multiSigAction->statusTip());
     multiSigAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_8));
+    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
 #else
-    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
 #endif
     tabGroup->addAction(multiSigAction);
 
