@@ -503,7 +503,7 @@ UniValue stormnodelist(const UniValue& params, bool fHelp)
                 obj.push_back(Pair(strOutpoint, strAddress));
             } else if (strMode == "full") {
                 std::ostringstream streamFull;
-                streamFull << std::setw(15) <<
+                streamFull << std::setw(18) <<
                                sn.GetStatus() << " " <<
                                sn.nProtocolVersion << " " <<
                                CDarkSilkAddress(sn.pubKeyCollateralAddress.GetID()).ToString() << " " <<

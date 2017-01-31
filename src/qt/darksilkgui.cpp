@@ -91,18 +91,20 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     progressDialog(0),
     appMenuBar(0),
     overviewAction(0),
-    historyAction(0),
-    stormnodeAction(0),
-    quitAction(0),
     sendCoinsAction(0),
     sendCoinsMenuAction(0),
+    receiveCoinsAction(0),
+    receiveCoinsMenuAction(0),
+    historyAction(0),
+    multiSigAction(0),
+    stormnodeAction(0),
+    dnsAction(0),
+    quitAction(0),
     usedSendingAddressesAction(0),
     usedReceivingAddressesAction(0),
     signMessageAction(0),
     verifyMessageAction(0),
     aboutAction(0),
-    receiveCoinsAction(0),
-    receiveCoinsMenuAction(0),
     optionsAction(0),
     toggleHideAction(0),
     encryptWalletAction(0),
@@ -113,7 +115,6 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     openAction(0),
     showHelpMessageAction(0),
     showPrivateSendHelpAction(0),
-    dnsAction(0),
     trayIcon(0),
     trayIconMenu(0),
     dockIconMenu(0),
@@ -121,7 +122,6 @@ DarkSilkGUI::DarkSilkGUI(const PlatformStyle *platformStyle, const NetworkStyle 
     rpcConsole(0),
     helpMessageDialog(0),
     prevBlocks(0),
-    multiSigAction(0),
     spinnerFrame(0),
     platformStyle(platformStyle)
 {
@@ -333,19 +333,30 @@ void DarkSilkGUI::createActions()
 #endif
     tabGroup->addAction(historyAction);
 
+    multiSigAction = new QAction(QIcon(":/icons/" + theme + "/multisig"), tr("&MultiSig"), this);
+    multiSigAction->setStatusTip(tr("Generate and Utilize Multiple Signature Addresses"));
+    multiSigAction->setToolTip(multiSigAction->statusTip());
+    multiSigAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
+#else
+    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+#endif
+    tabGroup->addAction(multiSigAction);
+
 #ifdef ENABLE_WALLET
     stormnodeAction = new QAction(QIcon(":/icons/" + theme + "/stormnodes"), tr("&Stormnodes"), this);
     stormnodeAction->setStatusTip(tr("Browse Stormnodes"));
     stormnodeAction->setToolTip(stormnodeAction->statusTip());
     stormnodeAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    stormnodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
+    stormnodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
 #else
-    stormnodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    stormnodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
 #endif
     tabGroup->addAction(stormnodeAction);    
 
-    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&DNS"), this);
+    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&dDNS"), this);
     dnsAction->setStatusTip(tr("Manage values registered via DarkSilk"));
     dnsAction->setToolTip(dnsAction->statusTip());
     dnsAction->setCheckable(true);
@@ -355,17 +366,6 @@ void DarkSilkGUI::createActions()
     dnsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
 #endif
     tabGroup->addAction(dnsAction);
-
-    multiSigAction = new QAction(QIcon(":/icons/" + theme + "/multisig"), tr("&MultiSig"), this);
-    multiSigAction->setStatusTip(tr("Generate and Utilize Multiple Signature Addresses"));
-    multiSigAction->setToolTip(multiSigAction->statusTip());
-    multiSigAction->setCheckable(true);
-#ifdef Q_OS_MAC
-    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_8));
-#else
-    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
-#endif
-    tabGroup->addAction(multiSigAction);
 
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
@@ -382,13 +382,13 @@ void DarkSilkGUI::createActions()
     connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
+    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(gotoMultiSigPage()));
+    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(stormnodeAction, SIGNAL(triggered()), this, SLOT(gotoStormnodePage()));
     connect(dnsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dnsAction, SIGNAL(triggered()), this, SLOT(gotoDNSPage()));
-    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(gotoMultiSigPage()));
-	  connect(multiSigAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-  
+
 #endif // ENABLE_WALLET
 
     quitAction = new QAction(QIcon(":/icons/" + theme + "/quit"), tr("E&xit"), this);
@@ -580,9 +580,9 @@ void DarkSilkGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        toolbar->addAction(multiSigAction);
         toolbar->addAction(stormnodeAction);
         toolbar->addAction(dnsAction);
-        toolbar->addAction(multiSigAction);
  
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -700,8 +700,8 @@ void DarkSilkGUI::setWalletActionsEnabled(bool enabled)
     sendCoinsMenuAction->setEnabled(enabled);
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
-	multiSigAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
+    multiSigAction->setEnabled(enabled);
     stormnodeAction->setEnabled(enabled);
     dnsAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
@@ -735,7 +735,13 @@ void DarkSilkGUI::createIconMenu(QMenu *pmenu)
     pmenu->addAction(signMessageAction);
     pmenu->addAction(verifyMessageAction);
     pmenu->addSeparator();
+    pmenu->addAction(overviewAction);
+    pmenu->addAction(sendCoinsAction);
+    pmenu->addAction(receiveCoinsAction);
+    pmenu->addAction(historyAction);
     pmenu->addAction(multiSigAction);
+    pmenu->addAction(stormnodeAction);
+    pmenu->addAction(dnsAction);
 	pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
@@ -866,16 +872,10 @@ void DarkSilkGUI::gotoOverviewPage()
     if (walletFrame) walletFrame->gotoOverviewPage();
 }
 
-void DarkSilkGUI::gotoHistoryPage()
+void DarkSilkGUI::gotoSendCoinsPage(QString addr)
 {
-    historyAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoHistoryPage();
-}
-
-void DarkSilkGUI::gotoStormnodePage()
-{
-    stormnodeAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoStormnodePage();
+    sendCoinsAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoSendCoinsPage(addr);
 }
 
 void DarkSilkGUI::gotoReceiveCoinsPage()
@@ -884,18 +884,29 @@ void DarkSilkGUI::gotoReceiveCoinsPage()
     if (walletFrame) walletFrame->gotoReceiveCoinsPage();
 }
 
-void DarkSilkGUI::gotoSendCoinsPage(QString addr)
+void DarkSilkGUI::gotoHistoryPage()
 {
-    sendCoinsAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoSendCoinsPage(addr);
+    historyAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoHistoryPage();
 }
-
 
 void DarkSilkGUI::gotoMultiSigPage()
 {
     multiSigAction->setChecked(true);
     if (walletFrame) walletFrame->gotoMultiSigPage();
 }
+
+void DarkSilkGUI::gotoStormnodePage()
+{
+    stormnodeAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoStormnodePage();
+}
+
+void DarkSilkGUI::gotoDNSPage()
+{
+    dnsAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoDNSPage();
+} 
 
 void DarkSilkGUI::gotoSignMessageTab(QString addr)
 {
@@ -1473,11 +1484,3 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
     }
 }
 
-void DarkSilkGUI::gotoDNSPage()
-{
-    dnsAction->setChecked(true);
-    if (walletFrame)
-    {
-        walletFrame->gotoDNSPage();
-    }
-} 

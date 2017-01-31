@@ -38,7 +38,6 @@ struct Params {
     uint256 hashGenesisBlock;
     int nStormnodePaymentsStartBlock;
     int nInstantSendKeepLock; // in blocks
-    int nInstantSendReprocessBlocks;
     int nBudgetPaymentsStartBlock;
     int nBudgetPaymentsCycleBlocks;
     int nBudgetPaymentsWindowBlocks;

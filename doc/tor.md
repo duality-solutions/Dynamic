@@ -52,11 +52,11 @@ reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equiv
 config file):
 
 	HiddenServiceDir /var/lib/tor/darksilk-service/
-	HiddenServicePort 31000 127.0.0.1:31000
-	HiddenServicePort 31750 127.0.0.1:31750
+	HiddenServicePort 31600 127.0.0.1:31600
+	HiddenServicePort 31700 127.0.0.1:31700
 
 The directory can be different of course, but (both) port numbers should be equal to
-your darksilkd's P2P listen port (31000 by default).
+your darksilkd's P2P listen port (31600 by default).
 
 	-externalip=X   You can tell darksilk about its publicly reachable address using
 	                this option, and this can be a .onion address. Given the above
@@ -86,20 +86,9 @@ specify:
 
 	./darksilkd ... -discover
 
-and open port 31000 on your firewall (or use -upnp).
+and open port 31600 on your firewall (or use -upnp).
 
 If you only want to use Tor to reach onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:
 
 	./darksilkd -onion=127.0.0.1:9050 -externalip=ssapp53tmftyjmjb.onion -discover
-
-
-3. List of known darksilk Tor relays
-------------------------------------
-
-* [drktalkwaybgxnoq.onion](http://drktalkwaybgxnoq.onion/)
-* [drkcoinooditvool.onion](http://drkcoinooditvool.onion/)
-* [darkcoxbtzggpmcc.onion](http://darkcoxbtzggpmcc.onion/)
-* [ssapp53tmftyjmjb.onion](http://ssapp53tmftyjmjb.onion/)
-* [j2dfl3cwxyxpbc7s.onion](http://j2dfl3cwxyxpbc7s.onion/)
-* [vf6d2mxpuhh2cbxt.onion](http://vf6d2mxpuhh2cbxt.onion/)

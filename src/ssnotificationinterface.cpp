@@ -5,6 +5,7 @@
 
 #include "ssnotificationinterface.h"
 #include "sandstorm.h"
+#include "instantx.h"
 #include "governance.h"
 #include "stormnodeman.h"
 #include "stormnode-payments.h"
@@ -22,7 +23,13 @@ void CSSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
 {
     snodeman.UpdatedBlockTip(pindex);
     sandStormPool.UpdatedBlockTip(pindex);
+    instantsend.UpdatedBlockTip(pindex);
     snpayments.UpdatedBlockTip(pindex);
     governance.UpdatedBlockTip(pindex);
     stormnodeSync.UpdatedBlockTip(pindex);
+}
+
+void CSSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
+{
+    instantsend.SyncTransaction(tx, pblock);
 }
