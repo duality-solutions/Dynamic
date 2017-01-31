@@ -1701,23 +1701,41 @@ void ThreadSnbRequestConnections()
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
         return;
 
-    int nTick = 0;
     while (true)
     {
         MilliSleep(1000);
-        nTick++;
 
         CSemaphoreGrant grant(*semStormnodeOutbound);
         boost::this_thread::interruption_point();
 
-        std::pair<CService, uint256> p = snodeman.PopScheduledSnbRequestConnection();
-        if(p.first == CService()) continue;
-        CNode* pnode = ConnectNode(CAddress(p.first), NULL, true);
-        if(pnode) {
-            grant.MoveTo(pnode->grantStormnodeOutbound);
-            if(p.second != uint256())
-                snodeman.AskForSnb(pnode, p.second);
+        std::pair<CService, std::set<uint256> > p = snodeman.PopScheduledSnbRequestConnection();
+        if(p.first == CService() || p.second.empty()) continue;
+
+        CNode* pnode = NULL;
+        {
+            LOCK(cs_vNodes);
+            pnode = ConnectNode(CAddress(p.first), NULL, true);
+            if(!pnode) continue;
+            pnode->AddRef();
         }
+
+        grant.MoveTo(pnode->grantStormnodeOutbound);
+
+        // compile request vector
+        std::vector<CInv> vToFetch;
+        std::set<uint256>::iterator it = p.second.begin();
+        while(it != p.second.end()) {
+            if(*it != uint256()) {
+                vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, *it));
+                LogPrint("Stormnode", "ThreadSnbRequestConnections -- asking for snb %s from addr=%s\n", it->ToString(), p.first.ToString());
+            }
+            ++it;
+        }
+
+        // ask for data
+        pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
+
+        pnode->Release();
     }
 }
 

@@ -106,6 +106,7 @@ private:
 
     static const int SNB_RECOVERY_QUORUM_TOTAL      = 10;
     static const int SNB_RECOVERY_QUORUM_REQUIRED   = 10;
+    static const int SNB_RECOVERY_MAX_ASK_ENTRIES   = 10;
     static const int SNB_RECOVERY_WAIT_SECONDS      = 60;
     static const int SNB_RECOVERY_RETRY_SECONDS     = 3 * 60 * 60;
 
@@ -298,7 +299,7 @@ public:
     CStormnode* GetStormnodeByRank(int nRank, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
 
     void ProcessStormnodeConnections();
-    std::pair<CService, uint256> PopScheduledSnbRequestConnection();
+    std::pair<CService, std::set<uint256> > PopScheduledSnbRequestConnection();
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
 
