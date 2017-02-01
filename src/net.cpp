@@ -393,6 +393,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         if (IsLocal(addrConnect) && !fConnectToStormnode)
             return NULL;
 
+        LOCK(cs_vNodes);
         // Look for an existing connection
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
@@ -400,8 +401,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
             // we have existing connection to this node but it was not a connection to Stormnodes,
             // change flag and add reference so that we can correctly clear it later
             if(fConnectToStormnode && !pnode->fStormnode) {
-                pnode->fStormnode = true;
                 pnode->AddRef();
+                pnode->fStormnode = true;
             }
             return pnode;
         }
@@ -429,15 +430,13 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         // Add node
         CNode* pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false, true);
 
-        {
-            LOCK(cs_vNodes);
-            vNodes.push_back(pnode);
-        }
+        LOCK(cs_vNodes);
+        vNodes.push_back(pnode);
 
         pnode->nTimeConnected = GetTime();
         if(fConnectToStormnode) {
-            pnode->fStormnode = true;
             pnode->AddRef();
+            pnode->fStormnode = true;
         }
 
         return pnode;
