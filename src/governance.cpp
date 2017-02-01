@@ -114,7 +114,11 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if (!stormnodeSync.IsSynced()) return;
 
         uint256 nProp;
+        CBloomFilter filter;
+
         vRecv >> nProp;
+        vRecv >> filter;
+        filter.UpdateEmptyFull();
 
         if(nProp == uint256()) {
             if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::SNGOVERNANCESYNC)) {
@@ -126,7 +130,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::SNGOVERNANCESYNC);
         }
 
-        Sync(pfrom, nProp);
+        Sync(pfrom, nProp, filter);
         LogPrint("gobject", "SNGOVERNANCESYNC -- syncing governance objects to our peer at %s\n", pfrom->addr.ToString());
 
     }
@@ -638,11 +642,14 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
         LogPrint("gobject", "CGovernanceManager::ConfirmInventoryRequest added inv to requested set\n");
     }
 
+    // Keep sync alive
+    stormnodeSync.AddedGovernanceItem();
+
     LogPrint("gobject", "CGovernanceManager::ConfirmInventoryRequest reached end, returning true\n");
     return true;
 }
 
-void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
+void CGovernanceManager::Sync(CNode* pfrom, const uint256& nProp, const CBloomFilter& filter)
 {
 
     /*
@@ -707,7 +714,10 @@ void CGovernanceManager::Sync(CNode* pfrom, uint256 nProp)
                 if(!vecVotes[i].IsValid(true)) {
                     continue;
                 }
-                pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT_VOTE, vecVotes[i].GetHash()));
+                if(filter.contains(vecVotes[i].GetHash())) {
+                    continue;
+                }
+                 pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT_VOTE, vecVotes[i].GetHash()));
                 ++nVoteCount;
             }
         }
@@ -923,13 +933,28 @@ void CGovernanceManager::CheckStormnodeOrphanObjects()
     fRateChecksEnabled = true;
 }
 
-void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nHash)
+void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nHash, bool fUseFilter)
 {
     if(!pfrom) {
         return;
     }
 
-    pfrom->PushMessage(NetMsgType::SNGOVERNANCESYNC, nHash);
+    CBloomFilter filter;
+    filter.clear();
+
+    if(fUseFilter) {
+        CGovernanceObject* pObj = FindGovernanceObject(nHash);
+
+        if(pObj) {
+            filter = CBloomFilter(Params().GetConsensus().nGovernanceFilterElements, GOVERNANCE_FILTER_FP_RATE, GetRandInt(999999), BLOOM_UPDATE_ALL);
+            std::vector<CGovernanceVote> vecVotes = pObj->GetVoteFile().GetVotes();
+            for(size_t i = 0; i < vecVotes.size(); ++i) {
+                filter.insert(vecVotes[i].GetHash());
+            }
+        }
+    }
+
+    pfrom->PushMessage(NetMsgType::MNGOVERNANCESYNC, nHash, filter);
 }
 
 void CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
@@ -975,7 +1000,7 @@ void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>&
             vpGovObjsTmp.erase(vpGovObjsTmp.begin() + r);
         }
         LogPrintf("CGovernanceManager::RequestGovernanceObjectVotes -- Requesting votes for %s, peer=%d\n", nHashGovobj.ToString(), pnode->id);
-        RequestGovernanceObject(pnode, nHashGovobj);
+        RequestGovernanceObject(pnode, nHashGovobj, true);
         mapAskedRecently[nHashGovobj] = nNow + mapObjects.size() * 60; // ask again after full cycle
     }
 }
