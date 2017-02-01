@@ -123,7 +123,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if(nProp == uint256()) {
             if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::SNGOVERNANCESYNC)) {
                 // Asking for the whole list multiple times in a short period of time is no good
-                LogPrint("gobject", "MNGOVERNANCESYNC -- peer already asked me for the list\n");
+                LogPrint("gobject", "SNGOVERNANCESYNC -- peer already asked me for the list\n");
                 Misbehaving(pfrom->GetId(), 20);
                 return;
             }
@@ -954,7 +954,7 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
         }
     }
 
-    pfrom->PushMessage(NetMsgType::MNGOVERNANCESYNC, nHash, filter);
+    pfrom->PushMessage(NetMsgType::SNGOVERNANCESYNC, nHash, filter);
 }
 
 void CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
