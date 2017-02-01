@@ -512,7 +512,7 @@ void CStormnodeSync::SendGovernanceSyncRequest(CNode* pnode)
     CBloomFilter filter;
     filter.clear();
 
-    pnode->PushMessage(NetMsgType::MNGOVERNANCESYNC, uint256(), filter);
+    pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256(), filter);
 }
 
 void CStormnodeSync::UpdatedBlockTip(const CBlockIndex *pindex)
