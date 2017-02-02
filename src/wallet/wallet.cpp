@@ -2124,7 +2124,7 @@ CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
     if(nNeedsToAnonymizeBalance > nAnonymizableBalance) nNeedsToAnonymizeBalance = nAnonymizableBalance;
 
     // we should never exceed the pool max
-    if (nNeedsToAnonymizeBalance > PRIVATESEND_POOL_MAX) nNeedsToAnonymizeBalance = PRIVATESEND_POOL_MAX;
+    if (nNeedsToAnonymizeBalance > sandStormPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = sandStormPool.GetMaxPoolAmount();
 
     return nNeedsToAnonymizeBalance;
 }
