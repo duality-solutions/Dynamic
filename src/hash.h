@@ -274,7 +274,7 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     context.m_cost = 1024; // Memory in KB
     context.lanes = 4;    // Degree of Parallelism
     context.threads = 2;  // Threads
-    context.t_cost = 2;   // Iterations
+    context.t_cost = 4;   // Iterations
 
     return argon2_core(&context, Argon2_d);
 }
