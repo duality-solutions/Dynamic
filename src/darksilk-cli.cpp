@@ -218,17 +218,9 @@ UniValue CallRPC(const string& strMethod, const UniValue& params)
     else if (response.body.empty())
         throw runtime_error("no response from server");
 
-    // DarkSilk:   
-    // we get darksilkd output (possibly binary) of .write() that either:
-    // 1) escapes some unicode characters (defined in univalue_escapes.h)
-    // 2) escapes all unicode character as in legacy json_spirit
-    // we must get back the same string byte by byte by invoking .read() with mode=1 or mode=2.
-    // finaly we "return reply" and it gets .write() in upper function
-    int mode = GetBoolArg("-legacyrpc", true) ? 2 : (strMethod.rfind("name_", 0) != std::string::npos ? 1 : 0);
-
     // Parse reply
     UniValue valReply(UniValue::VSTR);
-    if (!valReply.read(response.body, mode))
+    if (!valReply.read(response.body))     
         throw runtime_error("couldn't parse reply from server");
     const UniValue& reply = valReply.get_obj();
     if (reply.empty())

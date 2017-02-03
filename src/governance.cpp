@@ -976,11 +976,11 @@ void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>&
     int nTimeout = 60 * 60;
     size_t nPeersPerHashMax = 3;
 
+    int nMaxObjRequestsPerNode = 1;
     size_t nProjectedVotes = 1;
     if(Params().NetworkIDString() != CBaseChainParams::MAIN) {
-        nProjectedVotes = 2000;
-    }
-    int nMaxObjRequestsPerNode = std::max(1, int(nProjectedVotes / std::max(1, snodeman.size())));
+        nProjectedVotes = 1;
+        nMaxObjRequestsPerNode = std::max(1, int(nProjectedVotes / std::max(1, snodeman.size())));    }
 
     std::vector<CGovernanceObject*> vpGovObjsTmp;
     std::vector<CGovernanceObject*> vpGovObjsTriggersTmp;
