@@ -53,9 +53,12 @@ namespace port {
 
 // Mac OS
 #elif defined(OS_MACOSX)
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < 101200
 inline void MemoryBarrier() {
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < 101200
   OSMemoryBarrier();
+# else
+  atomic_thread_fence(std::memory_order_seq_cst);
+#endif
 }
 #define LEVELDB_HAVE_MEMORY_BARRIER
 #endif
