@@ -61,7 +61,6 @@ inline void MemoryBarrier() {
 #endif
 }
 #define LEVELDB_HAVE_MEMORY_BARRIER
-#endif
 
 // Gcc on x86
 #elif defined(ARCH_CPU_X86_FAMILY) && defined(__GNUC__)
