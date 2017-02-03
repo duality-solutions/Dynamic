@@ -548,7 +548,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                    if (!fvNodesEmpty && !IsInitialBlockDownload() && !stormnodeSync.IsSynced())
                         break;
                     MilliSleep(1000);
                 } while (true);
