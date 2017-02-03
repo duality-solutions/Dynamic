@@ -809,8 +809,8 @@ bool CTxLockRequest::IsValid(bool fRequireUnspent) const
 {
     if(vout.size() < 1) return false;
 
-    if(vin.size() > MAX_INPUTS) {
-        LogPrint("instantsend", "CTxLockRequest::IsValid -- Too many inputs: tx=%s", ToString());
+    if(vin.size() > WARN_MANY_INPUTS) {
+        LogPrint("instantsend", "CTxLockRequest::IsValid -- WARNING: Too many inputs: tx=%s", ToString());
         return false;
     }
 

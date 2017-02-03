@@ -2040,12 +2040,12 @@ CAmount CWallet::GetAnonymizedBalance() const
 
 // Note: calculated including unconfirmed,
 // that's ok as long as we use it for informational purposes only
-double CWallet::GetAverageAnonymizedRounds() const
+float CWallet::GetAverageAnonymizedRounds() const
 {
     if(fLiteMode) return 0;
 
-    double fTotal = 0;
-    double fCount = 0;
+    int nTotal = 0;
+    int nCount = 0;
 
     {
         LOCK2(cs_main, cs_wallet);
@@ -2057,20 +2057,19 @@ double CWallet::GetAverageAnonymizedRounds() const
 
             for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
 
-                CTxIn vin = CTxIn(hash, i);
+                CTxIn txin = CTxIn(hash, i);
 
-                if(IsSpent(hash, i) || IsMine(pcoin->vout[i]) != ISMINE_SPENDABLE || !IsDenominated(vin)) continue;
+                if(IsSpent(hash, i) || IsMine(pcoin->vout[i]) != ISMINE_SPENDABLE || !IsDenominated(txin)) continue;
 
-                int rounds = GetInputPrivateSendRounds(vin);
-                fTotal += (float)rounds;
-                fCount += 1;
+                nTotal += GetInputPrivateSendRounds(txin);
+                nCount++;
             }
         }
     }
 
-    if(fCount == 0) return 0;
+    if(nCount == 0) return 0;
 
-    return fTotal/fCount;
+    return (float)nTotal/nCount;
 }
 
 // Note: calculated including unconfirmed,
@@ -2124,7 +2123,7 @@ CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
     if(nNeedsToAnonymizeBalance > nAnonymizableBalance) nNeedsToAnonymizeBalance = nAnonymizableBalance;
 
     // we should never exceed the pool max
-    if (nNeedsToAnonymizeBalance > PRIVATESEND_POOL_MAX) nNeedsToAnonymizeBalance = PRIVATESEND_POOL_MAX;
+    if (nNeedsToAnonymizeBalance > sandStormPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = sandStormPool.GetMaxPoolAmount();
 
     return nNeedsToAnonymizeBalance;
 }
@@ -2502,9 +2501,6 @@ bool CWallet::SelectCoins(const CAmount& nTargetValue, set<pair<const CWalletTx*
             nValueRet += out.tx->vout[out.i].nValue;
             setCoinsRet.insert(make_pair(out.tx, out.i));
         }
-
-        if(fUseInstantSend && setCoinsRet.size() > CTxLockRequest::MAX_INPUTS)
-            return false;
 
         return (nValueRet >= nTargetValue);
     }
@@ -3160,10 +3156,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                         strFailReason = _("Insufficient funds.");
                     }
                     if (fUseInstantSend) {
-                        size_t nMaxInputs = CTxLockRequest::MAX_INPUTS;
-                        if(setCoins.size() > nMaxInputs) {
-                            strFailReason += " " + strprintf(_("InstantSend doesn't support transactions with more than %d inputs."), nMaxInputs);
-                        } else if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
+                        if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
                             strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
                         } else {
                             // could be not true but most likely that's the reason
