@@ -404,7 +404,6 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
                 pnode->AddRef();
                 pnode->fStormnode = true;
             }
-            pnode->AddRef();
             return pnode;
         }
     }
