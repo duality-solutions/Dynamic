@@ -401,8 +401,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
             // we have existing connection to this node but it was not a connection to Stormnodes,
             // change flag and add reference so that we can correctly clear it later
             if(fConnectToStormnode && !pnode->fStormnode) {
-                pnode->AddRef();
                 pnode->fStormnode = true;
+                pnode->AddRef();
             }
             return pnode;
         }
@@ -429,13 +429,12 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
 
         // Add node
         CNode* pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false, true);
-        pnode->AddRef();
 
         {
             LOCK(cs_vNodes);
             vNodes.push_back(pnode);
         }
-
+        
         pnode->nTimeConnected = GetTime();
         if(fConnectToStormnode) {
             pnode->AddRef();
@@ -482,10 +481,6 @@ void CNode::PushVersion()
     PushMessage(NetMsgType::VERSION, PROTOCOL_VERSION, nLocalServices, nTime, addrYou, addrMe,
                 nLocalHostNonce, strSubVersion, nBestHeight, !GetBoolArg("-blocksonly", DEFAULT_BLOCKSONLY));
 }
-
-
-
-
 
 banmap_t CNode::setBanned;
 CCriticalSection CNode::cs_setBanned;
@@ -756,14 +751,6 @@ int CNetMessage::readData(const char *pch, unsigned int nBytes)
 
     return nCopy;
 }
-
-
-
-
-
-
-
-
 
 // requires LOCK(cs_vSend)
 void SocketSendData(CNode *pnode)
@@ -1307,14 +1294,6 @@ void ThreadSocketHandler()
     }
 }
 
-
-
-
-
-
-
-
-
 #ifdef USE_UPNP
 void ThreadMapPort()
 {
@@ -1428,11 +1407,6 @@ void MapPort(bool)
 }
 #endif
 
-
-
-
-
-
 void ThreadDNSAddressSeed()
 {
     // goal: only query DNS seeds if address need is acute
@@ -1475,17 +1449,6 @@ void ThreadDNSAddressSeed()
 
     LogPrintf("%d addresses found from DNS seeds\n", found);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void DumpAddresses()
 {
@@ -1769,7 +1732,6 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
     return true;
 }
 
-
 void ThreadMessageHandler()
 {
     boost::mutex condition_mutex;
@@ -1832,11 +1794,6 @@ void ThreadMessageHandler()
             messageHandlerCondition.timed_wait(lock, boost::posix_time::microsec_clock::universal_time() + boost::posix_time::milliseconds(100));
     }
 }
-
-
-
-
-
 
 bool BindListenPort(const CService &addrBind, string& strError, bool fWhitelisted)
 {
