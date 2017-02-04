@@ -404,6 +404,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
                 pnode->AddRef();
                 pnode->fStormnode = true;
             }
+            pnode->AddRef();
             return pnode;
         }
     }
@@ -429,9 +430,12 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
 
         // Add node
         CNode* pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false, true);
+        pnode->AddRef();
 
-        LOCK(cs_vNodes);
-        vNodes.push_back(pnode);
+        {
+            LOCK(cs_vNodes);
+            vNodes.push_back(pnode);
+        }
 
         pnode->nTimeConnected = GetTime();
         if(fConnectToStormnode) {
