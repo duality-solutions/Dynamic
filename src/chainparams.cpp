@@ -125,7 +125,7 @@ public:
         consensus.powLimit = uint256S("0000ffffff000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // DarkSilk: 24 hours
         consensus.nPowTargetSpacing = 2 * 64; // DarkSilk: 128 seconds
-        consensus.fPowAllowMinDifficultyBlocks = true;
+        consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 641; // 95% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 675; // nPowTargetTimespan / nPowTargetSpacing

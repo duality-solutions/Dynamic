@@ -669,7 +669,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DarkSilkMiner -- terminated\n");
-        throw;
+        return;
     }
     catch (const std::runtime_error &e)
     {
