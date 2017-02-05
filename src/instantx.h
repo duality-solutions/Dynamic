@@ -21,7 +21,7 @@ static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
 
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 60800;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 60900;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -109,7 +109,7 @@ private:
     int64_t nTimeCreated;
 
 public:
-    static const int MAX_INPUTS             = 10;
+    static const int WARN_MANY_INPUTS       = 100;
 
     CTxLockRequest() :
         CTransaction(),

@@ -548,7 +548,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                    if (!fvNodesEmpty && !IsInitialBlockDownload() && !stormnodeSync.IsSynced())
                         break;
                     MilliSleep(1000);
                 } while (true);
@@ -669,7 +669,7 @@ void static DarkSilkMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DarkSilkMiner -- terminated\n");
-        throw;
+        return;
     }
     catch (const std::runtime_error &e)
     {

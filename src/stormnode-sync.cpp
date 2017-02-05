@@ -343,8 +343,7 @@ void CStormnodeSync::ProcessTick()
             } else if(nRequestedStormnodeAttempt < 6) {
                 int nSnCount = snodeman.CountStormnodes();
                 pnode->PushMessage(NetMsgType::STORMNODEPAYMENTSYNC, nSnCount); //sync payment votes
-                uint256 n = uint256();
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, n); //sync Stormnode votes
+                SendGovernanceSyncRequest(pnode);
             } else {
                 nRequestedStormnodeAssets = STORMNODE_SYNC_FINISHED;
             }
@@ -497,7 +496,7 @@ void CStormnodeSync::ProcessTick()
                 if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
                 nRequestedStormnodeAttempt++;
 
-                pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256()); //sync Stormnode votes
+                SendGovernanceSyncRequest(pnode);
 
                 ReleaseNodes(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
@@ -506,6 +505,14 @@ void CStormnodeSync::ProcessTick()
     }
     // looped through all nodes, release them
     ReleaseNodes(vNodesCopy);
+}
+
+void CStormnodeSync::SendGovernanceSyncRequest(CNode* pnode)
+{
+    CBloomFilter filter;
+    filter.clear();
+
+    pnode->PushMessage(NetMsgType::SNGOVERNANCESYNC, uint256(), filter);
 }
 
 void CStormnodeSync::UpdatedBlockTip(const CBlockIndex *pindex)

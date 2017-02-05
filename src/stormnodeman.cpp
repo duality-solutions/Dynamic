@@ -161,16 +161,6 @@ void CStormnodeMan::AskForSN(CNode* pnode, const CTxIn &vin)
     pnode->PushMessage(NetMsgType::SSEG, vin);
 }
 
-void CStormnodeMan::AskForSnb(CNode* pnode, const uint256 &hash)
-{
-    if(!pnode || hash == uint256()) return;
-
-    LogPrint("stormnode", "CStormnodeMan::AskForSnb -- asking for snb %s from addr=%s\n", hash.ToString(), pnode->addr.ToString());
-    std::vector<CInv> vToFetch;
-    vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, hash));
-    pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
-}
-
 void CStormnodeMan::Check()
 {
     LOCK(cs);
@@ -198,7 +188,8 @@ void CStormnodeMan::CheckAndRemove()
         // Remove spent Stormnodes, prepare structures and make requests to reasure the state of inactive ones
         std::vector<CStormnode>::iterator it = vStormnodes.begin();
         std::vector<std::pair<int, CStormnode> > vecStormnodeRanks;
-        bool fAskedForSnbRecovery = false; // ask for one sn at a time
+        // ask for up to SNB_RECOVERY_MAX_ASK_ENTRIES stormnode entries at a time
+        int nAskForSnbRecovery = SNB_RECOVERY_MAX_ASK_ENTRIES;
         while(it != vStormnodes.end()) {
             CStormnodeBroadcast snb = CStormnodeBroadcast(*it);
             uint256 hash = snb.GetHash();
@@ -214,7 +205,7 @@ void CStormnodeMan::CheckAndRemove()
                 fStormnodesRemoved = true;
             } else {
                 bool fAsk = pCurrentBlockIndex &&
-                            !fAskedForSnbRecovery &&
+                            (nAskForSnbRecovery > 0) &&
                             stormnodeSync.IsSynced() &&
                             it->IsNewStartRequired() &&
                             !IsSnbRecoveryRequested(hash);
@@ -226,7 +217,8 @@ void CStormnodeMan::CheckAndRemove()
                         int nRandomBlockHeight = GetRandInt(pCurrentBlockIndex->nHeight);
                         vecStormnodeRanks = GetStormnodeRanks(nRandomBlockHeight);
                     }
-                    // ask first SNB_RECOVERY_QUORUM_TOTAL sn's we can connect to and we haven't asked recently
+                    bool fAskedForSnbRecovery = false;
+                    // ask first SNB_RECOVERY_QUORUM_TOTAL stormnodes we can connect to and we haven't asked recently
                     for(int i = 0; setRequested.size() < SNB_RECOVERY_QUORUM_TOTAL && i < (int)vecStormnodeRanks.size(); i++) {
                         // avoid banning
                         if(mWeAskedForStormnodeListEntry.count(it->vin.prevout) && mWeAskedForStormnodeListEntry[it->vin.prevout].count(vecStormnodeRanks[i].second.addr)) continue;
@@ -235,6 +227,10 @@ void CStormnodeMan::CheckAndRemove()
                         setRequested.insert(addr);
                         listScheduledSnbRequestConnections.push_back(std::make_pair(addr, hash));
                         fAskedForSnbRecovery = true;
+                    }
+                    if(fAskedForSnbRecovery) {
+                        LogPrint("Stormnode", "CStormnodeMan::CheckAndRemove -- Recovery initiated, Stormnode=%s\n", it->vin.prevout.ToStringShort());
+                        nAskForSnbRecovery--;
                     }
                     // wait for snb recovery replies for SNB_RECOVERY_WAIT_SECONDS seconds
                     mSnbRecoveryRequests[hash] = std::make_pair(GetTime() + SNB_RECOVERY_WAIT_SECONDS, setRequested);
@@ -771,13 +767,31 @@ void CStormnodeMan::ProcessStormnodeConnections()
     }
 }
 
-std::pair<CService, uint256> CStormnodeMan::PopScheduledSnbRequestConnection()
+std::pair<CService, std::set<uint256> > CStormnodeMan::PopScheduledSnbRequestConnection()
 {
     LOCK(cs);
-    if(listScheduledSnbRequestConnections.empty()) return make_pair(CService(), uint256());
-    std::pair<CService, uint256> p = listScheduledSnbRequestConnections.front();
-    listScheduledSnbRequestConnections.pop_front();
-    return p;
+    if(listScheduledSnbRequestConnections.empty()) {
+        return std::make_pair(CService(), std::set<uint256>());
+    }
+
+    std::set<uint256> setResult;
+
+    listScheduledSnbRequestConnections.sort();
+    std::pair<CService, uint256> pairFront = listScheduledSnbRequestConnections.front();
+
+    // squash hashes from requests with the same CService as the first one into setResult
+    std::list< std::pair<CService, uint256> >::iterator it = listScheduledSnbRequestConnections.begin();
+    while(it != listScheduledSnbRequestConnections.end()) {
+        if(pairFront.first == it->first) {
+            setResult.insert(it->second);
+            it = listScheduledSnbRequestConnections.erase(it);
+        } else {
+            // since list is sorted now, we can be sure that there is no more hashes left
+            // to ask for from this addr
+            break;
+        }
+    }
+    return std::make_pair(pairFront.first, setResult);
 }
 
 void CStormnodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)

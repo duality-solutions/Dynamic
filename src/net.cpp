@@ -66,8 +66,8 @@
 using namespace std;
 
 namespace {
-    const int MAX_OUTBOUND_CONNECTIONS = 8;
-    const int MAX_OUTBOUND_STORMNODE_CONNECTIONS = 20;
+    const int MAX_OUTBOUND_CONNECTIONS = 16;
+    const int MAX_OUTBOUND_STORMNODE_CONNECTIONS = 64;
 
     struct ListenSocket {
         SOCKET socket;
@@ -393,6 +393,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         if (IsLocal(addrConnect) && !fConnectToStormnode)
             return NULL;
 
+        LOCK(cs_vNodes);
         // Look for an existing connection
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
@@ -433,11 +434,11 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
             LOCK(cs_vNodes);
             vNodes.push_back(pnode);
         }
-
+        
         pnode->nTimeConnected = GetTime();
         if(fConnectToStormnode) {
-            pnode->fStormnode = true;
             pnode->AddRef();
+            pnode->fStormnode = true;
         }
 
         return pnode;
@@ -480,10 +481,6 @@ void CNode::PushVersion()
     PushMessage(NetMsgType::VERSION, PROTOCOL_VERSION, nLocalServices, nTime, addrYou, addrMe,
                 nLocalHostNonce, strSubVersion, nBestHeight, !GetBoolArg("-blocksonly", DEFAULT_BLOCKSONLY));
 }
-
-
-
-
 
 banmap_t CNode::setBanned;
 CCriticalSection CNode::cs_setBanned;
@@ -754,14 +751,6 @@ int CNetMessage::readData(const char *pch, unsigned int nBytes)
 
     return nCopy;
 }
-
-
-
-
-
-
-
-
 
 // requires LOCK(cs_vSend)
 void SocketSendData(CNode *pnode)
@@ -1305,14 +1294,6 @@ void ThreadSocketHandler()
     }
 }
 
-
-
-
-
-
-
-
-
 #ifdef USE_UPNP
 void ThreadMapPort()
 {
@@ -1426,11 +1407,6 @@ void MapPort(bool)
 }
 #endif
 
-
-
-
-
-
 void ThreadDNSAddressSeed()
 {
     // goal: only query DNS seeds if address need is acute
@@ -1473,17 +1449,6 @@ void ThreadDNSAddressSeed()
 
     LogPrintf("%d addresses found from DNS seeds\n", found);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void DumpAddresses()
 {
@@ -1701,23 +1666,41 @@ void ThreadSnbRequestConnections()
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
         return;
 
-    int nTick = 0;
     while (true)
     {
         MilliSleep(1000);
-        nTick++;
 
         CSemaphoreGrant grant(*semStormnodeOutbound);
         boost::this_thread::interruption_point();
 
-        std::pair<CService, uint256> p = snodeman.PopScheduledSnbRequestConnection();
-        if(p.first == CService()) continue;
-        CNode* pnode = ConnectNode(CAddress(p.first), NULL, true);
-        if(pnode) {
-            grant.MoveTo(pnode->grantStormnodeOutbound);
-            if(p.second != uint256())
-                snodeman.AskForSnb(pnode, p.second);
+        std::pair<CService, std::set<uint256> > p = snodeman.PopScheduledSnbRequestConnection();
+        if(p.first == CService() || p.second.empty()) continue;
+
+        CNode* pnode = NULL;
+        {
+            LOCK2(cs_main, cs_vNodes);
+            pnode = ConnectNode(CAddress(p.first), NULL, true);
+            if(!pnode) continue;
+            pnode->AddRef();
         }
+
+        grant.MoveTo(pnode->grantStormnodeOutbound);
+
+        // compile request vector
+        std::vector<CInv> vToFetch;
+        std::set<uint256>::iterator it = p.second.begin();
+        while(it != p.second.end()) {
+            if(*it != uint256()) {
+                vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, *it));
+                LogPrint("Stormnode", "ThreadSnbRequestConnections -- asking for snb %s from addr=%s\n", it->ToString(), p.first.ToString());
+            }
+            ++it;
+        }
+
+        // ask for data
+        pnode->PushMessage(NetMsgType::GETDATA, vToFetch);
+
+        pnode->Release();
     }
 }
 
@@ -1748,7 +1731,6 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
 
     return true;
 }
-
 
 void ThreadMessageHandler()
 {
@@ -1812,11 +1794,6 @@ void ThreadMessageHandler()
             messageHandlerCondition.timed_wait(lock, boost::posix_time::microsec_clock::universal_time() + boost::posix_time::milliseconds(100));
     }
 }
-
-
-
-
-
 
 bool BindListenPort(const CService &addrBind, string& strError, bool fWhitelisted)
 {

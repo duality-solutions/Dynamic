@@ -189,6 +189,18 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
 
         LogPrint("privatesend", "SSVIN -- txCollateral %s", entry.txCollateral.ToString());
 
+        if(entry.vecTxSSIn.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
+            LogPrintf("SSVIN -- ERROR: too many inputs! %d/%d\n", entry.vecTxSSIn.size(), PRIVATESEND_ENTRY_MAX_SIZE);
+            PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM);
+            return;
+        }
+
+        if(entry.vecTxSSOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
+            LogPrintf("SSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxSSOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
+            PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM);
+            return;
+        }
+
         //do we have the same denominations as the current session?
         if(!IsOutputsCompatibleWithSessionDenom(entry.vecTxSSOut)) {
             LogPrintf("SSVIN -- not compatible with existing transactions!\n");
@@ -236,16 +248,10 @@ void CSandstormPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
                 }
             }
 
-            if(nValueIn > PRIVATESEND_POOL_MAX) {
-                LogPrintf("SSVIN -- more than PrivateSend pool max! nValueIn: %lld, tx=%s", nValueIn, tx.ToString());
-                PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM);
-                return;
-            }
-
-            // Allow lowest denom (at max) as a a fee. Normally shouldn't happen though.
-            // TODO: Or do not allow fees at all?
-            if(nValueIn - nValueOut > vecPrivateSendDenominations.back()) {
-                LogPrintf("SSVIN -- fees are too high! fees: %lld, tx=%s", nValueIn - nValueOut, tx.ToString());
+            // There should be no fee in mixing tx
+            CAmount nFee = nValueIn - nValueOut;
+            if(nFee != 0) {
+                LogPrintf("SSVIN -- there should be no fee in mixing tx! fees: %lld, tx=%s", nFee, tx.ToString());
                 PushStatus(pfrom, STATUS_REJECTED, ERR_FEES);
                 return;
             }
@@ -1651,6 +1657,8 @@ bool CSandstormPool::SubmitDenominate()
 
 bool CSandstormPool::PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxIn>& vecTxInRet, std::vector<CTxOut>& vecTxOutRet)
 {
+    if(!pwalletMain) return false;
+
     if (pwalletMain->IsLocked(true)) {
         strErrorRet = "Wallet locked, unable to create transaction!";
         return false;
@@ -1676,7 +1684,7 @@ bool CSandstormPool::PrepareDenominate(int nMinRounds, int nMaxRounds, std::stri
 
         if nMinRounds >= 0 it means only denominated inputs are going in and coming out
     */
-    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecPrivateSendDenominations.back(), PRIVATESEND_POOL_MAX, vecTxIn, vCoins, nValueIn, nMinRounds, nMaxRounds);
+    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecPrivateSendDenominations.back(), GetMaxPoolAmount(), vecTxIn, vCoins, nValueIn, nMinRounds, nMaxRounds);
     if (nMinRounds >= 0 && !fSelected) {
         strErrorRet = "Can't select current denominated inputs";
         return false;
@@ -1693,11 +1701,11 @@ bool CSandstormPool::PrepareDenominate(int nMinRounds, int nMaxRounds, std::stri
 
     CAmount nValueLeft = nValueIn;
 
-    // Try to add every needed denomination, repeat up to 5-9 times.
+    // Try to add every needed denomination, repeat up to 5-PRIVATESEND_ENTRY_MAX_SIZE times.
     // NOTE: No need to randomize order of inputs because they were
     // initially shuffled in CWallet::SelectCoinsByDenominations already.
     int nStep = 0;
-    int nStepsMax = 5 + GetRandInt(5);
+    int nStepsMax = 5 + GetRandInt(PRIVATESEND_ENTRY_MAX_SIZE-5+1);
     std::vector<int> vecBits;
     if (!GetDenominationsBits(nSessionDenom, vecBits)) {
         strErrorRet = "Incorrect session denom";
@@ -2226,7 +2234,7 @@ std::string CSandstormPool::GetMessageByID(PoolMessage nMessageID)
         case ERR_INVALID_INPUT:         return _("Input is not valid.");
         case ERR_INVALID_SCRIPT:        return _("Invalid script detected.");
         case ERR_INVALID_TX:            return _("Transaction not valid.");
-        case ERR_MAXIMUM:               return _("Value more than PrivateSend pool maximum allows.");
+        case ERR_MAXIMUM:               return _("Entry exceeds maximum size.");
         case ERR_SN_LIST:               return _("Not in the Stormnode list.");
         case ERR_MODE:                  return _("Incompatible mode.");
         case ERR_NON_STANDARD_PUBKEY:   return _("Non-standard public key detected.");

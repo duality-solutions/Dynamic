@@ -60,7 +60,7 @@ std::string CActiveStormnode::GetStateString() const
         case ACTIVE_STORMNODE_INPUT_TOO_NEW:   return "INPUT_TOO_NEW";
         case ACTIVE_STORMNODE_NOT_CAPABLE:     return "NOT_CAPABLE";
         case ACTIVE_STORMNODE_STARTED:         return "STARTED";
-        default:                                return "UNKNOWN";
+        default:                               return "UNKNOWN";
     }
 }
 

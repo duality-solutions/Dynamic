@@ -69,6 +69,8 @@ public:
     void AddedPaymentVote() { nTimeLastPaymentVote = GetTime(); }
     void AddedGovernanceItem() { nTimeLastGovernanceItem = GetTime(); };
 
+    void SendGovernanceSyncRequest(CNode* pnode);
+
     bool IsFailed() { return nRequestedStormnodeAssets == STORMNODE_SYNC_FAILED; }
     bool IsBlockchainSynced(bool fBlockAccepted = false);
     bool IsStormnodeListSynced() { return nRequestedStormnodeAssets > STORMNODE_SYNC_LIST; }
