@@ -824,16 +824,6 @@ bool CStormnodePing::SimpleCheck(int& nDos)
        }
     }
 
-    {
-        LOCK(cs_main);
-        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
-        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: Stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
-            //nDos = 1;
-            return false;
-        }
-    }
-
     LogPrint("Stormnode", "CStormnodePing::CheckAndUpdate -- New ping: Stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
 
     // LogPrintf("snping - Found corresponding sn for vin: %s\n", vin.prevout.ToStringShort());
