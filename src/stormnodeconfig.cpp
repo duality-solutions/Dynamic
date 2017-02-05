@@ -14,7 +14,7 @@
 CStormnodeConfig stormnodeConfig;
 
 void CStormnodeConfig::add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex) {
-    CMasternodeEntry cme(alias, ip, privKey, txHash, outputIndex);
+    CStormnodeEntry cme(alias, ip, privKey, txHash, outputIndex);
     entries.push_back(cme);
 }
 
