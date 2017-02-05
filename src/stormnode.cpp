@@ -251,6 +251,8 @@ void CStormnode::Check(bool fForce)
         LogPrint("Stormnode", "CStormnode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
                 vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
 
+        // Enable once Stormnode network has grown       
+        /*
         if(fWatchdogExpired) {
             nActiveState = STORMNODE_WATCHDOG_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
@@ -258,6 +260,7 @@ void CStormnode::Check(bool fForce)
             }
             return;
         }
+        */
 
         if(!IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
             nActiveState = STORMNODE_EXPIRED;
@@ -292,7 +295,7 @@ bool CStormnode::IsValidNetAddr(CService addrIn)
     // TODO: regtest is fine with any addresses for now,
     // should probably be a bit smarter if one day we start to implement tests for this
     return Params().NetworkIDString() == CBaseChainParams::REGTEST ||
-            (addrIn.IsIPv4() && IsReachable(addrIn) && addrIn.IsRoutable());
+            (addrIn.IsIPv4() && !addrIn.IsIPv6() && IsReachable(addrIn) && addrIn.IsRoutable());
 }
 
 stormnode_info_t CStormnode::GetInfo()
@@ -822,16 +825,6 @@ bool CStormnodePing::SimpleCheck(int& nDos)
             LogPrint("Stormnode", "CStormnodePing::CheckAndUpdate -- Stormnode is completely expired, new start is required, Stormnode=%s\n", vin.prevout.ToStringShort());
             return false;
        }
-    }
-
-    {
-        LOCK(cs_main);
-        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
-        if ((*mi).second && (*mi).second->nHeight < chainActive.Height() - 24) {
-            LogPrintf("CStormnodePing::CheckAndUpdate -- Stormnode ping is invalid, block hash is too old: Stormnode=%s  blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
-            //nDos = 1;
-            return false;
-        }
     }
 
     LogPrint("Stormnode", "CStormnodePing::CheckAndUpdate -- New ping: Stormnode=%s  blockHash=%s  sigTime=%d\n", vin.prevout.ToStringShort(), blockHash.ToString(), sigTime);
