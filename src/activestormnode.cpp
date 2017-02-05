@@ -145,11 +145,9 @@ void CActiveStormnode::ManageStateInitial()
     LogPrint("Stormnode", "CActiveStormnode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
     BOOST_FOREACH(CNode* pnode, vNodes) {
-    if (!pnode->addr.IsIPv4()) {
+    if (pnode->addr.IsIPv6()) {
         // listen option is probably overwritten by smth else, no good
-        nState = ACTIVE_STORMNODE_NOT_CAPABLE;
-        strNotCapableReason = "Stormnodes cannot use IPv6, you must use IPv4 for Stormnode connectivity.";
-        LogPrintf("CActiveStormnode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+        LogPrintf = "Stormnodes cannot use IPv6, you must use IPv4 for Stormnode connectivity.";
         return;
         }
     }
