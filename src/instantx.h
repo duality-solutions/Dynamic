@@ -190,8 +190,8 @@ private:
     std::map<COutPoint, CTxLockVote> mapStormnodeVotes; // stormnode outpoint - vote
 
 public:
-    static const int SIGNATURES_REQUIRED        = 6;
-    static const int SIGNATURES_TOTAL           = 10;
+    static const int SIGNATURES_REQUIRED        = 10;
+    static const int SIGNATURES_TOTAL           = 20;
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),
