@@ -440,6 +440,13 @@ bool CStormnodeBroadcast::Create(std::string strService, std::string strKeyStorm
         return false;
     }
 
+    BOOST_FOREACH(CNode* pnode, vNodes) {
+    if (pnode->addr.IsIPv6()) {
+        LogPrintf("Invalid protocol for Stormnode, only IPv4 is supported.");
+        return false;
+        }
+    }
+
     return Create(txin, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyStormnodeNew, pubKeyStormnodeNew, strErrorRet, snbRet);
 }
 
