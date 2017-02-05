@@ -1093,9 +1093,12 @@ int CGovernanceManager::GetStormnodeIndex(const CTxIn& stormnodeVin)
     LOCK(cs);
     bool fIndexRebuilt = false;
     int nSNIndex = snodeman.GetStormnodeIndex(stormnodeVin, fIndexRebuilt);
-    while(fIndexRebuilt) {
+    if(fIndexRebuilt) {
         RebuildVoteMaps();
         nSNIndex = snodeman.GetStormnodeIndex(stormnodeVin, fIndexRebuilt);
+        if(fIndexRebuilt) {
+            LogPrintf("CGovernanceManager::GetStormnodeIndex -- WARNING: vote map rebuild failed\n");
+        }
     }
     return nSNIndex;
 }
@@ -1105,6 +1108,7 @@ void CGovernanceManager::RebuildVoteMaps()
     for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
         it->second.RebuildVoteMap();
     }
+    snodeman.ClearOldStormnodeIndex();
 }
 
 void CGovernanceManager::AddCachedTriggers()

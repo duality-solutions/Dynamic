@@ -1352,6 +1352,7 @@ std::string CStormnodeMan::ToString() const
             ", peers who asked us for Stormnode list: " << (int)mAskedUsForStormnodeList.size() <<
             ", peers we asked for Stormnode list: " << (int)mWeAskedForStormnodeList.size() <<
             ", entries in Stormnode list we asked for: " << (int)mWeAskedForStormnodeListEntry.size() <<
+            ", stormnode index size: " << indexStormnodes.GetSize() <<
             ", nSsqCount: " << (int)nSsqCount;
 
     return info.str();
