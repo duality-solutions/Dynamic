@@ -109,7 +109,7 @@ bool static LookupIntern(const char *pszName, std::vector<CNetAddr>& vIP, unsign
     struct in6_addr ipv6_addr;
     if (inet_pton(AF_INET6, pszName, &ipv6_addr) > 0) {
         vIP.push_back(CNetAddr(ipv6_addr));
-        return false;
+        return true;
     }
 #else
     ipv4_addr.s_addr = inet_addr(pszName);
@@ -803,7 +803,7 @@ bool CNetAddr::IsLocal() const
    // IPv6 loopback (::1/128)
    static const unsigned char pchLocal[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
    if (memcmp(ip, pchLocal, 16) == 0)
-       return false;
+       return true;
 
    return false;
 }
@@ -865,10 +865,8 @@ enum Network CNetAddr::GetNetwork() const
 
     if (IsTor())
         return NET_TOR;
-    if (IsIPv6())
-        return NET_IPV6;
 
-    return NET_IPV4;
+    return NET_IPV6;
 }
 
 std::string CNetAddr::ToStringIP(bool fUseGetnameinfo) const

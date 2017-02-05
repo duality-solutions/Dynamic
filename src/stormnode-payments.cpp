@@ -550,19 +550,14 @@ bool CStormnodeBlockPayees::HasPayeeWithVotes(CScript payeeIn, int nVotesReq)
 {
     LOCK(cs_vecPayees);
 
-    const Consensus::Params& consensusParams = Params().GetConsensus();
-    
-    if(chainActive.Height() <= consensusParams.nBudgetPaymentsCycleBlocks) {
-        return true;
-    } else if(chainActive.Height() > consensusParams.nBudgetPaymentsCycleBlocks) {
-        BOOST_FOREACH(CStormnodePayee& payee, vecPayees) {
-            if (payee.GetVoteCount() >= nVotesReq && payee.GetPayee() == payeeIn) {
-                return true;
-            }
+    BOOST_FOREACH(CStormnodePayee& payee, vecPayees) {
+        if (payee.GetVoteCount() >= nVotesReq && payee.GetPayee() == payeeIn) {
+            return true;
         }
-        LogPrint("snpayments", "CStormnodeBlockPayees::HasPayeeWithVotes -- ERROR: couldn't find any payee with %d+ votes\n", nVotesReq);
-        return false;
     }
+
+    LogPrint("snpayments", "CStormnodeBlockPayees::HasPayeeWithVotes -- ERROR: couldn't find any payee with %d+ votes\n", nVotesReq);
+    return false;
 }
 
 bool CStormnodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
