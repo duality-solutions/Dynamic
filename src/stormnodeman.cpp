@@ -1352,6 +1352,7 @@ std::string CStormnodeMan::ToString() const
             ", peers who asked us for Stormnode list: " << (int)mAskedUsForStormnodeList.size() <<
             ", peers we asked for Stormnode list: " << (int)mWeAskedForStormnodeList.size() <<
             ", entries in Stormnode list we asked for: " << (int)mWeAskedForStormnodeListEntry.size() <<
+            ", stormnode index size: " << indexStormnodes.GetSize() <<
             ", nSsqCount: " << (int)nSsqCount;
 
     return info.str();
@@ -1389,7 +1390,7 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroad
     LogPrint("Stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Stormnode=%s\n", snb.vin.prevout.ToStringShort());
 
     uint256 hash = snb.GetHash();
-    if(mapSeenStormnodeBroadcast.count(hash) && !snb.fRecovery) { //seen
+    if(stormnodeSync.IsStormnodeListSynced() && mapSeenStormnodeBroadcast.count(hash) && !snb.fRecovery) { //seen
         LogPrint("Stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Stormnode=%s seen\n", snb.vin.prevout.ToStringShort());
         // less then 2 pings left before this SN goes into non-recoverable state, bump sync timeout
         if(GetTime() - mapSeenStormnodeBroadcast[hash].first > STORMNODE_NEW_START_REQUIRED_SECONDS - STORMNODE_MIN_SNP_SECONDS * 2) {
@@ -1421,6 +1422,10 @@ bool CStormnodeMan::CheckSnbAndUpdateStormnodeList(CNode* pfrom, CStormnodeBroad
         return true;
     }
     mapSeenStormnodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), snb)));
+
+    if(!stormnodeSync.IsStormnodeListSynced()) {
+        snb.fRecovery = true;
+    }
 
     LogPrint("Stormnode", "CStormnodeMan::CheckSnbAndUpdateStormnodeList -- Stormnode=%s new\n", snb.vin.prevout.ToStringShort());
 

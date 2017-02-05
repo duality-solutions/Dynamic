@@ -482,6 +482,7 @@ public:
     void Release()
     {
         nRefCount--;
+        assert(nRefCount >= 0);
     }
 
 
