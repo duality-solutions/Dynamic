@@ -147,7 +147,7 @@ void CActiveStormnode::ManageStateInitial()
     BOOST_FOREACH(CNode* pnode, vNodes) {
     if (pnode->addr.IsIPv6()) {
         // listen option is probably overwritten by smth else, no good
-        LogPrintf = "Stormnodes cannot use IPv6, you must use IPv4 for Stormnode connectivity.";
+        LogPrintf("Stormnodes cannot use IPv6, you must use IPv4 for Stormnode connectivity.");
         return;
         }
     }
