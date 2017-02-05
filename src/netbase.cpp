@@ -54,7 +54,7 @@ if (fStormNode){
     boost::to_lower(net);
     if (net == "ipv4") return NET_IPV4;
     if (net == "ipv6") return NET_UNROUTABLE;
-    if (net == "tor" || net == "onion")  return NET_UNROUTABLE;
+    if (net == "tor" || net == "onion")  return NET_TOR;
     return NET_UNROUTABLE;
 } else if (!fStormNode) {
     boost::to_lower(net);
