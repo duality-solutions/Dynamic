@@ -1777,9 +1777,9 @@ bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CM
 
     uint256 hash = SignatureHash(txout.scriptPubKey, txTo, nIn, nHashType);
 
-    //CScript scriptPubKey;
-    //if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
-    //    return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
+    CScript scriptPubKey;
+    if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
+        return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
 
     txnouttype whichType;
     if (!Solver(keystore, txout.scriptPubKey, hash, nHashType, txin.scriptSig, whichType))
