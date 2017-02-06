@@ -348,11 +348,7 @@ enum {
     MSG_TXLOCK_VOTE,
     MSG_SPORK,
     MSG_STORMNODE_PAYMENT_VOTE,
-    MSG_STORMNODE_PAYMENT_BLOCK, // reusing, was MSG_STORMNODE_SCANNING_ERROR previousely, was NOT used in 12.0
-    MSG_BUDGET_VOTE, // depreciated since 12.1
-    MSG_BUDGET_PROPOSAL, // depreciated since 12.1
-    MSG_BUDGET_FINALIZED, // depreciated since 12.1
-    MSG_BUDGET_FINALIZED_VOTE, // depreciated since 12.1
+    MSG_STORMNODE_PAYMENT_BLOCK,
     MSG_STORMNODE_QUORUM, // not implemented
     MSG_STORMNODE_ANNOUNCE,
     MSG_STORMNODE_PING,

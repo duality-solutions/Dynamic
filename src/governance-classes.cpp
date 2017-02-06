@@ -316,8 +316,6 @@ bool CSuperblockManager::IsSuperblockTriggered(int nBlockHeight)
 
         LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- data = %s\n", pObj->GetDataAsString());
 
-        // note : 12.1 - is epoch calculation correct?
-
         if(nBlockHeight != Params().GetConsensus().nSuperblockCycle) {
             LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- block height doesn't match nBlockHeight = %d, blockStart = %d, continuing\n",
                      nBlockHeight,

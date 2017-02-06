@@ -45,11 +45,6 @@ const char *GETSPORKS="getsporks";
 const char *STORMNODEPAYMENTVOTE="snw";
 const char *STORMNODEPAYMENTBLOCK="snwb";
 const char *STORMNODEPAYMENTSYNC="snget";
-const char *SNBUDGETSYNC="snvs"; // depreciated since 12.1
-const char *SNBUDGETVOTE="svote"; // depreciated since 12.1
-const char *SNBUDGETPROPOSAL="sprop"; // depreciated since 12.1
-const char *SNBUDGETFINAL="fbs"; // depreciated since 12.1
-const char *SNBUDGETFINALVOTE="fbvote"; // depreciated since 12.1
 const char *SNQUORUM="sn quorum"; // not implemented
 const char *SNANNOUNCE="snb";
 const char *SNPING="snp";
@@ -81,11 +76,7 @@ static const char* ppszTypeName[] =
     NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
     NetMsgType::STORMNODEPAYMENTVOTE,
-    NetMsgType::STORMNODEPAYMENTBLOCK, // reusing, was SNSCANERROR previousely, was NOT used in 12.0, we need this for inv
-    NetMsgType::SNBUDGETVOTE, // depreciated since 12.1
-    NetMsgType::SNBUDGETPROPOSAL, // depreciated since 12.1
-    NetMsgType::SNBUDGETFINAL, // depreciated since 12.1
-    NetMsgType::SNBUDGETFINALVOTE, // depreciated since 12.1
+    NetMsgType::STORMNODEPAYMENTBLOCK,
     NetMsgType::SNQUORUM, // not implemented
     NetMsgType::SNANNOUNCE,
     NetMsgType::SNPING,
