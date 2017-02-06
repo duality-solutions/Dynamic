@@ -1,5 +1,5 @@
 ---
-name: "darksilk-osx-1.0"
+name: "darksilk-osx-1.0.0.0"
 enable_cache: true
 suites:
 - "trusty"
@@ -26,7 +26,7 @@ remotes:
 - "url": "https://github.com/silknetwork/darksilk-core.git"
   "dir": "darksilk"
 files:
-- "MacOSX10.9.sdk.tar.gz"
+- "MacOSX10.1.sdk.tar.gz"
 script: |
   WRAP_DIR=$HOME/wrapped
   HOSTS="x86_64-apple-darwin11"
