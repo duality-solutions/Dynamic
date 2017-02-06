@@ -100,7 +100,7 @@ private:
 
     static const int LAST_PAID_SCAN_BLOCKS      = 100;
 
-    static const int MIN_POSE_PROTO_VERSION     = 60900;
+    static const int MIN_POSE_PROTO_VERSION     = 70000;
     static const int MAX_POSE_RANK              = 10;
     static const int MAX_POSE_BLOCKS            = 10;
 

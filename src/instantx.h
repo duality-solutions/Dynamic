@@ -21,7 +21,7 @@ static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
 
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 60900;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70000;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
