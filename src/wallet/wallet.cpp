@@ -3079,7 +3079,9 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.BindWallet(this);
     CMutableTransaction txNew;
-    txNew.nVersion = wtxNew.nVersion; // DarkSilk: important for name transactions
+    if (fDDNS) {
+        txNew.nVersion = NAMECOIN_TX_VERSION; // DarkSilk: important for DDNS transactions
+    }
     
     // Discourage fee sniping.
     //
@@ -3325,42 +3327,35 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     }
                 }
                 
-                // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
-                sort(txNew.vin.begin(), txNew.vin.end());
-                sort(txNew.vout.begin(), txNew.vout.end());
+                if (!fDDNS) {
+                    // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
+                    sort(txNew.vin.begin(), txNew.vin.end());
+                    sort(txNew.vout.begin(), txNew.vout.end());
+                }
                 
-                // If there was change output added before, we must update its position now
-                if (nChangePosRet != -1) {
-                    int i = 0;
-                    BOOST_FOREACH(const CTxOut& txOut, txNew.vout)
-                    {
-                        if (txOut == newTxOut)
+                if (!fDDNS) {
+                    // If there was change output added before, we must update its position now
+                    if (nChangePosRet != -1) {
+                        int i = 0;
+                        BOOST_FOREACH(const CTxOut& txOut, txNew.vout)
                         {
-                            nChangePosRet = i;
-                            break;
+                            if (txOut == newTxOut)
+                            {
+                                nChangePosRet = i;
+                                break;
+                            }
+                            i++;
                         }
-                        i++;
                     }
                 }
-
                 // Sign
                 int nIn = 0;
                 CTransaction txNewConst(txNew);
-                if (fDDNS)
-                {
-                    BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
-                    {
-                        // DarkSilk: we sign name tx differently.
-                        // TODO: put back if.  needs wtxPrevDDNS
-                        //if (coin.first == &wtxPrevDDNS && coin.second == nNameTxOut)
-                        {
-                            if (!SignNameSignature(*this, *coin.first, txNew, nIn++))
-                            {
-                                strFailReason = _("Signing transaction failed");
-                                return false;
-                            }
-                        }
-                    }
+                if (fDDNS) {
+                    //if (!SignNameSignature(*this, txNewConst, txNew, nIn++)) {
+                    //    strFailReason = _("Signing transaction failed");
+                    //    return false;
+                    //}
                 }
                 else {
                     BOOST_FOREACH(const CTxIn& txin, txNew.vin)
@@ -3384,9 +3379,11 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
                 // Remove scriptSigs if we used dummy signatures for fee calculation
-                if (!sign) {
-                    BOOST_FOREACH (CTxIn& txin, txNew.vin)
-                        txin.scriptSig = CScript();
+                if (!fDDNS) {
+                    if (!sign) {
+                        BOOST_FOREACH (CTxIn& txin, txNew.vin)
+                            txin.scriptSig = CScript();
+                    }
                 }
 
                 // Embed the constructed transaction data in wtxNew.
