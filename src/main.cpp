@@ -42,7 +42,7 @@
 
 #include "privatesend.h"
 #include "governance.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"

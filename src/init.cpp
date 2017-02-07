@@ -49,7 +49,7 @@
 #include "ssnotificationinterface.h"
 #include "flat-database.h"
 #include "governance.h"
-#include "instantx.h"
+#include "instantsend.h"
 #ifdef ENABLE_WALLET
 #include "keepass.h"
 #endif

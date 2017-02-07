@@ -2368,8 +2368,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2424,8 +2424,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>tout fonds disponible (non recommandé)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>et InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>et InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>en conflit</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/déconnecté (vérifié avec instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/déconnecté (vérifié avec instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/confirmé (verifié avec instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/confirmé (verifié avec instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 confirmations (verifié avec instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 confirmations (verifié avec instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 confirmations</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/déconnecté (vérification d'InstantX en cours - %2 sur %3 signatures)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/déconnecté (vérification d'InstantSend en cours - %2 sur %3 signatures)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/confirmé (vérification d'InstantX en cours - %2 sur %3 signatures)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/confirmé (vérification d'InstantSend en cours - %2 sur %3 signatures)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 confirmations (vérification d'InstantX en cours - %2 sur %3 signatures)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 confirmations (vérification d'InstantSend en cours - %2 sur %3 signatures)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/déconnecté (La vérification d'InstantX a échoué)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/déconnecté (La vérification d'InstantSend a échoué)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/confirmé (La vérification d'InstantX a échoué)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/confirmé (La vérification d'InstantSend a échoué)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Envoyer des pièces</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX ne supporte pas des transferts aussi élevés. Les transactions sont pour le moment limitées à %11 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend ne supporte pas des transferts aussi élevés. Les transactions sont pour le moment limitées à %11 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Dans ce mode -genproclimit contrôle combien de blocs sont générés immédiatement.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX nécessite des entrées avec au moins 6 confirmations, vous devriez attendre quelques minutes avant de réessayer.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend nécessite des entrées avec au moins 6 confirmations, vous devriez attendre quelques minutes avant de réessayer.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3614,16 +3614,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Effacer toutes les transactions du portefeuille et récupère celle qui font partie de la chaine de blocs via -rescan au démarrage</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Désactivez toutes les fonctionnalités liées à DarkSilk (Stormnode, Privatesend, InstantX, Budgetisation) (0-1, par défaut: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Désactivez toutes les fonctionnalités liées à DarkSilk (Stormnode, Privatesend, InstantSend, Budgetisation) (0-1, par défaut: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Distribué sous la licence logicielle MIT, voir le fichier joint COPYING ou &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Activer instantx, montrer les confirmations pour les transactions verrouillées (bool, par defaut: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Activer instantsend, montrer les confirmations pour les transactions verrouillées (bool, par defaut: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
@@ -3912,8 +3912,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte DarkSilk" admin@foo.com
         <translation>L'entrée est invalide.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>Options InstantX :</translation>
+        <source>InstantSend options:</source>
+        <translation>Options InstantSend :</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>

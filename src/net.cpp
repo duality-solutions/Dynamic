@@ -24,7 +24,7 @@
 #include "utilstrencodings.h"
 
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "stormnodeman.h"
 
 #ifdef WIN32

@@ -14,7 +14,7 @@
 #include "wallet/wallet.h"
 
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 
 #include <stdint.h>
 

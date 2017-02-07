@@ -2368,8 +2368,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2424,8 +2424,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>bất kỳ khoản tiền sẵn nào (gợi ý không nên)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>và InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>và InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>xung đột</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/ngắt kết nối (đã được kiểm tra qua instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/ngắt kết nối (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/đã được xác nhận (đã được kiểm tra qua instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/đã được xác nhận (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 xác nhận (đã được kiểm tra qua instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 xác nhận (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 xác nhận</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/mất kết nối (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/mất kết nối (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/được xác nhận (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/được xác nhận (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 xác nhận (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 xác nhận (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/mất kết nối (Thất bại trong việc kiểm tra InstantX)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/mất kết nối (Thất bại trong việc kiểm tra InstantSend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/đã được xác nhận (Thất bại trong việc kiểm tra InstantX)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/đã được xác nhận (Thất bại trong việc kiểm tra InstantSend)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Gửi tiền</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX không hỗ trợ để gửi giá trị lớn đến như vậy. Giới hạn giao dịch hiện tại đến %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend không hỗ trợ để gửi giá trị lớn đến như vậy. Giới hạn giao dịch hiện tại đến %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Chế độ này -genproclimit kiểm soát bao nhiêu khối được sinh tức thời.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX cần đầu vào với ít nhất 6 xác nhận, bạn có thể cần phải đợi vài phút và thử lại.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend cần đầu vào với ít nhất 6 xác nhận, bạn có thể cần phải đợi vài phút và thử lại.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3614,16 +3614,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Xoá hết tất cả các giao dịch ví và chỉ phục hồi những phần đó của blockchain qua -rescan khi khởi động</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Tắt tất cả các chức năng đặc trưng của DarkSilk (Stormnode, Privatesend, InstantX, Lập ngân sách) (0-1, ngầm định: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Tắt tất cả các chức năng đặc trưng của DarkSilk (Stormnode, Privatesend, InstantSend, Lập ngân sách) (0-1, ngầm định: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Phân phối dưới giấy phép phần mềm MIT, hãy xem file COPYING đi kèm hoặc &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Bật InstantX, hiển thị các xác thực cho các giao dịch bị khoá (bool, ngầm định: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Bật InstantSend, hiển thị các xác thực cho các giao dịch bị khoá (bool, ngầm định: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
@@ -3911,8 +3911,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Đầu vào không hợp lệ.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>Tuỳ chọn InstantX:</translation>
+        <source>InstantSend options:</source>
+        <translation>Tuỳ chọn InstantSend:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>

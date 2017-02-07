@@ -5,7 +5,7 @@
 
 #include "ssnotificationinterface.h"
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "governance.h"
 #include "stormnodeman.h"
 #include "stormnode-payments.h"

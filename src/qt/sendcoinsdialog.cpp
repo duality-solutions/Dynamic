@@ -70,11 +70,11 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *platformStyle, QWidget *pa
     QSettings settings;
     if (!settings.contains("bUsePrivateSend"))
         settings.setValue("bUsePrivateSend", false);
-    if (!settings.contains("bUseInstantX"))
-        settings.setValue("bUseInstantX", false);
+    if (!settings.contains("bUseInstantSend"))
+        settings.setValue("bUseInstantSend", false);
 
     bool fUsePrivateSend = settings.value("bUsePrivateSend").toBool();
-    bool fUseInstantSend = settings.value("bUseInstantX").toBool();
+    bool fUseInstantSend = settings.value("bUseInstantSend").toBool();
     if(fLiteMode) {
         ui->checkUsePrivateSend->setChecked(false);
         ui->checkUsePrivateSend->setVisible(false);
@@ -606,7 +606,7 @@ void SendCoinsDialog::updateDisplayUnit()
 void SendCoinsDialog::updateInstantSend()
 {
     QSettings settings;
-    settings.setValue("bUseInstantX", ui->checkUseInstantSend->isChecked());
+    settings.setValue("bUseInstantSend", ui->checkUseInstantSend->isChecked());
     CoinControlDialog::coinControl->fUseInstantSend = ui->checkUseInstantSend->isChecked();
     coinControlUpdateLabels();
 }

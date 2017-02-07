@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -3093,8 +3093,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>and InstantX</source>
-        <translation>and InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>and InstantSend</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -3552,18 +3552,18 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="-31"/>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/offline (verified via instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/offline (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/confirmed (verified via instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/confirmed (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 confirmations (verified via instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 confirmations (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+29"/>
@@ -3583,28 +3583,28 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="-26"/>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/offline (InstantX verification in progress - %2 of %3 signatures)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/offline (InstantX verification failed)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/offline (InstantSend verification failed)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/confirmed (InstantX verification failed)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/confirmed (InstantSend verification failed)</translation>
     </message>
     <message>
         <location line="+32"/>
@@ -4189,8 +4189,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     <message>
         <location line="-20"/>
         <location line="+9"/>
-        <source>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</translation>
+        <source>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -4290,8 +4290,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -4610,8 +4610,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4620,8 +4620,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Enable instantx, show confirmations for locked transactions (bool, default: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4977,8 +4977,8 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+1"/>
-        <source>InstantX options:</source>
-        <translation>InstantX options:</translation>
+        <source>InstantSend options:</source>
+        <translation>InstantSend options:</translation>
     </message>
     <message>
         <location line="+1"/>

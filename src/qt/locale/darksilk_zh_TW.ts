@@ -2340,7 +2340,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>匿名發送</translation>
     </message>
     <message>
-        <source>InstantX</source>
+        <source>InstantSend</source>
         <translation>即時到帳</translation>
     </message>
     <message>
@@ -2380,7 +2380,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>複製找零金額</translation>
     </message>
     <message>
-        <source>and InstantX</source>
+        <source>and InstantSend</source>
         <translation>和 即時到帳</translation>
     </message>
     <message>
@@ -2726,15 +2726,15 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>發生衝突</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
+        <source>%1/offline (verified via instantsend)</source>
         <translation>%1 次/離線 (經即時到帳系統核實)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
+        <source>%1/confirmed (verified via instantsend)</source>
         <translation>%1 次/確認 (經即時到帳系統核實)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
+        <source>%1 confirmations (verified via instantsend)</source>
         <translation>確認 %1 次 (經即時到帳系統核實)</translation>
     </message>
     <message>
@@ -2750,23 +2750,23 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>確認 %1 次</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1 次/離線 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
         <translation>%1 次/已確認 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1 次確認 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
+        <source>%1/offline (InstantSend verification failed)</source>
         <translation>%1 次/離線 (即時到帳系統未能核實)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
+        <source>%1/confirmed (InstantSend verification failed)</source>
         <translation>%1 次/已確認 (即時到帳系統未能核實)</translation>
     </message>
     <message>
@@ -3180,7 +3180,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>付款</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
         <translation>即時到帳系統暫時並不支援這麼高的交易金額。目前的金額僅限於%1 DSLK。</translation>
     </message>
 </context>
@@ -3242,7 +3242,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>當最新區塊改變時要執行的指令(指令中的 %s 會被取代成區塊雜湊值)</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
         <translation>即時到帳系統要求輸入的資金最少要有6個確認，你可能需要等待數分鐘然後再重試。</translation>
     </message>
     <message>
@@ -3582,7 +3582,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>資訊</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
+        <source>InstantSend options:</source>
         <translation>即時到帳選項:</translation>
     </message>
     <message>

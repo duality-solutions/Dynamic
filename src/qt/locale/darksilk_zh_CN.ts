@@ -2365,7 +2365,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>匿名发送</translation>
     </message>
     <message>
-        <source>InstantX</source>
+        <source>InstantSend</source>
         <translation>即时支付</translation>
     </message>
     <message>
@@ -2421,7 +2421,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>全部有效金额(不推荐)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
+        <source>and InstantSend</source>
         <translation>和 即时支付</translation>
     </message>
     <message>
@@ -2771,15 +2771,15 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>发现冲突</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
+        <source>%1/offline (verified via instantsend)</source>
         <translation>%1/下线(经过即时支付系统认证)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
+        <source>%1/confirmed (verified via instantsend)</source>
         <translation>%1/已确认(经过即时支付系统认证)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
+        <source>%1 confirmations (verified via instantsend)</source>
         <translation>%1/确认完成(经过即时支付付系统认证)</translation>
     </message>
     <message>
@@ -2795,23 +2795,23 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 已确认</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1/下线 (即时支付系统正在认证中 - %2 of %3签名数)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
         <translation>%1/已确认 (即时支付系统正在认证中 - %2 of %3签名数)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1/确认完成 (即时支付系统正在认证中 - %2 of %3签名数)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
+        <source>%1/offline (InstantSend verification failed)</source>
         <translation>%1/下线 (即时支付系统认证失败)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
+        <source>%1/confirmed (InstantSend verification failed)</source>
         <translation>%1/已确认 (即时支付系统认证失败)</translation>
     </message>
     <message>
@@ -3257,7 +3257,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>发送达世币</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
         <translation>即时支付功能目前还不支持发送如此高的金额.目前限制在%1 达世币.</translation>
     </message>
 </context>
@@ -3335,7 +3335,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>当最新区块改变时需要执行的命令(命令中的 %s 会被区块哈希值代替)</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
         <translation>即时支付功能需要6步确认，您可以稍后重试。</translation>
     </message>
     <message>
@@ -3531,11 +3531,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>删除钱包里的所有交易信息, 并且在下次启动时, 使用 -rescan 来从区块链中恢复</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
         <translation>禁止所有达世币附加功能(主节点, 匿名发送, 即时发送, 预算) (0-1, default: %u)</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
         <translation>激活即时支付,显示锁定交易的确认数(bool, 默认: %s)</translation>
     </message>
     <message>
@@ -3750,7 +3750,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>输入是无效的。</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
+        <source>InstantSend options:</source>
         <translation>即时支付 选项：</translation>
     </message>
     <message>

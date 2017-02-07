@@ -5,7 +5,7 @@
 
 #include "activestormnode.h"
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "key.h"
 #include "main.h"
 #include "stormnode-sync.h"

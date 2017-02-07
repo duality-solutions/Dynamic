@@ -22,7 +22,7 @@
 #include "wallet/wallet.h"
 
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 

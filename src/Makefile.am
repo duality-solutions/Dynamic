@@ -110,7 +110,7 @@ DARKSILK_CORE_H = \
   httprpc.h \
   httpserver.h \
   init.h \
-  instantx.h \
+  instantsend.h \
   key.h \
   keepass.h \
   keystore.h \
@@ -262,7 +262,7 @@ libdarksilk_wallet_a_SOURCES = \
   privatesend.cpp \
   ssnotificationinterface.cpp \
   privatesend-relay.cpp \
-  instantx.cpp \
+  instantsend.cpp \
   stormnode.cpp \
   stormnode-payments.cpp \
   stormnode-sync.cpp \

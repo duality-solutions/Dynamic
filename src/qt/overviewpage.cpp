@@ -21,7 +21,7 @@
 #include "walletmodel.h"
 
 #include "privatesend.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "privatesendconfig.h"
 #include "stormnode-sync.h"
 

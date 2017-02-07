@@ -2373,8 +2373,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2429,8 +2429,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>kaikkia käytössä olevia varoja (ei suositeltu)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>ja InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>ja InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2783,16 +2783,16 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>ristiriitainen</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/ei yhteyttä (vahvistettu instantx:lla)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/ei yhteyttä (vahvistettu instantsend:lla)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/vahvistettu (vahvistettu instantx:lla)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/vahvistettu (vahvistettu instantsend:lla)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 vahvistusta (vahvistettu instantx:lla)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 vahvistusta (vahvistettu instantsend:lla)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2807,24 +2807,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>%1 vahvistusta</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/ei yhteyttä (vahvistus instantx:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/ei yhteyttä (vahvistus instantsend:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/vahvistettu (vahvistus instantx:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/vahvistettu (vahvistus instantsend:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 vahvistusta (vahvistus instantx:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 vahvistusta (vahvistus instantsend:lla käynnissä - %2 / %3 allekirjoitusta)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/ei yhteyttä (instantx vahvistus epäonnistui)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/ei yhteyttä (instantsend vahvistus epäonnistui)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/vahvistettu (instantx vahvistus epäonnistui)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/vahvistettu (instantsend vahvistus epäonnistui)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3281,8 +3281,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lähetä DarkSilkeja</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX ei tue näin korkeaa lähetysmäärää vielä. Siirtotapahtumat on tällä hetkellä rajoitettu %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend ei tue näin korkeaa lähetysmäärää vielä. Siirtotapahtumat on tällä hetkellä rajoitettu %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3363,8 +3363,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tässä moodissa -genproclimit ohjaa kuinka monta lohkoa luodaan välittömästi.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX vaatii syötteille vähintään 6 vahvistusta, odota muutama minuutti ja yritä uudelleen.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend vaatii syötteille vähintään 6 vahvistusta, odota muutama minuutti ja yritä uudelleen.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3619,16 +3619,16 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Poista kaikki lompakon siirtotapahtumat ja palauta vain nuo osat lohkoketjusta -rescan valinnan avulla käynnistyksessä</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Kytke pois käytöstä kaikki DarkSilk:in erityistoiminnot (Stormnodet, Privatesend, InstantX, Budjetointi) (0-1, oletus: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Kytke pois käytöstä kaikki DarkSilk:in erityistoiminnot (Stormnodet, Privatesend, InstantSend, Budjetointi) (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Levitetään MIT ohjelmistolisenssin alaisuudessa. Tarkemmat tiedot löytyvät tiedostosta COPYING tai osoitteesta &lt;http://www.opensource.org/licenses/mit-license.php&gt;. </translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Ota instantx käyttöön, näytä lukittujen siirtojen vahvistukset (bool, oletus: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Ota instantsend käyttöön, näytä lukittujen siirtojen vahvistukset (bool, oletus: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
@@ -3919,8 +3919,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
         <translation>Syöte ei ole pätevä.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>InstantX valinnat:</translation>
+        <source>InstantSend options:</source>
+        <translation>InstantSend valinnat:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>

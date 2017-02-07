@@ -378,7 +378,7 @@ HEADERS += \
     src/httprpc.h \
     src/httpserver.h \
     src/init.h \
-    src/instantx.h \
+    src/instantsend.h \
     src/keepass.h \
     src/key.h \
     src/keystore.h \
@@ -556,7 +556,7 @@ SOURCES += \
     src/httprpc.cpp \
     src/httpserver.cpp \
     src/init.cpp \
-    src/instantx.cpp \
+    src/instantsend.cpp \
     src/keepass.cpp \
     src/key.cpp \
     src/keystore.cpp \

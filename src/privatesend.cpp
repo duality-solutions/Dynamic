@@ -8,7 +8,7 @@
 #include "consensus/validation.h"
 #include "privatesend.h"
 #include "init.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"

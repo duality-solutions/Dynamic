@@ -2368,8 +2368,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2424,8 +2424,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>всякакви налични средства (не се препоръчва)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>и InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>и InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>конфликтно</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/офлайн(проверено през instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/офлайн(проверено през instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/потвърдени (проверено от instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/потвърдени (проверено от instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 потвърждения (проверено от instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 потвърждения (проверено от instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>включена в %1 блока</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/офлайн (InstantX проверка в процес - %2 of %3 подписани)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/офлайн (InstantSend проверка в процес - %2 of %3 подписани)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/потвърдени (InstantX проверка в процес - %2 of %3 подписани )</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/потвърдени (InstantSend проверка в процес - %2 of %3 подписани )</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 потвърждения (InstantX проверка в процес - %2 of %3 подписвания)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 потвърждения (InstantSend проверка в процес - %2 of %3 подписвания)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/офлайн (InstantX проверката е неуспешна)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/офлайн (InstantSend проверката е неуспешна)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/потвърдени (InstantX проверката е неуспешна)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/потвърдени (InstantSend проверката е неуспешна)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Изпращане</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX не поддържа изпращане на толкова големи суми. Транзакциите са ограничени до %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend не поддържа изпращане на толкова големи суми. Транзакциите са ограничени до %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>В този режим -genproclimit се контролира колко блока са генерирани моментално.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX изисква средства с поне 10 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend изисква средства с поне 10 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3614,16 +3614,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Изтриване на всички транзакции на портфейла и  възстановява само тези части на блок веригата чрез -rescan при стартиране</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Изключване на всички специфични DarkSilk функции (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, по подразбиране: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Изключване на всички специфични DarkSilk функции (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, по подразбиране: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Разпространява се под MIT софтуерен лиценз,вижте придружаващият файл COPYING или&lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Включен instantx,покажи потвърждения за заключени транзакции (bool, по подразбиране: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Включен instantsend,покажи потвърждения за заключени транзакции (bool, по подразбиране: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
@@ -3903,8 +3903,8 @@ for example: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Въвеждането е невалидно.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>InstantX опции:</translation>
+        <source>InstantSend options:</source>
+        <translation>InstantSend опции:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>

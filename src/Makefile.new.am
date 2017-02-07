@@ -120,7 +120,7 @@ DARKSILK_CORE_H = \
   httprpc.h \
   httpserver.h \
   init.h \
-  instantx.h \
+  instantsend.h \
   key.h \
   keepass.h \
   keystore.h \
@@ -262,7 +262,7 @@ libdarksilk_wallet_a_SOURCES = \
   governance-classes.cpp \
   governance-keys.cpp \
   governance-vote.cpp \
-  instantx.cpp \
+  instantsend.cpp \
   stormnode.cpp \
   stormnodeconfig.cpp \
   stormnode-payments.cpp \

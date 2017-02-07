@@ -11,7 +11,7 @@
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "keystore.h"
 #include "main.h"
 #include "merkleblock.h"

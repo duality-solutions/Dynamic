@@ -31,7 +31,7 @@
 
 #include "privatesend.h"
 #include "governance.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "keepass.h"
 #include "spork.h"
 

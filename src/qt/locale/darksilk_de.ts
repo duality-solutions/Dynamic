@@ -2367,8 +2367,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2423,8 +2423,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>beliebiger verfügbarer Coins (nicht empfohlen)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>und InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>und InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>in Konflikt stehend</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/offline (Überprüft durch InstantX)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/offline (Überprüft durch InstantSend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/bestätigt (Überprüft durch InstantX)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/bestätigt (Überprüft durch InstantSend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 Bestätigungen (Überprüft durch InstantX)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 Bestätigungen (Überprüft durch InstantSend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>%1 Bestätigungen</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/offline (Überprüfung durch InstantX - %2 von %3 Signaturen)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/offline (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/bestätigt (Überprüfung durch InstantX - %2 von %3 Signaturen)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/bestätigt (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 Bestätigungen (Überprüfung durch InstantX - %2 von %3 Signaturen)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 Bestätigungen (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/offline (Überprüfung durch InstantX fehlgeschlagen)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/offline (Überprüfung durch InstantSend fehlgeschlagen)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/bestätigt (Überprüfung durch InstantX fehlgeschlagen)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/bestätigt (Überprüfung durch InstantSend fehlgeschlagen)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3276,8 +3276,8 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>DSLK überweisen</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX unterstützt das Versenden von Beträgen dieser Höhe noch nicht. Transaktionen sind zur Zeit auf maximal %1 DSLK begrenzt.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend unterstützt das Versenden von Beträgen dieser Höhe noch nicht. Transaktionen sind zur Zeit auf maximal %1 DSLK begrenzt.</translation>
     </message>
 </context>
 <context>
@@ -3358,8 +3358,8 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>In diesem Modus legt -genproclimit fest, wie viele Blöcke sofort erzeugt werden.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX benötigt Zahlungseingänge mit mindestens 10 Bestätigungen, warten Sie also ein paar Minuten und versuchen Sie es dann erneut.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend benötigt Zahlungseingänge mit mindestens 10 Bestätigungen, warten Sie also ein paar Minuten und versuchen Sie es dann erneut.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3614,16 +3614,16 @@ Dies kann passieren, wenn einige DSLK aus ihrer Wallet bereits ausgegeben wurden
         <translation>Lösche alle Wallet-Transaktionen stelle nur diese mittels -rescan beim nächsten Start des Wallets wieder her.</translation>
     </message>
     <message>
-        <source>Disable all DSLK specific functionality (stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Deaktiviere all DSLK-spezifischen Funktionen (stormnodes, Privatesend, InstantX, Budgeting) (0-1, Standard: %u)</translation>
+        <source>Disable all DSLK specific functionality (stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Deaktiviere all DSLK-spezifischen Funktionen (stormnodes, Privatesend, InstantSend, Budgeting) (0-1, Standard: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Unter MIT Software Lizenz zur Verfügung gestellt, siehe beigefügte Datei COPYING oder &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Aktiviere InstantX, zeige Bestätigungen für gesperrte Transaktionen an (bool, Standard: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Aktiviere InstantSend, zeige Bestätigungen für gesperrte Transaktionen an (bool, Standard: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
@@ -3912,8 +3912,8 @@ DSLK Core wird heruntergefahren.</translation>
         <translation>Eintrag ist nicht gültig.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>InstantX Optionen:</translation>
+        <source>InstantSend options:</source>
+        <translation>InstantSend Optionen:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
