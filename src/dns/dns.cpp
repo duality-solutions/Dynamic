@@ -231,19 +231,28 @@ bool IsNameFeeEnough(const CTransaction& tx, const NameTxInfo& nti, const CBlock
 {
     // scan last 10 PoW block for tx fee that matches the one specified in tx
     const CBlockIndex* lastPoW = GetLastBlockIndex(pindexBlock);
-    //LogPrintf("IsNameFeeEnough(): pindexBlock->nHeight = %d, op = %s, nameSize = %lu, valueSize = %lu, nRentalDays = %d, txFee = %"PRI64d"\n",
-    //       lastPoW->nHeight, nameFromOp(nti.op), nti.name.size(), nti.value.size(), nti.nRentalDays, txFee);
+    if (lastPoW == NULL) {
+        LogPrintf("IsNameFeeEnough(): Error finding lastPoW using GetLastBlockIndex(pindexBlock)");
+        return false;
+    }
+    //LogPrintf("IsNameFeeEnough(): pindexBlock->nHeight = %d, nameSize = %lu, valueSize = %lu, nRentalDays = %d, txFee = %d\n",
+    //       lastPoW->nHeight, nti.name.size(), nti.value.size(), nti.nRentalDays, txFee);
     bool txFeePass = false;
     for (int i = 1; i <= 10; i++)
     {
         CAmount netFee = GetNameOpFee(nti.nRentalDays, nti.op);
-        //LogPrintf("                 : netFee = %"PRI64d", lastPoW->nHeight = %d\n", netFee, lastPoW->nHeight);
+        //LogPrintf("dDNS Operation: netFee = %d, lastPoW->nHeight = %d\n", netFee, lastPoW->nHeight);
         if (txFee >= netFee)
         {
             txFeePass = true;
             break;
         }
-        lastPoW = GetLastBlockIndex(lastPoW->pprev);
+        if (lastPoW != NULL) {
+            lastPoW = GetLastBlockIndex(lastPoW->pprev);
+        }
+        else {
+            i = 11;
+        }
     }
     return txFeePass;
 }
@@ -1765,7 +1774,7 @@ bool CNameDB::DumpToTextFile()
     return true;
 }
 
-bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType)
+bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, const unsigned int nIn, const CScript& scriptDDNS, const int nHashType)
 {
     assert(nIn < txTo.vin.size());
     CTxIn& txin = txTo.vin[nIn];
@@ -1775,10 +1784,10 @@ bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CM
     // Leave out the signature from the hash, since a signature can't sign itself.
     // The checksig op will also drop the signatures from its hash.
 
-    uint256 hash = SignatureHash(txout.scriptPubKey, txTo, nIn, nHashType);
+    uint256 hash = SignatureHash(scriptDDNS, txTo, nIn, nHashType);
 
     CScript scriptPubKey;
-    if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
+    if (!RemoveNameScriptPrefix(scriptDDNS, scriptPubKey))
         return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
 
     txnouttype whichType;
