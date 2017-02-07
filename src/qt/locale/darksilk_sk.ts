@@ -3357,8 +3357,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>V tomto móde -genproclimit kontroluje počet blokov, ktoré sú vygenerované okamžite.</translation>
     </message>
     <message>
-        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend vyžaduje vstupy s aspoň 6 potvrdeniami, môžete počkať pár minút a skúsiť znova.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend vyžaduje vstupy s aspoň 10 potvrdeniami, môžete počkať pár minút a skúsiť znova.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>

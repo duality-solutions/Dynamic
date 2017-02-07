@@ -2694,8 +2694,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>I detta läge kontrollerar -genproclimit hur många block som genereras omedelbart.</translation>
     </message>
     <message>
-        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend kräver indatan med åtminstone 6 bekräftelser. Du kanske måste vänta ett par minuter och försöka igen.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend kräver indatan med åtminstone 10 bekräftelser. Du kanske måste vänta ett par minuter och försöka igen.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>

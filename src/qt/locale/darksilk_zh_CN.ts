@@ -3335,7 +3335,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>当最新区块改变时需要执行的命令(命令中的 %s 会被区块哈希值代替)</translation>
     </message>
     <message>
-        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
         <translation>即时支付功能需要6步确认，您可以稍后重试。</translation>
     </message>
     <message>
