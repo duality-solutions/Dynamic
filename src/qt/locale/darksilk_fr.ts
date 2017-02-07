@@ -2284,12 +2284,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Minimiser</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Si les frais personnalisés sont à 1000 duffs et que la transaction fait seulement 250 octets, alors "par kilooctet" payera seulement 250 duffs de frais,&lt;br /&gt;alors que "au moins" payera 1000 duffs. Pour les transactions de plus d'un kilooctet les deux payeront par kilooctet.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Si les frais personnalisés sont à 1000 satoshis et que la transaction fait seulement 250 octets, alors "par kilooctet" payera seulement 250 satoshis de frais,&lt;br /&gt;alors que "au moins" payera 1000 satoshis. Pour les transactions de plus d'un kilooctet les deux payeront par kilooctet.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Si les frais personnalisés sont à 1000 duffs et que la transaction fait seulement 250 octets, alors "par kilooctet" payera seulement 250 duffs de frais,&lt;br /&gt;alors que "total au moins" payera 1000 duffs. Pour les transactions de plus d'un kilooctet les deux payeront par kilooctet.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Si les frais personnalisés sont à 1000 satoshis et que la transaction fait seulement 250 octets, alors "par kilooctet" payera seulement 250 satoshis de frais,&lt;br /&gt;alors que "total au moins" payera 1000 satoshis. Pour les transactions de plus d'un kilooctet les deux payeront par kilooctet.</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>

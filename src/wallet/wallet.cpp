@@ -56,7 +56,7 @@ const char * DEFAULT_WALLET_DAT = "wallet.dat";
 const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
 
 /** 
- * Fees smaller than this (in duffs) are considered zero fee (for transaction creation)
+ * Fees smaller than this (in satoshis) are considered zero fee (for transaction creation)
  * Override with -mintxfee
  */
 CFeeRate CWallet::minTxFee = CFeeRate(DEFAULT_TRANSACTION_MINFEE);

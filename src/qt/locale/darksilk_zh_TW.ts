@@ -2256,12 +2256,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>縮小</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>如果自訂手續費設定為 1000 duffs ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 duffs 的手續費，&lt;br /&gt;而「至少」會支付 1000 duffs。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自訂手續費設定為 1000 satoshis ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 satoshis 的手續費，&lt;br /&gt;而「至少」會支付 1000 satoshis。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>如果自訂手續費設定為 1000 duffs ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 duffs 的手續費，&lt;br /&gt;而「總共至少」會支付 1000 duffs。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自訂手續費設定為 1000 satoshis ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 satoshis 的手續費，&lt;br /&gt;而「總共至少」會支付 1000 satoshis。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
