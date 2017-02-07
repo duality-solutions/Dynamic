@@ -4290,8 +4290,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</translation>
     </message>
     <message>
         <location line="+17"/>

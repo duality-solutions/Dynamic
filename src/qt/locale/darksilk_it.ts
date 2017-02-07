@@ -3196,8 +3196,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>In questa modalità -genproclimit determina quanti blocchi saranno generati immediatamente.</translation>
     </message>
     <message>
-        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend richiede input con almeno 6 conferme, potrebbe essere necessario attendere qualche minuto e poi riprovare.</translation>
+        <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend richiede input con almeno 10 conferme, potrebbe essere necessario attendere qualche minuto e poi riprovare.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
