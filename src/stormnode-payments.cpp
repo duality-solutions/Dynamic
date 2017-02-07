@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance-classes.h"
 #include "policy/fees.h"
 #include "stormnode-payments.h"
@@ -438,12 +438,12 @@ bool CStormnodePaymentVote::Sign()
                 boost::lexical_cast<std::string>(nBlockHeight) +
                 ScriptToAsmStr(payee);
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, activeStormnode.keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, activeStormnode.keyStormnode)) {
         LogPrintf("CStormnodePaymentVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CStormnodePaymentVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -804,7 +804,7 @@ bool CStormnodePaymentVote::CheckSignature(const CPubKey& pubKeyStormnode, int n
                 ScriptToAsmStr(payee);
 
     std::string strError = "";
-    if (!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if (!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         // Only ban for future block vote when we are already synced.
         // Otherwise it could be the case when SN which signed this vote is using another key now
         // and we have no idea about the old one.

@@ -740,8 +740,8 @@ Adresa: %4</translation>
         <translation>Kopírovať zmenu</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;Sandstorm bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť Sandstorm, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite Sandstorm začiarkavacie políčko.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;Privatesend bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť Privatesend, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite Privatesend začiarkavacie políčko.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -841,10 +841,10 @@ Adresa: %4</translation>
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Konfigurovať Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Konfigurovať Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -891,20 +891,20 @@ Adresa: %4</translation>
         <translation>Toto je najpomalšia a najviac bezpečná možnosť. Použitie maximálnej anonymity bude stáť</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Konfigurácia Sandstorm</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Konfigurácia Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky DarkSilk.</translation>
     </message>
 </context>
 <context>
@@ -1145,12 +1145,12 @@ Adresa: %4</translation>
         <translation>(0 = auto, &lt;0 = nechať toľko jadier voľných)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Použiť kôl Sandstorm</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Použiť kôl Privatesend</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Táto suma slúži ako hranica pre vypnutie Sandstorm akonáhle je dosiahnutá</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Táto suma slúži ako hranica pre vypnutie Privatesend akonáhle je dosiahnutá</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1422,8 +1422,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Dokončenie:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Bilancia Sandstorm:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Bilancia Privatesend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1442,8 +1442,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1462,16 +1462,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Posledná správa)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Skúsiť manuálne odoslať Sandstorm požiadavku.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Skúsiť manuálne odoslať Privatesend požiadavku.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Výskúšať mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Vynulovať súčasný stav Sandstorm (môže prerušiť Sandstorm ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Vynulovať súčasný stav Privatesend (môže prerušiť Privatesend ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1486,11 +1486,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Vypnuté</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
+        <source>Start Privatesend Mixing</source>
         <translation>Začať Dasksend miešanie</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
+        <source>Stop Privatesend Mixing</source>
         <translation>Zastaviť Dasksend miešanie</translation>
     </message>
     <message>
@@ -1534,9 +1534,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Povolené </translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Posledná Sandstorm správa:
+        <translation>Posledná Privatesend správa:
 </translation>
     </message>
     <message>
@@ -1544,20 +1544,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm bol úspešne obnovený</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend bol úspešne obnovený</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Ak nechcete vidieť interné Sandstorm poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
+        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Ak nechcete vidieť interné Privatesend poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Pre použitie vyžaduje Sandstorm aspoň %1.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Pre použitie vyžaduje Privatesend aspoň %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -2363,8 +2363,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>&amp;Pridať príjemcu</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2415,8 +2415,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>anonymne zdroje</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(Sandstorm vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(Privatesend vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -3019,8 +3019,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Prijaté od:</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Prijaté cez Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Prijaté cez Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3035,24 +3035,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Vyfárané</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Denominácia Sandstorm</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Denominácia Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Zaisťovacia Sandstorm platba</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Zaisťovacia Privatesend platba</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm uskutočnil zaisťovacie vstupy</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Vytvoriť denominácie Sandstorm</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Vytvoriť denominácie Privatesend</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3130,24 +3130,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Odoslané na</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm uskutočnil zaisťovacie vstupy</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Vytvoriť denominácie Sandstorm</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Vytvoriť denominácie Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Denominácia Sandstorm</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Denominácia Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Zaisťovacia Sandstorm platba</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Zaisťovacia Privatesend platba</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3329,8 +3329,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Nedá sa zamknúť dátový adresár %s. DarkSilk Core už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Pre poslanie zdrojov používa Sandstorm presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Pre poslanie zdrojov používa Privatesend presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3385,12 +3385,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Nedá sa viazať ku %s na tomto počítači. DarkSilk Core už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Nedá sa nájsť dostatok denominácií Sandstorm pre túto transakciu. </translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Nedá sa nájsť dostatok denominácií Privatesend pre túto transakciu. </translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Nedá sa nájsť dostatok ne-denominovaných Sandstorm zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Nedá sa nájsť dostatok ne-denominovaných Privatesend zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3489,8 +3489,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Zistený poškodený blok databázy</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Možnosti Sandstorm:</translation>
+        <source>Privatesend options:</source>
+        <translation>Možnosti Privatesend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3561,8 +3561,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Chyba: Peňaženka je zamknutá, transakcia sa nedá vytvoriť!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Chyba: Už máte čakajúce položky vo fronte Sandstorm</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Chyba: Už máte čakajúce položky vo fronte Privatesend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3613,8 +3613,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Vymazať všetky transakcie z peňaženky a pri spustení znova získať z reťazca blokov iba tie získané pomocou -rescan</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Vypnúť všetky funkcie špecifické pre DarkSilk (Stormnode, Sandstorm, InstantX, Rozpočty) (0-1, predvolené: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Vypnúť všetky funkcie špecifické pre DarkSilk (Stormnode, Privatesend, InstantX, Rozpočty) (0-1, predvolené: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3625,8 +3625,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Zapnúť InstantX, ukázať potvrdenia pre zamknuté transakcie (bool, predvolené: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Povoliť používanie automatického sandstorm pre zdroje uložené v tejto peňaženke (0-1, predvolené: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Povoliť používanie automatického privatesend pre zdroje uložené v tejto peňaženke (0-1, predvolené: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3685,8 +3685,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Výstupné ladiace informácie (predvolené: %u, dodanie &lt;category&gt; je voliteľné)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Poskytnúť likviditu pre Sandstorm nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Poskytnúť likviditu pre Privatesend nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3807,16 +3807,16 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>Nedá sa analyzovať -rpcbind hodnota %s ako sieťová adresa</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm je nečinný.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend je nečinný.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Sandstorm požiadavok dokončený:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Privatesend požiadavok dokončený:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Sandstorm požiadavok nedokončený:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Privatesend požiadavok nedokončený:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3947,7 +3947,7 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>Neplatná suma pre -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Sandstorm action was too recent.</source>
+        <source>Last successful Privatesend action was too recent.</source>
         <translation>Posledná Dasksend akcia bola pred chvíľou.</translation>
     </message>
     <message>
@@ -4223,7 +4223,7 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>V pamäti udržiavať najviac &lt;n&gt; nepotvrdených transakcií (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
+        <source>Last Privatesend was too recent.</source>
         <translation>Posledný Dasksend bol pred chvíľou.</translation>
     </message>
     <message>
@@ -4475,8 +4475,8 @@ napríklad: alertnotify=echo %%s | mail -s "DarkSilk Upozornenie" admin@foo.com
         <translation>Užívateľské meno pre JSON-RPC spojenia</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Väčšia hodnota ako dovoľuje fronta Sandstorm.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Väčšia hodnota ako dovoľuje fronta Privatesend.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

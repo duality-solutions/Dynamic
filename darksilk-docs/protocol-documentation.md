@@ -97,7 +97,7 @@ When a new block is found on the network, a Stormnode quorum will be determined 
 
 ### SSTX - "sstx"
 
-CSandstormBroadcastTx
+CPrivatesendBroadcastTx
 
 Stormnodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the SSTX message.
 
@@ -122,7 +122,7 @@ Mixing pool status update
 
 ### SSQUEUE - "ssq"
 
-CSandstormQueue
+CPrivatesendQueue
 
 Asks users to sign final mixing tx message.
 
@@ -145,7 +145,7 @@ Response to SSQ message which allows the user to join a mixing pool
 
 ### SSVIN - "ssi"
 
-CSandstormEntry
+CPrivatesendEntry
 
 When queue is ready user is expected to send his entry to start actual mixing
 

@@ -8,7 +8,7 @@
 //#define ENABLE_DARKSILK_DEBUG
 
 #include "activestormnode.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "governance-vote.h"
 #include "governance-classes.h"
@@ -352,7 +352,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)){
+            if(!privateSendSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)){
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", "Stormnode signing error, could not set key correctly"));
@@ -471,7 +471,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!sandStormSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)) {
+            if(!privateSendSigner.GetKeysFromSecret(sne.getPrivKey(), keyStormnode, pubKeyStormnode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", strprintf("Invalid Stormnode key %s.", sne.getPrivKey())));

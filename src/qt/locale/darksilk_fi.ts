@@ -741,8 +741,8 @@ Osoite: %4
         <translation>Kopioi vaihtoraha</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;Sandstorm poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää Sandstorm:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen Sandstorm optio.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;Privatesend poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää Privatesend:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen Privatesend optio.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Osoite: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Sandstorm Asetukset</translation>
+        <source>Configure Privatesend</source>
+        <translation>Privatesend Asetukset</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Osoite: %4
         <translation>Tämä vaihtoehto on hitain ja kaikkein anonyymi. Suurimman yksityisyyden käyttö maksaa</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Sandstorm Asetukset</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Privatesend Asetukset</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain DarkSilk asetuksista.</translation>
     </message>
 </context>
 <context>
@@ -1147,12 +1147,12 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>(0 = auto, &lt;0 = jätä näin monta prosessorin ydintä vapaaksi)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Kuinka montaa Sandstorm kierrosta käytetään</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Kuinka montaa Privatesend kierrosta käytetään</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Tämä määrä toimii rajana keskeytykselle kun Sandstorm anonymisointi sen saavuttaa.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Tämä määrä toimii rajana keskeytykselle kun Privatesend anonymisointi sen saavuttaa.</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1424,8 +1424,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Valmiina:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Sandstorm Saldo:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Privatesend Saldo:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1444,8 +1444,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1464,16 +1464,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Viimeisin Viesti)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Yritä manuaalisesti esittää Sandstorm sekoituspyyntö.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Yritä manuaalisesti esittää Privatesend sekoituspyyntö.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Yritä Sekoittaa</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Nollaa nykyinen Sandstorm tila (voi keskeyttää Sandstorm sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Nollaa nykyinen Privatesend tila (voi keskeyttää Privatesend sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1488,12 +1488,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Ei käytössä</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Käynnistä Sandstorm Sekoitus</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Käynnistä Privatesend Sekoitus</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Lopeta Sandstorm Sekoitus</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Lopeta Privatesend Sekoitus</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1536,9 +1536,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Käytössä</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Viimeisin Sandstorm viesti:
+        <translation>Viimeisin Privatesend viesti:
 </translation>
     </message>
     <message>
@@ -1546,20 +1546,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm nollattu onnistuneesti.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend nollattu onnistuneesti.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Jos et halua nähdä sisäisiä Sandstorm sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
+        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Jos et halua nähdä sisäisiä Privatesend sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstormin käyttö vaatii vähintään %1.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesendin käyttö vaatii vähintään %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. Sandstorm asetetaan pois käytöstä.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. Privatesend asetetaan pois käytöstä.</translation>
     </message>
 </context>
 <context>
@@ -2369,8 +2369,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lisää &amp;Vastaanottaja</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2421,8 +2421,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>anonymisoituja varoja</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm pyöristää tämän lähimpään %1).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend pyöristää tämän lähimpään %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -3025,8 +3025,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vastaanotettu osoitteesta</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Sandstorm vastaanotettu</translation>
+        <source>Received via Privatesend</source>
+        <translation>Privatesend vastaanotettu</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3041,24 +3041,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Louhittu</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm denominointi</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend denominointi</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm vakuus maksu</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend vakuus maksu</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm luo vakuus syötteet</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm denominointien luonti</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend denominointien luonti</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstorm lähetetty</translation>
+        <source>Privatesended</source>
+        <translation>Privatesend lähetetty</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3136,24 +3136,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lähetetty</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstorm lähetetty</translation>
+        <source>Privatesended</source>
+        <translation>Privatesend lähetetty</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm luo vakuus syötteet</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm denominointien luonti</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend denominointien luonti</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm denominointi</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend denominointi</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm vakuus maksu</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend vakuus maksu</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3335,8 +3335,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ei voida lukita data hakemistoa %s. DarkSilk Core on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3391,12 +3391,12 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ei voida yhdistää %s tässä tietokoneessa. DarkSilk Core on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Ei tarpeeksi Sandstorm anonymisoituja varoja tälle siirtotapahtumalle.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Ei tarpeeksi Privatesend anonymisoituja varoja tälle siirtotapahtumalle.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Ei tarpeeksi Sandstorm ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Ei tarpeeksi Privatesend ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3495,8 +3495,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vioittunut lohkotietokanta havaittu</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Sandstorm valinnat:</translation>
+        <source>Privatesend options:</source>
+        <translation>Privatesend valinnat:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3567,8 +3567,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Virhe: Lompakko on lukittu, siirtotapahtumaa ei voida luoda!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Virhe: Sinulla on jo odottavia merkintöjä Sandstorm varannossa</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Virhe: Sinulla on jo odottavia merkintöjä Privatesend varannossa</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3619,8 +3619,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Poista kaikki lompakon siirtotapahtumat ja palauta vain nuo osat lohkoketjusta -rescan valinnan avulla käynnistyksessä</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Kytke pois käytöstä kaikki DarkSilk:in erityistoiminnot (Stormnodet, Sandstorm, InstantX, Budjetointi) (0-1, oletus: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantX, Budgeting) (0-1, default: %u)</source>
+        <translation>Kytke pois käytöstä kaikki DarkSilk:in erityistoiminnot (Stormnodet, Privatesend, InstantX, Budjetointi) (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3631,8 +3631,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ota instantx käyttöön, näytä lukittujen siirtojen vahvistukset (bool, oletus: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Ota käyttöön automaattinen Sandstorm rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Ota käyttöön automaattinen Privatesend rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3691,8 +3691,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tulosta debuggaustieto (oletus: %u, tarjottava &lt;category&gt; on valinnainen)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Tarjoa Sandstorm:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Tarjoa Privatesend:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3815,16 +3815,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
         <translation>Ei voida jäsentää -rpcbind arvoa %s verkko-osoitteena</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm odottaa.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend odottaa.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Sandstorm pyyntö valmis:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Privatesend pyyntö valmis:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Sandstorm pyyntö kesken:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Privatesend pyyntö kesken:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3955,8 +3955,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
         <translation>Virheellinen määrä -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Sandstorm action was too recent.</source>
-        <translation>Viimeinen onnistunut Sandstorm tapahtuma oli liian äskettäin.</translation>
+        <source>Last successful Privatesend action was too recent.</source>
+        <translation>Viimeinen onnistunut Privatesend tapahtuma oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4231,8 +4231,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
         <translation>Pidä enintään &lt;n&gt; ei yhdistettyä siirtotapahtumaa muistissa (oletus: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>Viimeisin Sandstorm oli liian äskettäin.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>Viimeisin Privatesend oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4483,8 +4483,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "DarkSilk Hälytys" admin@foo.com
         <translation>Käyttäjätunnus JSON-RPC yhteyksille</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Määrä on enemmän kuin Sandstorm varannon maksimi sallii.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Määrä on enemmän kuin Privatesend varannon maksimi sallii.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

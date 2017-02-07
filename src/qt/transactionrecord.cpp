@@ -13,7 +13,7 @@
 #include "timedata.h"
 #include "wallet/wallet.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "instantx.h"
 
 #include <stdint.h>

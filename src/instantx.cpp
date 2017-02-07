@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "instantx.h"
 #include "key.h"
 #include "main.h"
@@ -1004,7 +1004,7 @@ bool CTxLockVote::CheckSignature() const
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(infoSn.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1017,12 +1017,12 @@ bool CTxLockVote::Sign()
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if(!sandStormSigner.SignMessage(strMessage, vchStormnodeSignature, activeStormnode.keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchStormnodeSignature, activeStormnode.keyStormnode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

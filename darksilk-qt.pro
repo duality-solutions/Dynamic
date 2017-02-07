@@ -267,7 +267,7 @@ HEADERS += \
     src/qt/signverifymessagedialog.h \
     src/qt/sendcoinsentry.h \
     src/qt/sendcoinsdialog.h \
-    src/qt/sandstormconfig.h \
+    src/qt/privatesendconfig.h \
     src/qt/rpcconsole.h \
     src/qt/recentrequeststablemodel.h \
     src/qt/receiverequestdialog.h \
@@ -400,8 +400,8 @@ HEADERS += \
     src/rpcclient.h \
     src/rpcprotocol.h \
     src/rpcserver.h \
-    src/sandstorm-relay.h \
-    src/sandstorm.h \
+    src/privatesend-relay.h \
+    src/privatesend.h \
     src/scheduler.h \
     src/serialize.h \
     src/spentindex.h \
@@ -477,7 +477,7 @@ SOURCES += \
     src/qt/receiverequestdialog.cpp \
     src/qt/recentrequeststablemodel.cpp \
     src/qt/rpcconsole.cpp \
-    src/qt/sandstormconfig.cpp \
+    src/qt/privatesendconfig.cpp \
     src/qt/sendcoinsdialog.cpp \
     src/qt/sendcoinsentry.cpp \
     src/qt/signverifymessagedialog.cpp \
@@ -582,8 +582,8 @@ SOURCES += \
     src/rpcrawtransaction.cpp \
     src/rpcserver.cpp \
     src/rpcstormnode.cpp \
-    src/sandstorm-relay.cpp \
-    src/sandstorm.cpp \
+    src/privatesend-relay.cpp \
+    src/privatesend.cpp \
     src/scheduler.cpp \
     src/spork.cpp \
     src/ssnotificationinterface.cpp \
@@ -637,7 +637,7 @@ FORMS += \
     src/qt/forms/receivecoinsdialog.ui \
     src/qt/forms/receiverequestdialog.ui \
     src/qt/forms/rpcconsole.ui \
-    src/qt/forms/sandstormconfig.ui \
+    src/qt/forms/privatesendconfig.ui \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/signverifymessagedialog.ui \

@@ -642,7 +642,7 @@
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     </context>
 <context>
     <name>EditAddressDialog</name>

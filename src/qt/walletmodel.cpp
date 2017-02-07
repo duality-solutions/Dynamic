@@ -23,7 +23,7 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "instantx.h"
 #include "spork.h"
 

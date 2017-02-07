@@ -24,7 +24,7 @@
 #include "wallet/wallet.h" // for CWallet::GetRequiredFee()
 #endif
 
-#include "sandstorm.h"
+#include "privatesend.h"
 
 #include <boost/thread.hpp>
 
@@ -260,7 +260,7 @@ void OptionsDialog::on_resetButton_clicked()
 void OptionsDialog::on_okButton_clicked()
 {
     mapper->submit();
-    sandStormPool.nCachedNumBlocks = std::numeric_limits<int>::max();
+    privateSendPool.nCachedNumBlocks = std::numeric_limits<int>::max();
     pwalletMain->MarkDirty();
     accept();
     updateDefaultProxyNets();

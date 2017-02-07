@@ -20,9 +20,9 @@
 #include "utilitydialog.h"
 #include "walletmodel.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "instantx.h"
-#include "sandstormconfig.h"
+#include "privatesendconfig.h"
 #include "stormnode-sync.h"
 
 #include <QAbstractItemDelegate>
@@ -175,9 +175,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
         } else {
             ui->togglePrivateSend->setText(tr("Stop Mixing"));
         }
-        // Disable sandStormPool builtin support for automatic backups while we are in GUI,
+        // Disable privateSendPool builtin support for automatic backups while we are in GUI,
         // we'll handle automatic backups and user warnings in privateSendStatus()
-        sandStormPool.fCreateAutoBackups = false;
+        privateSendPool.fCreateAutoBackups = false;
 
         timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
@@ -459,7 +459,7 @@ void OverviewPage::privateSendStatus()
     int nBestHeight = clientModel->getNumBlocks();
 
     // We are processing more then 1 block per second, we'll just leave
-    if(((nBestHeight - sandStormPool.nCachedNumBlocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
+    if(((nBestHeight - privateSendPool.nCachedNumBlocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
     nLastDSProgressBlockTime = GetTimeMillis();
 
     QString strKeysLeftText(tr("keys left: %1").arg(pwalletMain->nKeysLeftSinceAutoBackup));
@@ -469,8 +469,8 @@ void OverviewPage::privateSendStatus()
     ui->labelPrivateSendEnabled->setToolTip(strKeysLeftText);
 
     if (!fEnablePrivateSend) {
-        if (nBestHeight != sandStormPool.nCachedNumBlocks) {
-            sandStormPool.nCachedNumBlocks = nBestHeight;
+        if (nBestHeight != privateSendPool.nCachedNumBlocks) {
+            privateSendPool.nCachedNumBlocks = nBestHeight;
             updatePrivateSendProgress();
         }
 
@@ -546,14 +546,14 @@ void OverviewPage::privateSendStatus()
         ui->labelPrivateSendEnabled->setToolTip(strWarning);
     }
 
-    // check sandstorm status and unlock if needed
-    if(nBestHeight != sandStormPool.nCachedNumBlocks) {
+    // check privatesend status and unlock if needed
+    if(nBestHeight != privateSendPool.nCachedNumBlocks) {
         // Balance and number of transactions might have changed
-        sandStormPool.nCachedNumBlocks = nBestHeight;
+        privateSendPool.nCachedNumBlocks = nBestHeight;
         updatePrivateSendProgress();
     }
 
-    QString strStatus = QString(sandStormPool.GetStatus().c_str());
+    QString strStatus = QString(privateSendPool.GetStatus().c_str());
 
     QString s = tr("Last PrivateSend message:\n") + strStatus;
 
@@ -562,21 +562,21 @@ void OverviewPage::privateSendStatus()
 
     ui->labelPrivateSendLastMessage->setText(s);
 
-    if(sandStormPool.nSessionDenom == 0){
+    if(privateSendPool.nSessionDenom == 0){
         ui->labelSubmittedDenom->setText(tr("N/A"));
     } else {
-        QString strDenom(sandStormPool.GetDenominationsToString(sandStormPool.nSessionDenom).c_str());
+        QString strDenom(privateSendPool.GetDenominationsToString(privateSendPool.nSessionDenom).c_str());
         ui->labelSubmittedDenom->setText(strDenom);
     }
 
 }
 
 void OverviewPage::privateSendAuto(){
-    sandStormPool.DoAutomaticDenominating();
+    privateSendPool.DoAutomaticDenominating();
 }
 
 void OverviewPage::privateSendReset(){
-    sandStormPool.ResetPool();
+    privateSendPool.ResetPool();
 
     QMessageBox::warning(this, tr("PrivateSend"),
         tr("PrivateSend was successfully reset."),
@@ -616,7 +616,7 @@ void OverviewPage::togglePrivateSend(){
             if(!ctx.isValid())
             {
                 //unlock was cancelled
-                sandStormPool.nCachedNumBlocks = std::numeric_limits<int>::max();
+                privateSendPool.nCachedNumBlocks = std::numeric_limits<int>::max();
                 QMessageBox::warning(this, tr("PrivateSend"),
                     tr("Wallet is locked and user declined to unlock. Disabling PrivateSend."),
                     QMessageBox::Ok, QMessageBox::Ok);
@@ -628,18 +628,18 @@ void OverviewPage::togglePrivateSend(){
     }
 
     fEnablePrivateSend = !fEnablePrivateSend;
-    sandStormPool.nCachedNumBlocks = std::numeric_limits<int>::max();
+    privateSendPool.nCachedNumBlocks = std::numeric_limits<int>::max();
 
     if(!fEnablePrivateSend){
         ui->togglePrivateSend->setText(tr("Start Mixing"));
-        sandStormPool.UnlockCoins();
+        privateSendPool.UnlockCoins();
     } else {
         ui->togglePrivateSend->setText(tr("Stop Mixing"));
 
-        /* show sandstorm configuration if client has defaults set */
+        /* show privatesend configuration if client has defaults set */
 
         if(nPrivateSendAmount == 0){
-            SandstormConfig dlg(this);
+            PrivatesendConfig dlg(this);
             dlg.setModel(walletModel);
             dlg.exec();
         }

@@ -25,7 +25,7 @@ QT_FORMS_UI = \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/coincontroldialog.ui \
   qt/forms/dnspage.ui \
-  qt/forms/sandstormconfig.ui \
+  qt/forms/privatesendconfig.ui \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
@@ -60,7 +60,7 @@ QT_MOC_CPP = \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
   qt/moc_csvmodelwriter.cpp \
-  qt/moc_sandstormconfig.cpp \
+  qt/moc_privatesendconfig.cpp \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
@@ -134,7 +134,7 @@ DARKSILK_QT_H = \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
   qt/csvmodelwriter.h \
-  qt/sandstormconfig.h \
+  qt/privatesendconfig.h \
   qt/editaddressdialog.h \
   qt/guiconstants.h \
   qt/guiutil.h \
@@ -278,7 +278,7 @@ DARKSILK_QT_CPP += \
   qt/askpassphrasedialog.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \
-  qt/sandstormconfig.cpp \
+  qt/privatesendconfig.cpp \
   qt/editaddressdialog.cpp \
   qt/stormnodelist.cpp \
   qt/openuridialog.cpp \

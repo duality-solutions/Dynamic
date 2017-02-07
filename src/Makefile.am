@@ -96,9 +96,9 @@ DARKSILK_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  sandstorm.h \
+  privatesend.h \
   ssnotificationinterface.h \
-  sandstorm-relay.h \
+  privatesend-relay.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -259,9 +259,9 @@ libdarksilk_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES)
 libdarksilk_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdarksilk_wallet_a_SOURCES = \
   activestormnode.cpp \
-  sandstorm.cpp \
+  privatesend.cpp \
   ssnotificationinterface.cpp \
-  sandstorm-relay.cpp \
+  privatesend-relay.cpp \
   instantx.cpp \
   stormnode.cpp \
   stormnode-payments.cpp \

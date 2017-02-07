@@ -5,7 +5,7 @@
 
 #include "activestormnode.h"
 #include "consensus/validation.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "init.h"
 #include "governance.h"
 #include "stormnode.h"
@@ -417,7 +417,7 @@ bool CStormnodeBroadcast::Create(std::string strService, std::string strKeyStorm
         return false;
     }
 
-    if(!sandStormSigner.GetKeysFromSecret(strKeyStormnode, keyStormnodeNew, pubKeyStormnodeNew)) {
+    if(!privateSendSigner.GetKeysFromSecret(strKeyStormnode, keyStormnodeNew, pubKeyStormnodeNew)) {
         strErrorRet = strprintf("Invalid Stormnode key %s", strKeyStormnode);
         LogPrintf("CStormnodeBroadcast::Create -- %s\n", strErrorRet);
         return false;
@@ -650,7 +650,7 @@ bool CStormnodeBroadcast::CheckOutpoint(int& nDos)
 
     // make sure the vout that was signed is related to the transaction that spawned the Stormnode
     //  - this is expensive, so it's only done once per Stormnode
-    if(!sandStormSigner.IsVinAssociatedWithPubkey(vin, pubKeyCollateralAddress)) {
+    if(!privateSendSigner.IsVinAssociatedWithPubkey(vin, pubKeyCollateralAddress)) {
         LogPrintf("CStormnodeMan::CheckOutpoint -- Got mismatched pubKeyCollateralAddress and vin\n");
         nDos = 33;
         return false;
@@ -689,12 +689,12 @@ bool CStormnodeBroadcast::Sign(CKey& keyCollateralAddress)
                     pubKeyCollateralAddress.GetID().ToString() + pubKeyStormnode.GetID().ToString() +
                     boost::lexical_cast<std::string>(nProtocolVersion);
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, keyCollateralAddress)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyCollateralAddress)) {
         LogPrintf("CStormnodeBroadcast::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
         LogPrintf("CStormnodeBroadcast::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -714,7 +714,7 @@ bool CStormnodeBroadcast::CheckSignature(int& nDos)
 
     LogPrint("Stormnode", "CStormnodeBroadcast::CheckSignature -- strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n", strMessage, CDarkSilkAddress(pubKeyCollateralAddress.GetID()).ToString(), EncodeBase64(&vchSig[0], vchSig.size()));
 
-    if(!sandStormSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
+    if(!privateSendSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
         LogPrintf("CStormnodeBroadcast::CheckSignature -- Got bad Stormnode announce signature, error: %s\n", strError);
         nDos = 100;
         return false;
@@ -748,12 +748,12 @@ bool CStormnodePing::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
     sigTime = GetAdjustedTime();
     std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
         LogPrintf("CStormnodePing::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CStormnodePing::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -767,7 +767,7 @@ bool CStormnodePing::CheckSignature(CPubKey& pubKeyStormnode, int &nDos)
     std::string strError = "";
     nDos = 0;
 
-    if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CStormnodePing::CheckSignature -- Got bad Stormnode ping signature, Stormnode=%s, error: %s\n", vin.prevout.ToStringShort(), strError);
         nDos = 33;
         return false;

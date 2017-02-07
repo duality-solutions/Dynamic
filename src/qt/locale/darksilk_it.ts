@@ -714,8 +714,8 @@ Indirizzo: %4
         <translation>Copia resto</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Selezionati input non anonimizzati.&lt;b&gt;Sandstorm sará disabilitato.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se vuoi ancora usare Sandstorm, per favore per prima cosa togli la selezione a tutti gli inputs non anonimizzati e dopo controlla il Sandstorm checkbox di nuovo.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Selezionati input non anonimizzati.&lt;b&gt;Privatesend sará disabilitato.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se vuoi ancora usare Privatesend, per favore per prima cosa togli la selezione a tutti gli inputs non anonimizzati e dopo controlla il Privatesend checkbox di nuovo.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -811,10 +811,10 @@ Indirizzo: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Configura Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Configura Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -861,20 +861,20 @@ Indirizzo: %4
         <translation>Questa è la più lenta ma più sicura opzione. Usare il massimo grado di anonimizzazione costerà</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Configurazione Sandstorm</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Configurazione Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
         <translation>Dark send è statto correttamente impostato su base (%1 e 2 round). Puoi cambiare questa impostazione in qualsiasi momento tu lo voglia dalla finestra di configurazione.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm è stata impostata correttamente a elevato (%1 e 8 turni). È possibile modificare in qualsiasi momento aprendo schermata di configurazione di DarkSilk.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend è stata impostata correttamente a elevato (%1 e 8 turni). È possibile modificare in qualsiasi momento aprendo schermata di configurazione di DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm è stato correttamente settato al massimo (%1 e 16 rounds). Puoi cambiarlo quando vuoi aprendo la finestra di configurazione di DarkSilk</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend è stato correttamente settato al massimo (%1 e 16 rounds). Puoi cambiarlo quando vuoi aprendo la finestra di configurazione di DarkSilk</translation>
     </message>
 </context>
 <context>
@@ -1111,12 +1111,12 @@ Indirizzo: %4
         <translation>(0 = automatico, &lt;0 = lascia questo numero di core liberi)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Round sandstorm da utilizzare</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Round privatesend da utilizzare</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Tale importo si comporta come una soglia per spegnere Sandstorm una volta che è raggiunto.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Tale importo si comporta come una soglia per spegnere Privatesend una volta che è raggiunto.</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1377,8 +1377,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Completamento:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Bilancio Sandstorm:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Bilancio Privatesend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1397,8 +1397,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>n/a</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1417,16 +1417,16 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>(Ultimo messaggio)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Prova ad inserire una richiesta Sandstorm manualmente.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Prova ad inserire una richiesta Privatesend manualmente.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Prova il Mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Resetta lo stato corrente del Sandstorm (può interrompere il Sandstorm se è nel processo di mixaggio, costandoti una perdita economica!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Resetta lo stato corrente del Privatesend (può interrompere il Privatesend se è nel processo di mixaggio, costandoti una perdita economica!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1441,12 +1441,12 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Disabilita</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Avvia Sandstorm mix</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Avvia Privatesend mix</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Ferma Sandstorm mix</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Ferma Privatesend mix</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1465,9 +1465,9 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Abilitato</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Ultimo messaggio Sandstorm
+        <translation>Ultimo messaggio Privatesend
 </translation>
     </message>
     <message>
@@ -1475,16 +1475,16 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>N/D</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm è stato resettato con successo</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend è stato resettato con successo</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstorm ha bisogno almeno dell' %1 per essere usato.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesend ha bisogno almeno dell' %1 per essere usato.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Portafoglio è bloccato e l'utente ha rifiutato di sbloccare. Disattivazione Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Portafoglio è bloccato e l'utente ha rifiutato di sbloccare. Disattivazione Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -2218,8 +2218,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>&amp;Aggiungi beneficiario</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -2266,8 +2266,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>fondi anonimi</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm richiede questo importo da arrotondato al più vicino %1).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend richiede questo importo da arrotondato al più vicino %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2862,8 +2862,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Ricevuto da</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Ricevuto via Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Ricevuto via Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -2878,24 +2878,24 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Ottenuto dal mining</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominazione</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominazione</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm Collaterale Pagamento</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend Collaterale Pagamento</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm Fa Ingressi Collaterali</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend Fa Ingressi Collaterali</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm Crea Denominazioni</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend Crea Denominazioni</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -2973,24 +2973,24 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Inviato a</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm Fa Ingressi Collaterali</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend Fa Ingressi Collaterali</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm Crea Denominazioni</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend Crea Denominazioni</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominazione</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominazione</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm Collaterale Pagamento</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend Collaterale Pagamento</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3168,8 +3168,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Impossibile ottenere un blocco sulla data directory %s. DarkSilk Core è probabilmente già in esecuzione.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm utilizza esatto denominato importo a inviare fondi, si potrebbe semplicemente bisogno di anonimizzare alcuni più monete.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend utilizza esatto denominato importo a inviare fondi, si potrebbe semplicemente bisogno di anonimizzare alcuni più monete.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3224,12 +3224,12 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Incapace di legare al %s su questo computer. DarkSilk Core è probabilmente già funzionato.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Impossibile trovare fondi sufficienti Sandstorm denominati per questa transazione.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Impossibile trovare fondi sufficienti Privatesend denominati per questa transazione.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Impossibile trovare un numero sufficiente di non denominati fondi Sandstorm per questa operazione che non sono uguali a 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Impossibile trovare un numero sufficiente di non denominati fondi Privatesend per questa operazione che non sono uguali a 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3328,8 +3328,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Rilevato database blocchi corrotto</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Opzioni Sandstorm:</translation>
+        <source>Privatesend options:</source>
+        <translation>Opzioni Privatesend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3400,8 +3400,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Errore: portafoglio bloccato, impossibile creare la transazione!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Errore: è già voci in sospeso in piscina Sandstorm</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Errore: è già voci in sospeso in piscina Privatesend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3436,8 +3436,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Abilita instantx, mostra conferme per le transazioni bloccate (bool, predefinito: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Abilita utilizzo di sandstorm automatizzato per i fondi conservati in questo portafoglio (0-1, predefinito: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Abilita utilizzo di privatesend automatizzato per i fondi conservati in questo portafoglio (0-1, predefinito: %u)</translation>
     </message>
     <message>
         <source>Fees (in DSLK/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
@@ -3452,16 +3452,16 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Uscite denominate non confermati trovati, saranno aspettare che confermano per continua.</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
+        <source>Privatesend is idle.</source>
         <translation>Nessun Stormnode trovato.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Richiesta di Sandstorm completa:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Richiesta di Privatesend completa:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Richiesta di Sandstorm incompleta:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Richiesta di Privatesend incompleta:</translation>
     </message>
     <message>
         <source>Error connecting to Stormnode.</source>
@@ -3588,8 +3588,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Mantenere al massimo &lt;n&gt; le operazioni in collegabile in memoria (predefinito: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>L'ultima sandstorm è troppo recente</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>L'ultima privatesend è troppo recente</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
@@ -3797,8 +3797,8 @@ Più URL vengono separati da una barra verticale |.</translation>
 </translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Più valore di Sandstorm piscina massima permette.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Più valore di Privatesend piscina massima permette.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

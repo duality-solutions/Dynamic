@@ -45,7 +45,7 @@
 #endif
 
 #include "activestormnode.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "ssnotificationinterface.h"
 #include "flat-database.h"
 #include "governance.h"
@@ -1657,7 +1657,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
         std::string strStormNodePrivKey = GetArg("-stormnodeprivkey", "");
         if(!strStormNodePrivKey.empty()) {
-            if(!sandStormSigner.GetKeysFromSecret(strStormNodePrivKey, activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode))
+            if(!privateSendSigner.GetKeysFromSecret(strStormNodePrivKey, activeStormnode.keyStormnode, activeStormnode.pubKeyStormnode))
                 return InitError(_("Invalid stormnodeprivkey. Please see documenation."));
 
             LogPrintf("  pubKeyStormnode: %s\n", CDarkSilkAddress(activeStormnode.pubKeyStormnode.GetID()).ToString());
@@ -1690,7 +1690,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     nLiquidityProvider = GetArg("-liquidityprovider", nLiquidityProvider);
     nLiquidityProvider = std::min(std::max(nLiquidityProvider, 0), 100);
-    sandStormPool.SetMinBlockSpacing(nLiquidityProvider * 15);
+    privateSendPool.SetMinBlockSpacing(nLiquidityProvider * 15);
 
     fEnablePrivateSend = GetBoolArg("-enableprivatesend", 0);
     fPrivateSendMultiSession = GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
@@ -1703,7 +1703,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    //lite mode disables all Stormnode and Sandstorm related functionality
+    //lite mode disables all Stormnode and Privatesend related functionality
     fLiteMode = GetBoolArg("-litemode", false);
     if(fStormNode && fLiteMode){
         return InitError("You can not start a Stormnode in litemode");
@@ -1714,7 +1714,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("PrivateSend rounds %d\n", nPrivateSendRounds);
     LogPrintf("PrivateSend amount %d\n", nPrivateSendAmount);
 
-    sandStormPool.InitDenominations();
+    privateSendPool.InitDenominations();
 
     // ********************************************************* Step 11b: Load cache data
 
@@ -1756,14 +1756,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
     // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
     snodeman.UpdatedBlockTip(chainActive.Tip());
-    sandStormPool.UpdatedBlockTip(chainActive.Tip());
+    privateSendPool.UpdatedBlockTip(chainActive.Tip());
     snpayments.UpdatedBlockTip(chainActive.Tip());
     stormnodeSync.UpdatedBlockTip(chainActive.Tip());
     governance.UpdatedBlockTip(chainActive.Tip());
 
     // ********************************************************* Step 11d: start darksilk-privatesend thread
 
-    threadGroup.create_thread(boost::bind(&ThreadCheckSandStormPool));
+    threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendPool));
 
     // ********************************************************* Step 12: start node
 

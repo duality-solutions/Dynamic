@@ -23,7 +23,7 @@
 #include "wallet/wallet.h"
 #include "utilstrencodings.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "instantx.h"
 #include "stormnodeman.h"
 
@@ -2092,8 +2092,8 @@ void RelayTransaction(const CTransaction& tx)
     ss.reserve(10000);
     uint256 hash = tx.GetHash();
     CTxLockRequest txLockRequest;
-    if(mapSandstormBroadcastTxes.count(hash)) { // MSG_SSTX
-        ss << mapSandstormBroadcastTxes[hash];
+    if(mapPrivatesendBroadcastTxes.count(hash)) { // MSG_SSTX
+        ss << mapPrivatesendBroadcastTxes[hash];
     } else if(instantsend.GetTxLockRequest(hash, txLockRequest)) { // MSG_TXLOCK_REQUEST
         ss << txLockRequest;
     } else { // MSG_TX
@@ -2105,7 +2105,7 @@ void RelayTransaction(const CTransaction& tx)
 void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
     uint256 hash = tx.GetHash();
-    int nInv = mapSandstormBroadcastTxes.count(hash) ? MSG_SSTX :
+    int nInv = mapPrivatesendBroadcastTxes.count(hash) ? MSG_SSTX :
                 (instantsend.HasTxLockRequest(hash) ? MSG_TXLOCK_REQUEST : MSG_TX);
     CInv inv(nInv, hash);
     {

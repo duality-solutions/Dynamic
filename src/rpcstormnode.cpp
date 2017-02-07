@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "init.h"
 #include "main.h"
 #include "stormnode-payments.h"
@@ -42,8 +42,8 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             return "Mixing is not supported from Stormnodes";
 
         fEnablePrivateSend = true;
-        bool result = sandStormPool.DoAutomaticDenominating();
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + sandStormPool.GetStatus() + ", will retry"));
+        bool result = privateSendPool.DoAutomaticDenominating();
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendPool.GetStatus() + ", will retry"));
     }
 
     if(params[0].get_str() == "stop") {
@@ -52,7 +52,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
     }
 
     if(params[0].get_str() == "reset") {
-        sandStormPool.ResetPool();
+        privateSendPool.ResetPool();
         return "Mixing was reset";
     }
 
@@ -67,15 +67,15 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "Returns an object containing mixing pool related information.\n");
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             sandStormPool.GetStateString()));
+    obj.push_back(Pair("state",             privateSendPool.GetStateString()));
     obj.push_back(Pair("mixing_mode",       fPrivateSendMultiSession ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             sandStormPool.GetQueueSize()));
-    obj.push_back(Pair("entries",           sandStormPool.GetEntriesCount()));
-    obj.push_back(Pair("status",            sandStormPool.GetStatus()));
+    obj.push_back(Pair("queue",             privateSendPool.GetQueueSize()));
+    obj.push_back(Pair("entries",           privateSendPool.GetEntriesCount()));
+    obj.push_back(Pair("status",            privateSendPool.GetStatus()));
 
-    if (sandStormPool.pSubmittedToStormnode) {
-        obj.push_back(Pair("outpoint",      sandStormPool.pSubmittedToStormnode->vin.prevout.ToStringShort()));
-        obj.push_back(Pair("addr",          sandStormPool.pSubmittedToStormnode->addr.ToString()));
+    if (privateSendPool.pSubmittedToStormnode) {
+        obj.push_back(Pair("outpoint",      privateSendPool.pSubmittedToStormnode->vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          privateSendPool.pSubmittedToStormnode->addr.ToString()));
     }
 
     if (pwalletMain) {

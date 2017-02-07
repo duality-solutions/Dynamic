@@ -29,7 +29,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "instantx.h"
 #include "keepass.h"
@@ -2123,7 +2123,7 @@ CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
     if(nNeedsToAnonymizeBalance > nAnonymizableBalance) nNeedsToAnonymizeBalance = nAnonymizableBalance;
 
     // we should never exceed the pool max
-    if (nNeedsToAnonymizeBalance > sandStormPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = sandStormPool.GetMaxPoolAmount();
+    if (nNeedsToAnonymizeBalance > privateSendPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = privateSendPool.GetMaxPoolAmount();
 
     return nNeedsToAnonymizeBalance;
 }
@@ -2642,7 +2642,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     // bit 3 - .1DSLK+1
 
     std::vector<int> vecBits;
-    if (!sandStormPool.GetDenominationsBits(nDenom, vecBits)) {
+    if (!privateSendPool.GetDenominationsBits(nDenom, vecBits)) {
         return false;
     }
 
@@ -3193,7 +3193,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                         nFeeRet += nChange;
                         wtxNew.mapValue["SS"] = "1";
                         // recheck skipped denominations during next mixing
-                        sandStormPool.ClearSkippedDenominations();
+                        privateSendPool.ClearSkippedDenominations();
                     } else {
 
                         // Fill a vout to ourself

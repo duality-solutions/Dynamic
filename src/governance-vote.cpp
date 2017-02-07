@@ -3,7 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance-vote.h"
 #include "stormnodeman.h"
 #include "stormnode-sync.h"
@@ -241,12 +241,12 @@ bool CGovernanceVote::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
     std::string strMessage = vinStormnode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
         LogPrintf("CGovernanceVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -287,7 +287,7 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
     std::string strMessage = vinStormnode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!sandStormSigner.VerifyMessage(infoSn.pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

@@ -40,7 +40,7 @@
 #include "versionbits.h"
 #include "dns/dns.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "instantx.h"
 #include "stormnode-payments.h"
@@ -4969,7 +4969,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         return snodeman.mapSeenStormnodePing.count(inv.hash);
 
     case MSG_SSTX:
-        return mapSandstormBroadcastTxes.count(inv.hash);
+        return mapPrivatesendBroadcastTxes.count(inv.hash);
 
     case MSG_GOVERNANCE_OBJECT:
     case MSG_GOVERNANCE_OBJECT_VOTE:
@@ -5190,10 +5190,10 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 }
 
                 if (!pushed && inv.type == MSG_SSTX) {
-                    if(mapSandstormBroadcastTxes.count(inv.hash)) {
+                    if(mapPrivatesendBroadcastTxes.count(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << mapSandstormBroadcastTxes[inv.hash];
+                        ss << mapPrivatesendBroadcastTxes[inv.hash];
                         pfrom->PushMessage(NetMsgType::SSTX, ss);
                         pushed = true;
                     }
@@ -5732,7 +5732,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         vector<uint256> vEraseQueue;
         CTransaction tx;
         CTxLockRequest txLockRequest;
-        CSandstormBroadcastTx sstx;
+        CPrivatesendBroadcastTx sstx;
         int nInvType = MSG_TX;
 
         // Read data and assign inv type
@@ -5762,7 +5762,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
             uint256 hashTx = tx.GetHash();
 
-            if(mapSandstormBroadcastTxes.count(hashTx)) {
+            if(mapPrivatesendBroadcastTxes.count(hashTx)) {
                 LogPrint("privatesend", "SSTX -- Already have %s, skipping...\n", hashTx.ToString());
                 return true; // not an error
             }
@@ -5803,7 +5803,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             if (strCommand == NetMsgType::SSTX) {
                 LogPrintf("SSTX -- Stormnode transaction accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);
-                mapSandstormBroadcastTxes.insert(make_pair(tx.GetHash(), sstx));
+                mapPrivatesendBroadcastTxes.insert(make_pair(tx.GetHash(), sstx));
             } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
                 LogPrintf("TXLOCKREQUEST -- Transaction Lock Request accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);
@@ -6312,7 +6312,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (found)
         {
             //probably one the extensions
-            sandStormPool.ProcessMessage(pfrom, strCommand, vRecv);
+            privateSendPool.ProcessMessage(pfrom, strCommand, vRecv);
             snodeman.ProcessMessage(pfrom, strCommand, vRecv);
             snpayments.ProcessMessage(pfrom, strCommand, vRecv);
             instantsend.ProcessMessage(pfrom, strCommand, vRecv);

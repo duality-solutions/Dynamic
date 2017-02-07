@@ -736,10 +736,10 @@ Adress: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Konfigurera Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Konfigurera Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -786,20 +786,20 @@ Adress: %4
         <translation>Detta är det långsammaste och det säkraste alternativet. Användning av maximal anonymitet kommer att kosta</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Sandstorm-konfiguration</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Privatesend-konfiguration</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna DarkSilk:s konfigurationsskärm</translation>
     </message>
 </context>
 <context>
@@ -1013,12 +1013,12 @@ Adress: %4
         <translation>(0 = auto, &lt;0 = lämna så många kärnor lediga)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Sandstorm-omgångar att använda</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Privatesend-omgångar att använda</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Denna mängd fungerar som en tröskel att stänga av Sandstorm då det har uppnåtts.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Denna mängd fungerar som en tröskel att stänga av Privatesend då det har uppnåtts.</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1230,8 +1230,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Förlopp:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Sandstorm-medel:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Privatesend-medel:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1250,8 +1250,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Start/Stop Mixing</source>
@@ -1262,16 +1262,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Senaste meddelande)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Försök att lämna in en Sandstorm-begäran manuellt.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Försök att lämna in en Privatesend-begäran manuellt.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Försök att mixa</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Återställ den nuvarande Sandstorm-statusen (kan störa Sandstorm om den håller på att mixa vilket kan kosta dig pengar!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Återställ den nuvarande Privatesend-statusen (kan störa Privatesend om den håller på att mixa vilket kan kosta dig pengar!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1286,12 +1286,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Inaktiverad</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Påbörja Sandstorm-mixning</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Påbörja Privatesend-mixning</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Stoppa Sandstorm-mixning</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Stoppa Privatesend-mixning</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1302,9 +1302,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Aktiverad</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Senaste Sandstorm-meddelande:
+        <translation>Senaste Privatesend-meddelande:
 
 
 
@@ -1316,16 +1316,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm återställdes framgångsrikt.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend återställdes framgångsrikt.</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstorm kräver åtminstone %1 att använda.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesend kräver åtminstone %1 att använda.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -1791,8 +1791,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Lägg till &amp;mottagare</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>InstantX</source>
@@ -1839,8 +1839,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>anonyma medel</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm kräver att denna mängd avrundas uppåt till närmaste %1)</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend kräver att denna mängd avrundas uppåt till närmaste %1)</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2384,8 +2384,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Mottagen från</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Mottagen genom Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Mottagen genom Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -2400,24 +2400,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Utvunnen</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm-denomination</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend-denomination</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
+        <source>Privatesend Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm-skapa säkerhetsinmatningar</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm-skapa denominationer</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend-skapa denominationer</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed-(skickat)</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended-(skickat)</translation>
     </message>
     <message>
         <source>(n/a)</source>
@@ -2483,23 +2483,23 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Skickad till</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed-(skickat)</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended-(skickat)</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm-skapa säkerhetsinmatningar</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm-skapa denominationer</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend-skapa denominationer</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm-denomination</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend-denomination</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
+        <source>Privatesend Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
@@ -2666,8 +2666,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Kan inte erhålla ett lås på datakatalog %s. DarkSilk Core körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -2722,12 +2722,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Det går inte att binda till %s till denna dator. DarkSilk Core körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Kunde inte hitta tillräckliga Sandstorm-denominationsmedel för denna transaktion.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Kunde inte hitta tillräckliga Privatesend-denominationsmedel för denna transaktion.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Kunde inte hitta tillräckliga Sandstorm-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Kunde inte hitta tillräckliga Privatesend-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -2826,8 +2826,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Korrumperad blockdatabas upptäcktes</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Sandstorm-alternativ:</translation>
+        <source>Privatesend options:</source>
+        <translation>Privatesend-alternativ:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -2898,8 +2898,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Fel: Plånbok låst, kan inte skapa en transaktion!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Fel: Du har redan väntande inmatningar i Sandstorm-poolen</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Fel: Du har redan väntande inmatningar i Privatesend-poolen</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3002,8 +3002,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Bibehåll som mest &lt;n&gt; icke-anslutningsbara transaktioner i minnet (standardvärde: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>Senaste Sandstorm gjordes för inte alltför länge sedan.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>Senaste Privatesend gjordes för inte alltför länge sedan.</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
@@ -3206,8 +3206,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Användarnamn för JSON-RPC-anslutningar</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Värdera mer än vad Sandstorms poolmaximum tillåter.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Värdera mer än vad Privatesends poolmaximum tillåter.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
