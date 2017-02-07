@@ -118,7 +118,8 @@ bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndI
 void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNames, std::map<CNameVal, NameTxInfo>& mapPending);
 bool GetNameValue(const CNameVal& name, CNameVal& value);
 class CKeyStore;
-bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType=SIGHASH_ALL);
+bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, const unsigned int nIn,
+                            const CScript& scriptDDNS, const int nHashType=SIGHASH_ALL);
 std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress);
 
 struct NameTxReturn

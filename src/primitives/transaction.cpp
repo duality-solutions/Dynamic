@@ -58,6 +58,13 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
     nRounds = -10;
 }
 
+CTxOut::CTxOut(const CAmount& nValueIn, const CScript& scriptPubKeyIn, int inRounds)
+{
+    nValue = nValueIn;
+    scriptPubKey = scriptPubKeyIn;
+    nRounds = inRounds;
+}
+
 uint256 CTxOut::GetHash() const
 {
     return SerializeHash(*this);

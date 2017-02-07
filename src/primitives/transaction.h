@@ -172,6 +172,7 @@ public:
     }
 
     CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn);
+    CTxOut(const CAmount& nValueIn, const CScript& scriptPubKeyIn, int inRounds);
 
     ADD_SERIALIZE_METHODS;
 
