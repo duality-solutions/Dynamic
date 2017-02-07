@@ -46,7 +46,7 @@
 
 #include "activestormnode.h"
 #include "privatesend.h"
-#include "ssnotificationinterface.h"
+#include "psnotificationinterface.h"
 #include "flat-database.h"
 #include "governance.h"
 #include "instantsend.h"
@@ -104,7 +104,7 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 static CZMQNotificationInterface* pzmqNotificationInterface = NULL;
 #endif
 
-static CSSNotificationInterface* pssNotificationInterface = NULL;
+static CPSNotificationInterface* ppsNotificationInterface = NULL;
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -281,10 +281,10 @@ void PrepareShutdown()
     }
 #endif
 
-    if (pssNotificationInterface) {
-        UnregisterValidationInterface(pssNotificationInterface);
-        delete pssNotificationInterface;
-        pssNotificationInterface = NULL;
+    if (ppsNotificationInterface) {
+        UnregisterValidationInterface(ppsNotificationInterface);
+        delete ppsNotificationInterface;
+        ppsNotificationInterface = NULL;
     }
 
 #ifndef WIN32
@@ -1406,8 +1406,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 #endif
 
-    pssNotificationInterface = new CSSNotificationInterface();
-    RegisterValidationInterface(pssNotificationInterface);
+    ppsNotificationInterface = new CPSNotificationInterface();
+    RegisterValidationInterface(ppsNotificationInterface);
 
     if (mapArgs.count("-maxuploadtarget")) {
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET)*1024*1024);

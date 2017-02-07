@@ -2092,7 +2092,7 @@ void RelayTransaction(const CTransaction& tx)
     ss.reserve(10000);
     uint256 hash = tx.GetHash();
     CTxLockRequest txLockRequest;
-    if(mapPrivatesendBroadcastTxes.count(hash)) { // MSG_SSTX
+    if(mapPrivatesendBroadcastTxes.count(hash)) { // MSG_PSTX
         ss << mapPrivatesendBroadcastTxes[hash];
     } else if(instantsend.GetTxLockRequest(hash, txLockRequest)) { // MSG_TXLOCK_REQUEST
         ss << txLockRequest;
@@ -2105,7 +2105,7 @@ void RelayTransaction(const CTransaction& tx)
 void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
     uint256 hash = tx.GetHash();
-    int nInv = mapPrivatesendBroadcastTxes.count(hash) ? MSG_SSTX :
+    int nInv = mapPrivatesendBroadcastTxes.count(hash) ? MSG_PSTX :
                 (instantsend.HasTxLockRequest(hash) ? MSG_TXLOCK_REQUEST : MSG_TX);
     CInv inv(nInv, hash);
     {

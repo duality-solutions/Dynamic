@@ -3,7 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "ssnotificationinterface.h"
+#include "psnotificationinterface.h"
 #include "privatesend.h"
 #include "instantsend.h"
 #include "governance.h"
@@ -11,15 +11,15 @@
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 
-CSSNotificationInterface::CSSNotificationInterface()
+CPSNotificationInterface::CPSNotificationInterface()
 {
 }
 
-CSSNotificationInterface::~CSSNotificationInterface()
+CPSNotificationInterface::~CPSNotificationInterface()
 {
 }
 
-void CSSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
+void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
 {
     snodeman.UpdatedBlockTip(pindex);
     privateSendPool.UpdatedBlockTip(pindex);
@@ -29,7 +29,7 @@ void CSSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
     stormnodeSync.UpdatedBlockTip(pindex);
 }
 
-void CSSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
+void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
 {
     instantsend.SyncTransaction(tx, pblock);
 }

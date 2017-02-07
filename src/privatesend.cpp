@@ -643,18 +643,18 @@ void CPrivatesendPool::CommitFinalTransaction()
         }
     }
 
-    LogPrintf("CPrivatesendPool::CommitFinalTransaction -- CREATING SSTX\n");
+    LogPrintf("CPrivatesendPool::CommitFinalTransaction -- CREATING PSTX\n");
 
-    // create and sign Stormnode sstx transaction
+    // create and sign Stormnode pstx transaction
     if(!mapPrivatesendBroadcastTxes.count(hashTx)) {
-        CPrivatesendBroadcastTx sstx(finalTransaction, activeStormnode.vin, GetAdjustedTime());
-        sstx.Sign();
-        mapPrivatesendBroadcastTxes.insert(std::make_pair(hashTx, sstx));
+        CPrivatesendBroadcastTx pstx(finalTransaction, activeStormnode.vin, GetAdjustedTime());
+        pstx.Sign();
+        mapPrivatesendBroadcastTxes.insert(std::make_pair(hashTx, pstx));
     }
 
-    LogPrintf("CPrivatesendPool::CommitFinalTransaction -- TRANSMITTING SSTX\n");
+    LogPrintf("CPrivatesendPool::CommitFinalTransaction -- TRANSMITTING PSTX\n");
 
-    CInv inv(MSG_SSTX, hashTx);
+    CInv inv(MSG_PSTX, hashTx);
     RelayInv(inv);
 
     // Tell the clients it was successful
@@ -2393,7 +2393,7 @@ bool CPrivatesendBroadcastTx::CheckSignature(const CPubKey& pubKeyStormnode)
     std::string strError = "";
 
     if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
-        LogPrintf("CPrivatesendBroadcastTx::CheckSignature -- Got bad sstx signature, error: %s\n", strError);
+        LogPrintf("CPrivatesendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
         return false;
     }
 

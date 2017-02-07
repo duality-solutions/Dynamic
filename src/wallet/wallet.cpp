@@ -2241,7 +2241,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
                 continue;
 
             int nDepth = pcoin->GetDepthInMainChain(false);
-            // do not use IX for inputs that have less then INSTANTSEND_CONFIRMATIONS_REQUIRED blockchain confirmations
+            // do not use IS for inputs that have less then INSTANTSEND_CONFIRMATIONS_REQUIRED blockchain confirmations
             if (fUseInstantSend && nDepth < INSTANTSEND_CONFIRMATIONS_REQUIRED)
                 continue;
 
@@ -2479,7 +2479,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
 
 bool CWallet::SelectCoins(const CAmount& nTargetValue, set<pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
-    // Note: this function should never be used for "always free" tx types like sstx
+    // Note: this function should never be used for "always free" tx types like pstx
 
     vector<COutput> vCoins;
     AvailableCoins(vCoins, true, coinControl, false, nCoinType, fUseInstantSend);

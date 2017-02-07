@@ -38,7 +38,7 @@ const char *FILTERCLEAR="filterclear";
 const char *REJECT="reject";
 const char *SENDHEADERS="sendheaders";
 // DarkSilk message types
-const char *TXLOCKREQUEST="ix";
+const char *TXLOCKREQUEST="is";
 const char *TXLOCKVOTE="txlvote";
 const char *SPORK="spork";
 const char *GETSPORKS="getsporks";
@@ -54,7 +54,7 @@ const char *SSFINALTX="ssf";
 const char *SSSIGNFINALTX="sss";
 const char *SSCOMPLETE="ssc";
 const char *SSSTATUSUPDATE="sssu";
-const char *SSTX="sstx";
+const char *PSTX="pstx";
 const char *SSQUEUE="ssq";
 const char *SSEG="sseg";
 const char *SYNCSTATUSCOUNT="ssc";
@@ -80,7 +80,7 @@ static const char* ppszTypeName[] =
     NetMsgType::SNQUORUM, // not implemented
     NetMsgType::SNANNOUNCE,
     NetMsgType::SNPING,
-    NetMsgType::SSTX,
+    NetMsgType::PSTX,
     NetMsgType::SNGOVERNANCEOBJECT,
     NetMsgType::SNGOVERNANCEOBJECTVOTE,
     NetMsgType::SNVERIFY,
@@ -129,7 +129,7 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::SSSIGNFINALTX,
     NetMsgType::SSCOMPLETE,
     NetMsgType::SSSTATUSUPDATE,
-    NetMsgType::SSTX,
+    NetMsgType::PSTX,
     NetMsgType::SSQUEUE,
     NetMsgType::SSEG,
     NetMsgType::SYNCSTATUSCOUNT,

@@ -4968,7 +4968,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_STORMNODE_PING:
         return snodeman.mapSeenStormnodePing.count(inv.hash);
 
-    case MSG_SSTX:
+    case MSG_PSTX:
         return mapPrivatesendBroadcastTxes.count(inv.hash);
 
     case MSG_GOVERNANCE_OBJECT:
@@ -5189,12 +5189,12 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                 }
 
-                if (!pushed && inv.type == MSG_SSTX) {
+                if (!pushed && inv.type == MSG_PSTX) {
                     if(mapPrivatesendBroadcastTxes.count(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
                         ss << mapPrivatesendBroadcastTxes[inv.hash];
-                        pfrom->PushMessage(NetMsgType::SSTX, ss);
+                        pfrom->PushMessage(NetMsgType::PSTX, ss);
                         pushed = true;
                     }
                 }
@@ -5718,7 +5718,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     }
 
 
-    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::SSTX || strCommand == NetMsgType::TXLOCKREQUEST)
+    else if (strCommand == NetMsgType::TX || strCommand == NetMsgType::PSTX || strCommand == NetMsgType::TXLOCKREQUEST)
     {
         // Stop processing the transaction early if
         // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
@@ -5732,7 +5732,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         vector<uint256> vEraseQueue;
         CTransaction tx;
         CTxLockRequest txLockRequest;
-        CPrivatesendBroadcastTx sstx;
+        CPrivatesendBroadcastTx pstx;
         int nInvType = MSG_TX;
 
         // Read data and assign inv type
@@ -5742,10 +5742,10 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             vRecv >> txLockRequest;
             tx = txLockRequest;
             nInvType = MSG_TXLOCK_REQUEST;
-        } else if (strCommand == NetMsgType::SSTX) {
-            vRecv >> sstx;
-            tx = sstx.tx;
-            nInvType = MSG_SSTX;
+        } else if (strCommand == NetMsgType::PSTX) {
+            vRecv >> pstx;
+            tx = pstx.tx;
+            nInvType = MSG_PSTX;
         }
 
         CInv inv(nInvType, tx.GetHash());
@@ -5758,34 +5758,34 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 LogPrint("instantsend", "TXLOCKREQUEST -- failed %s\n", txLockRequest.GetHash().ToString());
                 return false;
             }
-        } else if (strCommand == NetMsgType::SSTX) {
+        } else if (strCommand == NetMsgType::PSTX) {
 
             uint256 hashTx = tx.GetHash();
 
             if(mapPrivatesendBroadcastTxes.count(hashTx)) {
-                LogPrint("privatesend", "SSTX -- Already have %s, skipping...\n", hashTx.ToString());
+                LogPrint("privatesend", "PSTX -- Already have %s, skipping...\n", hashTx.ToString());
                 return true; // not an error
             }
 
-            CStormnode* psn = snodeman.Find(sstx.vin);
+            CStormnode* psn = snodeman.Find(pstx.vin);
             if(psn == NULL) {
-                LogPrint("privatesend", "SSTX -- Can't find Stormnode %s to verify %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
+                LogPrint("privatesend", "PSTX -- Can't find Stormnode %s to verify %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return false;
             }
 
             if(!psn->fAllowMixingTx) {
-                LogPrint("privatesend", "SSTX -- Stormnode %s is sending too many transactions %s\n", sstx.vin.prevout.ToStringShort(), hashTx.ToString());
+                LogPrint("privatesend", "PSTX -- Stormnode %s is sending too many transactions %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return true;
-                // TODO: Not an error? Could it be that someone is relaying old SSTXes
+                // TODO: Not an error? Could it be that someone is relaying old PSTXes
                 // we have no idea about (e.g we were offline)? How to handle them?
             }
 
-            if(!sstx.CheckSignature(psn->pubKeyStormnode)) {
-                LogPrint("privatesend", "SSTX -- CheckSignature() failed for %s\n", hashTx.ToString());
+            if(!pstx.CheckSignature(psn->pubKeyStormnode)) {
+                LogPrint("privatesend", "PSTX -- CheckSignature() failed for %s\n", hashTx.ToString());
                 return false;
             }
 
-            LogPrintf("SSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
+            LogPrintf("PSTX -- Got Stormnode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
             psn->fAllowMixingTx = false;
         }
@@ -5800,10 +5800,10 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))
         {
             // Process custom txes, this changes AlreadyHave to "true"
-            if (strCommand == NetMsgType::SSTX) {
-                LogPrintf("SSTX -- Stormnode transaction accepted, txid=%s, peer=%d\n",
+            if (strCommand == NetMsgType::PSTX) {
+                LogPrintf("PSTX -- Stormnode transaction accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);
-                mapPrivatesendBroadcastTxes.insert(make_pair(tx.GetHash(), sstx));
+                mapPrivatesendBroadcastTxes.insert(make_pair(tx.GetHash(), pstx));
             } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
                 LogPrintf("TXLOCKREQUEST -- Transaction Lock Request accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);

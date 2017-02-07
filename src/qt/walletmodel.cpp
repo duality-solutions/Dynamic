@@ -381,9 +381,9 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
             return TransactionCommitFailed;
 
         CTransaction* t = (CTransaction*)newTx;
-        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-        ssTx << *t;
-        transaction_array.append(&(ssTx[0]), ssTx.size());
+        CDataStream psTx(SER_NETWORK, PROTOCOL_VERSION);
+        psTx << *t;
+        transaction_array.append(&(psTx[0]), psTx.size());
     }
 
     // Add addresses / update labels that we've sent to to the address book,

@@ -97,7 +97,7 @@ DARKSILK_CORE_H = \
   core_io.h \
   core_memusage.h \
   privatesend.h \
-  ssnotificationinterface.h \
+  psnotificationinterface.h \
   privatesend-relay.h \
   governance.h \
   governance-classes.h \
@@ -260,7 +260,7 @@ libdarksilk_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdarksilk_wallet_a_SOURCES = \
   activestormnode.cpp \
   privatesend.cpp \
-  ssnotificationinterface.cpp \
+  psnotificationinterface.cpp \
   privatesend-relay.cpp \
   instantsend.cpp \
   stormnode.cpp \

@@ -121,9 +121,9 @@ string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
 
 string EncodeHexTx(const CTransaction& tx)
 {
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-    ssTx << tx;
-    return HexStr(ssTx.begin(), ssTx.end());
+    CDataStream psTx(SER_NETWORK, PROTOCOL_VERSION);
+    psTx << tx;
+    return HexStr(psTx.begin(), psTx.end());
 }
 
 void ScriptPubKeyToUniv(const CScript& scriptPubKey,

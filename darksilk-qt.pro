@@ -406,7 +406,7 @@ HEADERS += \
     src/serialize.h \
     src/spentindex.h \
     src/spork.h \
-    src/ssnotificationinterface.h \
+    src/psnotificationinterface.h \
     src/stormnode-payments.h \
     src/stormnode-sync.h \
     src/stormnode.h \
@@ -586,7 +586,7 @@ SOURCES += \
     src/privatesend.cpp \
     src/scheduler.cpp \
     src/spork.cpp \
-    src/ssnotificationinterface.cpp \
+    src/psnotificationinterface.cpp \
     src/stormnode-payments.cpp \
     src/stormnode-sync.cpp \
     src/stormnode.cpp \
