@@ -25,7 +25,7 @@
 #include "wallet/walletdb.h"
 #endif
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #ifdef ENABLED_WALLET
 #include "stormnodeconfig.h"
 #endif

@@ -25,7 +25,7 @@
 #include "txmempool.h"
 #include "wallet/wallet.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 
 #include <QMessageBox>
 #include <QScrollBar>
@@ -68,13 +68,13 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *platformStyle, QWidget *pa
 
     // DarkSilk specific
     QSettings settings;
-    if (!settings.contains("bUseSandStorm"))
-        settings.setValue("bUseSandStorm", false);
-    if (!settings.contains("bUseInstantX"))
-        settings.setValue("bUseInstantX", false);
+    if (!settings.contains("bUsePrivateSend"))
+        settings.setValue("bUsePrivateSend", false);
+    if (!settings.contains("bUseInstantSend"))
+        settings.setValue("bUseInstantSend", false);
 
-    bool fUsePrivateSend = settings.value("bUseSandStorm").toBool();
-    bool fUseInstantSend = settings.value("bUseInstantX").toBool();
+    bool fUsePrivateSend = settings.value("bUsePrivateSend").toBool();
+    bool fUseInstantSend = settings.value("bUseInstantSend").toBool();
     if(fLiteMode) {
         ui->checkUsePrivateSend->setChecked(false);
         ui->checkUsePrivateSend->setVisible(false);
@@ -581,7 +581,7 @@ void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& unconfir
     {
 	    uint64_t bal = 0;
         QSettings settings;
-        settings.setValue("bUseSandStorm", ui->checkUsePrivateSend->isChecked());
+        settings.setValue("bUsePrivateSend", ui->checkUsePrivateSend->isChecked());
 	    if(ui->checkUsePrivateSend->isChecked()) {
 		    bal = anonymizedBalance;
 	    } else {
@@ -606,7 +606,7 @@ void SendCoinsDialog::updateDisplayUnit()
 void SendCoinsDialog::updateInstantSend()
 {
     QSettings settings;
-    settings.setValue("bUseInstantX", ui->checkUseInstantSend->isChecked());
+    settings.setValue("bUseInstantSend", ui->checkUseInstantSend->isChecked());
     CoinControlDialog::coinControl->fUseInstantSend = ui->checkUseInstantSend->isChecked();
     coinControlUpdateLabels();
 }

@@ -132,7 +132,7 @@ struct stormnode_info_t
 };
 
 //
-// The Stormnode Class. For managing the Sandstorm process. It contains the input of the 1000DSLK, signature to prove
+// The Stormnode Class. For managing the Privatesend process. It contains the input of the 1000DSLK, signature to prove
 // it's the one who own that ip address and code for calculating the payment election.
 //
 class CStormnode

@@ -5,32 +5,32 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_SANDSTORMCONFIG_H
-#define DARKSILK_QT_SANDSTORMCONFIG_H
+#ifndef DARKSILK_QT_PRIVATESENDCONFIG_H
+#define DARKSILK_QT_PRIVATESENDCONFIG_H
 
 #include <QDialog>
 
 namespace Ui {
-    class SandstormConfig;
+    class PrivatesendConfig;
 }
 class WalletModel;
 
 /** Multifunctional dialog to ask for passphrases. Used for encryption, unlocking, and changing the passphrase.
  */
-class SandstormConfig : public QDialog
+class PrivatesendConfig : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    SandstormConfig(QWidget *parent = 0);
-    ~SandstormConfig();
+    PrivatesendConfig(QWidget *parent = 0);
+    ~PrivatesendConfig();
 
     void setModel(WalletModel *model);
 
 
 private:
-    Ui::SandstormConfig *ui;
+    Ui::PrivatesendConfig *ui;
     WalletModel *model;
     void configure(bool enabled, int coins, int rounds);
 
@@ -41,4 +41,4 @@ private Q_SLOTS:
     void clickMax();
 };
 
-#endif // DARKSILK_QT_SANDSTORMCONFIG_H
+#endif // DARKSILK_QT_PRIVATESENDCONFIG_H

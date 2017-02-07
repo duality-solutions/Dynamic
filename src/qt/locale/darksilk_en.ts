@@ -933,8 +933,8 @@ Address: %4
     </message>
     <message>
         <location line="+329"/>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</translation>
     </message>
     <message>
         <location line="+32"/>
@@ -1062,11 +1062,11 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <location filename="../forms/sandstormconfig.ui" line="+14"/>
-        <source>Configure Sandstorm</source>
-        <translation>Configure Sandstorm</translation>
+        <location filename="../forms/privatesendconfig.ui" line="+14"/>
+        <source>Configure Privatesend</source>
+        <translation>Configure Privatesend</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -1124,26 +1124,26 @@ Address: %4
         <translation>This is the slowest and most secure option. Using maximum anonymity will cost</translation>
     </message>
     <message>
-        <location filename="../sandstormconfig.cpp" line="+43"/>
+        <location filename="../privatesendconfig.cpp" line="+43"/>
         <location line="+15"/>
         <location line="+15"/>
-        <source>Sandstorm Configuration</source>
-        <translation>Sandstorm Configuration</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Privatesend Configuration</translation>
     </message>
     <message>
         <location line="-29"/>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
-        <translation>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
-        <translation>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
-        <translation>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</source>
+        <translation>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk&apos;s configuration screen.</translation>
     </message>
 </context>
 <context>
@@ -1441,13 +1441,13 @@ Address: %4
     </message>
     <message>
         <location line="+40"/>
-        <source>Sandstorm rounds to use</source>
-        <translation>Sandstorm rounds to use</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Privatesend rounds to use</translation>
     </message>
     <message>
         <location line="+24"/>
-        <source>This amount acts as a threshold to turn off Sandstorm once it&apos;s reached.</source>
-        <translation>This amount acts as a threshold to turn off Sandstorm once it&apos;s reached.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it&apos;s reached.</source>
+        <translation>This amount acts as a threshold to turn off Privatesend once it&apos;s reached.</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -1790,8 +1790,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Sandstorm Balance:</source>
-        <translation>Sandstorm Balance:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Privatesend Balance:</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -1819,8 +1819,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <location line="+10"/>
         <location line="+10"/>
         <location line="+14"/>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <location line="+74"/>
@@ -1844,8 +1844,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Try to manually submit a Sandstorm request.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Try to manually submit a Privatesend request.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1854,8 +1854,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it&apos;s in the process of Mixing, which can cost you money!)</source>
-        <translation>Reset the current status of Sandstorm (can interrupt Sandstorm if it&apos;s in the process of Mixing, which can cost you money!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>Reset the current status of Privatesend (can interrupt Privatesend if it&apos;s in the process of Mixing, which can cost you money!)</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -1881,14 +1881,14 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <location line="-288"/>
         <location line="+290"/>
         <location line="+91"/>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Start Sandstorm Mixing</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Start Privatesend Mixing</translation>
     </message>
     <message>
         <location line="-379"/>
         <location line="+382"/>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Stop Sandstorm Mixing</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Stop Privatesend Mixing</translation>
     </message>
     <message>
         <location line="-211"/>
@@ -1945,9 +1945,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Last Sandstorm message:
+        <translation>Last Privatesend message:
 </translation>
     </message>
     <message>
@@ -1957,23 +1957,23 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm was successfully reset.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend was successfully reset.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>If you don&apos;t want to see internal Sandstorm fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
-        <translation>If you don&apos;t want to see internal Sandstorm fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
+        <source>If you don&apos;t want to see internal Privatesend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>If you don&apos;t want to see internal Privatesend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstorm requires at least %1 to use.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesend requires at least %1 to use.</translation>
     </message>
     <message>
         <location line="+14"/>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Wallet is locked and user declined to unlock. Disabling Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Wallet is locked and user declined to unlock. Disabling Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -2914,13 +2914,13 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+78"/>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 duffs in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 duffs in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
     </message>
     <message>
         <location line="+16"/>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 duffs in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 duffs in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
     </message>
     <message>
         <location line="+33"/>
@@ -3015,13 +3015,13 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+38"/>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -3083,8 +3083,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm requires this amount to be rounded up to the nearest %1).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend requires this amount to be rounded up to the nearest %1).</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -3093,8 +3093,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>and InstantX</source>
-        <translation>and InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>and InstantSend</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -3552,18 +3552,18 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="-31"/>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/offline (verified via instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/offline (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/confirmed (verified via instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/confirmed (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 confirmations (verified via instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 confirmations (verified via instantsend)</translation>
     </message>
     <message>
         <location line="+29"/>
@@ -3583,28 +3583,28 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="-26"/>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/offline (InstantX verification in progress - %2 of %3 signatures)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/offline (InstantX verification failed)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/offline (InstantSend verification failed)</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/confirmed (InstantX verification failed)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/confirmed (InstantSend verification failed)</translation>
     </message>
     <message>
         <location line="+32"/>
@@ -3868,8 +3868,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Received via Sandstorm</source>
-        <translation>Received via Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Received via Privatesend</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3888,28 +3888,28 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominate</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominate</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm Collateral Payment</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend Collateral Payment</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm Make Collateral Inputs</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm Create Denominations</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend Create Denominations</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <location line="+30"/>
@@ -4007,28 +4007,28 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm Make Collateral Inputs</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm Create Denominations</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend Create Denominations</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominate</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominate</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm Collateral Payment</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend Collateral Payment</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4189,8 +4189,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     <message>
         <location line="-20"/>
         <location line="+9"/>
-        <source>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</translation>
+        <source>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -4255,8 +4255,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+12"/>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -4290,8 +4290,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -4325,13 +4325,13 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Unable to locate enough Sandstorm denominated funds for this transaction.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Unable to locate enough Privatesend denominated funds for this transaction.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -4455,8 +4455,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>Sandstorm options:</source>
-        <translation>Sandstorm options:</translation>
+        <source>Privatesend options:</source>
+        <translation>Privatesend options:</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4545,8 +4545,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Error: You already have pending entries in the Sandstorm pool</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Error: You already have pending entries in the Privatesend pool</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4610,8 +4610,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4620,13 +4620,13 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Enable instantx, show confirmations for locked transactions (bool, default: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -4700,8 +4700,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -4847,18 +4847,18 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm is idle.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend is idle.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Sandstorm request complete:</source>
-        <translation>Sandstorm request complete:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Privatesend request complete:</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Sandstorm request incomplete:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Privatesend request incomplete:</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -4977,8 +4977,8 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+1"/>
-        <source>InstantX options:</source>
-        <translation>InstantX options:</translation>
+        <source>InstantSend options:</source>
+        <translation>InstantSend options:</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5022,8 +5022,8 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+11"/>
-        <source>Last successful Sandstorm action was too recent.</source>
-        <translation>Last successful Sandstorm action was too recent.</translation>
+        <source>Last successful Privatesend action was too recent.</source>
+        <translation>Last successful Privatesend action was too recent.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5367,8 +5367,8 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+1"/>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>Last Sandstorm was too recent.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>Last Privatesend was too recent.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5682,8 +5682,8 @@ for example: alertnotify=echo %%s | mail -s &quot;DarkSilk Alert&quot; admin@foo
     </message>
     <message>
         <location line="+1"/>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Value more than Sandstorm pool maximum allows.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Value more than Privatesend pool maximum allows.</translation>
     </message>
     <message>
         <location line="+1"/>

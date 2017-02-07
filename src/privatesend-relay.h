@@ -3,15 +3,15 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_SANDSTORM_RELAY_H
-#define DARKSILK_SANDSTORM_RELAY_H
+#ifndef DARKSILK_PRIVATESEND_RELAY_H
+#define DARKSILK_PRIVATESEND_RELAY_H
 
 #include "main.h"
 #include "activestormnode.h"
 #include "stormnodeman.h"
 
 
-class CSandStormRelay
+class CPrivateSendRelay
 {
 public:
     CTxIn vinStormnode;
@@ -22,8 +22,8 @@ public:
     CTxIn in;
     CTxOut out;
 
-    CSandStormRelay();
-    CSandStormRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
+    CPrivateSendRelay();
+    CPrivateSendRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
     
     ADD_SERIALIZE_METHODS;
 
@@ -48,4 +48,4 @@ public:
 
 
 
-#endif // DARKSILK_SANDSTORM_RELAY_H
+#endif // DARKSILK_PRIVATESEND_RELAY_H

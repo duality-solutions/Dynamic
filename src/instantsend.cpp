@@ -4,8 +4,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "sandstorm.h"
-#include "instantx.h"
+#include "privatesend.h"
+#include "instantsend.h"
 #include "key.h"
 #include "main.h"
 #include "stormnode-sync.h"
@@ -883,7 +883,7 @@ bool CTxLockRequest::IsValid(bool fRequireUnspent) const
         }
 
         int nTxAge = chainActive.Height() - (nPrevoutHeight ? nPrevoutHeight : coins.nHeight) + 1;
-        // 1 less than the "send IX" gui requires, in case of a block propagating the network at the time
+        // 1 less than the "send IS" gui requires, in case of a block propagating the network at the time
         int nConfirmationsRequired = INSTANTSEND_CONFIRMATIONS_REQUIRED - 1;
 
         if(nTxAge < nConfirmationsRequired) {
@@ -1004,7 +1004,7 @@ bool CTxLockVote::CheckSignature() const
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(infoSn.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1017,12 +1017,12 @@ bool CTxLockVote::Sign()
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if(!sandStormSigner.SignMessage(strMessage, vchStormnodeSignature, activeStormnode.keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchStormnodeSignature, activeStormnode.keyStormnode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(activeStormnode.pubKeyStormnode, vchStormnodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

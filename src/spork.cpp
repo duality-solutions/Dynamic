@@ -3,7 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "main.h"
 #include "spork.h"
 
@@ -223,17 +223,17 @@ bool CSporkMessage::Sign(std::string strSignKey)
     std::string strError = "";
     std::string strMessage = boost::lexical_cast<std::string>(nSporkID) + boost::lexical_cast<std::string>(nValue) + boost::lexical_cast<std::string>(nTimeSigned);
 
-    if(!sandStormSigner.GetKeysFromSecret(strSignKey, key, pubkey)) {
+    if(!privateSendSigner.GetKeysFromSecret(strSignKey, key, pubkey)) {
         LogPrintf("CSporkMessage::Sign -- GetKeysFromSecret() failed, invalid spork key %s\n", strSignKey);
         return false;
     }
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, key)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, key)) {
         LogPrintf("CSporkMessage::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
         LogPrintf("CSporkMessage::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -248,7 +248,7 @@ bool CSporkMessage::CheckSignature()
     std::string strMessage = boost::lexical_cast<std::string>(nSporkID) + boost::lexical_cast<std::string>(nValue) + boost::lexical_cast<std::string>(nTimeSigned);
     CPubKey pubkey(ParseHex(Params().SporkPubKey()));
 
-    if(!sandStormSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
         LogPrintf("CSporkMessage::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

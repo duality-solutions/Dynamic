@@ -5,7 +5,7 @@
 
 #include "activestormnode.h"
 #include "addrman.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
@@ -760,7 +760,7 @@ void CStormnodeMan::ProcessStormnodeConnections()
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes) {
         if(pnode->fStormnode) {
-            if(sandStormPool.pSubmittedToStormnode != NULL && pnode->addr == sandStormPool.pSubmittedToStormnode->addr) continue;
+            if(privateSendPool.pSubmittedToStormnode != NULL && pnode->addr == privateSendPool.pSubmittedToStormnode->addr) continue;
             LogPrintf("Closing Stormnode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
@@ -1123,14 +1123,14 @@ void CStormnodeMan::SendVerifyReply(CNode* pnode, CStormnodeVerification& snv)
 
     std::string strMessage = strprintf("%s%d%s", activeStormnode.service.ToString(false), snv.nonce, blockHash.ToString());
 
-    if(!sandStormSigner.SignMessage(strMessage, snv.vchSig1, activeStormnode.keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, snv.vchSig1, activeStormnode.keyStormnode)) {
         LogPrintf("StormnodeMan::SendVerifyReply -- SignMessage() failed\n");
         return;
     }
 
     std::string strError;
 
-    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, snv.vchSig1, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(activeStormnode.pubKeyStormnode, snv.vchSig1, strMessage, strError)) {
         LogPrintf("StormnodeMan::SendVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
         return;
     }
@@ -1189,7 +1189,7 @@ void CStormnodeMan::ProcessVerifyReply(CNode* pnode, CStormnodeVerification& snv
         std::string strMessage1 = strprintf("%s%d%s", pnode->addr.ToString(false), snv.nonce, blockHash.ToString());
         while(it != vStormnodes.end()) {
             if((CAddress)it->addr == pnode->addr) {
-                if(sandStormSigner.VerifyMessage(it->pubKeyStormnode, snv.vchSig1, strMessage1, strError)) {
+                if(privateSendSigner.VerifyMessage(it->pubKeyStormnode, snv.vchSig1, strMessage1, strError)) {
                     // found it!
                     prealStormnode = &(*it);
                     if(!it->IsPoSeVerified()) {
@@ -1206,14 +1206,14 @@ void CStormnodeMan::ProcessVerifyReply(CNode* pnode, CStormnodeVerification& snv
                     std::string strMessage2 = strprintf("%s%d%s%s%s", snv.addr.ToString(false), snv.nonce, blockHash.ToString(),
                                             snv.vin1.prevout.ToStringShort(), snv.vin2.prevout.ToStringShort());
                     // ... and sign it
-                    if(!sandStormSigner.SignMessage(strMessage2, snv.vchSig2, activeStormnode.keyStormnode)) {
+                    if(!privateSendSigner.SignMessage(strMessage2, snv.vchSig2, activeStormnode.keyStormnode)) {
                         LogPrintf("StormnodeMan::ProcessVerifyReply -- SignMessage() failed\n");
                         return;
                     }
 
                     std::string strError;
 
-                    if(!sandStormSigner.VerifyMessage(activeStormnode.pubKeyStormnode, snv.vchSig2, strMessage2, strError)) {
+                    if(!privateSendSigner.VerifyMessage(activeStormnode.pubKeyStormnode, snv.vchSig2, strMessage2, strError)) {
                         LogPrintf("StormnodeMan::ProcessVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
                         return;
                     }
@@ -1312,12 +1312,12 @@ void CStormnodeMan::ProcessVerifyBroadcast(CNode* pnode, const CStormnodeVerific
             return;
         }
 
-        if(sandStormSigner.VerifyMessage(psn1->pubKeyStormnode, snv.vchSig1, strMessage1, strError)) {
+        if(privateSendSigner.VerifyMessage(psn1->pubKeyStormnode, snv.vchSig1, strMessage1, strError)) {
             LogPrintf("StormnodeMan::ProcessVerifyBroadcast -- VerifyMessage() for Stormnode1 failed, error: %s\n", strError);
             return;
         }
 
-        if(sandStormSigner.VerifyMessage(psn2->pubKeyStormnode, snv.vchSig2, strMessage2, strError)) {
+        if(privateSendSigner.VerifyMessage(psn2->pubKeyStormnode, snv.vchSig2, strMessage2, strError)) {
             LogPrintf("StormnodeMan::ProcessVerifyBroadcast -- VerifyMessage() for Stormnode2 failed, error: %s\n", strError);
             return;
         }

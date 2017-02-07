@@ -366,19 +366,19 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
     if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
         return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
 
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-    ssTx << tx;
+    CDataStream psTx(SER_NETWORK, PROTOCOL_VERSION);
+    psTx << tx;
 
     switch (rf) {
     case RF_BINARY: {
-        string binaryTx = ssTx.str();
+        string binaryTx = psTx.str();
         req->WriteHeader("Content-Type", "application/octet-stream");
         req->WriteReply(HTTP_OK, binaryTx);
         return true;
     }
 
     case RF_HEX: {
-        string strHex = HexStr(ssTx.begin(), ssTx.end()) + "\n";
+        string strHex = HexStr(psTx.begin(), psTx.end()) + "\n";
         req->WriteHeader("Content-Type", "text/plain");
         req->WriteReply(HTTP_OK, strHex);
         return true;

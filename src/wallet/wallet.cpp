@@ -30,9 +30,9 @@
 #include "util.h"
 #include "utilmoneystr.h"
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
-#include "instantx.h"
+#include "instantsend.h"
 #include "keepass.h"
 #include "spork.h"
 
@@ -57,7 +57,7 @@ const char * DEFAULT_WALLET_DAT = "wallet.dat";
 const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
 
 /** 
- * Fees smaller than this (in duffs) are considered zero fee (for transaction creation)
+ * Fees smaller than this (in satoshis) are considered zero fee (for transaction creation)
  * Override with -mintxfee
  */
 CFeeRate CWallet::minTxFee = CFeeRate(DEFAULT_TRANSACTION_MINFEE);
@@ -2128,7 +2128,7 @@ CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
     if(nNeedsToAnonymizeBalance > nAnonymizableBalance) nNeedsToAnonymizeBalance = nAnonymizableBalance;
 
     // we should never exceed the pool max
-    if (nNeedsToAnonymizeBalance > sandStormPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = sandStormPool.GetMaxPoolAmount();
+    if (nNeedsToAnonymizeBalance > privateSendPool.GetMaxPoolAmount()) nNeedsToAnonymizeBalance = privateSendPool.GetMaxPoolAmount();
 
     return nNeedsToAnonymizeBalance;
 }
@@ -2246,7 +2246,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
                 continue;
 
             int nDepth = pcoin->GetDepthInMainChain(false);
-            // do not use IX for inputs that have less then INSTANTSEND_CONFIRMATIONS_REQUIRED blockchain confirmations
+            // do not use IS for inputs that have less then INSTANTSEND_CONFIRMATIONS_REQUIRED blockchain confirmations
             if (fUseInstantSend && nDepth < INSTANTSEND_CONFIRMATIONS_REQUIRED)
                 continue;
 
@@ -2493,7 +2493,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
 
 bool CWallet::SelectCoins(const CAmount& nTargetValue, set<pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
-    // Note: this function should never be used for "always free" tx types like sstx
+    // Note: this function should never be used for "always free" tx types like pstx
 
     vector<COutput> vCoins;
     AvailableCoins(vCoins, true, coinControl, false, nCoinType, fUseInstantSend);
@@ -2656,7 +2656,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     // bit 3 - .1DSLK+1
 
     std::vector<int> vecBits;
-    if (!sandStormPool.GetDenominationsBits(nDenom, vecBits)) {
+    if (!privateSendPool.GetDenominationsBits(nDenom, vecBits)) {
         return false;
     }
 
@@ -3257,7 +3257,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                         nFeeRet += nChange;
                         wtxNew.mapValue["SS"] = "1";
                         // recheck skipped denominations during next mixing
-                        sandStormPool.ClearSkippedDenominations();
+                        privateSendPool.ClearSkippedDenominations();
                     } else {
 
                         // Fill a vout to ourself

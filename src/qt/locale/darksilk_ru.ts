@@ -741,8 +741,8 @@ Address: %4
         <translation>Копировать сдачу</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Выбраны неанонимизированные средства. &lt;b&gt;Sandstorm будет отключен.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Если Вы все-таки хотите использовать Sandstorm, пожалуйста, снимите выделение с со всех неанонимизированных средств и заново поставьте галочку напротив Sandstorm.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Выбраны неанонимизированные средства. &lt;b&gt;Privatesend будет отключен.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Если Вы все-таки хотите использовать Privatesend, пожалуйста, снимите выделение с со всех неанонимизированных средств и заново поставьте галочку напротив Privatesend.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Настройте Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Настройте Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Address: %4
         <translation>Этот самый медленный и безопасный вариант. Анонимизация будет стоить</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Настройки Sandstorm</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Настройки Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm успешно установлен в режим обычной приватности (%1 и 2 раунда). Вы можете изменить это в любое время, используя окно настроек.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend успешно установлен в режим обычной приватности (%1 и 2 раунда). Вы можете изменить это в любое время, используя окно настроек.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm успешно установлен в режим высокой приватности (%1 и 8 раундов). Вы можете изменить это в любое время, используя окно настроек.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend успешно установлен в режим высокой приватности (%1 и 8 раундов). Вы можете изменить это в любое время, используя окно настроек.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm успешно установлен в режим максимально приватности (%1 и 16 раундов). Вы можете изменить это в любое время, используя окно настроек.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend успешно установлен в режим максимально приватности (%1 и 16 раундов). Вы можете изменить это в любое время, используя окно настроек.</translation>
     </message>
 </context>
 <context>
@@ -1146,11 +1146,11 @@ Address: %4
         <translation>(0 = автоматически, &lt;0 = оставить столько незагруженных ядер)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Количество раундов Sandstorm</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Количество раундов Privatesend</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
         <translation>Это пороговое значение, при достижении которого автоматическое перемешивание отключается.</translation>
     </message>
     <message>
@@ -1423,8 +1423,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Завершение:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Баланс Sandstorm:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Баланс Privatesend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1443,8 +1443,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>н/д</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1463,16 +1463,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Последнее сообщение)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Попробовать отправить Sandstorm-запрос вручную.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Попробовать отправить Privatesend-запрос вручную.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Попробовать вручную</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Сбросить текущий статус Sandstorm (можно прервать процесс перемешивания Sandstorm, но это может стоить Вам немного денег!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Сбросить текущий статус Privatesend (можно прервать процесс перемешивания Privatesend, но это может стоить Вам немного денег!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1487,11 +1487,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Выключен</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
+        <source>Start Privatesend Mixing</source>
         <translation>Начать автоперемешивание</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
+        <source>Stop Privatesend Mixing</source>
         <translation>Остановить перемешивание</translation>
     </message>
     <message>
@@ -1535,9 +1535,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Включен</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Последнее сообщение Sandstorm:
+        <translation>Последнее сообщение Privatesend:
 </translation>
     </message>
     <message>
@@ -1545,20 +1545,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Н/Д</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Статус Sandstorm был успешно сброшен.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Статус Privatesend был успешно сброшен.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Если Вы не хотите видеть внутренние транзакции/комиссии от работы Sandstorm, выберите Тип "Наиболее общие" на закладке "Транзакции".</translation>
+        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Если Вы не хотите видеть внутренние транзакции/комиссии от работы Privatesend, выберите Тип "Наиболее общие" на закладке "Транзакции".</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Для работы Sandstorm требуется минимум %1.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Для работы Privatesend требуется минимум %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Кошелёк заблокирован и пользователь отказался его разблокировать. Sandstorm будет выключен.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Кошелёк заблокирован и пользователь отказался его разблокировать. Privatesend будет выключен.</translation>
     </message>
 </context>
 <context>
@@ -2284,11 +2284,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Свернуть</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
         <translation>Если ручная комиссия  установлена в 1000 duff, а транзакция по размеру только 250 байт, то плата "за килобайт" составит лишь 250 duff,&lt;br&gt;в то время как "минимум" будет равна 1000 duff. Для транзакций больше килобайта в любом случае идет расчет "за килобайт".</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
         <translation>Если ручная комиссия  установлена в 1000 duff, а транзакция по размеру только 250 байт, то плата "за килобайт" составит лишь 250 duff,&lt;br&gt;в то время как "итого минимум" будет равна 1000 duff. Для тразакций больше килобайта в любом случае идет расчет "за килобайт".</translation>
     </message>
     <message>
@@ -2364,12 +2364,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>&amp;Добавить получателя</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2416,16 +2416,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>анонимные средства</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(для работы sandstorm требуется принудительно округлить до ближайшего %1).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(для работы privatesend требуется принудительно округлить до ближайшего %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
         <translation>любые доступные средства (не рекомендуется)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>и InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>и InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>в противоречии</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/отключен (проверено через instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/отключен (проверено через instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/подтвержден (проверено через instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/подтвержден (проверено через instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 подтверждений (проверено через instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 подтверждений (проверено через instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 подтверждений</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/отключен (верификация InstantX в процессе - %2 из %3 подписей)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/отключен (верификация InstantSend в процессе - %2 из %3 подписей)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/подтвержден (верификация InstantX в процессе - %2 из %3 подписей)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/подтвержден (верификация InstantSend в процессе - %2 из %3 подписей)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 подтверждений (верификация InstantX в процессе - %2 из %3 подписей)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 подтверждений (верификация InstantSend в процессе - %2 из %3 подписей)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/отключен (верификация InstantX завершилась неудачно)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/отключен (верификация InstantSend завершилась неудачно)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/подтвержден (верификация InstantX завершилась неудачно)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/подтвержден (верификация InstantSend завершилась неудачно)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Получено от</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Получено через Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Получено через Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3036,24 +3036,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Добыто</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Перемешивание Sandstorm</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Перемешивание Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Обеспечительный платеж Sandstorm</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Обеспечительный платеж Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Создание обеспечительных монет для Sandstorm</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Создание обеспечительных монет для Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Создание номиналов для Sandstorm</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Создание номиналов для Privatesend</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Отправлено через Sandstorm</translation>
+        <source>Privatesended</source>
+        <translation>Отправлено через Privatesend</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3131,24 +3131,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Отправлено на</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Отправлено через Sandstorm</translation>
+        <source>Privatesended</source>
+        <translation>Отправлено через Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Создание обеспечительных монет для Sandstorm</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Создание обеспечительных монет для Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Создание номиналов для Sandstorm</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Создание номиналов для Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Перемешивание Sandstorm</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Перемешивание Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Обеспечительный платеж Sandstorm</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Обеспечительный платеж Privatesend</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Отправка</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX пока что не поддерживает такие большие суммы. На данный момент транзакции ограничены суммами до %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend пока что не поддерживает такие большие суммы. На данный момент транзакции ограничены суммами до %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3330,8 +3330,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Не удалось установить блокировку на каталог данных %s. Возможно, DarkSilk Core уже запущен.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>При отправке Sandstorm использует только деноминированные средства, возможно, Вам просто нужно анонимизировать немного больше монет.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>При отправке Privatesend использует только деноминированные средства, возможно, Вам просто нужно анонимизировать немного больше монет.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>В этом режиме -genproclimit определяет, сколько блоков генерируется немедленно.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX требует наличия средств с хотя бы 6 подтверждениями, возможно Вам нужно подождать пару минут и попробовать снова.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend требует наличия средств с хотя бы 6 подтверждениями, возможно Вам нужно подождать пару минут и попробовать снова.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3386,11 +3386,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Не удалось привязаться к %s на этом компьютере. Возможно, DarkSilk Core уже запущен.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Не удалось обнаружить достаточных для выполнения этой транзакции номиналов Sandstorm.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Не удалось обнаружить достаточных для выполнения этой транзакции номиналов Privatesend.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
         <translation>Не удалось обнаружить достаточных для выполнения этой транзакции неденоминированных средств, отличающихся от 1000DRK.</translation>
     </message>
     <message>
@@ -3490,8 +3490,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>База данных блоков повреждена</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Параметры Sandstorm:</translation>
+        <source>Privatesend options:</source>
+        <translation>Параметры Privatesend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3562,8 +3562,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Ошибка: кошелёк заблокирован, создание транзакции невозможно!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Ошибка: у Вас уже есть ожидающие записи в пуле Sandstorm</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Ошибка: у Вас уже есть ожидающие записи в пуле Privatesend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3614,20 +3614,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Удалить все трансакции из кошелька и при рестарте с помощью -rescan восстановить только те, которые есть в цепочке блоков</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Отключить всю функциональность, относящуюся к  DarkSilk (Мастерноды, Sandstorm, InstantX, бюджеты) (0-1, по умолчанию: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Отключить всю функциональность, относящуюся к  DarkSilk (Мастерноды, Privatesend, InstantSend, бюджеты) (0-1, по умолчанию: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Распространяется под лицензией на программное обеспечение MIT, смотрите прилагаемый файл COPYING или &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Включить instantx, показывать подтверждения для заблокированных транзакций (булевое, по умолчанию: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Включить instantsend, показывать подтверждения для заблокированных транзакций (булевое, по умолчанию: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Включить автоматическое перемешивание Sandstorm для средств, хранящихся в этом кошельке (0-1, по умолчанию: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Включить автоматическое перемешивание Privatesend для средств, хранящихся в этом кошельке (0-1, по умолчанию: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3686,8 +3686,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Вывод отладочной информации (по умолчанию: %u, указание &lt;category&gt; необязательно)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Предоставлять ликвидность для Sandstorm путем редкого участия в перемешивании монет на постоянной основе (0-100, по умолчанию: %u, 1=очень часто, высокая комиссия, 100=очень редко, низкая комиссия)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Предоставлять ликвидность для Privatesend путем редкого участия в перемешивании монет на постоянной основе (0-100, по умолчанию: %u, 1=очень часто, высокая комиссия, 100=очень редко, низкая комиссия)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3808,16 +3808,16 @@ rpcpassword=%s
         <translation>Не могу распознать сетевой адрес в значении %s параметра -rpcbind</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm в режиме ожидания.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend в режиме ожидания.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Запрос Sandstorm завершен:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Запрос Privatesend завершен:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Запрос Sandstorm не завершен:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Запрос Privatesend не завершен:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3912,8 +3912,8 @@ rpcpassword=%s
         <translation>Вход некорректен.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>Параметры InstantX:</translation>
+        <source>InstantSend options:</source>
+        <translation>Параметры InstantSend:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
@@ -3948,8 +3948,8 @@ rpcpassword=%s
         <translation>Неверная сумма в параметре -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Sandstorm action was too recent.</source>
-        <translation>Последнее успешное действие Sandstorm было слишком недавно.</translation>
+        <source>Last successful Privatesend action was too recent.</source>
+        <translation>Последнее успешное действие Privatesend было слишком недавно.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4224,8 +4224,8 @@ rpcpassword=%s
         <translation>Держать в памяти до &lt;n&gt; несвязных транзакций (по умолчанию: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>Последнее действие Sandstorm было слишком недавно.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>Последнее действие Privatesend было слишком недавно.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4476,8 +4476,8 @@ rpcpassword=%s
         <translation>Имя для подключений JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Превышено значение допустимой для пула Sandstorm суммы.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Превышено значение допустимой для пула Privatesend суммы.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

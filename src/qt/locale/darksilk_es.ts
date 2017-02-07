@@ -741,8 +741,8 @@ Dirección: %4
         <translation>Copiar cambio</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Se seleccionó alguna entrada no anónima. &lt;b&gt;Sandstorm se desactivará.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Si aún desea usar Sandstorm, por favor desmarque primero todas las entradas que no son anónimas y luego active de nuevo la casilla de Sandstorm.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Se seleccionó alguna entrada no anónima. &lt;b&gt;Privatesend se desactivará.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Si aún desea usar Privatesend, por favor desmarque primero todas las entradas que no son anónimas y luego active de nuevo la casilla de Privatesend.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Dirección: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Configurar Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Configurar Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Dirección: %4
         <translation>Esta es la opción más lenta y segura de todas. Usar la anonimización máxima costará</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Configuración de Sandstorm</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Configuración de Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm fue configurado con éxito en la básica (%1 y 2 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend fue configurado con éxito en la básica (%1 y 2 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm fue configurado con éxito en la alta (%1 y 8 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend fue configurado con éxito en la alta (%1 y 8 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm fue configurado con éxito en la máxima (%1 y 16 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend fue configurado con éxito en la máxima (%1 y 16 rondas). Puede cambiarlo en cualquier momento abriendo la pantalla de configuración de DarkSilk.</translation>
     </message>
 </context>
 <context>
@@ -1146,12 +1146,12 @@ Dirección: %4
         <translation>(0 = automático, &lt;0 = dejar libres ese número de núcleos)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Rondas de Sandstorm a usar</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Rondas de Privatesend a usar</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Esta cuantía sirve de umbral para que Sandstorm se apague, una vez sea alcanzada.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Esta cuantía sirve de umbral para que Privatesend se apague, una vez sea alcanzada.</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1423,8 +1423,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Completado:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Saldo de Sandstorm:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Saldo de Privatesend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1443,8 +1443,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>n/d</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1463,16 +1463,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Último Mensaje)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Intentar enviar manualmente una solicitud Sandstorm.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Intentar enviar manualmente una solicitud Privatesend.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Probar</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Reiniciar el estado actual de Sandstorm (¡puede interrumpir Sandstorm si está en el proceso de Mezcla, lo cual puede costarle dinero!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Reiniciar el estado actual de Privatesend (¡puede interrumpir Privatesend si está en el proceso de Mezcla, lo cual puede costarle dinero!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1487,12 +1487,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Desactivado</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Iniciar Mezclador Sandstorm</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Iniciar Mezclador Privatesend</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Parar Mezclador Sandstorm</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Parar Mezclador Privatesend</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1535,9 +1535,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Activado</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Último mensaje de Sandstorm:
+        <translation>Último mensaje de Privatesend:
 </translation>
     </message>
     <message>
@@ -1545,20 +1545,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>N/D</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm se reinició correctamente.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend se reinició correctamente.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Si no desea ver las comisiones/transacciones internas de Sandstorm seleccione "Más Habitual" como Tipo en la pestaña de "Transacciones".</translation>
+        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Si no desea ver las comisiones/transacciones internas de Privatesend seleccione "Más Habitual" como Tipo en la pestaña de "Transacciones".</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstorm requiere al menos %1 para su uso.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesend requiere al menos %1 para su uso.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>El monedero está bloqueado y el usuario rechazó desbloquearlo. Desactivando Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>El monedero está bloqueado y el usuario rechazó desbloquearlo. Desactivando Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -2284,12 +2284,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Minimizar</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Si la comisión personalizada se establece en 1000 duffs y la transacción sólo ocupa 250 bytes, entonces "por kilobyte" sólo se pagan 250 duffs de comisión,&lt;br /&gt;mientras que "como mínimo" paga 1000 duffs. Para transacciones mayores de un kilobyte ambas pagan por kilobyte.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Si la comisión personalizada se establece en 1000 satoshis y la transacción sólo ocupa 250 bytes, entonces "por kilobyte" sólo se pagan 250 satoshis de comisión,&lt;br /&gt;mientras que "como mínimo" paga 1000 satoshis. Para transacciones mayores de un kilobyte ambas pagan por kilobyte.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Si la comisión personalizada se establece en 1000 duffs y la transacción sólo ocupa 250 bytes, entonces "por kilobyte" sólo se pagan 250 duffs de comisión,&lt;br /&gt;mientras que "total como mínimo" paga 1000 duffs. Para transacciones mayores de un kilobyte ambas pagan por kilobyte.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Si la comisión personalizada se establece en 1000 satoshis y la transacción sólo ocupa 250 bytes, entonces "por kilobyte" sólo se pagan 250 satoshis de comisión,&lt;br /&gt;mientras que "total como mínimo" paga 1000 satoshis. Para transacciones mayores de un kilobyte ambas pagan por kilobyte.</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
@@ -2364,12 +2364,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Añadir &amp;Destinatario</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2416,16 +2416,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>fondos anónimos</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm requiere que esta cantidad sea redondeada al %1 más cercano).</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend requiere que esta cantidad sea redondeada al %1 más cercano).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
         <translation>cualquier fondo disponible (no recomendado)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>e InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>e InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>en conflicto</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1 desconectado (comprobado por instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1 desconectado (comprobado por instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/confirmado (comprobado por instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/confirmado (comprobado por instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 confirmaciones (comprobado por instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 confirmaciones (comprobado por instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 confirmaciones</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/desconectado (Verificación de InstantX en curso - %2 de %3 firmas)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/desconectado (Verificación de InstantSend en curso - %2 de %3 firmas)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/confirmada (Verificación de InstantX en curso - %2 de %3 firmas)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/confirmada (Verificación de InstantSend en curso - %2 de %3 firmas)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 confirmaciones (Verificación de InstantX en curso - %2 de %3 firmas)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 confirmaciones (Verificación de InstantSend en curso - %2 de %3 firmas)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/desconectado (Falló la verificación de InstantX)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/desconectado (Falló la verificación de InstantSend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/confirmada (Falló la verificación de InstantX)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/confirmada (Falló la verificación de InstantSend)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Recibido desde</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Recibido mediante Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Recibido mediante Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3036,24 +3036,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Minado</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Denominación Sandstorm</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Denominación Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm - Pago de Colateral</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend - Pago de Colateral</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm - Efectuar Entradas de Colateral</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend - Efectuar Entradas de Colateral</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm - Crear Denominaciones</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend - Crear Denominaciones</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3131,24 +3131,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Enviado a</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm - Efectuar Entradas de Colateral</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend - Efectuar Entradas de Colateral</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm - Crear Denominaciones</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend - Crear Denominaciones</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm - Denominar</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend - Denominar</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Sandstorm - Pago de Colateral</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Privatesend - Pago de Colateral</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Enviar DarkSilk</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX aún no soporta el envío de valores tan elevados. Las transacciones están limitadas actualmente a %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend aún no soporta el envío de valores tan elevados. Las transacciones están limitadas actualmente a %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3330,8 +3330,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>No se ha podido bloquear el directorio de datos %s. Probablemente ya se está ejecutando DarkSilk Core.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm utiliza cuantías denominadas exactas para enviar fondos, simplemente necesita anonimizar algunos darksilks más. </translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend utiliza cuantías denominadas exactas para enviar fondos, simplemente necesita anonimizar algunos darksilks más. </translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>En este modo -genproclimit controla cuántos bloques se generan de inmediato.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX requiere entradas con al menos 6 confirmaciones, puede que neesite esperar unos pocos minutos y volver a intentarlo.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend requiere entradas con al menos 6 confirmaciones, puede que neesite esperar unos pocos minutos y volver a intentarlo.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3386,12 +3386,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>No se puede enlazar a %s en este equipo. DarkSilk Core probablemente ya está en funcionamiento.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>No se pueden localizar fondos denominados de Sandstorm suficientes para esta transacción.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>No se pueden localizar fondos denominados de Privatesend suficientes para esta transacción.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>No se pueden localizar fondos no denominados de Sandstorm suficientes para esta transacción que no sean iguales a 1000 DSLK.</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>No se pueden localizar fondos no denominados de Privatesend suficientes para esta transacción que no sean iguales a 1000 DSLK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3491,8 +3491,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Corrupción de base de datos de bloques detectada.</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Opciones de Sandstorm:</translation>
+        <source>Privatesend options:</source>
+        <translation>Opciones de Privatesend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3563,8 +3563,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Error: ¡El monedero está bloqueado; no se puede crear la transacción!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Error: Ya tiene entradas pendientes en el pool de Sandstorm</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Error: Ya tiene entradas pendientes en el pool de Privatesend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3615,20 +3615,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Borrar todas las transacciones del monedero y recuperar únicamente aquellas partes de la cadena de bloques a través de -rescan en el inicio</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Desactivar todas las funciones asociadas a DarkSilk (Nodos Maestros, Sandstorm, InstantX, Presupuesto) (0-1, predeterminado: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Desactivar todas las funciones asociadas a DarkSilk (Nodos Maestros, Privatesend, InstantSend, Presupuesto) (0-1, predeterminado: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Distribuido bajo la licencia de software MIT, vea el archivo COPYING adjunto o &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Activar InstantX, mostrar las confirmaciones de transacciones bloqueadas (booleano, predeterminado: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Activar InstantSend, mostrar las confirmaciones de transacciones bloqueadas (booleano, predeterminado: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Activar uso automatizado de Sandstorm para los fondos almacenados en este monedero (0-1, predeterminado: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Activar uso automatizado de Privatesend para los fondos almacenados en este monedero (0-1, predeterminado: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3687,8 +3687,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Información de salida para depuración (predeterminado: %u, proporcionar una &lt;category&gt; es opcional)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Ofrecer liquidez a Sandstorm mezclando darksilk con poca frecuencia y de forma continua (0-100, predeterminado: %u, 1=muy frecuente, comisiones altas, 100=muy pocas veces, comisiones bajas)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Ofrecer liquidez a Privatesend mezclando darksilk con poca frecuencia y de forma continua (0-100, predeterminado: %u, 1=muy frecuente, comisiones altas, 100=muy pocas veces, comisiones bajas)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3809,16 +3809,16 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de DarkSilk" admin@foo.com
         <translation>No se pudo intrepretar el valor -rpcbind %s como una dirección de red</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm está parado.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend está parado.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Solicitud Sandstorm completada:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Solicitud Privatesend completada:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Petición de Sandstorm incompleta:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Petición de Privatesend incompleta:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3913,8 +3913,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de DarkSilk" admin@foo.com
         <translation>La entrada no es válida.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>Opciones de InstantX:</translation>
+        <source>InstantSend options:</source>
+        <translation>Opciones de InstantSend:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
@@ -3949,8 +3949,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de DarkSilk" admin@foo.com
         <translation>Cuantía inválida para -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Sandstorm action was too recent.</source>
-        <translation>La última acción de Sandstorm exitosa era demasiado reciente.</translation>
+        <source>Last successful Privatesend action was too recent.</source>
+        <translation>La última acción de Privatesend exitosa era demasiado reciente.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4225,8 +4225,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de DarkSilk" admin@foo.com
         <translation>Mantenga a lo sumo &lt;n&gt; transacciones no conectables en la memoria (por defecto: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>El último Sandstorm era demasiado reciente.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>El último Privatesend era demasiado reciente.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4477,8 +4477,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de DarkSilk" admin@foo.com
         <translation>Nombre de usuario para las conexiones JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>El valor es mayor al máximo permitido por el pool Sandstorm. </translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>El valor es mayor al máximo permitido por el pool Privatesend. </translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

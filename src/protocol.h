@@ -238,7 +238,7 @@ extern const char *SSFINALTX;
 extern const char *SSSIGNFINALTX;
 extern const char *SSCOMPLETE;
 extern const char *SSSTATUSUPDATE;
-extern const char *SSTX;
+extern const char *PSTX;
 extern const char *SSQUEUE;
 extern const char *SSEG;
 extern const char *SYNCSTATUSCOUNT;
@@ -352,7 +352,7 @@ enum {
     MSG_STORMNODE_QUORUM, // not implemented
     MSG_STORMNODE_ANNOUNCE,
     MSG_STORMNODE_PING,
-    MSG_SSTX,
+    MSG_PSTX,
     MSG_GOVERNANCE_OBJECT,
     MSG_GOVERNANCE_OBJECT_VOTE,
     MSG_STORMNODE_VERIFY,

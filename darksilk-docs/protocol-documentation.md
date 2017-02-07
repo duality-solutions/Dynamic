@@ -95,11 +95,11 @@ When a new block is found on the network, a Stormnode quorum will be determined 
 | ? | payeeAddress | CScript | The address to pay to
 | 71-73 | sig | char[] | Signature of the Stormnode which is signing the message
 
-### SSTX - "sstx"
+### PSTX - "pstx"
 
-CSandstormBroadcastTx
+CPrivatesendBroadcastTx
 
-Stormnodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the SSTX message.
+Stormnodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the PSTX message.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
@@ -122,7 +122,7 @@ Mixing pool status update
 
 ### SSQUEUE - "ssq"
 
-CSandstormQueue
+CPrivatesendQueue
 
 Asks users to sign final mixing tx message.
 
@@ -145,7 +145,7 @@ Response to SSQ message which allows the user to join a mixing pool
 
 ### SSVIN - "ssi"
 
-CSandstormEntry
+CPrivatesendEntry
 
 When queue is ready user is expected to send his entry to start actual mixing
 

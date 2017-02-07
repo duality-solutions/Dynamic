@@ -5,11 +5,11 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "sandstormconfig.h"
-#include "ui_sandstormconfig.h"
+#include "privatesendconfig.h"
+#include "ui_privatesendconfig.h"
 
 #include "darksilkunits.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "guiconstants.h"
 #include "optionsmodel.h"
 #include "walletmodel.h"
@@ -19,9 +19,9 @@
 #include <QKeyEvent>
 #include <QSettings>
 
-SandstormConfig::SandstormConfig(QWidget *parent) :
+PrivatesendConfig::PrivatesendConfig(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::SandstormConfig),
+    ui(new Ui::PrivatesendConfig),
     model(0)
 {
     ui->setupUi(this);
@@ -31,17 +31,17 @@ SandstormConfig::SandstormConfig(QWidget *parent) :
     connect(ui->buttonMax, SIGNAL(clicked()), this, SLOT(clickMax()));
 }
 
-SandstormConfig::~SandstormConfig()
+PrivatesendConfig::~PrivatesendConfig()
 {
     delete ui;
 }
 
-void SandstormConfig::setModel(WalletModel *model)
+void PrivatesendConfig::setModel(WalletModel *model)
 {
     this->model = model;
 }
 
-void SandstormConfig::clickBasic()
+void PrivatesendConfig::clickBasic()
 {
     configure(true, 1000, 2);
 
@@ -56,7 +56,7 @@ void SandstormConfig::clickBasic()
     close();
 }
 
-void SandstormConfig::clickHigh()
+void PrivatesendConfig::clickHigh()
 {
     configure(true, 1000, 8);
 
@@ -71,7 +71,7 @@ void SandstormConfig::clickHigh()
     close();
 }
 
-void SandstormConfig::clickMax()
+void PrivatesendConfig::clickMax()
 {
     configure(true, 1000, 16);
 
@@ -86,7 +86,7 @@ void SandstormConfig::clickMax()
     close();
 }
 
-void SandstormConfig::configure(bool enabled, int coins, int rounds) {
+void PrivatesendConfig::configure(bool enabled, int coins, int rounds) {
 
     QSettings settings;
 

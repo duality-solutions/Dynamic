@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "core_io.h"
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "governance-classes.h"
 #include "governance-object.h"
@@ -240,12 +240,12 @@ bool CGovernanceObject::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
 
     LOCK(cs);
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
         LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceObject::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -264,7 +264,7 @@ bool CGovernanceObject::CheckSignature(CPubKey& pubKeyStormnode)
     std::string strMessage = GetSignatureMessage();
 
     LOCK(cs);
-    if(!sandStormSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

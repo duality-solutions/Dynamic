@@ -3,7 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "sandstorm.h"
+#include "privatesend.h"
 #include "governance.h"
 #include "governance-vote.h"
 #include "governance-classes.h"

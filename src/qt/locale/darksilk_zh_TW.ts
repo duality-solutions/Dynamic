@@ -737,7 +737,7 @@ Address: %4
         <translation>複製找零金額</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
         <translation>選擇了非匿名的輸入。 &lt;b&gt; 匿名發送將會被禁用。&lt;/ b&gt;&lt;br&gt; &lt;br&gt;如果你仍然想用匿名發送，請先取消選取所有非匿名的輸入，然後再勾選匿名發送的核取方塊</translation>
     </message>
     <message>
@@ -838,9 +838,9 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
+        <source>Configure Privatesend</source>
         <translation>配置匿名發送</translation>
     </message>
     <message>
@@ -888,19 +888,19 @@ Address: %4
         <translation>這是最慢的和最安全的選頁。耗費最多的匿名處理費</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
+        <source>Privatesend Configuration</source>
         <translation>匿名發送配置</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
         <translation>匿名發送已成功設置為一般(%1到2次循環)。你可以隨時打開達世幣配置窗口來修改。</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
         <translation>匿名發送已成功設置為高(%1到8次循環)。你可以隨時打開達世幣配置窗口來修改。</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
         <translation>匿名發送已成功設置為最高(%1到16次循環)。你可以隨時打開達世幣配置窗口來修改。</translation>
     </message>
 </context>
@@ -1142,11 +1142,11 @@ Address: %4
         <translation>(0 表示程式自動決定，小於 0 表示保留處理器核心不用的數目)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
+        <source>Privatesend rounds to use</source>
         <translation>匿名發送的循環次數</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
         <translation>此金額為關閉匿名發送的門檻。</translation>
     </message>
     <message>
@@ -1419,7 +1419,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>完成度:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
+        <source>Privatesend Balance:</source>
         <translation>匿名發送餘額:</translation>
     </message>
     <message>
@@ -1439,7 +1439,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>不適用</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
+        <source>Privatesend</source>
         <translation>匿名發送</translation>
     </message>
     <message>
@@ -1459,7 +1459,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(最近一次信息)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
+        <source>Try to manually submit a Privatesend request.</source>
         <translation>嘗試手動提交匿名發送請求。</translation>
     </message>
     <message>
@@ -1467,7 +1467,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>嘗試混合</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>重置目前匿名發送狀態(此操作可能會影響您目前正在執行的混合過程，並且產生費用!)</translation>
     </message>
     <message>
@@ -1483,11 +1483,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>己禁用</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
+        <source>Start Privatesend Mixing</source>
         <translation>開始匿名發送混合</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
+        <source>Stop Privatesend Mixing</source>
         <translation>停止匿名發送混合</translation>
     </message>
     <message>
@@ -1527,7 +1527,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>己啟用</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
         <translation>最近收到的匿名發送訊息:
 </translation>
@@ -1537,7 +1537,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>不適用</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
+        <source>Privatesend was successfully reset.</source>
         <translation>匿名發送成功重置。</translation>
     </message>
     </context>
@@ -2256,12 +2256,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>縮小</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>如果自訂手續費設定為 1000 duffs ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 duffs 的手續費，&lt;br /&gt;而「至少」會支付 1000 duffs。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自訂手續費設定為 1000 satoshis ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 satoshis 的手續費，&lt;br /&gt;而「至少」會支付 1000 satoshis。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>如果自訂手續費設定為 1000 duffs ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 duffs 的手續費，&lt;br /&gt;而「總共至少」會支付 1000 duffs。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>如果自訂手續費設定為 1000 satoshis ，而交易資料大小只有 250 個位元組的話，那麽選擇「每千位元組」就只會付 250 satoshis 的手續費，&lt;br /&gt;而「總共至少」會支付 1000 satoshis。但是如果交易資料大小超過一千個位元組，那麽兩者都是每千位元組的費用。</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for darksilk transactions than the network can process.</source>
@@ -2336,11 +2336,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>增加收款人(&amp;R)</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
+        <source>Privatesend</source>
         <translation>匿名發送</translation>
     </message>
     <message>
-        <source>InstantX</source>
+        <source>InstantSend</source>
         <translation>即時到帳</translation>
     </message>
     <message>
@@ -2380,7 +2380,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>複製找零金額</translation>
     </message>
     <message>
-        <source>and InstantX</source>
+        <source>and InstantSend</source>
         <translation>和 即時到帳</translation>
     </message>
     <message>
@@ -2726,15 +2726,15 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>發生衝突</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
+        <source>%1/offline (verified via instantsend)</source>
         <translation>%1 次/離線 (經即時到帳系統核實)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
+        <source>%1/confirmed (verified via instantsend)</source>
         <translation>%1 次/確認 (經即時到帳系統核實)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
+        <source>%1 confirmations (verified via instantsend)</source>
         <translation>確認 %1 次 (經即時到帳系統核實)</translation>
     </message>
     <message>
@@ -2750,23 +2750,23 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>確認 %1 次</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1 次/離線 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
         <translation>%1 次/已確認 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
         <translation>%1 次確認 (即時到帳系統正在進行核實- 共 %3 個簽署中的 %2 個 )</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
+        <source>%1/offline (InstantSend verification failed)</source>
         <translation>%1 次/離線 (即時到帳系統未能核實)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
+        <source>%1/confirmed (InstantSend verification failed)</source>
         <translation>%1 次/已確認 (即時到帳系統未能核實)</translation>
     </message>
     <message>
@@ -2960,7 +2960,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>收款來自</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
+        <source>Received via Privatesend</source>
         <translation>經由匿名發送收到</translation>
     </message>
     <message>
@@ -2976,7 +2976,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>開採所得</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
+        <source>Privatesended</source>
         <translation>匿名發送</translation>
     </message>
     <message>
@@ -3051,7 +3051,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>付款給</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
+        <source>Privatesended</source>
         <translation>匿名發送</translation>
     </message>
     <message>
@@ -3180,7 +3180,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>付款</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
         <translation>即時到帳系統暫時並不支援這麼高的交易金額。目前的金額僅限於%1 DSLK。</translation>
     </message>
 </context>
@@ -3242,7 +3242,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>當最新區塊改變時要執行的指令(指令中的 %s 會被取代成區塊雜湊值)</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
         <translation>即時到帳系統要求輸入的資金最少要有6個確認，你可能需要等待數分鐘然後再重試。</translation>
     </message>
     <message>
@@ -3330,7 +3330,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>發現區塊資料庫壞掉了</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
+        <source>Privatesend options:</source>
         <translation>匿名發送選項:</translation>
     </message>
     <message>
@@ -3394,7 +3394,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>錯誤: 錢包被鎖定，無法創建交易！</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
         <translation>錯誤: 你已經有待處理項目在匿名發送資金池中</translation>
     </message>
     <message>
@@ -3538,15 +3538,15 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>沒辦法解析 -rpcbind 參數值 %s 為網路位址</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
+        <source>Privatesend is idle.</source>
         <translation>匿名發送處於閒置狀態。</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
+        <source>Privatesend request complete:</source>
         <translation>完成匿名發送請求:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
+        <source>Privatesend request incomplete:</source>
         <translation>未完成匿名發送請求:</translation>
     </message>
     <message>
@@ -3582,7 +3582,7 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>資訊</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
+        <source>InstantSend options:</source>
         <translation>即時到帳選項:</translation>
     </message>
     <message>

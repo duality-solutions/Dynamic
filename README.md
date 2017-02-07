@@ -33,7 +33,7 @@ What is DarkSilk?
 
 DarkSilk is a new digital currency that enables instant payments to anyone, anywhere in the world. DarkSilk uses peer-to-peer technology over Tor/ClearNet to operate securly with no central authority (centralisation): managing transactions and issuing currency (DSLK) are carried out collectively by the DarkSilk network. DarkSilk is the name of open source software which enables the use of the currency DSLK.
 
-DarkSilk utilises Stormnodes, Sandstorm and InstantX to provide anonymous and near instant transaction confirmations.
+DarkSilk utilises Stormnodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
 
 DarkSilk implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
 
@@ -44,10 +44,10 @@ DarkSilk includes a completely decentralised marketplace, providing anonymity an
 DarkSilk includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the DarkSilk codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
 
 
-**Stormnode/Sandstorm Network Information**
+**Stormnode/Privatesend Network Information**
 Ported Masternodes from Dash, rebranded as Stormnodes.
-Darksend/PrivateSend ported and rebranded as Sandstorm/PrivateSend.
-Utilisation of InstantX/InstantSend for instant transaction confirmation(s).
+Darksend/PrivateSend ported and rebranded as Privatesend/PrivateSend.
+Utilisation of InstantSend/InstantSend for instant transaction confirmation(s).
 
 **MainNet Parameters**
 P2P Port = 31600

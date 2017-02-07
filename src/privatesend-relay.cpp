@@ -3,11 +3,11 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "sandstorm.h"
-#include "sandstorm-relay.h"
+#include "privatesend.h"
+#include "privatesend-relay.h"
 
 
-CSandStormRelay::CSandStormRelay()
+CPrivateSendRelay::CPrivateSendRelay()
 {
     vinStormnode = CTxIn();
     nBlockHeight = 0;
@@ -16,7 +16,7 @@ CSandStormRelay::CSandStormRelay()
     out = CTxOut();
 }
 
-CSandStormRelay::CSandStormRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
+CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
 {
     vinStormnode = vinStormnodeIn;
     vchSig = vchSigIn;
@@ -26,7 +26,7 @@ CSandStormRelay::CSandStormRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& v
     out = out2;
 }
 
-std::string CSandStormRelay::ToString()
+std::string CPrivateSendRelay::ToString()
 {
     std::ostringstream info;
 
@@ -39,7 +39,7 @@ std::string CSandStormRelay::ToString()
     return info.str();   
 }
 
-bool CSandStormRelay::Sign(std::string strSharedKey)
+bool CPrivateSendRelay::Sign(std::string strSharedKey)
 {
     std::string strError = "";
     std::string strMessage = in.ToString() + out.ToString();
@@ -47,25 +47,25 @@ bool CSandStormRelay::Sign(std::string strSharedKey)
     CKey key2;
     CPubKey pubkey2;
 
-    if(!sandStormSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
-        LogPrintf("CSandStormRelay::Sign -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
+    if(!privateSendSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
+        LogPrintf("CPrivateSendRelay::Sign -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
         return false;
     }
 
-    if(!sandStormSigner.SignMessage(strMessage, vchSig2, key2)) {
-        LogPrintf("CSandStormRelay::Sign -- SignMessage() failed\n");
+    if(!privateSendSigner.SignMessage(strMessage, vchSig2, key2)) {
+        LogPrintf("CPrivateSendRelay::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
-        LogPrintf("CSandStormRelay::Sign -- VerifyMessage() failed, error: %s\n", strError);
+    if(!privateSendSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
+        LogPrintf("CPrivateSendRelay::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
 
     return true;
 }
 
-bool CSandStormRelay::VerifyMessage(std::string strSharedKey)
+bool CPrivateSendRelay::VerifyMessage(std::string strSharedKey)
 {
     std::string strError = "";
     std::string strMessage = in.ToString() + out.ToString();
@@ -73,20 +73,20 @@ bool CSandStormRelay::VerifyMessage(std::string strSharedKey)
     CKey key2;
     CPubKey pubkey2;
 
-    if(!sandStormSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
-        LogPrintf("CSandStormRelay::VerifyMessage -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
+    if(!privateSendSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
+        LogPrintf("CPrivateSendRelay::VerifyMessage -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
         return false;
     }
 
-    if(!sandStormSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
-        LogPrintf("CSandStormRelay::VerifyMessage -- VerifyMessage() failed, error: %s\n", strError);
+    if(!privateSendSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
+        LogPrintf("CPrivateSendRelay::VerifyMessage -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
 
     return true;
 }
 
-void CSandStormRelay::Relay()
+void CPrivateSendRelay::Relay()
 {
     int nCount = std::min(snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION), 20);
     int nRank1 = (rand() % nCount)+1; 
@@ -102,7 +102,7 @@ void CSandStormRelay::Relay()
     RelayThroughNode(nRank2);
 }
 
-void CSandStormRelay::RelayThroughNode(int nRank)
+void CPrivateSendRelay::RelayThroughNode(int nRank)
 {
     CStormnode* psn = snodeman.GetStormnodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
 

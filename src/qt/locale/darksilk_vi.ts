@@ -741,8 +741,8 @@ Kiểu: %3
         <translation>Sao chép tiền trả lại</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Sandstorm will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Sandstorm, please deselect all non-nonymized inputs first and then check Sandstorm checkbox again.</source>
-        <translation>Đầu vào không ẩn danh được chọn. &lt;b&gt;Sandstorm sẽ bị tắt.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nếu bạn vẫn muốn sử dụng Sandstorm, hãy bỏ chọn tata cả các đầu vào không ẩn danh trước và đánh dấu vào hộp Sandstorm lần nữa.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
+        <translation>Đầu vào không ẩn danh được chọn. &lt;b&gt;Privatesend sẽ bị tắt.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nếu bạn vẫn muốn sử dụng Privatesend, hãy bỏ chọn tata cả các đầu vào không ẩn danh trước và đánh dấu vào hộp Privatesend lần nữa.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Kiểu: %3
     </message>
 </context>
 <context>
-    <name>SandstormConfig</name>
+    <name>PrivatesendConfig</name>
     <message>
-        <source>Configure Sandstorm</source>
-        <translation>Cấu hình Sandstorm</translation>
+        <source>Configure Privatesend</source>
+        <translation>Cấu hình Privatesend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Kiểu: %3
         <translation>Đây là tuỳ chọn chậm nhất và an toàn nhất. Sử dụng mức vô danh cao nhất sẽ tốn kém</translation>
     </message>
     <message>
-        <source>Sandstorm Configuration</source>
-        <translation>Cấu hình Sandstorm</translation>
+        <source>Privatesend Configuration</source>
+        <translation>Cấu hình Privatesend</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm được thiết lập thành công về mức cơ bản (%1 và 2 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
+        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend được thiết lập thành công về mức cơ bản (%1 và 2 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm được thiết lập thành công về mức cao (%1 và 8 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
+        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend được thiết lập thành công về mức cao (%1 và 8 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
-        <translation>Sandstorm được thiết lập thành công về mức tối đa (%1 và 16 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
+        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DarkSilk's configuration screen.</source>
+        <translation>Privatesend được thiết lập thành công về mức tối đa (%1 và 16 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình DarkSilk.</translation>
     </message>
 </context>
 <context>
@@ -1146,12 +1146,12 @@ Kiểu: %3
         <translation>(0 = tự động, &lt;0 = để đó rất nhiều lõi miễn phí)</translation>
     </message>
     <message>
-        <source>Sandstorm rounds to use</source>
-        <translation>Số vòng Sandstorm sử dụng</translation>
+        <source>Privatesend rounds to use</source>
+        <translation>Số vòng Privatesend sử dụng</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Sandstorm once it's reached.</source>
-        <translation>Số lượng này hoạt động như là một ngưỡng để tắt Sandstorm một khi nó đạt đến.</translation>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>Số lượng này hoạt động như là một ngưỡng để tắt Privatesend một khi nó đạt đến.</translation>
     </message>
     <message>
         <source>Amount of DarkSilk to keep anonymized</source>
@@ -1423,8 +1423,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Hoàn thành:</translation>
     </message>
     <message>
-        <source>Sandstorm Balance:</source>
-        <translation>Số dư cho Sandstorm:</translation>
+        <source>Privatesend Balance:</source>
+        <translation>Số dư cho Privatesend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1443,8 +1443,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>không áp dụng</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1463,16 +1463,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>(Thông điệp cuối)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Sandstorm request.</source>
-        <translation>Thử gửi yêu cầu Sandstorm bằng tay.</translation>
+        <source>Try to manually submit a Privatesend request.</source>
+        <translation>Thử gửi yêu cầu Privatesend bằng tay.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Thử Trộn</translation>
     </message>
     <message>
-        <source>Reset the current status of Sandstorm (can interrupt Sandstorm if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Tái lập lại trạng thái hiện tại của Sandstorm (có thể gián đoạn Sandstorm nếu nó đang trong quá trình trộn, điều đó có thể làm bạn bị mất tiền!)</translation>
+        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Tái lập lại trạng thái hiện tại của Privatesend (có thể gián đoạn Privatesend nếu nó đang trong quá trình trộn, điều đó có thể làm bạn bị mất tiền!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1487,12 +1487,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Đã tắt</translation>
     </message>
     <message>
-        <source>Start Sandstorm Mixing</source>
-        <translation>Bắt đầu trộn Sandstorm</translation>
+        <source>Start Privatesend Mixing</source>
+        <translation>Bắt đầu trộn Privatesend</translation>
     </message>
     <message>
-        <source>Stop Sandstorm Mixing</source>
-        <translation>Tắt trộn Sandstorm</translation>
+        <source>Stop Privatesend Mixing</source>
+        <translation>Tắt trộn Privatesend</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1535,9 +1535,9 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Đã bật</translation>
     </message>
     <message>
-        <source>Last Sandstorm message:
+        <source>Last Privatesend message:
 </source>
-        <translation>Thông điệp Sandstorm cuối cùng:
+        <translation>Thông điệp Privatesend cuối cùng:
 </translation>
     </message>
     <message>
@@ -1545,20 +1545,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Không áp dụng</translation>
     </message>
     <message>
-        <source>Sandstorm was successfully reset.</source>
-        <translation>Sandstorm vừa được tái lập thành công.</translation>
+        <source>Privatesend was successfully reset.</source>
+        <translation>Privatesend vừa được tái lập thành công.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Sandstorm fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Nếu bạn không muốn thấy các thông tin bên trong về Sandstorm phí/giao dịch thì hãy chọn "Thông dụng nhất" làm Kiểu trong trang "Giao dịch".</translation>
+        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Nếu bạn không muốn thấy các thông tin bên trong về Privatesend phí/giao dịch thì hãy chọn "Thông dụng nhất" làm Kiểu trong trang "Giao dịch".</translation>
     </message>
     <message>
-        <source>Sandstorm requires at least %1 to use.</source>
-        <translation>Sandstorm cần ít nhất %1 để sử dụng.</translation>
+        <source>Privatesend requires at least %1 to use.</source>
+        <translation>Privatesend cần ít nhất %1 để sử dụng.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Sandstorm.</source>
-        <translation>Ví đã được khoá và người dùng từ chối mở khoá. Đang tắt Sandstorm.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <translation>Ví đã được khoá và người dùng từ chối mở khoá. Đang tắt Privatesend.</translation>
     </message>
 </context>
 <context>
@@ -2284,11 +2284,11 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Tối thiểu hoá</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
         <translation>Nếu mức phí tuỳ chỉnh được đặt là 1000 duff và giao dịch chỉ có 250 byte, thì "theo kilobyte" chỉ trả 250 duff cho phí,&lt;br /&gt;trong khi "ít nhất" phải trả 1000 duff. Cho các giao dịch lớn hơn 1 kilobyte thì cả hai đều trả theo kilobyte.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 duffs and the transaction is only 250 bytes, then "per kilobyte" only pays 250 duffs in fee,&lt;br /&gt;while "total at least" pays 1000 duffs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
         <translation>Nếu phí giao dịch tuỳ chỉnh được đặt là 1000 duff và giao dịch chỉ có 250 bytes, thì "theo kilobyte" chỉ trả 250 duff phí,&lt;br /&gt;trong khi "tổng ít nhất" trả 1000 duff. Với các giao dịch lớn hơn 1 kilobyte thì cả hai đều trả theo kilobyte.</translation>
     </message>
     <message>
@@ -2364,12 +2364,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Thêm &amp;Người nhận</translation>
     </message>
     <message>
-        <source>Sandstorm</source>
-        <translation>Sandstorm</translation>
+        <source>Privatesend</source>
+        <translation>Privatesend</translation>
     </message>
     <message>
-        <source>InstantX</source>
-        <translation>InstantX</translation>
+        <source>InstantSend</source>
+        <translation>InstantSend</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2416,16 +2416,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>các khoản tiền ẩn danh</translation>
     </message>
     <message>
-        <source>(sandstorm requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(sandstorm yêu cầu số tiền này sẽ được làm tròn đến gần %1)</translation>
+        <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
+        <translation>(privatesend yêu cầu số tiền này sẽ được làm tròn đến gần %1)</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
         <translation>bất kỳ khoản tiền sẵn nào (gợi ý không nên)</translation>
     </message>
     <message>
-        <source>and InstantX</source>
-        <translation>và InstantX</translation>
+        <source>and InstantSend</source>
+        <translation>và InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -2778,16 +2778,16 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>xung đột</translation>
     </message>
     <message>
-        <source>%1/offline (verified via instantx)</source>
-        <translation>%1/ngắt kết nối (đã được kiểm tra qua instantx)</translation>
+        <source>%1/offline (verified via instantsend)</source>
+        <translation>%1/ngắt kết nối (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (verified via instantx)</source>
-        <translation>%1/đã được xác nhận (đã được kiểm tra qua instantx)</translation>
+        <source>%1/confirmed (verified via instantsend)</source>
+        <translation>%1/đã được xác nhận (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
-        <source>%1 confirmations (verified via instantx)</source>
-        <translation>%1 xác nhận (đã được kiểm tra qua instantx)</translation>
+        <source>%1 confirmations (verified via instantsend)</source>
+        <translation>%1 xác nhận (đã được kiểm tra qua instantsend)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2802,24 +2802,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>%1 xác nhận</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/mất kết nối (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1/mất kết nối (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/được xác nhận (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
+        <translation>%1/được xác nhận (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1 confirmations (InstantX verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 xác nhận (Đang trong tiến trình kiểm tra InstantX - %2 trên %3 các chữ ký)</translation>
+        <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
+        <translation>%1 xác nhận (Đang trong tiến trình kiểm tra InstantSend - %2 trên %3 các chữ ký)</translation>
     </message>
     <message>
-        <source>%1/offline (InstantX verification failed)</source>
-        <translation>%1/mất kết nối (Thất bại trong việc kiểm tra InstantX)</translation>
+        <source>%1/offline (InstantSend verification failed)</source>
+        <translation>%1/mất kết nối (Thất bại trong việc kiểm tra InstantSend)</translation>
     </message>
     <message>
-        <source>%1/confirmed (InstantX verification failed)</source>
-        <translation>%1/đã được xác nhận (Thất bại trong việc kiểm tra InstantX)</translation>
+        <source>%1/confirmed (InstantSend verification failed)</source>
+        <translation>%1/đã được xác nhận (Thất bại trong việc kiểm tra InstantSend)</translation>
     </message>
     <message>
         <source>Status</source>
@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Nhận từ</translation>
     </message>
     <message>
-        <source>Received via Sandstorm</source>
-        <translation>Nhận qua Sandstorm</translation>
+        <source>Received via Privatesend</source>
+        <translation>Nhận qua Privatesend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3036,24 +3036,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Được đào</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominate</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominate</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Thanh toán Sandstorm Collateral</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Thanh toán Privatesend Collateral</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm tạo đầu vào Collateral</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend tạo đầu vào Collateral</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm tạo các mệnh giá</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend tạo các mệnh giá</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3131,24 +3131,24 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Gửi đến</translation>
     </message>
     <message>
-        <source>Sandstormed</source>
-        <translation>Sandstormed</translation>
+        <source>Privatesended</source>
+        <translation>Privatesended</translation>
     </message>
     <message>
-        <source>Sandstorm Make Collateral Inputs</source>
-        <translation>Sandstorm tạo đầu vào Collateral</translation>
+        <source>Privatesend Make Collateral Inputs</source>
+        <translation>Privatesend tạo đầu vào Collateral</translation>
     </message>
     <message>
-        <source>Sandstorm Create Denominations</source>
-        <translation>Sandstorm tạo các mệnh giá</translation>
+        <source>Privatesend Create Denominations</source>
+        <translation>Privatesend tạo các mệnh giá</translation>
     </message>
     <message>
-        <source>Sandstorm Denominate</source>
-        <translation>Sandstorm Denominate</translation>
+        <source>Privatesend Denominate</source>
+        <translation>Privatesend Denominate</translation>
     </message>
     <message>
-        <source>Sandstorm Collateral Payment</source>
-        <translation>Thanh toán Sandstorm Collateral</translation>
+        <source>Privatesend Collateral Payment</source>
+        <translation>Thanh toán Privatesend Collateral</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3276,8 +3276,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Gửi tiền</translation>
     </message>
     <message>
-        <source>InstantX doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
-        <translation>InstantX không hỗ trợ để gửi giá trị lớn đến như vậy. Giới hạn giao dịch hiện tại đến %1 DSLK.</translation>
+        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DSLK.</source>
+        <translation>InstantSend không hỗ trợ để gửi giá trị lớn đến như vậy. Giới hạn giao dịch hiện tại đến %1 DSLK.</translation>
     </message>
 </context>
 <context>
@@ -3330,8 +3330,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Không nhận được một khoá trong thư mục %s. DarkSilk Core có thể đã đang chạy.</translation>
     </message>
     <message>
-        <source>Sandstorm uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Sandstorm sử dụng số lượng mệnh giá nhất định để gửi tiền, bạn có thể chỉ cần đơn giản ẩn danh vài coin nữa.</translation>
+        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Privatesend sử dụng số lượng mệnh giá nhất định để gửi tiền, bạn có thể chỉ cần đơn giản ẩn danh vài coin nữa.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3358,8 +3358,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Chế độ này -genproclimit kiểm soát bao nhiêu khối được sinh tức thời.</translation>
     </message>
     <message>
-        <source>InstantX requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantX cần đầu vào với ít nhất 6 xác nhận, bạn có thể cần phải đợi vài phút và thử lại.</translation>
+        <source>InstantSend requires inputs with at least 6 confirmations, you might need to wait a few minutes and try again.</source>
+        <translation>InstantSend cần đầu vào với ít nhất 6 xác nhận, bạn có thể cần phải đợi vài phút và thử lại.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
@@ -3386,12 +3386,12 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Không thể để ràng buộc vào %s trên máy tính này. DarkSilk Core có thể đã chạy.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm denominated funds for this transaction.</source>
-        <translation>Không tìm đủ ngân sách Sandstorm denominated cho giao dịch này.</translation>
+        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <translation>Không tìm đủ ngân sách Privatesend denominated cho giao dịch này.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Sandstorm non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
-        <translation>Không tìm đủ ngân sách Sandstorm denominated cho giao dịch mà nó không bằng 1000 DSLK</translation>
+        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DSLK.</source>
+        <translation>Không tìm đủ ngân sách Privatesend denominated cho giao dịch mà nó không bằng 1000 DSLK</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3490,8 +3490,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Phát hiện ra dữ liệu khối bị hỏng</translation>
     </message>
     <message>
-        <source>Sandstorm options:</source>
-        <translation>Tuỳ chọn Sandstorm:</translation>
+        <source>Privatesend options:</source>
+        <translation>Tuỳ chọn Privatesend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3562,8 +3562,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Lỗi: Ví đã bị khoá, không thể tạo giao dịch!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Sandstorm pool</source>
-        <translation>Lỗi: Bạn đã có các thành phần đang chờ trong Sandstorm pool</translation>
+        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <translation>Lỗi: Bạn đã có các thành phần đang chờ trong Privatesend pool</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3614,20 +3614,20 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Xoá hết tất cả các giao dịch ví và chỉ phục hồi những phần đó của blockchain qua -rescan khi khởi động</translation>
     </message>
     <message>
-        <source>Disable all DarkSilk specific functionality (Stormnodes, Sandstorm, InstantX, Budgeting) (0-1, default: %u)</source>
-        <translation>Tắt tất cả các chức năng đặc trưng của DarkSilk (Stormnode, Sandstorm, InstantX, Lập ngân sách) (0-1, ngầm định: %u)</translation>
+        <source>Disable all DarkSilk specific functionality (Stormnodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Tắt tất cả các chức năng đặc trưng của DarkSilk (Stormnode, Privatesend, InstantSend, Lập ngân sách) (0-1, ngầm định: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
         <translation>Phân phối dưới giấy phép phần mềm MIT, hãy xem file COPYING đi kèm hoặc &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
-        <source>Enable instantx, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Bật InstantX, hiển thị các xác thực cho các giao dịch bị khoá (bool, ngầm định: %s)</translation>
+        <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
+        <translation>Bật InstantSend, hiển thị các xác thực cho các giao dịch bị khoá (bool, ngầm định: %s)</translation>
     </message>
     <message>
-        <source>Enable use of automated sandstorm for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Cho phép sử dụng tự động sandstorm cho những ngân sách được lưu trong ví (0-1, ngầm định: %u)</translation>
+        <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Cho phép sử dụng tự động privatesend cho những ngân sách được lưu trong ví (0-1, ngầm định: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3686,8 +3686,8 @@ https://www.transifex.com/projects/p/darksilk/</translation>
         <translation>Thông tin gỡ rối đầu ra (ngầm định: %u, cung cấp &lt;category&gt;  là một tuỳ chọn)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Sandstorm by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Cung cấp thanh khoản cho Sandstorm bằng việc thường xuyên trộn tiền một cách liên tục (0-100, ngầm định: %u, 1=rất thường xuyên, phí cao, 100=rất ít thường xuyên, phí thấp)</translation>
+        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Cung cấp thanh khoản cho Privatesend bằng việc thường xuyên trộn tiền một cách liên tục (0-100, ngầm định: %u, 1=rất thường xuyên, phí cao, 100=rất ít thường xuyên, phí thấp)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3807,16 +3807,16 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Không thể phân tích giá trị -rpcbind %s như là địa chỉ mạng</translation>
     </message>
     <message>
-        <source>Sandstorm is idle.</source>
-        <translation>Sandstorm đang nghỉ.</translation>
+        <source>Privatesend is idle.</source>
+        <translation>Privatesend đang nghỉ.</translation>
     </message>
     <message>
-        <source>Sandstorm request complete:</source>
-        <translation>Yêu cầu Sandstorm hoàn thành:</translation>
+        <source>Privatesend request complete:</source>
+        <translation>Yêu cầu Privatesend hoàn thành:</translation>
     </message>
     <message>
-        <source>Sandstorm request incomplete:</source>
-        <translation>Yêu cầu Sandstorm chưa hoàn thành:</translation>
+        <source>Privatesend request incomplete:</source>
+        <translation>Yêu cầu Privatesend chưa hoàn thành:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3911,8 +3911,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Đầu vào không hợp lệ.</translation>
     </message>
     <message>
-        <source>InstantX options:</source>
-        <translation>Tuỳ chọn InstantX:</translation>
+        <source>InstantSend options:</source>
+        <translation>Tuỳ chọn InstantSend:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
@@ -3947,8 +3947,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Số tiền không hợp lệ cho -paytxfee =&lt;số tiền&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Sandstorm action was too recent.</source>
-        <translation>Phiên giao dịch Sandstorm thành công cuối cùng quá gần đây.</translation>
+        <source>Last successful Privatesend action was too recent.</source>
+        <translation>Phiên giao dịch Privatesend thành công cuối cùng quá gần đây.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4223,8 +4223,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Giữ nhiều nhất &lt;n&gt; các giao dịch không kết nối được trong bộ nhớ (ngầm định: %u)</translation>
     </message>
     <message>
-        <source>Last Sandstorm was too recent.</source>
-        <translation>Sandstorm cuối cùng quá gần.</translation>
+        <source>Last Privatesend was too recent.</source>
+        <translation>Privatesend cuối cùng quá gần.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4475,8 +4475,8 @@ ví dụ: alertnotify=echo %%s | mail -s "DarkSilk Alert" admin@foo.com
         <translation>Username cho kết nối JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Sandstorm pool maximum allows.</source>
-        <translation>Giá tri trị lớn hơn giá trị tối đa mà bể Sandstorm cho phép.</translation>
+        <source>Value more than Privatesend pool maximum allows.</source>
+        <translation>Giá tri trị lớn hơn giá trị tối đa mà bể Privatesend cho phép.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

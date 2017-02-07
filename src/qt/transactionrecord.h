@@ -64,8 +64,8 @@ public:
     /** Current number of blocks (to know whether cached status is still valid) */
     int cur_num_blocks;
 
-    //** Know when to update transaction for ix locks **/
-    int cur_num_ix_locks;
+    //** Know when to update transaction for is locks **/
+    int cur_num_is_locks;
 };
 
 /** UI model for a transaction. A core transaction can be represented by multiple UI transactions if it has
