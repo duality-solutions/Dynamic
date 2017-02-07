@@ -21,7 +21,7 @@ static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
 
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 60900;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70000;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -190,8 +190,8 @@ private:
     std::map<COutPoint, CTxLockVote> mapStormnodeVotes; // stormnode outpoint - vote
 
 public:
-    static const int SIGNATURES_REQUIRED        = 6;
-    static const int SIGNATURES_TOTAL           = 10;
+    static const int SIGNATURES_REQUIRED        = 10;
+    static const int SIGNATURES_TOTAL           = 20;
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),

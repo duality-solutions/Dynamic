@@ -274,9 +274,6 @@ bool CGovernanceObject::CheckSignature(CPubKey& pubKeyStormnode)
 
 int CGovernanceObject::GetObjectSubtype()
 {
-    // todo - 12.1
-    //   - detect subtype from strData json, obj["subtype"]
-
     if(nObjectType == GOVERNANCE_OBJECT_TRIGGER) return TRIGGER_SUPERBLOCK;
     return -1;
 }
@@ -330,9 +327,6 @@ UniValue CGovernanceObject::GetJSONObject()
 
 void CGovernanceObject::LoadData()
 {
-    // todo : 12.1 - resolved
-    //return;
-
     if(strData.empty()) {
         return;
     }
@@ -464,19 +458,6 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingStor
             return false;
         }
     }
-
-    /*
-        TODO
-
-        - There might be an issue with multisig in the coinbase on mainnet, we will add support for it in a future release.
-        - Post 12.2+ (test multisig coinbase transaction)
-    */
-
-    // 12.1 - todo - compile error
-    // if(address.IsPayToScriptHash()) {
-    //     strError = "Governance system - multisig is not currently supported";
-    //     return false;
-    // }
 
     return true;
 }
@@ -651,11 +632,8 @@ void CGovernanceObject::UpdateSentinelVariables()
 
     // CALCULATE THE MINUMUM VOTE COUNT REQUIRED FOR FULL SIGNAL
 
-    // todo - 12.1 - should be set to `10` after governance vote compression is implemented
     int nAbsVoteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, nSnCount / 10);
     int nAbsDeleteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, (2 * nSnCount) / 3);
-    // todo - 12.1 - Temporarily set to 1 for testing - reverted
-    //nAbsVoteReq = 1;
 
     // SET SENTINEL FLAGS TO FALSE
 
