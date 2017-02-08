@@ -48,14 +48,14 @@ const char *STORMNODEPAYMENTSYNC="snget";
 const char *SNQUORUM="sn quorum"; // not implemented
 const char *SNANNOUNCE="snb";
 const char *SNPING="snp";
-const char *SSACCEPT="ssa";
-const char *SSVIN="ssi";
-const char *SSFINALTX="ssf";
-const char *SSSIGNFINALTX="sss";
-const char *SSCOMPLETE="ssc";
-const char *SSSTATUSUPDATE="sssu";
+const char *PSACCEPT="psa";
+const char *PSVIN="psi";
+const char *PSFINALTX="psf";
+const char *PSSIGNFINALTX="pss";
+const char *PSCOMPLETE="psc";
+const char *PSSTATUSUPDATE="pssu";
 const char *PSTX="pstx";
-const char *SSQUEUE="ssq";
+const char *PSQUEUE="psq";
 const char *SSEG="sseg";
 const char *SYNCSTATUSCOUNT="ssc";
 const char *SNGOVERNANCESYNC="govsync";
@@ -123,14 +123,14 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::STORMNODEPAYMENTSYNC,
     NetMsgType::SNANNOUNCE,
     NetMsgType::SNPING,
-    NetMsgType::SSACCEPT,
-    NetMsgType::SSVIN,
-    NetMsgType::SSFINALTX,
-    NetMsgType::SSSIGNFINALTX,
-    NetMsgType::SSCOMPLETE,
-    NetMsgType::SSSTATUSUPDATE,
+    NetMsgType::PSACCEPT,
+    NetMsgType::PSVIN,
+    NetMsgType::PSFINALTX,
+    NetMsgType::PSSIGNFINALTX,
+    NetMsgType::PSCOMPLETE,
+    NetMsgType::PSSTATUSUPDATE,
     NetMsgType::PSTX,
-    NetMsgType::SSQUEUE,
+    NetMsgType::PSQUEUE,
     NetMsgType::SSEG,
     NetMsgType::SYNCSTATUSCOUNT,
     NetMsgType::SNGOVERNANCESYNC,

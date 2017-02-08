@@ -35,23 +35,23 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
     if(fLiteMode) return; // ignore all DarkSilk related functionality
     if(!stormnodeSync.IsBlockchainSynced()) return;
 
-    if(strCommand == NetMsgType::SSACCEPT) {
+    if(strCommand == NetMsgType::PSACCEPT) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSACCEPT -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSACCEPT -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION);
             return;
         }
 
         if(!fStormNode) {
-            LogPrintf("SSACCEPT -- not a Stormnode!\n");
+            LogPrintf("PSACCEPT -- not a Stormnode!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_NOT_A_SN);
             return;
         }
 
         if(IsSessionReady()) {
             // too many users in this session already, reject new ones
-            LogPrintf("SSACCEPT -- queue is already full!\n");
+            LogPrintf("PSACCEPT -- queue is already full!\n");
             PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL);
             return;
         }
@@ -60,7 +60,7 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         CTransaction txCollateral;
         vRecv >> nDenom >> txCollateral;
 
-        LogPrint("privatesend", "SSACCEPT -- nDenom %d (%s)  txCollateral %s", nDenom, GetDenominationsToString(nDenom), txCollateral.ToString());
+        LogPrint("privatesend", "PSACCEPT -- nDenom %d (%s)  txCollateral %s", nDenom, GetDenominationsToString(nDenom), txCollateral.ToString());
 
         CStormnode* psn = snodeman.Find(activeStormnode.vin);
         if(psn == NULL) {
@@ -71,7 +71,7 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         if(vecSessionCollaterals.size() == 0 && psn->nLastSsq != 0 &&
             psn->nLastSsq + snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5 > snodeman.nSsqCount)
         {
-            LogPrintf("SSACCEPT -- last ssq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
+            LogPrintf("PSACCEPT -- last psq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
             PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT);
             return;
         }
@@ -81,105 +81,105 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         bool fResult = nSessionID == 0  ? CreateNewSession(nDenom, txCollateral, nMessageID)
                                         : AddUserToExistingSession(nDenom, txCollateral, nMessageID);
         if(fResult) {
-            LogPrintf("SSACCEPT -- is compatible, please submit!\n");
+            LogPrintf("PSACCEPT -- is compatible, please submit!\n");
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID);
             return;
         } else {
-            LogPrintf("SSACCEPT -- not compatible with existing transactions!\n");
+            LogPrintf("PSACCEPT -- not compatible with existing transactions!\n");
             PushStatus(pfrom, STATUS_REJECTED, nMessageID);
             return;
         }
 
-    } else if(strCommand == NetMsgType::SSQUEUE) {
+    } else if(strCommand == NetMsgType::PSQUEUE) {
         TRY_LOCK(cs_privatesend, lockRecv);
         if(!lockRecv) return;
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrint("privatesend", "SSQUEUE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrint("privatesend", "PSQUEUE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             return;
         }
 
-        CPrivatesendQueue ssq;
-        vRecv >> ssq;
+        CPrivatesendQueue psq;
+        vRecv >> psq;
 
-        // process every ssq only once
+        // process every psq only once
         BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
-            if(q == ssq) {
-                // LogPrint("privatesend", "SSQUEUE -- %s seen\n", ssq.ToString());
+            if(q == psq) {
+                // LogPrint("privatesend", "PSQUEUE -- %s seen\n", psq.ToString());
                 return;
             }
         }
 
-        LogPrint("privatesend", "SSQUEUE -- %s new\n", ssq.ToString());
+        LogPrint("privatesend", "PSQUEUE -- %s new\n", psq.ToString());
 
-        if(ssq.IsExpired() || ssq.nTime > GetTime() + PRIVATESEND_QUEUE_TIMEOUT) return;
+        if(psq.IsExpired() || psq.nTime > GetTime() + PRIVATESEND_QUEUE_TIMEOUT) return;
 
-        CStormnode* psn = snodeman.Find(ssq.vin);
+        CStormnode* psn = snodeman.Find(psq.vin);
         if(psn == NULL) return;
 
-        if(!ssq.CheckSignature(psn->pubKeyStormnode)) {
+        if(!psq.CheckSignature(psn->pubKeyStormnode)) {
             // we probably have outdated info
-            snodeman.AskForSN(pfrom, ssq.vin);
+            snodeman.AskForSN(pfrom, psq.vin);
             return;
         }
 
         // if the queue is ready, submit if we can
-        if(ssq.fReady) {
+        if(psq.fReady) {
             if(!pSubmittedToStormnode) return;
             if((CNetAddr)pSubmittedToStormnode->addr != (CNetAddr)psn->addr) {
-                LogPrintf("SSQUEUE -- message doesn't match current Stormnode: pSubmittedToStormnode=%s, addr=%s\n", pSubmittedToStormnode->addr.ToString(), psn->addr.ToString());
+                LogPrintf("PSQUEUE -- message doesn't match current Stormnode: pSubmittedToStormnode=%s, addr=%s\n", pSubmittedToStormnode->addr.ToString(), psn->addr.ToString());
                 return;
             }
 
             if(nState == POOL_STATE_QUEUE) {
-                LogPrint("privatesend", "SSQUEUE -- PrivateSend queue (%s) is ready on Stormnode %s\n", ssq.ToString(), psn->addr.ToString());
+                LogPrint("privatesend", "PSQUEUE -- PrivateSend queue (%s) is ready on Stormnode %s\n", psq.ToString(), psn->addr.ToString());
                 SubmitDenominate();
             }
         } else {
             BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
-                if(q.vin == ssq.vin) {
-                    // no way same sn can send another "not yet ready" ssq this soon
-                    LogPrint("privatesend", "SSQUEUE -- Stormnode %s is sending WAY too many ssq messages\n", psn->addr.ToString());
+                if(q.vin == psq.vin) {
+                    // no way same sn can send another "not yet ready" psq this soon
+                    LogPrint("privatesend", "PSQUEUE -- Stormnode %s is sending WAY too many psq messages\n", psn->addr.ToString());
                     return;
                 }
             }
 
             int nThreshold = psn->nLastSsq + snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5;
-            LogPrint("privatesend", "SSQUEUE -- nLastSsq: %d  threshold: %d  nSsqCount: %d\n", psn->nLastSsq, nThreshold, snodeman.nSsqCount);
+            LogPrint("privatesend", "PSQUEUE -- nLastSsq: %d  threshold: %d  nSsqCount: %d\n", psn->nLastSsq, nThreshold, snodeman.nSsqCount);
             //don't allow a few nodes to dominate the queuing process
             if(psn->nLastSsq != 0 && nThreshold > snodeman.nSsqCount) {
-                LogPrint("privatesend", "SSQUEUE -- Stormnode %s is sending too many ssq messages\n", psn->addr.ToString());
+                LogPrint("privatesend", "PSQUEUE -- Stormnode %s is sending too many psq messages\n", psn->addr.ToString());
                 return;
             }
             snodeman.nSsqCount++;
             psn->nLastSsq = snodeman.nSsqCount;
             psn->fAllowMixingTx = true;
 
-            LogPrint("privatesend", "SSQUEUE -- new PrivateSend queue (%s) from Stormnode %s\n", ssq.ToString(), psn->addr.ToString());
-            if(pSubmittedToStormnode && pSubmittedToStormnode->vin.prevout == ssq.vin.prevout) {
-                ssq.fTried = true;
+            LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from Stormnode %s\n", psq.ToString(), psn->addr.ToString());
+            if(pSubmittedToStormnode && pSubmittedToStormnode->vin.prevout == psq.vin.prevout) {
+                psq.fTried = true;
             }
-            vecPrivatesendQueue.push_back(ssq);
-            ssq.Relay();
+            vecPrivatesendQueue.push_back(psq);
+            psq.Relay();
         }
 
-    } else if(strCommand == NetMsgType::SSVIN) {
+    } else if(strCommand == NetMsgType::PSVIN) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSVIN -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSVIN -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION);
             return;
         }
 
         if(!fStormNode) {
-            LogPrintf("SSVIN -- not a Stormnode!\n");
+            LogPrintf("PSVIN -- not a Stormnode!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_NOT_A_SN);
             return;
         }
 
         //do we have enough users in the current session?
         if(!IsSessionReady()) {
-            LogPrintf("SSVIN -- session not complete!\n");
+            LogPrintf("PSVIN -- session not complete!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION);
             return;
         }
@@ -187,23 +187,23 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         CPrivateSendEntry entry;
         vRecv >> entry;
 
-        LogPrint("privatesend", "SSVIN -- txCollateral %s", entry.txCollateral.ToString());
+        LogPrint("privatesend", "PSVIN -- txCollateral %s", entry.txCollateral.ToString());
 
-        if(entry.vecTxSSIn.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
-            LogPrintf("SSVIN -- ERROR: too many inputs! %d/%d\n", entry.vecTxSSIn.size(), PRIVATESEND_ENTRY_MAX_SIZE);
+        if(entry.vecTxPSIn.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
+            LogPrintf("PSVIN -- ERROR: too many inputs! %d/%d\n", entry.vecTxPSIn.size(), PRIVATESEND_ENTRY_MAX_SIZE);
             PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM);
             return;
         }
 
-        if(entry.vecTxSSOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
-            LogPrintf("SSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxSSOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
+        if(entry.vecTxPSOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
+            LogPrintf("PSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxPSOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
             PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM);
             return;
         }
 
         //do we have the same denominations as the current session?
-        if(!IsOutputsCompatibleWithSessionDenom(entry.vecTxSSOut)) {
-            LogPrintf("SSVIN -- not compatible with existing transactions!\n");
+        if(!IsOutputsCompatibleWithSessionDenom(entry.vecTxPSOut)) {
+            LogPrintf("PSVIN -- not compatible with existing transactions!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_EXISTING_TX);
             return;
         }
@@ -215,26 +215,26 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
 
             CMutableTransaction tx;
 
-            BOOST_FOREACH(const CTxOut txout, entry.vecTxSSOut) {
+            BOOST_FOREACH(const CTxOut txout, entry.vecTxPSOut) {
                 nValueOut += txout.nValue;
                 tx.vout.push_back(txout);
 
                 if(txout.scriptPubKey.size() != 25) {
-                    LogPrintf("SSVIN -- non-standard pubkey detected! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
+                    LogPrintf("PSVIN -- non-standard pubkey detected! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
                     PushStatus(pfrom, STATUS_REJECTED, ERR_NON_STANDARD_PUBKEY);
                     return;
                 }
                 if(!txout.scriptPubKey.IsNormalPaymentScript()) {
-                    LogPrintf("SSVIN -- invalid script! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
+                    LogPrintf("PSVIN -- invalid script! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
                     PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_SCRIPT);
                     return;
                 }
             }
 
-            BOOST_FOREACH(const CTxIn txin, entry.vecTxSSIn) {
+            BOOST_FOREACH(const CTxIn txin, entry.vecTxPSIn) {
                 tx.vin.push_back(txin);
 
-                LogPrint("privatesend", "SSVIN -- txin=%s\n", txin.ToString());
+                LogPrint("privatesend", "PSVIN -- txin=%s\n", txin.ToString());
 
                 CTransaction txPrev;
                 uint256 hash;
@@ -242,7 +242,7 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
                     if(txPrev.vout.size() > txin.prevout.n)
                         nValueIn += txPrev.vout[txin.prevout.n].nValue;
                 } else {
-                    LogPrintf("SSVIN -- missing input! tx=%s", tx.ToString());
+                    LogPrintf("PSVIN -- missing input! tx=%s", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_MISSING_TX);
                     return;
                 }
@@ -251,7 +251,7 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
             // There should be no fee in mixing tx
             CAmount nFee = nValueIn - nValueOut;
             if(nFee != 0) {
-                LogPrintf("SSVIN -- there should be no fee in mixing tx! fees: %lld, tx=%s", nFee, tx.ToString());
+                LogPrintf("PSVIN -- there should be no fee in mixing tx! fees: %lld, tx=%s", nFee, tx.ToString());
                 PushStatus(pfrom, STATUS_REJECTED, ERR_FEES);
                 return;
             }
@@ -261,7 +261,7 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
                 CValidationState validationState;
                 mempool.PrioritiseTransaction(tx.GetHash(), tx.GetHash().ToString(), 1000, 0.1*COIN);
                 if(!AcceptToMemoryPool(mempool, validationState, CTransaction(tx), false, NULL, false, true, true)) {
-                    LogPrintf("SSVIN -- transaction not valid! tx=%s", tx.ToString());
+                    LogPrintf("PSVIN -- transaction not valid! tx=%s", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_TX);
                     return;
                 }
@@ -279,21 +279,21 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
             SetNull();
         }
 
-    } else if(strCommand == NetMsgType::SSSTATUSUPDATE) {
+    } else if(strCommand == NetMsgType::PSSTATUSUPDATE) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSSTATUSUPDATE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSSTATUSUPDATE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             return;
         }
 
         if(fStormNode) {
-            // LogPrintf("SSSTATUSUPDATE -- Can't run on a Stormnode!\n");
+            // LogPrintf("PSSTATUSUPDATE -- Can't run on a Stormnode!\n");
             return;
         }
 
         if(!pSubmittedToStormnode) return;
         if((CNetAddr)pSubmittedToStormnode->addr != (CNetAddr)pfrom->addr) {
-            //LogPrintf("SSSTATUSUPDATE -- message doesn't match current Stormnode: pSubmittedToStormnode %s addr %s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
+            //LogPrintf("PSSTATUSUPDATE -- message doesn't match current Stormnode: pSubmittedToStormnode %s addr %s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -304,46 +304,46 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         int nMsgMessageID;
         vRecv >> nMsgSessionID >> nMsgState >> nMsgEntriesCount >> nMsgStatusUpdate >> nMsgMessageID;
 
-        LogPrint("privatesend", "SSSTATUSUPDATE -- nMsgSessionID %d  nMsgState: %d  nEntriesCount: %d  nMsgStatusUpdate: %d  nMsgMessageID %d\n",
+        LogPrint("privatesend", "PSSTATUSUPDATE -- nMsgSessionID %d  nMsgState: %d  nEntriesCount: %d  nMsgStatusUpdate: %d  nMsgMessageID %d\n",
                 nMsgSessionID, nMsgState, nEntriesCount, nMsgStatusUpdate, nMsgMessageID);
 
         if(nMsgState < POOL_STATE_MIN || nMsgState > POOL_STATE_MAX) {
-            LogPrint("privatesend", "SSSTATUSUPDATE -- nMsgState is out of bounds: %d\n", nMsgState);
+            LogPrint("privatesend", "PSSTATUSUPDATE -- nMsgState is out of bounds: %d\n", nMsgState);
             return;
         }
 
         if(nMsgStatusUpdate < STATUS_REJECTED || nMsgStatusUpdate > STATUS_ACCEPTED) {
-            LogPrint("privatesend", "SSSTATUSUPDATE -- nMsgStatusUpdate is out of bounds: %d\n", nMsgStatusUpdate);
+            LogPrint("privatesend", "PSSTATUSUPDATE -- nMsgStatusUpdate is out of bounds: %d\n", nMsgStatusUpdate);
             return;
         }
 
         if(nMsgMessageID < MSG_POOL_MIN || nMsgMessageID > MSG_POOL_MAX) {
-            LogPrint("privatesend", "SSSTATUSUPDATE -- nMsgMessageID is out of bounds: %d\n", nMsgMessageID);
+            LogPrint("privatesend", "PSSTATUSUPDATE -- nMsgMessageID is out of bounds: %d\n", nMsgMessageID);
             return;
         }
 
-        LogPrint("privatesend", "SSSTATUSUPDATE -- GetMessageByID: %s\n", GetMessageByID(PoolMessage(nMsgMessageID)));
+        LogPrint("privatesend", "PSSTATUSUPDATE -- GetMessageByID: %s\n", GetMessageByID(PoolMessage(nMsgMessageID)));
 
         if(!CheckPoolStateUpdate(PoolState(nMsgState), nMsgEntriesCount, PoolStatusUpdate(nMsgStatusUpdate), PoolMessage(nMsgMessageID), nMsgSessionID)) {
-            LogPrint("privatesend", "SSSTATUSUPDATE -- CheckPoolStateUpdate failed\n");
+            LogPrint("privatesend", "PSSTATUSUPDATE -- CheckPoolStateUpdate failed\n");
         }
 
-    } else if(strCommand == NetMsgType::SSSIGNFINALTX) {
+    } else if(strCommand == NetMsgType::PSSIGNFINALTX) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSSIGNFINALTX -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSSIGNFINALTX -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             return;
         }
 
         if(!fStormNode) {
-            LogPrintf("SSSIGNFINALTX -- not a Stormnode!\n");
+            LogPrintf("PSSIGNFINALTX -- not a Stormnode!\n");
             return;
         }
 
         std::vector<CTxIn> vecTxIn;
         vRecv >> vecTxIn;
 
-        LogPrint("privatesend", "SSSIGNFINALTX -- vecTxIn.size() %s\n", vecTxIn.size());
+        LogPrint("privatesend", "PSSIGNFINALTX -- vecTxIn.size() %s\n", vecTxIn.size());
 
         int nTxInIndex = 0;
         int nTxInsCount = (int)vecTxIn.size();
@@ -351,30 +351,30 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         BOOST_FOREACH(const CTxIn txin, vecTxIn) {
             nTxInIndex++;
             if(!AddScriptSig(txin)) {
-                LogPrint("privatesend", "SSSIGNFINALTX -- AddScriptSig() failed at %d/%d, session: %d\n", nTxInIndex, nTxInsCount, nSessionID);
+                LogPrint("privatesend", "PSSIGNFINALTX -- AddScriptSig() failed at %d/%d, session: %d\n", nTxInIndex, nTxInsCount, nSessionID);
                 RelayStatus(STATUS_REJECTED);
                 return;
             }
-            LogPrint("privatesend", "SSSIGNFINALTX -- AddScriptSig() %d/%d success\n", nTxInIndex, nTxInsCount);
+            LogPrint("privatesend", "PSSIGNFINALTX -- AddScriptSig() %d/%d success\n", nTxInIndex, nTxInsCount);
         }
         // all is good
         CheckPool();
 
-    } else if(strCommand == NetMsgType::SSFINALTX) {
+    } else if(strCommand == NetMsgType::PSFINALTX) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSFINALTX -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSFINALTX -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             return;
         }
 
         if(fStormNode) {
-            // LogPrintf("SSFINALTX -- Can't run on a Stormnode!\n");
+            // LogPrintf("PSFINALTX -- Can't run on a Stormnode!\n");
             return;
         }
 
         if(!pSubmittedToStormnode) return;
         if((CNetAddr)pSubmittedToStormnode->addr != (CNetAddr)pfrom->addr) {
-            //LogPrintf("SSFINALTX -- message doesn't match current Stormnode: pSubmittedToStormnode %s addr %s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
+            //LogPrintf("PSFINALTX -- message doesn't match current Stormnode: pSubmittedToStormnode %s addr %s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -383,30 +383,30 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         vRecv >> nMsgSessionID >> txNew;
 
         if(nSessionID != nMsgSessionID) {
-            LogPrint("privatesend", "SSFINALTX -- message doesn't match current PrivateSend session: nSessionID: %d  nMsgSessionID: %d\n", nSessionID, nMsgSessionID);
+            LogPrint("privatesend", "PSFINALTX -- message doesn't match current PrivateSend session: nSessionID: %d  nMsgSessionID: %d\n", nSessionID, nMsgSessionID);
             return;
         }
 
-        LogPrint("privatesend", "SSFINALTX -- txNew %s", txNew.ToString());
+        LogPrint("privatesend", "PSFINALTX -- txNew %s", txNew.ToString());
 
         //check to see if input is spent already? (and probably not confirmed)
         SignFinalTransaction(txNew, pfrom);
 
-    } else if(strCommand == NetMsgType::SSCOMPLETE) {
+    } else if(strCommand == NetMsgType::PSCOMPLETE) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("SSCOMPLETE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrintf("PSCOMPLETE -- incompatible version! nVersion: %d\n", pfrom->nVersion);
             return;
         }
 
         if(fStormNode) {
-            // LogPrintf("SSCOMPLETE -- Can't run on a Stormnode!\n");
+            // LogPrintf("PSCOMPLETE -- Can't run on a Stormnode!\n");
             return;
         }
 
         if(!pSubmittedToStormnode) return;
         if((CNetAddr)pSubmittedToStormnode->addr != (CNetAddr)pfrom->addr) {
-            LogPrint("privatesend", "SSCOMPLETE -- message doesn't match current Stormnode: pSubmittedToStormnode=%s  addr=%s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
+            LogPrint("privatesend", "PSCOMPLETE -- message doesn't match current Stormnode: pSubmittedToStormnode=%s  addr=%s\n", pSubmittedToStormnode->addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -415,16 +415,16 @@ void CPrivatesendPool::ProcessMessage(CNode* pfrom, std::string& strCommand, CDa
         vRecv >> nMsgSessionID >> nMsgMessageID;
 
         if(nMsgMessageID < MSG_POOL_MIN || nMsgMessageID > MSG_POOL_MAX) {
-            LogPrint("privatesend", "SSCOMPLETE -- nMsgMessageID is out of bounds: %d\n", nMsgMessageID);
+            LogPrint("privatesend", "PSCOMPLETE -- nMsgMessageID is out of bounds: %d\n", nMsgMessageID);
             return;
         }
 
         if(nSessionID != nMsgSessionID) {
-            LogPrint("privatesend", "SSCOMPLETE -- message doesn't match current PrivateSend session: nSessionID: %d  nMsgSessionID: %d\n", privateSendPool.nSessionID, nMsgSessionID);
+            LogPrint("privatesend", "PSCOMPLETE -- message doesn't match current PrivateSend session: nSessionID: %d  nMsgSessionID: %d\n", privateSendPool.nSessionID, nMsgSessionID);
             return;
         }
 
-        LogPrint("privatesend", "SSCOMPLETE -- nMsgSessionID %d  nMsgMessageID %d (%s)\n", nMsgSessionID, nMsgMessageID, GetMessageByID(PoolMessage(nMsgMessageID)));
+        LogPrint("privatesend", "PSCOMPLETE -- nMsgSessionID %d  nMsgMessageID %d (%s)\n", nMsgSessionID, nMsgMessageID, GetMessageByID(PoolMessage(nMsgMessageID)));
 
         CompletedTransaction(PoolMessage(nMsgMessageID));
     }
@@ -600,11 +600,11 @@ void CPrivatesendPool::CreateFinalTransaction()
 
     // make our new transaction
     for(int i = 0; i < GetEntriesCount(); i++) {
-        BOOST_FOREACH(const CTxSSOut& txssout, vecEntries[i].vecTxSSOut)
-            txNew.vout.push_back(txssout);
+        BOOST_FOREACH(const CTxPSOut& txpsout, vecEntries[i].vecTxPSOut)
+            txNew.vout.push_back(txpsout);
 
-        BOOST_FOREACH(const CTxSSIn& txssin, vecEntries[i].vecTxSSIn)
-            txNew.vin.push_back(txssin);
+        BOOST_FOREACH(const CTxPSIn& txpsin, vecEntries[i].vecTxPSIn)
+            txNew.vin.push_back(txpsin);
     }
 
     // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
@@ -676,7 +676,7 @@ void CPrivatesendPool::CommitFinalTransaction()
 // a client submits a transaction then refused to sign, there must be a cost. Otherwise they
 // would be able to do this over and over again and bring the mixing to a hault.
 //
-// How does this work? Messages to Stormnodes come in via NetMsgType::SSVIN, these require a valid collateral
+// How does this work? Messages to Stormnodes come in via NetMsgType::PSVIN, these require a valid collateral
 // transaction for the client to be able to enter the pool. This transaction is kept by the Stormnodes
 // until the transaction is either complete or fails.
 //
@@ -707,8 +707,8 @@ void CPrivatesendPool::ChargeFees()
     if(nState == POOL_STATE_SIGNING) {
         // who didn't sign?
         BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-            BOOST_FOREACH(const CTxSSIn txssin, entry.vecTxSSIn) {
-                if(!txssin.fHasSig) {
+            BOOST_FOREACH(const CTxPSIn txpsin, entry.vecTxPSIn) {
+                if(!txpsin.fHasSig) {
                     LogPrintf("CPrivatesendPool::ChargeFees -- found uncooperative node (didn't sign), found offence\n");
                     vecOffendersCollaterals.push_back(entry.txCollateral);
                 }
@@ -835,7 +835,7 @@ void CPrivatesendPool::CheckTimeout()
 
 /*
     Check to see if we're ready for submissions from clients
-    After receiving multiple ssa messages, the queue will switch to "accepting entries"
+    After receiving multiple psa messages, the queue will switch to "accepting entries"
     which is the active state right before merging the transaction
 */
 void CPrivatesendPool::CheckForCompleteQueue()
@@ -845,10 +845,10 @@ void CPrivatesendPool::CheckForCompleteQueue()
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
 
-        CPrivatesendQueue ssq(nSessionDenom, activeStormnode.vin, GetTime(), true);
-        LogPrint("privatesend", "CPrivatesendPool::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", ssq.ToString());
-        ssq.Sign();
-        ssq.Relay();
+        CPrivatesendQueue psq(nSessionDenom, activeStormnode.vin, GetTime(), true);
+        LogPrint("privatesend", "CPrivatesendPool::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", psq.ToString());
+        psq.Sign();
+        psq.Relay();
     }
 }
 
@@ -865,15 +865,15 @@ bool CPrivatesendPool::IsInputScriptSigValid(const CTxIn& txin)
 
     BOOST_FOREACH(CPrivateSendEntry& entry, vecEntries) {
 
-        BOOST_FOREACH(const CTxSSOut& txssout, entry.vecTxSSOut)
-            txNew.vout.push_back(txssout);
+        BOOST_FOREACH(const CTxPSOut& txpsout, entry.vecTxPSOut)
+            txNew.vout.push_back(txpsout);
 
-        BOOST_FOREACH(const CTxSSIn& txssin, entry.vecTxSSIn) {
-            txNew.vin.push_back(txssin);
+        BOOST_FOREACH(const CTxPSIn& txpsin, entry.vecTxPSIn) {
+            txNew.vin.push_back(txpsin);
 
-            if(txssin.prevout == txin.prevout) {
+            if(txpsin.prevout == txin.prevout) {
                 nTxInIndex = i;
-                sigPubKey = txssin.prevPubKey;
+                sigPubKey = txpsin.prevPubKey;
             }
             i++;
         }
@@ -958,7 +958,7 @@ bool CPrivatesendPool::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage& 
 {
     if(!fStormNode) return false;
 
-    BOOST_FOREACH(CTxIn txin, entryNew.vecTxSSIn) {
+    BOOST_FOREACH(CTxIn txin, entryNew.vecTxPSIn) {
         if(txin.prevout.IsNull()) {
             LogPrint("privatesend", "CPrivatesendPool::AddEntry -- input not valid!\n");
             nMessageIDRet = ERR_INVALID_INPUT;
@@ -978,11 +978,11 @@ bool CPrivatesendPool::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage& 
         return false;
     }
 
-    BOOST_FOREACH(CTxIn txin, entryNew.vecTxSSIn) {
+    BOOST_FOREACH(CTxIn txin, entryNew.vecTxPSIn) {
         LogPrint("privatesend", "looking for txin -- %s\n", txin.ToString());
         BOOST_FOREACH(const CPrivateSendEntry& entry, vecEntries) {
-            BOOST_FOREACH(const CTxSSIn& txssin, entry.vecTxSSIn) {
-                if(txssin.prevout == txin.prevout) {
+            BOOST_FOREACH(const CTxPSIn& txpsin, entry.vecTxPSIn) {
+                if(txpsin.prevout == txin.prevout) {
                     LogPrint("privatesend", "CPrivatesendPool::AddEntry -- found in txin\n");
                     nMessageIDRet = ERR_ALREADY_HAVE;
                     return false;
@@ -1005,8 +1005,8 @@ bool CPrivatesendPool::AddScriptSig(const CTxIn& txinNew)
     LogPrint("privatesend", "CPrivatesendPool::AddScriptSig -- scriptSig=%s\n", ScriptToAsmStr(txinNew.scriptSig).substr(0,24));
 
     BOOST_FOREACH(const CPrivateSendEntry& entry, vecEntries) {
-        BOOST_FOREACH(const CTxSSIn& txssin, entry.vecTxSSIn) {
-            if(txssin.scriptSig == txinNew.scriptSig) {
+        BOOST_FOREACH(const CTxPSIn& txpsin, entry.vecTxPSIn) {
+            if(txpsin.scriptSig == txinNew.scriptSig) {
                 LogPrint("privatesend", "CPrivatesendPool::AddScriptSig -- already exists\n");
                 return false;
             }
@@ -1042,8 +1042,8 @@ bool CPrivatesendPool::AddScriptSig(const CTxIn& txinNew)
 bool CPrivatesendPool::IsSignaturesComplete()
 {
     BOOST_FOREACH(const CPrivateSendEntry& entry, vecEntries)
-        BOOST_FOREACH(const CTxSSIn& txssin, entry.vecTxSSIn)
-            if(!txssin.fHasSig) return false;
+        BOOST_FOREACH(const CTxPSIn& txpsin, entry.vecTxPSIn)
+            if(!txpsin.fHasSig) return false;
 
     return true;
 }
@@ -1185,17 +1185,17 @@ bool CPrivatesendPool::SignFinalTransaction(const CTransaction& finalTransaction
 
     //make sure my inputs/outputs are present, otherwise refuse to sign
     BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-        BOOST_FOREACH(const CTxSSIn txssin, entry.vecTxSSIn) {
+        BOOST_FOREACH(const CTxPSIn txpsin, entry.vecTxPSIn) {
             /* Sign my transaction and all outputs */
             int nMyInputIndex = -1;
             CScript prevPubKey = CScript();
             CTxIn txin = CTxIn();
 
             for(unsigned int i = 0; i < finalMutableTransaction.vin.size(); i++) {
-                if(finalMutableTransaction.vin[i] == txssin) {
+                if(finalMutableTransaction.vin[i] == txpsin) {
                     nMyInputIndex = i;
-                    prevPubKey = txssin.prevPubKey;
-                    txin = txssin;
+                    prevPubKey = txpsin.prevPubKey;
+                    txin = txpsin;
                 }
             }
 
@@ -1205,7 +1205,7 @@ bool CPrivatesendPool::SignFinalTransaction(const CTransaction& finalTransaction
                 CAmount nValue2 = 0;
 
                 for(unsigned int i = 0; i < finalMutableTransaction.vout.size(); i++) {
-                    BOOST_FOREACH(const CTxOut& txout, entry.vecTxSSOut) {
+                    BOOST_FOREACH(const CTxOut& txout, entry.vecTxPSOut) {
                         if(finalMutableTransaction.vout[i] == txout) {
                             nFoundOutputsCount++;
                             nValue1 += finalMutableTransaction.vout[i].nValue;
@@ -1213,10 +1213,10 @@ bool CPrivatesendPool::SignFinalTransaction(const CTransaction& finalTransaction
                     }
                 }
 
-                BOOST_FOREACH(const CTxOut txout, entry.vecTxSSOut)
+                BOOST_FOREACH(const CTxOut txout, entry.vecTxPSOut)
                     nValue2 += txout.nValue;
 
-                int nTargetOuputsCount = entry.vecTxSSOut.size();
+                int nTargetOuputsCount = entry.vecTxPSOut.size();
                 if(nFoundOutputsCount < nTargetOuputsCount || nValue1 != nValue2) {
                     // in this case, something went wrong and we'll refuse to sign. It's possible we'll be charged collateral. But that's
                     // better then signing if the transaction doesn't look like what we wanted.
@@ -1251,7 +1251,7 @@ bool CPrivatesendPool::SignFinalTransaction(const CTransaction& finalTransaction
 
     // push all of our signatures to the Stormnode
     LogPrintf("CPrivatesendPool::SignFinalTransaction -- pushing sigs to the Stormnode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
-    pnode->PushMessage(NetMsgType::SSSIGNFINALTX, sigs);
+    pnode->PushMessage(NetMsgType::PSSIGNFINALTX, sigs);
     SetState(POOL_STATE_SIGNING);
     nTimeLastSuccessfulStep = GetTimeMillis();
 
@@ -1516,49 +1516,49 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
     if(nLiquidityProvider || fUseQueue) {
 
         // Look through the queues and see if anything matches
-        BOOST_FOREACH(CPrivatesendQueue& ssq, vecPrivatesendQueue) {
+        BOOST_FOREACH(CPrivatesendQueue& psq, vecPrivatesendQueue) {
             // only try each queue once
-            if(ssq.fTried) continue;
-            ssq.fTried = true;
+            if(psq.fTried) continue;
+            psq.fTried = true;
 
-            if(ssq.IsExpired()) continue;
+            if(psq.IsExpired()) continue;
 
-            CStormnode* psn = snodeman.Find(ssq.vin);
+            CStormnode* psn = snodeman.Find(psq.vin);
             if(psn == NULL) {
-                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- ssq Stormnode is not in Stormnode list, Stormnode=%s\n", ssq.vin.prevout.ToStringShort());
+                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- psq Stormnode is not in Stormnode list, Stormnode=%s\n", psq.vin.prevout.ToStringShort());
                 continue;
             }
 
             if(psn->nProtocolVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) continue;
 
             // incompatible denom
-            if(ssq.nDenom >= (1 << vecPrivateSendDenominations.size())) continue;
+            if(psq.nDenom >= (1 << vecPrivateSendDenominations.size())) continue;
 
-            // mixing rate limit i.e. nLastSsq check should already pass in SSQUEUE ProcessMessage
-            // in order for ssq to get into vecPrivatesendQueue, so we should be safe to mix already,
+            // mixing rate limit i.e. nLastSsq check should already pass in PSQUEUE ProcessMessage
+            // in order for psq to get into vecPrivatesendQueue, so we should be safe to mix already,
             // no need for additional verification here
 
-            LogPrint("privatesend", "CPrivatesendPool::DoAutomaticDenominating -- found valid queue: %s\n", ssq.ToString());
+            LogPrint("privatesend", "CPrivatesendPool::DoAutomaticDenominating -- found valid queue: %s\n", psq.ToString());
 
             std::vector<CTxIn> vecTxInTmp;
             std::vector<COutput> vCoinsTmp;
             // Try to match their denominations if possible
-            if(!pwalletMain->SelectCoinsByDenominations(ssq.nDenom, nValueMin, nBalanceNeedsAnonymized, vecTxInTmp, vCoinsTmp, nValueIn, 0, nPrivateSendRounds)) {
-                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- Couldn't match denominations %d (%s)\n", ssq.nDenom, GetDenominationsToString(ssq.nDenom));
+            if(!pwalletMain->SelectCoinsByDenominations(psq.nDenom, nValueMin, nBalanceNeedsAnonymized, vecTxInTmp, vCoinsTmp, nValueIn, 0, nPrivateSendRounds)) {
+                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- Couldn't match denominations %d (%s)\n", psq.nDenom, GetDenominationsToString(psq.nDenom));
                 continue;
             }
 
-            vecStormnodesUsed.push_back(ssq.vin);
+            vecStormnodesUsed.push_back(psq.vin);
 
             LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- attempt to connect to Stormnode from queue, addr=%s\n", psn->addr.ToString());
             // connect to Stormnode and submit the queue request
             CNode* pnode = ConnectNode((CAddress)psn->addr, NULL, true);
             if(pnode) {
                 pSubmittedToStormnode = psn;
-                nSessionDenom = ssq.nDenom;
+                nSessionDenom = psq.nDenom;
 
-                pnode->PushMessage(NetMsgType::SSACCEPT, nSessionDenom, txMyCollateral);
-                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- connected (from queue), sending SSACCEPT: nSessionDenom: %d (%s), addr=%s\n",
+                pnode->PushMessage(NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
+                LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- connected (from queue), sending PSACCEPT: nSessionDenom: %d (%s), addr=%s\n",
                         nSessionDenom, GetDenominationsToString(nSessionDenom), pnode->addr.ToString());
                 strAutoDenomResult = _("Mixing in progress...");
                 SetState(POOL_STATE_QUEUE);
@@ -1609,8 +1609,8 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
                 nSessionDenom = GetDenominationsByAmounts(vecAmounts);
             }
 
-            pnode->PushMessage(NetMsgType::SSACCEPT, nSessionDenom, txMyCollateral);
-            LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- connected, sending SSACCEPT, nSessionDenom: %d (%s)\n",
+            pnode->PushMessage(NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
+            LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- connected, sending PSACCEPT, nSessionDenom: %d (%s)\n",
                     nSessionDenom, GetDenominationsToString(nSessionDenom));
             strAutoDenomResult = _("Mixing in progress...");
             SetState(POOL_STATE_QUEUE);
@@ -1996,13 +1996,13 @@ bool CPrivatesendPool::CreateDenominated(const CompactTallyItem& tallyItem, bool
     return true;
 }
 
-bool CPrivatesendPool::IsOutputsCompatibleWithSessionDenom(const std::vector<CTxSSOut>& vecTxSSOut)
+bool CPrivatesendPool::IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut)
 {
-    if(GetDenominations(vecTxSSOut) == 0) return false;
+    if(GetDenominations(vecTxPSOut) == 0) return false;
 
     BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-        LogPrintf("CPrivatesendPool::IsOutputsCompatibleWithSessionDenom -- vecTxSSOut denom %d, entry.vecTxSSOut denom %d\n", GetDenominations(vecTxSSOut), GetDenominations(entry.vecTxSSOut));
-        if(GetDenominations(vecTxSSOut) != GetDenominations(entry.vecTxSSOut)) return false;
+        LogPrintf("CPrivatesendPool::IsOutputsCompatibleWithSessionDenom -- vecTxPSOut denom %d, entry.vecTxPSOut denom %d\n", GetDenominations(vecTxPSOut), GetDenominations(entry.vecTxPSOut));
+        if(GetDenominations(vecTxPSOut) != GetDenominations(entry.vecTxPSOut)) return false;
     }
 
     return true;
@@ -2055,11 +2055,11 @@ bool CPrivatesendPool::CreateNewSession(int nDenom, CTransaction txCollateral, P
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CPrivatesendQueue ssq(nDenom, activeStormnode.vin, GetTime(), false);
-        LogPrint("privatesend", "CPrivatesendPool::CreateNewSession -- signing and relaying new queue: %s\n", ssq.ToString());
-        ssq.Sign();
-        ssq.Relay();
-        vecPrivatesendQueue.push_back(ssq);
+        CPrivatesendQueue psq(nDenom, activeStormnode.vin, GetTime(), false);
+        LogPrint("privatesend", "CPrivatesendPool::CreateNewSession -- signing and relaying new queue: %s\n", psq.ToString());
+        psq.Sign();
+        psq.Relay();
+        vecPrivatesendQueue.push_back(psq);
     }
 
     vecSessionCollaterals.push_back(txCollateral);
@@ -2135,11 +2135,11 @@ std::string CPrivatesendPool::GetDenominationsToString(int nDenom)
     return strDenom;
 }
 
-int CPrivatesendPool::GetDenominations(const std::vector<CTxSSOut>& vecTxSSOut)
+int CPrivatesendPool::GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut)
 {
     std::vector<CTxOut> vecTxOut;
 
-    BOOST_FOREACH(CTxSSOut out, vecTxSSOut)
+    BOOST_FOREACH(CTxPSOut out, vecTxPSOut)
         vecTxOut.push_back(out);
 
     return GetDenominations(vecTxOut);
@@ -2311,13 +2311,13 @@ bool CPrivateSendSigner::VerifyMessage(CPubKey pubkey, const std::vector<unsigne
 
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
-    BOOST_FOREACH(CTxSSIn& txssin, vecTxSSIn) {
-        if(txssin.prevout == txin.prevout && txssin.nSequence == txin.nSequence) {
-            if(txssin.fHasSig) return false;
+    BOOST_FOREACH(CTxPSIn& txpsin, vecTxPSIn) {
+        if(txpsin.prevout == txin.prevout && txpsin.nSequence == txin.nSequence) {
+            if(txpsin.fHasSig) return false;
 
-            txssin.scriptSig = txin.scriptSig;
-            txssin.prevPubKey = txin.prevPubKey;
-            txssin.fHasSig = true;
+            txpsin.scriptSig = txin.scriptSig;
+            txpsin.prevPubKey = txin.prevPubKey;
+            txpsin.fHasSig = true;
 
             return true;
         }
@@ -2364,7 +2364,7 @@ bool CPrivatesendQueue::Relay()
     }
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::SSQUEUE, (*this));
+            pnode->PushMessage(NetMsgType::PSQUEUE, (*this));
     {
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodesCopy)
@@ -2405,7 +2405,7 @@ void CPrivatesendPool::RelayFinalTransaction(const CTransaction& txFinal)
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::SSFINALTX, nSessionID, txFinal);
+            pnode->PushMessage(NetMsgType::PSFINALTX, nSessionID, txFinal);
 }
 
 void CPrivatesendPool::RelayIn(const CPrivateSendEntry& entry)
@@ -2415,14 +2415,14 @@ void CPrivatesendPool::RelayIn(const CPrivateSendEntry& entry)
     CNode* pnode = FindNode(pSubmittedToStormnode->addr);
     if(pnode != NULL) {
         LogPrintf("CPrivatesendPool::RelayIn -- found Stormnode, relaying message to %s\n", pnode->addr.ToString());
-        pnode->PushMessage(NetMsgType::SSVIN, entry);
+        pnode->PushMessage(NetMsgType::PSVIN, entry);
     }
 }
 
 void CPrivatesendPool::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
 {
     if(!pnode) return;
-    pnode->PushMessage(NetMsgType::SSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
+    pnode->PushMessage(NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
 }
 
 void CPrivatesendPool::RelayStatus(PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
@@ -2438,7 +2438,7 @@ void CPrivatesendPool::RelayCompletedTransaction(PoolMessage nMessageID)
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::SSCOMPLETE, nSessionID, (int)nMessageID);
+            pnode->PushMessage(NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID);
 }
 
 void CPrivatesendPool::SetState(PoolState nStateNew)

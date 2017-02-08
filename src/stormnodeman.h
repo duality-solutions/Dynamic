@@ -161,7 +161,7 @@ public:
     std::map<uint256, CStormnodePing> mapSeenStormnodePing;
     // Keep track of all verifications I've seen
     std::map<uint256, CStormnodeVerification> mapSeenStormnodeVerification;
-    // keep track of ssq count to prevent Stormnodes from gaming privatesend queue
+    // keep track of psq count to prevent Stormnodes from gaming privatesend queue
     int64_t nSsqCount;
 
 

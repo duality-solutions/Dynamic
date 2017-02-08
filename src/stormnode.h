@@ -122,7 +122,7 @@ struct stormnode_info_t
     CPubKey pubKeyCollateralAddress;
     CPubKey pubKeyStormnode;
     int64_t sigTime; //snb message time
-    int64_t nLastSsq; //the ssq count from the last ssq broadcast of this node
+    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
@@ -160,7 +160,7 @@ public:
     CStormnodePing lastPing;
     std::vector<unsigned char> vchSig;
     int64_t sigTime; //snb message time
-    int64_t nLastSsq; //the ssq count from the last ssq broadcast of this node
+    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
