@@ -988,7 +988,7 @@ int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin)
     return nResult;
 }
 
-int GetIXConfirmations(const uint256 &nTXHash)
+int GetISConfirmations(const uint256 &nTXHash)
 {
     if (instantsend.IsLockedInstantSendTransaction(nTXHash))
         return nInstantSendDepth;

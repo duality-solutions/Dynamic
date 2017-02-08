@@ -538,7 +538,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
     // GET CONFIRMATIONS FOR TRANSACTION
 
     LOCK(cs_main);
-    int nConfirmationsIn = GetIXConfirmations(nCollateralHash);
+    int nConfirmationsIn = GetISConfirmations(nCollateralHash);
     if (nBlockHash != uint256()) {
         BlockMap::iterator mi = mapBlockIndex.find(nBlockHash);
         if (mi != mapBlockIndex.end() && (*mi).second) {
