@@ -442,14 +442,12 @@ void CPrivatesendPool::InitDenominations()
         1DSLK+1000 == (.1DSLK+100)*10
         10DSLK+10000 == (1DSLK+1000)*10
     */
-    /* Disabled
     vecPrivateSendDenominations.push_back( (100      * COIN)+100000 );
-    */
     vecPrivateSendDenominations.push_back( (10       * COIN)+10000 );
     vecPrivateSendDenominations.push_back( (1        * COIN)+1000 );
     vecPrivateSendDenominations.push_back( (.1       * COIN)+100 );
-    vecPrivateSendDenominations.push_back( (.01      * COIN)+10 );
     /* Disabled till we need them
+    vecPrivateSendDenominations.push_back( (.01      * COIN)+10 );
     vecPrivateSendDenominations.push_back( (.001     * COIN)+1 );
     */
 }
