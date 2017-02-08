@@ -786,8 +786,8 @@ void CPrivatesendPool::ChargeRandomFees()
 void CPrivatesendPool::CheckTimeout()
 {
     {
-        TRY_LOCK(cs_privatesend, lockSS);
-        if(!lockSS) return; // it's ok to fail here, we run this quite frequently
+        TRY_LOCK(cs_privatesend, lockPS);
+        if(!lockPS) return; // it's ok to fail here, we run this quite frequently
 
        int c = 0;
        vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
@@ -1365,8 +1365,8 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
         return false;
     }
 
-    TRY_LOCK(cs_privatesend, lockSS);
-    if(!lockSS) {
+    TRY_LOCK(cs_privatesend, lockPS);
+    if(!lockPS) {
         strAutoDenomResult = _("Lock is already in place.");
         return false;
     }
@@ -1989,7 +1989,7 @@ bool CPrivatesendPool::CreateDenominated(const CompactTallyItem& tallyItem, bool
         return false;
     }
 
-    // use the same nCachedLastSuccessBlock as for SS mixing to prevent race
+    // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     nCachedLastSuccessBlock = pCurrentBlockIndex->nHeight;
     LogPrintf("CPrivatesendPool::CreateDenominated -- txid=%s\n", wtx.GetHash().GetHex());
 
