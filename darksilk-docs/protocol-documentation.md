@@ -67,7 +67,7 @@ Whenever a Stormnode comes online or a client is syncing, they will send this me
 | 8 | sigTime | int64_t | Time which the signature was created
 | 4 | nProtocolVersion | int | The protocol version of the Stormnode
 | # | lastPing | CStormnodePing | The last known ping of the Stormnode
-| 8 | nLastSsq | int64_t | The last time the Stormnode sent a SSQ message (for mixing)
+| 8 | nLastPsq | int64_t | The last time the Stormnode sent a PSQ message (for mixing)
 
 ### SNPING - "snp"
 
@@ -108,7 +108,7 @@ Stormnodes can broadcast subsidised transactions without fees for the sake of se
 | 71-73 | vchSig | char[] | Signature of this message by Stormnode (verifiable via pubKeyStormnode)
 | 8 | sigTime | int64_t | Time this message was signed
 
-### SSSTATUSUPDATE - "sssu"
+### PSTATUSUPDATE - "pssu"
 
 Mixing pool status update
 
@@ -120,7 +120,7 @@ Mixing pool status update
 | 4 | nMsgStatusUpdate | int | Update state and/or signal if entry was accepted or not
 | 4 | nMsgMessageID | int | ID of the typical Stormnode reply message
 
-### SSQUEUE - "ssq"
+### PSQUEUE - "psq"
 
 CPrivatesendQueue
 
@@ -134,16 +134,16 @@ Asks users to sign final mixing tx message.
 | 4 | fReady | int | if the mixing pool is ready to be executed
 | 71-73 | vchSig | char[] | Signature of this message by Stormnode (verifiable via pubKeyStormnode)
 
-### SSACCEPT - "ssa"
+### PSACCEPT - "psa"
 
-Response to SSQ message which allows the user to join a mixing pool
+Response to PSQ message which allows the user to join a mixing pool
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | 4 | nDenom | int | denomination that will be exclusively used when submitting inputs into the pool
 | 41+ | txCollateral | int | collateral tx that will be charged if this client acts maliciousely
 
-### SSVIN - "ssi"
+### PSVIN - "psi"
 
 CPrivatesendEntry
 
@@ -151,12 +151,12 @@ When queue is ready user is expected to send his entry to start actual mixing
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| ? | vecTxSSIn | CTxSSIn[] | vector of users inputs (CTxSSIn serialization is equal to CTxIn serialization)
+| ? | vecTxPSIn | CTxPSIn[] | vector of users inputs (CTxPSIn serialization is equal to CTxIn serialization)
 | 8 | nAmount | int64_t | depreciated, can be removed with future protocol bump
 | ? | txCollateral | CTransaction | Collateral transaction which is used to prevent misbehavior and also to charge fees randomly
-| ? | vecTxSSOut | CTxSSOut[] | vector of user outputs (CTxSSOut serialization is equal to CTxOut serialization)
+| ? | vecTxPSOut | CTxPSOut[] | vector of user outputs (CTxPSOut serialization is equal to CTxOut serialization)
 
-### SSSIGNFINALTX - "sss"
+### PSSIGNFINALTX - "pss"
 
 User's signed inputs for a group transaction in a mixing session
 

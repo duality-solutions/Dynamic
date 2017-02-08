@@ -54,19 +54,19 @@ extern std::vector<CAmount> vecPrivateSendDenominations;
 
 /** Holds an mixing input
  */
-class CTxSSIn : public CTxIn
+class CTxPSIn : public CTxIn
 {
 public:
     bool fHasSig; // flag to indicate if signed
     int nSentTimes; //times we've sent this anonymously
 
-    CTxSSIn(const CTxIn& txin) :
+    CTxPSIn(const CTxIn& txin) :
         CTxIn(txin),
         fHasSig(false),
         nSentTimes(0)
         {}
 
-    CTxSSIn() :
+    CTxPSIn() :
         CTxIn(),
         fHasSig(false),
         nSentTimes(0)
@@ -75,17 +75,17 @@ public:
 
 /** Holds an mixing output
  */
-class CTxSSOut : public CTxOut
+class CTxPSOut : public CTxOut
 {
 public:
     int nSentTimes; //times we've sent this anonymously
 
-    CTxSSOut(const CTxOut& out) :
+    CTxPSOut(const CTxOut& out) :
         CTxOut(out),
         nSentTimes(0)
         {}
 
-    CTxSSOut() :
+    CTxPSOut() :
         CTxOut(),
         nSentTimes(0)
         {}
@@ -95,13 +95,13 @@ public:
 class CPrivateSendEntry
 {
 public:
-    std::vector<CTxSSIn> vecTxSSIn;
-    std::vector<CTxSSOut> vecTxSSOut;
+    std::vector<CTxPSIn> vecTxPSIn;
+    std::vector<CTxPSOut> vecTxPSOut;
     CTransaction txCollateral;
 
     CPrivateSendEntry() :
-        vecTxSSIn(std::vector<CTxSSIn>()),
-        vecTxSSOut(std::vector<CTxSSOut>()),
+        vecTxPSIn(std::vector<CTxPSIn>()),
+        vecTxPSOut(std::vector<CTxPSOut>()),
         txCollateral(CTransaction())
         {}
 
@@ -109,18 +109,18 @@ public:
         txCollateral(txCollateral)
     {
         BOOST_FOREACH(CTxIn txin, vecTxIn)
-            vecTxSSIn.push_back(txin);
+            vecTxPSIn.push_back(txin);
         BOOST_FOREACH(CTxOut txout, vecTxOut)
-            vecTxSSOut.push_back(txout);
+            vecTxPSOut.push_back(txout);
     }
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(vecTxSSIn);
+        READWRITE(vecTxPSIn);
         READWRITE(txCollateral);
-        READWRITE(vecTxSSOut);
+        READWRITE(vecTxPSOut);
     }
 
     bool AddScriptSig(const CTxIn& txin);
@@ -376,7 +376,7 @@ private:
     /// Check to make sure a given input matches an input in the pool and its scriptSig is valid
     bool IsInputScriptSigValid(const CTxIn& txin);
     /// Are these outputs compatible with other client in the pool?
-    bool IsOutputsCompatibleWithSessionDenom(const std::vector<CTxSSOut>& vecTxSSOut);
+    bool IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut);
 
     bool IsDenomSkipped(CAmount nDenomValue) {
         return std::find(vecDenominationsSkipped.begin(), vecDenominationsSkipped.end(), nDenomValue) != vecDenominationsSkipped.end();
@@ -435,13 +435,13 @@ public:
      * \param strCommand lower case command string; valid values are:
      *        Command  | Description
      *        -------- | -----------------
-     *        ssa      | Acceptable
-     *        ssc      | Complete
-     *        ssf      | Final tx
-     *        ssi      | Vector of CTxIn
-     *        ssq      | Queue
-     *        sss      | Signal Final Tx
-     *        sssu     | status update
+     *        psa      | Acceptable
+     *        psc      | Complete
+     *        psf      | Final tx
+     *        psi      | Vector of CTxIn
+     *        psq      | Queue
+     *        pss      | Signal Final Tx
+     *        pssu     | status update
      * \param vRecv
      */
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
@@ -451,7 +451,7 @@ public:
 
     /// Get the denominations for a list of outputs (returns a bitshifted integer)
     int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
-    int GetDenominations(const std::vector<CTxSSOut>& vecTxSSOut);
+    int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
     std::string GetDenominationsToString(int nDenom);
     bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
 
