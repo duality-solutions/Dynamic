@@ -442,16 +442,12 @@ void CPrivatesendPool::InitDenominations()
         1DSLK+1000 == (.1DSLK+100)*10
         10DSLK+10000 == (1DSLK+1000)*10
     */
-    /* Disabled
     vecPrivateSendDenominations.push_back( (100      * COIN)+100000 );
-    */
     vecPrivateSendDenominations.push_back( (10       * COIN)+10000 );
     vecPrivateSendDenominations.push_back( (1        * COIN)+1000 );
     vecPrivateSendDenominations.push_back( (.1       * COIN)+100 );
     vecPrivateSendDenominations.push_back( (.01      * COIN)+10 );
-    /* Disabled till we need them
     vecPrivateSendDenominations.push_back( (.001     * COIN)+1 );
-    */
 }
 
 void CPrivatesendPool::ResetPool()
@@ -786,8 +782,8 @@ void CPrivatesendPool::ChargeRandomFees()
 void CPrivatesendPool::CheckTimeout()
 {
     {
-        TRY_LOCK(cs_privatesend, lockSS);
-        if(!lockSS) return; // it's ok to fail here, we run this quite frequently
+        TRY_LOCK(cs_privatesend, lockPS);
+        if(!lockPS) return; // it's ok to fail here, we run this quite frequently
 
        int c = 0;
        vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
@@ -1365,8 +1361,8 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
         return false;
     }
 
-    TRY_LOCK(cs_privatesend, lockSS);
-    if(!lockSS) {
+    TRY_LOCK(cs_privatesend, lockPS);
+    if(!lockPS) {
         strAutoDenomResult = _("Lock is already in place.");
         return false;
     }
@@ -1989,7 +1985,7 @@ bool CPrivatesendPool::CreateDenominated(const CompactTallyItem& tallyItem, bool
         return false;
     }
 
-    // use the same nCachedLastSuccessBlock as for SS mixing to prevent race
+    // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     nCachedLastSuccessBlock = pCurrentBlockIndex->nHeight;
     LogPrintf("CPrivatesendPool::CreateDenominated -- txid=%s\n", wtx.GetHash().GetHex());
 

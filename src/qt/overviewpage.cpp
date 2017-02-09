@@ -273,6 +273,8 @@ void OverviewPage::setWalletModel(WalletModel *model)
     this->walletModel = model;
     if(model && model->getOptionsModel())
     {
+        // update the display unit, to not use the default ("DSLK")
+        updateDisplayUnit();
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance(),
                    model->getWatchBalance(), model->getWatchUnconfirmedBalance(), model->getWatchImmatureBalance());
@@ -292,9 +294,6 @@ void OverviewPage::setWalletModel(WalletModel *model)
         updateWatchOnlyLabels(model->haveWatchOnly());
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
     }
-
-    // update the display unit, to not use the default ("DSLK")
-    updateDisplayUnit();
 }
 
 void OverviewPage::updateDisplayUnit()
@@ -600,7 +599,7 @@ void OverviewPage::togglePrivateSend(){
         settings.setValue("hasMixed", "hasMixed");
     }
     if(!fEnablePrivateSend){
-        CAmount nMinAmount = vecPrivateSendDenominations.back() + PRIVATESEND_COLLATERAL*4;
+        CAmount nMinAmount = vecPrivateSendDenominations.back() + PRIVATESEND_COLLATERAL*6;
         if(currentBalance < nMinAmount){
             QString strMinAmount(DarkSilkUnits::formatWithUnit(nDisplayUnit, nMinAmount));
             QMessageBox::warning(this, tr("PrivateSend"),
