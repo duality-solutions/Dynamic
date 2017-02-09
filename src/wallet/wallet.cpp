@@ -2111,7 +2111,7 @@ CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
     CAmount nAnonymizedBalance = GetAnonymizedBalance();
     CAmount nNeedsToAnonymizeBalance = nPrivateSendAmount*COIN - nAnonymizedBalance;
 
-    // try to overshoot target DS balance up to nMinBalance
+    // try to overshoot target PS balance up to nMinBalance
     nNeedsToAnonymizeBalance += nMinBalance;
 
     CAmount nAnonymizableBalance = GetAnonymizableBalance();
