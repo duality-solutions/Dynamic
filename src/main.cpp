@@ -4963,7 +4963,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         }
 
     case MSG_STORMNODE_ANNOUNCE:
-        return snodeman.mapSeenStormnodeBroadcast.count(inv.hash) && !snodeman.IsSnbRecoveryRequested(inv.hash) && stormnodeSync.IsStormnodeListSynced();
+        return snodeman.mapSeenStormnodeBroadcast.count(inv.hash) && !snodeman.IsSnbRecoveryRequested(inv.hash);      
 
     case MSG_STORMNODE_PING:
         return snodeman.mapSeenStormnodePing.count(inv.hash);

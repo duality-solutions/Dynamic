@@ -130,7 +130,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             sub.type = TransactionRecord::SendToSelf;
             sub.address = "";
 
-            if(mapValue["DS"] == "1")
+            if(mapValue["PS"] == "1")
             {
                 sub.type = TransactionRecord::PrivateSend;
                 CTxDestination address;
@@ -200,7 +200,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.address = mapValue["to"];
                 }
 
-                if(mapValue["DS"] == "1")
+                if(mapValue["PS"] == "1")
                 {
                     sub.type = TransactionRecord::PrivateSend;
                 }

@@ -590,8 +590,8 @@ Endereço: %4
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (DS compatible: %2 / Enabled: %3)</source>
-        <translation>Total: %1 (Compatível DS: %2 / Ligados: %3)</translation>
+        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <translation>Total: %1 (Compatível PS: %2 / Ligados: %3)</translation>
     </message>
     <message>
         <source>Network Alert</source>
@@ -665,8 +665,8 @@ Endereço: %4
         <translation>Recebido com endereço</translation>
     </message>
     <message>
-        <source>DS Rounds</source>
-        <translation>Rondas DS</translation>
+        <source>PS Rounds</source>
+        <translation>Rondas PS</translation>
     </message>
     <message>
         <source>Date</source>

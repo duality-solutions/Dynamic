@@ -1393,7 +1393,7 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
     CAmount nBalanceNeedsDenominated;
 
     CAmount nLowestDenom = vecPrivateSendDenominations.back();
-    // if there are no confirmed DS collateral inputs yet
+    // if there are no confirmed PS collateral inputs yet
     if(!pwalletMain->HasCollateralInputs()) {
         // should have some additional amount for them
         nLowestDenom += PRIVATESEND_COLLATERAL*4;
@@ -1840,7 +1840,7 @@ bool CPrivatesendPool::MakeCollateralAmounts(const CompactTallyItem& tallyItem)
 
     LogPrintf("CPrivatesendPool::MakeCollateralAmounts -- txid=%s\n", wtx.GetHash().GetHex());
 
-    // use the same nCachedLastSuccessBlock as for DS mixinx to prevent race
+    // use the same nCachedLastSuccessBlock as for PS mixinx to prevent race
     if(!pwalletMain->CommitTransaction(wtx, reservekeyChange)) {
         LogPrintf("CPrivatesendPool::MakeCollateralAmounts -- CommitTransaction failed!\n");
         return false;

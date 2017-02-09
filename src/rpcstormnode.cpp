@@ -32,11 +32,13 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             "  start       - Start mixing\n"
             "  stop        - Stop mixing\n"
             "  reset       - Reset mixing\n"
-            + HelpRequiringPassphrase());
+            );
 
     if(params[0].get_str() == "start") {
-        if (pwalletMain->IsLocked(true))
-            throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+        {
+            LOCK(pwalletMain->cs_wallet);
+            EnsureWalletIsUnlocked();
+        }
 
         if(fStormNode)
             return "Mixing is not supported from Stormnodes";
@@ -103,11 +105,10 @@ UniValue stormnode(const UniValue& params, bool fHelp)
          strCommand != "debug" && strCommand != "current" && strCommand != "winner" && strCommand != "winners" && strCommand != "genkey" &&
          strCommand != "connect" && strCommand != "outputs" && strCommand != "status"))
             throw std::runtime_error(
-                "stormnode \"command\"... ( \"passphrase\" )\n"
+                "stormnode \"command\"...\n"
                 "Set of commands to execute stormnode-sync related actions\n"
                 "\nArguments:\n"
                 "1. \"command\"        (string or set of strings, required) The command to execute\n"
-                "2. \"passphrase\"     (string, optional) The wallet passphrase\n"
                 "\nAvailable commands:\n"
                 "  count        - Print number of all known Stormnodes (optional: 'ps', 'enabled', 'all', 'qualify')\n"
                 "  current      - Print info on current Stormnode winner to be paid the next block (calculated locally)\n"
@@ -572,17 +573,16 @@ UniValue stormnodebroadcast(const UniValue& params, bool fHelp)
     if (fHelp  ||
         (strCommand != "create-alias" && strCommand != "create-all" && strCommand != "decode" && strCommand != "relay"))
         throw std::runtime_error(
-                "stormnodebroadcast \"command\"... ( \"passphrase\" )\n"
+                "stormnodebroadcast \"command\"...\n"
                 "Set of commands to create and relay Stormnode broadcast messages\n"
                 "\nArguments:\n"
                 "1. \"command\"        (string or set of strings, required) The command to execute\n"
-                "2. \"passphrase\"     (string, optional) The wallet passphrase\n"
                 "\nAvailable commands:\n"
                 "  create-alias  - Create single remote Stormnode broadcast message by assigned alias configured in stormnode.conf\n"
                 "  create-all    - Create remote Stormnode broadcast messages for all Stormnodes configured in stormnode.conf\n"
                 "  decode        - Decode Stormnode broadcast message\n"
                 "  relay         - Relay Stormnode broadcast message to the network\n"
-                + HelpRequiringPassphrase());
+                );
 
     if (strCommand == "create-alias")
     {
