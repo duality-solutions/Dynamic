@@ -52,7 +52,7 @@ private:
     bool fFilterUpdated;
 
 public Q_SLOTS:
-    void updateMyStormnodeInfo(QString strAlias, QString strAddr, CStormnode *psn);
+    void updateMyStormnodeInfo(QString strAlias, QString strAddr, stormnode_info_t& infoSn);
     void updateMyNodeList(bool fForce = false);
     void updateNodeList();
 
@@ -63,7 +63,11 @@ private:
     Ui::StormnodeList *ui;
     ClientModel *clientModel;
     WalletModel *walletModel;
-    CCriticalSection cs_snlistupdate;
+    // Protects tableWidgetStormnodes
+    CCriticalSection cs_snlist;
+
+    // Protects tableWidgetMyStormnodes
+    CCriticalSection cs_mysnlist;
     QString strCurrentFilter;
 
 private Q_SLOTS:
