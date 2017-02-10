@@ -1544,9 +1544,22 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
 
             vecStormnodesUsed.push_back(psq.vin);
 
+            CNode* pnodeFound = NULL;
+            {
+                LOCK(cs_vNodes);
+                pnodeFound = FindNode(psn->addr);
+                if(pnodeFound) {
+                    if(pnodeFound->fDisconnect) {
+                        continue;
+                    } else {
+                        pnodeFound->AddRef();
+                    }
+                }
+            }
+
             LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- attempt to connect to Stormnode from queue, addr=%s\n", psn->addr.ToString());
             // connect to Stormnode and submit the queue request
-            CNode* pnode = ConnectNode((CAddress)psn->addr, NULL, true);
+            CNode* pnode = (pnodeFound && pnodeFound->fStormnode) ? pnodeFound : ConnectNode((CAddress)psn->addr, NULL, true);
             if(pnode) {
                 pSubmittedToStormnode = psn;
                 nSessionDenom = psq.nDenom;
@@ -1557,6 +1570,9 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
                 strAutoDenomResult = _("Mixing in progress...");
                 SetState(POOL_STATE_QUEUE);
                 nTimeLastSuccessfulStep = GetTimeMillis();
+                if(pnodeFound) {
+                    pnodeFound->Release();
+                }
                 return true;
             } else {
                 LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- can't connect, addr=%s\n", psn->addr.ToString());
@@ -1590,8 +1606,22 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
             continue;
         }
 
+        CNode* pnodeFound = NULL;
+        {
+            LOCK(cs_vNodes);
+            pnodeFound = FindNode(psn->addr);
+            if(pnodeFound) {
+                if(pnodeFound->fDisconnect) {
+                    nTries++;
+                    continue;
+                } else {
+                    pnodeFound->AddRef();
+                }
+            }
+        }
+
         LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- attempt %d connection to Stormnode %s\n", nTries, psn->addr.ToString());
-        CNode* pnode = ConnectNode((CAddress)psn->addr, NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fStormnode) ? pnodeFound : ConnectNode((CAddress)psn->addr, NULL, true);
         if(pnode) {
             LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- connected, addr=%s\n", psn->addr.ToString());
             pSubmittedToStormnode = psn;
@@ -1609,6 +1639,9 @@ bool CPrivatesendPool::DoAutomaticDenominating(bool fDryRun)
             strAutoDenomResult = _("Mixing in progress...");
             SetState(POOL_STATE_QUEUE);
             nTimeLastSuccessfulStep = GetTimeMillis();
+            if(pnodeFound) {
+                pnodeFound->Release();
+            }
             return true;
         } else {
             LogPrintf("CPrivatesendPool::DoAutomaticDenominating -- can't connect, addr=%s\n", psn->addr.ToString());

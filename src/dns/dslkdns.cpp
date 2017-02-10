@@ -106,12 +106,13 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
 
     m_address.sin_family = AF_INET;
     m_address.sin_port = htons(port_no);
-
+    int local_len2 = 0;
+    
     if(!inet_pton(AF_INET, bind_ip, &m_address.sin_addr.s_addr)) 
       m_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if(bind(m_sockfd, (struct sockaddr *) &m_address,
-                     sizeof (struct sockaddr_in)) < 0) {
+                     sizeof (struct sockaddr_in)) < local_len2) {
       char buf[80];
       sprintf(buf, "DslkDns::DslkDns: Cannot bind to port %u", port_no);
       throw runtime_error(buf);
