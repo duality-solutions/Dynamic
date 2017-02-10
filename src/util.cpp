@@ -669,7 +669,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
         // Create darksilk.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
         if (configFile != NULL) {
-            // Write silk.conf file with random username and password.
+            // Write darksilk.conf file with random username and password.
             WriteConfigFile(configFile);
             // New darksilk.conf file written, now read it.
         }
