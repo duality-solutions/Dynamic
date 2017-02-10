@@ -46,7 +46,7 @@ struct CNodeStateStats;
 struct LockPoints;
 
 /** Default for accepting alerts from the P2P network. */
-static const bool DEFAULT_ALERTS = false;
+static const bool DEFAULT_ALERTS = true;
 /** Default for DEFAULT_WHITELISTRELAY. */
 static const bool DEFAULT_WHITELISTRELAY = true;
 /** Default for DEFAULT_WHITELISTFORCERELAY. */
