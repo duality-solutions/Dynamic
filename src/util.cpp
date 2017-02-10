@@ -543,6 +543,43 @@ static boost::filesystem::path pathCached;
 static boost::filesystem::path pathCachedNetSpecific;
 static CCriticalSection csPathCached;
 
+static std::string GenerateRandomString(unsigned int len) {
+    if (len == 0){
+        len = 24;
+    }
+    srand(time(NULL) + len); //seed srand before using
+    char s[len];
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (unsigned int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    s[len] = 0;
+    std::string sPassword(s);
+    return sPassword;
+}
+
+static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
+{
+  srand(time(NULL) + nMax); //seed srand before using
+  return nMin + rand() % (nMax - nMin) + 1;
+}
+
+static void WriteConfigFile(FILE* configFile)
+{
+    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
+    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
+    fputs (sUserID.c_str(), configFile);
+    fputs (sRPCpassword.c_str(), configFile);
+    fputs ("rpcport=31650\n", configFile);
+    fputs ("port=31600\n",configFile);
+    fputs ("#Do not use special characters with username/password", configFile);
+    fclose(configFile);
+}
+
 const boost::filesystem::path &GetDataDir(bool fNetSpecific)
 {
     namespace fs = boost::filesystem;
@@ -627,12 +664,15 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
                     map<string, vector<string> >& mapMultiSettingsRet)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
+
     if (!streamConfig.good()){
-        // Create empty darksilk.conf if it does not excist
+        // Create darksilk.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
-        if (configFile != NULL)
-            fclose(configFile);
-        return; // Nothing to read, so just return
+        if (configFile != NULL) {
+            // Write silk.conf file with random username and password.
+            WriteConfigFile(configFile);
+            // New darksilk.conf file written, now read it.
+        }
     }
 
     set<string> setOptions;
