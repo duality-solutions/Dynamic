@@ -574,9 +574,9 @@ static void WriteConfigFile(FILE* configFile)
     std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
     fputs (sUserID.c_str(), configFile);
     fputs (sRPCpassword.c_str(), configFile);
+    fputs ("#Do not use special characters with username/password", configFile);
     fputs ("rpcport=31650\n", configFile);
     fputs ("port=31600\n",configFile);
-    fputs ("#Do not use special characters with username/password", configFile);
     fclose(configFile);
 }
 
