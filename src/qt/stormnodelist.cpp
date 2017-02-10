@@ -22,8 +22,6 @@
 #include <QTimer>
 #include <QMessageBox>
 
-CCriticalSection cs_stormnodes;
-
 StormnodeList::StormnodeList(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::StormnodeList),
@@ -139,10 +137,14 @@ void StormnodeList::StartAll(std::string strCommand)
         std::string strError;
         CStormnodeBroadcast snb;
 
-        CTxIn txin = CTxIn(uint256S(sne.getTxHash()), uint32_t(atoi(sne.getOutputIndex().c_str())));
-        CStormnode *psn = snodeman.Find(txin);
+        int32_t nOutputIndex = 0;
+        if(!ParseInt32(sne.getOutputIndex(), &nOutputIndex)) {
+            continue;
+        }
 
-        if(strCommand == "start-missing" && psn) continue;
+        CTxIn txin = CTxIn(uint256S(sne.getTxHash()), nOutputIndex);
+
+        if(strCommand == "start-missing" && snodeman.Has(txin)) continue;
 
         bool fSuccess = CStormnodeBroadcast::Create(sne.getIp(), sne.getPrivKey(), sne.getTxHash(), sne.getOutputIndex(), strError, snb);
 
@@ -171,9 +173,8 @@ void StormnodeList::StartAll(std::string strCommand)
     updateMyNodeList(true);
 }
 
-void StormnodeList::updateMyStormnodeInfo(QString strAlias, QString strAddr, CStormnode *psn)
+void StormnodeList::updateMyStormnodeInfo(QString strAlias, QString strAddr, stormnode_info_t& infoSn)
 {
-    LOCK(cs_snlistupdate);
     bool fOldRowFound = false;
     int nNewRow = 0;
 
@@ -191,12 +192,13 @@ void StormnodeList::updateMyStormnodeInfo(QString strAlias, QString strAddr, CSt
     }
 
     QTableWidgetItem *aliasItem = new QTableWidgetItem(strAlias);
-    QTableWidgetItem *addrItem = new QTableWidgetItem(psn ? QString::fromStdString(psn->addr.ToString()) : strAddr);
-    QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(psn ? psn->nProtocolVersion : -1));
-    QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(psn ? psn->GetStatus() : "MISSING"));
-    QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(psn ? (psn->lastPing.sigTime - psn->sigTime) : 0)));
-    QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", psn ? psn->lastPing.sigTime + QDateTime::currentDateTime().offsetFromUtc() : 0)));
-    QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(psn ? CDarkSilkAddress(psn->pubKeyCollateralAddress.GetID()).ToString() : ""));
+    QTableWidgetItem *addrItem = new QTableWidgetItem(infoSn.fInfoValid ? QString::fromStdString(infoSn.addr.ToString()) : strAddr);
+    QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(infoSn.fInfoValid ? infoSn.nProtocolVersion : -1));
+    QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(infoSn.fInfoValid ? CStormnode::StateToString(infoSn.nActiveState) : "MISSING"));
+    QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(infoSn.fInfoValid ? (infoSn.nTimeLastPing - infoSn.sigTime) : 0)));
+    QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M",
+                                                                                                   infoSn.fInfoValid ? infoSn.nTimeLastPing + QDateTime::currentDateTime().offsetFromUtc() : 0)));
+    QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(infoSn.fInfoValid ? CDarkSilkAddress(infoSn.pubKeyCollateralAddress.GetID()).ToString() : ""));
 
     ui->tableWidgetMyStormnodes->setItem(nNewRow, 0, aliasItem);
     ui->tableWidgetMyStormnodes->setItem(nNewRow, 1, addrItem);
@@ -209,6 +211,11 @@ void StormnodeList::updateMyStormnodeInfo(QString strAlias, QString strAddr, CSt
 
 void StormnodeList::updateMyNodeList(bool fForce)
 {
+    TRY_LOCK(cs_mysnlist, fLockAcquired);
+    if(!fLockAcquired) {
+        return;
+    }
+
     static int64_t nTimeMyListUpdated = 0;
 
     // automatically update my Stormnode list only once in MY_STORMNODELIST_UPDATE_SECONDS seconds,
@@ -221,10 +228,16 @@ void StormnodeList::updateMyNodeList(bool fForce)
 
     ui->tableWidgetStormnodes->setSortingEnabled(false);
     BOOST_FOREACH(CStormnodeConfig::CStormnodeEntry sne, stormnodeConfig.getEntries()) {
-        CTxIn txin = CTxIn(uint256S(sne.getTxHash()), uint32_t(atoi(sne.getOutputIndex().c_str())));
-        CStormnode *psn = snodeman.Find(txin);
+        int32_t nOutputIndex = 0;
+        if(!ParseInt32(sne.getOutputIndex(), &nOutputIndex)) {
+            continue;
+        }
 
-        updateMyStormnodeInfo(QString::fromStdString(sne.getAlias()), QString::fromStdString(sne.getIp()), psn);
+        CTxIn txin = CTxIn(uint256S(sne.getTxHash()), nOutputIndex);
+
+        stormnode_info_t infoSn = snodeman.GetStormnodeInfo(txin);
+
+        updateMyStormnodeInfo(QString::fromStdString(sne.getAlias()), QString::fromStdString(sne.getIp()), infoSn);
     }
     ui->tableWidgetStormnodes->setSortingEnabled(true);
 
@@ -234,6 +247,11 @@ void StormnodeList::updateMyNodeList(bool fForce)
 
 void StormnodeList::updateNodeList()
 {
+    TRY_LOCK(cs_snlist, fLockAcquired);
+    if(!fLockAcquired) {
+        return;
+    }
+
     static int64_t nTimeListUpdated = GetTime();
 
     // to prevent high cpu usage update only once in STORMNODELIST_UPDATE_SECONDS seconds
@@ -247,9 +265,6 @@ void StormnodeList::updateNodeList()
 
     nTimeListUpdated = GetTime();
     fFilterUpdated = false;
-
-    TRY_LOCK(cs_stormnodes, lockStormnodes);
-    if(!lockStormnodes) return;
 
     QString strToFilter;
     ui->countLabel->setText("Updating...");
@@ -303,15 +318,19 @@ void StormnodeList::on_filterLineEdit_textChanged(const QString &strFilterIn)
 
 void StormnodeList::on_startButton_clicked()
 {
-    // Find selected node alias
-    QItemSelectionModel* selectionModel = ui->tableWidgetMyStormnodes->selectionModel();
-    QModelIndexList selected = selectionModel->selectedRows();
+    std::string strAlias;
+    {
+        LOCK(cs_mysnlist);
+        // Find selected node alias
+        QItemSelectionModel* selectionModel = ui->tableWidgetMyStormnodes->selectionModel();
+        QModelIndexList selected = selectionModel->selectedRows();
 
-    if(selected.count() == 0) return;
+        if(selected.count() == 0) return;
 
-    QModelIndex index = selected.at(0);
-    int nSelectedRow = index.row();
-    std::string strAlias = ui->tableWidgetMyStormnodes->item(nSelectedRow, 0)->text().toStdString();
+        QModelIndex index = selected.at(0);
+        int nSelectedRow = index.row();
+        strAlias = ui->tableWidgetMyStormnodes->item(nSelectedRow, 0)->text().toStdString();
+    }
 
     // Display message box
     QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm Stormnode start"),
