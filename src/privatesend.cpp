@@ -446,8 +446,6 @@ void CPrivatesendPool::InitDenominations()
     vecPrivateSendDenominations.push_back( (10       * COIN)+10000 );
     vecPrivateSendDenominations.push_back( (1        * COIN)+1000 );
     vecPrivateSendDenominations.push_back( (.1       * COIN)+100 );
-    vecPrivateSendDenominations.push_back( (.01      * COIN)+10 );
-    vecPrivateSendDenominations.push_back( (.001     * COIN)+1 );
 }
 
 void CPrivatesendPool::ResetPool()
