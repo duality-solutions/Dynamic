@@ -3374,25 +3374,31 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 int nIn = 0;
                 CTransaction txNewConst(txNew);
 
-
-                BOOST_FOREACH(const CTxIn& txin, txNew.vin)
-                {
-                    bool signSuccess;
-                    const CScript& scriptPubKey = txin.prevPubKey;
-                    CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
-                    if (sign)
-                        signSuccess = ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, scriptSigRes);
-                    else
-                        signSuccess = ProduceSignature(DummySignatureCreator(this), scriptPubKey, scriptSigRes);
-
-                    if (!signSuccess)
-                    {
+                if (fDDNS) {
+                    if (!SignNameSignature(*this, txNewConst, txNew, nIn++, ddnsScript)) {
                         strFailReason = _("Signing transaction failed");
                         return false;
                     }
-                    nIn++;
                 }
+                else {
+                    BOOST_FOREACH(const CTxIn& txin, txNew.vin)
+                    {
+                        bool signSuccess;
+                        const CScript& scriptPubKey = txin.prevPubKey;
+                        CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
+                        if (sign)
+                            signSuccess = ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, scriptSigRes);
+                        else
+                            signSuccess = ProduceSignature(DummySignatureCreator(this), scriptPubKey, scriptSigRes);
 
+                        if (!signSuccess)
+                        {
+                            strFailReason = _("Signing transaction failed");
+                            return false;
+                        }
+                        nIn++;
+                    }
+                }
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
                 // Remove scriptSigs if we used dummy signatures for fee calculation

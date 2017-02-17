@@ -160,7 +160,7 @@ CAmount GetNameOpFee(const unsigned int& nRentalDays, const int& op)
     return txMinFee;
 }
 
-// scans nameindex.dat and return names with their last CNameIndex
+// scans ddns.dat and return names with their last CNameIndex
 bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
         vector<
             pair<
@@ -1430,7 +1430,7 @@ bool CDarkSilkHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
             return error("CheckInputsHook() : failed to read from name DB for %s", info);
         uint256 lasthash = lastKnownNameTx.GetHash();
         if (!DecodeNameTx(lastKnownNameTx, prev_nti))
-            return error("CheckInputsHook() : Failed to decode existing previous name tx for %s. Your blockchain or nameindex.dat may be corrupt.", info);
+            return error("CheckInputsHook() : Failed to decode existing previous name tx for %s. Your blockchain or ddns.dat may be corrupt.", info);
 
         for (unsigned int i = 0; i < tx.vin.size(); i++) //this scans all scripts of tx.vin
         {
@@ -1514,7 +1514,7 @@ bool CDarkSilkHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
             return error("CheckInputsHook() : unknown name operation for %s", info);
     }
 
-    // all checks passed - record tx information to vName. It will be sorted by nTime and writen to nameindex.dat at the end of ConnectBlock
+    // all checks passed - record tx information to vName. It will be sorted by nTime and writen to ddns.dat at the end of ConnectBlock
     CNameIndex txPos2;
     txPos2.nHeight = pindexBlock->nHeight;
     txPos2.value = nti.value;
@@ -1552,7 +1552,7 @@ bool CDarkSilkHooks::DisconnectInputs(const CTransaction& tx)
         // be empty, since a reorg cannot go that far back.  Be safe anyway and do not try to pop if empty.
         if (nameRec.vtxPos.size() > 0)
         {
-            // check if tx matches last tx in nameindex.dat
+            // check if tx matches last tx in ddns.dat
             CTransaction lastTx;
             lastTx.ReadFromDisk(nameRec.vtxPos.back().txPos);
             assert(lastTx.GetHash() == tx.GetHash());
@@ -1614,14 +1614,14 @@ bool CDarkSilkHooks::ExtractAddress(const CScript& script, string& address)
     return true;
 }
 
-// Executes name operations in vName and writes result to nameindex.dat.
+// Executes name operations in vName and writes result to ddns.dat.
 // NOTE: the block should already be written to blockchain by now - otherwise this may fail.
 bool CDarkSilkHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy> &vName)
 {
     if (vName.empty())
         return true;
 
-    // All of these name ops should succed. If there is an error - nameindex.dat is probably corrupt.
+    // All of these name ops should succed. If there is an error - ddns.dat is probably corrupt.
     CNameDB dbName("r+");
     set<CNameVal> sNameNew;
 
