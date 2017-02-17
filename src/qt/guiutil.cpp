@@ -129,7 +129,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a DarkSilk address (e.g. %1)").arg("D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
+    widget->setPlaceholderText(QObject::tr("Enter a DarkSilk Address or Name Registered on the dDNS."));
 #endif
     widget->setValidator(new DarkSilkAddressEntryValidator(parent));
     widget->setCheckValidator(new DarkSilkAddressCheckValidator(parent));
