@@ -1809,6 +1809,25 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 #endif
 
+    // init dslkdns. WARNING: this should be done after hooks initialization
+    if (GetBoolArg("-dslkdns", false))
+    {
+        #define DSLKDNS_PORT 5335
+        int port = GetArg("-dslkdnsport", DSLKDNS_PORT);
+        int verbose = GetArg("-dslkdnsverbose", 1);
+        if (port <= 0)
+            port = DSLKDNS_PORT;
+        string suffix  = GetArg("-dslkdnssuffix", "");
+        string bind_ip = GetArg("-dslkdnsbindip", "");
+        string allowed = GetArg("-dslkdnsallowed", "");
+        string localcf = GetArg("-dslkdnslocalcf", "");
+        string enums   = GetArg("-enumtrust", "");
+        string tf      = GetArg("-enumtollfree", "");
+        dslkdns = new DslkDns(bind_ip.c_str(), port,
+        suffix.c_str(), allowed.c_str(), localcf.c_str(), enums.c_str(), tf.c_str(), verbose);
+        LogPrintf("dDNS server started\n");
+    }
+
     threadGroup.create_thread(boost::bind(&ThreadSendAlert));
 
     return !fRequestShutdown;

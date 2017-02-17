@@ -17,7 +17,7 @@
 // DNS standard information released in 1987.
 // https://tools.ietf.org/html/rfc1035
 // Our Current implementation is missing Type, Class, and TTL (cache time)
-static const int NAMECOIN_TX_VERSION = 0x0666; //0x0666 is initial version. rfc1035, our initial version is 1030.
+static const int DARKSILK_TX_VERSION = 0x0666; //0x0666 is initial version. rfc1035, our initial version is 1030.
 typedef std::vector<unsigned char> CNameVal;
 struct NameTxInfo
 {

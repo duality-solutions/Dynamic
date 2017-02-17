@@ -27,6 +27,7 @@
 #include "script/sign.h"
 #include "timedata.h"
 #include "txmempool.h"
+#include "uint256hm.h"
 #include "util.h"
 #include "utilmoneystr.h"
 
@@ -1735,7 +1736,7 @@ CAmount CWalletTx::GetAvailableCredit(bool fUseCache) const
     for (unsigned int i = 0; i < vout.size(); i++)
     {
         // ignore DDNS TxOut
-        if (nVersion == NAMECOIN_TX_VERSION && hooks->IsNameScript(vout[i].scriptPubKey))
+        if (nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(vout[i].scriptPubKey))
             continue;
 
         if (!pwallet->IsSpent(hashTx, i))
@@ -2258,7 +2259,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
             for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
                 bool found = false;
                 // ignore DDNS TxOut
-                if (pcoin->nVersion == NAMECOIN_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
+                if (pcoin->nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
                     continue;
 
                 if(nCoinType == ONLY_DENOMINATED) {
@@ -2401,7 +2402,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
             
             int i = output.i;
             // ignore DDNS TxOut
-            if (pcoin->nVersion == NAMECOIN_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
+            if (pcoin->nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
                 continue;
 
             CAmount n = pcoin->vout[i].nValue;
@@ -3075,7 +3076,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
         strFailReason = _("Transaction amounts must be positive");
         return false;
     }
-    // DarkSilk: define some values used in case of namecoin tx creation
+    // DarkSilk: define some values used in case of darksilk tx creation
     CAmount nNameTxInCredit = 0;
     unsigned int nNameTxOut = 0;
     bool fDDNSUpdateOperation = false;
@@ -3090,7 +3091,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
     wtxNew.BindWallet(this);
     CMutableTransaction txNew;
     if (fDDNS) {
-        txNew.nVersion = NAMECOIN_TX_VERSION; // DarkSilk: important for DDNS transactions
+        txNew.nVersion = DARKSILK_TX_VERSION; // DarkSilk: important for DDNS transactions
     }
     
     // Discourage fee sniping.
@@ -3373,31 +3374,25 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 int nIn = 0;
                 CTransaction txNewConst(txNew);
 
-                if (fDDNS) {
-                    if (!SignNameSignature(*this, txNewConst, txNew, nIn++, ddnsScript)) {
+
+                BOOST_FOREACH(const CTxIn& txin, txNew.vin)
+                {
+                    bool signSuccess;
+                    const CScript& scriptPubKey = txin.prevPubKey;
+                    CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
+                    if (sign)
+                        signSuccess = ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, scriptSigRes);
+                    else
+                        signSuccess = ProduceSignature(DummySignatureCreator(this), scriptPubKey, scriptSigRes);
+
+                    if (!signSuccess)
+                    {
                         strFailReason = _("Signing transaction failed");
                         return false;
                     }
+                    nIn++;
                 }
-                else {
-                    BOOST_FOREACH(const CTxIn& txin, txNew.vin)
-                    {
-                        bool signSuccess;
-                        const CScript& scriptPubKey = txin.prevPubKey;
-                        CScript& scriptSigRes = txNew.vin[nIn].scriptSig;
-                        if (sign)
-                            signSuccess = ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, SIGHASH_ALL), scriptPubKey, scriptSigRes);
-                        else
-                            signSuccess = ProduceSignature(DummySignatureCreator(this), scriptPubKey, scriptSigRes);
 
-                        if (!signSuccess)
-                        {
-                            strFailReason = _("Signing transaction failed");
-                            return false;
-                        }
-                        nIn++;
-                    }
-                }
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
                 // Remove scriptSigs if we used dummy signatures for fee calculation

@@ -18,6 +18,7 @@
 #include "consensus/validation.h"
 #include "hash.h"
 #include "init.h"
+#include "keystore.h"      
 #include "merkleblock.h"
 #include "net.h"
 #include "policy/policy.h"
@@ -1111,7 +1112,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
 
     // Added for DDNS
-    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
+    bool isNameTx = tx.nVersion == DARKSILK_TX_VERSION;
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     string reason;
     if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
@@ -1800,6 +1801,30 @@ CAmount GetStormnodePayment(bool fStormnode)
 
 bool IsInitialBlockDownload()
 {
+    static bool rc = true; // Default - we're in the Initial Download
+    do {
+      if(rc == false)
+    break; // ret false
+
+      const CChainParams& chainParams = Params();
+      LOCK(cs_main);
+ 
+      if (fImporting || fReindex)
+        break; // ret true
+ 
+      int cah = chainActive.Height();
+
+      if(cah < Checkpoints::GetTotalBlocksEstimate(chainParams.Checkpoints()) || cah < pindexBestHeader->nHeight - 24 * 6)
+        break; // ret true
+
+      rc = pindexBestHeader->GetBlockTime() < GetTime() - chainParams.MaxTipAge();
+
+    } while(false);
+
+    return rc;
+}
+
+#if 0
     static bool lockIBDState = false;
     if (lockIBDState)
         return false;
@@ -1816,7 +1841,7 @@ bool IsInitialBlockDownload()
     if (!state)
         lockIBDState = true;
      return state;
-}
+#endif
 
 bool fLargeWorkForkFound = false;
 bool fLargeWorkInvalidChainFound = false;
@@ -2002,7 +2027,7 @@ void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCach
 
 bool CScriptCheck::operator()() {
     const CScript &scriptSig = ptxTo->vin[nIn].scriptSig;
-    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error, ptxTo->nVersion == NAMECOIN_TX_VERSION)) {
+    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error, ptxTo->nVersion == DARKSILK_TX_VERSION)) {
         return false;
     }
     return true;

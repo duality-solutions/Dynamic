@@ -315,7 +315,7 @@ color: rgb(0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Enter Namecoin address (or prefix of it)</string>
+          <string>Enter DarkSilk address (or prefix of it)</string>
          </property>
          <property name="text">
           <string notr="true"/>
@@ -346,7 +346,7 @@ color: rgb(0, 0, 0);</string>
         <enum>Qt::CustomContextMenu</enum>
        </property>
        <property name="toolTip">
-        <string>Double-click name to configure</string>
+        <string>Double-click name to copy all values</string>
        </property>
        <property name="verticalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOn</enum>

@@ -1,21 +1,15 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2011-2017 Namecoin Developers
-// Copyright (c) 2013-2017 Emercoin Developers
 // Copyright (c) 2015-2017 Silk Network Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
 #include "dns/dns.h"
-#include "keystore.h"
 #include "script/interpreter.h"
 #include "script/script.h"
 #include "script/sign.h"
-#include "policy/policy.h"
 #include "wallet/wallet.h"
 #include "rpcserver.h"
-#include "txmempool.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -34,7 +28,7 @@ extern string _(const char* psz);
 extern map<uint256, CTransaction> mapTransactions;
 extern CWallet* pwalletMain;
 
-class CNamecoinHooks : public CHooks
+class CDarkSilkHooks : public CHooks
 {
 public:
     virtual bool IsNameFeeEnough(const CTransaction& tx, const CAmount& txFee);
@@ -43,6 +37,7 @@ public:
     virtual bool ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy>& vName);
     virtual bool ExtractAddress(const CScript& script, string& address);
     virtual void AddToPendingNames(const CTransaction& tx);
+    virtual bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
     virtual bool IsNameScript(CScript scr);
     virtual bool getNameValue(const string& sName, string& sValue);
     virtual bool DumpToTextFile();
@@ -88,6 +83,15 @@ string limitString(const string& inp, unsigned int size, string message = "")
     return ret;
 }
 
+string encodeNameVal(const CNameVal& input, const string& format)
+{
+    string output;
+    if      (format == "hex")    output = HexStr(input);
+    else if (format == "base64") output = EncodeBase64(input.data(), input.size());
+    else                         output = stringFromNameVal(input);
+    return output;
+}
+
 // Calculate at which block will expire.
 bool CalculateExpiresAt(CNameRecord& nameRec)
 {
@@ -106,7 +110,7 @@ bool CalculateExpiresAt(CNameRecord& nameRec)
 
         NameTxInfo nti;
         if (!DecodeNameTx(tx, nti))
-            return error("CalculateExpiresAt() : %s is not namecoin tx, this should never happen", tx.GetHash().GetHex());
+            return error("CalculateExpiresAt() : %s is not darksilk tx, this should never happen", tx.GetHash().GetHex());
 
         sum += nti.nRentalDays * 1350; //days to blocks. 1350 is average number of PoS blocks per day
     }
@@ -224,42 +228,33 @@ bool CNameDB::ReadName(const CNameVal& name, CNameRecord& rec)
 
 CHooks* InitHook()
 {
-    return new CNamecoinHooks();
+    return new CDarkSilkHooks();
 }
 
 bool IsNameFeeEnough(const CTransaction& tx, const NameTxInfo& nti, const CBlockIndex* pindexBlock, const CAmount& txFee)
 {
     // scan last 10 PoW block for tx fee that matches the one specified in tx
     const CBlockIndex* lastPoW = GetLastBlockIndex(pindexBlock);
-    if (lastPoW == NULL) {
-        LogPrintf("IsNameFeeEnough(): Error finding lastPoW using GetLastBlockIndex(pindexBlock)");
-        return false;
-    }
-    //LogPrintf("IsNameFeeEnough(): pindexBlock->nHeight = %d, nameSize = %lu, valueSize = %lu, nRentalDays = %d, txFee = %d\n",
-    //       lastPoW->nHeight, nti.name.size(), nti.value.size(), nti.nRentalDays, txFee);
+    //LogPrintf("IsNameFeeEnough(): pindexBlock->nHeight = %d, op = %s, nameSize = %lu, valueSize = %lu, nRentalDays = %d, txFee = %"PRI64d"\n",
+    //       lastPoW->nHeight, nameFromOp(nti.op), nti.name.size(), nti.value.size(), nti.nRentalDays, txFee);
     bool txFeePass = false;
     for (int i = 1; i <= 10; i++)
     {
         CAmount netFee = GetNameOpFee(nti.nRentalDays, nti.op);
-        //LogPrintf("dDNS Operation: netFee = %d, lastPoW->nHeight = %d\n", netFee, lastPoW->nHeight);
+        //LogPrintf("                 : netFee = %"PRI64d", lastPoW->nHeight = %d\n", netFee, lastPoW->nHeight);
         if (txFee >= netFee)
         {
             txFeePass = true;
             break;
         }
-        if (lastPoW != NULL) {
-            lastPoW = GetLastBlockIndex(lastPoW->pprev);
-        }
-        else {
-            i = 11;
-        }
+        lastPoW = GetLastBlockIndex(lastPoW->pprev);
     }
     return txFeePass;
 }
 
-bool CNamecoinHooks::IsNameFeeEnough(const CTransaction& tx, const CAmount& txFee)
+bool CDarkSilkHooks::IsNameFeeEnough(const CTransaction& tx, const CAmount& txFee)
 {
-    if (tx.nVersion != NAMECOIN_TX_VERSION)
+    if (tx.nVersion != DARKSILK_TX_VERSION)
         return false;
 
     NameTxInfo nti;
@@ -373,20 +368,27 @@ bool GetNameCurrentAddress(const CNameVal& name, CDarkSilkAddress& address, stri
     return true;
 }
 
+bool CDarkSilkHooks::RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut)
+{
+    return ::RemoveNameScriptPrefix(scriptIn, scriptOut);
+}
+
 UniValue name_list(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 1)
+    if (fHelp || params.size() > 2)
         throw runtime_error(
-                "name_list [<name>]\n"
-                "list my own names"
-                );
+                "name_list [name] [valuetype]\n"
+                "list my own names.\n"
+                "\nArguments:\n"
+                "1. name      (string, required) Restrict output to specific name.\n"
+                "2. valuetype (string, optional) If \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"
+                 );
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
-    CNameVal nameUniq;
-    if (params.size() == 1)
-        nameUniq = nameValFromValue(params[0]);
+    CNameVal nameUniq = params.size() > 0 ? nameValFromValue(params[0]) : CNameVal();
+   string outputType = params.size() > 1 ? params[1].get_str() : "";
 
     map<CNameVal, NameTxInfo> mapNames, mapPending;
     GetNameList(nameUniq, mapNames, mapPending);
@@ -396,7 +398,7 @@ UniValue name_list(const UniValue& params, bool fHelp)
     {
         UniValue oName(UniValue::VOBJ);
         oName.push_back(Pair("name", stringFromNameVal(item.second.name)));
-        oName.push_back(Pair("value", stringFromNameVal(item.second.value)));
+        oName.push_back(Pair("value", encodeNameVal(item.second.value, outputType)));
         if (item.second.fIsMine == false)
             oName.push_back(Pair("transferred", true));
         oName.push_back(Pair("address", item.second.strAddress));
@@ -454,7 +456,6 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
         if (!item.second.size())
             continue;
 
-        // TODO (Amir) DDNS, test to see if we can use nLockTime instead of nTime.
         // if there is a set of pending op on a single name - select last one, by nTime
         CTransaction tx;
         uint32_t nTime = 0;
@@ -516,11 +517,14 @@ UniValue name_debug(const UniValue& params, bool fHelp)
 
 UniValue name_show(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() < 1 || params.size() > 3)
         throw runtime_error(
-            "name_show <name> [filepath]\n"
+            "name_show <name> [valuetype] [filepath]\n"
             "Show values of a name.\n"
-            "If filepath is specified name value will be saved in that file in binary format (file will be overwritten!).\n"
+            "\nArguments:\n"
+            "1. name      (string, required).\n"
+            "2. valuetype (string, optional) If \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"
+            "3. filepath  (string, optional) save name value in binary format in specified file (file will be overwritten!).\n"
             );
 
     if (IsInitialBlockDownload())
@@ -528,6 +532,7 @@ UniValue name_show(const UniValue& params, bool fHelp)
 
     UniValue oName(UniValue::VOBJ);
     CNameVal name = nameValFromValue(params[0]);
+    string outputType = params.size() > 1 ? params[1].get_str() : "";
     string sName = stringFromNameVal(name);
     NameTxInfo nti;
     {
@@ -548,8 +553,7 @@ UniValue name_show(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_WALLET_ERROR, "failed to decode name");
 
         oName.push_back(Pair("name", sName));
-        string value = stringFromNameVal(nti.value);
-        oName.push_back(Pair("value", value));
+        oName.push_back(Pair("value", encodeNameVal(nti.value, outputType)));
         oName.push_back(Pair("txid", tx.GetHash().GetHex()));
         oName.push_back(Pair("address", nti.strAddress));
         oName.push_back(Pair("expires_in", nameRec.nExpiresAt - chainActive.Height()));
@@ -562,9 +566,9 @@ UniValue name_show(const UniValue& params, bool fHelp)
                 oName.push_back(Pair("expired", true));
     }
 
-    if (params.size() > 1)
+    if (params.size() > 2)
     {
-        string filepath = params[1].get_str();
+        string filepath = params[2].get_str();
         ofstream file;
         file.open(filepath.c_str(), ios::out | ios::binary | ios::trunc);
         if (!file.is_open())
@@ -579,13 +583,14 @@ UniValue name_show(const UniValue& params, bool fHelp)
 
 UniValue name_history (const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() < 1 || params.size() > 3)
         throw std::runtime_error (
-            "name_history \"name\" ( fullhistory )\n"
+            "name_history <name> [fullhistory] [valuetype]\n"
             "\nLook up the current and all past data for the given name.\n"
             "\nArguments:\n"
-            "1. \"name\"           (string, required) the name to query for\n"
-            "2. \"fullhistory\"    (boolean, optional) shows full history, even if name is not active\n"
+            "1. name        (string, required) the name to query for\n"
+            "2. fullhistory (boolean, optional) shows full history, even if name is not active\n"
+            "3. valuetype   (string, optional) If \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"
             "\nResult:\n"
             "[\n"
             "  {\n"
@@ -608,9 +613,8 @@ UniValue name_history (const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
     CNameVal name = nameValFromValue(params[0]);
-    bool fFullHistory = false;
-    if (params.size() > 1)
-        fFullHistory = params[1].get_bool();
+    bool fFullHistory = params.size() > 1 ? params[1].get_bool() : false;
+    string outputType = params.size() > 2 ? params[2].get_str() : "";
 
     CNameRecord nameRec;
     {
@@ -635,7 +639,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
 
         NameTxInfo nti;
         if (!DecodeNameTx(tx, nti, true))
-            throw JSONRPCError(RPC_DATABASE_ERROR, "failed to decode namecoin transaction");
+            throw JSONRPCError(RPC_DATABASE_ERROR, "failed to decode darksilk transaction");
 
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("txid",             tx.GetHash().ToString()));
@@ -648,7 +652,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
         if (nti.op == OP_NAME_UPDATE || nti.op == OP_NAME_NEW || nti.op == OP_NAME_MULTISIG)
             obj.push_back(Pair("days_added",       nti.nRentalDays));
         if (nti.op == OP_NAME_UPDATE || nti.op == OP_NAME_NEW || nti.op == OP_NAME_MULTISIG)
-            obj.push_back(Pair("value",            stringFromNameVal(nti.value)));
+        obj.push_back(Pair("value", encodeNameVal(nti.value, outputType)));
 
         res.push_back(obj);
     }
@@ -658,9 +662,11 @@ UniValue name_history (const UniValue& params, bool fHelp)
 
 UniValue name_mempool (const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 0)
+    if (fHelp || params.size() > 1)
         throw std::runtime_error (
-            "name_mempool\n"
+            "name_mempool [valuetype]\n"
+            "\nArguments:\n"
+            "1. valuetype   (string, optional) If \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"
             "\nList pending name transactions in mempool.\n"
             "\nResult:\n"
             "[\n"
@@ -680,6 +686,8 @@ UniValue name_mempool (const UniValue& params, bool fHelp)
             + HelpExampleRpc ("name_mempool", "" )
         );
 
+    string outputType = params.size() > 0 ? params[0].get_str() : "";
+
     UniValue res(UniValue::VARR);
     BOOST_FOREACH(const PAIRTYPE(CNameVal, set<uint256>) &pairPending, mapNamePending)
     {
@@ -692,7 +700,7 @@ UniValue name_mempool (const UniValue& params, bool fHelp)
             CTransaction tx = mempool.mapTx.find(hash)->GetTx();
             NameTxInfo nti;
             if (!DecodeNameTx(tx, nti, true))
-                throw JSONRPCError(RPC_DATABASE_ERROR, "failed to decode namecoin transaction");
+                throw JSONRPCError(RPC_DATABASE_ERROR, "failed to decode darksilk transaction");
 
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("name",             sName));
@@ -705,7 +713,7 @@ UniValue name_mempool (const UniValue& params, bool fHelp)
             if (nti.op == OP_NAME_UPDATE || nti.op == OP_NAME_NEW || nti.op == OP_NAME_MULTISIG)
                 obj.push_back(Pair("days_added",       nti.nRentalDays));
             if (nti.op == OP_NAME_UPDATE || nti.op == OP_NAME_NEW || nti.op == OP_NAME_MULTISIG)
-                obj.push_back(Pair("value",            stringFromNameVal(nti.value)));
+            obj.push_back(Pair("value",            encodeNameVal(nti.value, outputType)));
 
             res.push_back(obj);
         }
@@ -723,15 +731,16 @@ bool mycompare2 (const UniValue& lhs, const UniValue& rhs)
 
 UniValue name_filter(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 5)
+    if (fHelp || params.size() > 6)
         throw runtime_error(
-                "name_filter [[[[[regexp] maxage=0] from=0] nb=0] stat]\n"
+                "name_filter [regexp] [maxage=0] [from=0] [nb=0] [stat] [valuetype]\n"
                 "scan and filter names\n"
                 "[regexp] : apply [regexp] on names, empty means all names\n"
                 "[maxage] : look in last [maxage] blocks\n"
                 "[from] : show results from number [from]\n"
                 "[nb] : show [nb] results, 0 means all\n"
-                "[stats] : show some stats instead of results\n"
+                "[stat] : show some stats instead of results\n"
+                "[valuetype] : if \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"                
                 "name_filter \"\" 5 # list names updated in last 5 blocks\n"
                 "name_filter \"^id/\" # list all names from the \"id\" namespace\n"
                 "name_filter \"^id/\" 0 0 0 stat # display stats (number of names) on active names from the \"id\" namespace\n"
@@ -740,29 +749,16 @@ UniValue name_filter(const UniValue& params, bool fHelp)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
-    string strRegexp;
-    int nFrom = 0;
-    int nNb = 0;
-    int nMaxAge = 0;
-    bool fStat = false;
     int nCountFrom = 0;
     int nCountNb = 0;
 
-    if (params.size() > 0)
-        strRegexp = params[0].get_str();
+    string strRegexp  = params.size() > 0 ? params[0].get_str() : "";
 
-    if (params.size() > 1)
-        nMaxAge = params[1].get_int();
-
-    if (params.size() > 2)
-        nFrom = params[2].get_int();
-
-    if (params.size() > 3)
-        nNb = params[3].get_int();
-
-    if (params.size() > 4)
-        fStat = (params[4].get_str() == "stat" ? true : false);
-
+    int nMaxAge       = params.size() > 1 ? params[1].get_int() : 0;
+    int nFrom         = params.size() > 2 ? params[2].get_int() : 0;
+    int nNb           = params.size() > 3 ? params[3].get_int() : 0;
+    bool fStat        = params.size() > 4 ? (params[4].get_str() == "stat" ? true : false) : false;
+    string outputType = params.size() > 5 ? params[5].get_str() : "";
 
     CNameDB dbName("r");
     vector<UniValue> oRes;
@@ -813,9 +809,7 @@ UniValue name_filter(const UniValue& params, bool fHelp)
         UniValue oName(UniValue::VOBJ);
         if (!fStat) {
             oName.push_back(Pair("name", name));
-
-            string value = stringFromNameVal(txName.value);
-            oName.push_back(Pair("value", limitString(value, 300, "\n...(value too large - use name_show to see full value)")));
+            oName.push_back(Pair("value", limitString(encodeNameVal(txName.value, outputType), 300, "\n...(value too large - use name_show to see full value)")));
 
             oName.push_back(Pair("registered_at", nHeight)); // pos = 2 in comparison function (above name_filter)
 
@@ -853,31 +847,22 @@ UniValue name_filter(const UniValue& params, bool fHelp)
 
 UniValue name_scan(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 3)
+    if (fHelp || params.size() > 4)
         throw runtime_error(
-                "name_scan [start-name] [max-returned] [max-value-length=-1]\n"
+                "name_scan [start-name] [max-returned] [max-value-length=-1] [valuetype]\n"
                 "Scan all names, starting at start-name and returning a maximum number of entries (default 500)\n"
                 "You can also control the length of shown value (0 = full value)\n"
+                "[valuetype] : if \"hex\" or \"base64\" is specified then it will print value in corresponding format instead of string.\n"
                 );
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
 
-    CNameVal name;
+    CNameVal name      = params.size() > 0 ? nameValFromValue(params[0]) : CNameVal();
     string strSearchName = "";
-    unsigned int nMax = 500;
-    unsigned int mMaxShownValue = 96;
-    if (params.size() > 0)
-    {
-        name = nameValFromValue(params[0]);
-        strSearchName = params[0].get_str();
-    }
-
-    if (params.size() > 1)
-        nMax = params[1].get_int();
-
-    if (params.size() > 2)
-        mMaxShownValue = params[2].get_int();
+    int nMax           = params.size() > 1 ? params[1].get_int() : 500;
+    int mMaxShownValue = params.size() > 2 ? params[2].get_int() : 0;
+    string outputType  = params.size() > 3 ? params[3].get_str() : "";
 
     CNameDB dbName("r");
     UniValue oRes(UniValue::VARR);
@@ -900,9 +885,8 @@ UniValue name_scan(const UniValue& params, bool fHelp)
             CNameIndex txName = pairScan.second.first;
             int nExpiresAt    = pairScan.second.second;
             CNameVal value = txName.value;
-            string sValue = stringFromNameVal(value);
 
-            oName.push_back(Pair("value", limitString(sValue, mMaxShownValue, "\n...(value too large - use name_show to see full value)")));
+        oName.push_back(Pair("value", limitString(encodeNameVal(value, outputType), mMaxShownValue, "\n...(value too large - use name_show to see full value)")));
             oName.push_back(Pair("expires_in", nExpiresAt - chainActive.Height()));
             if (nExpiresAt - chainActive.Height() <= 0)
                 oName.push_back(Pair("expired", true));
@@ -982,25 +966,28 @@ UniValue name_new(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 5)
         throw runtime_error(
-                "name_new <name> <value> <days> [toaddress] [valueAsFilepath]\n"
+                "name_new <name> <value> <days> [toaddress] [valuetype]\n"
                 "Creates new key->value pair which expires after specified number of days.\n"
                 "Cost is square root of (1% of last PoW + 1% per year of last PoW)."
-                "If [valueAsFilepath] is non-zero it will interpret <value> as a filepath and try to write file contents in binary format.\n"
+                "If <value> is empty then previous value is left intact.\n"
+                "\nArguments:\n"
+                "1. name      (string, required) Name to create.\n"
+                "2. value     (string, required) Value to write.\n"
+                "3. toaddress (string, optional) Address of recipient. Empty string = transaction to yourself.\n"
+                "4. valuetype (string, optional) Interpretation of value string. Can be \"hex\", \"base64\" or filepath.\n"
+                "   not specified or empty - Write value as a unicode string.\n"
+                "   \"hex\" or \"base64\" - Decode value string as a binary data in hex or base64 string format.\n"
+                "   otherwise - Decode value string as a filepath from which to read the data.\n"
                 + HelpRequiringPassphrase());
 
     // make sure the DDNS entry is all lowercase.
     CNameVal name = CNameValToLowerCase(nameValFromValue(params[0]));
     CNameVal value = nameValFromValue(params[1]);
     int nRentalDays = params[2].get_int();
-    string strAddress = "";
-    if (params.size() == 4)
-        strAddress = params[3].get_str();
+    string strAddress = params.size() > 3 ? params[3].get_str() : "";
+    string strValueType = params.size() > 4 ? params[4].get_str() : "";
 
-    bool fValueAsFilepath = false;
-    if (params.size() > 4)
-        fValueAsFilepath = (params[4].get_int() != 0);
-
-    NameTxReturn ret = name_operation(OP_NAME_NEW, name, value, nRentalDays, strAddress, fValueAsFilepath);
+    NameTxReturn ret = name_operation(OP_NAME_NEW, name, value, nRentalDays, strAddress, strValueType);
     if (!ret.ok)
         throw JSONRPCError(ret.err_code, ret.err_msg);
     return ret.hex.GetHex();
@@ -1010,24 +997,27 @@ UniValue name_update(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 5)
         throw runtime_error(
-                "name_update <name> <value> <days> [toaddress] [valueAsFilepath]\n"
+                "name_update <name> <value> <days> [toaddress] [valuetype]\n"
                 "Update name value, add days to expiration time and possibly transfer a name to diffrent address.\n"
-                "If [valueAsFilepath] is non-zero it will interpret <value> as a filepath and try to write file contents in binary format.\n"
+                "\nArguments:\n"
+                "1. name      (string, required) Name to update.\n"
+                "2. value     (string, required) Value to write. Empty string = use previous value.\n"
+                "3. toaddress (string, optional) Address of recipient. Empty string = transaction to yourself.\n"
+                "4. valuetype (string, optional) Interpretation of value string. Can be \"hex\", \"base64\" or filepath.\n"
+                "   not specified or empty - Write value as a unicode string.\n"
+                "   \"hex\" or \"base64\" - Decode value string as a binary data in hex or base64 string format.\n"
+                "   otherwise - Decode value string as a filepath from which to read the data.\n"
                 + HelpRequiringPassphrase());
 
     // make sure the DDNS entry is all lowercase.
     CNameVal name = CNameValToLowerCase(nameValFromValue(params[0]));
     CNameVal value = nameValFromValue(params[1]);
     int nRentalDays = params[2].get_int();
-    string strAddress = "";
-    if (params.size() == 4)
-        strAddress = params[3].get_str();
+    string strAddress = params.size() > 3 ? params[3].get_str() : "";
+    string strValueType = params.size() > 4 ? params[4].get_str() : "";
 
-    bool fValueAsFilepath = false;
-    if (params.size() > 4)
-        fValueAsFilepath = (params[4].get_int() != 0);
+    NameTxReturn ret = name_operation(OP_NAME_UPDATE, name, value, nRentalDays, strAddress, strValueType);
 
-    NameTxReturn ret = name_operation(OP_NAME_UPDATE, name, value, nRentalDays, strAddress, fValueAsFilepath);
      if (!ret.ok)
         throw JSONRPCError(ret.err_code, ret.err_msg);
     return ret.hex.GetHex();
@@ -1043,21 +1033,21 @@ UniValue name_delete(const UniValue& params, bool fHelp)
     // make sure the DDNS entry is all lowercase.
     CNameVal name = CNameValToLowerCase(nameValFromValue(params[0]));
 
-    NameTxReturn ret = name_operation(OP_NAME_DELETE, name, CNameVal(), 0, "");
+    NameTxReturn ret = name_operation(OP_NAME_DELETE, name, CNameVal(), 0, "", "");
     if (!ret.ok)
         throw JSONRPCError(ret.err_code, ret.err_msg);
     return ret.hex.GetHex();
 
 }
 
-NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string strAddress, bool fValueAsFilepath)
+NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string& strAddress, const string& strValueType)
 {
     NameTxReturn ret;
     ret.err_code = RPC_INTERNAL_ERROR; // default value in case of abnormal exit
     ret.err_msg = "unkown error";
     ret.ok = false;
 
-    if ((op == OP_NAME_NEW || op == OP_NAME_UPDATE || op == OP_NAME_MULTISIG) && value.empty())
+    if ((op == OP_NAME_NEW || op == OP_NAME_MULTISIG) && value.empty())
     {
         ret.err_msg = "value must not be empty";
         return ret;
@@ -1070,31 +1060,54 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         return ret;
     }
 
-    if (fValueAsFilepath)
+    // decode value or leave it as is
+    if (!strValueType.empty() && !value.empty())
     {
-        string filepath = stringFromNameVal(value);
-        std::ifstream ifs;
-        ifs.open(filepath.c_str(), std::ios::binary | std::ios::ate);
-        if (!ifs)
+        string strValue = stringFromNameVal(value);
+        if (strValueType == "hex")
         {
-            ret.err_msg = "failed to open file";
-            return ret;
+            if (!IsHex(strValue))
+            {
+                ret.err_msg = "failed to decode value as hex";
+                return ret;
+            }
+            value = ParseHex(strValue);        
         }
-        std::streampos fileSize = ifs.tellg();
-        if (fileSize > MAX_VALUE_LENGTH)
+        else if (strValueType == "base64")
         {
-            ret.err_msg = "file is larger than maximum allowed size";
-            return ret;
+            bool fInvalid = false;
+            value = DecodeBase64(strValue.c_str(), &fInvalid);
+            if (fInvalid)
+            {
+                ret.err_msg = "failed to decode value as base64";
+                return ret;
+            }
         }
-
-        ifs.clear();
-        ifs.seekg(0, std::ios::beg);
-
-        value.resize(fileSize);
-        if (!ifs.read(reinterpret_cast<char*>(&value[0]), fileSize))
+        else // decode as filepath
         {
-            ret.err_msg = "failed to read file";
-            return ret;
+            std::ifstream ifs;
+            ifs.open(strValue.c_str(), std::ios::binary | std::ios::ate);
+            if (!ifs)
+            {
+                ret.err_msg = "failed to open file";
+                return ret;
+            }
+            std::streampos fileSize = ifs.tellg();
+            if (fileSize > MAX_VALUE_LENGTH)
+            {
+                ret.err_msg = "file is larger than maximum allowed size";
+                return ret;
+            }
+
+            ifs.clear();
+            ifs.seekg(0, std::ios::beg);
+
+            value.resize(fileSize);
+            if (!ifs.read(reinterpret_cast<char*>(&value[0]), fileSize))
+            {
+                ret.err_msg = "failed to read file";
+                return ret;
+            }
         }
     }
 
@@ -1119,7 +1132,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         return ret;
 
     CMutableTransaction tmpTx;
-    tmpTx.nVersion = NAMECOIN_TX_VERSION;
+    tmpTx.nVersion = DARKSILK_TX_VERSION;
     CWalletTx wtx(pwalletMain, tmpTx);
     stringstream ss;
     CScript scriptPubKey;
@@ -1160,11 +1173,16 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         {
             CNameDB dbName("r");
             CTransaction prevTx;
-            if (!GetLastTxOfName(dbName, name, prevTx))
+            CNameRecord nameRec;
+            if (!GetLastTxOfName(dbName, name, prevTx, nameRec))
             {
                 ret.err_msg = "could not find tx with this name";
                 return ret;
             }
+
+            // empty value == reuse old value
+            if ((op == OP_NAME_UPDATE || op == OP_NAME_MULTISIG) && value.empty())
+                value = nameRec.vtxPos.back().value;
 
             uint256 wtxInHash = prevTx.GetHash();
             if (!pwalletMain->mapWallet.count(wtxInHash))
@@ -1250,9 +1268,8 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
 bool createNameIndexFile()
 {
     LogPrintf("Scanning blockchain for names to create fast index...\n");
-    
     CNameDB dbName("cr+");
-    
+
     if (!fTxIndex)
         return error("createNameIndexFile() : transaction index not available");
 
@@ -1303,7 +1320,7 @@ bool createNameIndexFile()
 // optionaly it can extract destination address and check if tx is mine (note: it does not check if address is valid)
 bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndIfIsMine /* = false */)
 {
-    if (tx.nVersion != NAMECOIN_TX_VERSION)
+    if (tx.nVersion != DARKSILK_TX_VERSION)
         return false;
 
     bool found = false;
@@ -1350,9 +1367,9 @@ int IndexOfNameOutput(const CTransaction& tx)
     return nti.nOut;
 }
 
-void CNamecoinHooks::AddToPendingNames(const CTransaction& tx)
+void CDarkSilkHooks::AddToPendingNames(const CTransaction& tx)
 {
-    if (tx.nVersion != NAMECOIN_TX_VERSION)
+    if (tx.nVersion != DARKSILK_TX_VERSION)
         return;
 
     CCoins coins;
@@ -1379,17 +1396,17 @@ void CNamecoinHooks::AddToPendingNames(const CTransaction& tx)
 // Checks name tx and save name data to vName if valid
 // returns true if: (tx is valid name tx) OR (tx is not a name tx)
 // returns false if tx is invalid name tx
-bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee)
+bool CDarkSilkHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee)
 {
-    if (tx.nVersion != NAMECOIN_TX_VERSION)
+    if (tx.nVersion != DARKSILK_TX_VERSION)
         return true;
 
-    //read name tx
+//read name tx
     NameTxInfo nti;
     if (!DecodeNameTx(tx, nti))
     {
         if (pindexBlock->nHeight > RELEASE_HEIGHT)
-            return error("CheckInputsHook() : could not decode namecoin tx %s in block %d", tx.GetHash().GetHex(), pindexBlock->nHeight);
+            return error("CheckInputsHook() : could not decode darksilk tx %s in block %d", tx.GetHash().GetHex(), pindexBlock->nHeight);
         return false;
     }
 
@@ -1398,7 +1415,7 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     string info = str( boost::format("name %s, tx=%s, block=%d, value=%s") %
         sName % tx.GetHash().GetHex() % pindexBlock->nHeight % stringFromNameVal(nti.value));
 
-    //check if last known tx on this name matches any of inputs of this tx
+//check if last known tx on this name matches any of inputs of this tx
     CNameDB dbName("r");
     CNameRecord nameRec;
     if (dbName.ExistsName(name) && !dbName.ReadName(name, nameRec))
@@ -1514,14 +1531,14 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     return true;
 }
 
-bool CNamecoinHooks::DisconnectInputs(const CTransaction& tx)
+bool CDarkSilkHooks::DisconnectInputs(const CTransaction& tx)
 {
-    if (tx.nVersion != NAMECOIN_TX_VERSION)
+    if (tx.nVersion != DARKSILK_TX_VERSION)
         return true;
 
     NameTxInfo nti;
     if (!DecodeNameTx(tx, nti))
-        return error("DisconnectInputsHook() : could not decode namecoin tx");
+        return error("DisconnectInputsHook() : could not decode darksilk tx");
 
     {
         CNameDB dbName("cr+");
@@ -1586,7 +1603,7 @@ string stringFromOp(int op)
     }
 }
 
-bool CNamecoinHooks::ExtractAddress(const CScript& script, string& address)
+bool CDarkSilkHooks::ExtractAddress(const CScript& script, string& address)
 {
     NameTxInfo nti;
     if (!DecodeNameScript(script, nti))
@@ -1599,7 +1616,7 @@ bool CNamecoinHooks::ExtractAddress(const CScript& script, string& address)
 
 // Executes name operations in vName and writes result to nameindex.dat.
 // NOTE: the block should already be written to blockchain by now - otherwise this may fail.
-bool CNamecoinHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy> &vName)
+bool CDarkSilkHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy> &vName)
 {
     if (vName.empty())
         return true;
@@ -1669,13 +1686,13 @@ bool CNamecoinHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProx
     return true;
 }
 
-bool CNamecoinHooks::IsNameScript(CScript scr)
+bool CDarkSilkHooks::IsNameScript(CScript scr)
 {
     NameTxInfo nti;
     return DecodeNameScript(scr, nti);
 }
 
-bool CNamecoinHooks::getNameValue(const string& sName, string& sValue)
+bool CDarkSilkHooks::getNameValue(const string& sName, string& sValue)
 {
     CNameVal name = nameValFromString(sName);
     CNameDB dbName("r");
@@ -1711,7 +1728,7 @@ bool GetNameValue(const CNameVal& name, CNameVal& value)
     return true;
 }
 
-bool CNamecoinHooks::DumpToTextFile()
+bool CDarkSilkHooks::DumpToTextFile()
 {
     CNameDB dbName("r");
     return dbName.DumpToTextFile();
@@ -1774,7 +1791,7 @@ bool CNameDB::DumpToTextFile()
     return true;
 }
 
-bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, const unsigned int nIn, const CScript& scriptDDNS, const int nHashType)
+bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType)
 {
     assert(nIn < txTo.vin.size());
     CTxIn& txin = txTo.vin[nIn];
@@ -1784,18 +1801,18 @@ bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CM
     // Leave out the signature from the hash, since a signature can't sign itself.
     // The checksig op will also drop the signatures from its hash.
 
-    uint256 hash = SignatureHash(scriptDDNS, txTo, nIn, nHashType);
+    uint256 hash = SignatureHash(txout.scriptPubKey, txTo, nIn, nHashType);
 
     CScript scriptPubKey;
-    if (!RemoveNameScriptPrefix(scriptDDNS, scriptPubKey))
-        return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
+    if (!RemoveNameScriptPrefix(txout.scriptPubKey, scriptPubKey))
+        return error("SignNameSignature(): failed to remove name script prefix");
 
     txnouttype whichType;
-    if (!Solver(keystore, txout.scriptPubKey, hash, nHashType, txin.scriptSig, whichType))
-        return error(strprintf("SignNameSignature() failed to remove name script prefix scriptSig=%s", txout.scriptPubKey.ToString()).c_str());
+    if (!Solver(keystore, scriptPubKey, hash, nHashType, txin.scriptSig, whichType))
+        return false;
 
     // Test solution
-    return VerifyScript(txin.scriptSig, txout.scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&txTo, nIn), NULL, txTo.nVersion == NAMECOIN_TX_VERSION);
+    return VerifyScript(txin.scriptSig, txout.scriptPubKey, MANDATORY_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&txTo, nIn), NULL, txTo.nVersion == DARKSILK_TX_VERSION);
 }
 
 std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress)

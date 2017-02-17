@@ -64,6 +64,7 @@ private Q_SLOTS:
     void on_addressBookButton_clicked();
     void on_pasteButton_clicked();
     void updateDisplayUnit();
+    void on_payTo_editingFinished();
 
 private:
     SendCoinsRecipient recipient;
