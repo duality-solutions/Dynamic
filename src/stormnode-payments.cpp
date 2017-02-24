@@ -677,7 +677,7 @@ bool CStormnodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::st
     if(!psn) {
         strError = strprintf("Unknown Stormnode: prevout=%s", vinStormnode.prevout.ToStringShort());
         // Only ask if we are already synced and still have no idea about that Stormnode
-        if(stormnodeSync.IsSynced()) {
+        if(stormnodeSync.IsStormnodeListSynced()) {
             snodeman.AskForSN(pnode, vinStormnode);
         }
 
@@ -789,7 +789,7 @@ bool CStormnodePayments::ProcessBlock(int nBlockHeight)
 void CStormnodePaymentVote::Relay()
 {
     // do not relay until synced
-    if (!stormnodeSync.IsSynced()) return;
+    if (!stormnodeSync.IsWinnersListSynced()) return;
     CInv inv(MSG_STORMNODE_PAYMENT_VOTE, GetHash());
     RelayInv(inv);
 }
@@ -808,7 +808,7 @@ bool CStormnodePaymentVote::CheckSignature(const CPubKey& pubKeyStormnode, int n
         // Only ban for future block vote when we are already synced.
         // Otherwise it could be the case when SN which signed this vote is using another key now
         // and we have no idea about the old one.
-        if(stormnodeSync.IsSynced() && nBlockHeight > nValidationHeight) {
+        if(stormnodeSync.IsStormnodeListSynced() && nBlockHeight > nValidationHeight) {
             nDos = 20;
         }
         return error("CStormnodePaymentVote::CheckSignature -- Got bad Stormnode payment signature, Stormnode=%s, error: %s", vinStormnode.prevout.ToStringShort().c_str(), strError);
