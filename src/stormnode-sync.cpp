@@ -459,7 +459,7 @@ void CStormnodeSync::ProcessTick()
                         }
                         // make sure the condition below is checked only once per tick
                         if(nLastTick == nTick) continue;
-                        if(GetTime() - nTimeNoObjectsLeft > MASTERNODE_SYNC_TIMEOUT_SECONDS &&
+                        if(GetTime() - nTimeNoObjectsLeft > STORMNODE_SYNC_TIMEOUT_SECONDS &&
                             governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), STORMNODE_SYNC_TICK_SECONDS)
                         ) {
                             // We already asked for all objects, waited for STORMNODE_SYNC_TIMEOUT_SECONDS
