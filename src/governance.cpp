@@ -586,10 +586,10 @@ std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& 
         for (vote_instance_m_it it3 = voteRecord.mapInstances.begin(); it3 != voteRecord.mapInstances.end(); ++it3) {
             int signal = (it3->first);
             int outcome = ((it3->second).eOutcome);
-            int64_t nTime = ((it3->second).nTime);
+            int64_t nCreationTime = ((it3->second).nCreationTime);
 
             CGovernanceVote vote = CGovernanceVote(snCollateralOutpoint, nParentHash, (vote_signal_enum_t)signal, (vote_outcome_enum_t)outcome);
-            vote.SetTime(nTime);
+            vote.SetTime(nCreationTime);
 
             vecResult.push_back(vote);
         }
