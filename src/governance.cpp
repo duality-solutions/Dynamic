@@ -986,7 +986,7 @@ int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
     return RequestGovernanceObjectVotes(vNodesCopy);
 }
 
-+int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy)
+int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy)
 {
     static std::map<uint256, std::map<CService, int64_t> > mapAskedRecently;
     if(vNodesCopy.empty()) return -1;
