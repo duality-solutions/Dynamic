@@ -13,6 +13,7 @@
 #include "coincontrol.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
+#include "dns/dns.h"
 #include "init.h"
 #include "key.h"
 #include "keystore.h"
@@ -26,6 +27,7 @@
 #include "script/sign.h"
 #include "timedata.h"
 #include "txmempool.h"
+#include "uint256hm.h"
 #include "util.h"
 #include "utilmoneystr.h"
 
@@ -1733,6 +1735,10 @@ CAmount CWalletTx::GetAvailableCredit(bool fUseCache) const
     uint256 hashTx = GetHash();
     for (unsigned int i = 0; i < vout.size(); i++)
     {
+        // ignore DDNS TxOut
+        if (nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(vout[i].scriptPubKey))
+            continue;
+
         if (!pwallet->IsSpent(hashTx, i))
         {
             const CTxOut &txout = vout[i];
@@ -2252,6 +2258,10 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
 
             for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
                 bool found = false;
+                // ignore DDNS TxOut
+                if (pcoin->nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
+                    continue;
+
                 if(nCoinType == ONLY_DENOMINATED) {
                     found = IsDenominatedAmount(pcoin->vout[i].nValue);
                 } else if(nCoinType == ONLY_NOT1000IFSN) {
@@ -2378,18 +2388,23 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
         LogPrint("selectcoins", "tryDenom: %d\n", tryDenom);
         vValue.clear();
         nTotalLower = 0;
+        
         BOOST_FOREACH(const COutput &output, vCoins)
         {
             if (!output.fSpendable)
                 continue;
 
             const CWalletTx *pcoin = output.tx;
-
-//            if (fDebug) LogPrint("selectcoins", "value %s confirms %d\n", FormatMoney(pcoin->vout[output.i].nValue), output.nDepth);
+            
+            //if (fDebug) LogPrint("selectcoins", "value %s confirms %d\n", FormatMoney(pcoin->vout[output.i].nValue), output.nDepth);
             if (output.nDepth < (pcoin->IsFromMe(ISMINE_ALL) ? nConfMine : nConfTheirs))
                 continue;
-
+            
             int i = output.i;
+            // ignore DDNS TxOut
+            if (pcoin->nVersion == DARKSILK_TX_VERSION && hooks->IsNameScript(pcoin->vout[i].scriptPubKey))
+                continue;
+
             CAmount n = pcoin->vout[i].nValue;
             if (tryDenom == 0 && IsDenominatedAmount(n)) continue; // we don't want denom values on first run
 
@@ -3027,8 +3042,18 @@ bool CWallet::ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecA
     return true;
 }
 
+/*
+static void TransferScript(const CScript& scriptTransfer, CScript& txNewScript)
+{
+    CScript& scriptDDNSOperation = const_cast<CScript&>(scriptTransfer);
+    CScript* ptxNewScript = &txNewScript;
+    ptxNewScript = scriptTransferNonConst;
+}
+*/
+
 bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
-                                int& nChangePosRet, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend)
+                                int& nChangePosRet, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend, 
+                                bool fDDNS, const CScript& ddnsScript)
 {
     CAmount nFeePay = fUseInstantSend ? CTxLockRequest().GetMinFee() : 0;
 
@@ -3051,11 +3076,24 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
         strFailReason = _("Transaction amounts must be positive");
         return false;
     }
+    // DarkSilk: define some values used in case of darksilk tx creation
+    CAmount nNameTxInCredit = 0;
+    unsigned int nNameTxOut = 0;
+    bool fDDNSUpdateOperation = false;
+    if (!wtxNew.IsNull()) // DarkSilk DDNS update or delete operation
+    {
+        nNameTxOut = IndexOfNameOutput(wtxNew);
+        nNameTxInCredit = wtxNew.vout[nNameTxOut].nValue;
+        fDDNSUpdateOperation = true;
 
+    }
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.BindWallet(this);
     CMutableTransaction txNew;
-
+    if (fDDNS) {
+        txNew.nVersion = DARKSILK_TX_VERSION; // DarkSilk: important for DDNS transactions
+    }
+    
     // Discourage fee sniping.
     //
     // For a large miner the value of the transactions in the best block and
@@ -3088,7 +3126,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
 
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-
+    
     {
         LOCK2(cs_main, cs_wallet);
         {
@@ -3102,48 +3140,70 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 wtxNew.fFromMe = true;
                 nChangePosRet = -1;
                 bool fFirst = true;
-
+                CAmount nTotalValue = nValue + nFeeRet;
                 CAmount nValueToSelect = nValue;
                 if (nSubtractFeeFromAmount == 0)
                     nValueToSelect += nFeeRet;
                 double dPriority = 0;
+
                 // vouts to the payees
-                BOOST_FOREACH (const CRecipient& recipient, vecSend)
-                {
-                    CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
-
-                    if (recipient.fSubtractFeeFromAmount)
-                    {
-                        txout.nValue -= nFeeRet / nSubtractFeeFromAmount; // Subtract fee equally from each selected recipient
-
-                        if (fFirst) // first receiver pays the remainder not divisible by output count
-                        {
-                            fFirst = false;
-                            txout.nValue -= nFeeRet % nSubtractFeeFromAmount;
-                        }
-                    }
-
-                    if (txout.IsDust(::minRelayTxFee))
-                    {
-                        if (recipient.fSubtractFeeFromAmount && nFeeRet > 0)
-                        {
-                            if (txout.nValue < 0)
-                                strFailReason = _("The transaction amount is too small to pay the fee");
-                            else
-                                strFailReason = _("The transaction amount is too small to send after the fee has been deducted");
-                        }
-                        else
-                            strFailReason = _("Transaction amount too small");
-                        return false;
-                    }
+                if (fDDNS) {
+                    CScript& scriptDDNSOperation = const_cast<CScript&>(ddnsScript);
+                    CTxOut txout(vecSend[0].nAmount, scriptDDNSOperation, -10);
                     txNew.vout.push_back(txout);
+                    CScript* ptxNewScript = &txNew.vout[0].scriptPubKey;
+                    ptxNewScript = &scriptDDNSOperation;
+                }
+                else {
+                    BOOST_FOREACH (const CRecipient& recipient, vecSend)
+                    {
+                        CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
+
+                        if (recipient.fSubtractFeeFromAmount)
+                        {
+                            txout.nValue -= nFeeRet / nSubtractFeeFromAmount; // Subtract fee equally from each selected recipient
+
+                            if (fFirst) // first receiver pays the remainder not divisible by output count
+                            {
+                                fFirst = false;
+                                txout.nValue -= nFeeRet % nSubtractFeeFromAmount;
+                            }
+                        }
+
+                        if (txout.IsDust(::minRelayTxFee))
+                        {
+                            if (recipient.fSubtractFeeFromAmount && nFeeRet > 0)
+                            {
+                                if (txout.nValue < 0)
+                                    strFailReason = _("The transaction amount is too small to pay the fee");
+                                else
+                                    strFailReason = _("The transaction amount is too small to send after the fee has been deducted");
+                            }
+                            else
+                                strFailReason = _("Transaction amount too small");
+                            return false;
+                        }
+                        txNew.vout.push_back(txout);
+                    }
                 }
 
                 // Choose coins to use
                 set<pair<const CWalletTx*,unsigned int> > setCoins;
                 CAmount nValueIn = 0;
 
-                if (!SelectCoins(nValueToSelect, setCoins, nValueIn, coinControl, nCoinType, fUseInstantSend))
+                // DarkSilk: in case of ddns tx we have already supplied input.
+                // If we have enough money: skip coin selection, unless we have ordered it with coinControl.
+                if (fDDNSUpdateOperation)
+                 {
+                    if ( (nTotalValue - nNameTxInCredit > 0 || (coinControl && coinControl->HasSelected()))
+                        && !SelectCoins(nTotalValue - nNameTxInCredit, setCoins, nValueIn, coinControl, nCoinType, false) )
+                    {
+                        strFailReason = _("Insufficient funds");
+                        return false;
+                    }
+                }
+                // otherwise proceed as we normaly would in DarkSilk
+                else if (!SelectCoins(nValueToSelect, setCoins, nValueIn, coinControl, nCoinType, fUseInstantSend))
                 {
                     if (nCoinType == ONLY_NOT1000IFSN) {
                         strFailReason = _("Unable to locate enough funds for this transaction that are not equal 1000 DSLK.");
@@ -3166,7 +3226,12 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
 
                     return false;
                 }
-
+                // DarkSilk: name tx always at first position
+                if (fDDNSUpdateOperation)
+                {
+                    setCoins.insert(setCoins.begin(), make_pair(&wtxNew, nNameTxOut));
+                    nValueIn += nNameTxInCredit;
+                }
 
                 BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
                 {
@@ -3174,7 +3239,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     //The coin age after the next block (depth+1) is used instead of the current,
                     //reflecting an assumption the user would accept a bit more delay for
                     //a chance at a free transaction.
-                    //But mempool inputs might still be in the mempool, so their age stays 0
+                    //But mempool inputs might still be in the mempool, so their agCreateTransactione stays 0
                     int age = pcoin.first->GetDepthInMainChain();
                     assert(age >= 0);
                     if (age != 0)
@@ -3268,37 +3333,48 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     reservekey.ReturnKey();
 
                 // Fill vin
-                //
-                // Note how the sequence number is set to max()-1 so that the
-                // nLockTime set above actually works.
-                BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins){
-                    CTxIn txin = CTxIn(coin.first->GetHash(),coin.second,CScript(),
-                                              std::numeric_limits<unsigned int>::max()-1);
-                    txin.prevPubKey = coin.first->vout[coin.second].scriptPubKey;
-                    txNew.vin.push_back(txin);
+                
+                if (fDDNS) {
+                    BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
+                        txNew.vin.push_back(CTxIn(coin.first->GetHash(),coin.second));
                 }
-
-                // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
-                sort(txNew.vin.begin(), txNew.vin.end());
-                sort(txNew.vout.begin(), txNew.vout.end());
-
-                // If there was change output added before, we must update its position now
-                if (nChangePosRet != -1) {
-                    int i = 0;
-                    BOOST_FOREACH(const CTxOut& txOut, txNew.vout)
-                    {
-                        if (txOut == newTxOut)
-                        {
-                            nChangePosRet = i;
-                            break;
-                        }
-                        i++;
+                else{
+                    // Note how the sequence number is set to max()-1 so that the
+                    // nLockTime set above actually works.
+                    BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins){
+                        CTxIn txin = CTxIn(coin.first->GetHash(),coin.second,CScript(),
+                                                  std::numeric_limits<unsigned int>::max()-1);
+                        txin.prevPubKey = coin.first->vout[coin.second].scriptPubKey;
+                        txNew.vin.push_back(txin);
                     }
                 }
-
+                
+                if (!fDDNS) {
+                    // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
+                    sort(txNew.vin.begin(), txNew.vin.end());
+                    sort(txNew.vout.begin(), txNew.vout.end());
+                }
+                
+                if (!fDDNS) {
+                    // If there was change output added before, we must update its position now
+                    if (nChangePosRet != -1) {
+                        int i = 0;
+                        BOOST_FOREACH(const CTxOut& txOut, txNew.vout)
+                        {
+                            if (txOut == newTxOut)
+                            {
+                                nChangePosRet = i;
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+                }
                 // Sign
                 int nIn = 0;
                 CTransaction txNewConst(txNew);
+
+
                 BOOST_FOREACH(const CTxIn& txin, txNew.vin)
                 {
                     bool signSuccess;
@@ -3320,9 +3396,11 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
                 // Remove scriptSigs if we used dummy signatures for fee calculation
-                if (!sign) {
-                    BOOST_FOREACH (CTxIn& txin, txNew.vin)
-                        txin.scriptSig = CScript();
+                if (!fDDNS) {
+                    if (!sign) {
+                        BOOST_FOREACH (CTxIn& txin, txNew.vin)
+                            txin.scriptSig = CScript();
+                    }
                 }
 
                 // Embed the constructed transaction data in wtxNew.
@@ -3380,12 +3458,14 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
     return true;
 }
 
-bool CWallet::CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletTx wtxNameIn, CAmount nFeeInput,
-                                CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int nSplitBlock, std::string& strFailReason, const CCoinControl* coinControl)
+bool CWallet::CreateNameTx(const CScript& scriptPubKey, const CAmount& nValue, CWalletTx& wtxNameIn, CAmount nFeeInput,
+                                const CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int nSplitBlock, std::string& strFailReason, const CCoinControl* coinControl)
 {
+    CRecipient ddnsRecipient = {scriptPubKey, nValue, false};
     std::vector<CRecipient> vecSend;
-    vecSend.push_back((CRecipient){scriptPubKey, nValue, false});
-    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeInput, nSplitBlock, strFailReason, coinControl);
+    vecSend.push_back(ddnsRecipient);
+
+    return CreateTransaction(vecSend, wtxNameIn, reservekey, nFeeRet, nSplitBlock, strFailReason, coinControl, true, ALL_COINS, false, true, scriptPubKey);
 }
 
 /**
@@ -3395,7 +3475,7 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std:
 {
     {
         LOCK2(cs_main, cs_wallet);
-        LogPrintf("CommitTransaction:\n%s", wtxNew.ToString());
+        LogPrintf("CommitTransaction:%s\n", wtxNew.ToString());
         {
             // This is only to keep the database open to defeat the auto-flush for the
             // duration of this scope.  This is the only place where this optimization
@@ -4446,7 +4526,7 @@ void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew)
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }
 
-void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWalletTx& wtxNameIn, CAmount nFeeInput)
+void SendName(const CScript& scriptPubKey, CAmount nValue, const CWalletTx& wtxNew, CWalletTx& wtxNameIn, CAmount nFeeInput)
 {
     SendMoneyCheck(nValue);
 
@@ -4459,9 +4539,9 @@ void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWa
     {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
-        LogPrintf("SendMoney() : %s\n", strError);
+        LogPrintf("SendName() : %s\n", strError);
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    if (!pwalletMain->CommitTransaction(wtxNew, reservekey))
+    if (!pwalletMain->CommitTransaction(wtxNameIn, reservekey))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }

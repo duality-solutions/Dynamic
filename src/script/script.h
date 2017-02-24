@@ -646,6 +646,8 @@ public:
         // The default std::vector::clear() does not release memory.
         CScriptBase().swap(*this);
     }
+    
+    std::string ToString() const;
 };
 
 class CReserveScript

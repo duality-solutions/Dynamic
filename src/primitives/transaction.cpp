@@ -14,12 +14,12 @@
 
 std::string COutPoint::ToString() const
 {
-    return strprintf("COutPoint(%s, %u)", hash.ToString()/*.substr(0,10)*/, n);
+    return strprintf("COutPoint(%s, %u)", hash.ToString().substr(0,10), n);
 }
 
 std::string COutPoint::ToStringShort() const
 {
-    return strprintf("%s-%u", hash.ToString().substr(0,64), n);
+    return strprintf("%s-%u", hash.ToString().substr(0,10), n);
 }
 
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, uint32_t nSequenceIn)
@@ -40,11 +40,11 @@ std::string CTxIn::ToString() const
 {
     std::string str;
     str += "CTxIn(";
-    str += prevout.ToString();
+    str += prevout.ToString().substr(0,30);
     if (prevout.IsNull())
-        str += strprintf(", coinbase %s", HexStr(scriptSig));
+        str += strprintf(", coinbase %s", scriptSig.ToString().substr(0,24));
     else
-        str += strprintf(", scriptSig=%s", HexStr(scriptSig).substr(0, 24));
+        str += strprintf(", scriptSig=%s", scriptSig.ToString().substr(0,24));
     if (nSequence != SEQUENCE_FINAL)
         str += strprintf(", nSequence=%u", nSequence);
     str += ")";
@@ -56,6 +56,13 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
     nValue = nValueIn;
     scriptPubKey = scriptPubKeyIn;
     nRounds = -10;
+}
+
+CTxOut::CTxOut(const CAmount& nValueIn, const CScript& scriptPubKeyIn, int inRounds)
+{
+    nValue = nValueIn;
+    scriptPubKey = scriptPubKeyIn;
+    nRounds = inRounds;
 }
 
 uint256 CTxOut::GetHash() const

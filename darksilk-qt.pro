@@ -611,7 +611,8 @@ SOURCES += \
     src/qt/dnstablemodel.cpp \
     src/qt/multisigaddressentry.cpp \
     src/qt/multisigdialog.cpp \
-    src/qt/multisiginputentry.cpp
+    src/qt/multisiginputentry.cpp \
+    src/sendalert.cpp
 
 
 OTHER_FILES += \

@@ -6,9 +6,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 /*
- * Simple DNS server for Silk Network project
+ * Simple DNS server for DarkSilk project
  *
- * Lookup for names like "dns:some-name" in the local nameindex database.
+ * Lookup for names like "dns:some-nake" in the local nameindex database.
  * Database is updates from blockchain, and keeps NMC-transactions.
  *
  * Supports standard RFC1034 UDP DNS protocol only
@@ -50,13 +50,16 @@
 /*---------------------------------------------------*/
 
 #define BUF_SIZE (512 + 512)
-#define MAX_OUT  512	// Old DNS restricts UDP to 512 bytes
-#define MAX_TOK  64	// Maximal TokenQty in the vsl_list, like A=IP1,..,IPn
-#define MAX_DOM  10	// Maximal domain level
+#define MAX_OUT  512  // Old DNS restricts UDP to 512 bytes
+#define MAX_TOK  64 // Maximal TokenQty in the vsl_list, like A=IP1,..,IPn
+#define MAX_DOM  20  // Maximal domain level; min 10 is needed for NAPTR E164
 
 #define VAL_SIZE (MAX_VALUE_LENGTH + 16)
 #define DNS_PREFIX "dns"
 #define REDEF_SYM  '~'
+
+// HT offset contains it for ENUM SPFUN
+#define ENUM_FLAG  (1 << 14)
 
 /*---------------------------------------------------*/
 
@@ -84,16 +87,31 @@ int inet_pton(int af, const char *src, void *dst)
   }
   return 0;
 }
+
+char *strsep(char **s, const char *ct)
+{
+    char *sstart = *s;
+    char *end;
+
+    if (sstart == NULL)
+        return NULL;
+
+    end = strpbrk(sstart, ct);
+    if (end)
+        *end++ = '\0';
+    *s = end;
+    return sstart;
+}
 #endif
 
 /*---------------------------------------------------*/
 
 DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
-	  const char *gw_suffix, const char *allowed_suff, const char *local_fname, uint8_t verbose) 
-    : m_status(0), m_thread(StatRun, this) {
+   const char *gw_suffix, const char *allowed_suff, const char *local_fname, const char *enums, const char *tollfree, uint8_t verbose) 
+    : m_status(-1), m_thread(StatRun, this) {
 
-    // Set object to a new state
-    memset(this, 0, sizeof(DslkDns)); // Clear previous state
+    // Clear vars [m_hdr..m_verbose)
+    memset(&m_hdr, 0, &m_verbose - (uint8_t *)&m_hdr); // Clear previous state
     m_verbose = verbose;
 
     // Create and socket
@@ -106,13 +124,11 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
 
     m_address.sin_family = AF_INET;
     m_address.sin_port = htons(port_no);
-    int local_len2 = 0;
-    
+
     if(!inet_pton(AF_INET, bind_ip, &m_address.sin_addr.s_addr)) 
       m_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if(bind(m_sockfd, (struct sockaddr *) &m_address,
-                     sizeof (struct sockaddr_in)) < local_len2) {
+    if(::bind(m_sockfd, (struct sockaddr *) &m_address, sizeof (struct sockaddr_in)) < 0) {
       char buf[80];
       sprintf(buf, "DslkDns::DslkDns: Cannot bind to port %u", port_no);
       throw runtime_error(buf);
@@ -126,16 +142,16 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
     if(local_fname != NULL && (flocal = fopen(local_fname, "r")) != NULL) {
       char *rd = local_tmp;
       while(rd < local_tmp + (1 << 15) - 200 && fgets(rd, 200, flocal)) {
-	if(*rd < '0' || *rd == ';')
-	  continue;
-	char *p = strchr(rd, '=');
-	if(p == NULL)
-	  continue;
-	rd = strchr(p, 0);
+  if(*rd < '0' || *rd == ';')
+    continue;
+  char *p = strchr(rd, '=');
+  if(p == NULL)
+    continue;
+  rd = strchr(p, 0);
         while(*--rd < 040) 
-	  *rd = 0;
-	rd += 2;
-	local_qty++;
+    *rd = 0;
+  rd += 2;
+  local_qty++;
       } // while rd
       local_len = rd - local_tmp;
       fclose(flocal);
@@ -150,18 +166,32 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
     if(m_gw_suf_len)
       for(const char *p = gw_suffix; *p; p++)
         if(*p == '.') 
-	  m_gw_suf_dots++;
+    m_gw_suf_dots++;
 
+    // Activate DAP only on the public gateways, with some suffixes, like .emergate.net
     // If no memory, DAP inactive - this is not critical problem
-    m_dap_ht  = (allowed_len | m_gw_suf_len)? (DNSAP*)calloc(DSLKDNS_DAPSIZE, sizeof(DNSAP)) : NULL; 
+    m_dap_ht  = (allowed_len && m_gw_suf_len)? (DNSAP*)calloc(DSLKDNS_DAPSIZE, sizeof(DNSAP)) : NULL; 
     m_daprand = GetRand(0xffffffff) | 1; 
 
     m_value  = (char *)malloc(VAL_SIZE + BUF_SIZE + 2 + 
-	    m_gw_suf_len + allowed_len + local_len + 4);
+      m_gw_suf_len + allowed_len + local_len + 4);
  
     if(m_value == NULL) 
       throw runtime_error("DslkDns::DslkDns: Cannot allocate buffer");
 
+    // Temporary use m_value for parse enum-verifiers and toll-free lists, if exist
+    if(enums && *enums) {
+      char *str = strcpy(m_value, enums);
+      Verifier empty_ver;
+      while(char *p_tok = strsep(&str, "|,"))
+        if(*p_tok) {
+          if(m_verbose > 5)
+          LogPrintf("\tEmcDns::EmcDns: enumtrust=%s\n", p_tok);
+          m_verifiers[string(p_tok)] = empty_ver;
+        }
+    } // ENUMs completed 
+
+    // Assign data buffers inside m_value hyper-array
     m_buf    = (uint8_t *)(m_value + VAL_SIZE);
     m_bufend = m_buf + MAX_OUT;
     char *varbufs = m_value + VAL_SIZE + BUF_SIZE + 2;
@@ -174,27 +204,37 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
       m_allowed_base = strcpy(varbufs + m_gw_suf_len + 1, allowed_suff);
       uint8_t pos = 0, step = 0; // pos, step for double hashing
       for(char *p = m_allowed_base + allowed_len; p > m_allowed_base; ) {
-	char c = *--p;
-	if(c ==  '|' || c <= 040) {
-	  *p = pos = step = 0;
-	  continue;
-	}
-	if(c == '.') {
-	  if(p[1] > 040) { // if allowed domain is not empty - save it into ht
-	    step |= 1;
-	    if(m_verbose > 3)
-	      LogPrintf("\tDslkDns::DslkDns: Insert TLD=%s: pos=%u step=%u\n", p + 1, pos, step);
-	    do 
-	      pos += step;
+  char c = *--p;
+  if(c ==  '|' || c <= 040) {
+    *p = pos = step = 0;
+    continue;
+  }
+ if(c == '.' || c == '$') {
+   *p = 64;
+    if(p[1] > 040) { // if allowed domain is not empty - save it into ht
+      step |= 1;
+      do 
+        pos += step;
             while(m_ht_offset[pos] != 0);
-	    m_ht_offset[pos] = p + 1 - m_allowed_base;
-	    m_allowed_qty++;
-	  }
-	  *p = pos = step = 0;
-	  continue;
-	}
+      m_ht_offset[pos] = p + 1 - m_allowed_base;
+     const char *dnstype = "DNS";
+     if(c == '$') {
+       m_ht_offset[pos] |= ENUM_FLAG;
+       char *pp = p; // ref to $
+        while(--pp >= m_allowed_base && *pp >= '0' && *pp <= '9');
+        if(++pp < p)
+          *p = atoi(pp);
+        dnstype = "ENUM";
+      }
+      m_allowed_qty++;
+     if(m_verbose > 3)
+       LogPrintf("\tDslkDns::EmcDns: Insert %s TLD=%s:%u\n", dnstype, p + 1, *p);
+    }
+   pos = step = 0;
+    continue;
+  }
         pos  = ((pos >> 7) | (pos << 1)) + c;
-	step = ((step << 5) - step) ^ c; // (step * 31) ^ c
+  step = ((step << 5) - step) ^ c; // (step * 31) ^ c
       } // for
     } // if(allowed_len)
 
@@ -202,34 +242,68 @@ DslkDns::DslkDns(const char *bind_ip, uint16_t port_no,
       char *p = m_local_base = (char*)memcpy(varbufs + m_gw_suf_len + 1 + allowed_len + 1, local_tmp, local_len) - 1;
       // and populate hashtable with offsets
       while(++p < m_local_base + local_len) {
-	char *p_eq = strchr(p, '=');
-	if(p_eq == NULL)
-	  break;
+  char *p_eq = strchr(p, '=');
+  if(p_eq == NULL)
+    break;
         char *p_h = p_eq;
         *p_eq++ = 0; // CLR = and go to data
         uint8_t pos = 0, step = 0; // pos, step for double hashing
-	while(--p_h >= p) {
+  while(--p_h >= p) {
           pos  = ((pos >> 7) | (pos << 1)) + *p_h;
-	  step = ((step << 5) - step) ^ *p_h; // (step * 31) ^ c
+    step = ((step << 5) - step) ^ *p_h; // (step * 31) ^ c
         } // while
-	step |= 1;
-	if(m_verbose > 3)
-	  LogPrintf("\tDslkDns::DslkDns: Insert Local:[%s]->[%s] pos=%u step=%u\n", p, p_eq, pos, step);
-	do 
-	  pos += step;
+  step |= 1;
+  if(m_verbose > 3)
+    LogPrintf("\tDslkDns::DslkDns: Insert Local:[%s]->[%s] pos=%u step=%u\n", p, p_eq, pos, step);
+  do 
+    pos += step;
         while(m_ht_offset[pos] != 0);
-	m_ht_offset[pos] = m_local_base - p; // negative value - flag LOCAL
-	p = strchr(p_eq, 0); // go to the next local record
+  m_ht_offset[pos] = m_local_base - p; // negative value - flag LOCAL
+  p = strchr(p_eq, 0); // go to the next local record
       } // while
     } //  if(local_len)
 
     if(m_verbose > 0)
-	 LogPrintf("DslkDns::DslkDns: Created/Attached: %s:%u; Qty=%u:%u\n", 
-		 m_address.sin_addr.s_addr == INADDR_ANY? "INADDR_ANY" : bind_ip, 
-		 port_no, m_allowed_qty, local_qty);
+   LogPrintf("DslkDns::DslkDns: Created/Attached: %s:%u; Qty=%u:%u\n", 
+     m_address.sin_addr.s_addr == INADDR_ANY? "INADDR_ANY" : bind_ip, 
+     port_no, m_allowed_qty, local_qty);
 
-    m_status = 1; // Active 
+    // Hack - pass TF file list through m_value to HandlePacket()
+
+    if(tollfree && *tollfree) {
+      if(m_verbose > 3)
+    LogPrintf("\tDslkDns::EmcDns: Setup deferred toll-free=%s\n", tollfree);
+      strcpy(m_value, tollfree);
+    } else
+      m_value[0] = 0;
+
+    m_status = 1; // Active, and maybe download
 } // DslkDns::DslkDns
+
+/*---------------------------------------------------*/
+void DslkDns::AddTF(char *tf_tok) {
+  // Skip comments and empty lines
+  if(tf_tok[0] < '0')
+    return;
+
+  // Clear TABs and SPs at the end of the line
+  char *end = strchr(tf_tok, 0);
+  while(*--end <= 040) {
+    *end = 0;
+    if(end <= tf_tok)
+      return;
+  }
+  
+  if(tf_tok[0] == '=') {
+    if(tf_tok[1])
+      m_tollfree.push_back(TollFree(tf_tok + 1));
+  } else 
+      if(!m_tollfree.empty())
+        m_tollfree.back().e2u.push_back(string(tf_tok));
+
+  if(m_verbose > 3)
+    LogPrintf("\tDslkDns::AddTF: Added token [%s] %u:%u\n", tf_tok, m_tollfree.size(), m_tollfree.back().e2u.size()); 
+} // EmcDns::AddTF
 
 /*---------------------------------------------------*/
 
@@ -244,7 +318,7 @@ DslkDns::~DslkDns() {
     free(m_value);
     free(m_dap_ht);
     if(m_verbose > 0)
-	 LogPrintf("DslkDns::~DslkDns: Destroyed OK\n");
+   LogPrintf("DslkDns::~DslkDns: Destroyed OK\n");
 } // DslkDns::~DslkDns
 
 
@@ -253,22 +327,22 @@ DslkDns::~DslkDns() {
 void DslkDns::StatRun(void *p) {
   DslkDns *obj = (DslkDns*)p;
   obj->Run();
-//darksilk  ExitThread(0);
+//DarkSilk  ExitThread(0);
 } // DslkDns::StatRun
 
 /*---------------------------------------------------*/
 void DslkDns::Run() {
   if(m_verbose > 2) LogPrintf("DslkDns::Run: started\n");
 
-  while(m_status == 0)
-      MilliSleep(133);
+  while(m_status < 0) // not initied yet
+    MilliSleep(133);
 
   for( ; ; ) {
     m_addrLen = sizeof(m_clientAddress);
     m_rcvlen  = recvfrom(m_sockfd, (char *)m_buf, BUF_SIZE, 0,
-	            (struct sockaddr *) &m_clientAddress, &m_addrLen);
+              (struct sockaddr *) &m_clientAddress, &m_addrLen);
     if(m_rcvlen <= 0)
-	break;
+  break;
 
     DNSAP *dap = NULL;
 
@@ -277,7 +351,7 @@ void DslkDns::Run() {
       HandlePacket();
 
       sendto(m_sockfd, (const char *)m_buf, m_snd - m_buf, MSG_NOSIGNAL,
-	             (struct sockaddr *) &m_clientAddress, m_addrLen);
+               (struct sockaddr *) &m_clientAddress, m_addrLen);
 
       if(dap != NULL)
         dap->ed_size += (m_snd - m_buf) >> 6;
@@ -331,17 +405,44 @@ void DslkDns::HandlePacket() {
       break;
     }
 
-    if(IsInitialBlockDownload()) {
-      m_hdr->Bits |= 2; // Server failure - not available valud nameindex DB yet
-      break;
-    }
+    if(m_status) {
+      if((m_status = IsInitialBlockDownload())) {
+        m_hdr->Bits |= 2; // Server failure - not available valid nameindex DB yet
+        break;
+      } else {
+ // Fill deferred toll-free default entries
+        char *tf_str = m_value;
+        // Iterate the list of Toll-Free fnames; can be fnames and NVS records
+        while(char *tf_fname = strsep(&tf_str, "|")) {
+          if(m_verbose > 3)
+      LogPrintf("\tDslkDns::HandlePacket: handle deferred toll-free=%s\n", tf_fname);
+          if(tf_fname[0] == '@') { // this is NVS record
+            string value;
+            if(hooks->getNameValue(string(tf_fname + 1), value)) {
+              char *tf_val = strcpy(m_value, value.c_str());
+              while(char *tf_tok = strsep(&tf_val, "\r\n"))
+          AddTF(tf_tok);
+      }
+          } else { // This is file
+      FILE *tf = fopen(tf_fname, "r");
+      if(tf != NULL) {
+        while(fgets(m_value, VAL_SIZE, tf))
+          AddTF(m_value);
+        fclose(tf);
+      }
+          } // if @
+        } // while tf_name
+       } // m_status #2
+    } // m_status #1
 
     // Handle questions here
-    for(uint16_t qno = 0; qno < m_hdr->QDCount && m_snd < m_bufend; qno--) {
+    for(uint16_t qno = 0; qno < m_hdr->QDCount && m_snd < m_bufend; qno++) {
+      if(m_verbose > 5) 
+        LogPrintf("\tDslkDns::HandlePacket: qno=%u m_hdr->QDCount=%u\n", qno, m_hdr->QDCount);
       uint16_t rc = HandleQuery();
       if(rc) {
-	m_hdr->Bits |= rc;
-	break;
+  m_hdr->Bits |= rc;
+  break;
       }
     }
   } while(false);
@@ -370,10 +471,10 @@ void DslkDns::HandlePacket() {
 /*---------------------------------------------------*/
 uint16_t DslkDns::HandleQuery() {
   // Decode qname
-  uint8_t key[BUF_SIZE];				// Key, transformed to dot-separated LC
+  uint8_t key[BUF_SIZE];        // Key, transformed to dot-separated LC
   uint8_t *key_end = key;
-  uint8_t *domain_ndx[MAX_DOM];				// indexes to domains
-  uint8_t **domain_ndx_p = domain_ndx;			// Ptr to end
+  uint8_t *domain_ndx[MAX_DOM];       // indexes to domains
+  uint8_t **domain_ndx_p = domain_ndx;     // Ptr to the end
 
   // m_rcv is pointer to QNAME
   // Set reference to domain label
@@ -388,10 +489,10 @@ uint16_t DslkDns::HandleQuery() {
       return 1; // Invalid request
     *domain_ndx_p++ = key_end;
     do {
-      *key_end++ = tolower(*m_rcv++);
+      *key_end++ = 040 | *m_rcv++;
     } while(--dom_len);
     *key_end++ = '.'; // Set DOT at domain end
-  }
+  } //  while(dom_len)
   *--key_end = 0; // Remove last dot, set EOLN
 
   if(m_verbose > 3) 
@@ -406,9 +507,9 @@ uint16_t DslkDns::HandleQuery() {
   if(qclass != 1)
     return 4; // Not implemented - support INET only
 
-  // If thid is puplic gateway, gw-suffix can be specified, like 
-  // slkdnssuffix=.xyz.com
-  // Followind block cuts this suffix, if exist.
+  // If thid is public gateway, gw-suffix can be specified, like 
+  // dslkdnssuffix=.xyz.com
+  // Followind block cuts this suffix, if exists.
   // If received domain name "xyz.com" only, keyp is empty string
 
   if(m_gw_suf_len) { // suffix defined [public DNS], need to cut
@@ -460,17 +561,22 @@ uint16_t DslkDns::HandleQuery() {
       if(*p != '.') {
         if(m_verbose > 3) 
       LogPrintf("DslkDns::HandleQuery: TLD-suffix=[.%s] is not specified in given key=%s; return NXDOMAIN\n", p, key);
-	return 3; // TLD-suffix is not specified, so NXDOMAIN
+  return 3; // TLD-suffix is not specified, so NXDOMAIN
       } 
       p++; // Set PTR after dot, to the suffix
       do {
         pos += step;
         if(m_ht_offset[pos] == 0) {
           if(m_verbose > 3) 
-  	    LogPrintf("DslkDns::HandleQuery: TLD-suffix=[.%s] in given key=%s is not allowed; return NXDOMAIN\n", p, key);
-	  return 3; // Reached EndOfList, so NXDOMAIN
+        LogPrintf("DslkDns::HandleQuery: TLD-suffix=[.%s] in given key=%s is not allowed; return NXDOMAIN\n", p, key);
+    return 3; // Reached EndOfList, so NXDOMAIN
         } 
-      } while(m_ht_offset[pos] < 0 || strcmp((const char *)p, m_allowed_base + m_ht_offset[pos]) != 0);
+      } while(m_ht_offset[pos] < 0 || strcmp((const char *)p, m_allowed_base + (m_ht_offset[pos] & ~ENUM_FLAG)) != 0);
+
+      // ENUM SPFUN works only if TLD-filter is active
+      if(m_ht_offset[pos] & ENUM_FLAG)
+        return SpfunENUM(m_allowed_base[(m_ht_offset[pos] & ~ENUM_FLAG) - 1], domain_ndx, domain_ndx_p);
+
     } // if(m_allowed_qty)
 
     uint8_t **cur_ndx_p, **prev_ndx_p = domain_ndx_p - 2;
@@ -491,9 +597,9 @@ uint16_t DslkDns::HandleQuery() {
     do {
       cur_ndx_p = prev_ndx_p;
       if(Search(*cur_ndx_p) <= 0) // Result saved into m_value
-	return 3; // empty answer, not found, return NXDOMAIN
+  return 3; // empty answer, not found, return NXDOMAIN
       if(cur_ndx_p == domain_ndx)
-	break; // This is 1st domain (last in the chain), go to answer
+  break; // This is 1st domain (last in the chain), go to answer
       // Try to search allowance in SD=list for step down
       prev_ndx_p = cur_ndx_p - 1;
       int domain_len = *cur_ndx_p - *prev_ndx_p - 1;
@@ -506,7 +612,7 @@ uint16_t DslkDns::HandleQuery() {
 
       // if no way down - maybe, we can create REF-answer from NS-records
       if(step_next == false && TryMakeref(m_label_ref + (*cur_ndx_p - key)))
-	return 0;
+  return 0;
       // if cannot create REF - just ANSWER for parent domain (ignore prefix)
     } while(step_next);
     
@@ -566,34 +672,34 @@ int DslkDns::Tokenize(const char *key, const char *sep2, char **tokens, char *bu
       // LogPrintf("Token:%s\n", token);
       char *val = strchr(token, '=');
       if(val == NULL)
-	  continue;
+    continue;
       *val = 0;
       if(strcmp(key, token)) {
-	  *val = '=';
-	  continue;
+    *val = '=';
+    continue;
       }
       val++;
       // Uplevel token found, tokenize value if needed
       // LogPrintf("Found: key=%s; val=%s\n", key, val);
       if(sep2 == NULL || *sep2 == 0) {
-	tokens[tokensN++] = val;
-	break;
+  tokens[tokensN++] = val;
+  break;
       }
      
       // if needed. redefine sep2
       char sepulka[2];
       if(*val == '~') {
-	  val++;
-	  sepulka[0] = *val++;
-	  sepulka[1] = 0;
-	  sep2 = sepulka;
+    val++;
+    sepulka[0] = *val++;
+    sepulka[1] = 0;
+    sep2 = sepulka;
       }
       // Tokenize value
       for(token = strtok(val, sep2); 
-	 token != NULL && tokensN < MAX_TOK; 
-	   token = strtok(NULL, sep2)) {
-	  // LogPrintf("Subtoken=%s\n", token);
-	  tokens[tokensN++] = token;
+   token != NULL && tokensN < MAX_TOK; 
+     token = strtok(NULL, sep2)) {
+    // LogPrintf("Subtoken=%s\n", token);
+    tokens[tokensN++] = token;
       }
       break;
   } // for - big tokens (MX, A, AAAA, etc)
@@ -613,7 +719,7 @@ void DslkDns::Answer_ALL(uint16_t qtype, char *buf) {
       case 16 : key = "TXT";    break;
       case 28 : key = "AAAA";   break;
       default: return;
-  } // swithc
+  } // switch
 
   char *tokens[MAX_TOK];
   int tokQty = Tokenize(key, ",", tokens, buf);
@@ -631,24 +737,24 @@ void DslkDns::Answer_ALL(uint16_t qtype, char *buf) {
 
   for(int tok_no = 0; tok_no < tokQty; tok_no++) {
       if(m_verbose > 1) 
-	LogPrintf("\tDslkDns::Answer_ALL: Token:%u=[%s]\n", tok_no, tokens[tok_no]);
+  LogPrintf("\tDslkDns::Answer_ALL: Token:%u=[%s]\n", tok_no, tokens[tok_no]);
       Out2(m_label_ref);
       Out2(qtype); // A record, or maybe something else
       Out2(1); //  INET
       Out4(m_ttl);
       switch(qtype) {
-	case 1 : Fill_RD_IP(tokens[tok_no], AF_INET);  break;
-	case 28: Fill_RD_IP(tokens[tok_no], AF_INET6); break;
-	case 2 :
-	case 5 :
-	case 12: Fill_RD_DName(tokens[tok_no], 0, 0); break; // NS,CNAME,PTR
-	case 15: Fill_RD_DName(tokens[tok_no], 2, 0); break; // MX
-	case 16: Fill_RD_DName(tokens[tok_no], 0, 1); break; // TXT
-	default: break;
+  case 1 : Fill_RD_IP(tokens[tok_no], AF_INET);  break;
+  case 28: Fill_RD_IP(tokens[tok_no], AF_INET6); break;
+  case 2 :
+  case 5 :
+  case 12: Fill_RD_DName(tokens[tok_no], 0, 0); break; // NS,CNAME,PTR
+  case 15: Fill_RD_DName(tokens[tok_no], 2, 0); break; // MX
+  case 16: Fill_RD_DName(tokens[tok_no], 0, 1); break; // TXT
+  default: break;
       } // swithc
   } // for
   m_hdr->ANCount += tokQty;
-} // DslkDns::Answer_A 
+} // DslkDns::Answer_ALL 
 
 /*---------------------------------------------------*/
 
@@ -663,14 +769,7 @@ void DslkDns::Fill_RD_IP(char *ipddrtxt, int af) {
   if(inet_pton(af, ipddrtxt, m_snd)) 
     m_snd += out_sz;
   else
-    m_snd -= 2, m_hdr->ANCount--;
-#if 0  
-  return;
-
-  in_addr_t inetaddr = inet_addr(ipddrtxt);
-  Out2(htons(sizeof(inetaddr)));
-  Out4(inetaddr);
-#endif
+    m_snd -= 12, m_hdr->ANCount--; // 12 = clear this 2 and 10 bytes at caller
 } // DslkDns::Fill_RD_IP
 
 /*---------------------------------------------------*/
@@ -737,7 +836,7 @@ int DslkDns::LocalSearch(const uint8_t *key, uint8_t pos, uint8_t step) {
       pos += step;
       if(m_ht_offset[pos] == 0) {
         if(m_verbose > 3) 
-  	  LogPrintf("DslkDns::LocalSearch: Local key=[%s] not found; go to nameindex search\n", key);
+      LogPrintf("DslkDns::LocalSearch: Local key=[%s] not found; go to nameindex search\n", key);
          return 0; // Reached EndOfList 
       } 
     } while(m_ht_offset[pos] > 0 || strcmp((const char *)key, m_local_base - m_ht_offset[pos]) != 0);
@@ -762,3 +861,313 @@ DNSAP *DslkDns::CheckDAP(uint32_t ip_addr) {
   return (dap->ed_size <= DSLKDNS_DAPTRESHOLD)? dap : NULL;
 } // DslkDns::CheckDAP 
 
+
+/*---------------------------------------------------*/
+// Handle Special function - phone number in the E.164 format
+// to support ENUM service
+int DslkDns::SpfunENUM(uint8_t len, uint8_t **domain_start, uint8_t **domain_end) {
+  int dom_length = domain_end - domain_start;
+  const char *tld = (const char*)domain_end[-1];
+
+  if(m_verbose > 3)
+    LogPrintf("\tDslkDns::SpfunENUM: Domain=[%s] N=%u TLD=[%s] Len=%u\n", 
+     (const char*)*domain_start, dom_length, tld, len);
+
+  do {
+    if(dom_length < 2)
+      break; // no domains for phone number - NXDOMAIN
+
+    if(m_verifiers.empty() && m_tollfree.empty())  
+      break; // no verifier - all ENUMs untrusted
+
+    // convert reversed domain record to ITU-T number
+    char itut_num[68], *pitut = itut_num, *pitutend = itut_num + len;
+    for(const uint8_t *p = domain_end[-1]; --p >= *domain_start; )
+      if(*p >= '0' && *p <= '9') {
+  *pitut++ = *p;
+        if(pitut >= pitutend)
+   break;
+      }
+    *pitut = 0; // EOLN at phone number end
+
+    if(pitut == itut_num)
+      break; // Empty phone number - NXDOMAIN
+
+    if(m_verbose > 3)
+      LogPrintf("\tDslkDns::SpfunENUM: ITU-T num=[%s]\n", itut_num);
+
+    // Itrrate all available ENUM-records, and build joined answer from them
+    if(!m_verifiers.empty())
+      for(int16_t qno = 0; qno >= 0; qno++) {
+        char q_str[100];
+        sprintf(q_str, "%s:%s:%u", tld, itut_num, qno);       
+        if(m_verbose > 1) 
+          LogPrintf("\tDslkDns::SpfunENUM Search(%s)\n", q_str);
+
+        string value;
+        if(!hooks->getNameValue(string(q_str), value))
+          break;
+
+        strcpy(m_value, value.c_str());
+        Answer_ENUM(q_str);
+      } // for 
+
+      // If notheing found in the ENUM - try to search in the Toll-Free
+      m_ttl = 24 * 3600; // 24h by default
+      boost::xpressive::smatch nameparts;
+      for(vector<TollFree>::const_iterator tf = m_tollfree.begin(); 
+        m_hdr->ANCount == 0 && tf != m_tollfree.end(); 
+        tf++) {
+  bool matched = regex_match(string(itut_num), nameparts, tf->regex);
+  // bool matched = regex_search(string(itut_num), nameparts, tf->regex);
+        if(m_verbose > 3) 
+          LogPrintf("\tEmcDns::SpfunENUM TF-match N=[%s] RE=[%s] -> %u\n", itut_num, tf->regex_str.c_str(), matched);
+        if(matched)
+    for(vector<string>::const_iterator e2u = tf->e2u.begin(); e2u != tf->e2u.end(); e2u++)
+        HandleE2U(strcpy(m_value, e2u->c_str()));
+      } // tf processing
+
+      if(m_hdr->ANCount)
+ return 0; // if collected some answers - OK
+
+  } while(false);
+
+  return 3; // NXDOMAIN
+} // DslkDns::SpfunENUM
+
+/*---------------------------------------------------*/
+
+#define ENC3(a, b, c) (a | (b << 8) | (c << 16))
+
+/*---------------------------------------------------*/
+// Generate answewr for found EMUM NVS record
+void DslkDns::Answer_ENUM(const char *q_str) {
+  char *str_val = m_value;
+  const char *pttl;
+  char *e2u[VAL_SIZE / 4]; // 20kb max input, and min 4 bytes per token
+  uint16_t e2uN = 0;
+  bool sigOK = false;
+
+  m_ttl = 24 * 3600; // 24h by default
+
+  // Tokenize lines in the NVS-value.
+  // There can be prefixes SIG=, TTL=, E2U
+  while(char *tok = strsep(&str_val, "\n\r"))
+    switch((*(uint32_t*)tok & 0xffffff) | 0x202020) {
+ case ENC3('e', '2', 'u'):
+    e2u[e2uN++] = tok;
+    continue;
+
+ case ENC3('t', 't', 'l'):
+   pttl = strchr(tok + 3, '=');
+   if(pttl)
+     m_ttl = atoi(pttl + 1);
+    continue;
+
+ case ENC3('s', 'i', 'g'):
+    if(!sigOK)
+      sigOK = CheckEnumSig(q_str, strchr(tok + 3, '='));
+    continue;
+
+  default:
+    continue;
+    } // while + switch
+
+  if(!sigOK)
+    return; // This ENUM-record does not contain a valid signature
+
+  // Generate ENUM-answers here
+  for(uint16_t e2undx = 0; e2undx < e2uN; e2undx++)
+    if(m_snd < m_bufend - 24)
+      HandleE2U(e2u[e2undx]);
+
+} // EmcDns::Answer_ENUM
+
+/*---------------------------------------------------*/
+void DslkDns::OutS(const char *p) {
+  int len = strlen(strcpy((char *)m_snd + 1, p));
+  *m_snd = len;
+  m_snd += len + 1; 
+} // DslkDns::OutS
+
+/*---------------------------------------------------*/
+ // Generate ENUM-answers for a single E2U entry
+ // E2U+sip=100|10|!^(.*)$!sip:17771234567@in.callcentric.com!
+void DslkDns::HandleE2U(char *e2u) {
+  char *data = strchr(e2u, '=');
+  if(data == NULL) 
+    return;
+
+  // Cleanum sufix for service; Service started from E2U
+  for(char *p = data; *--p <= 040; *p = 0) {}
+
+  unsigned int ord, pref;
+  char re[VAL_SIZE];
+
+  *data++ = 0; // Remove '='
+
+  if(sscanf(data, "%u | %u | %s", &ord, &pref, re) != 3)
+    return;
+
+    if(m_verbose > 3)
+      LogPrintf("\tEmcDns::HandleE2U: Parsed: %u %u %s %s\n", ord, pref, e2u, re);
+
+  if(m_snd + strlen(re) + strlen(e2u) + 24 >= m_bufend)
+    return;
+
+  Out2(m_label_ref);
+  Out2(0x23); // NAPTR record
+  Out2(1); //  INET
+  Out4(m_ttl);
+  uint8_t *snd0 = m_snd; m_snd += 2;
+  Out2(ord);
+  Out2(pref);
+  OutS("u");
+  OutS(e2u);
+  OutS(re);
+  *m_snd++ = 0;
+
+  uint16_t len = m_snd - snd0 - 2;
+  *snd0++ = len >> 8;
+  *snd0++ = len;
+
+  m_hdr->ANCount++;
+} //  DslkDns::HandleE2U
+
+/*---------------------------------------------------*/
+bool DslkDns::CheckEnumSig(const char *q_str, char *sig_str) {
+    if(sig_str == NULL)
+      return false;
+
+    // skip SP/TABs in signature
+    while(*++sig_str <= ' ');
+
+    char *signature = strchr(sig_str, '|');
+    if(signature == NULL)
+      return false;
+    
+    for(char *p = signature; *--p <= 040; *p = 0) {}
+    *signature++ = 0;
+
+    map<string, Verifier>::iterator it = m_verifiers.find(sig_str);
+    if(it == m_verifiers.end())
+      return false; // Unknown verifier - do not trust it
+
+    Verifier &ver = it->second;
+
+    if(ver.mask < 0) {
+      if(ver.mask == VERMASK_BLOCKED)
+  return false; // Already unable to fetch
+
+      do {
+        NameTxInfo nti;
+        CNameRecord nameRec;
+        CTransaction tx;
+        LOCK(cs_main);
+        CNameDB dbName("r");
+        if(!dbName.ReadName(CNameVal(it->first.c_str(), it->first.c_str() + it->first.size()), nameRec))
+    break; // failed to read from name DB
+        if(nameRec.vtxPos.size() < 1)
+    break; // no result returned
+        if(!tx.ReadFromDisk(nameRec.vtxPos.back().txPos))
+          break; // failed to read from from disk
+        if(!DecodeNameTx(tx, nti, true))
+          break; // failed to decode name
+  CDarkSilkAddress addr(nti.strAddress);
+        if(!addr.IsValid())
+          break; // Invalid address
+        if(!addr.GetKeyID(ver.keyID))
+          break; // Address does not refer to key
+
+  // Verifier has been read successfully, configure SRL if exist
+  char valbuf[VAL_SIZE], *str_val = valbuf;
+        memcpy(valbuf, &nti.value[0], nti.value.size());
+        valbuf[nti.value.size()] = 0;
+
+ // Proces SRL-line like
+  // SRL=5|srl:hello-%02x
+  ver.mask = VERMASK_NOSRL;
+        while(char *tok = strsep(&str_val, "\n\r"))
+   if(((*(uint32_t*)tok & 0xffffff) | 0x202020) == ENC3('s', 'r', 'l') && (tok = strchr(tok + 3, '='))) {
+     unsigned nbits = atoi(++tok);
+            if(nbits > 30) nbits = 30;
+     ///mask = (1 << mask) - 1;
+      tok = strchr(tok, '|');
+      if(tok != NULL) {
+   do {
+     if(*++tok == 0)
+       break; // empty SRL, thus keep VERMASK_NOSRL
+     char *pp = strchr(tok, '%');
+      if(pp != NULL) {
+        if(*++pp == '0')
+          do ++pp; while(*pp >= '0' && *pp <= '9');
+                    if(strchr("diouXx", *pp) == NULL)
+      break; // Invalid char in the template
+        if(strchr(pp, '%'))
+      break; // Not allowed 2nd % symbol
+      } else
+        nbits = 0; // Don't needed nbits/mask for no-bucket srl_tpl
+
+                  ver.srl_tpl.assign(tok);
+      ver.mask = (1 << nbits) - 1;
+    } while(false);
+      } // if(tok != NULL)
+      if(ver.mask != VERMASK_NOSRL)
+        break; // Mask found
+   } // while + if
+
+      } while(false);
+      if(ver.mask < 0) {
+ ver.mask = VERMASK_BLOCKED; // Unable to read - block next read
+  return false;
+      } // if(ver.mask < 0) - after try-fill verifiyer
+
+    } // if(ver.mask < 0) - main
+ 
+    while(*signature <= 040 && *signature) 
+      signature++;
+
+    bool fInvalid = false;
+    vector<unsigned char> vchSig(DecodeBase64(signature, &fInvalid));
+
+    if(fInvalid)
+      return false;
+
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << string(q_str);
+
+    CPubKey pubkey;
+    if(!pubkey.RecoverCompact(ss.GetHash(), vchSig))
+      return false;
+
+    if(pubkey.GetID() != ver.keyID)
+  return false; // Signature check did not passed
+
+    if(ver.mask == VERMASK_NOSRL)
+  return true; // This verifiyer does not have active SRL
+
+    char valbuf[VAL_SIZE];
+    // Compute a simple hash from q_str like enum:17771234567:0
+    // This hasu must be used by verifiyers for build buckets
+    unsigned h = 0x5555;
+    for(const char *p = q_str; *p; p++)
+  h += (h << 5) + *p;
+    sprintf(valbuf, ver.srl_tpl.c_str(), h & ver.mask);
+
+    string value;
+    if(!hooks->getNameValue(string(valbuf), value))
+      return true; // Unable fetch SRL - as same as SRL does not exist
+
+    // Is q_str missing in the SRL
+    return value.find(q_str) == string::npos;
+
+#if 0
+    char *valstr = strcpy(valbuf, value.c_str());
+    while(char *tok = strsep(&valstr, "|, \r\n\t"))
+      if(strcmp(tok, q_str) == 0)
+  reurn false;
+
+    return true;
+#endif
+} // DslkDns::CheckEnumSig
