@@ -657,6 +657,9 @@ void CGovernanceManager::Sync(CNode* pfrom, const uint256& nProp, const CBloomFi
         budget object to see if they're OK. If all checks pass, we'll send it to the peer.
     */
 
+    // do not provide any data until our node is synced
+    if(fStormNode && !stormnodeSync.IsSynced()) return;
+
     int nObjCount = 0;
     int nVoteCount = 0;
 
@@ -1023,9 +1026,11 @@ void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>&
         }
         bool fAsked = false;
         BOOST_FOREACH(CNode* pnode, vNodesCopy) {
-            // only use reqular peers, don't try to ask from temporary nodes we connected to -
-            // they stay connected for a short period of time and it's possible that we won't get everything we should
-            if(pnode->fStormnode) continue;
+            // Only use regular peers, don't try to ask from outbound "stormnode" connections -
+            // they stay connected for a short period of time and it's possible that we won't get everything we should.
+            // Only use outbound connections - inbound connection could be a "stormnode" connection
+            // initiated from another node, so skip it too.
+            if(pnode->fStormnode || (fStormNode && pnode->fInbound)) continue;
             // only use up to date peers
             if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
             // stop early to prevent setAskFor overflow
