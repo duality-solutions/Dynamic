@@ -251,8 +251,7 @@ void CStormnode::Check(bool fForce)
         LogPrint("Stormnode", "CStormnode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
                 vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
 
-        // Enable once Stormnode network has grown       
-        /*
+        // (TODO):: Check to see if WATCHDOG_EXPIRED is fixed or enable once Stormnode network has grown       
         if(fWatchdogExpired) {
             nActiveState = STORMNODE_WATCHDOG_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
@@ -260,7 +259,6 @@ void CStormnode::Check(bool fForce)
             }
             return;
         }
-        */
 
         if(!IsPingedWithin(STORMNODE_EXPIRATION_SECONDS)) {
             nActiveState = STORMNODE_EXPIRED;

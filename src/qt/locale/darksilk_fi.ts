@@ -188,7 +188,7 @@
         <translation>Lompakko salattu</translation>
     </message>
     <message>
-        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <source>DarkSilk-Core will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your DarkSilk from being stolen by malware infecting your computer.</source>
         <translation>DarkSilk sulkeutuu nyt salauksen viimeistelyä varten. Muista että salaus pelkästään ei voi estää DarkSilkiesi varastamista jos koneesi saastuu haittaohjelmilla tai viruksilla.</translation>
     </message>
     <message>

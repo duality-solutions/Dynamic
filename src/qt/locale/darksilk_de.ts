@@ -188,7 +188,7 @@
         <translation>Wallet verschlüsselt</translation>
     </message>
     <message>
-        <source>DSLK will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
+        <source>DarkSilk-Core will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your DarkSilk from being stolen by malware infecting your computer.</source>
         <translation>DSLK wird jetzt beendet, um den Verschlüsselungsprozess abzuschließen. Bitte beachten Sie, dass die Wallet-Verschlüsselung nicht vollständig vor Diebstahl ihrer DSLK durch Schadsoftware schützt, die ihren Computer befällt.</translation>
     </message>
     <message>

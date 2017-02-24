@@ -103,6 +103,9 @@ CStormnodeMan::CStormnodeMan()
   mAskedUsForStormnodeList(),
   mWeAskedForStormnodeList(),
   mWeAskedForStormnodeListEntry(),
+  mWeAskedForVerification(),
+  mSnbRecoveryRequests(),
+  mSnbRecoveryGoodReplies(),
   listScheduledSnbRequestConnections(),
   nLastIndexRebuildTime(0),
   indexStormnodes(),
@@ -957,7 +960,6 @@ void CStormnodeMan::DoFullVerificationStep()
     LOCK2(cs_main, cs);
 
     int nCount = 0;
-    int nCountMax = std::max(10, (int)vStormnodes.size() / 100); // verify at least 10 Stormnode at once but at most 1% of all known Stormnodes
 
     int nMyRank = -1;
     int nRanksTotal = (int)vecStormnodeRanks.size();
@@ -973,7 +975,7 @@ void CStormnodeMan::DoFullVerificationStep()
         if(it->second.vin == activeStormnode.vin) {
             nMyRank = it->first;
             LogPrint("Stormnode", "CStormnodeMan::DoFullVerificationStep -- Found self at rank %d/%d, verifying up to %d Stormnodes\n",
-                        nMyRank, nRanksTotal, nCountMax);
+                        nMyRank, nRanksTotal, (int)MAX_POSE_CONNECTIONS);
             break;
         }
         ++it;
@@ -982,9 +984,9 @@ void CStormnodeMan::DoFullVerificationStep()
     // edge case: list is too short and this Stormnode is not enabled
     if(nMyRank == -1) return;
 
-    // send verify requests to up to nCountMax Stormnodes starting from
-    // (MAX_POSE_RANK + nCountMax * (nMyRank - 1) + 1)
-    int nOffset = MAX_POSE_RANK + nCountMax * (nMyRank - 1);
+    // send verify requests to up to MAX_POSE_CONNECTIONS Stormnodes
+    // starting from MAX_POSE_RANK + nMyRank and using MAX_POSE_CONNECTIONS as a step
+    int nOffset = MAX_POSE_RANK + nMyRank - 1;
     if(nOffset >= (int)vecStormnodeRanks.size()) return;
 
     std::vector<CStormnode*> vSortedByAddr;
@@ -1002,16 +1004,20 @@ void CStormnodeMan::DoFullVerificationStep()
                         it->second.IsPoSeVerified() && it->second.IsPoSeBanned() ? " and " : "",
                         it->second.IsPoSeBanned() ? "banned" : "",
                         it->second.vin.prevout.ToStringShort(), it->second.addr.ToString());
-            ++it;
+            nOffset += MAX_POSE_CONNECTIONS;
+            if(nOffset >= (int)vecStormnodeRanks.size()) break;
+            it += MAX_POSE_CONNECTIONS;
             continue;
         }
         LogPrint("Stormnode", "CStormnodeMan::DoFullVerificationStep -- Verifying Stormnode %s rank %d/%d address %s\n",
                     it->second.vin.prevout.ToStringShort(), it->first, nRanksTotal, it->second.addr.ToString());
         if(SendVerifyRequest((CAddress)it->second.addr, vSortedByAddr)) {
             nCount++;
-            if(nCount >= nCountMax) break;
+            if(nCount >= MAX_POSE_CONNECTIONS) break;
         }
-        ++it;
+        nOffset += MAX_POSE_CONNECTIONS;
+        if(nOffset >= (int)vecStormnodeRanks.size()) break;
+        it += MAX_POSE_CONNECTIONS;
     }
 
     LogPrint("Stormnode", "CStormnodeMan::DoFullVerificationStep -- Sent verification requests to %d Stormnodes\n", nCount);
@@ -1629,7 +1635,6 @@ void CStormnodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
     CheckSameAddr();
 
     if(fStormNode) {
-        DoFullVerificationStep();
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
         UpdateLastPaid();
     }

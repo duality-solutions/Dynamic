@@ -25,6 +25,7 @@
 
 #include "privatesend.h"
 #include "instantsend.h"
+#include "stormnode-sync.h"
 #include "stormnodeman.h"
 
 #ifdef WIN32
@@ -952,7 +953,8 @@ static bool AttemptToEvictConnection(bool fPreferNewConnection) {
     return true;
 }
 
-static void AcceptConnection(const ListenSocket& hListenSocket) {
+static void AcceptConnection(const ListenSocket& hListenSocket) 
+{
     struct sockaddr_storage sockaddr;
     socklen_t len = sizeof(sockaddr);
     SOCKET hSocket = accept(hListenSocket.socket, (struct sockaddr*)&sockaddr, &len);
@@ -1011,6 +1013,13 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
             CloseSocket(hSocket);
             return;
         }
+    }
+
+    // don't accept incoming connections until fully synced
+    if(fStormNode && !stormnodeSync.IsSynced()) {
+        LogPrintf("AcceptConnection -- stormnode is not synced yet, skipping inbound connection attempt\n");
+        CloseSocket(hSocket);
+        return;
     }
 
     CNode* pnode = new CNode(hSocket, addr, "", true);

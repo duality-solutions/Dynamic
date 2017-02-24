@@ -237,6 +237,10 @@ private:
 
     hash_time_m_t mapWatchdogObjects;
 
+    uint256 nHashWatchdogCurrent;
+
+    int64_t nTimeWatchdogCurrent;
+
     object_ref_cache_t mapVoteToObject;
 
     vote_cache_t mapInvalidVotes;
@@ -285,7 +289,7 @@ public:
     std::vector<CGovernanceObject*> GetAllNewerThan(int64_t nMoreThanTime);
 
     bool IsBudgetPaymentBlock(int nBlockHeight);
-    bool AddGovernanceObject (CGovernanceObject& govobj);
+    bool AddGovernanceObject(CGovernanceObject& govobj, CNode* pfrom = NULL);
 
     std::string GetRequiredPaymentsString(int nBlockHeight);
 
@@ -301,6 +305,8 @@ public:
         mapObjects.clear();
         mapSeenGovernanceObjects.clear();
         mapWatchdogObjects.clear();
+        nHashWatchdogCurrent = uint256();
+        nTimeWatchdogCurrent = 0;
         mapVoteToObject.Clear();
         mapInvalidVotes.Clear();
         mapOrphanVotes.Clear();
@@ -327,7 +333,9 @@ public:
         READWRITE(mapOrphanVotes);
         READWRITE(mapObjects);
         READWRITE(mapWatchdogObjects);
-        READWRITE(mapLastStormnodeObject);
+        READWRITE(nHashWatchdogCurrent);
+        READWRITE(nTimeWatchdogCurrent);
+         READWRITE(mapLastStormnodeObject);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
             return;
@@ -344,6 +352,8 @@ public:
     bool HaveObjectForHash(uint256 nHash);
 
     bool HaveVoteForHash(uint256 nHash);
+
+    int GetVoteCount() const;
 
     bool SerializeObjectForHash(uint256 nHash, CDataStream& ss);
 
@@ -376,8 +386,8 @@ public:
 
     void InitOnLoad();
 
-    void RequestGovernanceObjectVotes(CNode* pnode);
-    void RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy);
+    int RequestGovernanceObjectVotes(CNode* pnode);
+    int RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy);
 
 private:
     void RequestGovernanceObject(CNode* pfrom, const uint256& nHash, bool fUseFilter = false);
@@ -412,6 +422,8 @@ private:
     void RebuildVoteMaps();
 
     void AddCachedTriggers();
+
+    bool UpdateCurrentWatchdog(CGovernanceObject& watchdogNew);
 
 };
 

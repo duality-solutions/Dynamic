@@ -235,8 +235,8 @@
     </message>
     <message>
         <location line="-57"/>
-        <source>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</source>
-        <translation>DarkSilk will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your darksilks from being stolen by malware infecting your computer.</translation>
+        <source>DarkSilk-Core will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your DarkSilk from being stolen by malware infecting your computer.</source>
+        <translation>DarkSilk-Core will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your DarkSilk from being stolen by malware infecting your computer.</translation>
     </message>
     <message>
         <location line="+4"/>

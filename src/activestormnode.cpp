@@ -259,7 +259,7 @@ void CActiveStormnode::ManageStateRemote()
         }
         if(service != infoSn.addr) {
             nState = ACTIVE_STORMNODE_NOT_CAPABLE;
-            strNotCapableReason = "Specified IP doesn't match our external address.";
+            strNotCapableReason = "Broadcasted IP doesn't match our external address. Make sure you issued a new broadcast if IP of this Stormnode changed recently.";
             LogPrintf("CActiveStormnode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }

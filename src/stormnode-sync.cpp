@@ -274,7 +274,7 @@ void CStormnodeSync::ProcessTick()
     {
         if(IsSynced()) {
             /*
-                Resync if we lose all Stormnodes from sleep/wake or failure to sync originally
+                Resync if we lost all stormnodes from sleep/wake or failed to sync originally
             */
             if(nSnCount == 0) {
                 LogPrintf("CStormnodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
@@ -333,6 +333,11 @@ void CStormnodeSync::ProcessTick()
     }
 
     BOOST_FOREACH(CNode* pnode, vNodesCopy)    {
+        // Don't try to sync any data from outbound "stormnode" connections -
+        // they are temporary and should be considered unreliable for a sync process.
+        // Inbound connection this early is most likely a "stormnode" connection
+        // initialted from another node, so skip it too.
+        if(pnode->fStormnode || (fStormNode && pnode->fInbound)) continue;
         // QUICK MODE (REGTEST ONLY!)
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {
@@ -355,8 +360,8 @@ void CStormnodeSync::ProcessTick()
         // NORMAL NETWORK MODE - TESTNET/MAINNET
         {
             if(netfulfilledman.HasFulfilledRequest(pnode->addr, "full-sync")) {
-                // we already fully synced from this node recently,
-                // disconnect to free this connection slot for a new node
+                // We already fully synced from this node recently,
+                // disconnect to free this connection slot for another peer.
                 pnode->fDisconnect = true;
                 LogPrintf("CStormnodeSync::ProcessTick -- disconnecting from recently synced peer %d\n", pnode->id);
                 continue;
@@ -442,8 +447,36 @@ void CStormnodeSync::ProcessTick()
                 // only request obj sync once from each peer, then request votes on per-obj basis
                 if(netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) {
                     governance.RequestGovernanceObjectVotes(pnode);
-                    continue;
-                }
+                    int nObjsLeftToAsk = governance.RequestGovernanceObjectVotes(pnode);
+                    static int64_t nTimeNoObjectsLeft = 0;
+                    // check for data
+                    if(nObjsLeftToAsk == 0) {
+                        static int nLastTick = 0;
+                        static int nLastVotes = 0;
+                        if(nTimeNoObjectsLeft == 0) {
+                            // asked all objects for votes for the first time
+                            nTimeNoObjectsLeft = GetTime();
+                        }
+                        // make sure the condition below is checked only once per tick
+                        if(nLastTick == nTick) continue;
+                        if(GetTime() - nTimeNoObjectsLeft > STORMNODE_SYNC_TIMEOUT_SECONDS &&
+                            governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), STORMNODE_SYNC_TICK_SECONDS)
+                        ) {
+                            // We already asked for all objects, waited for STORMNODE_SYNC_TIMEOUT_SECONDS
+                            // after that and less then 0.01% or STORMNODE_SYNC_TICK_SECONDS
+                            // (i.e. 1 per second) votes were recieved during the last tick.
+                            // We can be pretty sure that we are done syncing.
+                            LogPrintf("CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedStormnodeAssets);
+                            // reset nTimeNoObjectsLeft to be able to use the same condition on resync
+                            nTimeNoObjectsLeft = 0;
+                            SwitchToNextAsset();
+                            ReleaseNodes(vNodesCopy);
+                            return;
+                        }
+                        nLastTick = nTick;
+                        nLastVotes = governance.GetVoteCount();
+                    }
+                 }
 
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "stormnode-payment-sync");
 
@@ -462,7 +495,7 @@ void CStormnodeSync::ProcessTick()
             // GOVOBJ : SYNC GOVERNANCE ITEMS FROM OUR PEERS
 
             if(nRequestedStormnodeAssets == STORMNODE_SYNC_GOVERNANCE) {
-                LogPrint("snpayments", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastPaymentVote %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastPaymentVote, GetTime(), GetTime() - nTimeLastPaymentVote);
+                LogPrint("gobject", "CStormnodeSync::ProcessTick -- nTick %d nRequestedStormnodeAssets %d nTimeLastGovernanceItem %lld GetTime() %lld diff %lld\n", nTick, nRequestedStormnodeAssets, nTimeLastGovernanceItem, GetTime(), GetTime() - nTimeLastGovernanceItem);
 
                 // check for timeout first
                 if(GetTime() - nTimeLastGovernanceItem > STORMNODE_SYNC_TIMEOUT_SECONDS) {
@@ -475,19 +508,6 @@ void CStormnodeSync::ProcessTick()
                     ReleaseNodes(vNodesCopy);
                     return;
                 }
-
-                // check for data
-                // if(nCountBudgetItemProp > 0 && nCountBudgetItemFin)
-                // {
-                //     if(governance.CountProposalInventoryItems() >= (nSumBudgetItemProp / nCountBudgetItemProp)*0.9)
-                //     {
-                //         if(governance.CountFinalizedInventoryItems() >= (nSumBudgetItemFin / nCountBudgetItemFin)*0.9)
-                //         {
-                //             SwitchToNextAsset();
-                //             return;
-                //         }
-                //     }
-                // }
 
                 // only request once from each peer
                 if(netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) continue;
