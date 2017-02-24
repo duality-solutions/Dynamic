@@ -72,6 +72,12 @@ bool CGovernanceManager::HaveVoteForHash(uint256 nHash)
     return true;
 }
 
+int CGovernanceManager::GetVoteCount() const
+{
+    LOCK(cs);
+    return (int)mapVoteToObject.GetSize();
+}
+
 bool CGovernanceManager::SerializeVoteForHash(uint256 nHash, CDataStream& ss)
 {
     LOCK(cs);
@@ -972,20 +978,22 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     pfrom->PushMessage(NetMsgType::SNGOVERNANCESYNC, nHash, filter);
 }
 
-void CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
+int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)
 {
-    if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) return;
+    if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) return -3;
     std::vector<CNode*> vNodesCopy;
     vNodesCopy.push_back(pnode);
-    RequestGovernanceObjectVotes(vNodesCopy);
+    return RequestGovernanceObjectVotes(vNodesCopy);
 }
 
-void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy)
++int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& vNodesCopy)
 {
     static std::map<uint256, std::map<CService, int64_t> > mapAskedRecently;
-    if(vNodesCopy.empty()) return;
+    if(vNodesCopy.empty()) return -1;
 
     LOCK2(cs_main, cs);
+
+    if(mapObjects.empty()) return -2;
 
     int64_t nNow = GetTime();
     int nTimeout = 60 * 60;
@@ -1019,7 +1027,7 @@ void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>&
         }
     }
 
-    LogPrint("governance", "CGovernanceManager::RequestGovernanceObjectVotes -- start: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
+    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- start: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
                 vpGovObjsTriggersTmp.size(), vpGovObjsTmp.size(), mapAskedRecently.size());
 
     InsecureRand insecureRand;
@@ -1065,8 +1073,11 @@ void CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>&
         }
         if(!fAsked) i--;
     }
-    LogPrint("governance", "CGovernanceManager::RequestGovernanceObjectVotes -- end: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
+    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- end: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
                 vpGovObjsTriggersTmp.size(), vpGovObjsTmp.size(), mapAskedRecently.size());
+
+    return int(vpGovObjsTriggersTmp.size() + vpGovObjsTmp.size());
+
 }
 
 bool CGovernanceManager::AcceptObjectMessage(const uint256& nHash)
