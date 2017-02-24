@@ -34,7 +34,6 @@ public:
     virtual bool DumpToTextFile() = 0;
 };
 
-
 extern CHooks* InitHook();
 extern std::string GetDefaultDataDirSuffix();
 extern CHooks* hooks;

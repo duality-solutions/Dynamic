@@ -8,16 +8,16 @@
 #ifndef DNS_H
 #define DNS_H
 
+#include "amount.h"
 #include "base58.h"
 #include "dns/hooks.h"
-#include "keystore.h"
 #include "main.h"
 #include "rpcprotocol.h"
 #include "wallet/db.h"
 
 static const unsigned int NAMEINDEX_CHAIN_SIZE = 1000;
 static const int RELEASE_HEIGHT = 1<<16;
-static const unsigned int NAME_REGISTRATION_DAILY_FEE = 1000000; // Current set to 0.3 DSLK per month or 3.65 DSLK per year.
+static const unsigned int NAME_REGISTRATION_DAILY_FEE = 100000; //  Current set to 0.03 DSLK per month or .36525 DSLK per year.
 
 class CNameIndex
 {
@@ -72,7 +72,9 @@ public:
 class CNameDB : public CDB
 {
 public:
-    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode) {}
+    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode)
+    {
+    }
 
     bool WriteName(const CNameVal& name, const CNameRecord& rec)
     {
@@ -111,9 +113,11 @@ std::string stringFromOp(int op);
 
 CAmount GetNameOpFee(const unsigned int& nRentalDays, const int& op);
 
+
 bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndIfIsMine = false);
 void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNames, std::map<CNameVal, NameTxInfo>& mapPending);
 bool GetNameValue(const CNameVal& name, CNameVal& value);
+class CKeyStore;
 bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType=SIGHASH_ALL);
 std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress);
 
@@ -125,7 +129,7 @@ struct NameTxReturn
      std::string address;
      uint256 hex;   // Transaction hash in hex
 };
-NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string& strAddress, const string& strValueType);
+NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string strAddress, bool fValueAsFilepath = false);
 
 
 struct nameTempProxy
@@ -137,4 +141,4 @@ struct nameTempProxy
     CNameIndex ind;
 };
 
-#endif // DNS_H
+#endif //DNS_H

@@ -91,10 +91,9 @@ bool MultisigDialog::AdvertisePublicKeyForMultiSig(const std::string& address, c
         string strAddress = ""; 
         CNameVal name = nameValFromString("address:" + address);
         CNameVal value = nameValFromString(publickey);
-        string strValue = stringFromNameVal(value);
         int nRentalDays = 35;
         
-        NameTxReturn ret = name_operation(OP_NAME_MULTISIG, name, value, nRentalDays, address, strValue);
+        NameTxReturn ret = name_operation(OP_NAME_MULTISIG, name, value, nRentalDays, address);
         if (!ret.ok)
         {
             QMessageBox::critical(this, tr("Multisig Dialog: Advertise PublicKey Error!"), tr("%1: %2").arg(ret.err_code).arg(ret.err_msg.c_str()));

@@ -43,7 +43,7 @@ static const char *hatoui(const char *first, const char *last,
 }
 
 enum jtokentype getJsonToken(string& tokenVal, unsigned int& consumed,
-                            const char *raw, bool binary)
+                            const char *raw)       
 {
     tokenVal.clear();
     consumed = 0;
@@ -217,10 +217,7 @@ enum jtokentype getJsonToken(string& tokenVal, unsigned int& consumed,
             }
 
             else {
-                if (binary)
-                    valStr += *raw;
-                else
-                    writer.push_back(*raw);
+                writer.push_back(*raw);        
                 raw++;
             }
         }
@@ -249,7 +246,7 @@ enum expect_bits {
 #define setExpect(bit) (expectMask |= EXP_##bit)
 #define clearExpect(bit) (expectMask &= ~EXP_##bit)
 
-bool UniValue::read(const char *raw, bool binary)
+bool UniValue::read(const char *raw)       
 {
     clear();
 
@@ -263,7 +260,7 @@ bool UniValue::read(const char *raw, bool binary)
     do {
         last_tok = tok;
 
-        tok = getJsonToken(tokenVal, consumed, raw, binary);
+        tok = getJsonToken(tokenVal, consumed, raw);       
         if (tok == JTOK_NONE || tok == JTOK_ERR)
             return false;
         raw += consumed;

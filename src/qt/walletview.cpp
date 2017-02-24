@@ -112,9 +112,6 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     // Update wallet with sum of selected transactions
     connect(transactionView, SIGNAL(trxAmount(QString)), this, SLOT(trxAmount(QString)));
 
-   // Double-clicking on a name on the dDNS page copies all values
-    connect(dnsPage, SIGNAL(doubleClicked(QModelIndex)), dnsPage, SLOT(onCopyAllAction()));
-
     // Clicking on "Export" allows to export the transaction list
     connect(exportButton, SIGNAL(clicked()), transactionView, SLOT(exportClicked()));
 

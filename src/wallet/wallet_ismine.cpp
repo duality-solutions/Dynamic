@@ -11,7 +11,7 @@
 #include "keystore.h"
 #include "script/script.h"
 #include "script/standard.h"
-#include "dns/hooks.h"
+#include "script/sign.h"
 
 #include <boost/foreach.hpp>
 
@@ -31,12 +31,19 @@ unsigned int HaveKeys(const vector<valtype>& pubkeys, const CKeyStore& keystore)
     return nResult;
 }
 
-isminetype IsMineInner(const CKeyStore &keystore, const CScript& scriptPubKey, txnouttype& whichType)
+isminetype IsMine(const CKeyStore &keystore, const CTxDestination& dest)
+{
+    CScript script = GetScriptForDestination(dest);
+    return IsMine(keystore, script);
+}
+
+isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
 {
     vector<valtype> vSolutions;
+    txnouttype whichType;
     if (!Solver(scriptPubKey, whichType, vSolutions)) {
         if (keystore.HaveWatchOnly(scriptPubKey))
-            return ISMINE_WATCH_ONLY;
+            return ISMINE_WATCH_UNSOLVABLE;
         return ISMINE_NO;
     }
 
@@ -52,12 +59,12 @@ isminetype IsMineInner(const CKeyStore &keystore, const CScript& scriptPubKey, t
             return ISMINE_SPENDABLE;
         break;
     case TX_PUBKEYHASH:
-    case TX_NAME:
         keyID = CKeyID(uint160(vSolutions[0]));
         if (keystore.HaveKey(keyID))
             return ISMINE_SPENDABLE;
         break;
     case TX_SCRIPTHASH:
+    case TX_NAME:
     {
         CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
         CScript subscript;
@@ -71,7 +78,7 @@ isminetype IsMineInner(const CKeyStore &keystore, const CScript& scriptPubKey, t
     case TX_MULTISIG:
     {
         // Only consider transactions "mine" if we own ALL the
-        // keys involved. multi-signature transactions that are
+        // keys involved. Multi-signature transactions that are
         // partially owned (somebody else has a key that can spend
         // them) enable spend-out-from-under-you attacks, especially
         // in shared-wallet situations.
@@ -82,31 +89,10 @@ isminetype IsMineInner(const CKeyStore &keystore, const CScript& scriptPubKey, t
     }
     }
 
-    if (keystore.HaveWatchOnly(scriptPubKey))
-        return ISMINE_WATCH_ONLY;
+    if (keystore.HaveWatchOnly(scriptPubKey)) {
+        // TODO: This could be optimized some by doing some work after the above solver
+        CScript scriptSig;
+        return ProduceSignature(DummySignatureCreator(&keystore), scriptPubKey, scriptSig) ? ISMINE_WATCH_SOLVABLE : ISMINE_WATCH_UNSOLVABLE;
+    }
     return ISMINE_NO;
-}
-
-isminetype IsMine(const CKeyStore &keystore, const CTxDestination& dest)
-{
-    CScript script = GetScriptForDestination(dest);
-    txnouttype whichType;
-    return IsMineInner(keystore, script, whichType);
-}
-
-isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
-{
-    txnouttype whichType;
-    return IsMineInner(keystore, scriptPubKey, whichType);
-}
-
-// normal check + name check
-isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool &fName)
-{
-    fName = false;
-    txnouttype whichType;
-    isminetype ret = IsMineInner(keystore, scriptPubKey, whichType);
-    fName = whichType == TX_NAME;
-
-    return ret;
 }

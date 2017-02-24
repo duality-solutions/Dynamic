@@ -218,12 +218,9 @@ UniValue CallRPC(const string& strMethod, const UniValue& params)
     else if (response.body.empty())
         throw runtime_error("no response from server");
 
-    // DarkSilk: in case of name commands assume string with binary data so that it would display
-    bool treatAsBinary = strMethod.rfind("name_", 0) != std::string::npos;
-
     // Parse reply
     UniValue valReply(UniValue::VSTR);
-    if (!valReply.read(response.body, treatAsBinary))     
+    if (!valReply.read(response.body))     
         throw runtime_error("couldn't parse reply from server");
     const UniValue& reply = valReply.get_obj();
     if (reply.empty())

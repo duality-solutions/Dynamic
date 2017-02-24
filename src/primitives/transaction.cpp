@@ -14,12 +14,12 @@
 
 std::string COutPoint::ToString() const
 {
-    return strprintf("COutPoint(%s, %u)", hash.ToString().substr(0,10), n);
+    return strprintf("COutPoint(%s, %u)", hash.ToString()/*.substr(0,10)*/, n);
 }
 
 std::string COutPoint::ToStringShort() const
 {
-    return strprintf("%s-%u", hash.ToString().substr(0,10), n);
+    return strprintf("%s-%u", hash.ToString().substr(0,64), n);
 }
 
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, uint32_t nSequenceIn)
@@ -40,11 +40,11 @@ std::string CTxIn::ToString() const
 {
     std::string str;
     str += "CTxIn(";
-    str += prevout.ToString().substr(0,30);
+    str += prevout.ToString();
     if (prevout.IsNull())
-        str += strprintf(", coinbase %s", scriptSig.ToString().substr(0,24));
+        str += strprintf(", coinbase %s", HexStr(scriptSig));
     else
-        str += strprintf(", scriptSig=%s", scriptSig.ToString().substr(0,24));
+        str += strprintf(", scriptSig=%s", HexStr(scriptSig).substr(0, 24));
     if (nSequence != SEQUENCE_FINAL)
         str += strprintf(", nSequence=%u", nSequence);
     str += ")";
@@ -58,13 +58,6 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
     nRounds = -10;
 }
 
-CTxOut::CTxOut(const CAmount& nValueIn, const CScript& scriptPubKeyIn, int inRounds)
-{
-    nValue = nValueIn;
-    scriptPubKey = scriptPubKeyIn;
-    nRounds = inRounds;
-}
-
 uint256 CTxOut::GetHash() const
 {
     return SerializeHash(*this);
@@ -72,7 +65,7 @@ uint256 CTxOut::GetHash() const
 
 std::string CTxOut::ToString() const
 {
-    return strprintf("CTxOut(nValue=%d.%06d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));
+    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));
 }
 
 CMutableTransaction::CMutableTransaction() : nVersion(CTransaction::CURRENT_VERSION), nLockTime(0) {}

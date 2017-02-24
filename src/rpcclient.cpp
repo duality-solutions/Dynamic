@@ -125,19 +125,6 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "getaddressdeltas", 0},
     { "getaddressutxos", 0},
     { "getaddressmempool", 0},
-
-    // dDNS
-    { "name_new", 2 },
-    { "name_update", 2 },
-    { "name_filter", 1 },
-    { "name_filter", 2 },
-    { "name_filter", 3 },
-    { "name_history", 1 },
-    { "sendtoname", 1 },
-    { "gettxlistfor", 0 },
-    { "gettxlistfor", 1 },
-    { "gettxlistfor", 3 },
-    { "gettxlistfor", 4 },
 };
 
 class CRPCConvertTable

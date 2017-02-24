@@ -20,7 +20,6 @@
 #include "sync.h"
 #include "versionbits.h"
 #include "spentindex.h"
-#include "txmempool.h"
 
 #include <algorithm>
 #include <exception>
@@ -39,6 +38,7 @@ class CBloomFilter;
 class CChainParams;
 class CInv;
 class CScriptCheck;
+class CTxMemPool;
 class CValidationInterface;
 class CValidationState;
 

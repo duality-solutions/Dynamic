@@ -1262,7 +1262,7 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigne
         return false;
     if (stack.empty())
         return set_error(serror, SCRIPT_ERR_EVAL_FALSE);
-    if ((!fDDNS) && CastToBool(stack.back()) == false)
+    if (CastToBool(stack.back()) == false)
         return set_error(serror, SCRIPT_ERR_EVAL_FALSE);
 
     // Additional validation for spend-to-script-hash transactions:
