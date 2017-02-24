@@ -883,7 +883,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString& text)
             }
             else // Known change address
             {
-                ui->labelCoinControlChangeLabel->setStyleSheet("QLabel{color:black;}");
+                ui->labelCoinControlChangeLabel->setStyleSheet("QLabel{color:white;}");
 
                 // Query label
                 QString associatedLabel = model->getAddressTableModel()->labelForAddress(text);
