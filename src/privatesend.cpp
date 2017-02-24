@@ -2529,6 +2529,9 @@ void ThreadCheckPrivateSendPool()
                 snpayments.CheckAndRemove();
                 instantsend.CheckAndRemove();
             }
+            if(fStormNode && (nTick % (60 * 5) == 0)) {
+                snodeman.DoFullVerificationStep();
+            }
 
             privateSendPool.CheckTimeout();
             privateSendPool.CheckForCompleteQueue();
