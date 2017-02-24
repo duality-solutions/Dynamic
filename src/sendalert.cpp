@@ -55,8 +55,8 @@ void ThreadSendAlert()
     alert.nCancel       = 0;   // cancels previous messages up to this ID number
 
     // These versions are protocol versions
-    alert.nMinVer       = 70200;
-    alert.nMaxVer       = 70200;
+    alert.nMinVer       = 70300;
+    alert.nMaxVer       = 70300;
 
     //
     //  1000 for Misc warnings like out of disk space and clock is wrong
