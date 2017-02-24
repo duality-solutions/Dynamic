@@ -97,7 +97,7 @@ QString DarkSilkUnits::description(int unit)
     {
         switch(unit)
         {
-            case DSLK: return QString("TestDarkSilks");
+            case DSLK: return QString("TestDarkSilk");
             case mDSLK: return QString("Milli-TestDarkSilk (1 / 1" THIN_SP_UTF8 "000)");
             case uDSLK: return QString("Micro-TestDarkSilk (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             case satoshis: return QString("Ten Nano-TestDarkSilk (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");

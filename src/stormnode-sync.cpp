@@ -274,7 +274,7 @@ void CStormnodeSync::ProcessTick()
     {
         if(IsSynced()) {
             /*
-                Resync if we lose all Stormnodes from sleep/wake or failure to sync originally
+                Resync if we lost all stormnodes from sleep/wake or failed to sync originally
             */
             if(nSnCount == 0) {
                 LogPrintf("CStormnodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
@@ -360,8 +360,8 @@ void CStormnodeSync::ProcessTick()
         // NORMAL NETWORK MODE - TESTNET/MAINNET
         {
             if(netfulfilledman.HasFulfilledRequest(pnode->addr, "full-sync")) {
-                // we already fully synced from this node recently,
-                // disconnect to free this connection slot for a new node
+                // We already fully synced from this node recently,
+                // disconnect to free this connection slot for another peer.
                 pnode->fDisconnect = true;
                 LogPrintf("CStormnodeSync::ProcessTick -- disconnecting from recently synced peer %d\n", pnode->id);
                 continue;

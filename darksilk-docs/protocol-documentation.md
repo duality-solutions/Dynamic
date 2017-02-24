@@ -164,6 +164,26 @@ User's signed inputs for a group transaction in a mixing session
 | ---------- | ----------- | --------- | -------- |
 | # | inputs | CTxIn[] | signed inputs for mixing session
 
+
+### TXLOCKREQUEST - "is"
+
+CTxLockRequest
+
+Transaction Lock Request, serialization is the same as for CTransaction.
+
+### TXLOCKVOTE - "txlvote"
+
+CTxLockVote
+
+Transaction Lock Vote
+
+| Field Size | Field Name | Data type | Description |
+| ---------- | ----------- | --------- | -------- |
+| 32 | txHash | uint256 | txid of the transaction to lock
+| 36 | outpoint | COutPoint | The utxo to lock in this transaction
+| 36 | outpointStormnode | COutPoint | The utxo of the stormnode which is signing the vote
+| 71-73 | vchStormnodeSignature | char[] | Signature of this message by stormnode (verifiable via pubKeyStormnode)
+
 ### SNGOVERNANCEOBJECT - "govobj"
 
 Governance Object
@@ -189,9 +209,9 @@ Stormnodes use governance voting in response to new proposals, contracts, settin
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
-| 4 | nVoteSignal | int | ???
 | 41+ | vinStormnode | CTxIn | Unspent output for the Stormnode which is voting
 | 32 | nParentHash | uint256 | Object which we're voting on (proposal, contract, setting or final budget)
 | 4 | nVoteOutcome | int | ???
+| 4 | nVoteSignal | int | ???
 | 8 | nTime | int64_t | Time which the vote was created
 | 71-73 | vchSig | char[] | Signature of the Stormnode
