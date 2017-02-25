@@ -240,8 +240,51 @@ padding-left:5px;
 padding-bottom:2px;
 }
 
+/*******************************************************/
+
 QAbstractSpinBox::down-arrow {
 image:url(':/images/drk/drkpurple_downArrow_small');
+}
+
+QCheckBox {
+spacing: 5px;
+}
+
+QCheckBox::indicator {
+width: 16px;
+height: 16px;
+}
+
+QCheckBox::indicator:unchecked {
+image:url(':/images/drk/unchecked');
+}
+
+QCheckBox::indicator:unchecked:hover {
+image:url(':/images/drk/unchecked');
+}
+
+QCheckBox::indicator:unchecked:pressed {
+image:url(':/images/drk/checked');
+}
+
+QCheckBox::indicator:checked {
+image:url(':/images/drk/checked');
+}
+
+QCheckBox::indicator:checked:hover {
+image:url(':/images/drk/checked');
+}
+
+QCheckBox::indicator:checked:pressed {
+image:url(':/images/drk/unchecked');
+}
+
+QCheckBox::indicator:indeterminate:hover {
+image:url(':/images/drk/unchecked');
+}
+
+QCheckBox::indicator:indeterminate:pressed {
+image:url(':/images/drk/checked');
 }
 
 /*******************************************************/
@@ -1204,18 +1247,18 @@ border:1px solid #d2d2d2;
 }
 
 QDialog#SendCoinsDialog .QCheckBox#checkUsePrivatesend { /* Privatesend Checkbox */
-color:#f8f8f8;
+color:#000000;
 font-weight:bold;
-background: #000000;
+background: #FFFFFF;
 border-radius:5px;
 padding-top:20px;
 padding-bottom:18px;
 }
 
 QDialog#SendCoinsDialog .QCheckBox#checkInstantSend { /* InstantSend Checkbox */
-color:#f8f8f8;
+color:#000000;
 font-weight:bold;
-background: #000000;
+background: #FFFFFF;
 border-radius:5px;
 padding-top:20px;
 padding-bottom:18px;
