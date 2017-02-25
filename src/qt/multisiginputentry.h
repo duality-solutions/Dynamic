@@ -5,10 +5,10 @@
 #ifndef MULTISIGINPUTENTRY_H
 #define MULTISIGINPUTENTRY_H
 
-#include <QFrame>
-
-#include "uint256.h"
 #include "amount.h"
+#include "uint256.h"
+
+#include <QFrame>
 
 class CTxIn;
 class WalletModel;

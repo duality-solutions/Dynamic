@@ -8,8 +8,8 @@
 #ifndef DARKSILK_QT_STORMNODELIST_H
 #define DARKSILK_QT_STORMNODELIST_H
 
-#include "stormnode.h"
 #include "platformstyle.h"
+#include "stormnode.h"
 #include "sync.h"
 #include "util.h"
 

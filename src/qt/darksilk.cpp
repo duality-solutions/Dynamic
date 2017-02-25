@@ -9,10 +9,8 @@
 #include "config/darksilk-config.h"
 #endif
 
-#include "darksilkgui.h"
-
-#include "chainparams.h"
 #include "clientmodel.h"
+#include "darksilkgui.h"
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "intro.h"
@@ -21,21 +19,20 @@
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "splashscreen.h"
+#include "stormnodeconfig.h"
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
-
 #ifdef ENABLE_WALLET
 #include "paymentserver.h"
 #include "walletmodel.h"
 #endif
-#include "stormnodeconfig.h"
 
+#include "chainparams.h"
 #include "init.h"
 #include "rpcserver.h"
 #include "scheduler.h"
 #include "ui_interface.h"
 #include "util.h"
-
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif

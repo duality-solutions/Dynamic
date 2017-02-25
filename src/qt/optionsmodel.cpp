@@ -18,16 +18,12 @@
 #include "init.h"
 #include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
+#include "privatesend.h"
 #include "txdb.h" // for -dbcache defaults
-
 #ifdef ENABLE_WALLET
+#include "stormnodeconfig.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-#endif
-
-#include "privatesend.h"
-#ifdef ENABLED_WALLET
-#include "stormnodeconfig.h"
 #endif
 
 #include <QNetworkProxy>

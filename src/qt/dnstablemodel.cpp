@@ -7,11 +7,12 @@
 
 #include "dnstablemodel.h"
 
+#include "guiconstants.h"
 #include "guiutil.h"
 #include "walletmodel.h"
-#include "guiconstants.h"
-#include "../wallet/wallet.h"
-#include "../dns/dns.h"
+
+#include "dns/dns.h"
+#include "wallet/wallet.h"
 
 #include <vector>
 

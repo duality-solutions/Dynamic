@@ -17,15 +17,14 @@
 #include "base58.h"
 #include "keystore.h"
 #include "dnstablemodel.h"
+#include "instantsend.h"
 #include "main.h"
+#include "privatesend.h"
+#include "spork.h"
 #include "sync.h"
 #include "ui_interface.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
-
-#include "privatesend.h"
-#include "instantsend.h"
-#include "spork.h"
 
 #include <stdint.h>
 

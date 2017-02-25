@@ -9,10 +9,11 @@
 #include "ui_privatesendconfig.h"
 
 #include "darksilkunits.h"
-#include "privatesend.h"
 #include "guiconstants.h"
 #include "optionsmodel.h"
 #include "walletmodel.h"
+
+#include "privatesend.h"
 
 #include <QMessageBox>
 #include <QPushButton>

@@ -6,6 +6,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "trafficgraphwidget.h"
+
 #include "clientmodel.h"
 
 #include <QPainter>

@@ -5,10 +5,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "guiutil.h"
 #include "transactiondescdialog.h"
 #include "ui_transactiondescdialog.h"
 
+#include "guiutil.h"
 #include "transactiontablemodel.h"
 
 #include <QModelIndex>

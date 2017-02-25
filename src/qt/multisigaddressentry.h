@@ -7,7 +7,6 @@
 
 #include <QFrame>
 
-
 class WalletModel;
 class PlatformStyle;
 

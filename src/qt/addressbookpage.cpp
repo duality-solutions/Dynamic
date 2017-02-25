@@ -13,8 +13,8 @@
 #include "ui_addressbookpage.h"
 
 #include "addresstablemodel.h"
-#include "darksilkgui.h"
 #include "csvmodelwriter.h"
+#include "darksilkgui.h"
 #include "editaddressdialog.h"
 #include "guiutil.h"
 #include "platformstyle.h"

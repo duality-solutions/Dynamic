@@ -2,21 +2,23 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <QApplication>
-#include <QClipboard>
-#include <string>
-#include <vector>
+#include "multisigaddressentry.h"
+#include "ui_multisigaddressentry.h"
 
 #include "addressbookpage.h"
 #include "addresstablemodel.h"
 #include "platformstyle.h"
-#include "base58.h"
 #include "guiutil.h"
-#include "key.h"
-#include "multisigaddressentry.h"
-#include "ui_multisigaddressentry.h"
 #include "walletmodel.h"
+
+#include "base58.h"
+#include "key.h"
 #include "utilstrencodings.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <string>
+#include <vector>
 
 MultisigAddressEntry::MultisigAddressEntry(const PlatformStyle *platformStyle, QWidget *parent) : QFrame(parent), ui(new Ui::MultisigAddressEntry), model(0)
 {

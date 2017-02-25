@@ -8,15 +8,16 @@
 #ifndef NAMETABLEMODEL_H
 #define NAMETABLEMODEL_H
 
+#include "uint256.h"
+
+#include <vector>
+
 #include <QAbstractTableModel>
 #include <QStringList>
 
 class NameTablePriv;
 class CWallet;
 class WalletModel;
-
-#include <vector>
-#include "uint256.h"
 
 /**
    Qt model for "DNS" page.

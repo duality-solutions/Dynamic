@@ -8,6 +8,9 @@
 #ifndef DSLKDNS_H
 #define DSLKDNS_H
 
+#include "netbase.h"
+#include "pubkey.h"
+
 #include <boost/thread.hpp>
 
 #define DSLKDNS_DAPSIZE     (8 * 1024)

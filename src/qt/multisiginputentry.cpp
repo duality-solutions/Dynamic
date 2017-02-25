@@ -2,21 +2,22 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <QApplication>
-#include <QClipboard>
-#include <string>
-#include <vector>
-
-#include "base58.h"
 #include "multisiginputentry.h"
 #include "ui_multisiginputentry.h"
+
+#include "walletmodel.h"
+
+#include "base58.h"
+#include "chainparamsbase.h"
 #include "main.h"
 #include "script/script.h"
 #include "util.h"
 #include "wallet/wallet.h"
-#include "walletmodel.h"
-#include "chainparamsbase.h"
 
+#include <QApplication>
+#include <QClipboard>
+#include <string>
+#include <vector>
 
 MultisigInputEntry::MultisigInputEntry(const PlatformStyle *platformStyle, QWidget *parent) : QFrame(parent), ui(new Ui::MultisigInputEntry), model(0)
 {

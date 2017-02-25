@@ -16,12 +16,12 @@
 #include "checkpoints.h"
 #include "clientversion.h"
 #include "net.h"
-#include "txmempool.h"
-#include "ui_interface.h"
-#include "util.h"
 #include "privatesend.h"
 #include "stormnodeman.h"
 #include "stormnode-sync.h"
+#include "txmempool.h"
+#include "ui_interface.h"
+#include "util.h"
 
 #include <stdint.h>
 

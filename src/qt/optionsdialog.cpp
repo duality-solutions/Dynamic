@@ -17,14 +17,12 @@
 #include "optionsmodel.h"
 
 #include "main.h" // for DEFAULT_SCRIPTCHECK_THREADS and MAX_SCRIPTCHECK_THREADS
+#include "privatesend.h"
 #include "netbase.h"
 #include "txdb.h" // for -dbcache defaults
-
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h" // for CWallet::GetRequiredFee()
 #endif
-
-#include "privatesend.h"
 
 #include <boost/thread.hpp>
 

@@ -5,14 +5,15 @@
 #ifndef MULTISIGDIALOG_H
 #define MULTISIGDIALOG_H
 
-#include <QDialog>
-
 #include "multisigaddressentry.h"
 #include "multisiginputentry.h"
 #include "sendcoinsentry.h"
 #include "walletmodel.h"
 
 #include <vector>
+
+#include <QDialog>
+
 
 class PlatformStyle;
 
