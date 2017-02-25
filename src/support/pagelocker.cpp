@@ -5,11 +5,11 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "support/pagelocker.h"
-
 #if defined(HAVE_CONFIG_H)
 #include "config/darksilk-config.h"
 #endif
+
+#include "support/pagelocker.h"
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT

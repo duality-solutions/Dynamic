@@ -8,24 +8,26 @@
 
 
 #include "dns/dns.h"
-#include "keystore.h"
+
 #include "script/interpreter.h"
+#include "keystore.h"
+#include "policy/policy.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "script/sign.h"
-#include "policy/policy.h"
-#include "wallet/wallet.h"
-#include "rpcserver.h"
 #include "txmempool.h"
+#include "wallet/wallet.h"
+
+#include <univalue.h>
+
+#include <fstream>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
-#include <fstream>
 
 using namespace std;
-
-#include <univalue.h>
 
 map<CNameVal, set<uint256> > mapNamePending; // for pending tx
 

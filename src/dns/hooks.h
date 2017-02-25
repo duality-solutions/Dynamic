@@ -8,15 +8,16 @@
 #ifndef DARKSILK_HOOKS_H
 #define DARKSILK_HOOKS_H
 
+#include <map>
+#include <vector>
+#include <string>
+
 class CScript;
 class CTransaction;
 class CBlockIndex;
 class CTxOut;
 struct nameTempProxy;
 
-#include <map>
-#include <vector>
-#include <string>
 using namespace std;
 
 class CHooks

@@ -25,12 +25,17 @@
  *
  */
 
+#include "dns/dslkdns.h"
+
+#include "dns/dns.h"
+#include "dns/hooks.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdlib.h>
-
 #include <string.h>
 
 #ifdef WIN32
@@ -41,11 +46,6 @@
 #endif
 
 #include <ctype.h>
-
-#include "dns/dns.h"
-#include "util.h"
-#include "dns/dslkdns.h"
-#include "dns/hooks.h"
 
 /*---------------------------------------------------*/
 

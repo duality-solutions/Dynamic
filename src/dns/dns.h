@@ -10,10 +10,10 @@
 
 #include "amount.h"
 #include "base58.h"
+#include "wallet/db.h"
 #include "dns/hooks.h"
 #include "main.h"
 #include "rpcprotocol.h"
-#include "wallet/db.h"
 
 static const unsigned int NAMEINDEX_CHAIN_SIZE = 1000;
 static const int RELEASE_HEIGHT = 1<<16;

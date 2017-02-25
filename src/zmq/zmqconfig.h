@@ -9,15 +9,15 @@
 #include "config/darksilk-config.h"
 #endif
 
-#include <stdarg.h>
-#include <string>
+#include "primitives/block.h"
+#include "primitives/transaction.h"
 
 #if ENABLE_ZMQ
 #include <zmq.h>
 #endif
 
-#include "primitives/block.h"
-#include "primitives/transaction.h"
+#include <stdarg.h>
+#include <string>
 
 void zmqError(const char *str);
 

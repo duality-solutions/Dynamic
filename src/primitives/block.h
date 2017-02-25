@@ -7,10 +7,10 @@
 #define DARKSILK_PRIMITIVES_BLOCK_H
 
 #include "hash.h"
-#include "utilstrencodings.h"
-#include "primitives/transaction.h"
 #include "serialize.h"
+#include "primitives/transaction.h"
 #include "uint256.h"
+#include "utilstrencodings.h"
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
