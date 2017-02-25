@@ -7,9 +7,9 @@
 
 #include "base58.h"
 #include "chain.h"
-#include "rpcserver.h"
 #include "init.h"
 #include "main.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "sync.h"
@@ -17,15 +17,14 @@
 #include "utiltime.h"
 #include "wallet.h"
 
+#include <univalue.h>
+
 #include <fstream>
 #include <stdint.h>
 
+#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-#include <univalue.h>
-
-#include <boost/foreach.hpp>
 
 using namespace std;
 

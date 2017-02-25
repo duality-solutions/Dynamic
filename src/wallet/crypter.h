@@ -9,8 +9,8 @@
 #define DARKSILK_WALLET_CRYPTER_H
 
 #include "keystore.h"
-#include "serialize.h"
 #include "support/allocators/secure.h"
+#include "serialize.h"
 
 class uint256;
 

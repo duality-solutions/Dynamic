@@ -10,6 +10,7 @@
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
+#include "keepass.h"
 #include "main.h"
 #include "net.h"
 #include "netbase.h"
@@ -20,13 +21,12 @@
 #include "utilmoneystr.h"
 #include "wallet.h"
 #include "walletdb.h"
-#include "keepass.h"
+
+#include <univalue.h>
 
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>
-
-#include <univalue.h>
 
 using namespace std;
 
