@@ -1,19 +1,18 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2015-2017 Silk Network Developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DARKSILK_QT_RPCCONSOLE_H
-#define DARKSILK_QT_RPCCONSOLE_H
+#define SILK_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
 
 #include "net.h"
 
-#include <QWidget>
+#include <QDialog>
 #include <QCompleter>
 
 class ClientModel;
@@ -25,17 +24,16 @@ namespace Ui {
 }
 
 QT_BEGIN_NAMESPACE
-class QMenu;
 class QItemSelection;
 QT_END_NAMESPACE
 
 /** Local DarkSilk RPC console. */
-class RPCConsole: public QWidget
+class RPCConsole: public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit RPCConsole(const PlatformStyle *platformStyle, QWidget *parent);
+    explicit RPCConsole(QWidget *parent);
     ~RPCConsole();
 
     void setClientModel(ClientModel *model);
@@ -83,7 +81,7 @@ private Q_SLOTS:
 
 public Q_SLOTS:
     void clear();
-    
+
     /** Wallet repair options */
     void walletSalvage();
     void walletRescan();
@@ -91,17 +89,14 @@ public Q_SLOTS:
     void walletZaptxes2();
     void walletUpgrade();
     void walletReindex();
-    
-    /** Append the message to the message widget */
+
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of Stormnodes shown in the UI */
-    void setStormnodeCount(const QString &strStormnodes);
-    /** Set number of blocks and last block date shown in the UI */
-    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);
-    /** Set size (number of transactions and memory usage) of the mempool in the UI */
-    void setMempoolSize(long numberOfTxs, size_t dynUsage);
+    /** Set number of Stormnodes shown in the UI */        
+    void setStormnodeCount(const QString &strStormnodes);      
+    /** Set number of blocks shown in the UI */
+    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);     
     /** Go forward or back in history */
     void browseHistory(int offset);
     /** Scroll console view to end */
@@ -110,6 +105,16 @@ public Q_SLOTS:
     void peerSelected(const QItemSelection &selected, const QItemSelection &deselected);
     /** Handle updated peer information */
     void peerLayoutChanged();
+    /** Switch to info tab and show */
+    void showInfo();
+    /** Switch to console tab and show */
+    void showConsole();
+    /** Switch to network tab and show */
+    void showNetwork();
+    /** Switch to peers tab and show */
+    void showPeers();
+    /** Switch to wallet-repair tab and show */
+    void showRepair();
     /** Disconnect a selected node on the Peers tab */
     void disconnectSelectedNode();
     /** Ban a selected node on the Peers tab */
@@ -118,7 +123,8 @@ public Q_SLOTS:
     void unbanSelectedNode();
     /** set which tab has the focus (is visible) */
     void setTabFocus(enum TabTypes tabType);
-
+    /** Set size (number of transactions and memory usage) of the mempool in the UI */
+    void setMempoolSize(long numberOfTxs, size_t dynUsage);
 Q_SIGNALS:
     // For RPC command executor
     void stopExecutor();
@@ -137,12 +143,11 @@ private:
 
     enum ColumnWidths
     {
-        ADDRESS_COLUMN_WIDTH = 170,
-        SUBVERSION_COLUMN_WIDTH = 150,
+        ADDRESS_COLUMN_WIDTH = 200,
+        SUBVERSION_COLUMN_WIDTH = 100,
         PING_COLUMN_WIDTH = 80,
         BANSUBNET_COLUMN_WIDTH = 200,
         BANTIME_COLUMN_WIDTH = 250
-
     };
 
     Ui::RPCConsole *ui;
@@ -150,8 +155,7 @@ private:
     QStringList history;
     int historyPtr;
     NodeId cachedNodeid;
-    const PlatformStyle *platformStyle;
-    RPCTimerInterface *rpcTimerInterface;
+    RPCTimerInterface *rpcTimerInterface;      
     QMenu *peersTableContextMenu;
     QMenu *banTableContextMenu;
     QCompleter *autoCompleter;

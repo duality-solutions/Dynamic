@@ -10,18 +10,528 @@
     <height>589</height>
    </rect>
   </property>
+  <property name="palette">
+   <palette>
+    <active>
+     <colorrole role="WindowText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Midlight">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Dark">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Mid">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Text">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="BrightText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ButtonText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Shadow">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>220</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="WindowText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Midlight">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Dark">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Mid">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Text">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="BrightText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ButtonText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Shadow">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>220</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="WindowText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Midlight">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Dark">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Mid">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Text">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="BrightText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ButtonText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Shadow">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>220</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="ToolTipText">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
+   </palette>
+  </property>
   <property name="windowTitle">
    <string>Tools window</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(0, 0, 0);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
      <property name="styleSheet">
       <string notr="true">QTabWidget:tab-bar { alignment: left }
-QTabBar { alignment: left; }</string>
+QTabBar { alignment: left; }
+</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_info">
       <attribute name="title">
@@ -39,6 +549,9 @@ QTabBar { alignment: left; }</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>General</string>
          </property>
@@ -46,6 +559,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_5">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Client name</string>
          </property>
@@ -55,6 +571,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="clientName">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -69,6 +588,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_6">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Client version</string>
          </property>
@@ -78,6 +600,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="clientVersion">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -92,6 +617,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="labelClientUserAgent">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>User Agent</string>
          </property>
@@ -104,6 +632,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="clientUserAgent">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -118,6 +649,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_berkeleyDBVersion">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Using BerkeleyDB version</string>
          </property>
@@ -130,6 +664,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="berkeleyDBVersion">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -144,6 +681,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="5" column="0">
         <widget class="QLabel" name="label_12">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Build date</string>
          </property>
@@ -153,6 +693,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="buildDate">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -167,6 +710,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="6" column="0">
         <widget class="QLabel" name="label_13">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Startup time</string>
          </property>
@@ -176,6 +722,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="startupTime">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -196,6 +745,9 @@ QTabBar { alignment: left; }</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Network</string>
          </property>
@@ -203,6 +755,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="8" column="0">
         <widget class="QLabel" name="label_8">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Name</string>
          </property>
@@ -212,6 +767,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="networkName">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -226,6 +784,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="9" column="0">
         <widget class="QLabel" name="label_7">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Number of connections</string>
          </property>
@@ -235,6 +796,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="numberOfConnections">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -249,6 +813,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="10" column="0">
         <widget class="QLabel" name="stormnodeCountLabel">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Number of Stormnodes</string>
          </property>
@@ -256,6 +823,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="10" column="1">
         <widget class="QLabel" name="stormnodeCount">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>N/A</string>
          </property>
@@ -269,6 +839,9 @@ QTabBar { alignment: left; }</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Block chain</string>
          </property>
@@ -276,6 +849,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="12" column="0">
         <widget class="QLabel" name="label_3">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Current number of blocks</string>
          </property>
@@ -285,6 +861,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="numberOfBlocks">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -299,6 +878,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="13" column="0">
         <widget class="QLabel" name="labelLastBlockTime">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Last block time</string>
          </property>
@@ -308,6 +890,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="lastBlockTime">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -328,6 +913,9 @@ QTabBar { alignment: left; }</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Memory Pool</string>
          </property>
@@ -335,6 +923,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="15" column="0">
         <widget class="QLabel" name="labelNumberOfTransactions">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Current number of transactions</string>
          </property>
@@ -344,6 +935,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="mempoolNumberTxs">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -358,6 +952,9 @@ QTabBar { alignment: left; }</string>
        </item>
        <item row="16" column="0">
         <widget class="QLabel" name="labelMemoryUsage">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Memory usage</string>
          </property>
@@ -367,6 +964,9 @@ QTabBar { alignment: left; }</string>
         <widget class="QLabel" name="mempoolSize">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
           <string>N/A</string>
@@ -399,6 +999,9 @@ QTabBar { alignment: left; }</string>
          </item>
          <item>
           <widget class="QLabel" name="labelDebugLogfile">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);</string>
+           </property>
            <property name="text">
             <string>Debug log file</string>
            </property>
@@ -408,6 +1011,46 @@ QTabBar { alignment: left; }</string>
           <widget class="QPushButton" name="openDebugLogfileButton">
            <property name="toolTip">
             <string>Open the DarkSilk Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QWidget#RPCConsole .QPushButton#openDebugLogfileButton {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#openDebugLogfileButton:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#openDebugLogfileButton:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
            </property>
            <property name="text">
             <string>&amp;Open</string>
@@ -450,6 +1093,10 @@ QTabBar { alignment: left; }</string>
            <height>100</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -474,7 +1121,12 @@ QTabBar { alignment: left; }</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLineEdit" name="lineEdit">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="clearButton">
@@ -521,12 +1173,73 @@ QTabBar { alignment: left; }</string>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
           </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QSlider" name="sldGraphRange">
+             <property name="styleSheet">
+              <string notr="true">QSlider::groove:horizontal {
+border: 1px solid #bbb;
+background: white;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal {
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,
+    stop: 0 #520072, stop: 1 #66008e);
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,
+    stop: 0 #66008e, stop: 1 #7f00b1);
+border: 1px solid #777;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::add-page:horizontal {
+background: #fff;
+border: 1px solid #777;
+height: 10px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #eee, stop:1 #ccc);
+border: 1px solid #777;
+width: 13px;
+margin-top: -2px;
+margin-bottom: -2px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal:hover {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #fff, stop:1 #ddd);
+border: 1px solid #444;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal:disabled {
+background: #bbb;
+border-color: #999;
+}
+
+QSlider::add-page:horizontal:disabled {
+background: #eee;
+border-color: #999;
+}
+
+QSlider::handle:horizontal:disabled {
+background: #eee;
+border: 1px solid #aaa;
+border-radius: 4px;
+}</string>
+             </property>
              <property name="minimum">
               <number>1</number>
              </property>
@@ -559,6 +1272,46 @@ QTabBar { alignment: left; }</string>
            </item>
            <item>
             <widget class="QPushButton" name="btnClearTrafficGraph">
+             <property name="styleSheet">
+              <string notr="true">QWidget#RPCConsole .QPushButton#btnClearTrafficGraph {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btnClearTrafficGraph:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btnClearTrafficGraph:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+             </property>
              <property name="text">
               <string>&amp;Clear</string>
              </property>
@@ -575,6 +1328,9 @@ QTabBar { alignment: left; }</string>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QGroupBox" name="groupBox">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);</string>
+           </property>
            <property name="title">
             <string>Totals</string>
            </property>
@@ -598,17 +1354,89 @@ QTabBar { alignment: left; }</string>
                 <property name="palette">
                  <palette>
                   <active>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
                       <red>0</red>
                       <green>255</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
                       <blue>0</blue>
                      </color>
                     </brush>
                    </colorrole>
                   </active>
                   <inactive>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
@@ -618,13 +1446,103 @@ QTabBar { alignment: left; }</string>
                      </color>
                     </brush>
                    </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                   </inactive>
                   <disabled>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
                       <red>0</red>
                       <green>255</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
                       <blue>0</blue>
                      </color>
                     </brush>
@@ -678,10 +1596,64 @@ QTabBar { alignment: left; }</string>
                 <property name="palette">
                  <palette>
                   <active>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
                       <red>255</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
                       <green>0</green>
                       <blue>0</blue>
                      </color>
@@ -689,6 +1661,24 @@ QTabBar { alignment: left; }</string>
                    </colorrole>
                   </active>
                   <inactive>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
@@ -698,12 +1688,102 @@ QTabBar { alignment: left; }</string>
                      </color>
                     </brush>
                    </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                   </inactive>
                   <disabled>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Button">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
                    <colorrole role="Light">
                     <brush brushstyle="SolidPattern">
                      <color alpha="255">
                       <red>255</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Text">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="ButtonText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Base">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                   <colorrole role="Window">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>0</red>
                       <green>0</green>
                       <blue>0</blue>
                      </color>
@@ -771,6 +1851,10 @@ QTabBar { alignment: left; }</string>
          </property>
          <item>
           <widget class="QTableView" name="peerWidget">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+           </property>
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
@@ -810,6 +1894,9 @@ QTabBar { alignment: left; }</string>
            <property name="cursor">
             <cursorShape>IBeamCursor</cursorShape>
            </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);</string>
+           </property>
            <property name="text">
             <string>Banned peers</string>
            </property>
@@ -831,6 +1918,10 @@ QTabBar { alignment: left; }</string>
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
            </property>
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAsNeeded</enum>
@@ -869,6 +1960,9 @@ QTabBar { alignment: left; }</string>
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
           <string>Select a peer to view detailed information.</string>
          </property>
@@ -894,6 +1988,9 @@ QTabBar { alignment: left; }</string>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <widget class="QLabel" name="label_30">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Whitelisted</string>
             </property>
@@ -903,6 +2000,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerWhitelisted">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -917,6 +2017,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_23">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Direction</string>
             </property>
@@ -926,6 +2029,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerDirection">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -940,6 +2046,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_21">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Version</string>
             </property>
@@ -949,6 +2058,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerVersion">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -963,6 +2075,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_28">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>User Agent</string>
             </property>
@@ -972,6 +2087,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerSubversion">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -986,6 +2104,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_4">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Services</string>
             </property>
@@ -995,6 +2116,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerServices">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1009,6 +2133,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="5" column="0">
            <widget class="QLabel" name="label_29">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Starting Block</string>
             </property>
@@ -1018,6 +2145,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerHeight">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1032,6 +2162,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="6" column="0">
            <widget class="QLabel" name="label_27">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Synced Headers</string>
             </property>
@@ -1041,6 +2174,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerSyncHeight">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1055,6 +2191,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="7" column="0">
            <widget class="QLabel" name="label_25">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Synced Blocks</string>
             </property>
@@ -1064,6 +2203,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerCommonHeight">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1078,6 +2220,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="8" column="0">
            <widget class="QLabel" name="label_24">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Ban Score</string>
             </property>
@@ -1087,6 +2232,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerBanScore">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1101,6 +2249,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="9" column="0">
            <widget class="QLabel" name="label_22">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Connection Time</string>
             </property>
@@ -1110,6 +2261,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerConnTime">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1124,6 +2278,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="10" column="0">
            <widget class="QLabel" name="label_15">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Last Send</string>
             </property>
@@ -1133,6 +2290,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerLastSend">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1147,6 +2307,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="11" column="0">
            <widget class="QLabel" name="label_19">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Last Receive</string>
             </property>
@@ -1156,6 +2319,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerLastRecv">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1170,6 +2336,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="12" column="0">
            <widget class="QLabel" name="label_18">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Sent</string>
             </property>
@@ -1179,6 +2348,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerBytesSent">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1193,6 +2365,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="13" column="0">
            <widget class="QLabel" name="label_20">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Received</string>
             </property>
@@ -1202,6 +2377,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerBytesRecv">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1216,6 +2394,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="14" column="0">
            <widget class="QLabel" name="label_26">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Ping Time</string>
             </property>
@@ -1225,6 +2406,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerPingTime">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1242,6 +2426,9 @@ QTabBar { alignment: left; }</string>
             <property name="toolTip">
              <string>The duration of a currently outstanding ping.</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Ping Wait</string>
             </property>
@@ -1251,6 +2438,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="peerPingWait">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1265,6 +2455,9 @@ QTabBar { alignment: left; }</string>
           </item>
           <item row="16" column="0">
            <widget class="QLabel" name="label_timeoffset">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
+            </property>
             <property name="text">
              <string>Time Offset</string>
             </property>
@@ -1274,6 +2467,9 @@ QTabBar { alignment: left; }</string>
            <widget class="QLabel" name="timeoffset">
             <property name="cursor">
              <cursorShape>IBeamCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>N/A</string>
@@ -1323,6 +2519,46 @@ QTabBar { alignment: left; }</string>
          <height>23</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_salvagewallet {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_salvagewallet:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_salvagewallet:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+       </property>
        <property name="text">
         <string>Salvage wallet</string>
        </property>
@@ -1341,6 +2577,46 @@ QTabBar { alignment: left; }</string>
          <width>180</width>
          <height>23</height>
         </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_rescan {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_rescan:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_rescan:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
        </property>
        <property name="text">
         <string>Rescan blockchain files</string>
@@ -1361,6 +2637,46 @@ QTabBar { alignment: left; }</string>
          <height>23</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_zapwallettxes1 {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_zapwallettxes1:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_zapwallettxes1:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+       </property>
        <property name="text">
         <string>Recover transactions 1</string>
        </property>
@@ -1379,6 +2695,46 @@ QTabBar { alignment: left; }</string>
          <width>180</width>
          <height>23</height>
         </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_zapwallettxes2 {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_zapwallettxes2:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_zapwallettxes2:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
        </property>
        <property name="text">
         <string>Recover transactions 2</string>
@@ -1399,6 +2755,46 @@ QTabBar { alignment: left; }</string>
          <height>23</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_upgradewallet {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_upgradewallet:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_upgradewallet:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+       </property>
        <property name="text">
         <string>Upgrade wallet format</string>
        </property>
@@ -1418,6 +2814,9 @@ QTabBar { alignment: left; }</string>
          <bold>false</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
        <property name="text">
         <string>The buttons below will restart the wallet with command-line options to repair the wallet, fix issues with corrupt blockhain files or missing/obsolete transactions.</string>
        </property>
@@ -1433,6 +2832,9 @@ QTabBar { alignment: left; }</string>
          <width>411</width>
          <height>41</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</string>
@@ -1450,6 +2852,9 @@ QTabBar { alignment: left; }</string>
          <height>41</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
        <property name="text">
         <string>-rescan: Rescan the block chain for missing wallet transactions.</string>
        </property>
@@ -1465,6 +2870,9 @@ QTabBar { alignment: left; }</string>
          <width>411</width>
          <height>41</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string>-zapwallettxes=1: Recover transactions from blockchain (keep meta-data, e.g. account owner).</string>
@@ -1482,6 +2890,9 @@ QTabBar { alignment: left; }</string>
          <height>41</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
        <property name="text">
         <string>-zapwallettxes=2: Recover transactions from blockchain (drop meta-data).</string>
        </property>
@@ -1497,6 +2908,9 @@ QTabBar { alignment: left; }</string>
          <width>411</width>
          <height>41</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</string>
@@ -1521,6 +2935,9 @@ QTabBar { alignment: left; }</string>
          <bold>true</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
        <property name="text">
         <string>Wallet repair options.</string>
        </property>
@@ -1537,6 +2954,46 @@ QTabBar { alignment: left; }</string>
          <height>23</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#RPCConsole .QPushButton#btn_reindex {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_reindex:hover {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}
+
+QWidget#RPCConsole .QPushButton#btn_reindex:pressed {
+background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
+border:0;
+border-radius:3px;
+color:#ffffff;
+font-size:12px;
+font-weight:bold;
+padding-left:25px;
+padding-right:25px;
+padding-top:5px;
+padding-bottom:5px;
+}</string>
+       </property>
        <property name="text">
         <string>Rebuild index</string>
        </property>
@@ -1549,6 +3006,9 @@ QTabBar { alignment: left; }</string>
          <width>411</width>
          <height>41</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string>-reindex: Rebuild block chain index from current blk000??.dat files.</string>
@@ -1565,6 +3025,9 @@ QTabBar { alignment: left; }</string>
          <width>731</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
         <string>Wallet Path</string>

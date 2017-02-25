@@ -172,7 +172,7 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const
         }
     } else if (role == Qt::TextAlignmentRole) {
         if (index.column() == Ping)
-            return (QVariant)(Qt::AlignRight | Qt::AlignVCenter);
+            return (QVariant)(Qt::AlignLeft | Qt::AlignVCenter);
     }
 
     return QVariant();

@@ -25,11 +25,11 @@ border:0px solid #520072;
 
 QMenuBar {
 background-color:#000000;
-color:#e6e6e6;
 }
 
 QMenuBar::item {
 background-color:#000000;
+color:#e6e6e6;
 }
 
 QMenuBar::item:selected {
@@ -66,13 +66,13 @@ font-weight:bold;
 color:#808080;
 }
 
-QToolBar > QToolButton:checked {
+QToolBar > QToolButton:hover {
 background-color:#771F99;
 color:#ffffff;
 font-weight:bold;
 }
 
-QToolBar > QToolButton:hover {
+QToolBar > QToolButton:checked {
 background-color:#771F99;
 color:#ffffff;
 font-weight:bold;
@@ -735,7 +735,7 @@ min-width:180px;
 }
 
 QDialog#RPCConsole QWidget#tab_peers  QLabel#peerHeading { /* Peers Info Header */
-color:#762894;
+color:#c0c0c0;
 }
 
 QDialog#RPCConsole QPushButton#openDebugLogfileButton {
@@ -751,9 +751,7 @@ margin-right:5px;
 }
 
 QDialog#RPCConsole QPushButton#clearButton { /* Console Clear Button */
-background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
-border:1px solid #d2d2d2;
-color:#616161;
+background-color:#000000;
 padding-left:10px;
 padding-right:10px;
 }
