@@ -8,13 +8,14 @@
 #ifndef DARKSILK_RPCPROTOCOL_H
 #define DARKSILK_RPCPROTOCOL_H
 
+#include <univalue.h>
+
 #include <list>
 #include <map>
 #include <stdint.h>
 #include <string>
-#include <boost/filesystem.hpp>
 
-#include <univalue.h>
+#include <boost/filesystem.hpp>
 
 //! HTTP status codes
 enum HTTPStatusCode

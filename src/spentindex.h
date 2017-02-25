@@ -8,8 +8,8 @@
 #ifndef DARKSILK_SPENTINDEX_H
 #define DARKSILK_SPENTINDEX_H
 
-#include "uint256.h"
 #include "amount.h"
+#include "uint256.h"
 
 struct CSpentIndexKey {
     uint256 txid;

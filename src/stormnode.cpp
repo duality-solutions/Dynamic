@@ -3,16 +3,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "stormnode.h"
+
 #include "activestormnode.h"
-#include "consensus/validation.h"
-#include "privatesend.h"
 #include "init.h"
 #include "governance.h"
-#include "stormnode.h"
+#include "privatesend.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
 #include "util.h"
+#include "consensus/validation.h"
 
 #include <boost/lexical_cast.hpp>
 

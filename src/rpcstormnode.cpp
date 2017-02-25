@@ -4,20 +4,21 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
-#include "privatesend.h"
 #include "init.h"
 #include "main.h"
+#include "privatesend.h"
+#include "rpcserver.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
-#include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
 
+#include <univalue.h>
+
 #include <fstream>
 #include <iomanip>
-#include <univalue.h>
 
 void EnsureWalletIsUnlocked();
 

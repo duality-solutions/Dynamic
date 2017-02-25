@@ -16,10 +16,10 @@
 #include "config/darksilk-config.h"
 #endif
 
+#include "amount.h"
 #include "compat.h"
 #include "tinyformat.h"
 #include "utiltime.h"
-#include "amount.h"
 
 #include <exception>
 #include <map>

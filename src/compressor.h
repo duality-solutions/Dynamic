@@ -8,9 +8,9 @@
 #ifndef DARKSILK_COMPRESSOR_H
 #define DARKSILK_COMPRESSOR_H
 
-#include "primitives/transaction.h"
 #include "script/script.h"
 #include "serialize.h"
+#include "primitives/transaction.h"
 
 class CKeyID;
 class CPubKey;

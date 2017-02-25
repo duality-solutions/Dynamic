@@ -5,38 +5,38 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "rpcserver.h"
-#include "base58.h"
 #include "amount.h"
+#include "base58.h"
 #include "chain.h"
 #include "chainparams.h"
-#include "consensus/merkle.h"
 #include "consensus/consensus.h"
-#include "consensus/params.h"
-#include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
 #include "main.h"
+#include "consensus/merkle.h"
 #include "miner.h"
 #include "net.h"
+#include "consensus/params.h"
 #include "pow.h"
 #include "rpcserver.h"
 #include "spork.h"
 #include "txmempool.h"
 #include "util.h"
+#include "utilstrencodings.h"
+#include "consensus/validation.h"
+#include "validationinterface.h"
+
 #ifdef ENABLE_WALLET
 #include "stormnode-sync.h"
 #include "wallet/wallet.h"
 #endif
-#include "utilstrencodings.h"
-#include "validationinterface.h"
+
+#include <univalue.h>
 
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>
 #include <boost/shared_ptr.hpp>
-
-#include <univalue.h>
 
 using namespace std;
 

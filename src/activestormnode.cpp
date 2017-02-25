@@ -6,10 +6,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activestormnode.h"
+
+#include "protocol.h"
 #include "stormnode.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
-#include "protocol.h"
 
 extern CWallet* pwalletMain;
 

@@ -12,14 +12,14 @@
 #include "rpcprotocol.h"
 #include "uint256.h"
 
+#include <univalue.h>
+
 #include <list>
 #include <map>
 #include <stdint.h>
 #include <string>
 
 #include <boost/function.hpp>
-
-#include <univalue.h>
 
 class CRPCCommand;
 

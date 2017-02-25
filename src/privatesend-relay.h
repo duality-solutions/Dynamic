@@ -6,8 +6,8 @@
 #ifndef DARKSILK_PRIVATESEND_RELAY_H
 #define DARKSILK_PRIVATESEND_RELAY_H
 
-#include "main.h"
 #include "activestormnode.h"
+#include "main.h"
 #include "stormnodeman.h"
 
 

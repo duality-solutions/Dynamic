@@ -3,17 +3,15 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "privatesend.h"
 #include "governance.h"
-#include "governance-vote.h"
+
 #include "governance-classes.h"
 #include "main.h"
+#include "privatesend.h"
 #include "stormnode.h"
-#include "governance.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
 #include "netfulfilledman.h"
-#include "util.h"
 
 CGovernanceManager governance;
 

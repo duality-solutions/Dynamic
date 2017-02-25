@@ -6,6 +6,7 @@
 #ifndef INSTANTSEND_H
 #define INSTANTSEND_H
 
+#include "chain.h"
 #include "net.h"
 #include "primitives/transaction.h"
 

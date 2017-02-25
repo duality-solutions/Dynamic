@@ -8,8 +8,8 @@
 #ifndef DARKSILK_STREAMS_H
 #define DARKSILK_STREAMS_H
 
-#include "support/allocators/zeroafterfree.h"
 #include "serialize.h"
+#include "support/allocators/zeroafterfree.h"
 
 #include <algorithm>
 #include <assert.h>

@@ -3,9 +3,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "privatesend.h"
-#include "main.h"
 #include "spork.h"
+
+#include "main.h"
+#include "privatesend.h"
 
 #include <boost/lexical_cast.hpp>
 

@@ -14,25 +14,26 @@
 #include "addrman.h"
 #include "chainparams.h"
 #include "clientversion.h"
-#include "consensus/consensus.h"
 #include "crypto/common.h"
+#include "consensus/consensus.h"
 #include "hash.h"
-#include "primitives/transaction.h"
-#include "scheduler.h"
-#include "ui_interface.h"
-#include "wallet/wallet.h"
-#include "utilstrencodings.h"
-
-#include "privatesend.h"
 #include "instantsend.h"
+#include "privatesend.h"
+#include "scheduler.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
+#include "primitives/transaction.h"
+#include "ui_interface.h"
+#include "utilstrencodings.h"
+#include "wallet/wallet.h"
 
 #ifdef WIN32
 #include <string.h>
 #else
 #include <fcntl.h>
 #endif
+
+#include <math.h>
 
 #ifdef USE_UPNP
 #include <miniupnpc/miniupnpc.h>
@@ -44,7 +45,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include <math.h>
 
 // Dump addresses to peers.dat every 15 minutes (900s)
 #define DUMP_ADDRESSES_INTERVAL 900

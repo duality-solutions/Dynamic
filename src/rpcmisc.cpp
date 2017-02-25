@@ -12,10 +12,10 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"
+#include "spork.h"
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
-#include "spork.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
 #include "stormnode-sync.h"
@@ -23,12 +23,12 @@
 #include "wallet/walletdb.h"
 #endif
 
+#include <univalue.h>
+
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string.hpp>
-
-#include <univalue.h>
 
 using namespace std;
 

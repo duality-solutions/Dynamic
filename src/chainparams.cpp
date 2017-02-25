@@ -6,21 +6,20 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "chainparams.h"
-#include "consensus/merkle.h"
 
+#include "arith_uint256.h"
+#include "chainparamsseeds.h"
+#include "hash.h"
+#include "consensus/merkle.h"
+#include "streams.h"
 #include "tinyformat.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #include "uint256.h"
-#include "arith_uint256.h"
-#include "hash.h"
-#include "streams.h"
 
 #include <assert.h>
 
 #include <boost/assign/list_of.hpp>
-
-#include "chainparamsseeds.h"
 
 static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, const uint32_t nTime, const uint32_t nNonce, const uint32_t nBits, const int32_t nVersion, const CAmount& genesisReward)
 {

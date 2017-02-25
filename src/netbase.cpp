@@ -12,9 +12,9 @@
 #include "netbase.h"
 
 #include "hash.h"
+#include "random.h"
 #include "sync.h"
 #include "uint256.h"
-#include "random.h"
 #include "util.h"
 #include "utilstrencodings.h"
 

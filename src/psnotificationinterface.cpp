@@ -4,9 +4,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "psnotificationinterface.h"
-#include "privatesend.h"
-#include "instantsend.h"
+
 #include "governance.h"
+#include "instantsend.h"
+#include "privatesend.h"
 #include "stormnodeman.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"

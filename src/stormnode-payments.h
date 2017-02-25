@@ -6,11 +6,11 @@
 #ifndef DARKSILK_STORMNODE_PAYMENTS_H
 #define DARKSILK_STORMNODE_PAYMENTS_H
 
-#include "util.h"
 #include "core_io.h"
 #include "key.h"
 #include "main.h"
 #include "stormnode.h"
+#include "util.h"
 #include "utilstrencodings.h"
 
 class CStormnodePayments;

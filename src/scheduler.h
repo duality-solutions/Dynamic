@@ -8,6 +8,8 @@
 #ifndef DARKSILK_SCHEDULER_H
 #define DARKSILK_SCHEDULER_H
 
+#include <map>
+
 //
 // NOTE:
 // boost::thread / boost::function / boost::chrono should be ported to
@@ -16,7 +18,7 @@
 #include <boost/function.hpp>
 #include <boost/chrono/chrono.hpp>
 #include <boost/thread.hpp>
-#include <map>
+
 
 //
 // Simple class for background tasks that should be run

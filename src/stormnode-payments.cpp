@@ -3,15 +3,16 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "activestormnode.h"
-#include "privatesend.h"
-#include "governance-classes.h"
-#include "policy/fees.h"
 #include "stormnode-payments.h"
+
+#include "activestormnode.h"
+#include "governance-classes.h"
+#include "netfulfilledman.h"
+#include "policy/fees.h"
+#include "privatesend.h"
+#include "spork.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
-#include "netfulfilledman.h"
-#include "spork.h"
 #include "util.h"
 
 #include <boost/lexical_cast.hpp>

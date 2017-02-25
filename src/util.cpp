@@ -11,9 +11,9 @@
 
 #include "util.h"
 
-#include "support/allocators/secure.h"
 #include "chainparamsbase.h"
 #include "random.h"
+#include "support/allocators/secure.h"
 #include "serialize.h"
 #include "sync.h"
 #include "utilstrencodings.h"

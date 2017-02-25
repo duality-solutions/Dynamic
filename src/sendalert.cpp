@@ -6,8 +6,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "alert.h"
-#include "clientversion.h"
 #include "chainparams.h"
+#include "clientversion.h"
 #include "init.h"
 #include "net.h"
 #include "utilstrencodings.h"

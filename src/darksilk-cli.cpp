@@ -12,6 +12,8 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
+#include <univalue.h>
+
 #include <boost/filesystem/operations.hpp>
 #include <stdio.h>
 
@@ -19,8 +21,6 @@
 #include <event2/http.h>
 #include <event2/buffer.h>
 #include <event2/keyvalq_struct.h>
-
-#include <univalue.h>
 
 using namespace std;
 

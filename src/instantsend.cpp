@@ -3,16 +3,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "activestormnode.h"
-#include "privatesend.h"
 #include "instantsend.h"
+
+#include "activestormnode.h"
 #include "key.h"
 #include "main.h"
-#include "stormnode-sync.h"
-#include "stormnodeman.h"
 #include "net.h"
+#include "privatesend.h"
 #include "protocol.h"
 #include "spork.h"
+#include "stormnode-sync.h"
+#include "stormnodeman.h"
 #include "sync.h"
 #include "txmempool.h"
 #include "util.h"

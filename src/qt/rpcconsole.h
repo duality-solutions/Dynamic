@@ -5,7 +5,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DARKSILK_QT_RPCCONSOLE_H
-#define SILK_QT_RPCCONSOLE_H
+#define DARKSILK_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"

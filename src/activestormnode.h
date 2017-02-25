@@ -8,8 +8,8 @@
 #ifndef DARKSILK_ACTIVESTORMNODE_H
 #define DARKSILK_ACTIVESTORMNODE_H
 
-#include "net.h"
 #include "key.h"
+#include "net.h"
 #include "wallet/wallet.h"
 
 class CActiveStormnode;

@@ -8,15 +8,15 @@
 #ifndef DARKSILK_TXMEMPOOL_H
 #define DARKSILK_TXMEMPOOL_H
 
-#include <list>
-#include <set>
-
 #include "addressindex.h"
-#include "spentindex.h"
 #include "amount.h"
 #include "coins.h"
 #include "primitives/transaction.h"
+#include "spentindex.h"
 #include "sync.h"
+
+#include <list>
+#include <set>
 
 #if !defined(QT_PROJECT_BUILD)
     #undef foreach

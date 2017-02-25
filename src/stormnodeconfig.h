@@ -6,6 +6,10 @@
 #ifndef DARKSILK_STORMNODECONFIG_H
 #define DARKSILK_STORMNODECONFIG_H
 
+#include "chainparams.h"
+#include "netbase.h"
+#include "util.h"
+
 class CStormnodeConfig;
 extern CStormnodeConfig stormnodeConfig;
 

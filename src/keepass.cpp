@@ -7,8 +7,8 @@
 
 #include "keepass.h"
 
-#include "wallet/crypter.h"
 #include "clientversion.h"
+#include "wallet/crypter.h"
 #include "protocol.h"
 #include "random.h"
 #include "rpcprotocol.h"
@@ -21,8 +21,6 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include <boost/foreach.hpp>
-
 #include <event2/event.h>
 #include <event2/http.h>
 #include <event2/buffer.h>
@@ -32,6 +30,8 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include "support/cleanse.h" // for OPENSSL_cleanse()
+
+#include <boost/foreach.hpp>
 
 const char* CKeePassIntegrator::KEEPASS_HTTP_HOST = "localhost";
 

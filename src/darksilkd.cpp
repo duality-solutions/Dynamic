@@ -7,21 +7,21 @@
 
 #include "chainparams.h"
 #include "clientversion.h"
-#include "rpcserver.h"
-#include "init.h"
-#include "noui.h"
-#include "scheduler.h"
-#include "util.h"
-#include "stormnodeconfig.h"
 #include "httpserver.h"
 #include "httprpc.h"
+#include "init.h"
+#include "noui.h"
 #include "rpcserver.h"
+#include "scheduler.h"
+#include "stormnodeconfig.h"
+#include "util.h"
+
+#include <stdio.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include <stdio.h>
 
 /* Introduction text for doxygen: */
 

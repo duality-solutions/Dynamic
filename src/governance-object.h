@@ -9,7 +9,6 @@
 //#define ENABLE_DARKSILK_DEBUG
 
 #include "cachemultimap.h"
-
 #include "governance-exceptions.h"
 #include "governance-vote.h"
 #include "governance-votedb.h"

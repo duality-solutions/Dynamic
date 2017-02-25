@@ -12,29 +12,30 @@
 #include "chainparams.h"
 #include "coins.h"
 #include "consensus/consensus.h"
-#include "consensus/merkle.h"
-#include "consensus/validation.h"
-#include "wallet/wallet.h"
 #include "hash.h"
 #include "main.h"
+#include "consensus/merkle.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "pow.h"
-#include "primitives/transaction.h"
 #include "script/standard.h"
 #include "timedata.h"
+#include "primitives/transaction.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
+#include "consensus/validation.h"
 #include "validationinterface.h"
+#include "wallet/wallet.h"
 
-#include <boost/thread.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <queue>
 
 #include <openssl/sha.h>
+
+#include <boost/thread.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace std;
 

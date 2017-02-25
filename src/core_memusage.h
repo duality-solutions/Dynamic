@@ -8,9 +8,9 @@
 #ifndef DARKSILK_CORE_MEMUSAGE_H
 #define DARKSILK_CORE_MEMUSAGE_H
 
-#include "primitives/transaction.h"
 #include "primitives/block.h"
 #include "memusage.h"
+#include "primitives/transaction.h"
 
 static inline size_t RecursiveDynamicUsage(const CScript& script) {
     return memusage::DynamicUsage(*static_cast<const CScriptBase*>(&script));

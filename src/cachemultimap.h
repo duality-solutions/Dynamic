@@ -8,14 +8,13 @@
 #ifndef DARKSILK_CACHEMULTIMAP_H
 #define DARKSILK_CACHEMULTIMAP_H
 
+#include "cachemap.h"
+#include "serialize.h"
+
 #include <cstddef>
 #include <map>
 #include <list>
 #include <set>
-
-#include "serialize.h"
-
-#include "cachemap.h"
 
 /**
  * Map like container that keeps the N most recently added items

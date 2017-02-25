@@ -8,11 +8,11 @@
 #ifndef DARKSILK_CACHEMAP_H
 #define DARKSILK_CACHEMAP_H
 
+#include "serialize.h"
+
 #include <map>
 #include <list>
 #include <cstddef>
-
-#include "serialize.h"
 
 /**
  * Serializable structure for key/value items

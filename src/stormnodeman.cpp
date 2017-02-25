@@ -3,14 +3,15 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "stormnodeman.h"
+
 #include "activestormnode.h"
 #include "addrman.h"
-#include "privatesend.h"
 #include "governance.h"
+#include "netfulfilledman.h"
+#include "privatesend.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
-#include "stormnodeman.h"
-#include "netfulfilledman.h"
 #include "util.h"
 
 /** Stormnode manager */

@@ -8,9 +8,9 @@
 #ifndef DARKSILK_GOVERNANCE_MISC_H
 #define DARKSILK_GOVERNANCE_MISC_H
 
-#include "main.h"
 #include "governance.h"
 #include "init.h"
+#include "main.h"
 
 using namespace std;
 

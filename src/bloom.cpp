@@ -7,12 +7,12 @@
 
 #include "bloom.h"
 
-#include "primitives/transaction.h"
 #include "hash.h"
+#include "random.h"
 #include "script/script.h"
 #include "script/standard.h"
-#include "random.h"
 #include "streams.h"
+#include "primitives/transaction.h"
 
 #include <math.h>
 #include <stdlib.h>

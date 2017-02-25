@@ -7,8 +7,8 @@
 
 #include "utilmoneystr.h"
 
-#include "primitives/transaction.h"
 #include "tinyformat.h"
+#include "primitives/transaction.h"
 #include "utilstrencodings.h"
 
 using namespace std;

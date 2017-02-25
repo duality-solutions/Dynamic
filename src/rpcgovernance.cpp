@@ -8,17 +8,17 @@
 //#define ENABLE_DARKSILK_DEBUG
 
 #include "activestormnode.h"
-#include "privatesend.h"
 #include "governance.h"
-#include "governance-vote.h"
 #include "governance-classes.h"
+#include "governance-vote.h"
 #include "init.h"
 #include "main.h"
+#include "privatesend.h"
+#include "rpcserver.h"
 #include "stormnode.h"
 #include "stormnode-sync.h"
 #include "stormnodeconfig.h"
 #include "stormnodeman.h"
-#include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
 

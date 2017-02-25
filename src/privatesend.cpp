@@ -3,19 +3,20 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "privatesend.h"
+
 #include "activestormnode.h"
 #include "coincontrol.h"
-#include "consensus/validation.h"
-#include "privatesend.h"
 #include "init.h"
 #include "instantsend.h"
+#include "script/sign.h"
 #include "stormnode-payments.h"
 #include "stormnode-sync.h"
 #include "stormnodeman.h"
-#include "script/sign.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
+#include "consensus/validation.h"
 
 #include <boost/lexical_cast.hpp>
 

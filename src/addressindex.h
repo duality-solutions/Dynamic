@@ -9,8 +9,8 @@
 #ifndef DARKSILK_ADDRESSINDEX_H
 #define DARKSILK_ADDRESSINDEX_H
 
-#include "uint256.h"
 #include "amount.h"
+#include "uint256.h"
 
 struct CMempoolAddressDelta
 {
