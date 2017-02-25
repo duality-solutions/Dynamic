@@ -430,6 +430,15 @@ UniValue getwork(const UniValue& params, bool fHelp)
         if (pindexPrev != chainActive.Tip() ||
             (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
         {
+            if (pindexPrev != chainActive.Tip())
+            {
+                // Deallocate old blocks since they're obsolete now
+                mapNewBlock.clear();
+                BOOST_FOREACH(CBlockTemplate* pblocktemplate, vNewBlockTemplate)
+                    delete pblocktemplate;
+                vNewBlockTemplate.clear();
+            }
+            
             // Clear pindexPrev so future calls make a new block, despite any failures from here on
             pindexPrev = NULL;
 
