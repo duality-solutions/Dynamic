@@ -1240,6 +1240,9 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("Unable to start HTTP server. See debug log for details."));
     }
 
+    // do not use hooks below this line
+    // hooks = InitHook();
+
     int64_t nStart;
 
     // ********************************************************* Step 5: Backup wallet and verify wallet database integrity
@@ -1806,6 +1809,25 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         threadGroup.create_thread(boost::bind(&ThreadFlushWalletDB, boost::ref(pwalletMain->strWalletFile)));
     }
 #endif
+
+    // init dyndns. WARNING: this should be done after hooks initialization
+    if (GetBoolArg("-dyndns", false))
+    {
+        #define DYNDNS_PORT 5335
+        int port = GetArg("-dyndnsport", DYNDNS_PORT);
+        int verbose = GetArg("-dyndnsverbose", 1);
+        if (port <= 0)
+            port = DYNDNS_PORT;
+        string suffix  = GetArg("-dyndnssuffix", "");
+        string bind_ip = GetArg("-dyndnsbindip", "");
+        string allowed = GetArg("-dyndnsallowed", "");
+        string localcf = GetArg("-dyndnslocalcf", "");
+        string enums   = GetArg("-enumtrust", "");
+        string tf      = GetArg("-enumtollfree", "");
+        dyndns = new DynDns(bind_ip.c_str(), port,
+        suffix.c_str(), allowed.c_str(), localcf.c_str(), enums.c_str(), tf.c_str(), verbose);
+        LogPrintf("dDNS server started\n");
+    }
 
     threadGroup.create_thread(boost::bind(&ThreadSendAlert));
 

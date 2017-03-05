@@ -909,7 +909,7 @@ QString getThemeName()
     if(!theme.isEmpty()){
         return theme;
     }
-    return QString("light");  
+    return QString("drk");  
 }
 
 // Open CSS when configured

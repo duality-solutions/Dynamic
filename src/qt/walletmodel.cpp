@@ -157,6 +157,10 @@ void WalletModel::pollBalanceChanged()
         checkBalanceChanged();
         if(transactionTableModel)
             transactionTableModel->updateConfirmations();
+
+        //TODO: perhaps redo this. Currently it rescans all tx available in wallet - idealy we do not need such scan.
+        if (nameTableModel)
+            nameTableModel->update();
     }
 }
 
