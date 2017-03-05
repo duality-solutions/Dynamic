@@ -8,17 +8,18 @@
 #ifndef DNS_H
 #define DNS_H
 
-#include "amount.h"
-#include "base58.h"
 #include "wallet/db.h"
+#include "base58.h"
+#include "hooks.h"
+#include "keystore.h"
 #include "main.h"
 #include "rpcprotocol.h"
 
-#include "dns/hooks.h"
+class CTxMemPool;
 
 static const unsigned int NAMEINDEX_CHAIN_SIZE = 1000;
 static const int RELEASE_HEIGHT = 1<<16;
-static const unsigned int NAME_REGISTRATION_DAILY_FEE = 100000; //  Current set to 0.03 DYN per month or .36525 DYN per year.
+static const unsigned int NAME_REGISTRATION_DAILY_FEE = 1000000; // Current set to 0.3 DYN per month or 3.65 DYN per year.
 
 class CNameIndex
 {
@@ -44,7 +45,7 @@ public:
     }
 };
 
-// CNameRecord is all the data that is saved (in ddns.dat) with associated name
+// CNameRecord is all the data that is saved (in nameindex.dat) with associated name
 class CNameRecord
 {
 public:
@@ -73,9 +74,7 @@ public:
 class CNameDB : public CDB
 {
 public:
-    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode)
-    {
-    }
+    CNameDB(const char* pszMode="r+") : CDB("ddns.dat", pszMode) {}
 
     bool WriteName(const CNameVal& name, const CNameRecord& rec)
     {
@@ -114,11 +113,9 @@ std::string stringFromOp(int op);
 
 CAmount GetNameOpFee(const unsigned int& nRentalDays, const int& op);
 
-
 bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndIfIsMine = false);
 void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNames, std::map<CNameVal, NameTxInfo>& mapPending);
 bool GetNameValue(const CNameVal& name, CNameVal& value);
-class CKeyStore;
 bool SignNameSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType=SIGHASH_ALL);
 std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress);
 
@@ -130,7 +127,7 @@ struct NameTxReturn
      std::string address;
      uint256 hex;   // Transaction hash in hex
 };
-NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string strAddress, bool fValueAsFilepath = false);
+NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string& strAddress, const string& strValueType);
 
 
 struct nameTempProxy
@@ -142,4 +139,4 @@ struct nameTempProxy
     CNameIndex ind;
 };
 
-#endif //DNS_H
+#endif // DNS_H
