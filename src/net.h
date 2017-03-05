@@ -865,4 +865,8 @@ void DumpBanlist();
 /** Return a timestamp in the future (in microseconds) for exponentially distributed events. */
 int64_t PoissonNextSend(int64_t nNow, int average_interval_seconds);
 
+std::vector<CNode*> CopyNodeVector();
+
+void ReleaseNodeVector(const std::vector<CNode*>& vecNodes);
+
 #endif // DYNAMIC_NET_H
