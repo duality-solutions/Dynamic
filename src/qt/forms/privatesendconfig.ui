@@ -75,7 +75,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 2 separate Stormnodes to mix funds up to 1000 DSLK</string>
+    <string>Use 2 separate Dynodes to mix funds up to 1000 DYN</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -88,7 +88,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 8 separate Stormnodes to mix funds up to 1000 DSLK</string>
+    <string>Use 8 separate Dynodes to mix funds up to 1000 DYN</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -101,7 +101,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Use 16 separate Stormnodes</string>
+    <string>Use 16 separate Dynodes</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
@@ -114,7 +114,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>This option is the quickest and will cost about ~0.025 DSLK to anonymize 1000 DSLK</string>
+    <string>This option is the quickest and will cost about ~0.025 DYN to anonymize 1000 DYN</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_7">
@@ -127,7 +127,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>This option is moderately fast and will cost about 0.05 DSLK to anonymize 1000 DSLK</string>
+    <string>This option is moderately fast and will cost about 0.05 DYN to anonymize 1000 DYN</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -153,7 +153,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>0.1 DSLK per 1000 DSLK you anonymize.</string>
+    <string>0.1 DYN per 1000 DYN you anonymize.</string>
    </property>
   </widget>
   <widget class="Line" name="line">

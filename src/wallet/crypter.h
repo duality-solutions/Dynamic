@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash CoreDevelopers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_WALLET_CRYPTER_H
-#define DARKSILK_WALLET_CRYPTER_H
+#ifndef DYNAMIC_WALLET_CRYPTER_H
+#define DYNAMIC_WALLET_CRYPTER_H
 
 #include "keystore.h"
 #include "support/allocators/secure.h"
@@ -220,4 +220,4 @@ public:
     boost::signals2::signal<void (CCryptoKeyStore* wallet)> NotifyStatusChanged;
 };
 
-#endif // DARKSILK_WALLET_CRYPTER_H
+#endif // DYNAMIC_WALLET_CRYPTER_H

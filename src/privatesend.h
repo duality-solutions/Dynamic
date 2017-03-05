@@ -1,13 +1,14 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_PRIVATESEND_H
-#define DARKSILK_PRIVATESEND_H
+#ifndef DYNAMIC_PRIVATESEND_H
+#define DYNAMIC_PRIVATESEND_H
 
-#include "stormnode.h"
 #include "wallet/wallet.h"
+
+#include "dynode.h"
 
 class CPrivatesendPool;
 class CPrivateSendSigner;
@@ -20,7 +21,7 @@ static const int PRIVATESEND_QUEUE_TIMEOUT          = 30;
 static const int PRIVATESEND_SIGNING_TIMEOUT        = 15;
 
 //! minimum peer version accepted by mixing pool
-static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70300;
+static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70500;
 
 //! 1/10 of min denom, should not collide with other values to avoid confusion
 static const CAmount PRIVATESEND_COLLATERAL         = 0.01 * COIN + 1;
@@ -46,7 +47,7 @@ extern bool fPrivateSendMultiSession;
 
 // The main object for accessing mixing
 extern CPrivatesendPool privateSendPool;
-// A helper object for signing messages from Stormnodes
+// A helper object for signing messages from Dynodes
 extern CPrivateSendSigner privateSendSigner;
 
 extern std::map<uint256, CPrivatesendBroadcastTx> mapPrivatesendBroadcastTxes;
@@ -172,14 +173,14 @@ public:
 
     /** Sign this mixing transaction
      *  \return true if all conditions are met:
-     *     1) we have an active Stormnode,
-     *     2) we have a valid Stormnode private key,
+     *     1) we have an active Dynode,
+     *     2) we have a valid Dynode private key,
      *     3) we signed the message successfully, and
      *     4) we verified the message successfully
      */
     bool Sign();
-    /// Check if we have a valid Stormnode address
-    bool CheckSignature(const CPubKey& pubKeyStormnode);
+    /// Check if we have a valid Dynode address
+    bool CheckSignature(const CPubKey& pubKeyDynode);
 
     bool Relay();
 
@@ -188,7 +189,7 @@ public:
 
     std::string ToString()
     {
-        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, Stormnode=%s",
+        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, Dynode=%s",
                         nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
     }
 
@@ -233,7 +234,7 @@ public:
     }
 
     bool Sign();
-    bool CheckSignature(const CPubKey& pubKeyStormnode);
+    bool CheckSignature(const CPubKey& pubKeyDynode);
 };
 
 /** Helper object for signing and checking signatures
@@ -241,7 +242,7 @@ public:
 class CPrivateSendSigner
 {
 public:
-    /// Is the input associated with this public key? (and there is 1000 DSLK - checking if valid Stormnode)
+    /// Is the input associated with this public key? (and there is 1000 DYN - checking if valid Dynode)
     bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
     /// Set the private/public key values, returns true if successful
     bool GetKeysFromSecret(std::string strSecret, CKey& keyRet, CPubKey& pubkeyRet);
@@ -268,10 +269,10 @@ private:
         ERR_INVALID_SCRIPT,
         ERR_INVALID_TX,
         ERR_MAXIMUM,
-        ERR_SN_LIST,
+        ERR_DN_LIST,
         ERR_MODE,
         ERR_NON_STANDARD_PUBKEY,
-        ERR_NOT_A_SN,
+        ERR_NOT_A_DN,
         ERR_QUEUE_FULL,
         ERR_RECENT,
         ERR_SESSION,
@@ -306,15 +307,15 @@ private:
 
     // The current mixing sessions in progress on the network
     std::vector<CPrivatesendQueue> vecPrivatesendQueue;
-    // Keep track of the used Stormnodes
-    std::vector<CTxIn> vecStormnodesUsed;
+    // Keep track of the used Dynodes
+    std::vector<CTxIn> vecDynodesUsed;
 
     std::vector<CAmount> vecDenominationsSkipped;
     std::vector<COutPoint> vecOutPointLocked;
     // Mixing uses collateral transactions to trust parties entering the pool
     // to behave honestly. If they don't it takes their money.
     std::vector<CTransaction> vecSessionCollaterals;
-    std::vector<CPrivateSendEntry> vecEntries; // Stormnodes/clients entries
+    std::vector<CPrivateSendEntry> vecEntries; // Dynodes/clients entries
 
     PoolState nState; // should be one of the POOL_STATE_XXX values
     int64_t nTimeLastSuccessfulStep; // the time when last successful mixing step was performed, in UTC milliseconds
@@ -354,7 +355,7 @@ private:
 
     void CompletedTransaction(PoolMessage nMessageID);
 
-    /// Get the denominations for a specific amount of darksilk.
+    /// Get the denominations for a specific amount of dynamic.
     int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
 
     std::string GetMessageByID(PoolMessage nMessageID);
@@ -390,14 +391,14 @@ private:
     bool MakeCollateralAmounts();
     bool MakeCollateralAmounts(const CompactTallyItem& tallyItem);
 
-    /// As a client, submit part of a future mixing transaction to a Stormnode to start the process
+    /// As a client, submit part of a future mixing transaction to a Dynode to start the process
     bool SubmitDenominate();
     /// step 1: prepare denominated inputs and outputs
     bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxIn>& vecTxInRet, std::vector<CTxOut>& vecTxOutRet);
     /// step 2: send denominated inputs and outputs prepared in step 1
     bool SendDenominate(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut);
 
-    /// Get Stormnode updates about the progress of mixing
+    /// Get Dynode updates about the progress of mixing
     bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew=0);
     // Set the 'state' value, with some logging and capturing when the state changed
     void SetState(PoolState nStateNew);
@@ -417,7 +418,7 @@ private:
     void SetNull();
 
 public:
-    CStormnode* pSubmittedToStormnode;
+    CDynode* pSubmittedToDynode;
     int nSessionDenom; //Users must submit an denom matching this
     int nCachedNumBlocks; //used for the overview screen
     bool fCreateAutoBackups; //builtin support for automatic backups
@@ -484,4 +485,4 @@ public:
 
 void ThreadCheckPrivateSendPool();
 
-#endif // DARKSILK_PRIVATESEND_H
+#endif // DYNAMIC_PRIVATESEND_H

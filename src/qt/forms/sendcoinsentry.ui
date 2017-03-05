@@ -57,7 +57,7 @@
       <item>
        <widget class="QValidatedLineEdit" name="payTo">
         <property name="toolTip">
-         <string>The DarkSilk address to send the payment to</string>
+         <string>The Dynamic address to send the payment to</string>
         </property>
        </widget>
       </item>
@@ -153,7 +153,7 @@
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0,1">
       <item>
-       <widget class="DarkSilkAmountField" name="payAmount"/>
+       <widget class="DynamicAmountField" name="payAmount"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkboxSubtractFeeFromAmount">
@@ -573,7 +573,7 @@
          </palette>
         </property>
         <property name="toolTip">
-         <string>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of DarkSilk than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</string>
+         <string>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Dynamic than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</string>
         </property>
         <property name="text">
          <string>S&amp;ubtract fee from amount</string>
@@ -595,7 +595,7 @@
     <item row="3" column="1">
      <widget class="QLabel" name="messageTextLabel">
       <property name="toolTip">
-       <string>A message that was attached to the DarkSilk: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DarkSilk network.</string>
+       <string>A message that was attached to the Dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dynamic network.</string>
       </property>
       <property name="textFormat">
        <enum>Qt::PlainText</enum>
@@ -1101,7 +1101,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="DarkSilkAmountField" name="payAmount_is">
+     <widget class="DynamicAmountField" name="payAmount_is">
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -1630,7 +1630,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="DarkSilkAmountField" name="payAmount_s">
+     <widget class="DynamicAmountField" name="payAmount_s">
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -1646,9 +1646,9 @@
    <header>qvalidatedlineedit.h</header>
   </customwidget>
   <customwidget>
-   <class>DarkSilkAmountField</class>
+   <class>DynamicAmountField</class>
    <extends>QLineEdit</extends>
-   <header>darksilkamountfield.h</header>
+   <header>dynamicamountfield.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1665,7 +1665,7 @@
   <tabstop>deleteButton_s</tabstop>
  </tabstops>
  <resources>
-  <include location="../darksilk.qrc"/>
+  <include location="../dynamic.qrc"/>
  </resources>
  <connections/>
 </ui>

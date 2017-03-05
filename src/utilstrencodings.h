@@ -1,15 +1,15 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 /**
  * Utilities for converting data from/to strings.
  */
-#ifndef DARKSILK_UTILSTRENCODINGS_H
-#define DARKSILK_UTILSTRENCODINGS_H
+#ifndef DYNAMIC_UTILSTRENCODINGS_H
+#define DYNAMIC_UTILSTRENCODINGS_H
 
 #include <stdint.h>
 #include <string>
@@ -42,7 +42,7 @@ enum SafeChars
 std::string SanitizeString(const std::string& str, int rule = SAFE_CHARS_DEFAULT);
 /// Formats the network peer user agent text (or subversion)
 /// by removing the begining and ending charactors(/).
-/// example: /DarkSilk Core:1.0.0/ --> DarkSilk Core:1.0.0
+/// example: /Dynamic:1.0.0/ --> Dynamic:1.0.0
 std::string SanitizeSubVersionString(const std::string& str);
 std::vector<unsigned char> ParseHex(const char* psz);
 std::vector<unsigned char> ParseHex(const std::string& str);
@@ -137,4 +137,4 @@ bool TimingResistantEqual(const T& a, const T& b)
  */
 bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out);
 
-#endif // DARKSILK_UTILSTRENCODINGS_H
+#endif // DYNAMIC_UTILSTRENCODINGS_H

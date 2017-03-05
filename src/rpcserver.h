@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_RPCSERVER_H
-#define DARKSILK_RPCSERVER_H
+#ifndef DYNAMIC_RPCSERVER_H
+#define DYNAMIC_RPCSERVER_H
 
 #include "amount.h"
 #include "rpcprotocol.h"
@@ -125,7 +125,7 @@ public:
 };
 
 /**
- * DarkSilk RPC command dispatcher.
+ * Dynamic RPC command dispatcher.
  */
 class CRPCTable
 {
@@ -215,6 +215,7 @@ extern UniValue generate(const UniValue& params, bool fHelp);
 extern UniValue getnetworkhashps(const UniValue& params, bool fHelp);
 extern UniValue gethashespersec(const UniValue& params, bool fHelp);
 extern UniValue getmininginfo(const UniValue& params, bool fHelp);
+extern UniValue getpowrewardstart(const UniValue& params, bool fHelp);
 extern UniValue prioritisetransaction(const UniValue& params, bool fHelp);
 extern UniValue getblocktemplate(const UniValue& params, bool fHelp);
 extern UniValue submitblock(const UniValue& params, bool fHelp);
@@ -249,6 +250,7 @@ extern UniValue listtransactions(const UniValue& params, bool fHelp);
 extern UniValue listaddressgroupings(const UniValue& params, bool fHelp);
 extern UniValue listaccounts(const UniValue& params, bool fHelp);
 extern UniValue listsinceblock(const UniValue& params, bool fHelp);
+extern UniValue makekeypair(const UniValue& params, bool fHelp);
 extern UniValue gettransaction(const UniValue& params, bool fHelp);
 extern UniValue abandontransaction(const UniValue& params, bool fHelp);
 extern UniValue backupwallet(const UniValue& params, bool fHelp);
@@ -282,14 +284,15 @@ extern UniValue verifytxoutproof(const UniValue& params, bool fHelp);
 extern UniValue privatesend(const UniValue& params, bool fHelp);
 extern UniValue getpoolinfo(const UniValue& params, bool fHelp);
 extern UniValue spork(const UniValue& params, bool fHelp);
-extern UniValue stormnode(const UniValue& params, bool fHelp);
-extern UniValue stormnodelist(const UniValue& params, bool fHelp);
-extern UniValue stormnodebroadcast(const UniValue& params, bool fHelp);
+extern UniValue dynode(const UniValue& params, bool fHelp);
+extern UniValue dynodelist(const UniValue& params, bool fHelp);
+extern UniValue dynodebroadcast(const UniValue& params, bool fHelp);
 extern UniValue gobject(const UniValue& params, bool fHelp);
 extern UniValue getgovernanceinfo(const UniValue& params, bool fHelp);
+extern UniValue getdynoderewardstart(const UniValue& params, bool fHelp);
 extern UniValue getsuperblockbudget(const UniValue& params, bool fHelp);
 extern UniValue voteraw(const UniValue& params, bool fHelp);
-extern UniValue snsync(const UniValue& params, bool fHelp);
+extern UniValue dnsync(const UniValue& params, bool fHelp);
 
 extern UniValue getblockcount(const UniValue& params, bool fHelp); // in rpcblockchain.cpp
 extern UniValue getbestblockhash(const UniValue& params, bool fHelp);
@@ -315,4 +318,4 @@ void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
 
-#endif // DARKSILK_RPCSERVER_H
+#endif // DYNAMIC_RPCSERVER_H

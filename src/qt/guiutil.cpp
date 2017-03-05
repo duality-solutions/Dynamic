@@ -1,14 +1,14 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "guiutil.h"
 
-#include "darksilkaddressvalidator.h"
-#include "darksilkunits.h"
+#include "dynamicaddressvalidator.h"
+#include "dynamicunits.h"
 #include "qvalidatedlineedit.h"
 #include "walletmodel.h"
 
@@ -95,7 +95,7 @@ QString dateTimeStr(qint64 nTime)
     return dateTimeStr(QDateTime::fromTime_t((qint32)nTime));
 }
 
-QFont DarkSilkAddressFont()
+QFont DynamicAddressFont()
 {
     QFont font("Monospace");
 #if QT_VERSION >= 0x040800
@@ -129,10 +129,10 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a DarkSilk address (e.g. %1)").arg("D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
+    widget->setPlaceholderText(QObject::tr("Enter a Dynamic address (e.g. %1)").arg("D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
 #endif
-    widget->setValidator(new DarkSilkAddressEntryValidator(parent));
-    widget->setCheckValidator(new DarkSilkAddressCheckValidator(parent));
+    widget->setValidator(new DynamicAddressEntryValidator(parent));
+    widget->setCheckValidator(new DynamicAddressCheckValidator(parent));
 }
 
 void setupAmountWidget(QLineEdit *widget, QWidget *parent)
@@ -144,10 +144,10 @@ void setupAmountWidget(QLineEdit *widget, QWidget *parent)
     widget->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 }
 
-bool parseDarkSilkURI(const QUrl &uri, SendCoinsRecipient *out)
+bool parseDynamicURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no darksilk: URI
-    if(!uri.isValid() || uri.scheme() != QString("darksilk"))
+    // return if URI is not valid or is no dynamic: URI
+    if(!uri.isValid() || uri.scheme() != QString("dynamic"))
         return false;
 
     SendCoinsRecipient rv;
@@ -196,7 +196,7 @@ bool parseDarkSilkURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!DarkSilkUnits::parse(DarkSilkUnits::DSLK, i->second, &rv.amount))
+                if(!DynamicUnits::parse(DynamicUnits::DYN, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -214,28 +214,28 @@ bool parseDarkSilkURI(const QUrl &uri, SendCoinsRecipient *out)
     return true;
 }
 
-bool parseDarkSilkURI(QString uri, SendCoinsRecipient *out)
+bool parseDynamicURI(QString uri, SendCoinsRecipient *out)
 {
-    // Convert darksilk:// to darksilk:
+    // Convert dynamic:// to dynamic:
     //
-    //    Cannot handle this later, because darksilk:// will cause Qt to see the part after // as host,
+    //    Cannot handle this later, because dynamic:// will cause Qt to see the part after // as host,
     //    which will lower-case it (and thus invalidate the address).
-    if(uri.startsWith("darksilk://", Qt::CaseInsensitive))
+    if(uri.startsWith("dynamic://", Qt::CaseInsensitive))
     {
-        uri.replace(0, 7, "darksilk:");
+        uri.replace(0, 7, "dynamic:");
     }
     QUrl uriInstance(uri);
-    return parseDarkSilkURI(uriInstance, out);
+    return parseDynamicURI(uriInstance, out);
 }
 
-QString formatDarkSilkURI(const SendCoinsRecipient &info)
+QString formatDynamicURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("darksilk:%1").arg(info.address);
+    QString ret = QString("dynamic:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(DarkSilkUnits::format(DarkSilkUnits::DSLK, info.amount, false, DarkSilkUnits::separatorNever));
+        ret += QString("?amount=%1").arg(DynamicUnits::format(DynamicUnits::DYN, info.amount, false, DynamicUnits::separatorNever));
         paramCount++;
     }
 
@@ -264,7 +264,7 @@ QString formatDarkSilkURI(const SendCoinsRecipient &info)
 
 bool isDust(const QString& address, const CAmount& amount)
 {
-    CTxDestination dest = CDarkSilkAddress(address.toStdString()).Get();
+    CTxDestination dest = CDynamicAddress(address.toStdString()).Get();
     CScript script = GetScriptForDestination(dest);
     CTxOut txOut(amount, script);
     return txOut.IsDust(::minRelayTxFee);
@@ -442,16 +442,16 @@ void openConfigfile()
 {
     boost::filesystem::path pathConfig = GetConfigFile();
 
-    /* Open darksilk.conf with the associated application */
+    /* Open dynamic.conf with the associated application */
     if (boost::filesystem::exists(pathConfig))
         QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathConfig)));
 }
 
 void openSNConfigfile()
 {
-    boost::filesystem::path pathConfig = GetStormnodeConfigFile();
+    boost::filesystem::path pathConfig = GetDynodeConfigFile();
 
-    /* Open stormnode.conf with the associated application */
+    /* Open dynode.conf with the associated application */
     if (boost::filesystem::exists(pathConfig))
         QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathConfig)));
 }
@@ -651,15 +651,15 @@ boost::filesystem::path static StartupShortcutPath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "DarkSilk.lnk";
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Dynamic.lnk";
     if (chain == CBaseChainParams::TESTNET) // Remove this special case when CBaseChainParams::TESTNET = "testnet4"
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "DarkSilk (testnet).lnk";
-    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("DarkSilk (%s).lnk", chain);
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Dynamic (testnet).lnk";
+    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Dynamic (%s).lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
 {
-    // check for DarkSilk*.lnk
+    // check for Dynamic*.lnk
     return boost::filesystem::exists(StartupShortcutPath());
 }
 
@@ -751,8 +751,8 @@ boost::filesystem::path static GetAutostartFilePath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetAutostartDir() / "darksilk.desktop";
-    return GetAutostartDir() / strprintf("darksilk-%s.lnk", chain);
+        return GetAutostartDir() / "dynamic.desktop";
+    return GetAutostartDir() / strprintf("dynamic-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
@@ -791,13 +791,13 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         if (!optionFile.good())
             return false;
         std::string chain = ChainNameFromCommandLine();
-        // Write a darksilk.desktop file to the autostart directory:
+        // Write a dynamic.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
         if (chain == CBaseChainParams::MAIN)
-            optionFile << "Name=DarkSilk\n";
+            optionFile << "Name=Dynamic\n";
         else
-            optionFile << strprintf("Name=DarkSilk (%s)\n", chain);
+            optionFile << strprintf("Name=Dynamic (%s)\n", chain);
         optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", GetBoolArg("-testnet", false), GetBoolArg("-regtest", false));
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";
@@ -816,7 +816,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl);
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl)
 {
-    // loop through the list of startup items and try to find the DarkSilk Core app
+    // loop through the list of startup items and try to find the Dynamic app
     CFArrayRef listSnapshot = LSSharedFileListCopySnapshot(list, NULL);
     for(int i = 0; i < CFArrayGetCount(listSnapshot); i++) {
         LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(listSnapshot, i);
@@ -848,21 +848,21 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
 
 bool GetStartOnSystemStartup()
 {
-    CFURLRef darksilkAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, darksilkAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
-    CFURLRef darksilkAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, darksilkAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add DarkSilk Core app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, darksilkAppUrl, NULL, NULL);
+        // add Dynamic app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, dynamicAppUrl, NULL, NULL);
     }
     else if(!fAutoStart && foundItem) {
         // remove item

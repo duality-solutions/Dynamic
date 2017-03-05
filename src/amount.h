@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_AMOUNT_H
-#define DARKSILK_AMOUNT_H
+#ifndef DYNAMIC_AMOUNT_H
+#define DYNAMIC_AMOUNT_H
 
 #include "serialize.h"
 
@@ -57,4 +57,4 @@ public:
     }
 };
 
-#endif //  DARKSILK_AMOUNT_H
+#endif //  DYNAMIC_AMOUNT_H

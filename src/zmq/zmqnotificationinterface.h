@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_ZMQ_ZMQNOTIFICATIONINTERFACE_H
-#define DARKSILK_ZMQ_ZMQNOTIFICATIONINTERFACE_H
+#ifndef DYNAMIC_ZMQ_ZMQNOTIFICATIONINTERFACE_H
+#define DYNAMIC_ZMQ_ZMQNOTIFICATIONINTERFACE_H
 
 #include "validationinterface.h"
 
@@ -36,4 +36,4 @@ private:
     std::list<CZMQAbstractNotifier*> notifiers;
 };
 
-#endif // DARKSILK_ZMQ_ZMQNOTIFICATIONINTERFACE_H
+#endif // DYNAMIC_ZMQ_ZMQNOTIFICATIONINTERFACE_H

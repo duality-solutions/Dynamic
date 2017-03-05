@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,7 +7,7 @@
 # Test rpc http basics
 #
 
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 
 try:
@@ -19,7 +19,7 @@ try:
 except ImportError:
     import urlparse
 
-class HTTPBasicsTest (DarkSilkTestFramework):
+class HTTPBasicsTest (DynamicTestFramework):
     def setup_nodes(self):
         return start_nodes(4, self.options.tmpdir)
 
@@ -94,7 +94,7 @@ class HTTPBasicsTest (DarkSilkTestFramework):
         conn.request('POST', '/', '{"method": "getbestblockhash"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1)
-        assert(conn.sock!=None) #connection must be closed because darksilkd should use keep-alive by default
+        assert(conn.sock!=None) #connection must be closed because dynamicd should use keep-alive by default
 
         # Check excessive request size
         conn = httplib.HTTPConnection(urlNode2.hostname, urlNode2.port)

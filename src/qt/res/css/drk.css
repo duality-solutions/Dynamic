@@ -779,16 +779,16 @@ QDialog#HelpMessageDialog QScrollBar:vertical, QDialog#HelpMessageDialog QScroll
 border:0;
 }
 
-/* About DarkSilk Dialog */
+/* About Dynamic Dialog */
 QDialog#AboutDialog {
 background-color:#000000;
 }
 
-QDialog#AboutDialog QLabel#label, QDialog#AboutDialog QLabel#copyrightLabel, QDialog#AboutDialog QLabel#label_2 { /* About DarkSilk Contents */
+QDialog#AboutDialog QLabel#label, QDialog#AboutDialog QLabel#copyrightLabel, QDialog#AboutDialog QLabel#label_2 { /* About Dynamic Contents */
 margin-left:10px;
 }
 
-QDialog#AboutDialog QLabel#label_2 { /* Margin for About DarkSilk text */
+QDialog#AboutDialog QLabel#label_2 { /* Margin for About Dynamic text */
 margin-right:10px;
 }
 
@@ -1124,15 +1124,12 @@ min-width:410px;
 margin-right:20px;
 margin-left:0;
 margin-top:0;
-background-image: url(':/images/drk/darksilk_logo_horizontal');
-background-repeat:none;
 }
 
 QWidget .QFrame#frame_2 .QLabel#label_4 { /* Recent Transactions Label */
 min-width:180px;
 color:#762894;
 margin-left:67px;
-margin-top:83px;
 margin-right:5px;
 padding-right:5px;
 font-weight:bold;
@@ -1617,9 +1614,9 @@ QDialog#TransactionDescDialog QTextEdit { /* Contents of Receive Coin Dialog */
 border:1px solid #520072;
 }
 
-/* STORMNODE NETWORK PAGE */
+/* DYNODE NETWORK PAGE */
 
-QWidget#StormnodeManager .QPushButton#copyAddressButton { /* Copy Address Button */
+QWidget#DynodeManager .QPushButton#copyAddressButton { /* Copy Address Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 border-radius:3px;
@@ -1632,17 +1629,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#copyAddressButton:hover {
+QWidget#DynodeManager .QPushButton#copyAddressButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(240, 240, 240, 255), stop: .95 rgba(240, 240, 240, 255), stop: 1 #ebebeb);
 color:#333;
 }
 
-QWidget#StormnodeManager .QPushButton#copyAddressButton:pressed {
+QWidget#DynodeManager .QPushButton#copyAddressButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 }
 
-QWidget#StormnodeManager .QPushButton#getConfigButton { /* Get Config Button */
+QWidget#DynodeManager .QPushButton#getConfigButton { /* Get Config Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1655,17 +1652,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#getConfigButton:hover {
+QWidget#DynodeManager .QPushButton#getConfigButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QPushButton#getConfigButton:pressed {
+QWidget#DynodeManager .QPushButton#getConfigButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:1px solid #520072;
 }
 
-QWidget#StormnodeManager .QPushButton#editButton { /* Edit Button */
+QWidget#DynodeManager .QPushButton#editButton { /* Edit Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 border-radius:3px;
@@ -1678,17 +1675,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#editButton:hover {
+QWidget#DynodeManager .QPushButton#editButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(240, 240, 240, 255), stop: .95 rgba(240, 240, 240, 255), stop: 1 #ebebeb);
 color:#333;
 }
 
-Qwidget#StormnodeManager .QPushButton#editButton:pressed {
+Qwidget#DynodeManager .QPushButton#editButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 }
 
-QWidget#StormnodeManager .QPushButton#removeButton { /* Remove Button */
+QWidget#DynodeManager .QPushButton#removeButton { /* Remove Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 border-radius:3px;
@@ -1701,17 +1698,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#removeButton:hover {
+QWidget#DynodeManager .QPushButton#removeButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(240, 240, 240, 255), stop: .95 rgba(240, 240, 240, 255), stop: 1 #ebebeb);
 color:#333;
 }
 
-QWidget#StormnodeManager .QPushButton#removeButton:pressed {
+QWidget#DynodeManager .QPushButton#removeButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #f6f6f6, stop: .1 rgba(250, 250, 250, 128), stop: .95 rgba(250, 250, 250, 255), stop: 1 #ebebeb);
 border:1px solid #d2d2d2;
 }
 
-QWidget#StormnodeManager .QPushButton#startButton { /* Start Button */
+QWidget#DynodeManager .QPushButton#startButton { /* Start Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #368019, stop: .1 #207200, stop: .95 #207200, stop: 1 #207200);
 border:0;
 border-radius:3px;
@@ -1724,17 +1721,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#startButton:hover {
+QWidget#DynodeManager .QPushButton#startButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #4c8e32, stop: .1 #4c8e32, stop: .95 #4c8e32, stop: 1 #4c8e32);
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QPushButton#startButton:pressed {
+QWidget#DynodeManager .QPushButton#startButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #368019, stop: .1 #207200, stop: .95 #195b00, stop: 1 #195b00);
 border:1px solid #207200;
 }
 
-QWidget#StormnodeManager .QPushButton#stopButton { /* Stop Button */
+QWidget#DynodeManager .QPushButton#stopButton { /* Stop Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #991f41, stop: .1 #720020, stop: .95 #720020, stop: 1 #720020);
 border:0;
 border-radius:3px;
@@ -1747,17 +1744,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#stopButton:hover {
+QWidget#DynodeManager .QPushButton#stopButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #a35b6f, stop: .1 #8E324C, stop: .95 #8E324C, stop: 1 #8E324C);
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QPushButton#stopButton:pressed {
+QWidget#DynodeManager .QPushButton#stopButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #991f41, stop: .1 #720020, stop: .95 #5b0019, stop: 1 #5b0019);
 border:1px solid #720020;
 }
 
-QWidget#StormnodeManager .QPushButton#startAllButton { /* Start All Button */
+QWidget#DynodeManager .QPushButton#startAllButton { /* Start All Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #368019, stop: .1 #207200, stop: .95 #207200, stop: 1 #207200);
 border:0;
 border-radius:3px;
@@ -1770,17 +1767,17 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#startAllButton:hover {
+QWidget#DynodeManager .QPushButton#startAllButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #4c8e32, stop: .1 #4c8e32, stop: .95 #4c8e32, stop: 1 #4c8e32);
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QPushButton#startAllButton:pressed {
+QWidget#DynodeManager .QPushButton#startAllButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #368019, stop: .1 #207200, stop: .95 #195b00, stop: 1 #195b00);
 border:1px solid #207200;
 }
 
-QWidget#StormnodeManager .QPushButton#stopAllButton { /* Stop All Button */
+QWidget#DynodeManager .QPushButton#stopAllButton { /* Stop All Button */
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #991f41, stop: .1 #720020, stop: .95 #720020, stop: 1 #720020);
 border:0;
 border-radius:3px;
@@ -1793,25 +1790,25 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeManager .QPushButton#stopAllButton:hover {
+QWidget#DynodeManager .QPushButton#stopAllButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #a35b6f, stop: .1 #8E324C, stop: .95 #8E324C, stop: 1 #8E324C);
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QPushButton#stopAllButton:pressed {
+QWidget#DynodeManager .QPushButton#stopAllButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #991f41, stop: .1 #720020, stop: .95 #5b0019, stop: 1 #5b0019);
 border:1px solid #720020;
 }
 
-QWidget#StormnodeManager .QTabWidget {
+QWidget#DynodeManager .QTabWidget {
 border-bottom:1px solid #7400A1;
 }
 
-QWidget#StormnodeManager .QTabWidget::pane {
+QWidget#DynodeManager .QTabWidget::pane {
 border: 1px solid #7400A1;
 }
 
-QWidget#StormnodeManager .QTabWidget QTabBar::tab {
+QWidget#DynodeManager .QTabWidget QTabBar::tab {
 background-color:#520072;
 color:#808080;
 padding-left:10px;
@@ -1821,47 +1818,47 @@ padding-bottom:5px;
 border-top: 1px solid #7400A1;
 }
 
-QWidget#StormnodeManager .QTabWidget QTabBar::tab:first {
+QWidget#DynodeManager .QTabWidget QTabBar::tab:first {
 border-left: 1px solid #7400A1;
 }
 
-QWidget#StormnodeManager .QTabWidget QTabBar::tab:last {
+QWidget#DynodeManager .QTabWidget QTabBar::tab:last {
 border-right: 1px solid #7400A1;
 }
 
-QWidget#StormnodeManager .QTabWidget QTabBar::tab:selected, QWidget#StormnodeManager .QTabWidget QTabBar::tab:hover {
+QWidget#DynodeManager .QTabWidget QTabBar::tab:selected, QWidget#DynodeManager .QTabWidget QTabBar::tab:hover {
 background-color:#7400A1;
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QTabWidget .QWidget {
+QWidget#DynodeManager .QTabWidget .QWidget {
 background-color:#000000;
 color:#ffffff;
 }
 
-QWidget#StormnodeManager .QTabWidget .QWidget QAbstractSpinBox {
+QWidget#DynodeManager .QTabWidget .QWidget QAbstractSpinBox {
 min-height:15px;
 }
 
-QWidget#StormnodeManager .QTabWidget .QWidget QAbstractSpinBox::down-button {
+QWidget#DynodeManager .QTabWidget .QWidget QAbstractSpinBox::down-button {
 width:15px;
 }
 
-QWidget#StormnodeManager .QTabWidget .QWidget QAbstractSpinBox::up-button {
+QWidget#DynodeManager .QTabWidget .QWidget QAbstractSpinBox::up-button {
 width:15px;
 }
 
-QWidget#StormnodeManager .QTabWidget .QWidget QComboBox {
+QWidget#DynodeManager .QTabWidget .QWidget QComboBox {
 min-height:15px;
 }
 
-QWidget#StormnodeManager QWidget { /* Remove Annoying Focus Rectangle */
+QWidget#DynodeManager QWidget { /* Remove Annoying Focus Rectangle */
 outline: 0;
 }
 
-/* StormnodeListUI */
+/* DynodeListUI */
 
-QWidget#StormnodeList .QPushButton#startAllButton {
+QWidget#DynodeList .QPushButton#startAllButton {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1874,7 +1871,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startAllButton:hover {
+QWidget#DynodeList .QPushButton#startAllButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
 border:0;
 border-radius:3px;
@@ -1887,7 +1884,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startAllButton:pressed {
+QWidget#DynodeList .QPushButton#startAllButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1900,7 +1897,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startButton {
+QWidget#DynodeList .QPushButton#startButton {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1913,7 +1910,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startButton:hover {
+QWidget#DynodeList .QPushButton#startButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
 border:0;
 border-radius:3px;
@@ -1926,7 +1923,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startButton:pressed {
+QWidget#DynodeList .QPushButton#startButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1939,7 +1936,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startMissingButton {
+QWidget#DynodeList .QPushButton#startMissingButton {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1952,7 +1949,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startMissingButton:hover {
+QWidget#DynodeList .QPushButton#startMissingButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
 border:0;
 border-radius:3px;
@@ -1965,7 +1962,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#startMissingButton:pressed {
+QWidget#DynodeList .QPushButton#startMissingButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1978,7 +1975,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#UpdateButton {
+QWidget#DynodeList .QPushButton#UpdateButton {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;
@@ -1991,7 +1988,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#UpdateButton:hover {
+QWidget#DynodeList .QPushButton#UpdateButton:hover {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #BA77D4, stop: .1 #9F2DCC, stop: .95 #9F2DCC, stop: 1 #7400A1);
 border:0;
 border-radius:3px;
@@ -2004,7 +2001,7 @@ padding-top:5px;
 padding-bottom:5px;
 }
 
-QWidget#StormnodeList .QPushButton#UpdateButton:pressed {
+QWidget#DynodeList .QPushButton#UpdateButton:pressed {
 background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #8F5BA3, stop: .1 #771F99, stop: .95 #771F99, stop: 1 #520072);
 border:0;
 border-radius:3px;

@@ -1,4 +1,4 @@
-# mininode.py - DarkSilk P2P network half-a-node
+# mininode.py - Dynamic P2P network half-a-node
 #
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -6,12 +6,12 @@
 # This python code was modified from ArtForz' public domain  half-a-node, as
 # found in the mini-node branch of http://github.com/jgarzik/pynode.
 #
-# NodeConn: an object which manages p2p connectivity to a darksilk node
+# NodeConn: an object which manages p2p connectivity to a dynamic node
 # NodeConnCB: a base class that describes the interface for receiving
 #             callbacks with network messages from a NodeConn
 # CBlock, CTransaction, CBlockHeader, CTxIn, CTxOut, etc....:
 #     data structures that should map to corresponding structures in
-#     darksilk/primitives
+#     dynamic/primitives
 # msg_block, msg_tx, msg_headers, etc.:
 #     data structures that represent network messages
 # ser_*, deser_*: functions that handle serialization/deserialization
@@ -32,10 +32,10 @@ from threading import Thread
 import logging
 import copy
 
-import darksilk_hash
+import dynamic_hash
 
 BIP0031_VERSION = 60000
-MY_VERSION = 70300  # past bip-31 for ping/pong
+MY_VERSION = 70500  # past bip-31 for ping/pong
 MY_SUBVERSION = b"/python-mininode-tester:0.0.2/"
 
 MAX_INV_SZ = 50000
@@ -64,8 +64,8 @@ def sha256(s):
 def hash256(s):
     return sha256(sha256(s))
 
-def darksilkhash(s):
-    return darksilk_hash.getPoWHash(s)
+def dynamichash(s):
+    return dynamic_hash.getPoWHash(s)
 
 def deser_string(f):
     nit = struct.unpack("<B", f.read(1))[0]
@@ -247,7 +247,7 @@ def FromHex(obj, hex_string):
 def ToHex(obj):
     return hexlify(obj.serialize()).decode('ascii')
 
-# Objects that map to darksilkd objects, which can be serialized/deserialized
+# Objects that map to dynamicd objects, which can be serialized/deserialized
 
 class CAddress(object):
     def __init__(self):
@@ -496,8 +496,8 @@ class CBlockHeader(object):
             r += struct.pack("<I", self.nTime)
             r += struct.pack("<I", self.nBits)
             r += struct.pack("<I", self.nNonce)
-            self.sha256 = uint256_from_str(darksilkhash(r))
-            self.hash = encode(darksilkhash(r)[::-1], 'hex_codec').decode('ascii')
+            self.sha256 = uint256_from_str(dynamichash(r))
+            self.hash = encode(dynamichash(r)[::-1], 'hex_codec').decode('ascii')
 
     def rehash(self):
         self.sha256 = None
@@ -972,7 +972,7 @@ class msg_headers(object):
         self.headers = []
 
     def deserialize(self, f):
-        # comment in darksilkd indicates these should be deserialized as blocks
+        # comment in dynamicd indicates these should be deserialized as blocks
         blocks = deser_vector(f, CBlock)
         for x in blocks:
             self.headers.append(CBlockHeader(x))
@@ -1185,7 +1185,7 @@ class NodeConn(asyncore.dispatcher):
         vt.addrFrom.ip = "0.0.0.0"
         vt.addrFrom.port = 0
         self.send_message(vt, True)
-        print 'MiniNode: Connecting to DarkSilk Node IP # ' + dstaddr + ':' \
+        print 'MiniNode: Connecting to Dynamic Node IP # ' + dstaddr + ':' \
             + str(dstport)
 
         try:

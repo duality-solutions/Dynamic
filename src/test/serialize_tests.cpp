@@ -5,7 +5,7 @@
 #include "serialize.h"
 #include "streams.h"
 #include "hash.h"
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <stdint.h>
 

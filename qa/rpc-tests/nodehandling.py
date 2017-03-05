@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,7 +7,7 @@
 # Test node handling
 #
 
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 
 try:
@@ -19,7 +19,7 @@ try:
 except ImportError:
     import urlparse
 
-class NodeHandlingTest (DarkSilkTestFramework):
+class NodeHandlingTest (DynamicTestFramework):
     def run_test(self):
         ###########################
         # setban/listbanned tests #

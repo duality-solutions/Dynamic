@@ -1,14 +1,13 @@
 Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?rev=174
-Upstream-Name: DarkSilk
+Upstream-Name: Dynamic
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#darksilk@freenode.net
-Source: https://github.com/silknetwork/darksilk-core
+ irc://#dynamic@freenode.net
+Source: https://github.com/duality-solutions/dynamic
 
 Files: *
-Copyright: 2015-2017, Silk Network
+Copyright: 2015-2017, Duality Blockchain Solutions
 License: Expat
-Comment: The Silk Network Developers encompasses the current developers listed on darksilk.silknetwork.org & silk.silknetwork.org,
-         as well as the numerous contributors to the project.
+Comment: The Duality Blockchain Solution Developers encompasses the current developers listed on dynamic.duality-solutions.com & sequence.duality-solutions.com, as well as the numerous contributors to the project.
 
 Files: src/json/*
 Copyright: 2007-2009, John W. Wilkinson
@@ -65,7 +64,7 @@ Copyright: http://www.everaldo.com
 License: LGPL
 Comment: Icon Pack: Crystal SVG
 
-Files: src/qt/res/icons/darksilk.png, src/qt/res/icons/toolbar.png
+Files: src/qt/res/icons/dynamic.png, src/qt/res/icons/toolbar.png
 Copyright: Bitboy (optimized for 16x16 by Wladimir van der Laan)
 License: PUB-DOM
 Comment: Site: https://bitcointalk.org/?topic=1756.0

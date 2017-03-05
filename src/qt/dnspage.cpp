@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2013-2017 Emercoin Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,16 +9,18 @@
 #include "ui_dnspage.h"
 
 #include "csvmodelwriter.h"
-#include "dnstablemodel.h"
 #include "guiutil.h"
 #include "guiconstants.h"
 #include "walletmodel.h"
 
+#include "dnstablemodel.h"
+
 #include "base58.h"
-#include "dns/dns.h"
 #include "main.h"
 #include "ui_interface.h"
 #include "wallet/wallet.h"
+
+#include "dns/dns.h"
 
 #include <QSortFilterProxyModel>
 #include <QMessageBox>
@@ -313,7 +315,7 @@ void DNSPage::on_submitNameButton_clicked()
     }
 
     if (QMessageBox::Yes != QMessageBox::question(this, tr("Confirm name registration"),
-          tr("This will issue a %1. Tx fee is at least %2 DSLK.").arg(txType).arg(txFee / (float)COIN, 0, 'f', 2),
+          tr("This will issue a %1. Tx fee is at least %2 DYN.").arg(txType).arg(txFee / (float)COIN, 0, 'f', 2),
           QMessageBox::Yes | QMessageBox::Cancel,
           QMessageBox::Cancel))
     {

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Dynamic
+Comment=Dynamic P2P Cryptocurrency
+Comment[fr]=Dynamic, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Dynamic, eşten eşe kriptografik sanal para birimi
+Exec=dynamic-qt %u
+Terminal=false
+Type=Application
+Icon=dynamic128
+MimeType=x-scheme-handler/dynamic;
+Categories=Office;Finance;

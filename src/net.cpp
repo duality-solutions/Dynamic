@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include "net.h"
@@ -17,15 +17,16 @@
 #include "crypto/common.h"
 #include "consensus/consensus.h"
 #include "hash.h"
-#include "instantsend.h"
-#include "privatesend.h"
 #include "scheduler.h"
-#include "stormnode-sync.h"
-#include "stormnodeman.h"
 #include "primitives/transaction.h"
 #include "ui_interface.h"
 #include "utilstrencodings.h"
 #include "wallet/wallet.h"
+
+#include "dynode-sync.h"
+#include "dynodeman.h"
+#include "instantsend.h"
+#include "privatesend.h"
 
 #ifdef WIN32
 #include <string.h>
@@ -68,7 +69,7 @@ using namespace std;
 
 namespace {
     const int MAX_OUTBOUND_CONNECTIONS = 16;
-    const int MAX_OUTBOUND_STORMNODE_CONNECTIONS = 64;
+    const int MAX_OUTBOUND_DYNODE_CONNECTIONS = 64;
 
     struct ListenSocket {
         SOCKET socket;
@@ -115,7 +116,7 @@ NodeId nLastNodeId = 0;
 CCriticalSection cs_nLastNodeId;
 
 static CSemaphore *semOutbound = NULL;
-static CSemaphore *semStormnodeOutbound = NULL;
+static CSemaphore *semDynodeOutbound = NULL;
 boost::condition_variable messageHandlerCondition;
 
 // Signals for message handling
@@ -386,12 +387,12 @@ CNode* FindNode(const CService& addr)
     return NULL;
 }
 
-CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToStormnode)
+CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToDynode)
 {
     if (pszDest == NULL) {
-        // we clean Stormnode connections in CStormnodeMan::ProcessStormnodeConnections()
-        // so should be safe to skip this and connect to local Hot SN on CActiveStormnode::ManageState()
-        if (IsLocal(addrConnect) && !fConnectToStormnode)
+        // we clean Dynode connections in CDynodeMan::ProcessDynodeConnections()
+        // so should be safe to skip this and connect to local Hot DN on CActiveDynode::ManageState()
+        if (IsLocal(addrConnect) && !fConnectToDynode)
             return NULL;
 
         LOCK(cs_vNodes);
@@ -399,10 +400,10 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         CNode* pnode = FindNode((CService)addrConnect);
         if (pnode)
         {
-            // we have existing connection to this node but it was not a connection to Stormnodes,
+            // we have existing connection to this node but it was not a connection to Dynodes,
             // change flag and add reference so that we can correctly clear it later
-            if(fConnectToStormnode && !pnode->fStormnode) {
-                pnode->fStormnode = true;
+            if(fConnectToDynode && !pnode->fDynode) {
+                pnode->fDynode = true;
                 pnode->AddRef();
             }
             return pnode;
@@ -437,9 +438,9 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToSto
         }
         
         pnode->nTimeConnected = GetTime();
-        if(fConnectToStormnode) {
+        if(fConnectToDynode) {
             pnode->AddRef();
-            pnode->fStormnode = true;
+            pnode->fDynode = true;
         }
 
         return pnode;
@@ -657,7 +658,7 @@ void CNode::copyStats(CNodeStats &stats)
         nPingUsecWait = GetTimeMicros() - nPingUsecStart;
     }
 
-    // Raw ping time is in microseconds, but show it to user as whole seconds (DarkSilk users should be well used to small numbers with many decimal places by now :)
+    // Raw ping time is in microseconds, but show it to user as whole seconds (Dynamic users should be well used to small numbers with many decimal places by now :)
     stats.dPingTime = (((double)nPingUsecTime) / 1e6);
     stats.dPingMin  = (((double)nMinPingUsecTime) / 1e6);
     stats.dPingWait = (((double)nPingUsecWait) / 1e6);
@@ -1016,8 +1017,8 @@ static void AcceptConnection(const ListenSocket& hListenSocket)
     }
 
     // don't accept incoming connections until fully synced
-    if(fStormNode && !stormnodeSync.IsSynced()) {
-        LogPrintf("AcceptConnection -- stormnode is not synced yet, skipping inbound connection attempt\n");
+    if(fDyNode && !dynodeSync.IsSynced()) {
+        LogPrintf("AcceptConnection -- dynode is not synced yet, skipping inbound connection attempt\n");
         CloseSocket(hSocket);
         return;
     }
@@ -1050,14 +1051,14 @@ void ThreadSocketHandler()
                 if (pnode->fDisconnect ||
                     (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
                 {
-                    LogPrintf("ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fNetworkNode=%d fInbound=%d fStormnode=%d\n",
-                              pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fNetworkNode, pnode->fInbound, pnode->fStormnode);
+                    LogPrintf("ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fNetworkNode=%d fInbound=%d fDynode=%d\n",
+                              pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fNetworkNode, pnode->fInbound, pnode->fDynode);
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
 
                     // release outbound grant (if any)
                     pnode->grantOutbound.Release();
-                    pnode->grantStormnodeOutbound.Release();
+                    pnode->grantDynodeOutbound.Release();
 
                     // close socket and cleanup
                     pnode->CloseSocketDisconnect();
@@ -1065,7 +1066,7 @@ void ThreadSocketHandler()
                     // hold in disconnected pool until all refs are released
                     if (pnode->fNetworkNode || pnode->fInbound)
                         pnode->Release();
-                    if (pnode->fStormnode)
+                    if (pnode->fDynode)
                         pnode->Release();
                     vNodesDisconnected.push_back(pnode);
                 }
@@ -1351,7 +1352,7 @@ void ThreadMapPort()
             }
         }
 
-        string strDesc = "DarkSilk Core " + FormatFullVersion();
+        string strDesc = "Dynamic " + FormatFullVersion();
 
         try {
             while (true) {
@@ -1671,9 +1672,9 @@ void ThreadOpenAddedConnections()
     }
 }
 
-void ThreadSnbRequestConnections()
+void ThreadDnbRequestConnections()
 {
-    // Connecting to specific addresses, no stormnode connections available
+    // Connecting to specific addresses, no dynode connections available
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
         return;
 
@@ -1681,10 +1682,10 @@ void ThreadSnbRequestConnections()
     {
         MilliSleep(1000);
 
-        CSemaphoreGrant grant(*semStormnodeOutbound);
+        CSemaphoreGrant grant(*semDynodeOutbound);
         boost::this_thread::interruption_point();
 
-        std::pair<CService, std::set<uint256> > p = snodeman.PopScheduledSnbRequestConnection();
+        std::pair<CService, std::set<uint256> > p = dnodeman.PopScheduledDnbRequestConnection();
         if(p.first == CService() || p.second.empty()) continue;
 
         CNode* pnode = NULL;
@@ -1695,15 +1696,15 @@ void ThreadSnbRequestConnections()
             pnode->AddRef();
         }
 
-        grant.MoveTo(pnode->grantStormnodeOutbound);
+        grant.MoveTo(pnode->grantDynodeOutbound);
 
         // compile request vector
         std::vector<CInv> vToFetch;
         std::set<uint256>::iterator it = p.second.begin();
         while(it != p.second.end()) {
             if(*it != uint256()) {
-                vToFetch.push_back(CInv(MSG_STORMNODE_ANNOUNCE, *it));
-                LogPrint("Stormnode", "ThreadSnbRequestConnections -- asking for snb %s from addr=%s\n", it->ToString(), p.first.ToString());
+                vToFetch.push_back(CInv(MSG_DYNODE_ANNOUNCE, *it));
+                LogPrint("Dynode", "ThreadDnbRequestConnections -- asking for dnb %s from addr=%s\n", it->ToString(), p.first.ToString());
             }
             ++it;
         }
@@ -1878,7 +1879,7 @@ bool BindListenPort(const CService &addrBind, string& strError, bool fWhiteliste
     {
         int nErr = WSAGetLastError();
         if (nErr == WSAEADDRINUSE)
-            strError = strprintf(_("Unable to bind to %s on this computer. DarkSilk Core is probably already running."), addrBind.ToString());
+            strError = strprintf(_("Unable to bind to %s on this computer. Dynamic is probably already running."), addrBind.ToString());
         else
             strError = strprintf(_("Unable to bind to %s on this computer (bind returned error %s)"), addrBind.ToString(), NetworkErrorString(nErr));
         LogPrintf("%s\n", strError);
@@ -1986,9 +1987,9 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
         semOutbound = new CSemaphore(nMaxOutbound);
     }
 
-    if (semStormnodeOutbound == NULL) {
+    if (semDynodeOutbound == NULL) {
         // initialize semaphore
-        semStormnodeOutbound = new CSemaphore(MAX_OUTBOUND_STORMNODE_CONNECTIONS);
+        semDynodeOutbound = new CSemaphore(MAX_OUTBOUND_DYNODE_CONNECTIONS);
     }
 
     if (pnodeLocalHost == NULL)
@@ -2017,8 +2018,8 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     // Initiate outbound connections
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "opencon", &ThreadOpenConnections));
 
-    // Initiate stormnode connections
-    threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "snbcon", &ThreadSnbRequestConnections));
+    // Initiate dynode connections
+    threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "dnbcon", &ThreadDnbRequestConnections));
 
     // Process messages
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "msghand", &ThreadMessageHandler));
@@ -2035,9 +2036,9 @@ bool StopNode()
         for (int i=0; i<MAX_OUTBOUND_CONNECTIONS; i++)
             semOutbound->post();
 
-    if (semStormnodeOutbound)
-        for (int i=0; i<MAX_OUTBOUND_STORMNODE_CONNECTIONS; i++)
-            semStormnodeOutbound->post();
+    if (semDynodeOutbound)
+        for (int i=0; i<MAX_OUTBOUND_DYNODE_CONNECTIONS; i++)
+            semDynodeOutbound->post();
 
     if (fAddressesInitialized)
     {
@@ -2074,8 +2075,8 @@ public:
         vhListenSocket.clear();
         delete semOutbound;
         semOutbound = NULL;
-        delete semStormnodeOutbound;
-        semStormnodeOutbound = NULL;
+        delete semDynodeOutbound;
+        semDynodeOutbound = NULL;
         delete pnodeLocalHost;
         pnodeLocalHost = NULL;
 
@@ -2446,7 +2447,7 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     nPingUsecStart = 0;
     nPingUsecTime = 0;
     fPingQueued = false;
-    fStormnode = false;
+    fDynode = false;
     nMinPingUsecTime = std::numeric_limits<int64_t>::max();
 
     {

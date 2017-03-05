@@ -2,7 +2,7 @@
 
 #include "cachemultimap.h"
 
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <algorithm>
 #include <iostream>

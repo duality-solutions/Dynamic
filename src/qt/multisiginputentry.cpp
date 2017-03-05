@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -133,12 +133,12 @@ void MultisigInputEntry::on_transactionId_textChanged(const QString &transaction
         CTxDestination addr;
         if(ExtractDestination(script, addr))
         {
-            CDarkSilkAddress address(addr);
+            CDynamicAddress address(addr);
             QString addressStr(address.ToString().c_str());
-            ui->transactionOutput->addItem(idStr + QString(" - ") + addressStr + QString(" - ") + amountStr + QString(" DSLK"));
+            ui->transactionOutput->addItem(idStr + QString(" - ") + addressStr + QString(" - ") + amountStr + QString(" DYN"));
         }
         else
-            ui->transactionOutput->addItem(idStr + QString(" - ") + amountStr + QString(" DSLK"));
+            ui->transactionOutput->addItem(idStr + QString(" - ") + amountStr + QString(" DYN"));
     }
 }
 

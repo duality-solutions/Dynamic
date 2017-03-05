@@ -34,7 +34,7 @@ class InvalidBlockRequestTest(ComparisonTestFramework):
         self.tip = None
         self.block_time = None
         NetworkThread().start() # Start up network handling in another thread
-        sync_stormnodes(self.nodes)
+        sync_dynodes(self.nodes)
         test.run()
 
     def get_tests(self):

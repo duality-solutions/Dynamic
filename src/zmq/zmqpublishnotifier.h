@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_ZMQ_ZMQPUBLISHNOTIFIER_H
-#define DARKSILK_ZMQ_ZMQPUBLISHNOTIFIER_H
+#ifndef DYNAMIC_ZMQ_ZMQPUBLISHNOTIFIER_H
+#define DYNAMIC_ZMQ_ZMQPUBLISHNOTIFIER_H
 
 #include "zmqabstractnotifier.h"
 
@@ -64,4 +64,4 @@ public:
     bool NotifyTransactionLock(const CTransaction &transaction);
 };
 
-#endif // DARKSILK_ZMQ_ZMQPUBLISHNOTIFIER_H
+#endif // DYNAMIC_ZMQ_ZMQPUBLISHNOTIFIER_H

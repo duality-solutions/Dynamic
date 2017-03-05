@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,12 +16,13 @@
 #include "checkpoints.h"
 #include "clientversion.h"
 #include "net.h"
-#include "privatesend.h"
-#include "stormnodeman.h"
-#include "stormnode-sync.h"
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "util.h"
+
+#include "dynodeman.h"
+#include "dynode-sync.h"
+#include "privatesend.h"
 
 #include <stdint.h>
 
@@ -37,7 +38,7 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     QObject(parent),
     optionsModel(optionsModel),
     peerTableModel(0),
-    cachedStormnodeCountString(""),
+    cachedDynodeCountString(""),
     banTableModel(0),
     pollTimer(0)
 {
@@ -74,16 +75,16 @@ int ClientModel::getNumConnections(unsigned int flags) const
     return nNum;
 }
 
-QString ClientModel::getStormnodeCountString() const
+QString ClientModel::getDynodeCountString() const
 {
-    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)snodeman.size()))
+    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)dnodeman.size()))
     return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
-            .arg(QString::number((int)snodeman.size()))
-            .arg(QString::number((int)snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
-            .arg(QString::number((int)snodeman.CountEnabled()));
-            // .arg(QString::number((int)snodeman.CountByIP(NET_IPV4)))
-            // .arg(QString::number((int)snodeman.CountByIP(NET_IPV6)))
-            // .arg(QString::number((int)snodeman.CountByIP(NET_TOR)));
+            .arg(QString::number((int)dnodeman.size()))
+            .arg(QString::number((int)dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+            .arg(QString::number((int)dnodeman.CountEnabled()));
+            // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV4)))
+            // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV6)))
+            // .arg(QString::number((int)dnodeman.CountByIP(NET_TOR)));
 }
 
 int ClientModel::getNumBlocks() const
@@ -143,13 +144,13 @@ void ClientModel::updateTimer()
 
 void ClientModel::updateSnTimer()
 {
-    QString newStormnodeCountString = getStormnodeCountString();
+    QString newDynodeCountString = getDynodeCountString();
 
-    if (cachedStormnodeCountString != newStormnodeCountString)
+    if (cachedDynodeCountString != newDynodeCountString)
     {
-        cachedStormnodeCountString = newStormnodeCountString;
+        cachedDynodeCountString = newDynodeCountString;
 
-        Q_EMIT strStormnodesChanged(cachedStormnodeCountString);
+        Q_EMIT strDynodesChanged(cachedDynodeCountString);
     }
 }
 

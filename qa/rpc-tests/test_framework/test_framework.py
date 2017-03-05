@@ -1,11 +1,11 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 # Base class for RPC testing
 
-# Add python-darksilkrpc to module search path:
+# Add python-dynamicrpc to module search path:
 import os
 import sys
 
@@ -21,7 +21,7 @@ from .util import (
     sync_blocks,
     sync_mempools,
     stop_nodes,
-    wait_darksilkds,
+    wait_dynamicds,
     enable_coverage,
     check_json_precision,
     initialize_chain_clean,
@@ -29,7 +29,7 @@ from .util import (
 from .authproxy import AuthServiceProxy, JSONRPCException
 
 
-class DarkSilkTestFramework(object):
+class DynamicTestFramework(object):
 
     # These may be over-ridden by subclasses:
     def run_test(self):
@@ -72,7 +72,7 @@ class DarkSilkTestFramework(object):
         """
         assert not self.is_network_split
         stop_nodes(self.nodes)
-        wait_darksilkds()
+        wait_dynamicds()
         self.setup_network(True)
 
     def sync_all(self):
@@ -91,7 +91,7 @@ class DarkSilkTestFramework(object):
         """
         assert self.is_network_split
         stop_nodes(self.nodes)
-        wait_darksilkds()
+        wait_dynamicds()
         self.setup_network(False)
 
     def main(self):
@@ -99,11 +99,11 @@ class DarkSilkTestFramework(object):
 
         parser = optparse.OptionParser(usage="%prog [options]")
         parser.add_option("--nocleanup", dest="nocleanup", default=False, action="store_true",
-                          help="Leave darksilkds and test.* datadir on exit or error")
+                          help="Leave dynamicds and test.* datadir on exit or error")
         parser.add_option("--noshutdown", dest="noshutdown", default=False, action="store_true",
-                          help="Don't stop darksilkds after the test execution")
+                          help="Don't stop dynamicds after the test execution")
         parser.add_option("--srcdir", dest="srcdir", default="../../src",
-                          help="Source directory containing darksilkd/darksilk-cli (default: %default)")
+                          help="Source directory containing dynamicd/dynamic-cli (default: %default)")
         parser.add_option("--tmpdir", dest="tmpdir", default=tempfile.mkdtemp(prefix="test"),
                           help="Root directory for datadirs")
         parser.add_option("--tracerpc", dest="trace_rpc", default=False, action="store_true",
@@ -149,9 +149,9 @@ class DarkSilkTestFramework(object):
         if not self.options.noshutdown:
             print("Stopping nodes")
             stop_nodes(self.nodes)
-            wait_darksilkds()
+            wait_dynamicds()
         else:
-            print("Note: darksilkds were not stopped and may still be running")
+            print("Note: dynamicds were not stopped and may still be running")
 
         if not self.options.nocleanup and not self.options.noshutdown:
             print("Cleaning up")
@@ -165,13 +165,13 @@ class DarkSilkTestFramework(object):
             sys.exit(1)
 
 
-# Test framework for doing p2p comparison testing, which sets up some darksilkd
+# Test framework for doing p2p comparison testing, which sets up some dynamicd
 # binaries:
 # 1 binary: test binary
 # 2 binaries: 1 test binary, 1 ref binary
 # n>2 binaries: 1 test binary, n-1 ref binaries
 
-class ComparisonTestFramework(DarkSilkTestFramework):
+class ComparisonTestFramework(DynamicTestFramework):
 
     # Can override the num_nodes variable to indicate how many nodes to run.
     def __init__(self):
@@ -179,11 +179,11 @@ class ComparisonTestFramework(DarkSilkTestFramework):
 
     def add_options(self, parser):
         parser.add_option("--testbinary", dest="testbinary",
-                          default=os.getenv("DARKSILKD", "darksilkd"),
-                          help="darksilkd binary to test")
+                          default=os.getenv("DYNAMICD", "dynamicd"),
+                          help="dynamicd binary to test")
         parser.add_option("--refbinary", dest="refbinary",
-                          default=os.getenv("DARKSILKD", "darksilkd"),
-                          help="darksilkd binary to use for reference nodes (if any)")
+                          default=os.getenv("DYNAMICD", "dynamicd"),
+                          help="dynamicd binary to use for reference nodes (if any)")
 
     def setup_chain(self):
         print "Initializing test directory "+self.options.tmpdir

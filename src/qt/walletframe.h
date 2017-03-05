@@ -1,17 +1,17 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_WALLETFRAME_H
-#define DARKSILK_QT_WALLETFRAME_H
+#ifndef DYNAMIC_QT_WALLETFRAME_H
+#define DYNAMIC_QT_WALLETFRAME_H
 
 #include <QFrame>
 #include <QMap>
 
-class DarkSilkGUI;
+class DynamicGUI;
 class ClientModel;
 class PlatformStyle;
 class SendCoinsRecipient;
@@ -27,7 +27,7 @@ class WalletFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit WalletFrame(const PlatformStyle *platformStyle, DarkSilkGUI *_gui = 0);
+    explicit WalletFrame(const PlatformStyle *platformStyle, DynamicGUI *_gui = 0);
     ~WalletFrame();
 
     void setClientModel(ClientModel *clientModel);
@@ -43,7 +43,7 @@ public:
 
 private:
     QStackedWidget *walletStack;
-    DarkSilkGUI *gui;
+    DynamicGUI *gui;
     ClientModel *clientModel;
     QMap<QString, WalletView*> mapWalletViews;
 
@@ -58,8 +58,8 @@ public Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to Stormnode page */
-    void gotoStormnodePage();
+    /** Switch to Dynode page */
+    void gotoDynodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
@@ -92,4 +92,4 @@ public Q_SLOTS:
     void usedReceivingAddresses();
 };
 
-#endif // DARKSILK_QT_WALLETFRAME_H
+#endif // DYNAMIC_QT_WALLETFRAME_H

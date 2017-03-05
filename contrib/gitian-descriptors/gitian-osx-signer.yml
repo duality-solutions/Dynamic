@@ -1,5 +1,5 @@
 ---
-name: "darksilk-dmg-signer"
+name: "dynamic-dmg-signer"
 suites:
 - "trusty"
 architectures:
@@ -8,10 +8,10 @@ packages:
 - "faketime"
 reference_datetime: "2017-01-01 00:00:00"
 remotes:
-- "url": "https://github.com/silknetwork/darksilk-detached-sigs.git"
+- "url": "https://github.com/duality-solutions/dynamic-detached-sigs.git"
   "dir": "signature"
 files:
-- "darksilk-osx-unsigned.tar.gz"
+- "dynamic-osx-unsigned.tar.gz"
 script: |
   WRAP_DIR=$HOME/wrapped
   mkdir -p ${WRAP_DIR}
@@ -28,10 +28,10 @@ script: |
     chmod +x ${WRAP_DIR}/${prog}
   done
 
-  UNSIGNED=darksilk-osx-unsigned.tar.gz
-  SIGNED=darksilk-osx-signed.dmg
+  UNSIGNED=dynamic-osx-unsigned.tar.gz
+  SIGNED=dynamic-osx-signed.dmg
 
   tar -xf ${UNSIGNED}
   ./detached-sig-apply.sh ${UNSIGNED} signature/osx
-  ${WRAP_DIR}/genisoimage -no-cache-inodes -D -l -probe -V "DarkSilk-Core" -no-pad -r -dir-mode 0755 -apple -o uncompressed.dmg signed-app
+  ${WRAP_DIR}/genisoimage -no-cache-inodes -D -l -probe -V "Dynamic" -no-pad -r -dir-mode 0755 -apple -o uncompressed.dmg signed-app
   ${WRAP_DIR}/dmg dmg uncompressed.dmg ${OUTDIR}/${SIGNED}

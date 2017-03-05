@@ -31,7 +31,7 @@
 
 //     	if(vecTokenized.size() == 2) continue;
 
-// 	    CDarkSilkSecret vchSecret;
+// 	    CDynamicSecret vchSecret;
 // 	    bool fGood = vchSecret.SetString(vecTokenized[0]);
 
 // 	    if(!fGood) {

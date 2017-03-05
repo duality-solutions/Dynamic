@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,13 +8,13 @@
 #
 
 import time
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 from test_framework.script import *
 from test_framework.mininode import *
 import binascii
 
-class AddressIndexTest(DarkSilkTestFramework):
+class AddressIndexTest(DynamicTestFramework):
 
     def setup_chain(self):
         print("Initializing test directory "+self.options.tmpdir)

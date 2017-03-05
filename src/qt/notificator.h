@@ -1,15 +1,15 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_NOTIFICATOR_H
-#define DARKSILK_QT_NOTIFICATOR_H
+#ifndef DYNAMIC_QT_NOTIFICATOR_H
+#define DYNAMIC_QT_NOTIFICATOR_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include <QIcon>
@@ -80,4 +80,4 @@ private:
 #endif
 };
 
-#endif // DARKSILK_QT_NOTIFICATOR_H
+#endif // DYNAMIC_QT_NOTIFICATOR_H

@@ -1,0 +1,33 @@
+# /etc/conf.d/dynamicd: config file for /etc/init.d/dynamicd
+
+# Config file location
+#DYNAMICD_CONFIGFILE="/etc/dynamic/dynamic.conf"
+
+# What directory to write pidfile to?  (created and owned by $DYNAMICD_USER)
+#DYNAMICD_PIDDIR="/var/run/dynamicd"
+
+# What filename to give the pidfile
+#DYNAMICD_PIDFILE="${DYNAMICD_PIDDIR}/dynamicd.pid"
+
+# Where to write dynamicd data (be mindful that the blockchain is large)
+#DYNAMICD_DATADIR="/var/lib/dynamicd"
+
+# User and group to own dynamicd process
+#DYNAMICD_USER="dynamic"
+#DYNAMICD_GROUP="dynamic"
+
+# Path to dynamicd executable
+#DYNAMICD_BIN="/usr/bin/dynamicd"
+
+# Nice value to run dynamicd under
+#DYNAMICD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+DYNAMICD_OPTS="-disablewallet"
+
+# The timeout in seconds OpenRC will wait for dynamicd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+DYNAMICD_SIGTERM_TIMEOUT=60

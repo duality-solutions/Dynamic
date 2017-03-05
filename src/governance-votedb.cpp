@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -54,11 +54,11 @@ std::vector<CGovernanceVote> CGovernanceObjectVoteFile::GetVotes() const
     return vecResult;
 }
 
-void CGovernanceObjectVoteFile::RemoveVotesFromStormnode(const CTxIn& vinStormnode)
+void CGovernanceObjectVoteFile::RemoveVotesFromDynode(const CTxIn& vinDynode)
 {
     vote_l_it it = listVotes.begin();
     while(it != listVotes.end()) {
-        if(it->GetVinStormnode() == vinStormnode) {
+        if(it->GetVinDynode() == vinDynode) {
             mapVoteIndex.erase(it->GetHash());
             listVotes.erase(it++);
         }

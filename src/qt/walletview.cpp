@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,11 +9,9 @@
 
 #include "addressbookpage.h"
 #include "askpassphrasedialog.h"
-#include "darksilkgui.h"
+#include "dynamicgui.h"
 #include "clientmodel.h"
 #include "guiutil.h"
-#include "dnspage.h"
-#include "stormnodeconfig.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
 #include "platformstyle.h"
@@ -24,6 +22,9 @@
 #include "transactionview.h"
 #include "walletmodel.h"
 #include "multisigdialog.h"
+
+#include "dnspage.h"
+#include "dynodeconfig.h"
 
 #include "ui_interface.h"
 
@@ -87,8 +88,8 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     multiSigPage = new MultisigDialog(platformStyle);
 
     QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeListPage = new StormnodeList(platformStyle);
+    if (settings.value("fShowDynodesTab").toBool()) {
+        dynodeListPage = new DynodeList(platformStyle);
     }
 
     dnsPage = new DNSPage();
@@ -99,8 +100,8 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     addWidget(transactionsPage);
     addWidget(multiSigPage);
     addWidget(dnsPage);
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        addWidget(stormnodeListPage);
+    if (settings.value("fShowDynodesTab").toBool()) {
+        addWidget(dynodeListPage);
     }
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
@@ -126,7 +127,7 @@ WalletView::~WalletView()
 {
 }
 
-void WalletView::setDarkSilkGUI(DarkSilkGUI *gui)
+void WalletView::setDynamicGUI(DynamicGUI *gui)
 {
     if (gui)
     {
@@ -154,8 +155,8 @@ void WalletView::setClientModel(ClientModel *clientModel)
     overviewPage->setClientModel(clientModel);
     sendCoinsPage->setClientModel(clientModel);
     QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeListPage->setClientModel(clientModel);
+    if (settings.value("fShowDynodesTab").toBool()) {
+        dynodeListPage->setClientModel(clientModel);
     }
 }
 
@@ -171,8 +172,8 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     transactionView->setModel(walletModel);
     multiSigPage->setModel(walletModel);
     QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        stormnodeListPage->setWalletModel(walletModel);
+    if (settings.value("fShowDynodesTab").toBool()) {
+        dynodeListPage->setWalletModel(walletModel);
     }
     dnsPage->setModel(walletModel);
 
@@ -248,11 +249,11 @@ void WalletView::gotoMultiSigPage()
     setCurrentWidget(multiSigPage);
 }
 
-void WalletView::gotoStormnodePage()
+void WalletView::gotoDynodePage()
 {
     QSettings settings;
-    if (settings.value("fShowStormnodesTab").toBool()) {
-        setCurrentWidget(stormnodeListPage);
+    if (settings.value("fShowDynodesTab").toBool()) {
+        setCurrentWidget(dynodeListPage);
     }
 }
 

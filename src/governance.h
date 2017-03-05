@@ -1,12 +1,12 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_GOVERNANCE_H
-#define DARKSILK_GOVERNANCE_H
+#ifndef DYNAMIC_GOVERNANCE_H
+#define DYNAMIC_GOVERNANCE_H
 
-//#define ENABLE_DARKSILK_DEBUG
+//#define ENABLE_DYNAMIC_DEBUG
 
 #include "bloom.h"
 #include "cachemap.h"
@@ -233,7 +233,7 @@ private:
 
     count_m_t mapSeenGovernanceObjects;
 
-    object_time_m_t mapStormnodeOrphanObjects;
+    object_time_m_t mapDynodeOrphanObjects;
 
     hash_time_m_t mapWatchdogObjects;
 
@@ -247,7 +247,7 @@ private:
 
     vote_mcache_t mapOrphanVotes;
 
-    txout_m_t mapLastStormnodeObject;
+    txout_m_t mapLastDynodeObject;
 
     hash_s_t setRequestedObjects;
 
@@ -310,7 +310,7 @@ public:
         mapVoteToObject.Clear();
         mapInvalidVotes.Clear();
         mapOrphanVotes.Clear();
-        mapLastStormnodeObject.clear();
+        mapLastDynodeObject.clear();
     }
 
     std::string ToString() const;
@@ -335,7 +335,7 @@ public:
         READWRITE(mapWatchdogObjects);
         READWRITE(nHashWatchdogCurrent);
         READWRITE(nTimeWatchdogCurrent);
-         READWRITE(mapLastStormnodeObject);
+         READWRITE(mapLastDynodeObject);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
             return;
@@ -363,9 +363,9 @@ public:
 
     void AddSeenVote(uint256 nHash, int status);
 
-    bool StormnodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast = false);
+    bool DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast = false);
 
-    bool StormnodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast, bool fForce, bool& fRateCheckBypassed);
+    bool DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateLast, bool fForce, bool& fRateCheckBypassed);
 
     bool ProcessVoteAndRelay(const CGovernanceVote& vote, CGovernanceException& exception) {
         bool fOK = ProcessVote(NULL, vote, exception);
@@ -375,9 +375,9 @@ public:
         return fOK;
     }
 
-    void CheckStormnodeOrphanVotes();
+    void CheckDynodeOrphanVotes();
 
-    void CheckStormnodeOrphanObjects();
+    void CheckDynodeOrphanObjects();
 
     bool AreRateChecksEnabled() const {
         LOCK(cs);
@@ -417,7 +417,7 @@ private:
     void RebuildIndexes();
 
     /// Returns SN index, handling the case of index rebuilds
-    int GetStormnodeIndex(const CTxIn& stormnodeVin);
+    int GetDynodeIndex(const CTxIn& dynodeVin);
 
     void RebuildVoteMaps();
 
@@ -427,4 +427,4 @@ private:
 
 };
 
-#endif // DARKSILK_GOVERNANCE_H
+#endif // DYNAMIC_GOVERNANCE_H

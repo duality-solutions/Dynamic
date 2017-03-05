@@ -8,7 +8,7 @@
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
 #include "main.h"
-#include "stormnode-payments.h"
+#include "dynode-payments.h"
 #include "miner.h"
 #include "pubkey.h"
 #include "script/standard.h"
@@ -17,7 +17,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     fCheckpointsEnabled = false;
 
     // force UpdatedBlockTip to initialize pCurrentBlockIndex
-    snpayments.UpdatedBlockTip(chainActive.Tip());
+    dnpayments.UpdatedBlockTip(chainActive.Tip());
 
     // Simple block creation, nothing special yet:
     BOOST_CHECK(pblocktemplate = CreateNewBlock(chainparams, scriptPubKey));

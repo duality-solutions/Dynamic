@@ -98,8 +98,8 @@
 // Overload formatValue() for more control.
 
 
-#ifndef DARKSILK_TINYFORMAT_H
-#define DARKSILK_TINYFORMAT_H
+#ifndef DYNAMIC_TINYFORMAT_H
+#define DYNAMIC_TINYFORMAT_H
 
 namespace tinyformat {}
 //------------------------------------------------------------------------------
@@ -1010,4 +1010,4 @@ TINYFORMAT_WRAP_FORMAT_N(16, returnType, funcName, funcDeclSuffix, bodyPrefix, s
 
 #define strprintf tfm::format
 
-#endif // DARKSILK_TINYFORMAT_H
+#endif // DYNAMIC_TINYFORMAT_H

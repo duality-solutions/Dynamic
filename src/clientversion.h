@@ -1,22 +1,22 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_CLIENTVERSION_H
-#define DARKSILK_CLIENTVERSION_H
+#ifndef DYNAMIC_CLIENTVERSION_H
+#define DYNAMIC_CLIENTVERSION_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #else
 
 /**
  * client versioning and copyright year
  */
 
-//! These need to be macros, as clientversion.cpp's and darksilk*-res.rc's voodoo requires it
+//! These need to be macros, as clientversion.cpp's and dynamic*-res.rc's voodoo requires it
 #define CLIENT_VERSION_MAJOR 1
 #define CLIENT_VERSION_MINOR 0
 #define CLIENT_VERSION_REVISION 0
@@ -25,10 +25,6 @@
 //! Set to true for release, false for prerelease or test build
 #define CLIENT_VERSION_IS_RELEASE true
 
-/**
- * Copyright year (2009-this)
- * Todo: update this when changing our copyright comments in the source
- */
 #define COPYRIGHT_YEAR 2017
 
 #endif //HAVE_CONFIG_H
@@ -41,10 +37,10 @@
 #define DO_STRINGIZE(X) #X
 
 //! Copyright string used in Windows .rc files
-#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2015-" STRINGIZE(COPYRIGHT_YEAR) " Silk Network"
+#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2015-" STRINGIZE(COPYRIGHT_YEAR) " Duality Blockchain Solutions, 2016-"
 
 /**
- * darksilkd-res.rc includes this file, but it cannot cope with real c++ code.
+ * dynamicd-res.rc includes this file, but it cannot cope with real c++ code.
  * WINDRES_PREPROC is defined to indicate that its pre-processor is running.
  * Anything other than a define should be guarded below.
  */
@@ -70,4 +66,4 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
 
 #endif // WINDRES_PREPROC
 
-#endif // DARKSILK_CLIENTVERSION_H
+#endif // DYNAMIC_CLIENTVERSION_H

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_CRYPTO_SHA256_H
-#define DARKSILK_CRYPTO_SHA256_H
+#ifndef DYNAMIC_CRYPTO_SHA256_H
+#define DYNAMIC_CRYPTO_SHA256_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,4 +25,4 @@ public:
     CSHA256& Reset();
 };
 
-#endif // DARKSILK_CRYPTO_SHA256_H
+#endif // DYNAMIC_CRYPTO_SHA256_H

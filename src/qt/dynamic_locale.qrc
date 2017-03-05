@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/translations">
+        <file alias="bg">locale/dynamic_bg.qm</file>
+        <file alias="de">locale/dynamic_de.qm</file>
+        <file alias="en">locale/dynamic_en.qm</file>
+        <file alias="es">locale/dynamic_es.qm</file>
+        <file alias="fi">locale/dynamic_fi.qm</file>
+        <file alias="fr">locale/dynamic_fr.qm</file>
+        <file alias="it">locale/dynamic_it.qm</file>
+        <file alias="ja">locale/dynamic_ja.qm</file>
+        <file alias="pl">locale/dynamic_pl.qm</file>
+        <file alias="pt">locale/dynamic_pt.qm</file>
+        <file alias="ru">locale/dynamic_ru.qm</file>
+        <file alias="sk">locale/dynamic_sk.qm</file>
+        <file alias="sv">locale/dynamic_sv.qm</file>
+        <file alias="vi">locale/dynamic_vi.qm</file>
+        <file alias="zh_CN">locale/dynamic_zh_CN.qm</file>
+        <file alias="zh_TW">locale/dynamic_zh_TW.qm</file>
+    </qresource>
+</RCC>

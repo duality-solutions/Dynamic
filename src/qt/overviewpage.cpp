@@ -1,18 +1,17 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
-#include "darksilkunits.h"
+#include "dynamicunits.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
 #include "guiutil.h"
-#include "init.h"
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "transactionfilterproxy.h"
@@ -20,10 +19,13 @@
 #include "utilitydialog.h"
 #include "walletmodel.h"
 
-#include "privatesend.h"
-#include "instantsend.h"
 #include "privatesendconfig.h"
-#include "stormnode-sync.h"
+
+#include "init.h"
+
+#include "dynode-sync.h"
+#include "instantsend.h"
+#include "privatesend.h"
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
@@ -40,7 +42,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
     TxViewDelegate(const PlatformStyle *platformStyle):
-        QAbstractItemDelegate(), unit(DarkSilkUnits::DSLK),
+        QAbstractItemDelegate(), unit(DynamicUnits::DYN),
         platformStyle(platformStyle)
     {
 
@@ -99,7 +101,7 @@ public:
             foreground = option.palette.color(QPalette::Text);
         }
         painter->setPen(foreground);
-        QString amountText = DarkSilkUnits::floorWithUnit(unit, amount, true, DarkSilkUnits::separatorAlways);
+        QString amountText = DynamicUnits::floorWithUnit(unit, amount, true, DynamicUnits::separatorAlways);
         if(!confirmed)
         {
             amountText = QString("[") + amountText + QString("]");
@@ -163,8 +165,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // that's it for litemode
     if(fLiteMode) return;
 
-    // Disable any PS UI for Stormnode or when autobackup is disabled or failed for whatever reason
-    if(fStormNode || nWalletBackups <= 0){
+    // Disable any PS UI for Dynode or when autobackup is disabled or failed for whatever reason
+    if(fDyNode || nWalletBackups <= 0){
         DisablePrivateSendCompletely();
         if (nWalletBackups <= 0) {
             ui->labelPrivateSendEnabled->setToolTip(tr("Automatic backups are disabled, no mixing available!"));
@@ -193,7 +195,7 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 
 OverviewPage::~OverviewPage()
 {
-    if(!fLiteMode && !fStormNode) disconnect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
+    if(!fLiteMode && !fDyNode) disconnect(timer, SIGNAL(timeout()), this, SLOT(privateSendStatus()));
     delete ui;
 }
 
@@ -206,15 +208,15 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchOnlyBalance = watchOnlyBalance;
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
-    ui->labelBalance->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, balance, false, DarkSilkUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, unconfirmedBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelImmature->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, immatureBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelAnonymized->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, anonymizedBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelTotal->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelWatchAvailable->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelWatchPending->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelWatchImmature->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, DarkSilkUnits::separatorAlways));
-    ui->labelWatchTotal->setText(DarkSilkUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, DarkSilkUnits::separatorAlways));
+    ui->labelBalance->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, balance, false, DynamicUnits::separatorAlways));
+    ui->labelUnconfirmed->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, unconfirmedBalance, false, DynamicUnits::separatorAlways));
+    ui->labelImmature->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, immatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelAnonymized->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, anonymizedBalance, false, DynamicUnits::separatorAlways));
+    ui->labelTotal->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, balance + unconfirmedBalance + immatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchAvailable->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchPending->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchImmature->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, DynamicUnits::separatorAlways));
+    ui->labelWatchTotal->setText(DynamicUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, DynamicUnits::separatorAlways));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
@@ -273,7 +275,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
     this->walletModel = model;
     if(model && model->getOptionsModel())
     {
-        // update the display unit, to not use the default ("DSLK")
+        // update the display unit, to not use the default ("DYN")
         updateDisplayUnit();
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance(),
@@ -327,12 +329,12 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 
 void OverviewPage::updatePrivateSendProgress()
 {
-    if(!stormnodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
+    if(!dynodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
 
     if(!pwalletMain) return;
 
     QString strAmountAndRounds;
-    QString strPrivateSendAmount = DarkSilkUnits::formatHtmlWithUnit(nDisplayUnit, nPrivateSendAmount * COIN, false, DarkSilkUnits::separatorAlways);
+    QString strPrivateSendAmount = DynamicUnits::formatHtmlWithUnit(nDisplayUnit, nPrivateSendAmount * COIN, false, DynamicUnits::separatorAlways);
 
     if(currentBalance == 0)
     {
@@ -340,7 +342,7 @@ void OverviewPage::updatePrivateSendProgress()
         ui->privateSendProgress->setToolTip(tr("No inputs detected"));
 
         // when balance is zero just show info from settings
-        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
+        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DynamicUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", nPrivateSendRounds);
 
         ui->labelAmountRounds->setToolTip(tr("No inputs detected"));
@@ -372,17 +374,17 @@ void OverviewPage::updatePrivateSendProgress()
     if(nMaxToAnonymize >= nPrivateSendAmount * COIN) {
         ui->labelAmountRounds->setToolTip(tr("Found enough compatible inputs to anonymize %1")
                                           .arg(strPrivateSendAmount));
-        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
+        strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), DynamicUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", nPrivateSendRounds);
     } else {
-        QString strMaxToAnonymize = DarkSilkUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, DarkSilkUnits::separatorAlways);
+        QString strMaxToAnonymize = DynamicUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, DynamicUnits::separatorAlways);
         ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:red;'>%1</span>,<br>"
                                              "will anonymize <span style='color:red;'>%2</span> instead")
                                           .arg(strPrivateSendAmount)
                                           .arg(strMaxToAnonymize));
-        strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), DarkSilkUnits::decimals(nDisplayUnit) + 1);
+        strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), DynamicUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = "<span style='color:red;'>" +
-                QString(DarkSilkUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
+                QString(DynamicUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
                 " / " + tr("%n Rounds", "", nPrivateSendRounds) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
@@ -452,7 +454,7 @@ void OverviewPage::updateAdvancedPSUI(bool fShowAdvancedPSUI) {
 
 void OverviewPage::privateSendStatus()
 {
-    if(!stormnodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
+    if(!dynodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
 
     static int64_t nLastDSProgressBlockTime = 0;
     int nBestHeight = clientModel->getNumBlocks();
@@ -601,7 +603,7 @@ void OverviewPage::togglePrivateSend(){
     if(!fEnablePrivateSend){
         CAmount nMinAmount = vecPrivateSendDenominations.back() + PRIVATESEND_COLLATERAL*4;
         if(currentBalance < nMinAmount){
-            QString strMinAmount(DarkSilkUnits::formatWithUnit(nDisplayUnit, nMinAmount));
+            QString strMinAmount(DynamicUnits::formatWithUnit(nDisplayUnit, nMinAmount));
             QMessageBox::warning(this, tr("PrivateSend"),
                 tr("PrivateSend requires at least %1 to use.").arg(strMinAmount),
                 QMessageBox::Ok, QMessageBox::Ok);

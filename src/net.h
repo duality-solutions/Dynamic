@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_NET_H
-#define DARKSILK_NET_H
+#ifndef DYNAMIC_NET_H
+#define DYNAMIC_NET_H
 
 #include "bloom.h"
 #include "compat.h"
@@ -87,9 +87,9 @@ CNode* FindNode(const CNetAddr& ip);
 CNode* FindNode(const CSubNet& subNet);
 CNode* FindNode(const std::string& addrName);
 CNode* FindNode(const CService& ip);
-// fConnectToStormnode should be 'true' only if you want this node to allow to connect to itself
-// and/or you want it to be disconnected on CStormnodeMan::ProcessStormnodeConnections()
-CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToStormnode = false);
+// fConnectToDynode should be 'true' only if you want this node to allow to connect to itself
+// and/or you want it to be disconnected on CDynodeMan::ProcessDynodeConnections()
+CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToDynode = false);
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false);
 void MapPort(bool fUseUPnP);
 unsigned short GetListenPort();
@@ -363,10 +363,10 @@ public:
     // b) the peer may tell us in its version message that we should not relay tx invs
     //    unless it loads a bloom filter.
     bool fRelayTxes;
-    // If 'true' this node will be disconnected on CStormnodeMan::ProcessStormnodeConnections()
-    bool fStormnode;
+    // If 'true' this node will be disconnected on CDynodeMan::ProcessDynodeConnections()
+    bool fDynode;
     CSemaphoreGrant grantOutbound;
-    CSemaphoreGrant grantStormnodeOutbound;
+    CSemaphoreGrant grantDynodeOutbound;
     CCriticalSection cs_filter;
     CBloomFilter* pfilter;
     int nRefCount;
@@ -865,4 +865,4 @@ void DumpBanlist();
 /** Return a timestamp in the future (in microseconds) for exponentially distributed events. */
 int64_t PoissonNextSend(int64_t nNow, int average_interval_seconds);
 
-#endif // DARKSILK_NET_H
+#endif // DYNAMIC_NET_H

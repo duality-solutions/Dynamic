@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include "util.h"
@@ -103,8 +103,8 @@ namespace boost {
 
 using namespace std;
 
-//DarkSilk only features
-bool fStormNode = false;
+//Dynamic only features
+bool fDyNode = false;
 bool fLiteMode = false;
 /**
     nWalletBackups:
@@ -115,8 +115,8 @@ bool fLiteMode = false;
 */
 int nWalletBackups = 10;
 
-const char * const DARKSILK_CONF_FILENAME = "darksilk.conf";
-const char * const DARKSILK_PID_FILENAME = "darksilkd.pid";
+const char * const DYNAMIC_CONF_FILENAME = "dynamic.conf";
+const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
 map<string, string> mapArgs;
 map<string, vector<string> > mapMultiArgs;
@@ -270,14 +270,14 @@ bool LogAcceptCategory(const char* category)
             const vector<string>& categories = mapMultiArgs["-debug"];
             ptrCategory.reset(new set<string>(categories.begin(), categories.end()));
             // thread_specific_ptr automatically deletes the set when the thread ends.
-            // "darksilk" is a composite category enabling all DarkSilk-related debug output
-            if(ptrCategory->count(string("darksilk"))) {
+            // "dynamic" is a composite category enabling all Dynamic-related debug output
+            if(ptrCategory->count(string("dynamic"))) {
                 ptrCategory->insert(string("privatesend"));
                 ptrCategory->insert(string("instantsend"));
-                ptrCategory->insert(string("stormnode"));
+                ptrCategory->insert(string("dynode"));
                 ptrCategory->insert(string("spork"));
                 ptrCategory->insert(string("keepass"));
-                ptrCategory->insert(string("snpayments"));
+                ptrCategory->insert(string("dnpayments"));
                 ptrCategory->insert(string("gobject"));
             }
         }
@@ -495,7 +495,7 @@ static std::string FormatException(const std::exception* pex, const char* pszThr
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "darksilk";
+    const char* pszModule = "dynamic";
 #endif
     if (pex)
         return strprintf(
@@ -515,13 +515,13 @@ void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\DarkSilk
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\DarkSilk
-    // Mac: ~/Library/Application Support/DarkSil
-    // Unix: ~/.darksilk
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Dynamic
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Dynamic
+    // Mac: ~/Library/Application Support/Dynamic
+    // Unix: ~/.dynamic
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "DarkSilk";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Dynamic";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -531,10 +531,10 @@ boost::filesystem::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/DarkSilk";
+    return pathRet / "Library/Application Support/Dynamic";
 #else
     // Unix
-    return pathRet / ".darksilk";
+    return pathRet / ".dynamic";
 #endif
 #endif
 }
@@ -575,8 +575,8 @@ static void WriteConfigFile(FILE* configFile)
     fputs (sUserID.c_str(), configFile);
     fputs (sRPCpassword.c_str(), configFile);
     fputs ("#Do not use special characters with username/password", configFile);
-    fputs ("rpcport=31650\n", configFile);
-    fputs ("port=31600\n",configFile);
+    fputs ("rpcport=31350\n", configFile);
+    fputs ("port=31300\n",configFile);
     fclose(configFile);
 }
 
@@ -646,16 +646,16 @@ void ClearDatadirCache()
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", DARKSILK_CONF_FILENAME));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir(false) / pathConfigFile;
 
     return pathConfigFile;
 }
 
-boost::filesystem::path GetStormnodeConfigFile()
+boost::filesystem::path GetDynodeConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-snconf", "stormnode.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-dnconf", "dynode.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir() / pathConfigFile;
     return pathConfigFile;
 }
@@ -666,12 +666,12 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
     boost::filesystem::ifstream streamConfig(GetConfigFile());
 
     if (!streamConfig.good()){
-        // Create darksilk.conf if it does not exist
+        // Create dynamic.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
         if (configFile != NULL) {
-            // Write darksilk.conf file with random username and password.
+            // Write dynamic.conf file with random username and password.
             WriteConfigFile(configFile);
-            // New darksilk.conf file written, now read it.
+            // New dynamic.conf file written, now read it.
         }
     }
 
@@ -680,7 +680,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
-        // Don't overwrite existing settings so command line settings override darksilk.conf
+        // Don't overwrite existing settings so command line settings override dynamic.conf
         string strKey = string("-") + it->string_key;
         string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
@@ -695,7 +695,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 #ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", DARKSILK_PID_FILENAME));
+    boost::filesystem::path pathPidFile(GetArg("-pid", DYNAMIC_PID_FILENAME));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }

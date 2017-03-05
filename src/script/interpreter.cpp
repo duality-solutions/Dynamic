@@ -1244,7 +1244,7 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigne
 {
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 
-    // DarkSilk: for backward compatability ddns script should not be checked for minimaldata
+    // Dynamic: for backward compatability ddns script should not be checked for minimaldata
     if (fDDNS)
         flags &= ~SCRIPT_VERIFY_MINIMALDATA;
     if ((flags & SCRIPT_VERIFY_SIGPUSHONLY) != 0 && !scriptSig.IsPushOnly()) {
@@ -1353,9 +1353,9 @@ bool AddressMatchesPubKey(const CNameVal& name, const CNameVal& value, std::stri
     }
 
     CKeyID keyID = vchPubKey.GetID();
-    if (CDarkSilkAddress(keyID).ToString() != strAddress)
+    if (CDynamicAddress(keyID).ToString() != strAddress)
     {
-        strError = CDarkSilkAddress(keyID).ToString() + " != Base58(SHA256(" + strAddress + "))";
+        strError = CDynamicAddress(keyID).ToString() + " != Base58(SHA256(" + strAddress + "))";
         return false;
     }*/
     return false;

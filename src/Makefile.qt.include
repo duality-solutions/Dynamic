@@ -1,24 +1,24 @@
-bin_PROGRAMS += qt/darksilk-qt
-EXTRA_LIBRARIES += qt/libdarksilkqt.a
+bin_PROGRAMS += qt/dynamic-qt
+EXTRA_LIBRARIES += qt/libdynamicqt.a
 
-# darksilk qt core #
+# dynamic qt core #
 QT_TS = \
-  qt/locale/darksilk_bg.ts \
-  qt/locale/darksilk_de.ts \
-  qt/locale/darksilk_en.ts \
-  qt/locale/darksilk_es.ts \
-  qt/locale/darksilk_fi.ts \
-  qt/locale/darksilk_fr.ts \
-  qt/locale/darksilk_it.ts \
-  qt/locale/darksilk_ja.ts \
-  qt/locale/darksilk_pl.ts \
-  qt/locale/darksilk_pt.ts \
-  qt/locale/darksilk_ru.ts \
-  qt/locale/darksilk_sk.ts \
-  qt/locale/darksilk_sv.ts \
-  qt/locale/darksilk_vi.ts \
-  qt/locale/darksilk_zh_CN.ts \
-  qt/locale/darksilk_zh_TW.ts
+  qt/locale/dynamic_bg.ts \
+  qt/locale/dynamic_de.ts \
+  qt/locale/dynamic_en.ts \
+  qt/locale/dynamic_es.ts \
+  qt/locale/dynamic_fi.ts \
+  qt/locale/dynamic_fr.ts \
+  qt/locale/dynamic_it.ts \
+  qt/locale/dynamic_ja.ts \
+  qt/locale/dynamic_pl.ts \
+  qt/locale/dynamic_pt.ts \
+  qt/locale/dynamic_ru.ts \
+  qt/locale/dynamic_sk.ts \
+  qt/locale/dynamic_sv.ts \
+  qt/locale/dynamic_vi.ts \
+  qt/locale/dynamic_zh_CN.ts \
+  qt/locale/dynamic_zh_TW.ts
 
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
@@ -29,7 +29,7 @@ QT_FORMS_UI = \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
-  qt/forms/stormnodelist.ui \
+  qt/forms/dynodelist.ui \
   qt/forms/openuridialog.ui \
   qt/forms/optionsdialog.ui \
   qt/forms/overviewpage.ui \
@@ -50,10 +50,10 @@ QT_MOC_CPP = \
   qt/moc_addresstablemodel.cpp \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_bantablemodel.cpp \
-  qt/moc_darksilkaddressvalidator.cpp \
-  qt/moc_darksilkamountfield.cpp \
-  qt/moc_darksilkgui.cpp \
-  qt/moc_darksilkunits.cpp \
+  qt/moc_dynamicaddressvalidator.cpp \
+  qt/moc_dynamicamountfield.cpp \
+  qt/moc_dynamicgui.cpp \
+  qt/moc_dynamicunits.cpp \
   qt/moc_dnspage.cpp \
   qt/moc_dnstablemodel.cpp \
   qt/moc_clientmodel.cpp \
@@ -66,7 +66,7 @@ QT_MOC_CPP = \
   qt/moc_intro.cpp \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
-  qt/moc_stormnodelist.cpp \
+  qt/moc_dynodelist.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
   qt/moc_optionsdialog.cpp \
@@ -99,35 +99,35 @@ QT_MOC_CPP = \
   qt/moc_multisiginputentry.cpp 
 
 
-DARKSILK_MM = \
+DYNAMIC_MM = \
   qt/macdockiconhandler.mm \
   qt/macnotificationhandler.mm
 
 QT_MOC = \
-  qt/darksilk.moc \
-  qt/darksilkamountfield.moc \
+  qt/dynamic.moc \
+  qt/dynamicamountfield.moc \
   qt/intro.moc \
   qt/overviewpage.moc \
   qt/rpcconsole.moc
 
-QT_QRC_CPP = qt/qrc_darksilk.cpp
-QT_QRC = qt/darksilk.qrc
-QT_QRC_LOCALE_CPP = qt/qrc_darksilk_locale.cpp
-QT_QRC_LOCALE = qt/darksilk_locale.qrc
+QT_QRC_CPP = qt/qrc_dynamic.cpp
+QT_QRC = qt/dynamic.qrc
+QT_QRC_LOCALE_CPP = qt/qrc_dynamic_locale.cpp
+QT_QRC_LOCALE = qt/dynamic_locale.qrc
 
 PROTOBUF_CC = qt/paymentrequest.pb.cc
 PROTOBUF_H = qt/paymentrequest.pb.h
 PROTOBUF_PROTO = qt/paymentrequest.proto
 
-DARKSILK_QT_H = \
+DYNAMIC_QT_H = \
   qt/addressbookpage.h \
   qt/addresstablemodel.h \
   qt/askpassphrasedialog.h \
   qt/bantablemodel.h \
-  qt/darksilkaddressvalidator.h \
-  qt/darksilkamountfield.h \
-  qt/darksilkgui.h \
-  qt/darksilkunits.h \
+  qt/dynamicaddressvalidator.h \
+  qt/dynamicamountfield.h \
+  qt/dynamicgui.h \
+  qt/dynamicunits.h \
   qt/dnspage.h \
   qt/dnstablemodel.h \
   qt/clientmodel.h \
@@ -141,7 +141,7 @@ DARKSILK_QT_H = \
   qt/intro.h \
   qt/macdockiconhandler.h \
   qt/macnotificationhandler.h \
-  qt/stormnodelist.h \
+  qt/dynodelist.h \
   qt/networkstyle.h \
   qt/notificator.h \
   qt/openuridialog.h \
@@ -180,8 +180,8 @@ DARKSILK_QT_H = \
   qt/multisiginputentry.h
   
 RES_ICONS = \
-  qt/res/icons/darksilk.ico \
-  qt/res/icons/darksilk.png \
+  qt/res/icons/dynamic.ico \
+  qt/res/icons/dynamic.png \
   qt/res/icons/drk/add.png \
   qt/res/icons/drk/address-book.png \
   qt/res/icons/drk/browse.png \
@@ -217,7 +217,7 @@ RES_ICONS = \
   qt/res/icons/drk/lock_closed.png \
   qt/res/icons/drk/lock_open.png \
   qt/res/icons/drk/multisig.png \
-  qt/res/icons/drk/stormnode_network.png \
+  qt/res/icons/drk/dynode_network.png \
   qt/res/icons/drk/overview.png \
   qt/res/icons/drk/quit.png \
   qt/res/icons/drk/receive.png \
@@ -234,17 +234,17 @@ RES_ICONS = \
   qt/res/icons/drk/about.png \
   qt/res/icons/drk/about_qt.png \
   qt/res/icons/drk/verify.png \
-  qt/res/icons/drk/unit_dslk.png \
-  qt/res/icons/drk/unit_mdslk.png \
-  qt/res/icons/drk/unit_udslk.png \
+  qt/res/icons/drk/unit_dyn.png \
+  qt/res/icons/drk/unit_mdyn.png \
+  qt/res/icons/drk/unit_udyn.png \
   qt/res/icons/drk/unit_satoshis.png
 
-DARKSILK_QT_CPP = \
+DYNAMIC_QT_CPP = \
   qt/bantablemodel.cpp \
-  qt/darksilkaddressvalidator.cpp \
-  qt/darksilkamountfield.cpp \
-  qt/darksilkgui.cpp \
-  qt/darksilkunits.cpp \
+  qt/dynamicaddressvalidator.cpp \
+  qt/dynamicamountfield.cpp \
+  qt/dynamicgui.cpp \
+  qt/dynamicunits.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
   qt/dnspage.cpp \
@@ -265,11 +265,11 @@ DARKSILK_QT_CPP = \
   qt/utilitydialog.cpp
 
 if TARGET_WINDOWS
-DARKSILK_QT_CPP += qt/winshutdownmonitor.cpp
+DYNAMIC_QT_CPP += qt/winshutdownmonitor.cpp
 endif
 
 if ENABLE_WALLET
-DARKSILK_QT_CPP += \
+DYNAMIC_QT_CPP += \
   qt/multisigaddressentry.cpp \
   qt/multisigdialog.cpp \
   qt/multisiginputentry.cpp \
@@ -280,7 +280,7 @@ DARKSILK_QT_CPP += \
   qt/coincontroltreewidget.cpp \
   qt/privatesendconfig.cpp \
   qt/editaddressdialog.cpp \
-  qt/stormnodelist.cpp \
+  qt/dynodelist.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
   qt/paymentrequestplus.cpp \
@@ -307,7 +307,7 @@ RES_IMAGES = \
   qt/res/images/drk/about.png \
   qt/res/images/drk/splash.png \
   qt/res/images/drk/splash_testnet.png \
-  qt/res/images/drk/darksilk_logo_horizontal.png \
+  qt/res/images/drk/dynamic_logo_horizontal.png \
   qt/res/images/drk/unchecked.png \
   qt/res/images/drk/checked.png \
   qt/res/images/drk/drkpurple_downArrow.png \
@@ -323,19 +323,19 @@ RES_CSS = \
 
 RES_MOVIES = $(wildcard qt/res/movies/spinner-*.png)
 
-DARKSILK_RC = qt/res/darksilk-qt-res.rc
+DYNAMIC_RC = qt/res/dynamic-qt-res.rc
 
-DARKSILK_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
+DYNAMIC_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
   -I$(builddir)/qt/forms -DQT_NO_KEYWORDS
 
-qt_libdarksilkqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES) $(DARKSILK_QT_INCLUDES) \
+qt_libdynamicqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(DYNAMIC_QT_INCLUDES) \
   $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
-qt_libdarksilkqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
+qt_libdynamicqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
-qt_libdarksilkqt_a_SOURCES = $(DARKSILK_QT_CPP) $(DARKSILK_QT_H) $(QT_FORMS_UI) \
+qt_libdynamicqt_a_SOURCES = $(DYNAMIC_QT_CPP) $(DYNAMIC_QT_H) $(QT_FORMS_UI) \
   $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES)
 
-nodist_qt_libdarksilkqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
+nodist_qt_libdynamicqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
   $(PROTOBUF_H) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
 
 # forms/foo.h -> forms/ui_foo.h
@@ -344,70 +344,70 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 # Most files will depend on the forms and moc files as includes. Generate them
 # before anything else.
 $(QT_MOC): $(QT_FORMS_H)
-$(qt_libdarksilkqt_a_OBJECTS) $(qt_darksilk_qt_OBJECTS) : | $(QT_MOC)
+$(qt_libdynamicqt_a_OBJECTS) $(qt_dynamic_qt_OBJECTS) : | $(QT_MOC)
 
 #Generating these with a half-written protobuf header leads to wacky results.
 #This makes sure it's done.
 $(QT_MOC): $(PROTOBUF_H)
 $(QT_MOC_CPP): $(PROTOBUF_H)
 
-# darksilk-qt binary #
-qt_darksilk_qt_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES) $(DARKSILK_QT_INCLUDES) \
+# dynamic-qt binary #
+qt_dynamic_qt_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(DYNAMIC_QT_INCLUDES) \
   $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
-qt_darksilk_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
+qt_dynamic_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
-qt_darksilk_qt_SOURCES = qt/darksilk.cpp
+qt_dynamic_qt_SOURCES = qt/dynamic.cpp
 if TARGET_DARWIN
-  qt_darksilk_qt_SOURCES += $(DARKSILK_MM)
+  qt_dynamic_qt_SOURCES += $(DYNAMIC_MM)
 endif
 if TARGET_WINDOWS
-  qt_darksilk_qt_SOURCES += $(DARKSILK_RC)
+  qt_dynamic_qt_SOURCES += $(DYNAMIC_RC)
 endif
-qt_darksilk_qt_LDADD = qt/libdarksilkqt.a $(LIBDARKSILK_SERVER)
+qt_dynamic_qt_LDADD = qt/libdynamicqt.a $(LIBDYNAMIC_SERVER)
 if ENABLE_WALLET
-qt_darksilk_qt_LDADD += $(LIBDARKSILK_WALLET)
+qt_dynamic_qt_LDADD += $(LIBDYNAMIC_WALLET)
 endif
 if ENABLE_ZMQ
-qt_darksilk_qt_LDADD += $(LIBDARKSILK_ZMQ) $(ZMQ_LIBS)
+qt_dynamic_qt_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif
-qt_darksilk_qt_LDADD += $(LIBDARKSILK_CLI) $(LIBDARKSILK_COMMON) $(LIBDARKSILK_UTIL) $(LIBDARKSILK_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
+qt_dynamic_qt_LDADD += $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-qt_darksilk_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
-qt_darksilk_qt_LIBTOOLFLAGS = --tag CXX
+qt_dynamic_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+qt_dynamic_qt_LIBTOOLFLAGS = --tag CXX
 
 #locale/foo.ts -> locale/foo.qm
 QT_QM=$(QT_TS:.ts=.qm)
 
 SECONDARY: $(QT_QM)
 
-qt/darksilkstrings.cpp: $(libdarksilk_server_a_SOURCES) $(libdarksilk_wallet_a_SOURCES) $(libdarksilk_common_a_SOURCES)
+qt/dynamicstrings.cpp: $(libdynamic_server_a_SOURCES) $(libdynamic_wallet_a_SOURCES) $(libdynamic_common_a_SOURCES)
 	@test -n $(XGETTEXT) || echo "xgettext is required for updating translations"
 	$(AM_V_GEN) cd $(srcdir); XGETTEXT=$(XGETTEXT) ../share/qt/extract_strings_qt.py $^
 
-translate: qt/darksilkstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(DARKSILK_QT_CPP) $(DARKSILK_QT_H) $(DARKSILK_MM)
+translate: qt/dynamicstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(DYNAMIC_QT_CPP) $(DYNAMIC_QT_H) $(DYNAMIC_MM)
 	@test -n $(LUPDATE) || echo "lupdate is required for updating translations"
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts qt/locale/darksilk_en.ts
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts qt/locale/dynamic_en.ts
 
 $(QT_QRC_LOCALE_CPP): $(QT_QRC_LOCALE) $(QT_QM)
 	@test -f $(RCC)
 	@test -f $(@D)/$(<F) || cp -f $< $(@D)
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name darksilk_locale $(@D)/$(<F) | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name dynamic_locale $(@D)/$(<F) | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
 $(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES) $(PROTOBUF_H)
 	@test -f $(RCC)
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name darksilk $< | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name dynamic $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
-CLEAN_QT = $(nodist_qt_libdarksilkqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno
+CLEAN_QT = $(nodist_qt_libdynamicqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno
 
 CLEANFILES += $(CLEAN_QT)
 
-darksilk_qt_clean: FORCE
-	rm -f $(CLEAN_QT) $(qt_libdarksilkqt_a_OBJECTS) $(qt_darksilk_qt_OBJECTS) qt/darksilk-qt$(EXEEXT) $(LIBDARKSILKQT)
+dynamic_qt_clean: FORCE
+	rm -f $(CLEAN_QT) $(qt_libdynamicqt_a_OBJECTS) $(qt_dynamic_qt_OBJECTS) qt/dynamic-qt$(EXEEXT) $(LIBDYNAMICQT)
 
-darksilk_qt : qt/darksilk-qt$(EXEEXT)
+dynamic_qt : qt/dynamic-qt$(EXEEXT)
 
 ui_%.h: %.ui
 	@test -f $(UIC)

@@ -1,24 +1,25 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "privatesend.h"
 #include "privatesend-relay.h"
+
+#include "privatesend.h"
 
 
 CPrivateSendRelay::CPrivateSendRelay()
 {
-    vinStormnode = CTxIn();
+    vinDynode = CTxIn();
     nBlockHeight = 0;
     nRelayType = 0;
     in = CTxIn();
     out = CTxOut();
 }
 
-CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinStormnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
+CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinDynodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
 {
-    vinStormnode = vinStormnodeIn;
+    vinDynode = vinDynodeIn;
     vchSig = vchSigIn;
     nBlockHeight = nBlockHeightIn;
     nRelayType = nRelayTypeIn;
@@ -30,7 +31,7 @@ std::string CPrivateSendRelay::ToString()
 {
     std::ostringstream info;
 
-    info << "vin: " << vinStormnode.ToString() <<
+    info << "vin: " << vinDynode.ToString() <<
         " nBlockHeight: " << (int)nBlockHeight <<
         " nRelayType: "  << (int)nRelayType <<
         " in " << in.ToString() <<
@@ -88,7 +89,7 @@ bool CPrivateSendRelay::VerifyMessage(std::string strSharedKey)
 
 void CPrivateSendRelay::Relay()
 {
-    int nCount = std::min(snodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION), 20);
+    int nCount = std::min(dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION), 20);
     int nRank1 = (rand() % nCount)+1; 
     int nRank2 = (rand() % nCount)+1; 
 
@@ -104,7 +105,7 @@ void CPrivateSendRelay::Relay()
 
 void CPrivateSendRelay::RelayThroughNode(int nRank)
 {
-    CStormnode* psn = snodeman.GetStormnodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
+    CDynode* psn = dnodeman.GetDynodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
     if(psn != NULL){
         //printf("RelayThroughNode %s\n", psn->addr.ToString().c_str());

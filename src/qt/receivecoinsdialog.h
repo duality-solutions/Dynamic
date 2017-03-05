@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_RECEIVECOINSDIALOG_H
-#define DARKSILK_QT_RECEIVECOINSDIALOG_H
+#ifndef DYNAMIC_QT_RECEIVECOINSDIALOG_H
+#define DYNAMIC_QT_RECEIVECOINSDIALOG_H
 
 #include "guiutil.h"
 
@@ -30,7 +30,7 @@ QT_BEGIN_NAMESPACE
 class QModelIndex;
 QT_END_NAMESPACE
 
-/** Dialog for requesting payment of DarkSilks */
+/** Dialog for requesting payment of Dynamics */
 class ReceiveCoinsDialog : public QDialog
 {
     Q_OBJECT
@@ -81,4 +81,4 @@ private Q_SLOTS:
     void copyAmount();
 };
 
-#endif // DARKSILK_QT_RECEIVECOINSDIALOG_H
+#endif // DYNAMIC_QT_RECEIVECOINSDIALOG_H

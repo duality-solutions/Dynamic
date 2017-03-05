@@ -1,4 +1,4 @@
-darksilk               ICON    "pixmaps/darksilk.ico"
+dynamic               ICON    "pixmaps/dynamic.ico"
 
 #include "wx/msw/wx.rc"
 

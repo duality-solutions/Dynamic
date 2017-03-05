@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -22,7 +22,7 @@ static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
 
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70300;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70500;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -47,8 +47,8 @@ static const int ORPHAN_VOTE_SECONDS            = 60;
     std::map<COutPoint, std::set<uint256> > mapVotedOutpoints; // utxo - tx hash set
     std::map<COutPoint, uint256> mapLockedOutpoints; // utxo - tx hash
 
-    //track stormnodes who voted with no txreq (for DOS protection)
-    std::map<COutPoint, int64_t> mapStormnodeOrphanVotes; // mn outpoint - time
+    //track dynodes who voted with no txreq (for DOS protection)
+    std::map<COutPoint, int64_t> mapDynodeOrphanVotes; // mn outpoint - time
 
     bool CreateTxLockCandidate(const CTxLockRequest& txLockRequest);
     void Vote(CTxLockCandidate& txLockCandidate);
@@ -58,7 +58,7 @@ static const int ORPHAN_VOTE_SECONDS            = 60;
     void ProcessOrphanTxLockVotes();
     bool IsEnoughOrphanVotesForTx(const CTxLockRequest& txLockRequest);
     bool IsEnoughOrphanVotesForTxAndOutPoint(const uint256& txHash, const COutPoint& outpoint);
-    int64_t GetAverageStormnodeOrphanVoteTime();
+    int64_t GetAverageDynodeOrphanVoteTime();
 
     void LockTransactionInputs(const CTxLockCandidate& txLockCandidate);
     //update UI and notify external script if any
@@ -132,8 +132,8 @@ class CTxLockVote
 private:
     uint256 txHash;
     COutPoint outpoint;
-    COutPoint outpointStormnode;
-    std::vector<unsigned char> vchStormnodeSignature;
+    COutPoint outpointDynode;
+    std::vector<unsigned char> vchDynodeSignature;
 // local memory only
     int nConfirmedHeight; // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
     int64_t nTimeCreated;
@@ -142,17 +142,17 @@ public:
     CTxLockVote() :
         txHash(),
         outpoint(),
-        outpointStormnode(),
-        vchStormnodeSignature(),
+        outpointDynode(),
+        vchDynodeSignature(),
         nConfirmedHeight(-1),
         nTimeCreated(GetTime())
         {}
 
-    CTxLockVote(const uint256& txHashIn, const COutPoint& outpointIn, const COutPoint& outpointStormnodeIn) :
+    CTxLockVote(const uint256& txHashIn, const COutPoint& outpointIn, const COutPoint& outpointDynodeIn) :
         txHash(txHashIn),
         outpoint(outpointIn),
-        outpointStormnode(outpointStormnodeIn),
-        vchStormnodeSignature(),
+        outpointDynode(outpointDynodeIn),
+        vchDynodeSignature(),
         nConfirmedHeight(-1),
         nTimeCreated(GetTime())
         {}
@@ -163,15 +163,15 @@ template <typename Stream, typename Operation>
 inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
     READWRITE(txHash);
         READWRITE(outpoint);
-        READWRITE(outpointStormnode);
-        READWRITE(vchStormnodeSignature);
+        READWRITE(outpointDynode);
+        READWRITE(vchDynodeSignature);
 }
 
 uint256 GetHash() const;
 
     uint256 GetTxHash() const { return txHash; }
     COutPoint GetOutpoint() const { return outpoint; }
-    COutPoint GetStormnodeOutpoint() const { return outpointStormnode; }
+    COutPoint GetDynodeOutpoint() const { return outpointDynode; }
     int64_t GetTimeCreated() const { return nTimeCreated; }
 
     bool IsValid(CNode* pnode) const;
@@ -188,7 +188,7 @@ class COutPointLock
 {
 private:
     COutPoint outpoint; // utxo
-    std::map<COutPoint, CTxLockVote> mapStormnodeVotes; // stormnode outpoint - vote
+    std::map<COutPoint, CTxLockVote> mapDynodeVotes; // dynode outpoint - vote
 
 public:
     static const int SIGNATURES_REQUIRED        = 10;
@@ -196,15 +196,15 @@ public:
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),
-        mapStormnodeVotes()
+        mapDynodeVotes()
         {}
 
     COutPoint GetOutpoint() const { return outpoint; }
 
     bool AddVote(const CTxLockVote& vote);
     std::vector<CTxLockVote> GetVotes() const;
-    bool HasStormnodeVoted(const COutPoint& outpointStormnodeIn) const;
-    int CountVotes() const { return mapStormnodeVotes.size(); }
+    bool HasDynodeVoted(const COutPoint& outpointDynodeIn) const;
+    int CountVotes() const { return mapDynodeVotes.size(); }
     bool IsReady() const { return CountVotes() >= SIGNATURES_REQUIRED; }
 
     void Relay() const;
@@ -231,7 +231,7 @@ public:
     bool AddVote(const CTxLockVote& vote);
     bool IsAllOutPointsReady() const;
 
-    bool HasStormnodeVoted(const COutPoint& outpointIn, const COutPoint& outpointStormnodeIn);
+    bool HasDynodeVoted(const COutPoint& outpointIn, const COutPoint& outpointDynodeIn);
     int CountVotes() const;
 
     void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }

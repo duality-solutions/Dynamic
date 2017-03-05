@@ -1,13 +1,13 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "recentrequeststablemodel.h"
 
-#include "darksilkunits.h"
+#include "dynamicunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
 
@@ -97,9 +97,9 @@ QVariant RecentRequestsTableModel::data(const QModelIndex &index, int role) cons
             if (rec->recipient.amount == 0 && role == Qt::DisplayRole)
                 return tr("(no amount)");
             else if (role == Qt::EditRole)
-                return DarkSilkUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount, false, DarkSilkUnits::separatorNever);
+                return DynamicUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount, false, DynamicUnits::separatorNever);
             else
-                return DarkSilkUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount);
+                return DynamicUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount);
         }
     }
     else if (role == Qt::TextAlignmentRole)
@@ -140,7 +140,7 @@ QString RecentRequestsTableModel::getAmountTitle()
     QString amountTitle = tr("Amount");
     if (this->walletModel->getOptionsModel() != NULL)
     {
-        amountTitle += " ("+DarkSilkUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()) + ")";
+        amountTitle += " ("+DynamicUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()) + ")";
     }
     return amountTitle;
 }

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_RPCPROTOCOL_H
-#define DARKSILK_RPCPROTOCOL_H
+#ifndef DYNAMIC_RPCPROTOCOL_H
+#define DYNAMIC_RPCPROTOCOL_H
 
 #include <univalue.h>
 
@@ -30,7 +30,7 @@ enum HTTPStatusCode
     HTTP_SERVICE_UNAVAILABLE   = 503,
 };
 
-//! DarkSilk Core RPC error codes
+//! Dynamic RPC error codes
 enum RPCErrorCode
 {
     //! Standard JSON-RPC 2.0 errors
@@ -60,7 +60,7 @@ enum RPCErrorCode
     RPC_TRANSACTION_ALREADY_IN_CHAIN= RPC_VERIFY_ALREADY_IN_CHAIN,
 
     //! P2P client errors
-    RPC_CLIENT_NOT_CONNECTED        = -9,  //! DarkSilk Core is not connected
+    RPC_CLIENT_NOT_CONNECTED        = -9,  //! Dynamic is not connected
     RPC_CLIENT_IN_INITIAL_DOWNLOAD  = -10, //! Still downloading initial blocks
     RPC_CLIENT_NODE_ALREADY_ADDED   = -23, //! Node is already added
     RPC_CLIENT_NODE_NOT_ADDED       = -24, //! Node has not been added before
@@ -93,4 +93,4 @@ bool GetAuthCookie(std::string *cookie_out);
 /** Delete RPC authentication cookie from disk */
 void DeleteAuthCookie();
 
-#endif // DARKSILK_RPCPROTOCOL_H
+#endif // DYNAMIC_RPCPROTOCOL_H

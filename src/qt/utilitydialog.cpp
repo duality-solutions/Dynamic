@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,12 +9,12 @@
 
 #include "ui_helpmessagedialog.h"
 
-#include "darksilkgui.h"
+#include "dynamicgui.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
+#include "guiutil.h"
 #include "intro.h"
 #include "paymentrequestplus.h"
-#include "guiutil.h"
 
 #include "clientversion.h"
 #include "init.h"
@@ -36,7 +36,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
 {
     ui->setupUi(this);
 
-    QString version = tr("DarkSilk Core") + " " + tr("version") + " " + QString::fromStdString(FormatFullVersion());
+    QString version = tr("Dynamic") + " " + tr("version") + " " + QString::fromStdString(FormatFullVersion());
     /* On x86 add a bit specifier to the version so that users can distinguish between
      * 32 and 64 bit builds. On other architectures, 32/64 bit may be more ambigious.
      */
@@ -48,7 +48,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
 
     if (helpMode == about)
     {
-        setWindowTitle(tr("About DarkSilk Core"));
+        setWindowTitle(tr("About Dynamic"));
 
         /// HTML-format the license message from the core
         QString licenseInfo = QString::fromStdString(LicenseInfo());
@@ -70,14 +70,14 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
     } else if (helpMode == cmdline) {
         setWindowTitle(tr("Command-line options"));
         QString header = tr("Usage:") + "\n" +
-            "  darksilk-qt [" + tr("command-line options") + "]                     " + "\n";
+            "  dynamic-qt [" + tr("command-line options") + "]                     " + "\n";
         QTextCursor cursor(ui->helpMessage->document());
         cursor.insertText(version);
         cursor.insertBlock();
         cursor.insertText(header);
         cursor.insertBlock();
 
-        std::string strUsage = HelpMessage(HMM_DARKSILK_QT);
+        std::string strUsage = HelpMessage(HMM_DYNAMIC_QT);
         const bool showDebug = GetBoolArg("-help-debug", false);
         strUsage += HelpMessageGroup(tr("UI Options:").toStdString());
         if (showDebug) {
@@ -90,7 +90,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         strUsage += HelpMessageOpt("-splash", strprintf(tr("Show splash screen on startup (default: %u)").toStdString(), DEFAULT_SPLASHSCREEN));
         strUsage += HelpMessageOpt("-resetguisettings", tr("Reset all settings changes made over the GUI").toStdString());
         if (showDebug) {
-            strUsage += HelpMessageOpt("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", DarkSilkGUI::DEFAULT_UIPLATFORM));
+            strUsage += HelpMessageOpt("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", DynamicGUI::DEFAULT_UIPLATFORM));
         }
         QString coreOptions = QString::fromStdString(strUsage);
         text = version + "\n" + header + "\n" + coreOptions;
@@ -137,18 +137,18 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         ui->aboutMessage->setText(tr("\
 <h3>PrivateSend Basics</h3> \
 PrivateSend gives you true financial privacy by obscuring the origins of your funds. \
-All the DarkSilk in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
+All the Dynamic in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
 PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. \
 You retain control of your money at all times..<hr> \
 <b>The PrivateSend process works like this:</b>\
 <ol type=\"1\"> \
 <li>PrivateSend begins by breaking your transaction inputs down into standard denominations. \
-These denominations are 0.1 DSLK, 1 DSLK, 10 DSLK, and 100 DSLK -- sort of like the paper money you use every day.</li> \
-<li>Your wallet then sends requests to specially configured software nodes on the network, called \"Stormnodes.\" \
-These Stormnodes are informed then that you are interested in mixing a certain denomination. \
-No identifiable information is sent to the Stormnodes, so they never know \"who\" you are.</li> \
+These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.</li> \
+<li>Your wallet then sends requests to specially configured software nodes on the network, called \"Dynodes.\" \
+These Dynodes are informed then that you are interested in mixing a certain denomination. \
+No identifiable information is sent to the Dynodes, so they never know \"who\" you are.</li> \
 <li>When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. \
-The Stormnode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
+The Dynode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. \
 Your wallet pays that denomination directly to itself, but in a different address (called a change address).</li> \
 <li>In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. \
 Each time the process is completed, it's called a \"round.\" Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.</li> \
@@ -204,12 +204,12 @@ ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
 {
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(new QLabel(
-        tr("DarkSilk Core is shutting down...") + "<br /><br />" +
+        tr("Dynamic is shutting down...") + "<br /><br />" +
         tr("Do not shut down the computer until this window disappears.")));
     setLayout(layout);
 }
 
-void ShutdownWindow::showShutdownWindow(DarkSilkGUI *window)
+void ShutdownWindow::showShutdownWindow(DynamicGUI *window)
 {
     if (!window)
         return;

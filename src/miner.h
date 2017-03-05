@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_MINER_H
-#define DARKSILK_MINER_H
+#ifndef DYNAMIC_MINER_H
+#define DYNAMIC_MINER_H
 
 #include "primitives/block.h"
 
@@ -42,7 +42,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 
 /** Run the miner threads */
-void GenerateDarkSilks(bool fGenerate, int nThreads, const CChainParams& chainparams);
+void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams);
 /** Generate a new block, without valid proof-of-work */
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn);
 /** Modify the extranonce in a block */
@@ -52,4 +52,4 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 extern double dHashesPerSec;
 extern int64_t nHPSTimerStart;
 
-#endif // DARKSILK_MINER_H
+#endif // DYNAMIC_MINER_H

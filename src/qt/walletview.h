@@ -1,19 +1,20 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_WALLETVIEW_H
-#define DARKSILK_QT_WALLETVIEW_H
+#ifndef DYNAMIC_QT_WALLETVIEW_H
+#define DYNAMIC_QT_WALLETVIEW_H
 
 #include "amount.h"
-#include "stormnodelist.h"
+
+#include "dynodelist.h"
 
 #include <QStackedWidget>
 
-class DarkSilkGUI;
+class DynamicGUI;
 class ClientModel;
 class OverviewPage;
 class PlatformStyle;
@@ -46,13 +47,13 @@ public:
     explicit WalletView(const PlatformStyle *platformStyle, QWidget *parent);
     ~WalletView();
 
-    void setDarkSilkGUI(DarkSilkGUI *gui);
+    void setDynamicGUI(DynamicGUI *gui);
     /** Set the client model.
         The client model represents the part of the core that communicates with the P2P network, and is wallet-agnostic.
     */
     void setClientModel(ClientModel *clientModel);
     /** Set the wallet model.
-        The wallet model represents a darksilk wallet, and offers access to the list of transactions, address book and sending
+        The wallet model represents a dynamic wallet, and offers access to the list of transactions, address book and sending
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
@@ -73,7 +74,7 @@ private:
     QWidget *transactionsPage;
     TransactionView *transactionView;
     MultisigDialog *multiSigPage;
-    StormnodeList *stormnodeListPage;
+    DynodeList *dynodeListPage;
     DNSPage *dnsPage;
 
     QProgressDialog *progressDialog;
@@ -91,8 +92,8 @@ public Q_SLOTS:
     void gotoHistoryPage();
     /** Switch to MultiSig page */
     void gotoMultiSigPage();
-    /** Switch to Stormnode page */
-    void gotoStormnodePage();
+    /** Switch to Dynode page */
+    void gotoDynodePage();
     /** Switch to DNS page */
     void gotoDNSPage();
 
@@ -128,7 +129,7 @@ public Q_SLOTS:
     /** Show progress dialog e.g. for rescan */
     void showProgress(const QString &title, int nProgress);
 
-    /** Update selected DSLK amount from transactionview */
+    /** Update selected DYN amount from transactionview */
     void trxAmount(QString amount);
 
 Q_SIGNALS:
@@ -144,4 +145,4 @@ Q_SIGNALS:
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
 };
 
-#endif // DARKSILK_QT_WALLETVIEW_H
+#endif // DYNAMIC_QT_WALLETVIEW_H

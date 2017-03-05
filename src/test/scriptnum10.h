@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_TEST_SCRIPTNUM10_H
-#define DARKSILK_TEST_SCRIPTNUM10_H
+#ifndef DYNAMIC_TEST_SCRIPTNUM10_H
+#define DYNAMIC_TEST_SCRIPTNUM10_H
 
 #include <algorithm>
 #include <limits>
@@ -180,4 +180,4 @@ private:
 };
 
 
-#endif // DARKSILK_TEST_BIGNUM_H
+#endif // DYNAMIC_TEST_BIGNUM_H

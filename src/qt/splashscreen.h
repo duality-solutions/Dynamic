@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_SPLASHSCREEN_H
-#define DARKSILK_QT_SPLASHSCREEN_H
+#ifndef DYNAMIC_QT_SPLASHSCREEN_H
+#define DYNAMIC_QT_SPLASHSCREEN_H
 
 #include <QSplashScreen>
 
@@ -14,7 +14,7 @@ class NetworkStyle;
 
 /** Class for the splashscreen with information of the running client.
  *
- * @note this is intentionally not a QSplashScreen. DarkSilk Core initialization
+ * @note this is intentionally not a QSplashScreen. Dynamic initialization
  * can take a long time, and in that case a progress window that cannot be
  * moved around and minimized has turned out to be frustrating to the user.
  */
@@ -49,4 +49,4 @@ private:
     int curAlignment;
 };
 
-#endif // DARKSILK_QT_SPLASHSCREEN_H
+#endif // DYNAMIC_QT_SPLASHSCREEN_H

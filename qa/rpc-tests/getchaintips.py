@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,13 +7,13 @@
 # on chains of different lengths, and join the network together again.
 # This gives us two tips, verify that it works.
 
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import assert_equal
 
-class GetChainTipsTest (DarkSilkTestFramework):
+class GetChainTipsTest (DynamicTestFramework):
 
     def run_test (self):
-        DarkSilkTestFramework.run_test (self)
+        DynamicTestFramework.run_test (self)
 
         tips = self.nodes[0].getchaintips ()
         assert_equal (len (tips), 1)

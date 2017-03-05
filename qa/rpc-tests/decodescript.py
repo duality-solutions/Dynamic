@@ -1,14 +1,14 @@
 #!/usr/bin/env python2
-# Copyright (c) 2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 from test_framework.mininode import *
 from io import BytesIO
 
-class DecodeScriptTest(DarkSilkTestFramework):
+class DecodeScriptTest(DynamicTestFramework):
     """Tests decoding scripts via RPC command "decodescript"."""
 
     def setup_chain(self):

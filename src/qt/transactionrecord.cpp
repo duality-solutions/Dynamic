@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,11 +9,12 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
-#include "instantsend.h"
 #include "main.h"
-#include "privatesend.h"
 #include "timedata.h"
 #include "wallet/wallet.h"
+
+#include "instantsend.h"
+#include "privatesend.h"
 
 #include <stdint.h>
 
@@ -64,9 +65,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
                 if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*wallet, address))
                 {
-                    // Received by DarkSilk Address
+                    // Received by Dynamic Address
                     sub.type = TransactionRecord::RecvWithAddress;
-                    sub.address = CDarkSilkAddress(address).ToString();
+                    sub.address = CDynamicAddress(address).ToString();
                 }
                 else
                 {
@@ -135,8 +136,8 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 CTxDestination address;
                 if (ExtractDestination(wtx.vout[0].scriptPubKey, address))
                 {
-                    // Sent to DarkSilk Address
-                    sub.address = CDarkSilkAddress(address).ToString();
+                    // Sent to Dynamic Address
+                    sub.address = CDynamicAddress(address).ToString();
                 }
                 else
                 {
@@ -188,9 +189,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 CTxDestination address;
                 if (ExtractDestination(txout.scriptPubKey, address))
                 {
-                    // Sent to DarkSilk Address
+                    // Sent to Dynamic Address
                     sub.type = TransactionRecord::SendToAddress;
-                    sub.address = CDarkSilkAddress(address).ToString();
+                    sub.address = CDynamicAddress(address).ToString();
                 }
                 else
                 {

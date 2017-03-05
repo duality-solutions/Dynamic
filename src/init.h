@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_INIT_H
-#define DARKSILK_INIT_H
+#ifndef DYNAMIC_INIT_H
+#define DYNAMIC_INIT_H
 
 #include <string>
 
@@ -34,8 +34,8 @@ void PrepareShutdown();
 
 /** The help message mode determines what help message to show */
 enum HelpMessageMode {
-    HMM_DARKSILKD,
-    HMM_DARKSILK_QT
+    HMM_DYNAMICD,
+    HMM_DYNAMIC_QT
 };
 
 /** Help for options shared between UI and daemon (for -help) */
@@ -43,4 +43,4 @@ std::string HelpMessage(HelpMessageMode mode);
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
 
-#endif // DARKSILK_INIT_H
+#endif // DYNAMIC_INIT_H

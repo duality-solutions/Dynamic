@@ -2,7 +2,7 @@
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2011-2017 Namecoin Developers
 // Copyright (c) 2013-2017 Emercoin Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -306,7 +306,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal name = nameValFromValue(params[0]);
     CAmount nAmount = AmountFromValue(params[1]);
@@ -319,7 +319,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
         wtx.mapValue["to"]      = params[3].get_str();
 
     string error;
-    CDarkSilkAddress address;
+    CDynamicAddress address;
     if (!GetNameCurrentAddress(name, address, error))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, error);
 
@@ -331,7 +331,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
     return res;
 }
 
-bool GetNameCurrentAddress(const CNameVal& name, CDarkSilkAddress& address, string& error)
+bool GetNameCurrentAddress(const CNameVal& name, CDynamicAddress& address, string& error)
 {
     CNameDB dbName("r");
     if (!dbName.ExistsName(name))
@@ -381,7 +381,7 @@ UniValue name_list(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal nameUniq;
     if (params.size() == 1)
@@ -523,7 +523,7 @@ UniValue name_show(const UniValue& params, bool fHelp)
             );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     UniValue oName(UniValue::VOBJ);
     CNameVal name = nameValFromValue(params[0]);
@@ -604,7 +604,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
         );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal name = nameValFromValue(params[0]);
     bool fFullHistory = false;
@@ -737,7 +737,7 @@ UniValue name_filter(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     string strRegexp;
     int nFrom = 0;
@@ -860,7 +860,7 @@ UniValue name_scan(const UniValue& params, bool fHelp)
                 );
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "DarkSilk is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal name;
     string strSearchName = "";
@@ -1100,7 +1100,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     if (IsInitialBlockDownload())
     {
         ret.err_code = RPC_CLIENT_IN_INITIAL_DOWNLOAD;
-        ret.err_msg = "DarkSilk is downloading blocks...";
+        ret.err_msg = "Dynamic is downloading blocks...";
         return ret;
     }
 
@@ -1195,11 +1195,11 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         // add destination to namescript
         if ((op == OP_NAME_UPDATE || op == OP_NAME_NEW || op == OP_NAME_MULTISIG) && strAddress != "")
         {
-            CDarkSilkAddress address(strAddress);
+            CDynamicAddress address(strAddress);
             if (!address.IsValid())
             {
                 ret.err_code = RPC_INVALID_ADDRESS_OR_KEY;
-                ret.err_msg = "DarkSilk address is invalid";
+                ret.err_msg = "Dynamic address is invalid";
                 return ret;
             }
             scriptPubKey = GetScriptForDestination(address.Get());
@@ -1237,7 +1237,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     CTxDestination address;
     if (ExtractDestination(scriptPubKey, address))
     {
-        ret.address = CDarkSilkAddress(address).ToString();
+        ret.address = CDynamicAddress(address).ToString();
     }
 
     ret.hex = wtx.GetHash();
@@ -1327,7 +1327,7 @@ bool DecodeNameTx(const CTransaction& tx, NameTxInfo& nti, bool checkAddressAndI
                 CScript scriptPubKey(pc, out.scriptPubKey.end());
                 if (!ExtractDestination(scriptPubKey, address))
                     nti.strAddress = "";
-                nti.strAddress = CDarkSilkAddress(address).ToString();
+                nti.strAddress = CDynamicAddress(address).ToString();
 
                 // check if this is mine destination
                 nti.fIsMine = IsMine(*pwalletMain, address) == ISMINE_SPENDABLE;

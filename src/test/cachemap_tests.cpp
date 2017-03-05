@@ -2,7 +2,7 @@
 
 #include "cachemap.h"
 
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <boost/test/unit_test.hpp>
 

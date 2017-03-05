@@ -248,14 +248,14 @@ QTabBar { alignment: left; }</string>
         </widget>
        </item>
        <item row="10" column="0">
-        <widget class="QLabel" name="stormnodeCountLabel">
+        <widget class="QLabel" name="dynodeCountLabel">
          <property name="text">
-          <string>Number of Stormnodes</string>
+          <string>Number of Dynodes</string>
          </property>
         </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QLabel" name="stormnodeCount">
+        <widget class="QLabel" name="dynodeCount">
          <property name="text">
           <string>N/A</string>
          </property>
@@ -407,7 +407,7 @@ QTabBar { alignment: left; }</string>
          <item>
           <widget class="QPushButton" name="openDebugLogfileButton">
            <property name="toolTip">
-            <string>Open the DarkSilk Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
+            <string>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</string>
            </property>
            <property name="text">
             <string>&amp;Open</string>
@@ -491,7 +491,7 @@ QTabBar { alignment: left; }</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../darksilk.qrc">
+            <iconset resource="../dynamic.qrc">
              <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
            </property>
            <property name="shortcut">
@@ -1587,7 +1587,7 @@ QTabBar { alignment: left; }</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../darksilk.qrc"/>
+  <include location="../dynamic.qrc"/>
  </resources>
  <connections/>
 </ui>

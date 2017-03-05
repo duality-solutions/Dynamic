@@ -16,7 +16,6 @@
 #include "base58.h"
 #include "chainparamsbase.h"
 #include "core_io.h"
-#include "dns/dns.h"
 #include "dbwrapper.h"
 #include "key.h"
 #include "main.h"
@@ -29,6 +28,8 @@
 #include "util.h"
 #include "consensus/validation.h"
 #include "wallet/wallet.h"
+
+#include "dns/dns.h"
 
 #include <QClipboard>
 #include <QWidget>
@@ -197,7 +198,7 @@ void MultisigDialog::on_createAddressButton_clicked()
 
     if (IsInitialBlockDownload())
     {
-        QMessageBox::critical(this, tr("Multisig: Chain Download Incomplete!"), tr("DarkSilk is downloading blocks..."));
+        QMessageBox::critical(this, tr("Multisig: Chain Download Incomplete!"), tr("Dynamic is downloading blocks..."));
         return;
     }
 
@@ -261,7 +262,7 @@ void MultisigDialog::on_createAddressButton_clicked()
         }
         else
         {
-            CDarkSilkAddress address(strAddressEntered);
+            CDynamicAddress address(strAddressEntered);
             if (pwalletMain && address.IsValid())
             {
                 bool fError = false;
@@ -296,7 +297,7 @@ void MultisigDialog::on_createAddressButton_clicked()
     {
         CScript script = GetScriptForMultisig(required, pubkeys);
         CScriptID scriptID = GetScriptID(script);
-        CDarkSilkAddress multiSigAddress(scriptID);
+        CDynamicAddress multiSigAddress(scriptID);
         ui->multisigAddress->setText(multiSigAddress.ToString().c_str());
         ui->redeemScript->setText(HexStr(script.begin(), script.end()).c_str());
     }
@@ -358,9 +359,9 @@ void MultisigDialog::on_saveMultisigAddressButton_clicked()
     if(!pwalletMain->HaveCScript(scriptID))
         pwalletMain->AddCScript(script);
 
-    CDarkSilkAddress dslkMultiSigAddress(address);
-    if(!pwalletMain->mapAddressBook.count(dslkMultiSigAddress.Get()))
-		pwalletMain->SetAddressBook(dslkMultiSigAddress.Get(), label, "multisig address");
+    CDynamicAddress dynMultiSigAddress(address);
+    if(!pwalletMain->mapAddressBook.count(dynMultiSigAddress.Get()))
+		pwalletMain->SetAddressBook(dynMultiSigAddress.Get(), label, "multisig address");
 }
 
 void MultisigDialog::clear()
@@ -426,7 +427,7 @@ void MultisigDialog::on_createTransactionButton_clicked()
             if(entry->validate())
             {
                 SendCoinsRecipient recipient = entry->getValue();
-                CDarkSilkAddress address(recipient.address.toStdString());
+                CDynamicAddress address(recipient.address.toStdString());
                 CScript scriptPubKey = GetScriptForDestination(address.Get());
                 CAmount amount = recipient.amount;
                 CTxOut output(amount, scriptPubKey);
@@ -498,7 +499,7 @@ void MultisigDialog::on_transaction_textChanged()
         CScript scriptPubKey = txout.scriptPubKey;
         CTxDestination addr;
         ExtractDestination(scriptPubKey, addr);
-        CDarkSilkAddress address(addr);
+        CDynamicAddress address(addr);
         SendCoinsRecipient recipient;
         recipient.address = QString(address.ToString().c_str());
         recipient.amount = txout.nValue;
@@ -674,13 +675,13 @@ void MultisigDialog::on_sendTransactionButton_clicked()
     int64_t minFee = DEFAULT_TRANSACTION_MINFEE * (1 + (int64_t) transactionSize / 1000);
     if(fee < minFee)
     {
-        QMessageBox::StandardButton ret = QMessageBox::question(this, tr("Confirm send transaction"), tr("The fee of the transaction (%1 DSLK) is smaller than the expected fee (%2 DSLK). Do you want to send the transaction anyway?").arg((double) fee / COIN).arg((double) minFee / COIN), QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
+        QMessageBox::StandardButton ret = QMessageBox::question(this, tr("Confirm send transaction"), tr("The fee of the transaction (%1 DYN) is smaller than the expected fee (%2 DYN). Do you want to send the transaction anyway?").arg((double) fee / COIN).arg((double) minFee / COIN), QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
         if(ret != QMessageBox::Yes)
             return;
     }
     else if(fee > minFee)
     {
-        QMessageBox::StandardButton ret = QMessageBox::question(this, tr("Confirm send transaction"), tr("The fee of the transaction (%1 DSLK) is bigger than the expected fee (%2 DSLK). Do you want to send the transaction anyway?").arg((double) fee / COIN).arg((double) minFee / COIN), QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
+        QMessageBox::StandardButton ret = QMessageBox::question(this, tr("Confirm send transaction"), tr("The fee of the transaction (%1 DYN) is bigger than the expected fee (%2 DYN). Do you want to send the transaction anyway?").arg((double) fee / COIN).arg((double) minFee / COIN), QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
         if(ret != QMessageBox::Yes)
             return;
     }

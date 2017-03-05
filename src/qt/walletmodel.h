@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_WALLETMODEL_H
-#define DARKSILK_QT_WALLETMODEL_H
+#ifndef DYNAMIC_QT_WALLETMODEL_H
+#define DYNAMIC_QT_WALLETMODEL_H
 
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
@@ -102,7 +102,7 @@ public:
     }
 };
 
-/** Interface to DarkDarkSilk wallet from Qt view code. */
+/** Interface to Dynamic wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -286,4 +286,4 @@ public Q_SLOTS:
     void pollBalanceChanged();
 };
 
-#endif // DARKSILK_QT_WALLETMODEL_H
+#endif // DYNAMIC_QT_WALLETMODEL_H

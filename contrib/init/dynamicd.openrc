@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/dynamic/.dynamic" ]; then
+	DYNAMICD_DEFAULT_DATADIR="/var/lib/dynamic/.dynamic"
+else
+	DYNAMICD_DEFAULT_DATADIR="/var/lib/dynamicd"
+fi
+
+DYNAMICD_CONFIGFILE=${DYNAMICD_CONFIGFILE:-/etc/dynamic/dynamic.conf}
+DYNAMICD_PIDDIR=${DYNAMICD_PIDDIR:-/var/run/dynamicd}
+DYNAMICD_PIDFILE=${DYNAMICD_PIDFILE:-${DYNAMICD_PIDDIR}/dynamicd.pid}
+DYNAMICD_DATADIR=${DYNAMICD_DATADIR:-${DYNAMICD_DEFAULT_DATADIR}}
+DYNAMICD_USER=${DYNAMICD_USER:-${DYNAMIC_USER:-dynamic}}
+DYNAMICD_GROUP=${DYNAMICD_GROUP:-dynamic}
+DYNAMICD_BIN=${DYNAMICD_BIN:-/usr/bin/dynamicd}
+DYNAMICD_NICE=${DYNAMICD_NICE:-${NICELEVEL:-0}}
+DYNAMICD_OPTS="${DYNAMICD_OPTS:-${DYNAMIC_OPTS}}"
+
+name="Dynamic Daemon"
+description="Dynamic cryptocurrency P2P network daemon"
+
+command="/usr/bin/dynamicd"
+command_args="-pid=\"${DYNAMICD_PIDFILE}\" \
+		-conf=\"${DYNAMICD_CONFIGFILE}\" \
+		-datadir=\"${DYNAMICD_DATADIR}\" \
+		-daemon \
+		${DYNAMICD_OPTS}"
+
+required_files="${DYNAMICD_CONFIGFILE}"
+start_stop_daemon_args="-u ${DYNAMICD_USER} \
+			-N ${DYNAMICD_NICE} -w 2000"
+pidfile="${DYNAMICD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${DYNAMICD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${DYNAMICD_USER}:${DYNAMICD_GROUP}" \
+	"${DYNAMICD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${DYNAMICD_USER}:${DYNAMICD_GROUP}" \
+	"${DYNAMICD_PIDDIR}"
+
+	checkpath -f \
+	-o ${DYNAMICD_USER}:${DYNAMICD_GROUP} \
+	-m 0660 \
+	${DYNAMICD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${DYNAMICD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run dynamicd."
+		eerror "The setting must appear in ${DYNAMICD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Dynamic Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

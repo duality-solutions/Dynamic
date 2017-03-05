@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,6 +15,7 @@
 #include <string.h>
 #include <vector>
 #include <string>
+
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
@@ -206,13 +207,13 @@ int CBase58Data::CompareTo(const CBase58Data& b58) const
 
 namespace
 {
-class CDarkSilkAddressVisitor : public boost::static_visitor<bool>
+class CDynamicAddressVisitor : public boost::static_visitor<bool>
 {
 private:
-    CDarkSilkAddress* addr;
+    CDynamicAddress* addr;
 
 public:
-    CDarkSilkAddressVisitor(CDarkSilkAddress* addrIn) : addr(addrIn) {}
+    CDynamicAddressVisitor(CDynamicAddress* addrIn) : addr(addrIn) {}
 
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
@@ -221,29 +222,29 @@ public:
 
 } // anon namespace
 
-bool CDarkSilkAddress::Set(const CKeyID& id)
+bool CDynamicAddress::Set(const CKeyID& id)
 {
     SetData(Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS), &id, 20);
     return true;
 }
 
-bool CDarkSilkAddress::Set(const CScriptID& id)
+bool CDynamicAddress::Set(const CScriptID& id)
 {
     SetData(Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS), &id, 20);
     return true;
 }
 
-bool CDarkSilkAddress::Set(const CTxDestination& dest)
+bool CDynamicAddress::Set(const CTxDestination& dest)
 {
-    return boost::apply_visitor(CDarkSilkAddressVisitor(this), dest);
+    return boost::apply_visitor(CDynamicAddressVisitor(this), dest);
 }
 
-bool CDarkSilkAddress::IsValid() const
+bool CDynamicAddress::IsValid() const
 {
     return IsValid(Params());
 }
 
-bool CDarkSilkAddress::IsValid(const CChainParams& params) const
+bool CDynamicAddress::IsValid(const CChainParams& params) const
 {
     bool fCorrectSize = vchData.size() == 20;
     bool fKnownVersion = vchVersion == params.Base58Prefix(CChainParams::PUBKEY_ADDRESS) ||
@@ -251,7 +252,7 @@ bool CDarkSilkAddress::IsValid(const CChainParams& params) const
     return fCorrectSize && fKnownVersion;
 }
 
-CTxDestination CDarkSilkAddress::Get() const
+CTxDestination CDynamicAddress::Get() const
 {
     if (!IsValid())
         return CNoDestination();
@@ -265,7 +266,7 @@ CTxDestination CDarkSilkAddress::Get() const
         return CNoDestination();
 }
 
-bool CDarkSilkAddress::GetIndexKey(uint160& hashBytes, int& type) const
+bool CDynamicAddress::GetIndexKey(uint160& hashBytes, int& type) const
 {
     if (!IsValid()) {
         return false;
@@ -282,7 +283,7 @@ bool CDarkSilkAddress::GetIndexKey(uint160& hashBytes, int& type) const
     return false;
 }
 
-bool CDarkSilkAddress::GetKeyID(CKeyID& keyID) const
+bool CDynamicAddress::GetKeyID(CKeyID& keyID) const
 {
     if (!IsValid() || vchVersion != Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS))
         return false;
@@ -292,12 +293,12 @@ bool CDarkSilkAddress::GetKeyID(CKeyID& keyID) const
     return true;
 }
 
-bool CDarkSilkAddress::IsScript() const
+bool CDynamicAddress::IsScript() const
 {
     return IsValid() && vchVersion == Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS);
 }
 
-void CDarkSilkSecret::SetKey(const CKey& vchSecret)
+void CDynamicSecret::SetKey(const CKey& vchSecret)
 {
     assert(vchSecret.IsValid());
     SetData(Params().Base58Prefix(CChainParams::SECRET_KEY), vchSecret.begin(), vchSecret.size());
@@ -305,7 +306,7 @@ void CDarkSilkSecret::SetKey(const CKey& vchSecret)
         vchData.push_back(1);
 }
 
-CKey CDarkSilkSecret::GetKey()
+CKey CDynamicSecret::GetKey()
 {
     CKey ret;
     assert(vchData.size() >= 32);
@@ -313,19 +314,19 @@ CKey CDarkSilkSecret::GetKey()
     return ret;
 }
 
-bool CDarkSilkSecret::IsValid() const
+bool CDynamicSecret::IsValid() const
 {
     bool fExpectedFormat = vchData.size() == 32 || (vchData.size() == 33 && vchData[32] == 1);
     bool fCorrectVersion = vchVersion == Params().Base58Prefix(CChainParams::SECRET_KEY);
     return fExpectedFormat && fCorrectVersion;
 }
 
-bool CDarkSilkSecret::SetString(const char* pszSecret)
+bool CDynamicSecret::SetString(const char* pszSecret)
 {
     return CBase58Data::SetString(pszSecret) && IsValid();
 }
 
-bool CDarkSilkSecret::SetString(const std::string& strSecret)
+bool CDynamicSecret::SetString(const std::string& strSecret)
 {
     return SetString(strSecret.c_str());
 }

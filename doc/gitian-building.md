@@ -1,9 +1,9 @@
 Gitian building
 ================
 
-*Setup instructions for a gitian build of DarkSilk using a Debian VM or physical system.*
+*Setup instructions for a gitian build of Dynamic using a Debian VM or physical system.*
 
-Gitian is the deterministic build process that is used to build the DarkSilk
+Gitian is the deterministic build process that is used to build the Dynamic
 Core executables. It provides a way to be reasonably sure that the
 executables are really built from source on GitHub. It also makes sure that
 the same, tested dependencies are used and statically built into the executable.
@@ -11,7 +11,7 @@ the same, tested dependencies are used and statically built into the executable.
 Multiple developers build the source code by following a specific descriptor
 ("recipe"), cryptographically sign the result, and upload the resulting signature.
 These results are compared and only if they match, the build is accepted and uploaded
-to darksilkpay.io.
+to dynamicpay.io.
 
 More independent gitian builders are needed, which is why I wrote this
 guide. It is preferred to follow these steps yourself instead of using someone else's
@@ -26,7 +26,7 @@ Table of Contents
 - [Installing gitian](#installing-gitian)
 - [Setting up gitian images](#setting-up-gitian-images)
 - [Getting and building the inputs](#getting-and-building-the-inputs)
-- [Building DarkSilk](#building-darksilk)
+- [Building Dynamic](#building-dynamic)
 - [Building an alternative repository](#building-an-alternative-repository)
 - [Signing externally](#signing-externally)
 - [Uploading signatures](#uploading-signatures)
@@ -41,7 +41,7 @@ Debian Linux was chosen as the host distribution because it has a lightweight in
 Any kind of virtualization can be used, for example:
 - [VirtualBox](https://www.virtualbox.org/), covered by this guide
 - [KVM](http://www.linux-kvm.org/page/Main_Page)
-- [LXC](https://linuxcontainers.org/), see also [Gitian host docker container](https://github.com/gdm85/tenku/tree/master/docker/gitian-darksilk-host/README.md).
+- [LXC](https://linuxcontainers.org/), see also [Gitian host docker container](https://github.com/gdm85/tenku/tree/master/docker/gitian-dynamic-host/README.md).
 
 You can also install on actual hardware instead of using virtualization.
 
@@ -277,12 +277,12 @@ cd ..
 
 **Note**: When sudo asks for a password, enter the password for the user *debian* not for *root*.
 
-Clone the git repositories for darksilk and gitian and then checkout the darksilk version that you want to build.
+Clone the git repositories for dynamic and gitian and then checkout the dynamic version that you want to build.
 
 ```bash
 git clone https://github.com/devrandom/gitian-builder.git
-git clone https://github.com/silknetwork/darksilk-core.git
-cd darksilk
+git clone https://github.com/duality-solutions/dynamic.git
+cd dynamic
 git checkout v${VERSION}
 cd ..
 ```
@@ -321,16 +321,16 @@ There will be a lot of warnings printed during build of the images. These can be
 Getting and building the inputs
 --------------------------------
 
-Follow the instructions in [doc/release-process.md](release-process.md) in the darksilk repository
+Follow the instructions in [doc/release-process.md](release-process.md) in the dynamic repository
 under 'Fetch and build inputs' to install sources which require manual intervention. Also follow
 the next step: 'Seed the Gitian sources cache', which will fetch all necessary source files allowing
 for gitian to work offline.
 
-Building DarkSilk
+Building Dynamic
 ----------------
 
-To build DarkSilk (for Linux, OSX and Windows) just follow the steps under 'perform
-gitian builds' in [doc/release-process.md](release-process.md) in the darksilk repository.
+To build Dynamic (for Linux, OSX and Windows) just follow the steps under 'perform
+gitian builds' in [doc/release-process.md](release-process.md) in the dynamic repository.
 
 This may take a long time as it also builds the dependencies needed for each descriptor.
 These dependencies will be cached after a successful build to avoid rebuilding them when possible.
@@ -345,12 +345,12 @@ tail -f var/build.log
 Output from `gbuild` will look something like
 
 ```bash
-    Initialized empty Git repository in /home/debian/gitian-builder/inputs/darksilk/.git/
+    Initialized empty Git repository in /home/debian/gitian-builder/inputs/dynamic/.git/
     remote: Reusing existing pack: 35606, done.
     remote: Total 35606 (delta 0), reused 0 (delta 0)
     Receiving objects: 100% (35606/35606), 26.52 MiB | 4.28 MiB/s, done.
     Resolving deltas: 100% (25724/25724), done.
-    From https://github.com/silknetwork/darksilk-core
+    From https://github.com/duality-solutions/dynamic
     ... (new tags, new branch etc)
     --- Building for precise x86_64 ---
     Stopping target if it is up
@@ -377,11 +377,11 @@ and inputs.
 
 For example:
 ```bash
-URL=https://github.com/crowning-/darksilk.git
+URL=https://github.com/crowning-/dynamic.git
 COMMIT=b616fb8ef0d49a919b72b0388b091aaec5849b96
-./bin/gbuild --commit darksilk=${COMMIT} --url darksilk=${URL} ../darksilk/contrib/gitian-descriptors/gitian-linux.yml
-./bin/gbuild --commit darksilk=${COMMIT} --url darksilk=${URL} ../darksilk/contrib/gitian-descriptors/gitian-win.yml
-./bin/gbuild --commit darksilk=${COMMIT} --url darksilk=${URL} ../darksilk/contrib/gitian-descriptors/gitian-osx.yml
+./bin/gbuild --commit dynamic=${COMMIT} --url dynamic=${URL} ../dynamic/contrib/gitian-descriptors/gitian-linux.yml
+./bin/gbuild --commit dynamic=${COMMIT} --url dynamic=${URL} ../dynamic/contrib/gitian-descriptors/gitian-win.yml
+./bin/gbuild --commit dynamic=${COMMIT} --url dynamic=${URL} ../dynamic/contrib/gitian-descriptors/gitian-osx.yml
 ```
 
 Signing externally
@@ -396,9 +396,9 @@ When you execute `gsign` you will get an error from GPG, which can be ignored. C
 in `gitian.sigs` to your signing machine and do
 
 ```bash
-    gpg --detach-sign ${VERSION}-linux/${SIGNER}/darksilk-build.assert
-    gpg --detach-sign ${VERSION}-win/${SIGNER}/darksilk-build.assert
-    gpg --detach-sign ${VERSION}-osx/${SIGNER}/darksilk-build.assert
+    gpg --detach-sign ${VERSION}-linux/${SIGNER}/dynamic-build.assert
+    gpg --detach-sign ${VERSION}-win/${SIGNER}/dynamic-build.assert
+    gpg --detach-sign ${VERSION}-osx/${SIGNER}/dynamic-build.assert
 ```
 
 This will create the `.sig` files that can be committed together with the `.assert` files to assert your

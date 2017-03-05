@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_OPTIONSMODEL_H
-#define DARKSILK_QT_OPTIONSMODEL_H
+#ifndef DYNAMIC_QT_OPTIONSMODEL_H
+#define DYNAMIC_QT_OPTIONSMODEL_H
 
 #include "amount.h"
 
@@ -16,7 +16,7 @@ QT_BEGIN_NAMESPACE
 class QNetworkProxy;
 QT_END_NAMESPACE
 
-/** Interface from Qt to configuration data structure for DarkSilk client.
+/** Interface from Qt to configuration data structure for Dynamic client.
    To Qt, the options are presented as a list with the different options
    laid out vertically.
    This can be changed to a tree once the settings become sufficiently
@@ -40,7 +40,7 @@ public:
         ProxyUseTor,            // bool
         ProxyIPTor,             // QString
         ProxyPortTor,           // int
-        DisplayUnit,            // DarkSilkUnits::Unit
+        DisplayUnit,            // DynamicUnits::Unit
         ThirdPartyTxUrls,       // QString
         Digits,                 // QString
         Theme,                  // QString
@@ -49,7 +49,7 @@ public:
         ThreadsScriptVerif,     // int
         DatabaseCache,          // int
         SpendZeroConfChange,    // bool
-        ShowStormnodesTab,     // bool
+        ShowDynodesTab,     // bool
         ShowAdvancedPSUI,       // bool
         LowKeysWarning,         // bool
         PrivateSendRounds,      // int
@@ -106,4 +106,4 @@ Q_SIGNALS:
     void coinControlFeaturesChanged(bool);
 };
 
-#endif // DARKSILK_QT_OPTIONSMODEL_H
+#endif // DYNAMIC_QT_OPTIONSMODEL_H

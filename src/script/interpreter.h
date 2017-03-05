@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_SCRIPT_INTERPRETER_H
-#define DARKSILK_SCRIPT_INTERPRETER_H
+#ifndef DYNAMIC_SCRIPT_INTERPRETER_H
+#define DYNAMIC_SCRIPT_INTERPRETER_H
 
 #include "script_error.h"
 #include "primitives/transaction.h"
@@ -153,4 +153,4 @@ bool DecodeNameScript(const CScript& script, NameTxInfo& ret, CScript::const_ite
 bool DecodeNameScript(const CScript& script, NameTxInfo& ret);
 bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
 
-#endif // DARKSILK_SCRIPT_INTERPRETER_H
+#endif // DYNAMIC_SCRIPT_INTERPRETER_H

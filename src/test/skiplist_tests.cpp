@@ -5,7 +5,7 @@
 #include "chain.h"
 #include "random.h"
 #include "util.h"
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <vector>
 

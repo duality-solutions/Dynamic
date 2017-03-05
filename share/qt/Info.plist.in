@@ -11,13 +11,13 @@
   </array>
 
   <key>CFBundleIconFile</key>
-  <string>darksilk.icns</string>
+  <string>dynamic.icns</string>
 
   <key>CFBundlePackageType</key>
   <string>APPL</string>
 
   <key>CFBundleGetInfoString</key>
-  <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@, Copyright © 2009-@COPYRIGHT_YEAR@ The Bitcoin Core developers, 2015-@COPYRIGHT_YEAR@ Silk Network</string>
+  <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@, Copyright © 2009-@COPYRIGHT_YEAR@ The Bitcoin Core developers, 2015-@COPYRIGHT_YEAR@ Dynamic Blockchain Solutions</string>
 
   <key>CFBundleShortVersionString</key>
   <string>@CLIENT_VERSION_MAJOR@.@CLIENT_VERSION_MINOR@.@CLIENT_VERSION_REVISION@</string>
@@ -29,10 +29,10 @@
   <string>????</string>
 
   <key>CFBundleExecutable</key>
-  <string>DarkSilk-Qt</string>
+  <string>Dynamic-Qt</string>
 
   <key>CFBundleIdentifier</key>
-  <string>io.darksilkpay.DarkSilk-Qt</string>
+  <string>io.dynamicpay.Dynamic-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>
@@ -40,10 +40,10 @@
       <key>CFBundleTypeRole</key>
       <string>Editor</string>
       <key>CFBundleURLName</key>
-      <string>io.darksilk.DarkSilkPayment</string>
+      <string>io.dynamic.DynamicPayment</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>darksilk</string>
+        <string>dynamic</string>
       </array>
     </dict>
   </array>
@@ -52,9 +52,9 @@
   <array>
     <dict>
       <key>UTTypeIdentifier</key>
-      <string>io.darksilk.paymentrequest</string>
+      <string>io.dynamic.paymentrequest</string>
       <key>UTTypeDescription</key>
-      <string>DarkSilk payment request</string>
+      <string>Dynamic payment request</string>
       <key>UTTypeConformsTo</key>
       <array>
         <string>public.data</string>
@@ -62,10 +62,10 @@
       <key>UTTypeTagSpecification</key>
       <dict>
         <key>public.mime-type</key>
-        <string>application/x-darksilk-payment-request</string>
+        <string>application/x-dynamic-payment-request</string>
         <key>public.filename-extension</key>
         <array>
-          <string>darksilkpaymentrequest</string>
+          <string>dynamicpaymentrequest</string>
         </array>
       </dict>
     </dict>
@@ -78,7 +78,7 @@
       <string>Editor</string>
       <key>LSItemContentTypes</key>
       <array>
-        <string>io.darksilk.paymentrequest</string>
+        <string>io.dynamic.paymentrequest</string>
       </array>
       <key>LSHandlerRank</key>
       <string>Owner</string>

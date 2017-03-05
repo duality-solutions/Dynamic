@@ -1,21 +1,22 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_GOVERNANCE_OBJECT_H
-#define DARKSILK_GOVERNANCE_OBJECT_H
+#ifndef DYNAMIC_GOVERNANCE_OBJECT_H
+#define DYNAMIC_GOVERNANCE_OBJECT_H
 
-//#define ENABLE_DARKSILK_DEBUG
+//#define ENABLE_DYNAMIC_DEBUG
 
 #include "cachemultimap.h"
-#include "governance-exceptions.h"
-#include "governance-vote.h"
-#include "governance-votedb.h"
 #include "key.h"
 #include "net.h"
 #include "sync.h"
 #include "util.h"
+
+#include "governance-exceptions.h"
+#include "governance-vote.h"
+#include "governance-votedb.h"
 
 #include <univalue.h>
 
@@ -25,9 +26,9 @@ class CGovernanceObject;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
-static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70300;
+static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70500;
 
-static const int GOVERNANCE_FILTER_PROTO_VERSION = 70300;
+static const int GOVERNANCE_FILTER_PROTO_VERSION = 70500;
 static const double GOVERNANCE_FILTER_FP_RATE = 0.001;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
@@ -148,15 +149,15 @@ private:
     /// Data field - can be used for anything
     std::string strData;
 
-    /// Stormnode info for signed objects
-    CTxIn vinStormnode;
+    /// Dynode info for signed objects
+    CTxIn vinDynode;
     std::vector<unsigned char> vchSig;
 
     /// is valid by blockchain
     bool fCachedLocalValidity;
     std::string strLocalValidityError;
 
-    // VARIOUS FLAGS FOR OBJECT / SET VIA STORMNODE VOTING
+    // VARIOUS FLAGS FOR OBJECT / SET VIA DYNODE VOTING
 
     /// true == minimum network support has been reached for this object to be funded (doesn't mean it will for sure though)
     bool fCachedFunding;
@@ -181,9 +182,9 @@ private:
     /// Failed to parse object data
     bool fUnparsable;
 
-    vote_m_t mapCurrentSNVotes;
+    vote_m_t mapCurrentDNVotes;
 
-    /// Limited map of votes orphaned by SN
+    /// Limited map of votes orphaned by DN
     vote_mcache_t mapOrphanVotes;
 
     CGovernanceObjectVoteFile fileVotes;
@@ -215,8 +216,8 @@ public:
         return nCollateralHash;
     }
 
-    const CTxIn& GetStormnodeVin() const {
-        return vinStormnode;
+    const CTxIn& GetDynodeVin() const {
+        return vinDynode;
     }
 
     bool IsSetCachedFunding() const {
@@ -253,9 +254,9 @@ public:
 
     // Signature related functions
 
-    void SetStormnodeInfo(const CTxIn& vin);
-    bool Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode);
-    bool CheckSignature(CPubKey& pubKeyStormnode);
+    void SetDynodeInfo(const CTxIn& vin);
+    bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
+    bool CheckSignature(CPubKey& pubKeyDynode);
 
     std::string GetSignatureMessage() const;
 
@@ -263,7 +264,7 @@ public:
 
     bool IsValidLocally(std::string& strError, bool fCheckCollateral);
 
-    bool IsValidLocally(std::string& strError, bool& fMissingStormnode, bool fCheckCollateral);
+    bool IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral);
 
     /// Check the collateral transaction for the budget proposal/finalized budget
     bool IsCollateralValid(std::string& strError);
@@ -292,7 +293,7 @@ public:
     int GetNoCount(vote_signal_enum_t eVoteSignalIn) const;
     int GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const;
 
-    bool GetCurrentSNVotes(const CTxIn& snCollateralOutpoint, vote_rec_t& voteRecord);
+    bool GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord);
 
     // FUNCTIONS FOR DEALING WITH DATA STRING
 
@@ -314,14 +315,14 @@ public:
         READWRITE(nCollateralHash);
         READWRITE(LIMITED_STRING(strData, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
         READWRITE(nObjectType);
-        READWRITE(vinStormnode);
+        READWRITE(vinDynode);
         READWRITE(vchSig);
         if(nType & SER_DISK) {
             // Only include these for the disk file format
             LogPrint("gobject", "CGovernanceObject::SerializationOp Reading/writing votes from/to disk\n");
             READWRITE(nDeletionTime);
             READWRITE(fExpired);
-            READWRITE(mapCurrentSNVotes);
+            READWRITE(mapCurrentDNVotes);
             READWRITE(fileVotes);
             LogPrint("gobject", "CGovernanceObject::SerializationOp hash = %s, vote count = %d\n", GetHash().ToString(), fileVotes.GetVoteCount());
         }
@@ -346,12 +347,12 @@ private:
 
     void RebuildVoteMap();
 
-    /// Called when SN's which have voted on this object have been removed
-    void ClearStormnodeVotes();
+    /// Called when DN's which have voted on this object have been removed
+    void ClearDynodeVotes();
 
     void CheckOrphanVotes();
 
 };
 
 
-#endif // DARKSILK_GOVERNANCE_OBJECT_H
+#endif // DYNAMIC_GOVERNANCE_OBJECT_H

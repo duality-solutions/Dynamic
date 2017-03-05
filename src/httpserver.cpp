@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,11 +9,11 @@
 
 #include "chainparamsbase.h"
 #include "compat.h"
+#include "util.h"
 #include "netbase.h"
 #include "rpcprotocol.h" // For HTTP status codes
 #include "sync.h"
 #include "ui_interface.h"
-#include "util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -313,7 +313,7 @@ static void http_reject_request_cb(struct evhttp_request* req, void*)
 /** Event dispatcher thread */
 static void ThreadHTTP(struct event_base* base, struct evhttp* http)
 {
-    RenameThread("darksilk-http");
+    RenameThread("dynamic-http");
     LogPrint("http", "Entering http event loop\n");
     event_base_dispatch(base);
     // Event loop will be interrupted by InterruptHTTPServer()
@@ -362,7 +362,7 @@ static bool HTTPBindAddresses(struct evhttp* http)
 /** Simple wrapper to set thread name and run work queue */
 static void HTTPWorkQueueRun(WorkQueue<HTTPClosure>* queue)
 {
-    RenameThread("darksilk-httpworker");
+    RenameThread("dynamic-httpworker");
     queue->Run();
 }
 

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_COINS_H
-#define DARKSILK_COINS_H
+#ifndef DYNAMIC_COINS_H
+#define DYNAMIC_COINS_H
 
 #include "compressor.h"
 #include "core_memusage.h"
@@ -459,7 +459,7 @@ public:
     size_t DynamicMemoryUsage() const;
 
     /** 
-     * Amount of darksilk coming in to a transaction
+     * Amount of dynamic coming in to a transaction
      * Note that lightweight clients may not know anything besides the hash of previous transactions,
      * so may not be able to calculate this.
      *
@@ -492,4 +492,4 @@ private:
     CCoinsViewCache(const CCoinsViewCache &);
 };
 
-#endif // DARKSILK_COINS_H
+#endif // DYNAMIC_COINS_H

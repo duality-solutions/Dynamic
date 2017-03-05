@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[darksilk.qt-translation-012x]
-file_filter = src/qt/locale/darksilk_<lang>.ts
-source_file = src/qt/locale/darksilk_en.ts
+[dynamic.qt-translation-012x]
+file_filter = src/qt/locale/dynamic_<lang>.ts
+source_file = src/qt/locale/dynamic_en.ts
 source_lang = en

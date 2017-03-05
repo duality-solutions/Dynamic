@@ -137,7 +137,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../darksilk.qrc"/>
+  <include location="../dynamic.qrc"/>
  </resources>
  <connections/>
 </ui>

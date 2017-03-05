@@ -812,7 +812,7 @@ QTabBar { alignment: left; }</string>
   </layout>
  </widget>
  <resources>
-  <include location="../silk.qrc"/>
+  <include location="../dynamic.qrc"/>
  </resources>
  <connections/>
 </ui>

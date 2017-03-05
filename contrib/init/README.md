@@ -1,11 +1,11 @@
 Sample configuration files for:
 
-SystemD: darksilkd.service
-Upstart: darksilkd.conf
-OpenRC:  darksilkd.openrc
-         darksilkd.openrcconf
-CentOS:  darksilkd.init
-OS X:    org.darksilk.darksilkd.plist
+SystemD: dynamicd.service
+Upstart: dynamicd.conf
+OpenRC:  dynamicd.openrc
+         dynamicd.openrcconf
+CentOS:  dynamicd.init
+OS X:    org.dynamic.dynamicd.plist
 
 have been made available to assist packagers in creating node packages here.
 

@@ -5,7 +5,7 @@
 #include "coins.h"
 #include "random.h"
 #include "uint256.h"
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 #include "main.h"
 #include "consensus/validation.h"
 

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_PRIMITIVES_BLOCK_H
-#define DARKSILK_PRIMITIVES_BLOCK_H
+#ifndef DYNAMIC_PRIMITIVES_BLOCK_H
+#define DYNAMIC_PRIMITIVES_BLOCK_H
 
 #include "hash.h"
 #include "serialize.h"
@@ -82,7 +82,7 @@ public:
     std::vector<CTransaction> vtx;
 
     // memory only
-    mutable CTxOut txoutStormnode; // Stormnode payment
+    mutable CTxOut txoutDynode; // Dynode payment
     mutable std::vector<CTxOut> voutSuperblock; // superblock payment
     mutable bool fChecked;
 
@@ -109,7 +109,7 @@ public:
     {
         CBlockHeader::SetNull();
         vtx.clear();
-        txoutStormnode = CTxOut();
+        txoutDynode = CTxOut();
         voutSuperblock.clear();
         fChecked = false;
     }
@@ -165,4 +165,4 @@ struct CBlockLocator
     }
 };
 
-#endif // DARKSILK_PRIMITIVES_BLOCK_H
+#endif // DYNAMIC_PRIMITIVES_BLOCK_H

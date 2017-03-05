@@ -1,30 +1,34 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include "optionsmodel.h"
 
-#include "darksilkunits.h"
+#include "dynamicunits.h"
 #include "guiutil.h"
 
 #include "amount.h"
 #include "init.h"
 #include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
-#include "privatesend.h"
 #include "txdb.h" // for -dbcache defaults
 #ifdef ENABLE_WALLET
-#include "stormnodeconfig.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
+
+#ifdef ENABLE_WALLET
+#include "dynodeconfig.h"
+#endif
+#include "privatesend.h"
+
 
 #include <QNetworkProxy>
 #include <QSettings>
@@ -67,7 +71,7 @@ void OptionsModel::Init(bool resetSettings)
 
     // Display
     if (!settings.contains("nDisplayUnit"))
-        settings.setValue("nDisplayUnit", DarkSilkUnits::DSLK);
+        settings.setValue("nDisplayUnit", DynamicUnits::DYN);
     nDisplayUnit = settings.value("nDisplayUnit").toInt();
 
     if (!settings.contains("strThirdPartyTxUrls"))
@@ -83,8 +87,8 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("theme"))
         settings.setValue("theme", "");
 
-    if (!settings.contains("fShowStormnodesTab"))
-        settings.setValue("fShowStormnodesTab", true);
+    if (!settings.contains("fShowDynodesTab"))
+        settings.setValue("fShowDynodesTab", true);
 
     if (!settings.contains("fShowAdvancedPSUI"))
         settings.setValue("fShowAdvancedPSUI", false);
@@ -128,10 +132,10 @@ void OptionsModel::Init(bool resetSettings)
 
     if (!settings.contains("nPrivateSendAmount")) {
         // for migration from old settings
-        if (!settings.contains("nAnonymizeDarkSilkAmount"))
+        if (!settings.contains("nAnonymizeDynamicAmount"))
             settings.setValue("nPrivateSendAmount", DEFAULT_PRIVATESEND_AMOUNT);
         else
-            settings.setValue("nPrivateSendAmount", settings.value("nAnonymizeDarkSilkAmount").toInt());
+            settings.setValue("nPrivateSendAmount", settings.value("nAnonymizeDynamicAmount").toInt());
     }
     if (!SoftSetArg("-privatesendamount", settings.value("nPrivateSendAmount").toString().toStdString()))
         addOverriddenOption("-privatesendamount");
@@ -190,7 +194,7 @@ void OptionsModel::Reset()
 
     // Remove all entries from our QSettings object
     settings.clear();
-    resetSettings = true; // Needed in darksilk.cpp during shotdown to also remove the window positions
+    resetSettings = true; // Needed in dynamic.cpp during shotdown to also remove the window positions
 
     // default setting for OptionsModel::StartAtStartup - disabled
     if (GUIUtil::GetStartOnSystemStartup())
@@ -254,8 +258,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
 #ifdef ENABLE_WALLET
         case SpendZeroConfChange:
             return settings.value("bSpendZeroConfChange");
-        case ShowStormnodesTab:
-            return settings.value("fShowStormnodesTab");
+        case ShowDynodesTab:
+            return settings.value("fShowDynodesTab");
         case ShowAdvancedPSUI:
             return fShowAdvancedPSUI;
         case LowKeysWarning:
@@ -388,9 +392,9 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
-        case ShowStormnodesTab:
-            if (settings.value("fShowStormnodesTab") != value) {
-                settings.setValue("fShowStormnodesTab", value);
+        case ShowDynodesTab:
+            if (settings.value("fShowDynodesTab") != value) {
+                settings.setValue("fShowDynodesTab", value);
                 setRestartRequired(true);
             }
             break;

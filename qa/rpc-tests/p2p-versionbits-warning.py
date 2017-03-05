@@ -1,11 +1,11 @@
 #!/usr/bin/env python2
-# Copyright (c) 2015-2017 Silk Network developers
+# Copyright (c) 2016-2017 Duality Blockchain Solutions developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
 
 from test_framework.mininode import *
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 import time
 from test_framework.blocktools import create_block, create_coinbase
@@ -59,7 +59,7 @@ class TestNode(NodeConnCB):
         return received_pong
 
 
-class VersionBitsWarningTest(DarkSilkTestFramework):
+class VersionBitsWarningTest(DynamicTestFramework):
     def setup_chain(self):
         initialize_chain_clean(self.options.tmpdir, 1)
 
@@ -139,7 +139,7 @@ class VersionBitsWarningTest(DarkSilkTestFramework):
         # to ACTIVE.
         self.nodes[0].generate(VB_PERIOD)
         stop_node(self.nodes[0], 0)
-        wait_darksilkds()
+        wait_dynamicds()
         # Empty out the alert file
         with open(self.alert_filename, 'w') as f:
             pass
@@ -149,7 +149,7 @@ class VersionBitsWarningTest(DarkSilkTestFramework):
         self.nodes[0].generate(1)
         assert(len(self.nodes[0].getinfo()["errors"]) != 0)
         stop_node(self.nodes[0], 0)
-        wait_darksilkds()
+        wait_dynamicds()
         self.test_versionbits_in_alert_file()
 
         # Test framework expects the node to still be running...

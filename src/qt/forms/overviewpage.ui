@@ -67,7 +67,7 @@
             <item>
              <widget class="QLabel" name="labelWalletStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="styleSheet">
                <string notr="true">QLabel { color: red; }</string>
@@ -422,7 +422,7 @@
             <item>
              <widget class="QLabel" name="labelPrivateSendSyncStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="styleSheet">
                <string notr="true">QLabel { color: red; }</string>
@@ -512,7 +512,7 @@ border-style:solid;</string>
                </font>
               </property>
               <property name="text">
-               <string notr="true">0 DSLK</string>
+               <string notr="true">0 DYN</string>
               </property>
              </widget>
             </item>
@@ -526,7 +526,7 @@ border-style:solid;</string>
             <item row="3" column="1">
              <widget class="QLabel" name="labelAmountRounds">
               <property name="text">
-               <string>0 DSLK / 0 Rounds</string>
+               <string>0 DYN / 0 Rounds</string>
               </property>
              </widget>
             </item>
@@ -543,7 +543,7 @@ border-style:solid;</string>
             <item row="4" column="1">
              <widget class="QLabel" name="labelSubmittedDenom">
               <property name="toolTip">
-               <string>The denominations you submitted to the Stormnode.&lt;br&gt;To mix, other users must submit the exact same denominations.</string>
+               <string>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</string>
               </property>
               <property name="text">
                <string>n/a</string>
@@ -694,7 +694,7 @@ border-style:solid;</string>
             <item>
              <widget class="QLabel" name="labelTransactionsStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the DarkSilk network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="styleSheet">
                <string notr="true">QLabel { color: red; }</string>

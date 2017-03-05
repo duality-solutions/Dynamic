@@ -1,16 +1,16 @@
 #!/usr/bin/env python2
-# Copyright (c) 2014-2015 The DarkSilk Core developers
+# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 # Exercise the wallet keypool, and interaction with wallet encryption/locking
 
-# Add python-darksilkrpc to module search path:
+# Add python-dynamicrpc to module search path:
 
-from test_framework.test_framework import DarkSilkTestFramework
+from test_framework.test_framework import DynamicTestFramework
 from test_framework.util import *
 
-class KeyPoolTest(DarkSilkTestFramework):
+class KeyPoolTest(DynamicTestFramework):
 
     def run_test(self):
         nodes = self.nodes
@@ -21,7 +21,7 @@ class KeyPoolTest(DarkSilkTestFramework):
 
         # Encrypt wallet and wait to terminate
         nodes[0].encryptwallet('test')
-        darksilkd_processes[0].wait()
+        dynamicd_processes[0].wait()
         # Restart node 0
         nodes[0] = start_node(0, self.options.tmpdir)
         # Keep creating keys

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_UI_INTERFACE_H
-#define DARKSILK_UI_INTERFACE_H
+#ifndef DYNAMIC_UI_INTERFACE_H
+#define DYNAMIC_UI_INTERFACE_H
 
 #include <stdint.h>
 #include <string>
@@ -84,8 +84,8 @@ public:
     /** Number of network connections changed. */
     boost::signals2::signal<void (int newNumConnections)> NotifyNumConnectionsChanged;
 
-    /** Number of Stormnodes changed. */
-    boost::signals2::signal<void (int newNumStormnodes)> NotifyStrStormnodeCountChanged;
+    /** Number of Dynodes changed. */
+    boost::signals2::signal<void (int newNumDynodes)> NotifyStrDynodeCountChanged;
 
     /**
      * New, updated or cancelled alert.
@@ -111,4 +111,4 @@ public:
 
 extern CClientUIInterface uiInterface;
 
-#endif // DARKSILK_UI_INTERFACE_H
+#endif // DYNAMIC_UI_INTERFACE_H

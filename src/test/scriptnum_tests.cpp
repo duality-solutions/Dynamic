@@ -4,7 +4,7 @@
 
 #include "scriptnum10.h"
 #include "script/script.h"
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <boost/test/unit_test.hpp>
 #include <limits.h>

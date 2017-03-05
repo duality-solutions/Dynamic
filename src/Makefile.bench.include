@@ -1,45 +1,45 @@
-bin_PROGRAMS += bench/bench_darksilk
+bin_PROGRAMS += bench/bench_dynamic
 BENCH_SRCDIR = bench
-BENCH_BINARY = bench/bench_darksilk$(EXEEXT)
+BENCH_BINARY = bench/bench_dynamic$(EXEEXT)
 
 
-bench_bench_darksilk_SOURCES = \
-  bench/bench_darksilk.cpp \
+bench_bench_dynamic_SOURCES = \
+  bench/bench_dynamic.cpp \
   bench/bench.cpp \
   bench/bench.h \
   bench/Examples.cpp
 
-bench_bench_darksilk_CPPFLAGS = $(AM_CPPFLAGS) $(DARKSILK_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
-bench_bench_darksilk_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-bench_bench_darksilk_LDADD = \
-  $(LIBDARKSILK_SERVER) \
-  $(LIBDARKSILK_COMMON) \
-  $(LIBDARKSILK_UNIVALUE) \
-  $(LIBDARKSILK_UTIL) \
-  $(LIBDARKSILK_CRYPTO) \
+bench_bench_dynamic_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
+bench_bench_dynamic_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bench_bench_dynamic_LDADD = \
+  $(LIBDYNAMIC_SERVER) \
+  $(LIBDYNAMIC_COMMON) \
+  $(LIBDYNAMIC_UNIVALUE) \
+  $(LIBDYNAMIC_UTIL) \
+  $(LIBDYNAMIC_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
 if ENABLE_ZMQ
-bench_bench_darksilk_LDADD += $(LIBDARKSILK_ZMQ) $(ZMQ_LIBS)
+bench_bench_dynamic_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif
 
 if ENABLE_WALLET
-bench_bench_darksilk_LDADD += $(LIBDARKSILK_WALLET)
+bench_bench_dynamic_LDADD += $(LIBDYNAMIC_WALLET)
 endif
 
-bench_bench_darksilk_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-bench_bench_darksilk_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bench_bench_dynamic_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+bench_bench_dynamic_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
-CLEAN_DARKSILK_BENCH = bench/*.gcda bench/*.gcno
+CLEAN_DYNAMIC_BENCH = bench/*.gcda bench/*.gcno
 
-CLEANFILES += $(CLEAN_DARKSILK_BENCH)
+CLEANFILES += $(CLEAN_DYNAMIC_BENCH)
 
-darksilk_bench: $(BENCH_BINARY)
+dynamic_bench: $(BENCH_BINARY)
 
 bench: $(BENCH_BINARY) FORCE
 	$(BENCH_BINARY)
 
-darksilk_bench_clean : FORCE
-	rm -f $(CLEAN_DARKSILK_BENCH) $(bench_bench_darksilk_OBJECTS) $(BENCH_BINARY)
+dynamic_bench_clean : FORCE
+	rm -f $(CLEAN_DYNAMIC_BENCH) $(bench_bench_dynamic_OBJECTS) $(BENCH_BINARY)

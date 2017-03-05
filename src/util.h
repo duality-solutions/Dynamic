@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,11 +9,11 @@
  * Server/client environment: argument handling, config file parsing,
  * logging, thread wrappers
  */
-#ifndef DARKSILK_UTIL_H
-#define DARKSILK_UTIL_H
+#ifndef DYNAMIC_UTIL_H
+#define DYNAMIC_UTIL_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include "amount.h"
@@ -35,16 +35,16 @@
 
 // Uncomment the following line to enable debugging messages
 // or enable on a per file basis prior to inclusion of util.h
-//#define ENABLE_DARKSILK_DEBUG
-#ifdef ENABLE_DARKSILK_DEBUG
+//#define ENABLE_DYNAMIC_DEBUG
+#ifdef ENABLE_DYNAMIC_DEBUG
 #define DBG( x ) x
 #else
 #define DBG( x ) 
 #endif
 
-//DarkSilk only features
+//Dynamic only features
 
-extern bool fStormNode;
+extern bool fDyNode;
 extern bool fLiteMode;
 extern int nWalletBackups;
 
@@ -75,8 +75,8 @@ extern bool fLogIPs;
 extern volatile bool fReopenDebugLog;
 extern CTranslationInterface translationInterface;
 
-extern const char * const DARKSILK_CONF_FILENAME;
-extern const char * const DARKSILK_PID_FILENAME;
+extern const char * const DYNAMIC_CONF_FILENAME;
+extern const char * const DYNAMIC_PID_FILENAME;
 
 /**
  * Translation function: Call Translate signal on UI interface, which returns a boost::optional result.
@@ -148,7 +148,7 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific = true);
 const boost::filesystem::path &GetBackupsDir();
 void ClearDatadirCache();
 boost::filesystem::path GetConfigFile();
-boost::filesystem::path GetStormnodeConfigFile();
+boost::filesystem::path GetDynodeConfigFile();
 #ifndef WIN32
 boost::filesystem::path GetPidFile();
 void CreatePidFile(const boost::filesystem::path &path, pid_t pid);
@@ -249,7 +249,7 @@ std::string GetThreadName();
  */
 template <typename Callable> void TraceThread(const char* name,  Callable func)
 {
-    std::string s = strprintf("darksilk-%s", name);
+    std::string s = strprintf("dynamic-%s", name);
     RenameThread(s.c_str());
     try
     {
@@ -272,4 +272,4 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
     }
 }
 
-#endif // DARKSILK_UTIL_H
+#endif // DYNAMIC_UTIL_H

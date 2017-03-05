@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_RPCCONSOLE_H
-#define DARKSILK_QT_RPCCONSOLE_H
+#ifndef DYNAMIC_QT_RPCCONSOLE_H
+#define DYNAMIC_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
@@ -27,7 +27,7 @@ QT_BEGIN_NAMESPACE
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local DarkSilk RPC console. */
+/** Local Dynamic RPC console. */
 class RPCConsole: public QDialog
 {
     Q_OBJECT
@@ -93,8 +93,8 @@ public Q_SLOTS:
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of Stormnodes shown in the UI */        
-    void setStormnodeCount(const QString &strStormnodes);      
+    /** Set number of Dynodes shown in the UI */        
+    void setDynodeCount(const QString &strDynodes);      
     /** Set number of blocks shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);     
     /** Go forward or back in history */
@@ -161,4 +161,4 @@ private:
     QCompleter *autoCompleter;
 };
 
-#endif // DARKSILK_QT_RPCCONSOLE_H
+#endif // DYNAMIC_QT_RPCCONSOLE_H

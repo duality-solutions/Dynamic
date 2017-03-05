@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash CoreDevelopers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_WALLET_DB_H
-#define DARKSILK_WALLET_DB_H
+#ifndef DYNAMIC_WALLET_DB_H
+#define DYNAMIC_WALLET_DB_H
 
 #include "clientversion.h"
 #include "serialize.h"
@@ -311,4 +311,4 @@ public:
     bool static Rewrite(const std::string& strFile, const char* pszSkip = NULL);
 };
 
-#endif // DARKSILK_WALLET_DB_H
+#endif // DYNAMIC_WALLET_DB_H

@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,16 +12,19 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"
-#include "spork.h"
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
-#include "stormnode-sync.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
+
+#ifdef ENABLE_WALLET
+#include "dynode-sync.h"
+#endif
+#include "spork.h"
 
 #include <univalue.h>
 
@@ -29,6 +32,9 @@
 
 #include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string.hpp>
+
+class CSporkMessage;
+class CSporkManager;
 
 using namespace std;
 
@@ -56,8 +62,8 @@ UniValue getinfo(const UniValue& params, bool fHelp)
             "  \"version\": xxxxx,           (numeric) the server version\n"
             "  \"protocolversion\": xxxxx,   (numeric) the protocol version\n"
             "  \"walletversion\": xxxxx,     (numeric) the wallet version\n"
-            "  \"balance\": xxxxxxx,         (numeric) the total darksilk balance of the wallet\n"
-            "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized darksilk balance of the wallet\n"
+            "  \"balance\": xxxxxxx,         (numeric) the total dynamic balance of the wallet\n"
+            "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized dynamic balance of the wallet\n"
             "  \"blocks\": xxxxxx,           (numeric) the current number of blocks processed in the server\n"
             "  \"timeoffset\": xxxxx,        (numeric) the time offset\n"
             "  \"connections\": xxxxx,       (numeric) the number of connections\n"
@@ -122,11 +128,11 @@ UniValue debug(const UniValue& params, bool fHelp)
         throw runtime_error(
             "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
             "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
-            "darksilk|privatesend|instantsend|stormnode|spork|keepass|snpayments|gobject )\n"
+            "dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject )\n"
             "Change debug category on the fly. Specify single category or use comma to specify many.\n"
             "\nExamples:\n"
-            + HelpExampleCli("debug", "darksilk")
-            + HelpExampleRpc("debug", "darksilk,net")
+            + HelpExampleCli("debug", "dynamic")
+            + HelpExampleRpc("debug", "dynamic,net")
         );
 
     std::string strMode = params[0].get_str();
@@ -140,11 +146,11 @@ UniValue debug(const UniValue& params, bool fHelp)
     return "Debug mode: " + (fDebug ? strMode : "off");
 }
 
-UniValue snsync(const UniValue& params, bool fHelp)
+UniValue dnsync(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "snsync [status|next|reset]\n"
+            "dnsync [status|next|reset]\n"
             "Returns the sync status, updates to the next step or resets it entirely.\n"
         );
 
@@ -152,26 +158,26 @@ UniValue snsync(const UniValue& params, bool fHelp)
 
     if(strMode == "status") {
         UniValue objStatus(UniValue::VOBJ);
-        objStatus.push_back(Pair("AssetID", stormnodeSync.GetAssetID()));
-        objStatus.push_back(Pair("AssetName", stormnodeSync.GetAssetName()));
-        objStatus.push_back(Pair("Attempt", stormnodeSync.GetAttempt()));
-        objStatus.push_back(Pair("IsBlockchainSynced", stormnodeSync.IsBlockchainSynced()));
-        objStatus.push_back(Pair("IsStormnodeListSynced", stormnodeSync.IsStormnodeListSynced()));
-        objStatus.push_back(Pair("IsWinnersListSynced", stormnodeSync.IsWinnersListSynced()));
-        objStatus.push_back(Pair("IsSynced", stormnodeSync.IsSynced()));
-        objStatus.push_back(Pair("IsFailed", stormnodeSync.IsFailed()));
+        objStatus.push_back(Pair("AssetID", dynodeSync.GetAssetID()));
+        objStatus.push_back(Pair("AssetName", dynodeSync.GetAssetName()));
+        objStatus.push_back(Pair("Attempt", dynodeSync.GetAttempt()));
+        objStatus.push_back(Pair("IsBlockchainSynced", dynodeSync.IsBlockchainSynced()));
+        objStatus.push_back(Pair("IsDynodeListSynced", dynodeSync.IsDynodeListSynced()));
+        objStatus.push_back(Pair("IsWinnersListSynced", dynodeSync.IsWinnersListSynced()));
+        objStatus.push_back(Pair("IsSynced", dynodeSync.IsSynced()));
+        objStatus.push_back(Pair("IsFailed", dynodeSync.IsFailed()));
         return objStatus;
     }
 
     if(strMode == "next")
     {
-        stormnodeSync.SwitchToNextAsset();
-        return "sync updated to " + stormnodeSync.GetAssetName();
+        dynodeSync.SwitchToNextAsset();
+        return "sync updated to " + dynodeSync.GetAssetName();
     }
 
     if(strMode == "reset")
     {
-        stormnodeSync.Reset();
+        dynodeSync.Reset();
         return "success";
     }
     return "failure";
@@ -207,7 +213,7 @@ public:
             obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
             UniValue a(UniValue::VARR);
             BOOST_FOREACH(const CTxDestination& addr, addresses)
-                a.push_back(CDarkSilkAddress(addr).ToString());
+                a.push_back(CDynamicAddress(addr).ToString());
             obj.push_back(Pair("addresses", a));
             if (whichType == TX_MULTISIG)
                 obj.push_back(Pair("sigsrequired", nRequired));
@@ -266,14 +272,14 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "validateaddress \"darksilkaddress\"\n"
-            "\nReturn information about the given darksilk address.\n"
+            "validateaddress \"dynamicaddress\"\n"
+            "\nReturn information about the given dynamic address.\n"
             "\nArguments:\n"
-            "1. \"darksilkaddress\"     (string, required) The darksilk address to validate\n"
+            "1. \"dynamicaddress\"     (string, required) The dynamic address to validate\n"
             "\nResult:\n"
             "{\n"
             "  \"isvalid\" : true|false,       (boolean) If the address is valid or not. If not, this is the only property returned.\n"
-            "  \"address\" : \"darksilkaddress\", (string) The darksilk address validated\n"
+            "  \"address\" : \"dynamicaddress\", (string) The dynamic address validated\n"
             "  \"scriptPubKey\" : \"hex\",       (string) The hex encoded scriptPubKey generated by the address\n"
             "  \"ismine\" : true|false,        (boolean) If the address is yours or not\n"
             "  \"iswatchonly\" : true|false,   (boolean) If the address is watchonly\n"
@@ -295,7 +301,7 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
     LOCK(cs_main);
 #endif
 
-    CDarkSilkAddress address(params[0].get_str());
+    CDynamicAddress address(params[0].get_str());
     bool isValid = address.IsValid();
 
     UniValue ret(UniValue::VOBJ);
@@ -351,8 +357,8 @@ CScript _createmultisig_redeemScript(const UniValue& params)
     {
         const std::string& ks = keys[i].get_str();
 #ifdef ENABLE_WALLET
-        // Case 1: DarkSilk address and we have full public key:
-        CDarkSilkAddress address(ks);
+        // Case 1: Dynamic address and we have full public key:
+        CDynamicAddress address(ks);
         if (pwalletMain && address.IsValid())
         {
             CKeyID keyID;
@@ -402,9 +408,9 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
 
             "\nArguments:\n"
             "1. nrequired      (numeric, required) The number of required signatures out of the n keys or addresses.\n"
-            "2. \"keys\"       (string, required) A json array of keys which are darksilk addresses or hex-encoded public keys\n"
+            "2. \"keys\"       (string, required) A json array of keys which are dynamic addresses or hex-encoded public keys\n"
             "     [\n"
-            "       \"key\"    (string) darksilk address or hex-encoded public key\n"
+            "       \"key\"    (string) dynamic address or hex-encoded public key\n"
             "       ,...\n"
             "     ]\n"
 
@@ -426,7 +432,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
     // Construct using pay-to-script-hash:
     CScript inner = _createmultisig_redeemScript(params);
     CScriptID innerID(inner);
-    CDarkSilkAddress address(innerID);
+    CDynamicAddress address(innerID);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("address", address.ToString()));
@@ -439,10 +445,10 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 3)
         throw runtime_error(
-            "verifymessage \"darksilkaddress\" \"signature\" \"message\"\n"
+            "verifymessage \"dynamicaddress\" \"signature\" \"message\"\n"
             "\nVerify a signed message\n"
             "\nArguments:\n"
-            "1. \"darksilkaddress\"  (string, required) The darksilk address to use for the signature.\n"
+            "1. \"dynamicaddress\"  (string, required) The dynamic address to use for the signature.\n"
             "2. \"signature\"       (string, required) The signature provided by the signer in base 64 encoding (see signmessage).\n"
             "3. \"message\"         (string, required) The message that was signed.\n"
             "\nResult:\n"
@@ -464,7 +470,7 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
     string strSign     = params[1].get_str();
     string strMessage  = params[2].get_str();
 
-    CDarkSilkAddress addr(strAddress);
+    CDynamicAddress addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -523,9 +529,9 @@ UniValue setmocktime(const UniValue& params, bool fHelp)
 bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &address)
 {
     if (type == 2) {
-        address = CDarkSilkAddress(CScriptID(hash)).ToString();
+        address = CDynamicAddress(CScriptID(hash)).ToString();
     } else if (type == 1) {
-        address = CDarkSilkAddress(CKeyID(hash)).ToString();
+        address = CDynamicAddress(CKeyID(hash)).ToString();
     } else {
         return false;
     }
@@ -535,7 +541,7 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
 bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint160, int> > &addresses)
 {
     if (params[0].isStr()) {
-        CDarkSilkAddress address(params[0].get_str());
+        CDynamicAddress address(params[0].get_str());
         uint160 hashBytes;
         int type = 0;
         if (!address.GetIndexKey(hashBytes, type)) {
@@ -553,7 +559,7 @@ bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint16
 
         for (std::vector<UniValue>::iterator it = values.begin(); it != values.end(); ++it) {
 
-            CDarkSilkAddress address(it->get_str());
+            CDynamicAddress address(it->get_str());
             uint160 hashBytes;
             int type = 0;
             if (!address.GetIndexKey(hashBytes, type)) {

@@ -1,14 +1,14 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "governance-vote.h"
 
-#include "privatesend.h"
-#include "stormnodeman.h"
-#include "stormnode-sync.h"
 #include "util.h"
+
+#include "dynodeman.h"
+#include "privatesend.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -208,18 +208,18 @@ CGovernanceVote::CGovernanceVote()
     : fValid(true),
       fSynced(false),
       nVoteSignal(int(VOTE_SIGNAL_NONE)),
-      vinStormnode(),
+      vinDynode(),
       nParentHash(),
       nVoteOutcome(int(VOTE_OUTCOME_NONE)),
       nTime(0),
       vchSig()
 {}
 
-CGovernanceVote::CGovernanceVote(CTxIn vinStormnodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn)
+CGovernanceVote::CGovernanceVote(CTxIn vinDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn)
     : fValid(true),
       fSynced(false),
       nVoteSignal(eVoteSignalIn),
-      vinStormnode(vinStormnodeIn),
+      vinDynode(vinDynodeIn),
       nParentHash(nParentHashIn),
       nVoteOutcome(eVoteOutcomeIn),
       nTime(GetAdjustedTime()),
@@ -232,22 +232,22 @@ void CGovernanceVote::Relay() const
     RelayInv(inv, PROTOCOL_VERSION);
 }
 
-bool CGovernanceVote::Sign(CKey& keyStormnode, CPubKey& pubKeyStormnode)
+bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
 {
     // Choose coins to use
     CPubKey pubKeyCollateralAddress;
     CKey keyCollateralAddress;
 
     std::string strError;
-    std::string strMessage = vinStormnode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyStormnode)) {
+    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyDynode)) {
         LogPrintf("CGovernanceVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -276,19 +276,19 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
         return false;
     }
 
-    stormnode_info_t infoSn = snodeman.GetStormnodeInfo(vinStormnode);
+    dynode_info_t infoSn = dnodeman.GetDynodeInfo(vinDynode);
     if(!infoSn.fInfoValid) {
-        LogPrint("gobject", "CGovernanceVote::IsValid -- Unknown Stormnode - %s\n", vinStormnode.prevout.ToStringShort());
+        LogPrint("gobject", "CGovernanceVote::IsValid -- Unknown Dynode - %s\n", vinDynode.prevout.ToStringShort());
         return false;
     }
 
     if(!fSignatureCheck) return true;
 
     std::string strError;
-    std::string strMessage = vinStormnode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyStormnode, vchSig, strMessage, strError)) {
+    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -298,7 +298,7 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
 
 bool operator==(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 {
-    bool fResult = ((vote1.vinStormnode == vote2.vinStormnode) &&
+    bool fResult = ((vote1.vinDynode == vote2.vinDynode) &&
                     (vote1.nParentHash == vote2.nParentHash) &&
                     (vote1.nVoteOutcome == vote2.nVoteOutcome) &&
                     (vote1.nVoteSignal == vote2.nVoteSignal) &&
@@ -308,11 +308,11 @@ bool operator==(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 
 bool operator<(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 {
-    bool fResult = (vote1.vinStormnode < vote2.vinStormnode);
+    bool fResult = (vote1.vinDynode < vote2.vinDynode);
     if(!fResult) {
         return false;
     }
-    fResult = (vote1.vinStormnode == vote2.vinStormnode);
+    fResult = (vote1.vinDynode == vote2.vinDynode);
 
     fResult = fResult && (vote1.nParentHash < vote2.nParentHash);
     if(!fResult) {

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_QT_TEST_URITESTS_H
-#define DARKSILK_QT_TEST_URITESTS_H
+#ifndef DYNAMIC_QT_TEST_URITESTS_H
+#define DYNAMIC_QT_TEST_URITESTS_H
 
 #include <QObject>
 #include <QTest>
@@ -16,4 +16,4 @@ private Q_SLOTS:
     void uriTests();
 };
 
-#endif // DARKSILK_QT_TEST_URITESTS_H
+#endif // DYNAMIC_QT_TEST_URITESTS_H

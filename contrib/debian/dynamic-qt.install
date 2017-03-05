@@ -1,0 +1,6 @@
+usr/local/bin/dynamic-qt usr/bin
+share/pixmaps/dynamic32.xpm usr/share/pixmaps
+share/pixmaps/dynamic16.xpm usr/share/pixmaps
+share/pixmaps/dynamic128.png usr/share/pixmaps
+debian/dynamic-qt.desktop usr/share/applications
+debian/dynamic-qt.protocol usr/share/kde4/services/

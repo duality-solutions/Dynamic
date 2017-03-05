@@ -2,11 +2,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_ZMQ_ZMQCONFIG_H
-#define DARKSILK_ZMQ_ZMQCONFIG_H
+#ifndef DYNAMIC_ZMQ_ZMQCONFIG_H
+#define DYNAMIC_ZMQ_ZMQCONFIG_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/darksilk-config.h"
+#include "config/dynamic-config.h"
 #endif
 
 #include "primitives/block.h"
@@ -21,4 +21,4 @@
 
 void zmqError(const char *str);
 
-#endif // DARKSILK_ZMQ_ZMQCONFIG_H
+#endif // DYNAMIC_ZMQ_ZMQCONFIG_H

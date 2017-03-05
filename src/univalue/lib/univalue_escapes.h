@@ -1,6 +1,6 @@
 // Automatically generated file. Do not modify.
-#ifndef DARKSILK_UNIVALUE_UNIVALUE_ESCAPES_H
-#define DARKSILK_UNIVALUE_UNIVALUE_ESCAPES_H
+#ifndef DYNAMIC_UNIVALUE_UNIVALUE_ESCAPES_H
+#define DYNAMIC_UNIVALUE_UNIVALUE_ESCAPES_H
 static const char *escapes[256] = {
 	"\\u0000",
 	"\\u0001",
@@ -259,4 +259,4 @@ static const char *escapes[256] = {
 	NULL,
 	NULL,
 };
-#endif // DARKSILK_UNIVALUE_UNIVALUE_ESCAPES_H
+#endif // DYNAMIC_UNIVALUE_UNIVALUE_ESCAPES_H

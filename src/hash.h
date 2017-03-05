@@ -1,18 +1,18 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_HASH_H
-#define DARKSILK_HASH_H
+#ifndef DYNAMIC_HASH_H
+#define DYNAMIC_HASH_H
 
 #include "crypto/argon2d/argon2.h"
 #include "crypto/blake2/blake2.h"
-#include "prevector.h"
 #include "crypto/ripemd160.h"
 #include "crypto/sha256.h"
+#include "prevector.h"
 #include "serialize.h"
 #include "uint256.h"
 #include "version.h"
@@ -337,4 +337,4 @@ inline uint256 hash_Argon2d(const void* input, const unsigned int& hashPhase) {
     return hashResult;
 }
 
-#endif // DARKSILK_HASH_H
+#endif // DYNAMIC_HASH_H

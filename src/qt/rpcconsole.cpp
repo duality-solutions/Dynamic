@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -398,8 +398,8 @@ void RPCConsole::setClientModel(ClientModel *model)
         setNumBlocks(model->getNumBlocks(), model->getLastBlockDate(), model->getVerificationProgress(NULL));      
         connect(model, SIGNAL(numBlocksChanged(int,QDateTime,double)), this, SLOT(setNumBlocks(int,QDateTime,double)));        
 
-        setStormnodeCount(model->getStormnodeCountString());       
-        connect(model, SIGNAL(strStormnodesChanged(QString)), this, SLOT(setStormnodeCount(QString)));
+        setDynodeCount(model->getDynodeCountString());       
+        connect(model, SIGNAL(strDynodesChanged(QString)), this, SLOT(setDynodeCount(QString)));
 
         updateTrafficStats(model->getTotalBytesRecv(), model->getTotalBytesSent());
         connect(model, SIGNAL(bytesChanged(quint64,quint64)), this, SLOT(updateTrafficStats(quint64, quint64)));
@@ -571,7 +571,7 @@ void RPCConsole::buildParameterlist(QString arg)
     // Append repair parameter to command line.
     args.append(arg);
 
-    // Send command-line arguments to DarkSilkGUI::handleRestart()
+    // Send command-line arguments to DynamicGUI::handleRestart()
     Q_EMIT handleRestart(args);
 }
 
@@ -605,14 +605,14 @@ void RPCConsole::clear()
         QString(            
                 "table { }"
                 "td.time { color: #808080; padding-top: 3px; } "
-                "td.message { font-family: monospace; font-size: 12px; } " // Todo: Remove fixed font-size
+                "td.message { font-family: %1; font-size: %2; } "
                 "td.cmd-request { color: #006060; } "
                 "td.cmd-error { color: red; } "
                 "b { color: #006060; } "
             ).arg(fixedFontInfo.family(), ptSize)      
         );     
     
-    message(CMD_REPLY, (tr("Welcome to the DarkSilk RPC console.") + "<br>" +
+    message(CMD_REPLY, (tr("Welcome to the Dynamic RPC console.") + "<br>" +
                         tr("Use up and down arrows to navigate history, and <b>Ctrl-L</b> to clear screen.") + "<br>" +
                         tr("Type <b>help</b> for an overview of available commands.")), true);
 }
@@ -659,9 +659,9 @@ void RPCConsole::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     ui->lastBlockTime->setText(blockDate.toString());      
 }
 
-void RPCConsole::setStormnodeCount(const QString &strStormnodes)       
+void RPCConsole::setDynodeCount(const QString &strDynodes)       
 {     
-    ui->stormnodeCount->setText(strStormnodes);       
+    ui->dynodeCount->setText(strDynodes);       
 }
 
 void RPCConsole::on_lineEdit_returnPressed()

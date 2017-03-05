@@ -44,7 +44,7 @@
                 <string />
               </property>
               <property name="icon">
-                <iconset resource="../silk.qrc">
+                <iconset resource="../dynamic.qrc">
                   <normaloff>:/icons/drk/editpaste</normaloff>
                   :/icons/drk/editpaste
                 </iconset>
@@ -63,7 +63,7 @@
                 <string />
               </property>
               <property name="icon">
-                <iconset resource="../silk.qrc">
+                <iconset resource="../dynamic.qrc">
                   <normaloff>:/icons/drk/remove</normaloff>
                   :/icons/drk/remove
                 </iconset>
@@ -135,7 +135,7 @@
                 <string />
               </property>
               <property name="icon">
-                <iconset resource="../silk.qrc">
+                <iconset resource="../dynamic.qrc">
                   <normaloff>:/icons/drk/editpaste</normaloff>
                   :/icons/drk/editpaste
                 </iconset>
@@ -160,7 +160,7 @@
     </customwidget>
   </customwidgets>
   <resources>
-    <include location="../silk.qrc" />
+    <include location="../dynamic.qrc" />
   </resources>
   <connections />
 </ui>

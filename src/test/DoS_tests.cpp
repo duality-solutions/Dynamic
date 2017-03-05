@@ -13,7 +13,7 @@
 #include "serialize.h"
 #include "util.h"
 
-#include "test/test_darksilk.h"
+#include "test/test_dynamic.h"
 
 #include <stdint.h>
 

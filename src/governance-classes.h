@@ -1,20 +1,22 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2015-2017 Silk Network Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DARKSILK_GOVERNANCE_CLASSES_H
-#define DARKSILK_GOVERNANCE_CLASSES_H
+#ifndef DYNAMIC_GOVERNANCE_CLASSES_H
+#define DYNAMIC_GOVERNANCE_CLASSES_H
 
-//#define ENABLE_DARKSILK_DEBUG
+//#define ENABLE_DYNAMIC_DEBUG
 
 #include "base58.h"
-#include "governance.h"
+#include "chainparams.h"
 #include "key.h"
 #include "script/standard.h"
 #include "util.h"
+
+#include "governance.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -25,7 +27,7 @@ class CSuperblockManager;
 
 static const int TRIGGER_UNKNOWN            = -1;
 static const int TRIGGER_SUPERBLOCK         = 1000;
-static const CAmount STATIC_SUPERBLOCK_AMOUNT = 10000 * COIN; //Budget amount fixed at 10000DSLK
+static const CAmount STATIC_SUPERBLOCK_AMOUNT = 10000 * COIN; //Budget amount fixed at 10000DYN
 
 typedef boost::shared_ptr<CSuperblock> CSuperblock_sptr;
 
@@ -103,7 +105,7 @@ public:
          nAmount(0)
     {}
 
-    CGovernancePayment(CDarkSilkAddress addrIn, CAmount nAmountIn)
+    CGovernancePayment(CDynamicAddress addrIn, CAmount nAmountIn)
         :fValid(false),
          script(),
          nAmount(0)
@@ -189,4 +191,4 @@ public:
     bool IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
 };
 
-#endif // DARKSILK_GOVERNANCE_CLASSES_H
+#endif // DYNAMIC_GOVERNANCE_CLASSES_H
