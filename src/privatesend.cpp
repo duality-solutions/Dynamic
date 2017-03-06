@@ -17,6 +17,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "governance.h"
 #include "instantsend.h"
 
 #include <boost/lexical_cast.hpp>
@@ -2509,6 +2510,10 @@ void ThreadCheckPrivateSendPool()
             }
             if(fDyNode && (nTick % (60 * 5) == 0)) {
                 dnodeman.DoFullVerificationStep();
+            }
+
+            if(nTick % (60 * 5) == 0) {
+                governance.DoMaintenance();
             }
 
             privateSendPool.CheckTimeout();

@@ -94,7 +94,7 @@ public:
     bool Insert(const K& key, const V& value)
     {
         if(nCurrentSize == nMaxSize) {
-            PruneLast();
+           PruneLast();
         }
         map_it mit = mapIndex.find(key);
         if(mit == mapIndex.end()) {
@@ -146,6 +146,13 @@ public:
             vecValues.push_back(item.value);
         }
         return true;
+    }
+
+    void GetKeys(std::vector<K>& vecKeys)
+    {
+        for(map_cit it = mapIndex.begin(); it != mapIndex.end(); ++it) {
+            vecKeys.push_back(it->first);
+        }
     }
 
     void Erase(const K& key)
