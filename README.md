@@ -74,8 +74,6 @@ UNIX BUILD NOTES
 ====================
 Some notes on how to build Dynamic in Unix. 
 
-Building requirements for Unix based Systems :  3GB
-
 Note
 ---------------------
 Always use absolute paths to configure and compile Dynamic and the dependencies,
@@ -124,9 +122,8 @@ For the versions used in the release, see [release-process.md](release-process.m
 System requirements
 --------------------
 
-C++ compilers are memory-hungry. It is recommended to have at least 1 GB of
-memory available when compiling Dynamic. With 512MB of memory or less
-compilation will take much longer due to swap thrashing.
+C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
+memory available when compiling Dynamic.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------

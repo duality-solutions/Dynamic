@@ -1,16 +1,16 @@
-# **Dynamic (DYN) v1.0**
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Stories in Ready](https://badge.waffle.io/Duality-Solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
-[![Build Status](https://travis-ci.org/Duality-Solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Build Status](https://travis-ci.org/Duality-Solutions/Dynamic.png?branch=master)](https://travis-ci.org/Duality-Solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/Duality-Solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/Duality-Solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
 [![Throughput Graph](https://graphs.waffle.io/Duality-Solutions/Dynamic/throughput.svg)](https://waffle.io/Duality-Solutions/Dynamic/metrics/throughput)  
-Dynamic Integration/Staging Tree
-================================
-![DYN logo](https://github.com/Duality-Solutions/Dynamic/blob/master/src/qt/res/images/drk/dynamic_logo_horizontal.png)
+
+# **Dynamic (DYN) v1.0.0.0**
+
+![DYN logo](https://github.com/Duality-Solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
 **Copyright (c) 2016-2017 Duality Blockchain Solutions**
 
@@ -21,11 +21,13 @@ What is Dynamic?
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: 1 DYN
+* PoW Reward Start Height: Block 20,546
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 10 Blocks
 * Dynode Reward: 0.382 DYN Static Reward (38.2% of a PoW reward)
+* Dynode Reward Start Height: Block 20,546
 * Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DYN, 20 confirmations (~30 minutes)
 * Min TX Fee: 0.0001 DYN
@@ -65,7 +67,7 @@ Magic Bytes: 0x2f 0x32 0x15 0x40
 P2P Port = 31500
 RPC Port = 31550
 Dynodes = 31500
-Magic Bytes: 0x2f 0x32 0x15 0x3f
+Magic Bytes = 0x2f 0x32 0x15 0x3f
 
 
 UNIX BUILD NOTES
@@ -120,9 +122,8 @@ For the versions used in the release, see [release-process.md](release-process.m
 System requirements
 --------------------
 
-C++ compilers are memory-hungry. It is recommended to have at least 1 GB of
-memory available when compiling Dynamic. With 512MB of memory or less
-compilation will take much longer due to swap thrashing.
+C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
+memory available when compiling Dynamic.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
