@@ -713,9 +713,6 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
-    if (!dynodeSync.IsSynced())     
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is syncing with network...");
-
     static unsigned int nTransactionsUpdatedLast;
 
     if (!lpval.isNull())
