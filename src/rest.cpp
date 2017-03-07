@@ -20,8 +20,8 @@
 
 #include <univalue.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 

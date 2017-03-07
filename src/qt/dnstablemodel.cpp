@@ -11,9 +11,8 @@
 #include "guiutil.h"
 #include "walletmodel.h"
 
-#include "wallet/wallet.h"
-
 #include "dns/dns.h"
+#include "wallet/wallet.h"
 
 #include <vector>
 

@@ -11,8 +11,8 @@
 #include "netbase.h"
 #include "pubkey.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #include <boost/thread.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>

@@ -11,8 +11,8 @@
 #include <QFrame>
 #include <QMap>
 
-class DynamicGUI;
 class ClientModel;
+class DynamicGUI;
 class PlatformStyle;
 class SendCoinsRecipient;
 class WalletModel;

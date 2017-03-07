@@ -14,7 +14,6 @@
 
 #include <QDialog>
 
-
 class PlatformStyle;
 
 namespace Ui

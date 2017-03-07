@@ -15,9 +15,9 @@
 
 #include "privatesend.h"
 
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QKeyEvent>
 #include <QSettings>
 
 PrivatesendConfig::PrivatesendConfig(QWidget *parent) :

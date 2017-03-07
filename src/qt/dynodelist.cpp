@@ -12,17 +12,16 @@
 #include "guiutil.h"
 #include "walletmodel.h"
 
-#include "init.h"
-#include "sync.h"
-#include "wallet/wallet.h"
-
 #include "activedynode.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
 #include "dynodeman.h"
+#include "init.h"
+#include "sync.h"
+#include "wallet/wallet.h"
 
-#include <QTimer>
 #include <QMessageBox>
+#include <QTimer>
 
 DynodeList::DynodeList(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),

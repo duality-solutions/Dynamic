@@ -10,8 +10,8 @@
 
 #include <boost/lexical_cast.hpp>
 
-class CSporkMessage;
 class CSporkManager;
+class CSporkMessage;
 
 CSporkManager sporkManager;
 

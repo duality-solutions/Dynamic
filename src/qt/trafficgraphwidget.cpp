@@ -9,11 +9,11 @@
 
 #include "clientmodel.h"
 
-#include <QPainter>
-#include <QColor>
-#include <QTimer>
-
 #include <cmath>
+
+#include <QColor>
+#include <QPainter>
+#include <QTimer>
 
 #define DESIRED_SAMPLES         800
 

@@ -12,8 +12,8 @@
 
 #include <QStackedWidget>
 
-class WalletModel;
 class PlatformStyle;
+class WalletModel;
 
 namespace Ui {
     class SendCoinsEntry;

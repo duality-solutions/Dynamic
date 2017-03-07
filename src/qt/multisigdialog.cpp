@@ -17,6 +17,7 @@
 #include "chainparamsbase.h"
 #include "core_io.h"
 #include "dbwrapper.h"
+#include "dns/dns.h"
 #include "key.h"
 #include "main.h"
 #include "policy/policy.h"
@@ -29,12 +30,10 @@
 #include "consensus/validation.h"
 #include "wallet/wallet.h"
 
-#include "dns/dns.h"
-
 #include <QClipboard>
-#include <QWidget>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QWidget>
 #include <vector>
 
 MultisigDialog::MultisigDialog(const PlatformStyle *platformStyle, QWidget *parent) :

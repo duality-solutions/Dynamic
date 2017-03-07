@@ -8,8 +8,8 @@
 #ifndef DNS_H
 #define DNS_H
 
-#include "wallet/db.h"
 #include "base58.h"
+#include "wallet/db.h"
 #include "hooks.h"
 #include "keystore.h"
 #include "main.h"

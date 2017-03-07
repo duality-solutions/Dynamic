@@ -5,16 +5,15 @@
 
 #include "dynode.h"
 
-#include "init.h"
-#include "util.h"
-#include "consensus/validation.h"
-
 #include "activedynode.h"
 #include "governance.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "init.h"
 #include "privatesend.h"
+#include "util.h"
+#include "consensus/validation.h"
 
 #include <boost/lexical_cast.hpp>
 

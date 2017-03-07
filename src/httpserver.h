@@ -10,18 +10,20 @@
 
 #include <string>
 #include <stdint.h>
-#include <boost/thread.hpp>
-#include <boost/scoped_ptr.hpp>
+
 #include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread.hpp>
 
 static const int DEFAULT_HTTP_THREADS=4;
 static const int DEFAULT_HTTP_WORKQUEUE=16;
 static const int DEFAULT_HTTP_SERVER_TIMEOUT=30;
 
-struct evhttp_request;
-struct event_base;
 class CService;
 class HTTPRequest;
+
+struct event_base;
+struct evhttp_request;
 
 /** Initialize HTTP server.
  * Call this before RegisterHTTPHandler or EventBase().

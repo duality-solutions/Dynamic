@@ -18,17 +18,18 @@
 
 class CBlockFileInfo;
 class CBlockIndex;
-struct CDiskTxPos;
-struct CAddressUnspentKey;
-struct CAddressUnspentValue;
-struct CAddressIndexKey;
+class uint256;
+
 struct CAddressIndexIteratorKey;
 struct CAddressIndexIteratorHeightKey;
-struct CTimestampIndexKey;
+struct CAddressIndexKey;
+struct CAddressUnspentKey;
+struct CAddressUnspentValue;
+struct CDiskTxPos;
 struct CTimestampIndexIteratorKey;
+struct CTimestampIndexKey;
 struct CSpentIndexKey;
 struct CSpentIndexValue;
-class uint256;
 
 //! -dbcache default (MiB)
 static const int64_t nDefaultDbCache = 100;

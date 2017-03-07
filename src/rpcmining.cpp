@@ -11,6 +11,9 @@
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "core_io.h"
+#ifdef ENABLE_WALLET
+#include "dynode-sync.h"
+#endif
 #include "init.h"
 #include "main.h"
 #include "consensus/merkle.h"
@@ -27,10 +30,6 @@
 #include "validationinterface.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
-#endif
-
-#ifdef ENABLE_WALLET
-#include "dynode-sync.h"
 #endif
 
 #include <univalue.h>

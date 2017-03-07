@@ -5,7 +5,6 @@
 
 #include "policy/fees.h"
 
-
 #include "amount.h"
 #include "policy/policy.h"
 #include "streams.h"

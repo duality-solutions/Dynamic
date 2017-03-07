@@ -8,8 +8,8 @@
 #ifndef DYNAMIC_QT_TRAFFICGRAPHWIDGET_H
 #define DYNAMIC_QT_TRAFFICGRAPHWIDGET_H
 
-#include <QWidget>
 #include <QQueue>
+#include <QWidget>
 
 class ClientModel;
 

@@ -13,9 +13,9 @@
 #include <QWidget>
 
 class ClientModel;
+class PlatformStyle;
 class TransactionFilterProxy;
 class TxViewDelegate;
-class PlatformStyle;
 class WalletModel;
 
 namespace Ui {

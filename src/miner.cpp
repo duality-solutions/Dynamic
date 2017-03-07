@@ -12,6 +12,8 @@
 #include "chainparams.h"
 #include "coins.h"
 #include "consensus/consensus.h"
+#include "dynode-payments.h"
+#include "dynode-sync.h"
 #include "hash.h"
 #include "main.h"
 #include "consensus/merkle.h"
@@ -27,9 +29,6 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "wallet/wallet.h"
-
-#include "dynode-payments.h"
-#include "dynode-sync.h"
 
 #include <memory>
 #include <queue>

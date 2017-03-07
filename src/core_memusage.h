@@ -9,6 +9,7 @@
 #define DYNAMIC_CORE_MEMUSAGE_H
 
 #include "memusage.h"
+
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 

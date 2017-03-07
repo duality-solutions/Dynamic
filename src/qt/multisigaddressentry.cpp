@@ -15,10 +15,11 @@
 #include "key.h"
 #include "utilstrencodings.h"
 
-#include <QApplication>
-#include <QClipboard>
 #include <string>
 #include <vector>
+
+#include <QApplication>
+#include <QClipboard>
 
 MultisigAddressEntry::MultisigAddressEntry(const PlatformStyle *platformStyle, QWidget *parent) : QFrame(parent), ui(new Ui::MultisigAddressEntry), model(0)
 {

@@ -12,10 +12,10 @@
 
 #include <stdint.h>
 
+class arith_uint256;
 class CBlockHeader;
 class CBlockIndex;
 class uint256;
-class arith_uint256;
 
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex);
 

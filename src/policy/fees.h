@@ -14,8 +14,8 @@
 
 class CAutoFile;
 class CFeeRate;
-class CTxMemPoolEntry;
 class CTxMemPool;
+class CTxMemPoolEntry;
 
 /** \class CBlockPolicyEstimator
  * The BlockPolicyEstimator is used for estimating the fee or priority needed

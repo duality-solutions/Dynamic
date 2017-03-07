@@ -9,12 +9,11 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "instantsend.h"
 #include "main.h"
+#include "privatesend.h"
 #include "timedata.h"
 #include "wallet/wallet.h"
-
-#include "instantsend.h"
-#include "privatesend.h"
 
 #include <stdint.h>
 

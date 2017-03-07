@@ -12,17 +12,16 @@
 
 #include "base58.h"
 #include "chainparams.h"
+#include "governance.h"
 #include "key.h"
 #include "script/standard.h"
 #include "util.h"
 
-#include "governance.h"
-
 #include <boost/shared_ptr.hpp>
 
-class CSuperblock;
 class CGovernanceTrigger;
 class CGovernanceTriggerManager;
+class CSuperblock;
 class CSuperblockManager;
 
 static const int TRIGGER_UNKNOWN            = -1;

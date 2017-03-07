@@ -14,10 +14,11 @@
 #include "util.h"
 #include "wallet/wallet.h"
 
-#include <QApplication>
-#include <QClipboard>
 #include <string>
 #include <vector>
+
+#include <QApplication>
+#include <QClipboard>
 
 MultisigInputEntry::MultisigInputEntry(const PlatformStyle *platformStyle, QWidget *parent) : QFrame(parent), ui(new Ui::MultisigInputEntry), model(0)
 {

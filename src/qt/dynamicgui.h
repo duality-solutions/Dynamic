@@ -23,6 +23,8 @@
 #include <QSystemTrayIcon>
 
 class ClientModel;
+class DynodeList;
+class HelpMessageDialog;
 class NetworkStyle;
 class Notificator;
 class OptionsModel;
@@ -32,8 +34,6 @@ class SendCoinsRecipient;
 class UnitDisplayStatusBarControl;
 class WalletFrame;
 class WalletModel;
-class HelpMessageDialog;
-class DynodeList;
 
 class CWallet;
 

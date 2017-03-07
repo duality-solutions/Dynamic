@@ -7,6 +7,7 @@
 #define DYNAMIC_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
+
 #include "prevector.h"
 
 #include <assert.h>

@@ -7,11 +7,10 @@
 
 #include "activedynode.h"
 
-#include "protocol.h"
-
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "protocol.h"
 
 
 extern CWallet* pwalletMain;

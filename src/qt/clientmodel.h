@@ -17,8 +17,8 @@ class OptionsModel;
 class PeerTableModel;
 class TransactionTableModel;
 
-class CWallet;
 class CBlockIndex;
+class CWallet;
 
 QT_BEGIN_NAMESPACE
 class QTimer;

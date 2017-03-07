@@ -11,24 +11,37 @@
 
 #include "init.h"
 
+#include "activedynode.h"
 #include "addrman.h"
 #include "amount.h"
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
-#include "compat/sanity.h"
-#include "consensus/validation.h"
+#include "dns/dyndns.h"
+#include "dynode-payments.h"
+#include "dynode-sync.h"
+#include "dynodeconfig.h"
+#include "dynodeman.h"
+#include "flat-database.h"
+#include "governance.h"
+#include "instantsend.h"
+#include "dns/hooks.h"
 #include "httpserver.h"
 #include "httprpc.h"
 #include "key.h"
 #include "main.h"
 #include "miner.h"
 #include "net.h"
+#include "netfulfilledman.h"
 #include "policy/policy.h"
+#include "privatesend.h"
+#include "psnotificationinterface.h"
 #include "rpcserver.h"
+#include "compat/sanity.h"
 #include "script/standard.h"
 #include "script/sigcache.h"
 #include "scheduler.h"
+#include "spork.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "torcontrol.h"
@@ -36,6 +49,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "consensus/validation.h"
 #include "validationinterface.h"
 #ifdef ENABLE_WALLET
 #include "wallet/db.h"
@@ -44,23 +58,6 @@
 #include "wallet/walletdb.h"
 #endif
 
-#include "activedynode.h"
-#include "dns/dyndns.h"
-#include "dns/hooks.h"
-#include "privatesend.h"
-#include "psnotificationinterface.h"
-#include "flat-database.h"
-#include "governance.h"
-#include "instantsend.h"
-#ifdef ENABLE_WALLET
-#endif
-#include "dynode-payments.h"
-#include "dynode-sync.h"
-#include "dynodeconfig.h"
-#include "dynodeman.h"
-#include "netfulfilledman.h"
-#include "spork.h"
-
 #include <stdint.h>
 #include <stdio.h>
 
@@ -68,16 +65,17 @@
 #include <signal.h>
 #endif
 
+#include <openssl/crypto.h>
+
+#include <boost/bind.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/function.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/function.hpp>
-#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/thread.hpp>
-#include <openssl/crypto.h>
 
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"

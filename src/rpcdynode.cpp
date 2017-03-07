@@ -3,18 +3,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "init.h"
-#include "main.h"
-#include "rpcserver.h"
-#include "util.h"
-#include "utilmoneystr.h"
-
 #include "activedynode.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
 #include "dynodeman.h"
+#include "init.h"
+#include "main.h"
 #include "privatesend.h"
+#include "rpcserver.h"
+#include "util.h"
+#include "utilmoneystr.h"
 
 #include <univalue.h>
 

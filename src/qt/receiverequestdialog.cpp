@@ -5,6 +5,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h" /* for USE_QRCODE */
+#endif
+
 #include "receiverequestdialog.h"
 #include "ui_receiverequestdialog.h"
 
@@ -14,6 +18,10 @@
 #include "optionsmodel.h"
 #include "walletmodel.h"
 
+#ifdef USE_QRCODE
+#include <qrencode.h>
+#endif
+
 #include <QClipboard>
 #include <QDrag>
 #include <QMenu>
@@ -22,14 +30,6 @@
 #include <QPixmap>
 #if QT_VERSION < 0x050000
 #include <QUrl>
-#endif
-
-#if defined(HAVE_CONFIG_H)
-#include "config/dynamic-config.h" /* for USE_QRCODE */
-#endif
-
-#ifdef USE_QRCODE
-#include <qrencode.h>
 #endif
 
 QRImageWidget::QRImageWidget(QWidget *parent):

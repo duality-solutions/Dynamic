@@ -17,9 +17,9 @@
 #include "coins.h"
 #include "net.h"
 #include "script/script_error.h"
+#include "spentindex.h"
 #include "sync.h"
 #include "versionbits.h"
-#include "spentindex.h"
 
 #include <algorithm>
 #include <exception>
@@ -32,9 +32,9 @@
 
 #include <boost/unordered_map.hpp>
 
+class CBloomFilter;
 class CBlockIndex;
 class CBlockTreeDB;
-class CBloomFilter;
 class CChainParams;
 class CInv;
 class CScriptCheck;
@@ -42,8 +42,8 @@ class CTxMemPool;
 class CValidationInterface;
 class CValidationState;
 
-struct CNodeStateStats;
 struct LockPoints;
+struct CNodeStateStats;
 
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;

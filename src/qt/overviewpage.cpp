@@ -14,16 +14,14 @@
 #include "guiutil.h"
 #include "optionsmodel.h"
 #include "platformstyle.h"
+#include "privatesendconfig.h"
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
 #include "utilitydialog.h"
 #include "walletmodel.h"
 
-#include "privatesendconfig.h"
-
-#include "init.h"
-
 #include "dynode-sync.h"
+#include "init.h"
 #include "instantsend.h"
 #include "privatesend.h"
 

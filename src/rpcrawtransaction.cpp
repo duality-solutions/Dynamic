@@ -10,6 +10,7 @@
 #include "coins.h"
 #include "core_io.h"
 #include "init.h"
+#include "instantsend.h"
 #include "keystore.h"
 #include "main.h"
 #include "merkleblock.h"
@@ -28,8 +29,6 @@
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
-
-#include "instantsend.h"
 
 #include <univalue.h>
 

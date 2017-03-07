@@ -7,13 +7,14 @@
 
 #include "httprpc.h"
 
+#include "crypto/hmac_sha256.h"
+
 #include "base58.h"
 #include "chainparams.h"
-#include "crypto/hmac_sha256.h"
 #include "httpserver.h"
+#include "random.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
-#include "random.h"
 #include "sync.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -22,8 +23,8 @@
 
 #include <stdio.h>
 
-#include <boost/algorithm/string.hpp> // boost::trim
 #include <boost/foreach.hpp> //BOOST_FOREACH
+#include <boost/algorithm/string.hpp> // boost::trim
 
 /** WWW-Authenticate to present with 401 Unauthorized response */
 static const char* WWW_AUTH_HEADER_DATA = "Basic realm=\"jsonrpc\"";

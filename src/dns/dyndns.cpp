@@ -31,13 +31,13 @@
 #include "hooks.h"
 #include "util.h"
 
-#include <stdio.h>
-#include <unistd.h>
+#include <ctype.h>
 #include <stdint.h>
-#include <sys/types.h>
+#include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -45,8 +45,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #endif
-
-#include <ctype.h>
 
 /*---------------------------------------------------*/
 

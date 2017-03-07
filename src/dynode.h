@@ -10,7 +10,6 @@
 #include "main.h"
 #include "net.h"
 #include "timedata.h"
-
 #include "spork.h"
 
 class CDynode;

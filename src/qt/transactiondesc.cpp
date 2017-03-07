@@ -14,14 +14,13 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "instantsend.h"
 #include "main.h"
 #include "script/script.h"
 #include "timedata.h"
 #include "util.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"
-
-#include "instantsend.h"
 
 #include <stdint.h>
 #include <string>

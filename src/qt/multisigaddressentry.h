@@ -7,8 +7,8 @@
 
 #include <QFrame>
 
-class WalletModel;
 class PlatformStyle;
+class WalletModel;
 
 namespace Ui
 {

@@ -6,13 +6,12 @@
 #ifndef DYNAMIC_PRIVATESEND_H
 #define DYNAMIC_PRIVATESEND_H
 
+#include "dynode.h"
 #include "wallet/wallet.h"
 
-#include "dynode.h"
-
+class CPrivatesendBroadcastTx;
 class CPrivatesendPool;
 class CPrivateSendSigner;
-class CPrivatesendBroadcastTx;
 
 // timeouts
 static const int PRIVATESEND_AUTO_TIMEOUT_MIN       = 5;

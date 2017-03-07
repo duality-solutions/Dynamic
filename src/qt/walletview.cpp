@@ -25,7 +25,6 @@
 
 #include "dnspage.h"
 #include "dynodeconfig.h"
-
 #include "ui_interface.h"
 
 #include <QAction>

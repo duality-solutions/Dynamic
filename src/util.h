@@ -27,9 +27,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/thread/exceptions.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/signals2/signal.hpp>
-#include <boost/thread/exceptions.hpp>
 
 // Debugging macros
 

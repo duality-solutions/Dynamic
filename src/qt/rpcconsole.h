@@ -12,8 +12,8 @@
 
 #include "net.h"
 
-#include <QDialog>
 #include <QCompleter>
+#include <QDialog>
 
 class ClientModel;
 class PlatformStyle;

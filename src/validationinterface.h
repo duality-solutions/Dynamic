@@ -12,13 +12,14 @@
 #include <boost/shared_ptr.hpp>
 
 class CBlock;
-struct CBlockLocator;
 class CBlockIndex;
 class CReserveScript;
 class CTransaction;
 class CValidationInterface;
 class CValidationState;
 class uint256;
+
+struct CBlockLocator;
 
 // These functions dispatch to one or all registered wallets
 

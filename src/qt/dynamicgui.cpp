@@ -29,12 +29,11 @@
 #include "macdockiconhandler.h"
 #endif
 
+#include "dynode-sync.h"
+#include "dynodelist.h"
 #include "init.h"
 #include "ui_interface.h"
 #include "util.h"
-
-#include "dynode-sync.h"
-#include "dynodelist.h"
 
 #include <iostream>
 

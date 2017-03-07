@@ -15,9 +15,9 @@
 #include <boost/signals2/signal.hpp>
 
 class CBasicKeyStore;
+class CBlockIndex;
 class CWallet;
 class uint256;
-class CBlockIndex;
 
 /** General change type (added, updated, removed). */
 enum ChangeType

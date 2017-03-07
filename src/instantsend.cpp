@@ -5,20 +5,19 @@
 
 #include "instantsend.h"
 
-#include "key.h"
-#include "main.h"
-#include "net.h"
-#include "protocol.h"
-#include "sync.h"
-#include "txmempool.h"
-#include "util.h"
-#include "consensus/validation.h"
-
 #include "activedynode.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "key.h"
+#include "main.h"
+#include "net.h"
 #include "privatesend.h"
+#include "protocol.h"
+#include "sync.h"
+#include "txmempool.h"
 #include "spork.h"
+#include "util.h"
+#include "consensus/validation.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>

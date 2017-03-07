@@ -15,20 +15,18 @@
 #include "guiutil.h"
 
 #include "amount.h"
+#ifdef ENABLE_WALLET
+#include "dynodeconfig.h"
+#endif
 #include "init.h"
 #include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
+#include "privatesend.h"
 #include "txdb.h" // for -dbcache defaults
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 #endif
-
-#ifdef ENABLE_WALLET
-#include "dynodeconfig.h"
-#endif
-#include "privatesend.h"
-
 
 #include <QNetworkProxy>
 #include <QSettings>

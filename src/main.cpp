@@ -14,15 +14,21 @@
 #include "checkpoints.h"
 #include "checkqueue.h"
 #include "consensus/consensus.h"
-#include "consensus/merkle.h"
-#include "consensus/params.h"
-#include "consensus/validation.h"
+#include "dns/dns.h"
+#include "dynode-payments.h"
+#include "dynode-sync.h"
+#include "dynodeman.h"
+#include "governance.h"
 #include "hash.h"
 #include "init.h"
+#include "instantsend.h"
+#include "consensus/merkle.h"
 #include "merkleblock.h"
 #include "net.h"
+#include "consensus/params.h"
 #include "policy/policy.h"
 #include "pow.h"
+#include "privatesend.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "script/script.h"
@@ -37,24 +43,17 @@
 #include "spork.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
 
-#include "dns/dns.h"
-#include "governance.h"
-#include "privatesend.h"
-#include "instantsend.h"
-#include "dynode-payments.h"
-#include "dynode-sync.h"
-#include "dynodeman.h"
-
 #include <sstream>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/math/distributions/poisson.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
 
 using namespace std;

@@ -11,8 +11,8 @@
 #include <QDialog>
 #include <QObject>
 
-class DynamicGUI;
 class ClientModel;
+class DynamicGUI;
 
 namespace Ui {
     class HelpMessageDialog;

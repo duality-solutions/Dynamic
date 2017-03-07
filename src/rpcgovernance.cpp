@@ -7,12 +7,6 @@
 
 //#define ENABLE_DYNAMIC_DEBUG
 
-#include "init.h"
-#include "main.h"
-#include "rpcserver.h"
-#include "util.h"
-#include "utilmoneystr.h"
-
 #include "activedynode.h"
 #include "dynode.h"
 #include "dynode-sync.h"
@@ -21,7 +15,12 @@
 #include "governance.h"
 #include "governance-classes.h"
 #include "governance-vote.h"
+#include "init.h"
+#include "main.h"
 #include "privatesend.h"
+#include "rpcserver.h"
+#include "util.h"
+#include "utilmoneystr.h"
 
 #include <boost/lexical_cast.hpp>
 

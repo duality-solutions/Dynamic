@@ -9,13 +9,14 @@
 #define DYNAMIC_HOOKS_H
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
+class CBlockIndex;
 class CScript;
 class CTransaction;
-class CBlockIndex;
 class CTxOut;
+
 struct nameTempProxy;
 
 using namespace std;

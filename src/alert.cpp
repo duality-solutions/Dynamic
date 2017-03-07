@@ -16,9 +16,9 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include <stdint.h>
 #include <algorithm>
 #include <map>
+#include <stdint.h>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>

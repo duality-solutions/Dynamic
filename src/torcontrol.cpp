@@ -8,29 +8,30 @@
 #include "torcontrol.h"
 
 #include "crypto/hmac_sha256.h"
+
 #include "net.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include <vector>
 #include <deque>
 #include <set>
 #include <stdlib.h>
+#include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/signals2/signal.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/replace.hpp>
-
-#include <event2/bufferevent.h>
 #include <event2/buffer.h>
-#include <event2/util.h>
+#include <event2/bufferevent.h>
 #include <event2/event.h>
 #include <event2/thread.h>
+#include <event2/util.h>
+
+#include <boost/bind.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/signals2/signal.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 /** Default control port */
 const std::string DEFAULT_TOR_CONTROL = "127.0.0.1:9051";

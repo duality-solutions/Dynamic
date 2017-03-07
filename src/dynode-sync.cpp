@@ -5,18 +5,16 @@
 
 #include "dynode-sync.h"
 
-#include "checkpoints.h"
-#include "main.h"
-#include "netfulfilledman.h"
-#include "util.h"
-
 #include "activedynode.h"
+#include "checkpoints.h"
 #include "governance.h"
 #include "dynode.h"
 #include "dynode-payments.h"
 #include "dynodeman.h"
+#include "main.h"
+#include "netfulfilledman.h"
 #include "spork.h"
-
+#include "util.h"
 
 class CDynodeSync;
 CDynodeSync dynodeSync;

@@ -13,11 +13,10 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include <stdint.h>
-
 #ifndef WIN32
 #include <sys/stat.h>
 #endif
+#include <stdint.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
@@ -25,9 +24,7 @@
 
 using namespace std;
 
-
 unsigned int nWalletDBUpdated;
-
 
 //
 // CDB

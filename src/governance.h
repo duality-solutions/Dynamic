@@ -21,8 +21,8 @@
 #include "util.h"
 
 class CGovernanceManager;
-class CGovernanceTriggerManager;
 class CGovernanceObject;
+class CGovernanceTriggerManager;
 class CGovernanceVote;
 
 extern CGovernanceManager governance;

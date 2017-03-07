@@ -13,6 +13,7 @@
 #include <map>
 
 class CBlockIndex;
+
 struct CCheckpointData;
 
 /**

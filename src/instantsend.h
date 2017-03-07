@@ -10,11 +10,11 @@
 #include "net.h"
 #include "primitives/transaction.h"
 
-class CTxLockVote;
-class COutPointLock;
-class CTxLockRequest;
-class CTxLockCandidate;
 class CInstantSend;
+class COutPointLock;
+class CTxLockCandidate;
+class CTxLockRequest;
+class CTxLockVote;
 
 extern CInstantSend instantsend;
 

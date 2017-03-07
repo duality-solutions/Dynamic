@@ -16,8 +16,9 @@
 #include <QStringList>
 
 class NameTablePriv;
-class CWallet;
 class WalletModel;
+
+class CWallet;
 
 /**
    Qt model for "DNS" page.

@@ -7,16 +7,15 @@
 #define DYNAMIC_DYNODE_PAYMENTS_H
 
 #include "core_io.h"
+#include "dynode.h"
 #include "key.h"
 #include "main.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include "dynode.h"
-
+class CDynodeBlockPayees;
 class CDynodePayments;
 class CDynodePaymentVote;
-class CDynodeBlockPayees;
 
 static const int DNPAYMENTS_SIGNATURES_REQUIRED         = 10;
 static const int DNPAYMENTS_SIGNATURES_TOTAL            = 20;

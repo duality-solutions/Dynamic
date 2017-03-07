@@ -8,11 +8,10 @@
 #ifndef DYNAMIC_PREVECTOR_H
 #define DYNAMIC_PREVECTOR_H
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
 #include <iterator>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #pragma pack(push, 1)
 /** Implements a drop-in replacement for std::vector<T> which stores up to N

@@ -10,8 +10,8 @@
 
 #include "guiutil.h"
 
-#include <QWidget>
 #include <QKeyEvent>
+#include <QWidget>
 
 class PlatformStyle;
 class TransactionFilterProxy;

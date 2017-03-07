@@ -11,8 +11,8 @@
 #include "walletmodel.h"
 
 #include <QAbstractTableModel>
-#include <QStringList>
 #include <QDateTime>
+#include <QStringList>
 
 class CWallet;
 

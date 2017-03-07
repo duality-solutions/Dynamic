@@ -11,8 +11,8 @@
 #include "guiconstants.h"
 #include "qvaluecombobox.h"
 
-#include <QApplication>
 #include <QAbstractSpinBox>
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>

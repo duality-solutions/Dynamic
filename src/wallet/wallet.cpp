@@ -13,32 +13,31 @@
 #include "chain.h"
 #include "coincontrol.h"
 #include "consensus/consensus.h"
+#include "governance.h"
 #include "init.h"
+#include "instantsend.h"
 #include "keepass.h"
 #include "key.h"
 #include "keystore.h"
 #include "main.h"
 #include "net.h"
 #include "policy/policy.h"
+#include "privatesend.h"
 #include "rpcprotocol.h"
 #include "script/script.h"
 #include "script/sign.h"
 #include "timedata.h"
 #include "primitives/transaction.h"
 #include "txmempool.h"
+#include "spork.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "consensus/validation.h"
 
-#include "governance.h"
-#include "instantsend.h"
-#include "privatesend.h"
-#include "spork.h"
-
 #include <assert.h>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
 
 

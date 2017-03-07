@@ -10,8 +10,8 @@
 #include "net.h"
 #include "utilstrencodings.h"
 
-class CSporkMessage;
 class CSporkManager;
+class CSporkMessage;
 
 /*
     Don't ever reuse these IDs for other sporks

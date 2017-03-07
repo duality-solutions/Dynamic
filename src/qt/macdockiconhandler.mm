@@ -7,15 +7,16 @@
 
 #include "macdockiconhandler.h"
 
+#include <QBuffer>
 #include <QImageWriter>
 #include <QMenu>
-#include <QBuffer>
 #include <QWidget>
 
 #undef slots
 #include <Cocoa/Cocoa.h>
-#include <objc/objc.h>
 #include <objc/message.h>
+#include <objc/objc.h>
+
 
 #if QT_VERSION < 0x050000
 extern void qt_mac_set_dock_menu(QMenu *);

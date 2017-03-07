@@ -23,8 +23,8 @@
 #include <stdint.h>
 
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 

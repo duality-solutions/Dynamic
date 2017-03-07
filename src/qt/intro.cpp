@@ -12,13 +12,13 @@
 
 #include "util.h"
 
+#include <cmath>
+
 #include <boost/filesystem.hpp>
 
 #include <QFileDialog>
-#include <QSettings>
 #include <QMessageBox>
-
-#include <cmath>
+#include <QSettings>
 
 static const uint64_t GB_BYTES = 1000000000LL;
 /* Minimum free space (in GB) needed for data directory */

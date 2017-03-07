@@ -17,12 +17,11 @@
 
 #include "coincontrol.h"
 #include "init.h"
+#include "instantsend.h"
 #include "main.h" // For minRelayTxFee
+#include "privatesend.h"
 #include "txmempool.h"
 #include "wallet/wallet.h"
-
-#include "instantsend.h"
-#include "privatesend.h"
 
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 

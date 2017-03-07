@@ -5,10 +5,9 @@
 
 #include "governance-vote.h"
 
-#include "util.h"
-
 #include "dynodeman.h"
 #include "privatesend.h"
+#include "util.h"
 
 #include <boost/lexical_cast.hpp>
 
