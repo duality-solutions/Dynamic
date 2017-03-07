@@ -254,7 +254,7 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
     /// Memory cost: 1024 kibibytes
     /// Lanes: 4 parallel threads
     /// Threads: 2 threads
-    /// Time Constraint: 3 iteration
+    /// Time Constraint: 4 iteration
 inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;
