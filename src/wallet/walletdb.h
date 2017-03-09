@@ -22,7 +22,6 @@ static const bool DEFAULT_FLUSHWALLET = true;
 
 class CAccount;
 class CAccountingEntry;
-struct CBlockLocator;
 class CKeyPool;
 class CMasterKey;
 class CScript;
@@ -30,6 +29,8 @@ class CWallet;
 class CWalletTx;
 class uint160;
 class uint256;
+
+struct CBlockLocator;
 
 /** Error statuses for the wallet database */
 enum DBErrors
