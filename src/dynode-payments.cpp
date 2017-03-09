@@ -275,7 +275,15 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
     CBlockIndex* pindexPrev = chainActive.Tip();       
     if(!pindexPrev) return;        
 
-    bool hasPayment = true;
+    if (chainActive.Height() <= Params().GetConsensus().nRewardsStart) 
+    {
+        bool hasPayment = false;
+    }
+    else 
+    {
+        bool hasPayment = true;
+    }
+
     CScript payee;
 
     //spork
