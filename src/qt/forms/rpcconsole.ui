@@ -21,7 +21,7 @@
 QTabBar { alignment: left; }</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab_info">
       <attribute name="title">
@@ -1324,7 +1324,7 @@ QTabBar { alignment: left; }</string>
         </size>
        </property>
        <property name="text">
-        <string>Salvage wallet</string>
+        <string>Disabled</string>
        </property>
       </widget>
       <widget class="QPushButton" name="btn_rescan">
@@ -1435,7 +1435,7 @@ QTabBar { alignment: left; }</string>
         </rect>
        </property>
        <property name="text">
-        <string>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</string>
+        <string>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat. (Power Users Only)</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
