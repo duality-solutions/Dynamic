@@ -44,8 +44,8 @@ Dynamic includes an Address Index feature, based on the address index API (searc
 
 **Dynode/Privatesend Network Information**
 Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend/PrivateSend ported and rebranded as Privatesend/PrivateSend.
-Utilisation of InstantSend/InstantSend for instant transaction confirmation(s).
+Darksend ported and rebranded as Privatesend.
+Utilisation of InstantSend for near-instant transactions.
 
 **MainNet Parameters**
 P2P Port = 31300
