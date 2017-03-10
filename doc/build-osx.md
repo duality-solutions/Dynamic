@@ -38,7 +38,7 @@ Instructions: Homebrew
 
 #### Install dependencies using Homebrew
 
-        brew install autoconf automake libevent libtool boost miniupnpc openssl pkg-config protobuf qt@5.5 berkeley-db4
+        brew install git autoconf automake libevent libtool boost miniupnpc openssl pkg-config protobuf qt@5.5 berkeley-db4
 
 After exiting you will want to symlink berkeley-db4 and openssl:
 
