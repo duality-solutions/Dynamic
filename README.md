@@ -33,7 +33,7 @@ What is Dynamic?
 * Min TX Fee: 0.0001 DYN
 
 
-The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (centralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
+The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
 
 Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
 
