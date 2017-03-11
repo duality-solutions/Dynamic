@@ -20,6 +20,7 @@
 #include <QObject>
 
 class AddressTableModel;
+class NameTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
@@ -33,7 +34,6 @@ class COutput;
 class CPubKey;
 class CWallet;
 class uint256;
-class NameTableModel;
 
 QT_BEGIN_NAMESPACE
 class QTimer;

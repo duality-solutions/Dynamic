@@ -13,8 +13,8 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 
-class ClientModel;
 class BanTablePriv;
+class ClientModel;
 
 struct CCombinedBan {
     CSubNet subnet;

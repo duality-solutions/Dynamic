@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash CoreDevelopers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -22,7 +22,6 @@ static const bool DEFAULT_FLUSHWALLET = true;
 
 class CAccount;
 class CAccountingEntry;
-struct CBlockLocator;
 class CKeyPool;
 class CMasterKey;
 class CScript;
@@ -30,6 +29,8 @@ class CWallet;
 class CWalletTx;
 class uint160;
 class uint256;
+
+struct CBlockLocator;
 
 /** Error statuses for the wallet database */
 enum DBErrors

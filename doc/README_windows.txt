@@ -3,10 +3,7 @@ Dynamic 1.0.0.0
 
 Intro
 -----
-Dynamic is a free open source peer-to-peer electronic cash system that is
-completely decentralized, without the need for a central server or trusted
-parties.  Users hold the crypto keys to their own money and transact directly
-with each other, with the help of a P2P network to check for double-spending.
+The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
 
 
 Setup

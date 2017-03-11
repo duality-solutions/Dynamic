@@ -14,8 +14,8 @@
 namespace Ui {
     class DNSPage;
 }
-class WalletModel;
 class NameTableModel;
+class WalletModel;
 
 QT_BEGIN_NAMESPACE
 class QTableView;

@@ -30,11 +30,12 @@
 #include "consensus/validation.h"
 #include "wallet/wallet.h"
 
+#include <vector>
+
 #include <QClipboard>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QWidget>
-#include <vector>
 
 MultisigDialog::MultisigDialog(const PlatformStyle *platformStyle, QWidget *parent) :
     QDialog(parent),

@@ -768,10 +768,6 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         // TODO: Maybe recheck connections/IBD and (if something wrong) send an expires-immediately template to stop miners?
     }
 
-    typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
-    static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
-    static vector<CBlockTemplate*> vNewBlockTemplate;
-    
     // Update block
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
@@ -779,14 +775,6 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     if (pindexPrev != chainActive.Tip() ||
         (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
     {
-        if (pindexPrev != chainActive.Tip())
-        {
-            // Deallocate old blocks since they're obsolete now
-            mapNewBlock.clear();
-            BOOST_FOREACH(CBlockTemplate* pblocktemplate, vNewBlockTemplate)
-                delete pblocktemplate;
-            vNewBlockTemplate.clear();
-        }
         // Clear pindexPrev so future calls make a new block, despite any failures from here on
         pindexPrev = NULL;
 

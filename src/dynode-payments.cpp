@@ -278,6 +278,12 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
     bool hasPayment = true;
     CScript payee;
 
+    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock){
+            if (fDebug)
+                LogPrintf("CreateNewBlock: No Dynode payments prior to block 20,546\n");
+            hasPayment = false;
+    }
+
     //spork
     if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
         //no Dynode detected
