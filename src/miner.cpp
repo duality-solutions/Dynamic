@@ -617,6 +617,7 @@ void static DynamicMiner(const CChainParams& chainparams)
                     if ((pblock->nNonce & 0xFF) == 0)
                         break;
                 }
+                
                 // Meter hashes/seconds
                 static int64_t nHashCounter = 0;
                 static int64_t nLogTime = 0;
@@ -674,7 +675,7 @@ void static DynamicMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
-        return;
+        throw;
     }
     catch (const std::runtime_error &e)
     {
