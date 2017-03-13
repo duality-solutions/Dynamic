@@ -674,7 +674,7 @@ void static DynamicMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
-        return;
+        throw;
     }
     catch (const std::runtime_error &e)
     {
