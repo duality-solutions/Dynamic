@@ -39,8 +39,6 @@ Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and n
 
 Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
 
-Dynamic includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the Dynamic codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
-
 
 **Dynode/Privatesend Network Information**
 Ported Masternodes from Dash, rebranded as Dynodes.
