@@ -585,10 +585,6 @@ void static DynamicMiner(const CChainParams& chainparams)
             //
             int64_t nStart = GetTime();
             arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
-            
-            // Meter hashes/seconds
-            int64_t nHashCounter = 0;
-            int64_t nLogTime = 0;
             uint256 hash;
             while (true)
             {
@@ -621,6 +617,9 @@ void static DynamicMiner(const CChainParams& chainparams)
                     if ((pblock->nNonce & 0xFF) == 0)
                         break;
                 }
+                // Meter hashes/seconds
+                static int64_t nHashCounter = 0;
+                static int64_t nLogTime = 0;
 
                 if (nHPSTimerStart == 0)
                 {
@@ -631,7 +630,9 @@ void static DynamicMiner(const CChainParams& chainparams)
                     nHashCounter += nHashesDone;
                 if (GetTimeMillis() - nHPSTimerStart > 4000)
                 {
+                    static CCriticalSection cs;        
                     {
+                        LOCK(cs);
                         if (GetTimeMillis() - nHPSTimerStart > 4000)
                         {
                             dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
