@@ -67,7 +67,7 @@ void ThreadSendAlert()
     alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality-solutions.com";
 
     // Set specific client version/versions here. If setSubVer is empty, no filtering on subver is done:
-    // alert.setSubVer.insert(std::string("/Dynamic:1.0.0.0/"));
+    // alert.setSubVer.insert(std::string("/Dynamic:1.1.0.0/"));
 
     // Sign
     if(!alert.Sign())

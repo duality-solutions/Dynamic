@@ -1,4 +1,4 @@
-Used in 1.0.0.0
+Used in 1.1.0.0
 ---------------------
 * wallet.dat: personal wallet (BDB) with keys and transactions
 * peers.dat: peer IP address database (custom format);
