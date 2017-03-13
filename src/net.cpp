@@ -405,8 +405,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToDyn
             // we have existing connection to this node but it was not a connection to Dynodes,
             // change flag and add reference so that we can correctly clear it later
             if(fConnectToDynode && !pnode->fDynode) {
-                pnode->fDynode = true;
                 pnode->AddRef();
+                pnode->fDynode = true;
             }
             return pnode;
         }
@@ -434,16 +434,14 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToDyn
         // Add node
         CNode* pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false, true);
 
-        {
-            LOCK(cs_vNodes);
-            vNodes.push_back(pnode);
-        }
-        
         pnode->nTimeConnected = GetTime();
         if(fConnectToDynode) {
             pnode->AddRef();
             pnode->fDynode = true;
         }
+
+        LOCK(cs_vNodes);
+        vNodes.push_back(pnode);
 
         return pnode;
     } else if (!proxyConnectionFailed) {
@@ -1024,6 +1022,7 @@ void ThreadSocketHandler()
                 {
                     LogPrintf("ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fNetworkNode=%d fInbound=%d fDynode=%d\n",
                               pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fNetworkNode, pnode->fInbound, pnode->fDynode);
+                    
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
 
@@ -1175,7 +1174,6 @@ void ThreadSocketHandler()
         // Service each socket
         //
         vector<CNode*> vNodesCopy = CopyNodeVector();
-
         BOOST_FOREACH(CNode* pnode, vNodesCopy)
         {
             boost::this_thread::interruption_point();
@@ -2400,6 +2398,7 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     fPingQueued = false;
     fDynode = false;
     nMinPingUsecTime = std::numeric_limits<int64_t>::max();
+    vchKeyedNetGroup = CalculateKeyedNetGroup(addr);
 
     {
         LOCK(cs_nLastNodeId);
