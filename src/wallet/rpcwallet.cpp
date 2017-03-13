@@ -1768,6 +1768,8 @@ UniValue listsinceblock(const UniValue& params, bool fHelp)
         BlockMap::iterator it = mapBlockIndex.find(blockId);
         if (it != mapBlockIndex.end())
             pindex = it->second;
+        else
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid blockhash");
     }
 
     if (params.size() > 1)
