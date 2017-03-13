@@ -356,7 +356,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         }
         netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC);
 
-        Sync(pfrom, nCountNeeded);
+        Sync(pfrom);
         LogPrintf("DYNODEPAYMENTSYNC -- Sent Dynode payment votes to peer %d\n", pfrom->id);
 
     } else if (strCommand == NetMsgType::DYNODEPAYMENTVOTE) { // Dynode Payments Vote for the Winner
@@ -840,18 +840,16 @@ std::string CDynodePaymentVote::ToString() const
     return info.str();
 }
 
-// Send all votes up to nCountNeeded blocks (but not more than GetStorageLimit)
-void CDynodePayments::Sync(CNode* pnode, int nCountNeeded)
+// Send all votes up to nCountNeeded blocks (but not more than GetStorageLimit)        
+void CMasternodePayments::Sync(CNode* pnode)
 {
     LOCK(cs_mapDynodeBlocks);
 
     if(!pCurrentBlockIndex) return;
 
-    nCountNeeded = 0;
-
     int nInvCount = 0;
 
-    for(int h = pCurrentBlockIndex->nHeight - nCountNeeded; h < pCurrentBlockIndex->nHeight + 20; h++) {
+    for(int h = pCurrentBlockIndex->nHeight; h < pCurrentBlockIndex->nHeight + 20; h++) {
         if(mapDynodeBlocks.count(h)) {
             BOOST_FOREACH(CDynodePayee& payee, mapDynodeBlocks[h].vecPayees) {
                 std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();

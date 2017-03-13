@@ -194,7 +194,7 @@ public:
     bool HasVerifiedPaymentVote(uint256 hashIn);
     bool ProcessBlock(int nBlockHeight);
 
-    void Sync(CNode* node, int nCountNeeded);
+    void Sync(CNode* node);
     void RequestLowDataPaymentBlocks(CNode* pnode);
     void CheckAndRemove();
 
