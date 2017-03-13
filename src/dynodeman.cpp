@@ -801,6 +801,7 @@ std::pair<CService, std::set<uint256> > CDynodeMan::PopScheduledDnbRequestConnec
 void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
+    
     if(!dynodeSync.IsBlockchainSynced()) return;
 
     if (strCommand == NetMsgType::DNANNOUNCE) { //Dynode Broadcast
@@ -812,7 +813,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         LogPrint("Dynode", "DNANNOUNCE -- Dynode announce, Dynode=%s\n", dnb.vin.prevout.ToStringShort());
 
-            int nDos = 0;
+        int nDos = 0;
 
         if (CheckDnbAndUpdateDynodeList(pfrom, dnb, nDos)) {
                 // use announced Dynode as a peer
