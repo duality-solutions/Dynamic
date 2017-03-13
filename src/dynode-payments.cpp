@@ -841,7 +841,7 @@ std::string CDynodePaymentVote::ToString() const
 }
 
 // Send all votes up to nCountNeeded blocks (but not more than GetStorageLimit)        
-void CMasternodePayments::Sync(CNode* pnode)
+void CDynodePayments::Sync(CNode* pnode)
 {
     LOCK(cs_mapDynodeBlocks);
 
