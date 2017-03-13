@@ -662,7 +662,7 @@ public:
 
     bool SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, std::vector<COutput>& vCoinsRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax);
     bool GetCollateralTxIn(CTxIn& txinRet, CAmount& nValueRet) const;
-    bool SelectCoinsDark(const CAmount nValueMin, const CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, const int nPrivateSendRoundsMin, const int nPrivateSendRoundsMax) const;
+    bool SelectCoinsMix(CAmount nValueMin, const CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax) const;
     bool SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true, bool fAnonymizable = true) const;
 
     /// Get 1000DYN output and keys which can be used for the Dynode
