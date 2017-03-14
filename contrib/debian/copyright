@@ -7,7 +7,7 @@ Source: https://github.com/duality-solutions/dynamic
 Files: *
 Copyright: 2015-2017, Duality Blockchain Solutions
 License: Expat
-Comment: The Duality Blockchain Solution Developers encompasses the current developers listed on dynamic.duality-solutions.com & sequence.duality-solutions.com, as well as the numerous contributors to the project.
+Comment: The Duality Blockchain Solution Developers encompasses the current developers listed on dynamic.duality.solutions & sequence.duality.solutions, as well as the numerous contributors to the project.
 
 Files: src/json/*
 Copyright: 2007-2009, John W. Wilkinson
