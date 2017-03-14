@@ -56,7 +56,7 @@ or you can instead symlink your newly installed OpenSSL:
 After exiting you will want to symlink berkeley-db4 and qt:
 
     $ brew link berkeley-db4 --force
-    $ brew link qt@5.5 --force
+    $ brew link qt --force
     $ brew link boost160 --c++11 --force    
 
 
