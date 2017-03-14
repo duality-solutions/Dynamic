@@ -8,4 +8,4 @@
 +unix|mingw {
      CONFIG += create_pc
      QMAKE_PKGCONFIG_DESTDIR = pkgconfig
-host_build: \
+     host_build: \
