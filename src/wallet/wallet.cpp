@@ -2796,7 +2796,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
     return vecTallyRet.size() > 0;
 }
 
-bool CWallet::SelectCoinsDark(const CAmount nValueMin, const CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, const int nPrivateSendRoundsMin, const int nPrivateSendRoundsMax) const
+bool CWallet::SelectCoinsMix(CAmount nValueMin, const CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax) const
 {
     CCoinControl *coinControl=NULL;
 
