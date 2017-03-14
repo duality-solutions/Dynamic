@@ -61,17 +61,18 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
         [$4], [default], [ax_cxx_compile_cxx$1_try_default=true],
         [$4], [nodefault], [ax_cxx_compile_cxx$1_try_default=false],
         [m4_fatal([invalid fourth argument `$4' to AX_CXX_COMPILE_STDCXX])])
-  AC_LANG_PUSH([C++])dnl
-  ac_success=no
+
+   AC_LANG_PUSH([C++])dnl
+   ac_success=no
 
   m4_if([$4], [nodefault], [], [dnl
-  AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
-  ax_cv_cxx_compile_cxx$1,
-  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
-    [ax_cv_cxx_compile_cxx$1=yes],
-    [ax_cv_cxx_compile_cxx$1=no])])
-  if test x$ax_cv_cxx_compile_cxx$1 = xyes; then
-    ac_success=yes
+   AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
+   ax_cv_cxx_compile_cxx$1,
+   [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
+     [ax_cv_cxx_compile_cxx$1=yes],
+     [ax_cv_cxx_compile_cxx$1=no])])
+   if test x$ax_cv_cxx_compile_cxx$1 = xyes; then
+     ac_success=yes
   fi])
 
   m4_if([$2], [noext], [], [dnl
