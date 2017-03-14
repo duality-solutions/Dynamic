@@ -46,7 +46,7 @@ related to the DNS seed operation.
 If these expectations cannot be satisfied the operator should
 discontinue providing services and contact the active Dynamic
 Core development team as well as posting on
-[dynamic-dev](https://duality-solutions.com).
+[dynamic-dev](https://duality.solutions).
 
 Behavior outside of these expectations may be reasonable in some
 situations but should be discussed in public in advance.

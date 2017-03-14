@@ -50,7 +50,7 @@ static const int MAX_URI_LENGTH = 255;
 #define SPINNER_FRAMES 36
 
 #define QAPP_ORG_NAME "Duality Solutions"
-#define QAPP_ORG_DOMAIN "duality-solutions.com"
+#define QAPP_ORG_DOMAIN "duality.solutions"
 #define QAPP_APP_NAME_DEFAULT "Dynamic-Qt"
 #define QAPP_APP_NAME_TESTNET "Dynamic-Qt-testnet"
 

@@ -64,7 +64,7 @@ void ThreadSendAlert()
     //  Higher numbers mean higher priority
     alert.nPriority     = 5000;
     alert.strComment    = "";
-    alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality-solutions.com";
+    alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality.solutions";
 
     // Set specific client version/versions here. If setSubVer is empty, no filtering on subver is done:
     // alert.setSubVer.insert(std::string("/Dynamic:1.1.0.0/"));
