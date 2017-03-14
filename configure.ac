@@ -47,6 +47,10 @@ case $host in
      lt_cv_deplibs_check_method="pass_all"
   ;;
 esac
+dnl Require C++11 compiler (no GNU extensions)
+AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory])
+dnl Check if -latomic is required for <std::atomic>
+CHECK_ATOMIC
 
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
@@ -494,14 +498,14 @@ AC_SEARCH_LIBS([inet_pton], [nsl resolv], [AC_DEFINE(HAVE_INET_PTON, 1, [Define 
 AC_CHECK_DECLS([strnlen])
 
 AC_CHECK_DECLS([le16toh, le32toh, le64toh, htole16, htole32, htole64, be16toh, be32toh, be64toh, htobe16, htobe32, htobe64],,,
-		[#if HAVE_ENDIAN_H
+    [#if HAVE_ENDIAN_H
                  #include <endian.h>
                  #elif HAVE_SYS_ENDIAN_H
                  #include <sys/endian.h>
                  #endif])
 
 AC_CHECK_DECLS([bswap_16, bswap_32, bswap_64],,,
-		[#if HAVE_BYTESWAP_H
+    [#if HAVE_BYTESWAP_H
                  #include <byteswap.h>
                  #endif])
 
