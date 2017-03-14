@@ -49,7 +49,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
         [$1], [14], [],
         [$1], [17], [m4_fatal([support for C++17 not yet implemented in AX_CXX_COMPILE_STDCXX])],
         [m4_fatal([invalid first argument `$1' to AX_CXX_COMPILE_STDCXX])])dnl
-  m4_if([$2], [], [],
+  m4_if([$2], [ext], [],
         [$2], [ext], [],
         [$2], [noext], [],
         [m4_fatal([invalid second argument `$2' to AX_CXX_COMPILE_STDCXX])])dnl
