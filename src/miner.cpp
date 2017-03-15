@@ -563,10 +563,11 @@ void static DynamicMiner(const CChainParams& chainparams)
             CBlockIndex* pindexPrev = chainActive.Tip();
             if(!pindexPrev) break;
             
-            unique_ptr<CBlockTemplate> pblocktemplate;
 #ifdef ENABLE_WALLET
+            unique_ptr<CBlockTemplate> pblocktemplate;
             pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
 #else
+            unique_ptr<CBlockTemplate> pblocktemplate;
             pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
 #endif
             if (!pblocktemplate.get())
