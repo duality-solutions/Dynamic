@@ -34,7 +34,6 @@
 
 #include <univalue.h>
 
-#include <memory>
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>

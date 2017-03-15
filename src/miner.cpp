@@ -30,7 +30,6 @@
 #include "validationinterface.h"
 #include "wallet/wallet.h"
 
-#include <memory>
 #include <queue>
 
 #include <openssl/sha.h>
@@ -124,7 +123,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 
 void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1)
 {
-	
+    
     //
     // Pre-build hash buffers
     //
@@ -193,7 +192,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 
         // Process this block the same as if we had received it from another node
         CValidationState state;
-		if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL))
+        if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL))
             return error("ProcessBlock, block not accepted");
     }
 
@@ -562,11 +561,12 @@ void static DynamicMiner(const CChainParams& chainparams)
             //
             unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
             CBlockIndex* pindexPrev = chainActive.Tip();
+            unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
-
+            
 #ifdef ENABLE_WALLET
             pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
-#else		
+#else
             pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
 #endif
             if (!pblocktemplate.get())
