@@ -565,9 +565,9 @@ void static DynamicMiner(const CChainParams& chainparams)
             if(!pindexPrev) break;
 
 #ifdef ENABLE_WALLET
-            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
-#else
-            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
+            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
+#else		
+            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
 #endif
             if (!pblocktemplate.get())
             {
