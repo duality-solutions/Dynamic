@@ -203,7 +203,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
-    auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
+    unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
@@ -565,9 +565,9 @@ void static DynamicMiner(const CChainParams& chainparams)
             if(!pindexPrev) break;
 
 #ifdef ENABLE_WALLET
-            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
+            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
 #else
-            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
+            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
 #endif
             if (!pblocktemplate.get())
             {
