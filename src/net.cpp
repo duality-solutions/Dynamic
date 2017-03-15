@@ -915,8 +915,7 @@ static bool AttemptToEvictConnection(bool fPreferNewConnection) {
 
     // Protect the half of the remaining nodes which have been connected the longest.
     // This replicates the existing implicit behavior.
-    static CompareNetGroupKeyed comparerNetGroupKeyed;  
-    std::sort(vEvictionCandidates.begin(), vEvictionCandidates.end(), comparerNetGroupKeyed);      
+    std::sort(vEvictionCandidates.begin(), vEvictionCandidates.end(), ReverseCompareNodeTimeConnected);
     vEvictionCandidates.erase(vEvictionCandidates.end() - static_cast<int>(vEvictionCandidates.size() / 2), vEvictionCandidates.end());
 
     if (vEvictionCandidates.empty()) return false;
