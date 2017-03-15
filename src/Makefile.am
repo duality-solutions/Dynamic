@@ -501,7 +501,7 @@ clean-local:
 	-$(MAKE) -C secp256k1 clean
 	-$(MAKE) -C univalue clean
 	-rm -f leveldb/*/*.gcda leveldb/*/*.gcno leveldb/helpers/memenv/*.gcda leveldb/helpers/memenv/*.gcno
-	-rm -f config.h
+	-rm -f config/dynamic-config.* config/stamp-h1
 
 .rc.o:
 	@test -f $(WINDRES)
