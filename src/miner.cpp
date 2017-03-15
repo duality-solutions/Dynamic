@@ -30,7 +30,6 @@
 #include "validationinterface.h"
 #include "wallet/wallet.h"
 
-#include <memory>
 #include <queue>
 
 #include <openssl/sha.h>
@@ -564,7 +563,7 @@ void static DynamicMiner(const CChainParams& chainparams)
             CBlockIndex* pindexPrev = chainActive.Tip();
             unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
-
+            
 #ifdef ENABLE_WALLET
             pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
 #else
