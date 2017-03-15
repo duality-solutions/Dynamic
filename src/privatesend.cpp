@@ -2380,8 +2380,11 @@ bool CPrivatesendQueue::Relay()
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
             pnode->PushMessage(NetMsgType::PSQUEUE, (*this));
-
-    ReleaseNodeVector(vNodesCopy);
+    {
+        LOCK(cs_vNodes);
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        pnode->Release();
+    }
     return true;
 }
 
