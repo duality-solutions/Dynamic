@@ -22,6 +22,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
+using namespace boost;
 using namespace std;
 
 static uint64_t nAccountingEntryNumber = 0;
