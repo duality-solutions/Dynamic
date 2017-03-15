@@ -90,7 +90,14 @@ bool CDynodeSync::IsBlockchainSynced(bool fBlockAccepted)
     if(fCheckpointsEnabled && pCurrentBlockIndex->nHeight < Checkpoints::GetTotalBlocksEstimate(Params().Checkpoints()))
         return false;
 
-    std::vector<CNode*> vNodesCopy = CopyNodeVector();
+    vector<CNode*> vNodesCopy;
+        {
+            LOCK(cs_vNodes);
+            vNodesCopy = vNodes;
+            BOOST_FOREACH(CNode* pnode, vNodesCopy) {
+                pnode->AddRef();
+            }
+        }
 
     // We have enough peers and assume most of them are synced
     if(vNodes.size() >= DYNODE_SYNC_ENOUGH_PEERS) {
@@ -268,7 +275,14 @@ void CDynodeSync::ProcessTick()
                 LogPrintf("CDynodeSync::ProcessTick -- WARNING: not enough data, restarting sync\n");
                 Reset();
             } else {
-                std::vector<CNode*> vNodesCopy = CopyNodeVector();
+                vector<CNode*> vNodesCopy;
+                {
+                    LOCK(cs_vNodes);
+                    vNodesCopy = vNodes;
+                    BOOST_FOREACH(CNode* pnode, vNodesCopy) {
+                        pnode->AddRef();
+                    }
+                }
 
                 governance.RequestGovernanceObjectVotes(vNodesCopy);
                 ReleaseNodeVector(vNodesCopy);
@@ -307,7 +321,14 @@ void CDynodeSync::ProcessTick()
         SwitchToNextAsset();
     }
 
-    std::vector<CNode*> vNodesCopy = CopyNodeVector();
+    vector<CNode*> vNodesCopy;
+        {
+            LOCK(cs_vNodes);
+            vNodesCopy = vNodes;
+            BOOST_FOREACH(CNode* pnode, vNodesCopy) {
+                pnode->AddRef();
+            }
+        }
 
     BOOST_FOREACH(CNode* pnode, vNodesCopy)    {
         // Don't try to sync any data from outbound "dynode" connections -
