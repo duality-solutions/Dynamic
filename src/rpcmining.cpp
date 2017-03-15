@@ -216,9 +216,9 @@ UniValue generate(const UniValue& params, bool fHelp)
     while (nHeight < nHeightEnd)
     {
 #ifdef ENABLE_WALLET
-            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
+            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
 #else
-            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
+            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params()));
 #endif
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
