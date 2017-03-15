@@ -11,6 +11,7 @@
 #include "primitives/block.h"
 
 #include <stdint.h>
+#include <cstddef>
 
 class CBlockIndex;
 class CChainParams;
