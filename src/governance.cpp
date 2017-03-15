@@ -1288,7 +1288,14 @@ void CGovernanceManager::UpdatedBlockTip(const CBlockIndex *pindex)
 
 void CGovernanceManager::RequestOrphanObjects()
 {
-    std::vector<CNode*> vNodesCopy = CopyNodeVector();
+    vector<CNode*> vNodesCopy;
+    {
+        LOCK(cs_vNodes);
+        vNodesCopy = vNodes;
+        BOOST_FOREACH(CNode* pnode, vNodesCopy) {
+            pnode->AddRef();
+        }
+    }
 
     std::vector<uint256> vecHashesFiltered;
     {
@@ -1316,7 +1323,11 @@ void CGovernanceManager::RequestOrphanObjects()
         }
     }
 
-    ReleaseNodeVector(vNodesCopy);
+    {
+        LOCK(cs_vNodes);
+        BOOST_FOREACH(CNode* pnode, vNodesCopy)
+        pnode->Release();
+    }
 }
 
 void CGovernanceManager::CleanOrphanObjects()
