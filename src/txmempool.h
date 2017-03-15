@@ -16,6 +16,7 @@
 #include "sync.h"
 
 #include <list>
+#include <memory>
 #include <set>
 
 #if !defined(QT_PROJECT_BUILD)
