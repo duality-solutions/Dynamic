@@ -30,7 +30,7 @@
  *
  * \section intro_sec Introduction
  *
- * This is the developer documentation of the reference client for an experimental new digital currency called Dynamic (https://www.duality-solutions.com/),
+ * This is the developer documentation of the reference client for an experimental new digital currency called Dynamic (https://www.duality.solutions/),
  * which enables instant payments to anyone, anywhere in the world. Dynamic uses peer-to-peer technology to operate
  * with no central authority: managing transactions and issuing money are carried out collectively by the network.
  *

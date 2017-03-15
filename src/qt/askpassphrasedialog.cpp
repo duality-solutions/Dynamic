@@ -121,6 +121,8 @@ void AskPassphraseDialog::accept()
         {
             if(newpass1 == newpass2)
             {
+                QDialog::accept(); // Success
+
                 if(model->setWalletEncrypted(true, newpass1))
                 {
                     QMessageBox::warning(this, tr("Wallet encrypted"),

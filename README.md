@@ -1,16 +1,16 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Build Status](https://travis-ci.org/Duality-Solutions/Dynamic.png?branch=master)](https://travis-ci.org/Duality-Solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/Duality-Solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/Duality-Solutions/Dynamic)
+[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/Duality-Solutions/Dynamic/throughput.svg)](https://waffle.io/Duality-Solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
 # **Dynamic (DYN) v1.1.0.0**
 
-![DYN logo](https://github.com/Duality-Solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
+![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
 **Copyright (c) 2016-2017 Duality Blockchain Solutions**
 
@@ -30,6 +30,7 @@ What is Dynamic?
 * Dynode Reward Start Height: Block 20,546
 * Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DYN, 20 confirmations (~30 minutes)
+* Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
 
 
@@ -38,8 +39,6 @@ The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, 
 Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
 
 Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
-
-Dynamic includes an Address Index feature, based on the address index API (searchrawtransactions RPC command) implemented in Bitcoin Core but modified implementation to work with the Dynamic codebase (PoS coins maintain a txindex by default for instance). Initialize the Address Index by running the -reindexaddr command line argument, it may take 10-15 minutes to build the initial index.
 
 
 **Dynode/Privatesend Network Information**

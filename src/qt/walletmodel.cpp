@@ -475,6 +475,7 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString &passphr
     if(encrypted)
     {
         // Encrypt
+        Q_EMIT message(tr("Encrypting your wallet..."), tr("This will take just a few seconds."),  CClientUIInterface::MSG_INFORMATION);
         return wallet->EncryptWallet(passphrase);
     }
     else
