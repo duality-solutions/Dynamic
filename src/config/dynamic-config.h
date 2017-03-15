@@ -62,6 +62,9 @@
 /* Define this symbol if the consensus lib has been built */
 #define HAVE_CONSENSUS_LIB 1
 
+/* define if the compiler supports basic C++11 syntax */
+#define HAVE_CXX11 1
+
 /* Define to 1 if you have the declaration of `be16toh', and to 0 if you
    don't. */
 #define HAVE_DECL_BE16TOH 0
@@ -342,7 +345,7 @@
 /* #undef STRERROR_R_CHAR_P */
 
 /* Define if dbus support should be compiled in */
-/* #undef USE_DBUS */
+#define USE_DBUS 1
 
 /* Define if QR support should be compiled in */
 /* #undef USE_QRCODE */
