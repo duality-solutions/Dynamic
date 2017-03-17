@@ -50,7 +50,7 @@ Utilisation of InstantSend for near-instant transactions.
 P2P Port = 31300
 RPC Port = 31350
 Dynodes = 31300
-Magic Bytes: 0x2f 0x32 0x15 0x41
+Magic Bytes: 0x3f 0x42 0x55 0x61
 
 **TestNet Parameters**
 P2P Port = 31400
