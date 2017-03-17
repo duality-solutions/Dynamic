@@ -15,11 +15,11 @@ Release Process
 
 ###tag version in git
 
-	git tag -s v(new version, e.g. 1.1.0.0)
+	git tag -s v(new version, e.g. 1.0.0.0)
 
 ###write release notes. git shortlog helps a lot, for example:
 
-	git shortlog --no-merges v(current version, e.g. 1.1.0.0)..v(new version, e.g. 1.2.0.0)
+	git shortlog --no-merges v(current version, e.g. 1.0.0.0)..v(new version, e.g. 1.2.0.0)
 
 * * *
 
