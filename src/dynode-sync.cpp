@@ -100,7 +100,7 @@ bool CDynodeSync::IsBlockchainSynced(bool fBlockAccepted)
     }
 
     // We have enough peers and assume most of them are synced
-    if(vNodesCopy.size() >= DYNODE_SYNC_ENOUGH_PEERS) {
+    if(vNodes.size() >= DYNODE_SYNC_ENOUGH_PEERS) {
         // Check to see how many of our peers are (almost) at the same height as we are
         int nNodesAtSameHeight = 0;
         BOOST_FOREACH(CNode* pnode, vNodesCopy)
