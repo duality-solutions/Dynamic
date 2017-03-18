@@ -1775,14 +1775,14 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
     }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
         LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
+        return BLOCKCHAIN_INIT_REWARD + nFees;
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
         return STATIC_POW_REWARD + nFees; // 1 DYN
     }
     else 
-        return BLOCKCHAIN_INIT_REWARD;
+        return BLOCKCHAIN_INIT_REWARD + nFees;
 }
 
 CAmount GetDynodePayment(bool fDynode)
