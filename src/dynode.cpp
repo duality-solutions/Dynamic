@@ -251,13 +251,16 @@ void CDynode::Check(bool fForce)
         LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
                 vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
 
-        // (TODO):: Check to see if WATCHDOG_EXPIRED is fixed or enable once Dynode network has grown       
-        if(fWatchdogExpired) {
-            nActiveState = DYNODE_WATCHDOG_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
-                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        int nDnCount = dnodeman.CountDynodes();
+
+        if (nDnCount > 200) {
+            if(fWatchdogExpired) {
+                nActiveState = DYNODE_WATCHDOG_EXPIRED;
+                if(nActiveStatePrev != nActiveState) {
+                    LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+                }
+                return;
             }
-            return;
         }
 
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {
@@ -839,7 +842,17 @@ bool CDynodePing::SimpleCheck(int& nDos)
 
     if (!CheckSignature(pdn->pubKeyDynode, nDos)) return false;
 
-    // so, ping seems to be ok, let's store it
+    // so, ping seems to be ok
+
+    // if we are still syncing and there was no known ping for this dn for quite a while
+    // (NOTE: assuming that DYNODE_EXPIRATION_SECONDS/2 should be enough to finish dn list sync)
+    if(!dynodeSync.IsDynodeListSynced() && !pdn->IsPingedWithin(DYNODE_EXPIRATION_SECONDS/2)) {
+        // let's bump sync timeout
+        LogPrint("dynode", "CDynodePing::CheckAndUpdate -- bumping sync timeout, dynode=%s\n", vin.prevout.ToStringShort());
+        dynodeSync.AddedDynodeList();
+    }
+
+    // let's store this ping as the last one
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping accepted, Dynode=%s\n", vin.prevout.ToStringShort());
     pdn->lastPing = *this;
 

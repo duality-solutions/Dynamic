@@ -35,7 +35,7 @@ import copy
 import dynamic_hash
 
 BIP0031_VERSION = 60000
-MY_VERSION = 70700  # past bip-31 for ping/pong
+MY_VERSION = 60800  # past bip-31 for ping/pong
 MY_SUBVERSION = b"/python-mininode-tester:0.0.2/"
 
 MAX_INV_SZ = 50000

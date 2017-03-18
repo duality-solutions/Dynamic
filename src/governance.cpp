@@ -126,14 +126,18 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         vRecv >> filter;
         filter.UpdateEmptyFull();
 
-        if(nProp == uint256()) {
-            if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DNGOVERNANCESYNC)) {
-                // Asking for the whole list multiple times in a short period of time is no good
-                LogPrint("gobject", "DNGOVERNANCESYNC -- peer already asked me for the list\n");
-                Misbehaving(pfrom->GetId(), 20);
-                return;
+        int nDnCount = dnodeman.CountDynodes();
+
+        if (nDnCount > 200) {
+            if(nProp == uint256()) {
+                if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DNGOVERNANCESYNC)) {
+                    // Asking for the whole list multiple times in a short period of time is no good
+                    LogPrint("gobject", "DNGOVERNANCESYNC -- peer already asked me for the list\n");
+                    Misbehaving(pfrom->GetId(), 20);
+                    return;
+                }
+                netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::DNGOVERNANCESYNC);
             }
-            netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::DNGOVERNANCESYNC);
         }
 
         Sync(pfrom, nProp, filter);

@@ -302,7 +302,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
 
     if (chainActive.Height() == 0) { blockValue = 4000000 * COIN; }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = STATIC_POW_REWARD + nFees; }
+    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = STATIC_POW_REWARD; }
     else { blockValue = BLOCKCHAIN_INIT_REWARD; }
 
     if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
@@ -317,7 +317,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = dynodePayment;
 
-        txNew.vout[0].nValue = STATIC_POW_REWARD + nFees;
+        txNew.vout[0].nValue = STATIC_POW_REWARD;
 
         CTxDestination address1;
         ExtractDestination(payee, address1);
@@ -347,13 +347,18 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         int nCountNeeded;
         vRecv >> nCountNeeded;
+        
+        int nDnCount = dnodeman.CountDynodes();
 
-        if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
-            // Asking for the payments list multiple times in a short period of time is no good
-            LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
-            Misbehaving(pfrom->GetId(), 20);
-            return;
+        if (nDnCount > 200) {
+            if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
+                // Asking for the payments list multiple times in a short period of time is no good
+                LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
+                Misbehaving(pfrom->GetId(), 20);
+                return;
+            }
         }
+
         netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC);
 
         Sync(pfrom);

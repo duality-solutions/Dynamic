@@ -1773,16 +1773,16 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 || chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
         LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
+        return BLOCKCHAIN_INIT_REWARD + nFees;
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
-        return STATIC_POW_REWARD + nFees; // 1 DYN + fees
+        return STATIC_POW_REWARD + nFees; // 1 DYN
     }
     else 
-        return BLOCKCHAIN_INIT_REWARD;
+        return BLOCKCHAIN_INIT_REWARD + nFees;
 }
 
 CAmount GetDynodePayment(bool fDynode)
@@ -1791,7 +1791,7 @@ CAmount GetDynodePayment(bool fDynode)
         LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(STATIC_DYNODE_PAYMENT), STATIC_DYNODE_PAYMENT);
         return STATIC_DYNODE_PAYMENT; // 0.382 DYN
     }
-    else if ((fDynode || !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
         LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD;
     }

@@ -55,8 +55,8 @@ void ThreadSendAlert()
     alert.nCancel       = 0;   // cancels previous messages up to this ID number
 
     // These versions are protocol versions
-    alert.nMinVer       = 70700;
-    alert.nMaxVer       = 70700;
+    alert.nMinVer       = 60800;
+    alert.nMaxVer       = 60800;
 
     //
     //  1000 for Misc warnings like out of disk space and clock is wrong
@@ -67,7 +67,7 @@ void ThreadSendAlert()
     alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality.solutions";
 
     // Set specific client version/versions here. If setSubVer is empty, no filtering on subver is done:
-    // alert.setSubVer.insert(std::string("/Dynamic:1.1.0.0/"));
+    // alert.setSubVer.insert(std::string("/Dynamic:1.0.0.0/"));
 
     // Sign
     if(!alert.Sign())
