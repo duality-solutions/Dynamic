@@ -30,7 +30,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1489827399 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1489829428 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -97,7 +97,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "NY Times 03/18/2017: Hacker Is a Villain to Russia and the United States, for Different Reasons";
+    const char* pszTimestamp = "NY Times 03/18/2017: Britain Livid on Spying Claim, but Trump Isn’t Apologizing";
     const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
@@ -156,14 +156,14 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1489828695, 1075916, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1489829991, 296073, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if(!startNewChain)
-            assert(consensus.hashGenesisBlock == uint256S("0x000007509d7ff1a53f31a72904bb7cc436deef568b2d7b832a9f3c57e0d08bc0"));
-            assert(genesis.hashMerkleRoot == uint256S("0x5e92081b754101ad56951e469950df17290c4f9cd29235f2547e15b8632e6e40"));
+            assert(consensus.hashGenesisBlock == uint256S("0x00000a8a932008cc9ea3efd7dc2f61bb9276bf0e58643b23487122378f262aed"));
+            assert(genesis.hashMerkleRoot == uint256S("0xd138a877f77308432d7bfca3e057b001c9ce710726d550876eab438e770949c6"));
 
         /*
         vSeeds.push_back(CDNSSeedData("dnsseeder.io", "dyn.dnsseeder.io"));
@@ -200,8 +200,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x000007509d7ff1a53f31a72904bb7cc436deef568b2d7b832a9f3c57e0d08bc0")),
-            1489828695, // * UNIX timestamp of last checkpoint block
+            (  0, uint256S("0x00000a8a932008cc9ea3efd7dc2f61bb9276bf0e58643b23487122378f262aed")),
+            1489829991, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint

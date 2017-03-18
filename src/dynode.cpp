@@ -251,13 +251,16 @@ void CDynode::Check(bool fForce)
         LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
                 vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
 
-        // (TODO):: Check to see if WATCHDOG_EXPIRED is fixed or enable once Dynode network has grown       
-        if(fWatchdogExpired) {
-            nActiveState = DYNODE_WATCHDOG_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
-                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+        int nDnCount = dnodeman.CountDynodes();
+
+        if (nDnCount > 200) {
+            if(fWatchdogExpired) {
+                nActiveState = DYNODE_WATCHDOG_EXPIRED;
+                if(nActiveStatePrev != nActiveState) {
+                    LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
+                }
+                return;
             }
-            return;
         }
 
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {

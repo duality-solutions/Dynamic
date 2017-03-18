@@ -347,13 +347,18 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         int nCountNeeded;
         vRecv >> nCountNeeded;
+        
+        int nDnCount = dnodeman.CountDynodes();
 
-        if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
-            // Asking for the payments list multiple times in a short period of time is no good
-            LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
-            Misbehaving(pfrom->GetId(), 20);
-            return;
+        if (nDnCount > 200) {
+            if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
+                // Asking for the payments list multiple times in a short period of time is no good
+                LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
+                Misbehaving(pfrom->GetId(), 20);
+                return;
+            }
         }
+
         netfulfilledman.AddFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC);
 
         Sync(pfrom);
