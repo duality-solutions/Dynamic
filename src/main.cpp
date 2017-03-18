@@ -1779,7 +1779,7 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
-        return STATIC_POW_REWARD + nFees; // 1 DYN + fees
+        return STATIC_POW_REWARD + nFees; // 1 DYN
     }
     else 
         return BLOCKCHAIN_INIT_REWARD;
