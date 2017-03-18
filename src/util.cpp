@@ -571,11 +571,11 @@ static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
 
 static void WriteConfigFile(FILE* configFile)
 {
+    fputs ("#Do not use special characters with username/password\n", configFile);
     std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
     std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
     fputs (sUserID.c_str(), configFile);
     fputs (sRPCpassword.c_str(), configFile);
-    fputs ("#Do not use special characters with username/password", configFile);
     fputs ("rpcport=31350\n", configFile);
     fputs ("port=31300\n",configFile);
     fclose(configFile);
