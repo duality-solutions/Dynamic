@@ -154,16 +154,16 @@ public:
         nDefaultPort = 31300;
         nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 100;
-        startNewChain = true;
+        startNewChain = false;
 
-        genesis = CreateGenesisBlock(0, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1489828695, 1075916, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if(!startNewChain)
-            assert(consensus.hashGenesisBlock == uint256S("0x"));
-            assert(genesis.hashMerkleRoot == uint256S("0x"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000007509d7ff1a53f31a72904bb7cc436deef568b2d7b832a9f3c57e0d08bc0"));
+            assert(genesis.hashMerkleRoot == uint256S("0x5e92081b754101ad56951e469950df17290c4f9cd29235f2547e15b8632e6e40"));
 
         /*
         vSeeds.push_back(CDNSSeedData("dnsseeder.io", "dyn.dnsseeder.io"));
@@ -200,11 +200,11 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x")),
-            0, // * UNIX timestamp of last checkpoint block
+            (  0, uint256S("0x000007509d7ff1a53f31a72904bb7cc436deef568b2d7b832a9f3c57e0d08bc0")),
+            1489828695, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
-            0        // * estimated number of transactions per day after checkpoint
+            2000        // * estimated number of transactions per day after checkpoint
         };
     }
 };
