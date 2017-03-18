@@ -1111,6 +1111,8 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
 
 void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 {
+    int nDnCount = dnodeman.CountDynodes();
+
     // only Dynodes can sign this, why would someone ask regular node?
     if(!fDyNode) {
         // do not ban, malicious node might be using my IP
@@ -1118,11 +1120,14 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         return;
     }
 
-    if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
-        // peer should not ask us that often
-        LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
-        Misbehaving(pnode->id, 20);
-        return;
+    if(nDnCount > 200) 
+    {
+        if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
+            // peer should not ask us that often
+            LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
+            Misbehaving(pnode->id, 20);
+            return;
+        }
     }
 
     uint256 blockHash;
@@ -1183,11 +1188,13 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         return;
     }
 
-    // we already verified this address, why node is spamming?
-    if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-done")) {
-        LogPrintf("CDynodeMan::ProcessVerifyReply -- ERROR: already verified %s recently\n", pnode->addr.ToString());
-        Misbehaving(pnode->id, 20);
-        return;
+    if (nDnCount > 200) {
+        // we already verified this address, why node is spamming?
+        if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-done")) {
+            LogPrintf("CDynodeMan::ProcessVerifyReply -- ERROR: already verified %s recently\n", pnode->addr.ToString());
+            Misbehaving(pnode->id, 20);
+            return;
+        }
     }
 
     {
