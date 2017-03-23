@@ -11,7 +11,7 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "init.h"
-#include "privatesend.h"
+#include "messagesigner.h"
 #include "util.h"
 #include "consensus/validation.h"
 
@@ -419,7 +419,7 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
         return false;
     }
 
-    if(!privateSendSigner.GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew)) {
+    if(!CMessageSigner::GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew)) {
         strErrorRet = strprintf("Invalid Dynode key %s", strKeyDynode);
         LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
         return false;
@@ -652,7 +652,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
 
     // make sure the vout that was signed is related to the transaction that spawned the Dynode
     //  - this is expensive, so it's only done once per Dynode
-    if(!privateSendSigner.IsVinAssociatedWithPubkey(vin, pubKeyCollateralAddress)) {
+    if(!IsVinAssociatedWithPubkey(vin, pubKeyCollateralAddress)) {
         LogPrintf("CDynodeMan::CheckOutpoint -- Got mismatched pubKeyCollateralAddress and vin\n");
         nDos = 33;
         return false;
@@ -680,6 +680,21 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
     return true;
 }
 
+bool CDynodeBroadcast::IsVinAssociatedWithPubkey(const CTxIn& txin, const CPubKey& pubkey)
+{
+    CScript payee;
+    payee = GetScriptForDestination(pubkey.GetID());
+
+    CTransaction tx;
+    uint256 hash;
+    if(GetTransaction(txin.prevout.hash, tx, Params().GetConsensus(), hash, true)) {
+        BOOST_FOREACH(CTxOut out, tx.vout)
+            if(out.nValue == 1000*COIN && out.scriptPubKey == payee) return true;
+    }
+
+    return false;
+}
+
 bool CDynodeBroadcast::Sign(CKey& keyCollateralAddress)
 {
     std::string strError;
@@ -691,12 +706,12 @@ bool CDynodeBroadcast::Sign(CKey& keyCollateralAddress)
                     pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
                     boost::lexical_cast<std::string>(nProtocolVersion);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyCollateralAddress)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyCollateralAddress)) {
         LogPrintf("CDynodeBroadcast::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
         LogPrintf("CDynodeBroadcast::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -716,7 +731,7 @@ bool CDynodeBroadcast::CheckSignature(int& nDos)
 
     LogPrint("Dynode", "CDynodeBroadcast::CheckSignature -- strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n", strMessage, CDynamicAddress(pubKeyCollateralAddress.GetID()).ToString(), EncodeBase64(&vchSig[0], vchSig.size()));
 
-    if(!privateSendSigner.VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
+    if(!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
         LogPrintf("CDynodeBroadcast::CheckSignature -- Got bad Dynode announce signature, error: %s\n", strError);
         nDos = 100;
         return false;
@@ -750,12 +765,12 @@ bool CDynodePing::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
     sigTime = GetAdjustedTime();
     std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
         LogPrintf("CDynodePing::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CDynodePing::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -769,7 +784,7 @@ bool CDynodePing::CheckSignature(CPubKey& pubKeyDynode, int &nDos)
     std::string strError = "";
     nDos = 0;
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CDynodePing::CheckSignature -- Got bad Dynode ping signature, Dynode=%s, error: %s\n", vin.prevout.ToStringShort(), strError);
         nDos = 33;
         return false;

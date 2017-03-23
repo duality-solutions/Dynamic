@@ -5,6 +5,7 @@
 
 #include "privatesend-relay.h"
 
+#include "messagesigner.h"
 #include "privatesend.h"
 
 
@@ -48,17 +49,17 @@ bool CPrivateSendRelay::Sign(std::string strSharedKey)
     CKey key2;
     CPubKey pubkey2;
 
-    if(!privateSendSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
+    if(!CMessageSigner::GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
         LogPrintf("CPrivateSendRelay::Sign -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
         return false;
     }
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig2, key2)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig2, key2)) {
         LogPrintf("CPrivateSendRelay::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
         LogPrintf("CPrivateSendRelay::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -74,12 +75,12 @@ bool CPrivateSendRelay::VerifyMessage(std::string strSharedKey)
     CKey key2;
     CPubKey pubkey2;
 
-    if(!privateSendSigner.GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
+    if(!CMessageSigner::GetKeysFromSecret(strSharedKey, key2, pubkey2)) {
         LogPrintf("CPrivateSendRelay::VerifyMessage -- GetKeysFromSecret() failed, invalid shared key %s\n", strSharedKey);
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubkey2, vchSig2, strMessage, strError)) {
         LogPrintf("CPrivateSendRelay::VerifyMessage -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

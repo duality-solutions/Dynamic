@@ -13,6 +13,7 @@
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"
+#include "messagesigner.h"
 #include "script/sign.h"
 #include "txmempool.h"
 #include "util.h"
@@ -28,7 +29,6 @@ bool fEnablePrivateSend = false;
 bool fPrivateSendMultiSession = DEFAULT_PRIVATESEND_MULTISESSION;
 
 CPrivatesendPool privateSendPool;
-CPrivateSendSigner privateSendSigner;
 std::map<uint256, CPrivatesendBroadcastTx> mapPrivatesendBroadcastTxes;
 std::vector<CAmount> vecPrivateSendDenominations;
 
@@ -2264,64 +2264,6 @@ std::string CPrivatesendPool::GetMessageByID(PoolMessage nMessageID)
     }
 }
 
-bool CPrivateSendSigner::IsVinAssociatedWithPubkey(const CTxIn& txin, const CPubKey& pubkey)
-{
-    CScript payee;
-    payee = GetScriptForDestination(pubkey.GetID());
-
-    CTransaction tx;
-    uint256 hash;
-    if(GetTransaction(txin.prevout.hash, tx, Params().GetConsensus(), hash, true)) {
-        BOOST_FOREACH(CTxOut out, tx.vout)
-            if(out.nValue == 1000*COIN && out.scriptPubKey == payee) return true;
-    }
-
-    return false;
-}
-
-bool CPrivateSendSigner::GetKeysFromSecret(std::string strSecret, CKey& keyRet, CPubKey& pubkeyRet)
-{
-    CDynamicSecret vchSecret;
-
-    if(!vchSecret.SetString(strSecret)) return false;
-
-    keyRet = vchSecret.GetKey();
-    pubkeyRet = keyRet.GetPubKey();
-
-    return true;
-}
-
-bool CPrivateSendSigner::SignMessage(std::string strMessage, std::vector<unsigned char>& vchSigRet, CKey key)
-{
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << strMessage;
-
-    return key.SignCompact(ss.GetHash(), vchSigRet);
-}
-
-bool CPrivateSendSigner::VerifyMessage(CPubKey pubkey, const std::vector<unsigned char>& vchSig, std::string strMessage, std::string& strErrorRet)
-{
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << strMessage;
-
-    CPubKey pubkeyFromSig;
-    if(!pubkeyFromSig.RecoverCompact(ss.GetHash(), vchSig)) {
-        strErrorRet = "Error recovering public key.";
-        return false;
-    }
-
-    if(pubkeyFromSig.GetID() != pubkey.GetID()) {
-        strErrorRet = strprintf("Keys don't match: pubkey=%s, pubkeyFromSig=%s, strMessage=%s, vchSig=%s",
-                    pubkey.GetID().ToString(), pubkeyFromSig.GetID().ToString(), strMessage,
-                    EncodeBase64(&vchSig[0], vchSig.size()));
-        return false;
-    }
-
-    return true;
-}
-
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
     BOOST_FOREACH(CTxPSIn& txpsin, vecTxPSIn) {
@@ -2345,7 +2287,7 @@ bool CPrivatesendQueue::Sign()
 
     std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
         LogPrintf("CPrivatesendQueue::Sign -- SignMessage() failed, %s\n", ToString());
         return false;
     }
@@ -2358,7 +2300,7 @@ bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
     std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
     std::string strError = "";
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CPrivatesendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
         return false;
     }
@@ -2394,7 +2336,7 @@ bool CPrivatesendBroadcastTx::Sign()
 
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
         LogPrintf("CPrivatesendBroadcastTx::Sign -- SignMessage() failed\n");
         return false;
     }
@@ -2407,7 +2349,7 @@ bool CPrivatesendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode)
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
     std::string strError = "";
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CPrivatesendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
         return false;
     }
