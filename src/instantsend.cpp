@@ -10,8 +10,8 @@
 #include "dynodeman.h"
 #include "key.h"
 #include "main.h"
+#include "messagesigner.h"
 #include "net.h"
-#include "privatesend.h"
 #include "protocol.h"
 #include "sync.h"
 #include "txmempool.h"
@@ -780,7 +780,17 @@ void CInstantSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
     uint256 txHash = tx.GetHash();
 
     // When tx is 0-confirmed or conflicted, pblock is NULL and nHeightNew should be set to -1
-    CBlockIndex* pblockindex = pblock ? mapBlockIndex[pblock->GetHash()] : NULL;
+    CBlockIndex* pblockindex = NULL;
+    if(pblock) {
+        uint256 blockHash = pblock->GetHash();
+        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
+        if(mi == mapBlockIndex.end() || !mi->second) {
+            // shouldn't happen
+            LogPrint("instantsend", "CTxLockRequest::SyncTransaction -- Failed to find block %s\n", blockHash.ToString());
+            return;
+        }
+        pblockindex = mi->second;
+    }
     int nHeightNew = pblockindex ? pblockindex->nHeight : -1;
 
     LogPrint("instantsend", "CInstantSend::SyncTransaction -- txid=%s nHeightNew=%d\n", txHash.ToString(), nHeightNew);
@@ -1011,7 +1021,7 @@ bool CTxLockVote::CheckSignature() const
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1024,12 +1034,12 @@ bool CTxLockVote::Sign()
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if(!privateSendSigner.SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

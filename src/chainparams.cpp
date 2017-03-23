@@ -165,12 +165,10 @@ public:
             assert(consensus.hashGenesisBlock == uint256S("0x00000ce9ce63ee661a41dd01fccaa4407e28e684cf925c58c87374082f07806d"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
 
-        /*
         vSeeds.push_back(CDNSSeedData("dnsseeder.io", "dyn.dnsseeder.io"));
         vSeeds.push_back(CDNSSeedData("dnsseeder.com", "dyn.dnsseeder.com"));
         vSeeds.push_back(CDNSSeedData("dnsseeder.host", "dyn.dnsseeder.host"));
         vSeeds.push_back(CDNSSeedData("dnsseeder.net", "dyn.dnsseeder.net"));
-        */
 
         // Dynamic addresses start with 'D'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,30);

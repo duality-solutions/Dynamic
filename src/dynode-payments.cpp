@@ -10,8 +10,8 @@
 #include "governance-classes.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "messagesigner.h"
 #include "netfulfilledman.h"
-#include "privatesend.h"
 #include "spork.h"
 #include "util.h"
 
@@ -454,12 +454,12 @@ bool CDynodePaymentVote::Sign()
                 boost::lexical_cast<std::string>(nBlockHeight) +
                 ScriptToAsmStr(payee);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
         LogPrintf("CDynodePaymentVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CDynodePaymentVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -820,7 +820,7 @@ bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValida
                 ScriptToAsmStr(payee);
 
     std::string strError = "";
-    if (!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         // Only ban for future block vote when we are already synced.
         // Otherwise it could be the case when DN which signed this vote is using another key now
         // and we have no idea about the old one.

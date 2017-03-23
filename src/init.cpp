@@ -30,6 +30,7 @@
 #include "httprpc.h"
 #include "key.h"
 #include "main.h"
+#include "messagesigner.h"
 #include "miner.h"
 #include "net.h"
 #include "netfulfilledman.h"
@@ -1658,7 +1659,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
         std::string strDyNodePrivKey = GetArg("-dynodeprivkey", "");
         if(!strDyNodePrivKey.empty()) {
-            if(!privateSendSigner.GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
+            if(!CMessageSigner::GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
                 return InitError(_("Invalid dynodeprivkey. Please see documenation."));
 
             LogPrintf("  pubKeyDynode: %s\n", CDynamicAddress(activeDynode.pubKeyDynode.GetID()).ToString());
@@ -1721,23 +1722,29 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
 
+    boost::filesystem::path pathDB = GetDataDir();
+    std::string strDBName;
+
+    strDBName = "dncache.dat";
     uiInterface.InitMessage(_("Loading Dynode cache..."));
-    CFlatDB<CDynodeMan> flatdb1("dncache.dat", "magicDynodeCache");
+    CFlatDB<CDynodeMan> flatdb1(strDBName, "magicDynodeCache");
     if(!flatdb1.Load(dnodeman)) {
-        return InitError("Failed to load Dynode cache from dncache.dat");
+        return InitError(_("Failed to load Dynode cache from") + "\n" + (pathDB / strDBName).string());
     }
 
     if(dnodeman.size()) {
+        strDBName = "dnpayments.dat";
         uiInterface.InitMessage(_("Loading Dynode payment cache..."));
-        CFlatDB<CDynodePayments> flatdb2("dnpayments.dat", "magicDynodePaymentsCache");
+        CFlatDB<CDynodePayments> flatdb2(strDBName, "magicDynodePaymentsCache");
         if(!flatdb2.Load(dnpayments)) {
-            return InitError("Failed to load Dynode payments cache from dnpayments.dat");
+            return InitError(_("Failed to load Dynode payments cache from") + "\n" + (pathDB / strDBName).string());
         }
 
+        strDBName = "governance.dat";
         uiInterface.InitMessage(_("Loading governance cache..."));
-        CFlatDB<CGovernanceManager> flatdb3("governance.dat", "magicGovernanceCache");
+        CFlatDB<CGovernanceManager> flatdb3(strDBName, "magicGovernanceCache");
         if(!flatdb3.Load(governance)) {
-            return InitError("Failed to load governance cache from governance.dat");
+            return InitError(_("Failed to load governance cache from") + "\n" + (pathDB / strDBName).string());
         }
         governance.InitOnLoad();
     } else {
@@ -1745,10 +1752,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
     governance.InitOnLoad();
 
+    strDBName = "netfulfilled.dat";
     uiInterface.InitMessage(_("Loading fullfiled requests cache..."));
-    CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
+    CFlatDB<CNetFulfilledRequestManager> flatdb4(strDBName, "magicFulfilledCache");
     if(!flatdb4.Load(netfulfilledman)) {
-        return InitError("Failed to load fulfilled requests cache from netfulfilled.dat");
+        return InitError(_("Failed to load fulfilled requests cache from") + "\n" + (pathDB / strDBName).string());
     }
 
     // ********************************************************* Step 11c: update block tip in Dynamic modules

@@ -124,6 +124,7 @@ DYNAMIC_CORE_H = \
   dynodeconfig.h \
   memusage.h \
   merkleblock.h \
+  messagesigner.h \
   miner.h \
   net.h \
   netbase.h \
@@ -214,6 +215,7 @@ libdynamic_server_a_SOURCES = \
   governance-votedb.cpp \
   main.cpp \
   merkleblock.cpp \
+  messagesigner.cpp \
   miner.cpp \
   net.cpp \
   netfulfilledman.cpp \

@@ -216,9 +216,9 @@ UniValue generate(const UniValue& params, bool fHelp)
     while (nHeight < nHeightEnd)
     {
 #ifdef ENABLE_WALLET
-            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
 #else
-            unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params()));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params()));
 #endif
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
@@ -468,7 +468,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
             }
 
             // Clear pindexPrev so future calls make a new block, despite any failures from here on
-            pindexPrev = NULL;
+            pindexPrev = nullptr;
 
             // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
             nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
@@ -479,7 +479,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
             if(pblocktemplate)
             {
                 delete pblocktemplate;
-                pblocktemplate = NULL;
+                pblocktemplate = nullptr;
             }
             CScript scriptDummy = CScript() << OP_TRUE;
             pblocktemplate = CreateNewBlock(Params(), scriptDummy);
@@ -775,7 +775,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
     {
         // Clear pindexPrev so future calls make a new block, despite any failures from here on
-        pindexPrev = NULL;
+        pindexPrev = nullptr;
 
         // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
         nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
@@ -786,7 +786,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         if(pblocktemplate)
         {
             delete pblocktemplate;
-            pblocktemplate = NULL;
+            pblocktemplate = nullptr;
         }
         CScript scriptDummy = CScript() << OP_TRUE;
         pblocktemplate = CreateNewBlock(Params(), scriptDummy);
@@ -844,12 +844,9 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
 
     UniValue aMutable(UniValue::VARR);
-    if (aMutable.empty())
-    {
-        aMutable.push_back("time");
-        aMutable.push_back("transactions");
-        aMutable.push_back("prevblock");
-    }
+    aMutable.push_back("time");
+    aMutable.push_back("transactions");
+    aMutable.push_back("prevblock");
     
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("capabilities", aCaps));
@@ -908,6 +905,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         // Note that this can probably also be removed entirely after the first BIP9 non-force deployment (ie, probably segwit) gets activated
         aMutable.push_back("version/force");
     }
+
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
