@@ -12,8 +12,8 @@
 #include "governance-object.h"
 #include "governance-vote.h"
 #include "main.h"
+#include "messagesigner.h"
 #include "netfulfilledman.h"
-#include "privatesend.h"
 
 CGovernanceManager governance;
 

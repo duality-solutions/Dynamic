@@ -9,7 +9,7 @@
 #include "governance.h"
 #include "governance-classes.h"
 #include "governance-vote.h"
-#include "privatesend.h"
+#include "messagesigner.h"
 #include "util.h"
 
 #include <univalue.h>
@@ -251,12 +251,12 @@ bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
 
     LOCK(cs);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
         LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceObject::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -275,7 +275,7 @@ bool CGovernanceObject::CheckSignature(CPubKey& pubKeyDynode)
     std::string strMessage = GetSignatureMessage();
 
     LOCK(cs);
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

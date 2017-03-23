@@ -6,7 +6,7 @@
 #include "governance-vote.h"
 
 #include "dynodeman.h"
-#include "privatesend.h"
+#include "messagesigner.h"
 #include "util.h"
 
 #include <boost/lexical_cast.hpp>
@@ -241,12 +241,12 @@ bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
     std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
         LogPrintf("CGovernanceVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -287,7 +287,7 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
     std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

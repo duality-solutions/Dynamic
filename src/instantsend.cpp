@@ -10,8 +10,8 @@
 #include "dynodeman.h"
 #include "key.h"
 #include "main.h"
+#include "messagesigner.h"
 #include "net.h"
-#include "privatesend.h"
 #include "protocol.h"
 #include "sync.h"
 #include "txmempool.h"
@@ -1021,7 +1021,7 @@ bool CTxLockVote::CheckSignature() const
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1034,12 +1034,12 @@ bool CTxLockVote::Sign()
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if(!privateSendSigner.SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

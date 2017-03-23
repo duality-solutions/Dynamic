@@ -11,7 +11,6 @@
 
 class CPrivatesendBroadcastTx;
 class CPrivatesendPool;
-class CPrivateSendSigner;
 
 // timeouts
 static const int PRIVATESEND_AUTO_TIMEOUT_MIN       = 5;
@@ -46,8 +45,6 @@ extern bool fPrivateSendMultiSession;
 
 // The main object for accessing mixing
 extern CPrivatesendPool privateSendPool;
-// A helper object for signing messages from Dynodes
-extern CPrivateSendSigner privateSendSigner;
 
 extern std::map<uint256, CPrivatesendBroadcastTx> mapPrivatesendBroadcastTxes;
 extern std::vector<CAmount> vecPrivateSendDenominations;
@@ -234,21 +231,6 @@ public:
 
     bool Sign();
     bool CheckSignature(const CPubKey& pubKeyDynode);
-};
-
-/** Helper object for signing and checking signatures
- */
-class CPrivateSendSigner
-{
-public:
-    /// Is the input associated with this public key? (and there is 1000 DYN - checking if valid Dynode)
-    bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
-    /// Set the private/public key values, returns true if successful
-    bool GetKeysFromSecret(std::string strSecret, CKey& keyRet, CPubKey& pubkeyRet);
-    /// Sign the message, returns true if successful
-    bool SignMessage(std::string strMessage, std::vector<unsigned char>& vchSigRet, CKey key);
-    /// Verify the message, returns true if succcessful
-    bool VerifyMessage(CPubKey pubkey, const std::vector<unsigned char>& vchSig, std::string strMessage, std::string& strErrorRet);
 };
 
 /** Used to keep track of current status of mixing pool

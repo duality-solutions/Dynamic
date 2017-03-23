@@ -5,8 +5,9 @@
 
 #include "spork.h"
 
+#include "chainparams.h"
 #include "main.h"
-#include "privatesend.h"
+#include "messagesigner.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -224,17 +225,17 @@ bool CSporkMessage::Sign(std::string strSignKey)
     std::string strError = "";
     std::string strMessage = boost::lexical_cast<std::string>(nSporkID) + boost::lexical_cast<std::string>(nValue) + boost::lexical_cast<std::string>(nTimeSigned);
 
-    if(!privateSendSigner.GetKeysFromSecret(strSignKey, key, pubkey)) {
+    if(!CMessageSigner::GetKeysFromSecret(strSignKey, key, pubkey)) {
         LogPrintf("CSporkMessage::Sign -- GetKeysFromSecret() failed, invalid spork key %s\n", strSignKey);
         return false;
     }
 
-    if(!privateSendSigner.SignMessage(strMessage, vchSig, key)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, key)) {
         LogPrintf("CSporkMessage::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!privateSendSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubkey, vchSig, strMessage, strError)) {
         LogPrintf("CSporkMessage::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -249,7 +250,7 @@ bool CSporkMessage::CheckSignature()
     std::string strMessage = boost::lexical_cast<std::string>(nSporkID) + boost::lexical_cast<std::string>(nValue) + boost::lexical_cast<std::string>(nTimeSigned);
     CPubKey pubkey(ParseHex(Params().SporkPubKey()));
 
-    if(!privateSendSigner.VerifyMessage(pubkey, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubkey, vchSig, strMessage, strError)) {
         LogPrintf("CSporkMessage::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

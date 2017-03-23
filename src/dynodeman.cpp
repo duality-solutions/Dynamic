@@ -10,6 +10,7 @@
 #include "governance.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
+#include "messagesigner.h"
 #include "netfulfilledman.h"
 #include "privatesend.h"
 #include "util.h"
@@ -1138,14 +1139,14 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 
     std::string strMessage = strprintf("%s%d%s", activeDynode.service.ToString(false), dnv.nonce, blockHash.ToString());
 
-    if(!privateSendSigner.SignMessage(strMessage, dnv.vchSig1, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, dnv.vchSig1, activeDynode.keyDynode)) {
         LogPrintf("DynodeMan::SendVerifyReply -- SignMessage() failed\n");
         return;
     }
 
     std::string strError;
 
-    if(!privateSendSigner.VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig1, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig1, strMessage, strError)) {
         LogPrintf("DynodeMan::SendVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
         return;
     }
@@ -1208,7 +1209,7 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         std::string strMessage1 = strprintf("%s%d%s", pnode->addr.ToString(false), dnv.nonce, blockHash.ToString());
         while(it != vDynodes.end()) {
             if((CAddress)it->addr == pnode->addr) {
-                if(privateSendSigner.VerifyMessage(it->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
+                if(CMessageSigner::VerifyMessage(it->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
                     // found it!
                     prealDynode = &(*it);
                     if(!it->IsPoSeVerified()) {
@@ -1225,14 +1226,14 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
                     std::string strMessage2 = strprintf("%s%d%s%s%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString(),
                                             dnv.vin1.prevout.ToStringShort(), dnv.vin2.prevout.ToStringShort());
                     // ... and sign it
-                    if(!privateSendSigner.SignMessage(strMessage2, dnv.vchSig2, activeDynode.keyDynode)) {
+                    if(!CMessageSigner::SignMessage(strMessage2, dnv.vchSig2, activeDynode.keyDynode)) {
                         LogPrintf("DynodeMan::ProcessVerifyReply -- SignMessage() failed\n");
                         return;
                     }
 
                     std::string strError;
 
-                    if(!privateSendSigner.VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
+                    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
                         LogPrintf("DynodeMan::ProcessVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
                         return;
                     }
@@ -1331,12 +1332,12 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
             return;
         }
 
-        if(privateSendSigner.VerifyMessage(pdn1->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
+        if(CMessageSigner::VerifyMessage(pdn1->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
             LogPrintf("DynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for Dynode1 failed, error: %s\n", strError);
             return;
         }
 
-        if(privateSendSigner.VerifyMessage(pdn2->pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
+        if(CMessageSigner::VerifyMessage(pdn2->pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
             LogPrintf("DynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for Dynode2 failed, error: %s\n", strError);
             return;
         }

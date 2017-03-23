@@ -17,7 +17,7 @@
 #include "governance-vote.h"
 #include "init.h"
 #include "main.h"
-#include "privatesend.h"
+#include "messagesigner.h"
 #include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -352,7 +352,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!privateSendSigner.GetKeysFromSecret(dne.getPrivKey(), keyDynode, pubKeyDynode)){
+            if(!CMessageSigner::GetKeysFromSecret(dne.getPrivKey(), keyDynode, pubKeyDynode)){
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", "Dynode signing error, could not set key correctly"));
@@ -471,7 +471,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             UniValue statusObj(UniValue::VOBJ);
 
-            if(!privateSendSigner.GetKeysFromSecret(dne.getPrivKey(), keyDynode, pubKeyDynode)) {
+            if(!CMessageSigner::GetKeysFromSecret(dne.getPrivKey(), keyDynode, pubKeyDynode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
                 statusObj.push_back(Pair("errorMessage", strprintf("Invalid Dynode key %s.", dne.getPrivKey())));

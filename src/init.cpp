@@ -30,6 +30,7 @@
 #include "httprpc.h"
 #include "key.h"
 #include "main.h"
+#include "messagesigner.h"
 #include "miner.h"
 #include "net.h"
 #include "netfulfilledman.h"
@@ -1658,7 +1659,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
         std::string strDyNodePrivKey = GetArg("-dynodeprivkey", "");
         if(!strDyNodePrivKey.empty()) {
-            if(!privateSendSigner.GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
+            if(!CMessageSigner::GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
                 return InitError(_("Invalid dynodeprivkey. Please see documenation."));
 
             LogPrintf("  pubKeyDynode: %s\n", CDynamicAddress(activeDynode.pubKeyDynode.GetID()).ToString());
