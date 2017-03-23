@@ -171,17 +171,17 @@ void CWallet::DeriveNewChildKey(CKeyMetadata& metadata, CKey& secret)
 
     // derive m/0'
     // use hardened derivation (child keys >= 0x80000000 are hardened after bip32)
-    masterKey.Derive(accountKey, 0x80000000);
+    masterKey.Derive(accountKey, BIP32_HARDENED_KEY_LIMIT);
 
     // derive m/0'/0'
-    accountKey.Derive(externalChainChildKey, 0x80000000);
+    accountKey.Derive(externalChainChildKey, BIP32_HARDENED_KEY_LIMIT);
 
     // derive child key at next index, skip keys already known to the wallet
     do {
         // always derive hardened keys
         // childIndex | 0x80000000 = derive childIndex in hardened child-index-range
         // example: 1 | 0x80000000 == 0x80000001 == 2147483649
-        externalChainChildKey.Derive(childKey, hdChain.nExternalChainCounter | 0x80000000);
+        externalChainChildKey.Derive(childKey, hdChain.nExternalChainCounter | BIP32_HARDENED_KEY_LIMIT);
         metadata.hdKeypath = "m/0'/0'/" + boost::to_string(hdChain.nExternalChainCounter) + "'";
         metadata.hdMasterKeyID = hdChain.masterKeyID;
         // increment childkey index
