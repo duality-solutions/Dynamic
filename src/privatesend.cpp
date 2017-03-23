@@ -1702,8 +1702,8 @@ bool CPrivatesendPool::PrepareDenominate(int nMinRounds, int nMaxRounds, std::st
         return false;
     }
 
-    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecPrivateSendDenominations[vecBits.front()], PRIVATESEND_ENTRY_MAX_SIZE, vecTxIn, vCoins, nValueIn, nMinRounds, nMaxRounds);
-     if (nMinRounds >= 0 && !fSelected) {
+    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecPrivateSendDenominations[vecBits.front()], GetMaxPoolAmount(), vecTxIn, vCoins, nValueIn, nMinRounds, nMaxRounds);     
+    if (nMinRounds >= 0 && !fSelected) {
         strErrorRet = "Can't select current denominated inputs";
         return false;
     }

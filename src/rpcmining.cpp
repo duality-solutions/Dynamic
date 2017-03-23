@@ -844,12 +844,9 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
 
     UniValue aMutable(UniValue::VARR);
-    if (aMutable.empty())
-    {
-        aMutable.push_back("time");
-        aMutable.push_back("transactions");
-        aMutable.push_back("prevblock");
-    }
+    aMutable.push_back("time");
+    aMutable.push_back("transactions");
+    aMutable.push_back("prevblock");
     
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("capabilities", aCaps));
@@ -908,6 +905,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         // Note that this can probably also be removed entirely after the first BIP9 non-force deployment (ie, probably segwit) gets activated
         aMutable.push_back("version/force");
     }
+
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
