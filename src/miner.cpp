@@ -202,7 +202,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
-    unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
+    std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
@@ -561,13 +561,13 @@ void static DynamicMiner(const CChainParams& chainparams)
             //
             unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
             CBlockIndex* pindexPrev = chainActive.Tip();
-            unique_ptr<CBlockTemplate> pblocktemplate;
+            std::unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
             
 #ifdef ENABLE_WALLET
-            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
+            pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
 #else
-            pblocktemplate = unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
+            pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
 #endif
             if (!pblocktemplate.get())
             {
