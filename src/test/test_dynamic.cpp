@@ -23,6 +23,8 @@
 #include "wallet/wallet.h"
 #endif
 
+#include <memory>
+
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
@@ -116,7 +118,7 @@ CBlock
 TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey)
 {
     const CChainParams& chainparams = Params();
-    CBlockTemplate *pblocktemplate = CreateNewBlock(chainparams, scriptPubKey);
+    std::unique_ptr<CBlockTemplate> pblocktemplate = CreateNewBlock(chainparams, scriptPubKey);
     CBlock& block = pblocktemplate->block;
 
     // Replace mempool-selected txns with just coinbase plus passed-in txns:
@@ -133,7 +135,6 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>&
     ProcessNewBlock(state, chainparams, NULL, &block, true, NULL);
 
     CBlock result = block;
-    delete pblocktemplate;
     return result;
 }
 
