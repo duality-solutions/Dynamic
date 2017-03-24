@@ -218,14 +218,18 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         govobj.UpdateSentinelVariables(); //this sets local vars in object
 
-        if(AddGovernanceObject(govobj, pfrom))
+        bool fAddToSeen = true;
+        if(AddGovernanceObject(govobj, fAddToSeen, pfrom))
         {
             LogPrintf("DNGOVERNANCEOBJECT -- %s new\n", strHash);
             govobj.Relay();
         }
 
-        // UPDATE THAT WE'VE SEEN THIS OBJECT
-        mapSeenGovernanceObjects.insert(std::make_pair(nHash, SEEN_OBJECT_IS_VALID));
+        if(fAddToSeen) {
+            // UPDATE THAT WE'VE SEEN THIS OBJECT
+            mapSeenGovernanceObjects.insert(std::make_pair(nHash, SEEN_OBJECT_IS_VALID));
+        }
+
         dynodeSync.AddedGovernanceItem();
 
 
@@ -303,12 +307,14 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
     fRateChecksEnabled = true;
 }
 
-bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CNode* pfrom)
+bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, bool& fAddToSeen, CNode* pfrom)
 {
     LOCK2(cs_main, cs);
     std::string strError = "";
 
     DBG( cout << "CGovernanceManager::AddGovernanceObject START" << endl; );
+
+    fAddToSeen = true;
 
     uint256 nHash = govobj.GetHash();
 
@@ -339,6 +345,8 @@ bool CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CNode* p
         }
 
         if(!UpdateCurrentWatchdog(govobj)) {
+            // Allow Watchdogs which are not current to be reprocessed
+            fAddToSeen = false;
             if(pfrom && (nHashWatchdogCurrent != uint256())) {
                 pfrom->PushInventory(CInv(MSG_GOVERNANCE_OBJECT, nHashWatchdogCurrent));
             }
@@ -1002,7 +1010,8 @@ void CGovernanceManager::CheckDynodeOrphanObjects()
             continue;
         }
 
-        if(AddGovernanceObject(govobj)) {
+        bool fAddToSeen = true;
+        if(AddGovernanceObject(govobj, fAddToSeen)) {
             LogPrintf("CGovernanceManager::CheckDynodeOrphanObjects -- %s new\n", govobj.GetHash().ToString());
             govobj.Relay();
             mapDynodeOrphanObjects.erase(it++);
