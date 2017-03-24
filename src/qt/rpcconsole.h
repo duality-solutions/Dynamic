@@ -14,6 +14,7 @@
 
 #include <QCompleter>
 #include <QDialog>
+#include <QThread>
 
 class ClientModel;
 class PlatformStyle;
@@ -159,6 +160,7 @@ private:
     QMenu *peersTableContextMenu;
     QMenu *banTableContextMenu;
     QCompleter *autoCompleter;
+    QThread thread;
 };
 
 #endif // DYNAMIC_QT_RPCCONSOLE_H

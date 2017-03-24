@@ -253,6 +253,7 @@ private:
 #endif
     int returnValue;
     const PlatformStyle *platformStyle;
+    std::unique_ptr<QWidget> shutdownWindow;
 
     void startThread();
 };
@@ -405,9 +406,8 @@ void DynamicApplication::createWindow(const NetworkStyle *networkStyle)
 void DynamicApplication::createSplashScreen(const NetworkStyle *networkStyle)
 {
     SplashScreen *splash = new SplashScreen(0, networkStyle);
-    // We don't hold a direct pointer to the splash screen after creation, so use
-    // Qt::WA_DeleteOnClose to make sure that the window will be deleted eventually.
-    splash->setAttribute(Qt::WA_DeleteOnClose);
+    // We don't hold a direct pointer to the splash screen after creation, but the splash
+    // screen will take care of deleting itself when slotFinish happens.
     splash->show();
     connect(this, SIGNAL(splashFinished(QWidget*)), splash, SLOT(slotFinish(QWidget*)));
     connect(this, SIGNAL(requestedShutdown()), splash, SLOT(close()));
@@ -450,6 +450,11 @@ void DynamicApplication::requestInitialize()
 
 void DynamicApplication::requestShutdown()
 {
+    // Show a simple window indicating shutdown status
+    // Do this first as some of the steps may take some time below,
+    // for example the RPC console may still be executing a command.
+    shutdownWindow.reset(ShutdownWindow::showShutdownWindow(window));
+
     qDebug() << __func__ << ": Requesting shutdown";
     startThread();
     window->hide();
@@ -463,9 +468,6 @@ void DynamicApplication::requestShutdown()
 #endif
     delete clientModel;
     clientModel = 0;
-
-    // Show a simple window indicating shutdown status
-    ShutdownWindow::showShutdownWindow(window);
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
