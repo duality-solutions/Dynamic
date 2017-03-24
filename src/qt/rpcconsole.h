@@ -103,6 +103,8 @@ public Q_SLOTS:
     void scrollToEnd();
     /** Handle selection of peer in peers list */
     void peerSelected(const QItemSelection &selected, const QItemSelection &deselected);
+    /** Handle selection caching before update */
+    void peerLayoutAboutToChange();
     /** Handle updated peer information */
     void peerLayoutChanged();
     /** Switch to info tab and show */
@@ -154,7 +156,7 @@ private:
     ClientModel *clientModel;
     QStringList history;
     int historyPtr;
-    NodeId cachedNodeid;
+    QList<NodeId> cachedNodeids;
     RPCTimerInterface *rpcTimerInterface;      
     QMenu *peersTableContextMenu;
     QMenu *banTableContextMenu;
