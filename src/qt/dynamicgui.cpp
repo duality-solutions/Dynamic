@@ -657,13 +657,6 @@ void DynamicGUI::setClientModel(ClientModel *clientModel)
             // Disable context menu on tray icon
             trayIconMenu->clear();
         }
-        // Propagate cleared model to child objects
-        rpcConsole->setClientModel(nullptr);
-#ifdef ENABLE_WALLET
-        walletFrame->setClientModel(nullptr);
-#endif // ENABLE_WALLET
-        unitDisplayControl->setOptionsModel(nullptr);
-
 #ifdef Q_OS_MAC
         if(dockIconMenu)
         {
@@ -1443,7 +1436,7 @@ void UnitDisplayStatusBarControl::mousePressEvent(QMouseEvent *event)
 /** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */
 void UnitDisplayStatusBarControl::createContextMenu()
 {
-    menu = new QMenu(this);
+    menu = new QMenu();
     Q_FOREACH(DynamicUnits::Unit u, DynamicUnits::availableUnits())
     {
         QAction *menuAction = new QAction(QString(DynamicUnits::name(u)), this);

@@ -17,7 +17,7 @@
 #include <boost/foreach.hpp>
 
 RecentRequestsTableModel::RecentRequestsTableModel(CWallet *wallet, WalletModel *parent) :
-    QAbstractTableModel(parent), walletModel(parent)
+    walletModel(parent)
 {
     Q_UNUSED(wallet);
     nReceiveRequestsMaxId = 0;

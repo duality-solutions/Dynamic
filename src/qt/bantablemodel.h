@@ -43,7 +43,6 @@ class BanTableModel : public QAbstractTableModel
 
 public:
     explicit BanTableModel(ClientModel *parent = 0);
-    ~BanTableModel();
     void startAutoRefresh();
     void stopAutoRefresh();
 
@@ -70,7 +69,7 @@ public Q_SLOTS:
 private:
     ClientModel *clientModel;
     QStringList columns;
-    std::unique_ptr<BanTablePriv> priv;
+    BanTablePriv *priv;
 };
 
 #endif // DYNAMIC_QT_BANTABLEMODEL_H

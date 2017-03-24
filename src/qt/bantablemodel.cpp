@@ -89,17 +89,12 @@ BanTableModel::BanTableModel(ClientModel *parent) :
     clientModel(parent)
 {
     columns << tr("IP/Netmask") << tr("Banned Until");
-    priv.reset(new BanTablePriv());
+    priv = new BanTablePriv();
     // default to unsorted
     priv->sortColumn = -1;
 
     // load initial data
     refresh();
-}
-
-BanTableModel::~BanTableModel()
-{
-    // Intentionally left empty
 }
 
 int BanTableModel::rowCount(const QModelIndex &parent) const

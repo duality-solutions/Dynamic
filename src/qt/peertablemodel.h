@@ -49,7 +49,6 @@ class PeerTableModel : public QAbstractTableModel
 
 public:
     explicit PeerTableModel(ClientModel *parent = 0);
-    ~PeerTableModel();
     const CNodeCombinedStats *getNodeStats(int idx);
     int getRowByNodeId(NodeId nodeid);
     void startAutoRefresh();
@@ -78,7 +77,7 @@ public Q_SLOTS:
 private:
     ClientModel *clientModel;
     QStringList columns;
-    std::unique_ptr<PeerTablePriv> priv;
+    PeerTablePriv *priv;
     QTimer *timer;
 };
 

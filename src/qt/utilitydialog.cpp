@@ -209,20 +209,22 @@ ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
     setLayout(layout);
 }
 
-QWidget *ShutdownWindow::showShutdownWindow(DynamicGUI *window)
+void ShutdownWindow::showShutdownWindow(DynamicGUI *window)
 {
     if (!window)
-        return nullptr;
+        return;
 
     // Show a simple window indicating shutdown status
     QWidget *shutdownWindow = new ShutdownWindow();
+    // We don't hold a direct pointer to the shutdown window after creation, so use
+    // Qt::WA_DeleteOnClose to make sure that the window will be deleted eventually.
+    shutdownWindow->setAttribute(Qt::WA_DeleteOnClose);
     shutdownWindow->setWindowTitle(window->windowTitle());
 
     // Center shutdown window at where main window was
     const QPoint global = window->mapToGlobal(window->rect().center());
     shutdownWindow->move(global.x() - shutdownWindow->width() / 2, global.y() - shutdownWindow->height() / 2);
     shutdownWindow->show();
-    return shutdownWindow;
 }
 
 void ShutdownWindow::closeEvent(QCloseEvent *event)
