@@ -20,6 +20,7 @@
 
 #include <univalue.h>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -499,9 +500,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
     vector<unsigned char> bitmap;
     vector<CCoin> outs;
     std::string bitmapStringRepresentation;
-    std::vector<bool> hits;
-
-    bitmap.resize((vOutPoints.size() + 7) / 8);
+    boost::dynamic_bitset<unsigned char> hits(vOutPoints.size());
     {
         LOCK2(cs_main, mempool.cs);
 
@@ -520,7 +519,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
             if (view.GetCoins(hash, coins)) {
                 mempool.pruneSpent(hash, coins);
                 if (coins.IsAvailable(vOutPoints[i].n)) {
-                    hit = true;
+                    hits[i] = true;
                     // Safe to index into vout here because IsAvailable checked if it's off the end of the array, or if
                     // n is valid but points to an already spent output (IsNull).
                     CCoin coin;
@@ -532,11 +531,10 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
                 }
             }
 
-            hits.push_back(hit);
-            bitmapStringRepresentation.append(hit ? "1" : "0"); // form a binary string representation (human-readable for json output)
-            bitmap[i / 8] |= ((uint8_t)hit) << (i % 8);
+            bitmapStringRepresentation.append(hits[i] ? "1" : "0"); // form a binary string representation (human-readable for json output)
         }
     }
+    boost::to_block_range(hits, std::back_inserter(bitmap));
 
     switch (rf) {
     case RF_BINARY: {
