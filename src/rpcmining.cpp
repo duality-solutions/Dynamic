@@ -34,6 +34,7 @@
 
 #include <univalue.h>
 
+#include <memory>
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>
@@ -453,7 +454,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
         static unsigned int nTransactionsUpdatedLast;
 		static CBlockIndex* pindexPrev;
 		static int64_t nStart;
-		static CBlockTemplate* pblocktemplate;
+        static std::unique_ptr<CBlockTemplate> pblocktemplate;
 		
         if (pindexPrev != chainActive.Tip() ||
             (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
@@ -476,11 +477,6 @@ UniValue getwork(const UniValue& params, bool fHelp)
             nStart = GetTime();
 
             // Create new block
-            if(pblocktemplate)
-            {
-                delete pblocktemplate;
-                pblocktemplate = nullptr;
-            }
             CScript scriptDummy = CScript() << OP_TRUE;
             pblocktemplate = CreateNewBlock(Params(), scriptDummy);
             if (!pblocktemplate)
@@ -770,7 +766,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     // Update block
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
-    static CBlockTemplate* pblocktemplate;
+    static std::unique_ptr<CBlockTemplate> pblocktemplate;
     if (pindexPrev != chainActive.Tip() ||
         (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
     {
@@ -783,11 +779,6 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         nStart = GetTime();
 
         // Create new block
-        if(pblocktemplate)
-        {
-            delete pblocktemplate;
-            pblocktemplate = nullptr;
-        }
         CScript scriptDummy = CScript() << OP_TRUE;
         pblocktemplate = CreateNewBlock(Params(), scriptDummy);
         if (!pblocktemplate)

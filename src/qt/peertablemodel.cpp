@@ -118,22 +118,17 @@ PeerTableModel::PeerTableModel(ClientModel *parent) :
     timer(0)
 {
     columns << tr("Node/Service") << tr("User Agent") << tr("Ping Time");
-    priv.reset(new PeerTablePriv());
+    priv = new PeerTablePriv();
     // default to unsorted
     priv->sortColumn = -1;
 
     // set up timer for auto refresh
-    timer = new QTimer(this);
+    timer = new QTimer();
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
     timer->setInterval(MODEL_UPDATE_DELAY);
 
     // load initial data
     refresh();
-}
-
-PeerTableModel::~PeerTableModel()
-{
-    // Intentionally left empty
 }
 
 void PeerTableModel::startAutoRefresh()
