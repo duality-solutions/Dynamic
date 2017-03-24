@@ -293,7 +293,9 @@ RPCConsole::RPCConsole(QWidget *parent) :
 #endif
     // Register RPC timer interface        
     rpcTimerInterface = new QtRPCTimerInterface();        
-    RPCRegisterTimerInterface(rpcTimerInterface);
+    // avoid accidentally overwriting an existing, non QTThread
+    // based timer interface
+    RPCSetTimerInterfaceIfUnset(rpcTimerInterface);
 
     startExecutor();
     setTrafficGraphRange(INITIAL_TRAFFIC_GRAPH_MINS);
@@ -308,7 +310,7 @@ RPCConsole::~RPCConsole()
 {
     GUIUtil::saveWindowGeometry("nRPCConsoleWindow", this);
     Q_EMIT stopExecutor();
-    RPCUnregisterTimerInterface(rpcTimerInterface);        
+    RPCUnsetTimerInterface(rpcTimerInterface);
     delete rpcTimerInterface;     
     delete ui;
 }
