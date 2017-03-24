@@ -459,7 +459,7 @@ void RPCConsole::setClientModel(ClientModel *model)
         // peer table signal handling - update peer details when new nodes are added to the model
         connect(model->getPeerTableModel(), SIGNAL(layoutChanged()), this, SLOT(peerLayoutChanged()));
         // peer table signal handling - cache selected node ids
-        connect(model->getPeerTableModel(), SIGNAL(layoutAboutToChange()), this, SLOT(peerLayoutAboutToChange()))
+        connect(model->getPeerTableModel(), SIGNAL(layoutAboutToChange()), this, SLOT(peerLayoutAboutToChange()));
 
         // set up ban table
         ui->banlistWidget->setModel(model->getBanTableModel());
