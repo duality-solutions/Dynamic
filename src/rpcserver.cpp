@@ -609,12 +609,12 @@ void RPCSetTimerInterfaceIfUnset(RPCTimerInterface *iface)
         timerInterface = iface;
 }
 
-+void RPCSetTimerInterface(RPCTimerInterface *iface)
+void RPCSetTimerInterface(RPCTimerInterface *iface)
 {
     timerInterface = iface;
 }
 
-+void RPCUnsetTimerInterface(RPCTimerInterface *iface)
+void RPCUnsetTimerInterface(RPCTimerInterface *iface)
 {
     if (timerInterface == iface)
         timerInterface = NULL;
