@@ -785,7 +785,7 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
 
     // Use CTransaction for the constant parts of the
     // transaction to avoid rehashing.
-    const CTransaction txConst(mergedTx)
+    const CTransaction txConst(mergedTx);
     // Sign what we can:
     for (unsigned int i = 0; i < mergedTx.vin.size(); i++) {
         CTxIn& txin = mergedTx.vin[i];
