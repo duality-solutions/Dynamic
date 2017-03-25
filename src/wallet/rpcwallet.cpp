@@ -1277,7 +1277,7 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
             tallyitem& _item = mapAccountTally[strAccount];
             _item.nAmount += nAmount;
             _item.nConf = min(_item.nConf, nConf);
-            _item.nBCConf = min(item.nBCConf, nBCConf);
+            _item.nBCConf = min(_item.nBCConf, nBCConf);
             _item.fIsWatchonly = fIsWatchonly;
         }
         else
