@@ -20,6 +20,19 @@
 * Do not shadow variable (multiple files)
 * dynamic-cli: More detailed error reporting
 * Add High TX Fee Warning
+* C++11: s/boost::scoped_ptr/std::unique_ptr/
+* Do not shadow variables in networking code
+* Remove shadowed variables in Qt files
+* Do not shadow LOCK's criticalblock variable for LOCK inside LOCK
+* Do not shadow variables in src/wallet
+* Berkeley DB v6 compatibility fix
+* Reduce default number of blocks to check at startup
+* Fix random segfault when closing Choose data directory dialog
+* Fix several node initialization issues
+* Add FEATURE_HD
+* Improve handling of unconnecting headers
+* Fix DoS vulnerability in mempool acceptance
+* Bump default db cache to 300MiB
 
 
 **Dynamic v1.1.0.0**		
