@@ -24,6 +24,12 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
+static void RandFailure()
+{
+    LogPrintf("Failed to read randomness, aborting\n");
+    abort();
+}
+
 static inline int64_t GetPerformanceCounter()
 {
     int64_t nCounter = 0;
@@ -82,6 +88,37 @@ void RandAddSeedPerfmon()
             warned = true;
         }
     }
+#endif
+}
+
+/** Get 32 bytes of system entropy. */
+static void GetOSRand(unsigned char *ent32)
+{
+#ifdef WIN32
+    HCRYPTPROV hProvider;
+    int ret = CryptAcquireContextW(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    if (!ret) {
+        RandFailure();
+    }
+    ret = CryptGenRandom(hProvider, 32, ent32);
+    if (!ret) {
+        RandFailure();
+    }
+    CryptReleaseContext(hProvider, 0);
+#else
+    int f = open("/dev/urandom", O_RDONLY);
+    if (f == -1) {
+        RandFailure();
+    }
+    int have = 0;
+    do {
+        ssize_t n = read(f, ent32 + have, 32 - have);
+        if (n <= 0 || n + have > 32) {
+            RandFailure();
+        }
+        have += n;
+    } while (have < 32);
+    close(f);
 #endif
 }
 
