@@ -70,8 +70,9 @@ public:
 
     void Set(const uint256& entry)
     {
-        size_t nMaxCacheSize = GetArg("-maxsigcachesize", DEFAULT_MAX_SIG_CACHE_SIZE) * ((size_t) 1 << 20);
-        if (nMaxCacheSize <= 0) return;
+    // nMaxCacheSize is unsigned. If -maxsigcachesize is set to zero,
+    // setup_bytes creates the minimum possible cache (2 elements).
+    size_t nMaxCacheSize = std::min(std::max((int64_t)0, GetArg("-maxsigcachesize", DEFAULT_MAX_SIG_CACHE_SIZE)), MAX_MAX_SIG_CACHE_SIZE) * ((size_t) 1 << 20);
 
         boost::unique_lock<boost::shared_mutex> lock(cs_sigcache);
         while (memusage::DynamicUsage(setValid) > nMaxCacheSize)
