@@ -127,7 +127,7 @@ bool CGovernanceTriggerManager::AddNewTrigger(uint256 nHash)
         CSuperblock_sptr pSuperblockTmp(new CSuperblock(nHash));
         pSuperblock = pSuperblockTmp;
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         DBG( cout << "CGovernanceTriggerManager::AddNewTrigger Error creating superblock"
              << ", e.what() = " << e.what()
              << endl; );

@@ -550,7 +550,7 @@ void MultisigDialog::on_signTransactionButton_clicked()
             ssData >> tx;
             txVariants.push_back(tx);
         }
-        catch (const std::exception &) {
+        catch (const std::exception&) {
             QMessageBox::critical(this, tr("Multisig: Sign Button failed!"), tr("TX decodefailed"));
         }
     }

@@ -302,7 +302,7 @@ void DynamicCore::restart(QStringList args)
             QProcess::startDetached(QApplication::applicationFilePath(), args);
             qDebug() << __func__ << ": Restart initiated...";
             QApplication::quit();
-        } catch (std::exception& e) {
+        } catch (const std::exception& e) {
             handleRunawayException(&e);
         } catch (...) {
             handleRunawayException(NULL);
