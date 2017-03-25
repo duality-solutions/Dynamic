@@ -1,4 +1,7 @@
-**Dynamic v1.1.0.0**		
+**Dynamic v1.2.0.0**	
+Bump Version
+
+**Dynamic v1.2.0.0**		
 		
 * Inline with BTC 0.12		
 * HD Wallet Code Improvements		
