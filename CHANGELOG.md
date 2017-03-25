@@ -33,6 +33,10 @@
 * Improve handling of unconnecting headers
 * Fix DoS vulnerability in mempool acceptance
 * Bump default db cache to 300MiB
+* Fix a bug where the SplashScreen will not be hidden during startup
+* Stop trimming when mapTx is empty
+* Evict orphans which are included or precluded by accepted blocks
+* Reduce unnecessary hashing in signrawtransaction
 
 
 **Dynamic v1.1.0.0**		
