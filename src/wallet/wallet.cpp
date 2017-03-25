@@ -170,7 +170,7 @@ void CWallet::DeriveNewChildKey(CKeyMetadata& metadata, CKey& secret)
         // childIndex | 0x80000000 = derive childIndex in hardened child-index-range
         // example: 1 | 0x80000000 == 0x80000001 == 2147483649
         externalChainChildKey.Derive(childKey, hdChain.nExternalChainCounter | BIP32_HARDENED_KEY_LIMIT);
-        metadata.hdKeypath = "m/0'/0'/" + boost::to_string(hdChain.nExternalChainCounter) + "'";
+        metadata.hdKeypath = "m/0'/0'/" + std::to_string(hdChain.nExternalChainCounter) + "'";
         metadata.hdMasterKeyID = hdChain.masterKeyID;
         // increment childkey index
         hdChain.nExternalChainCounter++;
