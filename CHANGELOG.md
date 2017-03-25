@@ -1,7 +1,28 @@
 **Dynamic v1.2.0.0**	
-Bump Version
 
-**Dynamic v1.2.0.0**		
+* Make RelayWalletTransaction attempt to AcceptToMemoryPool
+* Update tests for Byteswap
+* Ensure is in valid range
+* Make strWalletFile const
+* Avoid ugly exception in log on unknown inv type
+* libconsensus: Add input validation of flags/missing flags & make catch() args const
+* Add LockedPool
+* Add getmemoryinfo
+* Add benchmark for lockedpool allocation/deallocation
+* trivial: fix bloom filter init to isEmpty = true
+* Lockedpool fixes
+* Improve DecodeBase58 performance.
+* Add #include <utility> to miner.cpp
+* Don't return the address of a P2SH of a P2SH
+* Implement (begin|end)_ptr in C++11 and add deprecation comment
+* add #include <stdlib.h> to random.cpp
+* Generate auth cookie in hex instead of base64
+* Do not shadow variable (multiple files)
+* dynamic-cli: More detailed error reporting
+* Add High TX Fee Warning
+
+
+**Dynamic v1.1.0.0**		
 		
 * Inline with BTC 0.12		
 * HD Wallet Code Improvements		
