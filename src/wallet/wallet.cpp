@@ -1305,6 +1305,9 @@ bool CWallet::SetHDMasterKey(const CPubKey& pubkey)
 {
     LOCK(cs_wallet);
 
+    // ensure this wallet.dat can only be opened by clients supporting HD
+    SetMinVersion(FEATURE_HD);
+
     // store the keyid (hash160) together with
     // the child index counter in the database
     // as a hdchain object
