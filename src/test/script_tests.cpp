@@ -279,10 +279,10 @@ public:
         return *this;
     }
 
-    TestBuilder& Add(const CScript& _script)
+    TestBuilder& Add(const CScript& script)
     {
         DoPush();
-        spendTx.vin[0].scriptSig += _script;
+        spendTx.vin[0].scriptSig += script;
         return *this;
     }
 
@@ -293,9 +293,9 @@ public:
         return *this;
     }
 
-    TestBuilder& Push(const CScript& _script) {
+    TestBuilder& Push(const std::string& hex)
     {
-         DoPush(std::vector<unsigned char>(_script.begin(), _script.end()));
+        DoPush(ParseHex(hex));
         return *this;
     }
 

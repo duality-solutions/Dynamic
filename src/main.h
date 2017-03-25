@@ -56,6 +56,8 @@ static const bool DEFAULT_WHITELISTFORCERELAY = true;
  * so it's still 10 times lower comparing to bitcoin.
  */
 static const unsigned int DEFAULT_MIN_RELAY_TX_FEE = 10000; // was 1000
+//! Discourage users to set fees higher than this amount (in satoshis) per kB
+static const CAmount HIGH_TX_FEE_PER_KB = 0.01 * COIN;
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 400;
 /** Default for -limitancestorcount, max number of in-mempool ancestors */

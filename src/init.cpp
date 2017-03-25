@@ -1073,10 +1073,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (mapArgs.count("-minrelaytxfee"))
     {
         CAmount n = 0;
-        if (ParseMoney(mapArgs["-minrelaytxfee"], n) && n > 0)
-            ::minRelayTxFee = CFeeRate(n);
-        else
+        if (!ParseMoney(mapArgs["-minrelaytxfee"], n))
             return InitError(strprintf(_("Invalid amount for -minrelaytxfee=<amount>: '%s'"), mapArgs["-minrelaytxfee"]));
+        // High fee check is done afterward in CWallet::ParameterInteraction()
+        ::minRelayTxFee = CFeeRate(n);
     }
 
     fRequireStandard = !GetBoolArg("-acceptnonstdtxn", !Params().RequireStandard());
@@ -1085,13 +1085,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
 
 #ifdef ENABLE_WALLET
+    if (::minRelayTxFee.GetFeePerK() > HIGH_TX_FEE_PER_KB)
+        InitWarning(AmountHighWarn("-minrelaytxfee") + " " +
+                    _("The wallet will avoid paying less than the minimum relay fee."));
+
     if (mapArgs.count("-mintxfee"))
     {
         CAmount n = 0;
-        if (ParseMoney(mapArgs["-mintxfee"], n) && n > 0)
-            CWallet::minTxFee = CFeeRate(n);
-        else
+        if (!ParseMoney(mapArgs["-mintxfee"], n))
             return InitError(strprintf(_("Invalid amount for -mintxfee=<amount>: '%s'"), mapArgs["-mintxfee"]));
+        if (n > HIGH_TX_FEE_PER_KB)
+            InitWarning(AmountHighWarn("-mintxfee") + " " +
+                        _("This is the minimum transaction fee you pay on every transaction."));
+        CWallet::minTxFee = CFeeRate(n); 
     }
     if (mapArgs.count("-fallbackfee"))
     {
@@ -1099,7 +1105,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!ParseMoney(mapArgs["-fallbackfee"], nFeePerK))
             return InitError(strprintf(_("Invalid amount for -fallbackfee=<amount>: '%s'"), mapArgs["-fallbackfee"]));
         if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-fallbackfee is set very high! This is the transaction fee you may pay when fee estimates are not available."));
+            InitWarning(AmountHighWarn("-fallbackfee") + " " +
+                        _("This is the transaction fee you may pay when fee estimates are not available."));
         CWallet::fallbackFee = CFeeRate(nFeePerK);
     }
     if (mapArgs.count("-paytxfee"))
@@ -1108,7 +1115,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!ParseMoney(mapArgs["-paytxfee"], nFeePerK))
             return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s'"), mapArgs["-paytxfee"]));
         if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
+            InitWarning(AmountHighWarn("-paytxfee") + " " +
+                        _("This is the transaction fee you will pay if you send a transaction."));
         payTxFee = CFeeRate(nFeePerK, 1000);
         if (payTxFee < ::minRelayTxFee)
         {
