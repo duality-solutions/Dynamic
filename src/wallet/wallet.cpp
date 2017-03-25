@@ -30,6 +30,7 @@
 #include "primitives/transaction.h"
 #include "txmempool.h"
 #include "spork.h"
+#include "ui_interface.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "consensus/validation.h"
@@ -81,19 +82,6 @@ struct CompareValueOnly
         return t1.first < t2.first;
     }
 };
-
-CClientUIInterface uiInterface;
-
-bool InitError(const std::string& str)
-{
-    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_ERROR);
-    return false;
-}
-
-void InitWarning(const std::string& str)
-{
-    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_WARNING);
-}
 
 std::string COutput::ToString() const
 {

@@ -7,6 +7,17 @@
 
 CClientUIInterface uiInterface;
 
+bool InitError(const std::string& str)
+{
+    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_ERROR);
+    return false;
+}
+
+void InitWarning(const std::string& str)
+{
+    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_WARNING);
+}
+
 std::string AmountHighWarn(const std::string& optname)
 {
     return strprintf(_("%s is set very high!"), optname);
