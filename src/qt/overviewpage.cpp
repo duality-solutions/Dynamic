@@ -39,9 +39,9 @@ class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(const PlatformStyle *platformStyle):
+    TxViewDelegate(const PlatformStyle *_platformStyle):
         QAbstractItemDelegate(), unit(DynamicUnits::DYN),
-        platformStyle(platformStyle)
+        platformStyle(_platformStyle)
     {
 
     }
