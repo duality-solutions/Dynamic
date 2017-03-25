@@ -1113,13 +1113,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
     if (tx.IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
 
-    // Added for DDNS
-    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
-    // Rather not work on nonstandard transactions (unless -testnet/-regtest)
-    string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
-        return state.DoS(0, false, REJECT_NONSTANDARD, reason);
-
     // Don't relay version 2 transactions until CSV is active, and we can be
     // sure that such transactions will be mined (unless we're on
     // -testnet/-regtest).
@@ -1127,6 +1120,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
     if (fRequireStandard && tx.nVersion >= 2 && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
         return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
     }
+
+    // Added for DDNS
+    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
+    
+    // Rather not work on nonstandard transactions (unless -testnet/-regtest)
+    string reason;
+    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
+        return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Only accept nLockTime-using transactions that can be mined in the next
     // block; we don't want our mempool filled up with transactions that can't
