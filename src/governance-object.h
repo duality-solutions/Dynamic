@@ -25,9 +25,9 @@ class CGovernanceTriggerManager;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
-static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 60900;
+static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70000;
 
-static const int GOVERNANCE_FILTER_PROTO_VERSION = 60900;
+static const int GOVERNANCE_FILTER_PROTO_VERSION = 70000;
 static const double GOVERNANCE_FILTER_FP_RATE = 0.001;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
