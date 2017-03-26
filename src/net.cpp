@@ -75,7 +75,7 @@ namespace {
         SOCKET socket;
         bool whitelisted;
 
-        ListenSocket(SOCKET socket, bool whitelisted) : socket(socket), whitelisted(whitelisted) {}
+        ListenSocket(SOCKET _socket, bool _whitelisted) : socket(_socket), whitelisted(_whitelisted) {}
     };
 }
 
@@ -1957,6 +1957,9 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     LogPrintf("Loaded %i addresses from peers.dat  %dms\n",
            addrman.size(), GetTimeMillis() - nStart);
+
+    uiInterface.InitMessage(_("Starting network threads..."));
+
     fAddressesInitialized = true;
 
     if (semOutbound == NULL) {

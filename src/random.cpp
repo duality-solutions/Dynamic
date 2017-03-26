@@ -15,6 +15,7 @@
 #include "util.h"             // for LogPrint()
 #include "utilstrencodings.h" // for GetTime()
 
+#include <stdlib.h>
 #include <limits>
 
 #ifndef WIN32
@@ -23,6 +24,12 @@
 
 #include <openssl/err.h>
 #include <openssl/rand.h>
+
+static void RandFailure()
+{
+    LogPrintf("Failed to read randomness, aborting\n");
+    abort();
+}
 
 static inline int64_t GetPerformanceCounter()
 {

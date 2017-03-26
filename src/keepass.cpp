@@ -190,7 +190,7 @@ SecureString CKeePassIntegrator::CKeePassResponse::getSecureStr(std::string strN
     {
         sValue = decrypt(strValueBase64Encrypted);
     }
-    catch (std::exception &e)
+    catch (const std::exception& e)
     {
         std::string strError = "Exception occured while decrypting ";
         strError += strName + ": " + e.what();

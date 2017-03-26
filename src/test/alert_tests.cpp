@@ -45,7 +45,7 @@ bool SignAndSave(CAlert &alert)
     try {
         fileout << alert;
     }
-    catch (std::exception &e) {
+    catch (const std::exception& e) {
         return error("%s: Serialize or I/O error - %s", __func__, e.what());
     }
     fileout.fclose();

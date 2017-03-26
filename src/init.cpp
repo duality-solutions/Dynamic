@@ -187,7 +187,7 @@ public:
 
 static CCoinsViewDB *pcoinsdbview = NULL;
 static CCoinsViewErrorCatcher *pcoinscatcher = NULL;
-static boost::scoped_ptr<ECCVerifyHandle> globalVerifyHandle;
+static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 void Interrupt(boost::thread_group& threadGroup)
 {
@@ -637,6 +637,21 @@ static void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex
     boost::thread t(runCommand, strCmd); // thread runs free
 }
 
+static bool fHaveGenesis = false;
+static boost::mutex cs_GenesisWait;
+static CConditionVariable condvar_GenesisWait;
+
+static void BlockNotifyGenesisWait(bool, const CBlockIndex *pBlockIndex)
+{
+    if (pBlockIndex != NULL) {
+        {
+            boost::unique_lock<boost::mutex> lock_GenesisWait(cs_GenesisWait);
+            fHaveGenesis = true;
+        }
+        condvar_GenesisWait.notify_all();
+    }
+}
+
 struct CImportingNow
 {
     CImportingNow() {
@@ -1073,10 +1088,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (mapArgs.count("-minrelaytxfee"))
     {
         CAmount n = 0;
-        if (ParseMoney(mapArgs["-minrelaytxfee"], n) && n > 0)
-            ::minRelayTxFee = CFeeRate(n);
-        else
+        if (!ParseMoney(mapArgs["-minrelaytxfee"], n))
             return InitError(strprintf(_("Invalid amount for -minrelaytxfee=<amount>: '%s'"), mapArgs["-minrelaytxfee"]));
+        // High fee check is done afterward in CWallet::ParameterInteraction()
+        ::minRelayTxFee = CFeeRate(n);
     }
 
     fRequireStandard = !GetBoolArg("-acceptnonstdtxn", !Params().RequireStandard());
@@ -1085,13 +1100,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
 
 #ifdef ENABLE_WALLET
+    if (::minRelayTxFee.GetFeePerK() > HIGH_TX_FEE_PER_KB)
+        InitWarning(AmountHighWarn("-minrelaytxfee") + " " +
+                    _("The wallet will avoid paying less than the minimum relay fee."));
+
     if (mapArgs.count("-mintxfee"))
     {
         CAmount n = 0;
-        if (ParseMoney(mapArgs["-mintxfee"], n) && n > 0)
-            CWallet::minTxFee = CFeeRate(n);
-        else
+        if (!ParseMoney(mapArgs["-mintxfee"], n))
             return InitError(strprintf(_("Invalid amount for -mintxfee=<amount>: '%s'"), mapArgs["-mintxfee"]));
+        if (n > HIGH_TX_FEE_PER_KB)
+            InitWarning(AmountHighWarn("-mintxfee") + " " +
+                        _("This is the minimum transaction fee you pay on every transaction."));
+        CWallet::minTxFee = CFeeRate(n); 
     }
     if (mapArgs.count("-fallbackfee"))
     {
@@ -1099,7 +1120,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!ParseMoney(mapArgs["-fallbackfee"], nFeePerK))
             return InitError(strprintf(_("Invalid amount for -fallbackfee=<amount>: '%s'"), mapArgs["-fallbackfee"]));
         if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-fallbackfee is set very high! This is the transaction fee you may pay when fee estimates are not available."));
+            InitWarning(AmountHighWarn("-fallbackfee") + " " +
+                        _("This is the transaction fee you may pay when fee estimates are not available."));
         CWallet::fallbackFee = CFeeRate(nFeePerK);
     }
     if (mapArgs.count("-paytxfee"))
@@ -1108,7 +1130,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!ParseMoney(mapArgs["-paytxfee"], nFeePerK))
             return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s'"), mapArgs["-paytxfee"]));
         if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
+            InitWarning(AmountHighWarn("-paytxfee") + " " +
+                        _("This is the transaction fee you will pay if you send a transaction."));
         payTxFee = CFeeRate(nFeePerK, 1000);
         if (payTxFee < ::minRelayTxFee)
         {
@@ -1451,10 +1474,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nTotalCache = std::max(nTotalCache, nMinDbCache << 20); // total cache cannot be less than nMinDbCache
     nTotalCache = std::min(nTotalCache, nMaxDbCache << 20); // total cache cannot be greated than nMaxDbcache
     int64_t nBlockTreeDBCache = nTotalCache / 8;
-    if (nBlockTreeDBCache > (1 << 21) && !GetBoolArg("-txindex", DEFAULT_TXINDEX))
-        nBlockTreeDBCache = (1 << 21); // block tree db cache shouldn't be larger than 2 MiB
+    nBlockTreeDBCache = std::min(nBlockTreeDBCache, (GetBoolArg("-txindex", DEFAULT_TXINDEX) ? nMaxBlockDBAndTxIndexCache : nMaxBlockDBCache) << 20);
     nTotalCache -= nBlockTreeDBCache;
     int64_t nCoinDBCache = std::min(nTotalCache / 2, (nTotalCache / 4) + (1 << 23)); // use 25%-50% of the remainder for disk cache
+    nCoinDBCache = std::min(nCoinDBCache, nMaxCoinsDBCache << 20); // cap total coins db cache
     nTotalCache -= nCoinDBCache;
     nCoinCacheUsage = nTotalCache; // the rest goes to in-memory cache
     LogPrintf("Cache configuration:\n");
@@ -1610,13 +1633,24 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (fPruneMode) {
         LogPrintf("Unsetting NODE_NETWORK on prune mode\n");
         nLocalServices &= ~NODE_NETWORK;
-        if (!fReindex) {
+        if (!fReindex && chainActive.Tip() != NULL) {
             uiInterface.InitMessage(_("Pruning blockstore..."));
             PruneAndFlush();
         }
     }
 
     // ********************************************************* Step 10: import blocks
+
+    if (!CheckDiskSpace())
+        return false;
+
+    // Either install a handler to notify us when genesis activates, or set fHaveGenesis directly.
+    // No locking, as this happens before any background thread is started.
+    if (chainActive.Tip() == NULL) {
+        uiInterface.NotifyBlockTip.connect(BlockNotifyGenesisWait);
+    } else {
+        fHaveGenesis = true;
+    }
 
     if (mapArgs.count("-blocknotify"))
         uiInterface.NotifyBlockTip.connect(BlockNotifyCallback);
@@ -1634,12 +1668,16 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             vImportFiles.push_back(strFile);
     }
     threadGroup.create_thread(boost::bind(&ThreadImport, vImportFiles));
-    if (chainActive.Tip() == NULL) {
+    // Wait for genesis block to be processed
+    {
         LogPrintf("Waiting for genesis block to be imported...\n");
-        while (!fRequestShutdown && chainActive.Tip() == NULL)
-            MilliSleep(10);
+        boost::unique_lock<boost::mutex> lock(cs_GenesisWait);
+        while (!fHaveGenesis) {
+            condvar_GenesisWait.wait(lock);
+        }
+    uiInterface.NotifyBlockTip.disconnect(BlockNotifyGenesisWait);
     }
-
+    
     // ********************************************************* Step 11a: setup PrivateSend
     fDyNode = GetBoolArg("-dynode", false);
 
@@ -1776,8 +1814,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 12: start node
 
-    if (!CheckDiskSpace())
-        return false;
 
     if (!strErrors.str().empty())
         return InitError(strErrors.str());

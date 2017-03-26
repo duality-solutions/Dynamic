@@ -76,7 +76,7 @@ const std::string DynamicGUI::DEFAULT_UIPLATFORM =
 
 const QString DynamicGUI::DEFAULT_WALLET = "~Default";
 
-DynamicGUI::DynamicGUI(const PlatformStyle *platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
+DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
     QMainWindow(parent),
     clientModel(0),
     walletFrame(0),
@@ -122,7 +122,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *platformStyle, const NetworkStyle *n
     helpMessageDialog(0),
     prevBlocks(0),
     spinnerFrame(0),
-    platformStyle(platformStyle)
+    platformStyle(_platformStyle)
 {
     /* Open CSS when configured */
     this->setStyleSheet(GUIUtil::loadStyleSheet());
@@ -165,7 +165,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *platformStyle, const NetworkStyle *n
     if(enableWallet)
     {
         /** Create wallet frame*/
-        walletFrame = new WalletFrame(platformStyle, this);
+        walletFrame = new WalletFrame(_platformStyle, this);
     } else
 #endif // ENABLE_WALLET
     {
@@ -597,10 +597,10 @@ void DynamicGUI::createToolBars()
     }
 }
 
-void DynamicGUI::setClientModel(ClientModel *clientModel)
+void DynamicGUI::setClientModel(ClientModel *_clientModel)
 {
-    this->clientModel = clientModel;
-    if(clientModel)
+    this->clientModel = _clientModel;
+    if(_clientModel)
     {
         // Create system tray menu (or setup the dock menu) that late to prevent users from calling actions,
         // while the client has not yet fully loaded
@@ -627,28 +627,28 @@ void DynamicGUI::setClientModel(ClientModel *clientModel)
         }
 
         // Keep up to date with client
-        setNumConnections(clientModel->getNumConnections());
-        connect(clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
+        setNumConnections(_clientModel->getNumConnections());
+        connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
-        setNumBlocks(clientModel->getNumBlocks(), clientModel->getLastBlockDate(), clientModel->getVerificationProgress(NULL));
-        connect(clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double)), this, SLOT(setNumBlocks(int,QDateTime,double)));
+        setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(NULL));
+        connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(setNumBlocks(int,QDateTime,double,bool)));
 
-        connect(clientModel, SIGNAL(additionalDataSyncProgressChanged(double)), this, SLOT(setAdditionalDataSyncProgress(double)));
+        connect(_clientModel, SIGNAL(additionalDataSyncProgressChanged(double)), this, SLOT(setAdditionalDataSyncProgress(double)));
 
         // Receive and report messages from client model
-        connect(clientModel, SIGNAL(message(QString,QString,unsigned int)), this, SLOT(message(QString,QString,unsigned int)));
+        connect(_clientModel, SIGNAL(message(QString,QString,unsigned int)), this, SLOT(message(QString,QString,unsigned int)));
 
         // Show progress dialog
-        connect(clientModel, SIGNAL(showProgress(QString,int)), this, SLOT(showProgress(QString,int)));
+        connect(_clientModel, SIGNAL(showProgress(QString,int)), this, SLOT(showProgress(QString,int)));
 
-        rpcConsole->setClientModel(clientModel);
+        rpcConsole->setClientModel(_clientModel);
 #ifdef ENABLE_WALLET
         if(walletFrame)
         {
-            walletFrame->setClientModel(clientModel);
+            walletFrame->setClientModel(_clientModel);
         }
 #endif // ENABLE_WALLET
-        unitDisplayControl->setOptionsModel(clientModel->getOptionsModel());
+        unitDisplayControl->setOptionsModel(_clientModel->getOptionsModel());
     } else {
         // Disable possibility to show main window via action
         toggleHideAction->setEnabled(false);
@@ -1447,17 +1447,17 @@ void UnitDisplayStatusBarControl::createContextMenu()
 }
 
 /** Lets the control know about the Options Model (and its signals) */
-void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel *optionsModel)
+void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel *_optionsModel)
 {
-    if (optionsModel)
+    if (_optionsModel)
     {
-        this->optionsModel = optionsModel;
+        this->optionsModel = _optionsModel;
 
         // be aware of a display unit change reported by the OptionsModel object.
-        connect(optionsModel,SIGNAL(displayUnitChanged(int)),this,SLOT(updateDisplayUnit(int)));
+        connect(_optionsModel,SIGNAL(displayUnitChanged(int)),this,SLOT(updateDisplayUnit(int)));
 
         // initialize the display units label with the current value in the model.
-        updateDisplayUnit(optionsModel->getDisplayUnit());
+        updateDisplayUnit(_optionsModel->getDisplayUnit());
     }
 }
 

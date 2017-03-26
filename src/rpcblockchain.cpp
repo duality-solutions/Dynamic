@@ -188,7 +188,7 @@ UniValue mempoolToJSON(bool fVerbose = false)
         UniValue o(UniValue::VOBJ);
         BOOST_FOREACH(const CTxMemPoolEntry& e, mempool.mapTx)
         {
-            const uint256& hash = e.GetTx().GetHash();
+            const uint256& _hash = e.GetTx().GetHash();
             UniValue info(UniValue::VOBJ);
             info.push_back(Pair("size", (int)e.GetTxSize()));
             info.push_back(Pair("fee", ValueFromAmount(e.GetFee())));
@@ -215,7 +215,7 @@ UniValue mempoolToJSON(bool fVerbose = false)
             }
 
             info.push_back(Pair("depends", depends));
-            o.push_back(Pair(hash.ToString(), info));
+            o.push_back(Pair(_hash.ToString(), info));
         }
         return o;
     }
@@ -267,8 +267,6 @@ UniValue getrawmempool(const UniValue& params, bool fHelp)
             + HelpExampleCli("getrawmempool", "true")
             + HelpExampleRpc("getrawmempool", "true")
         );
-
-    LOCK(cs_main);
 
     bool fVerbose = false;
     if (params.size() > 0)

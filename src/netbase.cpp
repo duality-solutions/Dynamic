@@ -612,8 +612,8 @@ bool ConnectSocketByName(CService &addr, SOCKET& hSocketRet, const char *pszDest
 
     SplitHostPort(std::string(pszDest), port, strDest);
 
-    proxyType nameProxy;
-    GetNameProxy(nameProxy);
+    proxyType proxy;
+    GetNameProxy(proxy);
 
     CService addrResolved(CNetAddr(strDest, fNameLookup && !HaveNameProxy()), port);
     if (addrResolved.IsValid()) {
@@ -625,7 +625,7 @@ bool ConnectSocketByName(CService &addr, SOCKET& hSocketRet, const char *pszDest
 
     if (!HaveNameProxy())
         return false;
-    return ConnectThroughProxy(nameProxy, strDest, port, hSocketRet, nTimeout, outProxyConnectionFailed);
+    return ConnectThroughProxy(proxy, strDest, port, hSocketRet, nTimeout, outProxyConnectionFailed);
 }
 
 void CNetAddr::Init()
@@ -826,8 +826,8 @@ bool CNetAddr::IsValid() const
         return false;
 
     // unspecified IPv6 address (::/128)
-    unsigned char ipNone[16] = {};
-    if (memcmp(ip, ipNone, 16) == 0)
+    unsigned char ipNone6[16] = {};
+    if (memcmp(ip, ipNone6, 16) == 0)
         return false;
 
     // documentation IPv6 address

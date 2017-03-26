@@ -31,6 +31,7 @@
 #include "wallet/wallet.h"
 
 #include <queue>
+#include <utility>
 
 #include <openssl/sha.h>
 

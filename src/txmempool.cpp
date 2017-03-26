@@ -1111,7 +1111,7 @@ void CTxMemPool::TrimToSize(size_t sizelimit, std::vector<uint256>* pvNoSpendsRe
 
     unsigned nTxnRemoved = 0;
     CFeeRate maxFeeRateRemoved(0);
-    while (DynamicMemoryUsage() > sizelimit) {
+    while (!mapTx.empty() && DynamicMemoryUsage() > sizelimit) {
         indexed_transaction_set::nth_index<1>::type::iterator it = mapTx.get<1>().begin();
 
         // We set the new mempool min fee to the feerate of the removed set, plus the
@@ -1130,8 +1130,8 @@ void CTxMemPool::TrimToSize(size_t sizelimit, std::vector<uint256>* pvNoSpendsRe
         std::vector<CTransaction> txn;
         if (pvNoSpendsRemaining) {
             txn.reserve(stage.size());
-            BOOST_FOREACH(txiter it, stage)
-                txn.push_back(it->GetTx());
+            BOOST_FOREACH(txiter iter, stage)
+                txn.push_back(iter->GetTx());
         }
         RemoveStaged(stage);
         if (pvNoSpendsRemaining) {

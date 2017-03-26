@@ -533,7 +533,7 @@ UniValue decodescript(const UniValue& params, bool fHelp)
             "     \"address\"     (string) dynamic address\n"
             "     ,...\n"
             "  ],\n"
-            "  \"p2sh\",\"address\" (string) script address\n"
+            "  \"p2sh\",\"address\" (string) address of P2SH script wrapping this redeem script (not returned if the script is already a P2SH).\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("decodescript", "\"hexstring\"")
@@ -552,7 +552,16 @@ UniValue decodescript(const UniValue& params, bool fHelp)
     }
     ScriptPubKeyToJSON(script, r, false);
 
-    r.push_back(Pair("p2sh", CDynamicAddress(CScriptID(script)).ToString()));
+    UniValue type;
+
+    type = find_value(r, "type");
+
+    if (type.isStr() && type.get_str() != "scripthash") {
+        // P2SH cannot be wrapped in a P2SH. If this script is already a P2SH,
+        // don't return the address for a P2SH of the P2SH.
+        r.push_back(Pair("p2sh", CDynamicAddress(CScriptID(script)).ToString()));
+    }
+
     return r;
 }
 
@@ -774,6 +783,9 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
     // Script verification errors
     UniValue vErrors(UniValue::VARR);
 
+    // Use CTransaction for the constant parts of the
+    // transaction to avoid rehashing.
+    const CTransaction txConst(mergedTx);
     // Sign what we can:
     for (unsigned int i = 0; i < mergedTx.vin.size(); i++) {
         CTxIn& txin = mergedTx.vin[i];
@@ -791,10 +803,10 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
 
         // ... and merge in other signatures:
         BOOST_FOREACH(const CMutableTransaction& txv, txVariants) {
-            txin.scriptSig = CombineSignatures(prevPubKey, mergedTx, i, txin.scriptSig, txv.vin[i].scriptSig);
+            txin.scriptSig = CombineSignatures(prevPubKey, txConst, i, txin.scriptSig, txv.vin[i].scriptSig);
         }
         ScriptError serror = SCRIPT_ERR_OK;
-        if (!VerifyScript(txin.scriptSig, prevPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&mergedTx, i), &serror)) {
+        if (!VerifyScript(txin.scriptSig, prevPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&txConst, i), &serror)) {
             TxInErrorToJSON(txin, vErrors, ScriptErrorString(serror));
         }
     }

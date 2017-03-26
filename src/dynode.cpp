@@ -245,23 +245,22 @@ void CDynode::Check(bool fForce)
             return;
         }
 
+        /*
         bool fWatchdogActive = dynodeSync.IsSynced() && dnodeman.IsWatchdogActive();
         bool fWatchdogExpired = (fWatchdogActive && ((GetTime() - nTimeLastWatchdogVote) > DYNODE_WATCHDOG_MAX_SECONDS));
 
         LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
                 vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
 
-        int nDnCount = dnodeman.CountDynodes();
 
-        if (nDnCount > 200) {
-            if(fWatchdogExpired) {
-                nActiveState = DYNODE_WATCHDOG_EXPIRED;
-                if(nActiveStatePrev != nActiveState) {
-                    LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
-                }
-                return;
+        if(fWatchdogExpired) {
+            nActiveState = DYNODE_WATCHDOG_EXPIRED;
+            if(nActiveStatePrev != nActiveState) {
+                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
             }
+            return;
         }
+        */
 
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {
             nActiveState = DYNODE_EXPIRED;

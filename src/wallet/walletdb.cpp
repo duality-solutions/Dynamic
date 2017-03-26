@@ -19,7 +19,6 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
 using namespace boost;
@@ -860,8 +859,8 @@ void ThreadFlushWalletDB(const string& strFile)
                 if (nRefCount == 0)
                 {
                     boost::this_thread::interruption_point();
-                    map<string, int>::iterator mi = bitdb.mapFileUseCount.find(strFile);
-                    if (mi != bitdb.mapFileUseCount.end())
+                    map<string, int>::iterator _mi = bitdb.mapFileUseCount.find(strFile);
+                    if (_mi != bitdb.mapFileUseCount.end())
                     {
                         LogPrint("db", "Flushing wallet.dat\n");
                         nLastFlushed = nWalletDBUpdated;
@@ -871,7 +870,7 @@ void ThreadFlushWalletDB(const string& strFile)
                         bitdb.CloseDb(strFile);
                         bitdb.CheckpointLSN(strFile);
 
-                        bitdb.mapFileUseCount.erase(mi++);
+                        bitdb.mapFileUseCount.erase(_mi++);
                         LogPrint("db", "Flushed wallet.dat %dms\n", GetTimeMillis() - nStart);
                     }
                 }
@@ -1073,7 +1072,7 @@ bool CWalletDB::Recover(CDBEnv& dbenv, const std::string& filename, bool fOnlyKe
     }
     LogPrintf("Salvage(aggressive) found %u records\n", salvagedData.size());
 
-    boost::scoped_ptr<Db> pdbCopy(new Db(dbenv.dbenv, 0));
+    std::unique_ptr<Db> pdbCopy(new Db(dbenv.dbenv, 0));
     int ret = pdbCopy->open(NULL,               // Txn pointer
                             filename.c_str(),   // Filename
                             "main",             // Logical db name

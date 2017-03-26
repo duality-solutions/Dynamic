@@ -1,3 +1,46 @@
+**Dynamic v1.2.0.0**	
+
+* Make RelayWalletTransaction attempt to AcceptToMemoryPool
+* Update tests for Byteswap
+* Ensure is in valid range
+* Make strWalletFile const
+* Avoid ugly exception in log on unknown inv type
+* libconsensus: Add input validation of flags/missing flags & make catch() args const
+* Add LockedPool
+* Add getmemoryinfo
+* Add benchmark for lockedpool allocation/deallocation
+* trivial: fix bloom filter init to isEmpty = true
+* Lockedpool fixes
+* Improve DecodeBase58 performance.
+* Add #include <utility> to miner.cpp
+* Don't return the address of a P2SH of a P2SH
+* Implement (begin|end)_ptr in C++11 and add deprecation comment
+* add #include <stdlib.h> to random.cpp
+* Generate auth cookie in hex instead of base64
+* Do not shadow variable (multiple files)
+* dynamic-cli: More detailed error reporting
+* Add High TX Fee Warning
+* C++11: s/boost::scoped_ptr/std::unique_ptr/
+* Do not shadow variables in networking code
+* Remove shadowed variables in Qt files
+* Do not shadow LOCK's criticalblock variable for LOCK inside LOCK
+* Do not shadow variables in src/wallet
+* Berkeley DB v6 compatibility fix
+* Reduce default number of blocks to check at startup
+* Fix random segfault when closing Choose data directory dialog
+* Fix several node initialization issues
+* Add FEATURE_HD
+* Improve handling of unconnecting headers
+* Fix DoS vulnerability in mempool acceptance
+* Bump default db cache to 300MiB
+* Fix a bug where the SplashScreen will not be hidden during startup
+* Stop trimming when mapTx is empty
+* Evict orphans which are included or precluded by accepted blocks
+* Reduce unnecessary hashing in signrawtransaction
+* Watchdog check removed until Sentinel is updated/compatible fully
+* Bump protocol versions to 70000
+* Added IPv4 seed nodes to chainparamsseeds.h
+
 **Dynamic v1.1.0.0**		
 		
 * Inline with BTC 0.12		

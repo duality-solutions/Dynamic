@@ -71,10 +71,19 @@ struct ECCryptoClosure
 ECCryptoClosure instance_of_eccryptoclosure;
 }
 
+/** Check that all specified flags are part of the libconsensus interface. */
+static bool verify_flags(unsigned int flags)
+{
+    return (flags & ~(dynamicconsensus_SCRIPT_FLAGS_VERIFY_ALL)) == 0;
+}
+
 int dynamicconsensus_verify_script(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen,
                                     const unsigned char *txTo        , unsigned int txToLen,
                                     unsigned int nIn, unsigned int flags, dynamicconsensus_error* err)
 {
+    if (!verify_flags(flags)) {
+        return dynamicconsensus_ERR_INVALID_FLAGS;
+    }
     try {
         TxInputStream stream(SER_NETWORK, PROTOCOL_VERSION, txTo, txToLen);
         CTransaction tx;

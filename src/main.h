@@ -56,8 +56,14 @@ static const bool DEFAULT_WHITELISTFORCERELAY = true;
  * so it's still 10 times lower comparing to bitcoin.
  */
 static const unsigned int DEFAULT_MIN_RELAY_TX_FEE = 10000; // was 1000
+//! Discourage users to set fees higher than this amount (in satoshis) per kB
+static const CAmount HIGH_TX_FEE_PER_KB = 0.01 * COIN;
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
-static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 400;
+static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 100;
+/** Expiration time for orphan transactions in seconds */
+static const int64_t ORPHAN_TX_EXPIRE_TIME = 20 * 60;
+/** Minimum time between orphan transactions expire time checks in seconds */
+static const int64_t ORPHAN_TX_EXPIRE_INTERVAL = 5 * 60;
 /** Default for -limitancestorcount, max number of in-mempool ancestors */
 static const unsigned int DEFAULT_ANCESTOR_LIMIT = 100;
 /** Default for -limitancestorsize, maximum kilobytes of tx + all in-mempool ancestors */
@@ -128,6 +134,8 @@ static const bool DEFAULT_ENABLE_REPLACEMENT = false;
 
 /** Maximum number of headers to announce when relaying blocks with headers message.*/
 static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 12;
+/** Maximum number of unconnecting headers announcements before DoS score */
+static const int MAX_UNCONNECTING_HEADERS = 10;
 
 //Dynamic Constants
 static const CAmount STATIC_POW_REWARD = COIN * 1;
@@ -182,7 +190,7 @@ extern uint64_t nPruneTarget;
 /** Block files containing a block-height within MIN_BLOCKS_TO_KEEP of chainActive.Tip() will not be pruned. */
 static const unsigned int MIN_BLOCKS_TO_KEEP = 288;
 
-static const signed int DEFAULT_CHECKBLOCKS = MIN_BLOCKS_TO_KEEP;
+static const signed int DEFAULT_CHECKBLOCKS = 6;
 static const unsigned int DEFAULT_CHECKLEVEL = 3;
 
 // Require that user allocate at least 1590MB for block & undo files (blk???.dat and rev???.dat)

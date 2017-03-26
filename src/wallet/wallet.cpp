@@ -30,6 +30,7 @@
 #include "primitives/transaction.h"
 #include "txmempool.h"
 #include "spork.h"
+#include "ui_interface.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "consensus/validation.h"
@@ -81,19 +82,6 @@ struct CompareValueOnly
         return t1.first < t2.first;
     }
 };
-
-CClientUIInterface uiInterface;
-
-bool InitError(const std::string& str)
-{
-    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_ERROR);
-    return false;
-}
-
-void InitWarning(const std::string& str)
-{
-    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_WARNING);
-}
 
 std::string COutput::ToString() const
 {
@@ -182,7 +170,7 @@ void CWallet::DeriveNewChildKey(CKeyMetadata& metadata, CKey& secret)
         // childIndex | 0x80000000 = derive childIndex in hardened child-index-range
         // example: 1 | 0x80000000 == 0x80000001 == 2147483649
         externalChainChildKey.Derive(childKey, hdChain.nExternalChainCounter | BIP32_HARDENED_KEY_LIMIT);
-        metadata.hdKeypath = "m/0'/0'/" + boost::to_string(hdChain.nExternalChainCounter) + "'";
+        metadata.hdKeypath = "m/0'/0'/" + std::to_string(hdChain.nExternalChainCounter) + "'";
         metadata.hdMasterKeyID = hdChain.masterKeyID;
         // increment childkey index
         hdChain.nExternalChainCounter++;
@@ -321,7 +309,7 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
     if (strWalletPassphrase == "keepass" && GetBoolArg("-keepass", false)) {
         try {
             strWalletPassphraseFinal = keePassInt.retrievePassphrase();
-        } catch (std::exception& e) {
+        } catch (const std::exception& e) {
             LogPrintf("CWallet::Unlock could not retrieve passphrase from KeePass: Error: %s\n", e.what());
             return false;
         }
@@ -365,7 +353,7 @@ bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase,
         bUseKeePass = true;
         try {
             strOldWalletPassphraseFinal = keePassInt.retrievePassphrase();
-        } catch (std::exception& e) {
+        } catch (const std::exception& e) {
             LogPrintf("CWallet::ChangeWalletPassphrase -- could not retrieve passphrase from KeePass: Error: %s\n", e.what());
             return false;
         }
@@ -413,7 +401,7 @@ bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase,
                     LogPrintf("CWallet::ChangeWalletPassphrase -- Updating KeePass with new passphrase");
                     try {
                         keePassInt.updatePassphrase(strNewWalletPassphrase);
-                    } catch (std::exception& e) {
+                    } catch (const std::exception& e) {
                         LogPrintf("CWallet::ChangeWalletPassphrase -- could not update passphrase in KeePass: Error: %s\n", e.what());
                         return false;
                     }
@@ -489,8 +477,8 @@ set<uint256> CWallet::GetConflicts(const uint256& txid) const
         if (mapTxSpends.count(txin.prevout) <= 1)
             continue;  // No conflict if zero or one spends
         range = mapTxSpends.equal_range(txin.prevout);
-        for (TxSpends::const_iterator it = range.first; it != range.second; ++it)
-            result.insert(it->second);
+        for (TxSpends::const_iterator _it = range.first; _it != range.second; ++_it)
+            result.insert(_it->second);
     }
     return result;
 }
@@ -741,7 +729,7 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
             LogPrintf("CWallet::EncryptWallet -- Updating KeePass with new passphrase");
             try {
                 keePassInt.updatePassphrase(strWalletPassphrase);
-            } catch (std::exception& e) {
+            } catch (const std::exception& e) {
                 LogPrintf("CWallet::EncryptWallet -- could not update passphrase in KeePass: Error: %s\n", e.what());
             }
         }
@@ -1317,6 +1305,9 @@ bool CWallet::SetHDMasterKey(const CPubKey& pubkey)
 {
     LOCK(cs_wallet);
 
+    // ensure this wallet.dat can only be opened by clients supporting HD
+    SetMinVersion(FEATURE_HD);
+
     // store the keyid (hash160) together with
     // the child index counter in the database
     // as a hdchain object
@@ -1408,9 +1399,9 @@ int CWalletTx::GetRequestCount() const
             // Generated block
             if (!hashUnset())
             {
-                map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
-                if (mi != pwallet->mapRequestCount.end())
-                    nRequests = (*mi).second;
+                    map<uint256, int>::const_iterator _mi = pwallet->mapRequestCount.find(hashBlock);
+                    if (_mi != pwallet->mapRequestCount.end())
+                        nRequests = (*_mi).second;
             }
         }
         else
@@ -1614,9 +1605,10 @@ void CWallet::ReacceptWalletTransactions()
 bool CWalletTx::RelayWalletTransaction(std::string strCommand)
 {
     assert(pwallet->GetBroadcastTransactions());
-    if (!IsCoinBase())
+    if (!IsCoinBase() && !isAbandoned() && GetDepthInMainChain() == 0)
     {
-        if (GetDepthInMainChain() == 0 && !isAbandoned() && InMempool()) {
+        /* GetDepthInMainChain already catches known conflicts. */
+        if (InMempool() || AcceptToMemoryPool(false)) {
             uint256 hash = GetHash();
             LogPrintf("Relaying wtx %s\n", hash.ToString());
 
@@ -3852,17 +3844,17 @@ set< set<CTxDestination> > CWallet::GetAddressGroupings()
 
     set< set<CTxDestination>* > uniqueGroupings; // a set of pointers to groups of addresses
     map< CTxDestination, set<CTxDestination>* > setmap;  // map addresses to the unique group containing it
-    BOOST_FOREACH(set<CTxDestination> grouping, groupings)
+    BOOST_FOREACH(set<CTxDestination> _grouping, groupings)
     {
         // make a set of all the groups hit by this new group
         set< set<CTxDestination>* > hits;
         map< CTxDestination, set<CTxDestination>* >::iterator it;
-        BOOST_FOREACH(CTxDestination address, grouping)
+        BOOST_FOREACH(CTxDestination address, _grouping)
             if ((it = setmap.find(address)) != setmap.end())
                 hits.insert((*it).second);
 
         // merge all hit groups into a new single group and delete old groups
-        set<CTxDestination>* merged = new set<CTxDestination>(grouping);
+        set<CTxDestination>* merged = new set<CTxDestination>(_grouping);
         BOOST_FOREACH(set<CTxDestination>* hit, hits)
         {
             merged->insert(hit->begin(), hit->end());

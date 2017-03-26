@@ -1274,11 +1274,11 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
 
         if (fByAccounts)
         {
-            tallyitem& item = mapAccountTally[strAccount];
-            item.nAmount += nAmount;
-            item.nConf = min(item.nConf, nConf);
-            item.nBCConf = min(item.nBCConf, nBCConf);
-            item.fIsWatchonly = fIsWatchonly;
+            tallyitem& _item = mapAccountTally[strAccount];
+            _item.nAmount += nAmount;
+            _item.nConf = min(_item.nConf, nConf);
+            _item.nBCConf = min(_item.nBCConf, nBCConf);
+            _item.fIsWatchonly = fIsWatchonly;
         }
         else
         {
@@ -1295,9 +1295,9 @@ UniValue ListReceived(const UniValue& params, bool fByAccounts)
             UniValue transactions(UniValue::VARR);
             if (it != mapTally.end())
             {
-                BOOST_FOREACH(const uint256& item, (*it).second.txids)
+                BOOST_FOREACH(const uint256& _item, (*it).second.txids)
                 {
-                    transactions.push_back(item.GetHex());
+                    transactions.push_back(_item.GetHex());
                 }
             }
             obj.push_back(Pair("txids", transactions));

@@ -354,7 +354,7 @@ void CGovernanceObject::LoadData()
         UniValue obj = GetJSONObject();
         nObjectType = obj["type"].get_int();
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         fUnparsable = true;
         std::ostringstream ostr;
         ostr << "CGovernanceObject::LoadData Error parsing JSON"

@@ -375,7 +375,7 @@ void DNSPage::on_submitNameButton_clicked()
     {
         err_msg = QString::fromStdString(find_value(objError, "message").get_str());
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         err_msg = e.what();
     }

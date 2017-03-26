@@ -76,7 +76,7 @@ class CKeyMetadata
 {
 public:
     static const int VERSION_BASIC=1;
-    static const int VERSION_WITH_HDDATA=10;
+    static const int VERSION_WITH_HDDATA=1;
     static const int CURRENT_VERSION=VERSION_WITH_HDDATA;
     int nVersion;
     int64_t nCreateTime; // 0 means unknown

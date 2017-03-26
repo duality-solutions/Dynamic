@@ -16,8 +16,8 @@ class reverse_lock
 {
 public:
 
-    explicit reverse_lock(Lock& lock) : lock(lock) {
-        lock.unlock();
+    explicit reverse_lock(Lock& _lock) : lock(_lock) {
+        _lock.unlock();
     }
 
     ~reverse_lock() {

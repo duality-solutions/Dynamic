@@ -109,6 +109,14 @@ public:
     boost::signals2::signal<void (void)> BannedListChanged;
 };
 
+/** Show warning message **/
+void InitWarning(const std::string& str);
+
+/** Show error message **/
+bool InitError(const std::string& str);
+
+std::string AmountHighWarn(const std::string& optname);
+
 extern CClientUIInterface uiInterface;
 
 #endif // DYNAMIC_UI_INTERFACE_H

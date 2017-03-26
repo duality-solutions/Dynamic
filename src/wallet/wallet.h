@@ -92,7 +92,8 @@ enum WalletFeature
     FEATURE_WALLETCRYPT = 40000, // wallet encryption
     FEATURE_COMPRPUBKEY = 60000, // compressed public keys
 
-    FEATURE_LATEST = 60000
+    FEATURE_HD = 60800, // Hierarchical key derivation after BIP32 (HD Wallet)
+    FEATURE_LATEST = FEATURE_COMPRPUBKEY // HD is optional, use FEATURE_COMPRPUBKEY as latest version
 };
 
 enum AvailableCoinsType
@@ -115,12 +116,6 @@ struct CompactTallyItem
         nAmount = 0;
     }
 };
-
-/** Show warning message **/
-void InitWarning(const std::string& str);
-
-/** Show error message **/
-bool InitError(const std::string& str);
 
 /** A key pool entry */
 class CKeyPool
@@ -577,7 +572,7 @@ public:
     mutable CCriticalSection cs_wallet;
 
     bool fFileBacked;
-    std::string strWalletFile;
+    const std::string strWalletFile;
 
     std::set<int64_t> setKeyPool;
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata;
@@ -591,11 +586,10 @@ public:
         SetNull();
     }
 
-    CWallet(const std::string& strWalletFileIn)
+    CWallet(const std::string& strWalletFileIn) : strWalletFile(strWalletFileIn)
     {
         SetNull();
 
-        strWalletFile = strWalletFileIn;
         fFileBacked = true;
     }
 

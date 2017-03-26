@@ -302,7 +302,7 @@ void DynamicCore::restart(QStringList args)
             QProcess::startDetached(QApplication::applicationFilePath(), args);
             qDebug() << __func__ << ": Restart initiated...";
             QApplication::quit();
-        } catch (std::exception& e) {
+        } catch (const std::exception& e) {
             handleRunawayException(&e);
         } catch (...) {
             handleRunawayException(NULL);
@@ -616,7 +616,8 @@ int main(int argc, char *argv[])
 
     /// 5. Now that settings and translations are available, ask user for data directory
     // User language is set up: pick a data directory
-    Intro::pickDataDirectory();
+    if (!Intro::pickDataDirectory())
+        return 0;
 
     /// 6. Determine availability of data directory and parse dynamic.conf
     /// - Do not call GetDataDir(true) before this step finishes

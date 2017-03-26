@@ -37,11 +37,11 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
+WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     QStackedWidget(parent),
     clientModel(0),
     walletModel(0),
-    platformStyle(platformStyle)
+    platformStyle(_platformStyle)
 {
     // Create tabs
     overviewPage = new OverviewPage(platformStyle);
@@ -147,56 +147,56 @@ void WalletView::setDynamicGUI(DynamicGUI *gui)
     }
 }
 
-void WalletView::setClientModel(ClientModel *clientModel)
+void WalletView::setClientModel(ClientModel *_clientModel)
 {
-    this->clientModel = clientModel;
+    this->clientModel = _clientModel;
 
-    overviewPage->setClientModel(clientModel);
-    sendCoinsPage->setClientModel(clientModel);
+    overviewPage->setClientModel(_clientModel);
+    sendCoinsPage->setClientModel(_clientModel);
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
-        dynodeListPage->setClientModel(clientModel);
+        dynodeListPage->setClientModel(_clientModel);
     }
 }
 
-void WalletView::setWalletModel(WalletModel *walletModel)
+void WalletView::setWalletModel(WalletModel *_walletModel)
 {
-    this->walletModel = walletModel;
+    this->walletModel = _walletModel;
     // Put transaction list in tabs
-    overviewPage->setWalletModel(walletModel);
-    receiveCoinsPage->setModel(walletModel);
-    sendCoinsPage->setModel(walletModel);
-    usedReceivingAddressesPage->setModel(walletModel->getAddressTableModel());
-    usedSendingAddressesPage->setModel(walletModel->getAddressTableModel());
-    transactionView->setModel(walletModel);
-    multiSigPage->setModel(walletModel);
+    overviewPage->setWalletModel(_walletModel);
+    receiveCoinsPage->setModel(_walletModel);
+    sendCoinsPage->setModel(_walletModel);
+    usedReceivingAddressesPage->setModel(_walletModel->getAddressTableModel());
+    usedSendingAddressesPage->setModel(_walletModel->getAddressTableModel());
+    transactionView->setModel(_walletModel);
+    multiSigPage->setModel(_walletModel);
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
-        dynodeListPage->setWalletModel(walletModel);
+        dynodeListPage->setWalletModel(_walletModel);
     }
-    dnsPage->setModel(walletModel);
+    dnsPage->setModel(_walletModel);
 
-    if (walletModel)
+    if (_walletModel)
     {
         // Receive and pass through messages from wallet model
-        connect(walletModel, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
+        connect(_walletModel, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
 
         // Handle changes in encryption status
-        connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SIGNAL(encryptionStatusChanged(int)));
+        connect(_walletModel, SIGNAL(encryptionStatusChanged(int)), this, SIGNAL(encryptionStatusChanged(int)));
         updateEncryptionStatus();
 
         // update HD status
-        Q_EMIT hdEnabledStatusChanged(walletModel->hdEnabled());
+        Q_EMIT hdEnabledStatusChanged(_walletModel->hdEnabled());
 
         // Balloon pop-up for new transaction
-        connect(walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
+        connect(_walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
                 this, SLOT(processNewTransaction(QModelIndex,int,int)));
 
         // Ask for passphrase if needed
-        connect(walletModel, SIGNAL(requireUnlock(bool)), this, SLOT(unlockWallet(bool)));
+        connect(_walletModel, SIGNAL(requireUnlock(bool)), this, SLOT(unlockWallet(bool)));
 
         // Show progress dialog
-        connect(walletModel, SIGNAL(showProgress(QString,int)), this, SLOT(showProgress(QString,int)));
+        connect(_walletModel, SIGNAL(showProgress(QString,int)), this, SLOT(showProgress(QString,int)));
     }
 }
 

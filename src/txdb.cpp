@@ -200,7 +200,7 @@ bool CBlockTreeDB::UpdateAddressUnspentIndex(const std::vector<std::pair<CAddres
 bool CBlockTreeDB::ReadAddressUnspentIndex(uint160 addressHash, int type,
                                            std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > &unspentOutputs) {
 
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->Seek(make_pair(DB_ADDRESSUNSPENTINDEX, CAddressIndexIteratorKey(type, addressHash)));
 
