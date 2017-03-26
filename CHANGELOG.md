@@ -37,7 +37,8 @@
 * Stop trimming when mapTx is empty
 * Evict orphans which are included or precluded by accepted blocks
 * Reduce unnecessary hashing in signrawtransaction
-
+* Watchdog check removed until Sentinel is updated/compatible fully
+* Bump protocol versions to 70000
 
 **Dynamic v1.1.0.0**		
 		
