@@ -39,6 +39,7 @@
 * Reduce unnecessary hashing in signrawtransaction
 * Watchdog check removed until Sentinel is updated/compatible fully
 * Bump protocol versions to 70000
+* Added IPv4 seed nodes to chainparamsseeds.h
 
 **Dynamic v1.1.0.0**		
 		
