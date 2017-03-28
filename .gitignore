@@ -6,13 +6,13 @@ reset-files.bash
 *.tar.gz
 
 *.exe
-src/darksilk
-src/darksilkd
-src/darksilk-cli
-src/darksilk-tx
-src/test/test_darksilk
-src/qt/test/test_darksilk-qt
-src/bench/bench_darksilk
+src/dynamic
+src/dynamicd
+src/dynamic-cli
+src/dynamic-tx
+src/test/test_dynamic
+src/qt/test/test_dynamic-qt
+src/bench/bench_dynamic
 
 # autoreconf
 Makefile.in
@@ -35,8 +35,8 @@ config.log
 config.status
 configure
 libtool
-src/config/darksilk-config.h
-src/config/darksilk-config.h.in
+src/config/dynamic-config.h
+src/config/dynamic-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -62,7 +62,7 @@ libconftest.dylib*
 *.o
 *.o-*
 *.patch
-.darksilk
+.dynamic
 *.a
 *.pb.cc
 *.pb.h
@@ -81,14 +81,14 @@ libconftest.dylib*
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-darksilk-qt
-darksilk-Qt.app
+dynamic-qt
+dynamic-Qt.app
 /dist/
 /dist/*.*
 
 # Unit-tests
 Makefile.test
-darksilk-qt_test
+dynamic-qt_test
 src/test/buildenv.py
 
 # Resources cpp
@@ -102,7 +102,7 @@ build
 *.gcno
 *.gcda
 /*.info
-test_darksilk.coverage/
+test_dynamic.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -110,13 +110,13 @@ coverage_percent.txt
 linux-coverage-build
 linux-build
 win32-build
-qa/pull-tester/run-darksilkd-for-test.sh
+qa/pull-tester/run-dynamicd-for-test.sh
 qa/pull-tester/tests_config.py
 qa/pull-tester/cache/*
 qa/pull-tester/test.*/*
 qa/tmp
 cache/
-share/DarkSilkdComparisonTool.jar
+share/DynamicdComparisonTool.jar
 
 !src/leveldb*/Makefile
 
@@ -125,12 +125,12 @@ share/DarkSilkdComparisonTool.jar
 .autotools
 /doc/doxygen/
 
-libdarksilkconsensus.pc
-src/qt/darksilk-qt.bash
+libdynamicconsensus.pc
+src/qt/dynamic-qt.bash
 qa/pull-tester/tests-config.sh
 
 #development symlinks
-darksilk-cli
-darksilkd
-darksilk-qt
+dynamic-cli
+dynamicd
+dynamic-qt
 make

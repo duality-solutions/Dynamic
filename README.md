@@ -100,7 +100,8 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
- libevent    | Networking   | OS independent asynchronous networking
+ libevent    | Networking       | OS independent asynchronous networking
+ 
 Optional dependencies:
 
  Library     | Purpose          | Description
