@@ -44,6 +44,7 @@ extern bool fLargeWorkForkFound;
 extern bool fLargeWorkInvalidChainFound;
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 2000;
+static const unsigned int HD_WALLET_KEYPOOL_SIZE = 400;
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -paytxfee will warn if called with a higher fee than this amount (in satoshis) per KB
