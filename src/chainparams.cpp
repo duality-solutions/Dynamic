@@ -24,6 +24,8 @@
 
 #include "chainparamsseeds.h"
 
+const arith_uint256 maxUint = UintToArith256(uint256S("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+
 static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, const uint32_t nTime, const uint32_t nNonce, const uint32_t nBits, const int32_t nVersion, const CAmount& genesisReward)
 {
     CMutableTransaction txNew;
@@ -128,7 +130,12 @@ public:
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
-        consensus.fPowAllowMinDifficultyBlocks = false;
+        consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
+        consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
+        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+		consensus.nPowAveragingWindow = 17;
+        assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
+		consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
@@ -161,10 +168,11 @@ public:
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain)
+        if(!startNewChain) {
             assert(consensus.hashGenesisBlock == uint256S("0x00000ce9ce63ee661a41dd01fccaa4407e28e684cf925c58c87374082f07806d"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
-
+		}
+		
         vSeeds.push_back(CDNSSeedData("dnsseeder.io", "dyn.dnsseeder.io"));
         vSeeds.push_back(CDNSSeedData("dnsseeder.com", "dyn.dnsseeder.com"));
         vSeeds.push_back(CDNSSeedData("dnsseeder.host", "dyn.dnsseeder.host"));
@@ -238,11 +246,15 @@ public:
         consensus.powLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
+        consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
+        consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
+        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+        assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
+		consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
 
@@ -340,6 +352,10 @@ public:
         consensus.powLimit = uint256S("000fffff00000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
+        consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
+        consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
+        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+        assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow

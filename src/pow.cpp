@@ -2,6 +2,7 @@
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2017 The ZCash Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,40 +26,104 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
+	if(!(pindexLast->nHeight >= params.nUpdateDiffAlgoHeight)) {
+		
+		unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+
+		if (pindexLast == NULL)
+			return nProofOfWorkLimit; // genesis block
+
+		const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast);
+		if (pindexPrev->pprev == NULL)
+			return nProofOfWorkLimit; // first block
+			
+		const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev);
+		if (pindexPrevPrev->pprev == NULL)
+			return nProofOfWorkLimit; // second block
+	
+		int64_t nTargetSpacing = params.nPowTargetTimespan;
+		int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+		if (nActualSpacing < 0) {
+			nActualSpacing = nTargetSpacing;
+		}
+		else if (nActualSpacing > nTargetSpacing * 10) {
+			nActualSpacing = nTargetSpacing * 10;
+		}
+
+		// target change every block
+		// retarget with exponential moving toward target spacing
+		// Includes fix for wrong retargeting difficulty by Mammix2
+		arith_uint256 bnNew;
+		bnNew.SetCompact(pindexPrev->nBits);
+
+		int64_t nInterval = 10;
+		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+		bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+		if (bnNew <= 0 || bnNew > nProofOfWorkLimit)
+        bnNew = nProofOfWorkLimit;
+
+		return bnNew.GetCompact();
+		
+	} else { return DeriveNextWorkRequired(pindexLast, pblock, params); }
+}
+
+unsigned int DeriveNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+{
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
+    // Genesis block
     if (pindexLast == NULL)
-        return nProofOfWorkLimit; // genesis block
+        return nProofOfWorkLimit;
 
-    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast);
-    if (pindexPrev->pprev == NULL)
-        return nProofOfWorkLimit; // first block
-    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev);
-    if (pindexPrevPrev->pprev == NULL)
-        return nProofOfWorkLimit; // second block
-
-    int64_t nTargetSpacing = params.nPowTargetTimespan;
-    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-
-    if (nActualSpacing < 0) {
-        nActualSpacing = nTargetSpacing;
-    }
-    else if (nActualSpacing > nTargetSpacing * 10) {
-         nActualSpacing = nTargetSpacing * 10;
+    // Find the first block in the averaging interval
+    const CBlockIndex* pindexFirst = pindexLast;
+    arith_uint256 bnTot {0};
+    for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
+        arith_uint256 bnTmp;
+        bnTmp.SetCompact(pindexFirst->nBits);
+        bnTot += bnTmp;
+        pindexFirst = pindexFirst->pprev;
     }
 
-    // target change every block
-    // retarget with exponential moving toward target spacing
-    // Includes fix for wrong retargeting difficulty by Mammix2
-    arith_uint256 bnNew;
-    bnNew.SetCompact(pindexPrev->nBits);
+    // Check we have enough blocks
+    if (pindexFirst == NULL)
+        return nProofOfWorkLimit;
 
-    int64_t nInterval = 10;
-    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-    bnNew /= ((nInterval + 1) * nTargetSpacing);
+    arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
 
-    if (bnNew <= 0 || bnNew > nProofOfWorkLimit)
-        bnNew = nProofOfWorkLimit;
+    return CalculateNextWorkRequired(bnAvg, pindexLast->GetMedianTimePast(), pindexFirst->GetMedianTimePast(), params);
+}
+
+unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
+                                       int64_t nLastBlockTime, int64_t nFirstBlockTime,
+                                       const Consensus::Params& params)
+{
+    // Limit adjustment step
+    // Use medians to prevent time-warp attacks
+    int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
+    nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan())/4;
+
+    if (nActualTimespan < params.MinActualTimespan())
+        nActualTimespan = params.MinActualTimespan();
+    if (nActualTimespan > params.MaxActualTimespan())
+        nActualTimespan = params.MaxActualTimespan();
+
+    // Retarget
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    arith_uint256 bnNew {bnAvg};
+    bnNew /= params.AveragingWindowTimespan();
+    bnNew *= nActualTimespan;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+    /// debug print
+    LogPrint("pow", "GetNextWorkRequired RETARGET\n");
+    LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
+    LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
+    LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
 
     return bnNew.GetCompact();
 }
