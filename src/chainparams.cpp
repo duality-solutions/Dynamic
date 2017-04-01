@@ -248,7 +248,7 @@ public:
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
-        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+        consensus.nUpdateDiffAlgoHeight = 100; // Dynamic: Algorithm fork block
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -354,7 +354,7 @@ public:
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
-        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+        consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
