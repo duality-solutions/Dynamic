@@ -12,6 +12,7 @@
 #include "primitives/block.h"
 #include "chain.h"
 #include "chainparams.h"
+#include "main.h"
 #include "uint256.h"
 #include "util.h"
 
@@ -26,7 +27,7 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
-	if(!(pindexLast->nHeight >= params.nUpdateDiffAlgoHeight)) {
+	if(chainActive.Height() < params.nUpdateDiffAlgoHeight) {
 		
 		unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
@@ -65,68 +66,176 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         bnNew = nProofOfWorkLimit;
 
 		return bnNew.GetCompact();
-		
-	} else { return DeriveNextWorkRequired(pindexLast, pblock, params); }
+
+	} else { return DeriveNextWorkRequired(pindexLast, pblock, params.nUpdateDiffAlgoHeight, params); }
 }
 
-unsigned int DeriveNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int DeriveNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block,
+									unsigned int initalBlock, const Consensus::Params& params)
 {
-    unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+    int64_t nRetargetTimespan = params.nPowTargetSpacing;
+    const unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
-    // Genesis block
+    const unsigned int nLastBlock = 1;
+    const unsigned int nShortFrame = 3;
+    const unsigned int nMiddleFrame = 24;
+    const unsigned int nLongFrame = 576;
+
+    const int64_t nLBWeight = 64;
+    const int64_t nShortWeight = 8;
+    int64_t nMiddleWeight = 2;
+    int64_t nLongWeight = 1;
+
+    const int64_t nLBMinGap = nRetargetTimespan / 6;
+    const int64_t nLBMaxGap = nRetargetTimespan * 6;
+
+    const int64_t nQBFrame = nShortFrame + 1;
+    const int64_t nQBMinGap = (nRetargetTimespan * PERCENT_FACTOR / 120) * nQBFrame;
+
+    const int64_t nBadTimeLimit = 0;
+    const int64_t nBadTimeReplace = nRetargetTimespan / 10;
+
+    const int64_t nLowTimeLimit = nRetargetTimespan * 90 / PERCENT_FACTOR;
+    const int64_t nFloorTimeLimit = nRetargetTimespan * 65 / PERCENT_FACTOR;
+
+    const int64_t nDrift = 1;
+    int64_t nLongTimeLimit = ((6 * nDrift)) * 60;
+    int64_t nLongTimeStep = nDrift * 60;
+
+    unsigned int nMinimumAdjustLimit = (unsigned int)nRetargetTimespan * 75 / PERCENT_FACTOR;
+
+    unsigned int nMaximumAdjustLimit = (unsigned int)nRetargetTimespan * 150 / PERCENT_FACTOR;
+
+    int64_t nDeltaTimespan = 0;
+    int64_t nLBTimespan = 0;
+    int64_t nShortTimespan = 0;
+    int64_t nMiddleTimespan = 0;
+    int64_t nLongTimespan = 0;
+    int64_t nQBTimespan = 0;
+
+    int64_t nWeightedSum = 0;
+    int64_t nWeightedDiv = 0;
+    int64_t nWeightedTimespan = 0;
+
+    const INDEX_TYPE pindexFirst = pindexLast; // multi algo - last block is selected on a per algo basis.
+
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
 
-    // Find the first block in the averaging interval
-    const CBlockIndex* pindexFirst = pindexLast;
-    arith_uint256 bnTot {0};
-    for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
-        arith_uint256 bnTmp;
-        bnTmp.SetCompact(pindexFirst->nBits);
-        bnTot += bnTmp;
-        pindexFirst = pindexFirst->pprev;
-    }
-
-    // Check we have enough blocks
-    if (pindexFirst == NULL)
+    if (INDEX_HEIGHT(pindexLast) <= nQBFrame)
         return nProofOfWorkLimit;
 
-    arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
+    pindexFirst = INDEX_PREV(pindexLast);
+    nLBTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirst);
 
-    return CalculateNextWorkRequired(bnAvg, pindexLast->GetMedianTimePast(), pindexFirst->GetMedianTimePast(), params);
+    if (nLBTimespan > nBadTimeLimit && nLBTimespan < nLBMinGap)
+        nLBTimespan = nLBTimespan * 50 / PERCENT_FACTOR;
+
+    if (nLBTimespan <= nBadTimeLimit)
+        nLBTimespan = nBadTimeReplace;
+
+    if (nLBTimespan > nLBMaxGap)
+        nLBTimespan = nLBTimespan * 150 / PERCENT_FACTOR;
+
+    pindexFirst = pindexLast;
+    for (unsigned int i = 1; pindexFirst != NULL && i <= nQBFrame; i++) {
+        nDeltaTimespan = INDEX_TIME(pindexFirst) - INDEX_TIME(INDEX_PREV(pindexFirst));
+
+        if (nDeltaTimespan <= nBadTimeLimit)
+            nDeltaTimespan = nBadTimeReplace;
+
+        if (i <= nShortFrame)
+            nShortTimespan += nDeltaTimespan;
+        nQBTimespan += nDeltaTimespan;
+        pindexFirst = INDEX_PREV(pindexFirst);
+    }
+
+    if (INDEX_HEIGHT(pindexLast) - initalBlock <= nMiddleFrame) {
+        nMiddleWeight = nMiddleTimespan = 0;
+    }
+    else {
+        pindexFirst = pindexLast;
+        for (unsigned int i = 1; pindexFirst != NULL && i <= nMiddleFrame; i++) {
+            nDeltaTimespan = INDEX_TIME(pindexFirst) - INDEX_TIME(INDEX_PREV(pindexFirst));
+
+            if (nDeltaTimespan <= nBadTimeLimit)
+                nDeltaTimespan = nBadTimeReplace;
+
+            nMiddleTimespan += nDeltaTimespan;
+            pindexFirst = INDEX_PREV(pindexFirst);
+        }
+    }
+
+    if (INDEX_HEIGHT(pindexLast) - initalBlock <= nLongFrame) {
+        nLongWeight = nLongTimespan = 0;
+    }
+    else {
+        pindexFirst = pindexLast;
+        for (unsigned int i = 1; pindexFirst != NULL && i <= nLongFrame; i++)
+            pindexFirst = INDEX_PREV(pindexFirst);
+
+        nLongTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirst);
+    }
+
+    if ((nQBTimespan > nBadTimeLimit) && (nQBTimespan < nQBMinGap) && (nLBTimespan < nRetargetTimespan * 40 / PERCENT_FACTOR)) {
+        nMiddleWeight = nMiddleTimespan = nLongWeight = nLongTimespan = 0;
+    }
+
+    nWeightedSum = (nLBTimespan * nLBWeight) + (nShortTimespan * nShortWeight);
+    nWeightedSum += (nMiddleTimespan * nMiddleWeight) + (nLongTimespan * nLongWeight);
+    nWeightedDiv = (nLastBlock * nLBWeight) + (nShortFrame * nShortWeight);
+    nWeightedDiv += (nMiddleFrame * nMiddleWeight) + (nLongFrame * nLongWeight);
+    nWeightedTimespan = nWeightedSum / nWeightedDiv;
+
+    if (DIFF_ABS(nLBTimespan - nRetargetTimespan) < nRetargetTimespan * 20 / PERCENT_FACTOR) {
+        nMinimumAdjustLimit = (unsigned int)nRetargetTimespan * 90 / PERCENT_FACTOR;
+        nMaximumAdjustLimit = (unsigned int)nRetargetTimespan * 110 / PERCENT_FACTOR;
+    }
+    else if (DIFF_ABS(nLBTimespan - nRetargetTimespan) < nRetargetTimespan * 30 / PERCENT_FACTOR) {
+        nMinimumAdjustLimit = (unsigned int)nRetargetTimespan * 80 / PERCENT_FACTOR;
+        nMaximumAdjustLimit = (unsigned int)nRetargetTimespan * 120 / PERCENT_FACTOR;
+    }
+
+    if (nWeightedTimespan < nMinimumAdjustLimit)
+        nWeightedTimespan = nMinimumAdjustLimit;
+
+    if (nWeightedTimespan > nMaximumAdjustLimit)
+        nWeightedTimespan = nMaximumAdjustLimit;
+
+    arith_uint256 bnNew;
+    SET_COMPACT(bnNew, INDEX_TARGET(pindexLast));
+    bnNew = BIGINT_MULTIPLY(bnNew, arith_uint256(nWeightedTimespan));
+    bnNew = BIGINT_DIVIDE(bnNew, arith_uint256(nRetargetTimespan));
+
+    nLBTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(INDEX_PREV(pindexLast));
+    arith_uint256 bnComp;
+    SET_COMPACT(bnComp, INDEX_TARGET(pindexLast));
+    if (nLBTimespan > 0 && nLBTimespan < nLowTimeLimit && BIGINT_GREATER_THAN(bnNew, bnComp)) {
+        if (nLBTimespan < nFloorTimeLimit) {
+            SET_COMPACT(bnNew, INDEX_TARGET(pindexLast));
+            bnNew = BIGINT_MULTIPLY(bnNew, arith_uint256(95));
+            bnNew = BIGINT_DIVIDE(bnNew, arith_uint256(PERCENT_FACTOR));
+        }
+        else {
+            SET_COMPACT(bnNew, INDEX_TARGET(pindexLast));
+        }
+    }
+
+    if ((BLOCK_TIME(block) - INDEX_TIME(pindexLast)) > nLongTimeLimit) {
+        int64_t nNumMissedSteps = ((BLOCK_TIME(block) - INDEX_TIME(pindexLast) - nLongTimeLimit) / nLongTimeStep) + 1;
+        for (int i = 0; i < nNumMissedSteps; ++i) {
+            bnNew = BIGINT_MULTIPLY(bnNew, arith_uint256(110));
+            bnNew = BIGINT_DIVIDE(bnNew, arith_uint256(PERCENT_FACTOR));
+        }
+    }
+
+    SET_COMPACT(bnComp, nProofOfWorkLimit);
+    if (BIGINT_GREATER_THAN(bnNew, bnComp))
+        SET_COMPACT(bnNew, nProofOfWorkLimit);
+
+    return GET_COMPACT(bnNew);
 }
 
-unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
-                                       int64_t nLastBlockTime, int64_t nFirstBlockTime,
-                                       const Consensus::Params& params)
-{
-    // Limit adjustment step
-    // Use medians to prevent time-warp attacks
-    int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
-    nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan())/4;
-
-    if (nActualTimespan < params.MinActualTimespan())
-        nActualTimespan = params.MinActualTimespan();
-    if (nActualTimespan > params.MaxActualTimespan())
-        nActualTimespan = params.MaxActualTimespan();
-
-    // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    arith_uint256 bnNew {bnAvg};
-    bnNew /= params.AveragingWindowTimespan();
-    bnNew *= nActualTimespan;
-
-    if (bnNew > bnPowLimit)
-        bnNew = bnPowLimit;
-
-    /// debug print
-    LogPrint("pow", "GetNextWorkRequired RETARGET\n");
-    LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
-    LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
-    LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
-
-    return bnNew.GetCompact();
-}
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
 {
