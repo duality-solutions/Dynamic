@@ -132,7 +132,7 @@ public:
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
-        consensus.nUpdateDiffAlgoHeight = 100000; // Dynamic: Algorithm fork block
+        consensus.nUpdateDiffAlgoHeight = 330000; // Dynamic: Algorithm fork block
 		consensus.nPowAveragingWindow = 17;
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
 		consensus.fPowAllowMinDifficultyBlocks = false;
@@ -274,7 +274,7 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1491084371, 168855, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1491119086, 24051, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -282,7 +282,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if(!startNewChain)
-            assert(consensus.hashGenesisBlock == uint256S("0x00006fccccbc4fff20836c8d66ec47c3e4621d098de52bd89cde1856145700f7"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0000e20f2438413d8fc19ee8b45c4a89c8ab01a2bbc5a62ae1626e394278d1be"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
 
         vFixedSeeds.clear();
@@ -318,8 +318,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x00006fccccbc4fff20836c8d66ec47c3e4621d098de52bd89cde1856145700f7")),
-            1491084371, // * UNIX timestamp of last checkpoint block
+            (  0, uint256S("0x0000e20f2438413d8fc19ee8b45c4a89c8ab01a2bbc5a62ae1626e394278d1be")),
+            1491119086, // * UNIX timestamp of last checkpoint block
             0,    // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             1000        // * estimated number of transactions per day after checkpoint

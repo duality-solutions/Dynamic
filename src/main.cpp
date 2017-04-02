@@ -1814,18 +1814,22 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
         return BLOCKCHAIN_INIT_REWARD + nFees;
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(STATIC_POW_REWARD), STATIC_POW_REWARD);
-        return STATIC_POW_REWARD + nFees; // 1 DYN
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
+        return PHASE_1_POW_REWARD + nFees; // 1 DYN
     }
     else 
         return BLOCKCHAIN_INIT_REWARD + nFees;
 }
 
 CAmount GetDynodePayment(bool fDynode)
-{
-    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(STATIC_DYNODE_PAYMENT), STATIC_DYNODE_PAYMENT);
-        return STATIC_DYNODE_PAYMENT; // 0.382 DYN
+{   
+    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
+        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
+    }
+    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+        return PHASE_2_DYNODE_PAYMENT; // 0.618 DYN
     }
     else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
         LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
