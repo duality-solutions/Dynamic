@@ -901,11 +901,6 @@ void InitParameterInteraction()
         mapArgs["-privatesendmultisession"] = "0";
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendmultisession=0\n", __func__, nLiqProvTmp);
     }
-
-    // we can use much smaller keypool for HD wallet
-    if (GetBoolArg("-usehd", DEFAULT_USE_HD_WALLET)) {
-        SoftSetBoolArg("-keypool", HD_WALLET_KEYPOOL_SIZE);
-    }
 }
 
 void InitLogging()
