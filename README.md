@@ -8,7 +8,7 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
-# **Dynamic (DYN) v1.2.0.0**
+# **Dynamic (DYN) v1.3.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
@@ -17,7 +17,8 @@ Graph on Pull Request History
 What is Dynamic?
 ----------------
 * Coin Suffix: DYN
-* PoW Algorithm: Argon2d
+* PoW Mining Algorithm: Argon2d
+* PoW Difficulty Algorithm: Delta
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: 1 DYN

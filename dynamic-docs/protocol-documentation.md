@@ -1,4 +1,4 @@
-Protocol Documentation - 1.2.0.0
+Protocol Documentation - 1.3.0.0
 =====================================
 
 This document describes the protocol extensions for all additional functionality build into the Dynamic protocol. This doesn't include any of the Bitcoin procotol, which has been left in tact in the Dynamic project. For more information about the core protocol, please see https://en.bitcoin.it/w/index.php?title#Protocol_documentation&action#edit

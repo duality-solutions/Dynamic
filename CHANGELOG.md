@@ -1,3 +1,10 @@
+**Dynamic v1.3.0.0**	
+
+* c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
+* InitError instead of throw on failure
+* Hard Fork at block 300,000 for Delta difficulty retarget algorithm
+
+
 **Dynamic v1.2.0.0**	
 
 * Make RelayWalletTransaction attempt to AcceptToMemoryPool

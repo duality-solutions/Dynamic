@@ -383,7 +383,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
             if(!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
 
-            CAmount nDynodePayment = STATIC_DYNODE_PAYMENT;
+            CAmount nDynodePayment = GetDynodePayment();
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
                 if(dnpayee == txout.scriptPubKey && nDynodePayment == txout.nValue) {

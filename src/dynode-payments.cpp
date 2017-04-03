@@ -302,11 +302,12 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
 
     if (chainActive.Height() == 0) { blockValue = 4000000 * COIN; }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = STATIC_POW_REWARD; }
+    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
     else { blockValue = BLOCKCHAIN_INIT_REWARD; }
 
     if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {dynodePayment = STATIC_DYNODE_PAYMENT; }
+    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_1_DYNODE_PAYMENT; }
+    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_2_DYNODE_PAYMENT; }
     else { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
 
     txNew.vout[0].nValue = blockValue;
@@ -317,7 +318,10 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = dynodePayment;
 
-        txNew.vout[0].nValue = STATIC_POW_REWARD;
+        if (chainActive.Height() == 0) { txNew.vout[0].nValue = 4000000 * COIN; }
+        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
+        else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
+        else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
 
         CTxDestination address1;
         ExtractDestination(payee, address1);
@@ -581,7 +585,7 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
-    CAmount nDynodePayment = STATIC_DYNODE_PAYMENT;
+    CAmount nDynodePayment = GetDynodePayment();
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 
