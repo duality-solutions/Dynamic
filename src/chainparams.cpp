@@ -132,7 +132,7 @@ public:
         consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
-        consensus.nUpdateDiffAlgoHeight = 330000; // Dynamic: Algorithm fork block
+        consensus.nUpdateDiffAlgoHeight = 300000; // Dynamic: Algorithm fork block
 		consensus.nPowAveragingWindow = 17;
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
 		consensus.fPowAllowMinDifficultyBlocks = false;
