@@ -17,7 +17,8 @@ Graph on Pull Request History
 What is Dynamic?
 ----------------
 * Coin Suffix: DYN
-* PoW Algorithm: Argon2d
+* PoW Mining Algorithm: Argon2d
+* PoW Difficulty Algorithm: Delta
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: 1 DYN
