@@ -1,3 +1,8 @@
+**Dynamic v1.3.0.1**
+
+* Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
+
+
 **Dynamic v1.3.0.0**	
 
 * c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
