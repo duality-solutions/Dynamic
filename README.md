@@ -27,7 +27,7 @@ What is Dynamic?
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 10 Blocks
-* Dynode Reward: 0.382 DYN Static Reward (38.2% of a PoW reward)
+* Dynode Reward: 0.614 DYN Static Reward
 * Dynode Reward Start Height: Block 20,546
 * Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DYN, 20 confirmations (~45 minutes)
