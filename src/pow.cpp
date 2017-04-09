@@ -27,7 +27,8 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
-	if(chainActive.Height() < params.nUpdateDiffAlgoHeight) {
+    int nHeight = pindexLast->nHeight + 1;
+	if(nHeight < params.nUpdateDiffAlgoHeight) {
 		
 		unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
