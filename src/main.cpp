@@ -319,7 +319,7 @@ map<NodeId, CNodeState> mapNodeState;
 
 // Requires cs_main.
 CNodeState *State(NodeId pnode) {
-    map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
+    std::map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
     if (it == mapNodeState.end())
         return NULL;
     return &it->second;
@@ -3889,25 +3889,23 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 }
 
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
-{   
+{ 
+    //TODO (Amir): Better fix for headers work diff hard fork issue
+    int nHeight = pindexPrev->nHeight + 1;
+    if (nHeight >= Params().GetConsensus().nUpdateDiffAlgoHeight)
+        return true;
+
     uint256 hash = block.GetHash();
     
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    int nHeight = pindexPrev->nHeight + 1;
     
-    if(Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+    
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
                             REJECT_INVALID, "bad-diffbits");
-    } else {
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                        REJECT_INVALID, "bad-diffbits");
-    }
-
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
         return state.Invalid(error("%s: block's timestamp is too early", __func__),
