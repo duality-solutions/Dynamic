@@ -12,36 +12,53 @@
  * it will give a runtime error.
  **/
 
+std::string GetStringForIdentifier(ForkID identifier) {
+	if (identifier == 1) { return "DELTA_RETARGET"; }
+	else if (identifier == 2) { return "PRE_DELTA_RETARGET"; }
+	else if (identifier == 3) { return "START_DYNODE_PAYMENTS"; }
+	else if (identifier == 4) { return "FORK_SLOT_3"; }
+	else if (identifier == 5) { return "FORK_SLOT_4"; }
+	else { return "NO_IDENTIFER!"; }
+}
+
 bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTableFlip) {
 
-	if(fTableFlip)
-		return true;
-
-	int32_t networkHeight = (pindexLast->nHeight + 1);
+	bool booleanParam;
+	const Consensus::Params& consensusParams = Params().GetConsensus();
 
 	int placeholderIntX = 2;
 	int placeholderIntY = 3;
 
-	const Consensus::Params& consensusParams = Params().GetConsensus();
+	int32_t networkHeight = (pindexLast->nHeight);
+	int32_t chainHeight = chainActive.Height();
 
-	assert(chainActive.Height() == networkHeight); // Well... why not?
-
-	if (identifier == DELTA_RETARGET || identifier == PRE_DELTA_RETARGET || identifier == START_DYNODE_PAYMENTS || identifier == FORK_SLOT_3 || identifier == FORK_SLOT_4) {  // Check if we are handling a valid fork
-
+	if(fTableFlip)
+		return true;
+	
+	// Check if we are handling a valid fork
+	if (identifier == DELTA_RETARGET || identifier == PRE_DELTA_RETARGET || identifier == START_DYNODE_PAYMENTS || identifier == FORK_SLOT_3 || identifier == FORK_SLOT_4) {  
 		// Have we forked to the DELTA Retargeting Algorithm?
-		if(networkHeight > consensusParams.nUpdateDiffAlgoHeight && chainActive.Height() > consensusParams.nUpdateDiffAlgoHeight && identifier == DELTA_RETARGET) { return true; }
+		if(networkHeight > consensusParams.nUpdateDiffAlgoHeight && chainHeight > consensusParams.nUpdateDiffAlgoHeight && identifier == DELTA_RETARGET) { booleanParam = true; }
 		// Are we using the reward system before DELTA Retargeting's Fork?
-		else if (networkHeight < consensusParams.nUpdateDiffAlgoHeight && chainActive.Height() < consensusParams.nUpdateDiffAlgoHeight && identifier == PRE_DELTA_RETARGET) { return true; }
+		else if (networkHeight < consensusParams.nUpdateDiffAlgoHeight && chainHeight < consensusParams.nUpdateDiffAlgoHeight && identifier == PRE_DELTA_RETARGET) { booleanParam = true; }
 		// Have we now formally enabled Dynode Payments?
-		else if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && identifier == START_DYNODE_PAYMENTS) { return true; }
+		else if (chainHeight > Params().GetConsensus().nDynodePaymentsStartBlock && identifier == START_DYNODE_PAYMENTS) { booleanParam = true; }
 		// Empty Forking Slot III
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_3) { return true; } 
+		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_3) { booleanParam = true; } 
 		// Empty Forking Slot IV
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_4) { return true; } 
-		
-		else { return false; }
+		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_4) { booleanParam = true; } 
+		// All parameters do not lead to forks!
+		else { booleanParam = false; }
+	
+		// Let's print
+		LogPrintf("CheckForkIsTrue: Reported Network Height: %d vs Chain Height %d : HaveWeForked to %s?,  %s \n", networkHeight, chainHeight, GetStringForIdentifier(identifier).c_str(), booleanParam?"true":"false");
 
 	} else { throw std::runtime_error(strprintf("%s: Unknown Fork Verification Cause! %s.", __func__, identifier)); }
+
+	if(!(pindexLast == NULL))
+		assert(chainHeight == networkHeight); // Well... are we even compairing with the correct parameters?
+
+	return booleanParam;
 }
 
 /**
