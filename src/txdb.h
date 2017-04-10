@@ -32,7 +32,7 @@ struct CSpentIndexKey;
 struct CSpentIndexValue;
 
 //! -dbcache default (MiB)
-static const int64_t nDefaultDbCache = 1024;
+static const int64_t nDefaultDbCache = 512;
 //! max. -dbcache (MiB)
 static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
 //! min. -dbcache (MiB)
