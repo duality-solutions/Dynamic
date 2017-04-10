@@ -3898,16 +3898,11 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         return true;
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    
-    // TODO (Plaxton/Empinel): Does this make logical sense for a fork?
-    if(!CheckForkIsTrue(DELTA_RETARGET, pindexPrev)) {
+
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
         if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
             return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                             REJECT_INVALID, "bad-diffbits");
-    } else {
-        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                             REJECT_INVALID, "bad-diffbits");
+                         REJECT_INVALID, "bad-diffbits");
     }
 
     // Check timestamp against prev
