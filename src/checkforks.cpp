@@ -13,7 +13,7 @@
  **/
 
 bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTableFlip) {
-	
+
 	if(fTableFlip)
 		return true;
 
@@ -24,13 +24,21 @@ bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTab
 
 	const Consensus::Params& consensusParams = Params().GetConsensus();
 
-	if (identifier == DELTA_RETARGET || identifier == FORK_SLOT_1 || identifier == FORK_SLOT_2 || identifier == FORK_SLOT_3 || identifier == FORK_SLOT_4) {  // Check if we are handling a valid fork
+	assert(chainActive.Height() == networkHeight); // Well... why not?
 
-		if(networkHeight > consensusParams.nUpdateDiffAlgoHeight && chainActive.Height() > consensusParams.nUpdateDiffAlgoHeight && identifier == DELTA_RETARGET) { return true;}
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_1) { return true; } // Empty Forking Slot I
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_2) { return true; } // Empty Forking Slot II
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_3) { return true; } // Empty Forking Slot III
-		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_4) { return true; } // Empty Forking Slot IV
+	if (identifier == DELTA_RETARGET || identifier == PRE_DELTA_RETARGET || identifier == START_DYNODE_PAYMENTS || identifier == FORK_SLOT_3 || identifier == FORK_SLOT_4) {  // Check if we are handling a valid fork
+
+		// Have we forked to the DELTA Retargeting Algorithm?
+		if(networkHeight > consensusParams.nUpdateDiffAlgoHeight && chainActive.Height() > consensusParams.nUpdateDiffAlgoHeight && identifier == DELTA_RETARGET) { return true; }
+		// Are we using the reward system before DELTA Retargeting's Fork?
+		else if (networkHeight < consensusParams.nUpdateDiffAlgoHeight && chainActive.Height() < consensusParams.nUpdateDiffAlgoHeight && identifier == PRE_DELTA_RETARGET) { return true; }
+		// Have we now formally enabled Dynode Payments?
+		else if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && identifier == START_DYNODE_PAYMENTS) { return true; }
+		// Empty Forking Slot III
+		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_3) { return true; } 
+		// Empty Forking Slot IV
+		else if (placeholderIntX == placeholderIntY && identifier == FORK_SLOT_4) { return true; } 
+		
 		else { return false; }
 
 	} else { throw std::runtime_error(strprintf("%s: Unknown Fork Verification Cause! %s.", __func__, identifier)); }
