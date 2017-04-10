@@ -24,6 +24,7 @@ std::string GetStringForIdentifier(ForkID identifier) {
 bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTableFlip) {
 
 	bool booleanParam;
+	bool trustable = true;
 	const Consensus::Params& consensusParams = Params().GetConsensus();
 
 	int placeholderIntX = 2;
@@ -35,6 +36,25 @@ bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTab
 	if(fTableFlip)
 		return true;
 	
+	if(!fTableFlip)
+	{
+		// chainActive.Height() == 0 at all times equals to syncing, we need a workaround
+		if(!(networkHeight == chainHeight) && chainActive.Height() != 0) {
+			LogPrintf("CheckForkIsSane: Reported Network Height: %d vs Chain Height %d \n", networkHeight, chainHeight); 
+			// Last minute negation function
+			while((networkHeight+1) == chainHeight) { networkHeight++; }
+			while((chainHeight+1) == networkHeight) { networkHeight--; }
+			trustable = false;
+		}
+
+		// The genesis and the first block are fimble as anything, so we make an except and run our rule just in case
+		if(pindexLast->nHeight >= 2 && chainActive.Height() == 0) {
+			// We still need to maintain our forks even if we're just syncing, we cannot risk mess-ups
+			chainHeight = networkHeight;
+			trustable = false;
+		}
+	}
+
 	// Check if we are handling a valid fork
 	if (identifier == DELTA_RETARGET || identifier == PRE_DELTA_RETARGET || identifier == START_DYNODE_PAYMENTS || identifier == FORK_SLOT_3 || identifier == FORK_SLOT_4) {  
 		// Have we forked to the DELTA Retargeting Algorithm?
@@ -51,11 +71,11 @@ bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTab
 		else { booleanParam = false; }
 	
 		// Let's print
-		LogPrintf("CheckForkIsTrue: Reported Network Height: %d vs Chain Height %d : HaveWeForked to %s?,  %s \n", networkHeight, chainHeight, GetStringForIdentifier(identifier).c_str(), booleanParam?"true":"false");
+		LogPrintf("CheckForkIsTrue (%s): Reported Network Height: %d vs Chain Height %d : HaveWeForked to %s? %s \n", trustable?"CAN_TRUST":"CANT_TRUST", networkHeight, chainHeight, GetStringForIdentifier(identifier).c_str(), booleanParam?"true":"false");
 
 	} else { throw std::runtime_error(strprintf("%s: Unknown Fork Verification Cause! %s.", __func__, identifier)); }
 
-	if(!(pindexLast == NULL))
+	if(!(pindexLast == NULL) && chainActive.Height() != 0)
 		assert(chainHeight == networkHeight); // Well... are we even compairing with the correct parameters?
 
 	return booleanParam;
