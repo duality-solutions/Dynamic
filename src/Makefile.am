@@ -78,6 +78,7 @@ DYNAMIC_CORE_H = \
   cachemultimap.h \
   chain.h \
   chainparams.h \
+  checkforks.h \
   chainparamsbase.h \
   chainparamsseeds.h \
   checkpoints.h \
@@ -204,6 +205,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  checkforks.cpp \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \

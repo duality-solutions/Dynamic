@@ -46,6 +46,7 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "checkforks.h"
 
 #include <atomic>
 #include <sstream>
@@ -3890,11 +3891,7 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
 { 
-    //TODO (Amir): Better fix for headers work diff hard fork issue
-    int nHeight = pindexPrev->nHeight + 1;
-    if (nHeight >= Params().GetConsensus().nUpdateDiffAlgoHeight)
-        return true;
-
+    int nHeight = (pindexPrev->nHeight + 1);
     uint256 hash = block.GetHash();
     
     if (hash == Params().GetConsensus().hashGenesisBlock)
@@ -3902,10 +3899,17 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
     
-    
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+    // TODO (Plaxton/Empinel): Does this make logical sense for a fork?
+    if(!CheckForkIsTrue(DELTA_RETARGET, pindexPrev)) {
+        if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
             return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                            REJECT_INVALID, "bad-diffbits");
+                             REJECT_INVALID, "bad-diffbits");
+    } else {
+        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                             REJECT_INVALID, "bad-diffbits");
+    }
+
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
         return state.Invalid(error("%s: block's timestamp is too early", __func__),
