@@ -22,7 +22,7 @@ static const int DNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
 //! minimum peer version that can receive and send Dynode payment messages,
 //  vote for Dynode and be elected as a payment winner
-static const int MIN_DYNODE_PAYMENT_PROTO_VERSION = 70100;
+static const int MIN_DYNODE_PAYMENT_PROTO_VERSION = 70200;
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapDynodeBlocks;

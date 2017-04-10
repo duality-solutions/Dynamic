@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = dynamic
-VERSION = 1.3.0.1
+VERSION = 1.3.0.2
 INCLUDEPATH += src \
                src/crypto \
                src/crypto/heavyhash \
