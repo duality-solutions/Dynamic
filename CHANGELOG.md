@@ -1,5 +1,13 @@
 **Dynamic v1.3.0.2**
 * [Sync] Fix issue with headers first sync
+* [Sync] [Consensus] Shift Fork Logic to its own file
+* [Qt] Add CheckForks in the Qt Project File
+* [Fork] Silence usage of pindex compeletely
+* [Sync]Timeouts/DB/Headers/Limits
+* Reduce nDefaultDbCache to 512MiB
+* Bump Proto and ONLY connect to 1.3.0.1 (Proto 70200)
+* Bump Governance/Core Proto/Versions
+
 
 **Dynamic v1.3.0.1**
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
