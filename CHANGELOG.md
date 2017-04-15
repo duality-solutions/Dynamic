@@ -1,17 +1,25 @@
-**Dynamic v1.3.0.1**
+**Dynamic v1.3.0.2**
+* [Sync] Fix issue with headers first sync
+* [Sync] [Consensus] Shift Fork Logic to its own file
+* [Qt] Add CheckForks in the Qt Project File
+* [Fork] Silence usage of pindex compeletely
+* [Sync]Timeouts/DB/Headers/Limits
+* Reduce nDefaultDbCache to 512MiB
+* Bump Proto and ONLY connect to 1.3.0.1 (Proto 70200)
+* Bump Governance/Core Proto/Versions
 
+
+**Dynamic v1.3.0.1**
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 
 
 **Dynamic v1.3.0.0**	
-
 * c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 
 
 **Dynamic v1.2.0.0**	
-
 * Make RelayWalletTransaction attempt to AcceptToMemoryPool
 * Update tests for Byteswap
 * Ensure is in valid range
@@ -24,10 +32,10 @@
 * trivial: fix bloom filter init to isEmpty = true
 * Lockedpool fixes
 * Improve DecodeBase58 performance.
-* Add #include <utility> to miner.cpp
+* Add include utility to miner.cpp
 * Don't return the address of a P2SH of a P2SH
 * Implement (begin|end)_ptr in C++11 and add deprecation comment
-* add #include <stdlib.h> to random.cpp
+* add include stdlib.h to random.cpp
 * Generate auth cookie in hex instead of base64
 * Do not shadow variable (multiple files)
 * dynamic-cli: More detailed error reporting
@@ -53,8 +61,8 @@
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
 
-**Dynamic v1.1.0.0**		
-		
+
+**Dynamic v1.1.0.0**			
 * Inline with BTC 0.12		
 * HD Wallet Code Improvements		
 * Remove/Replace Boost usage for c++11		

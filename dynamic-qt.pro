@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = dynamic
-VERSION = 1.3.0.1
+VERSION = 1.3.0.2
 INCLUDEPATH += src \
                src/crypto \
                src/crypto/heavyhash \
@@ -358,6 +358,7 @@ HEADERS += \
     src/chainparamsseeds.h \
     src/checkpoints.h \
     src/checkqueue.h \
+    src/checkforks.h \
     src/clientversion.h \
     src/coincontrol.h \
     src/coins.h \
@@ -538,6 +539,7 @@ SOURCES += \
     src/base58.cpp \
     src/bloom.cpp \
     src/chain.cpp \
+    src/checkforks.cpp \
     src/chainparams.cpp \
     src/chainparamsbase.cpp \
     src/checkpoints.cpp \

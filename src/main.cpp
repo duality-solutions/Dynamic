@@ -46,6 +46,7 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "checkforks.h"
 
 #include <atomic>
 #include <sstream>
@@ -319,7 +320,7 @@ map<NodeId, CNodeState> mapNodeState;
 
 // Requires cs_main.
 CNodeState *State(NodeId pnode) {
-    map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
+    std::map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
     if (it == mapNodeState.end())
         return NULL;
     return &it->second;
@@ -3889,23 +3890,19 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 }
 
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
-{   
+{ 
+    int nHeight = (pindexPrev->nHeight + 1);
     uint256 hash = block.GetHash();
     
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    int nHeight = pindexPrev->nHeight + 1;
-    
-    if(Params().NetworkIDString() == CBaseChainParams::TESTNET) {
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                            REJECT_INVALID, "bad-diffbits");
-    } else {
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
-        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                        REJECT_INVALID, "bad-diffbits");
+
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
+        if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
+            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                         REJECT_INVALID, "bad-diffbits");
     }
 
     // Check timestamp against prev

@@ -63,22 +63,45 @@ bool CDynodeSync::IsBlockchainSynced(bool fBlockAccepted)
 
     if(!pCurrentBlockIndex || !pindexBestHeader || fImporting || fReindex) return false;
 
-    if(fBlockAccepted) {
-        // this should be only triggered while we are still syncing
-        if(!IsSynced()) {
-            // we are trying to download smth, reset blockchain sync status
-            if(fDebug) LogPrintf("CDynodeSync::IsBlockchainSynced -- reset\n");
-            fFirstBlockAccepted = true;
-            fBlockchainSynced = false;
-            nTimeLastProcess = GetTime();
-            return false;
+    if (IsInitialBlockDownload()) {
+        if(fBlockAccepted) {
+            // this should be only triggered while we are still syncing
+            if(!IsSynced()) {
+                // we are trying to download smth, reset blockchain sync status
+                if(fDebug) LogPrintf("CDynodeSync::IsBlockchainSynced -- reset\n");
+                fFirstBlockAccepted = true;
+                fBlockchainSynced = false;
+                nTimeLastProcess = GetTime();
+                return false;
+            }
+        } else {
+            // skip if we already checked less than 1 tick ago
+            if(GetTime() - nTimeLastProcess < DYNODE_SYNC_TICK_SECONDS - DYNODE_SYNC_TICK_SECONDS_INITIAL) {
+                nSkipped++;
+                return fBlockchainSynced;
+           }
         }
-    } else {
-        // skip if we already checked less than 1 tick ago
-        if(GetTime() - nTimeLastProcess < DYNODE_SYNC_TICK_SECONDS) {
-            nSkipped++;
-            return fBlockchainSynced;
-       }
+    }
+    else 
+    if (!IsInitialBlockDownload())
+    {
+        if(fBlockAccepted) {
+            // this should be only triggered while we are still syncing
+            if(!IsSynced()) {
+                // we are trying to download smth, reset blockchain sync status
+                if(fDebug) LogPrintf("CDynodeSync::IsBlockchainSynced -- reset\n");
+                fFirstBlockAccepted = true;
+                fBlockchainSynced = false;
+                nTimeLastProcess = GetTime();
+                return false;
+            }
+        } else {
+            // skip if we already checked less than 1 tick ago
+            if(GetTime() - nTimeLastProcess < DYNODE_SYNC_TICK_SECONDS) {
+                nSkipped++;
+                return fBlockchainSynced;
+           }
+        }
     }
 
     if(fDebug) LogPrintf("CDynodeSync::IsBlockchainSynced -- state before check: %ssynced, skipped %d times\n", fBlockchainSynced ? "" : "not ", nSkipped);
@@ -250,7 +273,15 @@ void CDynodeSync::ClearFulfilledRequests()
 void CDynodeSync::ProcessTick()
 {
     static int nTick = 0;
-    if(nTick++ % DYNODE_SYNC_TICK_SECONDS != 0) return;
+
+    if (IsInitialBlockDownload()) {
+        if(nTick++ % (DYNODE_SYNC_TICK_SECONDS - DYNODE_SYNC_TICK_SECONDS_INITIAL) != 0) return;
+    }
+    else
+    if (!IsInitialBlockDownload()) {
+        if(nTick++ % DYNODE_SYNC_TICK_SECONDS != 0) return;
+    }
+
     if(!pCurrentBlockIndex) return;
 
     //the actual count of Dynodes we have currently
@@ -358,19 +389,38 @@ void CDynodeSync::ProcessTick()
 
             if(nRequestedDynodeAssets == DYNODE_SYNC_LIST) {
                 LogPrint("Dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nTimeLastDynodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedDynodeAssets, nTimeLastDynodeList, GetTime(), GetTime() - nTimeLastDynodeList);
-                // check for timeout first
-                if(nTimeLastDynodeList < GetTime() - DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
-                    if (nRequestedDynodeAttempt == 0) {
-                        LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
-                        // there is no way we can continue without Dynode list, fail here and try later
-                        Fail();
+                if (IsInitialBlockDownload()) {
+                    // check for timeout first
+                    if(nTimeLastDynodeList < GetTime() - (DYNODE_SYNC_TIMEOUT_SECONDS - DYNODE_SYNC_TIMEOUT_SECONDS_INITIAL)) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if (nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
+                            // there is no way we can continue without Dynode list, fail here and try later
+                            Fail();
+                            ReleaseNodeVector(vNodesCopy);
+                            return;
+                        }
+                        SwitchToNextAsset();
                         ReleaseNodeVector(vNodesCopy);
                         return;
                     }
-                    SwitchToNextAsset();
-                    ReleaseNodeVector(vNodesCopy);
-                    return;
+                }
+                else
+                if (!IsInitialBlockDownload()) {
+                    // check for timeout first
+                    if(nTimeLastDynodeList < GetTime() - DYNODE_SYNC_TIMEOUT_SECONDS) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if (nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
+                            // there is no way we can continue without Dynode list, fail here and try later
+                            Fail();
+                            ReleaseNodeVector(vNodesCopy);
+                            return;
+                        }
+                        SwitchToNextAsset();
+                        ReleaseNodeVector(vNodesCopy);
+                        return;
+                    }
                 }
 
                 // only request once from each peer
@@ -393,20 +443,37 @@ void CDynodeSync::ProcessTick()
                 // check for timeout first
                 // This might take a lot longer than DYNODE_SYNC_TIMEOUT_SECONDS minutes due to new blocks,
                 // but that should be OK and it should timeout eventually.
-                if(nTimeLastPaymentVote < GetTime() - DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
-                    if (nRequestedDynodeAttempt == 0) {
-                        LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
-                        // probably not a good idea to proceed without winner list
-                        Fail();
+                if (IsInitialBlockDownload()) {
+                    if(nTimeLastPaymentVote < GetTime() - (DYNODE_SYNC_TIMEOUT_SECONDS - DYNODE_SYNC_TIMEOUT_SECONDS_INITIAL)) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if (nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
+                            // probably not a good idea to proceed without winner list
+                            Fail();
+                            ReleaseNodeVector(vNodesCopy);
+                            return;
+                        }
+                        SwitchToNextAsset();
                         ReleaseNodeVector(vNodesCopy);
                         return;
                     }
-                    SwitchToNextAsset();
-                    ReleaseNodeVector(vNodesCopy);
-                    return;
                 }
-
+                else
+                if (!IsInitialBlockDownload()) {
+                    if(nTimeLastPaymentVote < GetTime() - (DYNODE_SYNC_TIMEOUT_SECONDS)) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if (nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
+                            // probably not a good idea to proceed without winner list
+                            Fail();
+                            ReleaseNodeVector(vNodesCopy);
+                            return;
+                        }
+                        SwitchToNextAsset();
+                        ReleaseNodeVector(vNodesCopy);
+                        return;
+                    }
+                }
                 // check for data
                 // if dnpayments already has enough blocks and votes, switch to the next asset
                 // try to fetch data from at least two peers though
@@ -439,17 +506,31 @@ void CDynodeSync::ProcessTick()
                 LogPrint("gobject", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nTimeLastGovernanceItem %lld GetTime() %lld diff %lld\n", nTick, nRequestedDynodeAssets, nTimeLastGovernanceItem, GetTime(), GetTime() - nTimeLastGovernanceItem);
 
                 // check for timeout first
-                if(GetTime() - nTimeLastGovernanceItem > DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
-                    if(nRequestedDynodeAttempt == 0) {
-                        LogPrintf("CDynodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
-                        // it's kind of ok to skip this for now, hopefully we'll catch up later?
+                if (IsInitialBlockDownload()) {
+                    if(GetTime() - nTimeLastGovernanceItem > (DYNODE_SYNC_TIMEOUT_SECONDS - DYNODE_SYNC_TIMEOUT_SECONDS_INITIAL)) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if(nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
+                            // it's kind of ok to skip this for now, hopefully we'll catch up later?
+                        }
+                        SwitchToNextAsset();
+                        ReleaseNodeVector(vNodesCopy);
+                        return;
                     }
-                    SwitchToNextAsset();
-                    ReleaseNodeVector(vNodesCopy);
-                    return;
                 }
-
+                else
+                if (!IsInitialBlockDownload()) {
+                    if(GetTime() - nTimeLastGovernanceItem > DYNODE_SYNC_TIMEOUT_SECONDS) {
+                        LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                        if(nRequestedDynodeAttempt == 0) {
+                            LogPrintf("CDynodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
+                            // it's kind of ok to skip this for now, hopefully we'll catch up later?
+                        }
+                        SwitchToNextAsset();
+                        ReleaseNodeVector(vNodesCopy);
+                        return;
+                    }
+                }
                 // only request obj sync once from each peer, then request votes on per-obj basis
                 if(netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) {
                     governance.RequestGovernanceObjectVotes(pnode);
@@ -465,20 +546,41 @@ void CDynodeSync::ProcessTick()
                         }
                         // make sure the condition below is checked only once per tick
                         if(nLastTick == nTick) continue;
-                        if(GetTime() - nTimeNoObjectsLeft > DYNODE_SYNC_TIMEOUT_SECONDS &&
-                            governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), DYNODE_SYNC_TICK_SECONDS)
-                        ) {
-                            // We already asked for all objects, waited for DYNODE_SYNC_TIMEOUT_SECONDS
-                            // after that and less then 0.01% or DYNODE_SYNC_TICK_SECONDS
-                            // (i.e. 1 per second) votes were recieved during the last tick.
-                            // We can be pretty sure that we are done syncing.
-                            LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedDynodeAssets);
-                            // reset nTimeNoObjectsLeft to be able to use the same condition on resync
-                            nTimeNoObjectsLeft = 0;
-                            SwitchToNextAsset();
-                            ReleaseNodeVector(vNodesCopy);
-                            return;
+
+                        if (IsInitialBlockDownload()) {
+                            if(GetTime() - nTimeNoObjectsLeft > DYNODE_SYNC_TIMEOUT_SECONDS &&
+                                governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), (DYNODE_SYNC_TICK_SECONDS - DYNODE_SYNC_TICK_SECONDS_INITIAL))
+                            ) {
+                                // We already asked for all objects, waited for DYNODE_SYNC_TIMEOUT_SECONDS
+                                // after that and less then 0.01% or DYNODE_SYNC_TICK_SECONDS
+                                // (i.e. 1 per second) votes were recieved during the last tick.
+                                // We can be pretty sure that we are done syncing.
+                                LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedDynodeAssets);
+                                // reset nTimeNoObjectsLeft to be able to use the same condition on resync
+                                nTimeNoObjectsLeft = 0;
+                                SwitchToNextAsset();
+                                ReleaseNodeVector(vNodesCopy);
+                                return;
+                            }
                         }
+                        else
+                        if (!IsInitialBlockDownload()) {
+                            if(GetTime() - nTimeNoObjectsLeft > DYNODE_SYNC_TIMEOUT_SECONDS &&
+                                governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), DYNODE_SYNC_TICK_SECONDS)
+                            ) {
+                                // We already asked for all objects, waited for DYNODE_SYNC_TIMEOUT_SECONDS
+                                // after that and less then 0.01% or DYNODE_SYNC_TICK_SECONDS
+                                // (i.e. 1 per second) votes were recieved during the last tick.
+                                // We can be pretty sure that we are done syncing.
+                                LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedDynodeAssets);
+                                // reset nTimeNoObjectsLeft to be able to use the same condition on resync
+                                nTimeNoObjectsLeft = 0;
+                                SwitchToNextAsset();
+                                ReleaseNodeVector(vNodesCopy);
+                                return;
+                            }
+                        }  
+
                         nLastTick = nTick;
                         nLastVotes = governance.GetVoteCount();
                     }
