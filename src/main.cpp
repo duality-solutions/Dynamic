@@ -114,7 +114,7 @@ struct COrphanTx {
     NodeId fromPeer;
     int64_t nTimeExpire;
 };
-map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(cs_main);;
+map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(cs_main);
 map<COutPoint, set<map<uint256, COrphanTx>::iterator, IteratorComparator>> mapOrphanTransactionsByPrev GUARDED_BY(cs_main);
 map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
 void EraseOrphansFor(NodeId peer) EXCLUSIVE_LOCKS_REQUIRED(cs_main);

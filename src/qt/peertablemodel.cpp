@@ -150,7 +150,7 @@ int PeerTableModel::rowCount(const QModelIndex &parent) const
 int PeerTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return columns.length();;
+    return columns.length();
 }
 
 QVariant PeerTableModel::data(const QModelIndex &index, int role) const

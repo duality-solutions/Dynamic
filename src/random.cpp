@@ -25,12 +25,6 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-static void RandFailure()
-{
-    LogPrintf("Failed to read randomness, aborting\n");
-    abort();
-}
-
 static inline int64_t GetPerformanceCounter()
 {
     int64_t nCounter = 0;

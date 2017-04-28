@@ -248,7 +248,7 @@ QString formatDynamicURI(const SendCoinsRecipient &info)
 
     if (!info.message.isEmpty())
     {
-        QString msg(QUrl::toPercentEncoding(info.message));;
+        QString msg(QUrl::toPercentEncoding(info.message));
         ret += QString("%1message=%2").arg(paramCount == 0 ? "?" : "&").arg(msg);
         paramCount++;
     }

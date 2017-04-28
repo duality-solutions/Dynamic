@@ -351,22 +351,6 @@ static bool findSighashFlags(int& flags, const string& flagStr)
     return false;
 }
 
-uint256 ParseHashUO(map<string,UniValue>& o, string strKey)
-{
-    if (!o.count(strKey))
-        return uint256();
-    return ParseHashUV(o[strKey], strKey);
-}
-
-vector<unsigned char> ParseHexUO(map<string,UniValue>& o, string strKey)
-{
-    if (!o.count(strKey)) {
-        vector<unsigned char> emptyVec;
-        return emptyVec;
-    }
-    return ParseHexUV(o[strKey], strKey);
-}
-
 static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
 {
     int nHashType = SIGHASH_ALL;
