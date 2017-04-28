@@ -1,4 +1,4 @@
-**Dynamic v1.3.0.2**
+**Dynamic v1.4.0.0**
 * [Sync] Fix issue with headers first sync
 * [Sync] [Consensus] Shift Fork Logic to its own file
 * [Qt] Add CheckForks in the Qt Project File
