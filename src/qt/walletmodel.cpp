@@ -752,11 +752,6 @@ bool WalletModel::saveReceiveRequest(const std::string &sAddress, const int64_t 
         return wallet->AddDestData(dest, key, sRequest);
 }
 
-bool WalletModel::hdEnabled() const
-{
-    return wallet->IsHDEnabled();
-}
-
 CWallet* WalletModel::getWallet()
 {
     return wallet;
