@@ -315,7 +315,6 @@ HEADERS += \
     src/crypto/argon2d/argon2.h \
     src/crypto/argon2d/core.h \
     src/crypto/argon2d/encoding.h \
-    src/crypto/argon2d/opt.h \
     src/crypto/argon2d/thread.h \
     src/crypto/blake2/blake2-impl.h \
     src/crypto/blake2/blake2.h \

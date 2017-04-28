@@ -1,9 +1,19 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+/*
+ * Argon2 reference source code package - reference C implementations
+ *
+ * Copyright 2015
+ * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
+ *
+ * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * License/Waiver or the Apache Public License 2.0, at your option. The terms of
+ * these licenses can be found at:
+ *
+ * - CC0 1.0 Universal : http://creativecommons.org/publicdomain/zero/1.0
+ * - Apache 2.0        : http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * You should have received a copy of both of these licenses along with this
+ * software. If not, they may be obtained at the above URLs.
+ */
 
 #include <stdint.h>
 #include <string.h>
@@ -51,7 +61,7 @@ static BLAKE2_INLINE void blake2b_increment_counter(blake2b_state *S,
 }
 
 static BLAKE2_INLINE void blake2b_invalidate_state(blake2b_state *S) {
-    burn(S, sizeof(*S));      /* wipe */
+    clear_internal_memory(S, sizeof(*S));      /* wipe */
     blake2b_set_lastblock(S); /* invalidate for further use */
 }
 
@@ -147,7 +157,8 @@ int blake2b_init_key(blake2b_state *S, size_t outlen, const void *key,
         memset(block, 0, BLAKE2B_BLOCKBYTES);
         memcpy(block, key, keylen);
         blake2b_update(S, block, BLAKE2B_BLOCKBYTES);
-        burn(block, BLAKE2B_BLOCKBYTES); /* Burn the key from stack */
+        /* Burn the key from stack */
+        clear_internal_memory(block, BLAKE2B_BLOCKBYTES);
     }
     return 0;
 }
@@ -274,9 +285,9 @@ int blake2b_final(blake2b_state *S, void *out, size_t outlen) {
     }
 
     memcpy(out, buffer, S->outlen);
-    burn(buffer, sizeof(buffer));
-    burn(S->buf, sizeof(S->buf));
-    burn(S->h, sizeof(S->h));
+    clear_internal_memory(buffer, sizeof(buffer));
+    clear_internal_memory(S->buf, sizeof(S->buf));
+    clear_internal_memory(S->h, sizeof(S->h));
     return 0;
 }
 
@@ -314,7 +325,7 @@ int blake2b(void *out, size_t outlen, const void *in, size_t inlen,
     ret = blake2b_final(&S, out, outlen);
 
 fail:
-    burn(&S, sizeof(S));
+    clear_internal_memory(&S, sizeof(S));
     return ret;
 }
 
@@ -372,7 +383,7 @@ int blake2b_long(void *pout, size_t outlen, const void *in, size_t inlen) {
         memcpy(out, out_buffer, toproduce);
     }
 fail:
-    burn(&blake_state, sizeof(blake_state));
+    clear_internal_memory(&blake_state, sizeof(blake_state));
     return ret;
 #undef TRY
 }

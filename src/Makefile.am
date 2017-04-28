@@ -307,7 +307,6 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/argon2d/core.h \
   crypto/argon2d/encoding.h \
   crypto/argon2d/thread.h \
-  crypto/argon2d/opt.h \
   crypto/argon2d/argon2.c \
   crypto/argon2d/core.c \
   crypto/argon2d/encoding.c \

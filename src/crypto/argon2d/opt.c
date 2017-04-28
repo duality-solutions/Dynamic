@@ -1,21 +1,18 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 /*
- * Argon2 source code package
+ * Argon2 reference source code package - reference C implementations
  *
- * Written by Daniel Dinu and Dmitry Khovratovich, 2015
+ * Copyright 2015
+ * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * This work is licensed under a Creative Commons CC0 1.0 License/Waiver.
+ * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * License/Waiver or the Apache Public License 2.0, at your option. The terms of
+ * these licenses can be found at:
  *
- * You should have received a copy of the CC0 Public Domain Dedication along
- * with
- * this software. If not, see
- * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ * - CC0 1.0 Universal : http://creativecommons.org/publicdomain/zero/1.0
+ * - Apache 2.0        : http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * You should have received a copy of both of these licenses along with this
+ * software. If not, they may be obtained at the above URLs.
  */
 
 #include <stdint.h>
@@ -23,105 +20,98 @@
 #include <stdlib.h>
 
 #include "argon2.h"
-#include "opt.h"
+#include "core.h"
 
 #include "../blake2/blake2.h"
 #include "../blake2/blamka-round-opt.h"
 
-void fill_block(__m128i *state, const uint8_t *ref_block, uint8_t *next_block) {
+/*
+ * Function fills a new memory block and optionally XORs the old block over the new one.
+ * Memory must be initialized.
+ * @param state Pointer to the just produced block. Content will be updated(!)
+ * @param ref_block Pointer to the reference block
+ * @param next_block Pointer to the block to be XORed over. May coincide with @ref_block
+ * @param with_xor Whether to XOR into the new block (1) or just overwrite (0)
+ * @pre all block pointers must be valid
+ */
+static void fill_block(__m128i *state, const block *ref_block,
+                       block *next_block, int with_xor) {
     __m128i block_XY[ARGON2_OWORDS_IN_BLOCK];
-    uint32_t i;
+    unsigned int i;
 
-    for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
-        block_XY[i] = state[i] = _mm_xor_si128(
-            state[i], _mm_loadu_si128((__m128i const *)(&ref_block[16 * i])));
+    if (with_xor) {
+        for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
+            state[i] = _mm_xor_si128(
+                state[i], _mm_loadu_si128((const __m128i *)ref_block->v + i));
+            block_XY[i] = _mm_xor_si128(
+                state[i], _mm_loadu_si128((const __m128i *)next_block->v + i));
+        }
+    } else {
+        for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
+            block_XY[i] = state[i] = _mm_xor_si128(
+                state[i], _mm_loadu_si128((const __m128i *)ref_block->v + i));
+        }
     }
 
     for (i = 0; i < 8; ++i) {
         BLAKE2_ROUND(state[8 * i + 0], state[8 * i + 1], state[8 * i + 2],
-                     state[8 * i + 3], state[8 * i + 4], state[8 * i + 5],
-                     state[8 * i + 6], state[8 * i + 7]);
+            state[8 * i + 3], state[8 * i + 4], state[8 * i + 5],
+            state[8 * i + 6], state[8 * i + 7]);
     }
 
     for (i = 0; i < 8; ++i) {
         BLAKE2_ROUND(state[8 * 0 + i], state[8 * 1 + i], state[8 * 2 + i],
-                     state[8 * 3 + i], state[8 * 4 + i], state[8 * 5 + i],
-                     state[8 * 6 + i], state[8 * 7 + i]);
+            state[8 * 3 + i], state[8 * 4 + i], state[8 * 5 + i],
+            state[8 * 6 + i], state[8 * 7 + i]);
     }
 
     for (i = 0; i < ARGON2_OWORDS_IN_BLOCK; i++) {
         state[i] = _mm_xor_si128(state[i], block_XY[i]);
-        _mm_storeu_si128((__m128i *)(&next_block[16 * i]), state[i]);
+        _mm_storeu_si128((__m128i *)next_block->v + i, state[i]);
     }
 }
 
-void generate_addresses(const argon2_instance_t *instance,
-                        const argon2_position_t *position,
-                        uint64_t *pseudo_rands) {
-    block address_block, input_block;
-    uint32_t i;
+static void next_addresses(block *address_block, block *input_block) {
+    /*Temporary zero-initialized blocks*/
+    __m128i zero_block[ARGON2_OWORDS_IN_BLOCK];
+    __m128i zero2_block[ARGON2_OWORDS_IN_BLOCK];
 
-    init_block_value(&address_block, 0);
-    init_block_value(&input_block, 0);
+    memset(zero_block, 0, sizeof(zero_block));
+    memset(zero2_block, 0, sizeof(zero2_block));
 
-    if (instance != NULL && position != NULL) {
-        input_block.v[0] = position->pass;
-        input_block.v[1] = position->lane;
-        input_block.v[2] = position->slice;
-        input_block.v[3] = instance->memory_blocks;
-        input_block.v[4] = instance->passes;
-        input_block.v[5] = instance->type;
+    /*Increasing index counter*/
+    input_block->v[6]++;
 
-        for (i = 0; i < instance->segment_length; ++i) {
-            if (i % ARGON2_ADDRESSES_IN_BLOCK == 0) {
-                __m128i zero_block[ARGON2_OWORDS_IN_BLOCK];
-                __m128i zero2_block[ARGON2_OWORDS_IN_BLOCK];
-                memset(zero_block, 0, sizeof(zero_block));
-                memset(zero2_block, 0, sizeof(zero2_block));
-                input_block.v[6]++;
-                fill_block(zero_block, (uint8_t *)&input_block.v,
-                           (uint8_t *)&address_block.v);
-                fill_block(zero2_block, (uint8_t *)&address_block.v,
-                           (uint8_t *)&address_block.v);
-            }
+    /*First iteration of G*/
+    fill_block(zero_block, input_block, address_block, 0);
 
-            pseudo_rands[i] = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
-        }
-    }
+    /*Second iteration of G*/
+    fill_block(zero2_block, address_block, address_block, 0);
 }
 
 void fill_segment(const argon2_instance_t *instance,
                   argon2_position_t position) {
     block *ref_block = NULL, *curr_block = NULL;
+    block address_block, input_block;
     uint64_t pseudo_rand, ref_index, ref_lane;
     uint32_t prev_offset, curr_offset;
     uint32_t starting_index, i;
     __m128i state[64];
     int data_independent_addressing;
 
-    /* Pseudo-random values that determine the reference block position */
-    uint64_t *pseudo_rands = NULL;
-
     if (instance == NULL) {
         return;
-    }
-
-    data_independent_addressing = (instance->type == Argon2_i);
-
-    pseudo_rands =
-        (uint64_t *)malloc(sizeof(uint64_t) * instance->segment_length);
-    if (pseudo_rands == NULL) {
-        return;
-    }
-
-    if (data_independent_addressing) {
-        generate_addresses(instance, &position, pseudo_rands);
     }
 
     starting_index = 0;
 
     if ((0 == position.pass) && (0 == position.slice)) {
         starting_index = 2; /* we have already generated the first two blocks */
+
+        /* Don't forget to generate the first block of addresses: */
+        if (data_independent_addressing) {
+            next_addresses(&address_block, &input_block);
+        }
     }
 
     /* Offset of the current block */
@@ -148,7 +138,10 @@ void fill_segment(const argon2_instance_t *instance,
         /* 1.2 Computing the index of the reference block */
         /* 1.2.1 Taking pseudo-random value from the previous block */
         if (data_independent_addressing) {
-            pseudo_rand = pseudo_rands[i];
+            if (i % ARGON2_ADDRESSES_IN_BLOCK == 0) {
+                next_addresses(&address_block, &input_block);
+            }
+            pseudo_rand = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
         } else {
             pseudo_rand = instance->memory[prev_offset].v[0];
         }
@@ -172,8 +165,8 @@ void fill_segment(const argon2_instance_t *instance,
         ref_block =
             instance->memory + instance->lane_length * ref_lane + ref_index;
         curr_block = instance->memory + curr_offset;
-        fill_block(state, (uint8_t *)ref_block->v, (uint8_t *)curr_block->v);
-    }
+            
+        fill_block(state, ref_block, curr_block, 0);
 
-    free(pseudo_rands);
+    }
 }
