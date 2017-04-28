@@ -96,7 +96,7 @@ public Q_SLOTS:
     /** Set number of Dynodes shown in the UI */        
     void setDynodeCount(const QString &strDynodes);      
     /** Set number of blocks shown in the UI */
-    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);     
+    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Go forward or back in history */
     void browseHistory(int offset);
     /** Scroll console view to end */
