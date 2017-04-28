@@ -132,6 +132,9 @@ public Q_SLOTS:
     /** Update selected DYN amount from transactionview */
     void trxAmount(QString amount);
 
+    // Clicking on the lock icon will open the passphrase dialog
+    void on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly = false);
+
 Q_SIGNALS:
     /** Signal that we want to show the main window */
     void showNormalIfMinimized();

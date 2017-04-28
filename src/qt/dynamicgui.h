@@ -43,6 +43,26 @@ class QProgressBar;
 class QProgressDialog;
 QT_END_NAMESPACE
 
+// Dynamic : to ensure that we can click on lock icon in GUI
+class ClickableLockLabel : public QLabel
+{
+    Q_OBJECT
+
+public:
+    ClickableLockLabel() : QLabel() {}
+    ~ClickableLockLabel() {}
+
+Q_SIGNALS:
+    void clicked();
+
+protected:
+    void mousePressEvent(QMouseEvent * event)
+    {
+        QLabel::mousePressEvent(event);
+        Q_EMIT clicked();
+    }
+};
+
 /**
   Dynamic GUI main class. This class represents the main window of the Dynamic UI. It communicates with both the client and
   wallet models to give the user an up-to-date view of the current core state.
@@ -73,6 +93,7 @@ public:
     void removeAllWallets();
 #endif // ENABLE_WALLET
     bool enableWallet;
+    QLabel *labelWalletEncryptionIcon;
 
 protected:
     void changeEvent(QEvent *e);
@@ -87,7 +108,6 @@ private:
     WalletFrame *walletFrame;
 
     UnitDisplayStatusBarControl *unitDisplayControl;
-    QLabel *labelWalletEncryptionIcon;
     QPushButton *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;

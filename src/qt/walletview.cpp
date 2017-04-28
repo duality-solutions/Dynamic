@@ -141,6 +141,9 @@ void WalletView::setDynamicGUI(DynamicGUI *gui)
 
         // Pass through transaction notifications
         connect(this, SIGNAL(incomingTransaction(QString,int,CAmount,QString,QString,QString)), gui, SLOT(incomingTransaction(QString,int,CAmount,QString,QString,QString)));
+
+        // Clicking on the lock icon will open the passphrase dialog
+        connect(gui->labelWalletEncryptionIcon, SIGNAL(clicked()), this, SLOT(on_labelWalletEncryptionIcon_clicked()));
     }
 }
 
@@ -394,6 +397,21 @@ void WalletView::showProgress(const QString &title, int nProgress)
     }
     else if (progressDialog)
         progressDialog->setValue(nProgress);
+}
+
+void WalletView::on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly)
+{
+    if(!walletModel)
+        return;
+
+    if (walletModel->getEncryptionStatus() == WalletModel::Unlocked) {
+        walletModel->setWalletLocked(true);
+    }
+    else {
+        AskPassphraseDialog dlg(fForMixingOnly ? AskPassphraseDialog::UnlockMixing : AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
 }
 
 /** Update wallet with the sum of the selected transactions */
