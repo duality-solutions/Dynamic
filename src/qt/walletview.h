@@ -129,11 +129,14 @@ public Q_SLOTS:
     /** Show progress dialog e.g. for rescan */
     void showProgress(const QString &title, int nProgress);
 
-    /** Update selected DYN amount from transactionview */
-    void trxAmount(QString amount);
-
     // Clicking on the lock icon will open the passphrase dialog
     void on_labelWalletEncryptionIcon_clicked(bool fForMixingOnly = false);
+
+    /** User has requested more information about the out of sync state */
+    void requestedSyncWarningInfo();
+
+    /** Update selected DYN amount from transactionview */
+    void trxAmount(QString amount);
 
 Q_SIGNALS:
     /** Signal that we want to show the main window */
@@ -144,6 +147,8 @@ Q_SIGNALS:
     void encryptionStatusChanged(int status);
     /** Notify that a new transaction appeared */
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
+    /** Notify that the out of sync warning icon has been pressed */
+    void outOfSyncWarningClicked();
 };
 
 #endif // DYNAMIC_QT_WALLETVIEW_H

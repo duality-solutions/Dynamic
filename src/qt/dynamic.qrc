@@ -56,6 +56,7 @@
         <file alias="about">res/icons/drk/about.png</file>
         <file alias="about_qt">res/icons/drk/about_qt.png</file>
         <file alias="verify">res/icons/drk/verify.png</file>
+        <file alias="warning">res/icons/drk/warning.png</file>
         <file alias="hd_enabled">res/icons/drk/hd_enabled.png</file>
         <file alias="hd_disabled">res/icons/drk/hd_disabled.png</file>
         <file alias="decentralised">res/icons/drk/decentralised.png</file>

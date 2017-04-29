@@ -55,6 +55,8 @@ public:
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
     QString getDynodeCountString() const;
     int getNumBlocks() const;
+    int getHeaderTipHeight() const;
+    int64_t getHeaderTipTime() const;
 
     //! Return number of transactions in the mempool
     long getMempoolSize() const;

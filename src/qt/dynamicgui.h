@@ -25,6 +25,7 @@
 class ClientModel;
 class DynodeList;
 class HelpMessageDialog;
+class ModalOverlay;
 class NetworkStyle;
 class Notificator;
 class OptionsModel;
@@ -156,6 +157,7 @@ private:
     Notificator *notificator;
     RPCConsole *rpcConsole;
     HelpMessageDialog *helpMessageDialog;
+    ModalOverlay *modalOverlay;
 
     /** Keep track of previous number of blocks, to detect progress */
     int prevBlocks;
@@ -181,6 +183,8 @@ private:
     void subscribeToCoreSignals();
     /** Disconnect core signals from GUI client */
     void unsubscribeFromCoreSignals();
+
+    void updateHeadersSyncProgressLabel();
 
 Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
@@ -286,6 +290,9 @@ private Q_SLOTS:
 
     /** Show progress dialog e.g. for verifychain */
     void showProgress(const QString &title, int nProgress);
+
+    void showModalOverlay();
+
 };
 
 class UnitDisplayStatusBarControl : public QLabel
