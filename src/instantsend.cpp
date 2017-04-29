@@ -495,7 +495,8 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
         } else if (mempool.mapNextTx.count(txin.prevout)) {
             // conflicting with tx in mempool
             fMempoolConflict = true;
-            const CTransaction *ptxConflicting = mempool.mapNextTx[txin.prevout].ptx;
+            auto itConflicting = mempool.mapNextTx.find(txin.prevout);
+            const CTransaction *ptxConflicting = itConflicting->second;
             uint256 hashConflicting = ptxConflicting->GetHash();
             if(HasTxLockRequest(hashConflicting)) {
                 // There can be only one completed lock, the other lock request should never complete,
