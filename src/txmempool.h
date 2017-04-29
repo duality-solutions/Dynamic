@@ -13,6 +13,7 @@
 #include "coins.h"
 #include "indirectmap.h"
 #include "primitives/transaction.h"
+#include "random.h"
 #include "spentindex.h"
 #include "sync.h"
 

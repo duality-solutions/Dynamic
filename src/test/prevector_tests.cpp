@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "prevector.h"
-#include "random.h"
+#include "test_random.h"
 
 #include "serialize.h"
 #include "streams.h"
