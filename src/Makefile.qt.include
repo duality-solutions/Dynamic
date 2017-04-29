@@ -235,6 +235,7 @@ RES_ICONS = \
   qt/res/icons/drk/tx_output.png \
   qt/res/icons/drk/tx_mined.png \
   qt/res/icons/drk/verify.png \
+  qt/res/icons/drk/warning.png \
   qt/res/icons/drk/unit_dyn.png \
   qt/res/icons/drk/unit_mdyn.png \
   qt/res/icons/drk/unit_udyn.png \
