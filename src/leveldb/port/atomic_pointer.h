@@ -26,9 +26,7 @@
 #include <windows.h>
 #endif
 #ifdef OS_MACOSX
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < 101200
 #include <libkern/OSAtomic.h>
-#endif
 #endif
 
 #if defined(_M_X64) || defined(__x86_64__)
@@ -37,8 +35,12 @@
 #define ARCH_CPU_X86_FAMILY 1
 #elif defined(__ARMEL__)
 #define ARCH_CPU_ARM_FAMILY 1
+#elif defined(__aarch64__)
+#define ARCH_CPU_ARM64_FAMILY 1
 #elif defined(__ppc__) || defined(__powerpc__) || defined(__powerpc64__)
 #define ARCH_CPU_PPC_FAMILY 1
+#elif defined(__mips__)
+#define ARCH_CPU_MIPS_FAMILY 1
 #endif
 
 namespace leveldb {
@@ -54,11 +56,7 @@ namespace port {
 // Mac OS
 #elif defined(OS_MACOSX)
 inline void MemoryBarrier() {
-#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < 101200
   OSMemoryBarrier();
-# else
-  atomic_thread_fence(std::memory_order_seq_cst);
-#endif
 }
 #define LEVELDB_HAVE_MEMORY_BARRIER
 
@@ -98,12 +96,26 @@ inline void MemoryBarrier() {
 }
 #define LEVELDB_HAVE_MEMORY_BARRIER
 
+// ARM64
+#elif defined(ARCH_CPU_ARM64_FAMILY)
+inline void MemoryBarrier() {
+  asm volatile("dmb sy" : : : "memory");
+}
+#define LEVELDB_HAVE_MEMORY_BARRIER
+
 // PPC
 #elif defined(ARCH_CPU_PPC_FAMILY) && defined(__GNUC__)
 inline void MemoryBarrier() {
   // TODO for some powerpc expert: is there a cheaper suitable variant?
   // Perhaps by having separate barriers for acquire and release ops.
   asm volatile("sync" : : : "memory");
+}
+#define LEVELDB_HAVE_MEMORY_BARRIER
+
+// MIPS
+#elif defined(ARCH_CPU_MIPS_FAMILY) && defined(__GNUC__)
+inline void MemoryBarrier() {
+  __asm__ __volatile__("sync" : : : "memory");
 }
 #define LEVELDB_HAVE_MEMORY_BARRIER
 
@@ -221,6 +233,7 @@ class AtomicPointer {
 #undef LEVELDB_HAVE_MEMORY_BARRIER
 #undef ARCH_CPU_X86_FAMILY
 #undef ARCH_CPU_ARM_FAMILY
+#undef ARCH_CPU_ARM64_FAMILY
 #undef ARCH_CPU_PPC_FAMILY
 
 }  // namespace port
