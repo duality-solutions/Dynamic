@@ -27,10 +27,9 @@
 #include <set>
 #include <stdint.h>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <boost/unordered_map.hpp>
 
 class CBloomFilter;
 class CBlockIndex;
@@ -152,7 +151,7 @@ struct BlockHasher
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
 extern CTxMemPool mempool;
-typedef boost::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
+typedef std::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap mapBlockIndex;
 extern uint64_t nLastBlockTx;
 extern uint64_t nLastBlockSize;

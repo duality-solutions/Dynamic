@@ -11,6 +11,7 @@
 #include "addressindex.h"
 #include "amount.h"
 #include "coins.h"
+#include "indirectmap.h"
 #include "primitives/transaction.h"
 #include "spentindex.h"
 #include "sync.h"
