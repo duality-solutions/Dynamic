@@ -521,23 +521,19 @@ public:
     //! Mark an entry as accessible.
     void Good(const CService &addr, int64_t nTime = GetAdjustedTime())
     {
-        {
-            LOCK(cs);
-            Check();
-            Good_(addr, nTime);
-            Check();
-        }
+        LOCK(cs);
+        Check();
+        Good_(addr, nTime);
+        Check();
     }
 
     //! Mark an entry as connection attempted to.
     void Attempt(const CService &addr, int64_t nTime = GetAdjustedTime())
     {
-        {
-            LOCK(cs);
-            Check();
-            Attempt_(addr, nTime);
-            Check();
-        }
+        LOCK(cs);
+        Check();
+        Attempt_(addr, nTime);
+        Check();
     }
 
     /**
@@ -571,12 +567,10 @@ public:
     //! Mark an entry as currently-connected-to.
     void Connected(const CService &addr, int64_t nTime = GetAdjustedTime())
     {
-        {
-            LOCK(cs);
-            Check();
-            Connected_(addr, nTime);
-            Check();
-        }
+        LOCK(cs);
+        Check();
+        Connected_(addr, nTime);
+        Check();
     }
     
     //! Ensure that bucket placement is always the same for testing purposes.
