@@ -311,8 +311,8 @@ RES_IMAGES = \
   qt/res/images/drk/drkpurple_downArrow.png \
   qt/res/images/drk/drkpurple_downArrow_small.png \
   qt/res/images/drk/drkpurple_leftArrow_small.png \
-  qt/res/images/drk/drkpurple_rightArrow_small.png \
   qt/res/images/drk/drkpurple_qtreeview_selected.png \
+  qt/res/images/drk/drkpurple_rightArrow_small.png \
   qt/res/images/drk/drkpurple_upArrow_small.png \
   qt/res/images/drk/drk_walletFrame_bg.png \
   qt/res/images/drk/dynamic_logo_horizontal.png \
