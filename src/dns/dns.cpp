@@ -23,27 +23,25 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 
-using namespace std;
-
-map<CNameVal, set<uint256> > mapNamePending; // for pending tx
+std::map<CNameVal, std::set<uint256> > mapNamePending; // for pending tx
 
 // forward decls
-extern string _(const char* psz);
-extern map<uint256, CTransaction> mapTransactions;
+extern std::string _(const char* psz);
+extern std::map<uint256, CTransaction> mapTransactions;
 extern CWallet* pwalletMain;
 
 class CNamecoinHooks : public CHooks
 {
 public:
     virtual bool IsNameFeeEnough(const CTransaction& tx, const CAmount& txFee);
-    virtual bool CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee);
+    virtual bool CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, std::vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee);
     virtual bool DisconnectInputs(const CTransaction& tx);
-    virtual bool ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy>& vName);
-    virtual bool ExtractAddress(const CScript& script, string& address);
+    virtual bool ConnectBlock(CBlockIndex* pindex, const std::vector<nameTempProxy>& vName);
+    virtual bool ExtractAddress(const CScript& script, std::string& address);
     virtual void AddToPendingNames(const CTransaction& tx);
     virtual bool RemoveNameScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
     virtual bool IsNameScript(CScript scr);
-    virtual bool getNameValue(const string& sName, string& sValue);
+    virtual bool getNameValue(const std::string& sName, std::string& sValue);
     virtual bool DumpToTextFile();
 };
 
@@ -65,19 +63,19 @@ bool CTransaction::ReadFromDisk(const CDiskTxPos& postx)
 }
 
 CNameVal nameValFromValue(const UniValue& value) {
-    string strName = value.get_str();
+    std::string strName = value.get_str();
     unsigned char *strbeg = (unsigned char*)strName.c_str();
     return CNameVal(strbeg, strbeg + strName.size());
 }
 
-CNameVal nameValFromString(const string& str) {
+CNameVal nameValFromString(const std::string& str) {
     unsigned char *strbeg = (unsigned char*)str.c_str();
     return CNameVal(strbeg, strbeg + str.size());
 }
 
-string limitString(const string& inp, unsigned int size, string message = "")
+std::string limitString(const std::string& inp, unsigned int size, std::string message = "")
 {
-    string ret = inp;
+    std::string ret = inp;
     if (inp.size() > size)
     {
         ret.resize(size);
@@ -87,9 +85,9 @@ string limitString(const string& inp, unsigned int size, string message = "")
     return ret;
 }
 
-string encodeNameVal(const CNameVal& input, const string& format)
+std::string encodeNameVal(const CNameVal& input, const std::string& format)
 {
-    string output;
+    std::string output;
     if      (format == "hex")    output = HexStr(input);
     else if (format == "base64") output = EncodeBase64(input.data(), input.size());
     else                         output = stringFromNameVal(input);
@@ -166,10 +164,10 @@ CAmount GetNameOpFee(const unsigned int& nRentalDays, const int& op)
 
 // scans nameindex.dat and return names with their last CNameIndex
 bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
-        vector<
-            pair<
+        std::vector<
+            std::pair<
                 CNameVal,
-                pair<CNameIndex, int>
+                std::pair<CNameIndex, int>
             >
         > &nameScan)
 {
@@ -183,7 +181,7 @@ bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
         // Read next record
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
         if (fFlags == DB_SET_RANGE)
-            ssKey << make_pair(string("namei"), name);
+            ssKey << std::make_pair(std::string("namei"), name);
         CDataStream ssValue(SER_DISK, CLIENT_VERSION);
         int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
         fFlags = DB_NEXT;
@@ -193,7 +191,7 @@ bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
             return false;
 
         // Unserialize
-        string strType;
+        std::string strType;
         ssKey >> strType;
         if (strType == "namei")
         {
@@ -203,7 +201,7 @@ bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
             ssValue >> val;
             if (val.deleted() || val.vtxPos.empty())
                 continue;
-            nameScan.push_back(make_pair(name2, make_pair(val.vtxPos.back(), val.nExpiresAt)));
+            nameScan.push_back(std::make_pair(name2, std::make_pair(val.vtxPos.back(), val.nExpiresAt)));
         }
 
         if (nameScan.size() >= nMax)
@@ -215,7 +213,7 @@ bool CNameDB::ScanNames(const CNameVal& name, unsigned int nMax,
 
 bool CNameDB::ReadName(const CNameVal& name, CNameRecord& rec)
 {
-    bool ret = Read(make_pair(std::string("namei"), name), rec);
+    bool ret = Read(std::make_pair(std::string("namei"), name), rec);
     int s = rec.vtxPos.size();
 
      // check if array index is out of array bounds
@@ -305,7 +303,7 @@ bool GetLastTxOfName(CNameDB& dbName, const CNameVal& name, CTransaction& tx)
 UniValue sendtoname(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
-        throw runtime_error(
+        throw std::runtime_error(
             "sendtoname <name> <amount> [comment] [comment-to]\n"
             "<amount> is a real and is rounded to the nearest 0.01"
             + HelpRequiringPassphrase());
@@ -323,7 +321,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
     if (params.size() > 3 && !params[3].isNull() && !params[3].get_str().empty())
         wtx.mapValue["to"]      = params[3].get_str();
 
-    string error;
+    std::string error;
     CDynamicAddress address;
     if (!GetNameCurrentAddress(name, address, error))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, error);
@@ -336,7 +334,7 @@ UniValue sendtoname(const UniValue& params, bool fHelp)
     return res;
 }
 
-bool GetNameCurrentAddress(const CNameVal& name, CDynamicAddress& address, string& error)
+bool GetNameCurrentAddress(const CNameVal& name, CDynamicAddress& address, std::string& error)
 {
     CNameDB dbName("r");
     if (!dbName.ExistsName(name))
@@ -362,7 +360,7 @@ bool GetNameCurrentAddress(const CNameVal& name, CDynamicAddress& address, strin
 
     if (!NameActive(dbName, name))
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "This name have expired. If you still wish to send money to it's last owner you can use this command:\n"
            << "sendtoaddress " << address.ToString() << " <your_amount> ";
         error = ss.str();
@@ -380,7 +378,7 @@ bool CNamecoinHooks::RemoveNameScriptPrefix(const CScript& scriptIn, CScript& sc
 UniValue name_list(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 2)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_list [name] [valuetype]\n"
                 "list my own names.\n"
                 "\nArguments:\n"
@@ -392,9 +390,9 @@ UniValue name_list(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal nameUniq = params.size() > 0 ? nameValFromValue(params[0]) : CNameVal();
-   string outputType = params.size() > 1 ? params[1].get_str() : "";
+    std::string outputType = params.size() > 1 ? params[1].get_str() : "";
 
-    map<CNameVal, NameTxInfo> mapNames, mapPending;
+    std::map<CNameVal, NameTxInfo> mapNames, mapPending;
     GetNameList(nameUniq, mapNames, mapPending);
 
     UniValue oRes(UniValue::VARR);
@@ -425,11 +423,11 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
     //vector<UniValue> oRes;
 
     CNameVal name;
-    vector<pair<CNameVal, pair<CNameIndex,int> > > nameScan;
+    std::vector<std::pair<CNameVal, std::pair<CNameIndex,int> > > nameScan;
     if (!dbName.ScanNames(name, 100000000, nameScan))
         return; // throw JSONRPCError(RPC_WALLET_ERROR, "scan failed");
 
-    pair<CNameVal, pair<CNameIndex,int> > pairScan;
+    std::pair<CNameVal, std::pair<CNameIndex,int> > pairScan;
     BOOST_FOREACH(pairScan, nameScan)
     {
         CNameVal name = pairScan.first;
@@ -455,7 +453,7 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
     }
 
     // add all pending names
-    BOOST_FOREACH(const PAIRTYPE(CNameVal, set<uint256>) &item, mapNamePending)
+    BOOST_FOREACH(const PAIRTYPE(CNameVal, std::set<uint256>) &item, mapNamePending)
     {
         if (!item.second.size())
             continue;
@@ -493,7 +491,7 @@ void GetNameList(const CNameVal& nameUniq, std::map<CNameVal, NameTxInfo>& mapNa
 UniValue name_debug(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "name_debug\n"
             "Dump pending transactions id in the debug file.\n");
 
@@ -501,9 +499,9 @@ UniValue name_debug(const UniValue& params, bool fHelp)
 
     {
         LOCK(cs_main);
-        BOOST_FOREACH(const PAIRTYPE(CNameVal, set<uint256>) &pairPending, mapNamePending)
+        BOOST_FOREACH(const PAIRTYPE(CNameVal, std::set<uint256>) &pairPending, mapNamePending)
         {
-            string name = stringFromNameVal(pairPending.first);
+            std::string name = stringFromNameVal(pairPending.first);
             LogPrintf("%s :\n", name);
             uint256 hash;
             BOOST_FOREACH(hash, pairPending.second)
@@ -522,7 +520,7 @@ UniValue name_debug(const UniValue& params, bool fHelp)
 UniValue name_show(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 3)
-        throw runtime_error(
+        throw std::runtime_error(
             "name_show <name> [valuetype] [filepath]\n"
             "Show values of a name.\n"
             "\nArguments:\n"
@@ -536,8 +534,8 @@ UniValue name_show(const UniValue& params, bool fHelp)
 
     UniValue oName(UniValue::VOBJ);
     CNameVal name = nameValFromValue(params[0]);
-    string outputType = params.size() > 1 ? params[1].get_str() : "";
-    string sName = stringFromNameVal(name);
+    std::string outputType = params.size() > 1 ? params[1].get_str() : "";
+    std::string sName = stringFromNameVal(name);
     NameTxInfo nti;
     {
         LOCK(cs_main);
@@ -572,9 +570,9 @@ UniValue name_show(const UniValue& params, bool fHelp)
 
     if (params.size() > 2)
     {
-        string filepath = params[2].get_str();
-        ofstream file;
-        file.open(filepath.c_str(), ios::out | ios::binary | ios::trunc);
+        std::string filepath = params[2].get_str();
+        std::ofstream file;
+        file.open(filepath.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
         if (!file.is_open())
             throw JSONRPCError(RPC_PARSE_ERROR, "Failed to open file. Check if you have permission to open it.");
 
@@ -618,7 +616,7 @@ UniValue name_history (const UniValue& params, bool fHelp)
 
     CNameVal name = nameValFromValue(params[0]);
     bool fFullHistory = params.size() > 1 ? params[1].get_bool() : false;
-    string outputType = params.size() > 2 ? params[2].get_str() : "";
+    std::string outputType = params.size() > 2 ? params[2].get_str() : "";
 
     CNameRecord nameRec;
     {
@@ -690,12 +688,12 @@ UniValue name_mempool (const UniValue& params, bool fHelp)
             + HelpExampleRpc ("name_mempool", "" )
         );
 
-    string outputType = params.size() > 0 ? params[0].get_str() : "";
+    std::string outputType = params.size() > 0 ? params[0].get_str() : "";
 
     UniValue res(UniValue::VARR);
-    BOOST_FOREACH(const PAIRTYPE(CNameVal, set<uint256>) &pairPending, mapNamePending)
+    BOOST_FOREACH(const PAIRTYPE(CNameVal, std::set<uint256>) &pairPending, mapNamePending)
     {
-        string sName = stringFromNameVal(pairPending.first);
+        std::string sName = stringFromNameVal(pairPending.first);
         BOOST_FOREACH(const uint256& hash, pairPending.second)
         {
             if (!mempool.exists(hash))
@@ -736,7 +734,7 @@ bool mycompare2 (const UniValue& lhs, const UniValue& rhs)
 UniValue name_filter(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 6)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_filter [regexp] [maxage=0] [from=0] [nb=0] [stat] [valuetype]\n"
                 "scan and filter names\n"
                 "[regexp] : apply [regexp] on names, empty means all names\n"
@@ -756,19 +754,19 @@ UniValue name_filter(const UniValue& params, bool fHelp)
     int nCountFrom = 0;
     int nCountNb = 0;
 
-    string strRegexp  = params.size() > 0 ? params[0].get_str() : "";
+    std::string strRegexp  = params.size() > 0 ? params[0].get_str() : "";
 
     int nMaxAge       = params.size() > 1 ? params[1].get_int() : 0;
     int nFrom         = params.size() > 2 ? params[2].get_int() : 0;
     int nNb           = params.size() > 3 ? params[3].get_int() : 0;
     bool fStat        = params.size() > 4 ? (params[4].get_str() == "stat" ? true : false) : false;
-    string outputType = params.size() > 5 ? params[5].get_str() : "";
+    std::string outputType = params.size() > 5 ? params[5].get_str() : "";
 
     CNameDB dbName("r");
-    vector<UniValue> oRes;
+    std::vector<UniValue> oRes;
 
     CNameVal name;
-    vector<pair<CNameVal, pair<CNameIndex,int> > > nameScan;
+    std::vector<std::pair<CNameVal, std::pair<CNameIndex,int> > > nameScan;
     if (!dbName.ScanNames(name, 100000000, nameScan))
         throw JSONRPCError(RPC_WALLET_ERROR, "scan failed");
 
@@ -777,10 +775,10 @@ UniValue name_filter(const UniValue& params, bool fHelp)
     smatch nameparts;
     sregex cregex = sregex::compile(strRegexp);
 
-    pair<CNameVal, pair<CNameIndex,int> > pairScan;
+    std::pair<CNameVal, std::pair<CNameIndex,int> > pairScan;
     BOOST_FOREACH(pairScan, nameScan)
     {
-        string name = stringFromNameVal(pairScan.first);
+        std::string name = stringFromNameVal(pairScan.first);
 
         //don't show multisig names
         if (name.length() >= 8 && name.substr(0,8) == "address:")
@@ -852,7 +850,7 @@ UniValue name_filter(const UniValue& params, bool fHelp)
 UniValue name_scan(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 4)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_scan [start-name] [max-returned] [max-value-length=-1] [valuetype]\n"
                 "Scan all names, starting at start-name and returning a maximum number of entries (default 500)\n"
                 "You can also control the length of shown value (0 = full value)\n"
@@ -863,27 +861,27 @@ UniValue name_scan(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
 
     CNameVal name      = params.size() > 0 ? nameValFromValue(params[0]) : CNameVal();
-    string strSearchName = "";
+    std::string strSearchName = "";
     int nMax           = params.size() > 1 ? params[1].get_int() : 500;
     int mMaxShownValue = params.size() > 2 ? params[2].get_int() : 0;
-    string outputType  = params.size() > 3 ? params[3].get_str() : "";
+    std::string outputType  = params.size() > 3 ? params[3].get_str() : "";
 
     CNameDB dbName("r");
     UniValue oRes(UniValue::VARR);
 
-    vector<pair<CNameVal, pair<CNameIndex,int> > > nameScan;
+    std::vector<std::pair<CNameVal, std::pair<CNameIndex,int> > > nameScan;
     if (!dbName.ScanNames(name, nMax, nameScan))
         throw JSONRPCError(RPC_WALLET_ERROR, "scan failed");
 
-    pair<CNameVal, pair<CNameIndex,int> > pairScan;
+    std::pair<CNameVal, std::pair<CNameIndex,int> > pairScan;
     BOOST_FOREACH(pairScan, nameScan)
     {
-        string ddnsName = stringFromNameVal(pairScan.first);
+        std::string ddnsName = stringFromNameVal(pairScan.first);
         // search for input string
         if (ddnsName.size() > strSearchName.size() && ddnsName.find(strSearchName) != std::string::npos)
         {
             UniValue oName(UniValue::VOBJ);
-            string ddnsName = stringFromNameVal(pairScan.first);
+            std::string ddnsName = stringFromNameVal(pairScan.first);
             oName.push_back(Pair("name", ddnsName));
 
             CNameIndex txName = pairScan.second.first;
@@ -902,7 +900,7 @@ UniValue name_scan(const UniValue& params, bool fHelp)
     return oRes;
 }
 
-bool createNameScript(CScript& nameScript, const CNameVal& name, const CNameVal& value, int nRentalDays, int op, string& err_msg)
+bool createNameScript(CScript& nameScript, const CNameVal& name, const CNameVal& value, int nRentalDays, int op, std::string& err_msg)
 {
     if (op == OP_NAME_DELETE)
     {
@@ -917,7 +915,7 @@ bool createNameScript(CScript& nameScript, const CNameVal& name, const CNameVal&
         return false;
     }
 
-    vector<unsigned char> vchRentalDays = CScriptNum(nRentalDays).getvch();
+    std::vector<unsigned char> vchRentalDays = CScriptNum(nRentalDays).getvch();
 
     //add name and rental days
     nameScript << op << OP_DROP << name << vchRentalDays << OP_2DROP;
@@ -928,9 +926,9 @@ bool createNameScript(CScript& nameScript, const CNameVal& name, const CNameVal&
 
         for (unsigned int i = 0; i < nChunks; i++)
         {   // insert data
-            vector<unsigned char>::const_iterator sliceBegin = value.begin() + i*520;
-            vector<unsigned char>::const_iterator sliceEnd = min(value.begin() + (i+1)*520, value.end());
-            vector<unsigned char> vchSubValue(sliceBegin, sliceEnd);
+            std::vector<unsigned char>::const_iterator sliceBegin = value.begin() + i*520;
+            std::vector<unsigned char>::const_iterator sliceEnd = min(value.begin() + (i+1)*520, value.end());
+            std::vector<unsigned char> vchSubValue(sliceBegin, sliceEnd);
             nameScript << vchSubValue;
         }
 
@@ -955,7 +953,7 @@ bool IsWalletLocked(NameTxReturn& ret)
 }
 
 static CNameVal CNameValToLowerCase(const CNameVal& nameVal) {
-    string strNameVal;
+    std::string strNameVal;
     CNameVal::const_iterator vi = nameVal.begin();
     while (vi != nameVal.end()) 
     {
@@ -969,7 +967,7 @@ static CNameVal CNameValToLowerCase(const CNameVal& nameVal) {
 UniValue name_new(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 5)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_new <name> <value> <days> [toaddress] [valuetype]\n"
                 "Creates new key->value pair which expires after specified number of days.\n"
                 "Cost is square root of (1% of last PoW + 1% per year of last PoW)."
@@ -988,8 +986,8 @@ UniValue name_new(const UniValue& params, bool fHelp)
     CNameVal name = CNameValToLowerCase(nameValFromValue(params[0]));
     CNameVal value = nameValFromValue(params[1]);
     int nRentalDays = params[2].get_int();
-    string strAddress = params.size() > 3 ? params[3].get_str() : "";
-    string strValueType = params.size() > 4 ? params[4].get_str() : "";
+    std::string strAddress = params.size() > 3 ? params[3].get_str() : "";
+    std::string strValueType = params.size() > 4 ? params[4].get_str() : "";
 
     NameTxReturn ret = name_operation(OP_NAME_NEW, name, value, nRentalDays, strAddress, strValueType);
     if (!ret.ok)
@@ -1000,7 +998,7 @@ UniValue name_new(const UniValue& params, bool fHelp)
 UniValue name_update(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 5)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_update <name> <value> <days> [toaddress] [valuetype]\n"
                 "Update name value, add days to expiration time and possibly transfer a name to diffrent address.\n"
                 "\nArguments:\n"
@@ -1017,8 +1015,8 @@ UniValue name_update(const UniValue& params, bool fHelp)
     CNameVal name = CNameValToLowerCase(nameValFromValue(params[0]));
     CNameVal value = nameValFromValue(params[1]);
     int nRentalDays = params[2].get_int();
-    string strAddress = params.size() > 3 ? params[3].get_str() : "";
-    string strValueType = params.size() > 4 ? params[4].get_str() : "";
+    std::string strAddress = params.size() > 3 ? params[3].get_str() : "";
+    std::string strValueType = params.size() > 4 ? params[4].get_str() : "";
 
     NameTxReturn ret = name_operation(OP_NAME_UPDATE, name, value, nRentalDays, strAddress, strValueType);
 
@@ -1030,7 +1028,7 @@ UniValue name_update(const UniValue& params, bool fHelp)
 UniValue name_delete(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
                 "name_delete <name>\nDelete a name if you own it. Others may do name_new after this command."
                 + HelpRequiringPassphrase());
 
@@ -1044,7 +1042,7 @@ UniValue name_delete(const UniValue& params, bool fHelp)
 
 }
 
-NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string& strAddress, const string& strValueType)
+NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const std::string& strAddress, const std::string& strValueType)
 {
     NameTxReturn ret;
     ret.err_code = RPC_INTERNAL_ERROR; // default value in case of abnormal exit
@@ -1067,7 +1065,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     // decode value or leave it as is
     if (!strValueType.empty() && !value.empty())
     {
-        string strValue = stringFromNameVal(value);
+        std::string strValue = stringFromNameVal(value);
         if (strValueType == "hex")
         {
             if (!IsHex(strValue))
@@ -1138,7 +1136,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
     CMutableTransaction tmpTx;
     tmpTx.nVersion = NAMECOIN_TX_VERSION;
     CWalletTx wtx(pwalletMain, tmpTx);
-    stringstream ss;
+    std::stringstream ss;
     CScript scriptPubKey;
 
     {
@@ -1207,7 +1205,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
 
         // create namescript
         CScript nameScript;
-        string prevMsg = ret.err_msg;
+        std::string prevMsg = ret.err_msg;
         if (!createNameScript(nameScript, name, value, nRentalDays, op, ret.err_msg))
         {
             if (prevMsg == ret.err_msg)  // in case error message not changed, but error still occurred
@@ -1286,7 +1284,7 @@ bool createNameIndexFile()
             return error("createNameIndexFile() : *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
 
         // collect name tx from block
-        vector<nameTempProxy> vName;
+        std::vector<nameTempProxy> vName;
         CDiskTxPos pos(pindex->GetBlockPos(), GetSizeOfCompactSize(block.vtx.size())); // start position
         for (unsigned int i=0; i<block.vtx.size(); i++)
         {
@@ -1367,7 +1365,7 @@ int IndexOfNameOutput(const CTransaction& tx)
 {
     NameTxInfo nti;
     if (!DecodeNameTx(tx, nti))
-        throw runtime_error("IndexOfNameOutput() : name output not found");
+        throw std::runtime_error("IndexOfNameOutput() : name output not found");
     return nti.nOut;
 }
 
@@ -1400,7 +1398,7 @@ void CNamecoinHooks::AddToPendingNames(const CTransaction& tx)
 // Checks name tx and save name data to vName if valid
 // returns true if: (tx is valid name tx) OR (tx is not a name tx)
 // returns false if tx is invalid name tx
-bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee)
+bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pindexBlock, std::vector<nameTempProxy> &vName, const CDiskTxPos& pos, const CAmount& txFee)
 {
     if (tx.nVersion != NAMECOIN_TX_VERSION)
         return true;
@@ -1415,8 +1413,8 @@ bool CNamecoinHooks::CheckInputs(const CTransaction& tx, const CBlockIndex* pind
     }
 
     CNameVal name = nti.name;
-    string sName = stringFromNameVal(name);
-    string info = str( boost::format("name %s, tx=%s, block=%d, value=%s") %
+    std::string sName = stringFromNameVal(name);
+    std::string info = str( boost::format("name %s, tx=%s, block=%d, value=%s") %
         sName % tx.GetHash().GetHex() % pindexBlock->nHeight % stringFromNameVal(nti.value));
 
 //check if last known tx on this name matches any of inputs of this tx
@@ -1590,7 +1588,7 @@ bool CNamecoinHooks::DisconnectInputs(const CTransaction& tx)
     return true;
 }
 
-string stringFromOp(int op)
+std::string stringFromOp(int op)
 {
     switch (op)
     {
@@ -1607,27 +1605,27 @@ string stringFromOp(int op)
     }
 }
 
-bool CNamecoinHooks::ExtractAddress(const CScript& script, string& address)
+bool CNamecoinHooks::ExtractAddress(const CScript& script, std::string& address)
 {
     NameTxInfo nti;
     if (!DecodeNameScript(script, nti))
         return false;
 
-    string strOp = stringFromOp(nti.op);
+    std::string strOp = stringFromOp(nti.op);
     address = strOp + ": " + stringFromNameVal(nti.name);
     return true;
 }
 
 // Executes name operations in vName and writes result to nameindex.dat.
 // NOTE: the block should already be written to blockchain by now - otherwise this may fail.
-bool CNamecoinHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProxy> &vName)
+bool CNamecoinHooks::ConnectBlock(CBlockIndex* pindex, const std::vector<nameTempProxy> &vName)
 {
     if (vName.empty())
         return true;
 
     // All of these name ops should succed. If there is an error - nameindex.dat is probably corrupt.
     CNameDB dbName("r+");
-    set<CNameVal> sNameNew;
+    std::set<CNameVal> sNameNew;
 
     BOOST_FOREACH(const nameTempProxy& i, vName)
     {
@@ -1675,7 +1673,7 @@ bool CNamecoinHooks::ConnectBlock(CBlockIndex* pindex, const vector<nameTempProx
         {
             // remove from pending names list
             LOCK(cs_main);
-            map<CNameVal, set<uint256> >::iterator mi = mapNamePending.find(i.name);
+            std::map<CNameVal, std::set<uint256> >::iterator mi = mapNamePending.find(i.name);
             if (mi != mapNamePending.end())
             {
                 mi->second.erase(i.hash);
@@ -1696,7 +1694,7 @@ bool CNamecoinHooks::IsNameScript(CScript scr)
     return DecodeNameScript(scr, nti);
 }
 
-bool CNamecoinHooks::getNameValue(const string& sName, string& sValue)
+bool CNamecoinHooks::getNameValue(const std::string& sName, std::string& sValue)
 {
     CNameVal name = nameValFromString(sName);
     CNameDB dbName("r");
@@ -1741,7 +1739,7 @@ bool CNamecoinHooks::DumpToTextFile()
 
 bool CNameDB::DumpToTextFile()
 {
-    ofstream myfile ("example111.txt");
+    std::ofstream myfile ("example111.txt");
     if (!myfile.is_open())
         return false;
 
@@ -1756,7 +1754,7 @@ bool CNameDB::DumpToTextFile()
         // Read next record
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
         if (fFlags == DB_SET_RANGE)
-            ssKey << make_pair(string("namei"), name);
+            ssKey << std::make_pair(std::string("namei"), name);
         CDataStream ssValue(SER_DISK, CLIENT_VERSION);
         int ret = ReadAtCursor(pcursor, ssKey, ssValue, fFlags);
         fFlags = DB_NEXT;
@@ -1766,7 +1764,7 @@ bool CNameDB::DumpToTextFile()
             return false;
 
         // Unserialize
-        string strType;
+        std::string strType;
         ssKey >> strType;
         if (strType == "namei")
         {
@@ -1827,11 +1825,11 @@ std::string MultiSigGetPubKeyFromAddress(const std::string& strAddress)
     
     CNameDB dbName("r");
 
-    vector<pair<CNameVal, pair<CNameIndex,int> > > nameScan;
+    std::vector<std::pair<CNameVal, std::pair<CNameIndex,int> > > nameScan;
     if (!dbName.ScanNames(nameVal, nMax, nameScan))
         throw JSONRPCError(RPC_WALLET_ERROR, "scan failed");
 
-    pair<CNameVal, pair<CNameIndex,int> > pairScan;
+    std::pair<CNameVal, std::pair<CNameIndex,int> > pairScan;
     BOOST_FOREACH(pairScan, nameScan)
     {
         CNameIndex nameIndex = pairScan.second.first;

@@ -12,8 +12,6 @@
 #include "init.h"
 #include "main.h"
 
-using namespace std;
-
 class CGovernanceVote;
 
 /**

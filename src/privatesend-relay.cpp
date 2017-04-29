@@ -18,7 +18,7 @@ CPrivateSendRelay::CPrivateSendRelay()
     out = CTxOut();
 }
 
-CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinDynodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
+CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinDynodeIn, std::vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
 {
     vinDynode = vinDynodeIn;
     vchSig = vchSigIn;

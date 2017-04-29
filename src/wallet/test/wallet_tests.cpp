@@ -11,7 +11,6 @@
 
 #include "test/test_dynamic.h"
 
-#include <boost/foreach.hpp>
 #include <boost/test/unit_test.hpp>
 
 // how many times to run all the tests to have a chance to catch errors that only show up with particular random shuffles
@@ -21,14 +20,12 @@
 // we repeat those tests this many times and only complain if all iterations of the test fail
 #define RANDOM_REPEATS 5
 
-using namespace std;
-
-typedef set<pair<const CWalletTx*,unsigned int> > CoinSet;
+typedef std::set<std::pair<const CWalletTx*,unsigned int> > CoinSet;
 
 BOOST_FIXTURE_TEST_SUITE(wallet_tests, TestingSetup)
 
 static CWallet wallet;
-static vector<COutput> vCoins;
+static std::vector<COutput> vCoins;
 
 static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = false, int nInput=0)
 {
@@ -54,14 +51,14 @@ static void add_coin(const CAmount& nValue, int nAge = 6*24, bool fIsFromMe = fa
 
 static void empty_wallet(void)
 {
-    BOOST_FOREACH(COutput output, vCoins)
+    for (COutput output : vCoins)
         delete output.tx;
     vCoins.clear();
 }
 
 static bool equal_sets(CoinSet a, CoinSet b)
 {
-    pair<CoinSet::iterator, CoinSet::iterator> ret = mismatch(a.begin(), a.end(), b.begin());
+    std::pair<CoinSet::iterator, CoinSet::iterator> ret = mismatch(a.begin(), a.end(), b.begin());
     return ret.first == a.end() && ret.second == b.end();
 }
 

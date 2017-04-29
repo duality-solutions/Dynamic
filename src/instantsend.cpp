@@ -653,12 +653,12 @@ bool CInstantSend::AlreadyHave(const uint256& hash)
 
 void CInstantSend::AcceptLockRequest(const CTxLockRequest& txLockRequest)
 {
-    mapLockRequestAccepted.insert(make_pair(txLockRequest.GetHash(), txLockRequest));
+    mapLockRequestAccepted.insert(std::make_pair(txLockRequest.GetHash(), txLockRequest));
 }
 
 void CInstantSend::RejectLockRequest(const CTxLockRequest& txLockRequest)
 {
-    mapLockRequestRejected.insert(make_pair(txLockRequest.GetHash(), txLockRequest));
+    mapLockRequestRejected.insert(std::make_pair(txLockRequest.GetHash(), txLockRequest));
 }
 
 bool CInstantSend::HasTxLockRequest(const uint256& txHash)
@@ -1103,7 +1103,7 @@ void COutPointLock::Relay() const
 //
 void CTxLockCandidate::AddOutPointLock(const COutPoint& outpoint)
 {
-    mapOutPointLocks.insert(make_pair(outpoint, COutPointLock(outpoint)));
+    mapOutPointLocks.insert(std::make_pair(outpoint, COutPointLock(outpoint)));
 }
 
 bool CTxLockCandidate::AddVote(const CTxLockVote& vote)

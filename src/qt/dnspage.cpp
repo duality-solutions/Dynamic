@@ -252,7 +252,7 @@ void DNSPage::on_submitNameButton_clicked()
     if (ui->registerValue->isEnabled())
     {
         displayValue = ui->registerValue->toPlainText();
-        string strValue = displayValue.toStdString();
+        std::string strValue = displayValue.toStdString();
         value.assign(strValue.begin(), strValue.end());
     }
     else
@@ -301,7 +301,7 @@ void DNSPage::on_submitNameButton_clicked()
     }
 
     int64_t txFee = MIN_TX_FEE;
-    string strName = qsName.toStdString();
+    std::string strName = qsName.toStdString();
     CNameVal name(strName.begin(), strName.end());
     {
         if (txType == "NAME_NEW")
@@ -469,7 +469,7 @@ void DNSPage::onSaveValueAsBinaryAction()
     CNameVal name;
     {
         QString tmpName1 = selection.at(0).data(Qt::EditRole).toString();
-        string tmpName2 = tmpName1.toStdString();
+        std::string tmpName2 = tmpName1.toStdString();
         name.assign(tmpName2.begin(), tmpName2.end());
     }
 
@@ -612,7 +612,7 @@ void DNSPage::on_registerValue_textChanged()
     float byteSize;
     if (ui->registerValue->isEnabled())
     {
-        string strValue = ui->registerValue->toPlainText().toStdString();
+        std::string strValue = ui->registerValue->toPlainText().toStdString();
         CNameVal value(strValue.begin(), strValue.end());
         byteSize = value.size();
     }

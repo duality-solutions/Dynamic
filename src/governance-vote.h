@@ -11,8 +11,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-using namespace std;
-
 class CGovernanceVote;
 
 // INTENTION OF DYNODES REGARDING ITEM

@@ -1,4 +1,45 @@
 **Dynamic v1.4.0.0**
+
+* Remove namespace std;/Repair Tests
+* Fix Signal/Slot/Strings
+* Implement modaloverlay
+* Qt: Sort transactions by date
+* Kill insecure_random and associated global state
+* Only send one GetAddr response per connection.
+* Refactor: Removed begin/end_ptr functions.
+* LevelDB 1.19
+* Increase context.threads to 4
+* Fix races
+* Fix calculation of number of bound sockets to use
+* Fix unlocked access to vNodes.size()
+* Move GetAccountBalance from rpcwallet.cpp into CWallet::GetAccountBalance
+* UpdateTip: log only one line at most per block
+* VerifyDB: don't check blocks that have been pruned 
+* qt: askpassphrasedialog: Clear pass fields on accept
+* net: Avoid duplicate getheaders requests.
+* Check non-null pindex before potentially referencing
+* mapNextTx: use pointer as key, simplify value
+* Implement indirectmap.h and update memusage.h
+* Add/Repair LOCK's
+* Fix parameter naming inconsistencies 
+* Clicking on the lock icon will open the passphrase dialog
+* Fix bip32_tests.cpp
+* Update Argon2d, hash.cpp/h
+* Repair SLOT issue in rpcconsole.cpp
+* Fix incorrect psTx usages
+* Fix torcontrol.cpp unused private field warning
+* Update Encryption(crypter.cpp/h)
+* Remove old HD wallet code
+* Move InitLoadWallet to init.cpp
+* Revert Tick Changes/Fix UI Thread Issue
+* Sentinel/Dynode Fixes
+* Remove unused functions/cleanup code
+* Reduce Keypool to 1000
+* Optimise Reindex
+* Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
+
+
+**Dynamic v1.3.0.2**
 * [Sync] Fix issue with headers first sync
 * [Sync] [Consensus] Shift Fork Logic to its own file
 * [Qt] Add CheckForks in the Qt Project File

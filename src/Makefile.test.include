@@ -83,6 +83,7 @@ DYNAMIC_TESTS =\
   test/streams_tests.cpp \
   test/test_dynamic.cpp \
   test/test_dynamic.h \
+  test/test_random.h \
   test/timedata_tests.cpp \
   test/transaction_tests.cpp \
   test/txvalidationcache_tests.cpp \

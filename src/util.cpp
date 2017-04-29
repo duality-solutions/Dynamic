@@ -90,8 +90,6 @@
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
 #include <boost/thread.hpp>
 
-using namespace std;
-
 //Dynamic only features
 bool fDyNode = false;
 bool fLiteMode = false;
@@ -107,14 +105,14 @@ int nWalletBackups = 10;
 const char * const DYNAMIC_CONF_FILENAME = "dynamic.conf";
 const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
-map<string, string> mapArgs;
-map<string, vector<string> > mapMultiArgs;
+std::map<std::string, std::string> mapArgs;
+std::map<std::string, std::vector<std::string> > mapMultiArgs;
 bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
 bool fDaemon = false;
 bool fServer = false;
-string strMiscWarning;
+std::string strMiscWarning;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogThreadNames = DEFAULT_LOGTHREADNAMES;
@@ -197,7 +195,7 @@ static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
  */
 static FILE* fileout = NULL;
 static boost::mutex* mutexDebugLog = NULL;
-static list<string> *vMsgsBeforeOpenLog;
+static std::list<std::string> *vMsgsBeforeOpenLog;
 
 static int FileWriteStr(const std::string &str, FILE *fp)
 {
@@ -208,7 +206,7 @@ static void DebugPrintInit()
 {
     assert(mutexDebugLog == NULL);
     mutexDebugLog = new boost::mutex();
-    vMsgsBeforeOpenLog = new list<string>;
+    vMsgsBeforeOpenLog = new std::list<std::string>;
 }
 
 void OpenDebugLog()
@@ -240,7 +238,7 @@ bool LogAcceptCategory(const char* category)
         // This helps prevent issues debugging global destructors,
         // where mapMultiArgs might be deleted before another
         // global destructor calls LogPrint()
-        static boost::thread_specific_ptr<set<string> > ptrCategory;
+        static boost::thread_specific_ptr<std::set<std::string> > ptrCategory;
 
         if (!fDebug) {
             if (ptrCategory.get() != NULL) {
@@ -256,26 +254,26 @@ bool LogAcceptCategory(const char* category)
             LogPrintf("debug turned on:\n");
             for (int i = 0; i < (int)mapMultiArgs["-debug"].size(); ++i)
                 LogPrintf("  thread %s category %s\n", strThreadName, mapMultiArgs["-debug"][i]);
-            const vector<string>& categories = mapMultiArgs["-debug"];
-            ptrCategory.reset(new set<string>(categories.begin(), categories.end()));
+            const std::vector<std::string>& categories = mapMultiArgs["-debug"];
+            ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
             // thread_specific_ptr automatically deletes the set when the thread ends.
             // "dynamic" is a composite category enabling all Dynamic-related debug output
-            if(ptrCategory->count(string("dynamic"))) {
-                ptrCategory->insert(string("privatesend"));
-                ptrCategory->insert(string("instantsend"));
-                ptrCategory->insert(string("dynode"));
-                ptrCategory->insert(string("spork"));
-                ptrCategory->insert(string("keepass"));
-                ptrCategory->insert(string("dnpayments"));
-                ptrCategory->insert(string("gobject"));
+            if(ptrCategory->count(std::string("dynamic"))) {
+                ptrCategory->insert(std::string("privatesend"));
+                ptrCategory->insert(std::string("instantsend"));
+                ptrCategory->insert(std::string("dynode"));
+                ptrCategory->insert(std::string("spork"));
+                ptrCategory->insert(std::string("keepass"));
+                ptrCategory->insert(std::string("dnpayments"));
+                ptrCategory->insert(std::string("gobject"));
             }
         }
-        const set<string>& setCategories = *ptrCategory.get();
+        const std::set<std::string>& setCategories = *ptrCategory.get();
 
         // if not debugging everything and not debugging specific category, LogPrint does nothing.
-        if (setCategories.count(string("")) == 0 &&
-            setCategories.count(string("1")) == 0 &&
-            setCategories.count(string(category)) == 0)
+        if (setCategories.count(std::string("")) == 0 &&
+            setCategories.count(std::string("1")) == 0 &&
+            setCategories.count(std::string(category)) == 0)
             return false;
     }
     return true;
@@ -288,7 +286,7 @@ bool LogAcceptCategory(const char* category)
  */
 static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine)
 {
-    string strStamped;
+    std::string strStamped;
 
     if (!fLogTimestamps)
         return str;
@@ -312,7 +310,7 @@ static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine
  */
 static std::string LogThreadNameStr(const std::string &str, bool *fStartedNewLine)
 {
-    string strThreadLogged;
+    std::string strThreadLogged;
 
     if (!fLogThreadNames)
         return str;
@@ -649,8 +647,8 @@ boost::filesystem::path GetDynodeConfigFile()
     return pathConfigFile;
 }
 
-void ReadConfigFile(map<string, string>& mapSettingsRet,
-                    map<string, vector<string> >& mapMultiSettingsRet)
+void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
+                    std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
 
@@ -664,14 +662,14 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
         }
     }
 
-    set<string> setOptions;
+    std::set<std::string> setOptions;
     setOptions.insert("*");
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
         // Don't overwrite existing settings so command line settings override dynamic.conf
-        string strKey = string("-") + it->string_key;
-        string strValue = it->value[0];
+        std::string strKey = std::string("-") + it->string_key;
+        std::string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
         if (mapSettingsRet.count(strKey) == 0)
             mapSettingsRet[strKey] = strValue;

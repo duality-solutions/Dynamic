@@ -17,8 +17,6 @@
 #include <boost/thread.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 
-using namespace std;
-
 #define DYNDNS_DAPSIZE     (8 * 1024)
 #define DYNDNS_DAPTRESHOLD 3000 // 200K/min limit answer
 
@@ -57,17 +55,17 @@ struct DNSAP {    // DNS Amplifier Protector ExpDecay structure
 struct Verifier {
     Verifier() : mask(VERMASK_NEW) {}  // -1 == uninited, neg != -1 == cant fetch
     int32_t  mask;   // Signature Revocation List mask
-    string   srl_tpl;   // Signature Revocation List template
+    std::string   srl_tpl;   // Signature Revocation List template
     CKeyID   keyID;    // Key for verify message
 }; // 72 bytes = 18 words
 
 struct TollFree {
     TollFree(const char *re) :
-  regex(boost::xpressive::sregex::compile(string(re))), regex_str(re)
+  regex(boost::xpressive::sregex::compile(std::string(re))), regex_str(re)
     {}
     boost::xpressive::sregex  regex;
-    string      regex_str;
-    vector<string>    e2u;
+    std::string      regex_str;
+    std::vector<std::string>    e2u;
 };
 
 class DynDns {
@@ -131,8 +129,8 @@ class DynDns {
         
     int8_t    m_status;
     boost::thread m_thread;
-    map<string, Verifier> m_verifiers;
-    vector<TollFree>      m_tollfree;
+    std::map<std::string, Verifier> m_verifiers;
+    std::vector<TollFree>      m_tollfree;
 }; // class DynDns
 
 #endif // DYNDNS_H

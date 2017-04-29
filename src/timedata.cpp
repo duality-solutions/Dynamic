@@ -15,8 +15,6 @@
 
 #include <boost/foreach.hpp>
 
-using namespace std;
-
 static CCriticalSection cs_nTimeOffset;
 static int64_t nTimeOffset = 0;
 
@@ -49,7 +47,7 @@ void AddTimeData(const CNetAddr& ip, int64_t nOffsetSample)
 {
     LOCK(cs_nTimeOffset);
     // Ignore duplicates
-    static set<CNetAddr> setKnown;
+    static std::set<CNetAddr> setKnown;
     if (setKnown.size() == DYNAMIC_TIMEDATA_MAX_SAMPLES)
         return;
     if (!setKnown.insert(ip).second)
@@ -102,7 +100,7 @@ void AddTimeData(const CNetAddr& ip, int64_t nOffsetSample)
                 if (!fMatch)
                 {
                     fDone = true;
-                    string strMessage = _("Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
+                    std::string strMessage = _("Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
                     strMiscWarning = strMessage;
                     uiInterface.ThreadSafeMessageBox(strMessage, "", CClientUIInterface::MSG_WARNING);
                 }

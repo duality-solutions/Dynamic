@@ -35,8 +35,6 @@
 class CSporkManager;
 class CSporkMessage;
 
-using namespace std;
-
 /**
  * @note Do not add or change anything in the information returned by this
  * method. `getinfo` exists for backwards-compatibility only. It combines
@@ -53,7 +51,7 @@ using namespace std;
 UniValue getinfo(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
-        throw runtime_error(
+        throw std::runtime_error(
             "getinfo\n"
             "Returns an object containing various state info.\n"
             "\nResult:\n"
@@ -104,7 +102,7 @@ UniValue getinfo(const UniValue& params, bool fHelp)
     obj.push_back(Pair("blocks",        (int)chainActive.Height()));
     obj.push_back(Pair("timeoffset",    GetTimeOffset()));
     obj.push_back(Pair("connections",   (int)vNodes.size()));
-    obj.push_back(Pair("proxy",         (proxy.IsValid() ? proxy.proxy.ToStringIPPort() : string())));
+    obj.push_back(Pair("proxy",         (proxy.IsValid() ? proxy.proxy.ToStringIPPort() : std::string())));
     obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
     obj.push_back(Pair("testnet",       Params().TestnetToBeDeprecatedFieldRPC()));
 #ifdef ENABLE_WALLET
@@ -124,7 +122,7 @@ UniValue getinfo(const UniValue& params, bool fHelp)
 UniValue debug(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
             "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
             "dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject )\n"
@@ -148,7 +146,7 @@ UniValue debug(const UniValue& params, bool fHelp)
 UniValue dnsync(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "dnsync [status|next|reset]\n"
             "Returns the sync status, updates to the next step or resets it entirely.\n"
         );
@@ -260,7 +258,7 @@ UniValue spork(const UniValue& params, bool fHelp)
 
     }
 
-    throw runtime_error(
+    throw std::runtime_error(
         "spork <name> [<value>]\n"
         "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active"
         "<value> is a epoch datetime to enable or disable spork"
@@ -270,7 +268,7 @@ UniValue spork(const UniValue& params, bool fHelp)
 UniValue validateaddress(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "validateaddress \"dynamicaddress\"\n"
             "\nReturn information about the given dynamic address.\n"
             "\nArguments:\n"
@@ -306,7 +304,7 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
     if (isValid)
     {
         CTxDestination dest = address.Get();
-        string currentAddress = address.ToString();
+        std::string currentAddress = address.ToString();
         ret.push_back(Pair("address", currentAddress));
 
         CScript scriptPubKey = GetScriptForDestination(dest);
@@ -335,13 +333,13 @@ CScript _createmultisig_redeemScript(const UniValue& params)
 
     // Gather public keys
     if (nRequired < 1)
-        throw runtime_error("a multisignature address must require at least one key to redeem");
+        throw std::runtime_error("a multisignature address must require at least one key to redeem");
     if ((int)keys.size() < nRequired)
-        throw runtime_error(
+        throw std::runtime_error(
             strprintf("not enough keys supplied "
                       "(got %u keys, but need at least %d to redeem)", keys.size(), nRequired));
     if (keys.size() > 16)
-        throw runtime_error("Number of addresses involved in the multisignature address creation > 16\nReduce the number");
+        throw std::runtime_error("Number of addresses involved in the multisignature address creation > 16\nReduce the number");
     std::vector<CPubKey> pubkeys;
     pubkeys.resize(keys.size());
     for (unsigned int i = 0; i < keys.size(); i++)
@@ -354,14 +352,14 @@ CScript _createmultisig_redeemScript(const UniValue& params)
         {
             CKeyID keyID;
             if (!address.GetKeyID(keyID))
-                throw runtime_error(
+                throw std::runtime_error(
                     strprintf("%s does not refer to a key",ks));
             CPubKey vchPubKey;
             if (!pwalletMain->GetPubKey(keyID, vchPubKey))
-                throw runtime_error(
+                throw std::runtime_error(
                     strprintf("no full public key for address %s",ks));
             if (!vchPubKey.IsFullyValid())
-                throw runtime_error(" Invalid public key: "+ks);
+                throw std::runtime_error(" Invalid public key: "+ks);
             pubkeys[i] = vchPubKey;
         }
 
@@ -372,18 +370,18 @@ CScript _createmultisig_redeemScript(const UniValue& params)
         {
             CPubKey vchPubKey(ParseHex(ks));
             if (!vchPubKey.IsFullyValid())
-                throw runtime_error(" Invalid public key: "+ks);
+                throw std::runtime_error(" Invalid public key: "+ks);
             pubkeys[i] = vchPubKey;
         }
         else
         {
-            throw runtime_error(" Invalid public key: "+ks);
+            throw std::runtime_error(" Invalid public key: "+ks);
         }
     }
     CScript result = GetScriptForMultisig(nRequired, pubkeys);
 
     if (result.size() > MAX_SCRIPT_ELEMENT_SIZE)
-        throw runtime_error(
+        throw std::runtime_error(
                 strprintf("redeemScript exceeds size limit: %d > %d", result.size(), MAX_SCRIPT_ELEMENT_SIZE));
 
     return result;
@@ -393,7 +391,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 2)
     {
-        string msg = "createmultisig nrequired [\"key\",...]\n"
+        std::string msg = "createmultisig nrequired [\"key\",...]\n"
             "\nCreates a multi-signature address with n signature of m keys required.\n"
             "It returns an object with the address and redeemScript.\n"
 
@@ -417,7 +415,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
             "\nAs a json rpc call\n"
             + HelpExampleRpc("createmultisig", "2, \"[\\\"D8RHNF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\",\\\"D2sMrF9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\\\"]\"")
         ;
-        throw runtime_error(msg);
+        throw std::runtime_error(msg);
     }
 
     // Construct using pay-to-script-hash:
@@ -435,7 +433,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
 UniValue verifymessage(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 3)
-        throw runtime_error(
+        throw std::runtime_error(
             "verifymessage \"dynamicaddress\" \"signature\" \"message\"\n"
             "\nVerify a signed message\n"
             "\nArguments:\n"
@@ -457,9 +455,9 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
 
     LOCK(cs_main);
 
-    string strAddress  = params[0].get_str();
-    string strSign     = params[1].get_str();
-    string strMessage  = params[2].get_str();
+    std::string strAddress  = params[0].get_str();
+    std::string strSign     = params[1].get_str();
+    std::string strMessage  = params[2].get_str();
 
     CDynamicAddress addr(strAddress);
     if (!addr.IsValid())
@@ -470,7 +468,7 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
 
     bool fInvalid = false;
-    vector<unsigned char> vchSig = DecodeBase64(strSign.c_str(), &fInvalid);
+    std::vector<unsigned char> vchSig = DecodeBase64(strSign.c_str(), &fInvalid);
 
     if (fInvalid)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
@@ -489,7 +487,7 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
 UniValue setmocktime(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "setmocktime timestamp\n"
             "\nSet the local time to given timestamp (-regtest only)\n"
             "\nArguments:\n"
@@ -498,7 +496,7 @@ UniValue setmocktime(const UniValue& params, bool fHelp)
         );
 
     if (!Params().MineBlocksOnDemand())
-        throw runtime_error("setmocktime for regression testing (-regtest mode) only");
+        throw std::runtime_error("setmocktime for regression testing (-regtest mode) only");
 
     // cs_vNodes is locked and node send/receive times are updated
     // atomically with the time change to prevent peers from being
@@ -536,7 +534,7 @@ UniValue getmemoryinfo(const UniValue& params, bool fHelp)
      * as users will undoubtedly confuse it with the other "memory pool"
      */
     if (fHelp || params.size() != 0)
-        throw runtime_error(
+        throw std::runtime_error(
             "getmemoryinfo\n"
             "Returns an object containing information about memory usage.\n"
             "\nResult:\n"
@@ -620,7 +618,7 @@ bool timestampSort(std::pair<CMempoolAddressDeltaKey, CMempoolAddressDelta> a,
 UniValue getaddressmempool(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getaddressmempool\n"
             "\nReturns all mempool deltas for an address (requires addressindex to be enabled).\n"
             "\nArguments:\n"
@@ -691,7 +689,7 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
 UniValue getaddressutxos(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getaddressutxos\n"
             "\nReturns all unspent outputs for an address (requires addressindex to be enabled).\n"
             "\nArguments:\n"
@@ -758,7 +756,7 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
 UniValue getaddressdeltas(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1 || !params[0].isObject())
-        throw runtime_error(
+        throw std::runtime_error(
             "getaddressdeltas\n"
             "\nReturns all changes for an address (requires addressindex to be enabled).\n"
             "\nArguments:\n"
@@ -845,7 +843,7 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
 UniValue getaddressbalance(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getaddressbalance\n"
             "\nReturns the balance for an address(es) (requires addressindex to be enabled).\n"
             "\nArguments:\n"
@@ -901,7 +899,7 @@ UniValue getaddressbalance(const UniValue& params, bool fHelp)
 UniValue getaddresstxids(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getaddresstxids\n"
             "\nReturns the txids for an address(es) (requires addressindex to be enabled).\n"
             "\nArguments:\n"
@@ -985,7 +983,7 @@ UniValue getspentinfo(const UniValue& params, bool fHelp)
 {
 
     if (fHelp || params.size() != 1 || !params[0].isObject())
-        throw runtime_error(
+        throw std::runtime_error(
             "getspentinfo\n"
             "\nReturns the txid and index where an output is spent.\n"
             "\nArguments:\n"

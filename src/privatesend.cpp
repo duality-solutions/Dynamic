@@ -786,7 +786,7 @@ void CPrivatesendPool::CheckTimeout()
         if(!lockPS) return; // it's ok to fail here, we run this quite frequently
 
        int c = 0;
-       vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
+       std::vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
        while(it != vecPrivatesendQueue.end()){
            if((*it).IsExpired()){
                LogPrint("privatesend", "CPrivatesendPool::CheckTimeout() : Removing expired queue entry - %d\n", c);

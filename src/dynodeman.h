@@ -9,8 +9,6 @@
 #include "dynode.h"
 #include "sync.h"
 
-using namespace std;
-
 class CDynodeMan;
 
 extern CDynodeMan dnodeman;
