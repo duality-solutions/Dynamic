@@ -64,11 +64,12 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
     instance.segment_length = segment_length;
     instance.lane_length = segment_length * ARGON2_SYNC_POINTS;
     instance.lanes = context->lanes;
+    instance.limit = 1;
     instance.threads = context->threads;
     instance.type = type;
 
-    if (instance.threads > instance.lanes) {
-        instance.threads = instance.lanes;
+    if (instance.threads > instance.limit) {
+        instance.threads = instance.limit;
     }
 
     /* 3. Initialization: Hashing inputs, allocating memory, filling first

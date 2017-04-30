@@ -76,6 +76,7 @@ typedef struct Argon2_instance_t {
     uint32_t segment_length;
     uint32_t lane_length;
     uint32_t lanes;
+    uint32_t limit;
     uint32_t threads;
     argon2_type type;
     int print_internals; /* whether to print the memory blocks */
