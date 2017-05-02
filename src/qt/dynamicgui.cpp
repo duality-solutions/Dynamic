@@ -983,11 +983,8 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             updateHeadersSyncProgressLabel();
             break;
         case BLOCK_SOURCE_DISK:
-            if (header) {
-                progressBarLabel->setText(tr("Indexing blocks on disk..."));
-            } else {
-                progressBarLabel->setText(tr("Processing blocks on disk..."));
-            }
+            if (header)
+                progressBarLabel->setText(tr("Importing blocks on disk..."));
             break;
         case BLOCK_SOURCE_REINDEX:
             progressBarLabel->setText(tr("Reindexing blocks on disk..."));
