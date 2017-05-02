@@ -1661,10 +1661,13 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         bool fFirstRun = true;
         pwalletMain = new CWallet(strWalletFile);
         DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
+        
         if (nLoadWalletRet != DB_LOAD_OK)
         {
             if (nLoadWalletRet == DB_CORRUPT)
-                strErrors << _("Error loading wallet.dat: Wallet corrupted") << "\n";
+                strErrors << _("Error loading wallet.dat: Wallet is either corrupted OR you need to use your previous client to dump ALL private keys for ALL addresses."
+                               " BACKUP your backups folder and wallet.dat to a safe place i.e. USB storage or Paper Wallet."
+                               " Allow Dynamic to build a new wallet.dat, fully sync and then import the private keys to the newly created wallet") << "\n";
             else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
             {
                 InitWarning(_("Error reading wallet.dat! All keys read correctly, but transaction data"
