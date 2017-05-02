@@ -1745,7 +1745,7 @@ bool CPrivatesendPool::PrepareDenominate(int nMinRounds, int nMaxRounds, std::st
                     CScript scriptChange;
                     CPubKey vchPubKey;
                     // use a unique change address
-                    assert(reservekey.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+                    assert(reservekey.GetReservedKey(vchPubKey, false)); // should never fail, as we just unlocked
                     scriptChange = GetScriptForDestination(vchPubKey.GetID());
                     reservekey.KeepKey();
 
@@ -1823,7 +1823,7 @@ bool CPrivatesendPool::MakeCollateralAmounts(const CompactTallyItem& tallyItem)
 
     CScript scriptCollateral;
     CPubKey vchPubKey;
-    assert(reservekeyCollateral.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+    assert(reservekeyCollateral.GetReservedKey(vchPubKey, false)); // should never fail, as we just unlocked
     scriptCollateral = GetScriptForDestination(vchPubKey.GetID());
 
     vecSend.push_back((CRecipient){scriptCollateral, PRIVATESEND_COLLATERAL*4, false});
@@ -1901,7 +1901,7 @@ bool CPrivatesendPool::CreateDenominated(const CompactTallyItem& tallyItem, bool
 
     CScript scriptCollateral;
     CPubKey vchPubKey;
-    assert(reservekeyCollateral.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+    assert(reservekeyCollateral.GetReservedKey(vchPubKey, false)); // should never fail, as we just unlocked
     scriptCollateral = GetScriptForDestination(vchPubKey.GetID());
 
     // ****** Add collateral outputs ************ /
@@ -1945,8 +1945,8 @@ bool CPrivatesendPool::CreateDenominated(const CompactTallyItem& tallyItem, bool
             while(nValueLeft - nDenomValue >= 0 && nOutputs <= 10) {
                 CScript scriptDenom;
                 CPubKey vchPubKey;
-                //use a unique change address
-                assert(reservekeyDenom.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+                // use a unique address
+                assert(reservekeyDenom.GetReservedKey(vchPubKey, false)); // should never fail, as we just unlocked
                 scriptDenom = GetScriptForDestination(vchPubKey.GetID());
                 // TODO: do not keep reservekeyDenom here
                 reservekeyDenom.KeepKey();

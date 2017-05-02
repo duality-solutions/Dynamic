@@ -73,6 +73,8 @@ DYNAMIC_CORE_H = \
   amount.h \
   arith_uint256.h \
   base58.h \
+  bip39_english.h \
+  bip39.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -114,6 +116,7 @@ DYNAMIC_CORE_H = \
   governance-vote.h \
   governance-votedb.h \
   hash.h \
+  hdchain.h \
   httprpc.h \
   httpserver.h \
   indirectmap.h \
@@ -325,6 +328,7 @@ libdynamic_common_a_SOURCES = \
   amount.cpp \
   arith_uint256.cpp \
   base58.cpp \
+  bip39.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
@@ -332,6 +336,7 @@ libdynamic_common_a_SOURCES = \
   core_read.cpp \
   core_write.cpp \
   hash.cpp \
+  hdchain.cpp \
   key.cpp \
   keystore.cpp \
   netbase.cpp \

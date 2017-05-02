@@ -145,6 +145,9 @@ void WalletView::setDynamicGUI(DynamicGUI *gui)
 
         // Clicking on the lock icon will open the passphrase dialog
         connect(gui->labelWalletEncryptionIcon, SIGNAL(clicked()), this, SLOT(on_labelWalletEncryptionIcon_clicked()));
+
+        // Connect HD enabled state signal
+        connect(this, SIGNAL(hdEnabledStatusChanged(int)), gui, SLOT(setHDStatus(int)));
     }
 }
 
@@ -185,6 +188,9 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
         // Handle changes in encryption status
         connect(_walletModel, SIGNAL(encryptionStatusChanged(int)), this, SIGNAL(encryptionStatusChanged(int)));
         updateEncryptionStatus();
+
+        // update HD status
+        Q_EMIT hdEnabledStatusChanged(walletModel->hdEnabled());
 
         // Balloon pop-up for new transaction
         connect(_walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),

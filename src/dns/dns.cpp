@@ -1228,7 +1228,7 @@ NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, 
         else
         {
             CPubKey vchPubKey;
-            if(!pwalletMain->GetKeyFromPool(vchPubKey))
+            if(!pwalletMain->GetKeyFromPool(vchPubKey, false))
             {
                 ret.err_msg = "failed to get key from pool";
                 return ret;

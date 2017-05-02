@@ -445,6 +445,51 @@ UniValue dumpprivkey(const UniValue& params, bool fHelp)
     return CDynamicSecret(vchSecret).ToString();
 }
 
+UniValue dumphdinfo(const UniValue& params, bool fHelp)
+{
+    if (!EnsureWalletIsAvailable(fHelp))
+        return NullUniValue;
+
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "dumphdinfo\n"
+            "Returns an object containing sensitive private info about this HD wallet.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"hdseed\": \"seed\",                    (string) The HD seed (bip32, in hex)\n"
+            "  \"mnemonic\": \"words\",                 (string) The mnemonic for this HD wallet (bip39, english words) \n"
+            "  \"mnemonicpassphrase\": \"passphrase\",  (string) The mnemonic passphrase for this HD wallet (bip39)\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("dumphdinfo", "")
+            + HelpExampleRpc("dumphdinfo", "")
+        );
+
+    LOCK(pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+
+    // add the base58check encoded extended master if the wallet uses HD
+    CHDChain hdChainCurrent;
+    if (pwalletMain->GetHDChain(hdChainCurrent))
+    {
+        if (!pwalletMain->GetDecryptedHDChain(hdChainCurrent))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot decrypt HD seed");
+
+        std::string strMnemonic;
+        std::string strMnemonicPassphrase;
+        hdChainCurrent.GetMnemonic(strMnemonic, strMnemonicPassphrase);
+
+        UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("hdseed", HexStr(hdChainCurrent.GetSeed())));
+        obj.push_back(Pair("mnemonic", strMnemonic));
+        obj.push_back(Pair("mnemonicpassphrase", strMnemonicPassphrase));
+
+        return obj;
+    }
+
+    return NullUniValue;
+}
 
 UniValue dumpwallet(const UniValue& params, bool fHelp)
 {
@@ -491,19 +536,57 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
     file << strprintf("#   mined on %s\n", EncodeDumpTime(chainActive.Tip()->GetBlockTime()));
     file << "\n";
 
-    for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
+    // add the base58check encoded extended master if the wallet uses HD
+    CHDChain hdChainCurrent;
+    if (pwalletMain->GetHDChain(hdChainCurrent))
+    {
+
+        if (!pwalletMain->GetDecryptedHDChain(hdChainCurrent))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot decrypt HD chain");
+
+        std::string strMnemonic;
+        std::string strMnemonicPassphrase;
+        hdChainCurrent.GetMnemonic(strMnemonic, strMnemonicPassphrase);
+        file << "# mnemonic: " << strMnemonic << "\n";
+        file << "# mnemonic passphrase: " << strMnemonicPassphrase << "\n\n";
+
+        std::vector<unsigned char> vchSeed = hdChainCurrent.GetSeed();
+        file << "# HD seed: " << HexStr(vchSeed) << "\n\n";
+
+        CExtKey masterKey;
+        masterKey.SetMaster(&vchSeed[0], vchSeed.size());
+
+        CDynamicExtKey b58extkey;
+        b58extkey.SetKey(masterKey);
+
+        file << "# extended private masterkey: " << b58extkey.ToString() << "\n";
+
+        CExtPubKey masterPubkey;
+        masterPubkey = masterKey.Neuter();
+
+        CDynamicExtPubKey b58extpubkey;
+        b58extpubkey.SetKey(masterPubkey);
+        file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
+
+        file << "# external chain counter: " << hdChainCurrent.nExternalChainCounter << "\n";
+        file << "# internal chain counter: " << hdChainCurrent.nInternalChainCounter << "\n\n";
+    }
+
+for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
         const CKeyID &keyid = it->second;
         std::string strTime = EncodeDumpTime(it->first);
         std::string strAddr = CDynamicAddress(keyid).ToString();
         CKey key;
         if (pwalletMain->GetKey(keyid, key)) {
+            file << strprintf("%s %s ", CDynamicSecret(key).ToString(), strTime);
             if (pwalletMain->mapAddressBook.count(keyid)) {
-                file << strprintf("%s %s label=%s # addr=%s\n", CDynamicSecret(key).ToString(), strTime, EncodeDumpString(pwalletMain->mapAddressBook[keyid].name), strAddr);     
+                file << strprintf("label=%s", EncodeDumpString(pwalletMain->mapAddressBook[keyid].name));
             } else if (setKeyPool.count(keyid)) {
-                file << strprintf("%s %s reserve=1 # addr=%s\n", CDynamicSecret(key).ToString(), strTime, strAddr);       
+                file << "reserve=1";
             } else {
-                file << strprintf("%s %s change=1 # addr=%s\n", CDynamicSecret(key).ToString(), strTime, strAddr);        
+                file << "change=1";
             }
+            file << strprintf(" # addr=%s%s\n", strAddr, (pwalletMain->mapHdPubKeys.count(keyid) ? " hdkeypath="+pwalletMain->mapHdPubKeys[keyid].GetKeyPath() : ""));
         }
     }
     file << "\n";

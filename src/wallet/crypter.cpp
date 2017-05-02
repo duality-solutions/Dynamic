@@ -271,14 +271,29 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixin
             if (fDecryptionThoroughlyChecked)
                 break;
         }
-        if (keyPass && keyFail)
+        if (keyFail || (!keyPass && cryptedHDChain.IsNull()))
         {
             LogPrintf("The wallet is probably corrupted: Some keys decrypt but not all.\n");
             assert(false);
         }
         if (keyFail || !keyPass)
             return false;
+
         vMasterKey = vMasterKeyIn;
+
+        if(!cryptedHDChain.IsNull()) {
+            bool chainPass = false;
+            // try to decrypt seed and make sure it matches
+            CHDChain hdChainTmp;
+            if (DecryptHDChain(hdChainTmp)) {
+                // make sure seed matches this chain
+                chainPass = cryptedHDChain.id == hdChainTmp.GetSeedHash();
+            }
+            if (!chainPass) {
+                vMasterKey.clear();
+                return false;
+            }
+        }
         fDecryptionThoroughlyChecked = true;
     }
     fOnlyMixingAllowed = fForMixingOnly;
@@ -379,4 +394,157 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
         mapKeys.clear();
     }
     return true;
+}
+
+bool EncryptVector(const CKeyingMaterial& vMasterKeyIn, const std::vector<unsigned char> &vchSecretIn, const uint256& nIV, std::vector<unsigned char> &vchCryptedSecretRet)
+{
+    uint8_t secret[vchSecretIn.size()];
+    memcpy(&secret[0], (unsigned char*)&(vchSecretIn.begin())[0], vchSecretIn.size());
+    CKeyingMaterial vchSecret(secret, secret + vchSecretIn.size());
+
+    return EncryptSecret(vMasterKeyIn, vchSecret, nIV, vchCryptedSecretRet);
+}
+
+bool DecryptVector(const CKeyingMaterial& vMasterKeyIn, const std::vector<unsigned char> &vchCryptedSecretIn, const uint256& nIV, std::vector<unsigned char> &vchSecretRet)
+{
+    CKeyingMaterial vchSecret;
+    if(!DecryptSecret(vMasterKeyIn, vchCryptedSecretIn, nIV, vchSecret))
+        return false;
+
+    uint8_t secret[vchSecret.size()];
+    memcpy(&secret[0], (unsigned char*)&(vchSecret.begin())[0], vchSecret.size());
+    vchSecretRet = std::vector<unsigned char>(secret, secret + vchSecret.size());
+
+    return true;
+}
+
+bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn)
+{
+    // should call EncryptKeys first
+    if (!IsCrypted())
+        return false;
+
+    if (!cryptedHDChain.IsNull())
+        return true;
+
+    if (cryptedHDChain.IsCrypted())
+        return true;
+
+    // make sure seed matches this chain
+    if (hdChain.id != hdChain.GetSeedHash())
+        return false;
+
+    std::vector<unsigned char> vchCryptedSeed;
+    if (!EncryptVector(vMasterKeyIn, hdChain.GetSeed(), hdChain.id, vchCryptedSeed))
+        return false;
+
+    hdChain.Debug(__func__);
+    cryptedHDChain = hdChain;
+    cryptedHDChain.SetCrypted(true);
+
+    if (!cryptedHDChain.SetSeed(vchCryptedSeed, false))
+        return false;
+
+    std::vector<unsigned char> vchMnemonic;
+    std::vector<unsigned char> vchMnemonicPassphrase;
+
+    // it's ok to have no mnemonic if wallet was initialized via hdseed
+    if (hdChain.GetMnemonic(vchMnemonic, vchMnemonicPassphrase)) {
+        std::vector<unsigned char> vchCryptedMnemonic;
+        std::vector<unsigned char> vchCryptedMnemonicPassphrase;
+
+        if (!vchMnemonic.empty() && !EncryptVector(vMasterKeyIn, vchMnemonic, hdChain.id, vchCryptedMnemonic))
+            return false;
+        if (!vchMnemonicPassphrase.empty() && !EncryptVector(vMasterKeyIn, vchMnemonicPassphrase, hdChain.id, vchCryptedMnemonicPassphrase))
+            return false;
+
+        if (!cryptedHDChain.SetMnemonic(vchCryptedMnemonic, vchCryptedMnemonicPassphrase, false))
+            return false;
+    }
+
+    if (!hdChain.SetNull())
+        return false;
+
+    return true;
+}
+
+bool CCryptoKeyStore::DecryptHDChain(CHDChain& hdChainRet) const
+{
+    if (!IsCrypted())
+        return true;
+
+    if (cryptedHDChain.IsNull())
+        return false;
+
+    if (!cryptedHDChain.IsCrypted())
+        return false;
+
+    std::vector<unsigned char> vchSeed;
+    if (!DecryptVector(vMasterKey, cryptedHDChain.GetSeed(), cryptedHDChain.id, vchSeed))
+        return false;
+
+    hdChainRet = cryptedHDChain;
+    if (!hdChainRet.SetSeed(vchSeed, false))
+        return false;
+
+    // hash of decrypted seed must match chain id
+    if (hdChainRet.GetSeedHash() != cryptedHDChain.id)
+        return false;
+
+    std::vector<unsigned char> vchCryptedMnemonic;
+    std::vector<unsigned char> vchCryptedMnemonicPassphrase;
+
+    // it's ok to have no mnemonic if wallet was initialized via hdseed
+    if (cryptedHDChain.GetMnemonic(vchCryptedMnemonic, vchCryptedMnemonicPassphrase)) {
+        std::vector<unsigned char> vchMnemonic;
+        std::vector<unsigned char> vchMnemonicPassphrase;
+
+        if (!vchCryptedMnemonic.empty() && !DecryptVector(vMasterKey, vchCryptedMnemonic, cryptedHDChain.id, vchMnemonic))
+            return false;
+        if (!vchCryptedMnemonicPassphrase.empty() && !DecryptVector(vMasterKey, vchCryptedMnemonicPassphrase, cryptedHDChain.id, vchMnemonicPassphrase))
+            return false;
+
+        if (!hdChainRet.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, false))
+            return false;
+    }
+
+    hdChainRet.SetCrypted(false);
+    hdChainRet.Debug(__func__);
+
+    return true;
+}
+
+bool CCryptoKeyStore::SetHDChain(const CHDChain& chain)
+{
+    if (IsCrypted())
+        return false;
+
+    if (chain.IsCrypted())
+        return false;
+
+    hdChain = chain;
+    return true;
+}
+
+bool CCryptoKeyStore::SetCryptedHDChain(const CHDChain& chain)
+{
+    if (!SetCrypted())
+        return false;
+
+    if (!chain.IsCrypted())
+        return false;
+
+    cryptedHDChain = chain;
+    return true;
+}
+
+bool CCryptoKeyStore::GetHDChain(CHDChain& hdChainRet) const
+{
+    if(IsCrypted()) {
+        hdChainRet = cryptedHDChain;
+        return !cryptedHDChain.IsNull();
+    }
+
+    hdChainRet = hdChain;
+    return !hdChain.IsNull();
 }
