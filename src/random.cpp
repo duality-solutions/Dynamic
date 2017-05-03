@@ -26,15 +26,24 @@
 
 static inline int64_t GetPerformanceCounter()
 {
-    int64_t nCounter = 0;
-#ifdef WIN32
-    QueryPerformanceCounter((LARGE_INTEGER*)&nCounter);
+    // Read the hardware time stamp counter when available.
+    // See https://en.wikipedia.org/wiki/Time_Stamp_Counter for more information.
+#if defined(_MSC_VER)
+    return __rdtsc();
+#elif defined(__i386__)
+    uint64_t r;
+    __asm__ volatile ("rdtsc" : "=A"(r)); // Constrain the r variable to the eax:edx pair.
+    return r;
+#elif defined(__x86_64__) || defined(__amd64__)
+    uint64_t r1, r2;
+    __asm__ volatile ("rdtsc" : "=a"(r1), "=d"(r2)); // Constrain r1 to rax and r2 to rdx.
+    return (r2 << 32) | r1;
 #else
-    timeval t;
-    gettimeofday(&t, NULL);
-    nCounter = (int64_t)(t.tv_sec * 1000000 + t.tv_usec);
+    // Fall back to using gettimeofday (with microsecond precision)
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return ((uint64_t)tv.tv_sec) * 1000000 + tv.tv_usec;
 #endif
-    return nCounter;
 }
 
 void RandAddSeed()
