@@ -618,9 +618,14 @@ void RPCConsole::clear()
             ).arg(fixedFontInfo.family(), ptSize)
         );    
     
+#ifdef Q_OS_MAC
+    QString clsKey = "<b>⌘cmd-L</b>";
+#else
+    QString clsKey = "<b>Ctrl-L</b>";
+#endif
+    
     message(CMD_REPLY, (tr("Welcome to the %1 RPC console.").arg(tr(PACKAGE_NAME)) + "<br>" +
-                        tr("Use up and down arrows to navigate history") + "<br>" +
-                        tr("To clear screen use <b>Ctrl-L</b> on Windows/Linux or <b>⌘CMD-L</b> on OSX") + "<br>" +
+                        tr("Use up and down arrows to navigate history, and %1 to clear screen.").arg(clsKey) + "<br>" +
                         tr("Type <b>help</b> for an overview of available commands.")) +
                         "<br><span class=\"secwarning\">" +
                         tr("WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.") +
