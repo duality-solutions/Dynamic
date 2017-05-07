@@ -32,8 +32,8 @@
 
 #define ICON_OFFSET 16
 #define DECORATION_SIZE 54
-#define NUM_ITEMS 5
-#define NUM_ITEMS_ADV 7
+#define NUM_ITEMS 7
+#define NUM_ITEMS_ADV 9
 
 class TxViewDelegate : public QAbstractItemDelegate
 {
