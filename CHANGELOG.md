@@ -1,5 +1,23 @@
 **Dynamic v1.4.0.0**
 
+* [BUILD]Fix warning deprecated in OSX Sierra
+* Improve EncodeBase58/DecodeBase58 performance.
+* Use hardware timestamps in RNG seeding
+* Add OSX keystroke to clear RPCConsole
+* Update DB_CORRUPT message
+* HD Wallet
+* Repair Traffic Graph
+* Scammer Warning and Translations
+* Amend DEFAULT_CHECKBLOCKS
+* Do not shadow upper local variable 'send', prevent -Wshadow compiler warning
+* Convert last boost::scoped_ptr to std::unique_ptr
+* Qt: fix UI bug that could result in paying unexpected fee
+* Fix Locks and Do not add random inbound peers to addrman
+* Use std::thread::hardwarencurrency, instead of Boost, to determine available cores
+* Sync icon now opens modaloverlay.ui
+* Fix Memleak and Enforce Fix
+* Sort dynamic.qrc
+* Sort MakeFiles
 * Remove namespace std;/Repair Tests
 * Fix Signal/Slot/Strings
 * Implement modaloverlay
@@ -72,7 +90,6 @@
 * Add benchmark for lockedpool allocation/deallocation
 * trivial: fix bloom filter init to isEmpty = true
 * Lockedpool fixes
-* Improve DecodeBase58 performance.
 * Add include utility to miner.cpp
 * Don't return the address of a P2SH of a P2SH
 * Implement (begin|end)_ptr in C++11 and add deprecation comment
