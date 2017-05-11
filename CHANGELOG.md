@@ -1,5 +1,6 @@
 **Dynamic v1.4.0.0**
 
+* [BUILD] quiet annoying warnings without adding new ones
 * [BUILD]Fix warning deprecated in OSX Sierra
 * Improve EncodeBase58/DecodeBase58 performance.
 * Use hardware timestamps in RNG seeding
