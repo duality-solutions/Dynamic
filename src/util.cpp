@@ -567,6 +567,7 @@ static void WriteConfigFile(FILE* configFile)
     fputs ("rpcport=31350\n", configFile);
     fputs ("port=31300\n",configFile);
     fclose(configFile);
+    ReadConfigFile(mapArgs, mapMultiArgs);
 }
 
 const boost::filesystem::path &GetDataDir(bool fNetSpecific)
