@@ -1,5 +1,6 @@
 **Dynamic v1.4.0.0**
 
+* Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
 * [BUILD]Fix warning deprecated in OSX Sierra
 * Improve EncodeBase58/DecodeBase58 performance.
