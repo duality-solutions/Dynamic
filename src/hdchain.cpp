@@ -11,13 +11,16 @@
 
 bool CHDChain::SetNull()
 {
+    LOCK(cs_accounts);
+    nVersion = CURRENT_VERSION;
+    id = uint256();
+    fCrypted = false;
     vchSeed.clear();
     vchMnemonic.clear();
     vchMnemonicPassphrase.clear();
-    fCrypted = false;
-    id = uint256();
-    nExternalChainCounter = 0;
-    nInternalChainCounter = 0;
+    mapAccounts.clear();
+    // default blank account
+    mapAccounts.insert(std::pair<uint32_t, CHDAccount>(0, CHDAccount()));
     return IsNull();
 }
 
@@ -66,9 +69,9 @@ void CHDChain::Debug(std::string strName) const
     );
 }
 
-bool CHDChain::SetMnemonic(const std::vector<unsigned char>& vchMnemonicIn, const std::vector<unsigned char>& vchMnemonicPassphraseIn, bool fUpdateID)
+bool CHDChain::SetMnemonic(const CSecureVector& vchMnemonicIn, const CSecureVector& vchMnemonicPassphraseIn, bool fUpdateID)
 {
-    std::vector<unsigned char> vchMnemonicTmp = vchMnemonicIn;
+    CSecureVector vchMnemonicTmp = vchMnemonicIn;
 
     if (fUpdateID) {
         // can't (re)set mnemonic if seed was already set
@@ -81,7 +84,7 @@ bool CHDChain::SetMnemonic(const std::vector<unsigned char>& vchMnemonicIn, cons
         // empty mnemonic i.e. "generate a new one"
         if (vchMnemonicIn.empty()) {
             strMnemonic = mnemonic_generate(128);
-            vchMnemonicTmp = std::vector<unsigned char>(strMnemonic.begin(), strMnemonic.end());
+            vchMnemonicTmp = CSecureVector(strMnemonic.begin(), strMnemonic.end());
         }
         // NOTE: default mnemonic passphrase is an empty string
 
@@ -91,7 +94,7 @@ bool CHDChain::SetMnemonic(const std::vector<unsigned char>& vchMnemonicIn, cons
 
         uint8_t seed[64];
         mnemonic_to_seed(strMnemonic.c_str(), strMnemonicPassphrase.c_str(), seed, 0);
-        vchSeed = std::vector<unsigned char>(seed, seed + 64);
+        vchSeed = CSecureVector(seed, seed + 64);
         id = GetSeedHash();
     }
 
@@ -101,7 +104,7 @@ bool CHDChain::SetMnemonic(const std::vector<unsigned char>& vchMnemonicIn, cons
     return !IsNull();
 }
 
-bool CHDChain::GetMnemonic(std::vector<unsigned char>& vchMnemonicRet, std::vector<unsigned char>& vchMnemonicPassphraseRet) const
+bool CHDChain::GetMnemonic(CSecureVector& vchMnemonicRet, CSecureVector& vchMnemonicPassphraseRet) const
 {
     // mnemonic was not set, fail
     if (vchMnemonic.empty())
@@ -124,7 +127,7 @@ bool CHDChain::GetMnemonic(std::string& strMnemonicRet, std::string& strMnemonic
     return true;
 }
 
-bool CHDChain::SetSeed(const std::vector<unsigned char>& vchSeedIn, bool fUpdateID)
+bool CHDChain::SetSeed(const CSecureVector& vchSeedIn, bool fUpdateID)
 {
     vchSeed = vchSeedIn;
 
@@ -135,7 +138,7 @@ bool CHDChain::SetSeed(const std::vector<unsigned char>& vchSeedIn, bool fUpdate
     return !IsNull();
 }
 
-std::vector<unsigned char> CHDChain::GetSeed() const
+CSecureVector CHDChain::GetSeed() const
 {
     return vchSeed;
 }
@@ -145,7 +148,7 @@ uint256 CHDChain::GetSeedHash()
     return Hash(vchSeed.begin(), vchSeed.end());
 }
 
-void CHDChain::DeriveChildExtKey(uint32_t childIndex, CExtKey& extKeyRet, bool fInternal)
+void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey& extKeyRet)
 {
     // Use BIP44 keypath scheme i.e. m / purpose' / coin_type' / account' / change / address_index
     CExtKey masterKey;              //hd master key
@@ -159,21 +162,51 @@ void CHDChain::DeriveChildExtKey(uint32_t childIndex, CExtKey& extKeyRet, bool f
 
     // Use hardened derivation for purpose, coin_type and account
     // (keys >= 0x80000000 are hardened after bip32)
-    // TODO: support multiple accounts, external/internal addresses, and multiple index per each
 
     // derive m/purpose'
     masterKey.Derive(purposeKey, 44 | 0x80000000);
     // derive m/purpose'/coin_type'
     purposeKey.Derive(cointypeKey, Params().ExtCoinType() | 0x80000000);
     // derive m/purpose'/coin_type'/account'
-    cointypeKey.Derive(accountKey, 0x80000000);
+    cointypeKey.Derive(accountKey, nAccountIndex | 0x80000000);
     // derive m/purpose'/coin_type'/account/change
     accountKey.Derive(changeKey, fInternal ? 1 : 0);
     // derive m/purpose'/coin_type'/account/change/address_index
-    changeKey.Derive(extKeyRet, childIndex);
+    changeKey.Derive(extKeyRet, nChildIndex);
+}
+
+void CHDChain::AddAccount()
+{
+    LOCK(cs_accounts);
+    mapAccounts.insert(std::pair<uint32_t, CHDAccount>(mapAccounts.size(), CHDAccount()));
+}
+
+bool CHDChain::GetAccount(uint32_t nAccountIndex, CHDAccount& hdAccountRet)
+{
+    LOCK(cs_accounts);
+    if (nAccountIndex > mapAccounts.size() - 1)
+        return false;
+    hdAccountRet = mapAccounts[nAccountIndex];
+    return true;
+}
+
+bool CHDChain::SetAccount(uint32_t nAccountIndex, const CHDAccount& hdAccount)
+{
+    LOCK(cs_accounts);
+    // can only replace existing accounts
+    if (nAccountIndex > mapAccounts.size() - 1)
+        return false;
+    mapAccounts[nAccountIndex] = hdAccount;
+    return true;
+}
+
+size_t CHDChain::CountAccounts()
+{
+    LOCK(cs_accounts);
+    return mapAccounts.size();
 }
 
 std::string CHDPubKey::GetKeyPath() const
 {
-    return strprintf("m/44'/%d'/%d'/%d/%d", Params().ExtCoinType(), nAccount, nChange, extPubKey.nChild);
+    return strprintf("m/44'/%d'/%d'/%d/%d", Params().ExtCoinType(), nAccountIndex, nChangeIndex, extPubKey.nChild);
 }

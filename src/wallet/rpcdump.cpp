@@ -550,7 +550,7 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
         file << "# mnemonic: " << strMnemonic << "\n";
         file << "# mnemonic passphrase: " << strMnemonicPassphrase << "\n\n";
 
-        std::vector<unsigned char> vchSeed = hdChainCurrent.GetSeed();
+        CSecureVector vchSeed = hdChainCurrent.GetSeed();
         file << "# HD seed: " << HexStr(vchSeed) << "\n\n";
 
         CExtKey masterKey;
@@ -568,8 +568,16 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
         b58extpubkey.SetKey(masterPubkey);
         file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
 
-        file << "# external chain counter: " << hdChainCurrent.nExternalChainCounter << "\n";
-        file << "# internal chain counter: " << hdChainCurrent.nInternalChainCounter << "\n\n";
+        for (int i = 0; i < hdChainCurrent.CountAccounts(); ++i)
+        {
+            CHDAccount acc;
+            if(hdChainCurrent.GetAccount(i, acc)) {
+                file << "# external chain counter: " << acc.nExternalChainCounter << "\n";
+                file << "# internal chain counter: " << acc.nInternalChainCounter << "\n\n";
+            } else {
+                file << "# WARNING: ACCOUNT " << i << " IS MISSING!" << "\n\n";
+            }
+        }
     }
 
 for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
