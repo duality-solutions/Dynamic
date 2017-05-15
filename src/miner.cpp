@@ -688,8 +688,9 @@ void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainpar
     static boost::thread_group* minerThreads = NULL;
 
     if (nThreads < 0)
-        nThreads = boost::thread::hardware_concurrency(); // Number of Cores are not equal to the number of threads 
-
+        nThreads = GetNumCores(); // Uses std::thread::hardwareconcurrency to detect available cores
+                                  // Return the number of cores available on the current system.
+                                  // @note This does count virtual cores, such as those provided by HyperThreading.
     if (minerThreads != NULL)
     {
         minerThreads->interrupt_all();
