@@ -271,12 +271,12 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixin
             if (fDecryptionThoroughlyChecked)
                 break;
         }
-        if (keyFail || (!keyPass && cryptedHDChain.IsNull()))
+        if (keyPass && keyFail)
         {
             LogPrintf("The wallet is probably corrupted: Some keys decrypt but not all.\n");
             assert(false);
         }
-        if (keyFail || !keyPass)
+        if (keyFail || (!keyPass && cryptedHDChain.IsNull()))
             return false;
 
         vMasterKey = vMasterKeyIn;
