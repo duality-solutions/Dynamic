@@ -124,7 +124,7 @@ void SplashScreen::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
-    QRect r = rect().adjusted(5, 5, -5, -5);
+    QRect r = rect().adjusted(5, 5, -5, -30);
     painter.setPen(curColor);
     painter.drawText(r, curAlignment, curMessage);
 }
