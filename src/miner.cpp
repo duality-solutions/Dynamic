@@ -690,7 +690,7 @@ void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainpar
     static boost::thread_group* minerThreads = NULL;
 
     if (nThreads < 0)
-        nThreads = boost::thread::hardware_concurrency(); // Number of Cores don't equal to number of threads
+        nThreads = boost::thread::hardware_concurrency(); // Number of Cores are not equal to the number of threads 
 
     if (minerThreads != NULL)
     {
