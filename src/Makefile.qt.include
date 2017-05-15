@@ -182,6 +182,7 @@ DYNAMIC_QT_H = \
   qt/winshutdownmonitor.h
   
 RES_ICONS = \
+  qt/res/icons/dynamic.icns \
   qt/res/icons/dynamic.ico \
   qt/res/icons/dynamic.png \
   qt/res/icons/drk/about.png \
@@ -200,20 +201,23 @@ RES_ICONS = \
   qt/res/icons/drk/connect2_16.png \
   qt/res/icons/drk/connect3_16.png \
   qt/res/icons/drk/connect4_16.png \
-  qt/res/icons/drk/decentralised.png \
   qt/res/icons/drk/debugwindow.png \
+  qt/res/icons/drk/decentralised.png \
   qt/res/icons/drk/drkpurple_editpaste.png \
   qt/res/icons/drk/drkpurple_address-book.png \
   qt/res/icons/drk/drkpurple_editcopy.png \
   qt/res/icons/drk/drkpurple_remove.png \
+  qt/res/icons/drk/dynamic_testnet.ico \
+  qt/res/icons/drk/dynamic_testnet.png \
+  qt/res/icons/drk/dynamic.png \
   qt/res/icons/drk/dynode_network.png \
   qt/res/icons/drk/edit.png \
   qt/res/icons/drk/editcopy.png \
   qt/res/icons/drk/editpaste.png \
   qt/res/icons/drk/export.png \
-  qt/res/icons/drk/eye.png \
   qt/res/icons/drk/eye_minus.png \
   qt/res/icons/drk/eye_plus.png \
+  qt/res/icons/drk/eye.png \
   qt/res/icons/drk/filesave.png \
   qt/res/icons/drk/hd_disabled.png \
   qt/res/icons/drk/hd_enabled.png \
@@ -222,25 +226,26 @@ RES_ICONS = \
   qt/res/icons/drk/lock_closed.png \
   qt/res/icons/drk/lock_open.png \
   qt/res/icons/drk/multisig.png \
+  qt/res/icons/drk/notsynced.png \
   qt/res/icons/drk/overview.png \
   qt/res/icons/drk/quit.png \
   qt/res/icons/drk/receive.png \
   qt/res/icons/drk/remove.png \
   qt/res/icons/drk/send.png \
   qt/res/icons/drk/synced.png \
+  qt/res/icons/drk/transaction_conflicted.png \
   qt/res/icons/drk/transaction0.png \
   qt/res/icons/drk/transaction2.png \
-  qt/res/icons/drk/transaction_conflicted.png \
   qt/res/icons/drk/tx_inout.png \
   qt/res/icons/drk/tx_input.png \
-  qt/res/icons/drk/tx_output.png \
   qt/res/icons/drk/tx_mined.png \
-  qt/res/icons/drk/verify.png \
-  qt/res/icons/drk/warning.png \
+  qt/res/icons/drk/tx_output.png \
   qt/res/icons/drk/unit_dyn.png \
   qt/res/icons/drk/unit_mdyn.png \
+  qt/res/icons/drk/unit_satoshis.png \
   qt/res/icons/drk/unit_udyn.png \
-  qt/res/icons/drk/unit_satoshis.png
+  qt/res/icons/drk/verify.png \
+  qt/res/icons/drk/warning.png
 
 DYNAMIC_QT_CPP = \
   qt/bantablemodel.cpp \
@@ -311,16 +316,17 @@ endif
 RES_IMAGES = \
   qt/res/images/drk/about.png \
   qt/res/images/drk/checked.png \
-  qt/res/images/drk/drkpurple_downArrow.png \
+  qt/res/images/drk/drk_walletFrame_bg.png \
+  qt/res/images/drk/drk_walletFrame.png \
   qt/res/images/drk/drkpurple_downArrow_small.png \
+  qt/res/images/drk/drkpurple_downArrow.png \
   qt/res/images/drk/drkpurple_leftArrow_small.png \
   qt/res/images/drk/drkpurple_qtreeview_selected.png \
   qt/res/images/drk/drkpurple_rightArrow_small.png \
   qt/res/images/drk/drkpurple_upArrow_small.png \
-  qt/res/images/drk/drk_walletFrame_bg.png \
   qt/res/images/drk/dynamic_logo_horizontal.png \
-  qt/res/images/drk/splash.png \
   qt/res/images/drk/splash_testnet.png \
+  qt/res/images/drk/splash.png \
   qt/res/images/drk/unchecked.png 
 
 RES_CSS = \

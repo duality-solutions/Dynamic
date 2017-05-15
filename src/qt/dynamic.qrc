@@ -24,9 +24,9 @@
         <file alias="editcopy">res/icons/drk/editcopy.png</file>
         <file alias="editpaste">res/icons/drk/editpaste.png</file>
         <file alias="export">res/icons/drk/export.png</file>
-        <file alias="eye">res/icons/drk/eye.png</file>
         <file alias="eye_minus">res/icons/drk/eye_minus.png</file>
         <file alias="eye_plus">res/icons/drk/eye_plus.png</file>
+        <file alias="eye">res/icons/drk/eye.png</file>
         <file alias="filesave">res/icons/drk/filesave.png</file>
         <file alias="hd_enabled">res/icons/drk/hd_enabled.png</file>
         <file alias="hd_disabled">res/icons/drk/hd_disabled.png</file>
@@ -66,17 +66,18 @@
     </qresource>
     <qresource prefix="/images/drk">
         <file alias="about">res/images/drk/about.png</file>
-        <file alias="dynamic_logo_horizontal">res/images/drk/dynamic_logo_horizontal.png</file>
         <file alias="checked">res/images/drk/checked.png</file>
-        <file alias="drkpurple_downArrow">res/images/drk/drkpurple_downArrow.png</file>
-        <file alias="drkpurple_downArrow_small">res/images/drk/drkpurple_downArrow_small.png</file>
-        <file alias="drkpurple_leftArrow_small">res/images/drk/drkpurple_leftArrow_small.png</file>
-        <file alias="drkpurple_rightArrow_small">res/images/drk/drkpurple_rightArrow_small.png</file>
-        <file alias="drkpurple_qtreeview_selected">res/images/drk/drkpurple_qtreeview_selected.png</file>
-        <file alias="drkpurple_upArrow_small">res/images/drk/drkpurple_upArrow_small.png</file>
         <file alias="drk_walletFrame_bg">res/images/drk/drk_walletFrame_bg.png</file>
-        <file alias="splash">res/images/drk/splash.png</file>
+        <file alias="drk_walletFrame">res/images/drk/drk_walletFrame.png</file>
+        <file alias="drkpurple_downArrow_small">res/images/drk/drkpurple_downArrow_small.png</file>
+        <file alias="drkpurple_downArrow">res/images/drk/drkpurple_downArrow.png</file>
+        <file alias="drkpurple_leftArrow_small">res/images/drk/drkpurple_leftArrow_small.png</file>
+        <file alias="drkpurple_qtreeview_selected">res/images/drk/drkpurple_qtreeview_selected.png</file>
+        <file alias="drkpurple_rightArrow_small">res/images/drk/drkpurple_rightArrow_small.png</file>
+        <file alias="drkpurple_upArrow_small">res/images/drk/drkpurple_upArrow_small.png</file>
+        <file alias="dynamic_logo_horizontal">res/images/drk/dynamic_logo_horizontal.png</file>
         <file alias="splash_testnet">res/images/drk/splash_testnet.png</file>
+        <file alias="splash">res/images/drk/splash.png</file>
         <file alias="unchecked">res/images/drk/unchecked.png</file>
     </qresource>
     <qresource prefix="/movies">
