@@ -1,7 +1,6 @@
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values
-* Check for number of threads on CPU in miner
 * Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
 * [BUILD]Fix warning deprecated in OSX Sierra
