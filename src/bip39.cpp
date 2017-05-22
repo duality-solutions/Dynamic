@@ -75,7 +75,7 @@ SecureString mnemonic_from_data(const uint8_t *data, int len)
     }
     memory_cleanse(bits, sizeof(bits));
 
-    return mnemo;
+    return mnemonic;
 }
 
 int mnemonic_check(SecureString mnemonic)
