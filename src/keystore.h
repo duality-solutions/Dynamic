@@ -112,7 +112,6 @@ public:
     virtual bool HaveWatchOnly(const CScript &dest) const;
     virtual bool HaveWatchOnly() const;
 
-    bool AddHDChain(const CHDChain& hdChainIn);
     bool GetHDChain(CHDChain& hdChainRet) const;
 };
 
