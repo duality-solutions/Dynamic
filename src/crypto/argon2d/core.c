@@ -538,7 +538,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
 
     store32(&value, context->pwdlen);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
-
+		
     if (context->pwd != NULL) {
         blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
                        context->pwdlen);
@@ -548,7 +548,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
             context->pwdlen = 0;
         }
     }
-
+		
     store32(&value, context->saltlen);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
