@@ -67,6 +67,11 @@ public:
     {
         return hash_Argon2d(UVOIDBEGIN(nVersion), 1);
     }
+    
+    uint256 GetHashWithCtx(void *Matrix) const
+    {
+		return(hash_Argon2d_ctx(UVOIDBEGIN(nVersion), Matrix, 1));
+	}
 
     int64_t GetBlockTime() const
     {

@@ -530,7 +530,11 @@ void static DynamicMiner(const CChainParams& chainparams)
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
-
+	
+	void *Ctx;
+	
+	WolfArgon2dAllocateCtx(&Ctx);
+	
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -592,7 +596,7 @@ void static DynamicMiner(const CChainParams& chainparams)
                 uint256 hash;
                 while (true)
                 {
-                    hash = pblock->GetHash();
+                    hash = pblock->GetHashWithCtx(Ctx);
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
@@ -674,13 +678,17 @@ void static DynamicMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
+        WolfArgon2dFreeCtx(Ctx);
         throw;
     }
     catch (const std::runtime_error &e)
     {
         LogPrintf("DynamicMiner -- runtime error: %s\n", e.what());
+        WolfArgon2dFreeCtx(Ctx);
         return;
     }
+    
+    WolfArgon2dFreeCtx(Ctx);
 }
 
 void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams)
