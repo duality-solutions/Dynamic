@@ -31,7 +31,7 @@
 
 #include <openssl/evp.h>
 
-SecureString mnemonic_generate(int strength)
+SecureString CMnemonic::Generate(int strength)
 {
     if (strength % 32 || strength < 128 || strength > 256) {
         return SecureString();
@@ -39,12 +39,12 @@ SecureString mnemonic_generate(int strength)
     uint8_t data[32];
     // random_buffer(data, 32);
     GetRandBytes(data, 32);
-    SecureString mnemonic = mnemonic_from_data(data, strength / 8);
+    SecureString mnemonic = FromData(data, strength / 8);
     memory_cleanse(data, sizeof(data));
     return mnemonic;
 }
 
-SecureString mnemonic_from_data(const uint8_t *data, int len)
+SecureString CMnemonic::FromData(const uint8_t *data, int len)
 {
     if (len % 4 || len < 16 || len > 32) {
         return SecureString();
@@ -78,7 +78,7 @@ SecureString mnemonic_from_data(const uint8_t *data, int len)
     return mnemonic;
 }
 
-int mnemonic_check(SecureString mnemonic)
+int CMnemonic::Check(SecureString mnemonic)
 {
     if (mnemonic.empty()) {
         return 0;
@@ -149,7 +149,7 @@ int mnemonic_check(SecureString mnemonic)
 }
 
 // passphrase must be at most 256 characters or code may crash
-void mnemonic_to_seed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet)
+void CMnemonic::ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet)
 {
     uint8_t salt[8 + 256 + 4];
     memcpy(salt, "mnemonic", 8);

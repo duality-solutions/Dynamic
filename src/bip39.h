@@ -21,22 +21,19 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __BIP39_H__
-#define __BIP39_H__
+#ifndef DYNAMIC_BIP39_H
+#define DYNAMIC_BIP39_H
 
 #include "support/allocators/secure.h"
 
-SecureString mnemonic_generate(int strength);    // strength in bits
+class CMnemonic
+{
+public:
+    static SecureString Generate(int strength);    // strength in bits
+    static SecureString FromData(const uint8_t *data, int len);
+    static int Check(SecureString mnemonic);
+    // passphrase must be at most 256 characters or code may crash
+    static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
+};
 
-SecureString mnemonic_from_data(const uint8_t *data, int len);
-
-int mnemonic_check(SecureString mnemonic);
-
-int mnemonic_check(const char *mnemonic);
-
-// passphrase must be at most 256 characters or code may crash
-void mnemonic_to_seed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
-
-const char * const *mnemonic_wordlist(void);
-
-#endif
+#endif // DYNAMIC_BIP39_H
