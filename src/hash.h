@@ -257,7 +257,7 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
     /// Threads: 2 threads
     /// Time Constraint: 1 iteration
 inline int Argon2d_Phase1_Hash(const void *in, void *out) {
-	/*argon2_context context;
+	argon2_context context;
     context.out = (uint8_t *)out;
     context.outlen = (uint32_t)OUTPUT_BYTES;
     context.pwd = (uint8_t *)in;
@@ -277,44 +277,18 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     context.threads = 1;  // Threads
     context.t_cost = 1;   // Iterations
 
-    return argon2_ctx(&context, Argon2_d);*/
-    
-    void *Matrix;
-    
-    WolfArgon2dAllocateCtx(&Matrix);
-    WolfArgon2dPoWHash(out, Matrix, in);
-    WolfArgon2dFreeCtx(Matrix);
-    
-    return(0);
+    return argon2_ctx(&context, Argon2_d);
 }
 
-inline int Argon2d_Phase1_Hash_Ctx(const void *in, void *Matrix, void *out) {
-	/*argon2_context context;
-    context.out = (uint8_t *)out;
-    context.outlen = (uint32_t)OUTPUT_BYTES;
-    context.pwd = (uint8_t *)in;
-    context.pwdlen = (uint32_t)INPUT_BYTES;
-    context.salt = (uint8_t *)in; //salt = input
-    context.saltlen = (uint32_t)INPUT_BYTES;
-    context.secret = NULL;
-    context.secretlen = 0;
-    context.ad = NULL;
-    context.adlen = 0;
-    context.allocate_cbk = NULL;
-    context.free_cbk = NULL;
-    context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
-    // main configurable Argon2 hash parameters
-    context.m_cost = 250; // Memory in KiB (~256KB)
-    context.lanes = 4;    // Degree of Parallelism
-    context.threads = 1;  // Threads
-    context.t_cost = 1;   // Iterations
+#ifdef __AVX2__
 
-    return argon2_ctx(&context, Argon2_d);*/
-        
+inline int Argon2d_Phase1_Hash_Ctx(const void *in, void *Matrix, void *out) {        
     WolfArgon2dPoWHash(out, Matrix, in);
         
     return(0);
 }
+
+#endif
 
     /// Argon2d Phase 2 Hash parameters for the next 5 years after phase 1
     /// Salt and password are the block header.
@@ -374,6 +348,8 @@ inline uint256 hash_Argon2d(const void* input, const unsigned int& hashPhase) {
     return hashResult;
 }
 
+#ifdef __AVX2__
+
 inline uint256 hash_Argon2d_ctx(const void* input, void *Matrix, const unsigned int& hashPhase) {
     uint256 hashResult;
     const uint32_t MaxInt32 = std::numeric_limits<uint32_t>::max();
@@ -392,5 +368,7 @@ inline uint256 hash_Argon2d_ctx(const void* input, void *Matrix, const unsigned 
     }
     return hashResult;
 }
+
+#endif
 
 #endif // DYNAMIC_HASH_H
