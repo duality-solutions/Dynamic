@@ -326,6 +326,8 @@ ARGON2_PUBLIC size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost,
                                        uint32_t parallelism, uint32_t saltlen,
                                        uint32_t hashlen, argon2_type type);
 
+#ifdef __AVX2__
+
 ///////////////////////////
 // Wolf's Additions
 ///////////////////////////
@@ -333,6 +335,8 @@ ARGON2_PUBLIC size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost,
 void WolfArgon2dPoWHash(void *Output, void *Matrix, const void *BlkHdr);
 void WolfArgon2dAllocateCtx(void **Matrix);
 void WolfArgon2dFreeCtx(void *Matrix);
+
+#endif
 
 #if defined(__cplusplus)
 }

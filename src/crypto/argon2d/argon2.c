@@ -19,6 +19,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <malloc.h>
+#endif
+
 #include "argon2.h"
 #include "encoding.h"
 #include "core.h"
@@ -378,6 +382,7 @@ size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost, uint32_t parallelism,
          b64len(saltlen) + b64len(hashlen);
 }
 
+#ifdef __AVX2__
 
 ///////////////////////////
 // Wolf's Additions
@@ -531,38 +536,7 @@ void Argon2dFillFirstBlocks(Argon2d_Block *Matrix, void *InitHash)
 #include "../blake2/blamka-round-opt.h"
 
 void Argon2dFillSingleBlock(Argon2d_Block *State, Argon2d_Block *RefBlock, Argon2d_Block *NextBlock)
-{
-	#if 0
-	//__m128i XY[64];
-	
-	//for(int i = 0; i < 64; ++i)
-	//	XY[i] = NextBlock->dqwords[i] = _mm_xor_si128(State->dqwords[i], RefBlock->dqwords[i]);
-	
-	__m256i XY[32];
-	
-	for(int i = 0; i < 32; ++i) XY[i] = NextBlock->qqwords[i] = _mm256_xor_si256(State->qqwords[i], RefBlock->qqwords[i]);
-	
-	for(int i = 0; i < 8; ++i)
-	{
-		BLAKE2_ROUND(	NextBlock->dqwords[8 * i + 0], NextBlock->dqwords[8 * i + 1], NextBlock->dqwords[8 * i + 2], NextBlock->dqwords[8 * i + 3],
-						NextBlock->dqwords[8 * i + 4], NextBlock->dqwords[8 * i + 5], NextBlock->dqwords[8 * i + 6], NextBlock->dqwords[8 * i + 7]);
-	}
-	
-	for(int i = 0; i < 8; ++i)
-	{
-		BLAKE2_ROUND(	NextBlock->dqwords[8 * 0 + i], NextBlock->dqwords[8 * 1 + i], NextBlock->dqwords[8 * 2 + i], NextBlock->dqwords[8 * 3 + i],
-						NextBlock->dqwords[8 * 4 + i], NextBlock->dqwords[8 * 5 + i], NextBlock->dqwords[8 * 6 + i], NextBlock->dqwords[8 * 7 + i]);
-	}
-	
-	//for(int i = 0; i < 64; ++i)
-	//{
-	//	NextBlock->dqwords[i] ^= XY[i];
-	//}
-	
-	for(int i = 0; i < 32; ++i) NextBlock->qqwords[i] = _mm256_xor_si256(NextBlock->qqwords[i], XY[i]);
-	
-	#else
-	
+{	
 	__m256i XY[32];
 		
 	for(int i = 0; i < 32; ++i)
@@ -585,8 +559,6 @@ void Argon2dFillSingleBlock(Argon2d_Block *State, Argon2d_Block *RefBlock, Argon
 		State->qqwords[i] = _mm256_xor_si256(State->qqwords[i], XY[i]);
 		_mm256_store_si256(NextBlock->qqwords + i, State->qqwords[i]);
 	}
-	
-	#endif
 }
 
 void FillSegment(Argon2d_Block *Matrix, uint32_t slice, uint32_t lane)
@@ -651,17 +623,8 @@ void Argon2dFillAllBlocks(Argon2d_Block *Matrix)
 		// WARNING: Assumes CONCURRENT_THREADS == lanes == 4
 		for(int l = 0; l < 4; ++l)
 		{
-			/*
-			ThrData[l].Matrix = Matrix;
-			ThrData[l].slice = s;
-			ThrData[l].lane = l;
-			
-			pthread_create(ThrHandles + l, NULL, ThreadedSegmentFill, (void *)(ThrData + l));
-			*/
 			FillSegment(Matrix, s, l);
-		}
-		
-		//for(int i = 0; i < CONCURRENT_THREADS; ++i) pthread_join(ThrHandles[i], NULL);
+		}		
 	}
 }
 
@@ -675,8 +638,6 @@ void Argon2dFinalizeHash(void *OutputHash, Argon2d_Block *Matrix)
 	
 	blake2b_long(OutputHash, 32, Matrix[LANE_LENGTH - 1].data, 1024);
 }
-
-
 
 void WolfArgon2dPoWHash(void *Output, void *Matrix, const void *BlkHdr)
 {
@@ -693,10 +654,17 @@ void WolfArgon2dPoWHash(void *Output, void *Matrix, const void *BlkHdr)
 
 void WolfArgon2dAllocateCtx(void **Matrix)
 {
-	*((Argon2d_Block **)Matrix) = (Argon2d_Block *)aligned_alloc(32, sizeof(Argon2d_Block) * (SEGMENT_LENGTH << 4));
+	#ifdef _WIN32
+	*((Argon2d_Block **)Matrix) = (Argon2d_Block *)_aligned_malloc(32, sizeof(Argon2d_Block) * (SEGMENT_LENGTH << 4));
+	#else
+	*((Argon2d_Block **)Matrix) = (Argon2d_Block *)malloc(sizeof(Argon2d_Block) * (SEGMENT_LENGTH << 4));
+	posix_memalign(Matrix, 32, sizeof(Argon2d_Block) * (SEGMENT_LENGTH << 4));
+	#endif
 }
 
 void WolfArgon2dFreeCtx(void *Matrix)
 {
 	free(Matrix);
 }
+
+#endif
