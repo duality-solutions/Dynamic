@@ -468,19 +468,21 @@ void CompressBlock(uint64_t *h, const uint64_t *m, uint64_t t, uint64_t f)
 {
 	uint64_t v[16];
 	
-	for(int i = 0; i < 8; ++i) v[i] = h[i];
+	int i;
+	for(i = 0; i < 8; ++i) v[i] = h[i];
 	
-	for(int i = 8; i < 16; ++i) v[i] = blake2b_IV[i - 8];
+	for(i = 8; i < 16; ++i) v[i] = blake2b_IV[i - 8];
 	
 	v[12] ^= t;
 	v[14] ^= f;
 	
-	for(int r = 0; r < 12; ++r)
+	int r;
+	for(r = 0; r < 12; ++r)
 	{
 		ROUND(r);
 	}
 	
-	for(int i = 0; i < 8; ++i) h[i] ^= v[i] ^ v[i + 8];
+	for(i = 0; i < 8; ++i) h[i] ^= v[i] ^ v[i + 8];
 }
 
 void Argon2dInitHash(void *HashOut, void *Input)
@@ -507,11 +509,12 @@ void Argon2dInitHash(void *HashOut, void *Input)
 	InBuf[48] = 0UL;								// Secret Length
 	InBuf[49] = 0UL;								// Associated Data Length
 	
-	for(int i = 50; i < 64; ++i) InBuf[i] = 0UL;
+	int i;
+	for(i = 50; i < 64; ++i) InBuf[i] = 0UL;
 		
 	uint64_t H[8];
 	
-	for(int i = 0; i < 8; ++i) H[i] = blake2b_IV[i];
+	for(i = 0; i < 8; ++i) H[i] = blake2b_IV[i];
 	
 	H[0] ^= 0x0000000001010040;
 	
@@ -523,7 +526,8 @@ void Argon2dInitHash(void *HashOut, void *Input)
 
 void Argon2dFillFirstBlocks(Argon2d_Block *Matrix, void *InitHash)
 {
-	for(uint32_t lane = 0; lane < 4; ++lane)
+	uint32_t lane;
+	for(lane = 0; lane < 4; ++lane)
 	{
 		((uint32_t *)InitHash)[16] = 0;
 		((uint32_t *)InitHash)[17] = lane;
@@ -538,23 +542,24 @@ void Argon2dFillFirstBlocks(Argon2d_Block *Matrix, void *InitHash)
 void Argon2dFillSingleBlock(Argon2d_Block *State, Argon2d_Block *RefBlock, Argon2d_Block *NextBlock)
 {	
 	__m256i XY[32];
-		
-	for(int i = 0; i < 32; ++i)
+	
+	int i;
+	for(i = 0; i < 32; ++i)
 		XY[i] = State->qqwords[i] = _mm256_xor_si256(State->qqwords[i], RefBlock->qqwords[i]);
 	
-	for(int i = 0; i < 8; ++i)
+	for(i = 0; i < 8; ++i)
 	{
 		BLAKE2_ROUND(	State->dqwords[8 * i + 0], State->dqwords[8 * i + 1], State->dqwords[8 * i + 2], State->dqwords[8 * i + 3],
 						State->dqwords[8 * i + 4], State->dqwords[8 * i + 5], State->dqwords[8 * i + 6], State->dqwords[8 * i + 7]);
 	}
 	
-	for(int i = 0; i < 8; ++i)
+	for(i = 0; i < 8; ++i)
 	{
 		BLAKE2_ROUND(	State->dqwords[8 * 0 + i], State->dqwords[8 * 1 + i], State->dqwords[8 * 2 + i], State->dqwords[8 * 3 + i],
 						State->dqwords[8 * 4 + i], State->dqwords[8 * 5 + i], State->dqwords[8 * 6 + i], State->dqwords[8 * 7 + i]);
 	}
 	
-	for(int i = 0; i < 32; ++i)
+	for(i = 0; i < 32; ++i)
 	{
 		State->qqwords[i] = _mm256_xor_si256(State->qqwords[i], XY[i]);
 		_mm256_store_si256(NextBlock->qqwords + i, State->qqwords[i]);
@@ -576,7 +581,8 @@ void FillSegment(Argon2d_Block *Matrix, uint32_t slice, uint32_t lane)
 	
 	memcpy(State.data, (Matrix + prevoff)->data, 1024);
 	
-	for(int i = startidx; i < SEGMENT_LENGTH; ++i, ++curoff, ++prevoff)
+	int i;
+	for(i = startidx; i < SEGMENT_LENGTH; ++i, ++curoff, ++prevoff)
 	{
 		if((curoff % LANE_LENGTH) == 1) prevoff = curoff - 1;
 		
@@ -618,10 +624,12 @@ void Argon2dFillAllBlocks(Argon2d_Block *Matrix)
 	pthread_t ThrHandles[CONCURRENT_THREADS];
 	Argon2ThreadData ThrData[CONCURRENT_THREADS];
 	
-	for(int s = 0; s < 4; ++s)
+	int s;
+	for(s = 0; s < 4; ++s)
 	{
 		// WARNING: Assumes CONCURRENT_THREADS == lanes == 4
-		for(int l = 0; l < 4; ++l)
+		int l;
+		for(l = 0; l < 4; ++l)
 		{
 			FillSegment(Matrix, s, l);
 		}		
@@ -629,10 +637,12 @@ void Argon2dFillAllBlocks(Argon2d_Block *Matrix)
 }
 
 void Argon2dFinalizeHash(void *OutputHash, Argon2d_Block *Matrix)
-{	
-	for(int l = 1; l < 4; ++l)
+{
+	int l;
+	for(l = 1; l < 4; ++l)
 	{
-		for(int i = 0; i < 32; ++i)
+		int i;
+		for(i = 0; i < 32; ++i)
 			Matrix[LANE_LENGTH - 1].qqwords[i] = _mm256_xor_si256(Matrix[LANE_LENGTH - 1].qqwords[i], Matrix[LANE_LENGTH * l + (LANE_LENGTH - 1)].qqwords[i]);
 	}
 	
