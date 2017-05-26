@@ -200,7 +200,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     statusBar();
 
     // Disable size grip because it looks ugly and nobody needs it
-    statusBar()->setSizeGripEnabled(false);
+    statusBar()->setSizeGripEnabled(true);
 
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
