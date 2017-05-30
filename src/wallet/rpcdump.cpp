@@ -26,8 +26,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
 
-using namespace std;
-
 void EnsureWalletIsUnlocked();
 bool EnsureWalletIsAvailable(bool avoidException);
 
@@ -80,7 +78,7 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
         return NullUniValue;
     
     if (fHelp || params.size() < 1 || params.size() > 3)
-        throw runtime_error(
+        throw std::runtime_error(
             "importprivkey \"dynamicprivkey\" ( \"label\" rescan )\n"
             "\nAdds a private key (as returned by dumpprivkey) to your wallet.\n"
             "\nArguments:\n"
@@ -104,8 +102,8 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    string strSecret = params[0].get_str();
-    string strLabel = "";
+    std::string strSecret = params[0].get_str();
+    std::string strLabel = "";
     if (params.size() > 1)
         strLabel = params[1].get_str();
 
@@ -152,8 +150,8 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
     return NullUniValue;
 }
 
-void ImportAddress(const CDynamicAddress& address, const string& strLabel);
-void ImportScript(const CScript& script, const string& strLabel, bool isRedeemScript)
+void ImportAddress(const CDynamicAddress& address, const std::string& strLabel);
+void ImportScript(const CScript& script, const std::string& strLabel, bool isRedeemScript)
 {
     if (!isRedeemScript && ::IsMine(*pwalletMain, script) == ISMINE_SPENDABLE)
         throw JSONRPCError(RPC_WALLET_ERROR, "The wallet already contains the private key for this address or script");
@@ -170,7 +168,7 @@ void ImportScript(const CScript& script, const string& strLabel, bool isRedeemSc
     }
 }
 
-void ImportAddress(const CDynamicAddress& address, const string& strLabel)
+void ImportAddress(const CDynamicAddress& address, const std::string& strLabel)
 {
     CScript script = GetScriptForDestination(address.Get());
     ImportScript(script, strLabel, false);
@@ -185,7 +183,7 @@ UniValue importaddress(const UniValue& params, bool fHelp)
         return NullUniValue;
     
     if (fHelp || params.size() < 1 || params.size() > 4)
-        throw runtime_error(
+        throw std::runtime_error(
             "importaddress \"address\" ( \"label\" rescan p2sh )\n"
             "\nAdds a script (in hex) or address that can be watched as if it were in your wallet but cannot be used to spend.\n"
             "\nArguments:\n"
@@ -205,7 +203,7 @@ UniValue importaddress(const UniValue& params, bool fHelp)
         );
 
 
-    string strLabel = "";
+    std::string strLabel = "";
     if (params.size() > 1)
         strLabel = params[1].get_str();
 
@@ -251,7 +249,7 @@ UniValue importpubkey(const UniValue& params, bool fHelp)
         return NullUniValue;
 
     if (fHelp || params.size() < 1 || params.size() > 4)
-        throw runtime_error(
+        throw std::runtime_error(
             "importpubkey \"pubkey\" ( \"label\" rescan )\n"
             "\nAdds a public key (in hex) that can be watched as if it were in your wallet but cannot be used to spend.\n"
             "\nArguments:\n"
@@ -269,7 +267,7 @@ UniValue importpubkey(const UniValue& params, bool fHelp)
         );
 
 
-    string strLabel = "";
+    std::string strLabel = "";
     if (params.size() > 1)
         strLabel = params[1].get_str();
 
@@ -309,7 +307,7 @@ UniValue importwallet(const UniValue& params, bool fHelp)
         return NullUniValue;
     
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "importwallet \"filename\"\n"
             "\nImports keys from a wallet dump file (see dumpwallet).\n"
             "\nArguments:\n"
@@ -330,7 +328,7 @@ UniValue importwallet(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    ifstream file;
+    std::ifstream file;
     file.open(params[0].get_str().c_str(), std::ios::in | std::ios::ate);
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
@@ -416,7 +414,7 @@ UniValue dumpprivkey(const UniValue& params, bool fHelp)
         return NullUniValue;
     
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "dumpprivkey \"dynamicaddress\"\n"
             "\nReveals the private key corresponding to 'dynamicaddress'.\n"
             "Then the importprivkey can be used with this output\n"
@@ -434,7 +432,7 @@ UniValue dumpprivkey(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    string strAddress = params[0].get_str();
+    std::string strAddress = params[0].get_str();
     CDynamicAddress address;
     if (!address.SetString(strAddress))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
@@ -447,6 +445,51 @@ UniValue dumpprivkey(const UniValue& params, bool fHelp)
     return CDynamicSecret(vchSecret).ToString();
 }
 
+UniValue dumphdinfo(const UniValue& params, bool fHelp)
+{
+    if (!EnsureWalletIsAvailable(fHelp))
+        return NullUniValue;
+
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "dumphdinfo\n"
+            "Returns an object containing sensitive private info about this HD wallet.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"hdseed\": \"seed\",                    (string) The HD seed (bip32, in hex)\n"
+            "  \"mnemonic\": \"words\",                 (string) The mnemonic for this HD wallet (bip39, english words) \n"
+            "  \"mnemonicpassphrase\": \"passphrase\",  (string) The mnemonic passphrase for this HD wallet (bip39)\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("dumphdinfo", "")
+            + HelpExampleRpc("dumphdinfo", "")
+        );
+
+    LOCK(pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+
+    // add the base58check encoded extended master if the wallet uses HD
+    CHDChain hdChainCurrent;
+    if (pwalletMain->GetHDChain(hdChainCurrent))
+    {
+        if (!pwalletMain->GetDecryptedHDChain(hdChainCurrent))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot decrypt HD seed");
+
+        SecureString ssMnemonic;
+        SecureString ssMnemonicPassphrase;
+        hdChainCurrent.GetMnemonic(ssMnemonic, ssMnemonicPassphrase);
+
+        UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("hdseed", HexStr(hdChainCurrent.GetSeed())));
+        obj.push_back(Pair("mnemonic", ssMnemonic.c_str()));
+        obj.push_back(Pair("mnemonicpassphrase", ssMnemonicPassphrase.c_str()));
+
+        return obj;
+    }
+
+    return NullUniValue;
+}
 
 UniValue dumpwallet(const UniValue& params, bool fHelp)
 {
@@ -454,7 +497,7 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
         return NullUniValue;
     
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "dumpwallet \"filename\"\n"
             "\nDumps all wallet keys in a human-readable format.\n"
             "\nArguments:\n"
@@ -468,7 +511,7 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    ofstream file;
+    std::ofstream file;
     file.open(params[0].get_str().c_str());
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
@@ -493,23 +536,51 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
     file << strprintf("#   mined on %s\n", EncodeDumpTime(chainActive.Tip()->GetBlockTime()));
     file << "\n";
 
-    // add the base58check encoded extended master if the wallet uses HD 
-    CKeyID masterKeyID = pwalletMain->GetHDChain().masterKeyID;
-    if (!masterKeyID.IsNull())
+    // add the base58check encoded extended master if the wallet uses HD
+    CHDChain hdChainCurrent;
+    if (pwalletMain->GetHDChain(hdChainCurrent))
     {
-        CKey key;
-        if (pwalletMain->GetKey(masterKeyID, key))
+
+        if (!pwalletMain->GetDecryptedHDChain(hdChainCurrent))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Cannot decrypt HD chain");
+
+        SecureString ssMnemonic;
+        SecureString ssMnemonicPassphrase;
+        hdChainCurrent.GetMnemonic(ssMnemonic, ssMnemonicPassphrase);
+        file << "# mnemonic: " << ssMnemonic << "\n";
+        file << "# mnemonic passphrase: " << ssMnemonicPassphrase << "\n\n";
+
+        SecureVector vchSeed = hdChainCurrent.GetSeed();
+        file << "# HD seed: " << HexStr(vchSeed) << "\n\n";
+
+        CExtKey masterKey;
+        masterKey.SetMaster(&vchSeed[0], vchSeed.size());
+
+        CDynamicExtKey b58extkey;
+        b58extkey.SetKey(masterKey);
+
+        file << "# extended private masterkey: " << b58extkey.ToString() << "\n";
+
+        CExtPubKey masterPubkey;
+        masterPubkey = masterKey.Neuter();
+
+        CDynamicExtPubKey b58extpubkey;
+        b58extpubkey.SetKey(masterPubkey);
+        file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
+
+        for (size_t i = 0; i < hdChainCurrent.CountAccounts(); ++i)
         {
-            CExtKey masterKey;
-            masterKey.SetMaster(key.begin(), key.size());
-
-            CDynamicExtKey b58extkey;
-            b58extkey.SetKey(masterKey);
-
-            file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+            CHDAccount acc;
+            if(hdChainCurrent.GetAccount(i, acc)) {
+                file << "# external chain counter: " << acc.nExternalChainCounter << "\n";
+                file << "# internal chain counter: " << acc.nInternalChainCounter << "\n\n";
+            } else {
+                file << "# WARNING: ACCOUNT " << i << " IS MISSING!" << "\n\n";
+            }
         }
     }
-    for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
+
+for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
         const CKeyID &keyid = it->second;
         std::string strTime = EncodeDumpTime(it->first);
         std::string strAddr = CDynamicAddress(keyid).ToString();
@@ -518,16 +589,12 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
             file << strprintf("%s %s ", CDynamicSecret(key).ToString(), strTime);
             if (pwalletMain->mapAddressBook.count(keyid)) {
                 file << strprintf("label=%s", EncodeDumpString(pwalletMain->mapAddressBook[keyid].name));
-            } else if (keyid == masterKeyID) {
-                file << "hdmaster=1";
             } else if (setKeyPool.count(keyid)) {
                 file << "reserve=1";
-            } else if (pwalletMain->mapKeyMetadata[keyid].hdKeypath == "m") {
-                file << "inactivehdmaster=1";
             } else {
                 file << "change=1";
             }
-            file << strprintf(" # addr=%s%s\n", strAddr, (pwalletMain->mapKeyMetadata[keyid].hdKeypath.size() > 0 ? " hdkeypath="+pwalletMain->mapKeyMetadata[keyid].hdKeypath : "")); 
+            file << strprintf(" # addr=%s%s\n", strAddr, (pwalletMain->mapHdPubKeys.count(keyid) ? " hdkeypath="+pwalletMain->mapHdPubKeys[keyid].GetKeyPath() : ""));
         }
     }
     file << "\n";

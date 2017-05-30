@@ -25,6 +25,7 @@
 class ClientModel;
 class DynodeList;
 class HelpMessageDialog;
+class ModalOverlay;
 class NetworkStyle;
 class Notificator;
 class OptionsModel;
@@ -42,6 +43,26 @@ class QAction;
 class QProgressBar;
 class QProgressDialog;
 QT_END_NAMESPACE
+
+// Dynamic : to ensure that we can click on lock icon in GUI
+class ClickableLockLabel : public QLabel
+{
+    Q_OBJECT
+
+public:
+    ClickableLockLabel() : QLabel() {}
+    ~ClickableLockLabel() {}
+
+Q_SIGNALS:
+    void clicked();
+
+protected:
+    void mousePressEvent(QMouseEvent * event)
+    {
+        QLabel::mousePressEvent(event);
+        Q_EMIT clicked();
+    }
+};
 
 /**
   Dynamic GUI main class. This class represents the main window of the Dynamic UI. It communicates with both the client and
@@ -73,6 +94,7 @@ public:
     void removeAllWallets();
 #endif // ENABLE_WALLET
     bool enableWallet;
+    QLabel *labelWalletEncryptionIcon;
 
 protected:
     void changeEvent(QEvent *e);
@@ -87,7 +109,6 @@ private:
     WalletFrame *walletFrame;
 
     UnitDisplayStatusBarControl *unitDisplayControl;
-    QLabel *labelWalletEncryptionIcon;
     QLabel *labelWalletHDStatusIcon;
     QPushButton *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
@@ -137,6 +158,7 @@ private:
     Notificator *notificator;
     RPCConsole *rpcConsole;
     HelpMessageDialog *helpMessageDialog;
+    ModalOverlay *modalOverlay;
 
     /** Keep track of previous number of blocks, to detect progress */
     int prevBlocks;
@@ -163,6 +185,8 @@ private:
     /** Disconnect core signals from GUI client */
     void unsubscribeFromCoreSignals();
 
+    void updateHeadersSyncProgressLabel();
+
 Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
     void receivedURI(const QString &uri);
@@ -175,7 +199,7 @@ public Q_SLOTS:
     /** Get restart command-line parameters and request restart */
     void handleRestart(QStringList args);
     /** Set number of blocks and last block date shown in the UI */
-    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);
+    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Set additional data sync status shown in the UI */
     void setAdditionalDataSyncProgress(double nSyncProgress);
 
@@ -189,17 +213,17 @@ public Q_SLOTS:
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = NULL);
 
 #ifdef ENABLE_WALLET
-    /** Set the encryption status as shown in the UI.
-       @param[in] status            current encryption status
-       @see WalletModel::EncryptionStatus
-    */
-    void setEncryptionStatus(int status);
-
     /** Set the hd-enabled status as shown in the UI.
      @param[in] status            current hd enabled status
      @see WalletModel::EncryptionStatus
      */
     void setHDStatus(int hdEnabled);
+
+    /** Set the encryption status as shown in the UI.
+       @param[in] status            current encryption status
+       @see WalletModel::EncryptionStatus
+    */
+    void setEncryptionStatus(int status);
 
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
@@ -273,6 +297,9 @@ private Q_SLOTS:
 
     /** Show progress dialog e.g. for verifychain */
     void showProgress(const QString &title, int nProgress);
+
+    void showModalOverlay();
+
 };
 
 class UnitDisplayStatusBarControl : public QLabel

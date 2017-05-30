@@ -80,6 +80,8 @@
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 
+#include <thread>
+
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/filesystem.hpp>
@@ -89,20 +91,6 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
 #include <boost/thread.hpp>
-
-// Work around clang compilation problem in Boost 1.46:
-// /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
-// See also: http://stackoverflow.com/questions/10020179/compilation-fail-in-boost-librairies-program-options
-//           http://clang.debian.net/status.php?version=3.0&key=CANNOT_FIND_FUNCTION
-namespace boost {
-
-    namespace program_options {
-        std::string to_internal(const std::string&);
-    }
-
-} // namespace boost
-
-using namespace std;
 
 //Dynamic only features
 bool fDyNode = false;
@@ -119,14 +107,14 @@ int nWalletBackups = 10;
 const char * const DYNAMIC_CONF_FILENAME = "dynamic.conf";
 const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
-map<string, string> mapArgs;
-map<string, vector<string> > mapMultiArgs;
+std::map<std::string, std::string> mapArgs;
+std::map<std::string, std::vector<std::string> > mapMultiArgs;
 bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
 bool fDaemon = false;
 bool fServer = false;
-string strMiscWarning;
+std::string strMiscWarning;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogThreadNames = DEFAULT_LOGTHREADNAMES;
@@ -209,7 +197,7 @@ static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
  */
 static FILE* fileout = NULL;
 static boost::mutex* mutexDebugLog = NULL;
-static list<string> *vMsgsBeforeOpenLog;
+static std::list<std::string> *vMsgsBeforeOpenLog;
 
 static int FileWriteStr(const std::string &str, FILE *fp)
 {
@@ -220,7 +208,7 @@ static void DebugPrintInit()
 {
     assert(mutexDebugLog == NULL);
     mutexDebugLog = new boost::mutex();
-    vMsgsBeforeOpenLog = new list<string>;
+    vMsgsBeforeOpenLog = new std::list<std::string>;
 }
 
 void OpenDebugLog()
@@ -252,7 +240,7 @@ bool LogAcceptCategory(const char* category)
         // This helps prevent issues debugging global destructors,
         // where mapMultiArgs might be deleted before another
         // global destructor calls LogPrint()
-        static boost::thread_specific_ptr<set<string> > ptrCategory;
+        static boost::thread_specific_ptr<std::set<std::string> > ptrCategory;
 
         if (!fDebug) {
             if (ptrCategory.get() != NULL) {
@@ -268,26 +256,26 @@ bool LogAcceptCategory(const char* category)
             LogPrintf("debug turned on:\n");
             for (int i = 0; i < (int)mapMultiArgs["-debug"].size(); ++i)
                 LogPrintf("  thread %s category %s\n", strThreadName, mapMultiArgs["-debug"][i]);
-            const vector<string>& categories = mapMultiArgs["-debug"];
-            ptrCategory.reset(new set<string>(categories.begin(), categories.end()));
+            const std::vector<std::string>& categories = mapMultiArgs["-debug"];
+            ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
             // thread_specific_ptr automatically deletes the set when the thread ends.
             // "dynamic" is a composite category enabling all Dynamic-related debug output
-            if(ptrCategory->count(string("dynamic"))) {
-                ptrCategory->insert(string("privatesend"));
-                ptrCategory->insert(string("instantsend"));
-                ptrCategory->insert(string("dynode"));
-                ptrCategory->insert(string("spork"));
-                ptrCategory->insert(string("keepass"));
-                ptrCategory->insert(string("dnpayments"));
-                ptrCategory->insert(string("gobject"));
+            if(ptrCategory->count(std::string("dynamic"))) {
+                ptrCategory->insert(std::string("privatesend"));
+                ptrCategory->insert(std::string("instantsend"));
+                ptrCategory->insert(std::string("dynode"));
+                ptrCategory->insert(std::string("spork"));
+                ptrCategory->insert(std::string("keepass"));
+                ptrCategory->insert(std::string("dnpayments"));
+                ptrCategory->insert(std::string("gobject"));
             }
         }
-        const set<string>& setCategories = *ptrCategory.get();
+        const std::set<std::string>& setCategories = *ptrCategory.get();
 
         // if not debugging everything and not debugging specific category, LogPrint does nothing.
-        if (setCategories.count(string("")) == 0 &&
-            setCategories.count(string("1")) == 0 &&
-            setCategories.count(string(category)) == 0)
+        if (setCategories.count(std::string("")) == 0 &&
+            setCategories.count(std::string("1")) == 0 &&
+            setCategories.count(std::string(category)) == 0)
             return false;
     }
     return true;
@@ -300,7 +288,7 @@ bool LogAcceptCategory(const char* category)
  */
 static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine)
 {
-    string strStamped;
+    std::string strStamped;
 
     if (!fLogTimestamps)
         return str;
@@ -324,7 +312,7 @@ static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine
  */
 static std::string LogThreadNameStr(const std::string &str, bool *fStartedNewLine)
 {
-    string strThreadLogged;
+    std::string strThreadLogged;
 
     if (!fLogThreadNames)
         return str;
@@ -579,6 +567,7 @@ static void WriteConfigFile(FILE* configFile)
     fputs ("rpcport=31350\n", configFile);
     fputs ("port=31300\n",configFile);
     fclose(configFile);
+    ReadConfigFile(mapArgs, mapMultiArgs);
 }
 
 const boost::filesystem::path &GetDataDir(bool fNetSpecific)
@@ -661,8 +650,8 @@ boost::filesystem::path GetDynodeConfigFile()
     return pathConfigFile;
 }
 
-void ReadConfigFile(map<string, string>& mapSettingsRet,
-                    map<string, vector<string> >& mapMultiSettingsRet)
+void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
+                    std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
 
@@ -676,14 +665,14 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
         }
     }
 
-    set<string> setOptions;
+    std::set<std::string> setOptions;
     setOptions.insert("*");
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
         // Don't overwrite existing settings so command line settings override dynamic.conf
-        string strKey = string("-") + it->string_key;
-        string strValue = it->value[0];
+        std::string strKey = std::string("-") + it->string_key;
+        std::string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
         if (mapSettingsRet.count(strKey) == 0)
             mapSettingsRet[strKey] = strValue;
@@ -742,19 +731,19 @@ bool TryCreateDirectory(const boost::filesystem::path& p)
     return false;
 }
 
-void FileCommit(FILE *fileout)
+void FileCommit(FILE *file)
 {
-    fflush(fileout); // harmless if redundantly called
+    fflush(file); // harmless if redundantly called
 #ifdef WIN32
-    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(fileout));
+    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(file));
     FlushFileBuffers(hFile);
 #else
     #if defined(__linux__) || defined(__NetBSD__)
-    fdatasync(fileno(fileout));
+    fdatasync(fileno(file));
     #elif defined(__APPLE__) && defined(F_FULLFSYNC)
-    fcntl(fileno(fileout), F_FULLFSYNC, 0);
+    fcntl(fileno(file), F_FULLFSYNC, 0);
     #else
-    fsync(fileno(fileout));
+    fsync(fileno(file));
     #endif
 #endif
 }
@@ -846,13 +835,13 @@ void ShrinkDebugFile()
         // Restart the file with some of the end
         std::vector <char> vch(200000,0);
         fseek(file, -((long)vch.size()), SEEK_END);
-        int nBytes = fread(begin_ptr(vch), 1, vch.size(), file);
+        int nBytes = fread(vch.data(), 1, vch.size(), file);
         fclose(file);
 
         file = fopen(pathLog.string().c_str(), "w");
         if (file)
         {
-            fwrite(begin_ptr(vch), 1, nBytes, file);
+            fwrite(vch.data(), 1, nBytes, file);
             fclose(file);
         }
     }
@@ -983,10 +972,6 @@ void SetThreadPriority(int nPriority)
 
 int GetNumCores()
 {
-#if BOOST_VERSION >= 105600
-    return boost::thread::physical_concurrency();
-#else // Must fall back to hardware_concurrency, which unfortunately counts virtual cores
-    return boost::thread::hardware_concurrency();
-#endif
+    return std::thread::hardware_concurrency();
 }
 

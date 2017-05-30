@@ -6,6 +6,7 @@
 #define DYNAMIC_POLICYESTIMATOR_H
 
 #include "amount.h"
+#include "random.h"
 #include "uint256.h"
 
 #include <map>
@@ -275,6 +276,8 @@ private:
         unsigned int bucketIndex;
         TxStatsInfo() : stats(NULL), blockHeight(0), bucketIndex(0) {}
     };
+
+    FastRandomContext insecure_rand;
 
     // map of txids to information about that transaction
     std::map<uint256, TxStatsInfo> mapMemPoolTxs;

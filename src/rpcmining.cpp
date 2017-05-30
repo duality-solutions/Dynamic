@@ -40,8 +40,6 @@
 #include <boost/assign/list_of.hpp>
 #include <boost/shared_ptr.hpp>
 
-using namespace std;
-
 /**
  * Temporary functions for the purpose of
  * getblock
@@ -71,7 +69,7 @@ void ShutdownRPCMining()
 UniValue getpowrewardstart(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getpowrewardstart [nHeight]\n"
             "Returns block when PoW rewards begin.");
 
@@ -81,7 +79,7 @@ UniValue getpowrewardstart(const UniValue& params, bool fHelp)
 UniValue getdynoderewardstart(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getdynoderewardstart [nHeight]\n"
             "Returns block when Dynode rewards begin.");
 
@@ -133,7 +131,7 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 UniValue getnetworkhashps(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 2)
-        throw runtime_error(
+        throw std::runtime_error(
             "getnetworkhashps ( blocks height )\n"
             "\nReturns the estimated network hashes per second based on the last n blocks.\n"
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
@@ -155,7 +153,7 @@ UniValue getnetworkhashps(const UniValue& params, bool fHelp)
 UniValue getgenerate(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
-        throw runtime_error(
+        throw std::runtime_error(
             "getgenerate\n"
             "\nReturn if the server is set to generate coins or not. The default is false.\n"
             "It is set with the command line argument -gen (or " + std::string(DYNAMIC_CONF_FILENAME) + " setting gen)\n"
@@ -174,7 +172,7 @@ UniValue getgenerate(const UniValue& params, bool fHelp)
 UniValue generate(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "generate numblocks\n"
             "\nMine blocks immediately (before the RPC call returns)\n"
             "\nNote: this function can only be used on the regtest network\n"
@@ -248,7 +246,7 @@ UniValue generate(const UniValue& params, bool fHelp)
 UniValue setgenerate(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)
-        throw runtime_error(
+        throw std::runtime_error(
             "setgenerate generate ( genproclimit )\n"
             "\nSet 'generate' true or false to turn generation on or off.\n"
             "Generation is limited to 'genproclimit' processors, -1 is unlimited.\n"
@@ -292,7 +290,7 @@ UniValue setgenerate(const UniValue& params, bool fHelp)
 UniValue gethashespersec(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
-        throw runtime_error(
+        throw std::runtime_error(
             "gethashespersec\n"
             "\nReturns a recent hashes per second performance measurement while generating.\n"
             "See the getgenerate and setgenerate calls to turn generation on and off.\n"
@@ -311,7 +309,7 @@ UniValue gethashespersec(const UniValue& params, bool fHelp)
 UniValue getmininginfo(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
-        throw runtime_error(
+        throw std::runtime_error(
             "getmininginfo\n"
             "\nReturns a json object containing mining-related information."
             "\nResult:\n"
@@ -356,7 +354,7 @@ UniValue getmininginfo(const UniValue& params, bool fHelp)
 UniValue prioritisetransaction(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 3)
-        throw runtime_error(
+        throw std::runtime_error(
             "prioritisetransaction <txid> <priority delta> <fee delta>\n"
             "Accepts the transaction into mined blocks at a higher (or lower) priority\n"
             "\nArguments:\n"
@@ -415,7 +413,7 @@ std::string gbt_vb_name(const Consensus::DeploymentPos pos)
 UniValue getwork(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getwork ( \"data\" )\n"
             "\nIf 'data' is not specified, it returns the formatted hash data to work on.\n"
             "If 'data' is specified, tries to solve the block and returns true if it was successful.\n"
@@ -444,9 +442,9 @@ UniValue getwork(const UniValue& params, bool fHelp)
     if (!dynodeSync.IsSynced())     
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is syncing with network...");
 
-    typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
+    typedef std::map<uint256, std::pair<CBlock*, CScript> > mapNewBlock_t;
     static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
-    static vector<CBlockTemplate*> vNewBlockTemplate;
+    static std::vector<CBlockTemplate*> vNewBlockTemplate;
 
     if (params.size() == 0)
     {
@@ -498,7 +496,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
         IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
         // Save
-        mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
+        mapNewBlock[pblock->hashMerkleRoot] = std::make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
         // Pre-build hash buffers
         char pmidstate[32];
@@ -518,7 +516,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
     else
     {
         // Parse parameters
-        vector<unsigned char> vchData = ParseHex(params[0].get_str());
+        std::vector<unsigned char> vchData = ParseHex(params[0].get_str());
         if (vchData.size() != 128)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
         CBlock* pdata = (CBlock*)&vchData[0];
@@ -549,7 +547,7 @@ UniValue getwork(const UniValue& params, bool fHelp)
 UniValue getblocktemplate(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "getblocktemplate ( \"jsonrequestobject\" )\n"
             "\nIf the request parameters include a 'mode' key, that is used to explicitly select between the default 'template' request or a 'proposal'.\n"
             "It returns data needed to construct a block to work on.\n"
@@ -798,7 +796,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     aCaps.push_back("proposal");
 
     UniValue transactions(UniValue::VARR);
-    map<uint256, int64_t> setTxIndex;
+    std::map<uint256, int64_t> setTxIndex;
     int i = 0;
     BOOST_FOREACH (const CTransaction& tx, pblock->vtx) 
     {
@@ -966,7 +964,7 @@ protected:
 UniValue submitblock(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)
-        throw runtime_error(
+        throw std::runtime_error(
             "submitblock \"hexdata\" ( \"jsonparametersobject\" )\n"
             "\nAttempts to submit new block to network.\n"
             "The 'jsonparametersobject' parameter is currently ignored.\n"
@@ -1027,7 +1025,7 @@ UniValue submitblock(const UniValue& params, bool fHelp)
 UniValue estimatefee(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "estimatefee nblocks\n"
             "\nEstimates the approximate fee per kilobyte needed for a transaction to begin\n"
             "confirmation within nblocks blocks.\n"
@@ -1060,7 +1058,7 @@ UniValue estimatefee(const UniValue& params, bool fHelp)
 UniValue estimatepriority(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "estimatepriority nblocks\n"
             "\nEstimates the approximate priority a zero-fee transaction needs to begin\n"
             "confirmation within nblocks blocks.\n"
@@ -1087,7 +1085,7 @@ UniValue estimatepriority(const UniValue& params, bool fHelp)
 UniValue estimatesmartfee(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "estimatesmartfee nblocks\n"
             "\nWARNING: This interface is unstable and may disappear or change!\n"
             "\nEstimates the approximate fee per kilobyte needed for a transaction to begin\n"
@@ -1123,7 +1121,7 @@ UniValue estimatesmartfee(const UniValue& params, bool fHelp)
 UniValue estimatesmartpriority(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
-        throw runtime_error(
+        throw std::runtime_error(
             "estimatesmartpriority nblocks\n"
             "\nWARNING: This interface is unstable and may disappear or change!\n"
             "\nEstimates the approximate priority a zero-fee transaction needs to begin\n"

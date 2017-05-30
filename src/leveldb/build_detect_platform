@@ -104,12 +104,6 @@ case "$TARGET_OS" in
         PLATFORM_LIBS="-lpthread"
         PORT_FILE=port/port_posix.cc
         ;;
-    GNU/kFreeBSD)
-        PLATFORM=OS_KFREEBSD
-        COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_KFREEBSD"
-        PLATFORM_LIBS="-lpthread"
-        PORT_FILE=port/port_posix.cc
-        ;;
     NetBSD)
         PLATFORM=OS_NETBSD
         COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_NETBSD"
@@ -161,8 +155,7 @@ case "$TARGET_OS" in
         PORT_FILE=port/port_win.cc
         CROSS_COMPILE=true
         ;;
-    *)
-        echo "Unknown platform!" >&2
+    *)        echo "Unknown platform!" >&2
         exit 1
 esac
 
@@ -175,7 +168,7 @@ DIRS="$PREFIX/db $PREFIX/util $PREFIX/table"
 set -f # temporarily disable globbing so that our patterns aren't expanded
 PRUNE_TEST="-name *test*.cc -prune"
 PRUNE_BENCH="-name *_bench.cc -prune"
-PRUNE_TOOL="-name leveldb_main.cc -prune"
+PRUNE_TOOL="-name leveldbutil.cc -prune"
 PORTABLE_FILES=`find $DIRS $PRUNE_TEST -o $PRUNE_BENCH -o $PRUNE_TOOL -o -name '*.cc' -print | sort | sed "s,^$PREFIX/,," | tr "\n" " "`
 
 set +f # re-enable globbing
@@ -202,6 +195,17 @@ EOF
         PLATFORM_CXXFLAGS="-std=c++0x"
     else
         COMMON_FLAGS="$COMMON_FLAGS -DLEVELDB_PLATFORM_POSIX"
+    fi
+
+    # Test whether Snappy library is installed
+    # http://code.google.com/p/snappy/
+    $CXX $CXXFLAGS -x c++ - -o $CXXOUTPUT 2>/dev/null  <<EOF
+      #include <snappy.h>
+      int main() {}
+EOF
+    if [ "$?" = 0 ]; then
+        COMMON_FLAGS="$COMMON_FLAGS -DSNAPPY"
+        PLATFORM_LIBS="$PLATFORM_LIBS -lsnappy"
     fi
 
     # Test whether tcmalloc is available

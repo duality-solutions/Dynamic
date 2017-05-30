@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(univalue_array)
     const char *s = "pippy";
     BOOST_CHECK(arr.push_back(s));
 
-    vector<UniValue> vec;
+    std::vector<UniValue> vec;
     v.setStr("boing");
     vec.push_back(v);
 

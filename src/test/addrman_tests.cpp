@@ -8,8 +8,6 @@
 
 #include "random.h"
 
-using namespace std;
-
 class CAddrManTest : public CAddrMan{};
 
 BOOST_FIXTURE_TEST_SUITE(addrman_tests, BasicTestingSetup)

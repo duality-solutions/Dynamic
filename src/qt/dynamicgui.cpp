@@ -11,6 +11,7 @@
 #include "dynamicunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
+#include "modaloverlay.h"
 #include "networkstyle.h"
 #include "notificator.h"
 #include "openuridialog.h"
@@ -29,6 +30,7 @@
 #include "macdockiconhandler.h"
 #endif
 
+#include "chainparams.h"
 #include "dynode-sync.h"
 #include "dynodelist.h"
 #include "init.h"
@@ -42,6 +44,7 @@
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
+#include <QIcon>
 #include <QListWidget>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -78,11 +81,12 @@ const QString DynamicGUI::DEFAULT_WALLET = "~Default";
 
 DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
     QMainWindow(parent),
+    enableWallet(false),
+    labelWalletEncryptionIcon(0),
     clientModel(0),
     walletFrame(0),
-    unitDisplayControl(0),
-    labelWalletEncryptionIcon(0),
     labelWalletHDStatusIcon(0),
+    unitDisplayControl(0),
     labelConnectionsIcon(0),
     labelBlocksIcon(0),
     progressBarLabel(0),
@@ -120,6 +124,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     notificator(0),
     rpcConsole(0),
     helpMessageDialog(0),
+    modalOverlay(0),
     prevBlocks(0),
     spinnerFrame(0),
     platformStyle(_platformStyle)
@@ -195,7 +200,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     statusBar();
 
     // Disable size grip because it looks ugly and nobody needs it
-    statusBar()->setSizeGripEnabled(false);
+    statusBar()->setSizeGripEnabled(true);
 
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
@@ -205,7 +210,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
     unitDisplayControl = new UnitDisplayStatusBarControl(platformStyle);
-    labelWalletEncryptionIcon = new QLabel();
+    labelWalletEncryptionIcon = new ClickableLockLabel();
     labelWalletHDStatusIcon = new QLabel();
     labelConnectionsIcon = new QPushButton();
     labelConnectionsIcon->setFlat(true); // Make the button look like a label, but clickable
@@ -214,7 +219,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     // Jump to peers tab by clicking on connections icon
     connect(labelConnectionsIcon, SIGNAL(clicked()), this, SLOT(showPeers()));
 
-    labelBlocksIcon = new QLabel();
+    labelBlocksIcon = new GUIUtil::ClickableLabel();
     if(enableWallet)
     {
         frameBlocksLayout->addStretch();
@@ -257,6 +262,15 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
 
     // Subscribe to notifications from core
     subscribeToCoreSignals();
+
+    modalOverlay = new ModalOverlay(this->centralWidget());
+#ifdef ENABLE_WALLET
+    if(enableWallet) {
+        connect(walletFrame, SIGNAL(requestedSyncWarningInfo()), this, SLOT(showModalOverlay()));
+        connect(labelBlocksIcon, SIGNAL(clicked(QPoint)), this, SLOT(showModalOverlay()));
+        connect(progressBar, SIGNAL(clicked(QPoint)), this, SLOT(showModalOverlay()));
+        }
+#endif
 }
 
 DynamicGUI::~DynamicGUI()
@@ -630,7 +644,7 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
         setNumConnections(_clientModel->getNumConnections());
         connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
-        setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(NULL));
+        setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(NULL), false);
         connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(setNumBlocks(int,QDateTime,double,bool)));
 
         connect(_clientModel, SIGNAL(additionalDataSyncProgressChanged(double)), this, SLOT(setAdditionalDataSyncProgress(double)));
@@ -650,6 +664,7 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
 #endif // ENABLE_WALLET
         unitDisplayControl->setOptionsModel(_clientModel->getOptionsModel());
     } else {
+        modalOverlay->setKnownBestHeight(clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(clientModel->getHeaderTipTime()));
         // Disable possibility to show main window via action
         toggleHideAction->setEnabled(false);
         if(trayIconMenu)
@@ -935,9 +950,25 @@ void DynamicGUI::setNumConnections(int count)
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Dynamic network", "", count));
 }
 
-void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress)
+void DynamicGUI::updateHeadersSyncProgressLabel()
 {
-    if(!clientModel)
+    int64_t headersTipTime = clientModel->getHeaderTipTime();
+    int headersTipHeight = clientModel->getHeaderTipHeight();
+    int estHeadersLeft = (GetTime() - headersTipTime) / Params().GetConsensus().nPowTargetSpacing;
+    if (estHeadersLeft > HEADER_HEIGHT_DELTA_SYNC)
+        progressBarLabel->setText(tr("Syncing Headers (%1%)...").arg(QString::number(100.0 / (headersTipHeight+estHeadersLeft)*headersTipHeight, 'f', 1)));
+}
+
+void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool header)
+{
+    if (modalOverlay)
+    {
+        if (header)
+            modalOverlay->setKnownBestHeight(count, blockDate);
+        else
+            modalOverlay->tipUpdate(count, blockDate, nVerificationProgress);
+    }
+    if (!clientModel)
         return;
 
     // Prevent orphan statusbar messages (e.g. hover Quit in main menu, wait until chain-sync starts -> garbelled text)
@@ -947,17 +978,25 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     enum BlockSource blockSource = clientModel->getBlockSource();
     switch (blockSource) {
         case BLOCK_SOURCE_NETWORK:
+            if (header) {
+                updateHeadersSyncProgressLabel();
+                return;
+            }
             progressBarLabel->setText(tr("Synchronizing with network..."));
+            updateHeadersSyncProgressLabel();
             break;
         case BLOCK_SOURCE_DISK:
-            progressBarLabel->setText(tr("Importing blocks from disk..."));
+            if (header)
+                progressBarLabel->setText(tr("Importing blocks on disk..."));
             break;
         case BLOCK_SOURCE_REINDEX:
             progressBarLabel->setText(tr("Reindexing blocks on disk..."));
             break;
         case BLOCK_SOURCE_NONE:
-            // Case: not Importing, not Reindexing and no network connection
-            progressBarLabel->setText(tr("No block source available..."));
+            if (header) {
+                return;
+            }
+            progressBarLabel->setText(tr("Connecting to peers..."));
             break;
     }
 
@@ -993,9 +1032,7 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         }
         else
         {
-            qint64 years = secs / YEAR_IN_SECONDS;
-            qint64 remainder = secs % YEAR_IN_SECONDS;
-            timeBehindText = tr("%1 and %2").arg(tr("%n year(s)", "", years)).arg(tr("%n week(s)","", remainder/WEEK_IN_SECONDS));
+            QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
         }
 
         progressBarLabel->setVisible(true);
@@ -1016,7 +1053,10 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 
 #ifdef ENABLE_WALLET
         if(walletFrame)
+        {
             walletFrame->showOutOfSyncWarning(true);
+            modalOverlay->showHide();
+        }
 #endif // ENABLE_WALLET
 
         tooltip += QString("<br>");
@@ -1064,7 +1104,10 @@ void DynamicGUI::setAdditionalDataSyncProgress(double nSyncProgress)
 
 #ifdef ENABLE_WALLET
             if(walletFrame)
-                walletFrame->showOutOfSyncWarning(false);
+        {
+            walletFrame->showOutOfSyncWarning(false);
+            modalOverlay->showHide(true, true);
+        }
 #endif // ENABLE_WALLET
 
             progressBar->setFormat(tr("Synchronizing additional data: %p%"));
@@ -1252,14 +1295,15 @@ bool DynamicGUI::handlePaymentRequest(const SendCoinsRecipient& recipient)
     return false;
 }
 
+ 
 void DynamicGUI::setHDStatus(int hdEnabled)
 {
     QString theme = GUIUtil::getThemeName();
-    
+
     labelWalletHDStatusIcon->setPixmap(platformStyle->SingleColorIcon(hdEnabled ? ":/icons/" + theme + "/hd_enabled" : ":/icons/" + theme + "/hd_disabled").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     labelWalletHDStatusIcon->setToolTip(hdEnabled ? tr("HD key generation is <b>enabled</b>") : tr("HD key generation is <b>disabled</b>"));
 
-    // eventually disable the QLabel to set its opacity to 50% 
+    // eventually disable the QLabel to set its opacity to 50%
     labelWalletHDStatusIcon->setEnabled(hdEnabled);
 }
 
@@ -1371,6 +1415,12 @@ void DynamicGUI::showProgress(const QString &title, int nProgress)
     }
     else if (progressDialog)
         progressDialog->setValue(nProgress);
+}
+
+void DynamicGUI::showModalOverlay()
+{
+    if (modalOverlay)
+        modalOverlay->showHide(false, true);
 }
 
 static bool ThreadSafeMessageBox(DynamicGUI *gui, const std::string& message, const std::string& caption, unsigned int style)

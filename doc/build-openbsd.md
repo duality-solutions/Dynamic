@@ -95,7 +95,29 @@ cd db-4.8.30.NC/build_unix/
 ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX CC=egcc CXX=eg++ CPP=ecpp
 make install
 ```
+AVX2 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX2 optimisations can be enabled. 
 
+Prior to running the build commands:
+
+    CPPFLAGS=-march=native
+    
+CPU's with AVX2 support:
+
+    Intel
+        Haswell processor, Q2 2013
+        Haswell E processor, Q3 2014
+        Broadwell processor, Q4 2014
+        Broadwell E processor, Q3 2016
+        Skylake processor, Q3 2015
+        Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
+        Coffee Lake processor, expected in 2017
+        Cannonlake processor, expected in 2017
+    AMD
+        Carrizo processor, Q2 2015
+        Ryzen processor, Q1 2017
+        
 ### Building Dynamic
 
 **Important**: use `gmake`, not `make`. The non-GNU `make` will exit with a horrible error.

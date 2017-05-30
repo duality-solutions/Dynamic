@@ -19,6 +19,7 @@
 #include "uint256.h"
 #include "util.h"
 
+#include <atomic>
 #include <deque>
 #include <stdint.h>
 
@@ -357,14 +358,14 @@ public:
     bool fInbound;
     bool fNetworkNode;
     bool fSuccessfullyConnected;
-    bool fDisconnect;
+    std::atomic_bool fDisconnect;
     // We use fRelayTxes for two purposes -
     // a) it allows us to not relay tx invs before receiving the peer's version message
     // b) the peer may tell us in its version message that we should not relay tx invs
     //    unless it loads a bloom filter.
     bool fRelayTxes;
-    // If 'true' this node will be disconnected on CDynodeMan::ProcessDynodeConnections()
-    bool fDynode;
+    bool fSentAddr;
+    bool fDynode; // If 'true' this node will be disconnected on CDynodeMan::ProcessDynodeConnections()
     CSemaphoreGrant grantOutbound;
     CSemaphoreGrant grantDynodeOutbound;
     CCriticalSection cs_filter;
@@ -497,14 +498,14 @@ public:
         addrKnown.insert(_addr.GetKey());
     }
 
-    void PushAddress(const CAddress& _addr)
+    void PushAddress(const CAddress& _addr, FastRandomContext &insecure_rand)
     {
         // Known checking here is only to save space from duplicates.
         // SendMessages will filter it again for knowns that were added
         // after addresses were pushed.
         if (_addr.IsValid() && !addrKnown.contains(_addr.GetKey())) {
             if (vAddrToSend.size() >= MAX_ADDR_TO_SEND) {
-                vAddrToSend[insecure_rand() % vAddrToSend.size()] = _addr;
+                vAddrToSend[insecure_rand.rand32() % vAddrToSend.size()] = _addr;
             } else {
                 vAddrToSend.push_back(_addr);
             }

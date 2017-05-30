@@ -76,7 +76,7 @@ static void InitMessage(SplashScreen *splash, const std::string &message)
         Qt::QueuedConnection,
         Q_ARG(QString, QString::fromStdString(message)),
         Q_ARG(int, Qt::AlignBottom|Qt::AlignHCenter),
-        Q_ARG(QColor, QColor(55,55,55)));
+        Q_ARG(QColor, QColor(200,150,200)));
 }
 
 static void ShowProgress(SplashScreen *splash, const std::string &title, int nProgress)
@@ -124,7 +124,7 @@ void SplashScreen::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
-    QRect r = rect().adjusted(5, 5, -5, -5);
+    QRect r = rect().adjusted(5, 5, -5, -30);
     painter.setPen(curColor);
     painter.drawText(r, curAlignment, curMessage);
 }

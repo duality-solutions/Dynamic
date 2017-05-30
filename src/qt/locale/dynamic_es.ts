@@ -1984,6 +1984,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Escriba &lt;b&gt;help&lt;/b&gt; para ver un resumen de los comandos disponibles.</translation>
     </message>
     <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>ADVERTENCIA: Los estafadores han sido activados, diciéndoles a los usuarios que escriban comandos aquí, robando el contenido de sus monederos. No utilice esta consola sin entender completamente la repercusión de un comando.</translation>
+    </message>
+    <message>
         <source>%1 B</source>
         <translation>%1 B</translation>
     </message>

@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = dynamic
-VERSION = 1.3.0.2
+VERSION = 1.4.0.0
 INCLUDEPATH += src \
                src/crypto \
                src/crypto/heavyhash \
@@ -8,7 +8,7 @@ INCLUDEPATH += src \
                src/secp256k1/include \
                src/univalue/include \
                src/leveldb/helpers/memenv \
-               src/script \
+               src/script
 
 INCLUDEPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
 DEPENDPATH += $$PWD/../../../../usr/lib/x86_64-linux-gnu
@@ -19,6 +19,7 @@ DEFINES += ENABLE_WALLET
 DEFINES += BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
 CONFIG += thread
+CONFIG += c++11
 
 
 lessThan(QT_MAJOR_VERSION, 5) {
@@ -32,21 +33,29 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 DEFINES += HAVE_WORKING_BOOST_SLEEP_FOR=1
 DEFINES += BOOST_THREAD_USES_CHRONO=1
 DEFINES += HAVE_ENDIAN_H=1
+DEFINES += HAVE_DECL_BE32TOH=1
+DEFINES += HAVE_DECL_LE32TOH=1
+
 DEFINES += HAVE_DECL_HTOLE16=1
 DEFINES += HAVE_DECL_BE16TOH=1
 DEFINES += HAVE_DECL_LE16TOH=1
 DEFINES += HAVE_DECL_HTOBE32=1
 DEFINES += HAVE_DECL_HTOLE32=1
-DEFINES += HAVE_DECL_BE32TOH=1
-DEFINES += HAVE_DECL_LE32TOH=1
+
+
 DEFINES += HAVE_DECL_HTOBE64=1
 DEFINES += HAVE_DECL_HTOLE64=1
 DEFINES += HAVE_DECL_BE64TOH=1
 DEFINES += HAVE_DECL_LE64TOH=1
 DEFINES += HAVE_DECL_STRNLEN=1
-
+DEFINES += WORDS_BIGENDIAN=0
+DEFINES += HAVE_DECL_HTOBE16=1
+DEFINES += HAVE_DECL_BE16TOH=1
 DEFINES += EVENT__HAVE_NETINET_IN_H=1
-DEFINES +=_XOPEN_SOURCE_EXTENDED=1
+DEFINES += _XOPEN_SOURCE_EXTENDED=0
+DEFINES += _HAVE_DECL_BE16TOH=1
+DEFINES += HAVE_DECL_BE16TOH=1
+
 
 QT += widgets
 # LIBSEC256K1 SUPPORT
@@ -315,7 +324,6 @@ HEADERS += \
     src/crypto/argon2d/argon2.h \
     src/crypto/argon2d/core.h \
     src/crypto/argon2d/encoding.h \
-    src/crypto/argon2d/opt.h \
     src/crypto/argon2d/thread.h \
     src/crypto/blake2/blake2-impl.h \
     src/crypto/blake2/blake2.h \
@@ -334,7 +342,6 @@ HEADERS += \
     src/script/sign.h \
     src/script/standard.h \
     src/support/cleanse.h \
-    src/support/pagelocker.h \
     src/support/allocators/secure.h \
     src/support/allocators/zeroafterfree.h \
     src/wallet/crypter.h \
@@ -440,7 +447,11 @@ HEADERS += \
     src/qt/dnstablemodel.h \
     src/qt/multisigaddressentry.h \
     src/qt/multisigdialog.h \
-    src/qt/multisiginputentry.h
+    src/qt/multisiginputentry.h \
+    src/support/lockedpool.h \
+    src/messagesigner.h \
+    src/qt/modaloverlay.h \
+    src/indirectmap.h
 
 SOURCES += \
     src/compat/glibcxx_sanity.cpp \
@@ -523,7 +534,6 @@ SOURCES += \
     src/script/sign.cpp \
     src/script/standard.cpp \
     src/support/cleanse.cpp \
-    src/support/pagelocker.cpp \
     src/wallet/crypter.cpp \
     src/wallet/db.cpp \
     src/wallet/rpcdump.cpp \
@@ -613,7 +623,12 @@ SOURCES += \
     src/qt/dnstablemodel.cpp \
     src/qt/multisigaddressentry.cpp \
     src/qt/multisigdialog.cpp \
-    src/qt/multisiginputentry.cpp
+    src/qt/multisiginputentry.cpp \
+    src/support/lockedpool.cpp \
+    src/ui_interface.cpp \
+    src/messagesigner.cpp \
+    src/qt/modaloverlay.cpp \
+    src/sendalert.cpp
 
 
 OTHER_FILES += \
@@ -647,4 +662,5 @@ FORMS += \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/multisigaddressentry.ui \
     src/qt/forms/multisigdialog.ui \
-    src/qt/forms/multisiginputentry.ui
+    src/qt/forms/multisiginputentry.ui \
+    src/qt/forms/modaloverlay.ui

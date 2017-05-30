@@ -55,6 +55,8 @@ public:
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
     QString getDynodeCountString() const;
     int getNumBlocks() const;
+    int getHeaderTipHeight() const;
+    int64_t getHeaderTipTime() const;
 
     //! Return number of transactions in the mempool
     long getMempoolSize() const;
@@ -96,7 +98,7 @@ private:
 Q_SIGNALS:
     void numConnectionsChanged(int count);
     void strDynodesChanged(const QString &strDynodes);
-    void numBlocksChanged(int count, const QDateTime& blockDate, double nVerificationProgress);
+    void numBlocksChanged(int count, const QDateTime& blockDate, double nVerificationProgress, bool header);
     void additionalDataSyncProgressChanged(double nSyncProgress);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);
     void alertsChanged(const QString &warnings);

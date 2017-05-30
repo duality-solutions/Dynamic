@@ -73,6 +73,8 @@ DYNAMIC_CORE_H = \
   amount.h \
   arith_uint256.h \
   base58.h \
+  bip39_english.h \
+  bip39.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -97,32 +99,34 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  privatesend.h \
-  psnotificationinterface.h \
-  privatesend-relay.h \
+  dbwrapper.h \
+  dns/dns.h \
+  dns/dyndns.h \
+  dns/hooks.h \
+  dynode.h \
+  dynode-payments.h \
+  dynode-sync.h \
+  dynodeman.h \
+  dynodeconfig.h \
+  flat-database.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
   governance-object.h \
   governance-vote.h \
   governance-votedb.h \
-  flat-database.h \
   hash.h \
+  hdchain.h \
   httprpc.h \
   httpserver.h \
+  indirectmap.h \
   init.h \
   instantsend.h \
   key.h \
   keepass.h \
   keystore.h \
-  dbwrapper.h \
   limitedmap.h \
   main.h \
-  dynode.h \
-  dynode-payments.h \
-  dynode-sync.h \
-  dynodeman.h \
-  dynodeconfig.h \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
@@ -138,6 +142,9 @@ DYNAMIC_CORE_H = \
   prevector.h \
   primitives/block.h \
   primitives/transaction.h \
+  privatesend.h \
+  psnotificationinterface.h \
+  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -184,11 +191,7 @@ DYNAMIC_CORE_H = \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
-  zmq/zmqpublishnotifier.h \
-  dns/dns.h \
-  dns/hooks.h \
-  dns/dyndns.h 
-
+  zmq/zmqpublishnotifier.h
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -206,15 +209,17 @@ libdynamic_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   checkforks.cpp \
-  httprpc.cpp \
-  httpserver.cpp \
-  init.cpp \
   dbwrapper.cpp \
+  dns/dns.cpp \
+  dns/dyndns.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
   governance-vote.cpp \
   governance-votedb.cpp \
+  httprpc.cpp \
+  httpserver.cpp \
+  init.cpp \
   main.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
@@ -243,8 +248,6 @@ libdynamic_server_a_SOURCES = \
   ui_interface.cpp \
   validationinterface.cpp \
   versionbits.cpp \
-  dns/dns.cpp \
-  dns/dyndns.cpp \
   $(DYNAMIC_CORE_H)
 
 if ENABLE_ZMQ
@@ -265,16 +268,17 @@ libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
   activedynode.cpp \
-  privatesend.cpp \
-  psnotificationinterface.cpp \
-  privatesend-relay.cpp \
-  instantsend.cpp \
   dynode.cpp \
   dynode-payments.cpp \
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
+  instantsend.cpp \
   keepass.cpp \
+  policy/rbf.cpp \
+  privatesend.cpp \
+  privatesend-relay.cpp \
+  psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/rpcdump.cpp \
@@ -282,7 +286,6 @@ libdynamic_wallet_a_SOURCES = \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
-  policy/rbf.cpp \
   $(DYNAMIC_CORE_H)
 
 # crypto primitives library
@@ -290,6 +293,20 @@ crypto_libdynamic_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_CONFIG_INCLUDES) 
 crypto_libdynamic_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_SOURCES = \
   crypto/common.h \
+  crypto/argon2d/argon2.h \
+  crypto/argon2d/core.h \
+  crypto/argon2d/encoding.h \
+  crypto/argon2d/thread.h \
+  crypto/argon2d/argon2.c \
+  crypto/argon2d/core.c \
+  crypto/argon2d/encoding.c \
+  crypto/argon2d/opt.c \
+  crypto/argon2d/thread.c \
+  crypto/blake2/blake2b.c \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blake2-impl.h \
+  crypto/blake2/blamka-round-opt.h \
+  crypto/blake2/blamka-round-ref.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
   crypto/hmac_sha512.cpp \
@@ -302,22 +319,7 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/sha256.h \
   crypto/sha512.h \
   crypto/sha512.cpp \
-  crypto/sha512.h \
-  crypto/argon2d/argon2.h \
-  crypto/argon2d/core.h \
-  crypto/argon2d/encoding.h \
-  crypto/argon2d/thread.h \
-  crypto/argon2d/opt.h \
-  crypto/argon2d/argon2.c \
-  crypto/argon2d/core.c \
-  crypto/argon2d/encoding.c \
-  crypto/argon2d/thread.c \
-  crypto/argon2d/opt.c \
-  crypto/blake2/blake2b.c \
-  crypto/blake2/blake2-impl.h \
-  crypto/blake2/blake2.h \
-  crypto/blake2/blamka-round-opt.h \
-  crypto/blake2/blamka-round-ref.h
+  crypto/sha512.h
 
 # common: shared between dynamicd, and dynamic-qt and non-server tools
 libdynamic_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
@@ -326,6 +328,7 @@ libdynamic_common_a_SOURCES = \
   amount.cpp \
   arith_uint256.cpp \
   base58.cpp \
+  bip39.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
@@ -333,6 +336,7 @@ libdynamic_common_a_SOURCES = \
   core_read.cpp \
   core_write.cpp \
   hash.cpp \
+  hdchain.cpp \
   key.cpp \
   keystore.cpp \
   netbase.cpp \
@@ -355,7 +359,6 @@ libdynamic_common_a_SOURCES = \
 libdynamic_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_util_a_SOURCES = \
-  support/lockedpool.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
   compat/glibc_sanity.cpp \
@@ -364,6 +367,7 @@ libdynamic_util_a_SOURCES = \
   random.cpp \
   rpcprotocol.cpp \
   support/cleanse.cpp \
+  support/lockedpool.cpp \
   sync.cpp \
   uint256.cpp \
   util.cpp \

@@ -11,7 +11,6 @@
 #ifdef WIN32
 #include "compat.h" // for Windows API
 #endif
-#include "serialize.h"        // for begin_ptr(vec)
 #include "util.h"             // for LogPrint()
 #include "utilstrencodings.h" // for GetTime()
 
@@ -25,23 +24,26 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-static void RandFailure()
-{
-    LogPrintf("Failed to read randomness, aborting\n");
-    abort();
-}
-
 static inline int64_t GetPerformanceCounter()
 {
-    int64_t nCounter = 0;
-#ifdef WIN32
-    QueryPerformanceCounter((LARGE_INTEGER*)&nCounter);
+    // Read the hardware time stamp counter when available.
+    // See https://en.wikipedia.org/wiki/Time_Stamp_Counter for more information.
+#if defined(_MSC_VER)
+    return __rdtsc();
+#elif defined(__i386__)
+    uint64_t r;
+    __asm__ volatile ("rdtsc" : "=A"(r)); // Constrain the r variable to the eax:edx pair.
+    return r;
+#elif defined(__x86_64__) || defined(__amd64__)
+    uint64_t r1, r2;
+    __asm__ volatile ("rdtsc" : "=a"(r1), "=d"(r2)); // Constrain r1 to rax and r2 to rdx.
+    return (r2 << 32) | r1;
 #else
-    timeval t;
-    gettimeofday(&t, NULL);
-    nCounter = (int64_t)(t.tv_sec * 1000000 + t.tv_usec);
+    // Fall back to using gettimeofday (with microsecond precision)
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return ((uint64_t)tv.tv_sec) * 1000000 + tv.tv_usec;
 #endif
-    return nCounter;
 }
 
 void RandAddSeed()
@@ -72,15 +74,15 @@ void RandAddSeedPerfmon()
     const size_t nMaxSize = 10000000; // Bail out at more than 10MB of performance data
     while (true) {
         nSize = vData.size();
-        ret = RegQueryValueExA(HKEY_PERFORMANCE_DATA, "Global", NULL, NULL, begin_ptr(vData), &nSize);
+        ret = RegQueryValueExA(HKEY_PERFORMANCE_DATA, "Global", NULL, NULL, vData.data(), &nSize);
         if (ret != ERROR_MORE_DATA || vData.size() >= nMaxSize)
             break;
         vData.resize(std::max((vData.size() * 3) / 2, nMaxSize)); // Grow size of buffer exponentially
     }
     RegCloseKey(HKEY_PERFORMANCE_DATA);
     if (ret == ERROR_SUCCESS) {
-        RAND_add(begin_ptr(vData), nSize, nSize / 100.0);
-        memory_cleanse(begin_ptr(vData), nSize);
+        RAND_add(vData.data(), nSize, nSize / 100.0);
+        memory_cleanse(vData.data(), nSize);
         LogPrint("rand", "%s: %lu bytes\n", __func__, nSize);
     } else {
         static bool warned = false; // Warn only once
@@ -127,23 +129,21 @@ uint256 GetRandHash()
     return hash;
 }
 
-uint32_t insecure_rand_Rz = 11;
-uint32_t insecure_rand_Rw = 11;
-void seed_insecure_rand(bool fDeterministic)
+FastRandomContext::FastRandomContext(bool fDeterministic)
 {
     // The seed values have some unlikely fixed points which we avoid.
     if (fDeterministic) {
-        insecure_rand_Rz = insecure_rand_Rw = 11;
+        Rz = Rw = 11;
     } else {
         uint32_t tmp;
         do {
             GetRandBytes((unsigned char*)&tmp, 4);
         } while (tmp == 0 || tmp == 0x9068ffffU);
-        insecure_rand_Rz = tmp;
+        Rz = tmp;
         do {
             GetRandBytes((unsigned char*)&tmp, 4);
         } while (tmp == 0 || tmp == 0x464fffffU);
-        insecure_rand_Rw = tmp;
+        Rw = tmp;
     }
 }
 

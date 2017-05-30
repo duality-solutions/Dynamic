@@ -1,3 +1,65 @@
+**Dynamic v1.4.0.0**
+
+* Securely erase potentially sensitive keys/values
+* Fix issue where config was created at launch but not read
+* [BUILD] quiet annoying warnings without adding new ones
+* [BUILD]Fix warning deprecated in OSX Sierra
+* Improve EncodeBase58/DecodeBase58 performance.
+* Use hardware timestamps in RNG seeding
+* Add OSX keystroke to clear RPCConsole
+* Update DB_CORRUPT message
+* HD Wallet
+* Repair Traffic Graph
+* Scammer Warning and Translations
+* Amend DEFAULT_CHECKBLOCKS
+* Do not shadow upper local variable 'send', prevent -Wshadow compiler warning
+* Convert last boost::scoped_ptr to std::unique_ptr
+* Qt: fix UI bug that could result in paying unexpected fee
+* Fix Locks and Do not add random inbound peers to addrman
+* Use std::thread::hardwarencurrency, instead of Boost, to determine available cores
+* Sync icon now opens modaloverlay.ui
+* Fix Memleak and Enforce Fix
+* Sort dynamic.qrc
+* Sort MakeFiles
+* Remove namespace std;/Repair Tests
+* Fix Signal/Slot/Strings
+* Implement modaloverlay
+* Qt: Sort transactions by date
+* Kill insecure_random and associated global state
+* Only send one GetAddr response per connection.
+* Refactor: Removed begin/end_ptr functions.
+* LevelDB 1.19
+* Increase context.threads to 4
+* Fix races
+* Fix calculation of number of bound sockets to use
+* Fix unlocked access to vNodes.size()
+* Move GetAccountBalance from rpcwallet.cpp into CWallet::GetAccountBalance
+* UpdateTip: log only one line at most per block
+* VerifyDB: don't check blocks that have been pruned 
+* qt: askpassphrasedialog: Clear pass fields on accept
+* net: Avoid duplicate getheaders requests.
+* Check non-null pindex before potentially referencing
+* mapNextTx: use pointer as key, simplify value
+* Implement indirectmap.h and update memusage.h
+* Add/Repair LOCK's
+* Fix parameter naming inconsistencies 
+* Clicking on the lock icon will open the passphrase dialog
+* Fix bip32_tests.cpp
+* Update Argon2d, hash.cpp/h
+* Repair SLOT issue in rpcconsole.cpp
+* Fix incorrect psTx usages
+* Fix torcontrol.cpp unused private field warning
+* Update Encryption(crypter.cpp/h)
+* Remove old HD wallet code
+* Move InitLoadWallet to init.cpp
+* Revert Tick Changes/Fix UI Thread Issue
+* Sentinel/Dynode Fixes
+* Remove unused functions/cleanup code
+* Reduce Keypool to 1000
+* Optimise Reindex
+* Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
+
+
 **Dynamic v1.3.0.2**
 * [Sync] Fix issue with headers first sync
 * [Sync] [Consensus] Shift Fork Logic to its own file
@@ -31,7 +93,6 @@
 * Add benchmark for lockedpool allocation/deallocation
 * trivial: fix bloom filter init to isEmpty = true
 * Lockedpool fixes
-* Improve DecodeBase58 performance.
 * Add include utility to miner.cpp
 * Don't return the address of a P2SH of a P2SH
 * Implement (begin|end)_ptr in C++11 and add deprecation comment

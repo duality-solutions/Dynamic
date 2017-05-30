@@ -38,8 +38,6 @@
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 
-using namespace std;
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // DynamicMiner
@@ -235,7 +233,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     CTxMemPool::setEntries waitSet;
 
     // This vector will be sorted into a priority queue:
-    vector<TxCoinAgePriority> vecPriority;
+    std::vector<TxCoinAgePriority> vecPriority;
     TxCoinAgePriorityCompare pricomparer;
     std::map<CTxMemPool::txiter, double, CTxMemPool::CompareIteratorByHash> waitPriMap;
     typedef std::map<CTxMemPool::txiter, double, CTxMemPool::CompareIteratorByHash>::iterator waitPriIter;
@@ -532,7 +530,15 @@ void static DynamicMiner(const CChainParams& chainparams)
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
-
+	
+	#ifdef __AVX2__
+	
+	void *Ctx;
+	
+	WolfArgon2dAllocateCtx(&Ctx);
+	
+	#endif
+	
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -594,7 +600,12 @@ void static DynamicMiner(const CChainParams& chainparams)
                 uint256 hash;
                 while (true)
                 {
+					#ifdef __AVX2__
+                    hash = pblock->GetHashWithCtx(Ctx);
+                    #else
                     hash = pblock->GetHash();
+                    #endif
+                    
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
@@ -676,13 +687,24 @@ void static DynamicMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
+        
+        #ifdef __AVX2__
+        WolfArgon2dFreeCtx(Ctx);
+        #endif
         throw;
     }
     catch (const std::runtime_error &e)
     {
         LogPrintf("DynamicMiner -- runtime error: %s\n", e.what());
+        #ifdef __AVX2__
+        WolfArgon2dFreeCtx(Ctx);
+        #endif
         return;
     }
+    
+    #ifdef __AVX2__
+    WolfArgon2dFreeCtx(Ctx);
+    #endif
 }
 
 void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams)
@@ -690,8 +712,9 @@ void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainpar
     static boost::thread_group* minerThreads = NULL;
 
     if (nThreads < 0)
-        nThreads = GetNumCores();
-
+        nThreads = GetNumCores(); // Uses std::thread::hardwareconcurrency to detect available cores
+                                  // Return the number of cores available on the current system.
+                                  // @note This does count virtual cores, such as those provided by HyperThreading.
     if (minerThreads != NULL)
     {
         minerThreads->interrupt_all();

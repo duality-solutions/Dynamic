@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_KEYSTORE_H
 #define DYNAMIC_KEYSTORE_H
 
+#include "hdchain.h"
 #include "key.h"
 #include "pubkey.h"
 #include "script/script.h"
@@ -61,6 +62,8 @@ protected:
     WatchKeyMap mapWatchKeys;
     ScriptMap mapScripts;
     WatchOnlySet setWatchOnly;
+    /* the HD chain data model*/
+    CHDChain hdChain;
 
 public:
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
@@ -108,6 +111,8 @@ public:
     virtual bool RemoveWatchOnly(const CScript &dest);
     virtual bool HaveWatchOnly(const CScript &dest) const;
     virtual bool HaveWatchOnly() const;
+
+    bool GetHDChain(CHDChain& hdChainRet) const;
 };
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;

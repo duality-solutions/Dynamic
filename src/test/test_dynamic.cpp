@@ -30,6 +30,7 @@
 #include <boost/thread.hpp>
 
 CWallet* pwalletMain;
+FastRandomContext insecure_rand_ctx(true);
 
 extern bool fPrintToConsole;
 extern void noui_connect();

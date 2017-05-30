@@ -9,15 +9,13 @@
 #include "uint256.h"
 #include "arith_uint256.h"
 #include "version.h"
-#include "random.h"
+#include "test_random.h"
 #include "test/test_dynamic.h"
 
 #include <vector>
 
 #include <boost/assign/list_of.hpp>
 #include <boost/test/unit_test.hpp>
-
-using namespace std;
 
 class CPartialMerkleTreeTester : public CPartialMerkleTree
 {

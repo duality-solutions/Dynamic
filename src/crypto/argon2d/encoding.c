@@ -1,18 +1,29 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+/*
+ * Argon2 reference source code package - reference C implementations
+ *
+ * Copyright 2015
+ * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
+ *
+ * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * License/Waiver or the Apache Public License 2.0, at your option. The terms of
+ * these licenses can be found at:
+ *
+ * - CC0 1.0 Universal : http://creativecommons.org/publicdomain/zero/1.0
+ * - Apache 2.0        : http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * You should have received a copy of both of these licenses along with this
+ * software. If not, they may be obtained at the above URLs.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include "encoding.h"
+#include "core.h"
 
-#/*
- * Example code for a decoder and encoder of "hash strings", with Argon2i
+/*
+ * Example code for a decoder and encoder of "hash strings", with Argon2
  * parameters.
  *
  * This code comprises three sections:
@@ -24,14 +35,9 @@
  *   the relevant functions are made public (non-static) and be given
  *   reasonable names to avoid collisions with other functions.
  *
- *   -- The second section is specific to Argon2i. It encodes and decodes
+ *   -- The second section is specific to Argon2. It encodes and decodes
  *   the parameters, salts and outputs. It does not compute the hash
  *   itself.
- *
- *   -- The third section is test code, with a main() function. With
- *   this section, the whole file compiles as a stand-alone program
- *   that exercises the encoding and decoding functions with some
- *   test vectors.
  *
  * The code was originally written by Thomas Pornin <pornin@bolet.org>,
  * to whom comments and remarks may be sent. It is released under what
@@ -65,7 +71,7 @@
  * Some macros for constant-time comparisons. These work over values in
  * the 0..255 range. Returned value is 0x00 on "false", 0xFF on "true".
  */
-#define EQ(x, y) ((((0U-((unsigned)(x) ^ (unsigned)(y))) >> 8) & 0xFF) ^ 0xFF)
+#define EQ(x, y) ((((0U - ((unsigned)(x) ^ (unsigned)(y))) >> 8) & 0xFF) ^ 0xFF)
 #define GT(x, y) ((((unsigned)(y) - (unsigned)(x)) >> 8) & 0xFF)
 #define GE(x, y) (GT(y, x) ^ 0xFF)
 #define LT(x, y) GT(y, x)
@@ -129,11 +135,11 @@ static size_t to_base64(char *dst, size_t dst_len, const void *src,
         acc_len += 8;
         while (acc_len >= 6) {
             acc_len -= 6;
-            *dst++ = (char) b64_byte_to_char((acc >> acc_len) & 0x3F);
+            *dst++ = (char)b64_byte_to_char((acc >> acc_len) & 0x3F);
         }
     }
     if (acc_len > 0) {
-        *dst++ = (char) b64_byte_to_char((acc << (6 - acc_len)) & 0x3F);
+        *dst++ = (char)b64_byte_to_char((acc << (6 - acc_len)) & 0x3F);
     }
     *dst++ = 0;
     return olen;
@@ -231,38 +237,37 @@ static const char *decode_decimal(const char *str, unsigned long *v) {
 
 /* ==================================================================== */
 /*
- * Code specific to Argon2i.
+ * Code specific to Argon2.
  *
  * The code below applies the following format:
  *
- *  $argon2i$m=<num>,t=<num>,p=<num>[,keyid=<bin>][,data=<bin>][$<bin>[$<bin>]]
+ *  $argon2<T>[$v=<num>]$m=<num>,t=<num>,p=<num>$<bin>$<bin>
  *
- * where <num> is a decimal integer (positive, fits in an 'unsigned long')
- * and <bin> is Base64-encoded data (no '=' padding characters, no newline
- * or whitespace). The "keyid" is a binary identifier for a key (up to 8
- * bytes); "data" is associated data (up to 32 bytes). When the 'keyid'
- * (resp. the 'data') is empty, then it is ommitted from the output.
+ * where <T> is either 'd', 'id', or 'i', <num> is a decimal integer (positive,
+ * fits in an 'unsigned long'), and <bin> is Base64-encoded data (no '=' padding
+ * characters, no newline or whitespace).
  *
  * The last two binary chunks (encoded in Base64) are, in that order,
- * the salt and the output. Both are optional, but you cannot have an
- * output without a salt. The binary salt length is between 8 and 48 bytes.
- * The output length is always exactly 32 bytes.
+ * the salt and the output. Both are required. The binary salt length and the
+ * output length must be in the allowed ranges defined in argon2.h.
+ *
+ * The ctx struct must contain buffers large enough to hold the salt and pwd
+ * when it is fed into decode_string.
  */
 
-/*
- * Decode an Argon2i hash string into the provided structure 'ctx'.
- * Returned value is 1 on success, 0 on error.
- */
 int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
+
+/* check for prefix */
 #define CC(prefix)                                                             \
     do {                                                                       \
         size_t cc_len = strlen(prefix);                                        \
         if (strncmp(str, prefix, cc_len) != 0) {                               \
-            return 0;                                                          \
+            return ARGON2_DECODING_FAIL;                                       \
         }                                                                      \
         str += cc_len;                                                         \
     } while ((void)0, 0)
 
+/* optional prefix checking with supplied code */
 #define CC_opt(prefix, code)                                                   \
     do {                                                                       \
         size_t cc_len = strlen(prefix);                                        \
@@ -272,116 +277,102 @@ int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
         }                                                                      \
     } while ((void)0, 0)
 
+/* Decoding prefix into decimal */
 #define DECIMAL(x)                                                             \
     do {                                                                       \
         unsigned long dec_x;                                                   \
         str = decode_decimal(str, &dec_x);                                     \
         if (str == NULL) {                                                     \
-            return 0;                                                          \
+            return ARGON2_DECODING_FAIL;                                       \
         }                                                                      \
         (x) = dec_x;                                                           \
     } while ((void)0, 0)
 
+
+/* Decoding prefix into uint32_t decimal */
+#define DECIMAL_U32(x)                                                         \
+    do {                                                                       \
+        unsigned long dec_x;                                                   \
+        str = decode_decimal(str, &dec_x);                                     \
+        if (str == NULL || dec_x > UINT32_MAX) {                               \
+            return ARGON2_DECODING_FAIL;                                       \
+        }                                                                      \
+        (x) = (uint32_t)dec_x;                                                 \
+    } while ((void)0, 0)
+
+
+/* Decoding base64 into a binary buffer */
 #define BIN(buf, max_len, len)                                                 \
     do {                                                                       \
         size_t bin_len = (max_len);                                            \
         str = from_base64(buf, &bin_len, str);                                 \
         if (str == NULL || bin_len > UINT32_MAX) {                             \
-            return 0;                                                          \
+            return ARGON2_DECODING_FAIL;                                       \
         }                                                                      \
         (len) = (uint32_t)bin_len;                                             \
     } while ((void)0, 0)
 
-    size_t maxadlen = ctx->adlen;
     size_t maxsaltlen = ctx->saltlen;
     size_t maxoutlen = ctx->outlen;
+    int validation_result;
+    const char* type_string;
 
-    ctx->adlen = 0;
-    ctx->saltlen = 0;
-    ctx->outlen = 0;
-    if (type == Argon2_i)
-        CC("$argon2i");
-    else if (type == Argon2_d)
-        CC("$argon2d");
-    else
-        return 0;
+    /* We should start with the argon2_type we are using */
+    type_string = argon2_type2string(type, 0);
+    if (!type_string) {
+        return ARGON2_INCORRECT_TYPE;
+    }
+
+    CC("$");
+    CC(type_string);
+
     CC("$m=");
-    DECIMAL(ctx->m_cost);
+    DECIMAL_U32(ctx->m_cost);
     CC(",t=");
-    DECIMAL(ctx->t_cost);
+    DECIMAL_U32(ctx->t_cost);
     CC(",p=");
-    DECIMAL(ctx->lanes);
+    DECIMAL_U32(ctx->lanes);
     ctx->threads = ctx->lanes;
 
-    /*
-     * Both m and t must be no more than 2^32-1. The tests below
-     * use a shift by 30 bits to avoid a direct comparison with
-     * 0xFFFFFFFF, which may trigger a spurious compiler warning
-     * on machines where 'unsigned long' is a 32-bit type.
-     */
-    if (ctx->m_cost < 1 || (ctx->m_cost >> 30) > 3) {
-        return 0;
-    }
-    if (ctx->t_cost < 1 || (ctx->t_cost >> 30) > 3) {
-        return 0;
-    }
-
-    /*
-     * The parallelism p must be between 1 and 255. The memory cost
-     * parameter, expressed in kilobytes, must be at least 8 times
-     * the value of p.
-     */
-    if (ctx->lanes < 1 || ctx->lanes > 255) {
-        return 0;
-    }
-    if (ctx->m_cost < (ctx->lanes << 3)) {
-        return 0;
-    }
-
-    CC_opt(",data=", BIN(ctx->ad, maxadlen, ctx->adlen));
-    if (*str == 0) {
-        return 1;
-    }
     CC("$");
     BIN(ctx->salt, maxsaltlen, ctx->saltlen);
-    if (ctx->saltlen < 8) {
-        return 0;
-    }
-    if (*str == 0) {
-        return 1;
-    }
     CC("$");
     BIN(ctx->out, maxoutlen, ctx->outlen);
-    if (ctx->outlen < 12) {
-        return 0;
-    }
-    return *str == 0;
 
+    /* The rest of the fields get the default values */
+    ctx->secret = NULL;
+    ctx->secretlen = 0;
+    ctx->ad = NULL;
+    ctx->adlen = 0;
+    ctx->allocate_cbk = NULL;
+    ctx->free_cbk = NULL;
+    ctx->flags = ARGON2_DEFAULT_FLAGS;
+
+    /* On return, must have valid context */
+    validation_result = validate_inputs(ctx);
+    if (validation_result != ARGON2_OK) {
+        return validation_result;
+    }
+
+    /* Can't have any additional characters */
+    if (*str == 0) {
+        return ARGON2_OK;
+    } else {
+        return ARGON2_DECODING_FAIL;
+    }
 #undef CC
 #undef CC_opt
 #undef DECIMAL
 #undef BIN
 }
 
-/*
- * encode an argon2i hash string into the provided buffer. 'dst_len'
- * contains the size, in characters, of the 'dst' buffer; if 'dst_len'
- * is less than the number of required characters (including the
- * terminating 0), then this function returns 0.
- *
- * if pp->output_len is 0, then the hash string will be a salt string
- * (no output). if pp->salt_len is also 0, then the string will be a
- * parameter-only string (no salt and no output).
- *
- * on success, 1 is returned.
- */
 int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
                   argon2_type type) {
 #define SS(str)                                                                \
     do {                                                                       \
         size_t pp_len = strlen(str);                                           \
         if (pp_len >= dst_len) {                                               \
-            return 0;                                                          \
+            return ARGON2_ENCODING_FAIL;                                       \
         }                                                                      \
         memcpy(dst, str, pp_len + 1);                                          \
         dst += pp_len;                                                         \
@@ -399,43 +390,67 @@ int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
     do {                                                                       \
         size_t sb_len = to_base64(dst, dst_len, buf, len);                     \
         if (sb_len == (size_t)-1) {                                            \
-            return 0;                                                          \
+            return ARGON2_ENCODING_FAIL;                                       \
         }                                                                      \
         dst += sb_len;                                                         \
         dst_len -= sb_len;                                                     \
     } while ((void)0, 0)
 
-    if (type == Argon2_i)
-        SS("$argon2i$m=");
-    else if (type == Argon2_d)
-        SS("$argon2d$m=");
-    else
-        return 0;
+    const char* type_string = argon2_type2string(type, 0);
+    int validation_result = validate_inputs(ctx);
+
+    if (!type_string) {
+      return ARGON2_ENCODING_FAIL;
+    }
+
+    if (validation_result != ARGON2_OK) {
+      return validation_result;
+    }
+
+
+    SS("$");
+    SS(type_string);
+
+    SS("$m=");
     SX(ctx->m_cost);
     SS(",t=");
     SX(ctx->t_cost);
     SS(",p=");
     SX(ctx->lanes);
 
-    if (ctx->adlen > 0) {
-        SS(",data=");
-        SB(ctx->ad, ctx->adlen);
-    }
-
-    if (ctx->saltlen == 0)
-        return 1;
-
     SS("$");
     SB(ctx->salt, ctx->saltlen);
 
-    if (ctx->outlen == 0)
-        return 1;
-
     SS("$");
     SB(ctx->out, ctx->outlen);
-    return 1;
+    return ARGON2_OK;
 
 #undef SS
 #undef SX
 #undef SB
 }
+
+size_t b64len(uint32_t len) {
+    size_t olen = ((size_t)len / 3) << 2;
+
+    switch (len % 3) {
+    case 2:
+        olen++;
+    /* fall through */
+    case 1:
+        olen += 2;
+        break;
+    }
+
+    return olen;
+}
+
+size_t numlen(uint32_t num) {
+    size_t len = 1;
+    while (num >= 10) {
+        ++len;
+        num = num / 10;
+    }
+    return len;
+}
+

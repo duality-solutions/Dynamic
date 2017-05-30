@@ -250,7 +250,7 @@ void CActiveDynode::ManageStateRemote()
     LogPrint("Dynode", "CActiveDynode::ManageStateRemote -- Start status = %s, type = %s, pinger enabled = %d, pubKeyDynode.GetID() = %s\n", 
              GetStatus(), fPingerEnabled, GetTypeString(), pubKeyDynode.GetID().ToString());
 
-    dnodeman.CheckDynode(pubKeyDynode);
+    dnodeman.CheckDynode(pubKeyDynode, true);
     dynode_info_t infoDn = dnodeman.GetDynodeInfo(pubKeyDynode);
     if(infoDn.fInfoValid) {
         if(infoDn.nProtocolVersion != PROTOCOL_VERSION) {

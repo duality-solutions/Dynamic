@@ -251,7 +251,7 @@ bool UniValue::read(const char *raw)
     clear();
 
     uint32_t expectMask = 0;
-    vector<UniValue*> stack;
+    std::vector<UniValue*> stack;
 
     string tokenVal;
     unsigned int consumed;

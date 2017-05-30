@@ -2535,6 +2535,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</translation>
     </message>
     <message>
+        <location line="+2"/>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+139"/>
         <source>%1 B</source>
         <translation>%1 B</translation>

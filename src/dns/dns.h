@@ -127,7 +127,7 @@ struct NameTxReturn
      std::string address;
      uint256 hex;   // Transaction hash in hex
 };
-NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const string& strAddress, const string& strValueType);
+NameTxReturn name_operation(const int op, const CNameVal& name, CNameVal value, const int nRentalDays, const std::string& strAddress, const std::string& strValueType);
 
 
 struct nameTempProxy

@@ -495,7 +495,8 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
         } else if (mempool.mapNextTx.count(txin.prevout)) {
             // conflicting with tx in mempool
             fMempoolConflict = true;
-            const CTransaction *ptxConflicting = mempool.mapNextTx[txin.prevout].ptx;
+            auto itConflicting = mempool.mapNextTx.find(txin.prevout);
+            const CTransaction *ptxConflicting = itConflicting->second;
             uint256 hashConflicting = ptxConflicting->GetHash();
             if(HasTxLockRequest(hashConflicting)) {
                 // There can be only one completed lock, the other lock request should never complete,
@@ -652,12 +653,12 @@ bool CInstantSend::AlreadyHave(const uint256& hash)
 
 void CInstantSend::AcceptLockRequest(const CTxLockRequest& txLockRequest)
 {
-    mapLockRequestAccepted.insert(make_pair(txLockRequest.GetHash(), txLockRequest));
+    mapLockRequestAccepted.insert(std::make_pair(txLockRequest.GetHash(), txLockRequest));
 }
 
 void CInstantSend::RejectLockRequest(const CTxLockRequest& txLockRequest)
 {
-    mapLockRequestRejected.insert(make_pair(txLockRequest.GetHash(), txLockRequest));
+    mapLockRequestRejected.insert(std::make_pair(txLockRequest.GetHash(), txLockRequest));
 }
 
 bool CInstantSend::HasTxLockRequest(const uint256& txHash)
@@ -1102,7 +1103,7 @@ void COutPointLock::Relay() const
 //
 void CTxLockCandidate::AddOutPointLock(const COutPoint& outpoint)
 {
-    mapOutPointLocks.insert(make_pair(outpoint, COutPointLock(outpoint)));
+    mapOutPointLocks.insert(std::make_pair(outpoint, COutPointLock(outpoint)));
 }
 
 bool CTxLockCandidate::AddVote(const CTxLockVote& vote)

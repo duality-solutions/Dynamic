@@ -16,8 +16,6 @@
 
 #include <vector>
 
-using namespace std;
-
 // ExpiresIn column is right-aligned as it contains numbers
 static int column_alignments[] = {
         Qt::AlignLeft|Qt::AlignVCenter,     // Name
@@ -59,7 +57,7 @@ public:
         cachedNameTable.clear();
 
         CNameVal nameUniq;
-        map<CNameVal, NameTxInfo> mapNames, mapPending;
+        std::map<CNameVal, NameTxInfo> mapNames, mapPending;
         GetNameList(nameUniq, mapNames, mapPending);
 
         // add info about existing names

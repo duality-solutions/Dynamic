@@ -997,7 +997,7 @@ void CGovernanceManager::CheckDynodeOrphanObjects()
             continue;
         }
 
-        string strError;
+        std::string strError;
         bool fDynodeMissing = false;
         bool fIsValid = govobj.IsValidLocally(strError, fDynodeMissing, true);
         if(!fIsValid) {

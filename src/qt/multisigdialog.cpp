@@ -90,10 +90,10 @@ bool MultisigDialog::AdvertisePublicKeyForMultiSig(const std::string& address, c
     msgBox.setDefaultButton(QMessageBox::No);
     if(msgBox.exec() == QMessageBox::Yes)
     {
-        string strAddress = ""; 
+        std::string strAddress = ""; 
         CNameVal name = nameValFromString("address:" + address);
         CNameVal value = nameValFromString(publickey);
-        string strValue = stringFromNameVal(value);
+        std::string strValue = stringFromNameVal(value);
         int nRentalDays = 35;
         
         NameTxReturn ret = name_operation(OP_NAME_MULTISIG, name, value, nRentalDays, address, strValue);
@@ -238,7 +238,7 @@ void MultisigDialog::on_createAddressButton_clicked()
     }
 
     unsigned int unknownAddressCount = 0;
-    std::map<string, string> myAddressList;
+    std::map<std::string, std::string> myAddressList;
     for(unsigned int i = 0; i < countPublicKeyEntered; i++)
     {
         MultisigAddressEntry *entry = qobject_cast<MultisigAddressEntry *>(ui->pubkeyEntries->itemAt(i)->widget());
@@ -287,7 +287,7 @@ void MultisigDialog::on_createAddressButton_clicked()
                 }
                 else
                 {
-                    myAddressList.insert(pair<string, string>(strAddressEntered, HexStr(vchPubKey.begin(), vchPubKey.end())));
+                    myAddressList.insert(std::pair<std::string, std::string>(strAddressEntered, HexStr(vchPubKey.begin(), vchPubKey.end())));
                     pubkeys[i] = vchPubKey;
                 }
             }
@@ -304,7 +304,7 @@ void MultisigDialog::on_createAddressButton_clicked()
     }
     else
     {
-        for(std::map<string,string>::iterator iter = myAddressList.begin(); iter != myAddressList.end(); ++iter)
+        for(std::map<std::string,std::string>::iterator iter = myAddressList.begin(); iter != myAddressList.end(); ++iter)
         {
             // TODO (Amir): If user agrees to advertise their public key using DDNS as a multisig name (fee = 0.001 SLK)
             AdvertisePublicKeyForMultiSig(iter->first, iter->second);

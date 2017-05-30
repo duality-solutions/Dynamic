@@ -26,9 +26,6 @@ static const int DYNODE_SYNC_FINISHED        = 999;
 static const int DYNODE_SYNC_TICK_SECONDS    = 6;
 static const int DYNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
 
-static const int DYNODE_SYNC_TICK_SECONDS_INITIAL = 3;
-static const int DYNODE_SYNC_TIMEOUT_SECONDS_INITIAL = 9;
-
 static const int DYNODE_SYNC_ENOUGH_PEERS    = 10;
 
 extern CDynodeSync dynodeSync;

@@ -1956,6 +1956,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>請鍵入 &lt;b&gt;help&lt;/b&gt; 來查看可用指令的簡介。</translation>
     </message>
     <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>警告:  已知有詐騙集團會叫人在這個畫面輸入指令，以偷取他們錢包的內容物。請不要在沒有充分理解指令可能造成後果的情況下使用主控台。</translation>
+    </message>
+    <message>
         <source>%1 B</source>
         <translation>%1 B (位元組)</translation>
     </message>

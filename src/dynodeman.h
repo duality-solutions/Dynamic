@@ -9,8 +9,6 @@
 #include "dynode.h"
 #include "sync.h"
 
-using namespace std;
-
 class CDynodeMan;
 
 extern CDynodeMan dnodeman;
@@ -337,7 +335,7 @@ public:
         LOCK(cs);
         std::vector<uint256> vecTmp = vecDirtyGovernanceObjectHashes;
         vecDirtyGovernanceObjectHashes.clear();
-        return vecTmp;;
+        return vecTmp;
     }
 
     bool IsWatchdogActive();

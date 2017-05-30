@@ -10,7 +10,6 @@
 #include <boost/assert.hpp>
 #include <boost/test/unit_test.hpp>
                     
-using namespace std;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
 BOOST_FIXTURE_TEST_SUITE(streams_tests, BasicTestingSetup)

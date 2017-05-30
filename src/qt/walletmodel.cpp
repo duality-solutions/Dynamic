@@ -391,10 +391,9 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
         if(!wallet->CommitTransaction(*newTx, *keyChange, recipients[0].fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
             return TransactionCommitFailed;
 
-        CTransaction* t = (CTransaction*)newTx;
-        CDataStream psTx(SER_NETWORK, PROTOCOL_VERSION);
-        psTx << *t;
-        transaction_array.append(&(psTx[0]), psTx.size());
+        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+        ssTx << *newTx;
+        transaction_array.append(&(ssTx[0]), ssTx.size());
     }
 
     // Add addresses / update labels that we've sent to to the address book,

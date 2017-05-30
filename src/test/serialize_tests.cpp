@@ -11,8 +11,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace std;
-
 BOOST_FIXTURE_TEST_SUITE(serialize_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(sizes)
@@ -163,7 +161,7 @@ BOOST_AUTO_TEST_CASE(varints)
 BOOST_AUTO_TEST_CASE(compactsize)
 {
     CDataStream ss(SER_DISK, 0);
-    vector<char>::size_type i, j;
+    std::vector<char>::size_type i, j;
 
     for (i = 1; i <= MAX_SIZE; i *= 2)
     {
@@ -196,7 +194,7 @@ BOOST_AUTO_TEST_CASE(noncanonical)
     // Write some non-canonical CompactSize encodings, and
     // make sure an exception is thrown when read back.
     CDataStream ss(SER_DISK, 0);
-    vector<char>::size_type n;
+    std::vector<char>::size_type n;
 
     // zero encoded with three bytes:
     ss.write("\xfd\x00\x00", 3);

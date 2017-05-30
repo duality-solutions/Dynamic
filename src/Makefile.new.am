@@ -106,9 +106,12 @@ DYNAMIC_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  privatesend.h \
-  psnotificationinterface.h \
-  privatesend-relay.h \
+  dbwrapper.h \
+  dynode.h \
+  dynode-payments.h \
+  dynode-sync.h \
+  dynodeman.h \
+  dynodeconfig.h \
   governance.h \
   governance-brain.h \
   governance-classes.h \
@@ -119,19 +122,14 @@ DYNAMIC_H = \
   hash.h \
   httprpc.h \
   httpserver.h \
+  indirectmap.h \
   init.h \
   instantsend.h \
   key.h \
   keepass.h \
   keystore.h \
-  dbwrapper.h \
   limitedmap.h \
   main.h \
-  dynode.h \
-  dynode-payments.h \
-  dynode-sync.h \
-  dynodeman.h \
-  dynodeconfig.h \
   memusage.h \
   merkleblock.h \
   miner.h \
@@ -145,6 +143,9 @@ DYNAMIC_H = \
   prevector.h \
   primitives/block.h \
   primitives/transaction.h \
+  privatesend.h \
+  psnotificationinterface.h \
+  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -208,10 +209,10 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  dbwrapper.cpp \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
-  dbwrapper.cpp \
   main.cpp \
   merkleblock.cpp \
   miner.cpp \
@@ -254,21 +255,22 @@ libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
   activedynode.cpp \
-  privatesend.cpp \
-  psnotificationinterface.cpp \
-  privatesend-relay.cpp \
-  governance.cpp \
-  governance-brain.cpp \ 
-  governance-classes.cpp \
-  governance-keys.cpp \
-  governance-vote.cpp \
-  instantsend.cpp \
   dynode.cpp \
   dynodeconfig.cpp \
   dynode-payments.cpp \
   dynode-sync.cpp \
   dynodeman.cpp \
+  governance.cpp \
+  governance-brain.cpp \
+  governance-classes.cpp \
+  governance-keys.cpp \
+  governance-vote.cpp \
+  instantsend.cpp \
   keepass.cpp \
+  policy/rbf.cpp \
+  privatesend.cpp \
+  psnotificationinterface.cpp \
+  privatesend-relay.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/rpcdump.cpp \
@@ -276,13 +278,26 @@ libdynamic_wallet_a_SOURCES = \
   wallet/wallet.cpp \
   wallet/wallet_ismine.cpp \
   wallet/walletdb.cpp \
-  policy/rbf.cpp \
   $(DYNAMIC_CORE_H)
 
 # crypto primitives library
 crypto_libdynamic_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_CONFIG_INCLUDES) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_SOURCES = \
+  crypto/argon2d/argon2.h \
+  crypto/argon2d/core.h \
+  crypto/argon2d/encoding.h \
+  crypto/argon2d/thread.h \
+  crypto/argon2d/argon2.c \
+  crypto/argon2d/core.c \
+  crypto/argon2d/encoding.c \
+  crypto/argon2d/thread.c \
+  crypto/argon2d/opt.c \
+  crypto/blake2/blake2b.c \
+  crypto/blake2/blake2-impl.h \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blamka-round-opt.h \
+  crypto/blake2/blamka-round-ref.h \
   crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
@@ -296,22 +311,7 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/sha256.h \
   crypto/sha512.h \
   crypto/sha512.cpp \
-  crypto/sha512.h \
-  crypto/argon2d/argon2.h \
-  crypto/argon2d/core.h \
-  crypto/argon2d/encoding.h \
-  crypto/argon2d/thread.h \
-  crypto/argon2d/opt.h \
-  crypto/argon2d/argon2.c \
-  crypto/argon2d/core.c \
-  crypto/argon2d/encoding.c \
-  crypto/argon2d/thread.c \
-  crypto/argon2d/opt.c \
-  crypto/blake2/blake2b.c \
-  crypto/blake2/blake2-impl.h \
-  crypto/blake2/blake2.h \
-  crypto/blake2/blamka-round-opt.h \
-  crypto/blake2/blamka-round-ref.h
+  crypto/sha512.h
 
 # common: shared between dynamicd, and dynamic-qt and non-server tools
 libdynamic_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
@@ -349,7 +349,6 @@ libdynamic_common_a_SOURCES = \
 libdynamic_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_util_a_SOURCES = \
-  support/pagelocker.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
   compat/glibc_sanity.cpp \
@@ -358,6 +357,7 @@ libdynamic_util_a_SOURCES = \
   random.cpp \
   rpcprotocol.cpp \
   support/cleanse.cpp \
+  support/pagelocker.cpp \
   sync.cpp \
   uint256.cpp \
   util.cpp \

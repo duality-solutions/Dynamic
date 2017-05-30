@@ -59,7 +59,29 @@ After exiting you will want to symlink berkeley-db4 and qt:
     $ brew link qt --force
     $ brew link boost --c++11 --force    
 
+AVX2 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX2 optimisations can be enabled. 
 
+Prior to running the build commands:
+
+    CPPFLAGS=-march=native
+    
+CPU's with AVX2 support:
+
+    Intel
+        Haswell processor, Q2 2013
+        Haswell E processor, Q3 2014
+        Broadwell processor, Q4 2014
+        Broadwell E processor, Q3 2016
+        Skylake processor, Q3 2015
+        Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
+        Coffee Lake processor, expected in 2017
+        Cannonlake processor, expected in 2017
+    AMD
+        Carrizo processor, Q2 2015
+        Ryzen processor, Q1 2017
+        
 ### Building `dynamicd`
 
 1. Clone the github tree to get the source code and go into the directory.
