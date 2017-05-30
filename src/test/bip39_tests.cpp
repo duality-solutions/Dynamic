@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
         key.SetMaster(&seed[0], 64);
         pubkey = key.Neuter();
 
-        CBitcoinExtKey b58key;
+        CDynamicExtKey b58key;
         b58key.SetKey(key);
-        // printf("CBitcoinExtKey: %s\n", b58key.ToString().c_str());
+        // printf("CDynamicExtKey: %s\n", b58key.ToString().c_str());
         BOOST_CHECK(b58key.ToString() == test[3].get_str());
     }
 }
