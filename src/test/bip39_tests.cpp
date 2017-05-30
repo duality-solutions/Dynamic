@@ -35,8 +35,9 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
         }
 
         std::vector<uint8_t> vData = ParseHex(test[0].get_str());
+        SecureVector data(vData.begin(), vData.end());
 
-        SecureString m = CMnemonic::FromData(&vData[0], vData.size());
+        SecureString m = CMnemonic::FromData(data, data.size());
         std::string strMnemonic = test[1].get_str();
         SecureString mnemonic(strMnemonic.begin(), strMnemonic.end());
 
@@ -56,9 +57,9 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
         key.SetMaster(&seed[0], 64);
         pubkey = key.Neuter();
 
-        CDynamicExtKey b58key;
+        CBitcoinExtKey b58key;
         b58key.SetKey(key);
-        // printf("CDynamicExtKey: %s\n", b58key.ToString().c_str());
+        // printf("CBitcoinExtKey: %s\n", b58key.ToString().c_str());
         BOOST_CHECK(b58key.ToString() == test[3].get_str());
     }
 }
