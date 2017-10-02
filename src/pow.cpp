@@ -31,7 +31,7 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
     if (CheckForkIsTrue(DELTA_RETARGET, pindexLast)) {
 
         unsigned int initalBlock = params.nUpdateDiffAlgoHeight;
-        int64_t nRetargetTimespan = params.nPowTargetSpacing;
+        int64_t nRetargetTimespan = params.nPowTargetTimespan;
         const unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
         const unsigned int nLastBlock = 1;
