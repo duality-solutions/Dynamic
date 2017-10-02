@@ -68,15 +68,13 @@ struct Params {
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
     int64_t nPowAveragingWindow;
-    int64_t nPowMaxAdjustDown;
-    int64_t nPowMaxAdjustUp;
     int64_t nUpdateDiffAlgoHeight;
 
     int64_t nLowTimeLimit;
     int64_t nFloorTimeLimit;
     int64_t nMinimumAdjustLimit;
     int64_t nMaximumAdjustLimit;
-    
+
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
 };
 } // namespace Consensus
