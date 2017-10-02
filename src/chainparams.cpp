@@ -129,7 +129,7 @@ public:
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
-        consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
+        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
         consensus.nUpdateDiffAlgoHeight = 300000; // Dynamic: Algorithm fork block
@@ -212,12 +212,12 @@ public:
             ( 2000, uint256S("0x00000c8d245d50f5367fce0395968eede651a57f7d3109391de2a1b1127a3d65"))
             ( 4000, uint256S("0x000009bb9a4bede31a48de0d0b5855f2216f010b8b9e1b841904e727b96170dd"))
             ( 8000, uint256S("0x000004afc06a08b1ffff872beb61bf8d24c3f7917b47fb34a538038dbb69d47c"))
-	    ( 16000, uint256S("0x000007acf3133e96fbd19c269dda826a7d493390ff581c8125c8f56769c3959a"))
-	    ( 20547, uint256S("0x000007e2309c07f0c75e2bd31122e2062c24afd4b8a9981b4706f3f9083c5adc"))
+            ( 16000, uint256S("0x000007acf3133e96fbd19c269dda826a7d493390ff581c8125c8f56769c3959a"))
+	        ( 20547, uint256S("0x000007e2309c07f0c75e2bd31122e2062c24afd4b8a9981b4706f3f9083c5adc"))
             ( 32000, uint256S("0x00000fb0818a910115ee27577621e8867824f578958fec651423ae8d67d6c6c4"))
-   	    ( 48000, uint256S("0x000008b04997bc4b28909d42b2ce7b15c550609bd08d3a089572885ddce31679"))
-	    ( 64000, uint256S("0x0000014bfcfcd0a0c09508f35aa274e6f181a6e9cfc695498a49a539499de6e5"))
-	    ( 92000, uint256S("0x00000352b5397a483a4cbc8942647f8be0e513d4386d2adfcb03a6299326cd1a")),
+   	        ( 48000, uint256S("0x000008b04997bc4b28909d42b2ce7b15c550609bd08d3a089572885ddce31679"))
+	        ( 64000, uint256S("0x0000014bfcfcd0a0c09508f35aa274e6f181a6e9cfc695498a49a539499de6e5"))
+	        ( 92000, uint256S("0x00000352b5397a483a4cbc8942647f8be0e513d4386d2adfcb03a6299326cd1a")),
             1489863148, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
@@ -252,10 +252,10 @@ public:
         consensus.powLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
         consensus.nPowAveragingWindow = 17;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
-        consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
-        consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
-        consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
-        consensus.nUpdateDiffAlgoHeight = 100; // Dynamic: Algorithm fork block
+        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
+        consensus.nPowMaxAdjustDown = 32; // Dynamic: 48% adjustment down
+        consensus.nPowMaxAdjustUp = 16; // Dynamic: 32% adjustment up
+        consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -280,17 +280,17 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1491119086, 24051, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1506913202, 47578, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain)
-            assert(consensus.hashGenesisBlock == uint256S("0x0000e20f2438413d8fc19ee8b45c4a89c8ab01a2bbc5a62ae1626e394278d1be"));
+        if(!startNewChain) {
+            assert(consensus.hashGenesisBlock == uint256S("0x0000ea5463fc4d1b07476440c87157e9c1d74f0dd24ef5d14c62bd78216d334b"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
-
+        }
         vFixedSeeds.clear();
         vSeeds.clear();
         //vSeeds.push_back(CDNSSeedData("",  ""));
@@ -311,7 +311,7 @@ public:
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
 
-        fMiningRequiresPeers = true;
+        fMiningRequiresPeers = false;
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
         fMineBlocksOnDemand = false;
@@ -324,8 +324,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (  0, uint256S("0x0000e20f2438413d8fc19ee8b45c4a89c8ab01a2bbc5a62ae1626e394278d1be")),
-            1491119086, // * UNIX timestamp of last checkpoint block
+            (  0, uint256S("0x0000ea5463fc4d1b07476440c87157e9c1d74f0dd24ef5d14c62bd78216d334b")),
+            1506913202, // * UNIX timestamp of last checkpoint block
             0,    // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             1000        // * estimated number of transactions per day after checkpoint
@@ -358,7 +358,7 @@ public:
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("000fffff00000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
-        consensus.nPowTargetSpacing = 2 * 64; // Dynamic: 256 seconds
+        consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nPowMaxAdjustDown = 32; // Dynamic: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Dynamic: 16% adjustment up
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
