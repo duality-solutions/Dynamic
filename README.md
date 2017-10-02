@@ -8,6 +8,8 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
+# **Dynamic (DYN) v1.5.0.0**
+
 # **Dynamic (DYN) v1.4.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
