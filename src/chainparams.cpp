@@ -132,6 +132,8 @@ public:
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
         consensus.nUpdateDiffAlgoHeight = 300000; // Dynamic: Algorithm fork block
 		consensus.nPowAveragingWindow = 17;
+        consensus.nPowMaxAdjustUp = 32;
+        consensus.nPowMaxAdjustDown = 48;
         consensus.nLowTimeLimit = 90;
         consensus.nFloorTimeLimit = 65;
         consensus.nMinimumAdjustLimit = 75;
@@ -253,6 +255,8 @@ public:
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
         consensus.nPowAveragingWindow = 5;
+        consensus.nPowMaxAdjustUp = 32;
+        consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
@@ -363,6 +367,9 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("000fffff00000000000000000000000000000000000000000000000000000000");
+        consensus.nPowAveragingWindow = 5;
+        consensus.nPowMaxAdjustUp = 32;
+        consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block

@@ -29,9 +29,31 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
 unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
 {
     if (CheckForkIsTrue(DELTA_RETARGET, pindexLast)) {
+        
+        // Find the first block in the averaging interval
+        const CBlockIndex* pindexFirst = pindexLast;
+        arith_uint256 bnTot {0};
+        for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
+            arith_uint256 bnTmp;
+            bnTmp.SetCompact(pindexFirst->nBits);
+            bnTot += bnTmp;
+            pindexFirst = pindexFirst->pprev;
+        }
+        // Use medians to prevent time-warp attacks
+        int64_t nLastBlockTime = pindexLast->GetMedianTimePast();
+        int64_t nFirstBlockTime = pindexFirst->GetMedianTimePast();
+        int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
+        LogPrint("pow", "  nActualTimespan = %d  before dampening\n", nActualTimespan);
+        nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan())/4;
+        LogPrint("pow", "  nActualTimespan = %d  before bounds\n", nActualTimespan);
+
+        if (nActualTimespan < params.MinActualTimespan())
+            nActualTimespan = params.MinActualTimespan();
+        if (nActualTimespan > params.MaxActualTimespan())
+            nActualTimespan = params.MaxActualTimespan();
 
         unsigned int initalBlock = params.nUpdateDiffAlgoHeight;
-        int64_t nRetargetTimespan = params.nPowTargetTimespan;
+        int64_t nRetargetTimespan = nActualTimespan;
         const unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
         const unsigned int nLastBlock = 1;
@@ -74,7 +96,7 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         int64_t nWeightedDiv = 0;
         int64_t nWeightedTimespan = 0;
 
-        const INDEX_TYPE pindexFirst = pindexLast; // multi algo - last block is selected on a per algo basis.
+        const INDEX_TYPE pindexFirstDelta = pindexLast; // multi algo - last block is selected on a per algo basis.
 
         if (pindexLast == NULL)
             return nProofOfWorkLimit;
@@ -82,8 +104,8 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         if (INDEX_HEIGHT(pindexLast) <= nQBFrame)
             return nProofOfWorkLimit;
 
-        pindexFirst = INDEX_PREV(pindexLast);
-        nLBTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirst);
+        pindexFirstDelta = INDEX_PREV(pindexLast);
+        nLBTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirstDelta);
 
         if (nLBTimespan > nBadTimeLimit && nLBTimespan < nLBMinGap)
             nLBTimespan = nLBTimespan * 50 / PERCENT_FACTOR;
@@ -94,9 +116,9 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         if (nLBTimespan > nLBMaxGap)
             nLBTimespan = nLBTimespan * 150 / PERCENT_FACTOR;
 
-        pindexFirst = pindexLast;
-        for (unsigned int i = 1; pindexFirst != NULL && i <= nQBFrame; i++) {
-            nDeltaTimespan = INDEX_TIME(pindexFirst) - INDEX_TIME(INDEX_PREV(pindexFirst));
+        pindexFirstDelta = pindexLast;
+        for (unsigned int i = 1; pindexFirstDelta != NULL && i <= nQBFrame; i++) {
+            nDeltaTimespan = INDEX_TIME(pindexFirstDelta) - INDEX_TIME(INDEX_PREV(pindexFirstDelta));
 
             if (nDeltaTimespan <= nBadTimeLimit)
                 nDeltaTimespan = nBadTimeReplace;
@@ -104,22 +126,22 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
             if (i <= nShortFrame)
                 nShortTimespan += nDeltaTimespan;
             nQBTimespan += nDeltaTimespan;
-            pindexFirst = INDEX_PREV(pindexFirst);
+            pindexFirstDelta = INDEX_PREV(pindexFirstDelta);
         }
 
         if (INDEX_HEIGHT(pindexLast) - initalBlock <= nMiddleFrame) {
             nMiddleWeight = nMiddleTimespan = 0;
         }
         else {
-            pindexFirst = pindexLast;
-            for (unsigned int i = 1; pindexFirst != NULL && i <= nMiddleFrame; i++) {
-                nDeltaTimespan = INDEX_TIME(pindexFirst) - INDEX_TIME(INDEX_PREV(pindexFirst));
+            pindexFirstDelta = pindexLast;
+            for (unsigned int i = 1; pindexFirstDelta != NULL && i <= nMiddleFrame; i++) {
+                nDeltaTimespan = INDEX_TIME(pindexFirstDelta) - INDEX_TIME(INDEX_PREV(pindexFirstDelta));
 
                 if (nDeltaTimespan <= nBadTimeLimit)
                     nDeltaTimespan = nBadTimeReplace;
 
                 nMiddleTimespan += nDeltaTimespan;
-                pindexFirst = INDEX_PREV(pindexFirst);
+                pindexFirstDelta = INDEX_PREV(pindexFirstDelta);
             }
         }
 
@@ -127,11 +149,11 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
             nLongWeight = nLongTimespan = 0;
         }
         else {
-            pindexFirst = pindexLast;
-            for (unsigned int i = 1; pindexFirst != NULL && i <= nLongFrame; i++)
-                pindexFirst = INDEX_PREV(pindexFirst);
+            pindexFirstDelta = pindexLast;
+            for (unsigned int i = 1; pindexFirstDelta != NULL && i <= nLongFrame; i++)
+                pindexFirstDelta = INDEX_PREV(pindexFirstDelta);
 
-            nLongTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirst);
+            nLongTimespan = INDEX_TIME(pindexLast) - INDEX_TIME(pindexFirstDelta);
         }
 
         if ((nQBTimespan > nBadTimeLimit) && (nQBTimespan < nQBMinGap) && (nLBTimespan < nRetargetTimespan * 40 / PERCENT_FACTOR)) {
