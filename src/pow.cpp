@@ -53,15 +53,15 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
         const int64_t nBadTimeLimit = 0;
         const int64_t nBadTimeReplace = nRetargetTimespan / 10;
 
-        const int64_t nLowTimeLimit = nRetargetTimespan * 90 / PERCENT_FACTOR;
-        const int64_t nFloorTimeLimit = nRetargetTimespan * 65 / PERCENT_FACTOR;
+        const int64_t nLowTimeLimit = nRetargetTimespan * params.nLowTimeLimit / PERCENT_FACTOR;
+        const int64_t nFloorTimeLimit = nRetargetTimespan * params.nFloorTimeLimit / PERCENT_FACTOR;
 
         const int64_t nDrift = 1;
         int64_t nLongTimeLimit = ((6 * nDrift)) * 60;
         int64_t nLongTimeStep = nDrift * 60;
 
-        unsigned int nMinimumAdjustLimit = (unsigned int)nRetargetTimespan * 75 / PERCENT_FACTOR;
-        unsigned int nMaximumAdjustLimit = (unsigned int)nRetargetTimespan * 150 / PERCENT_FACTOR;
+        unsigned int nMinimumAdjustLimit = (unsigned int)nRetargetTimespan * params.nMinimumAdjustLimit / PERCENT_FACTOR;
+        unsigned int nMaximumAdjustLimit = (unsigned int)nRetargetTimespan * params.nMaximumAdjustLimit / PERCENT_FACTOR;
 
         int64_t nDeltaTimespan = 0;
         int64_t nLBTimespan = 0;
