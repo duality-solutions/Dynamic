@@ -135,6 +135,7 @@ DYNAMIC_CORE_H = \
   netbase.h \
   netfulfilledman.h \
   noui.h \
+  ntp.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -227,6 +228,7 @@ libdynamic_server_a_SOURCES = \
   net.cpp \
   netfulfilledman.cpp \
   noui.cpp \
+  ntp.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
