@@ -108,7 +108,7 @@ void ThreadSendAlert()
     int nSent = 0;
     {
         LOCK(cs_vNodes);
-        BOOST_FOREACH(CNode* pnode, vNodes)
+        for (CNode* pnode : vNodes)
         {
             if (alert2.RelayTo(pnode))
             {
