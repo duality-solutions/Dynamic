@@ -134,10 +134,6 @@ public:
 		consensus.nPowAveragingWindow = 17;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nLowTimeLimit = 90;
-        consensus.nFloorTimeLimit = 65;
-        consensus.nMinimumAdjustLimit = 75;
-        consensus.nMaximumAdjustLimit = 150;
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
 		consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -261,11 +257,6 @@ public:
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 
-        consensus.nLowTimeLimit = 90;
-        consensus.nFloorTimeLimit = 65;
-        consensus.nMinimumAdjustLimit = 75;
-        consensus.nMaximumAdjustLimit = 150;
-
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -373,11 +364,6 @@ public:
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
-
-        consensus.nLowTimeLimit = 90;
-        consensus.nFloorTimeLimit = 65;
-        consensus.nMinimumAdjustLimit = 75;
-        consensus.nMaximumAdjustLimit = 150;
 
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;

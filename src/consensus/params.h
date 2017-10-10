@@ -71,11 +71,6 @@ struct Params {
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
-
-    int64_t nLowTimeLimit;
-    int64_t nFloorTimeLimit;
-    int64_t nMinimumAdjustLimit;
-    int64_t nMaximumAdjustLimit;
     
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
     int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp  )) / 100; }
