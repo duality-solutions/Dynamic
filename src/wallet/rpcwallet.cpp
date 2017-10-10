@@ -2688,9 +2688,14 @@ UniValue makekeypair(const UniValue& params, bool fHelp)
         return NullUniValue;
 
     CPrivKey vchPrivKey = key.GetPrivKey();
+    CKeyID keyID = key.GetPubKey().GetID();
+    CKey vchSecret = CKey();
+    vchSecret.SetPrivKey(vchPrivKey, false);
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
+    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
+    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
     return result;
 }
 
