@@ -1806,7 +1806,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
     if (chainActive.Height() == 0) {
-        CAmount nSubsidy = 4000000 * COIN;
+        CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }

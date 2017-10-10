@@ -300,7 +300,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
     CAmount blockValue;
     CAmount dynodePayment;
 
-    if (chainActive.Height() == 0) { blockValue = 4000000 * COIN; }
+    if (chainActive.Height() == 0) { blockValue = INITIAL_SUPERBLOCK_PAYMENT; }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
     else { blockValue = BLOCKCHAIN_INIT_REWARD; }
@@ -318,7 +318,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = dynodePayment;
 
-        if (chainActive.Height() == 0) { txNew.vout[0].nValue = 4000000 * COIN; }
+        if (chainActive.Height() == 0) { txNew.vout[0].nValue = INITIAL_SUPERBLOCK_PAYMENT; }
         else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
         else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
         else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
