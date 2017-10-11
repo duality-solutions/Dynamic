@@ -275,7 +275,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex("0429101c788f4f3cd58bf77c511e5533ed39f4a9a498bb57dc35c37c9892a276a9387ed93ef1027528749f51e10e94f9177932f38b2857c59424d46b5554bd742f");
         nDefaultPort = 31400;
         nMaxTipAge = 24 * 60 * 64;
         nPruneAfterHeight = 100;
@@ -320,8 +320,9 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        strSporkPubKey = "";
-        strDynodePaymentsPubKey = "";
+        // DDws4CoaTo3KB3PUZ6FjBx3nxa8RzYhhHD
+        strSporkPubKey = "0448563b94ecad33218cba2fd07f59af12055cd671175e522ee09b45e2cbd3fddb04bb18294495b700c055fb3055faad4954af764d5a10b620b139b03dc162cec4";
+        strDynodePaymentsPubKey = "0448563b94ecad33218cba2fd07f59af12055cd671175e522ee09b45e2cbd3fddb04bb18294495b700c055fb3055faad4954af764d5a10b620b139b03dc162cec4";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -407,6 +408,10 @@ public:
         fTestnetToBeDeprecatedFieldRPC = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
+        // DDws4CoaTo3KB3PUZ6FjBx3nxa8RzYhhHD
+        strSporkPubKey = "0448563b94ecad33218cba2fd07f59af12055cd671175e522ee09b45e2cbd3fddb04bb18294495b700c055fb3055faad4954af764d5a10b620b139b03dc162cec4";
+        strDynodePaymentsPubKey = "0448563b94ecad33218cba2fd07f59af12055cd671175e522ee09b45e2cbd3fddb04bb18294495b700c055fb3055faad4954af764d5a10b620b139b03dc162cec4";
+
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
             (  0, uint256S("0x0009b505c91e7c59933702b91115fb3da25b31983924655b84bcfed62b04bd9c")),
