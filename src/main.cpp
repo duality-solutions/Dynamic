@@ -1803,7 +1803,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
     return ReadBlockFromDisk(block, pindex, Params().GetConsensus());
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
+CAmount GetPoWBlockPayment(const int& nHeight)
 {
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
@@ -1812,14 +1812,14 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
     }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
         LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD + nFees;
+        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
-        return PHASE_1_POW_REWARD + nFees; // 1 DYN
+        return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
     }
-    else 
-        return BLOCKCHAIN_INIT_REWARD + nFees;
+    else
+        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
 CAmount GetDynodePayment(bool fDynode)
@@ -2836,7 +2836,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fDynodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetDynodePayment(fDynodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
+    CAmount nExpectedBlockValue = GetDynodePayment(fDynodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight); // Burn transaction fees
     std::string strError = "";
 
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
