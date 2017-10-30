@@ -1,3 +1,7 @@
+Dynamic 1.5.0.0
+==================
+- [v1.5.0.0](release-notes/dynamic/release-notes.md)
+
 Dynamic 1.4.0.0
 ==================
 

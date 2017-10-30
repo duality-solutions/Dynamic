@@ -78,8 +78,8 @@ private:
 
 private Q_SLOTS:
     void on_sendButton_clicked();
-    void on_buttonChooseFee_clicked();
-    void on_buttonMinimizeFee_clicked();
+    //void on_buttonChooseFee_clicked();
+    //void on_buttonMinimizeFee_clicked();
     void removeEntry(SendCoinsEntry* entry);
     void updateDisplayUnit();
     void updateInstantSend();
@@ -96,7 +96,7 @@ private Q_SLOTS:
     void coinControlClipboardPriority();
     void coinControlClipboardLowOutput();
     void coinControlClipboardChange();
-    void setMinimumFee();
+    //void setMinimumFee();
     void updateFeeSectionControls();
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
