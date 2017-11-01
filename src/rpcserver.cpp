@@ -406,6 +406,18 @@ static const CRPCCommand vRPCCommands[] =
     { "Wallet",             "walletlock",             &walletlock,             true  },
     { "Wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
     { "Wallet",             "walletpassphrase",       &walletpassphrase,       true  },
+
+    /* Fluid Protocol */
+    { "Protocol",           "sendfluidtransaction",	  &sendfluidtransaction,   true  },
+    { "Protocol",           "signtoken",			  &signtoken,			   true  },
+    { "Protocol",           "consenttoken",			  &consenttoken,		   true  },
+    { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
+    { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
+    { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
+    { "Protocol",           "fluidcommandshistory",	  &fluidcommandshistory,   true  },
+    { "Protocol",           "getfluidmasters",	      &getfluidmasters,   	   true  },
+    { "Protocol",           "gettime",	      		  &gettime,   	   			true  },
+
      /* Decentralised DNS */
     { "DDNS",               "name_scan",              &name_scan,              true  },
     { "DDNS",               "name_filter",            &name_filter,            true  },

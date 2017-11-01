@@ -139,6 +139,11 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP9                   : return "OP_NOP9";
     case OP_NOP10                  : return "OP_NOP10";
 
+	// fluid
+	case OP_MINT				   : return "OP_MINT";
+	case OP_REWARD_DYNODE		   : return "OP_REWARD_DYNODE";
+	case OP_REWARD_MINING		   : return "OP_REWARD_MINING";
+
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
     // Note:

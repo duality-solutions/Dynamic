@@ -19,6 +19,16 @@
 #include <string>
 #include <vector>
 
+// Identification codes for Fluid Protocol Transactions
+
+enum ProtocolCodes {
+	MINT_TX 			= 1,
+	DYNODE_MODFIY_TX 	= 2,
+	MINING_MODIFY_TX 	= 3,
+	
+	NO_TX = 0
+};
+
 // Maximum number of bytes pushable to the stack
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520;
 
@@ -175,6 +185,10 @@ enum opcodetype
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
+	// fluid
+    OP_MINT = 0xc0,
+	OP_REWARD_DYNODE = 0xc3,
+	OP_REWARD_MINING = 0xc4,
 
     // template matching params
     OP_SMALLINTEGER = 0xfa,
@@ -640,6 +654,24 @@ public:
     bool IsUnspendable() const
     {
         return (size() > 0 && *begin() == OP_RETURN);
+    }
+
+	bool IsProtocolInstruction(ProtocolCodes code) const
+    {
+		switch(code) {
+			case MINT_TX:
+				return (size() > 0 && *begin() == OP_MINT);
+				break;
+			case DYNODE_MODFIY_TX:
+				return (size() > 0 && *begin() == OP_REWARD_DYNODE);
+				break;
+			case MINING_MODIFY_TX:
+				return (size() > 0 && *begin() == OP_REWARD_MINING);
+				break;
+			default:
+				throw std::runtime_error("Protocol code is invalid!");
+		}
+		return false;
     }
 
     void clear()
