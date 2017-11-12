@@ -112,8 +112,8 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nRewardsStart = 20545; // PoW Rewards begin on block 20546
-        consensus.nDynodePaymentsStartBlock = 20545; // Dynode Payments begin on block 20546
+        consensus.nRewardsStart = 250; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
+        consensus.nDynodePaymentsStartBlock = 20546; // Dynode Payments begin on block 20546
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20546; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
@@ -163,13 +163,13 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1509390364, 1694146, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1510513582, 318658, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x0000081952a2e63b266edca779817f232d62e28e6b90a2f797c2a2c83cdbdcef"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000003805fc0f75bbd23ad58b3280df128c3fb8e35ee23745f89c7b9bf3b3d12"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
 		}
 		
@@ -206,7 +206,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x0000081952a2e63b266edca779817f232d62e28e6b90a2f797c2a2c83cdbdcef")),
+	        (        0, uint256S("0x000003805fc0f75bbd23ad58b3280df128c3fb8e35ee23745f89c7b9bf3b3d12")),
             1489863148, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
