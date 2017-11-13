@@ -111,10 +111,8 @@ limitedmap<uint256, int64_t> mapAlreadyAskedFor(MAX_INV_SZ);
 static std::deque<std::string> vOneShots;
 CCriticalSection cs_vOneShots;
 
-std::set<CNetAddr> setservAddNodeAddresses;
-CCriticalSection cs_setservAddNodeAddresses;
-
 std::vector<std::string> vAddedNodes;
+
 CCriticalSection cs_vAddedNodes;
 
 NodeId nLastNodeId = 0;
@@ -457,6 +455,26 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fConnectToDyn
     return nullptr;
 }
 
+static void DumpBanlist()
+{
+    CNode::SweepBanned(); // clean unused entries (if bantime has expired)
+
+    if (!CNode::BannedSetIsDirty())
+        return;
+
+    int64_t nStart = GetTimeMillis();
+
+    CBanDB bandb;
+    banmap_t banmap;
+    CNode::SetBannedSetDirty(false);
+    CNode::GetBanned(banmap);
+    if (!bandb.Write(banmap))
+        CNode::SetBannedSetDirty(true);
+
+    LogPrint("net", "Flushed %d banned node ips/subnets to banlist.dat  %dms\n",
+        banmap.size(), GetTimeMillis() - nStart);
+}
+
 void CNode::CloseSocketDisconnect()
 {
     fDisconnect = true;
@@ -474,7 +492,7 @@ void CNode::CloseSocketDisconnect()
 
 void CNode::PushVersion()
 {
-    int nBestHeight = g_signals.GetHeight().get_value_or(0);
+    int nBestHeight = GetNodeSignals().GetHeight().get_value_or(0);
 
     int64_t nTime = (fInbound ? GetAdjustedTime() : GetTime());
     CAddress addrYou = (addr.IsRoutable() && !IsProxy(addr) ? addr : CAddress(CService("0.0.0.0", 0), addr.nServices));
@@ -494,9 +512,13 @@ bool CNode::setBannedIsDirty;
 
 void CNode::ClearBanned()
 {
-    LOCK(cs_setBanned);
-    setBanned.clear();
-    setBannedIsDirty = true;
+    {
+        LOCK(cs_setBanned);
+        setBanned.clear();
+        setBannedIsDirty = true;
+    }
+    DumpBanlist(); //store banlist to disk
+    uiInterface.BannedListChanged();
 }
 
 bool CNode::IsBanned(CNetAddr ip)
@@ -547,26 +569,43 @@ void CNode::Ban(const CSubNet& subNet, const BanReason &banReason, int64_t banti
     }
     banEntry.nBanUntil = (sinceUnixEpoch ? 0 : GetTime() )+bantimeoffset;
 
-    LOCK(cs_setBanned);
-    if (setBanned[subNet].nBanUntil < banEntry.nBanUntil)
-        setBanned[subNet] = banEntry;
-
-    setBannedIsDirty = true;
+    {
+        LOCK(cs_setBanned);
+        if (setBanned[subNet].nBanUntil < banEntry.nBanUntil) {
+            setBanned[subNet] = banEntry;
+            setBannedIsDirty = true;
+        }
+        else
+            return;
+    }
+    uiInterface.BannedListChanged();
+    {
+        LOCK(cs_vNodes);
+        BOOST_FOREACH(CNode* pnode, vNodes) {
+            if (subNet.Match((CNetAddr)pnode->addr))
+                pnode->fDisconnect = true;
+        }
+    }
+    if(banReason == BanReasonManuallyAdded)
+        DumpBanlist(); //store banlist to disk immediately if user requested ban
 }
 
-bool CNode::Unban(const CNetAddr &addr) {
+bool CNode::Unban(const CNetAddr &addr) 
+{
     CSubNet subNet(addr);
     return Unban(subNet);
 }
 
 bool CNode::Unban(const CSubNet &subNet) {
-    LOCK(cs_setBanned);
-    if (setBanned.erase(subNet))
     {
+        LOCK(cs_setBanned);
+        if (!setBanned.erase(subNet))
+            return false;
         setBannedIsDirty = true;
-        return true;
     }
-    return false;
+    uiInterface.BannedListChanged();
+    DumpBanlist(); //store banlist to disk immediately
+    return true;
 }
 
 void CNode::GetBanned(banmap_t &banMap)
@@ -1651,14 +1690,7 @@ void ThreadOpenAddedConnections()
         for (const std::string& strAddNode : lAddresses) {
             std::vector<CService> vservNode(0);
             if(Lookup(strAddNode.c_str(), vservNode, Params().GetDefaultPort(), fNameLookup, 0))
-            {
                 lservAddressesToAdd.push_back(vservNode);
-                {
-                    LOCK(cs_setservAddNodeAddresses);
-                    for (const CService& serv : vservNode)
-                        setservAddNodeAddresses.insert(serv);
-                }
-            }
         }
         // Attempt to connect to each IP for each addnode entry until at least one is successful per addnode entry
         // (keeping in mind that addnode entries can have many IPs if fNameLookup)
@@ -1780,7 +1812,7 @@ void ThreadMessageHandler()
                 TRY_LOCK(pnode->cs_vRecvMsg, lockRecv);
                 if (lockRecv)
                 {
-                    if (!g_signals.ProcessMessages(pnode))
+                    if (!GetNodeSignals().ProcessMessages(pnode))
                         pnode->fDisconnect = true;
 
                     if (pnode->nSendSize < SendBufferSize())
@@ -1798,7 +1830,7 @@ void ThreadMessageHandler()
             {
                 TRY_LOCK(pnode->cs_vSend, lockSend);
                 if (lockSend)
-                    g_signals.SendMessages(pnode);
+                    GetNodeSignals().SendMessages(pnode);
             }
             boost::this_thread::interruption_point();
         }
@@ -2725,27 +2757,6 @@ bool CBanDB::Read(banmap_t& banSet)
     }
     
     return true;
-}
-
-void DumpBanlist()
-{
-    CNode::SweepBanned(); // clean unused entries (if bantime has expired)
-
-    if (!CNode::BannedSetIsDirty())
-
-        return;
-
-    int64_t nStart = GetTimeMillis();
-
-    CBanDB bandb;
-    banmap_t banmap;
-    CNode::SetBannedSetDirty(false);
-    CNode::GetBanned(banmap);
-    if (!bandb.Write(banmap))
-        CNode::SetBannedSetDirty(true);
-
-    LogPrint("net", "Flushed %d banned node ips/subnets to banlist.dat  %dms\n",
-        banmap.size(), GetTimeMillis() - nStart);
 }
 
 int64_t PoissonNextSend(int64_t nNow, int average_interval_seconds) {
