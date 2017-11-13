@@ -28,6 +28,10 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 //
 // The Dynode Ping Class : Contains a different serialize method for sending pings from Dynodes throughout the network
 //
+
+// sentinel version before sentinel ping implementation
+#define DEFAULT_SENTINEL_VERSION 0x010001
+
 class CDynodePing
 {
 public:
@@ -45,7 +49,7 @@ public:
         sigTime(0),
         vchSig(),
         fSentinelIsCurrent(false),
-        nSentinelVersion(0)
+        nSentinelVersion(DEFAULT_SENTINEL_VERSION)
         {}
 
     CDynodePing(CTxIn& vinNew);
@@ -59,7 +63,11 @@ public:
         READWRITE(sigTime);
         READWRITE(vchSig);
         if(ser_action.ForRead() && (s.size() == 0))
-            return;
+        {
+            fSentinelIsCurrent = false;
+            nSentinelVersion = DEFAULT_SENTINEL_VERSION;
+           return;
+        }
         READWRITE(fSentinelIsCurrent);
         READWRITE(nSentinelVersion);
     }

@@ -747,7 +747,7 @@ void CDynodeBroadcast::Relay()
 
 CDynodePing::CDynodePing(CTxIn& vinNew) :
     fSentinelIsCurrent(false),
-    nSentinelVersion(0)
+    nSentinelVersion(DEFAULT_SENTINEL_VERSION)
 {
     LOCK(cs_main);
     if (!chainActive.Tip() || chainActive.Height() < 12) return;

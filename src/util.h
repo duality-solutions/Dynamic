@@ -297,4 +297,13 @@ uint32_t StringVersionToInt(const std::string& strVersion);
  */
 std::string IntVersionToString(uint32_t nVersion);
 
+/**
+ * @brief Copy of the IntVersionToString, that returns "Invalid version" string
+ * instead of throwing std::bad_cast
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * or "Invalid version" if can't cast the given value
+ */
+std::string SafeIntVersionToString(uint32_t nVersion);
+
 #endif // DYNAMIC_UTIL_H
