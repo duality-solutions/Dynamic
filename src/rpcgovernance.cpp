@@ -1,5 +1,3 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -8,16 +6,16 @@
 //#define ENABLE_DYNAMIC_DEBUG
 
 #include "activedynode.h"
+#include "governance.h"
+#include "governance-vote.h"
+#include "governance-classes.h"
+#include "governance-validators.h"
+#include "init.h"
+#include "main.h"
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
 #include "dynodeman.h"
-#include "governance.h"
-#include "governance-classes.h"
-#include "governance-validators.h"
-#include "governance-vote.h"
-#include "init.h"
-#include "main.h"
 #include "messagesigner.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -49,10 +47,11 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 "  getcurrentvotes    - Get only current (tallying) votes for a governance object hash (does not include old votes)\n"
                 "  list               - List governance objects (can be filtered by signal and/or object type)\n"
                 "  diff               - List differences since last diff\n"
-                "  vote-alias         - Vote on a governance object by Dynode alias (using dynode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by Dynode configured in dynamic.conf\n"
-                "  vote-many          - Vote on a governance object by all Dynodes (using dynode.conf setup)\n"
+                "  vote-alias         - Vote on a governance object by dynode alias (using dynode.conf setup)\n"
+                "  vote-conf          - Vote on a governance object by dynode configured in dash.conf\n"
+                "  vote-many          - Vote on a governance object by all dynodes (using dynode.conf setup)\n"
                 );
+
 
     if(strCommand == "count")
         return governance.ToString();
@@ -152,7 +151,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only Dynodes can create them)");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only dynodes can create them)");
         }
 
         std::string strError = "";
@@ -186,7 +185,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         }
 
         if(!dynodeSync.IsBlockchainSynced()) {
-            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with Dynode network. Try again in a minute or so.");
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with dynode network. Try again in a minute or so.");
         }
 
         CDynode dn;
@@ -242,8 +241,8 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 govobj.Sign(activeDynode.keyDynode, activeDynode.pubKeyDynode);
             }
             else {
-                LogPrintf("gobject(submit) -- Object submission rejected because node is not a Dynode\n");
-                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid Dynodes can submit this type of object");
+                LogPrintf("gobject(submit) -- Object submission rejected because node is not a dynode\n");
+                throw JSONRPCError(RPC_INVALID_PARAMETER, "Only valid dynodes can submit this type of object");
             }
         }
         else {
@@ -256,7 +255,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
         std::string strHash = govobj.GetHash().ToString();
 
         std::string strError = "";
-        if(!govobj.IsValidLocally(strError, true)) {
+        bool fMissingDynode;
+        bool fMissingConfirmations;
+        if(!govobj.IsValidLocally(strError, fMissingDynode, fMissingConfirmations, true) && !fMissingConfirmations) {
             LogPrintf("gobject(submit) -- Object submission rejected because object is not valid - hash = %s, strError = %s\n", strHash, strError);
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + strHash + " - " + strError);
         }
@@ -268,16 +269,19 @@ UniValue gobject(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
         }
         // This check should always pass, update buffer
-        if(!governance.DynodeRateCheck(govobj, true)) {
+        if(!governance.DynodeRateCheck(govobj, UPDATE_TRUE)) {
             LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure (buffer updated) - hash = %s\n", strHash);
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
         }
 
-        governance.AddSeenGovernanceObject(govobj.GetHash(), SEEN_OBJECT_IS_VALID);
-        govobj.Relay();
         LogPrintf("gobject(submit) -- Adding locally created governance object - %s\n", strHash);
-        bool fAddToSeen = true;
-        governance.AddGovernanceObject(govobj, fAddToSeen);
+
+        if(fMissingConfirmations) {
+            governance.AddPostponedObject(govobj);
+            govobj.Relay();
+        } else {
+            governance.AddGovernanceObject(govobj);
+        }
 
         return govobj.GetHash().ToString();
     }
@@ -323,8 +327,8 @@ UniValue gobject(const UniValue& params, bool fHelp)
         if(!fDnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
-            statusObj.push_back(Pair("errorMessage", "Can't find Dynode by collateral output"));
-            resultsObj.push_back(Pair("dynamic.conf", statusObj));
+            statusObj.push_back(Pair("errorMessage", "Can't find dynode by collateral output"));
+            resultsObj.push_back(Pair("dash.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
             return returnObj;
@@ -335,7 +339,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
             statusObj.push_back(Pair("errorMessage", "Failure to sign."));
-            resultsObj.push_back(Pair("dynamic.conf", statusObj));
+            resultsObj.push_back(Pair("dash.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
             return returnObj;
@@ -352,7 +356,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             statusObj.push_back(Pair("errorMessage", exception.GetMessage()));
         }
 
-        resultsObj.push_back(Pair("dynamic.conf", statusObj));
+        resultsObj.push_back(Pair("dash.conf", statusObj));
 
         returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
         returnObj.push_back(Pair("detail", resultsObj));
@@ -429,7 +433,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!fDnFound) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", "Can't find Dynode by collateral output"));
+                statusObj.push_back(Pair("errorMessage", "Can't find dynode by collateral output"));
                 resultsObj.push_back(Pair(dne.getAlias(), statusObj));
                 continue;
             }
@@ -527,7 +531,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             if(!CMessageSigner::GetKeysFromSecret(dne.getPrivKey(), keyDynode, pubKeyDynode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
-                statusObj.push_back(Pair("errorMessage", strprintf("Invalid Dynode key %s.", dne.getPrivKey())));
+                statusObj.push_back(Pair("errorMessage", strprintf("Invalid dynode key %s.", dne.getPrivKey())));
                 resultsObj.push_back(Pair(dne.getAlias(), statusObj));
                 continue;
             }
@@ -786,7 +790,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
     // GETVOTES FOR SPECIFIC GOVERNANCE OBJECT
     if(strCommand == "getcurrentvotes")
     {
-        if (params.size() < 2 || params.size() == 3 || params.size() > 4)
+        if (params.size() != 2 && params.size() != 4)
             throw std::runtime_error(
                 "Correct usage is 'gobject getcurrentvotes <governance-hash> [txid vout_index]'"
                 );
@@ -838,7 +842,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
                 "Compile and relay a governance vote with provided external signature instead of signing vote internally\n"
                 );
 
-    uint256 hashDnTx = ParseHashV(params[0], "Dynode tx hash");
+    uint256 hashDnTx = ParseHashV(params[0], "dn tx hash");
     int nDnTxIndex = params[1].get_int();
     CTxIn vin = CTxIn(hashDnTx, nDnTxIndex);
 
@@ -871,7 +875,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     bool fDnFound = dnodeman.Get(vin, dn);
 
     if(!fDnFound) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find Dynode in list : " + vin.prevout.ToStringShort());
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find dynode in list : " + vin.prevout.ToStringShort());
     }
 
     CGovernanceVote vote(vin, hashGovObj, eVoteSignal, eVoteOutcome);
