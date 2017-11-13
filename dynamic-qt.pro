@@ -408,7 +408,6 @@ HEADERS += \
     src/rpcclient.h \
     src/rpcprotocol.h \
     src/rpcserver.h \
-    src/privatesend-relay.h \
     src/privatesend.h \
     src/scheduler.h \
     src/serialize.h \
@@ -594,7 +593,6 @@ SOURCES += \
     src/rpcrawtransaction.cpp \
     src/rpcserver.cpp \
     src/rpcdynode.cpp \
-    src/privatesend-relay.cpp \
     src/privatesend.cpp \
     src/scheduler.cpp \
     src/spork.cpp \

@@ -34,7 +34,7 @@ class CPrivateSendClient : public CPrivateSendBase
 private:
     mutable CCriticalSection cs_privatesend;
 
-    // Keep track of the used Masternodes
+    // Keep track of the used Dynodes
     std::vector<CTxIn> vecDynodesUsed;
 
     std::vector<CAmount> vecDenominationsSkipped;
@@ -73,14 +73,14 @@ private:
     bool MakeCollateralAmounts();
     bool MakeCollateralAmounts(const CompactTallyItem& tallyItem);
 
-    /// As a client, submit part of a future mixing transaction to a Masternode to start the process
+    /// As a client, submit part of a future mixing transaction to a Dynode to start the process
     bool SubmitDenominate();
     /// step 1: prepare denominated inputs and outputs
     bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxIn>& vecTxInRet, std::vector<CTxOut>& vecTxOutRet);
     /// step 2: send denominated inputs and outputs prepared in step 1
     bool SendDenominate(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut);
 
-    /// Get Masternode updates about the progress of mixing
+    /// Get Dynodes updates about the progress of mixing
     bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew=0);
     // Set the 'state' value, with some logging and capturing when the state changed
     void SetState(PoolState nStateNew);

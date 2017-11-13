@@ -1647,7 +1647,7 @@ void CDynodeMan::SetDynodeLastPing(const CTxIn& vin, const CDynodePing& dnp)
         return;
     }
     pDN->lastPing = dnp;
-    // if masternode uses sentinel ping instead of watchdog
+    // if dynode uses sentinel ping instead of watchdog
     // we shoud update nTimeLastWatchdogVote here if sentinel
     // ping flag is actual
     if(dnp.fSentinelIsCurrent)
