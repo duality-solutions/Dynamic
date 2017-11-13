@@ -356,6 +356,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Dynamic",                "dnsync",                 &dnsync,                 true  },
     { "Dynamic",                "spork",                  &spork,                  true  },
     { "Dynamic",                "getpoolinfo",            &getpoolinfo,            true  },
+    { "Dynamic",                "sentinelping",           &sentinelping,           true  },
 #ifdef ENABLE_WALLET
     { "Dynamic",                "privatesend",            &privatesend,            false },
 

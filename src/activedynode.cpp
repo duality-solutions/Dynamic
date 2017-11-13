@@ -113,6 +113,9 @@ bool CActiveDynode::SendDynodePing()
     }
 
     CDynodePing dnp(vin);
+    dnp.nSentinelVersion = nSentinelVersion;
+    dnp.fSentinelIsCurrent =
+            (abs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
     if(!dnp.Sign(keyDynode, pubKeyDynode)) {
         LogPrintf("CActiveDynode::SendDynodePing -- ERROR: Couldn't sign Dynode Ping\n");
         return false;
@@ -128,6 +131,14 @@ bool CActiveDynode::SendDynodePing()
 
     LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", vin.ToString());
     dnp.Relay();
+
+    return true;
+}
+
+bool CActiveDynode::UpdateSentinelPing(int version)
+{
+    nSentinelVersion = version;
+    nSentinelPingTime = GetAdjustedTime();
 
     return true;
 }

@@ -35,13 +35,17 @@ public:
     uint256 blockHash;
     int64_t sigTime; //dnb message times
     std::vector<unsigned char> vchSig;
+    bool fSentinelIsCurrent; // true if last sentinel ping was actual
+    uint32_t nSentinelVersion; // MSB is always 0, other 3 bits corresponds to x.x.x version scheme
     //removed stop
 
     CDynodePing() :
         vin(),
         blockHash(),
         sigTime(0),
-        vchSig()
+        vchSig(),
+        fSentinelIsCurrent(false),
+        nSentinelVersion(0)
         {}
 
     CDynodePing(CTxIn& vinNew);
@@ -54,6 +58,10 @@ public:
         READWRITE(blockHash);
         READWRITE(sigTime);
         READWRITE(vchSig);
+        if(ser_action.ForRead() && (s.size() == 0))
+            return;
+        READWRITE(fSentinelIsCurrent);
+        READWRITE(nSentinelVersion);
     }
 
     void swap(CDynodePing& first, CDynodePing& second) // nothrow
@@ -67,6 +75,8 @@ public:
         swap(first.blockHash, second.blockHash);
         swap(first.sigTime, second.sigTime);
         swap(first.vchSig, second.vchSig);
+        swap(first.fSentinelIsCurrent, second.fSentinelIsCurrent);
+        swap(first.nSentinelVersion, second.nSentinelVersion);
     }
 
     uint256 GetHash() const
@@ -315,7 +325,7 @@ public:
 
     void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
 
-    void UpdateWatchdogVoteTime();
+    void UpdateWatchdogVoteTime(uint64_t nVoteTime = 0);
 
     CDynode& operator=(CDynode from)
     {

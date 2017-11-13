@@ -847,6 +847,12 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         // see if we have this Dynode
         CDynode* pdn = dnodeman.Find(dnp.vin);
 
+        // if dynode uses sentinel ping instead of watchdog
+        // we shoud update nTimeLastWatchdogVote here if sentinel
+        // ping flag is actual
+        if(pdn && dnp.fSentinelIsCurrent)
+            pdn->UpdateWatchdogVoteTime(dnp.sigTime);
+
         // too late, new DNANNOUNCE is required
         if(pdn && pdn->IsNewStartRequired()) return;
 
@@ -1641,6 +1647,12 @@ void CDynodeMan::SetDynodeLastPing(const CTxIn& vin, const CDynodePing& dnp)
         return;
     }
     pDN->lastPing = dnp;
+    // if masternode uses sentinel ping instead of watchdog
+    // we shoud update nTimeLastWatchdogVote here if sentinel
+    // ping flag is actual
+    if(dnp.fSentinelIsCurrent)
+        pDN->UpdateWatchdogVoteTime(dnp.sigTime);
+
     mapSeenDynodePing.insert(std::make_pair(dnp.GetHash(), dnp));
 
     CDynodeBroadcast dnb(*pDN);
