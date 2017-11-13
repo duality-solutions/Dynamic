@@ -884,14 +884,11 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             int nDnCount = dnodeman.CountDynodes();
             // This is to prevent unnecessary banning of Dynodes whilst the network is in its infancy
             if(!isLocal && Params().NetworkIDString() == CBaseChainParams::MAIN && nDnCount > 200) {
-                std::map<CNetAddr, int64_t>::iterator i = mAskedUsForDynodeList.find(pfrom->addr);
-                if (i != mAskedUsForDynodeList.end()){
-                    int64_t t = (*i).second;
-                    if (GetTime() < t) {
-                        Misbehaving(pfrom->GetId(), 34);
-                        LogPrintf("SSEG -- peer already asked me for the list, peer=%d\n", pfrom->id);
-                        return;
-                    }
+                std::map<CNetAddr, int64_t>::iterator it = mAskedUsForDynodeList.find(pfrom->addr);
+                if (it != mAskedUsForDynodeList.end() && it->second > GetTime()) {
+                    Misbehaving(pfrom->GetId(), 34);
+                    LogPrintf("PSEG -- peer already asked me for the list, peer=%d\n", pfrom->id);
+                    return;
                 }
                 int64_t askAgain = GetTime() + SSEG_UPDATE_SECONDS;
                 mAskedUsForDynodeList[pfrom->addr] = askAgain;
