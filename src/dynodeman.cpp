@@ -1383,7 +1383,7 @@ std::string CDynodeMan::ToString() const
 
 void CDynodeMan::UpdateDynodeList(CDynodeBroadcast dnb)
 {
-    LOCK(cs);
+    LOCK2(cs_main, cs);
     mapSeenDynodePing.insert(std::make_pair(dnb.lastPing.GetHash(), dnb.lastPing));
     mapSeenDynodeBroadcast.insert(std::make_pair(dnb.GetHash(), std::make_pair(GetTime(), dnb)));
 

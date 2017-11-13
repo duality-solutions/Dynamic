@@ -808,7 +808,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     }
 
     {
-        LOCK(cs_main);
+        AssertLockHeld(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if (mi == mapBlockIndex.end()) {
             LogPrint("Dynode", "DynodePing::SimpleCheck -- Dynode ping is invalid, unknown block hash: Dynode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
