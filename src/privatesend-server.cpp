@@ -1,8 +1,6 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "privatesend-server.h"
 
 #include "activedynode.h"
@@ -20,7 +18,7 @@ CPrivateSendServer privateSendServer;
 void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
     if(!fDyNode) return;
-    if(fLiteMode) return; // ignore all Dynamic related functionality
+    if(fLiteMode) return; // ignore all Dash related functionality
     if(!dynodeSync.IsBlockchainSynced()) return;
 
     if(strCommand == NetMsgType::PSACCEPT) {
@@ -42,11 +40,11 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         CTransaction txCollateral;
         vRecv >> nDenom >> txCollateral;
 
-        LogPrint("privatesend", "PSACCEPT -- nDenom %d (%s)  txCollateral %s", nDenom, GetDenominationsToString(nDenom), txCollateral.ToString());
+        LogPrint("privatesend", "PSACCEPT -- nDenom %d (%s)  txCollateral %s", nDenom, CPrivateSend::GetDenominationsToString(nDenom), txCollateral.ToString());
 
         CDynode* pdn = dnodeman.Find(activeDynode.vin);
         if(pdn == NULL) {
-            PushStatus(pfrom, STATUS_REJECTED, ERR_MN_LIST);
+            PushStatus(pfrom, STATUS_REJECTED, ERR_DN_LIST);
             return;
         }
 
@@ -96,10 +94,10 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(psq.IsExpired() || psq.nTime > GetTime() + PRIVATESEND_QUEUE_TIMEOUT) return;
 
-        CDynode* pdn = dnodeman.Find(psq.vin);
-        if(pdn == NULL) return;
+        CDynode* pmn = dnodeman.Find(psq.vin);
+        if(pmn == NULL) return;
 
-        if(!psq.CheckSignature(pdn->pubKeyDynode)) {
+        if(!psq.CheckSignature(pmn->pubKeyDynode)) {
             // we probably have outdated info
             dnodeman.AskForDN(pfrom, psq.vin);
             return;
@@ -109,23 +107,23 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
                 if(q.vin == psq.vin) {
                     // no way same mn can send another "not yet ready" psq this soon
-                    LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", pdn->addr.ToString());
+                    LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", pmn->addr.ToString());
                     return;
                 }
             }
 
-            int nThreshold = pdn->nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5;
-            LogPrint("privatesend", "PSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", pdn->nLastPsq, nThreshold, dnodeman.nPsqCount);
+            int nThreshold = pmn->nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5;
+            LogPrint("privatesend", "PSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", pmn->nLastPsq, nThreshold, dnodeman.nPsqCount);
             //don't allow a few nodes to dominate the queuing process
-            if(pdn->nLastPsq != 0 && nThreshold > dnodeman.nPsqCount) {
-                LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending too many psq messages\n", pdn->addr.ToString());
+            if(pmn->nLastPsq != 0 && nThreshold > dnodeman.nPsqCount) {
+                LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending too many psq messages\n", pmn->addr.ToString());
                 return;
             }
             dnodeman.nPsqCount++;
-            pdn->nLastPsq = dnodeman.nPsqCount;
-            pdn->fAllowMixingTx = true;
+            pmn->nLastPsq = dnodeman.nPsqCount;
+            pmn->fAllowMixingTx = true;
 
-            LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), pdn->addr.ToString());
+            LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), pmn->addr.ToString());
             vecPrivatesendQueue.push_back(psq);
             psq.Relay();
         }
@@ -271,10 +269,10 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
 void CPrivateSendServer::SetNull()
 {
-    // MN side
+    // DN side
     vecSessionCollaterals.clear();
 
-    CPrivateSend::SetNull();
+    CPrivateSendBase::SetNull();
 }
 
 //
@@ -286,7 +284,7 @@ void CPrivateSendServer::CheckPool()
         LogPrint("privatesend", "CPrivateSendServer::CheckPool -- entries count %lu\n", GetEntriesCount());
 
         // If entries are full, create finalized transaction
-        if(nState == POOL_STATE_ACCEPTING_ENTRIES && GetEntriesCount() >= GetMaxPoolTransactions()) {
+        if(nState == POOL_STATE_ACCEPTING_ENTRIES && GetEntriesCount() >= CPrivateSend::GetMaxPoolTransactions()) {
             LogPrint("privatesend", "CPrivateSendServer::CheckPool -- FINALIZE TRANSACTIONS\n");
             CreateFinalTransaction();
             return;
@@ -361,10 +359,10 @@ void CPrivateSendServer::CommitFinalTransaction()
     LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING PSTX\n");
 
     // create and sign dynode pstx transaction
-    if(!mapPrivatesendBroadcastTxes.count(hashTx)) {
-        CPrivatesendBroadcastTx pstx(finalTransaction, activeDynode.vin, GetAdjustedTime());
-        pstx.Sign();
-        mapPrivatesendBroadcastTxes.insert(std::make_pair(hashTx, pstx));
+    if(CPrivateSend::GetPSTX(hashTx)) {
+        CPrivatesendBroadcastTx pstxNew(finalTransaction, activeDynode.vin, GetAdjustedTime());
+        pstxNew.Sign();
+        CPrivateSend::AddPSTX(pstxNew);
     }
 
     LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING PSTX\n");
@@ -468,9 +466,9 @@ void CPrivateSendServer::ChargeFees()
 
     Being that mixing has "no fees" we need to have some kind of cost associated
     with using it to stop abuse. Otherwise it could serve as an attack vector and
-    allow endless transaction that would bloat Dynamic and make it unusable. To
+    allow endless transaction that would bloat Dash and make it unusable. To
     stop these kinds of attacks 1 in 10 successful transactions are charged. This
-    adds up to a cost of 0.001DYN per transaction on average.
+    adds up to a cost of 0.001DRK per transaction on average.
 */
 void CPrivateSendServer::ChargeRandomFees()
 {
@@ -531,7 +529,7 @@ void CPrivateSendServer::CheckTimeout()
 
 /*
     Check to see if we're ready for submissions from clients
-    After receiving multiple dsa messages, the queue will switch to "accepting entries"
+    After receiving multiple psa messages, the queue will switch to "accepting entries"
     which is the active state right before merging the transaction
 */
 void CPrivateSendServer::CheckForCompleteQueue()
@@ -606,13 +604,13 @@ bool CPrivateSendServer::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage
         }
     }
 
-    if(!IsCollateralValid(entryNew.txCollateral)) {
+    if(!CPrivateSend::IsCollateralValid(entryNew.txCollateral)) {
         LogPrint("privatesend", "CPrivateSendServer::AddEntry -- collateral not valid!\n");
         nMessageIDRet = ERR_INVALID_COLLATERAL;
         return false;
     }
 
-    if(GetEntriesCount() >= GetMaxPoolTransactions()) {
+    if(GetEntriesCount() >= CPrivateSend::GetMaxPoolTransactions()) {
         LogPrint("privatesend", "CPrivateSendServer::AddEntry -- entries is full!\n");
         nMessageIDRet = ERR_ENTRIES_FULL;
         return false;
@@ -690,11 +688,12 @@ bool CPrivateSendServer::IsSignaturesComplete()
 
 bool CPrivateSendServer::IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut)
 {
-    if(GetDenominations(vecTxPSOut) == 0) return false;
+    if(CPrivateSend::GetDenominations(vecTxPSOut) == 0) return false;
 
     BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-        LogPrintf("CPrivateSendServer::IsOutputsCompatibleWithSessionDenom -- vecTxPSOut denom %d, entry.vecTxPSOut denom %d\n", GetDenominations(vecTxPSOut), GetDenominations(entry.vecTxPSOut));
-        if(GetDenominations(vecTxPSOut) != GetDenominations(entry.vecTxPSOut)) return false;
+        LogPrintf("CPrivateSendServer::IsOutputsCompatibleWithSessionDenom -- vecTxPSOut denom %d, entry.vecTxPSOut denom %d\n",
+                CPrivateSend::GetDenominations(vecTxPSOut), CPrivateSend::GetDenominations(entry.vecTxPSOut));
+        if(CPrivateSend::GetDenominations(vecTxPSOut) != CPrivateSend::GetDenominations(entry.vecTxPSOut)) return false;
     }
 
     return true;
@@ -706,14 +705,14 @@ bool CPrivateSendServer::IsAcceptableDenomAndCollateral(int nDenom, CTransaction
 
     // is denom even smth legit?
     std::vector<int> vecBits;
-    if(!GetDenominationsBits(nDenom, vecBits)) {
+    if(!CPrivateSend::GetDenominationsBits(nDenom, vecBits)) {
         LogPrint("privatesend", "CPrivateSendServer::IsAcceptableDenomAndCollateral -- denom not valid!\n");
         nMessageIDRet = ERR_DENOM;
         return false;
     }
 
     // check collateral
-    if(!fUnitTest && !IsCollateralValid(txCollateral)) {
+    if(!fUnitTest && !CPrivateSend::IsCollateralValid(txCollateral)) {
         LogPrint("privatesend", "CPrivateSendServer::IsAcceptableDenomAndCollateral -- collateral not valid!\n");
         nMessageIDRet = ERR_INVALID_COLLATERAL;
         return false;
@@ -756,7 +755,7 @@ bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral,
 
     vecSessionCollaterals.push_back(txCollateral);
     LogPrintf("CPrivateSendServer::CreateNewSession -- new session created, nSessionID: %d  nSessionDenom: %d (%s)  vecSessionCollaterals.size(): %d\n",
-            nSessionID, nSessionDenom, GetDenominationsToString(nSessionDenom), vecSessionCollaterals.size());
+            nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), vecSessionCollaterals.size());
 
     return true;
 }
@@ -778,7 +777,7 @@ bool CPrivateSendServer::AddUserToExistingSession(int nDenom, CTransaction txCol
 
     if(nDenom != nSessionDenom) {
         LogPrintf("CPrivateSendServer::AddUserToExistingSession -- incompatible denom %d (%s) != nSessionDenom %d (%s)\n",
-                    nDenom, GetDenominationsToString(nDenom), nSessionDenom, GetDenominationsToString(nSessionDenom));
+                    nDenom, CPrivateSend::GetDenominationsToString(nDenom), nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
         nMessageIDRet = ERR_DENOM;
         return false;
     }
@@ -790,7 +789,7 @@ bool CPrivateSendServer::AddUserToExistingSession(int nDenom, CTransaction txCol
     vecSessionCollaterals.push_back(txCollateral);
 
     LogPrintf("CPrivateSendServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecSessionCollaterals.size(): %d\n",
-            nSessionID, nSessionDenom, GetDenominationsToString(nSessionDenom), vecSessionCollaterals.size());
+            nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), vecSessionCollaterals.size());
 
     return true;
 }
@@ -839,7 +838,7 @@ void CPrivateSendServer::SetState(PoolState nStateNew)
 //TODO: Rename/move to core
 void ThreadCheckPrivateSendServer()
 {
-    if(fLiteMode) return; // disable all Dynamic specific functionality
+    if(fLiteMode) return; // disable all Dash specific functionality
 
     static bool fOneThread;
     if(fOneThread) return;

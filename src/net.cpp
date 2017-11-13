@@ -2118,14 +2118,16 @@ void CExplicitNetCleanup::callCleanup()
     delete tmp; // Stroustrup's gonna kill me for that
 }
 
+
 void RelayTransaction(const CTransaction& tx)
 {
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss.reserve(10000);
     uint256 hash = tx.GetHash();
     CTxLockRequest txLockRequest;
-    if(mapPrivatesendBroadcastTxes.count(hash)) { // MSG_PSTX
-        ss << mapPrivatesendBroadcastTxes[hash];
+    CPrivatesendBroadcastTx pstx = CPrivateSend::GetPSTX(hash);
+    if(pstx) { // MSG_PSTX
+        ss << pstx;
     } else if(instantsend.GetTxLockRequest(hash, txLockRequest)) { // MSG_TXLOCK_REQUEST
         ss << txLockRequest;
     } else { // MSG_TX
@@ -2137,7 +2139,7 @@ void RelayTransaction(const CTransaction& tx)
 void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
     uint256 hash = tx.GetHash();
-    int nInv = mapPrivatesendBroadcastTxes.count(hash) ? MSG_PSTX :
+    int nInv = static_cast<bool>(CPrivateSend::GetPSTX(hash)) ? MSG_PSTX :
                 (instantsend.HasTxLockRequest(hash) ? MSG_TXLOCK_REQUEST : MSG_TX);
     CInv inv(nInv, hash);
     {
@@ -2154,7 +2156,7 @@ void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
         vRelayExpiration.push_back(std::make_pair(GetTime() + 15 * 60, inv));
     }
     LOCK(cs_vNodes);
-    for (CNode* pnode : vNodes)
+    BOOST_FOREACH(CNode* pnode, vNodes)
     {
         if(!pnode->fRelayTxes)
             continue;

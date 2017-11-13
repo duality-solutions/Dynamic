@@ -33,4 +33,5 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
 {
     instantsend.SyncTransaction(tx, pblock);
+    CPrivateSend::SyncTransaction(tx, pblock);
 }

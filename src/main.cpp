@@ -5077,8 +5077,9 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_DYNODE_PING:
         return dnodeman.mapSeenDynodePing.count(inv.hash);
 
-    case MSG_PSTX:
-        return mapPrivatesendBroadcastTxes.count(inv.hash);
+    case MSG_PSTX: {
+        return static_cast<bool>(CPrivateSend::GetPSTX(inv.hash));
+    }
 
     case MSG_GOVERNANCE_OBJECT:
     case MSG_GOVERNANCE_OBJECT_VOTE:
@@ -5305,10 +5306,11 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 }
 
                 if (!pushed && inv.type == MSG_PSTX) {
-                    if(mapPrivatesendBroadcastTxes.count(inv.hash)) {
+                    CPrivatesendBroadcastTx pstx = CPrivateSend::GetPSTX(inv.hash);
+                    if(pstx) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << mapPrivatesendBroadcastTxes[inv.hash];
+                        ss << pstx;
                         pfrom->PushMessage(NetMsgType::PSTX, ss);
                         pushed = true;
                     }
@@ -5903,10 +5905,8 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
                 return false;
             }
         } else if (strCommand == NetMsgType::PSTX) {
-
             uint256 hashTx = tx.GetHash();
-
-            if(mapPrivatesendBroadcastTxes.count(hashTx)) {
+            if(CPrivateSend::GetPSTX(hashTx)) {
                 LogPrint("privatesend", "PSTX -- Already have %s, skipping...\n", hashTx.ToString());
                 return true; // not an error
             }
@@ -5947,7 +5947,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             if (strCommand == NetMsgType::PSTX) {
                 LogPrintf("PSTX -- Dynode transaction accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);
-                mapPrivatesendBroadcastTxes.insert(std::make_pair(tx.GetHash(), pstx));
+                CPrivateSend::AddPSTX(pstx);
             } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
                 LogPrintf("TXLOCKREQUEST -- Transaction Lock Request accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);

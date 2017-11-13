@@ -1,5 +1,4 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -30,12 +29,12 @@ extern CPrivateSendClient privateSendClient;
 
 /** Used to keep track of current status of mixing pool
  */
-class CPrivateSendClient : public CPrivateSend
+class CPrivateSendClient : public CPrivateSendBase
 {
 private:
     mutable CCriticalSection cs_privatesend;
 
-    // Keep track of the used Dynodes
+    // Keep track of the used Masternodes
     std::vector<CTxIn> vecDynodesUsed;
 
     std::vector<CAmount> vecDenominationsSkipped;
@@ -74,14 +73,14 @@ private:
     bool MakeCollateralAmounts();
     bool MakeCollateralAmounts(const CompactTallyItem& tallyItem);
 
-    /// As a client, submit part of a future mixing transaction to a Dynode to start the process
+    /// As a client, submit part of a future mixing transaction to a Masternode to start the process
     bool SubmitDenominate();
     /// step 1: prepare denominated inputs and outputs
     bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxIn>& vecTxInRet, std::vector<CTxOut>& vecTxOutRet);
     /// step 2: send denominated inputs and outputs prepared in step 1
     bool SendDenominate(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut);
 
-    /// Get Dynode updates about the progress of mixing
+    /// Get Masternode updates about the progress of mixing
     bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew=0);
     // Set the 'state' value, with some logging and capturing when the state changed
     void SetState(PoolState nStateNew);

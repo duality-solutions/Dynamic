@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,8 +9,9 @@
 #include "chainparams.h"
 #include "primitives/transaction.h"
 #include "pubkey.h"
-#include "utiltime.h"
+#include "sync.h"
 #include "tinyformat.h"
+#include "utiltime.h"
 
 class CPrivateSend;
 
@@ -20,18 +22,55 @@ static const int PRIVATESEND_QUEUE_TIMEOUT          = 30;
 static const int PRIVATESEND_SIGNING_TIMEOUT        = 15;
 
 //! minimum peer version accepted by mixing pool
-static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70206;
+static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70500;
 
-static const CAmount PRIVATESEND_COLLATERAL         = 0.001 * COIN;
 static const CAmount PRIVATESEND_ENTRY_MAX_SIZE     = 9;
 
-class CPrivatesendBroadcastTx;
+// pool responses
+enum PoolMessage {
+    ERR_ALREADY_HAVE,
+    ERR_DENOM,
+    ERR_ENTRIES_FULL,
+    ERR_EXISTING_TX,
+    ERR_FEES,
+    ERR_INVALID_COLLATERAL,
+    ERR_INVALID_INPUT,
+    ERR_INVALID_SCRIPT,
+    ERR_INVALID_TX,
+    ERR_MAXIMUM,
+    ERR_DN_LIST,
+    ERR_MODE,
+    ERR_NON_STANDARD_PUBKEY,
+    ERR_NOT_A_DN, // not used
+    ERR_QUEUE_FULL,
+    ERR_RECENT,
+    ERR_SESSION,
+    ERR_MISSING_TX,
+    ERR_VERSION,
+    MSG_NOERR,
+    MSG_SUCCESS,
+    MSG_ENTRIES_ADDED,
+    MSG_POOL_MIN = ERR_ALREADY_HAVE,
+    MSG_POOL_MAX = MSG_ENTRIES_ADDED
+};
 
-// The main object for accessing mixing
-// extern CPrivateSend privateSend;
+// pool states
+enum PoolState {
+    POOL_STATE_IDLE,
+    POOL_STATE_QUEUE,
+    POOL_STATE_ACCEPTING_ENTRIES,
+    POOL_STATE_SIGNING,
+    POOL_STATE_ERROR,
+    POOL_STATE_SUCCESS,
+    POOL_STATE_MIN = POOL_STATE_IDLE,
+    POOL_STATE_MAX = POOL_STATE_SUCCESS
+};
 
-extern std::map<uint256, CPrivatesendBroadcastTx> mapPrivatesendBroadcastTxes;
-extern std::vector<CAmount> vecPrivateSendDenominations;
+// status update message constants
+enum PoolStatusUpdate {
+    STATUS_REJECTED,
+    STATUS_ACCEPTED
+};
 
 /** Holds an mixing input
  */
@@ -176,6 +215,11 @@ public:
  */
 class CPrivatesendBroadcastTx
 {
+private:
+    // memory only
+    // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
+    int nConfirmedHeight;
+
 public:
     CTransaction tx;
     CTxIn vin;
@@ -183,16 +227,18 @@ public:
     int64_t sigTime;
 
     CPrivatesendBroadcastTx() :
-        tx(CTransaction()),
-        vin(CTxIn()),
-        vchSig(std::vector<unsigned char>()),
+        nConfirmedHeight(-1),
+        tx(),
+        vin(),
+        vchSig(),
         sigTime(0)
         {}
 
     CPrivatesendBroadcastTx(CTransaction tx, CTxIn vin, int64_t sigTime) :
+        nConfirmedHeight(-1),
         tx(tx),
         vin(vin),
-        vchSig(std::vector<unsigned char>()),
+        vchSig(),
         sigTime(sigTime)
         {}
 
@@ -206,60 +252,30 @@ public:
         READWRITE(sigTime);
     }
 
+    friend bool operator==(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    {
+        return a.tx == b.tx;
+    }
+    friend bool operator!=(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    {
+        return !(a == b);
+    }
+    explicit operator bool() const
+    {
+        return *this != CPrivatesendBroadcastTx();
+    }
+
     bool Sign();
-    bool CheckSignature(const CPubKey& pubKeyMasternode);
+    bool CheckSignature(const CPubKey& pubKeyDynode);
+
+    void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }
+    bool IsExpired(int nHeight);
 };
 
-// static class or base class or helper?
-class CPrivateSend
+// base class
+class CPrivateSendBase
 {
 protected:
-    // pool responses
-    enum PoolMessage {
-        ERR_ALREADY_HAVE,
-        ERR_DENOM,
-        ERR_ENTRIES_FULL,
-        ERR_EXISTING_TX,
-        ERR_FEES,
-        ERR_INVALID_COLLATERAL,
-        ERR_INVALID_INPUT,
-        ERR_INVALID_SCRIPT,
-        ERR_INVALID_TX,
-        ERR_MAXIMUM,
-        ERR_MN_LIST,
-        ERR_MODE,
-        ERR_NON_STANDARD_PUBKEY,
-        ERR_NOT_A_MN, // not used
-        ERR_QUEUE_FULL,
-        ERR_RECENT,
-        ERR_SESSION,
-        ERR_MISSING_TX,
-        ERR_VERSION,
-        MSG_NOERR,
-        MSG_SUCCESS,
-        MSG_ENTRIES_ADDED,
-        MSG_POOL_MIN = ERR_ALREADY_HAVE,
-        MSG_POOL_MAX = MSG_ENTRIES_ADDED
-    };
-
-    // pool states
-    enum PoolState {
-        POOL_STATE_IDLE,
-        POOL_STATE_QUEUE,
-        POOL_STATE_ACCEPTING_ENTRIES,
-        POOL_STATE_SIGNING,
-        POOL_STATE_ERROR,
-        POOL_STATE_SUCCESS,
-        POOL_STATE_MIN = POOL_STATE_IDLE,
-        POOL_STATE_MAX = POOL_STATE_SUCCESS
-    };
-
-    // status update message constants
-    enum PoolStatusUpdate {
-        STATUS_REJECTED,
-        STATUS_ACCEPTED
-    };
-
     // The current mixing sessions in progress on the network
     std::vector<CPrivatesendQueue> vecPrivatesendQueue;
 
@@ -272,39 +288,69 @@ protected:
 
     CMutableTransaction finalMutableTransaction; // the finalized transaction ready for signing
 
-    /// Get the denominations for a specific amount of dash.
-    int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
-
-    std::string GetMessageByID(PoolMessage nMessageID);
-
-    /// Get the maximum number of transactions for the pool
-    int GetMaxPoolTransactions() { return Params().PoolMaxTransactions(); }
-
-    /// If the collateral is valid given by a client
-    bool IsCollateralValid(const CTransaction& txCollateral);
-
     void SetNull();
 
 public:
     int nSessionDenom; //Users must submit an denom matching this
 
-    CPrivateSend() { SetNull(); }
-
-    void InitDenominations();
-
-    /// Get the denominations for a list of outputs (returns a bitshifted integer)
-    int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
-    int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
-    std::string GetDenominationsToString(int nDenom);
-    bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
-
-    CAmount GetMaxPoolAmount() { return vecPrivateSendDenominations.empty() ? 0 : PRIVATESEND_ENTRY_MAX_SIZE * vecPrivateSendDenominations.front(); }
+    CPrivateSendBase() { SetNull(); }
 
     int GetQueueSize() const { return vecPrivatesendQueue.size(); }
     int GetState() const { return nState; }
     std::string GetStateString() const;
 
     int GetEntriesCount() const { return vecEntries.size(); }
+};
+
+// helper class
+class CPrivateSend
+{
+private:
+    // make constructor, destructor and copying not available
+    CPrivateSend() {}
+    ~CPrivateSend() {}
+    CPrivateSend(CPrivateSend const&) = delete;
+    CPrivateSend& operator= (CPrivateSend const&) = delete;
+
+    static const CAmount COLLATERAL = 0.001 * COIN;
+
+    // static members
+    static std::vector<CAmount> vecStandardDenominations;
+    static std::map<uint256, CPrivatesendBroadcastTx> mapPSTX;
+
+    static CCriticalSection cs_mappstx;
+
+public:
+    static void InitStandardDenominations();
+    static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
+    static CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
+
+    /// Get the denominations for a specific amount of dash.
+    static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
+
+    /// Get the denominations for a list of outputs (returns a bitshifted integer)
+    static int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
+    static int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
+    static std::string GetDenominationsToString(int nDenom);
+    static bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
+
+    static std::string GetMessageByID(PoolMessage nMessageID);
+
+    /// Get the maximum number of transactions for the pool
+    static int GetMaxPoolTransactions() { return Params().PoolMaxTransactions(); }
+
+    static CAmount GetMaxPoolAmount() { return vecStandardDenominations.empty() ? 0 : PRIVATESEND_ENTRY_MAX_SIZE * vecStandardDenominations.front(); }
+
+    /// If the collateral is valid given by a client
+    static bool IsCollateralValid(const CTransaction& txCollateral);
+    static CAmount GetCollateralAmount() { return COLLATERAL; }
+    static CAmount GetMaxCollateralAmount() { return COLLATERAL*4; }
+
+    static void AddPSTX(const CPrivatesendBroadcastTx& pstx);
+    static CPrivatesendBroadcastTx GetPSTX(const uint256& hash);
+    static void CheckPSTXes(int nHeight);
+
+    static void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
 };
 
 void ThreadCheckPrivateSend();
