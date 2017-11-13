@@ -1282,7 +1282,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
                 std::shared_ptr<CReserveKey> reservekeyDenom = std::make_shared<CReserveKey>(pwalletMain);
                 reservekeyDenomVec.push_back(reservekeyDenom);
 
-                assert(reservekeyDenom->GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+                assert(reservekeyDenom->GetReservedKey(vchPubKey, true)); // should never fail, as we just unlocked
                 scriptDenom = GetScriptForDestination(vchPubKey.GetID());
 
                 vecSend.push_back((CRecipient){ scriptDenom, nDenomValue, false });
