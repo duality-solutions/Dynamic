@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <vector>
 
 class CNetAddr;
 
