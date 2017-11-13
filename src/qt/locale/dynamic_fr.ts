@@ -3762,8 +3762,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
         <translation>Pairs en liste blanche ne peuvent être bannis pour DoS et leurs transactions sont toujours relayées, même si elles sont déjà en mémoire, utile par ex. pour une passerelle</translation>
     </message>
     <message>
-        <source>(31300 could be used only on mainnet)</source>
-        <translation>(31300 n'est utilisable que sur mainnet)</translation>
+        <source>(32300 could be used only on mainnet)</source>
+        <translation>(32300 n'est utilisable que sur mainnet)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4180,8 +4180,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
         <translation>dynodeprivkey invalide. Veuillez vous référer à la documentation.</translation>
     </message>
     <message>
-        <source>(must be 31300 for mainnet)</source>
-        <translation>(doit être 31300 pour mainnet)</translation>
+        <source>(must be 32300 for mainnet)</source>
+        <translation>(doit être 32300 pour mainnet)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>

@@ -141,7 +141,8 @@ static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
 static const CAmount PHASE_1_POW_REWARD = COIN * 1;
 static const CAmount PHASE_1_DYNODE_PAYMENT = COIN * 0.382;
-static const CAmount PHASE_2_DYNODE_PAYMENT = COIN * 0.618;
+static const CAmount PHASE_2_DYNODE_PAYMENT = COIN * 1.618;
+static const CAmount INITIAL_SUPERBLOCK_PAYMENT = 10000000 * COIN;
 
 struct BlockHasher
 {
@@ -261,7 +262,7 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 
-CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees);
+CAmount GetPoWBlockPayment(const int& nHeight);
 CAmount GetDynodePayment(bool fDynode = true);
 
 /**
@@ -756,7 +757,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
 /** Context-dependent validity checks */
-bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex *pindexPrev);
+bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev, int64_t nAdjustedTime);
 bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIndex *pindexPrev);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */

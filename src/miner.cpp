@@ -400,8 +400,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
         }
 
-
-        CAmount blockReward = GetPoWBlockPayment(nHeight, nFees);
+        CAmount blockReward = GetPoWBlockPayment(nHeight); // Burn transaction fees
 
         // Compute regular coinbase transaction.
         txNew.vout[0].nValue = blockReward;
@@ -415,7 +414,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
+        LogPrintf("CreateNewBlock(): total size %u txs: %u fees burned: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
 
         // Update block coinbase
         pblock->vtx[0] = txNew;

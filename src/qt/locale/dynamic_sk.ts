@@ -3757,8 +3757,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Uzle na zoznam povolených nemôžu byť DoS zakázané a ich transakcie vždy postúpené ďalej, aj v prípade, ak sú už pamäťovej fronte. Užitočné napr. pre brány</translation>
     </message>
     <message>
-        <source>(31300 could be used only on mainnet)</source>
-        <translation>(31300 nemôže byť použité pre hlavnú sieť)</translation>
+        <source>(32300 could be used only on mainnet)</source>
+        <translation>(32300 nemôže byť použité pre hlavnú sieť)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4175,8 +4175,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Neplatný dynodeprivkey. Prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
-        <source>(must be 31300 for mainnet)</source>
-        <translation>(pre hlavnú sieť musí byť 31300)</translation>
+        <source>(must be 32300 for mainnet)</source>
+        <translation>(pre hlavnú sieť musí byť 32300)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>

@@ -272,6 +272,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Network",            "setban",                 &setban,                 true  },
     { "Network",            "listbanned",             &listbanned,             true  },
     { "Network",            "clearbanned",            &clearbanned,            true  },
+    { "Network",            "ntptime",                &ntptime,                true  },
 
     /* Block chain and UTXO */
     { "Blockchain",         "getblockchaininfo",      &getblockchaininfo,      true  },
@@ -394,6 +395,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Wallet",             "listunspent",            &listunspent,            false },
     { "Wallet",             "lockunspent",            &lockunspent,            true  },
     { "Wallet",             "makekeypair",            &makekeypair,            false },
+    { "Wallet",             "convertrawprivkey",      &convertrawprivkey,      false },
     { "Wallet",             "move",                   &movecmd,                false },
     { "Wallet",             "sendfrom",               &sendfrom,               false },
     { "Wallet",             "sendmany",               &sendmany,               false },

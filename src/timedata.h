@@ -9,8 +9,7 @@
 #define DYNAMIC_TIMEDATA_H
 
 #include <algorithm>
-#include <assert.h>
-#include <stdint.h>
+#include <cassert>
 #include <vector>
 
 class CNetAddr;
@@ -74,6 +73,7 @@ public:
 /** Functions to keep track of adjusted P2P time */
 int64_t GetTimeOffset();
 int64_t GetAdjustedTime();
+int64_t GetNodesOffset();
 void AddTimeData(const CNetAddr& ip, int64_t nTime);
 
 #endif // DYNAMIC_TIMEDATA_H

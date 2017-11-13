@@ -3619,8 +3619,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>在白名单中的节点不会因为检测到DoS攻击而被停用. 来自这些节点的交易也一定会被转发, 即使说交易本神就来自记忆池. 适用于网关</translation>
     </message>
     <message>
-        <source>(31300 could be used only on mainnet)</source>
-        <translation>(31300 只能被用于主网)</translation>
+        <source>(32300 could be used only on mainnet)</source>
+        <translation>(32300 只能被用于主网)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -3963,8 +3963,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>无效主节点私钥。请查阅文件材料。</translation>
     </message>
     <message>
-        <source>(must be 31300 for mainnet)</source>
-        <translation>(设置 31300 为主网)</translation>
+        <source>(must be 32300 for mainnet)</source>
+        <translation>(设置 32300 为主网)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>

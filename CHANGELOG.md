@@ -1,3 +1,7 @@
+**Dynamic v1.5.0.0**
+* Fix Network Time Protocol (NTP)
+
+
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values

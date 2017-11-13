@@ -3763,8 +3763,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de Dynamic" admin@foo.com
         <translation>Los pares de la lista blanca no pueden ser excluidos por DoS y sus transacciones siempre se transmitirán, incluso si ya se encuentran en el grupo de memoria, útil e.g. para una pasarela</translation>
     </message>
     <message>
-        <source>(31300 could be used only on mainnet)</source>
-        <translation>(31300 sólo se puede usar en la red principal)</translation>
+        <source>(32300 could be used only on mainnet)</source>
+        <translation>(32300 sólo se puede usar en la red principal)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4181,8 +4181,8 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de Dynamic" admin@foo.com
         <translation>La clave prinvada del nodo maestro no es válida. Por favor, consulte la  documentación.</translation>
     </message>
     <message>
-        <source>(must be 31300 for mainnet)</source>
-        <translation>(debe ser 31300 para la red principal)</translation>
+        <source>(must be 32300 for mainnet)</source>
+        <translation>(debe ser 32300 para la red principal)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>

@@ -186,20 +186,31 @@ void CActiveDynode::ManageStateInitial()
     }
     
     int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    
+    int testnetDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
+    int regTestnetDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u - only 31300 is supported on mainnet.", service.GetPort());
+            strNotCapableReason = strprintf("Invalid port: %u - only %u is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
             LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
             return;
         }
     }
 
-    if(Params().NetworkIDString() != CBaseChainParams::MAIN) {
-        if(service.GetPort() == mainnetDefaultPort) {
+    if(Params().NetworkIDString() != CBaseChainParams::TESTNET) {
+        if(service.GetPort() == testnetDefaultPort) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u - 31300 is only supported on mainnet.", service.GetPort());
+            strNotCapableReason = strprintf("Invalid port: %u -  only %u is supported on testnnet.", service.GetPort(), testnetDefaultPort);
+            LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
+            return;
+        }
+    }
+
+    if(Params().NetworkIDString() != CBaseChainParams::REGTEST) {
+        if(service.GetPort() == regTestnetDefaultPort) {
+            nState = ACTIVE_DYNODE_NOT_CAPABLE;
+            strNotCapableReason = strprintf("Invalid port: %u -  only %u is supported on regtestnnet.", service.GetPort(), regTestnetDefaultPort);
             LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
             return;
         }

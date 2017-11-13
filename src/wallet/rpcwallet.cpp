@@ -2688,9 +2688,43 @@ UniValue makekeypair(const UniValue& params, bool fHelp)
         return NullUniValue;
 
     CPrivKey vchPrivKey = key.GetPrivKey();
+    CKeyID keyID = key.GetPubKey().GetID();
+    CKey vchSecret = CKey();
+    vchSecret.SetPrivKey(vchPrivKey, false);
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
+    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
+    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
     return result;
 }
 
+UniValue convertrawprivkey(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw std::runtime_error(
+            "convertrawprivkey [private key]\n"
+            "Converts private key to base58 encoded wallet private key.\n");
+
+    std::string strPrivKey = params[0].get_str();
+    CPrivKey vecPrivateKey;
+    for (unsigned i = 0, uchr ; i < strPrivKey.length() ; i += 2) {
+        sscanf( strPrivKey.c_str()+ i, "%2x", &uchr ); // conversion
+        vecPrivateKey.push_back(uchr);
+      }
+
+    CKey vchSecret = CKey();
+    vchSecret.SetPrivKey(vecPrivateKey, false);
+
+    UniValue result(UniValue::VOBJ);
+    if (vchSecret.IsValid())
+    {
+        result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
+    }
+    else
+    {
+        result.push_back(Pair("WalletPrivateKey", "Could not convert private key.  Invalid."));
+    }
+    
+    return result;
+}
