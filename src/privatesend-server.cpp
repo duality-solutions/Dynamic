@@ -358,7 +358,7 @@ void CPrivateSendServer::CommitFinalTransaction()
     LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING PSTX\n");
 
     // create and sign dynode pstx transaction
-    if(CPrivateSend::GetPSTX(hashTx)) {
+    if(!CPrivateSend::GetPSTX(hashTx)) {
         CPrivatesendBroadcastTx pstxNew(finalTransaction, activeDynode.vin, GetAdjustedTime());
         pstxNew.Sign();
         CPrivateSend::AddPSTX(pstxNew);
