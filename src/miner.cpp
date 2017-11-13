@@ -14,6 +14,7 @@
 #include "consensus/consensus.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
+#include "governance-classes.h"
 #include "hash.h"
 #include "main.h"
 #include "consensus/merkle.h"
@@ -248,7 +249,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     CAmount nFees = 0;
 
     {
-        LOCK2(cs_main, mempool.cs);
+        LOCK2(cs_main, governance.cs);
+        LOCK(mempool.cs);
         CBlockIndex* pindexPrev = chainActive.Tip();
         const int nHeight = pindexPrev->nHeight + 1;
         pblock->nTime = GetAdjustedTime();
