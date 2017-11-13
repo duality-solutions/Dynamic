@@ -148,7 +148,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         CService addr = CService(strAddress);
 
-        CNode *pnode = ConnectNode((CAddress)addr, NULL);
+        CNode *pnode = ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
         if(!pnode)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Dynode %s", strAddress));
 

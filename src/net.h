@@ -69,6 +69,8 @@ static const bool DEFAULT_FORCEDNSSEED = false;
 static const size_t DEFAULT_MAXRECEIVEBUFFER = 5 * 1000;
 static const size_t DEFAULT_MAXSENDBUFFER    = 1 * 1000;
 
+static const ServiceFlags REQUIRED_SERVICES = NODE_NETWORK;
+
 // This seems like a bit too much adjusting
 enum threadId {
     THREAD_NTP,
@@ -159,7 +161,7 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer = nullptr);
 
 extern bool fDiscover;
 extern bool fListen;
-extern uint64_t nLocalServices;
+extern ServiceFlags nLocalServices;
 extern uint64_t nLocalHostNonce;
 extern CAddrMan addrman;
 
@@ -195,7 +197,7 @@ class CNodeStats
 {
 public:
     NodeId nodeid;
-    uint64_t nServices;
+    ServiceFlags nServices;
     bool fRelayTxes;
     int64_t nLastSend;
     int64_t nLastRecv;
@@ -325,7 +327,8 @@ class CNode
 {
 public:
     // socket
-    uint64_t nServices;
+    ServiceFlags nServices;
+    ServiceFlags nServicesExpected;
     SOCKET hSocket;
     CDataStream ssSend;
     size_t nSendSize; // total size of all vSendMsg entries

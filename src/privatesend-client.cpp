@@ -864,7 +864,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to Dynode from queue, addr=%s\n", infoDn.addr.ToString());
         // connect to Dynode and submit the queue request
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode((CAddress)infoDn.addr, NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
         if(pnode) {
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
@@ -937,7 +937,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Dynode %s\n", nTries, infoDn.addr.ToString());
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode((CAddress)infoDn.addr, NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
         if(pnode) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoDn.addr.ToString());
             infoMixingDynode = infoDn;

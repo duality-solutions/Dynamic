@@ -818,7 +818,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         if (CheckDnbAndUpdateDynodeList(pfrom, dnb, nDos)) {
                 // use announced Dynode as a peer
-                addrman.Add(CAddress(dnb.addr), pfrom->addr, 2*60*60);
+            addrman.Add(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
                 Misbehaving(pfrom->GetId(), nDos);
         }
@@ -1019,7 +1019,7 @@ void CDynodeMan::DoFullVerificationStep()
         }
         LogPrint("Dynode", "CDynodeMan::DoFullVerificationStep -- Verifying Dynode %s rank %d/%d address %s\n",
                     it->second.vin.prevout.ToStringShort(), it->first, nRanksTotal, it->second.addr.ToString());
-        if(SendVerifyRequest((CAddress)it->second.addr, vSortedByAddr)) {
+        if(SendVerifyRequest(CAddress(it->second.addr, NODE_NETWORK), vSortedByAddr)) {
             nCount++;
             if(nCount >= MAX_POSE_CONNECTIONS) break;
         }
@@ -1211,7 +1211,7 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         std::vector<CDynode>::iterator it = vDynodes.begin();
         std::string strMessage1 = strprintf("%s%d%s", pnode->addr.ToString(false), dnv.nonce, blockHash.ToString());
         while(it != vDynodes.end()) {
-            if((CAddress)it->addr == pnode->addr) {
+            if(CAddress(it->addr, NODE_NETWORK) == pnode->addr) {
                 if(CMessageSigner::VerifyMessage(it->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
                     // found it!
                     prealDynode = &(*it);
