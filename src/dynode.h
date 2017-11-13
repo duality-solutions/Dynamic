@@ -108,7 +108,7 @@ struct dynode_info_t
           pubKeyCollateralAddress(),
           pubKeyDynode(),
           sigTime(0),
-          nLastSsq(0),
+          nLastPsq(0),
           nTimeLastChecked(0),
           nTimeLastPaid(0),
           nTimeLastWatchdogVote(0),
@@ -123,7 +123,7 @@ struct dynode_info_t
     CPubKey pubKeyCollateralAddress;
     CPubKey pubKeyDynode;
     int64_t sigTime; //dnb message time
-    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
+    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
@@ -162,7 +162,7 @@ public:
     CDynodePing lastPing;
     std::vector<unsigned char> vchSig;
     int64_t sigTime; //dnb message time
-    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
+    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
@@ -195,7 +195,7 @@ public:
         READWRITE(lastPing);
         READWRITE(vchSig);
         READWRITE(sigTime);
-        READWRITE(nLastSsq);
+        READWRITE(nLastPsq);
         READWRITE(nTimeLastChecked);
         READWRITE(nTimeLastPaid);
         READWRITE(nTimeLastWatchdogVote);
@@ -224,7 +224,7 @@ public:
         swap(first.lastPing, second.lastPing);
         swap(first.vchSig, second.vchSig);
         swap(first.sigTime, second.sigTime);
-        swap(first.nLastSsq, second.nLastSsq);
+        swap(first.nLastPsq, second.nLastPsq);
         swap(first.nTimeLastChecked, second.nTimeLastChecked);
         swap(first.nTimeLastPaid, second.nTimeLastPaid);
         swap(first.nTimeLastWatchdogVote, second.nTimeLastWatchdogVote);

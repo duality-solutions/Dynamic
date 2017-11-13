@@ -25,7 +25,7 @@ CDynode::CDynode() :
     lastPing(),
     vchSig(),
     sigTime(GetAdjustedTime()),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(0),
@@ -47,7 +47,7 @@ CDynode::CDynode(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddress
     lastPing(),
     vchSig(),
     sigTime(GetAdjustedTime()),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(0),
@@ -69,7 +69,7 @@ CDynode::CDynode(const CDynode& other) :
     lastPing(other.lastPing),
     vchSig(other.vchSig),
     sigTime(other.sigTime),
-    nLastSsq(other.nLastSsq),
+    nLastPsq(other.nLastPsq),
     nTimeLastChecked(other.nTimeLastChecked),
     nTimeLastPaid(other.nTimeLastPaid),
     nTimeLastWatchdogVote(other.nTimeLastWatchdogVote),
@@ -91,7 +91,7 @@ CDynode::CDynode(const CDynodeBroadcast& dnb) :
     lastPing(dnb.lastPing),
     vchSig(dnb.vchSig),
     sigTime(dnb.sigTime),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(dnb.sigTime),
@@ -306,7 +306,7 @@ dynode_info_t CDynode::GetInfo()
     info.pubKeyCollateralAddress = pubKeyCollateralAddress;
     info.pubKeyDynode = pubKeyDynode;
     info.sigTime = sigTime;
-    info.nLastSsq = nLastSsq;
+    info.nLastPsq = nLastPsq;
     info.nTimeLastChecked = nTimeLastChecked;
     info.nTimeLastPaid = nTimeLastPaid;
     info.nTimeLastWatchdogVote = nTimeLastWatchdogVote;

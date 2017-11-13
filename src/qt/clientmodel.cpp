@@ -22,7 +22,7 @@
 
 #include "dynodeman.h"
 #include "dynode-sync.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 
 #include <stdint.h>
 

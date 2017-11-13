@@ -10,7 +10,8 @@
 #include "dynodeman.h"
 #include "init.h"
 #include "main.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
+#include "privatesend-server.h"
 #include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -44,18 +45,18 @@ UniValue privatesend(const UniValue& params, bool fHelp)
         if(fDyNode)
             return "Mixing is not supported from Dynodes";
 
-        fEnablePrivateSend = true;
-        bool result = privateSendPool.DoAutomaticDenominating();
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendPool.GetStatus() + ", will retry"));
+        privateSendClient.fEnablePrivateSend = true;
+        bool result = privateSendClient.DoAutomaticDenominating();
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
     }
 
     if(params[0].get_str() == "stop") {
-        fEnablePrivateSend = false;
+        privateSendClient.fEnablePrivateSend = false;
         return "Mixing was stopped";
     }
 
     if(params[0].get_str() == "reset") {
-        privateSendPool.ResetPool();
+        privateSendClient.ResetPool();
         return "Mixing was reset";
     }
 
@@ -69,16 +70,18 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "getpoolinfo\n"
             "Returns an object containing mixing pool related information.\n");
 
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             privateSendPool.GetStateString()));
-    obj.push_back(Pair("mixing_mode",       fPrivateSendMultiSession ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             privateSendPool.GetQueueSize()));
-    obj.push_back(Pair("entries",           privateSendPool.GetEntriesCount()));
-    obj.push_back(Pair("status",            privateSendPool.GetStatus()));
+    CPrivateSend privateSend = fDyNode ? (CPrivateSend)privateSendServer : (CPrivateSend)privateSendClient;
 
-    if (privateSendPool.pSubmittedToDynode) {
-        obj.push_back(Pair("outpoint",      privateSendPool.pSubmittedToDynode->vin.prevout.ToStringShort()));
-        obj.push_back(Pair("addr",          privateSendPool.pSubmittedToDynode->addr.ToString()));
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("state",             privateSend.GetStateString()));
+    obj.push_back(Pair("mixing_mode",       (!fDyNode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
+    obj.push_back(Pair("queue",             privateSend.GetQueueSize()));
+    obj.push_back(Pair("entries",           privateSend.GetEntriesCount()));
+    obj.push_back(Pair("status",            privateSendClient.GetStatus()));
+
+    if (privateSendClient.infoMixingDynode.fInfoValid) {
+        obj.push_back(Pair("outpoint",      privateSendClient.infoMixingDynode.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          privateSendClient.infoMixingDynode.addr.ToString()));
     }
 
     if (pwalletMain) {
@@ -715,7 +718,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
                 resultObj.push_back(Pair("vchSig", EncodeBase64(&dnb.vchSig[0], dnb.vchSig.size())));
                 resultObj.push_back(Pair("sigTime", dnb.sigTime));
                 resultObj.push_back(Pair("protocolVersion", dnb.nProtocolVersion));
-                resultObj.push_back(Pair("nLastSsq", dnb.nLastSsq));
+                resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
                 lastPingObj.push_back(Pair("vin", dnb.lastPing.vin.ToString()));

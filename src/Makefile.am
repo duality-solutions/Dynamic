@@ -144,9 +144,10 @@ DYNAMIC_CORE_H = \
   prevector.h \
   primitives/block.h \
   primitives/transaction.h \
+  privatesend-client.h \
   privatesend.h \
+  privatesend-server.h \    
   psnotificationinterface.h \
-  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -234,6 +235,8 @@ libdynamic_server_a_SOURCES = \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
+  privatesend.cpp \
+  privatesend-server.cpp \
   rest.cpp \
   rpcblockchain.cpp \
   rpcdynode.cpp \
@@ -280,8 +283,7 @@ libdynamic_wallet_a_SOURCES = \
   instantsend.cpp \
   keepass.cpp \
   policy/rbf.cpp \
-  privatesend.cpp \
-  privatesend-relay.cpp \
+  privatesend-client.cpp \
   psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \

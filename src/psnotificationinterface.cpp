@@ -10,7 +10,7 @@
 #include "dynode-sync.h"
 #include "governance.h"
 #include "instantsend.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 
 CPSNotificationInterface::CPSNotificationInterface()
 {
@@ -23,7 +23,7 @@ CPSNotificationInterface::~CPSNotificationInterface()
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
 {
     dnodeman.UpdatedBlockTip(pindex);
-    privateSendPool.UpdatedBlockTip(pindex);
+    privateSendClient.UpdatedBlockTip(pindex);
     instantsend.UpdatedBlockTip(pindex);
     dnpayments.UpdatedBlockTip(pindex);
     governance.UpdatedBlockTip(pindex);

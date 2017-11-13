@@ -21,7 +21,7 @@
 #include "base58.h"
 #include "coincontrol.h"
 #include "main.h" // mempool and minRelayTxFee
-#include "privatesend.h"
+#include "privatesend-client.h"
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "wallet/wallet.h"

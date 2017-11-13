@@ -130,7 +130,7 @@ Asks users to sign final mixing tx message.
 | ---------- | ----------- | --------- | -------- |
 | 4 | nDenom | int | Which denomination is allowed in this mixing session
 | 41 | vin | CTxIn | unspend output from Dynode which is hosting this session
-| 4 | nTime | int | the time this SSQ was created
+| 4 | nTime | int | the time this PSQ was created
 | 4 | fReady | int | if the mixing pool is ready to be executed
 | 71-73 | vchSig | char[] | Signature of this message by Dynode (verifiable via pubKeyDynode)
 

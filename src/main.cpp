@@ -28,7 +28,8 @@
 #include "consensus/params.h"
 #include "policy/policy.h"
 #include "pow.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
+#include "privatesend-server.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "script/script.h"
@@ -6522,7 +6523,8 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
         if (found)
         {
             //probably one the extensions
-            privateSendPool.ProcessMessage(pfrom, strCommand, vRecv);
+            privateSendClient.ProcessMessage(pfrom, strCommand, vRecv);
+            privateSendServer.ProcessMessage(pfrom, strCommand, vRecv);
             dnodeman.ProcessMessage(pfrom, strCommand, vRecv);
             dnpayments.ProcessMessage(pfrom, strCommand, vRecv);
             instantsend.ProcessMessage(pfrom, strCommand, vRecv);

@@ -12,7 +12,7 @@
 #include "dynode-sync.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 #include "util.h"
 
 /** Dynode manager */
@@ -119,7 +119,7 @@ CDynodeMan::CDynodeMan()
   nLastWatchdogVoteTime(0),
   mapSeenDynodeBroadcast(),
   mapSeenDynodePing(),
-  nSsqCount(0)
+  nPsqCount(0)
 {}
 
 bool CDynodeMan::Add(CDynode &dn)
@@ -371,7 +371,7 @@ void CDynodeMan::Clear()
     mWeAskedForDynodeListEntry.clear();
     mapSeenDynodeBroadcast.clear();
     mapSeenDynodePing.clear();
-    nSsqCount = 0;
+    nPsqCount = 0;
     nLastWatchdogVoteTime = 0;
     indexDynodes.Clear();
     indexDynodesOld.Clear();
@@ -610,7 +610,7 @@ CDynode* CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilt
     return pBestDynode;
 }
 
-CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion)
+dynode_info_t CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion)
 {
     LOCK(cs);
 
@@ -620,7 +620,7 @@ CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, 
     int nCountNotExcluded = nCountEnabled - vecToExclude.size();
 
     LogPrintf("CDynodeMan::FindRandomNotInVec -- %d enabled Dynodes, %d Dynodes to choose from\n", nCountEnabled, nCountNotExcluded);
-    if(nCountNotExcluded < 1) return NULL;
+    if(nCountNotExcluded < 1) return dynode_info_t();
 
     // fill a vector of pointers
     std::vector<CDynode*> vpDynodesShuffled;
@@ -647,11 +647,11 @@ CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, 
         if(fExclude) continue;
         // found the one not in vecToExclude
         LogPrint("Dynode", "CDynodeMan::FindRandomNotInVec -- found, Dynode=%s\n", pdn->vin.prevout.ToStringShort());
-        return pdn;
+        return pdn->GetInfo();
     }
 
     LogPrint("Dynode", "CDynodeMan::FindRandomNotInVec -- failed\n");
-    return NULL;
+    return dynode_info_t();
 }
 
 int CDynodeMan::GetDynodeRank(const CTxIn& vin, int nBlockHeight, int nMinProtocol, bool fOnlyActive)
@@ -765,7 +765,7 @@ void CDynodeMan::ProcessDynodeConnections()
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes) {
         if(pnode->fDynode) {
-            if(privateSendPool.pSubmittedToDynode != NULL && pnode->addr == privateSendPool.pSubmittedToDynode->addr) continue;
+            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr) continue;
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
@@ -1373,7 +1373,7 @@ std::string CDynodeMan::ToString() const
             ", peers we asked for Dynode list: " << (int)mWeAskedForDynodeList.size() <<
             ", entries in Dynode list we asked for: " << (int)mWeAskedForDynodeListEntry.size() <<
             ", dynode index size: " << indexDynodes.GetSize() <<
-            ", nSsqCount: " << (int)nSsqCount;
+            ", nPsqCount: " << (int)nPsqCount;
 
     return info.str();
 }
@@ -1510,6 +1510,18 @@ void CDynodeMan::UpdateLastPaid()
 
     // every time is like the first time if winners list is not synced
     IsFirstRun = !dynodeSync.IsWinnersListSynced();
+}
+
+bool CDynodeMan::UpdateLastPsq(const CTxIn& vin)
+{
+    dynode_info_t info;
+    LOCK(cs);
+    CDynode* pDN = Find(vin);
+    if(!pDN)
+        return false;
+    pDN->nLastPsq = nPsqCount;
+    pDN->fAllowMixingTx = true;
+    return true;
 }
 
 void CDynodeMan::CheckAndRebuildDynodeIndex()

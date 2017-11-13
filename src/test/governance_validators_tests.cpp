@@ -84,15 +84,3 @@ BOOST_AUTO_TEST_CASE(invalid_proposals_test)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-© 2017 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-API
-Training
-Shop
-Blog
-About
