@@ -3433,9 +3433,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     txNew.vin.push_back(txin);
                 }
 
-                // BIP69 https://github.com/kristovatlas/bips/blob/master/bip-0069.mediawiki
-                sort(txNew.vin.begin(), txNew.vin.end());
-                sort(txNew.vout.begin(), txNew.vout.end());
+                sort(txNew.vin.begin(), txNew.vin.end(), CompareInputBIP69());
+                sort(txNew.vout.begin(), txNew.vout.end(), CompareOutputBIP69());
 
                 // If there was change output added before, we must update its position now
                 if (nChangePosRet != -1) {
