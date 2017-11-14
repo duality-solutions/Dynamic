@@ -113,6 +113,9 @@ bool CActiveDynode::SendDynodePing()
     }
 
     CDynodePing dnp(vin);
+    dnp.nSentinelVersion = nSentinelVersion;
+    dnp.fSentinelIsCurrent =
+            (abs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
     if(!dnp.Sign(keyDynode, pubKeyDynode)) {
         LogPrintf("CActiveDynode::SendDynodePing -- ERROR: Couldn't sign Dynode Ping\n");
         return false;
@@ -128,6 +131,14 @@ bool CActiveDynode::SendDynodePing()
 
     LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", vin.ToString());
     dnp.Relay();
+
+    return true;
+}
+
+bool CActiveDynode::UpdateSentinelPing(int version)
+{
+    nSentinelVersion = version;
+    nSentinelPingTime = GetAdjustedTime();
 
     return true;
 }
@@ -218,7 +229,7 @@ void CActiveDynode::ManageStateInitial()
 
     LogPrintf("CActiveDynode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
-    if(!ConnectNode((CAddress)service, NULL, true)) {
+    if(!ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = "Could not connect to " + service.ToString();
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);

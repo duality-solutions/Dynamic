@@ -13,7 +13,7 @@ script:
 
 deploy:
   provider: releases
-  file: "darksilk-qt"
+  file: "dynamic-qt"
   skip_cleanup: true
   on:
     tags: true

@@ -418,13 +418,15 @@ void CGovernanceObject::UpdateLocalValidity()
 bool CGovernanceObject::IsValidLocally(std::string& strError, bool fCheckCollateral)
 {
     bool fMissingDynode = false;
+    bool fMissingConfirmations = false;
 
-    return IsValidLocally(strError, fMissingDynode, fCheckCollateral);
+    return IsValidLocally(strError, fMissingDynode, fMissingConfirmations, fCheckCollateral);
 }
 
-bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral)
+bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDynode, bool& fMissingConfirmations, bool fCheckCollateral)
 {
     fMissingDynode = false;
+    fMissingConfirmations = false;
 
     if(fUnparsable) {
         strError = "Object data unparseable";
@@ -463,11 +465,8 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             return true;
         }
 
-        if(!IsCollateralValid(strError)) {
-            // strError set in IsCollateralValid
-            if(strError == "") strError = "Collateral is invalid";
+        if (!IsCollateralValid(strError, fMissingConfirmations))
             return false;
-        }
     }
 
     return true;
@@ -484,9 +483,10 @@ CAmount CGovernanceObject::GetMinCollateralFee()
     }
 }
 
-bool CGovernanceObject::IsCollateralValid(std::string& strError)
+bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingConfirmations)
 {
     strError = "";
+    fMissingConfirmations = false;
     CAmount nMinFee = GetMinCollateralFee();
     uint256 nExpectedHash = GetHash();
 
@@ -512,7 +512,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
     CScript findScript;
     findScript << OP_RETURN << ToByteVector(nExpectedHash);
 
-    DBG( cout << "IsCollateralValid txCollateral.vout.size() = " << txCollateral.vout.size() << endl; );
+    DBG( cout << "IsCollateralValid: txCollateral.vout.size() = " << txCollateral.vout.size() << endl; );
 
     DBG( cout << "IsCollateralValid: findScript = " << ScriptToAsmStr( findScript, false ) << endl; );
 
@@ -560,14 +560,19 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
         }
     }
 
-    if(nConfirmationsIn >= GOVERNANCE_FEE_CONFIRMATIONS) {
-        strError = "valid";
-    } else {
-        strError = strprintf("Collateral requires at least %d confirmations - %d confirmations", GOVERNANCE_FEE_CONFIRMATIONS, nConfirmationsIn);
-        LogPrintf ("CGovernanceObject::IsCollateralValid -- %s - %d confirmations\n", strError, nConfirmationsIn);
+    if(nConfirmationsIn < GOVERNANCE_FEE_CONFIRMATIONS) {
+        strError = strprintf("Collateral requires at least %d confirmations to be relayed throughout the network (it has only %d)", GOVERNANCE_FEE_CONFIRMATIONS, nConfirmationsIn);
+        if (nConfirmationsIn >= GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS) {
+            fMissingConfirmations = true;
+            strError += ", pre-accepted -- waiting for required confirmations";
+        } else {
+            strError += ", rejected -- try again later";
+        }
+        LogPrintf ("CGovernanceObject::IsCollateralValid -- %s\n", strError);
         return false;
     }
 
+    strError = "valid";
     return true;
 }
 

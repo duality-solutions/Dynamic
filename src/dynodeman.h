@@ -161,7 +161,7 @@ public:
     // Keep track of all verifications I've seen
     std::map<uint256, CDynodeVerification> mapSeenDynodeVerification;
     // keep track of psq count to prevent Dynodes from gaming privatesend queue
-    int64_t nSsqCount;
+    int64_t nPsqCount;
 
 
     ADD_SERIALIZE_METHODS;
@@ -185,7 +185,7 @@ public:
         READWRITE(mDnbRecoveryRequests);
         READWRITE(mDnbRecoveryGoodReplies);
         READWRITE(nLastWatchdogVoteTime);
-        READWRITE(nSsqCount);
+        READWRITE(nPsqCount);
 
         READWRITE(mapSeenDynodeBroadcast);
         READWRITE(mapSeenDynodePing);
@@ -289,7 +289,7 @@ public:
     CDynode* GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCount);
 
     /// Find a random entry
-    CDynode* FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion = -1);
+    dynode_info_t FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion = -1);
 
     std::vector<CDynode> GetFullDynodeVector() { return vDynodes; }
 
@@ -321,6 +321,7 @@ public:
     bool IsDnbRecoveryRequested(const uint256& hash) { return mDnbRecoveryRequests.count(hash); }
 
     void UpdateLastPaid();
+    bool UpdateLastPsq(const CTxIn& vin);
 
     void CheckAndRebuildDynodeIndex();
 

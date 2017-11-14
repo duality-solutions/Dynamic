@@ -28,6 +28,10 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 //
 // The Dynode Ping Class : Contains a different serialize method for sending pings from Dynodes throughout the network
 //
+
+// sentinel version before sentinel ping implementation
+#define DEFAULT_SENTINEL_VERSION 0x010001
+
 class CDynodePing
 {
 public:
@@ -35,13 +39,17 @@ public:
     uint256 blockHash;
     int64_t sigTime; //dnb message times
     std::vector<unsigned char> vchSig;
+    bool fSentinelIsCurrent; // true if last sentinel ping was actual
+    uint32_t nSentinelVersion; // MSB is always 0, other 3 bits corresponds to x.x.x version scheme
     //removed stop
 
     CDynodePing() :
         vin(),
         blockHash(),
         sigTime(0),
-        vchSig()
+        vchSig(),
+        fSentinelIsCurrent(false),
+        nSentinelVersion(DEFAULT_SENTINEL_VERSION)
         {}
 
     CDynodePing(CTxIn& vinNew);
@@ -54,6 +62,14 @@ public:
         READWRITE(blockHash);
         READWRITE(sigTime);
         READWRITE(vchSig);
+        if(ser_action.ForRead() && (s.size() == 0))
+        {
+            fSentinelIsCurrent = false;
+            nSentinelVersion = DEFAULT_SENTINEL_VERSION;
+           return;
+        }
+        READWRITE(fSentinelIsCurrent);
+        READWRITE(nSentinelVersion);
     }
 
     void swap(CDynodePing& first, CDynodePing& second) // nothrow
@@ -67,6 +83,8 @@ public:
         swap(first.blockHash, second.blockHash);
         swap(first.sigTime, second.sigTime);
         swap(first.vchSig, second.vchSig);
+        swap(first.fSentinelIsCurrent, second.fSentinelIsCurrent);
+        swap(first.nSentinelVersion, second.nSentinelVersion);
     }
 
     uint256 GetHash() const
@@ -108,7 +126,7 @@ struct dynode_info_t
           pubKeyCollateralAddress(),
           pubKeyDynode(),
           sigTime(0),
-          nLastSsq(0),
+          nLastPsq(0),
           nTimeLastChecked(0),
           nTimeLastPaid(0),
           nTimeLastWatchdogVote(0),
@@ -123,7 +141,7 @@ struct dynode_info_t
     CPubKey pubKeyCollateralAddress;
     CPubKey pubKeyDynode;
     int64_t sigTime; //dnb message time
-    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
+    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
@@ -162,7 +180,7 @@ public:
     CDynodePing lastPing;
     std::vector<unsigned char> vchSig;
     int64_t sigTime; //dnb message time
-    int64_t nLastSsq; //the psq count from the last psq broadcast of this node
+    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked;
     int64_t nTimeLastPaid;
     int64_t nTimeLastWatchdogVote;
@@ -195,7 +213,7 @@ public:
         READWRITE(lastPing);
         READWRITE(vchSig);
         READWRITE(sigTime);
-        READWRITE(nLastSsq);
+        READWRITE(nLastPsq);
         READWRITE(nTimeLastChecked);
         READWRITE(nTimeLastPaid);
         READWRITE(nTimeLastWatchdogVote);
@@ -224,7 +242,7 @@ public:
         swap(first.lastPing, second.lastPing);
         swap(first.vchSig, second.vchSig);
         swap(first.sigTime, second.sigTime);
-        swap(first.nLastSsq, second.nLastSsq);
+        swap(first.nLastPsq, second.nLastPsq);
         swap(first.nTimeLastChecked, second.nTimeLastChecked);
         swap(first.nTimeLastPaid, second.nTimeLastPaid);
         swap(first.nTimeLastWatchdogVote, second.nTimeLastWatchdogVote);
@@ -315,7 +333,7 @@ public:
 
     void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
 
-    void UpdateWatchdogVoteTime();
+    void UpdateWatchdogVoteTime(uint64_t nVoteTime = 0);
 
     CDynode& operator=(CDynode from)
     {

@@ -12,7 +12,7 @@
 #include "dynode-sync.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 #include "util.h"
 
 /** Dynode manager */
@@ -119,7 +119,7 @@ CDynodeMan::CDynodeMan()
   nLastWatchdogVoteTime(0),
   mapSeenDynodeBroadcast(),
   mapSeenDynodePing(),
-  nSsqCount(0)
+  nPsqCount(0)
 {}
 
 bool CDynodeMan::Add(CDynode &dn)
@@ -371,7 +371,7 @@ void CDynodeMan::Clear()
     mWeAskedForDynodeListEntry.clear();
     mapSeenDynodeBroadcast.clear();
     mapSeenDynodePing.clear();
-    nSsqCount = 0;
+    nPsqCount = 0;
     nLastWatchdogVoteTime = 0;
     indexDynodes.Clear();
     indexDynodesOld.Clear();
@@ -610,7 +610,7 @@ CDynode* CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilt
     return pBestDynode;
 }
 
-CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion)
+dynode_info_t CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion)
 {
     LOCK(cs);
 
@@ -620,7 +620,7 @@ CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, 
     int nCountNotExcluded = nCountEnabled - vecToExclude.size();
 
     LogPrintf("CDynodeMan::FindRandomNotInVec -- %d enabled Dynodes, %d Dynodes to choose from\n", nCountEnabled, nCountNotExcluded);
-    if(nCountNotExcluded < 1) return NULL;
+    if(nCountNotExcluded < 1) return dynode_info_t();
 
     // fill a vector of pointers
     std::vector<CDynode*> vpDynodesShuffled;
@@ -647,11 +647,11 @@ CDynode* CDynodeMan::FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, 
         if(fExclude) continue;
         // found the one not in vecToExclude
         LogPrint("Dynode", "CDynodeMan::FindRandomNotInVec -- found, Dynode=%s\n", pdn->vin.prevout.ToStringShort());
-        return pdn;
+        return pdn->GetInfo();
     }
 
     LogPrint("Dynode", "CDynodeMan::FindRandomNotInVec -- failed\n");
-    return NULL;
+    return dynode_info_t();
 }
 
 int CDynodeMan::GetDynodeRank(const CTxIn& vin, int nBlockHeight, int nMinProtocol, bool fOnlyActive)
@@ -765,7 +765,7 @@ void CDynodeMan::ProcessDynodeConnections()
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes) {
         if(pnode->fDynode) {
-            if(privateSendPool.pSubmittedToDynode != NULL && pnode->addr == privateSendPool.pSubmittedToDynode->addr) continue;
+            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr) continue;
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
@@ -818,7 +818,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         if (CheckDnbAndUpdateDynodeList(pfrom, dnb, nDos)) {
                 // use announced Dynode as a peer
-                addrman.Add(CAddress(dnb.addr), pfrom->addr, 2*60*60);
+            addrman.Add(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
                 Misbehaving(pfrom->GetId(), nDos);
         }
@@ -846,6 +846,12 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         // see if we have this Dynode
         CDynode* pdn = dnodeman.Find(dnp.vin);
+
+        // if dynode uses sentinel ping instead of watchdog
+        // we shoud update nTimeLastWatchdogVote here if sentinel
+        // ping flag is actual
+        if(pdn && dnp.fSentinelIsCurrent)
+            pdn->UpdateWatchdogVoteTime(dnp.sigTime);
 
         // too late, new DNANNOUNCE is required
         if(pdn && pdn->IsNewStartRequired()) return;
@@ -884,14 +890,11 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             int nDnCount = dnodeman.CountDynodes();
             // This is to prevent unnecessary banning of Dynodes whilst the network is in its infancy
             if(!isLocal && Params().NetworkIDString() == CBaseChainParams::MAIN && nDnCount > 200) {
-                std::map<CNetAddr, int64_t>::iterator i = mAskedUsForDynodeList.find(pfrom->addr);
-                if (i != mAskedUsForDynodeList.end()){
-                    int64_t t = (*i).second;
-                    if (GetTime() < t) {
-                        Misbehaving(pfrom->GetId(), 34);
-                        LogPrintf("SSEG -- peer already asked me for the list, peer=%d\n", pfrom->id);
-                        return;
-                    }
+                std::map<CNetAddr, int64_t>::iterator it = mAskedUsForDynodeList.find(pfrom->addr);
+                if (it != mAskedUsForDynodeList.end() && it->second > GetTime()) {
+                    Misbehaving(pfrom->GetId(), 34);
+                    LogPrintf("PSEG -- peer already asked me for the list, peer=%d\n", pfrom->id);
+                    return;
                 }
                 int64_t askAgain = GetTime() + SSEG_UPDATE_SECONDS;
                 mAskedUsForDynodeList[pfrom->addr] = askAgain;
@@ -1016,7 +1019,7 @@ void CDynodeMan::DoFullVerificationStep()
         }
         LogPrint("Dynode", "CDynodeMan::DoFullVerificationStep -- Verifying Dynode %s rank %d/%d address %s\n",
                     it->second.vin.prevout.ToStringShort(), it->first, nRanksTotal, it->second.addr.ToString());
-        if(SendVerifyRequest((CAddress)it->second.addr, vSortedByAddr)) {
+        if(SendVerifyRequest(CAddress(it->second.addr, NODE_NETWORK), vSortedByAddr)) {
             nCount++;
             if(nCount >= MAX_POSE_CONNECTIONS) break;
         }
@@ -1208,7 +1211,7 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         std::vector<CDynode>::iterator it = vDynodes.begin();
         std::string strMessage1 = strprintf("%s%d%s", pnode->addr.ToString(false), dnv.nonce, blockHash.ToString());
         while(it != vDynodes.end()) {
-            if((CAddress)it->addr == pnode->addr) {
+            if(CAddress(it->addr, NODE_NETWORK) == pnode->addr) {
                 if(CMessageSigner::VerifyMessage(it->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
                     // found it!
                     prealDynode = &(*it);
@@ -1373,14 +1376,14 @@ std::string CDynodeMan::ToString() const
             ", peers we asked for Dynode list: " << (int)mWeAskedForDynodeList.size() <<
             ", entries in Dynode list we asked for: " << (int)mWeAskedForDynodeListEntry.size() <<
             ", dynode index size: " << indexDynodes.GetSize() <<
-            ", nSsqCount: " << (int)nSsqCount;
+            ", nPsqCount: " << (int)nPsqCount;
 
     return info.str();
 }
 
 void CDynodeMan::UpdateDynodeList(CDynodeBroadcast dnb)
 {
-    LOCK(cs);
+    LOCK2(cs_main, cs);
     mapSeenDynodePing.insert(std::make_pair(dnb.lastPing.GetHash(), dnb.lastPing));
     mapSeenDynodeBroadcast.insert(std::make_pair(dnb.GetHash(), std::make_pair(GetTime(), dnb)));
 
@@ -1512,6 +1515,18 @@ void CDynodeMan::UpdateLastPaid()
     IsFirstRun = !dynodeSync.IsWinnersListSynced();
 }
 
+bool CDynodeMan::UpdateLastPsq(const CTxIn& vin)
+{
+    dynode_info_t info;
+    LOCK(cs);
+    CDynode* pDN = Find(vin);
+    if(!pDN)
+        return false;
+    pDN->nLastPsq = nPsqCount;
+    pDN->fAllowMixingTx = true;
+    return true;
+}
+
 void CDynodeMan::CheckAndRebuildDynodeIndex()
 {
     LOCK(cs);
@@ -1632,6 +1647,12 @@ void CDynodeMan::SetDynodeLastPing(const CTxIn& vin, const CDynodePing& dnp)
         return;
     }
     pDN->lastPing = dnp;
+    // if dynode uses sentinel ping instead of watchdog
+    // we shoud update nTimeLastWatchdogVote here if sentinel
+    // ping flag is actual
+    if(dnp.fSentinelIsCurrent)
+        pDN->UpdateWatchdogVoteTime(dnp.sigTime);
+
     mapSeenDynodePing.insert(std::make_pair(dnp.GetHash(), dnp));
 
     CDynodeBroadcast dnb(*pDN);

@@ -10,7 +10,7 @@
 #include "dynode-sync.h"
 #include "governance.h"
 #include "instantsend.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 
 CPSNotificationInterface::CPSNotificationInterface()
 {
@@ -20,17 +20,18 @@ CPSNotificationInterface::~CPSNotificationInterface()
 {
 }
 
-void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
+void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
-    dnodeman.UpdatedBlockTip(pindex);
-    privateSendPool.UpdatedBlockTip(pindex);
-    instantsend.UpdatedBlockTip(pindex);
-    dnpayments.UpdatedBlockTip(pindex);
-    governance.UpdatedBlockTip(pindex);
-    dynodeSync.UpdatedBlockTip(pindex);
+    dnodeman.UpdatedBlockTip(pindexNew);
+    privateSendClient.UpdatedBlockTip(pindexNew);
+    instantsend.UpdatedBlockTip(pindexNew);
+    dnpayments.UpdatedBlockTip(pindexNew);
+    governance.UpdatedBlockTip(pindexNew);
+    dynodeSync.UpdatedBlockTip(pindexNew);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
 {
     instantsend.SyncTransaction(tx, pblock);
+    CPrivateSend::SyncTransaction(tx, pblock);
 }

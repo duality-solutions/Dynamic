@@ -25,7 +25,7 @@ CDynode::CDynode() :
     lastPing(),
     vchSig(),
     sigTime(GetAdjustedTime()),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(0),
@@ -47,7 +47,7 @@ CDynode::CDynode(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddress
     lastPing(),
     vchSig(),
     sigTime(GetAdjustedTime()),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(0),
@@ -69,7 +69,7 @@ CDynode::CDynode(const CDynode& other) :
     lastPing(other.lastPing),
     vchSig(other.vchSig),
     sigTime(other.sigTime),
-    nLastSsq(other.nLastSsq),
+    nLastPsq(other.nLastPsq),
     nTimeLastChecked(other.nTimeLastChecked),
     nTimeLastPaid(other.nTimeLastPaid),
     nTimeLastWatchdogVote(other.nTimeLastWatchdogVote),
@@ -91,7 +91,7 @@ CDynode::CDynode(const CDynodeBroadcast& dnb) :
     lastPing(dnb.lastPing),
     vchSig(dnb.vchSig),
     sigTime(dnb.sigTime),
-    nLastSsq(0),
+    nLastPsq(0),
     nTimeLastChecked(0),
     nTimeLastPaid(0),
     nTimeLastWatchdogVote(dnb.sigTime),
@@ -306,7 +306,7 @@ dynode_info_t CDynode::GetInfo()
     info.pubKeyCollateralAddress = pubKeyCollateralAddress;
     info.pubKeyDynode = pubKeyDynode;
     info.sigTime = sigTime;
-    info.nLastSsq = nLastSsq;
+    info.nLastPsq = nLastPsq;
     info.nTimeLastChecked = nTimeLastChecked;
     info.nTimeLastPaid = nTimeLastPaid;
     info.nTimeLastWatchdogVote = nTimeLastWatchdogVote;
@@ -745,7 +745,9 @@ void CDynodeBroadcast::Relay()
     RelayInv(inv);
 }
 
-CDynodePing::CDynodePing(CTxIn& vinNew)
+CDynodePing::CDynodePing(CTxIn& vinNew) :
+    fSentinelIsCurrent(false),
+    nSentinelVersion(DEFAULT_SENTINEL_VERSION)
 {
     LOCK(cs_main);
     if (!chainActive.Tip() || chainActive.Height() < 12) return;
@@ -761,6 +763,7 @@ bool CDynodePing::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
     std::string strError;
     std::string strDyNodeSignMessage;
 
+    // TODO: add sentinel data
     sigTime = GetAdjustedTime();
     std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
@@ -779,6 +782,7 @@ bool CDynodePing::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
 
 bool CDynodePing::CheckSignature(CPubKey& pubKeyDynode, int &nDos)
 {
+    // TODO: add sentinel data
     std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
     std::string strError = "";
     nDos = 0;
@@ -804,7 +808,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     }
 
     {
-        LOCK(cs_main);
+        AssertLockHeld(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(blockHash);
         if (mi == mapBlockIndex.end()) {
             LogPrint("Dynode", "DynodePing::SimpleCheck -- Dynode ping is invalid, unknown block hash: Dynode=%s blockHash=%s\n", vin.prevout.ToStringShort(), blockHash.ToString());
@@ -862,7 +866,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     // (NOTE: assuming that DYNODE_EXPIRATION_SECONDS/2 should be enough to finish dn list sync)
     if(!dynodeSync.IsDynodeListSynced() && !pdn->IsPingedWithin(DYNODE_EXPIRATION_SECONDS/2)) {
         // let's bump sync timeout
-        LogPrint("dynode", "CDynodePing::CheckAndUpdate -- bumping sync timeout, dynode=%s\n", vin.prevout.ToStringShort());
+        LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- bumping sync timeout, dynode=%s\n", vin.prevout.ToStringShort());
         dynodeSync.AddedDynodeList();
     }
 
@@ -910,10 +914,10 @@ void CDynode::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
     mapGovernanceObjectsVotedOn.erase(it);
 }
 
-void CDynode::UpdateWatchdogVoteTime()
+void CDynode::UpdateWatchdogVoteTime(uint64_t nVoteTime)
 {
     LOCK(cs);
-    nTimeLastWatchdogVote = GetTime();
+    nTimeLastWatchdogVote = (nVoteTime == 0) ? GetTime() : nVoteTime;
 }
 
 /**

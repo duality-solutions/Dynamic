@@ -1,7 +1,7 @@
 Protocol Documentation - 1.4.0.0
 =====================================
 
-This document describes the protocol extensions for all additional functionality build into the Dynamic protocol. This doesn't include any of the Bitcoin procotol, which has been left in tact in the Dynamic project. For more information about the core protocol, please see https://en.bitcoin.it/w/index.php?title#Protocol_documentation&action#edit
+This document describes the protocol extensions for all additional functionality build into the Dynamic protocol. This doesn't include any of the Bitcoin protocol, which has been left intact in the Dynamic project. For more information about the core protocol, please see https://en.bitcoin.it/w/index.php?title#Protocol_documentation&action#edit
 
 ## Common Structures
 
@@ -60,10 +60,10 @@ Whenever a Dynode comes online or a client is syncing, they will send this messa
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | 41 | vin | CTxIn | The unspent output which is holding 1000 Dynamic
-| # | addr | CService | Address of the main 1000 Dynamic unspent output
+| # | addr | CService | IPv4 address of the Dynode
 | 33-65 | pubKeyCollateralAddress | CPubKey | CPubKey of the main 1000 Dynamic unspent output
 | 33-65 | pubKeyDynode | CPubKey | CPubKey of the secondary signing key (For all other messaging other than announce message)
-| 71-73 | sig | char[] | Signature of this message
+| 71-73 | sig | char[] | Signature of this message (verifiable via pubKeyCollateralAddress)
 | 8 | sigTime | int64_t | Time which the signature was created
 | 4 | nProtocolVersion | int | The protocol version of the Dynode
 | # | lastPing | CDynodePing | The last known ping of the Dynode
@@ -130,7 +130,7 @@ Asks users to sign final mixing tx message.
 | ---------- | ----------- | --------- | -------- |
 | 4 | nDenom | int | Which denomination is allowed in this mixing session
 | 41 | vin | CTxIn | unspend output from Dynode which is hosting this session
-| 4 | nTime | int | the time this SSQ was created
+| 4 | nTime | int | the time this PSQ was created
 | 4 | fReady | int | if the mixing pool is ready to be executed
 | 71-73 | vchSig | char[] | Signature of this message by Dynode (verifiable via pubKeyDynode)
 
@@ -215,3 +215,72 @@ Dynodes use governance voting in response to new proposals, contracts, settings 
 | 4 | nVoteSignal | int | ???
 | 8 | nTime | int64_t | Time which the vote was created
 | 71-73 | vchSig | char[] | Signature of the Dynode
+
+### SPORK - "spork"
+
+Spork
+
+Spork
+
+| Field Size | Field Name | Data type | Description |
+| ---------- | ----------- | --------- | -------- |
+| 4 | nSporkID | int | 
+| 8 | nValue | int64_t | 
+| 8 | nTimeSigned | int64_t | 
+| 66* | vchSig | char[] | Unclear if 66 is the correct size, but this is what it appears to be in most cases
+
+#### Defined Sporks (per src/sporks.h)
+ 
+| Spork ID | Number | Name | Description | 
+| ---------- | ---------- | ----------- | ----------- |
+| 10001 | 2 | INSTANTSEND_ENABLED | Turns on and off InstantSend network wide
+| 10002 | 3 | INSTANTSEND_BLOCK_FILTERING | Turns on and off InstantSend block filtering
+| 10004 | 5 | INSTANTSEND_MAX_VALUE | Controls the max value for an InstantSend transaction (currently 2000 Dynamic)
+| 10007 | 8 | DYNODE_PAYMENT_ENFORCEMENT | Requires dynodes to be paid by miners when blocks are processed
+| 10008 | 9 | SUPERBLOCKS_ENABLED | Superblocks are enabled (the 10% comes to fund the dynamic treasury)
+| 10009 | 10 | DYNODE_PAY_UPDATED_NODES | Only current protocol version dynode's will be paid (not older nodes)
+| 10011 | 12 | RECONSIDER_BLOCKS |
+| 10012 | 13 | OLD_SUPERBLOCK_FLAG |
+| 10013 | 14 | REQUIRE_SENTINEL_FLAG | Only dynode's running sentinel will be paid 
+
+## Undocumented messages
+
+### DYNODEPAYMENTBLOCK - "dnwb"
+
+Dynode Payment Block
+
+*NOTE: Per src/protocol.cpp, there is no message for this (only inventory)*
+
+### DNVERIFY - "dnv"
+
+Dynode Verify
+
+### PSFINALTX - "psf"
+
+Privatesend Final Transaction
+
+### PSCOMPLETE - "psc"
+
+PrivateSend Complete
+
+### TXLOCKREQUEST - "ix"
+
+Tx Lock Request
+
+### DNGOVERNANCESYNC - "govsync"
+
+Governance Sync
+
+### PSEG - "Pseg"
+
+Dynode List/Entry Sync
+
+Get Dynode list or specific entry
+
+### SYNCSTATUSCOUNT - "ssc"
+
+Sync Status Count
+
+### DYNODEPAYMENTSYNC - "mnget"
+
+Dynode Payment Sync

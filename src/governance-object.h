@@ -25,9 +25,9 @@ class CGovernanceTriggerManager;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
-static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70300;
+static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70500;
 
-static const int GOVERNANCE_FILTER_PROTO_VERSION = 70400;
+static const int GOVERNANCE_FILTER_PROTO_VERSION = 70500;
 static const double GOVERNANCE_FILTER_FP_RATE = 0.001;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
@@ -38,6 +38,7 @@ static const int GOVERNANCE_OBJECT_WATCHDOG = 3;
 static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (20*COIN);
 
 static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 10;
+static const int64_t GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS = 1;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
 static const int64_t GOVERNANCE_DELETION_DELAY = 10*60;
 static const int64_t GOVERNANCE_ORPHAN_EXPIRATION_TIME = 5*60;
@@ -263,10 +264,10 @@ public:
 
     bool IsValidLocally(std::string& strError, bool fCheckCollateral);
 
-    bool IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral);
+    bool IsValidLocally(std::string& strError, bool& fMissingDynode, bool& fMissingConfirmations, bool fCheckCollateral);
 
     /// Check the collateral transaction for the budget proposal/finalized budget
-    bool IsCollateralValid(std::string& strError);
+    bool IsCollateralValid(std::string& strError, bool &fMissingConfirmations);
 
     void UpdateLocalValidity();
 

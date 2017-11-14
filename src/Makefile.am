@@ -113,6 +113,7 @@ DYNAMIC_CORE_H = \
   governance-classes.h \
   governance-exceptions.h \
   governance-object.h \
+  governance-validators.h \
   governance-vote.h \
   governance-votedb.h \
   hash.h \
@@ -143,9 +144,10 @@ DYNAMIC_CORE_H = \
   prevector.h \
   primitives/block.h \
   primitives/transaction.h \
+  privatesend-client.h \
   privatesend.h \
+  privatesend-server.h \    
   psnotificationinterface.h \
-  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -216,6 +218,7 @@ libdynamic_server_a_SOURCES = \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
+  governance-validators.cpp \
   governance-vote.cpp \
   governance-votedb.cpp \
   httprpc.cpp \
@@ -232,6 +235,8 @@ libdynamic_server_a_SOURCES = \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
+  privatesend.cpp \
+  privatesend-server.cpp \
   rest.cpp \
   rpcblockchain.cpp \
   rpcdynode.cpp \
@@ -278,8 +283,7 @@ libdynamic_wallet_a_SOURCES = \
   instantsend.cpp \
   keepass.cpp \
   policy/rbf.cpp \
-  privatesend.cpp \
-  privatesend-relay.cpp \
+  privatesend-client.cpp \
   psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \

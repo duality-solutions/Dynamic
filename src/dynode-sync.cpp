@@ -138,7 +138,6 @@ void CDynodeSync::Reset()
     nTimeLastPaymentVote = GetTime();
     nTimeLastGovernanceItem = GetTime();
     nTimeLastFailure = 0;
-    nCountFailures = 0;
 }
 
 std::string CDynodeSync::GetAssetName()
@@ -361,7 +360,7 @@ void CDynodeSync::ProcessTick()
             if(nRequestedDynodeAssets == DYNODE_SYNC_LIST) {
                 LogPrint("Dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nTimeLastDynodeList %lld GetTime() %lld diff %lld\n", nTick, nRequestedDynodeAssets, nTimeLastDynodeList, GetTime(), GetTime() - nTimeLastDynodeList);
                 // check for timeout first
-                if(nTimeLastDynodeList < GetTime() - DYNODE_SYNC_TIMEOUT_SECONDS) {
+                if(GetTime() - nTimeLastDynodeList > DYNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
                     if (nRequestedDynodeAttempt == 0) {
                         LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
@@ -395,7 +394,7 @@ void CDynodeSync::ProcessTick()
                 // check for timeout first
                 // This might take a lot longer than DYNODE_SYNC_TIMEOUT_SECONDS minutes due to new blocks,
                 // but that should be OK and it should timeout eventually.
-                if(nTimeLastPaymentVote < GetTime() - (DYNODE_SYNC_TIMEOUT_SECONDS)) {
+                if(GetTime() - nTimeLastPaymentVote > DYNODE_SYNC_TIMEOUT_SECONDS) {
                     LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
                     if (nRequestedDynodeAttempt == 0) {
                         LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
