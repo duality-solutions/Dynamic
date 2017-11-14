@@ -62,6 +62,11 @@ void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataSt
         if (pwalletMain)
             LOCK(pwalletMain->cs_wallet);
 #endif
+        LOCK(cs_main);
+#ifdef ENABLE_WALLET
+        if (pwalletMain)
+            LOCK(pwalletMain->cs_wallet);
+#endif
         LOCK(cs_instantsend);
 
         uint256 nVoteHash = vote.GetHash();
@@ -77,8 +82,13 @@ void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataSt
 
 bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest)
 {
-    LOCK2(cs_main, cs_instantsend);
-
+    // cs_main, cs_wallet and cs_instantsend should be already locked
+    AssertLockHeld(cs_main);
+#ifdef ENABLE_WALLET
+    if (pwalletMain)
+        AssertLockHeld(pwalletMain->cs_wallet);
+#endif
+    AssertLockHeld(cs_instantsend);
 
     uint256 txHash = txLockRequest.GetHash();
 
@@ -386,6 +396,11 @@ bool CInstantSend::ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote)
 
 void CInstantSend::ProcessOrphanTxLockVotes()
 {
+    LOCK(cs_main);
+#ifdef ENABLE_WALLET
+    if (pwalletMain)
+        LOCK(pwalletMain->cs_wallet);
+#endif
     LOCK(cs_main);
 #ifdef ENABLE_WALLET
     if (pwalletMain)
