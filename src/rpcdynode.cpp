@@ -456,7 +456,8 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     if (fHelp || (
                 strMode != "activeseconds" && strMode != "addr" && strMode != "full" && strMode != "info" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
-                strMode != "protocol" && strMode != "payee" && strMode != "rank" && strMode != "status"))
+                strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
+                strMode != "rank" && strMode != "status"))
     {
         throw std::runtime_error(
                 "dynodelist ( \"mode\" \"filter\" )\n"
@@ -479,6 +480,7 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 "  payee          - Print Dynamic address associated with a Dynode (can be additionally filtered,\n"
                 "                   partial match)\n"
                 "  protocol       - Print protocol of a Dynode (can be additionally filtered, exact match))\n"
+                "  pubkey         - Print the masternode (not collateral) public key\n"
                 "  rank           - Print rank of a Dynode based on current block\n"
                 "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
@@ -558,6 +560,9 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 if (strFilter !="" && strFilter != strprintf("%d", dn.nProtocolVersion) &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, (int64_t)dn.nProtocolVersion));
+            } else if (strMode == "pubkey") {
+                if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
+                obj.push_back(Pair(strOutpoint, HexStr(mn.pubKeyDynode)));
             } else if (strMode == "status") {
                 std::string strStatus = dn.GetStatus();
                 if (strFilter !="" && strStatus.find(strFilter) == std::string::npos &&
