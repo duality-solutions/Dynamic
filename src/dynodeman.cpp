@@ -1406,88 +1406,92 @@ void CDynodeMan::UpdateDynodeList(CDynodeBroadcast dnb)
 
 bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos)
 {
-    // Need LOCK2 here to ensure consistent locking order because the SimpleCheck call below locks cs_main
-    LOCK2(cs_main, cs);
+    // Need to lock cs_main here to ensure consistent locking order because the SimpleCheck call below locks cs_main
+    LOCK(cs_main);
 
-    nDos = 0;
-    LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Dynode=%s\n", dnb.vin.prevout.ToStringShort());
+    {
+        LOCK(cs);
+        nDos = 0;
+        LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s\n", dnb.vin.prevout.ToStringShort());
 
-    uint256 hash = dnb.GetHash();
-    if(mapSeenDynodeBroadcast.count(hash) && !dnb.fRecovery) { //seen      
-        LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Dynode=%s seen\n", dnb.vin.prevout.ToStringShort());
-        // less then 2 pings left before this DN goes into non-recoverable state, bump sync timeout
-        if(GetTime() - mapSeenDynodeBroadcast[hash].first > DYNODE_NEW_START_REQUIRED_SECONDS - DYNODE_MIN_DNP_SECONDS * 2) {
-            LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Dynode=%s seen update\n", dnb.vin.prevout.ToStringShort());
-            mapSeenDynodeBroadcast[hash].first = GetTime();
-            dynodeSync.AddedDynodeList();
-        }
-        // did we ask this node for it?
-        if(pfrom && IsDnbRecoveryRequested(hash) && GetTime() < mDnbRecoveryRequests[hash].first) {
-            LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request\n", hash.ToString());
-            if(mDnbRecoveryRequests[hash].second.count(pfrom->addr)) {
-                LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s\n", hash.ToString(), pfrom->addr.ToString());
-                // do not allow node to send same dnb multiple times in recovery mode
-                mDnbRecoveryRequests[hash].second.erase(pfrom->addr);
-                // does it have newer lastPing?
-                if(dnb.lastPing.sigTime > mapSeenDynodeBroadcast[hash].second.lastPing.sigTime) {
-                    // simulate Check
-                    CDynode dnTemp = CDynode(dnb);
-                    dnTemp.Check();
-                    LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
-                    if(dnTemp.IsValidStateForAutoStart(dnTemp.nActiveState)) {
-                        // this node thinks it's a good one
-                        LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Dynode=%s seen good\n", dnb.vin.prevout.ToStringShort());
-                        mDnbRecoveryGoodReplies[hash].push_back(dnb);
+        uint256 hash = dnb.GetHash();
+        if(mapSeenDynodeBroadcast.count(hash) && !dnb.fRecovery) { //seen
+            LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen\n", dnb.vin.prevout.ToStringShort());
+            // less then 2 pings left before this DN goes into non-recoverable state, bump sync timeout
+            if(GetTime() - mapSeenDynodeBroadcast[hash].first > DYNODE_NEW_START_REQUIRED_SECONDS - DYNODE_MIN_DNP_SECONDS * 2) {
+                LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen update\n", dnb.vin.prevout.ToStringShort());
+                mapSeenDynodeBroadcast[hash].first = GetTime();
+                dynodeSync.AddedDynodeList();
+            }
+            // did we ask this node for it?
+            if(pfrom && IsDnbRecoveryRequested(hash) && GetTime() < mDnbRecoveryRequests[hash].first) {
+                LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request\n", hash.ToString());
+                if(mDnbRecoveryRequests[hash].second.count(pfrom->addr)) {
+                    LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s\n", hash.ToString(), pfrom->addr.ToString());
+                    // do not allow node to send same dnb multiple times in recovery mode
+                    mDnbRecoveryRequests[hash].second.erase(pfrom->addr);
+                    // does it have newer lastPing?
+                    if(dnb.lastPing.sigTime > mapSeenDynodeBroadcast[hash].second.lastPing.sigTime) {
+                        // simulate Check
+                        CDynode dnTemp = CDynode(dnb);
+                        dnTemp.Check();
+                        LogPrint("dynode", "CDynodeMan::CheckMnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
+                        if(dnTemp.IsValidStateForAutoStart(dnTemp.nActiveState)) {
+                            // this node thinks it's a good one
+                            LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen good\n", dnb.vin.prevout.ToStringShort());
+                            mDnbRecoveryGoodReplies[hash].push_back(dnb);
+
                     }
                 }
             }
         }
         return true;
     }
-    mapSeenDynodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), dnb)));
+        mapSeenDynodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), dnb)));
 
-    LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Dynode=%s new\n", dnb.vin.prevout.ToStringShort());
+        LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s new\n", dnb.vin.prevout.ToStringShort());
 
-    if(!dnb.SimpleCheck(nDos)) {
-        LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- SimpleCheck() failed, Dynode=%s\n", dnb.vin.prevout.ToStringShort());
-        return false;
+        if(!dnb.SimpleCheck(nDos)) {
+            LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- SimpleCheck() failed, dynode=%s\n", dnb.vin.prevout.ToStringShort());
+            return false;
+        }
+        // search Dynode list
+        CDynode* pmn = Find(dnb.vin);
+        if(pmn) {
+            CDynodeBroadcast dnbOld = mapSeenDynodeBroadcast[CDynodeBroadcast(*pmn).GetHash()].second;
+            if(!dnb.Update(pmn, nDos)) {
+                LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Update() failed, dynode=%s\n", dnb.vin.prevout.ToStringShort());
+                return false;
+            }
+            if(hash != dnbOld.GetHash()) {
+                mapSeenDynodeBroadcast.erase(dnbOld.GetHash());
+            }
+            return true;
+        }
     }
 
-    // search Dynode list
-    CDynode* pdn = Find(dnb.vin);
-    if(pdn) {
-        CDynodeBroadcast dnbOld = mapSeenDynodeBroadcast[CDynodeBroadcast(*pdn).GetHash()].second;
-        if(!dnb.Update(pdn, nDos)) {
-            LogPrint("Dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- Update() failed, Dynode=%s\n", dnb.vin.prevout.ToStringShort());
-            return false;
-        }
-        if(hash != dnbOld.GetHash()) {
-            mapSeenDynodeBroadcast.erase(dnbOld.GetHash());
-        }
-    } else {
-        if(dnb.CheckOutpoint(nDos)) {
-            Add(dnb);
-            dynodeSync.AddedDynodeList();
-            // if it matches our Dynode privkey...
-            if(fDyNode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
-                dnb.nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
-                if(dnb.nProtocolVersion == PROTOCOL_VERSION) {
-                    // ... and PROTOCOL_VERSION, then we've been remotely activated ...
-                    LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- Got NEW Dynode entry: Dynode=%s  sigTime=%lld  addr=%s\n",
-                                dnb.vin.prevout.ToStringShort(), dnb.sigTime, dnb.addr.ToString());
-                    activeDynode.ManageState();
-                } else {
-                    // ... otherwise we need to reactivate our node, do not add it to the list and do not relay
-                    // but also do not ban the node we get this message from
-                    LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- wrong PROTOCOL_VERSION, re-activate your DN: message nProtocolVersion=%d  PROTOCOL_VERSION=%d\n", dnb.nProtocolVersion, PROTOCOL_VERSION);
-                    return false;
-                }
+    if(dnb.CheckOutpoint(nDos)) {
+        Add(dnb);
+        dynodeSync.AddedDynodeList();
+        // if it matches our Dynode privkey...
+        if(fDyNode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
+            dnb.nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
+            if(dnb.nProtocolVersion == PROTOCOL_VERSION) {
+                // ... and PROTOCOL_VERSION, then we've been remotely activated ...
+                LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- Got NEW Dynode entry: dynode=%s  sigTime=%lld  addr=%s\n",
+                            dnb.vin.prevout.ToStringShort(), dnb.sigTime, dnb.addr.ToString());
+                activeDynode.ManageState();
+            } else {
+                // ... otherwise we need to reactivate our node, do not add it to the list and do not relay
+                // but also do not ban the node we get this message from
+                LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- wrong PROTOCOL_VERSION, re-activate your DN: message nProtocolVersion=%d  PROTOCOL_VERSION=%d\n", dnb.nProtocolVersion, PROTOCOL_VERSION);
+                return false;
             }
-            dnb.Relay();
-        } else {
-            LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- Rejected Dynode entry: %s  addr=%s\n", dnb.vin.prevout.ToStringShort(), dnb.addr.ToString());
-            return false;
         }
+        dnb.Relay();
+    } else {
+        LogPrintf("CDynodeMan::CheckDnbAndUpdateDynodeList -- Rejected Dynode entry: %s  addr=%s\n", dnb.vin.prevout.ToStringShort(), dnb.addr.ToString());
+        return false;
     }
 
     return true;
