@@ -22,6 +22,9 @@ CPSNotificationInterface::~CPSNotificationInterface()
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
+    if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
+     	return; 
+
     dnodeman.UpdatedBlockTip(pindexNew);
     privateSendClient.UpdatedBlockTip(pindexNew);
     instantsend.UpdatedBlockTip(pindexNew);
