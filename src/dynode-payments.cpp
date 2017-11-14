@@ -564,7 +564,7 @@ bool CDynodeBlockPayees::GetBestPayee(CScript& payeeRet)
     return (nVotes > -1);
 }
 
-bool CDynodeBlockPayees::HasPayeeWithVotes(CScript payeeIn, int nVotesReq)
+bool CDynodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq)
 {
     LOCK(cs_vecPayees);
 
