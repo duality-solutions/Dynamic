@@ -562,7 +562,7 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 obj.push_back(Pair(strOutpoint, (int64_t)dn.nProtocolVersion));
             } else if (strMode == "pubkey") {
                 if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
-                obj.push_back(Pair(strOutpoint, HexStr(mn.pubKeyDynode)));
+                obj.push_back(Pair(strOutpoint, HexStr(dn.pubKeyDynode)));
             } else if (strMode == "status") {
                 std::string strStatus = dn.GetStatus();
                 if (strFilter !="" && strStatus.find(strFilter) == std::string::npos &&

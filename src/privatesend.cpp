@@ -20,7 +20,7 @@
 #include <boost/lexical_cast.hpp>
 
 CPrivateSendEntry::CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
-    txCollateral(txCollateral)
+    txCollateral(txCollateral), addr(CService())
 {
     BOOST_FOREACH(CTxIn txin, vecTxIn)
         vecTxPSIn.push_back(txin);

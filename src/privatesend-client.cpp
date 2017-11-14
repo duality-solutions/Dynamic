@@ -60,7 +60,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         // if the queue is ready, submit if we can
         if(psq.fReady) {
             if(!infoMixingDynode.fInfoValid) return;
-            if((CNetAddr)infoMixingDynode.addr != (CNetAddr)infoDn.addr) {
+            if(infoMixingDynode.addr != infoDn.addr) {
                 LogPrintf("PSQUEUE -- message doesn't match current Dynode: infoMixingDynode=%s, addr=%s\n", infoMixingDynode.addr.ToString(), infoDn.addr.ToString());
                 return;
             }
@@ -105,7 +105,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         if(!infoMixingDynode.fInfoValid) return;
-        if((CNetAddr)infoMixingDynode.addr != (CNetAddr)pfrom->addr) {
+        if(infoMixingDynode.addr != pfrom->addr) {
             //LogPrintf("PSSTATUSUPDATE -- message doesn't match current Dynode: infoMixingDynode %s addr %s\n", infoMixingDynode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
@@ -176,7 +176,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         if(!infoMixingDynode.fInfoValid) return;
-        if((CNetAddr)infoMixingDynode.addr != (CNetAddr)pfrom->addr) {
+        if(infoMixingDynode.addr != pfrom->addr) {
             LogPrint("privatesend", "PSCOMPLETE -- message doesn't match current Dynode: infoMixingDynode=%s  addr=%s\n", infoMixingDynode.addr.ToString(), pfrom->addr.ToString());
             return;
         }

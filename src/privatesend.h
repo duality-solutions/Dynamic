@@ -118,11 +118,14 @@ public:
     std::vector<CTxPSIn> vecTxPSIn;
     std::vector<CTxPSOut> vecTxPSOut;
     CTransaction txCollateral;
+    // memory only
+    CService addr;
 
     CPrivateSendEntry() :
         vecTxPSIn(std::vector<CTxPSIn>()),
         vecTxPSOut(std::vector<CTxPSOut>()),
-        txCollateral(CTransaction())
+        txCollateral(CTransaction()),
+        addr(CService())
         {}
 
     CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral);
