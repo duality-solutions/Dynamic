@@ -176,6 +176,7 @@ UniValue dnsync(const UniValue& params, bool fHelp)
     if(strMode == "reset")
     {
         dynodeSync.Reset();
+        dynodeSync.SwitchToNextAsset();
         return "success";
     }
     return "failure";

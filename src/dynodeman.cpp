@@ -1391,14 +1391,13 @@ void CDynodeMan::UpdateDynodeList(CDynodeBroadcast dnb)
 
     CDynode* pdn = Find(dnb.vin);
     if(pdn == NULL) {
-        CDynode dn(dnb);
-        if(Add(dn)) {
-            dynodeSync.AddedDynodeList();
+        if(Add(dnb)) {
+            dynodeSync.BumpAssetLastTime("CDynodeMan::UpdateDynodeList - new");
         }
     } else {
         CDynodeBroadcast dnbOld = mapSeenDynodeBroadcast[CDynodeBroadcast(*pdn).GetHash()].second;
         if(pdn->UpdateFromNewBroadcast(dnb)) {
-            dynodeSync.AddedDynodeList();
+            dynodeSync.BumpAssetLastTime("CDynodeMan::UpdateDynodeList - seen");
             mapSeenDynodeBroadcast.erase(dnbOld.GetHash());
         }
     }
@@ -1421,7 +1420,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
             if(GetTime() - mapSeenDynodeBroadcast[hash].first > DYNODE_NEW_START_REQUIRED_SECONDS - DYNODE_MIN_DNP_SECONDS * 2) {
                 LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen update\n", dnb.vin.prevout.ToStringShort());
                 mapSeenDynodeBroadcast[hash].first = GetTime();
-                dynodeSync.AddedDynodeList();
+                dynodeSync.BumpAssetLastTime("CDynodeMan::CheckDnbAndUpdateDynodeList - seen");
             }
             // did we ask this node for it?
             if(pfrom && IsDnbRecoveryRequested(hash) && GetTime() < mDnbRecoveryRequests[hash].first) {
@@ -1472,7 +1471,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
 
     if(dnb.CheckOutpoint(nDos)) {
         Add(dnb);
-        dynodeSync.AddedDynodeList();
+        dynodeSync.BumpAssetLastTime("CDynodeMan::CheckDnbAndUpdateDynodeList - new");
         // if it matches our Dynode privkey...
         if(fDyNode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
             dnb.nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
@@ -1501,8 +1500,8 @@ void CDynodeMan::UpdateLastPaid()
 {
     LOCK(cs);
 
-    if(fLiteMode) return;
-    if(!pCurrentBlockIndex) return;
+    if(fLiteMode || !pCurrentBlockIndex) return;
+    if(!dynodeSync.IsWinnersListSynced() || vDynodes.empty()) return;
 
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a Dynode
@@ -1515,8 +1514,7 @@ void CDynodeMan::UpdateLastPaid()
         dn.UpdateLastPaid(pCurrentBlockIndex, nMaxBlocksToScanBack);
     }
 
-    // every time is like the first time if winners list is not synced
-    IsFirstRun = !dynodeSync.IsWinnersListSynced();
+    IsFirstRun = false;
 }
 
 bool CDynodeMan::UpdateLastPsq(const CTxIn& vin)

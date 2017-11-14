@@ -615,7 +615,7 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos)
             pdn->Check();
             Relay();
         }
-        dynodeSync.AddedDynodeList();
+        dynodeSync.BumpAssetLastTime("CDynodeBroadcast::Update");
     }
 
     return true;
@@ -883,7 +883,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     if(!dynodeSync.IsDynodeListSynced() && !pdn->IsPingedWithin(DYNODE_EXPIRATION_SECONDS/2)) {
         // let's bump sync timeout
         LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- bumping sync timeout, dynode=%s\n", vin.prevout.ToStringShort());
-        dynodeSync.AddedDynodeList();
+        dynodeSync.BumpAssetLastTime("CDynodePing::CheckAndUpdate");
     }
 
     // let's store this ping as the last one

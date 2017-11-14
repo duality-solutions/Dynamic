@@ -262,7 +262,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         CGovernanceException exception;
         if(ProcessVote(pfrom, vote, exception)) {
             LogPrint("gobject", "DNGOVERNANCEOBJECTVOTE -- %s new\n", strHash);
-            dynodeSync.AddedGovernanceItem();
+            dynodeSync.BumpAssetLastTime("DNGOVERNANCEOBJECTVOTE");
             vote.Relay();
         }
         else {
@@ -383,7 +383,7 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CNode* p
     // Update the rate buffer
     DynodeRateCheck(govobj, UPDATE_TRUE);
 
-    dynodeSync.AddedGovernanceItem();
+   dynodeSync.BumpAssetLastTime("CGovernanceManager::AddGovernanceObject");
 
     // WE MIGHT HAVE PENDING/ORPHAN VOTES FOR THIS OBJECT
 
@@ -703,6 +703,9 @@ void CGovernanceManager::DoMaintenance()
 
 bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
 {
+    // do not request objects until it's time to sync
+    if(!dynodeSync.IsWinnersListSynced()) return false;
+
     LOCK(cs);
 
     LogPrint("gobject", "CGovernanceManager::ConfirmInventoryRequest inv = %s\n", inv.ToString());
@@ -748,9 +751,6 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
         setHash->insert(inv.hash);
         LogPrint("gobject", "CGovernanceManager::ConfirmInventoryRequest added inv to requested set\n");
     }
-
-    // Keep sync alive
-    dynodeSync.AddedGovernanceItem();
 
     LogPrint("gobject", "CGovernanceManager::ConfirmInventoryRequest reached end, returning true\n");
     return true;
@@ -1070,6 +1070,8 @@ void CGovernanceManager::CheckDynodeOrphanObjects()
 
 void CGovernanceManager::CheckPostponedObjects()
 {
+    if(!dynodeSync.IsSynced()) return;
+
     LOCK2(cs_main, cs);
 
     // Check postponed proposals

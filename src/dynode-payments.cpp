@@ -446,7 +446,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         if(AddPaymentVote(vote)){
             vote.Relay();
-            dynodeSync.AddedPaymentVote();
+            dynodeSync.BumpAssetLastTime("DYNODEPAYMENTVOTE");
         }
     }
 }

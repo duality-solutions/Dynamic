@@ -4065,8 +4065,6 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, C
     if (!ActivateBestChain(state, chainparams, pblock, connman))
         return error("%s: ActivateBestChain failed", __func__);
 
-    dynodeSync.IsBlockchainSynced(true);
-
     LogPrintf("%s : ACCEPTED\n", __func__);
     return true;
 }

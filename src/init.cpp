@@ -2001,7 +2001,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     dnodeman.UpdatedBlockTip(chainActive.Tip());
     privateSendClient.UpdatedBlockTip(chainActive.Tip());
     dnpayments.UpdatedBlockTip(chainActive.Tip());
-    dynodeSync.UpdatedBlockTip(chainActive.Tip());
+    dynodeSync.UpdatedBlockTip(chainActive.Tip(), IsInitialBlockDownload());
     governance.UpdatedBlockTip(chainActive.Tip());
 
     // ********************************************************* Step 11d: start dynamic-ps-<smth> threads

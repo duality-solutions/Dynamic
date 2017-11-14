@@ -27,7 +27,7 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
     instantsend.UpdatedBlockTip(pindexNew);
     dnpayments.UpdatedBlockTip(pindexNew);
     governance.UpdatedBlockTip(pindexNew);
-    dynodeSync.UpdatedBlockTip(pindexNew);
+    dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
