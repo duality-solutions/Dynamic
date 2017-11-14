@@ -207,14 +207,25 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(!fIsValid) {
             if(fDynodeMissing) {
-                mapDynodeOrphanObjects.insert(std::make_pair(nHash, object_time_pair_t(govobj, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME)));
+                int& count = mapDynodeOrphanCounter[govobj.GetDynodeVin().prevout];
+                if (count >= 10) {
+                    LogPrint("gobject", "DNGOVERNANCEOBJECT -- Too many orphan objects, missing dynode=%s\n", govobj.GetDynodeVin().prevout.ToStringShort());
+                    // ask for this object again in 2 minutes
+                    CInv inv(MSG_GOVERNANCE_OBJECT, govobj.GetHash());
+                    pfrom->AskFor(inv);
+                    return;
+                }
+                count++;
+                ExpirationInfo info(pfrom->GetId(), GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME);
+                mapDynodeOrphanObjects.insert(std::make_pair(nHash, object_info_pair_t(govobj, info)));
                 LogPrintf("DNGOVERNANCEOBJECT -- Missing dynode for: %s, strError = %s\n", strHash, strError);
             } else if(fMissingConfirmations) {
                 AddPostponedObject(govobj);
                 LogPrintf("DNGOVERNANCEOBJECT -- Not enough fee confirmations for: %s, strError = %s\n", strHash, strError);
             } else {
                 LogPrintf("DNGOVERNANCEOBJECT -- Governance object is invalid - %s\n", strError);
-                // TODO: apply node's ban score if object is invalid
+                // apply node's ban score
+                Misbehaving(pfrom->GetId(), 20);
             }
 
             return;
@@ -1024,31 +1035,31 @@ void CGovernanceManager::CheckDynodeOrphanObjects()
     LOCK2(cs_main, cs);
     int64_t nNow = GetAdjustedTime();
     CRateChecksGuard guard(false, *this);
-    object_time_m_it it = mapDynodeOrphanObjects.begin();
+    object_info_m_it it = mapDynodeOrphanObjects.begin();
     while(it != mapDynodeOrphanObjects.end()) {
-        object_time_pair_t& pair = it->second;
+        object_info_pair_t& pair = it->second;
         CGovernanceObject& govobj = pair.first;
 
-        if(pair.second < nNow) {
-            mapDynodeOrphanObjects.erase(it++);
-            continue;
-        }
+        if(pair.second.nExpirationTime >= nNow) {
+            std::string strError;
+            bool fDynodeMissing = false;
+            bool fConfirmationsMissing = false;
+            bool fIsValid = govobj.IsValidLocally(strError, fDynodeMissing, fConfirmationsMissing, true);
 
-        std::string strError;
-        bool fDynodeMissing = false;
-        bool fConfirmationsMissing = false;
-        bool fIsValid = govobj.IsValidLocally(strError, fDynodeMissing, fConfirmationsMissing, true);
-        if(!fIsValid) {
-            if(!fDynodeMissing) {
-                mapDynodeOrphanObjects.erase(it++);
-            }
-            else {
+            if(fIsValid) {
+                AddGovernanceObject(govobj);
+            } else if(fDynodeMissing) {
                 ++it;
+                continue;
             }
-            continue;
+        } else {
+            // apply node's ban score
+            Misbehaving(pair.second.idFrom, 20);
         }
 
-        AddGovernanceObject(govobj);
+        auto it_count = mapDynodeOrphanCounter.find(govobj.GetDynodeVin().prevout);
+        if(--it_count->second == 0)
+            mapDynodeOrphanCounter.erase(it_count);
         mapDynodeOrphanObjects.erase(it++);
     }
 }

@@ -162,6 +162,31 @@ arith_uint256 CDynode::CalculateScore(const uint256& blockHash)
     return (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
 }
 
+CDynode::CollateralStatus CDynode::CheckCollateral(CTxIn vin)
+{
+    int nHeight;
+    return CheckCollateral(vin, nHeight);
+}
+
+CDynode::CollateralStatus CDynode::CheckCollateral(CTxIn vin, int& nHeight)
+{
+    AssertLockHeld(cs_main);
+
+    CCoins coins;
+    if(!pcoinsTip->GetCoins(vin.prevout.hash, coins) ||
+       (unsigned int)vin.prevout.n>=coins.vout.size() ||
+       coins.vout[vin.prevout.n].IsNull()) {
+        return COLLATERAL_UTXO_NOT_FOUND;
+    }
+
+    if(coins.vout[vin.prevout.n].nValue != 1000 * COIN) {
+        return COLLATERAL_INVALID_AMOUNT;
+    }
+
+    nHeight = coins.nHeight;
+    return COLLATERAL_OK;
+}
+
 void CDynode::Check(bool fForce)
 {
     LOCK(cs);
@@ -181,10 +206,8 @@ void CDynode::Check(bool fForce)
         TRY_LOCK(cs_main, lockMain);
         if(!lockMain) return;
 
-        CCoins coins;
-        if(!pcoinsTip->GetCoins(vin.prevout.hash, coins) ||
-           (unsigned int)vin.prevout.n>=coins.vout.size() ||
-           coins.vout[vin.prevout.n].IsNull()) {
+        CollateralStatus err = CheckCollateral(vin);
+        if (err == COLLATERAL_UTXO_NOT_FOUND) {
             nActiveState = DYNODE_OUTPOINT_SPENT;
             LogPrint("Dynode", "CDynode::Check -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
             return;
@@ -627,18 +650,18 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
             return false;
         }
 
-        CCoins coins;
-        if(!pcoinsTip->GetCoins(vin.prevout.hash, coins) ||
-           (unsigned int)vin.prevout.n>=coins.vout.size() ||
-           coins.vout[vin.prevout.n].IsNull()) {
+        int nHeight;
+        CollateralStatus err = CheckCollateral(vin, nHeight);
+        if (err == COLLATERAL_UTXO_NOT_FOUND) {
             LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
             return false;
         }
-        if(coins.vout[vin.prevout.n].nValue != 1000 * COIN) {
+        if (err == COLLATERAL_INVALID_AMOUNT) {
             LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO should have 1000 DYN, Dynode=%s\n", vin.prevout.ToStringShort());
             return false;
         }
-        if(chainActive.Height() - coins.nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
+
+        if(chainActive.Height() - nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
             LogPrintf("CDynodeBroadcast::CheckOutpoint -- Dynode UTXO must have at least %d confirmations, Dynode=%s\n",
                     Params().GetConsensus().nDynodeMinimumConfirmations, vin.prevout.ToStringShort());
             // maybe we miss few blocks, let this dnb to be checked again later

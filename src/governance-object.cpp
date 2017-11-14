@@ -410,6 +410,7 @@ std::string CGovernanceObject::GetDataAsString()
 
 void CGovernanceObject::UpdateLocalValidity()
 {
+    LOCK(cs_main);
     // THIS DOES NOT CHECK COLLATERAL, THIS IS CHECKED UPON ORIGINAL ARRIVAL
     fCachedLocalValidity = IsValidLocally(strLocalValidityError, false);
 };
@@ -452,8 +453,15 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             std::string strOutpoint = vinDynode.prevout.ToStringShort();
             dynode_info_t infoDn = dnodeman.GetDynodeInfo(vinDynode);
             if(!infoDn.fInfoValid) {
-                fMissingDynode = true;
-                strError = "Dynode not found: " + strOutpoint;
+                 CDynode::CollateralStatus err = CDynode::CheckCollateral(GetDynodeVin());
+                if (err == CDynode::COLLATERAL_OK) {
+                    fMissingDynode = true;
+                    strError = "Dynode not found: " + strOutpoint;
+                } else if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
+                    strError = "Failed to find Dynode UTXO, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
+                    strError = "Dynode UTXO should have 1000 DYN, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                }
                 return false;
             }
 
@@ -548,7 +556,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
 
     // GET CONFIRMATIONS FOR TRANSACTION
 
-    LOCK(cs_main);
+    AssertLockHeld(cs_main);
     int nConfirmationsIn = GetISConfirmations(nCollateralHash);
     if (nBlockHash != uint256()) {
         BlockMap::iterator mi = mapBlockIndex.find(nBlockHash);

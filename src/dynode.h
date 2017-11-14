@@ -173,6 +173,12 @@ public:
         DYNODE_POSE_BAN
     };
 
+    enum CollateralStatus {
+        COLLATERAL_OK,
+        COLLATERAL_UTXO_NOT_FOUND,
+        COLLATERAL_INVALID_AMOUNT
+    };
+
     CTxIn vin;
     CService addr;
     CPubKey pubKeyCollateralAddress;
@@ -262,6 +268,8 @@ public:
 
     bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb);
 
+    static CollateralStatus CheckCollateral(CTxIn vin);
+    static CollateralStatus CheckCollateral(CTxIn vin, int& nHeight);
     void Check(bool fForce = false);
 
     bool IsBroadcastedWithin(int nSeconds) { return GetAdjustedTime() - sigTime < nSeconds; }
