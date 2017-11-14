@@ -717,7 +717,7 @@ uint256 blockHash = uint256S("0");
     return;
     SyncWithWallets(tx, NULL);
     //(CInv(MSG_TX, txHash), tx);
-    RelayTransaction(tx);
+    g_connman->RelayTransaction(tx);
 }
 
 MultisigInputEntry * MultisigDialog::addInput()

@@ -644,7 +644,7 @@ bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vot
 void CGovernanceObject::Relay()
 {
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
-    RelayInv(inv, PROTOCOL_VERSION);
+    g_connman->RelayInv(inv, PROTOCOL_VERSION);
 }
 
 void CGovernanceObject::UpdateSentinelVariables()

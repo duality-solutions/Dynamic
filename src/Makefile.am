@@ -66,8 +66,8 @@ endif
 # dynamic #
 DYNAMIC_CORE_H = \
   activedynode.h \
+  addrdb.h \
   addressindex.h \
-  spentindex.h \
   addrman.h \
   alert.h \
   amount.h \
@@ -163,6 +163,7 @@ DYNAMIC_CORE_H = \
   script/sign.h \
   script/standard.h \
   serialize.h \
+  spentindex.h \
   spork.h \
   streams.h \
   support/allocators/secure.h \
@@ -206,6 +207,7 @@ libdynamic_util_a-clientversion.$(OBJEXT): obj/build.h
 libdynamic_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libdynamic_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_server_a_SOURCES = \
+  addrdb.cpp \
   addrman.cpp \
   alert.cpp \
   bloom.cpp \

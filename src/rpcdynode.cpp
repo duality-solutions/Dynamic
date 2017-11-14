@@ -46,7 +46,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             return "Mixing is not supported from Dynodes";
 
         privateSendClient.fEnablePrivateSend = true;
-        bool result = privateSendClient.DoAutomaticDenominating();
+        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
         return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
     }
 
@@ -148,7 +148,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         CService addr = CService(strAddress);
 
-        CNode *pnode = ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
+        // TODO: Pass CConnman instance somehow and don't use global variable.
+        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
         if(!pnode)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Dynode %s", strAddress));
 

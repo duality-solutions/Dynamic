@@ -1419,7 +1419,7 @@ void CGovernanceManager::UpdatedBlockTip(const CBlockIndex *pindex)
 
 void CGovernanceManager::RequestOrphanObjects()
 {
-    std::vector<CNode*> vNodesCopy = CopyNodeVector();
+    std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
 
     std::vector<uint256> vecHashesFiltered;
     {
@@ -1446,7 +1446,7 @@ void CGovernanceManager::RequestOrphanObjects()
         }
     }
 
-    ReleaseNodeVector(vNodesCopy);
+    g_connman->ReleaseNodeVector(vNodesCopy);
 }
 
 void CGovernanceManager::CleanOrphanObjects()

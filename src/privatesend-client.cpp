@@ -656,7 +656,7 @@ bool CPrivateSendClient::CheckAutomaticBackup()
 //
 // Passively run mixing in the background to anonymize funds based on the given configuration.
 //
-bool CPrivateSendClient::DoAutomaticDenominating(bool fDryRun)
+bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
     if(!fEnablePrivateSend || fDyNode || !pCurrentBlockIndex) return false;
     if(!pwalletMain || pwalletMain->IsLocked(true)) return false;
@@ -737,11 +737,11 @@ bool CPrivateSendClient::DoAutomaticDenominating(bool fDryRun)
     // there are funds to denominate and denominated balance does not exceed
     // max amount to mix yet.
     if(nBalanceAnonimizableNonDenom >= nValueMin + CPrivateSend::GetCollateralAmount() && nBalanceDenominated < nPrivateSendAmount*COIN)
-        return CreateDenominated();
+        return CreateDenominated(connman);
 
     //check if we have the collateral sized inputs
     if(!pwalletMain->HasCollateralInputs())
-        return !pwalletMain->HasCollateralInputs(false) && MakeCollateralAmounts();
+        return !pwalletMain->HasCollateralInputs(false) && MakeCollateralAmounts(connman);
 
     if(nSessionID) {
         strAutoDenomResult = _("Mixing in progress...");
@@ -849,21 +849,23 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
         vecDynodesUsed.push_back(psq.vin);
 
         CNode* pnodeFound = NULL;
-        {
-            LOCK(cs_vNodes);
-            pnodeFound = FindNode(infoDn.addr);
-            if(pnodeFound) {
-                if(pnodeFound->fDisconnect) {
-                    continue;
-                } else {
-                    pnodeFound->AddRef();
-                }
+        bool fDisconnect = false;
+        g_connman->ForNode(infoDn.addr, [&pnodeFound, &fDisconnect](CNode* pnode) {
+            pnodeFound = pnode;
+            if(pnodeFound->fDisconnect) {
+                fDisconnect = true;
+            } else {
+                pnodeFound->AddRef();
             }
-        }
+            return true;
+        });
+        if (fDisconnect)
+            continue;
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to dynode from queue, addr=%s\n", infoDn.addr.ToString());
         // connect to Dynode and submit the queue request
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
+        // TODO: Pass CConnman instance somehow and don't use global variable.
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : g_connman->ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
         if(pnode) {
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
@@ -922,21 +924,24 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
         }
 
         CNode* pnodeFound = NULL;
-        {
-            LOCK(cs_vNodes);
-            pnodeFound = FindNode(infoDn.addr);
-            if(pnodeFound) {
-                if(pnodeFound->fDisconnect) {
-                    nTries++;
-                    continue;
-                } else {
-                    pnodeFound->AddRef();
-                }
+        bool fDisconnect = false;
+        g_connman->ForNode(infoDn.addr, [&pnodeFound, &fDisconnect](CNode* pnode) {
+            pnodeFound = pnode;
+            if(pnodeFound->fDisconnect) {
+                fDisconnect = true;
+            } else {
+                pnodeFound->AddRef();
             }
+            return true;
+        });
+        if (fDisconnect) {
+            nTries++;
+            continue;
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Dynode %s\n", nTries, infoDn.addr.ToString());
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
+        // TODO: Pass CConnman instance somehow and don't use global variable.
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : g_connman->ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
         if(pnode) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoDn.addr.ToString());
             infoMixingDynode = infoDn;
@@ -1121,7 +1126,7 @@ bool CPrivateSendClient::PrepareDenominate(int nMinRounds, int nMaxRounds, std::
 }
 
 // Create collaterals by looping through inputs grouped by addresses
-bool CPrivateSendClient::MakeCollateralAmounts()
+bool CPrivateSendClient::MakeCollateralAmounts(CConnman& connman)
 {
     std::vector<CompactTallyItem> vecTally;
     if(!pwalletMain->SelectCoinsGrouppedByAddresses(vecTally, false)) {
@@ -1131,13 +1136,13 @@ bool CPrivateSendClient::MakeCollateralAmounts()
 
     // First try to use only non-denominated funds
     BOOST_FOREACH(CompactTallyItem& item, vecTally) {
-        if(!MakeCollateralAmounts(item, false)) continue;
+        if(!MakeCollateralAmounts(item, false, connman)) continue;
         return true;
     }
 
     // There should be at least some denominated funds we should be able to break in pieces to continue mixing
     BOOST_FOREACH(CompactTallyItem& item, vecTally) {
-        if(!MakeCollateralAmounts(item, true)) continue;
+        if(!MakeCollateralAmounts(item, true, connman)) continue;
         return true;
     }
 
@@ -1147,7 +1152,7 @@ bool CPrivateSendClient::MakeCollateralAmounts()
 }
 
 // Split up large inputs or create fee sized inputs
-bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated)
+bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman& connman)
 {
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
@@ -1205,7 +1210,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
     LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- txid=%s\n", wtx.GetHash().GetHex());
 
     // use the same nCachedLastSuccessBlock as for DS mixinx to prevent race
-    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange)) {
+    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman)) {
         LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- CommitTransaction failed!\n");
         return false;
     }
@@ -1216,7 +1221,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
 }
 
 // Create denominations by looping through inputs grouped by addresses
-bool CPrivateSendClient::CreateDenominated()
+bool CPrivateSendClient::CreateDenominated(CConnman& connman)
 {
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
@@ -1229,7 +1234,7 @@ bool CPrivateSendClient::CreateDenominated()
     bool fCreateMixingCollaterals = !pwalletMain->HasCollateralInputs();
 
     BOOST_FOREACH(CompactTallyItem& item, vecTally) {
-        if(!CreateDenominated(item, fCreateMixingCollaterals)) continue;
+        if(!CreateDenominated(item, fCreateMixingCollaterals, connman)) continue;
         return true;
     }
 
@@ -1238,7 +1243,7 @@ bool CPrivateSendClient::CreateDenominated()
 }
 
 // Create denominations
-bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals)
+bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman& connman)
 {
     std::vector<CRecipient> vecSend;
     CAmount nValueLeft = tallyItem.nAmount;
@@ -1352,7 +1357,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
     reservekeyCollateral.KeepKey();
     LogPrintf("CPrivateSendClient::CreateDenominated -- %d keys keeped\n", reservekeyDenomVec.size() + 1);
 
-    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange)) {
+    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman)) {
         LogPrintf("CPrivateSendClient::CreateDenominated -- CommitTransaction failed!\n");
         return false;
     }
@@ -1368,12 +1373,11 @@ void CPrivateSendClient::RelayIn(const CPrivateSendEntry& entry)
 {
     if(!infoMixingDynode.fInfoValid) return;
 
-    LOCK(cs_vNodes);
-    CNode* pnode = FindNode(infoMixingDynode.addr);
-    if(pnode != NULL) {
+    g_connman->ForNode(infoMixingDynode.addr, [&entry](CNode* pnode) {
         LogPrintf("CPrivateSendClient::RelayIn -- found master, relaying message to %s\n", pnode->addr.ToString());
         pnode->PushMessage(NetMsgType::PSVIN, entry);
-    }
+        return true;
+    });
 }
 
 void CPrivateSendClient::SetState(PoolState nStateNew)
@@ -1395,7 +1399,7 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
 }
 
 //TODO: Rename/move to core
-void ThreadCheckPrivateSendClient()
+void ThreadCheckPrivateSendClient(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dash specific functionality
 
@@ -1417,7 +1421,7 @@ void ThreadCheckPrivateSendClient()
             nTick++;
             privateSendClient.CheckTimeout();
             if(nDoAutoNextRun == nTick) {
-                privateSendClient.DoAutomaticDenominating();
+                privateSendClient.DoAutomaticDenominating(connman);
                 nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
             }
         }

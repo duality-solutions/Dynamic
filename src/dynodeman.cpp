@@ -762,14 +762,13 @@ void CDynodeMan::ProcessDynodeConnections()
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes) {
+    g_connman->ForEachNode([](CNode* pnode) {
         if(pnode->fDynode) {
-            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr) continue;
+            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr) return true;
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
-    }
+    });
 }
 
 std::pair<CService, std::set<uint256> > CDynodeMan::PopScheduledDnbRequestConnection()
@@ -817,8 +816,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         int nDos = 0;
 
         if (CheckDnbAndUpdateDynodeList(pfrom, dnb, nDos)) {
-                // use announced Dynode as a peer
-            addrman.Add(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
+            // use announced Dynode as a peer
+            g_connman->AddNewAddress(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
                 Misbehaving(pfrom->GetId(), nDos);
         }
@@ -1097,7 +1096,8 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
         return false;
     }
 
-    CNode* pnode = ConnectNode(addr, NULL, true);
+    // TODO: Pass CConnman instance somehow and don't use global variable.
+    CNode* pnode = g_connman->ConnectNode(addr, NULL, true);
     if(pnode == NULL) {
         LogPrintf("CDynodeMan::SendVerifyRequest -- can't connect to node to verify it, addr=%s\n", addr.ToString());
         return false;

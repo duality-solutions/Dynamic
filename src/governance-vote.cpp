@@ -228,7 +228,7 @@ CGovernanceVote::CGovernanceVote(CTxIn vinDynodeIn, uint256 nParentHashIn, vote_
 void CGovernanceVote::Relay() const
 {
     CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, GetHash());
-    RelayInv(inv, PROTOCOL_VERSION);
+    g_connman->RelayInv(inv, PROTOCOL_VERSION);
 }
 
 bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)

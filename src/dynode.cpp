@@ -467,13 +467,6 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
         return false;
     }
 
-    BOOST_FOREACH(CNode* pnode, vNodes) {
-    if (pnode->addr.IsIPv6()) {
-        LogPrintf("Invalid protocol for Dynode, only IPv4 is supported.");
-        return false;
-        }
-    }
-
     return Create(txin, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyDynodeNew, pubKeyDynodeNew, strErrorRet, dnbRet);
 }
 
@@ -765,7 +758,7 @@ bool CDynodeBroadcast::CheckSignature(int& nDos)
 void CDynodeBroadcast::Relay()
 {
     CInv inv(MSG_DYNODE_ANNOUNCE, GetHash());
-    RelayInv(inv);
+    g_connman->RelayInv(inv);
 }
 
 CDynodePing::CDynodePing(CTxIn& vinNew) :
@@ -916,7 +909,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
 void CDynodePing::Relay()
 {
     CInv inv(MSG_DYNODE_PING, GetHash());
-    RelayInv(inv);
+    g_connman->RelayInv(inv);
 }
 
 void CDynode::AddGovernanceVote(uint256 nGovernanceObjectHash)

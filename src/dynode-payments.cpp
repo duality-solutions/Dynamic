@@ -811,7 +811,7 @@ void CDynodePaymentVote::Relay()
     // do not relay until synced
     if (!dynodeSync.IsWinnersListSynced()) return;
     CInv inv(MSG_DYNODE_PAYMENT_VOTE, GetHash());
-    RelayInv(inv);
+    g_connman->RelayInv(inv);
 }
 
 bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValidationHeight, int &nDos)

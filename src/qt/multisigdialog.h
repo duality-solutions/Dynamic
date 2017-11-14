@@ -14,6 +14,7 @@
 
 #include <QDialog>
 
+class CConnman;
 class PlatformStyle;
 
 namespace Ui
