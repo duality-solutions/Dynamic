@@ -970,7 +970,7 @@ bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, update
 
 bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, CGovernanceException& exception)
 {
-    LOCK(cs);
+    ENTER_CRITICAL_SECTION(cs);
     uint256 nHashVote = vote.GetHash();
     if(mapInvalidVotes.HasKey(nHashVote)) {
         std::ostringstream ostr;
@@ -979,6 +979,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
                 << ", governance object hash = " << vote.GetParentHash().ToString();
         LogPrintf("%s\n", ostr.str());
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
+        LEAVE_CRITICAL_SECTION(cs);
         return false;
     }
 
@@ -991,12 +992,13 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
              << ", governance object hash = " << vote.GetParentHash().ToString();
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
         if(mapOrphanVotes.Insert(nHashGovobj, vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
+            LEAVE_CRITICAL_SECTION(cs);
             RequestGovernanceObject(pfrom, nHashGovobj);
             LogPrintf("%s\n", ostr.str());
+            return false;
         }
-        else {
-            LogPrint("gobject", "%s\n", ostr.str());
-        }
+        LogPrint("gobject", "%s\n", ostr.str());
+        LEAVE_CRITICAL_SECTION(cs);
         return false;
     }
 
@@ -1004,6 +1006,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
 
     if(govobj.IsSetCachedDelete() || govobj.IsSetExpired()) {
         LogPrint("gobject", "CGovernanceObject::ProcessVote -- ignoring vote for expired or deleted object, hash = %s\n", nHashGovobj.ToString());
+        LEAVE_CRITICAL_SECTION(cs);
         return false;
     }
 
@@ -1016,6 +1019,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
             LogPrint("gobject", "CGovernanceObject::ProcessVote -- GOVERNANCE_OBJECT_WATCHDOG vote for %s\n", vote.GetParentHash().ToString());
         }
     }
+    LEAVE_CRITICAL_SECTION(cs);
     return fOk;
 }
 
