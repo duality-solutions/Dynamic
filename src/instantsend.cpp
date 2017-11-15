@@ -571,9 +571,7 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
     // Not in block yet, make sure all its inputs are still unspent
     BOOST_FOREACH(const CTxIn& txin, txLockCandidate.txLockRequest.vin) {
         CCoins coins;
-        if(!pcoinsTip->GetCoins(txin.prevout.hash, coins) ||
-           (unsigned int)txin.prevout.n>=coins.vout.size() ||
-           coins.vout[txin.prevout.n].IsNull()) {
+        if(!GetUTXOCoins(txin.prevout, coins)) {
             // Not in UTXO anymore? Either this lock or conflicting tx was mined while we were waiting for votes.
             // Reprocess tip to make sure tx for this lock was included.
             //
@@ -779,6 +777,11 @@ int CInstantSend::GetTransactionLockSignatures(const uint256& txHash)
     return -1;
 }
 
+int CInstantSend::GetConfirmations(const uint256 &nTXHash)
+{
+    return IsLockedInstantSendTransaction(nTXHash) ? nInstantSendDepth : 0;
+}
+
 bool CInstantSend::IsTxLockRequestTimedOut(const uint256& txHash)
 {
     if(!fEnableInstantSend) return false;
@@ -910,9 +913,7 @@ bool CTxLockRequest::IsValid(bool fRequireUnspent) const
         int nPrevoutHeight = 0;
         CAmount nValue = 0;
 
-        if(!pcoinsTip->GetCoins(txin.prevout.hash, coins) ||
-           (unsigned int)txin.prevout.n>=coins.vout.size() ||
-           coins.vout[txin.prevout.n].IsNull()) {
+        if(!GetUTXOCoins(txin.prevout, coins)) {
             LogPrint("instantsend", "CTxLockRequest::IsValid -- Failed to find UTXO %s\n", txin.prevout.ToStringShort());
             // Normally above sould be enough, but in case we are reprocessing this because of
             // a lot of legit orphan votes we should also check already spent outpoints.

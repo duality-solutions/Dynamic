@@ -573,7 +573,7 @@ CDynode* CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilt
         if(fFilterSigTime && dn.sigTime + (nDnCount*2.6*60) > GetAdjustedTime()) continue;
 
         //make sure it has at least as many confirmations as there are Dynodes
-        if(dn.GetCollateralAge() < nDnCount) continue;
+        if(GetUTXOConfirmations(dn.vin.prevout) < nDnCount) continue;
 
         vecDynodeLastPaid.push_back(std::make_pair(dn.GetLastPaidBlock(), &dn));
     }

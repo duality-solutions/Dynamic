@@ -90,6 +90,9 @@ public:
     // get the actual uber og accepted lock signatures
     int GetTransactionLockSignatures(const uint256& txHash);
 
+    // get instantsend confirmations (only)
+    int GetConfirmations(const uint256 &nTXHash);
+
     // remove expired entries from maps
     void CheckAndRemove();
     // verify if transaction lock timed out

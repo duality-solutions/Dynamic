@@ -307,10 +307,10 @@ void CActiveDynode::ManageStateLocal()
     CKey keyCollateral;
 
     if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
-        int nInputAge = GetInputAge(vin);
-        if(nInputAge < Params().GetConsensus().nDynodeMinimumConfirmations){
+        int nPrevoutAge = GetUTXOConfirmations(vin.prevout);
+        if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
             nState = ACTIVE_DYNODE_INPUT_TOO_NEW;
-            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nInputAge);
+            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nPrevoutAge);
             LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
