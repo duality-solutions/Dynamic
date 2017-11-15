@@ -101,8 +101,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
                                     const CGovernanceVote& vote,
                                     CGovernanceException& exception)
 {
-    int nDNIndex = governance.GetDynodeIndex(vote.GetVinDynode());
-    if(nDNIndex < 0) {
+    if(!dnodeman.Has(vote.GetVinDynode())) {
         std::ostringstream ostr;
         ostr << "CGovernanceObject::ProcessVote -- Dynode index not found\n";
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
@@ -118,9 +117,9 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         return false;
     }
 
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
+    vote_m_it it = mapCurrentDNVotes.find(vote.GetVinDynode());
     if(it == mapCurrentDNVotes.end()) {
-        it = mapCurrentDNVotes.insert(vote_m_t::value_type(nDNIndex,vote_rec_t())).first;
+        it = mapCurrentDNVotes.insert(vote_m_t::value_type(vote.GetVinDynode(), vote_rec_t())).first;
     }
     vote_rec_t& recVote = it->second;
     vote_signal_enum_t eSignal = vote.GetSignal();
@@ -188,38 +187,12 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     return true;
 }
 
-void CGovernanceObject::RebuildVoteMap()
-{
-    vote_m_t mapDNVotesNew;
-    for(vote_m_it it = mapCurrentDNVotes.begin(); it != mapCurrentDNVotes.end(); ++it) {
-        CTxIn vinDynode;
-        if(dnodeman.GetDynodeVinForIndexOld(it->first, vinDynode)) {
-            int nNewIndex = dnodeman.GetDynodeIndex(vinDynode);
-            if((nNewIndex >= 0)) {
-                mapDNVotesNew[nNewIndex] = it->second;
-            }
-        }
-    }
-    mapCurrentDNVotes = mapDNVotesNew;
-}
-
 void CGovernanceObject::ClearDynodeVotes()
 {
     vote_m_it it = mapCurrentDNVotes.begin();
     while(it != mapCurrentDNVotes.end()) {
-        bool fIndexRebuilt = false;
-        CTxIn vinDynode;
-        bool fRemove = true;
-        if(dnodeman.Get(it->first, vinDynode, fIndexRebuilt)) {
-            if(dnodeman.Has(vinDynode)) {
-                fRemove = false;
-            }
-            else {
-                fileVotes.RemoveVotesFromDynode(vinDynode);
-            }
-        }
-
-        if(fRemove) {
+        if(!dnodeman.Has(it->first)) {
+            fileVotes.RemoveVotesFromDynode(it->first);
             mapCurrentDNVotes.erase(it++);
         }
         else {
@@ -634,8 +607,7 @@ int CGovernanceObject::GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const
 
 bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord)
 {
-    int nDNIndex = governance.GetDynodeIndex(dnCollateralOutpoint);
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
+    vote_m_it it = mapCurrentDNVotes.find(dnCollateralOutpoint);
     if (it == mapCurrentDNVotes.end()) {
         return false;
     }

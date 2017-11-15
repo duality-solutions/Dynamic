@@ -452,11 +452,6 @@ private:
 
     void RebuildIndexes();
 
-    /// Returns DN index, handling the case of index rebuilds
-    int GetDynodeIndex(const CTxIn& dynodeVin);
-
-    void RebuildVoteMaps();
-
     void AddCachedTriggers();
 
     bool UpdateCurrentWatchdog(CGovernanceObject& watchdogNew);

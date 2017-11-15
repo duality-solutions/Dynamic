@@ -13,85 +13,11 @@ class CDynodeMan;
 
 extern CDynodeMan dnodeman;
 
-/**
- * Provides a forward and reverse index between DN vin's and integers.
- *
- * This mapping is normally add-only and is expected to be permanent
- * It is only rebuilt if the size of the index exceeds the expected maximum number
- * of DN's and the current number of known DN's.
- *
- * The external interface to this index is provided via delegation by CDynodeMan
- */
-class CDynodeIndex
-{
-public: // Types
-    typedef std::map<CTxIn,int> index_m_t;
-
-    typedef index_m_t::iterator index_m_it;
-
-    typedef index_m_t::const_iterator index_m_cit;
-
-    typedef std::map<int,CTxIn> rindex_m_t;
-
-    typedef rindex_m_t::iterator rindex_m_it;
-
-    typedef rindex_m_t::const_iterator rindex_m_cit;
-
-private:
-    int                  nSize;
-
-    index_m_t            mapIndex;
-
-    rindex_m_t           mapReverseIndex;
-
-public:
-    CDynodeIndex();
-
-    int GetSize() const {
-        return nSize;
-    }
-
-    /// Retrieve Dynode vin by index
-    bool Get(int nIndex, CTxIn& vinDynode) const;
-
-    /// Get index of a Dynode vin
-    int GetDynodeIndex(const CTxIn& vinDynode) const;
-
-    void AddDynodeVIN(const CTxIn& vinDynode);
-
-    void Clear();
-
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
-    {
-        READWRITE(mapIndex);
-        if(ser_action.ForRead()) {
-            RebuildIndex();
-        }
-    }
-
-private:
-    void RebuildIndex();
-
-};
-
 class CDynodeMan
 {
 public:
-    typedef std::map<CTxIn,int> index_m_t;
-
-    typedef index_m_t::iterator index_m_it;
-
-    typedef index_m_t::const_iterator index_m_cit;
 
 private:
-    static const int MAX_EXPECTED_INDEX_SIZE = 30000;
-
-    /// Only allow 1 index rebuild per hour
-    static const int64_t MIN_INDEX_REBUILD_TIME = 3600;
-
     static const std::string SERIALIZATION_VERSION_STRING;
 
     static const int PSEG_UPDATE_SECONDS        = 3 * 60 * 60;
@@ -130,16 +56,6 @@ private:
     std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > > mDnbRecoveryRequests;
     std::map<uint256, std::vector<CDynodeBroadcast> > mDnbRecoveryGoodReplies;
     std::list< std::pair<CService, uint256> > listScheduledDnbRequestConnections;
-
-
-    int64_t nLastIndexRebuildTime;
-
-    CDynodeIndex indexDynodes;
-
-    CDynodeIndex indexDynodesOld;
-
-    /// Set when index has been rebuilt, clear when read
-    bool fIndexRebuilt;
 
     /// Set when Dynodes are added, cleared when CGovernanceManager is notified
     bool fDynodesAdded;
@@ -189,7 +105,6 @@ public:
 
         READWRITE(mapSeenDynodeBroadcast);
         READWRITE(mapSeenDynodePing);
-        READWRITE(indexDynodes);
         if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
         }
@@ -233,50 +148,6 @@ public:
     /// Versions of Find that are safe to use from outside the class
     bool Get(const CPubKey& pubKeyDynode, CDynode& dynode);
     bool Get(const CTxIn& vin, CDynode& dynode);
-
-    /// Retrieve Dynode vin by index
-    bool Get(int nIndex, CTxIn& vinDynode, bool& fIndexRebuiltOut) {
-        LOCK(cs);
-        fIndexRebuiltOut = fIndexRebuilt;
-        return indexDynodes.Get(nIndex, vinDynode);
-    }
-
-    bool GetIndexRebuiltFlag() {
-        LOCK(cs);
-        return fIndexRebuilt;
-    }
-
-    /// Get index of a Dynode vin
-    int GetDynodeIndex(const CTxIn& vinDynode) {
-        LOCK(cs);
-        return indexDynodes.GetDynodeIndex(vinDynode);
-    }
-
-    /// Get old index of a Dynode vin
-    int GetDynodeIndexOld(const CTxIn& vinDynode) {
-        LOCK(cs);
-        return indexDynodesOld.GetDynodeIndex(vinDynode);
-    }
-
-    /// Get Dynode VIN for an old index value
-    bool GetDynodeVinForIndexOld(int nDynodeIndex, CTxIn& vinDynodeOut) {
-        LOCK(cs);
-        return indexDynodesOld.Get(nDynodeIndex, vinDynodeOut);
-    }
-
-    /// Get index of a Dynode vin, returning rebuild flag
-    int GetDynodeIndex(const CTxIn& vinDynode, bool& fIndexRebuiltOut) {
-        LOCK(cs);
-        fIndexRebuiltOut = fIndexRebuilt;
-        return indexDynodes.GetDynodeIndex(vinDynode);
-    }
-
-    void ClearOldDynodeIndex() {
-        LOCK(cs);
-        indexDynodesOld.Clear();
-        fIndexRebuilt = false;
-    }
-
     bool Has(const CTxIn& vin);
 
     dynode_info_t GetDynodeInfo(const CTxIn& vin);
@@ -322,8 +193,6 @@ public:
 
     void UpdateLastPaid(const CBlockIndex* pindex);
     bool UpdateLastPsq(const CTxIn& vin);
-
-    void CheckAndRebuildDynodeIndex();
 
     void AddDirtyGovernanceObjectHash(const uint256& nHash)
     {

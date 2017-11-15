@@ -1282,29 +1282,6 @@ void CGovernanceManager::RebuildIndexes()
     }
 }
 
-int CGovernanceManager::GetDynodeIndex(const CTxIn& dynodeVin)
-{
-    LOCK(cs);
-    bool fIndexRebuilt = false;
-    int nDNIndex = dnodeman.GetDynodeIndex(dynodeVin, fIndexRebuilt);
-    if(fIndexRebuilt) {
-        RebuildVoteMaps();
-        nDNIndex = dnodeman.GetDynodeIndex(dynodeVin, fIndexRebuilt);
-        if(fIndexRebuilt) {
-            LogPrintf("CGovernanceManager::GetDynodeIndex -- WARNING: vote map rebuild failed\n");
-        }
-    }
-    return nDNIndex;
-}
-
-void CGovernanceManager::RebuildVoteMaps()
-{
-    for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
-        it->second.RebuildVoteMap();
-    }
-    dnodeman.ClearOldDynodeIndex();
-}
-
 void CGovernanceManager::AddCachedTriggers()
 {
     LOCK(cs);

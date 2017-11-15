@@ -38,49 +38,6 @@ struct CompareScoreDN
     }
 };
 
-CDynodeIndex::CDynodeIndex()
-    : nSize(0),
-      mapIndex(),
-      mapReverseIndex()
-{}
-
-bool CDynodeIndex::Get(int nIndex, CTxIn& vinDynode) const
-{
-    rindex_m_cit it = mapReverseIndex.find(nIndex);
-    if(it == mapReverseIndex.end()) {
-        return false;
-    }
-    vinDynode = it->second;
-    return true;
-}
-
-int CDynodeIndex::GetDynodeIndex(const CTxIn& vinDynode) const
-{
-    index_m_cit it = mapIndex.find(vinDynode);
-    if(it == mapIndex.end()) {
-        return -1;
-    }
-    return it->second;
-}
-
-void CDynodeIndex::AddDynodeVIN(const CTxIn& vinDynode)
-{
-    index_m_it it = mapIndex.find(vinDynode);
-    if(it != mapIndex.end()) {
-        return;
-    }
-    int nNextIndex = nSize;
-    mapIndex[vinDynode] = nNextIndex;
-    mapReverseIndex[nNextIndex] = vinDynode;
-    ++nSize;
-}
-
-void CDynodeIndex::Clear()
-{
-    mapIndex.clear();
-    mapReverseIndex.clear();
-    nSize = 0;
-}
 struct CompareByAddr
 
 {
@@ -90,14 +47,6 @@ struct CompareByAddr
         return t1->addr < t2->addr;
     }
 };
-
-void CDynodeIndex::RebuildIndex()
-{
-    nSize = mapIndex.size();
-    for(index_m_it it = mapIndex.begin(); it != mapIndex.end(); ++it) {
-        mapReverseIndex[it->second] = it->first;
-    }
-}
 
 CDynodeMan::CDynodeMan()
 : cs(),
@@ -109,10 +58,6 @@ CDynodeMan::CDynodeMan()
   mDnbRecoveryRequests(),
   mDnbRecoveryGoodReplies(),
   listScheduledDnbRequestConnections(),
-  nLastIndexRebuildTime(0),
-  indexDynodes(),
-  indexDynodesOld(),
-  fIndexRebuilt(false),
   fDynodesAdded(false),
   fDynodesRemoved(false),
   vecDirtyGovernanceObjectHashes(),
@@ -126,17 +71,12 @@ bool CDynodeMan::Add(CDynode &dn)
 {
     LOCK(cs);
 
-    CDynode *pdn = Find(dn.vin);
-    if (pdn == NULL) {
-        LogPrint("Dynode", "CDynodeMan::Add -- Adding new Dynode: addr=%s, %i now\n", dn.addr.ToString(), size() + 1);
-        dn.nTimeLastWatchdogVote = dn.sigTime;
-        vDynodes.push_back(dn);
-        indexDynodes.AddDynodeVIN(dn.vin);
-        fDynodesAdded = true;
-        return true;
-    }
+    if (Has(dn.vin)) return false;
 
-    return false;
+    LogPrint("dynode", "CDynodeMan::Add -- Adding new Dynode: addr=%s, %i now\n", dn.addr.ToString(), size() + 1);
+    vDynodes.push_back(dn);
+    fDynodesAdded = true;
+    return true;
 }
 
 void CDynodeMan::AskForDN(CNode* pnode, const CTxIn &vin)
@@ -351,9 +291,6 @@ void CDynodeMan::CheckAndRemove()
 
         LogPrintf("CDynodeMan::CheckAndRemove -- %s\n", ToString());
 
-        if(fDynodesRemoved) {
-            CheckAndRebuildDynodeIndex();
-        }
     }
 
     if(fDynodesRemoved) {
@@ -372,8 +309,6 @@ void CDynodeMan::Clear()
     mapSeenDynodePing.clear();
     nPsqCount = 0;
     nLastWatchdogVoteTime = 0;
-    indexDynodes.Clear();
-    indexDynodesOld.Clear();
 }
 
 int CDynodeMan::CountDynodes(int nProtocolVersion)
@@ -1376,7 +1311,6 @@ std::string CDynodeMan::ToString() const
             ", peers who asked us for Dynode list: " << (int)mAskedUsForDynodeList.size() <<
             ", peers we asked for Dynode list: " << (int)mWeAskedForDynodeList.size() <<
             ", entries in Dynode list we asked for: " << (int)mWeAskedForDynodeListEntry.size() <<
-            ", dynode index size: " << indexDynodes.GetSize() <<
             ", nPsqCount: " << (int)nPsqCount;
 
     return info.str();
@@ -1527,32 +1461,6 @@ bool CDynodeMan::UpdateLastPsq(const CTxIn& vin)
     pDN->nLastPsq = nPsqCount;
     pDN->fAllowMixingTx = true;
     return true;
-}
-
-void CDynodeMan::CheckAndRebuildDynodeIndex()
-{
-    LOCK(cs);
-
-    if(GetTime() - nLastIndexRebuildTime < MIN_INDEX_REBUILD_TIME) {
-        return;
-    }
-
-    if(indexDynodes.GetSize() <= MAX_EXPECTED_INDEX_SIZE) {
-        return;
-    }
-
-    if(indexDynodes.GetSize() <= int(vDynodes.size())) {
-        return;
-    }
-
-    indexDynodesOld = indexDynodes;
-    indexDynodes.Clear();
-    for(size_t i = 0; i < vDynodes.size(); ++i) {
-        indexDynodes.AddDynodeVIN(vDynodes[i].vin);
-    }
-
-    fIndexRebuilt = true;
-    nLastIndexRebuildTime = GetTime();
 }
 
 void CDynodeMan::UpdateWatchdogVoteTime(const CTxIn& vin)
