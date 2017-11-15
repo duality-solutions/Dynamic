@@ -105,7 +105,7 @@ void CSporkManager::ExecuteSpork(int nSporkID, int nValue)
 bool CSporkManager::UpdateSpork(int nSporkID, int64_t nValue)
 {
 
-    CSporkMessage spork = CSporkMessage(nSporkID, nValue, GetTime());
+    CSporkMessage spork = CSporkMessage(nSporkID, nValue, GetAdjustedTime());
 
     if(spork.Sign(strMasterPrivKey)) {
         spork.Relay();
@@ -142,7 +142,7 @@ bool CSporkManager::IsSporkActive(int nSporkID)
         }
     }
 
-    return r < GetTime();
+    return r < GetAdjustedTime();
 }
 
 // grab the value of the spork on the network, or the default

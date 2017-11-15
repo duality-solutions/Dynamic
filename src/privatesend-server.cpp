@@ -92,7 +92,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         LogPrint("privatesend", "PSQUEUE -- %s new\n", psq.ToString());
 
-        if(psq.IsExpired() || psq.nTime > GetTime() + PRIVATESEND_QUEUE_TIMEOUT) return;
+        if(psq.IsExpired()) return;
 
         CDynode* pmn = dnodeman.Find(psq.vin);
         if(pmn == NULL) return;
@@ -537,7 +537,7 @@ void CPrivateSendServer::CheckForCompleteQueue()
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
 
-        CPrivatesendQueue psq(nSessionDenom, activeDynode.vin, GetTime(), true);
+        CPrivatesendQueue psq(nSessionDenom, activeDynode.vin, GetAdjustedTime(), true);
         LogPrint("privatesend", "CPrivateSendServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", psq.ToString());
         psq.Sign();
         psq.Relay();
@@ -744,7 +744,7 @@ bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral,
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CPrivatesendQueue psq(nDenom, activeDynode.vin, GetTime(), false);
+        CPrivatesendQueue psq(nDenom, activeDynode.vin, GetAdjustedTime(), false);
         LogPrint("privatesend", "CPrivateSendServer::CreateNewSession -- signing and relaying new queue: %s\n", psq.ToString());
         psq.Sign();
         psq.Relay();

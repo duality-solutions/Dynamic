@@ -1369,7 +1369,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
                         // simulate Check
                         CDynode dnTemp = CDynode(dnb);
                         dnTemp.Check();
-                        LogPrint("dynode", "CDynodeMan::CheckMnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
+                        LogPrint("dynode", "CDynodeMan::CheckMnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetAdjustedTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
                         if(dnTemp.IsValidStateForAutoStart(dnTemp.nActiveState)) {
                             // this node thinks it's a good one
                             LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen good\n", dnb.vin.prevout.ToStringShort());

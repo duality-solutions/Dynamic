@@ -70,7 +70,7 @@ public:
         return ss.GetHash();
     }
 
-    bool IsExpired() const { return GetTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
+    bool IsExpired() const { return GetAdjustedTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
     bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
     bool CheckSignature(CPubKey& pubKeyDynode, int &nDos);
     bool SimpleCheck(int& nDos);
