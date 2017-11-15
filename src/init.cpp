@@ -2004,11 +2004,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // force UpdatedBlockTip to initialize nCachedBlockHeight for PS, DN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
     // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
-    dnodeman.UpdatedBlockTip(chainActive.Tip());
-    privateSendClient.UpdatedBlockTip(chainActive.Tip());
-    dnpayments.UpdatedBlockTip(chainActive.Tip());
-    dynodeSync.UpdatedBlockTip(chainActive.Tip(), IsInitialBlockDownload());
-    governance.UpdatedBlockTip(chainActive.Tip());
+    ppsNotificationInterface->InitializeCurrentBlockTip();
 
     // ********************************************************* Step 11d: start dynamic-ps-<smth> threads
 

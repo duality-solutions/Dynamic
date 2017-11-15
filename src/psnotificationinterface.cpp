@@ -12,18 +12,16 @@
 #include "instantsend.h"
 #include "privatesend-client.h"
 
-CPSNotificationInterface::CPSNotificationInterface()
+void CPSNotificationInterface::InitializeCurrentBlockTip()
 {
-}
-
-CPSNotificationInterface::~CPSNotificationInterface()
-{
+    LOCK(cs_main);
+    UpdatedBlockTip(chainActive.Tip(), NULL, IsInitialBlockDownload());
 }
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
     if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
-     	return; 
+        return;
 
     dnodeman.UpdatedBlockTip(pindexNew);
     privateSendClient.UpdatedBlockTip(pindexNew);
