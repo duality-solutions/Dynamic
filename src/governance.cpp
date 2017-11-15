@@ -186,7 +186,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         bool fRateCheckBypassed = false;
-        if(!DynodeRateCheck(govobj, UPDATE_FAIL_ONLY, false, fRateCheckBypassed)) {
+        if(!DynodeRateCheck(govobj, true, false, fRateCheckBypassed)) {
             LogPrintf("DNGOVERNANCEOBJECT -- dynode rate check failed - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
             return;
         }
@@ -199,7 +199,7 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         bool fIsValid = govobj.IsValidLocally(strError, fDynodeMissing, fMissingConfirmations, true);
 
         if(fRateCheckBypassed && (fIsValid || fDynodeMissing)) {
-            if(!DynodeRateCheck(govobj, UPDATE_FAIL_ONLY)) {
+            if(!DynodeRateCheck(govobj, true)) {
                 LogPrintf("DNGOVERNANCEOBJECT -- dynode rate check failed (after signature verification) - %s - (current block height %d) \n", strHash, nCachedBlockHeight);
                 return;
             }
@@ -381,7 +381,7 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CNode* p
     govobj.Relay();
 
     // Update the rate buffer
-    DynodeRateCheck(govobj, UPDATE_TRUE);
+    DynodeRateUpdate(govobj);
 
    dynodeSync.BumpAssetLastTime("CGovernanceManager::AddGovernanceObject");
 
@@ -556,9 +556,10 @@ void CGovernanceManager::UpdateCachesAndClean()
     }
 
     // forget about expired deleted objects
+    nNow = GetTime();
     hash_time_m_it s_it = mapErasedGovernanceObjects.begin();
     while(s_it != mapErasedGovernanceObjects.end()) {
-        if(s_it->second < GetTime())
+        if(s_it->second < nNow)
             mapErasedGovernanceObjects.erase(s_it++);
         else
             ++s_it;
@@ -838,13 +839,39 @@ void CGovernanceManager::Sync(CNode* pfrom, const uint256& nProp, const CBloomFi
     LogPrintf("CGovernanceManager::Sync -- sent %d objects and %d votes to peer=%d\n", nObjCount, nVoteCount, pfrom->id);
 }
 
-bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, update_mode_enum_t eUpdateLast)
+void CGovernanceManager::DynodeRateUpdate(const CGovernanceObject& govobj)
 {
-    bool fRateCheckBypassed;
-    return DynodeRateCheck(govobj, eUpdateLast, true, fRateCheckBypassed);
+    int nObjectType = govobj.GetObjectType();
+    if((nObjectType != GOVERNANCE_OBJECT_TRIGGER) && (nObjectType != GOVERNANCE_OBJECT_WATCHDOG))
+        return;
+
+    const CTxIn& vin = govobj.GetDynodeVin();
+    txout_m_it it  = mapLastDynodeObject.find(vin.prevout);
+
+    if(it == mapLastDynodeObject.end())
+        it = mapLastDynodeObject.insert(txout_m_t::value_type(vin.prevout, last_object_rec(true))).first;
+
+    int64_t nTimestamp = govobj.GetCreationTime();
+    if (GOVERNANCE_OBJECT_TRIGGER == nObjectType)
+        it->second.triggerBuffer.AddTimestamp(nTimestamp);
+    else if (GOVERNANCE_OBJECT_WATCHDOG == nObjectType)
+        it->second.watchdogBuffer.AddTimestamp(nTimestamp);
+
+    if (nTimestamp > GetTime() + MAX_TIME_FUTURE_DEVIATION - RELIABLE_PROPAGATION_TIME) {
+        // schedule additional relay for the object
+        setAdditionalRelayObjects.insert(govobj.GetHash());
+    }
+
+    it->second.fStatusOK = true;
 }
 
-bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, update_mode_enum_t eUpdateLast, bool fForce, bool& fRateCheckBypassed)
+bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateFailStatus)
+{
+    bool fRateCheckBypassed;
+    return DynodeRateCheck(govobj, fUpdateFailStatus, true, fRateCheckBypassed);
+}
+
+bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateFailStatus, bool fForce, bool& fRateCheckBypassed)
 {
     LOCK(cs);
 
@@ -863,109 +890,66 @@ bool CGovernanceManager::DynodeRateCheck(const CGovernanceObject& govobj, update
         return true;
     }
 
+    const CTxIn& vin = govobj.GetDynodeVin();
     int64_t nTimestamp = govobj.GetCreationTime();
     int64_t nNow = GetTime();
     int64_t nSuperblockCycleSeconds = Params().GetConsensus().nSuperblockCycle * Params().GetConsensus().nPowTargetSpacing;
 
-    const CTxIn& vin = govobj.GetDynodeVin();
-
-    txout_m_it it  = mapLastDynodeObject.find(vin.prevout);
-
-    if(it == mapLastDynodeObject.end()) {
-        if(eUpdateLast == UPDATE_TRUE) {
-            it = mapLastDynodeObject.insert(txout_m_t::value_type(vin.prevout, last_object_rec(true))).first;
-            switch(nObjectType) {
-            case GOVERNANCE_OBJECT_TRIGGER:
-                it->second.triggerBuffer.AddTimestamp(nTimestamp);
-                break;
-            case GOVERNANCE_OBJECT_WATCHDOG:
-                it->second.watchdogBuffer.AddTimestamp(nTimestamp);
-                break;
-            default:
-                break;
-            }
-        }
-        return true;
-    }
-
-    if(it->second.fStatusOK && !fForce) {
-        fRateCheckBypassed = true;
-        return true;
-    }
-
     std::string strHash = govobj.GetHash().ToString();
-
     if(nTimestamp < nNow - 2 * nSuperblockCycleSeconds) {
         LogPrintf("CGovernanceManager::DynodeRateCheck -- object %s rejected due to too old timestamp, dynode vin = %s, timestamp = %d, current time = %d\n",
                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
         return false;
     }
 
-    bool fAdditionalRelay = false;
     if(nTimestamp > nNow + MAX_TIME_FUTURE_DEVIATION) {
         LogPrintf("CGovernanceManager::DynodeRateCheck -- object %s rejected due to too new (future) timestamp, dynode vin = %s, timestamp = %d, current time = %d\n",
                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
         return false;
-    } else if (nTimestamp > nNow + MAX_TIME_FUTURE_DEVIATION - RELIABLE_PROPAGATION_TIME) {
-        // schedule additional relay for the object
-        fAdditionalRelay = true;
+    }
+
+    txout_m_it it  = mapLastDynodeObject.find(vin.prevout);
+    if(it == mapLastDynodeObject.end())
+        return true;
+
+    if(it->second.fStatusOK && !fForce) {
+        fRateCheckBypassed = true;
+        return true;
     }
 
     double dMaxRate = 1.1 / nSuperblockCycleSeconds;
     double dRate = 0.0;
     CRateCheckBuffer buffer;
-    CRateCheckBuffer* pBuffer = NULL;
     switch(nObjectType) {
     case GOVERNANCE_OBJECT_TRIGGER:
         // Allow 1 trigger per dn per cycle, with a small fudge factor
-        pBuffer = &it->second.triggerBuffer;
+        buffer = it->second.triggerBuffer;
         dMaxRate = 2 * 1.1 / double(nSuperblockCycleSeconds);
         break;
     case GOVERNANCE_OBJECT_WATCHDOG:
-        pBuffer = &it->second.watchdogBuffer;
+        buffer = it->second.watchdogBuffer;
         dMaxRate = 2 * 1.1 / 3600.;
         break;
     default:
         break;
     }
 
-    if(!pBuffer) {
-        LogPrintf("CGovernanceManager::DynodeRateCheck -- Internal Error returning false, NULL ptr found for object %s dynode vin = %s, timestamp = %d, current time = %d\n",
-                  strHash, vin.prevout.ToStringShort(), nTimestamp, nNow);
-        return false;
-    }
-
-    buffer = *pBuffer;
     buffer.AddTimestamp(nTimestamp);
     dRate = buffer.GetRate();
 
     bool fRateOK = ( dRate < dMaxRate );
 
-    if (eUpdateLast == UPDATE_TRUE && fAdditionalRelay)
-        setAdditionalRelayObjects.insert(govobj.GetHash());
-
-    switch(eUpdateLast) {
-    case UPDATE_TRUE:
-        pBuffer->AddTimestamp(nTimestamp);
-        it->second.fStatusOK = fRateOK;
-        break;
-    case UPDATE_FAIL_ONLY:
-        if(!fRateOK) {
-            pBuffer->AddTimestamp(nTimestamp);
-            it->second.fStatusOK = false;
-        }
-    default:
-        return true;
-    }
-
-    if(fRateOK) {
-        return true;
-    }
-    else {
+    if(!fRateOK)
+    {
         LogPrintf("CGovernanceManager::DynodeRateCheck -- Rate too high: object hash = %s, dynode vin = %s, object timestamp = %d, rate = %f, max rate = %f\n",
                   strHash, vin.prevout.ToStringShort(), nTimestamp, dRate, dMaxRate);
+
+        if (fUpdateFailStatus)
+            it->second.fStatusOK = false;
     }
-    return false;
+
+    return fRateOK;
+
 }
 
 bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, CGovernanceException& exception)
