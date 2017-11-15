@@ -18,6 +18,16 @@ void CPSNotificationInterface::InitializeCurrentBlockTip()
     UpdatedBlockTip(chainActive.Tip(), NULL, IsInitialBlockDownload());
 }
 
+void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex *pindexNew)
+{
+    dynodeSync.AcceptedBlockHeader(pindexNew);
+}
+
+void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
+{
+    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload);
+}
+
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
     if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
@@ -28,7 +38,6 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
     instantsend.UpdatedBlockTip(pindexNew);
     dnpayments.UpdatedBlockTip(pindexNew);
     governance.UpdatedBlockTip(pindexNew);
-    dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)

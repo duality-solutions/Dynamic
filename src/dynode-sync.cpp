@@ -30,7 +30,7 @@ void CDynodeSync::Reset()
     nRequestedDynodeAssets = DYNODE_SYNC_INITIAL;
     nRequestedDynodeAttempt = 0;
     nTimeAssetSyncStarted = GetTime();
-    nTimeLastBumped = 0;
+    nTimeLastBumped = GetTime();
     nTimeLastFailure = 0;
 }
 
@@ -46,6 +46,7 @@ std::string CDynodeSync::GetAssetName()
     switch(nRequestedDynodeAssets)
     {
         case(DYNODE_SYNC_INITIAL):      return "DYNODE_SYNC_INITIAL";
+        case(DYNODE_SYNC_WAITING):      return "DYNODE_SYNC_WAITING";
         case(DYNODE_SYNC_LIST):         return "DYNODE_SYNC_LIST";
         case(DYNODE_SYNC_DNW):          return "DYNODE_SYNC_DNW";
         case(DYNODE_SYNC_GOVERNANCE):   return "DYNODE_SYNC_GOVERNANCE";
@@ -64,6 +65,12 @@ void CDynodeSync::SwitchToNextAsset()
             break;
         case(DYNODE_SYNC_INITIAL):
             ClearFulfilledRequests();
+            nRequestedDynodeAssets = DYNODE_SYNC_WAITING;
+            LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
+            break;
+        case(DYNODE_SYNC_WAITING):
+            ClearFulfilledRequests();
+            LogPrintf("CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
             nRequestedDynodeAssets = DYNODE_SYNC_LIST;
             LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
             break;
@@ -103,7 +110,8 @@ void CDynodeSync::SwitchToNextAsset()
 std::string CDynodeSync::GetSyncStatus()
 {
     switch (dynodeSync.nRequestedDynodeAssets) {
-        case DYNODE_SYNC_INITIAL:       return _("Synchronization pending...");
+        case DYNODE_SYNC_INITIAL:       return _("Synchroning blockchain...");
+        case DYNODE_SYNC_WAITING:       return _("Synchronization pending...");
         case DYNODE_SYNC_LIST:          return _("Synchronizing Dynodes...");
         case DYNODE_SYNC_DNW:           return _("Synchronizing Dynode payments...");
         case DYNODE_SYNC_GOVERNANCE:    return _("Synchronizing governance objects...");
@@ -229,7 +237,23 @@ void CDynodeSync::ProcessTick()
                 LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- requesting sporks from peer %d\n", nTick, nRequestedDynodeAssets, pnode->id);
             }
 
-            // MNLIST : SYNC DYNODE LIST FROM OTHER CONNECTED CLIENTS
+            // INITIAL TIMEOUT
+
+            if(nRequestedDynodeAssets == DYNODE_SYNC_WAITING) {
+                if(GetTime() - nTimeLastBumped > DYNODE_SYNC_TIMEOUT_SECONDS) {
+                    // At this point we know that:
+                    // a) there are peers (because we are looping on at least one of them);
+                    // b) we waited for at least DYNODE_SYNC_TIMEOUT_SECONDS since we reached
+                    //    the headers tip the last time (i.e. since we switched from
+                    //     DYNODE_SYNC_INITIAL to DYNODE_SYNC_WAITING and bumped time);
+                    // c) there were no blocks (NotifyHeaderTip) or headers (AcceptedBlockHeader)
+                    //    for at least DYNODE_SYNC_TIMEOUT_SECONDS.
+                    // We must be at the tip already, let's move to the next asset.
+                    SwitchToNextAsset();
+                }
+            }
+
+            // DNLIST : SYNC DYNODE LIST FROM OTHER CONNECTED CLIENTS
 
             if(nRequestedDynodeAssets == DYNODE_SYNC_LIST) {
                 LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nTimeLastBumped %lld GetTime() %lld diff %lld\n", nTick, nRequestedDynodeAssets, nTimeLastBumped, GetTime(), GetTime() - nTimeLastBumped);
@@ -388,15 +412,57 @@ void CDynodeSync::SendGovernanceSyncRequest(CNode* pnode)
     }
 }
 
-void CDynodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload)
+void CDynodeSync::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 {
-    if(fDebug) LogPrintf("CDynodeSync::UpdatedBlockTip -- pindexNew->nHeight: %d fInitialDownload=%d\n", pindexNew->nHeight, fInitialDownload);
-    // nothing to do here if we failed to sync previousely,
-    // just wait till status reset after a cooldown (see ProcessTick)
-    if(IsFailed()) return;
-    // switch from DYNODE_SYNC_INITIAL to the next "asset"
-    // the first time we are out of IBD mode (and only the first time)
-    if(!fInitialDownload && !IsBlockchainSynced()) SwitchToNextAsset();
-    // postpone timeout each time new block arrives while we are syncing
-    if(!IsSynced()) BumpAssetLastTime("CDynodeSync::UpdatedBlockTip");
+    if (fDebug)
+        LogPrintf("CDynodeSync::AcceptedBlockHeader -- pindexNew->nHeight: %d\n", pindexNew->nHeight);
+
+    if (!IsBlockchainSynced()) {
+        // Postpone timeout each time new block header arrives while we are still syncing blockchain
+        BumpAssetLastTime("CDynodeSync::AcceptedBlockHeader");
+    }
+}
+
+void CDynodeSync::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
+{
+    if (fDebug)
+        LogPrintf("CDynodeSync::NotifyHeaderTip -- pindexNew->nHeight: %d fInitialDownload=%d\n", pindexNew->nHeight, fInitialDownload);
+
+    if (IsFailed() || IsSynced() || !pindexBestHeader)
+        return;
+
+    if (!IsBlockchainSynced()) {
+        // Postpone timeout each time new block arrives while we are still syncing blockchain
+        BumpAssetLastTime("CDynodeSync::NotifyHeaderTip");
+    }
+
+    if (fInitialDownload) {
+        // no need to check any further while still in IBD mode
+        return;
+    }
+
+    // Note: since we sync headers first, it should be ok to use this
+    static bool fReachedBestHeader = false;
+    bool fReachedBestHeaderNew = pindexNew->GetBlockHash() == pindexBestHeader->GetBlockHash();
+
+    if (fReachedBestHeader && !fReachedBestHeaderNew) {
+        // Switching from true to false means that we previousely stuck syncing headers for some reason,
+        // probably initial timeout was not enough,
+        // because there is no way we can update tip not having best header
+        Reset();
+        fReachedBestHeader = false;
+        return;
+    }
+
+    fReachedBestHeader = fReachedBestHeaderNew;
+
+    if (fDebug)
+        LogPrintf("CDynodeSync::NotifyHeaderTip -- pindexNew->nHeight: %d pindexBestHeader->nHeight: %d fInitialDownload=%d fReachedBestHeader=%d\n",
+                pindexNew->nHeight, pindexBestHeader->nHeight, fInitialDownload, fReachedBestHeader);
+
+    if (!IsBlockchainSynced() && fReachedBestHeader) {
+        // Reached best header while being in initial mode.
+        // We must be at the tip already, let's move to the next asset.
+        SwitchToNextAsset();
+    }
 }

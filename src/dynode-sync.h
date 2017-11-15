@@ -15,6 +15,7 @@ class CDynodeSync;
 
 static const int DYNODE_SYNC_FAILED          = -1;
 static const int DYNODE_SYNC_INITIAL         = 0; // sync just started, was reset recently or still in IDB
+static const int DYNODE_SYNC_WAITING         = 1; // waiting after initial to see if we can get more headers/blocks
 static const int DYNODE_SYNC_LIST            = 2;
 static const int DYNODE_SYNC_DNW             = 3;
 static const int DYNODE_SYNC_GOVERNANCE      = 4;
@@ -59,7 +60,7 @@ public:
     void SendGovernanceSyncRequest(CNode* pnode);
 
     bool IsFailed() { return nRequestedDynodeAssets == DYNODE_SYNC_FAILED; }
-    bool IsBlockchainSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_INITIAL; }
+    bool IsBlockchainSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_WAITING; }
     bool IsDynodeListSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_LIST; }
     bool IsWinnersListSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_DNW; }
     bool IsSynced() { return nRequestedDynodeAssets == DYNODE_SYNC_FINISHED; }
@@ -77,7 +78,8 @@ public:
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     void ProcessTick();
 
-    void UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload);
+    void AcceptedBlockHeader(const CBlockIndex *pindexNew);
+    void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload);
 };
 
 #endif // DYNAMIC_DYNODE_SYNC_H
