@@ -1229,12 +1229,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 pfrom->fGetAddr = true;
             }
             connman.MarkAddressGood(pfrom->addr);
-        } else {
-            if (((CNetAddr)pfrom->addr) == (CNetAddr)addrFrom)
-            {
-                connman.AddNewAddress(addrFrom, addrFrom);
-                connman.MarkAddressGood(addrFrom);
-            }
         }
 
         // Relay alerts
