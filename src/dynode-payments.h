@@ -9,7 +9,7 @@
 #include "core_io.h"
 #include "dynode.h"
 #include "key.h"
-#include "main.h"
+#include "net_processing.h"
 #include "util.h"
 #include "utilstrencodings.h"
 

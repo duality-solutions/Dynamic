@@ -11,7 +11,7 @@
 #include "governance-classes.h"
 #include "governance-validators.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"

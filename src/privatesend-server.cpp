@@ -802,7 +802,7 @@ void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal)
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto entry : vecEntries) {
         bool fOk = g_connman->ForNode(entry.addr, [&txFinal, this](CNode* pnode) {
-            pnode->PushMessage(NetMsgType::PSFINALTX, nSessionID, txFinal);
+            g_connman->PushMessage(pnode, NetMsgType::PSFINALTX, nSessionID, txFinal);
             return true;
         });
         if(!fOk) {
@@ -816,7 +816,7 @@ void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal)
 void CPrivateSendServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
 {
     if(!pnode) return;
-    pnode->PushMessage(NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
+    g_connman->PushMessage(pnode, NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
 }
 
 void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
@@ -863,7 +863,7 @@ void CPrivateSendServer::RelayCompletedTransaction(PoolMessage nMessageID)
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto entry : vecEntries) {
         bool fOk = g_connman->ForNode(entry.addr, [&nMessageID, this](CNode* pnode) {
-            pnode->PushMessage(NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID);
+            g_connman->PushMessage(pnode, NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID);
             return true;
         });
         if(!fOk) {

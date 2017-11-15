@@ -13,7 +13,7 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkforks.h"
-#include "main.h"
+#include "validation.h"
 #include "uint256.h"
 #include "util.h"
 

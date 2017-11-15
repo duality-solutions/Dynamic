@@ -77,7 +77,7 @@ bool CPrivatesendQueue::Relay()
     std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::PSQUEUE, (*this));
+            g_connman->PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
 
     g_connman->ReleaseNodeVector(vNodesCopy);
     return true;

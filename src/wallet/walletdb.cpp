@@ -8,7 +8,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
-#include "main.h" // For CheckTransaction
+#include "validation.h" // For CheckTransaction
 #include "protocol.h"
 #include "serialize.h"
 #include "sync.h"

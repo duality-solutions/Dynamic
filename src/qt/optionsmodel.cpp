@@ -19,7 +19,7 @@
 #include "dynodeconfig.h"
 #endif
 #include "init.h"
-#include "main.h" // For DEFAULT_SCRIPTCHECK_THREADS
+#include "validation.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
 #include "privatesend-client.h"
 #include "txdb.h" // for -dbcache defaults

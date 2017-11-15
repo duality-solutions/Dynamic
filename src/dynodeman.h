@@ -94,7 +94,7 @@ private:
 
     static const std::string SERIALIZATION_VERSION_STRING;
 
-    static const int SSEG_UPDATE_SECONDS        = 3 * 60 * 60;
+    static const int PSEG_UPDATE_SECONDS        = 3 * 60 * 60;
 
     static const int LAST_PAID_SCAN_BLOCKS      = 100;
 
@@ -223,7 +223,7 @@ public:
     /// Count Dynodes by network type - NET_IPV4, NET_IPV6, NET_TOR
     // int CountByIP(int nNetworkType);
 
-    void SsegUpdate(CNode* pnode);
+    void PsegUpdate(CNode* pnode);
 
     /// Find an entry
     CDynode* Find(const CScript &payee);

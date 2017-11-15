@@ -7,7 +7,7 @@
 #include "governance-object.h"
 #include "governance-vote.h"
 #include "governance-classes.h"
-#include "main.h"
+#include "net_processing.h"
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
@@ -833,8 +833,8 @@ void CGovernanceManager::Sync(CNode* pfrom, const uint256& nProp, const CBloomFi
         }
     }
 
-    pfrom->PushMessage(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, nObjCount);
-    pfrom->PushMessage(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount);
+    g_connman->PushMessage(pfrom, NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ, nObjCount);
+    g_connman->PushMessage(pfrom, NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_GOVOBJ_VOTE, nVoteCount);
     LogPrintf("CGovernanceManager::Sync -- sent %d objects and %d votes to peer=%d\n", nObjCount, nVoteCount, pfrom->id);
 }
 
@@ -1146,7 +1146,7 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     LogPrint("gobject", "CGovernanceObject::RequestGovernanceObject -- hash = %s (peer=%d)\n", nHash.ToString(), pfrom->GetId());
 
     if(pfrom->nVersion < GOVERNANCE_FILTER_PROTO_VERSION) {
-        pfrom->PushMessage(NetMsgType::DNGOVERNANCESYNC, nHash);
+        g_connman->PushMessage(pfrom, NetMsgType::DNGOVERNANCESYNC, nHash);
         return;
     }
 
@@ -1169,7 +1169,7 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     }
 
     LogPrint("gobject", "CGovernanceManager::RequestGovernanceObject -- nHash %s nVoteCount %d peer=%d\n", nHash.ToString(), nVoteCount, pfrom->id);
-    pfrom->PushMessage(NetMsgType::DNGOVERNANCESYNC, nHash, filter);
+    g_connman->PushMessage(pfrom, NetMsgType::DNGOVERNANCESYNC, nHash, filter);
 }
 
 int CGovernanceManager::RequestGovernanceObjectVotes(CNode* pnode)

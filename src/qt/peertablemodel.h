@@ -8,7 +8,7 @@
 #ifndef DYNAMIC_QT_PEERTABLEMODEL_H
 #define DYNAMIC_QT_PEERTABLEMODEL_H
 
-#include "main.h" // For CNodeStateStats
+#include "net_processing.h" // For CNodeStateStats
 #include "net.h"
 
 #include <QAbstractTableModel>

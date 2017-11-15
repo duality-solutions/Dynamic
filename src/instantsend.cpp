@@ -9,7 +9,7 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "key.h"
-#include "main.h"
+#include "validation.h"
 #include "messagesigner.h"
 #include "net.h"
 #include "protocol.h"

@@ -16,7 +16,7 @@
 #include "dynode-sync.h"
 #include "governance-classes.h"
 #include "hash.h"
-#include "main.h"
+#include "validation.h"
 #include "consensus/merkle.h"
 #include "net.h"
 #include "policy/policy.h"
@@ -192,7 +192,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 
         // Process this block the same as if we had received it from another node
         CValidationState state;
-        if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL, connman))
+        if (!ProcessNewBlock(chainparams, pblock, true, NULL, NULL))
             return error("ProcessBlock, block not accepted");
     }
 
@@ -514,7 +514,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 
     // Process this block the same as if we had received it from another node
     CValidationState state;
-    if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL, connman))
+    if (!ProcessNewBlock(chainparams, pblock, true, NULL, NULL))
         return error("ProcessBlockFound -- ProcessNewBlock() failed, block not accepted");
 
     return true;

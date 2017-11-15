@@ -12,7 +12,7 @@
 #include "guiutil.h"
 #include "peertablemodel.h"
 
-#include "main.h"
+#include "validation.h"
 #include "chainparams.h"
 #include "rpcserver.h"
 #include "rpcclient.h"

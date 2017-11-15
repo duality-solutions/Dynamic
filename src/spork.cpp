@@ -6,8 +6,9 @@
 #include "spork.h"
 
 #include "chainparams.h"
-#include "main.h"
+#include "validation.h"
 #include "messagesigner.h"
+#include "net_processing.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -66,7 +67,7 @@ void CSporkManager::ProcessSpork(CNode* pfrom, std::string& strCommand, CDataStr
         std::map<int, CSporkMessage>::iterator it = mapSporksActive.begin();
 
         while(it != mapSporksActive.end()) {
-            pfrom->PushMessage(NetMsgType::SPORK, it->second);
+            g_connman->PushMessage(pfrom, NetMsgType::SPORK, it->second);
             it++;
         }
     }

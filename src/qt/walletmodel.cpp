@@ -18,11 +18,13 @@
 #include "base58.h"
 #include "instantsend.h"
 #include "keystore.h"
-#include "main.h"
+#include "validation.h"
+#include "net.h" // for g_connman
 #include "privatesend-client.h"
 #include "spork.h"
 #include "sync.h"
 #include "ui_interface.h"
+#include "util.h" // for GetBoolArg
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
 

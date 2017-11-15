@@ -7,14 +7,11 @@
 #define DYNAMIC_DYNODE_H
 
 #include "key.h"
-#include "main.h"
-#include "net.h"
-#include "timedata.h"
+#include "validation.h"
 #include "spork.h"
 
 class CDynode;
 class CDynodeBroadcast;
-class CDynodePing;
 
 static const int DYNODE_CHECK_SECONDS                = 5;
 static const int DYNODE_MIN_DNB_SECONDS              = 5 * 60;
@@ -35,22 +32,15 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 class CDynodePing
 {
 public:
-    CTxIn vin;
-    uint256 blockHash;
-    int64_t sigTime; //dnb message times
-    std::vector<unsigned char> vchSig;
-    bool fSentinelIsCurrent; // true if last sentinel ping was actual
-    uint32_t nSentinelVersion; // MSB is always 0, other 3 bits corresponds to x.x.x version scheme
-    //removed stop
+    CTxIn vin{};
+    uint256 blockHash{};
+    int64_t sigTime{}; //dnb message times
+    std::vector<unsigned char> vchSig{};
+    bool fSentinelIsCurrent = false; // true if last sentinel ping was actual
+    // DSB is always 0, other 3 bits corresponds to x.x.x version scheme
+    uint32_t nSentinelVersion{DEFAULT_SENTINEL_VERSION};
 
-    CDynodePing() :
-        vin(),
-        blockHash(),
-        sigTime(0),
-        vchSig(),
-        fSentinelIsCurrent(false),
-        nSentinelVersion(DEFAULT_SENTINEL_VERSION)
-        {}
+    CDynodePing() = default;
 
     CDynodePing(CTxIn& vinNew);
 
@@ -72,21 +62,6 @@ public:
         READWRITE(nSentinelVersion);
     }
 
-    void swap(CDynodePing& first, CDynodePing& second) // nothrow
-    {
-        // enable ADL (not necessary in our case, but good practice)
-        using std::swap;
-
-        // by swapping the members of two classes,
-        // the two classes are effectively swapped
-        swap(first.vin, second.vin);
-        swap(first.blockHash, second.blockHash);
-        swap(first.sigTime, second.sigTime);
-        swap(first.vchSig, second.vchSig);
-        swap(first.fSentinelIsCurrent, second.fSentinelIsCurrent);
-        swap(first.nSentinelVersion, second.nSentinelVersion);
-    }
-
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
@@ -95,67 +70,65 @@ public:
         return ss.GetHash();
     }
 
-    bool IsExpired() { return GetTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
+    bool IsExpired() const { return GetTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
     bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
     bool CheckSignature(CPubKey& pubKeyDynode, int &nDos);
     bool SimpleCheck(int& nDos);
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos);
     void Relay();
 
-    CDynodePing& operator=(CDynodePing from)
-    {
-        swap(*this, from);
-        return *this;
-    }
-    friend bool operator==(const CDynodePing& a, const CDynodePing& b)
-    {
-        return a.vin == b.vin && a.blockHash == b.blockHash;
-    }
-    friend bool operator!=(const CDynodePing& a, const CDynodePing& b)
-    {
-        return !(a == b);
-    }
-
 };
+
+inline bool operator==(const CDynodePing& a, const CDynodePing& b)
+{
+    return a.vin == b.vin && a.blockHash == b.blockHash;
+}
+inline bool operator!=(const CDynodePing& a, const CDynodePing& b)
+{
+    return !(a == b);
+}
 
 struct dynode_info_t 
 {
-    dynode_info_t()
-        : vin(),
-          addr(),
-          pubKeyCollateralAddress(),
-          pubKeyDynode(),
-          sigTime(0),
-          nLastPsq(0),
-          nTimeLastChecked(0),
-          nTimeLastPaid(0),
-          nTimeLastWatchdogVote(0),
-          nTimeLastPing(0),
-          nActiveState(0),
-          nProtocolVersion(0),
-          fInfoValid(false)
-        {}
+    // Note: all these constructors can be removed once C++14 is enabled.
+    // (in C++11 the member initializers wrongly disqualify this as an aggregate)
+    dynode_info_t() = default;
+    dynode_info_t(dynode_info_t const&) = default;
 
-    CTxIn vin;
-    CService addr;
-    CPubKey pubKeyCollateralAddress;
-    CPubKey pubKeyDynode;
-    int64_t sigTime; //dnb message time
-    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
-    int64_t nTimeLastChecked;
-    int64_t nTimeLastPaid;
-    int64_t nTimeLastWatchdogVote;
-    int64_t nTimeLastPing;
-    int nActiveState;
-    int nProtocolVersion;
-    bool fInfoValid;
+    dynode_info_t(int activeState, int protoVer, int64_t sTime) :
+        nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
+
+    dynode_info_t(int activeState, int protoVer, int64_t sTime,
+                      CTxIn const& vin, CService const& addr,
+                      CPubKey const& pkCollAddr, CPubKey const& pkDN,
+                      int64_t tWatchdogV = 0) :
+        nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
+        vin{vin}, addr{addr},
+        pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN},
+        nTimeLastWatchdogVote{tWatchdogV} {}
+
+    int nActiveState = 0;
+    int nProtocolVersion = 0;
+    int64_t sigTime = 0; //dnb message time
+
+    CTxIn vin{};
+    CService addr{};
+    CPubKey pubKeyCollateralAddress{};
+    CPubKey pubKeyDynode{};
+    int64_t nTimeLastWatchdogVote = 0;
+
+    int64_t nLastPsq = 0; //the psq count from the last psq broadcast of this node
+    int64_t nTimeLastChecked = 0;
+    int64_t nTimeLastPaid = 0;
+    int64_t nTimeLastPing = 0; //* not in CDN
+    bool fInfoValid = false; //* not in CDN
 };
 
 //
 // The Dynode Class. For managing the Privatesend process. It contains the input of the 1000DYN, signature to prove
 // it's the one who own that ip address and code for calculating the payment election.
 //
-class CDynode
+class CDynode : public dynode_info_t
 {
 private:
     // critical section to protect the inner data structures
@@ -179,25 +152,16 @@ public:
         COLLATERAL_INVALID_AMOUNT
     };
 
-    CTxIn vin;
-    CService addr;
-    CPubKey pubKeyCollateralAddress;
-    CPubKey pubKeyDynode;
-    CDynodePing lastPing;
-    std::vector<unsigned char> vchSig;
-    int64_t sigTime; //dnb message time
-    int64_t nLastPsq; //the psq count from the last psq broadcast of this node
-    int64_t nTimeLastChecked;
-    int64_t nTimeLastPaid;
-    int64_t nTimeLastWatchdogVote;
-    int nActiveState;
-    int nCacheCollateralBlock;
-    int nBlockLastPaid;
-    int nProtocolVersion;
-    int nPoSeBanScore;
-    int nPoSeBanHeight;
-    bool fAllowMixingTx;
-    bool fUnitTest;
+
+    CDynodePing lastPing{};
+    std::vector<unsigned char> vchSig{};
+
+    int nCacheCollateralBlock{};
+    int nBlockLastPaid{};
+    int nPoSeBanScore{};
+    int nPoSeBanHeight{};
+    bool fAllowMixingTx{};
+    bool fUnitTest = false;
 
     // KEEP TRACK OF GOVERNANCE ITEMS EACH DYNODE HAS VOTE UPON FOR RECALCULATION
     std::map<uint256, int> mapGovernanceObjectsVotedOn;
@@ -232,35 +196,6 @@ public:
         READWRITE(fAllowMixingTx);
         READWRITE(fUnitTest);
         READWRITE(mapGovernanceObjectsVotedOn);
-    }
-
-    void swap(CDynode& first, CDynode& second) // nothrow
-    {
-        // enable ADL (not necessary in our case, but good practice)
-        using std::swap;
-
-        // by swapping the members of two classes,
-        // the two classes are effectively swapped
-        swap(first.vin, second.vin);
-        swap(first.addr, second.addr);
-        swap(first.pubKeyCollateralAddress, second.pubKeyCollateralAddress);
-        swap(first.pubKeyDynode, second.pubKeyDynode);
-        swap(first.lastPing, second.lastPing);
-        swap(first.vchSig, second.vchSig);
-        swap(first.sigTime, second.sigTime);
-        swap(first.nLastPsq, second.nLastPsq);
-        swap(first.nTimeLastChecked, second.nTimeLastChecked);
-        swap(first.nTimeLastPaid, second.nTimeLastPaid);
-        swap(first.nTimeLastWatchdogVote, second.nTimeLastWatchdogVote);
-        swap(first.nActiveState, second.nActiveState);
-        swap(first.nCacheCollateralBlock, second.nCacheCollateralBlock);
-        swap(first.nBlockLastPaid, second.nBlockLastPaid);
-        swap(first.nProtocolVersion, second.nProtocolVersion);
-        swap(first.nPoSeBanScore, second.nPoSeBanScore);
-        swap(first.nPoSeBanHeight, second.nPoSeBanHeight);
-        swap(first.fAllowMixingTx, second.fAllowMixingTx);
-        swap(first.fUnitTest, second.fUnitTest);
-        swap(first.mapGovernanceObjectsVotedOn, second.mapGovernanceObjectsVotedOn);
     }
 
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
@@ -343,22 +278,30 @@ public:
 
     void UpdateWatchdogVoteTime(uint64_t nVoteTime = 0);
 
-    CDynode& operator=(CDynode from)
+    CDynode& operator=(CDynode const& from)
     {
-        swap(*this, from);
+        static_cast<dynode_info_t&>(*this)=from;
+        lastPing = from.lastPing;
+        vchSig = from.vchSig;
+        nCacheCollateralBlock = from.nCacheCollateralBlock;
+        nBlockLastPaid = from.nBlockLastPaid;
+        nPoSeBanScore = from.nPoSeBanScore;
+        nPoSeBanHeight = from.nPoSeBanHeight;
+        fAllowMixingTx = from.fAllowMixingTx;
+        fUnitTest = from.fUnitTest;
+        mapGovernanceObjectsVotedOn = from.mapGovernanceObjectsVotedOn;
         return *this;
     }
-    friend bool operator==(const CDynode& a, const CDynode& b)
-    {
-        return a.vin == b.vin;
-    }
-    friend bool operator!=(const CDynode& a, const CDynode& b)
-    {
-        return !(a.vin == b.vin);
-    }
-
 };
 
+inline bool operator==(const CDynode& a, const CDynode& b)
+{
+    return a.vin == b.vin;
+}
+inline bool operator!=(const CDynode& a, const CDynode& b)
+{
+    return !(a.vin == b.vin);
+}
 
 //
 // The Dynode Broadcast Class : Contains a different serialize method for sending Dynodes through the network
@@ -415,33 +358,21 @@ public:
 class CDynodeVerification
 {
 public:
-    CTxIn vin1;
-    CTxIn vin2;
-    CService addr;
-    int nonce;
-    int nBlockHeight;
-    std::vector<unsigned char> vchSig1;
-    std::vector<unsigned char> vchSig2;
+    CTxIn vin1{};
+    CTxIn vin2{};
+    CService addr{};
+    int nonce{};
+    int nBlockHeight{};
+    std::vector<unsigned char> vchSig1{};
+    std::vector<unsigned char> vchSig2{};
 
-    CDynodeVerification() :
-        vin1(),
-        vin2(),
-        addr(),
-        nonce(0),
-        nBlockHeight(0),
-        vchSig1(),
-        vchSig2()
-        {}
+    CDynodeVerification() = default;
 
     CDynodeVerification(CService addr, int nonce, int nBlockHeight) :
-        vin1(),
-        vin2(),
         addr(addr),
         nonce(nonce),
-        nBlockHeight(nBlockHeight),
-        vchSig1(),
-        vchSig2()
-        {}
+        nBlockHeight(nBlockHeight)
+    {}
 
     ADD_SERIALIZE_METHODS;
 

@@ -1,15 +1,13 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2009-2010 Satoshi Nakamoto
+// Copyright (c) 2009-2015 The Bitcoin Core developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_STREAMS_H
 #define DYNAMIC_STREAMS_H
 
-#include "serialize.h"
 #include "support/allocators/zeroafterfree.h"
+#include "serialize.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -79,6 +77,13 @@ public:
     CDataStream(const std::vector<unsigned char>& vchIn, int nTypeIn, int nVersionIn) : vch(vchIn.begin(), vchIn.end())
     {
         Init(nTypeIn, nVersionIn);
+    }
+
+    template <typename... Args>
+    CDataStream(int nTypeIn, int nVersionIn, Args&&... args)
+    {
+        Init(nTypeIn, nVersionIn);
+        ::SerializeMany(*this, nType, nVersion, std::forward<Args>(args)...);
     }
 
     void Init(int nTypeIn, int nVersionIn)
@@ -347,8 +352,8 @@ private:
 
     int nType;
     int nVersion;
-	
-    FILE* file;	
+    
+    FILE* file; 
 
 public:
     CAutoFile(FILE* filenew, int nTypeIn, int nVersionIn)

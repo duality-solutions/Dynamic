@@ -11,7 +11,7 @@
 #include "dynode.h"
 #include "dynode-payments.h"
 #include "dynodeman.h"
-#include "main.h"
+#include "validation.h"
 #include "netfulfilledman.h"
 #include "spork.h"
 #include "util.h"
@@ -88,7 +88,7 @@ void CDynodeSync::SwitchToNextAsset()
             // TRY_LOCK(cs_vNodes, lockRecv);
             // if(lockRecv) { ... }
 
-            g_connman->ForEachNode([](CNode* pnode) {
+            g_connman->ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "full-sync");
             });
             LogPrintf("CDynodeSync::SwitchToNextAsset -- Sync has finished\n");
@@ -134,7 +134,7 @@ void CDynodeSync::ClearFulfilledRequests()
     // TRY_LOCK(cs_vNodes, lockRecv);
     // if(!lockRecv) return;
 
-    g_connman->ForEachNode([](CNode* pnode) {
+    g_connman->ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
         netfulfilledman.RemoveFulfilledRequest(pnode->addr, "spork-sync");
         netfulfilledman.RemoveFulfilledRequest(pnode->addr, "dynode-list-sync");
         netfulfilledman.RemoveFulfilledRequest(pnode->addr, "dynode-payment-sync");
@@ -196,12 +196,12 @@ void CDynodeSync::ProcessTick()
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {
             if(nRequestedDynodeAttempt <= 2) {
-                pnode->PushMessage(NetMsgType::GETSPORKS); //get current network sporks
+                g_connman->PushMessageWithVersion(pnode, INIT_PROTO_VERSION, NetMsgType::GETSPORKS); //get current network sporks
             } else if(nRequestedDynodeAttempt < 4) {
-                dnodeman.SsegUpdate(pnode);
+                dnodeman.PsegUpdate(pnode);
             } else if(nRequestedDynodeAttempt < 6) {
                 int nDnCount = dnodeman.CountDynodes();
-                pnode->PushMessage(NetMsgType::DYNODEPAYMENTSYNC, nDnCount); //sync payment votes
+                g_connman->PushMessage(pnode, NetMsgType::DYNODEPAYMENTSYNC, nDnCount); //sync payment votes
                 SendGovernanceSyncRequest(pnode);
             } else {
                 nRequestedDynodeAssets = DYNODE_SYNC_FINISHED;
@@ -227,7 +227,7 @@ void CDynodeSync::ProcessTick()
                 // always get sporks first, only request once from each peer
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "spork-sync");
                 // get current network sporks
-                pnode->PushMessage(NetMsgType::GETSPORKS);
+                g_connman->PushMessageWithVersion(pnode, INIT_PROTO_VERSION, NetMsgType::GETSPORKS);
                 LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- requesting sporks from peer %d\n", nTick, nRequestedDynodeAssets, pnode->id);
             }
 
@@ -257,7 +257,7 @@ void CDynodeSync::ProcessTick()
                 if (pnode->nVersion < dnpayments.GetMinDynodePaymentsProto()) continue;
                 nRequestedDynodeAttempt++;
 
-                dnodeman.SsegUpdate(pnode);
+                dnodeman.PsegUpdate(pnode);
 
                 g_connman->ReleaseNodeVector(vNodesCopy);
                 return; //this will cause each peer to get one request each six seconds for the various assets we need
@@ -301,7 +301,7 @@ void CDynodeSync::ProcessTick()
                 nRequestedDynodeAttempt++;
 
                 // ask node for all payment votes it has (new nodes will only return votes for future payments)
-                pnode->PushMessage(NetMsgType::DYNODEPAYMENTSYNC, dnpayments.GetStorageLimit());
+                g_connman->PushMessage(pnode, NetMsgType::DYNODEPAYMENTSYNC, dnpayments.GetStorageLimit());
                 // ask node for missing pieces only (old nodes will not be asked)
                 dnpayments.RequestLowDataPaymentBlocks(pnode);
 
@@ -379,10 +379,15 @@ void CDynodeSync::ProcessTick()
 
 void CDynodeSync::SendGovernanceSyncRequest(CNode* pnode)
 {
-    CBloomFilter filter;
-    filter.clear();
+    if(pnode->nVersion >= GOVERNANCE_FILTER_PROTO_VERSION) {
+        CBloomFilter filter;
+        filter.clear();
 
-    pnode->PushMessage(NetMsgType::DNGOVERNANCESYNC, uint256(), filter);
+        g_connman->PushMessage(pnode, NetMsgType::DNGOVERNANCESYNC, uint256(), filter);
+    }
+    else {
+        g_connman->PushMessage(pnode, NetMsgType::DNGOVERNANCESYNC, uint256());
+    }
 }
 
 void CDynodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload)

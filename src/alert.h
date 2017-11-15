@@ -17,6 +17,7 @@
 #include <string>
 
 class CAlert;
+class CConnman;
 class CNode;
 class uint256;
 
@@ -101,7 +102,7 @@ public:
     bool Cancels(const CAlert& alert) const;
     bool AppliesTo(int nVersion, const std::string& strSubVerIn) const;
     bool AppliesToMe() const;
-    bool RelayTo(CNode* pnode) const;
+    bool RelayTo(CNode* pnode, CConnman& connman) const;
     bool Sign();
     bool CheckSignature(const std::vector<unsigned char>& alertKey) const;
     bool ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThread = true); // fThread means run -alertnotify in a free-running thread

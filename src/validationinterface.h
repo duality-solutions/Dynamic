@@ -1,8 +1,6 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2009-2010 Satoshi Nakamoto
+// Copyright (c) 2009-2015 The Bitcoin Core developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_VALIDATIONINTERFACE_H
@@ -12,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 
 class CBlock;
+struct CBlockLocator;
 class CBlockIndex;
 class CConnman;
 class CReserveScript;
@@ -19,8 +18,6 @@ class CTransaction;
 class CValidationInterface;
 class CValidationState;
 class uint256;
-
-struct CBlockLocator;
 
 // These functions dispatch to one or all registered wallets
 
@@ -30,12 +27,10 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn);
 void UnregisterValidationInterface(CValidationInterface* pwalletIn);
 /** Unregister all wallets from core */
 void UnregisterAllValidationInterfaces();
-/** Push an updated transaction to all registered wallets */
-void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL);
 
 class CValidationInterface {
 protected:
-    virtual void UpdatedBlockTip(const CBlockIndex *pindex) {}
+    virtual void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {}
     virtual void SyncTransaction(const CTransaction &tx, const CBlock *pblock) {}
     virtual void NotifyTransactionLock(const CTransaction &tx) {}
     virtual void SetBestChain(const CBlockLocator &locator) {}
@@ -52,7 +47,7 @@ protected:
 
 struct CMainSignals {
     /** Notifies listeners of updated block chain tip */
-    boost::signals2::signal<void (const CBlockIndex *)> UpdatedBlockTip;
+    boost::signals2::signal<void (const CBlockIndex *, const CBlockIndex *, bool fInitialDownload)> UpdatedBlockTip;
     /** Notifies listeners of updated transaction data (transaction, and optionally the block it is found in. */
     boost::signals2::signal<void (const CTransaction &, const CBlock *)> SyncTransaction;
     /** Notifies listeners of an updated transaction lock without new data. */

@@ -29,11 +29,12 @@
 #include "httpserver.h"
 #include "httprpc.h"
 #include "key.h"
-#include "main.h"
+#include "validation.h"
 #include "messagesigner.h"
 #include "miner.h"
 #include "net.h"
 #include "netfulfilledman.h"
+#include "net_processing.h"
 #include "policy/policy.h"
 #include "privatesend-client.h"
 #include "privatesend-server.h"
@@ -199,6 +200,8 @@ void Interrupt(boost::thread_group& threadGroup)
     InterruptRPC();
     InterruptREST();
     InterruptTorControl();
+    if (g_connman)
+        g_connman->Interrupt();
     threadGroup.interrupt_all();
 }
 
@@ -2055,7 +2058,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     connOptions.nSendBufferMaxSize = 1000*GetArg("-maxsendbuffer", DEFAULT_MAXSENDBUFFER);
     connOptions.nReceiveFloodSize = 1000*GetArg("-maxreceivebuffer", DEFAULT_MAXRECEIVEBUFFER);
 
-    if(!connman.Start(threadGroup, scheduler, strNodeError, connOptions))
+    if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
 
     // Generate coins in the background

@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_MAIN_H
-#define DYNAMIC_MAIN_H
+#ifndef DYNAMIC_VALIDATION_H
+#define DYNAMIC_VALIDATION_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/dynamic-config.h"
@@ -15,7 +15,7 @@
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
-#include "net.h"
+#include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "spentindex.h"
 #include "sync.h"
@@ -30,6 +30,10 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <atomic>
+#include <boost/unordered_map.hpp>
+#include <boost/filesystem/path.hpp>
 
 class CBloomFilter;
 class CBlockIndex;
@@ -201,10 +205,7 @@ static const unsigned int DEFAULT_CHECKLEVEL = 3;
 // Add 20% for Orphan block rate = 1590MB
 static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 1590 * 1024 * 1024;
 
-/** Register with a network node to receive its signals */
-void RegisterNodeSignals(CNodeSignals& nodeSignals);
-/** Unregister a network node */
-void UnregisterNodeSignals(CNodeSignals& nodeSignals);
+
 
 /** 
  * Process an incoming block. This only returns after the best known valid
@@ -218,7 +219,16 @@ void UnregisterNodeSignals(CNodeSignals& nodeSignals);
  * @param[out]  dbp     The already known disk position of pblock, or NULL if not yet stored.
  * @return True if state.IsValid()
  */
-bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, CNode* pfrom, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp, CConnman* connman);
+bool ProcessNewBlock(const CChainParams& chainparams, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp, bool* fNewBlock);
+/**
+ * Process incoming block headers.
+ *
+ * @param[in]  block The block headers themselves
+ * @param[out] state This may be set to an Error state if any error occurred processing them
+ * @param[in]  chainparams The params for the chain we want to connect to
+ * @param[out] ppindex If set, the pointer will be set to point to the last new block index object for the given headers
+ */
+bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& block, CValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex=NULL);
 /** Check whether enough disk space is available for an incoming block */
 bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
 /** Open a block file (blk?????.dat) */
@@ -235,15 +245,6 @@ bool InitBlockIndex(const CChainParams& chainparams);
 bool LoadBlockIndex();
 /** Unload database information */
 void UnloadBlockIndex();
-/** Process protocol messages received from a given node */
-bool ProcessMessages(CNode* pfrom, CConnman& connman);
-/**
- * Send queued protocol messages to be sent to a give node.
- *
- * @param[in]   pto             The node which we are sending messages to.
- * @param[in]   connman         The connection manager for that node.
- */
-bool SendMessages(CNode* pto, CConnman& connman);
 /** Run an instance of the script checking thread */
 void ThreadScriptCheck();
 
@@ -289,10 +290,6 @@ void UnlinkPrunedFiles(std::set<int>& setFilesToPrune);
 
 /** Create a new block index entry for a given block hash */
 CBlockIndex * InsertBlockIndex(uint256 hash);
-/** Get statistics from node state */
-bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);
-/** Increase a node's misbehavior score. */
-void Misbehaving(NodeId nodeid, int howmuch);
 /** Flush all state, indexes and buffers to disk. */
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */
@@ -312,13 +309,6 @@ std::string FormatStateMessage(const CValidationState &state);
 
 /** Get the BIP9 state for a given deployment at the current tip. */
 ThresholdState VersionBitsTipState(const Consensus::Params& params, Consensus::DeploymentPos pos);
-
-struct CNodeStateStats {
-    int nMisbehavior;
-    int nSyncHeight;
-    int nCommonHeight;
-    std::vector<int> vHeightInFlight;
-};
 
 struct CTimestampIndexIteratorKey {
     unsigned int timestamp;
@@ -876,4 +866,4 @@ static const unsigned int REJECT_ALREADY_KNOWN = 0x101;
 /** Transaction conflicts with a transaction already known */
 static const unsigned int REJECT_CONFLICT = 0x102;
 
-#endif // DYNAMIC_MAIN_H
+#endif // DYNAMIC_VALIDATION_H

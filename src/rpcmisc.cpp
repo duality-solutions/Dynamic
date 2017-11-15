@@ -11,7 +11,7 @@
 #include "dynode-sync.h"
 #endif
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"

@@ -552,7 +552,7 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
 
     // push all of our signatures to the Dynode
     LogPrintf("CPrivateSendClient::SignFinalTransaction -- pushing sigs to the dynode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
-    pnode->PushMessage(NetMsgType::PSSIGNFINALTX, sigs);
+    g_connman->PushMessage(pnode, NetMsgType::PSSIGNFINALTX, sigs);
     SetState(POOL_STATE_SIGNING);
     nTimeLastSuccessfulStep = GetTimeMillis();
 
@@ -850,7 +850,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
 
         CNode* pnodeFound = NULL;
         bool fDisconnect = false;
-        g_connman->ForNode(infoDn.addr, [&pnodeFound, &fDisconnect](CNode* pnode) {
+        g_connman->ForNode(infoDn.addr, CConnman::AllNodes, [&pnodeFound, &fDisconnect](CNode* pnode) {
             pnodeFound = pnode;
             if(pnodeFound->fDisconnect) {
                 fDisconnect = true;
@@ -870,7 +870,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
 
-            pnode->PushMessage(NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
+            g_connman->PushMessage(pnode, NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- connected (from queue), sending PSACCEPT: nSessionDenom: %d (%s), addr=%s\n",
                     nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), pnode->addr.ToString());
             strAutoDenomResult = _("Mixing in progress...");
@@ -925,7 +925,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
 
         CNode* pnodeFound = NULL;
         bool fDisconnect = false;
-        g_connman->ForNode(infoDn.addr, [&pnodeFound, &fDisconnect](CNode* pnode) {
+        g_connman->ForNode(infoDn.addr, CConnman::AllNodes, [&pnodeFound, &fDisconnect](CNode* pnode) {
             pnodeFound = pnode;
             if(pnodeFound->fDisconnect) {
                 fDisconnect = true;
@@ -953,7 +953,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
                 nSessionDenom = CPrivateSend::GetDenominationsByAmounts(vecAmounts);
             }
 
-            pnode->PushMessage(NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
+            g_connman->PushMessage(pnode, NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, sending PSACCEPT, nSessionDenom: %d (%s)\n",
                     nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
             strAutoDenomResult = _("Mixing in progress...");
@@ -1375,7 +1375,7 @@ void CPrivateSendClient::RelayIn(const CPrivateSendEntry& entry)
 
     g_connman->ForNode(infoMixingDynode.addr, [&entry](CNode* pnode) {
         LogPrintf("CPrivateSendClient::RelayIn -- found master, relaying message to %s\n", pnode->addr.ToString());
-        pnode->PushMessage(NetMsgType::PSVIN, entry);
+        g_connman->PushMessage(pnode, NetMsgType::PSVIN, entry);
         return true;
     });
 }

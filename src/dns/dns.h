@@ -12,7 +12,7 @@
 #include "wallet/db.h"
 #include "hooks.h"
 #include "keystore.h"
-#include "main.h"
+#include "validation.h"
 #include "rpcprotocol.h"
 
 class CTxMemPool;

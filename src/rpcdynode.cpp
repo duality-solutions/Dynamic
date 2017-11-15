@@ -9,7 +9,7 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "privatesend-client.h"
 #include "privatesend-server.h"
 #include "rpcserver.h"

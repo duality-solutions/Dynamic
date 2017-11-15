@@ -10,7 +10,7 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "coins.h"
-#include "main.h"
+#include "validation.h"
 #include "policy/policy.h"
 #include "rpcserver.h"
 #include "streams.h"
@@ -1006,7 +1006,7 @@ UniValue invalidateblock(const UniValue& params, bool fHelp)
     }
 
     if (state.IsValid()) {
-        ActivateBestChain(state, Params(), NULL, g_connman.get());
+        ActivateBestChain(state, Params(), NULL);
     }
 
     if (!state.IsValid()) {
@@ -1045,7 +1045,7 @@ UniValue reconsiderblock(const UniValue& params, bool fHelp)
     }
 
     if (state.IsValid()) {
-        ActivateBestChain(state, Params(), NULL, g_connman.get());
+        ActivateBestChain(state, Params(), NULL);
     }
 
     if (!state.IsValid()) {

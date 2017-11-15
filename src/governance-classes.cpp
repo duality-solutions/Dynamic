@@ -11,7 +11,7 @@
 
 #include "core_io.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "utilstrencodings.h"
 
 #include <univalue.h>

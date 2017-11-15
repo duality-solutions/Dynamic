@@ -7,7 +7,7 @@
 #include "consensus/consensus.h"
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
-#include "main.h"
+#include "validation.h"
 #include "dynode-payments.h"
 #include "miner.h"
 #include "pubkey.h"
@@ -119,9 +119,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             txFirst.push_back(new CTransaction(pblock->vtx[0]));
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
         pblock->nNonce = blockinfo[i].nonce;
-        CValidationState state;
-        BOOST_CHECK(ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL, connman));
-        BOOST_CHECK(state.IsValid());
+        BOOST_CHECK(ProcessNewBlock(chainparams, pblock, true, NULL, NULL));
         pblock->hashPrevBlock = pblock->GetHash();
     }
 

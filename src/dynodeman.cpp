@@ -161,9 +161,9 @@ void CDynodeMan::AskForDN(CNode* pnode, const CTxIn &vin)
         // we never asked any node for this outpoint
         LogPrintf("CDynodeMan::AskForDN -- Asking peer %s for missing Dynode entry for the first time: %s\n", pnode->addr.ToString(), vin.prevout.ToStringShort());
     }
-    mWeAskedForDynodeListEntry[vin.prevout][pnode->addr] = GetTime() + SSEG_UPDATE_SECONDS;
+    mWeAskedForDynodeListEntry[vin.prevout][pnode->addr] = GetTime() + PSEG_UPDATE_SECONDS;
 
-    pnode->PushMessage(NetMsgType::SSEG, vin);
+    g_connman->PushMessage(pnode, NetMsgType::PSEG, vin);
 }
 
 void CDynodeMan::Check()
@@ -422,7 +422,7 @@ int CDynodeMan::CountByIP(int nNetworkType)
 }
 */
 
-void CDynodeMan::SsegUpdate(CNode* pnode)
+void CDynodeMan::PsegUpdate(CNode* pnode)
 {
     LOCK(cs);
     
@@ -430,17 +430,17 @@ void CDynodeMan::SsegUpdate(CNode* pnode)
         if(!(pnode->addr.IsRFC1918() || pnode->addr.IsLocal())) {
             std::map<CNetAddr, int64_t>::iterator it = mWeAskedForDynodeList.find(pnode->addr);
             if(it != mWeAskedForDynodeList.end() && GetTime() < (*it).second) {
-                LogPrintf("CDynodeMan::SsegUpdate -- we already asked %s for the list; skipping...\n", pnode->addr.ToString());
+                LogPrintf("CDynodeMan::PsegUpdate -- we already asked %s for the list; skipping...\n", pnode->addr.ToString());
                 return;
             }
         }
     }      
 
-    pnode->PushMessage(NetMsgType::SSEG, CTxIn());
-    int64_t askAgain = GetTime() + SSEG_UPDATE_SECONDS;
+    g_connman->PushMessage(pnode, NetMsgType::PSEG, CTxIn());
+    int64_t askAgain = GetTime() + PSEG_UPDATE_SECONDS;
     mWeAskedForDynodeList[pnode->addr] = askAgain;
 
-    LogPrint("Dynode", "CDynodeMan::SsegUpdate -- asked %s for the list\n", pnode->addr.ToString());
+    LogPrint("Dynode", "CDynodeMan::PsegUpdate -- asked %s for the list\n", pnode->addr.ToString());
 }
 
 CDynode* CDynodeMan::Find(const CScript &payee)
@@ -762,7 +762,7 @@ void CDynodeMan::ProcessDynodeConnections()
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    g_connman->ForEachNode([](CNode* pnode) {
+    g_connman->ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
         if(pnode->fDynode) {
             if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr) return true;
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
@@ -870,7 +870,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         // we might have to ask for a Dynode entry once
         AskForDN(pfrom, dnp.vin);
 
-    } else if (strCommand == NetMsgType::SSEG) { //Get Dynode list or specific entry
+    } else if (strCommand == NetMsgType::PSEG) { //Get Dynode list or specific entry
         // Ignore such requests until we are fully synced.
         // We could start processing this after Dynode list is synced
         // but this is a heavy one so it's better to finish sync first.
@@ -879,7 +879,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         CTxIn vin;
         vRecv >> vin;
 
-        LogPrint("Dynode", "SSEG -- Dynode list, Dynode=%s\n", vin.prevout.ToStringShort());
+        LogPrint("Dynode", "PSEG -- Dynode list, Dynode=%s\n", vin.prevout.ToStringShort());
 
         LOCK(cs);
 
@@ -895,7 +895,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
                     LogPrintf("PSEG -- peer already asked me for the list, peer=%d\n", pfrom->id);
                     return;
                 }
-                int64_t askAgain = GetTime() + SSEG_UPDATE_SECONDS;
+                int64_t askAgain = GetTime() + PSEG_UPDATE_SECONDS;
                 mAskedUsForDynodeList[pfrom->addr] = askAgain;
             }
         } //else, asking for a specific node which is ok
@@ -907,7 +907,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             if (dn.addr.IsRFC1918() || dn.addr.IsLocal()) continue; // do not send local network Dynode
             if (dn.IsUpdateRequired()) continue; // do not send outdated Dynodes
 
-            LogPrint("Dynode", "SSEG -- Sending Dynode entry: Dynode=%s  addr=%s\n", dn.vin.prevout.ToStringShort(), dn.addr.ToString());
+            LogPrint("Dynode", "PSEG -- Sending Dynode entry: Dynode=%s  addr=%s\n", dn.vin.prevout.ToStringShort(), dn.addr.ToString());
             CDynodeBroadcast dnb = CDynodeBroadcast(dn);
             uint256 hash = dnb.GetHash();
             pfrom->PushInventory(CInv(MSG_DYNODE_ANNOUNCE, hash));
@@ -919,18 +919,18 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             }
 
             if (vin == dn.vin) {
-                LogPrintf("SSEG -- Sent 1 Dynode inv to peer %d\n", pfrom->id);
+                LogPrintf("PSEG -- Sent 1 Dynode inv to peer %d\n", pfrom->id);
                 return;
             }
         }
 
         if(vin == CTxIn()) {
-            pfrom->PushMessage(NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_LIST, nInvCount);
-            LogPrintf("SSEG -- Sent %d Dynode invs to peer %d\n", nInvCount, pfrom->id);
+            g_connman->PushMessage(pfrom, NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_LIST, nInvCount);
+            LogPrintf("PSEG -- Sent %d Dynode invs to peer %d\n", nInvCount, pfrom->id);
             return;
         }
         // smth weird happen - someone asked us for vin we have no idea about?
-        LogPrint("Dynode", "SSEG -- No invs sent to peer %d\n", pfrom->id);
+        LogPrint("Dynode", "PSEG -- No invs sent to peer %d\n", pfrom->id);
 
     } else if (strCommand == NetMsgType::DNVERIFY) { // Dynode Verify
 
@@ -1108,7 +1108,7 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
     CDynodeVerification dnv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
     mWeAskedForVerification[addr] = dnv;
     LogPrintf("CDynodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", dnv.nonce, addr.ToString());
-    pnode->PushMessage(NetMsgType::DNVERIFY, dnv);
+    g_connman->PushMessage(pnode, NetMsgType::DNVERIFY, dnv);
 
     return true;
 }
@@ -1154,7 +1154,7 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         return;
     }
 
-    pnode->PushMessage(NetMsgType::DNVERIFY, dnv);
+    g_connman->PushMessage(pnode, NetMsgType::DNVERIFY, dnv);
     netfulfilledman.AddFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply");
 }
 

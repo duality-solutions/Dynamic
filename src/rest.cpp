@@ -8,7 +8,7 @@
 #include "primitives/block.h"
 #include "chain.h"
 #include "chainparams.h"
-#include "main.h"
+#include "validation.h"
 #include "httpserver.h"
 #include "rpcserver.h"
 #include "streams.h"
