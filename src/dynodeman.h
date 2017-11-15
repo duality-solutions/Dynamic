@@ -166,7 +166,7 @@ public:
 
     std::vector<std::pair<int, CDynode> > GetDynodeRanks(int nBlockHeight = -1, int nMinProtocol=0);
     int GetDynodeRank(const CTxIn &vin, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
-    CDynode* GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
+    bool GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive, dynode_info_t& dnInfoRet);
 
     void ProcessDynodeConnections();
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();

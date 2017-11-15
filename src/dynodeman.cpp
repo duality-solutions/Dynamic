@@ -657,7 +657,7 @@ std::vector<std::pair<int, CDynode> > CDynodeMan::GetDynodeRanks(int nBlockHeigh
     return vecDynodeRanks;
 }
 
-CDynode* CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive)
+bool CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive, dynode_info_t& dnInfoRet)
 {
     std::vector<std::pair<int64_t, CDynode*> > vecDynodeScores;
 
@@ -666,7 +666,7 @@ CDynode* CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtoc
     uint256 blockHash;
     if(!GetBlockHash(blockHash, nBlockHeight)) {
         LogPrintf("CDynode::GetDynodeByRank -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nBlockHeight);
-        return NULL;
+        return false;
     }
 
     // Fill scores
@@ -686,7 +686,8 @@ CDynode* CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtoc
     BOOST_FOREACH (PAIRTYPE(int64_t, CDynode*)& s, vecDynodeScores){
         rank++;
         if(rank == nRank) {
-            return s.second;
+            dnInfoRet = *s.second;
+            return true;
         }
     }
 
