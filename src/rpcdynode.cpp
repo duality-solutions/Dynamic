@@ -189,11 +189,13 @@ UniValue dynode(const UniValue& params, bool fHelp)
         int nCount;
         int nHeight;
         CDynode* winner = NULL;
+        CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
-            nHeight = chainActive.Height() + (strCommand == "current" ? 1 : 10);
+            pindex = chainActive.Tip();
         }
-        dnodeman.UpdateLastPaid();
+        nHeight = pindex->nHeight + (strCommand == "current" ? 1 : 10);
+        dnodeman.UpdateLastPaid(pindex);
         winner = dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount);
         if(!winner) return "unknown";
 
@@ -488,7 +490,12 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     }
 
     if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-       dnodeman.UpdateLastPaid();
+        CBlockIndex* pindex = NULL;
+         {
+            LOCK(cs_main);
+            pindex = chainActive.Tip();
+        }
+        dnodeman.UpdateLastPaid(pindex);
     }
 
     UniValue obj(UniValue::VOBJ);

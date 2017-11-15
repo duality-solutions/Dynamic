@@ -615,7 +615,7 @@ int64_t CInstantSend::GetAverageDynodeOrphanVoteTime()
 
 void CInstantSend::CheckAndRemove()
 {
-    if(!pCurrentBlockIndex) return;
+    if(!dynodeSync.IsDynodeListSynced()) return;
 
     LOCK(cs_instantsend);
 
@@ -625,7 +625,7 @@ void CInstantSend::CheckAndRemove()
     while(itLockCandidate != mapTxLockCandidates.end()) {
         CTxLockCandidate &txLockCandidate = itLockCandidate->second;
         uint256 txHash = txLockCandidate.GetHash();
-        if(txLockCandidate.IsExpired(pCurrentBlockIndex->nHeight)) {
+        if(txLockCandidate.IsExpired(nCachedBlockHeight)) {
             LogPrintf("CInstantSend::CheckAndRemove -- Removing expired Transaction Lock Candidate: txid=%s\n", txHash.ToString());
             std::map<COutPoint, COutPointLock>::iterator itOutpointLock = txLockCandidate.mapOutPointLocks.begin();
             while(itOutpointLock != txLockCandidate.mapOutPointLocks.end()) {
@@ -643,7 +643,7 @@ void CInstantSend::CheckAndRemove()
     // remove expired votes
     std::map<uint256, CTxLockVote>::iterator itVote = mapTxLockVotes.begin();
     while(itVote != mapTxLockVotes.end()) {
-        if(itVote->second.IsExpired(pCurrentBlockIndex->nHeight)) {
+        if(itVote->second.IsExpired(nCachedBlockHeight)) {
             LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired vote: txid=%s  dynode=%s\n",
                     itVote->second.GetTxHash().ToString(), itVote->second.GetDynodeOutpoint().ToStringShort());
             mapTxLockVotes.erase(itVote++);        } else {
@@ -806,7 +806,7 @@ void CInstantSend::Relay(const uint256& txHash) const
 }
 
 void CInstantSend::UpdatedBlockTip(const CBlockIndex *pindex){
-    pCurrentBlockIndex = pindex;
+    nCachedBlockHeight = pindex->nHeight;
 }
 
 void CInstantSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)

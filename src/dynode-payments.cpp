@@ -375,8 +375,6 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         if(pfrom->nVersion < GetMinDynodePaymentsProto()) return;
 
-        if(!pCurrentBlockIndex) return;
-
         uint256 nHash = vote.GetHash();
 
         pfrom->setAskFor.erase(nHash);
@@ -384,7 +382,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         {
             LOCK(cs_mapDynodePaymentVotes);
             if(mapDynodePaymentVotes.count(nHash)) {
-                LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", nHash.ToString(), pCurrentBlockIndex->nHeight);
+                LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- hash=%s, nHeight=%d seen\n", nHash.ToString(), nCachedBlockHeight);
                 return;
             }
 
@@ -395,14 +393,14 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
             mapDynodePaymentVotes[nHash].MarkAsNotVerified();
         }
 
-        int nFirstBlock = pCurrentBlockIndex->nHeight - GetStorageLimit();
-        if(vote.nBlockHeight < nFirstBlock || vote.nBlockHeight > pCurrentBlockIndex->nHeight+20) {
-            LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- vote out of range: nFirstBlock=%d, nBlockHeight=%d, nHeight=%d\n", nFirstBlock, vote.nBlockHeight, pCurrentBlockIndex->nHeight);
+        int nFirstBlock = nCachedBlockHeight - GetStorageLimit();
+        if(vote.nBlockHeight < nFirstBlock || vote.nBlockHeight > nCachedBlockHeight+20) {
+            LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- vote out of range: nFirstBlock=%d, nBlockHeight=%d, nHeight=%d\n", nFirstBlock, vote.nBlockHeight, nCachedBlockHeight);
             return;
         }
 
         std::string strError = "";
-        if(!vote.IsValid(pfrom, pCurrentBlockIndex->nHeight, strError)) {
+        if(!vote.IsValid(pfrom, nCachedBlockHeight, strError)) {
             LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- invalid message, error: %s\n", strError);
             return;
         }
@@ -421,7 +419,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         }
 
         int nDos = 0;
-        if(!vote.CheckSignature(dnInfo.pubKeyDynode, pCurrentBlockIndex->nHeight, nDos)) {
+        if(!vote.CheckSignature(dnInfo.pubKeyDynode, nCachedBlockHeight, nDos)) {
             if(nDos) {
                 LogPrintf("DYNODEPAYMENTVOTE -- ERROR: invalid signature\n");
                 Misbehaving(pfrom->GetId(), nDos);
@@ -442,7 +440,8 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         ExtractDestination(vote.payee, address1);
         CDynamicAddress address2(address1);
 
-        LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- vote: address=%s, nBlockHeight=%d, nHeight=%d, prevout=%s\n", address2.ToString(), vote.nBlockHeight, pCurrentBlockIndex->nHeight, vote.vinDynode.prevout.ToStringShort());
+        LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- vote: address=%s, nBlockHeight=%d, nHeight=%d, prevout=%s, hash=%s new\n",
+                    address2.ToString(), vote.nBlockHeight, nCachedBlockHeight, vote.vinDynode.prevout.ToStringShort(), nHash.ToString());
 
         if(AddPaymentVote(vote)){
             vote.Relay();
@@ -486,13 +485,13 @@ bool CDynodePayments::IsScheduled(CDynode& dn, int nNotBlockHeight)
 {
     LOCK(cs_mapDynodeBlocks);
 
-    if(!pCurrentBlockIndex) return false;
+    if(!dynodeSync.IsDynodeListSynced()) return false;
 
     CScript dnpayee;
     dnpayee = GetScriptForDestination(dn.pubKeyCollateralAddress.GetID());
 
     CScript payee;
-    for(int64_t h = pCurrentBlockIndex->nHeight; h <= pCurrentBlockIndex->nHeight + 8; h++){
+    for(int64_t h = nCachedBlockHeight; h <= nCachedBlockHeight + 8; h++){
         if(h == nNotBlockHeight) continue;
         if(mapDynodeBlocks.count(h) && mapDynodeBlocks[h].GetBestPayee(payee) && dnpayee == payee) {
             return true;
@@ -669,7 +668,7 @@ bool CDynodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHe
 
 void CDynodePayments::CheckAndRemove()
 {
-    if(!pCurrentBlockIndex) return;
+    if(!dynodeSync.IsBlockchainSynced()) return;
 
     LOCK2(cs_mapDynodeBlocks, cs_mapDynodePaymentVotes);
 
@@ -679,7 +678,7 @@ void CDynodePayments::CheckAndRemove()
     while(it != mapDynodePaymentVotes.end()) {
         CDynodePaymentVote vote = (*it).second;
 
-        if(pCurrentBlockIndex->nHeight - vote.nBlockHeight > nLimit) {
+        if(nCachedBlockHeight - vote.nBlockHeight > nLimit) {
             LogPrint("dnpayments", "CDynodePayments::CheckAndRemove -- Removing old Dynode payment: nBlockHeight=%d\n", vote.nBlockHeight);
             mapDynodePaymentVotes.erase(it++);
             mapDynodeBlocks.erase(vote.nBlockHeight);
@@ -854,11 +853,11 @@ void CDynodePayments::Sync(CNode* pnode)
 {
     LOCK(cs_mapDynodeBlocks);
 
-    if(!pCurrentBlockIndex) return;
+    if(!dynodeSync.IsWinnersListSynced()) return;
 
     int nInvCount = 0;
 
-    for(int h = pCurrentBlockIndex->nHeight; h < pCurrentBlockIndex->nHeight + 20; h++) {
+    for(int h = nCachedBlockHeight; h < nCachedBlockHeight + 20; h++) {
         if(mapDynodeBlocks.count(h)) {
             BOOST_FOREACH(CDynodePayee& payee, mapDynodeBlocks[h].vecPayees) {
                 std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
@@ -878,16 +877,16 @@ void CDynodePayments::Sync(CNode* pnode)
 // Request low data/unknown payment blocks in batches directly from some node instead of/after preliminary Sync.
 void CDynodePayments::RequestLowDataPaymentBlocks(CNode* pnode)
 {
-    if(!pCurrentBlockIndex) return;
+    if(!dynodeSync.IsDynodeListSynced()) return;
 
     LOCK2(cs_main, cs_mapDynodeBlocks);
 
     std::vector<CInv> vToFetch;
     int nLimit = GetStorageLimit();
 
-    const CBlockIndex *pindex = pCurrentBlockIndex;
+    const CBlockIndex *pindex = chainActive.Tip();
 
-    while(pCurrentBlockIndex->nHeight - pindex->nHeight < nLimit) {
+    while(nCachedBlockHeight - pindex->nHeight < nLimit) {
         if(!mapDynodeBlocks.count(pindex->nHeight)) {
             // We have no idea about this block height, let's ask
             vToFetch.push_back(CInv(MSG_DYNODE_PAYMENT_BLOCK, pindex->GetBlockHash()));
@@ -979,8 +978,10 @@ int CDynodePayments::GetStorageLimit()
 
 void CDynodePayments::UpdatedBlockTip(const CBlockIndex *pindex)
 {
-    pCurrentBlockIndex = pindex;
-    LogPrint("dnpayments", "CDynodePayments::UpdatedBlockTip -- pCurrentBlockIndex->nHeight=%d\n", pCurrentBlockIndex->nHeight);
+    if(!pindex) return;
 
-    ProcessBlock(pindex->nHeight + 10);
+    nCachedBlockHeight = pindex->nHeight;
+    LogPrint("dnpayments", "CDynodePayments::UpdatedBlockTip -- nCachedBlockHeight=%d\n", nCachedBlockHeight);
+
+    ProcessBlock(nCachedBlockHeight + 10);
 }

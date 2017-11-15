@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     LOCK(cs_main);
     fCheckpointsEnabled = false;
 
-    // force UpdatedBlockTip to initialize pCurrentBlockIndex
+    // force UpdatedBlockTip to initialize nCachedBlockHeight
     dnpayments.UpdatedBlockTip(chainActive.Tip());
 
     // Simple block creation, nothing special yet:

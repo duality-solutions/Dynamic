@@ -112,8 +112,8 @@ private:
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
 
-    // Keep track of current block index
-    const CBlockIndex *pCurrentBlockIndex;
+    // Keep track of current block height
+    int nCachedBlockHeight;
 
     // map to hold all DNs
     std::vector<CDynode> vDynodes;
@@ -320,7 +320,7 @@ public:
     bool CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos);
     bool IsDnbRecoveryRequested(const uint256& hash) { return mDnbRecoveryRequests.count(hash); }
 
-    void UpdateLastPaid();
+    void UpdateLastPaid(const CBlockIndex* pindex);
     bool UpdateLastPsq(const CTxIn& vin);
 
     void CheckAndRebuildDynodeIndex();

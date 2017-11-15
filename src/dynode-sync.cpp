@@ -149,8 +149,6 @@ void CDynodeSync::ProcessTick()
 
     if(nTick++ % DYNODE_SYNC_TICK_SECONDS != 0) return;
     
-    if(!pCurrentBlockIndex) return;
-
     // reset the sync process if the last call to this function was more than 60 minutes ago (client was in sleep mode)
     static int64_t nTimeLastProcess = GetTime();
     if(GetTime() - nTimeLastProcess > 60*60) {
@@ -392,8 +390,7 @@ void CDynodeSync::SendGovernanceSyncRequest(CNode* pnode)
 
 void CDynodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload)
 {
-    pCurrentBlockIndex = pindexNew;
-    if(fDebug) LogPrintf("CDynodeSync::UpdatedBlockTip -- pCurrentBlockIndex->nHeight: %d fInitialDownload=%d\n", pCurrentBlockIndex->nHeight, fInitialDownload);
+    if(fDebug) LogPrintf("CDynodeSync::UpdatedBlockTip -- pindexNew->nHeight: %d fInitialDownload=%d\n", pindexNew->nHeight, fInitialDownload);
     // nothing to do here if we failed to sync previousely,
     // just wait till status reset after a cooldown (see ProcessTick)
     if(IsFailed()) return;

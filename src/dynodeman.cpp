@@ -209,8 +209,7 @@ void CDynodeMan::CheckAndRemove()
                 it = vDynodes.erase(it);
                 fDynodesRemoved = true;
             } else {
-                bool fAsk = pCurrentBlockIndex &&
-                            (nAskForDnbRecovery > 0) &&
+                bool fAsk = (nAskForDnbRecovery > 0) &&
                             dynodeSync.IsSynced() &&
                             it->IsNewStartRequired() &&
                             !IsDnbRecoveryRequested(hash);
@@ -219,7 +218,7 @@ void CDynodeMan::CheckAndRemove()
                     std::set<CNetAddr> setRequested;
                     // calulate only once and only when it's needed
                     if(vecDynodeRanks.empty()) {
-                        int nRandomBlockHeight = GetRandInt(pCurrentBlockIndex->nHeight);
+                        int nRandomBlockHeight = GetRandInt(nCachedBlockHeight);
                         vecDynodeRanks = GetDynodeRanks(nRandomBlockHeight);
                     }
                     bool fAskedForDnbRecovery = false;
@@ -319,7 +318,7 @@ void CDynodeMan::CheckAndRemove()
 
         std::map<CNetAddr, CDynodeVerification>::iterator it3 = mWeAskedForVerification.begin();
         while(it3 != mWeAskedForVerification.end()){
-            if(it3->second.nBlockHeight < pCurrentBlockIndex->nHeight - MAX_POSE_BLOCKS) {
+            if(it3->second.nBlockHeight < nCachedBlockHeight - MAX_POSE_BLOCKS) {
                 mWeAskedForVerification.erase(it3++);
             } else {
                 ++it3;
@@ -342,7 +341,7 @@ void CDynodeMan::CheckAndRemove()
         // remove expired mapSeenDynodeVerification
         std::map<uint256, CDynodeVerification>::iterator itv2 = mapSeenDynodeVerification.begin();
         while(itv2 != mapSeenDynodeVerification.end()){
-            if((*itv2).second.nBlockHeight < pCurrentBlockIndex->nHeight - MAX_POSE_BLOCKS){
+            if((*itv2).second.nBlockHeight < nCachedBlockHeight - MAX_POSE_BLOCKS){
                 LogPrint("Dynode", "CDynodeMan::CheckAndRemove -- Removing expired Dynode verification: hash=%s\n", (*itv2).first.ToString());
                 mapSeenDynodeVerification.erase(itv2++);
             } else {
@@ -539,15 +538,17 @@ bool CDynodeMan::Has(const CTxIn& vin)
 //
 CDynode* CDynodeMan::GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCount)
 {
-    if(!pCurrentBlockIndex) {
-        nCount = 0;
-        return NULL;
-    }
-    return GetNextDynodeInQueueForPayment(pCurrentBlockIndex->nHeight, fFilterSigTime, nCount);
+    return GetNextDynodeInQueueForPayment(nCachedBlockHeight, fFilterSigTime, nCount);
 }
 
 CDynode* CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount)
 {
+    if (!dynodeSync.IsWinnersListSynced()) {
+        // without winner list we can't reliably find the next winner anyway
+        nCount = 0;
+        return NULL;
+    }
+
     // Need LOCK2 here to ensure consistent locking order because the GetBlockHash call below locks cs_main
     LOCK2(cs_main,cs);
 
@@ -960,7 +961,7 @@ void CDynodeMan::DoFullVerificationStep()
     if(activeDynode.vin == CTxIn()) return;
     if(!dynodeSync.IsSynced()) return;
 
-    std::vector<std::pair<int, CDynode> > vecDynodeRanks = GetDynodeRanks(pCurrentBlockIndex->nHeight - 1, MIN_POSE_PROTO_VERSION);
+    std::vector<std::pair<int, CDynode> > vecDynodeRanks = GetDynodeRanks(nCachedBlockHeight - 1, MIN_POSE_PROTO_VERSION);
 
     // Need LOCK2 here to ensure consistent locking order because the SendVerifyRequest call below locks cs_main
     // through GetHeight() signal in ConnectNode
@@ -1105,7 +1106,7 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
 
     netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::DNVERIFY)+"-request");
     // use random nonce, store it and require node to reply with correct one later
-    CDynodeVerification dnv(addr, GetRandInt(999999), pCurrentBlockIndex->nHeight - 1);
+    CDynodeVerification dnv(addr, GetRandInt(999999), nCachedBlockHeight - 1);
     mWeAskedForVerification[addr] = dnv;
     LogPrintf("CDynodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", dnv.nonce, addr.ToString());
     g_connman->PushMessage(pnode, NetMsgType::DNVERIFY, dnv);
@@ -1282,9 +1283,9 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
     mapSeenDynodeVerification[dnv.GetHash()] = dnv;
 
     // we don't care about history
-    if(dnv.nBlockHeight < pCurrentBlockIndex->nHeight - MAX_POSE_BLOCKS) {
+    if(dnv.nBlockHeight < nCachedBlockHeight - MAX_POSE_BLOCKS) {
         LogPrint("Dynode", "DynodeMan::ProcessVerifyBroadcast -- Outdated: current block %d, verification block %d, peer=%d\n",
-                    pCurrentBlockIndex->nHeight, dnv.nBlockHeight, pnode->id);
+                    nCachedBlockHeight, dnv.nBlockHeight, pnode->id);
         return;
     }
 
@@ -1496,22 +1497,21 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
     return true;
 }
 
-void CDynodeMan::UpdateLastPaid()
+void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
 {
     LOCK(cs);
 
-    if(fLiteMode || !pCurrentBlockIndex) return;
-    if(!dynodeSync.IsWinnersListSynced() || vDynodes.empty()) return;
+    if(fLiteMode || !dynodeSync.IsWinnersListSynced() || vDynodes.empty()) return;
 
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a Dynode
     // (MNs should update this info on every block, so limited scan should be enough for them)
     int nMaxBlocksToScanBack = (IsFirstRun || !fDyNode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
-    // pCurrentBlockIndex->nHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
+    //                         nCachedBlockHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
 
     BOOST_FOREACH(CDynode& dn, vDynodes) {
-        dn.UpdateLastPaid(pCurrentBlockIndex, nMaxBlocksToScanBack);
+        dn.UpdateLastPaid(pindex, nMaxBlocksToScanBack);
     }
 
     IsFirstRun = false;
@@ -1666,14 +1666,14 @@ void CDynodeMan::SetDynodeLastPing(const CTxIn& vin, const CDynodePing& dnp)
 
 void CDynodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
 {
-    pCurrentBlockIndex = pindex;
-    LogPrint("Dynode", "CDynodeMan::UpdatedBlockTip -- pCurrentBlockIndex->nHeight=%d\n", pCurrentBlockIndex->nHeight);
+    nCachedBlockHeight = pindex->nHeight;
+    LogPrint("dynode", "CDynodeMan::UpdatedBlockTip -- nCachedBlockHeight=%d\n", nCachedBlockHeight);
 
     CheckSameAddr();
 
     if(fDyNode) {
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
-        UpdateLastPaid();
+        UpdateLastPaid(pindex);
     }
 }
 
