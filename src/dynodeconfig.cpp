@@ -65,7 +65,7 @@ bool CDynodeConfig::read(std::string& strErr) {
             streamConfig.close();
             return false;
         }
-        int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+        int mainnetDefaultPort = DEFAULT_P2P_PORT;
         if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
             if(port != mainnetDefaultPort) {
                 strErr = _("Invalid port detected in dynode.conf") + "\n" +

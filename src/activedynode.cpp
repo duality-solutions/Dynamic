@@ -182,9 +182,9 @@ void CActiveDynode::ManageStateInitial()
         return;
     }
     
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    int testnetDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
-    int regTestnetDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
+    int testnetDefaultPort = DEFAULT_P2P_PORT + 100;
+    int regTestnetDefaultPort = DEFAULT_P2P_PORT + 200;
 
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
