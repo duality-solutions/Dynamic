@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>769</width>
-    <height>589</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,12 +16,8 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <property name="styleSheet">
-      <string notr="true">QTabWidget:tab-bar { alignment: left }
-QTabBar { alignment: left; }</string>
-     </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_info">
       <attribute name="title">
@@ -189,17 +185,17 @@ QTabBar { alignment: left; }</string>
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="labelNetwork">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Network</string>
-         </property>
-        </widget>
+           <widget class="QLabel" name="labelNetwork">
+               <property name="font">
+                   <font>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                   </font>
+               </property>
+               <property name="text">
+                   <string>Network</string>
+               </property>
+           </widget>
        </item>
        <item row="8" column="0">
         <widget class="QLabel" name="label_8">
@@ -250,7 +246,7 @@ QTabBar { alignment: left; }</string>
        <item row="10" column="0">
         <widget class="QLabel" name="dynodeCountLabel">
          <property name="text">
-          <string>Number of Dynodes</string>
+          <string>Number of Masternodes</string>
          </property>
         </widget>
        </item>
@@ -407,7 +403,7 @@ QTabBar { alignment: left; }</string>
          <item>
           <widget class="QPushButton" name="openDebugLogfileButton">
            <property name="toolTip">
-            <string>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</string>
+            <string>Open the Dash Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
            </property>
            <property name="text">
             <string>&amp;Open</string>
@@ -442,6 +438,125 @@ QTabBar { alignment: left; }</string>
        <property name="spacing">
         <number>3</number>
        </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="fontSmallerButton">
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="toolTip">
+            <string>Decrease font size</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../bitcoin.qrc">
+             <normaloff>:/icons/fontsmaller</normaloff>:/icons/fontsmaller</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>16</height>
+            </size>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="fontBiggerButton">
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Increase font size</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../bitcoin.qrc">
+             <normaloff>:/icons/fontbigger</normaloff>:/icons/fontbigger</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>16</height>
+            </size>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clearButton">
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Clear console</string>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../bitcoin.qrc">
+             <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+           </property>
+           <property name="shortcut">
+            <string notr="true">Ctrl+L</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QTextEdit" name="messagesWidget">
          <property name="minimumSize">
@@ -462,43 +577,47 @@ QTabBar { alignment: left; }</string>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="horizontalLayoutPrompt">
          <property name="spacing">
           <number>3</number>
          </property>
          <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string notr="true">&gt;</string>
+          <widget class="QPushButton" name="promptIcon">
+           <property name="enabled">
+            <bool>false</bool>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="clearButton">
            <property name="maximumSize">
             <size>
-             <width>24</width>
+             <width>16</width>
              <height>24</height>
             </size>
-           </property>
-           <property name="toolTip">
-            <string>Clear console</string>
            </property>
            <property name="text">
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../dynamic.qrc">
-             <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+            <iconset resource="../dash.qrc">
+             <normaloff>:/icons/prompticon</normaloff>
+             <disabledoff>:/icons/prompticon</disabledoff>:/icons/prompticon</iconset>
            </property>
-           <property name="shortcut">
-            <string notr="true">Ctrl+L</string>
+           <property name="iconSize">
+            <size>
+             <width>14</width>
+             <height>14</height>
+            </size>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit">
+           <property name="placeholderText">
+            <string/>
            </property>
           </widget>
          </item>
@@ -1324,7 +1443,7 @@ QTabBar { alignment: left; }</string>
         </size>
        </property>
        <property name="text">
-        <string>Disabled</string>
+        <string>Salvage wallet</string>
        </property>
       </widget>
       <widget class="QPushButton" name="btn_rescan">
@@ -1435,7 +1554,7 @@ QTabBar { alignment: left; }</string>
         </rect>
        </property>
        <property name="text">
-        <string>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat. (Power Users Only)</string>
+        <string>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -1587,7 +1706,7 @@ QTabBar { alignment: left; }</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../dynamic.qrc"/>
+  <include location="../dash.qrc"/>
  </resources>
  <connections/>
 </ui>

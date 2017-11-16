@@ -185,6 +185,7 @@ RES_ICONS = \
   qt/res/icons/dynamic.icns \
   qt/res/icons/dynamic.ico \
   qt/res/icons/dynamic.png \
+  qt/res/icons/chevron.png \
   qt/res/icons/drk/about.png \
   qt/res/icons/drk/about_qt.png \
   qt/res/icons/drk/add.png \
@@ -244,6 +245,8 @@ RES_ICONS = \
   qt/res/icons/drk/unit_mdyn.png \
   qt/res/icons/drk/unit_satoshis.png \
   qt/res/icons/drk/unit_udyn.png \
+  qt/res/icons/drk/fontbigger.png \
+  qt/res/icons/drk/fontsmaller.png \ 
   qt/res/icons/drk/verify.png \
   qt/res/icons/drk/warning.png
 
