@@ -140,9 +140,13 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP10                  : return "OP_NOP10";
 
 	// fluid
-	case OP_MINT				   : return "OP_MINT";
-	case OP_REWARD_DYNODE		   : return "OP_REWARD_DYNODE";
-	case OP_REWARD_MINING		   : return "OP_REWARD_MINING";
+    case OP_MINT                   : return "OP_MINT";
+    case OP_REWARD_DYNODE          : return "OP_REWARD_DYNODE";
+    case OP_REWARD_MINING          : return "OP_REWARD_MINING";
+    case OP_SWAP_SOVEREIGN_ADDRESS : return "OP_SWAP_SOVEREIGN_ADDRESS";
+    case OP_UPDATE_FEES            : return "OP_UPDATE_FEES";
+    case OP_FREEZE_ADDRESS         : return "OP_FREEZE_ADDRESS";
+    case OP_RELEASE_ADDRESS        : return "OP_RELEASE_ADDRESS";
 
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
