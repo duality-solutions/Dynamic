@@ -189,7 +189,11 @@ enum opcodetype
     OP_MINT = 0xc0,
 	OP_REWARD_DYNODE = 0xc3,
 	OP_REWARD_MINING = 0xc4,
-
+    OP_SWAP_SOVEREIGN_ADDRESS = 0xc5,
+    OP_UPDATE_FEES = 0xc6,
+    OP_FREEZE_ADDRESS = 0xc7,
+    OP_RELEASE_ADDRESS = 0xc8,
+    
     // template matching params
     OP_SMALLINTEGER = 0xfa,
     OP_PUBKEYS = 0xfb,
