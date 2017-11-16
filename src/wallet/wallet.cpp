@@ -3310,16 +3310,16 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
                     } else if (nValueIn < nValueToSelect) {
                         strFailReason = _("Insufficient funds.");
-                    }
-                    if (fUseInstantSend) {
-                        if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
-                            strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
-                        } else {
+                        if (fUseInstantSend) {
                             // could be not true but most likely that's the reason
                             strFailReason += " " + strprintf(_("InstantSend requires inputs with at least %d confirmations, you might need to wait a few minutes and try again."), INSTANTSEND_CONFIRMATIONS_REQUIRED);
                         }
                     }
 
+                    return false;
+                }
+                if (fUseInstantSend && nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
+                    strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
                     return false;
                 }
 
