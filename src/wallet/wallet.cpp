@@ -19,7 +19,7 @@
 #include "keepass.h"
 #include "key.h"
 #include "keystore.h"
-#include "main.h"
+#include "validation.h" // For CheckTransaction
 #include "net.h"
 #include "policy/policy.h"
 #include "privatesend-client.h"
@@ -1753,7 +1753,7 @@ void CWallet::ReacceptWalletTransactions()
     }
 }
 
-bool CWalletTx::RelayWalletTransaction(std::string strCommand)
+bool CWalletTx::RelayWalletTransaction(CConnman* connman, std::string strCommand)
 {
     assert(pwallet->GetBroadcastTransactions());
     if (!IsCoinBase() && !isAbandoned() && GetDepthInMainChain() == 0)
@@ -1766,8 +1766,10 @@ bool CWalletTx::RelayWalletTransaction(std::string strCommand)
             if(strCommand == NetMsgType::TXLOCKREQUEST) {
                 instantsend.ProcessTxLockRequest(((CTxLockRequest)*this));
             }
-            RelayTransaction((CTransaction)*this);
-            return true;
+            if (connman) {
+                connman->RelayTransaction((CTransaction)*this);
+                return true;
+            }
         }
     }
     return false;
@@ -2073,7 +2075,7 @@ bool CWalletTx::IsEquivalentTo(const CWalletTx& tx) const
         return CTransaction(tx1) == CTransaction(tx2);
 }
 
-std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime)
+std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime, CConnman* connman)
 {
     std::vector<uint256> result;
 
@@ -2091,13 +2093,13 @@ std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime)
     BOOST_FOREACH(PAIRTYPE(const unsigned int, CWalletTx*)& item, mapSorted)
     {
         CWalletTx& wtx = *item.second;
-        if (wtx.RelayWalletTransaction())
+        if (wtx.RelayWalletTransaction(connman))
             result.push_back(wtx.GetHash());
     }
     return result;
 }
 
-void CWallet::ResendWalletTransactions(int64_t nBestBlockTime)
+void CWallet::ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman)
 {
     // Do this infrequently and randomly to avoid giving away
     // that these are our transactions.
@@ -2115,7 +2117,7 @@ void CWallet::ResendWalletTransactions(int64_t nBestBlockTime)
 
     // Rebroadcast unconfirmed txes older than 5 minutes before the last
     // block was found:
-    std::vector<uint256> relayed = ResendWalletTransactionsBefore(nBestBlockTime-5*60);
+    std::vector<uint256> relayed = ResendWalletTransactionsBefore(nBestBlockTime-5*60, connman);
     if (!relayed.empty())
         LogPrintf("%s: rebroadcast %u unconfirmed transactions\n", __func__, relayed.size());
 }
@@ -3308,16 +3310,16 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
                     } else if (nValueIn < nValueToSelect) {
                         strFailReason = _("Insufficient funds.");
-                    }
-                    if (fUseInstantSend) {
-                        if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
-                            strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
-                        } else {
+                        if (fUseInstantSend) {
                             // could be not true but most likely that's the reason
                             strFailReason += " " + strprintf(_("InstantSend requires inputs with at least %d confirmations, you might need to wait a few minutes and try again."), INSTANTSEND_CONFIRMATIONS_REQUIRED);
                         }
                     }
 
+                    return false;
+                }
+                if (fUseInstantSend && nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
+                    strFailReason += " " + strprintf(_("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN."), sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE));
                     return false;
                 }
 
@@ -3545,7 +3547,7 @@ bool CWallet::CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletT
 /**
  * Call after CreateTransaction unless you want to abort
  */
-bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std::string strCommand)
+bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CConnman* connman, std::string strCommand)
 {
     {
         LOCK2(cs_main, cs_wallet);
@@ -3591,7 +3593,7 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std:
                 LogPrintf("CommitTransaction(): Error: Transaction not valid\n");
                 return false;
             }
-            wtxNew.RelayWalletTransaction(strCommand);
+            wtxNew.RelayWalletTransaction(connman, strCommand);
         }
     }
     return true;
@@ -4543,7 +4545,7 @@ void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew)
         LogPrintf("SendMoney() : %s\n", strError);
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    if (!pwalletMain->CommitTransaction(wtxNew, reservekey))
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get()))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }
 
@@ -4563,6 +4565,6 @@ void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWa
         LogPrintf("SendMoney() : %s\n", strError);
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    if (!pwalletMain->CommitTransaction(wtxNew, reservekey))
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get()))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }

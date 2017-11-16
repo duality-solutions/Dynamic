@@ -20,7 +20,7 @@
 #include <boost/lexical_cast.hpp>
 
 CPrivateSendEntry::CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
-    txCollateral(txCollateral)
+    txCollateral(txCollateral), addr(CService())
 {
     BOOST_FOREACH(CTxIn txin, vecTxIn)
         vecTxPSIn.push_back(txin);
@@ -74,12 +74,12 @@ bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 
 bool CPrivatesendQueue::Relay()
 {
-    std::vector<CNode*> vNodesCopy = CopyNodeVector();
+    std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::PSQUEUE, (*this));
+            g_connman->PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
 
-    ReleaseNodeVector(vNodesCopy);
+    g_connman->ReleaseNodeVector(vNodesCopy);
     return true;
 }
 
@@ -178,7 +178,6 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
 
     CAmount nValueIn = 0;
     CAmount nValueOut = 0;
-    bool fMissingTx = false;
 
     BOOST_FOREACH(const CTxOut txout, txCollateral.vout) {
         nValueOut += txout.nValue;
@@ -190,19 +189,12 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     }
 
     BOOST_FOREACH(const CTxIn txin, txCollateral.vin) {
-        CTransaction txPrev;
-        uint256 hash;
-        if(GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true)) {
-            if(txPrev.vout.size() > txin.prevout.n)
-                nValueIn += txPrev.vout[txin.prevout.n].nValue;
-        } else {
-            fMissingTx = true;
+        CCoins coins;
+        if(!GetUTXOCoins(txin.prevout, coins)) {
+            LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- Unknown inputs in collateral transaction, txCollateral=%s", txCollateral.ToString());
+            return false;
         }
-    }
-
-    if(fMissingTx) {
-        LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- Unknown inputs in collateral transaction, txCollateral=%s", txCollateral.ToString());
-        return false;
+        nValueIn += coins.vout[txin.prevout.n].nValue;
     }
 
     //collateral transactions are required to pay out a small fee to the miners

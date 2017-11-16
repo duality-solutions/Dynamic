@@ -228,7 +228,7 @@ CGovernanceVote::CGovernanceVote(CTxIn vinDynodeIn, uint256 nParentHashIn, vote_
 void CGovernanceVote::Relay() const
 {
     CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, GetHash());
-    RelayInv(inv, PROTOCOL_VERSION);
+    g_connman->RelayInv(inv, PROTOCOL_VERSION);
 }
 
 bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
@@ -256,8 +256,8 @@ bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
 
 bool CGovernanceVote::IsValid(bool fSignatureCheck) const
 {
-    if(nTime > GetTime() + (60*60)) {
-        LogPrint("gobject", "CGovernanceVote::IsValid -- vote is too far ahead of current time - %s - nTime %lli - Max Time %lli\n", GetHash().ToString(), nTime, GetTime() + (60*60));
+    if(nTime > GetAdjustedTime() + (60*60)) {
+        LogPrint("gobject", "CGovernanceVote::IsValid -- vote is too far ahead of current time - %s - nTime %lli - Max Time %lli\n", GetHash().ToString(), nTime, GetAdjustedTime() + (60*60));
         return false;
     }
 

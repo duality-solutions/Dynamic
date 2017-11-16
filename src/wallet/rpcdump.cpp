@@ -8,7 +8,7 @@
 #include "base58.h"
 #include "chain.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "rpcserver.h"
 #include "script/script.h"
 #include "script/standard.h"

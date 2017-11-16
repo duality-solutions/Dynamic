@@ -9,7 +9,7 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "key.h"
-#include "main.h"
+#include "validation.h"
 #include "messagesigner.h"
 #include "net.h"
 #include "protocol.h"
@@ -62,6 +62,11 @@ void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataSt
         if (pwalletMain)
             LOCK(pwalletMain->cs_wallet);
 #endif
+        LOCK(cs_main);
+#ifdef ENABLE_WALLET
+        if (pwalletMain)
+            LOCK(pwalletMain->cs_wallet);
+#endif
         LOCK(cs_instantsend);
 
         uint256 nVoteHash = vote.GetHash();
@@ -77,8 +82,13 @@ void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataSt
 
 bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest)
 {
-    LOCK2(cs_main, cs_instantsend);
-
+    // cs_main, cs_wallet and cs_instantsend should be already locked
+    AssertLockHeld(cs_main);
+#ifdef ENABLE_WALLET
+    if (pwalletMain)
+        AssertLockHeld(pwalletMain->cs_wallet);
+#endif
+    AssertLockHeld(cs_instantsend);
 
     uint256 txHash = txLockRequest.GetHash();
 
@@ -391,6 +401,11 @@ void CInstantSend::ProcessOrphanTxLockVotes()
     if (pwalletMain)
         LOCK(pwalletMain->cs_wallet);
 #endif
+    LOCK(cs_main);
+#ifdef ENABLE_WALLET
+    if (pwalletMain)
+        LOCK(pwalletMain->cs_wallet);
+#endif
     LOCK(cs_instantsend);
 
     std::map<uint256, CTxLockVote>::iterator it = mapTxLockVotesOrphan.begin();
@@ -556,9 +571,7 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
     // Not in block yet, make sure all its inputs are still unspent
     BOOST_FOREACH(const CTxIn& txin, txLockCandidate.txLockRequest.vin) {
         CCoins coins;
-        if(!pcoinsTip->GetCoins(txin.prevout.hash, coins) ||
-           (unsigned int)txin.prevout.n>=coins.vout.size() ||
-           coins.vout[txin.prevout.n].IsNull()) {
+        if(!GetUTXOCoins(txin.prevout, coins)) {
             // Not in UTXO anymore? Either this lock or conflicting tx was mined while we were waiting for votes.
             // Reprocess tip to make sure tx for this lock was included.
             //
@@ -602,7 +615,7 @@ int64_t CInstantSend::GetAverageDynodeOrphanVoteTime()
 
 void CInstantSend::CheckAndRemove()
 {
-    if(!pCurrentBlockIndex) return;
+    if(!dynodeSync.IsDynodeListSynced()) return;
 
     LOCK(cs_instantsend);
 
@@ -612,7 +625,7 @@ void CInstantSend::CheckAndRemove()
     while(itLockCandidate != mapTxLockCandidates.end()) {
         CTxLockCandidate &txLockCandidate = itLockCandidate->second;
         uint256 txHash = txLockCandidate.GetHash();
-        if(txLockCandidate.IsExpired(pCurrentBlockIndex->nHeight)) {
+        if(txLockCandidate.IsExpired(nCachedBlockHeight)) {
             LogPrintf("CInstantSend::CheckAndRemove -- Removing expired Transaction Lock Candidate: txid=%s\n", txHash.ToString());
             std::map<COutPoint, COutPointLock>::iterator itOutpointLock = txLockCandidate.mapOutPointLocks.begin();
             while(itOutpointLock != txLockCandidate.mapOutPointLocks.end()) {
@@ -630,7 +643,7 @@ void CInstantSend::CheckAndRemove()
     // remove expired votes
     std::map<uint256, CTxLockVote>::iterator itVote = mapTxLockVotes.begin();
     while(itVote != mapTxLockVotes.end()) {
-        if(itVote->second.IsExpired(pCurrentBlockIndex->nHeight)) {
+        if(itVote->second.IsExpired(nCachedBlockHeight)) {
             LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired vote: txid=%s  dynode=%s\n",
                     itVote->second.GetTxHash().ToString(), itVote->second.GetDynodeOutpoint().ToStringShort());
             mapTxLockVotes.erase(itVote++);        } else {
@@ -764,6 +777,11 @@ int CInstantSend::GetTransactionLockSignatures(const uint256& txHash)
     return -1;
 }
 
+int CInstantSend::GetConfirmations(const uint256 &nTXHash)
+{
+    return IsLockedInstantSendTransaction(nTXHash) ? nInstantSendDepth : 0;
+}
+
 bool CInstantSend::IsTxLockRequestTimedOut(const uint256& txHash)
 {
     if(!fEnableInstantSend) return false;
@@ -788,7 +806,7 @@ void CInstantSend::Relay(const uint256& txHash) const
 }
 
 void CInstantSend::UpdatedBlockTip(const CBlockIndex *pindex){
-    pCurrentBlockIndex = pindex;
+    nCachedBlockHeight = pindex->nHeight;
 }
 
 void CInstantSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
@@ -895,9 +913,7 @@ bool CTxLockRequest::IsValid(bool fRequireUnspent) const
         int nPrevoutHeight = 0;
         CAmount nValue = 0;
 
-        if(!pcoinsTip->GetCoins(txin.prevout.hash, coins) ||
-           (unsigned int)txin.prevout.n>=coins.vout.size() ||
-           coins.vout[txin.prevout.n].IsNull()) {
+        if(!GetUTXOCoins(txin.prevout, coins)) {
             LogPrint("instantsend", "CTxLockRequest::IsValid -- Failed to find UTXO %s\n", txin.prevout.ToStringShort());
             // Normally above sould be enough, but in case we are reprocessing this because of
             // a lot of legit orphan votes we should also check already spent outpoints.
@@ -1073,7 +1089,7 @@ bool CTxLockVote::Sign()
 void CTxLockVote::Relay() const
 {
     CInv inv(MSG_TXLOCK_VOTE, GetHash());
-    RelayInv(inv);
+    g_connman->RelayInv(inv);
 }
 
 bool CTxLockVote::IsExpired(int nHeight) const
@@ -1173,7 +1189,7 @@ bool CTxLockCandidate::IsExpired(int nHeight) const
 
 void CTxLockCandidate::Relay() const
 {
-    RelayTransaction(txLockRequest);
+    g_connman->RelayTransaction(txLockRequest);
     std::map<COutPoint, COutPointLock>::const_iterator itOutpointLock = mapOutPointLocks.begin();
     while(itOutpointLock != mapOutPointLocks.end()) {
         itOutpointLock->second.Relay();

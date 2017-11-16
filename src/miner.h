@@ -16,6 +16,7 @@
 
 class CBlockIndex;
 class CChainParams;
+class CConnman;
 class CReserveKey;
 class CScript;
 class CWallet;
@@ -39,12 +40,12 @@ uint32_t ByteReverse(uint32_t value);
 /** Do mining precalculation */
 void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1);
 /** Check mined block */
-bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey);
+bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman);
 /** Base sha256 mining transform */
 void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 
 /** Run the miner threads */
-void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams);
+void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams, CConnman& connman);
 /** Generate a new block, without valid proof-of-work */
 std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn);
 /** Modify the extranonce in a block */

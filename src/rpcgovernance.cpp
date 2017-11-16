@@ -11,7 +11,7 @@
 #include "governance-classes.h"
 #include "governance-validators.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -92,7 +92,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         int nRevision = 1;
 
-        int64_t nTime = GetTime();
+        int64_t nTime = GetAdjustedTime();
         std::string strData = params[1].get_str();
 
         CGovernanceObject govobj(hashParent, nRevision, nTime, uint256(), strData);
@@ -154,9 +154,12 @@ UniValue gobject(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Trigger and watchdog objects need not be prepared (however only dynodes can create them)");
         }
 
-        std::string strError = "";
-        if(!govobj.IsValidLocally(strError, false))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + govobj.GetHash().ToString() + " - " + strError);
+        {
+            LOCK(cs_main);
+            std::string strError = "";
+            if(!govobj.IsValidLocally(strError, false))
+                throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + govobj.GetHash().ToString() + " - " + strError);
+        }
 
         CWalletTx wtx;
         if(!pwalletMain->GetBudgetSystemCollateralTX(wtx, govobj.GetHash(), govobj.GetMinCollateralFee(), false)) {
@@ -166,7 +169,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         // -- make our change address
         CReserveKey reservekey(pwalletMain);
         // -- send the tx to the network
-        pwalletMain->CommitTransaction(wtx, reservekey, NetMsgType::TX);
+        pwalletMain->CommitTransaction(wtx, reservekey, g_connman.get(), NetMsgType::TX);
 
         DBG( cout << "gobject: prepare "
              << " strData = " << govobj.GetDataAsString()
@@ -257,20 +260,18 @@ UniValue gobject(const UniValue& params, bool fHelp)
         std::string strError = "";
         bool fMissingDynode;
         bool fMissingConfirmations;
-        if(!govobj.IsValidLocally(strError, fMissingDynode, fMissingConfirmations, true) && !fMissingConfirmations) {
-            LogPrintf("gobject(submit) -- Object submission rejected because object is not valid - hash = %s, strError = %s\n", strHash, strError);
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + strHash + " - " + strError);
+        {
+            LOCK(cs_main);
+            if(!govobj.IsValidLocally(strError, fMissingDynode, fMissingConfirmations, true) && !fMissingConfirmations) {
+                LogPrintf("gobject(submit) -- Object submission rejected because object is not valid - hash = %s, strError = %s\n", strHash, strError);
+                throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + strHash + " - " + strError);
+            }
         }
 
         // RELAY THIS OBJECT
         // Reject if rate check fails but don't update buffer
         if(!governance.DynodeRateCheck(govobj)) {
             LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure - hash = %s\n", strHash);
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
-        }
-        // This check should always pass, update buffer
-        if(!governance.DynodeRateCheck(govobj, UPDATE_TRUE)) {
-            LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure (buffer updated) - hash = %s\n", strHash);
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
         }
 

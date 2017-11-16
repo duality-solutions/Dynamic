@@ -47,7 +47,7 @@ public:
         READWRITE(FLATDATA(pchMessageStart));
         READWRITE(FLATDATA(pchCommand));
         READWRITE(nMessageSize);
-        READWRITE(nChecksum);
+        READWRITE(FLATDATA(pchChecksum));
     }
 
     // TODO: make private (improves encapsulation)
@@ -64,7 +64,7 @@ public:
     char pchMessageStart[MESSAGE_START_SIZE];
     char pchCommand[COMMAND_SIZE];
     unsigned int nMessageSize;
-    unsigned int nChecksum;
+    uint8_t pchChecksum[CHECKSUM_SIZE];
 };
 
 /**
@@ -240,7 +240,7 @@ extern const char *PSCOMPLETE;
 extern const char *PSSTATUSUPDATE;
 extern const char *PSTX;
 extern const char *PSQUEUE;
-extern const char *SSEG;
+extern const char *PSEG;
 extern const char *SYNCSTATUSCOUNT;
 extern const char *DNGOVERNANCESYNC;
 extern const char *DNGOVERNANCEOBJECT;

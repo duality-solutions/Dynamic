@@ -5,8 +5,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_MAIN_H
-#define DYNAMIC_MAIN_H
+#ifndef DYNAMIC_VALIDATION_H
+#define DYNAMIC_VALIDATION_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/dynamic-config.h"
@@ -15,7 +15,7 @@
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
-#include "net.h"
+#include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "spentindex.h"
 #include "sync.h"
@@ -31,11 +31,16 @@
 #include <utility>
 #include <vector>
 
+#include <atomic>
+#include <boost/unordered_map.hpp>
+#include <boost/filesystem/path.hpp>
+
 class CBloomFilter;
 class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
 class CInv;
+class CConnman;
 class CScriptCheck;
 class CTxMemPool;
 class CValidationInterface;
@@ -200,10 +205,7 @@ static const unsigned int DEFAULT_CHECKLEVEL = 3;
 // Add 20% for Orphan block rate = 1590MB
 static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 1590 * 1024 * 1024;
 
-/** Register with a network node to receive its signals */
-void RegisterNodeSignals(CNodeSignals& nodeSignals);
-/** Unregister a network node */
-void UnregisterNodeSignals(CNodeSignals& nodeSignals);
+
 
 /** 
  * Process an incoming block. This only returns after the best known valid
@@ -217,7 +219,16 @@ void UnregisterNodeSignals(CNodeSignals& nodeSignals);
  * @param[out]  dbp     The already known disk position of pblock, or NULL if not yet stored.
  * @return True if state.IsValid()
  */
-bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, CNode* pfrom, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp);
+bool ProcessNewBlock(const CChainParams& chainparams, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp, bool* fNewBlock);
+/**
+ * Process incoming block headers.
+ *
+ * @param[in]  block The block headers themselves
+ * @param[out] state This may be set to an Error state if any error occurred processing them
+ * @param[in]  chainparams The params for the chain we want to connect to
+ * @param[out] ppindex If set, the pointer will be set to point to the last new block index object for the given headers
+ */
+bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& block, CValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex=NULL);
 /** Check whether enough disk space is available for an incoming block */
 bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
 /** Open a block file (blk?????.dat) */
@@ -234,19 +245,9 @@ bool InitBlockIndex(const CChainParams& chainparams);
 bool LoadBlockIndex();
 /** Unload database information */
 void UnloadBlockIndex();
-/** Process protocol messages received from a given node */
-bool ProcessMessages(CNode* pfrom);
-/**
- * Send queued protocol messages to be sent to a give node.
- *
- * @param[in]   pto             The node which we are sending messages to.
- */
-bool SendMessages(CNode* pto);
 /** Run an instance of the script checking thread */
 void ThreadScriptCheck();
 
-/** Try to detect Partition (network isolation) attacks against us */
-void PartitionCheck(bool (*initialDownloadCheck)(), CCriticalSection& cs, const CBlockIndex *const &bestHeader, int64_t nPowTargetSpacing);
 /** Check whether we are doing an initial block download (synchronizing from disk or network) */
 bool IsInitialBlockDownload();
 /** Format a string that describes several potential problems detected by the core.
@@ -260,7 +261,7 @@ std::string GetWarnings(const std::string& strFor);
 /** Retrieve a transaction (from memory pool, or from disk, if possible) */
 bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Params& params, uint256 &hashBlock, bool fAllowSlow = false);
 /** Find the best known block, and make it the tip of the block chain */
-bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
+bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL, CConnman* connman = NULL);
 
 CAmount GetPoWBlockPayment(const int& nHeight);
 CAmount GetDynodePayment(bool fDynode = true);
@@ -289,10 +290,6 @@ void UnlinkPrunedFiles(std::set<int>& setFilesToPrune);
 
 /** Create a new block index entry for a given block hash */
 CBlockIndex * InsertBlockIndex(uint256 hash);
-/** Get statistics from node state */
-bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);
-/** Increase a node's misbehavior score. */
-void Misbehaving(NodeId nodeid, int howmuch);
 /** Flush all state, indexes and buffers to disk. */
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */
@@ -302,23 +299,16 @@ void PruneAndFlush();
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                         bool* pfMissingInputs, bool fOverrideMempoolLimit=false, bool fRejectAbsurdFee=false, bool fDryRun=false);
 
+bool GetUTXOCoins(const COutPoint& outpoint, CCoins& coins);
 int GetUTXOHeight(const COutPoint& outpoint);
-int GetInputAge(const CTxIn &txin);
-int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin);
-int GetISConfirmations(const uint256 &nTXHash);
+int GetUTXOConfirmations(const COutPoint& outpoint);
+
 
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
 
 /** Get the BIP9 state for a given deployment at the current tip. */
 ThresholdState VersionBitsTipState(const Consensus::Params& params, Consensus::DeploymentPos pos);
-
-struct CNodeStateStats {
-    int nMisbehavior;
-    int nSyncHeight;
-    int nCommonHeight;
-    std::vector<int> vHeightInFlight;
-};
 
 struct CTimestampIndexIteratorKey {
     unsigned int timestamp;
@@ -876,4 +866,4 @@ static const unsigned int REJECT_ALREADY_KNOWN = 0x101;
 /** Transaction conflicts with a transaction already known */
 static const unsigned int REJECT_CONFLICT = 0x102;
 
-#endif // DYNAMIC_MAIN_H
+#endif // DYNAMIC_VALIDATION_H

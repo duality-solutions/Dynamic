@@ -155,37 +155,23 @@ void CActiveDynode::ManageStateInitial()
         return;
     }
 
-    LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
-    // Check that our local network configuration is correct
-    BOOST_FOREACH(CNode* pnode, vNodes) {
-    if (pnode->addr.IsIPv6()) {
-        // listen option is probably overwritten by smth else, no good
-        LogPrintf("Dynodes cannot use IPv6, you must use IPv4 for Dynode connectivity.");
-        return;
-        }
-    }
-
-    bool fFoundLocal = false;
-    {
-        LOCK(cs_vNodes);
-
-        // First try to find whatever local address is specified by externalip option
-        fFoundLocal = GetLocal(service) && CDynode::IsValidNetAddr(service);
-        if(!fFoundLocal) {
-            // nothing and no live connections, can't do anything for now
-            if (vNodes.empty()) {
-                nState = ACTIVE_DYNODE_NOT_CAPABLE;
-                strNotCapableReason = "Can't detect valid external address. Will retry when there are some connections available.";
-                LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
-                return;
-            }
-            // We have some peers, let's try to find our local address from one of them
-            BOOST_FOREACH(CNode* pnode, vNodes) {
-                if (pnode->fSuccessfullyConnected && pnode->addr.IsIPv4()) {
-                    fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);
-                    if(fFoundLocal) break;
-                }
-            }
+    // First try to find whatever local address is specified by externalip option
+    bool fFoundLocal = GetLocal(service) && CDynode::IsValidNetAddr(service);
+    if(!fFoundLocal) {
+        bool empty = true;
+        // If we have some peers, let's try to find our local address from one of them
+        g_connman->ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
+            empty = false;
+            if (pnode->addr.IsIPv4())
+                fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);
+            return !fFoundLocal;
+        });
+        // nothing and no live connections, can't do anything for now
+        if (empty) {
+            nState = ACTIVE_DYNODE_NOT_CAPABLE;
+            strNotCapableReason = "Can't detect valid external address. Will retry when there are some connections available.";
+            LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+            return;
         }
     }
 
@@ -196,9 +182,9 @@ void CActiveDynode::ManageStateInitial()
         return;
     }
     
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    int testnetDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
-    int regTestnetDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
+    int testnetDefaultPort = DEFAULT_P2P_PORT + 100;
+    int regTestnetDefaultPort = DEFAULT_P2P_PORT + 200;
 
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
@@ -229,7 +215,8 @@ void CActiveDynode::ManageStateInitial()
 
     LogPrintf("CActiveDynode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
-    if(!ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
+    // TODO: Pass CConnman instance somehow and don't use global variable.
+    if(!g_connman->ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = "Could not connect to " + service.ToString();
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
@@ -320,10 +307,10 @@ void CActiveDynode::ManageStateLocal()
     CKey keyCollateral;
 
     if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
-        int nInputAge = GetInputAge(vin);
-        if(nInputAge < Params().GetConsensus().nDynodeMinimumConfirmations){
+        int nPrevoutAge = GetUTXOConfirmations(vin.prevout);
+        if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
             nState = ACTIVE_DYNODE_INPUT_TOO_NEW;
-            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nInputAge);
+            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nPrevoutAge);
             LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }

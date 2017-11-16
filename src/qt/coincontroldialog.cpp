@@ -18,7 +18,7 @@
 #include "coincontrol.h"
 #include "init.h"
 #include "instantsend.h"
-#include "main.h" // For minRelayTxFee
+#include "validation.h" // For minRelayTxFee
 #include "privatesend-client.h"
 #include "txmempool.h"
 #include "wallet/wallet.h"

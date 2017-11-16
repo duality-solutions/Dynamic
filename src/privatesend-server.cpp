@@ -92,7 +92,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         LogPrint("privatesend", "PSQUEUE -- %s new\n", psq.ToString());
 
-        if(psq.IsExpired() || psq.nTime > GetTime() + PRIVATESEND_QUEUE_TIMEOUT) return;
+        if(psq.IsExpired()) return;
 
         CDynode* pmn = dnodeman.Find(psq.vin);
         if(pmn == NULL) return;
@@ -195,11 +195,9 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
                 LogPrint("privatesend", "PSVIN -- txin=%s\n", txin.ToString());
 
-                CTransaction txPrev;
-                uint256 hash;
-                if(GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true)) {
-                    if(txPrev.vout.size() > txin.prevout.n)
-                        nValueIn += txPrev.vout[txin.prevout.n].nValue;
+                CCoins coins;
+                if(GetUTXOCoins(txin.prevout, coins)) {
+                    nValueIn += coins.vout[txin.prevout.n].nValue;
                 } else {
                     LogPrintf("PSVIN -- missing input! tx=%s", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_MISSING_TX);
@@ -229,6 +227,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         PoolMessage nMessageID = MSG_NOERR;
 
+        entry.addr = pfrom->addr;
         if(AddEntry(entry, nMessageID)) {
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID);
             CheckPool();
@@ -367,7 +366,7 @@ void CPrivateSendServer::CommitFinalTransaction()
     LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING PSTX\n");
 
     CInv inv(MSG_PSTX, hashTx);
-    RelayInv(inv);
+    g_connman->RelayInv(inv);
 
     // Tell the clients it was successful
     RelayCompletedTransaction(MSG_SUCCESS);
@@ -452,7 +451,7 @@ void CPrivateSendServer::ChargeFees()
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            RelayTransaction(vecOffendersCollaterals[0]);
+            g_connman->RelayTransaction(vecOffendersCollaterals[0]);
         }
     }
 }
@@ -487,7 +486,7 @@ void CPrivateSendServer::ChargeRandomFees()
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeRandomFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            RelayTransaction(txCollateral);
+            g_connman->RelayTransaction(txCollateral);
         }
     }
 }
@@ -538,7 +537,7 @@ void CPrivateSendServer::CheckForCompleteQueue()
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
 
-        CPrivatesendQueue psq(nSessionDenom, activeDynode.vin, GetTime(), true);
+        CPrivatesendQueue psq(nSessionDenom, activeDynode.vin, GetAdjustedTime(), true);
         LogPrint("privatesend", "CPrivateSendServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", psq.ToString());
         psq.Sign();
         psq.Relay();
@@ -745,7 +744,7 @@ bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral,
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CPrivatesendQueue psq(nDenom, activeDynode.vin, GetTime(), false);
+        CPrivatesendQueue psq(nDenom, activeDynode.vin, GetAdjustedTime(), false);
         LogPrint("privatesend", "CPrivateSendServer::CreateNewSession -- signing and relaying new queue: %s\n", psq.ToString());
         psq.Sign();
         psq.Relay();
@@ -795,32 +794,82 @@ bool CPrivateSendServer::AddUserToExistingSession(int nDenom, CTransaction txCol
 
 void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal)
 {
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes)
-        if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::PSFINALTX, nSessionID, txFinal);
+    LogPrint("privatesend", "CPrivateSendServer::%s -- nSessionID: %d  nSessionDenom: %d (%s)\n",
+            __func__, nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
+
+    // final mixing tx with empty signatures should be relayed to mixing participants only
+    for (const auto entry : vecEntries) {
+        bool fOk = g_connman->ForNode(entry.addr, [&txFinal, this](CNode* pnode) {
+            g_connman->PushMessage(pnode, NetMsgType::PSFINALTX, nSessionID, txFinal);
+            return true;
+        });
+        if(!fOk) {
+            // no such node? maybe this client disconnected or our own connection went down
+            RelayStatus(STATUS_REJECTED);
+            break;
+        }
+    }
 }
 
 void CPrivateSendServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
 {
     if(!pnode) return;
-    pnode->PushMessage(NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
+    g_connman->PushMessage(pnode, NetMsgType::PSSTATUSUPDATE, nSessionID, (int)nState, (int)vecEntries.size(), (int)nStatusUpdate, (int)nMessageID);
 }
 
 void CPrivateSendServer::RelayStatus(PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID)
 {
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes)
-        if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
+    unsigned int nDisconnected{};
+    // status updates should be relayed to mixing participants only
+    for (const auto entry : vecEntries) {
+        // make sure everyone is still connected
+        bool fOk = g_connman->ForNode(entry.addr, [&nStatusUpdate, &nMessageID, this](CNode* pnode) {
             PushStatus(pnode, nStatusUpdate, nMessageID);
+            return true;
+        });
+        if(!fOk) {
+            // no such node? maybe this client disconnected or our own connection went down
+            ++nDisconnected;
+        }
+    }
+    if (nDisconnected == 0) return; // all is clear
+
+    // smth went wrong
+    LogPrintf("CPrivateSendServer::%s -- can't continue, %llu client(s) disconnected, nSessionID: %d  nSessionDenom: %d (%s)\n",
+            __func__, nDisconnected, nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
+
+    // notify everyone else that this session should be terminated
+    for (const auto entry : vecEntries) {
+        g_connman->ForNode(entry.addr, [this](CNode* pnode) {
+            PushStatus(pnode, STATUS_REJECTED, MSG_NOERR);
+            return true;
+        });
+    }
+
+    if(nDisconnected == vecEntries.size()) {
+        // all clients disconnected, there is probably some issues with our own connection
+        // do not charge any fees, just reset the pool
+        SetNull();
+    }
 }
 
 void CPrivateSendServer::RelayCompletedTransaction(PoolMessage nMessageID)
 {
-    LOCK(cs_vNodes);
-    BOOST_FOREACH(CNode* pnode, vNodes)
-        if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            pnode->PushMessage(NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID);
+    LogPrint("privatesend", "CPrivateSendServer::%s -- nSessionID: %d  nSessionDenom: %d (%s)\n",
+            __func__, nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
+
+    // final mixing tx with empty signatures should be relayed to mixing participants only
+    for (const auto entry : vecEntries) {
+        bool fOk = g_connman->ForNode(entry.addr, [&nMessageID, this](CNode* pnode) {
+            g_connman->PushMessage(pnode, NetMsgType::PSCOMPLETE, nSessionID, (int)nMessageID);
+            return true;
+        });
+        if(!fOk) {
+            // no such node? maybe client disconnected or our own connection went down
+            RelayStatus(STATUS_REJECTED);
+            break;
+        }
+    }
 }
 
 void CPrivateSendServer::SetState(PoolState nStateNew)

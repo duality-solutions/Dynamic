@@ -27,7 +27,14 @@ class CGovernanceVote;
 
 extern CGovernanceManager governance;
 
-typedef std::pair<CGovernanceObject, int64_t> object_time_pair_t;
+struct ExpirationInfo {
+    ExpirationInfo(int64_t _nExpirationTime, int _idFrom) : nExpirationTime(_nExpirationTime), idFrom(_idFrom) {}
+
+    int64_t nExpirationTime;
+    NodeId idFrom;
+};
+
+typedef std::pair<CGovernanceObject, ExpirationInfo> object_info_pair_t;
 
 static const int RATE_BUFFER_SIZE = 5;
 
@@ -111,7 +118,7 @@ public:
     double GetRate()
     {
         int nCount = GetCount();
-        if(nCount < 2) {
+        if(nCount < RATE_BUFFER_SIZE) {
             return 0.0;
         }
         int64_t nMin = GetMinTimestamp();
@@ -133,12 +140,6 @@ public:
         READWRITE(nDataEnd);
         READWRITE(fBufferEmpty);
     }
-};
-
-enum update_mode_enum_t {
-    UPDATE_FALSE,
-    UPDATE_TRUE,
-    UPDATE_FAIL_ONLY
 };
 
 //
@@ -198,17 +199,19 @@ public: // Types
 
     typedef txout_m_t::const_iterator txout_m_cit;
 
+    typedef std::map<COutPoint, int> txout_int_m_t;
+
     typedef std::set<uint256> hash_s_t;
 
     typedef hash_s_t::iterator hash_s_it;
 
     typedef hash_s_t::const_iterator hash_s_cit;
 
-    typedef std::map<uint256, object_time_pair_t> object_time_m_t;
+    typedef std::map<uint256, object_info_pair_t> object_info_m_t;
 
-    typedef object_time_m_t::iterator object_time_m_it;
+    typedef object_info_m_t::iterator object_info_m_it;
 
-    typedef object_time_m_t::const_iterator object_time_m_cit;
+    typedef object_info_m_t::const_iterator object_info_m_cit;
 
     typedef std::map<uint256, int64_t> hash_time_m_t;
 
@@ -224,10 +227,9 @@ private:
     static const int MAX_TIME_FUTURE_DEVIATION;
     static const int RELIABLE_PROPAGATION_TIME;
 
-    // Keep track of current block index
-    const CBlockIndex *pCurrentBlockIndex;
-
     int64_t nTimeLastDiff;
+
+    // keep track of current block height
     int nCachedBlockHeight;
 
     // keep track of the scanning errors
@@ -238,7 +240,8 @@ private:
     //   value - expiration time for deleted objects
     hash_time_m_t mapErasedGovernanceObjects;
 
-    object_time_m_t mapDynodeOrphanObjects;
+    object_info_m_t mapDynodeOrphanObjects;
+    txout_int_m_t mapDynodeOrphanCounter;
 
     object_m_t mapPostponedObjects;
     hash_s_t setAdditionalRelayObjects;
@@ -392,9 +395,11 @@ public:
 
     void AddSeenVote(uint256 nHash, int status);
 
-    bool DynodeRateCheck(const CGovernanceObject& govobj, update_mode_enum_t eUpdateLast = UPDATE_FALSE);
+    void DynodeRateUpdate(const CGovernanceObject& govobj);
 
-    bool DynodeRateCheck(const CGovernanceObject& govobj, update_mode_enum_t eUpdateLast, bool fForce, bool& fRateCheckBypassed);
+    bool DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateFailStatus = false);
+
+    bool DynodeRateCheck(const CGovernanceObject& govobj, bool fUpdateFailStatus, bool fForce, bool& fRateCheckBypassed);
 
     bool ProcessVoteAndRelay(const CGovernanceVote& vote, CGovernanceException& exception) {
         bool fOK = ProcessVote(NULL, vote, exception);
@@ -446,11 +451,6 @@ private:
     void CheckOrphanVotes(CGovernanceObject& govobj, CGovernanceException& exception);
 
     void RebuildIndexes();
-
-    /// Returns DN index, handling the case of index rebuilds
-    int GetDynodeIndex(const CTxIn& dynodeVin);
-
-    void RebuildVoteMaps();
 
     void AddCachedTriggers();
 

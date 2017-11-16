@@ -158,8 +158,9 @@ public:
         pchMessageStart[2] = 0x55;
         pchMessageStart[3] = 0x61;
         vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
-        nDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+        nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
+        nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
@@ -264,8 +265,9 @@ public:
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
         vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
-        nDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
+        nDefaultPort = DEFAULT_P2P_PORT + 100;
         nMaxTipAge = 24 * 60 * 64;
+        nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 100;
         startNewChain = false;
 
@@ -370,7 +372,8 @@ public:
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
         nMaxTipAge = 24 * 60 * 64;
-        nDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+        nDelayGetHeadersTime = 0; // never delay
+        nDefaultPort = DEFAULT_P2P_PORT + 200;
         nPruneAfterHeight = 100;
         startNewChain = false;
 

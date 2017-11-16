@@ -10,7 +10,7 @@
 
 #include "governance.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 
 class CGovernanceVote;
 

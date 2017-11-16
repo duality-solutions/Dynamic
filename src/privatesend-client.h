@@ -10,6 +10,7 @@
 #include "wallet/wallet.h"
 
 class CPrivateSendClient;
+class CConnman;
 
 static const int DENOMS_COUNT_MAX                   = 100;
 
@@ -41,8 +42,10 @@ private:
     std::vector<COutPoint> vecOutPointLocked;
 
     int nCachedLastSuccessBlock;
-    int nMinBlockSpacing; //required blocks between mixes
-    const CBlockIndex *pCurrentBlockIndex; // Keep track of current block index
+    int nMinBlocksToWait; // how many blocks to wait after one successful mixing tx in non-multisession mode
+
+    // Keep track of current block height
+    int nCachedBlockHeight;
 
     int nEntriesCount;
     bool fLastEntryAccepted;
@@ -60,18 +63,20 @@ private:
         return std::find(vecDenominationsSkipped.begin(), vecDenominationsSkipped.end(), nDenomValue) != vecDenominationsSkipped.end();
     }
 
+    bool WaitForAnotherBlock();
+
     // Make sure we have enough keys since last backup
     bool CheckAutomaticBackup();
     bool JoinExistingQueue(CAmount nBalanceNeedsAnonymized);
     bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized);
 
     /// Create denominations
-    bool CreateDenominated();
-    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals);
+    bool CreateDenominated(CConnman& connman);
+    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman& connman);
 
     /// Split up large inputs or make fee sized inputs
-    bool MakeCollateralAmounts();
-    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated);
+    bool MakeCollateralAmounts(CConnman& connman);
+    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated, CConnman& connman);
 
     /// As a client, submit part of a future mixing transaction to a Dynode to start the process
     bool SubmitDenominate();
@@ -105,7 +110,7 @@ public:
 
     CPrivateSendClient() :
         nCachedLastSuccessBlock(0),
-        nMinBlockSpacing(0),
+        nMinBlocksToWait(1),
         txMyCollateral(CMutableTransaction()),
         nPrivateSendRounds(DEFAULT_PRIVATESEND_ROUNDS),
         nPrivateSendAmount(DEFAULT_PRIVATESEND_AMOUNT),
@@ -119,7 +124,7 @@ public:
 
     void ClearSkippedDenominations() { vecDenominationsSkipped.clear(); }
 
-    void SetMinBlockSpacing(int nMinBlockSpacingIn) { nMinBlockSpacing = nMinBlockSpacingIn; }
+    void SetMinBlocksToWait(int nMinBlocksToWaitIn) { nMinBlocksToWait = nMinBlocksToWaitIn; }
 
     void ResetPool();
 
@@ -128,7 +133,7 @@ public:
     std::string GetStatus();
 
     /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(bool fDryRun=false);
+    bool DoAutomaticDenominating(CConnman& connman, bool fDryRun=false);
 
     void CheckTimeout();
 
@@ -138,6 +143,6 @@ public:
     void UpdatedBlockTip(const CBlockIndex *pindex);
 };
 
-void ThreadCheckPrivateSendClient();
+void ThreadCheckPrivateSendClient(CConnman& connman);
 
 #endif

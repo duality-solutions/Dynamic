@@ -14,6 +14,7 @@
 
 #include <QDialog>
 
+class CConnman;
 class PlatformStyle;
 
 namespace Ui
@@ -61,7 +62,7 @@ class MultisigDialog : public QDialog
     void on_pasteTransactionButton_clicked();
     void on_signTransactionButton_clicked();
     void on_copySignedTransactionButton_clicked();
-    void on_sendTransactionButton_clicked();
+    void on_sendTransactionButton_clicked(CConnman& connman);
     void removeEntry(MultisigInputEntry *entry);
     void removeEntry(SendCoinsEntry *entry);
     void updateAmounts();

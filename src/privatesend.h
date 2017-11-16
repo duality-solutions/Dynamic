@@ -11,7 +11,7 @@
 #include "pubkey.h"
 #include "sync.h"
 #include "tinyformat.h"
-#include "utiltime.h"
+#include "timedata.h"
 
 class CPrivateSend;
 
@@ -118,11 +118,14 @@ public:
     std::vector<CTxPSIn> vecTxPSIn;
     std::vector<CTxPSOut> vecTxPSOut;
     CTransaction txCollateral;
+    // memory only
+    CService addr;
 
     CPrivateSendEntry() :
         vecTxPSIn(std::vector<CTxPSIn>()),
         vecTxPSOut(std::vector<CTxPSOut>()),
-        txCollateral(CTransaction())
+        txCollateral(CTransaction()),
+        addr(CService())
         {}
 
     CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral);
@@ -197,7 +200,7 @@ public:
     bool Relay();
 
     /// Is this queue expired?
-    bool IsExpired() { return GetTime() - nTime > PRIVATESEND_QUEUE_TIMEOUT; }
+    bool IsExpired() { return GetAdjustedTime() - nTime > PRIVATESEND_QUEUE_TIMEOUT; }
 
     std::string ToString()
     {

@@ -9,7 +9,7 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "privatesend-client.h"
 #include "privatesend-server.h"
 #include "rpcserver.h"
@@ -46,7 +46,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             return "Mixing is not supported from Dynodes";
 
         privateSendClient.fEnablePrivateSend = true;
-        bool result = privateSendClient.DoAutomaticDenominating();
+        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
         return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
     }
 
@@ -148,7 +148,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         CService addr = CService(strAddress);
 
-        CNode *pnode = ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
+        // TODO: Pass CConnman instance somehow and don't use global variable.
+        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
         if(!pnode)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Dynode %s", strAddress));
 
@@ -188,11 +189,13 @@ UniValue dynode(const UniValue& params, bool fHelp)
         int nCount;
         int nHeight;
         CDynode* winner = NULL;
+        CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
-            nHeight = chainActive.Height() + (strCommand == "current" ? 1 : 10);
+            pindex = chainActive.Tip();
         }
-        dnodeman.UpdateLastPaid();
+        nHeight = pindex->nHeight + (strCommand == "current" ? 1 : 10);
+        dnodeman.UpdateLastPaid(pindex);
         winner = dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount);
         if(!winner) return "unknown";
 
@@ -455,7 +458,8 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     if (fHelp || (
                 strMode != "activeseconds" && strMode != "addr" && strMode != "full" && strMode != "info" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
-                strMode != "protocol" && strMode != "payee" && strMode != "rank" && strMode != "status"))
+                strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
+                strMode != "rank" && strMode != "status"))
     {
         throw std::runtime_error(
                 "dynodelist ( \"mode\" \"filter\" )\n"
@@ -478,6 +482,7 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 "  payee          - Print Dynamic address associated with a Dynode (can be additionally filtered,\n"
                 "                   partial match)\n"
                 "  protocol       - Print protocol of a Dynode (can be additionally filtered, exact match))\n"
+                "  pubkey         - Print the masternode (not collateral) public key\n"
                 "  rank           - Print rank of a Dynode based on current block\n"
                 "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
@@ -485,7 +490,12 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     }
 
     if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-       dnodeman.UpdateLastPaid();
+        CBlockIndex* pindex = NULL;
+         {
+            LOCK(cs_main);
+            pindex = chainActive.Tip();
+        }
+        dnodeman.UpdateLastPaid(pindex);
     }
 
     UniValue obj(UniValue::VOBJ);
@@ -557,6 +567,9 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 if (strFilter !="" && strFilter != strprintf("%d", dn.nProtocolVersion) &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, (int64_t)dn.nProtocolVersion));
+            } else if (strMode == "pubkey") {
+                if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
+                obj.push_back(Pair(strOutpoint, HexStr(dn.pubKeyDynode)));
             } else if (strMode == "status") {
                 std::string strStatus = dn.GetStatus();
                 if (strFilter !="" && strStatus.find(strFilter) == std::string::npos &&
