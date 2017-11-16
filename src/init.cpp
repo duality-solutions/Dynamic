@@ -1464,7 +1464,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 #endif
 
-    ppsNotificationInterface = new CPSNotificationInterface();
+    ppsNotificationInterface = new CPSNotificationInterface(connman);
     RegisterValidationInterface(ppsNotificationInterface);
 
     if (mapArgs.count("-maxuploadtarget")) {

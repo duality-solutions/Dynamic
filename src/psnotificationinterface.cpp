@@ -30,7 +30,12 @@ void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, boo
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
-    if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
+    if (pindexNew == pindexFork) // blocks were disconnected without any new ones
+        return;
+
+    dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
+
+    if (fInitialDownload) // In IBD
         return;
 
     dnodeman.UpdatedBlockTip(pindexNew);
