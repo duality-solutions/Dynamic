@@ -13,7 +13,7 @@
 #include "optionsmodel.h"
 #include "walletmodel.h"
 
-#include "privatesend.h"
+#include "privatesend-client.h"
 
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -94,6 +94,6 @@ void PrivatesendConfig::configure(bool enabled, int coins, int rounds) {
     settings.setValue("nPrivateSendRounds", rounds);
     settings.setValue("nPrivateSendAmount", coins);
 
-    nPrivateSendRounds = rounds;
-    nPrivateSendAmount = coins;
+    privateSendClient.nPrivateSendRounds = rounds;
+    privateSendClient.nPrivateSendAmount = coins;
 }

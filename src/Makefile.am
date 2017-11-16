@@ -66,8 +66,8 @@ endif
 # dynamic #
 DYNAMIC_CORE_H = \
   activedynode.h \
+  addrdb.h \
   addressindex.h \
-  spentindex.h \
   addrman.h \
   alert.h \
   amount.h \
@@ -114,6 +114,7 @@ DYNAMIC_CORE_H = \
   governance-classes.h \
   governance-exceptions.h \
   governance-object.h \
+  governance-validators.h \
   governance-vote.h \
   governance-votedb.h \
   hash.h \
@@ -127,7 +128,6 @@ DYNAMIC_CORE_H = \
   keepass.h \
   keystore.h \
   limitedmap.h \
-  main.h \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
@@ -135,6 +135,7 @@ DYNAMIC_CORE_H = \
   net.h \
   netbase.h \
   netfulfilledman.h \
+  net_processing.h \
   noui.h \
   ntp.h \
   policy/fees.h \
@@ -144,9 +145,10 @@ DYNAMIC_CORE_H = \
   prevector.h \
   primitives/block.h \
   primitives/transaction.h \
+  privatesend-client.h \
   privatesend.h \
+  privatesend-server.h \    
   psnotificationinterface.h \
-  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -162,6 +164,7 @@ DYNAMIC_CORE_H = \
   script/sign.h \
   script/standard.h \
   serialize.h \
+  spentindex.h \
   spork.h \
   streams.h \
   support/allocators/secure.h \
@@ -169,6 +172,7 @@ DYNAMIC_CORE_H = \
   support/cleanse.h \
   support/lockedpool.h \
   sync.h \
+  threadinterrupt.h \
   threadsafety.h \
   timedata.h \
   tinyformat.h \
@@ -182,6 +186,7 @@ DYNAMIC_CORE_H = \
   utilmoneystr.h \
   utilstrencodings.h \
   utiltime.h \
+  validation.h \
   validationinterface.h \
   version.h \
   versionbits.h \
@@ -205,6 +210,7 @@ libdynamic_util_a-clientversion.$(OBJEXT): obj/build.h
 libdynamic_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libdynamic_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_server_a_SOURCES = \
+  addrdb.cpp \
   addrman.cpp \
   alert.cpp \
   bloom.cpp \
@@ -218,22 +224,25 @@ libdynamic_server_a_SOURCES = \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
+  governance-validators.cpp \
   governance-vote.cpp \
   governance-votedb.cpp \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
-  main.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
   miner.cpp \
   net.cpp \
   netfulfilledman.cpp \
+  net_processing.cpp \
   noui.cpp \
   ntp.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
+  privatesend.cpp \
+  privatesend-server.cpp \
   rest.cpp \
   rpcblockchain.cpp \
   rpcdynode.cpp \
@@ -251,6 +260,7 @@ libdynamic_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   ui_interface.cpp \
+  validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
   $(DYNAMIC_CORE_H)
@@ -281,8 +291,7 @@ libdynamic_wallet_a_SOURCES = \
   instantsend.cpp \
   keepass.cpp \
   policy/rbf.cpp \
-  privatesend.cpp \
-  privatesend-relay.cpp \
+  privatesend-client.cpp \
   psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
@@ -374,6 +383,7 @@ libdynamic_util_a_SOURCES = \
   support/cleanse.cpp \
   support/lockedpool.cpp \
   sync.cpp \
+  threadinterrupt.cpp \
   uint256.cpp \
   util.cpp \
   utilmoneystr.cpp \

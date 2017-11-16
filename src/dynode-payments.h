@@ -9,7 +9,7 @@
 #include "core_io.h"
 #include "dynode.h"
 #include "key.h"
-#include "main.h"
+#include "net_processing.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
@@ -96,7 +96,7 @@ public:
 
     void AddPayee(const CDynodePaymentVote& vote);
     bool GetBestPayee(CScript& payeeRet);
-    bool HasPayeeWithVotes(CScript payeeIn, int nVotesReq);
+    bool HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq);
 
     bool IsTransactionValid(const CTransaction& txNew);
 
@@ -170,8 +170,8 @@ private:
     // ... but at least nMinBlocksToStore (payments blocks)
     const int nMinBlocksToStore;
 
-    // Keep track of current block index
-    const CBlockIndex *pCurrentBlockIndex;
+    // Keep track of current block height
+    int nCachedBlockHeight;
 
 public:
     std::map<uint256, CDynodePaymentVote> mapDynodePaymentVotes;

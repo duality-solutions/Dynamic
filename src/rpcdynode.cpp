@@ -9,8 +9,9 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "init.h"
-#include "main.h"
-#include "privatesend.h"
+#include "validation.h"
+#include "privatesend-client.h"
+#include "privatesend-server.h"
 #include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -44,18 +45,18 @@ UniValue privatesend(const UniValue& params, bool fHelp)
         if(fDyNode)
             return "Mixing is not supported from Dynodes";
 
-        fEnablePrivateSend = true;
-        bool result = privateSendPool.DoAutomaticDenominating();
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendPool.GetStatus() + ", will retry"));
+        privateSendClient.fEnablePrivateSend = true;
+        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
     }
 
     if(params[0].get_str() == "stop") {
-        fEnablePrivateSend = false;
+        privateSendClient.fEnablePrivateSend = false;
         return "Mixing was stopped";
     }
 
     if(params[0].get_str() == "reset") {
-        privateSendPool.ResetPool();
+        privateSendClient.ResetPool();
         return "Mixing was reset";
     }
 
@@ -69,16 +70,18 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "getpoolinfo\n"
             "Returns an object containing mixing pool related information.\n");
 
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             privateSendPool.GetStateString()));
-    obj.push_back(Pair("mixing_mode",       fPrivateSendMultiSession ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             privateSendPool.GetQueueSize()));
-    obj.push_back(Pair("entries",           privateSendPool.GetEntriesCount()));
-    obj.push_back(Pair("status",            privateSendPool.GetStatus()));
+    CPrivateSendBase privateSend = fDyNode ? (CPrivateSendBase)privateSendServer : (CPrivateSendBase)privateSendClient;
 
-    if (privateSendPool.pSubmittedToDynode) {
-        obj.push_back(Pair("outpoint",      privateSendPool.pSubmittedToDynode->vin.prevout.ToStringShort()));
-        obj.push_back(Pair("addr",          privateSendPool.pSubmittedToDynode->addr.ToString()));
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("state",             privateSend.GetStateString()));
+    obj.push_back(Pair("mixing_mode",       (!fDyNode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
+    obj.push_back(Pair("queue",             privateSend.GetQueueSize()));
+    obj.push_back(Pair("entries",           privateSend.GetEntriesCount()));
+    obj.push_back(Pair("status",            privateSendClient.GetStatus()));
+
+    if (privateSendClient.infoMixingDynode.fInfoValid) {
+        obj.push_back(Pair("outpoint",      privateSendClient.infoMixingDynode.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          privateSendClient.infoMixingDynode.addr.ToString()));
     }
 
     if (pwalletMain) {
@@ -145,7 +148,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         CService addr = CService(strAddress);
 
-        CNode *pnode = ConnectNode((CAddress)addr, NULL);
+        // TODO: Pass CConnman instance somehow and don't use global variable.
+        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
         if(!pnode)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Dynode %s", strAddress));
 
@@ -185,11 +189,13 @@ UniValue dynode(const UniValue& params, bool fHelp)
         int nCount;
         int nHeight;
         CDynode* winner = NULL;
+        CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
-            nHeight = chainActive.Height() + (strCommand == "current" ? 1 : 10);
+            pindex = chainActive.Tip();
         }
-        dnodeman.UpdateLastPaid();
+        nHeight = pindex->nHeight + (strCommand == "current" ? 1 : 10);
+        dnodeman.UpdateLastPaid(pindex);
         winner = dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount);
         if(!winner) return "unknown";
 
@@ -450,9 +456,10 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     if (params.size() == 2) strFilter = params[1].get_str();
 
     if (fHelp || (
-                strMode != "activeseconds" && strMode != "addr" && strMode != "full" &&
+                strMode != "activeseconds" && strMode != "addr" && strMode != "full" && strMode != "info" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
-                strMode != "protocol" && strMode != "payee" && strMode != "rank" && strMode != "status"))
+                strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
+                strMode != "rank" && strMode != "status"))
     {
         throw std::runtime_error(
                 "dynodelist ( \"mode\" \"filter\" )\n"
@@ -467,12 +474,15 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 "  addr           - Print ip address associated with a Dynode (can be additionally filtered, partial match)\n"
                 "  full           - Print info in format 'status protocol payee lastseen activeseconds lastpaidtime lastpaidblock IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
+                "  info           - Print info in format 'status protocol payee lastseen activeseconds sentinelversion sentinelstate IP'\n"
+                "                   (can be additionally filtered, partial match)\n"
                 "  lastpaidblock  - Print the last block height a node was paid on the network\n"
                 "  lastpaidtime   - Print the last time a node was paid on the network\n"
                 "  lastseen       - Print timestamp of when a Dynode was last seen on the network\n"
                 "  payee          - Print Dynamic address associated with a Dynode (can be additionally filtered,\n"
                 "                   partial match)\n"
                 "  protocol       - Print protocol of a Dynode (can be additionally filtered, exact match))\n"
+                "  pubkey         - Print the masternode (not collateral) public key\n"
                 "  rank           - Print rank of a Dynode based on current block\n"
                 "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
@@ -480,7 +490,12 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
     }
 
     if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
-       dnodeman.UpdateLastPaid();
+        CBlockIndex* pindex = NULL;
+         {
+            LOCK(cs_main);
+            pindex = chainActive.Tip();
+        }
+        dnodeman.UpdateLastPaid(pindex);
     }
 
     UniValue obj(UniValue::VOBJ);
@@ -518,6 +533,21 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 if (strFilter !="" && strFull.find(strFilter) == std::string::npos &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, strFull));
+            } else if (strMode == "info") {
+                std::ostringstream streamInfo;
+                streamInfo << std::setw(18) <<
+                               dn.GetStatus() << " " <<
+                               dn.nProtocolVersion << " " <<
+                               CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString() << " " <<
+                               (int64_t)dn.lastPing.sigTime << " " << std::setw(8) <<
+                               (int64_t)(dn.lastPing.sigTime - dn.sigTime) << " " <<
+                               SafeIntVersionToString(dn.lastPing.nSentinelVersion) << " "  <<
+                               (dn.lastPing.fSentinelIsCurrent ? "current" : "expired") << " " <<
+                               dn.addr.ToString();
+                std::string strInfo = streamInfo.str();
+                if (strFilter !="" && strInfo.find(strFilter) == std::string::npos &&
+                    strOutpoint.find(strFilter) == std::string::npos) continue;
+                obj.push_back(Pair(strOutpoint, strInfo));
             } else if (strMode == "lastpaidblock") {
                 if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, dn.GetLastPaidBlock()));
@@ -537,6 +567,9 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
                 if (strFilter !="" && strFilter != strprintf("%d", dn.nProtocolVersion) &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, (int64_t)dn.nProtocolVersion));
+            } else if (strMode == "pubkey") {
+                if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
+                obj.push_back(Pair(strOutpoint, HexStr(dn.pubKeyDynode)));
             } else if (strMode == "status") {
                 std::string strStatus = dn.GetStatus();
                 if (strFilter !="" && strStatus.find(strFilter) == std::string::npos &&
@@ -715,7 +748,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
                 resultObj.push_back(Pair("vchSig", EncodeBase64(&dnb.vchSig[0], dnb.vchSig.size())));
                 resultObj.push_back(Pair("sigTime", dnb.sigTime));
                 resultObj.push_back(Pair("protocolVersion", dnb.nProtocolVersion));
-                resultObj.push_back(Pair("nLastSsq", dnb.nLastSsq));
+                resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
                 lastPingObj.push_back(Pair("vin", dnb.lastPing.vin.ToString()));
@@ -793,3 +826,24 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
     return NullUniValue;
 }
+
+UniValue sentinelping(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1) {
+        throw std::runtime_error(
+            "sentinelping version\n"
+            "\nSentinel ping.\n"
+            "\nArguments:\n"
+            "1. version           (string, required) Sentinel version in the form \"x.x.x\"\n"
+            "\nResult:\n"
+            "state                (boolean) Ping result\n"
+            "\nExamples:\n"
+            + HelpExampleCli("sentinelping", "1.0.2")
+            + HelpExampleRpc("sentinelping", "1.0.2")
+        );
+    }
+
+    activeDynode.UpdateSentinelPing(StringVersionToInt(params[0].get_str()));
+    return true;
+}
+

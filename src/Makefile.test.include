@@ -55,6 +55,7 @@ DYNAMIC_TESTS =\
   test/crypto_tests.cpp \
   test/DoS_tests.cpp \
   test/getarg_tests.cpp \
+  test/governance_validators_tests.cpp \
   test/hash_tests.cpp \
   test/key_tests.cpp \
   test/limitedmap_tests.cpp \
@@ -64,6 +65,7 @@ DYNAMIC_TESTS =\
   test/merkle_tests.cpp \
   test/miner_tests.cpp \
   test/multisig_tests.cpp \
+  test/net_tests.cpp \
   test/netbase_tests.cpp \
   test/pmt_tests.cpp \
   test/policyestimator_tests.cpp \

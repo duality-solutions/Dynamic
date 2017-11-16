@@ -9,7 +9,7 @@
 
 #include "base58.h"
 #include "chainparamsbase.h"
-#include "main.h"
+#include "validation.h"
 #include "script/script.h"
 #include "util.h"
 #include "wallet/wallet.h"

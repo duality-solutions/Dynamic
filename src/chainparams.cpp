@@ -112,8 +112,8 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nRewardsStart = 20545; // PoW Rewards begin on block 20546
-        consensus.nDynodePaymentsStartBlock = 20545; // Dynode Payments begin on block 20546
+        consensus.nRewardsStart = 250; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
+        consensus.nDynodePaymentsStartBlock = 20546; // Dynode Payments begin on block 20546
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20546; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
@@ -158,18 +158,19 @@ public:
         pchMessageStart[2] = 0x55;
         pchMessageStart[3] = 0x61;
         vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
-        nDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+        nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
+        nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1509390364, 1694146, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1510513582, 318658, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x0000081952a2e63b266edca779817f232d62e28e6b90a2f797c2a2c83cdbdcef"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000003805fc0f75bbd23ad58b3280df128c3fb8e35ee23745f89c7b9bf3b3d12"));
             assert(genesis.hashMerkleRoot == uint256S("0xe89257a8e8dc153acd33b55c571d4b4878fce912cc4e334c2a4bddcd3cbbfcc9"));
 		}
 		
@@ -202,11 +203,10 @@ public:
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
         strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
-        strDynodePaymentsPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x0000081952a2e63b266edca779817f232d62e28e6b90a2f797c2a2c83cdbdcef")),
+	        (        0, uint256S("0x000003805fc0f75bbd23ad58b3280df128c3fb8e35ee23745f89c7b9bf3b3d12")),
             1489863148, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
@@ -265,8 +265,9 @@ public:
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
         vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
-        nDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
+        nDefaultPort = DEFAULT_P2P_PORT + 100;
         nMaxTipAge = 24 * 60 * 64;
+        nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 100;
         startNewChain = false;
 
@@ -311,7 +312,6 @@ public:
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
         // DQibPzNCKAGRzPUs55uAW7nr7UfU1T7ATi
         strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
-        strDynodePaymentsPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -372,7 +372,8 @@ public:
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
         nMaxTipAge = 24 * 60 * 64;
-        nDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+        nDelayGetHeadersTime = 0; // never delay
+        nDefaultPort = DEFAULT_P2P_PORT + 200;
         nPruneAfterHeight = 100;
         startNewChain = false;
 
@@ -399,7 +400,6 @@ public:
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
         // DQibPzNCKAGRzPUs55uAW7nr7UfU1T7ATi
         strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
-        strDynodePaymentsPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of

@@ -317,6 +317,7 @@ extern UniValue getchaintips(const UniValue& params, bool fHelp);
 extern UniValue invalidateblock(const UniValue& params, bool fHelp);
 extern UniValue reconsiderblock(const UniValue& params, bool fHelp);
 extern UniValue getspentinfo(const UniValue& params, bool fHelp);
+extern UniValue sentinelping(const UniValue& params, bool fHelp);
 
 extern UniValue sendfluidtransaction(const UniValue& params, bool fHelp); // in fluid.cpp
 extern UniValue gettime(const UniValue& params, bool fHelp);

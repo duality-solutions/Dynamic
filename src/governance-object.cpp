@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2016 The Dash Core developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +10,7 @@
 #include "governance.h"
 #include "governance-classes.h"
 #include "governance-vote.h"
+#include "instantsend.h"
 #include "messagesigner.h"
 #include "util.h"
 
@@ -99,8 +101,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
                                     const CGovernanceVote& vote,
                                     CGovernanceException& exception)
 {
-    int nDNIndex = governance.GetDynodeIndex(vote.GetVinDynode());
-    if(nDNIndex < 0) {
+    if(!dnodeman.Has(vote.GetVinDynode())) {
         std::ostringstream ostr;
         ostr << "CGovernanceObject::ProcessVote -- Dynode index not found\n";
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
@@ -116,9 +117,9 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         return false;
     }
 
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
+    vote_m_it it = mapCurrentDNVotes.find(vote.GetVinDynode());
     if(it == mapCurrentDNVotes.end()) {
-        it = mapCurrentDNVotes.insert(vote_m_t::value_type(nDNIndex,vote_rec_t())).first;
+        it = mapCurrentDNVotes.insert(vote_m_t::value_type(vote.GetVinDynode(), vote_rec_t())).first;
     }
     vote_rec_t& recVote = it->second;
     vote_signal_enum_t eSignal = vote.GetSignal();
@@ -151,7 +152,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         return false;
     }
 
-    int64_t nNow = GetTime();
+    int64_t nNow = GetAdjustedTime();
     int64_t nVoteTimeUpdate = voteInstance.nTime;
     if(governance.AreRateChecksEnabled()) {
         int64_t nTimeDelta = nNow - voteInstance.nTime;
@@ -186,38 +187,12 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     return true;
 }
 
-void CGovernanceObject::RebuildVoteMap()
-{
-    vote_m_t mapDNVotesNew;
-    for(vote_m_it it = mapCurrentDNVotes.begin(); it != mapCurrentDNVotes.end(); ++it) {
-        CTxIn vinDynode;
-        if(dnodeman.GetDynodeVinForIndexOld(it->first, vinDynode)) {
-            int nNewIndex = dnodeman.GetDynodeIndex(vinDynode);
-            if((nNewIndex >= 0)) {
-                mapDNVotesNew[nNewIndex] = it->second;
-            }
-        }
-    }
-    mapCurrentDNVotes = mapDNVotesNew;
-}
-
 void CGovernanceObject::ClearDynodeVotes()
 {
     vote_m_it it = mapCurrentDNVotes.begin();
     while(it != mapCurrentDNVotes.end()) {
-        bool fIndexRebuilt = false;
-        CTxIn vinDynode;
-        bool fRemove = true;
-        if(dnodeman.Get(it->first, vinDynode, fIndexRebuilt)) {
-            if(dnodeman.Has(vinDynode)) {
-                fRemove = false;
-            }
-            else {
-                fileVotes.RemoveVotesFromDynode(vinDynode);
-            }
-        }
-
-        if(fRemove) {
+        if(!dnodeman.Has(it->first)) {
+            fileVotes.RemoveVotesFromDynode(it->first);
             mapCurrentDNVotes.erase(it++);
         }
         else {
@@ -410,6 +385,7 @@ std::string CGovernanceObject::GetDataAsString()
 
 void CGovernanceObject::UpdateLocalValidity()
 {
+    LOCK(cs_main);
     // THIS DOES NOT CHECK COLLATERAL, THIS IS CHECKED UPON ORIGINAL ARRIVAL
     fCachedLocalValidity = IsValidLocally(strLocalValidityError, false);
 };
@@ -418,13 +394,15 @@ void CGovernanceObject::UpdateLocalValidity()
 bool CGovernanceObject::IsValidLocally(std::string& strError, bool fCheckCollateral)
 {
     bool fMissingDynode = false;
+    bool fMissingConfirmations = false;
 
-    return IsValidLocally(strError, fMissingDynode, fCheckCollateral);
+    return IsValidLocally(strError, fMissingDynode, fMissingConfirmations, fCheckCollateral);
 }
 
-bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral)
+bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDynode, bool& fMissingConfirmations, bool fCheckCollateral)
 {
     fMissingDynode = false;
+    fMissingConfirmations = false;
 
     if(fUnparsable) {
         strError = "Object data unparseable";
@@ -450,8 +428,15 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             std::string strOutpoint = vinDynode.prevout.ToStringShort();
             dynode_info_t infoDn = dnodeman.GetDynodeInfo(vinDynode);
             if(!infoDn.fInfoValid) {
-                fMissingDynode = true;
-                strError = "Dynode not found: " + strOutpoint;
+                 CDynode::CollateralStatus err = CDynode::CheckCollateral(GetDynodeVin());
+                if (err == CDynode::COLLATERAL_OK) {
+                    fMissingDynode = true;
+                    strError = "Dynode not found: " + strOutpoint;
+                } else if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
+                    strError = "Failed to find Dynode UTXO, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
+                    strError = "Dynode UTXO should have 1000 DYN, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                }
                 return false;
             }
 
@@ -463,11 +448,8 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             return true;
         }
 
-        if(!IsCollateralValid(strError)) {
-            // strError set in IsCollateralValid
-            if(strError == "") strError = "Collateral is invalid";
+        if (!IsCollateralValid(strError, fMissingConfirmations))
             return false;
-        }
     }
 
     return true;
@@ -484,9 +466,10 @@ CAmount CGovernanceObject::GetMinCollateralFee()
     }
 }
 
-bool CGovernanceObject::IsCollateralValid(std::string& strError)
+bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingConfirmations)
 {
     strError = "";
+    fMissingConfirmations = false;
     CAmount nMinFee = GetMinCollateralFee();
     uint256 nExpectedHash = GetHash();
 
@@ -512,7 +495,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
     CScript findScript;
     findScript << OP_RETURN << ToByteVector(nExpectedHash);
 
-    DBG( cout << "IsCollateralValid txCollateral.vout.size() = " << txCollateral.vout.size() << endl; );
+    DBG( cout << "IsCollateralValid: txCollateral.vout.size() = " << txCollateral.vout.size() << endl; );
 
     DBG( cout << "IsCollateralValid: findScript = " << ScriptToAsmStr( findScript, false ) << endl; );
 
@@ -548,8 +531,8 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
 
     // GET CONFIRMATIONS FOR TRANSACTION
 
-    LOCK(cs_main);
-    int nConfirmationsIn = GetISConfirmations(nCollateralHash);
+    AssertLockHeld(cs_main);
+    int nConfirmationsIn = instantsend.GetConfirmations(nCollateralHash);
     if (nBlockHash != uint256()) {
         BlockMap::iterator mi = mapBlockIndex.find(nBlockHash);
         if (mi != mapBlockIndex.end() && (*mi).second) {
@@ -560,14 +543,19 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
         }
     }
 
-    if(nConfirmationsIn >= GOVERNANCE_FEE_CONFIRMATIONS) {
-        strError = "valid";
-    } else {
-        strError = strprintf("Collateral requires at least %d confirmations - %d confirmations", GOVERNANCE_FEE_CONFIRMATIONS, nConfirmationsIn);
-        LogPrintf ("CGovernanceObject::IsCollateralValid -- %s - %d confirmations\n", strError, nConfirmationsIn);
+    if(nConfirmationsIn < GOVERNANCE_FEE_CONFIRMATIONS) {
+        strError = strprintf("Collateral requires at least %d confirmations to be relayed throughout the network (it has only %d)", GOVERNANCE_FEE_CONFIRMATIONS, nConfirmationsIn);
+        if (nConfirmationsIn >= GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS) {
+            fMissingConfirmations = true;
+            strError += ", pre-accepted -- waiting for required confirmations";
+        } else {
+            strError += ", rejected -- try again later";
+        }
+        LogPrintf ("CGovernanceObject::IsCollateralValid -- %s\n", strError);
         return false;
     }
 
+    strError = "valid";
     return true;
 }
 
@@ -619,8 +607,7 @@ int CGovernanceObject::GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const
 
 bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord)
 {
-    int nDNIndex = governance.GetDynodeIndex(dnCollateralOutpoint);
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
+    vote_m_it it = mapCurrentDNVotes.find(dnCollateralOutpoint);
     if (it == mapCurrentDNVotes.end()) {
         return false;
     }
@@ -631,7 +618,7 @@ bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vot
 void CGovernanceObject::Relay()
 {
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
-    RelayInv(inv, PROTOCOL_VERSION);
+    g_connman->RelayInv(inv, PROTOCOL_VERSION);
 }
 
 void CGovernanceObject::UpdateSentinelVariables()

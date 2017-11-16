@@ -16,7 +16,7 @@
 
 #include "base58.h"
 #include "dns/dns.h"
-#include "main.h"
+#include "validation.h"
 #include "ui_interface.h"
 #include "wallet/wallet.h"
 

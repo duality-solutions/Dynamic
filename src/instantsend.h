@@ -22,7 +22,7 @@ static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
 
 static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70300;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70500;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -33,8 +33,8 @@ class CInstantSend
 private:
 static const int ORPHAN_VOTE_SECONDS            = 60;
 
-    // Keep track of current block index
-    const CBlockIndex *pCurrentBlockIndex;
+    // Keep track of current block height
+    int nCachedBlockHeight;
 
     // maps for AlreadyHave
     std::map<uint256, CTxLockRequest> mapLockRequestAccepted; // tx hash - tx
@@ -89,6 +89,9 @@ public:
     bool IsLockedInstantSendTransaction(const uint256& txHash);
     // get the actual uber og accepted lock signatures
     int GetTransactionLockSignatures(const uint256& txHash);
+
+    // get instantsend confirmations (only)
+    int GetConfirmations(const uint256 &nTXHash);
 
     // remove expired entries from maps
     void CheckAndRemove();

@@ -50,6 +50,7 @@ static const unsigned char pchIPv4[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0
 
 // Need ample time for negotiation for very slow proxies such as Tor (milliseconds)
 static const int SOCKS5_RECV_TIMEOUT = 20 * 1000;
+static std::atomic<bool> interruptSocks5Recv(false);
 
 enum Network ParseNetwork(std::string net) {
     boost::to_lower(net);
@@ -242,7 +243,7 @@ struct timeval MillisToTimeval(int64_t nTimeout)
 /**
  * Read bytes from socket. This will either read the full number of bytes requested
  * or return False on error or timeout.
- * This function can be interrupted by boost thread interrupt.
+ * This function can be interrupted by calling InterruptSocks5()
  *
  * @param data Buffer to receive into
  * @param len  Length of data to receive
@@ -282,7 +283,8 @@ bool static InterruptibleRecv(char* data, size_t len, int timeout, SOCKET& hSock
                 return false;
             }
         }
-        boost::this_thread::interruption_point();
+        if (interruptSocks5Recv)
+            return false;
         curTime = GetTimeMillis();
     }
     return len == 0;
@@ -617,10 +619,12 @@ bool ConnectSocketByName(CService &addr, SOCKET& hSocketRet, const char *pszDest
     proxyType proxy;
     GetNameProxy(proxy);
 
-    CService addrResolved(CNetAddr(strDest, fNameLookup && !HaveNameProxy()), port);
-    if (addrResolved.IsValid()) {
-        addr = addrResolved;
-        return ConnectSocket(addr, hSocketRet, nTimeout);
+    std::vector<CService> addrResolved;
+    if (Lookup(strDest.c_str(), addrResolved, port, fNameLookup && !HaveNameProxy(), 256)) {
+        if (addrResolved.size() > 0) {
+            addr = addrResolved[GetRand(addrResolved.size())];
+            return ConnectSocket(addr, hSocketRet, nTimeout);
+        }
     }
 
     addr = CService("0.0.0.0:0");
@@ -687,19 +691,19 @@ CNetAddr::CNetAddr(const struct in6_addr& ipv6Addr)
     SetRaw(NET_IPV6, (const uint8_t*)&ipv6Addr);
 }
 
-CNetAddr::CNetAddr(const char *pszIp, bool fAllowLookup)
+CNetAddr::CNetAddr(const char *pszIp)
 {
     Init();
     std::vector<CNetAddr> vIP;
-    if (LookupHost(pszIp, vIP, 1, fAllowLookup))
+    if (LookupHost(pszIp, vIP, 1, false))
         *this = vIP[0];
 }
 
-CNetAddr::CNetAddr(const std::string &strIp, bool fAllowLookup)
+CNetAddr::CNetAddr(const std::string &strIp)
 {
     Init();
     std::vector<CNetAddr> vIP;
-    if (LookupHost(strIp.c_str(), vIP, 1, fAllowLookup))
+    if (LookupHost(strIp.c_str(), vIP, 1, false))
         *this = vIP[0];
 }
 
@@ -1125,35 +1129,35 @@ bool CService::SetSockAddr(const struct sockaddr *paddr)
     }
 }
 
-CService::CService(const char *pszIpPort, bool fAllowLookup)
+CService::CService(const char *pszIpPort)
 {
     Init();
     CService ip;
-    if (Lookup(pszIpPort, ip, 0, fAllowLookup))
+    if (Lookup(pszIpPort, ip, 0, false))
         *this = ip;
 }
 
-CService::CService(const char *pszIpPort, int portDefault, bool fAllowLookup)
+CService::CService(const char *pszIpPort, int portDefault)
 {
     Init();
     CService ip;
-    if (Lookup(pszIpPort, ip, portDefault, fAllowLookup))
+    if (Lookup(pszIpPort, ip, portDefault, false))
         *this = ip;
 }
 
-CService::CService(const std::string &strIpPort, bool fAllowLookup)
+CService::CService(const std::string &strIpPort)
 {
     Init();
     CService ip;
-    if (Lookup(strIpPort.c_str(), ip, 0, fAllowLookup))
+    if (Lookup(strIpPort.c_str(), ip, 0, false))
         *this = ip;
 }
 
-CService::CService(const std::string &strIpPort, int portDefault, bool fAllowLookup)
+CService::CService(const std::string &strIpPort, int portDefault)
 {
     Init();
     CService ip;
-    if (Lookup(strIpPort.c_str(), ip, portDefault, fAllowLookup))
+    if (Lookup(strIpPort.c_str(), ip, portDefault, false))
         *this = ip;
 }
 
@@ -1246,7 +1250,7 @@ CSubNet::CSubNet():
     memset(netmask, 0, sizeof(netmask));
 }
 
-CSubNet::CSubNet(const std::string &strSubnet, bool fAllowLookup)
+CSubNet::CSubNet(const std::string &strSubnet)
 {
     size_t slash = strSubnet.find_last_of('/');
     std::vector<CNetAddr> vIP;
@@ -1256,7 +1260,7 @@ CSubNet::CSubNet(const std::string &strSubnet, bool fAllowLookup)
     memset(netmask, 255, sizeof(netmask));
 
     std::string strAddress = strSubnet.substr(0, slash);
-    if (LookupHost(strAddress.c_str(), vIP, 1, fAllowLookup))
+    if (LookupHost(strAddress.c_str(), vIP, 1, false))
     {
         network = vIP[0];
         if (slash != strSubnet.npos)
@@ -1470,4 +1474,9 @@ bool SetSocketNonBlocking(SOCKET& hSocket, bool fNonBlocking)
     }
 
     return true;
+}
+
+void InterruptSocks5(bool interrupt)
+{
+    interruptSocks5Recv = interrupt;
 }

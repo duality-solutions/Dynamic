@@ -20,8 +20,8 @@
 
 #include "base58.h"
 #include "coincontrol.h"
-#include "main.h" // mempool and minRelayTxFee
-#include "privatesend.h"
+#include "validation.h" // mempool and minRelayTxFee
+#include "privatesend-client.h"
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "wallet/wallet.h"
@@ -263,7 +263,7 @@ void SendCoinsDialog::on_sendButton_clicked()
         strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
         QString strNearestAmount(
             DynamicUnits::formatWithUnit(
-                model->getOptionsModel()->getDisplayUnit(), vecPrivateSendDenominations.back()));
+                model->getOptionsModel()->getDisplayUnit(), CPrivateSend::GetSmallestDenomination()));
         strFee = QString(tr(
             "(privatesend requires this amount to be rounded up to the nearest %1)."
         ).arg(strNearestAmount));

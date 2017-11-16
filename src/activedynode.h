@@ -43,6 +43,10 @@ private:
     /// Ping Dynode
     bool SendDynodePing();
 
+    //  sentinel ping data
+    int64_t nSentinelPingTime;
+    uint32_t nSentinelVersion;
+
 public:
     // Keys for the active Dynode
     CPubKey pubKeyDynode;
@@ -71,6 +75,8 @@ public:
     std::string GetStateString() const;
     std::string GetStatus() const;
     std::string GetTypeString() const;
+
+    bool UpdateSentinelPing(int version);
 
 private:
     void ManageStateInitial();

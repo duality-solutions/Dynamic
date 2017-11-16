@@ -98,7 +98,8 @@ bool AppInit(int argc, char* argv[])
 
     try
     {
-        if (!boost::filesystem::is_directory(GetDataDir(false)))
+        bool datadirFromCmdLine = mapArgs.count("-datadir") != 0;
+        if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false)))
         {
             fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", mapArgs["-datadir"].c_str());
             return false;
@@ -109,6 +110,11 @@ bool AppInit(int argc, char* argv[])
         } catch (const std::exception& e) {
             fprintf(stderr,"Error reading configuration file: %s\n", e.what());
             return false;
+        }
+        if (!datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false)))
+        {
+            fprintf(stderr, "Error: Specified data directory \"%s\" from config file does not exist.\n", mapArgs["-datadir"].c_str());
+            return EXIT_FAILURE;
         }
         // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
         try {

@@ -10,27 +10,38 @@
 #include "dynode-sync.h"
 #include "governance.h"
 #include "instantsend.h"
-#include "privatesend.h"
+#include "privatesend-client.h"
 
-CPSNotificationInterface::CPSNotificationInterface()
+void CPSNotificationInterface::InitializeCurrentBlockTip()
 {
+    LOCK(cs_main);
+    UpdatedBlockTip(chainActive.Tip(), NULL, IsInitialBlockDownload());
 }
 
-CPSNotificationInterface::~CPSNotificationInterface()
+void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 {
+    dynodeSync.AcceptedBlockHeader(pindexNew);
 }
 
-void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindex)
+void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
 {
-    dnodeman.UpdatedBlockTip(pindex);
-    privateSendPool.UpdatedBlockTip(pindex);
-    instantsend.UpdatedBlockTip(pindex);
-    dnpayments.UpdatedBlockTip(pindex);
-    governance.UpdatedBlockTip(pindex);
-    dynodeSync.UpdatedBlockTip(pindex);
+    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload);
+}
+
+void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
+{
+    if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
+        return;
+
+    dnodeman.UpdatedBlockTip(pindexNew);
+    privateSendClient.UpdatedBlockTip(pindexNew);
+    instantsend.UpdatedBlockTip(pindexNew);
+    dnpayments.UpdatedBlockTip(pindexNew);
+    governance.UpdatedBlockTip(pindexNew);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)
 {
     instantsend.SyncTransaction(tx, pblock);
+    CPrivateSend::SyncTransaction(tx, pblock);
 }

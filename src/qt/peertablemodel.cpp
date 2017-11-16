@@ -11,6 +11,7 @@
 #include "guiconstants.h"
 #include "guiutil.h"
 
+#include "validation.h" // for cs_main
 #include "sync.h"
 
 #include <QDebug>
@@ -27,6 +28,8 @@ bool NodeLessThan::operator()(const CNodeCombinedStats &left, const CNodeCombine
 
     switch(column)
     {
+    case PeerTableModel::NetNodeId:
+        return pLeft->nodeid < pRight->nodeid;
     case PeerTableModel::Address:
         return pLeft->addrName.compare(pRight->addrName) < 0;
     case PeerTableModel::Subversion:
@@ -55,24 +58,21 @@ public:
     void refreshPeers()
     {
         {
-            TRY_LOCK(cs_vNodes, lockNodes);
-            if (!lockNodes)
-            {
-                // skip the refresh if we can't immediately get the lock
-                return;
-            }
             cachedNodeStats.clear();
+            std::vector<CNodeStats> vstats;
+            if(g_connman)
+                g_connman->GetNodeStats(vstats);
 #if QT_VERSION >= 0x040700
-            cachedNodeStats.reserve(vNodes.size());
+            cachedNodeStats.reserve(vstats.size());
 #endif
-            Q_FOREACH (CNode* pnode, vNodes)
+            Q_FOREACH (const CNodeStats& nodestats, vstats)
             {
                 CNodeCombinedStats stats;
                 stats.nodeStateStats.nMisbehavior = 0;
                 stats.nodeStateStats.nSyncHeight = -1;
                 stats.nodeStateStats.nCommonHeight = -1;
                 stats.fNodeStateStatsAvailable = false;
-                pnode->copyStats(stats.nodeStats);
+                stats.nodeStats = nodestats;
                 cachedNodeStats.append(stats);
             }
         }
@@ -117,7 +117,7 @@ PeerTableModel::PeerTableModel(ClientModel *parent) :
     clientModel(parent),
     timer(0)
 {
-    columns << tr("Node/Service") << tr("User Agent") << tr("Ping Time");
+    columns << tr("NodeId") << tr("Node/Service") << tr("User Agent") << tr("Ping Time");
     priv = new PeerTablePriv();
     // default to unsorted
     priv->sortColumn = -1;
@@ -163,6 +163,8 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         switch(index.column())
         {
+        case NetNodeId:
+            return rec->nodeStats.nodeid;
         case Address:
             return QString::fromStdString(rec->nodeStats.addrName);
         case Subversion:

@@ -145,7 +145,6 @@ DYNAMIC_H = \
   primitives/transaction.h \
   privatesend.h \
   psnotificationinterface.h \
-  privatesend-relay.h \
   protocol.h \
   pubkey.h \
   random.h \
@@ -270,7 +269,6 @@ libdynamic_wallet_a_SOURCES = \
   policy/rbf.cpp \
   privatesend.cpp \
   psnotificationinterface.cpp \
-  privatesend-relay.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/rpcdump.cpp \

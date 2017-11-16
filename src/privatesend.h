@@ -3,14 +3,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_PRIVATESEND_H
-#define DYNAMIC_PRIVATESEND_H
+#ifndef PRIVATESEND_H
+#define PRIVATESEND_H
 
-#include "dynode.h"
-#include "wallet/wallet.h"
+#include "chainparams.h"
+#include "primitives/transaction.h"
+#include "pubkey.h"
+#include "sync.h"
+#include "tinyformat.h"
+#include "timedata.h"
 
-class CPrivatesendBroadcastTx;
-class CPrivatesendPool;
+class CPrivateSend;
 
 // timeouts
 static const int PRIVATESEND_AUTO_TIMEOUT_MIN       = 5;
@@ -19,35 +22,55 @@ static const int PRIVATESEND_QUEUE_TIMEOUT          = 30;
 static const int PRIVATESEND_SIGNING_TIMEOUT        = 15;
 
 //! minimum peer version accepted by mixing pool
-static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70200;
+static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70500;
 
-//! 1/10 of min denom, should not collide with other values to avoid confusion
-static const CAmount PRIVATESEND_COLLATERAL         = 0.01 * COIN + 1;
 static const CAmount PRIVATESEND_ENTRY_MAX_SIZE     = 9;
-static const int DENOMS_COUNT_MAX                   = 100;
 
-static const int DEFAULT_PRIVATESEND_ROUNDS         = 2;
-static const int DEFAULT_PRIVATESEND_AMOUNT         = 1000;
-static const int DEFAULT_PRIVATESEND_LIQUIDITY      = 0;
-static const bool DEFAULT_PRIVATESEND_MULTISESSION  = false;
+// pool responses
+enum PoolMessage {
+    ERR_ALREADY_HAVE,
+    ERR_DENOM,
+    ERR_ENTRIES_FULL,
+    ERR_EXISTING_TX,
+    ERR_FEES,
+    ERR_INVALID_COLLATERAL,
+    ERR_INVALID_INPUT,
+    ERR_INVALID_SCRIPT,
+    ERR_INVALID_TX,
+    ERR_MAXIMUM,
+    ERR_DN_LIST,
+    ERR_MODE,
+    ERR_NON_STANDARD_PUBKEY,
+    ERR_NOT_A_DN, // not used
+    ERR_QUEUE_FULL,
+    ERR_RECENT,
+    ERR_SESSION,
+    ERR_MISSING_TX,
+    ERR_VERSION,
+    MSG_NOERR,
+    MSG_SUCCESS,
+    MSG_ENTRIES_ADDED,
+    MSG_POOL_MIN = ERR_ALREADY_HAVE,
+    MSG_POOL_MAX = MSG_ENTRIES_ADDED
+};
 
-// Warn user if mixing in gui or try to create backup if mixing in daemon mode
-// when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 100;
-// Stop mixing completely, it's too dangerous to continue when we have only this many keys left
-static const int PRIVATESEND_KEYS_THRESHOLD_STOP    = 50;
+// pool states
+enum PoolState {
+    POOL_STATE_IDLE,
+    POOL_STATE_QUEUE,
+    POOL_STATE_ACCEPTING_ENTRIES,
+    POOL_STATE_SIGNING,
+    POOL_STATE_ERROR,
+    POOL_STATE_SUCCESS,
+    POOL_STATE_MIN = POOL_STATE_IDLE,
+    POOL_STATE_MAX = POOL_STATE_SUCCESS
+};
 
-extern int nPrivateSendRounds;
-extern int nPrivateSendAmount;
-extern int nLiquidityProvider;
-extern bool fEnablePrivateSend;
-extern bool fPrivateSendMultiSession;
-
-// The main object for accessing mixing
-extern CPrivatesendPool privateSendPool;
-
-extern std::map<uint256, CPrivatesendBroadcastTx> mapPrivatesendBroadcastTxes;
-extern std::vector<CAmount> vecPrivateSendDenominations;
+// status update message constants
+enum PoolStatusUpdate {
+    STATUS_REJECTED,
+    STATUS_ACCEPTED
+};
 
 /** Holds an mixing input
  */
@@ -95,21 +118,17 @@ public:
     std::vector<CTxPSIn> vecTxPSIn;
     std::vector<CTxPSOut> vecTxPSOut;
     CTransaction txCollateral;
+    // memory only
+    CService addr;
 
     CPrivateSendEntry() :
         vecTxPSIn(std::vector<CTxPSIn>()),
         vecTxPSOut(std::vector<CTxPSOut>()),
-        txCollateral(CTransaction())
+        txCollateral(CTransaction()),
+        addr(CService())
         {}
 
-    CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
-        txCollateral(txCollateral)
-    {
-        BOOST_FOREACH(CTxIn txin, vecTxIn)
-            vecTxPSIn.push_back(txin);
-        BOOST_FOREACH(CTxOut txout, vecTxOut)
-            vecTxPSOut.push_back(txout);
-    }
+    CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral);
 
     ADD_SERIALIZE_METHODS;
 
@@ -181,11 +200,11 @@ public:
     bool Relay();
 
     /// Is this queue expired?
-    bool IsExpired() { return GetTime() - nTime > PRIVATESEND_QUEUE_TIMEOUT; }
+    bool IsExpired() { return GetAdjustedTime() - nTime > PRIVATESEND_QUEUE_TIMEOUT; }
 
     std::string ToString()
     {
-        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, Dynode=%s",
+        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, dynode=%s",
                         nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
     }
 
@@ -199,6 +218,11 @@ public:
  */
 class CPrivatesendBroadcastTx
 {
+private:
+    // memory only
+    // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
+    int nConfirmedHeight;
+
 public:
     CTransaction tx;
     CTxIn vin;
@@ -206,16 +230,18 @@ public:
     int64_t sigTime;
 
     CPrivatesendBroadcastTx() :
-        tx(CTransaction()),
-        vin(CTxIn()),
-        vchSig(std::vector<unsigned char>()),
+        nConfirmedHeight(-1),
+        tx(),
+        vin(),
+        vchSig(),
         sigTime(0)
         {}
 
     CPrivatesendBroadcastTx(CTransaction tx, CTxIn vin, int64_t sigTime) :
+        nConfirmedHeight(-1),
         tx(tx),
         vin(vin),
-        vchSig(std::vector<unsigned char>()),
+        vchSig(),
         sigTime(sigTime)
         {}
 
@@ -229,241 +255,107 @@ public:
         READWRITE(sigTime);
     }
 
+    friend bool operator==(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    {
+        return a.tx == b.tx;
+    }
+    friend bool operator!=(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    {
+        return !(a == b);
+    }
+    explicit operator bool() const
+    {
+        return *this != CPrivatesendBroadcastTx();
+    }
+
     bool Sign();
     bool CheckSignature(const CPubKey& pubKeyDynode);
+
+    void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }
+    bool IsExpired(int nHeight);
 };
 
-/** Used to keep track of current status of mixing pool
- */
-class CPrivatesendPool
+// base class
+class CPrivateSendBase
 {
-private:
-    // pool responses
-    enum PoolMessage {
-        ERR_ALREADY_HAVE,
-        ERR_DENOM,
-        ERR_ENTRIES_FULL,
-        ERR_EXISTING_TX,
-        ERR_FEES,
-        ERR_INVALID_COLLATERAL,
-        ERR_INVALID_INPUT,
-        ERR_INVALID_SCRIPT,
-        ERR_INVALID_TX,
-        ERR_MAXIMUM,
-        ERR_DN_LIST,
-        ERR_MODE,
-        ERR_NON_STANDARD_PUBKEY,
-        ERR_NOT_A_DN,
-        ERR_QUEUE_FULL,
-        ERR_RECENT,
-        ERR_SESSION,
-        ERR_MISSING_TX,
-        ERR_VERSION,
-        MSG_NOERR,
-        MSG_SUCCESS,
-        MSG_ENTRIES_ADDED,
-        MSG_POOL_MIN = ERR_ALREADY_HAVE,
-        MSG_POOL_MAX = MSG_ENTRIES_ADDED
-    };
-
-    // pool states
-    enum PoolState {
-        POOL_STATE_IDLE,
-        POOL_STATE_QUEUE,
-        POOL_STATE_ACCEPTING_ENTRIES,
-        POOL_STATE_SIGNING,
-        POOL_STATE_ERROR,
-        POOL_STATE_SUCCESS,
-        POOL_STATE_MIN = POOL_STATE_IDLE,
-        POOL_STATE_MAX = POOL_STATE_SUCCESS
-    };
-
-    // status update message constants
-    enum PoolStatusUpdate {
-        STATUS_REJECTED,
-        STATUS_ACCEPTED
-    };
-
-    mutable CCriticalSection cs_privatesend;
-
+protected:
     // The current mixing sessions in progress on the network
     std::vector<CPrivatesendQueue> vecPrivatesendQueue;
-    // Keep track of the used Dynodes
-    std::vector<CTxIn> vecDynodesUsed;
 
-    std::vector<CAmount> vecDenominationsSkipped;
-    std::vector<COutPoint> vecOutPointLocked;
-    // Mixing uses collateral transactions to trust parties entering the pool
-    // to behave honestly. If they don't it takes their money.
-    std::vector<CTransaction> vecSessionCollaterals;
-    std::vector<CPrivateSendEntry> vecEntries; // Dynodes/clients entries
+    std::vector<CPrivateSendEntry> vecEntries; // Dynode/clients entries
 
     PoolState nState; // should be one of the POOL_STATE_XXX values
     int64_t nTimeLastSuccessfulStep; // the time when last successful mixing step was performed, in UTC milliseconds
 
-    int nCachedLastSuccessBlock;
-    int nMinBlockSpacing; //required blocks between mixes
-    const CBlockIndex *pCurrentBlockIndex; // Keep track of current block index
-
     int nSessionID; // 0 if no mixing session is active
 
-    int nEntriesCount;
-    bool fLastEntryAccepted;
-
-    std::string strLastMessage;
-    std::string strAutoDenomResult;
-
-    bool fUnitTest;
-
-    CMutableTransaction txMyCollateral; // client side collateral
     CMutableTransaction finalMutableTransaction; // the finalized transaction ready for signing
-
-    /// Add a clients entry to the pool
-    bool AddEntry(const CPrivateSendEntry& entryNew, PoolMessage& nMessageIDRet);
-    /// Add signature to a txin
-    bool AddScriptSig(const CTxIn& txin);
-
-    /// Charge fees to bad actors (Charge clients a fee if they're abusive)
-    void ChargeFees();
-    /// Rarely charge fees to pay miners
-    void ChargeRandomFees();
-
-    /// Check for process
-    void CheckPool();
-
-    void CreateFinalTransaction();
-    void CommitFinalTransaction();
-
-    void CompletedTransaction(PoolMessage nMessageID);
-
-    /// Get the denominations for a specific amount of dynamic.
-    int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
-
-    std::string GetMessageByID(PoolMessage nMessageID);
-
-    /// Get the maximum number of transactions for the pool
-    int GetMaxPoolTransactions() { return Params().PoolMaxTransactions(); }
-
-    /// Is this nDenom and txCollateral acceptable?
-    bool IsAcceptableDenomAndCollateral(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet);
-    bool CreateNewSession(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet);
-    bool AddUserToExistingSession(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet);
-    /// Do we have enough users to take entries?
-    bool IsSessionReady() { return (int)vecSessionCollaterals.size() >= GetMaxPoolTransactions(); }
-
-    /// If the collateral is valid given by a client
-    bool IsCollateralValid(const CTransaction& txCollateral);
-    /// Check that all inputs are signed. (Are all inputs signed?)
-    bool IsSignaturesComplete();
-    /// Check to make sure a given input matches an input in the pool and its scriptSig is valid
-    bool IsInputScriptSigValid(const CTxIn& txin);
-    /// Are these outputs compatible with other client in the pool?
-    bool IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut);
-
-    bool IsDenomSkipped(CAmount nDenomValue) {
-        return std::find(vecDenominationsSkipped.begin(), vecDenominationsSkipped.end(), nDenomValue) != vecDenominationsSkipped.end();
-    }
-
-    /// Create denominations
-    bool CreateDenominated();
-    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals);
-
-    /// Split up large inputs or make fee sized inputs
-    bool MakeCollateralAmounts();
-    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem);
-
-    /// As a client, submit part of a future mixing transaction to a Dynode to start the process
-    bool SubmitDenominate();
-    /// step 1: prepare denominated inputs and outputs
-    bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxIn>& vecTxInRet, std::vector<CTxOut>& vecTxOutRet);
-    /// step 2: send denominated inputs and outputs prepared in step 1
-    bool SendDenominate(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut);
-
-    /// Get Dynode updates about the progress of mixing
-    bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew=0);
-    // Set the 'state' value, with some logging and capturing when the state changed
-    void SetState(PoolState nStateNew);
-
-    /// As a client, check and sign the final transaction
-    bool SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode);
-
-    /// Relay mixing Messages
-    void RelayFinalTransaction(const CTransaction& txFinal);
-    void RelaySignaturesAnon(std::vector<CTxIn>& vin);
-    void RelayInAnon(std::vector<CTxIn>& vin, std::vector<CTxOut>& vout);
-    void RelayIn(const CPrivateSendEntry& entry);
-    void PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID);
-    void RelayStatus(PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID = MSG_NOERR);
-    void RelayCompletedTransaction(PoolMessage nMessageID);
 
     void SetNull();
 
 public:
-    CDynode* pSubmittedToDynode;
     int nSessionDenom; //Users must submit an denom matching this
-    int nCachedNumBlocks; //used for the overview screen
-    bool fCreateAutoBackups; //builtin support for automatic backups
 
-    CPrivatesendPool() :
-        nCachedLastSuccessBlock(0),
-        nMinBlockSpacing(0),
-        fUnitTest(false),
-        txMyCollateral(CMutableTransaction()),
-        nCachedNumBlocks(std::numeric_limits<int>::max()),
-        fCreateAutoBackups(true) { SetNull(); }
-
-    /** Process a mixing message using the protocol below
-     * \param pfrom
-     * \param strCommand lower case command string; valid values are:
-     *        Command  | Description
-     *        -------- | -----------------
-     *        psa      | Acceptable
-     *        psc      | Complete
-     *        psf      | Final tx
-     *        psi      | Vector of CTxIn
-     *        psq      | Queue
-     *        pss      | Signal Final Tx
-     *        pssu     | status update
-     * \param vRecv
-     */
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
-
-    void InitDenominations();
-    void ClearSkippedDenominations() { vecDenominationsSkipped.clear(); }
-
-    /// Get the denominations for a list of outputs (returns a bitshifted integer)
-    int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
-    int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
-    std::string GetDenominationsToString(int nDenom);
-    bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
-
-    CAmount GetMaxPoolAmount() { return vecPrivateSendDenominations.empty() ? 0 : PRIVATESEND_ENTRY_MAX_SIZE * vecPrivateSendDenominations.front(); }
-
-    void SetMinBlockSpacing(int nMinBlockSpacingIn) { nMinBlockSpacing = nMinBlockSpacingIn; }
-
-    void ResetPool();
-
-    void UnlockCoins();
+    CPrivateSendBase() { SetNull(); }
 
     int GetQueueSize() const { return vecPrivatesendQueue.size(); }
     int GetState() const { return nState; }
-    std::string GetStatus();
     std::string GetStateString() const;
 
     int GetEntriesCount() const { return vecEntries.size(); }
-
-    /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(bool fDryRun=false);
-
-    void CheckTimeout();
-    void CheckForCompleteQueue();
-
-    /// Process a new block
-    void NewBlock();
-
-    void UpdatedBlockTip(const CBlockIndex *pindex);
 };
 
-void ThreadCheckPrivateSendPool();
+// helper class
+class CPrivateSend
+{
+private:
+    // make constructor, destructor and copying not available
+    CPrivateSend() {}
+    ~CPrivateSend() {}
+    CPrivateSend(CPrivateSend const&) = delete;
+    CPrivateSend& operator= (CPrivateSend const&) = delete;
 
-#endif // DYNAMIC_PRIVATESEND_H
+    static const CAmount COLLATERAL = 0.001 * COIN;
+
+    // static members
+    static std::vector<CAmount> vecStandardDenominations;
+    static std::map<uint256, CPrivatesendBroadcastTx> mapPSTX;
+
+    static CCriticalSection cs_mappstx;
+
+public:
+    static void InitStandardDenominations();
+    static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
+    static CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
+
+    /// Get the denominations for a specific amount of dash.
+    static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
+
+    /// Get the denominations for a list of outputs (returns a bitshifted integer)
+    static int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
+    static int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
+    static std::string GetDenominationsToString(int nDenom);
+    static bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
+
+    static std::string GetMessageByID(PoolMessage nMessageID);
+
+    /// Get the maximum number of transactions for the pool
+    static int GetMaxPoolTransactions() { return Params().PoolMaxTransactions(); }
+
+    static CAmount GetMaxPoolAmount() { return vecStandardDenominations.empty() ? 0 : PRIVATESEND_ENTRY_MAX_SIZE * vecStandardDenominations.front(); }
+
+    /// If the collateral is valid given by a client
+    static bool IsCollateralValid(const CTransaction& txCollateral);
+    static CAmount GetCollateralAmount() { return COLLATERAL; }
+    static CAmount GetMaxCollateralAmount() { return COLLATERAL*4; }
+
+    static void AddPSTX(const CPrivatesendBroadcastTx& pstx);
+    static CPrivatesendBroadcastTx GetPSTX(const uint256& hash);
+    static void CheckPSTXes(int nHeight);
+
+    static void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
+};
+
+void ThreadCheckPrivateSend();
+
+#endif
