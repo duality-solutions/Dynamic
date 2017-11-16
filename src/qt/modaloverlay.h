@@ -1,9 +1,9 @@
-// Copyright (c) 2016 The Bitcoin Core developers
+// Copyright (c) 2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_MODALOVERLAY_H
-#define DYNAMIC_QT_MODALOVERLAY_H
+#ifndef BITCOIN_QT_MODALOVERLAY_H
+#define BITCOIN_QT_MODALOVERLAY_H
 
 #include <QDateTime>
 #include <QWidget>
@@ -28,11 +28,9 @@ public Q_SLOTS:
     void tipUpdate(int count, const QDateTime& blockDate, double nVerificationProgress);
     void setKnownBestHeight(int count, const QDateTime& blockDate);
 
-    void toggleVisibility();
     // will show or hide the modal layer
     void showHide(bool hide = false, bool userRequested = false);
     void closeClicked();
-    bool isLayerVisible() { return layerIsVisible; }
 
 protected:
     bool eventFilter(QObject * obj, QEvent * ev);
@@ -47,4 +45,4 @@ private:
     bool userClosed;
 };
 
-#endif // DYNAMIC_QT_MODALOVERLAY_H
+#endif // BITCOIN_QT_MODALOVERLAY_H

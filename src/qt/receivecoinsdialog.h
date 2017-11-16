@@ -63,7 +63,8 @@ private:
     WalletModel *model;
     QMenu *contextMenu;
     const PlatformStyle *platformStyle;
-
+	
+	QModelIndex selectedRow();
     void copyColumnToClipboard(int column);
     virtual void resizeEvent(QResizeEvent *event);
 
@@ -79,6 +80,7 @@ private Q_SLOTS:
     void copyLabel();
     void copyMessage();
     void copyAmount();
+    void copyURI();
 };
 
 #endif // DYNAMIC_QT_RECEIVECOINSDIALOG_H
