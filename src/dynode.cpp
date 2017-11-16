@@ -360,7 +360,7 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
         return Log(strprintf("Could not allocate txin %s:%s for Dynode %s", strTxHash, strOutputIndex, strService));
 
     CService service = CService(strService);
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
     if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if (service.GetPort() != mainnetDefaultPort)
             return Log(strprintf("Invalid port %u for Dynode %s, only %d is supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
@@ -460,7 +460,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
         return false;
     }
 
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(addr.GetPort() != mainnetDefaultPort) return false;
     } else if(addr.GetPort() == mainnetDefaultPort) return false;

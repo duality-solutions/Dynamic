@@ -100,7 +100,7 @@ void CConnman::AddOneShot(const std::string& strDest)
 
 unsigned short GetListenPort()
 {
-    return (unsigned short)(GetArg("-port", Params().GetDefaultPort()));
+    return (unsigned short)(GetArg("-port", DEFAULT_P2P_PORT));
 }
 
 // find 'best' local address for a particular peer
@@ -376,7 +376,7 @@ CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCo
     // Connect
     SOCKET hSocket;
     bool proxyConnectionFailed = false;
-    if (pszDest ? ConnectSocketByName(addrConnect, hSocket, pszDest, Params().GetDefaultPort(), nConnectTimeout, &proxyConnectionFailed) :
+    if (pszDest ? ConnectSocketByName(addrConnect, hSocket, pszDest, DEFAULT_P2P_PORT, nConnectTimeout, &proxyConnectionFailed) :
                   ConnectSocket(addrConnect, hSocket, nConnectTimeout, &proxyConnectionFailed))
     {
         if (!IsSelectableSocket(hSocket)) {

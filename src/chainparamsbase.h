@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+static const int DEFAULT_P2P_PORT = 32300;
+
 /**
  * CBaseChainParams defines the base parameters (shared between dynamic-cli and dynamicd)
  * of a given instance of the Dynamic system.
@@ -25,13 +27,11 @@ public:
 
     const std::string& DataDir() const { return strDataDir; }
     int RPCPort() const { return nRPCPort; }
-    int Port() const { return nPort; }
 
 protected:
     CBaseChainParams() {}
 
     int nRPCPort;
-    int nPort;
     std::string strDataDir;
 };
 
