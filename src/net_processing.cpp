@@ -1577,7 +1577,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         // Process custom logic, no matter if tx will be accepted to mempool later or not
         if (strCommand == NetMsgType::TXLOCKREQUEST) {
-            if(!instantsend.ProcessTxLockRequest(txLockRequest)) {
+            if(!instantsend.ProcessTxLockRequest(txLockRequest, connman)) {
                 LogPrint("instantsend", "TXLOCKREQUEST -- failed %s\n", txLockRequest.GetHash().ToString());
                 return false;
             }
@@ -2164,7 +2164,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             privateSendServer.ProcessMessage(pfrom, strCommand, vRecv);
             dnodeman.ProcessMessage(pfrom, strCommand, vRecv);
             dnpayments.ProcessMessage(pfrom, strCommand, vRecv);
-            instantsend.ProcessMessage(pfrom, strCommand, vRecv);
+            instantsend.ProcessMessage(pfrom, strCommand, vRecv, connman);
             sporkManager.ProcessSpork(pfrom, strCommand, vRecv, connman);
             dynodeSync.ProcessMessage(pfrom, strCommand, vRecv);
             governance.ProcessMessage(pfrom, strCommand, vRecv);

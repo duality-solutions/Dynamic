@@ -3190,7 +3190,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                 if(instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx.GetHash()) {
                     // The node which relayed this will have to swtich later,
                     // relaying instantsend data won't help it.
-                    instantsend.Relay(hashLocked);
                     LOCK(cs_main);
                     mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
                     return state.DoS(0, error("CheckBlock(DYN): transaction %s conflicts with transaction lock %s",
