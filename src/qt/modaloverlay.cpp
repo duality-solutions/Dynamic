@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Bitcoin Core developers
+// Copyright (c) 2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -6,8 +6,6 @@
 #include "ui_modaloverlay.h"
 
 #include "guiutil.h"
-
-#include "chainparams.h"
 
 #include <QResizeEvent>
 #include <QPropertyAnimation>
@@ -79,7 +77,7 @@ void ModalOverlay::tipUpdate(int count, const QDateTime& blockDate, double nVeri
     QDateTime currentDate = QDateTime::currentDateTime();
 
     // keep a vector of samples of verification progress at height
-    blockProcessTime.push_front(qMakePair(currentDate.toMSecsSinceEpoch(), nVerificationProgress));
+    blockProcessTime.push_front(qMakePair(currentDate.currentMSecsSinceEpoch(), nVerificationProgress));
 
     // show progress speed if we have more then one sample
     if (blockProcessTime.size() >= 2)
@@ -95,7 +93,8 @@ void ModalOverlay::tipUpdate(int count, const QDateTime& blockDate, double nVeri
             QPair<qint64, double> sample = blockProcessTime[i];
 
             // take first sample after 500 seconds or last available one
-            if (sample.first < (currentDate.toMSecsSinceEpoch() - 500 * 1000) || i == blockProcessTime.size() - 1) {
+            if (sample.first < (currentDate.currentMSecsSinceEpoch() - 500*1000) || i == blockProcessTime.size()-1)
+            {
                 progressDelta = progressStart-sample.second;
                 timeDelta = blockProcessTime[0].first - sample.first;
                 progressPerHour = progressDelta/(double)timeDelta*1000*3600;
@@ -109,6 +108,7 @@ void ModalOverlay::tipUpdate(int count, const QDateTime& blockDate, double nVeri
         // show expected remaining time
         ui->expectedTimeLeft->setText(GUIUtil::formatNiceTimeOffset(remainingMSecs/1000.0));
 
+        // keep maximal 5000 samples
         static const int MAX_SAMPLES = 5000;
         if (blockProcessTime.count() > MAX_SAMPLES)
             blockProcessTime.remove(MAX_SAMPLES, blockProcessTime.count()-MAX_SAMPLES);
@@ -127,23 +127,15 @@ void ModalOverlay::tipUpdate(int count, const QDateTime& blockDate, double nVeri
 
     // estimate the number of headers left based on nPowTargetSpacing
     // and check if the gui is not aware of the the best header (happens rarely)
-    int estimateNumHeadersLeft = bestHeaderDate.secsTo(currentDate) / Params().GetConsensus().nPowTargetSpacing;
+    int estimateNumHeadersLeft = bestHeaderDate.secsTo(currentDate) / 600;
     bool hasBestHeader = bestHeaderHeight >= count;
 
     // show remaining number of blocks
-    if (estimateNumHeadersLeft < HEADER_HEIGHT_DELTA_SYNC && hasBestHeader) {
+    if (estimateNumHeadersLeft < 24 && hasBestHeader) {
         ui->numberOfBlocksLeft->setText(QString::number(bestHeaderHeight - count));
     } else {
-        ui->numberOfBlocksLeft->setText(tr("unknown. Current Block %1").arg(bestHeaderHeight));
-        ui->expectedTimeLeft->setText(tr("unknown..."));
+        ui->expectedTimeLeft->setText(tr("Unknown. Syncing Headers..."));
     }
-}
-
-void ModalOverlay::toggleVisibility()
-{
-    showHide(layerIsVisible, true);
-    if (!layerIsVisible)
-        userClosed = true;
 }
 
 void ModalOverlay::showHide(bool hide, bool userRequested)

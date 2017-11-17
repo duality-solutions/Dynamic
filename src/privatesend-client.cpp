@@ -21,7 +21,7 @@ CPrivateSendClient privateSendClient;
 void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
     if(fDyNode) return;
-    if(fLiteMode) return; // ignore all Dash related functionality
+    if(fLiteMode) return; // ignore all Dynamic related functionality
     if(!dynodeSync.IsBlockchainSynced()) return;
 
     if(strCommand == NetMsgType::PSQUEUE) {
@@ -1205,7 +1205,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
             // MN-like funds should not be touched in any case.
             if(!pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
                                 nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NOT1000IFDN)) {
-                LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NOT1000IFMN Error: %s\n", strFail);
+                LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NOT1000IFDN Error: %s\n", strFail);
                 reservekeyCollateral.ReturnKey();
                 return false;
             }
@@ -1412,14 +1412,14 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
 //TODO: Rename/move to core
 void ThreadCheckPrivateSendClient(CConnman& connman)
 {
-    if(fLiteMode) return; // disable all Dash specific functionality
+    if(fLiteMode) return; // disable all Dynamic specific functionality
 
     static bool fOneThread;
     if(fOneThread) return;
     fOneThread = true;
 
     // Make this thread recognisable as the PrivateSend thread
-    RenameThread("dash-ps-client");
+    RenameThread("dynamic-ps-client");
 
     unsigned int nTick = 0;
     unsigned int nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN;

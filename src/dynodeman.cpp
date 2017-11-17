@@ -691,7 +691,7 @@ bool CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, 
         }
     }
 
-    return NULL;
+    return false;
 }
 
 void CDynodeMan::ProcessDynodeConnections()
@@ -1370,7 +1370,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
                         // simulate Check
                         CDynode dnTemp = CDynode(dnb);
                         dnTemp.Check();
-                        LogPrint("dynode", "CDynodeMan::CheckMnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetAdjustedTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
+                        LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dnb=%s seen request, addr=%s, better lastPing: %d min ago, projected dn state: %s\n", hash.ToString(), pfrom->addr.ToString(), (GetAdjustedTime() - dnb.lastPing.sigTime)/60, dnTemp.GetStateString());
                         if(dnTemp.IsValidStateForAutoStart(dnTemp.nActiveState)) {
                             // this node thinks it's a good one
                             LogPrint("dynode", "CDynodeMan::CheckDnbAndUpdateDynodeList -- dynode=%s seen good\n", dnb.vin.prevout.ToStringShort());
@@ -1440,7 +1440,7 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
 
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a Dynode
-    // (MNs should update this info on every block, so limited scan should be enough for them)
+    // (DNs should update this info on every block, so limited scan should be enough for them)
     int nMaxBlocksToScanBack = (IsFirstRun || !fDyNode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
     //                         nCachedBlockHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");

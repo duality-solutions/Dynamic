@@ -2744,12 +2744,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Версия %1</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Водещи Bitcoin разработчици</translation>
-    </message>
-    <message>
         <source>The Dynamic developers</source>
         <translation>Водещи Dynamic разработчици</translation>
+    </message>
+    <message>
+        <source>The Bitcoin Core developers</source>
+        <translation>Водещи Bitcoin разработчици</translation>
     </message>
     <message>
         <source>[testnet]</source>
