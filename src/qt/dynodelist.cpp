@@ -121,9 +121,9 @@ void DynodeList::StartAlias(std::string strAlias)
 
             if(fSuccess) {
                 strStatusHtml += "<br>Successfully started Dynode.";
-                dnodeman.UpdateDynodeList(dnb);
-                dnb.Relay();
-                dnodeman.NotifyDynodeUpdates();
+                dnodeman.UpdateDynodeList(dnb, *g_connman);
+                dnb.Relay(*g_connman);
+                dnodeman.NotifyDynodeUpdates(*g_connman);
             } else {
                 strStatusHtml += "<br>Failed to start Dynode.<br>Error: " + strError;
             }
@@ -162,9 +162,9 @@ void DynodeList::StartAll(std::string strCommand)
 
         if(fSuccess) {
             nCountSuccessful++;
-            dnodeman.UpdateDynodeList(dnb);
-            dnb.Relay();
-            dnodeman.NotifyDynodeUpdates();
+            dnodeman.UpdateDynodeList(dnb, *g_connman);
+            dnb.Relay(*g_connman);
+            dnodeman.NotifyDynodeUpdates(*g_connman);
         } else {
             nCountFailed++;
             strFailedHtml += "\nFailed to start " + dne.getAlias() + ". Error: " + strError;
@@ -294,7 +294,7 @@ void DynodeList::updateNodeList()
         QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(dn.nProtocolVersion));
         QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(dn.GetStatus()));
         QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(dn.lastPing.sigTime - dn.sigTime)));
-        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", mn.lastPing.sigTime + offsetFromUtc)));
+        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", dn.lastPing.sigTime + offsetFromUtc)));
         QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
 
         if (strCurrentFilter != "")

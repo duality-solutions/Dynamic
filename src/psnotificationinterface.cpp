@@ -25,7 +25,7 @@ void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 
 void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
 {
-    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload);
+    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload, connman);
 }
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
@@ -41,8 +41,8 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
     dnodeman.UpdatedBlockTip(pindexNew);
     privateSendClient.UpdatedBlockTip(pindexNew);
     instantsend.UpdatedBlockTip(pindexNew);
-    dnpayments.UpdatedBlockTip(pindexNew);
-    governance.UpdatedBlockTip(pindexNew);
+    dnpayments.UpdatedBlockTip(pindexNew, connman);
+    governance.UpdatedBlockTip(pindexNew, connman);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)

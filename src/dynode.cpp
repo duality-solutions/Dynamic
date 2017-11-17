@@ -50,7 +50,7 @@ CDynode::CDynode(const CDynodeBroadcast& dnb) :
 //
 // When a new Dynode broadcast is sent, update our information
 //
-bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
+bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman)
 {
     if(dnb.sigTime <= sigTime && !dnb.fRecovery) return false;
 
@@ -63,7 +63,7 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
     nPoSeBanHeight = 0;
     nTimeLastChecked = 0;
     int nDos = 0;
-    if(dnb.lastPing == CDynodePing() || (dnb.lastPing != CDynodePing() && dnb.lastPing.CheckAndUpdate(this, true, nDos))) {
+    if(dnb.lastPing == CDynodePing() || (dnb.lastPing != CDynodePing() && dnb.lastPing.CheckAndUpdate(this, true, nDos, connman))) {
         lastPing = dnb.lastPing;
         dnodeman.mapSeenDynodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
@@ -72,7 +72,7 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
         nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
         if(nProtocolVersion == PROTOCOL_VERSION) {
             // ... and PROTOCOL_VERSION, then we've been remotely activated ...
-            activeDynode.ManageState();
+            activeDynode.ManageState(connman);
         } else {
             // ... otherwise we need to reactivate our node, do not add it to the list and do not relay
             // but also do not ban the node we get this message from
@@ -460,7 +460,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     return true;
 }
 
-bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos)
+bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 {
     nDos = 0;
 
@@ -502,9 +502,9 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos)
     if(!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDyNode && pubKeyDynode == activeDynode.pubKeyDynode)) {
         // take the newest entry
         LogPrintf("CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
-        if(pdn->UpdateFromNewBroadcast((*this))) {
+        if(pdn->UpdateFromNewBroadcast(*this, connman)) {
             pdn->Check();
-            Relay();
+            Relay(connman);
         }
         dynodeSync.BumpAssetLastTime("CDynodeBroadcast::Update");
     }
@@ -648,10 +648,10 @@ bool CDynodeBroadcast::CheckSignature(int& nDos)
     return true;
 }
 
-void CDynodeBroadcast::Relay()
+void CDynodeBroadcast::Relay(CConnman& connman)
 {
     CInv inv(MSG_DYNODE_ANNOUNCE, GetHash());
-    g_connman->RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
 CDynodePing::CDynodePing(const COutPoint& outpoint)
@@ -727,7 +727,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
      return true;
  }
  
- bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos)
+ bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman)
  {
      // don't ban by default
      nDos = 0;
@@ -791,15 +791,15 @@ bool CDynodePing::SimpleCheck(int& nDos)
     if (!pdn->IsEnabled()) return false;
 
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping acceepted and relayed, Dynode=%s\n", vin.prevout.ToStringShort());
-    Relay();
+    Relay(connman);
 
     return true;
 }
 
-void CDynodePing::Relay()
+void CDynodePing::Relay(CConnman& connman)
 {
     CInv inv(MSG_DYNODE_PING, GetHash());
-    g_connman->RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
 void CDynode::AddGovernanceVote(uint256 nGovernanceObjectHash)

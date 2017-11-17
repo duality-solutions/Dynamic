@@ -2160,14 +2160,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (found)
         {
             //probably one the extensions
-            privateSendClient.ProcessMessage(pfrom, strCommand, vRecv);
-            privateSendServer.ProcessMessage(pfrom, strCommand, vRecv);
-            dnodeman.ProcessMessage(pfrom, strCommand, vRecv);
-            dnpayments.ProcessMessage(pfrom, strCommand, vRecv);
+            privateSendClient.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            privateSendServer.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            dnodeman.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            dnpayments.ProcessMessage(pfrom, strCommand, vRecv, connman);
             instantsend.ProcessMessage(pfrom, strCommand, vRecv, connman);
             sporkManager.ProcessSpork(pfrom, strCommand, vRecv, connman);
             dynodeSync.ProcessMessage(pfrom, strCommand, vRecv);
-            governance.ProcessMessage(pfrom, strCommand, vRecv);
+            governance.ProcessMessage(pfrom, strCommand, vRecv, connman);
         }
         else
         {

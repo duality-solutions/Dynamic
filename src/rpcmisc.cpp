@@ -169,14 +169,14 @@ UniValue dnsync(const UniValue& params, bool fHelp)
 
     if(strMode == "next")
     {
-        dynodeSync.SwitchToNextAsset();
+        dynodeSync.SwitchToNextAsset(*g_connman);
         return "sync updated to " + dynodeSync.GetAssetName();
     }
 
     if(strMode == "reset")
     {
         dynodeSync.Reset();
-        dynodeSync.SwitchToNextAsset();
+        dynodeSync.SwitchToNextAsset(*g_connman);
         return "success";
     }
     return "failure";

@@ -278,9 +278,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if(fMissingConfirmations) {
             governance.AddPostponedObject(govobj);
-            govobj.Relay();
+            govobj.Relay(*g_connman);
         } else {
-            governance.AddGovernanceObject(govobj);
+            governance.AddGovernanceObject(govobj, *g_connman);
         }
 
         return govobj.GetHash().ToString();
@@ -346,7 +346,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         }
 
         CGovernanceException exception;
-        if(governance.ProcessVoteAndRelay(vote, exception)) {
+        if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
             nSuccessful++;
             statusObj.push_back(Pair("result", "success"));
         }
@@ -448,7 +448,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             }
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception)) {
+            if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             }
@@ -573,7 +573,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             // UPDATE LOCAL DATABASE WITH NEW OBJECT SETTINGS
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception)) {
+            if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             }
@@ -887,7 +887,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     }
 
     CGovernanceException exception;
-    if(governance.ProcessVoteAndRelay(vote, exception)) {
+    if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
         return "Voted successfully";
     }
     else {

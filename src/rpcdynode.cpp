@@ -240,7 +240,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         if(activeDynode.nState != ACTIVE_DYNODE_STARTED){
             activeDynode.nState = ACTIVE_DYNODE_INITIAL; // TODO: consider better way
-            activeDynode.ManageState();
+            activeDynode.ManageState(*g_connman);
         }
 
         return activeDynode.GetStatus();
@@ -273,12 +273,12 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
                 statusObj.push_back(Pair("result", fResult ? "successful" : "failed"));
                 if(fResult) {
-                    dnodeman.UpdateDynodeList(dnb);
-                    dnb.Relay();
+                    dnodeman.UpdateDynodeList(dnb, *g_connman);
+                    dnb.Relay(*g_connman);
                 } else {
                     statusObj.push_back(Pair("errorMessage", strError));
                 }
-                dnodeman.NotifyDynodeUpdates();
+                dnodeman.NotifyDynodeUpdates(*g_connman);
                 break;
             }
         }
@@ -327,8 +327,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
             if (fResult) {
                 nSuccessful++;
-                dnodeman.UpdateDynodeList(dnb);
-                dnb.Relay();
+                dnodeman.UpdateDynodeList(dnb, *g_connman);
+                dnb.Relay(*g_connman);
             } else {
                 nFailed++;
                 statusObj.push_back(Pair("errorMessage", strError));
@@ -336,7 +336,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
             resultsObj.push_back(Pair("status", statusObj));
         }
-        dnodeman.NotifyDynodeUpdates();
+        dnodeman.NotifyDynodeUpdates(*g_connman);
 
         UniValue returnObj(UniValue::VOBJ);
         returnObj.push_back(Pair("overall", strprintf("Successfully started %d Dynodes, failed to start %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
@@ -803,13 +803,13 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
             bool fResult;
             if (dnb.CheckSignature(nDos)) {
                 if (fSafe) {
-                    fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos);
+                    fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
                 } else {
-                    dnodeman.UpdateDynodeList(dnb);
-                    dnb.Relay();
+                    dnodeman.UpdateDynodeList(dnb, *g_connman);
+                    dnb.Relay(*g_connman);
                     fResult = true;
                 }
-                dnodeman.NotifyDynodeUpdates();
+                dnodeman.NotifyDynodeUpdates(*g_connman);
             } else fResult = false;
 
             if(fResult) {

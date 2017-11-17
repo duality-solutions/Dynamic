@@ -73,7 +73,7 @@ bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
     return true;
 }
 
-bool CPrivatesendQueue::Relay()
+bool CPrivatesendQueue::Relay(CConnman& connman)
 {
     std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
@@ -419,7 +419,7 @@ void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
 }
 
 //TODO: Rename/move to core
-void ThreadCheckPrivateSend()
+void ThreadCheckPrivateSend(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
 
@@ -437,7 +437,7 @@ void ThreadCheckPrivateSend()
         MilliSleep(1000);
 
         // try to sync from all available nodes, one step at a time
-        dynodeSync.ProcessTick();
+        dynodeSync.ProcessTick(connman);
 
         if(dynodeSync.IsBlockchainSynced() && !ShutdownRequested()) {
 
@@ -449,20 +449,20 @@ void ThreadCheckPrivateSend()
             // check if we should activate or ping every few minutes,
             // slightly postpone first run to give net thread a chance to connect to some peers
             if(nTick % DYNODE_MIN_DNP_SECONDS == 15)
-                activeDynode.ManageState();
+                activeDynode.ManageState(connman);
 
             if(nTick % 60 == 0) {
-                dnodeman.ProcessDynodeConnections();
-                dnodeman.CheckAndRemove();
+                dnodeman.ProcessDynodeConnections(connman);
+                dnodeman.CheckAndRemove(connman);
                 dnpayments.CheckAndRemove();
                 instantsend.CheckAndRemove();
             }
             if(fDyNode && (nTick % (60 * 5) == 0)) {
-                dnodeman.DoFullVerificationStep();
+                dnodeman.DoFullVerificationStep(connman);
             }
 
             if(nTick % (60 * 5) == 0) {
-                governance.DoMaintenance();
+                governance.DoMaintenance(connman);
             }
         }
     }

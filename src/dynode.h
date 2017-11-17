@@ -74,8 +74,8 @@ public:
     bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
     bool CheckSignature(CPubKey& pubKeyDynode, int &nDos);
     bool SimpleCheck(int& nDos);
-    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos);
-    void Relay();
+    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
+    void Relay(CConnman& connman);
 
 };
 
@@ -201,7 +201,7 @@ public:
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
     arith_uint256 CalculateScore(const uint256& blockHash);
 
-    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb);
+    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman);
 
     static CollateralStatus CheckCollateral(const COutPoint& outpoint);
     static CollateralStatus CheckCollateral(const COutPoint& outpoint, int& nHeightRet);
@@ -346,14 +346,14 @@ public:
     static bool Create(std::string strService, std::string strKey, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
-    bool Update(CDynode* pdn, int& nDos);
+    bool Update(CDynode* pdn, int& nDos, CConnman& connman);
     bool CheckOutpoint(int& nDos);
     /// Is the input associated with this public key? (and there is 1000 DYN - checking if valid Dynode)
     bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
 
     bool Sign(const CKey& keyCollateralAddress);
     bool CheckSignature(int& nDos);
-    void Relay();
+    void Relay(CConnman& connman);
 };
 
 class CDynodeVerification

@@ -124,7 +124,7 @@ public:
     bool Add(CDynode &dn);
 
     /// Ask (source) node for dnb
-    void AskForDN(CNode *pnode, const COutPoint& outpoint);
+    void AskForDN(CNode *pnode, const COutPoint& outpoint, CConnman& connman);
     void AskForDnb(CNode *pnode, const uint256 &hash);
 
     bool PoSeBan(const COutPoint &outpoint);
@@ -134,8 +134,10 @@ public:
     /// Check all Dynodes
     void Check();
 
-    /// Check all Dynodes and remove inactive
-    void CheckAndRemove();
+    /// Check all Dynode and remove inactive
+    void CheckAndRemove(CConnman& connman);
+    /// This is dummy overload to be used for dumping/loading dncache.dat
+    void CheckAndRemove() {}
 
     /// Clear Dynode vector
     void Clear();
@@ -150,7 +152,7 @@ public:
     /// Count Dynodes by network type - NET_IPV4, NET_IPV6, NET_TOR
     // int CountByIP(int nNetworkType);
 
-    void PsegUpdate(CNode* pnode);
+    void PsegUpdate(CNode* pnode, CConnman& connman);
 
     /// Versions of Find that are safe to use from outside the class
     bool Get(const COutPoint& outpoint, CDynode& dynodeRet);
@@ -174,15 +176,15 @@ public:
     bool GetDynodeRank(const COutPoint &outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
     bool GetDynodeByRank(int nRank, dynode_info_t& dnInfoRet, int nBlockHeight = -1, int nMinProtocol = 0);
 
-    void ProcessDynodeConnections();
+    void ProcessDynodeConnections(CConnman& connman);
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
+    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
-    void DoFullVerificationStep();
+    void DoFullVerificationStep(CConnman& connman);
     void CheckSameAddr();
-    bool SendVerifyRequest(const CAddress& addr, const std::vector<CDynode*>& vSortedByAddr);
-    void SendVerifyReply(CNode* pnode, CDynodeVerification& dnv);
+    bool SendVerifyRequest(const CAddress& addr, const std::vector<CDynode*>& vSortedByAddr, CConnman& connman);
+    void SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman& connman);
     void ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv);
     void ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification& dnv);
 
@@ -192,9 +194,9 @@ public:
     std::string ToString() const;
 
     /// Update Dynode list and maps using provided CDynodeBroadcast
-    void UpdateDynodeList(CDynodeBroadcast dnb);
+    void UpdateDynodeList(CDynodeBroadcast dnb, CConnman& connman);
     /// Perform complete check and only then update list and maps
-    bool CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos);
+    bool CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos, CConnman& connman);
     bool IsDnbRecoveryRequested(const uint256& hash) { return mDnbRecoveryRequests.count(hash); }
 
     void UpdateLastPaid(const CBlockIndex* pindex);
@@ -230,7 +232,7 @@ public:
      * Called to notify CGovernanceManager that the Dynode index has been updated.
      * Must be called while not holding the CDynodeMan::cs mutex
      */
-    void NotifyDynodeUpdates();
+    void NotifyDynodeUpdates(CConnman& connman);
 
 };
 

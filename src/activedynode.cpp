@@ -18,7 +18,7 @@ extern CWallet* pwalletMain;
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
 
-void CActiveDynode::ManageState()
+void CActiveDynode::ManageState(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
     if(!fDyNode) {
@@ -39,7 +39,7 @@ void CActiveDynode::ManageState()
     LogPrint("Dynode", "CActiveDynode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 
     if(eType == DYNODE_UNKNOWN) {
-        ManageStateInitial();
+        ManageStateInitial(connman);
     }
 
     if(eType == DYNODE_REMOTE) {
@@ -48,10 +48,10 @@ void CActiveDynode::ManageState()
         // Try Remote Start first so the started local Dynode can be restarted without recreate Dynode broadcast.
         ManageStateRemote();
         if(nState != ACTIVE_DYNODE_STARTED)
-            ManageStateLocal();
+            ManageStateLocal(connman);
     }
 
-    SendDynodePing();
+    SendDynodePing(connman);
 }
 
 std::string CActiveDynode::GetStateString() const
@@ -98,7 +98,7 @@ std::string CActiveDynode::GetTypeString() const
     return strType;
 }
 
-bool CActiveDynode::SendDynodePing()
+bool CActiveDynode::SendDynodePing(CConnman& connman)
 {
     if(!fPingerEnabled) {
         LogPrint("Dynode", "CActiveDynode::SendDynodePing -- %s: Dynode ping service is disabled, skipping...\n", GetStateString());
@@ -130,7 +130,7 @@ bool CActiveDynode::SendDynodePing()
     dnodeman.SetDynodeLastPing(outpoint, dnp);
 
     LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", outpoint.ToStringShort());
-    dnp.Relay();
+    dnp.Relay(connman);
 
     return true;
 }
@@ -143,7 +143,7 @@ bool CActiveDynode::UpdateSentinelPing(int version)
     return true;
 }
 
-void CActiveDynode::ManageStateInitial()
+void CActiveDynode::ManageStateInitial(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
@@ -160,7 +160,7 @@ void CActiveDynode::ManageStateInitial()
     if(!fFoundLocal) {
         bool empty = true;
         // If we have some peers, let's try to find our local address from one of them
-        g_connman->ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
+        connman.ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
             empty = false;
             if (pnode->addr.IsIPv4())
                 fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);
@@ -215,8 +215,7 @@ void CActiveDynode::ManageStateInitial()
 
     LogPrintf("CActiveDynode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
-    // TODO: Pass CConnman instance somehow and don't use global variable.
-    if(!g_connman->ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
+    if(!connman.ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = "Could not connect to " + service.ToString();
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
@@ -295,7 +294,7 @@ void CActiveDynode::ManageStateRemote()
     }
 }
 
-void CActiveDynode::ManageStateLocal()
+void CActiveDynode::ManageStateLocal(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageStateLocal -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     if(nState == ACTIVE_DYNODE_STARTED) {
@@ -340,11 +339,11 @@ void CActiveDynode::ManageStateLocal()
 
         //update to Dynode list
         LogPrintf("CActiveDynode::ManageStateLocal -- Update Dynode List\n");
-        dnodeman.UpdateDynodeList(dnb);
-        dnodeman.NotifyDynodeUpdates();
+        dnodeman.UpdateDynodeList(dnb, connman);
+        dnodeman.NotifyDynodeUpdates(connman);
 
         //send to all peers
         LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, collateral=%s\n", outpoint.ToStringShort());
-        dnb.Relay();
+        dnb.Relay(connman);
     }
 }
