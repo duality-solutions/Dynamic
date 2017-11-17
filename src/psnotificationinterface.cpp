@@ -35,7 +35,7 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
 
     dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 
-    if (fInitialDownload) // In IBD
+    if (fInitialDownload)
         return;
 
     dnodeman.UpdatedBlockTip(pindexNew);
