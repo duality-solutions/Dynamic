@@ -57,12 +57,11 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
 
         int nSignatures = instantsend.GetTransactionLockSignatures(wtx.GetHash());
         int nSignaturesMax = CTxLockRequest(wtx).GetMaxSignatures();
-
         // InstantSend
         strTxStatus += " (";
         if(instantsend.IsLockedInstantSendTransaction(wtx.GetHash())) {
             strTxStatus += tr("verified via InstantSend");
-        } else if(!instantsend.IsTxLockRequestTimedOut(wtx.GetHash())) {
+        } else if(!instantsend.IsTxLockCandidateTimedOut(wtx.GetHash())) {
             strTxStatus += tr("InstantSend verification in progress - %1 of %2 signatures").arg(nSignatures).arg(nSignaturesMax);
         } else {
             strTxStatus += tr("InstantSend verification failed");
@@ -72,7 +71,6 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
         return strTxStatus;
     }
 }
-
 QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionRecord *rec, int unit)
 {
     QString strHTML;

@@ -256,6 +256,7 @@ public:
 
     void IncreasePoSeBanScore() { if(nPoSeBanScore < DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
+    void PoSeBan() { nPoSeBanScore = DYNODE_POSE_BAN_MAX_SCORE; }
 
     dynode_info_t GetInfo();
 

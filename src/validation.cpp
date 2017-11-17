@@ -630,10 +630,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
     LOCK(pool.cs); // protect pool.mapNextTx
     BOOST_FOREACH(const CTxIn &txin, tx.vin)
     {
-        auto itConflicting = pool.mapNextTx.find(txin.prevout);
-        if (itConflicting != pool.mapNextTx.end())
+        if (pool.mapNextTx.count(txin.prevout))
         {
-            const CTransaction *ptxConflicting = itConflicting->second;
+            const CTransaction *ptxConflicting = pool.mapNextTx[txin.prevout].ptx;
             if (!setConflicts.count(ptxConflicting->GetHash()))
             {
                 // InstantSend txes are not replacable
@@ -3189,10 +3188,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
             BOOST_FOREACH(const CTxIn& txin, tx.vin) {
                 uint256 hashLocked;
                 if(instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx.GetHash()) {
-                    // Every node which relayed this block to us must invalidate it
-                    // but they probably need more data.
-                    // Relay corresponding transaction lock request and all its votes
-                    // to let other nodes complete the lock.
+                    // The node which relayed this will have to swtich later,
+                    // relaying instantsend data won't help it.
                     instantsend.Relay(hashLocked);
                     LOCK(cs_main);
                     mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));

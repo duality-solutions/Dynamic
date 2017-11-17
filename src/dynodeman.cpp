@@ -134,6 +134,18 @@ bool CDynodeMan::DisallowMixing(const COutPoint &outpoint)
     return true;
 }
 
+bool CDynodeMan::PoSeBan(const COutPoint &outpoint)
+{
+    LOCK(cs);
+    CDynode* pdn = Find(outpoint);
+    if (!pdn) {
+        return false;
+    }
+    pdn->PoSeBan();
+
+    return true;
+}
+
 void CDynodeMan::Check()
 {
     LOCK(cs);
