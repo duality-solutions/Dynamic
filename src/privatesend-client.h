@@ -7,6 +7,7 @@
 
 #include "dynode.h"
 #include "privatesend.h"
+#include "privatesend-util.h"
 #include "wallet/wallet.h"
 
 class CPrivateSendClient;
@@ -54,6 +55,8 @@ private:
     std::string strAutoDenomResult;
 
     CMutableTransaction txMyCollateral; // client side collateral
+
+    CKeyHolderStorage keyHolderStorage; // storage for keys used in PrepareDenominate
 
     /// Check for process
     void CheckPool();
