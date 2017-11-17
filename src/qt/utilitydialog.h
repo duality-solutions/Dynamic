@@ -52,7 +52,7 @@ class ShutdownWindow : public QWidget
 
 public:
     ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
-    static void showShutdownWindow(DynamicGUI *window);
+    static QWidget *showShutdownWindow(DynamicGUI *window);
 
 protected:
     void closeEvent(QCloseEvent *event);

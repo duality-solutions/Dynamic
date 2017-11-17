@@ -15,6 +15,7 @@
 
 #include <QCompleter>
 #include <QDialog>
+#include <QThread>
 
 class ClientModel;
 class PlatformStyle;
@@ -167,6 +168,7 @@ private:
     QMenu *banTableContextMenu;
     int consoleFontSize;
     QCompleter *autoCompleter;
+    QThread thread;
 };
 
 #endif // DYNAMIC_QT_RPCCONSOLE_H
