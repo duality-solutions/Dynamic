@@ -329,6 +329,12 @@ void CActiveDynode::ManageStateLocal()
             return;
         }
 
+        {
+            LOCK(cs_main);
+            // remember the hash of the block where dynode collateral had minimum required confirmations
+            dnb.nCollateralMinConfBlockHash = chainActive[GetUTXOHeight(outpoint) + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
+        }
+
         fPingerEnabled = true;
         nState = ACTIVE_DYNODE_STARTED;
 
