@@ -278,7 +278,7 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
     std::vector<vote_time_pair_t> vecVotePairs;
     mapOrphanVotes.GetAll(nHash, vecVotePairs);
 
-    CRateChecksGuard guard(false, *this);
+    ScopedLockBool guard(cs, fRateChecksEnabled, false);
 
     int64_t nNow = GetAdjustedTime();
     for(size_t i = 0; i < vecVotePairs.size(); ++i) {
@@ -468,7 +468,7 @@ void CGovernanceManager::UpdateCachesAndClean()
         it->second.fDirtyCache = true;
     }
 
-    CRateChecksGuard guard(false, *this);
+    ScopedLockBool guard(cs, fRateChecksEnabled, false);
 
     // UPDATE CACHE FOR EACH OBJECT THAT IS FLAGGED DIRTYCACHE=TRUE
 
@@ -987,7 +987,7 @@ void CGovernanceManager::CheckDynodeOrphanVotes()
 {
     LOCK2(cs_main, cs);
 
-    CRateChecksGuard guard(false, *this);
+    ScopedLockBool guard(cs, fRateChecksEnabled, false);
 
     for(object_m_it it = mapObjects.begin(); it != mapObjects.end(); ++it) {
         it->second.CheckOrphanVotes();
@@ -998,7 +998,7 @@ void CGovernanceManager::CheckDynodeOrphanObjects()
 {
     LOCK2(cs_main, cs);
     int64_t nNow = GetAdjustedTime();
-    CRateChecksGuard guard(false, *this);
+    ScopedLockBool guard(cs, fRateChecksEnabled, false);
     object_info_m_it it = mapDynodeOrphanObjects.begin();
     while(it != mapDynodeOrphanObjects.end()) {
         object_info_pair_t& pair = it->second;
