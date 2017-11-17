@@ -1665,8 +1665,7 @@ void CConnman::ThreadOpenConnections()
                 }
             }
         }
-        assert(nOutbound <= (nMaxOutbound + nMaxFeeler));
-
+        
         // Feeler Connections
         //
         // Design goals:
