@@ -651,7 +651,7 @@ bool CGovernanceObject::GetCurrentDNVotes(const COutPoint& dnCollateralOutpoint,
 void CGovernanceObject::Relay()
 {
     CInv inv(MSG_GOVERNANCE_OBJECT, GetHash());
-    g_connman->RelayInv(inv, PROTOCOL_VERSION);
+    connman.RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
 }
 
 void CGovernanceObject::UpdateSentinelVariables()
