@@ -68,6 +68,8 @@ void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataSt
 
         uint256 nVoteHash = vote.GetHash();
 
+        pfrom->setAskFor.erase(nVoteHash);
+
         if(mapTxLockVotes.count(nVoteHash)) return;
         mapTxLockVotes.insert(std::make_pair(nVoteHash, vote));
 
@@ -668,7 +670,7 @@ void CInstantSend::CheckAndRemove()
         }
     }
 
-    // remove timed out orphan votes
+    // remove expired orphan votes
     std::map<uint256, CTxLockVote>::iterator itOrphanVote = mapTxLockVotesOrphan.begin();
     while(itOrphanVote != mapTxLockVotesOrphan.end()) {
         if(itOrphanVote->second.IsTimedOut()) {
@@ -681,23 +683,11 @@ void CInstantSend::CheckAndRemove()
         }
     }
 
-    // remove invalid votes and votes for failed lock attempts
-    itVote = mapTxLockVotes.begin();
-    while(itVote != mapTxLockVotes.end()) {
-        if(itVote->second.IsFailed()) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing vote for failed lock attempt: txid=%s  dynode=%s\n",
-                    itVote->second.GetTxHash().ToString(), itVote->second.GetDynodenodeOutpoint().ToStringShort());
-            mapTxLockVotes.erase(itVote++);
-        } else {
-            ++itVote;
-        }
-    }
-
-    // remove timed out masternode orphan votes (DOS protection)
+    // remove expired dynode orphan votes (DOS protection)
     std::map<COutPoint, int64_t>::iterator itDynodeOrphan = mapDynodeOrphanVotes.begin();
     while(itDynodeOrphan != mapDynodeOrphanVotes.end()) {
         if(itDynodeOrphan->second < GetTime()) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing timed out orphan masternode vote: masternode=%s\n",
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan dynode vote: dynode=%s\n",
                     itDynodeOrphan->first.ToStringShort());
             mapDynodeOrphanVotes.erase(itDynodeOrphan++);
         } else {
@@ -1097,7 +1087,7 @@ bool CTxLockVote::IsExpired(int nHeight) const
 
 bool CTxLockVote::IsTimedOut() const
 {
-    return GetTime() - nTimeCreated > INSTANTSEND_TIMEOUT_SECONDS;
+    return GetTime() - nTimeCreated > INSTANTSEND_LOCK_TIMEOUT_SECONDS;
 }
 
 //
