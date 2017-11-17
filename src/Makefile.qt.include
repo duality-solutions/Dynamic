@@ -185,12 +185,12 @@ RES_ICONS = \
   qt/res/icons/dynamic.icns \
   qt/res/icons/dynamic.ico \
   qt/res/icons/dynamic.png \
-  qt/res/icons/chevron.png \
   qt/res/icons/drk/about.png \
   qt/res/icons/drk/about_qt.png \
   qt/res/icons/drk/add.png \
   qt/res/icons/drk/address-book.png \
   qt/res/icons/drk/browse.png \
+  qt/res/icons/drk/chevron.png \
   qt/res/icons/drk/clock1.png \
   qt/res/icons/drk/clock2.png \
   qt/res/icons/drk/clock3.png \

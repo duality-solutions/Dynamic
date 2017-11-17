@@ -25,8 +25,8 @@ typedef uint256 ChainCode;
 static const size_t INPUT_BYTES = 80;  // Lenth of a block header in bytes. Input Length = Salt Length (salt = input)
 static const size_t OUTPUT_BYTES = 32; // Length of output needed for a 256-bit hash
 static const unsigned int DEFAULT_ARGON2_FLAG = 2; //Same as ARGON2_DEFAULT_FLAGS
-/* ----------- Bitcoin Hash ------------------------------------------------- */
-/** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
+/* ----------- Dynamic Hash ------------------------------------------------- */
+/** A hasher class for Dynamic's 256-bit hash (double SHA-256). */
 class CHash256 {
 private:
     CSHA256 sha;
@@ -50,7 +50,7 @@ public:
     }
 };
 
-/** A hasher class for Bitcoin's 160-bit hash (SHA-256 + RIPEMD-160). */
+/** A hasher class for Dynamic's 160-bit hash (SHA-256 + RIPEMD-160). */
 class CHash160 {
 private:
     CSHA256 sha;

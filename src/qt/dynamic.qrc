@@ -8,6 +8,7 @@
         <file alias="add">res/icons/drk/add.png</file>
         <file alias="address-book">res/icons/drk/address-book.png</file>
         <file alias="browse">res/icons/drk/browse.png</file>
+        <file alias="prompticon">res/icons/drk/chevron.png</file>
         <file alias="connect_0">res/icons/drk/connect0_16.png</file>
         <file alias="connect_1">res/icons/drk/connect1_16.png</file>
         <file alias="connect_2">res/icons/drk/connect2_16.png</file>
@@ -27,6 +28,8 @@
         <file alias="eye_minus">res/icons/drk/eye_minus.png</file>
         <file alias="eye_plus">res/icons/drk/eye_plus.png</file>
         <file alias="eye">res/icons/drk/eye.png</file>
+        <file alias="fontbigger">res/icons/drk/fontbigger.png</file>
+        <file alias="fontsmaller">res/icons/drk/fontsmaller.png</file>
         <file alias="filesave">res/icons/drk/filesave.png</file>
         <file alias="hd_enabled">res/icons/drk/hd_enabled.png</file>
         <file alias="hd_disabled">res/icons/drk/hd_disabled.png</file>

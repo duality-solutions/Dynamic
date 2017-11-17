@@ -446,7 +446,7 @@ void CDynodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDow
 
     if (!IsBlockchainSynced()) {
         // Postpone timeout each time new block arrives while we are still syncing blockchain
-        BumpAssetLastTime("CMasternodeSync::UpdatedBlockTip");
+        BumpAssetLastTime("CDynodeSync::UpdatedBlockTip");
     }
 
     if (fInitialDownload) {

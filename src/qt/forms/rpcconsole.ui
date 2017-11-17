@@ -249,7 +249,7 @@
        <item row="10" column="0">
         <widget class="QLabel" name="dynodeCountLabel">
          <property name="text">
-          <string>Number of Masternodes</string>
+          <string>Number of Dynodes</string>
          </property>
         </widget>
        </item>
@@ -406,7 +406,7 @@
          <item>
           <widget class="QPushButton" name="openDebugLogfileButton">
            <property name="toolTip">
-            <string>Open the Dash Core debug log file from the current data directory. This can take a few seconds for large log files.</string>
+            <string>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</string>
            </property>
            <property name="text">
             <string>&amp;Open</string>
@@ -477,7 +477,7 @@
             <string>Decrease font size</string>
            </property>
            <property name="icon">
-            <iconset resource="../bitcoin.qrc">
+            <iconset resource="../dynamic.qrc">
              <normaloff>:/icons/fontsmaller</normaloff>:/icons/fontsmaller</iconset>
            </property>
            <property name="iconSize">
@@ -509,7 +509,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../bitcoin.qrc">
+            <iconset resource="../dynamic.qrc">
              <normaloff>:/icons/fontbigger</normaloff>:/icons/fontbigger</iconset>
            </property>
            <property name="iconSize">
@@ -544,8 +544,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../bitcoin.qrc">
-             <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+            <iconset resource="../dynamic.qrc">
+             <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
            </property>
            <property name="shortcut">
             <string notr="true">Ctrl+L</string>
@@ -585,7 +585,7 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QPushButton" name="promptIcon">
+          <widget class="QPushButton" name="prompticon">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -599,9 +599,9 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../dash.qrc">
-             <normaloff>:/icons/prompticon</normaloff>
-             <disabledoff>:/icons/prompticon</disabledoff>:/icons/prompticon</iconset>
+            <iconset resource="../dynamic.qrc">
+             <normaloff>:/icons/drk/prompticon</normaloff>
+             <disabledoff>:/icons/drk/prompticon</disabledoff>:/icons/drk/prompticon</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1732,7 +1732,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../dash.qrc"/>
+  <include location="../dynamic.qrc"/>
  </resources>
  <connections/>
 </ui>

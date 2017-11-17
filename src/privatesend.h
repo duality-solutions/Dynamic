@@ -328,7 +328,7 @@ public:
     static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
     static CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
 
-    /// Get the denominations for a specific amount of dash.
+    /// Get the denominations for a specific amount of Dynamic.
     static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
 
     /// Get the denominations for a list of outputs (returns a bitshifted integer)
