@@ -398,7 +398,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         UniValue dnObj(UniValue::VOBJ);
 
-        dnObj.push_back(Pair("vin", activeDynode.outpoint.ToStringShort()));
+        dnObj.push_back(Pair("outpoint", activeDynode.outpoint.ToStringShort()));
         dnObj.push_back(Pair("service", activeDynode.service.ToString()));
 
         CDynode dn;
@@ -745,7 +745,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
             if(dnb.CheckSignature(nDos)) {
                 nSuccessful++;
-                resultObj.push_back(Pair("vin", dnb.vin.ToString()));
+                resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
                 resultObj.push_back(Pair("addr", dnb.addr.ToString()));
                 resultObj.push_back(Pair("pubKeyCollateralAddress", CDynamicAddress(dnb.pubKeyCollateralAddress.GetID()).ToString()));
                 resultObj.push_back(Pair("pubKeyDynode", CDynamicAddress(dnb.pubKeyDynode.GetID()).ToString()));
@@ -755,7 +755,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
                 resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
-                lastPingObj.push_back(Pair("vin", dnb.lastPing.vin.ToString()));
+                lastPingObj.push_back(Pair("outpoint", dnb.lastPing.vin.prevout.ToStringShort()));
                 lastPingObj.push_back(Pair("blockHash", dnb.lastPing.blockHash.ToString()));
                 lastPingObj.push_back(Pair("sigTime", dnb.lastPing.sigTime));
                 lastPingObj.push_back(Pair("vchSig", EncodeBase64(&dnb.lastPing.vchSig[0], dnb.lastPing.vchSig.size())));
@@ -796,7 +796,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
         BOOST_FOREACH(CDynodeBroadcast& dnb, vecDnb) {
             UniValue resultObj(UniValue::VOBJ);
 
-            resultObj.push_back(Pair("vin", dnb.vin.ToString()));
+            resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
             resultObj.push_back(Pair("addr", dnb.addr.ToString()));
 
             int nDos = 0;
