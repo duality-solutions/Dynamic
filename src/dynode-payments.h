@@ -177,6 +177,7 @@ public:
     std::map<uint256, CDynodePaymentVote> mapDynodePaymentVotes;
     std::map<int, CDynodeBlockPayees> mapDynodeBlocks;
     std::map<COutPoint, int> mapDynodesLastVote;
+    std::map<COutPoint, int> mapDynodesDidNotVote;
 
     CDynodePayments() : nStorageCoeff(1.25), nMinBlocksToStore(5000) {}
 
@@ -193,6 +194,7 @@ public:
     bool AddPaymentVote(const CDynodePaymentVote& vote);
     bool HasVerifiedPaymentVote(uint256 hashIn);
     bool ProcessBlock(int nBlockHeight);
+    void CheckPreviousBlockVotes(int nPrevBlockHeight);
 
     void Sync(CNode* node);
     void RequestLowDataPaymentBlocks(CNode* pnode);

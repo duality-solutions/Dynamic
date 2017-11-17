@@ -810,6 +810,68 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight)
     return false;
 }
 
+void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
+{
+    if (!dynodeSync.IsWinnersListSynced()) return;
+
+    std::string debugStr;
+
+    debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes -- nPrevBlockHeight=%d, expected voting DNs:\n", nPrevBlockHeight);
+
+    CDynodeMan::rank_pair_vec_t dns;
+    if (!mnodeman.GetMasternodeRanks(dns, nPrevBlockHeight - 101, GetMinDynodePaymentsProto())) {
+        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetMasternodeRanks failed\n";
+        LogPrint("dnpayments", "%s", debugStr);
+        return;
+    }
+
+    LOCK2(cs_mapDynodeBlocks, cs_mapDynodePaymentVotes);
+
+    for (int i = 0; i < DNPAYMENTS_SIGNATURES_TOTAL && i < (int)dns.size(); i++) {
+        auto dn = dns[i];
+        CScript payee;
+        bool found = false;
+
+        if (mapDynodeBlocks.count(nPrevBlockHeight)) {
+            for (auto &p : mapDynodeBlocks[nPrevBlockHeight].vecPayees) {
+                for (auto &voteHash : p.GetVoteHashes()) {
+                    if (!mapDynodePaymentVotes.count(voteHash)) {
+                        debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   could not find vote %s\n",
+                                              voteHash.ToString());
+                        continue;
+                    }
+                    auto vote = mapDynodePaymentVotes[voteHash];
+                    if (vote.vinDynode.prevout == dn.second.vin.prevout) {
+                        payee = vote.payee;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   %s - no vote received\n",
+                                  dn.second.vin.prevout.ToStringShort());
+            mapDynodesDidNotVote[dn.second.vin.prevout]++;
+            continue;
+        }
+
+        CTxDestination address1;
+        ExtractDestination(payee, address1);
+        CDynamicAddress address2(address1);
+
+        debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   %s - voted for %s\n",
+                              dn.second.vin.prevout.ToStringShort(), address2.ToString());
+    }
+    debugStr += "CDynodePayments::CheckPreviousBlockVotes -- Dynodes which missed a vote in the past:\n";
+    for (auto it : mapDynodesDidNotVote) {
+        debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   %s: %d\n", it.first.ToStringShort(), it.second);
+    }
+
+    LogPrint("dnpayments", "%s", debugStr);
+}
+
 void CDynodePaymentVote::Relay()
 {
     // do not relay until synced
@@ -988,5 +1050,8 @@ void CDynodePayments::UpdatedBlockTip(const CBlockIndex *pindex)
     nCachedBlockHeight = pindex->nHeight;
     LogPrint("dnpayments", "CDynodePayments::UpdatedBlockTip -- nCachedBlockHeight=%d\n", nCachedBlockHeight);
 
-    ProcessBlock(nCachedBlockHeight + 10);
+    int nFutureBlock = nCachedBlockHeight + 10;
+
+    CheckPreviousBlockVotes(nFutureBlock - 1);
+    ProcessBlock(nFutureBlock, connman);
 }
