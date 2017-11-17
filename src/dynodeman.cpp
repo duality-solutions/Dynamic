@@ -469,12 +469,12 @@ bool CDynodeMan::Has(const COutPoint& outpoint)
 //
 // Deterministically select the oldest/best Dynode to pay on the network
 //
-bool CDynodeMan::GetNextDynodeInQueueForPayment(bool fFilterSigTime, bool fFilterScheduled, int& nCountRet, dynode_info_t& dnInfoRet)
+bool CDynodeMan::GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet)
 {
-    return GetNextDynodeInQueueForPayment(nCachedBlockHeight, fFilterSigTime, fFilterScheduled, nCountRet, dnInfoRet);
+    return GetNextDynodeInQueueForPayment(nCachedBlockHeight, fFilterSigTime, nCountRet, dnInfoRet);
 }
 
-bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, bool fFilterScheduled, int& nCountRet, dynode_info_t& dnInfoRet)
+bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet)
 {
     dnInfoRet = dynode_info_t();
     nCountRet = 0;
@@ -503,7 +503,7 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
         if(dnpair.second.nProtocolVersion < dnpayments.GetMinDynodePaymentsProto()) continue;
 
         //it's in the list (up to 8 entries ahead of current block to allow propagation) -- so let's skip it
-        if(fFilterScheduled && dnpayments.IsScheduled(dnpair.second, nBlockHeight)) continue;
+        if(dnpayments.IsScheduled(dnpair.second, nBlockHeight)) continue;
 
         //it's too new, wait for a cycle
         if(fFilterSigTime && dnpair.second.sigTime + (nDnCount*2.6*60) > GetAdjustedTime()) continue;
@@ -518,7 +518,7 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
 
     //when the network is in the process of upgrading, don't penalize nodes that recently restarted
     if(fFilterSigTime && nCountRet < nDnCount/3)
-        return GetNextDynodeInQueueForPayment(nBlockHeight, false, fFilterScheduled, nCountRet, dnInfoRet);
+        return GetNextDynodeInQueueForPayment(nBlockHeight, false, nCountRet, dnInfoRet);
 
     // Sort them low to high
     sort(vecDynodeLastPaid.begin(), vecDynodeLastPaid.end(), CompareLastPaidBlock());
