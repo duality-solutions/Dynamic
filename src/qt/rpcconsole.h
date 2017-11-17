@@ -161,7 +161,6 @@ private:
     ClientModel *clientModel;
     QStringList history;
     int historyPtr;
-    NodeId cachedNodeid;
     QList<NodeId> cachedNodeids;
     RPCTimerInterface *rpcTimerInterface;      
     QMenu *peersTableContextMenu;
