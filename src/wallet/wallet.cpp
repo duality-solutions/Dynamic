@@ -2156,12 +2156,12 @@ CAmount CWallet::GetBalance() const
 }
 
 
-CAmount CWallet::GetAnonymizableBalance(bool fSkipDenominated) const
+CAmount CWallet::GetAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) const
 {
     if(fLiteMode) return 0;
 
     std::vector<CompactTallyItem> vecTally;
-    if(!SelectCoinsGrouppedByAddresses(vecTally, fSkipDenominated, true)) return 0;
+    if(!SelectCoinsGrouppedByAddresses(vecTally, fSkipDenominated, true, fSkipUnconfirmed)) return 0;
 
     CAmount nTotal = 0;
 
@@ -2828,14 +2828,14 @@ struct CompareByAmount
     }
 };
 
-bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated, bool fAnonymizable) const
+bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated, bool fAnonymizable, bool fSkipUnconfirmed) const
 {
     LOCK2(cs_main, cs_wallet);
 
     isminefilter filter = ISMINE_SPENDABLE;
 
     // try to use cache
-    if(fAnonymizable) {
+    if(fAnonymizable && fSkipUnconfirmed) {
         if(fSkipDenominated && fAnonymizableTallyCachedNonDenom) {
             vecTallyRet = vecAnonymizableTallyCachedNonDenom;
             LogPrint("selectcoins", "SelectCoinsGrouppedByAddresses - using cache for non-denom inputs\n");
@@ -2864,7 +2864,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
         const CWalletTx& wtx = (*it).second;
 
         if(wtx.IsCoinBase() && wtx.GetBlocksToMaturity() > 0) continue;
-        if(!fAnonymizable && !wtx.IsTrusted()) continue;
+        if(fSkipUnconfirmed && !wtx.IsTrusted()) continue;
 
         for (unsigned int i = 0; i < wtx.vout.size(); i++) {
             CTxDestination txdest;
@@ -2906,7 +2906,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
     sort(vecTallyRet.rbegin(), vecTallyRet.rend(), CompareByAmount());
 
     // cache anonymizable for later use
-    if(fAnonymizable) {
+    if(fAnonymizable && fSkipUnconfirmed) {
         if(fSkipDenominated) {
             vecAnonymizableTallyCachedNonDenom = vecTallyRet;
             fAnonymizableTallyCachedNonDenom = true;

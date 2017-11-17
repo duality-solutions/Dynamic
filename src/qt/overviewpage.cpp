@@ -352,21 +352,9 @@ void OverviewPage::updatePrivateSendProgress()
         return;
     }
 
-    CAmount nDenominatedConfirmedBalance;
-    CAmount nDenominatedUnconfirmedBalance;
-    CAmount nAnonymizableBalance;
-    CAmount nNormalizedAnonymizedBalance;
-    float nAverageAnonymizedRounds;
+    CAmount nAnonymizableBalance = pwalletMain->GetAnonymizableBalance(false, false);
 
-    {
-        nDenominatedConfirmedBalance = pwalletMain->GetDenominatedBalance();
-        nDenominatedUnconfirmedBalance = pwalletMain->GetDenominatedBalance(true);
-        nAnonymizableBalance = pwalletMain->GetAnonymizableBalance();
-        nNormalizedAnonymizedBalance = pwalletMain->GetNormalizedAnonymizedBalance();
-        nAverageAnonymizedRounds = pwalletMain->GetAverageAnonymizedRounds();
-    }
-
-    CAmount nMaxToAnonymize = nAnonymizableBalance + currentAnonymizedBalance + nDenominatedUnconfirmedBalance;
+    CAmount nMaxToAnonymize = nAnonymizableBalance + currentAnonymizedBalance;
 
     // If it's more than the anon threshold, limit to that.
     if(nMaxToAnonymize > privateSendClient.nPrivateSendAmount*COIN) nMaxToAnonymize = privateSendClient.nPrivateSendAmount*COIN;
@@ -390,6 +378,18 @@ void OverviewPage::updatePrivateSendProgress()
                 " / " + tr("%n Rounds", "", privateSendClient.nPrivateSendRounds) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
+
+    if (!fShowAdvancedPSUI) return;
+
+    CAmount nDenominatedConfirmedBalance;
+    CAmount nDenominatedUnconfirmedBalance;
+    CAmount nNormalizedAnonymizedBalance;
+    float nAverageAnonymizedRounds;
+
+    nDenominatedConfirmedBalance = pwalletMain->GetDenominatedBalance();
+    nDenominatedUnconfirmedBalance = pwalletMain->GetDenominatedBalance(true);
+    nNormalizedAnonymizedBalance = pwalletMain->GetNormalizedAnonymizedBalance();
+    nAverageAnonymizedRounds = pwalletMain->GetAverageAnonymizedRounds();
 
     // calculate parts of the progress, each of them shouldn't be higher than 1
     // progress of denominating
