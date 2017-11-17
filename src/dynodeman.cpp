@@ -1480,14 +1480,14 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
     IsFirstRun = false;
 }
 
-void CDynodeMan::UpdateWatchdogVoteTime(const COutPoint& outpoint)
+void CDynodeMan::UpdateWatchdogVoteTime(const COutPoint& outpoint, uint64_t nVoteTime)
 {
     LOCK(cs);
     CDynode* pdn = Find(outpoint);
     if(!pdn) {
         return;
     }
-    pdn->UpdateWatchdogVoteTime();
+    pdn->UpdateWatchdogVoteTime(nVoteTime);
     nLastWatchdogVoteTime = GetTime();
 }
 
@@ -1547,7 +1547,7 @@ void CDynodeMan::SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing&
     // we shoud update nTimeLastWatchdogVote here if sentinel
     // ping flag is actual
     if(dnp.fSentinelIsCurrent) {
-        pdn->UpdateWatchdogVoteTime(dnp.sigTime);
+        UpdateWatchdogVoteTime(dnp.vin.prevout, mnp.sigTime);
     }
 
     mapSeenDynodePing.insert(std::make_pair(dnp.GetHash(), dnp));
