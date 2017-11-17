@@ -163,6 +163,7 @@ void CDynodeSync::ProcessTick()
         LogPrintf("CDynodeSync::HasSyncFailures -- WARNING: no actions for too long, restarting sync...\n");
         Reset();
         SwitchToNextAsset();
+        nTimeLastProcess = GetTime();
         return;
     }
     nTimeLastProcess = GetTime();
