@@ -709,7 +709,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         // new votes must comply SPORK_10_DYNODE_PAY_UPDATED_NODES rules
         nMinRequiredProtocol = dnpayments.GetMinDynodePaymentsProto();
     } else {
-        // allow non-updated Dynodes for old blocks
+        // allow non-updated dynodes for old blocks
         nMinRequiredProtocol = MIN_DYNODE_PAYMENT_PROTO_VERSION;
     }
 
@@ -718,21 +718,26 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         return false;
     }
 
-    // Only Dynodes should try to check Dynode rank for old votes - they need to pick the right winner for future blocks.
-    // Regular clients (miners included) need to verify Dynode rank for future block votes only.
+    // Only dynodes should try to check dynode rank for old votes - they need to pick the right winner for future blocks.
+    // Regular clients (miners included) need to verify dynode rank for future block votes only.
     if(!fDyNode && nBlockHeight < nValidationHeight) return true;
 
-    int nRank = dnodeman.GetDynodeRank(vinDynode.prevout, nBlockHeight - 101, nMinRequiredProtocol, false);
+    int nRank;
+
+    if(!dnodeman.GetDynodeRank(vinDynode.prevout, nRank, nBlockHeight - 101, nMinRequiredProtocol)) {
+        LogPrint("dnpayments", "CDynodePaymentVote::IsValid -- Can't calculate rank for dynode %s\n",
+                    vinDynode.prevout.ToStringShort());
+        return false;
+    }
 
     if(nRank > DNPAYMENTS_SIGNATURES_TOTAL) {
-        // It's common to have Dynodes mistakenly think they are in the top 10
+        // It's common to have dynodes mistakenly think they are in the top 10
         // We don't want to print all of these messages in normal mode, debug mode should print though
         strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL, nRank);
-        // Only ban for new dnw which is out of bounds, for old dnw DN list itself might be way too much off
+        // Only ban for new dnw which is out of bounds, for old mnw DN list itself might be way too much off
         if(nRank > DNPAYMENTS_SIGNATURES_TOTAL*2 && nBlockHeight > nValidationHeight) {
             strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL*2, nRank);
             LogPrintf("CDynodePaymentVote::IsValid -- Error: %s\n", strError);
-            Misbehaving(pnode->GetId(), 20);
         }
         // Still invalid however
         return false;
@@ -752,9 +757,9 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight)
     // if we have not enough data about Dynodes.
     if(!dynodeSync.IsDynodeListSynced()) return false;
 
-    int nRank = dnodeman.GetDynodeRank(activeDynode.outpoint, nBlockHeight - 101, GetMinDynodePaymentsProto(), false);
+    int nRank;
 
-    if (nRank == -1) {
+    if (!dnodeman.GetDynodeRank(activeDynode.outpoint, nRank, nBlockHeight - 101, GetMinDynodePaymentsProto())) {
         LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- Unknown Dynode\n");
         return false;
     }

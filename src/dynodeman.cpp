@@ -31,8 +31,8 @@ struct CompareLastPaidBlock
 
 struct CompareScoreDN
 {
-    bool operator()(const std::pair<int64_t, CDynode*>& t1,
-                    const std::pair<int64_t, CDynode*>& t2) const
+    bool operator()(const std::pair<arith_uint256, CDynode*>& t1,
+                    const std::pair<arith_uint256, CDynode*>& t2) const
     {
         return (t1.first != t2.first) ? (t1.first < t2.first) : (t1.second->vin < t2.second->vin);
     }
@@ -171,7 +171,7 @@ void CDynodeMan::CheckAndRemove()
         Check();
 
         // Remove spent Dynodes, prepare structures and make requests to reasure the state of inactive ones
-        std::vector<std::pair<int, CDynode> > vecDynodeRanks;
+        rank_pair_vec_t vecDynodeRanks;
         // ask for up to DNB_RECOVERY_MAX_ASK_ENTRIES dynode entries at a time
         int nAskForDnbRecovery = DNB_RECOVERY_MAX_ASK_ENTRIES;
         std::map<COutPoint, CDynode>::iterator it = mapDynodes.begin();
@@ -199,7 +199,7 @@ void CDynodeMan::CheckAndRemove()
                     // calulate only once and only when it's needed
                     if(vecDynodeRanks.empty()) {
                         int nRandomBlockHeight = GetRandInt(nCachedBlockHeight);
-                        vecDynodeRanks = GetDynodeRanks(nRandomBlockHeight);
+                        GetDynodeRanks(vecDynodeRanks, nRandomBlockHeight);
                     }
                     bool fAskedForDnbRecovery = false;
                     // ask first DNB_RECOVERY_QUORUM_TOTAL dynodes we can connect to and we haven't asked recently
@@ -494,7 +494,7 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
         Make a vector with all of the last paid times
     */
 
-    int nDnCount = CountEnabled();
+    int nDnCount = CountDynodes();
 
     for (auto& dnpair : mapDynodes) {
         if(!dnpair.second.IsValidForPayment()) continue;
@@ -595,103 +595,119 @@ dynode_info_t CDynodeMan::FindRandomNotInVec(const std::vector<COutPoint> &vecTo
     return dynode_info_t();
 }
 
-int CDynodeMan::GetDynodeRank(const COutPoint& outpoint, int nBlockHeight, int nMinProtocol, bool fOnlyActive)
+bool CDynodeMan::GetDynodeScores(const uint256& nBlockHash, CDynodeMan::score_pair_vec_t& vecDynodeScoresRet, int nMinProtocol)
 {
-    std::vector<std::pair<int64_t, CDynode*> > vecDynodeScores;
+    vecDynodeScoresRet.clear();
 
-    //make sure we know about this block
-    uint256 blockHash = uint256();
-    if(!GetBlockHash(blockHash, nBlockHeight)) return -1;
+    if (!dynodeSync.IsDynodeListSynced())
+        return false;
 
-    LOCK(cs);
 
-    // scan for winner
+    AssertLockHeld(cs);
+
+    if (mapDynodes.empty())
+        return false;
+
+    // calculate scores
     for (auto& dnpair : mapDynodes) {
-        if(dnpair.second.nProtocolVersion < nMinProtocol) continue;
-        if(fOnlyActive) {
-            if(!dnpair.second.IsEnabled()) continue;
+        if (dnpair.second.nProtocolVersion >= nMinProtocol) {
+            vecDynodeScoresRet.push_back(std::make_pair(dnpair.second.CalculateScore(nBlockHash), &dnpair.second));
         }
-        else {
-            if(!dnpair.second.IsValidForPayment()) continue;
-        }
-        int64_t nScore = dnpair.second.CalculateScore(blockHash).GetCompact(false);
-
-        vecDynodeScores.push_back(std::make_pair(nScore, &dnpair.second));
     }
 
-    sort(vecDynodeScores.rbegin(), vecDynodeScores.rend(), CompareScoreDN());
-
-    int nRank = 0;
-    BOOST_FOREACH (PAIRTYPE(int64_t, CDynode*)& scorePair, vecDynodeScores) {
-        nRank++;
-        if(scorePair.second->vin.prevout == outpoint) return nRank;
-    }
-
-    return -1;
+    sort(vecDynodeScoresRet.rbegin(), vecDynodeScoresRet.rend(), CompareScoreDN());
+    return !vecDynodeScoresRet.empty();
 }
 
-std::vector<std::pair<int, CDynode> > CDynodeMan::GetDynodeRanks(int nBlockHeight, int nMinProtocol)
+bool CDynodeMan::GetDynodeRank(const COutPoint& outpoint, int& nRankRet, int nBlockHeight, int nMinProtocol)
 {
-    std::vector<std::pair<int64_t, CDynode*> > vecDynodeScores;
-    std::vector<std::pair<int, CDynode> > vecDynodeRanks;
+    nRankRet = -1;
 
-    //make sure we know about this block
-    uint256 blockHash = uint256();
-    if(!GetBlockHash(blockHash, nBlockHeight)) return vecDynodeRanks;
+    if (!dynodeSync.IsDynodeListSynced())
+        return false;
 
-    LOCK(cs);
-
-    // scan for winner
-    for (auto& dnpair : mapDynodes) {
-
-        if(dnpair.second.nProtocolVersion < nMinProtocol || !dnpair.second.IsEnabled()) continue;
-
-        int64_t nScore = dnpair.second.CalculateScore(blockHash).GetCompact(false);
-
-        vecDynodeScores.push_back(std::make_pair(nScore, &dnpair.second));
-    }
-
-    sort(vecDynodeScores.rbegin(), vecDynodeScores.rend(), CompareScoreDN());
-
-    int nRank = 0;
-    BOOST_FOREACH (PAIRTYPE(int64_t, CDynode*)& s, vecDynodeScores) {
-        nRank++;
-        vecDynodeRanks.push_back(std::make_pair(nRank, *s.second));
-    }
-
-    return vecDynodeRanks;
-}
-
-bool CDynodeMan::GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive, dynode_info_t& dnInfoRet)
-{
-    std::vector<std::pair<int64_t, CDynode*> > vecDynodeScores;
-
-    LOCK(cs);
-
-    uint256 blockHash;
-    if(!GetBlockHash(blockHash, nBlockHeight)) {
-        LogPrintf("CDynode::GetDynodeByRank -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nBlockHeight);
+    // make sure we know about this block
+    uint256 nBlockHash = uint256();
+    if (!GetBlockHash(nBlockHash, nBlockHeight)) {
+        LogPrintf("CDynodeMan::%s -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", __func__, nBlockHeight);
         return false;
     }
 
-    // Fill scores
-    for (auto& dnpair : mapDynodes) {
+    LOCK(cs);
 
-        if(dnpair.second.nProtocolVersion < nMinProtocol) continue;
-        if(fOnlyActive && !dnpair.second.IsEnabled()) continue;
+    score_pair_vec_t vecDynodeScores;
+    if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
+        return false;
 
-        int64_t nScore = dnpair.second.CalculateScore(blockHash).GetCompact(false);
-
-        vecDynodeScores.push_back(std::make_pair(nScore, &dnpair.second));
+    int nRank = 0;
+    for (auto& scorePair : vecDynodeScores) {
+        nRank++;
+        if(scorePair.second->vin.prevout == outpoint) {
+            nRankRet = nRank;
+            return true;
+        }
     }
 
-    sort(vecDynodeScores.rbegin(), vecDynodeScores.rend(), CompareScoreDN());
+    return false;
+}
 
-    int rank = 0;
-    BOOST_FOREACH (PAIRTYPE(int64_t, CDynode*)& s, vecDynodeScores){
-        rank++;
-        if(rank == nRank) {
-            dnInfoRet = *s.second;
+bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, int nBlockHeight, int nMinProtocol)
+{
+    vecDynodeRanksRet.clear();
+
+    if (!dynodeSync.IsDynodeListSynced())
+        return false;
+
+    // make sure we know about this block
+    uint256 nBlockHash = uint256();
+    if (!GetBlockHash(nBlockHash, nBlockHeight)) {
+        LogPrintf("CDynodeMan::%s -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", __func__, nBlockHeight);
+        return false;
+    }
+
+    LOCK(cs);
+
+    score_pair_vec_t vecDynodeScores;
+    if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
+        return false;
+
+    int nRank = 0;
+    for (auto& scorePair : vecDynodeScores) {
+        nRank++;
+        vecDynodeRanksRet.push_back(std::make_pair(nRank, *scorePair.second));
+    }
+
+    return true;
+}
+
+bool CDynodeMan::GetDynodeByRank(int nRankIn, dynode_info_t& dnInfoRet, int nBlockHeight, int nMinProtocol)
+{
+    dnInfoRet = dynode_info_t();
+
+    if (!dynodeSync.IsDynodeListSynced())
+        return false;
+
+    // make sure we know about this block
+    uint256 nBlockHash = uint256();
+    if (!GetBlockHash(nBlockHash, nBlockHeight)) {
+        LogPrintf("CDynodeMan::%s -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", __func__, nBlockHeight);
+        return false;
+    }
+
+    LOCK(cs);
+
+    score_pair_vec_t vecDynodeScores;
+    if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
+        return false;
+
+    if (vecDynodeScores.size() < nRankIn)
+        return false;
+
+    int nRank = 0;
+    for (auto& scorePair : vecDynodeScores) {
+        nRank++;
+        if(nRank == nRankIn) {
+            dnInfoRet = *scorePair.second;
             return true;
         }
     }
@@ -902,7 +918,9 @@ void CDynodeMan::DoFullVerificationStep()
     if(activeDynode.outpoint == COutPoint()) return;
     if(!dynodeSync.IsSynced()) return;
 
-    std::vector<std::pair<int, CDynode> > vecDynodeRanks = GetDynodeRanks(nCachedBlockHeight - 1, MIN_POSE_PROTO_VERSION);
+    rank_pair_vec_t vecDynodeRanks;
+
+    GetDynodeRanks(vecDynodeRanks, nCachedBlockHeight - 1, MIN_POSE_PROTO_VERSION);
 
     // Need LOCK2 here to ensure consistent locking order because the SendVerifyRequest call below locks cs_main
     // through GetHeight() signal in ConnectNode
@@ -1223,13 +1241,13 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
 
     // we don't care about history
     if(dnv.nBlockHeight < nCachedBlockHeight - MAX_POSE_BLOCKS) {
-        LogPrint("Dynode", "DynodeMan::ProcessVerifyBroadcast -- Outdated: current block %d, verification block %d, peer=%d\n",
+        LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- Outdated: current block %d, verification block %d, peer=%d\n",
                     nCachedBlockHeight, dnv.nBlockHeight, pnode->id);
         return;
     }
 
     if(dnv.vin1.prevout == dnv.vin2.prevout) {
-        LogPrint("Dynode", "DynodeMan::ProcessVerifyBroadcast -- ERROR: same vins %s, peer=%d\n",
+        LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- ERROR: same vins %s, peer=%d\n",
                     dnv.vin1.prevout.ToStringShort(), pnode->id);
         // that was NOT a good idea to cheat and verify itself,
         // ban the node we received such message from
@@ -1240,14 +1258,21 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
     uint256 blockHash;
     if(!GetBlockHash(blockHash, dnv.nBlockHeight)) {
         // this shouldn't happen...
-        LogPrintf("DynodeMan::ProcessVerifyBroadcast -- Can't get block hash for unknown block height %d, peer=%d\n", dnv.nBlockHeight, pnode->id);
+        LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- Can't get block hash for unknown block height %d, peer=%d\n", dnv.nBlockHeight, pnode->id);
         return;
     }
 
-    int nRank = GetDynodeRank(dnv.vin2.prevout, dnv.nBlockHeight, MIN_POSE_PROTO_VERSION);
-    if(nRank < MAX_POSE_RANK) {
-        LogPrint("Dynode", "DynodeMan::ProcessVerifyBroadcast -- Dynode is not in top %d, current rank %d, peer=%d\n",
-                    (int)MAX_POSE_RANK, nRank, pnode->id);
+    int nRank;
+
+    if (!GetDynodeRank(dnv.vin2.prevout, nRank, dnv.nBlockHeight, MIN_POSE_PROTO_VERSION)) {
+        LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- Can't calculate rank for dynode %s\n",
+                    dnv.vin2.prevout.ToStringShort());
+        return;
+    }
+
+    if(nRank > MAX_POSE_RANK) {
+        LogPrint("dynode", "CDynodeMan::ProcessVerifyBroadcast -- Dynode %s is not in top %d, current rank %d, peer=%d\n",
+                    dnv.vin2.prevout.ToStringShort(), (int)MAX_POSE_RANK, nRank, pnode->id);
         return;
     }
 

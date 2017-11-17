@@ -30,7 +30,7 @@ CDynode::CDynode(const CDynode& other) :
     dynode_info_t{other},
     lastPing(other.lastPing),
     vchSig(other.vchSig),
-    nCacheCollateralBlock(other.nCacheCollateralBlock),
+    nCollateralMinConfBlockHash(other.nCollateralMinConfBlockHash),
     nBlockLastPaid(other.nBlockLastPaid),
     nPoSeBanScore(other.nPoSeBanScore),
     nPoSeBanHeight(other.nPoSeBanHeight),
@@ -90,18 +90,10 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
 //
 arith_uint256 CDynode::CalculateScore(const uint256& blockHash)
 {
-    uint256 aux = ArithToUint256(UintToArith256(vin.prevout.hash) + vin.prevout.n);
-
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << blockHash;
-    arith_uint256 hash2 = UintToArith256(ss.GetHash());
-
-    CHashWriter ss2(SER_GETHASH, PROTOCOL_VERSION);
-    ss2 << blockHash;
-    ss2 << aux;
-    arith_uint256 hash3 = UintToArith256(ss2.GetHash());
-
-    return (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
+        // Deterministically calculate a "score" for a Dynode based on any given (block)hash
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << vin.prevout << nCollateralMinConfBlockHash << blockHash;
+        return UintToArith256(ss.GetHash());
 }
 
 CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint)
@@ -560,6 +552,8 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
             dnodeman.mapSeenDynodeBroadcast.erase(GetHash());
             return false;
         }
+        // remember the hash of the block where dynode collateral had minimum required confirmations
+        nCollateralMinConfBlockHash = chainActive[nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
     }
 
     LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO verified\n");

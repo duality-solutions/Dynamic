@@ -196,22 +196,21 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
 
         int nLockInputHeight = nPrevoutHeight + 4;
 
-        int n = dnodeman.GetDynodeRank(activeDynode.outpoint, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
-
-        if(n == -1) {
+        int nRank;
+        if(!dnodeman.GetDynodeRank(activeDynode.outpoint, nRank, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION)) {
             LogPrint("instantsend", "CInstantSend::Vote -- Can't calculate rank for dynode %s\n", activeDynode.outpoint.ToStringShort());
             ++itOutpointLock;
             continue;
         }
 
         int nSignaturesTotal = COutPointLock::SIGNATURES_TOTAL;
-        if(n > nSignaturesTotal) {
-            LogPrint("instantsend", "CInstantSend::Vote -- Dynode not in the top %d (%d)\n", nSignaturesTotal, n);
+        if(nRank > nSignaturesTotal) {
+            LogPrint("instantsend", "CInstantSend::Vote -- Dynode not in the top %d (%d)\n", nSignaturesTotal, nRank);
             ++itOutpointLock;
             continue;
         }
 
-        LogPrint("instantsend", "CInstantSend::Vote -- In the top %d (%d)\n", nSignaturesTotal, n);
+        LogPrint("instantsend", "CInstantSend::Vote -- In the top %d (%d)\n", nSignaturesTotal, nRank);
 
         std::map<COutPoint, std::set<uint256> >::iterator itVoted = mapVotedOutpoints.find(itOutpointLock->first);
 
@@ -1001,19 +1000,19 @@ bool CTxLockVote::IsValid(CNode* pnode) const
 
     int nLockInputHeight = coins.nHeight + 4;
 
-    int n = dnodeman.GetDynodeRank(outpointDynode, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
+    int nRank;
 
-    if(n == -1) {
+    if(!dnodeman.GetDynodeRank(outpointDynode, nRank, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION)) {
         //can be caused by past versions trying to vote with an invalid protocol
         LogPrint("instantsend", "CTxLockVote::IsValid -- Can't calculate rank for dynode %s\n", outpointDynode.ToStringShort());
         return false;
     }
-    LogPrint("instantsend", "CTxLockVote::IsValid -- Dynode %s, rank=%d\n", outpointDynode.ToStringShort(), n);
+    LogPrint("instantsend", "CTxLockVote::IsValid -- Dynode %s, rank=%d\n", outpointDynode.ToStringShort(), nRank);
 
     int nSignaturesTotal = COutPointLock::SIGNATURES_TOTAL;
-    if(n > nSignaturesTotal) {
+    if(nRank > nSignaturesTotal) {
         LogPrint("instantsend", "CTxLockVote::IsValid -- Dynode %s is not in the top %d (%d), vote hash=%s\n",
-                outpointDynode.ToStringShort(), nSignaturesTotal, n, GetHash().ToString());
+                outpointDynode.ToStringShort(), nSignaturesTotal, nRank, GetHash().ToString());
         return false;
     }
 

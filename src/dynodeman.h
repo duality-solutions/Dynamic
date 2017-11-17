@@ -16,6 +16,10 @@ extern CDynodeMan dnodeman;
 class CDynodeMan
 {
 public:
+    typedef std::pair<arith_uint256, CDynode*> score_pair_t;
+    typedef std::vector<score_pair_t> score_pair_vec_t;
+    typedef std::pair<int, CDynode> rank_pair_t;
+    typedef std::vector<rank_pair_t> rank_pair_vec_t;
 
 private:
     static const std::string SERIALIZATION_VERSION_STRING;
@@ -71,6 +75,7 @@ private:
     /// Find an entry
     CDynode* Find(const COutPoint& outpoint);
 
+    bool GetDynodeScores(const uint256& nBlockHash, score_pair_vec_t& vecDynodeScoresRet, int nMinProtocol = 0);
 
 public:
     // Keep track of all broadcasts I've seen
@@ -165,9 +170,9 @@ public:
 
     std::map<COutPoint, CDynode> GetFullDynodeMap() { return mapDynodes; }
 
-    std::vector<std::pair<int, CDynode> > GetDynodeRanks(int nBlockHeight = -1, int nMinProtocol=0);
-    int GetDynodeRank(const COutPoint &outpoint, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
-    bool GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive, dynode_info_t& dnInfoRet);
+    bool GetDynodeRanks(rank_pair_vec_t& vecDynodeRanksRet, int nBlockHeight = -1, int nMinProtocol = 0);
+    bool GetDynodeRank(const COutPoint &outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
+    bool GetDynodeByRank(int nRank, dynode_info_t& dnInfoRet, int nBlockHeight = -1, int nMinProtocol = 0);
 
     void ProcessDynodeConnections();
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();

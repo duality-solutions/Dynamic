@@ -502,7 +502,8 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
 
     UniValue obj(UniValue::VOBJ);
     if (strMode == "rank") {
-        std::vector<std::pair<int, CDynode> > vDynodeRanks = dnodeman.GetDynodeRanks();
+        CDynodeMan::rank_pair_vec_t vDynodeRanks;
+        dnodeman.GetDynodeRanks(vDynodeRanks);
         BOOST_FOREACH(PAIRTYPE(int, CDynode)& s, vDynodeRanks) {
             std::string strOutpoint = s.second.vin.prevout.ToStringShort();
             if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
