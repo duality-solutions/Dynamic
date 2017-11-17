@@ -23,6 +23,17 @@
 #include <QMessageBox>
 #include <QTimer>
 
+int GetOffsetFromUtc()
+{
+#if QT_VERSION < 0x050200
+    const QDateTime dateTime1 = QDateTime::currentDateTime();
+    const QDateTime dateTime2 = QDateTime(dateTime1.date(), dateTime1.time(), Qt::UTC);
+    return dateTime1.secsTo(dateTime2);
+#else
+    return QDateTime::currentDateTime().offsetFromUtc();
+#endif
+}
+
 DynodeList::DynodeList(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DynodeList),
@@ -201,7 +212,7 @@ void DynodeList::updateMyDynodeInfo(QString strAlias, QString strAddr, const COu
     QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynode::StateToString(infoDn.nActiveState) : "MISSING"));
     QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(fFound ? (infoDn.nTimeLastPing - infoDn.sigTime) : 0)));
     QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M",
-                                                                                                   fFound ? infoDn.nTimeLastPing + QDateTime::currentDateTime().offsetFromUtc() : 0)));
+                                                                                                   fFound ? infoDn.nTimeLastPing + GetOffsetFromUtc() : 0)));
     QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynamicAddress(infoDn.pubKeyCollateralAddress.GetID()).ToString() : ""));
 
     ui->tableWidgetMyDynodes->setItem(nNewRow, 0, aliasItem);
@@ -272,6 +283,7 @@ void DynodeList::updateNodeList()
     ui->tableWidgetDynodes->clearContents();
     ui->tableWidgetDynodes->setRowCount(0);
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
+    int offsetFromUtc = GetOffsetFromUtc();
 
     for(auto& dnpair : mapDynodes)
     {
@@ -282,7 +294,7 @@ void DynodeList::updateNodeList()
         QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(dn.nProtocolVersion));
         QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(dn.GetStatus()));
         QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(dn.lastPing.sigTime - dn.sigTime)));
-        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", dn.lastPing.sigTime + QDateTime::currentDateTime().offsetFromUtc())));
+        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", mn.lastPing.sigTime + offsetFromUtc)));
         QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
 
         if (strCurrentFilter != "")
