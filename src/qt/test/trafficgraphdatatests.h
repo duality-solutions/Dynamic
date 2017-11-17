@@ -14,6 +14,8 @@ private Q_SLOTS:
     void getRangeTests();
     void switchRangeTests();
     void clearTests();
+    void averageBandwidthTest();
+    void averageBandwidthEvery2EmptyTest();
 };
 
 
