@@ -38,7 +38,7 @@ void CDynodeSync::BumpAssetLastTime(std::string strFuncName)
 {
     if(IsSynced() || IsFailed()) return;
     nTimeLastBumped = GetTime();
-    if(fDebug) LogPrintf("CDynodeSync::BumpAssetLastTime -- %s\n", strFuncName);
+    LogPrint("dnsync", "CDynodeSync::BumpAssetLastTime -- %s\n", strFuncName);
 }
 
 std::string CDynodeSync::GetAssetName()
@@ -414,8 +414,7 @@ void CDynodeSync::SendGovernanceSyncRequest(CNode* pnode)
 
 void CDynodeSync::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 {
-    if (fDebug)
-        LogPrintf("CDynodeSync::AcceptedBlockHeader -- pindexNew->nHeight: %d\n", pindexNew->nHeight);
+    LogPrint("dnsync", "CDynodeSync::AcceptedBlockHeader -- pindexNew->nHeight: %d\n", pindexNew->nHeight);
 
     if (!IsBlockchainSynced()) {
         // Postpone timeout each time new block header arrives while we are still syncing blockchain
@@ -425,8 +424,7 @@ void CDynodeSync::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 
 void CDynodeSync::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
 {
-    if (fDebug)
-        LogPrintf("CDynodeSync::NotifyHeaderTip -- pindexNew->nHeight: %d fInitialDownload=%d\n", pindexNew->nHeight, fInitialDownload);
+    LogPrint("dnsync", "CDynodeSync::NotifyHeaderTip -- pindexNew->nHeight: %d fInitialDownload=%d\n", pindexNew->nHeight, fInitialDownload);
 
     if (IsFailed() || IsSynced() || !pindexBestHeader)
         return;
@@ -474,8 +472,7 @@ void CDynodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDow
 
     fReachedBestHeader = fReachedBestHeaderNew;
 
-    if (fDebug)
-    LogPrint("dnsync", "CDynodeSync::UpdatedBlockTip -- pindexNew->nHeight: %d pindexBestHeader->nHeight: %d fInitialDownload=%d fReachedBestHeader=%d\n",
+    LogPrint("dnsync", "CDynodeSync::NotifyHeaderTip -- pindexNew->nHeight: %d pindexBestHeader->nHeight: %d fInitialDownload=%d fReachedBestHeader=%d\n",
                 pindexNew->nHeight, pindexBestHeader->nHeight, fInitialDownload, fReachedBestHeader);
 
     if (!IsBlockchainSynced() && fReachedBestHeader) {
