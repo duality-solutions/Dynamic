@@ -1837,13 +1837,12 @@ void CConnman::ThreadDnbRequestConnections()
         std::pair<CService, std::set<uint256> > p = dnodeman.PopScheduledDnbRequestConnection();
         if(p.first == CService() || p.second.empty()) continue;
 
-        CNode* pnode = NULL;
-        {
-            LOCK2(cs_main, cs_vNodes);
-            pnode = ConnectNode(CAddress(p.first, NODE_NETWORK), NULL, true);
-            if(!pnode) continue;
-            pnode->AddRef();
-        }
+        ConnectNode(CAddress(p.first, NODE_NETWORK), NULL, true);
+
+        LOCK(cs_vNodes);
+
+        CNode *pnode = FindNode(p.first);
+        if(!pnode || pnode->fDisconnect) continue;
 
         grant.MoveTo(pnode->grantDynodeOutbound);
 
@@ -1860,8 +1859,6 @@ void CConnman::ThreadDnbRequestConnections()
 
         // ask for data
         PushMessage(pnode, NetMsgType::GETDATA, vToFetch);
-
-        pnode->Release();
     }
 }
 
