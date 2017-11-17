@@ -1,12 +1,11 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_GOVERNANCE_OBJECT_H
-#define DYNAMIC_GOVERNANCE_OBJECT_H
+#ifndef GOVERNANCE_OBJECT_H
+#define GOVERNANCE_OBJECT_H
 
-//#define ENABLE_DYNAMIC_DEBUG
+//#define ENABLE_DASH_DEBUG
 
 #include "cachemultimap.h"
 #include "governance-exceptions.h"
@@ -20,14 +19,14 @@
 #include <univalue.h>
 
 class CGovernanceManager;
-class CGovernanceObject;
 class CGovernanceTriggerManager;
+class CGovernanceObject;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
 static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70500;
+static const int GOVERNANCE_FILTER_PROTO_VERSION = 70206;
 
-static const int GOVERNANCE_FILTER_PROTO_VERSION = 70500;
 static const double GOVERNANCE_FILTER_FP_RATE = 0.001;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
@@ -35,15 +34,16 @@ static const int GOVERNANCE_OBJECT_PROPOSAL = 1;
 static const int GOVERNANCE_OBJECT_TRIGGER = 2;
 static const int GOVERNANCE_OBJECT_WATCHDOG = 3;
 
-static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (20*COIN);
+static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (5.0*COIN);
 
-static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 10;
+static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 6;
 static const int64_t GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS = 1;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
 static const int64_t GOVERNANCE_DELETION_DELAY = 10*60;
-static const int64_t GOVERNANCE_ORPHAN_EXPIRATION_TIME = 5*60;
+static const int64_t GOVERNANCE_ORPHAN_EXPIRATION_TIME = 10*60;
 static const int64_t GOVERNANCE_WATCHDOG_EXPIRATION_TIME = 2*60*60;
-static const int GOVERNANCE_TRIGGER_EXPIRATION_BLOCKS = 675;
+
+static const int GOVERNANCE_TRIGGER_EXPIRATION_BLOCKS = 576;
 
 // FOR SEEN MAP ARRAYS - GOVERNANCE OBJECTS AND VOTES
 static const int SEEN_OBJECT_IS_VALID = 0;
@@ -116,13 +116,13 @@ class CGovernanceObject
     friend class CGovernanceTriggerManager;
 
 public: // Types
-    typedef std::map<CTxIn, vote_rec_t> vote_m_t;
+    typedef std::map<COutPoint, vote_rec_t> vote_m_t;
 
     typedef vote_m_t::iterator vote_m_it;
 
     typedef vote_m_t::const_iterator vote_m_cit;
 
-    typedef CacheMultiMap<CTxIn, vote_time_pair_t> vote_mcache_t;
+    typedef CacheMultiMap<COutPoint, vote_time_pair_t> vote_mcache_t;
 
 private:
     /// critical section to protect the inner data structures
@@ -254,7 +254,7 @@ public:
 
     // Signature related functions
 
-    void SetDynodeInfo(const CTxIn& vin);
+    void SetDynodeVin(const COutPoint& outpoint);
     bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
     bool CheckSignature(CPubKey& pubKeyDynode);
 
@@ -293,7 +293,7 @@ public:
     int GetNoCount(vote_signal_enum_t eVoteSignalIn) const;
     int GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const;
 
-    bool GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord);
+    bool GetCurrentDNVotes(const COutPoint& dnCollateralOutpoint, vote_rec_t& voteRecord);
 
     // FUNCTIONS FOR DEALING WITH DATA STRING
 
@@ -353,4 +353,4 @@ private:
 };
 
 
-#endif // DYNAMIC_GOVERNANCE_OBJECT_H
+#endif

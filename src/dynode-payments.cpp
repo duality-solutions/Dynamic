@@ -227,7 +227,7 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
 
     if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
         // FILL BLOCK PAYEE WITH DYNODE PAYMENT OTHERWISE
-        dnpayments.FillBlockPayee(txNew);
+        dnpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutDynodeRet);
         LogPrint("dnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutDynodeRet %s txNew %s",
                                 nBlockHeight, blockReward, txoutDynodeRet.ToString(), txNew.ToString());
     }
@@ -270,7 +270,7 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
 *   Fill Dynode ONLY payment block
 */
 
-void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew)
+void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet)
 {
     CBlockIndex* pindexPrev = chainActive.Tip();       
     if(!pindexPrev) return;        
@@ -287,9 +287,10 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew)
     //spork
     if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
         //no Dynode detected
-        CDynode* winningNode = dnodeman.Find(payee);
-        if(winningNode){
-            payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
+        int nCount = 0;
+        dynode_info_t dnInfo;
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
+        payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
         } else {
             if (fDebug)
                 LogPrintf("CreateNewBlock: Failed to detect Dynode to pay\n");
@@ -410,11 +411,11 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
             return;
         }
 
-        dynode_info_t dnInfo = dnodeman.GetDynodeInfo(vote.vinDynode);
-        if(!dnInfo.fInfoValid) {
+        dynode_info_t dnInfo;
+        if(!dnodeman.GetDynodeInfo(vote.vinDynode.prevout, dnInfo)) {
             // dn was not found, so we can't check vote, some info is probably missing
             LogPrintf("DYNODEPAYMENTVOTE -- Dynode is missing %s\n", vote.vinDynode.prevout.ToStringShort());
-            dnodeman.AskForDN(pfrom, vote.vinDynode);
+            dnodeman.AskForDN(pfrom, vote.vinDynode.prevout);
             return;
         }
 
@@ -429,7 +430,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
             }
             // Either our info or vote info could be outdated.
             // In case our info is outdated, ask for an update,
-            dnodeman.AskForDN(pfrom, vote.vinDynode);
+            dnodeman.AskForDN(pfrom, vote.vinDynode.prevout);
             // but there is nothing we can do if vote info itself is outdated
             // (i.e. it was signed by a DN which changed its key),
             // so just quit here.
@@ -691,13 +692,13 @@ void CDynodePayments::CheckAndRemove()
 
 bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::string& strError)
 {
-    CDynode* pdn = dnodeman.Find(vinDynode);
+    dynode_info_t dnInfo;
 
-    if(!pdn) {
+    if(!dnodeman.GetDynodeInfo(vinDynode.prevout, dnInfo)) {
         strError = strprintf("Unknown Dynode: prevout=%s", vinDynode.prevout.ToStringShort());
         // Only ask if we are already synced and still have no idea about that Dynode
         if(dynodeSync.IsDynodeListSynced()) {
-            dnodeman.AskForDN(pnode, vinDynode);
+            dnodeman.AskForDN(pnode, vinDynode.prevout);
         }
 
         return false;
@@ -712,8 +713,8 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         nMinRequiredProtocol = MIN_DYNODE_PAYMENT_PROTO_VERSION;
     }
 
-    if(pdn->nProtocolVersion < nMinRequiredProtocol) {
-        strError = strprintf("Dynode protocol is too old: nProtocolVersion=%d, nMinRequiredProtocol=%d", pdn->nProtocolVersion, nMinRequiredProtocol);
+    if(dnInfo.nProtocolVersion < nMinRequiredProtocol) {
+        strError = strprintf("Dynode protocol is too old: nProtocolVersion=%d, nMinRequiredProtocol=%d", dnInfo.nProtocolVersion, nMinRequiredProtocol);
         return false;
     }
 
@@ -721,7 +722,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
     // Regular clients (miners included) need to verify Dynode rank for future block votes only.
     if(!fDyNode && nBlockHeight < nValidationHeight) return true;
 
-    int nRank = dnodeman.GetDynodeRank(vinDynode, nBlockHeight - 101, nMinRequiredProtocol, false);
+    int nRank = dnodeman.GetDynodeRank(vinDynode.prevout, nBlockHeight - 101, nMinRequiredProtocol, false);
 
     if(nRank > DNPAYMENTS_SIGNATURES_TOTAL) {
         // It's common to have Dynodes mistakenly think they are in the top 10
@@ -751,7 +752,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight)
     // if we have not enough data about Dynodes.
     if(!dynodeSync.IsDynodeListSynced()) return false;
 
-    int nRank = dnodeman.GetDynodeRank(activeDynode.vin, nBlockHeight - 101, GetMinDynodePaymentsProto(), false);
+    int nRank = dnodeman.GetDynodeRank(activeDynode.outpoint, nBlockHeight - 101, GetMinDynodePaymentsProto(), false);
 
     if (nRank == -1) {
         LogPrint("dnpayments", "CDynodePayments::ProcessBlock -- Unknown Dynode\n");
@@ -766,23 +767,22 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight)
 
     // LOCATE THE NEXT DYNODE WHICH SHOULD BE PAID
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Start: nBlockHeight=%d, Dynode=%s\n", nBlockHeight, activeDynode.vin.prevout.ToStringShort());
+    LogPrintf("CDynodePayments::ProcessBlock -- Start: nBlockHeight=%d, dynode=%s\n", nBlockHeight, activeDynode.outpoint.ToStringShort());
 
     // pay to the oldest DN that still had no payment but its input is old enough and it was active long enough
     int nCount = 0;
-    CDynode *pdn = dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount);
+    dynode_info_t dnInfo;
 
-    if (pdn == NULL) {
+    if (!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
         LogPrintf("CDynodePayments::ProcessBlock -- ERROR: Failed to find Dynode to pay\n");
         return false;
     }
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", pdn->vin.prevout.ToStringShort());
+    LogPrintf("CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", dnInfo.vin.prevout.ToStringShort());
 
+    CScript payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
 
-    CScript payee = GetScriptForDestination(pdn->pubKeyCollateralAddress.GetID());
-
-    CDynodePaymentVote voteNew(activeDynode.vin, nBlockHeight, payee);
+    CDynodePaymentVote voteNew(activeDynode.outpoint, nBlockHeight, payee);
 
     CTxDestination address1;
     ExtractDestination(payee, address1);

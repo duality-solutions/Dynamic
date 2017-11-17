@@ -105,14 +105,14 @@ bool CActiveDynode::SendDynodePing()
         return false;
     }
 
-    if(!dnodeman.Has(vin)) {
+    if(!dnodeman.Has(outpoint)) {
         strNotCapableReason = "Dynode not in Dynode list";
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         LogPrintf("CActiveDynode::SendDynodePing -- %s: %s\n", GetStateString(), strNotCapableReason);
         return false;
     }
 
-    CDynodePing dnp(vin);
+    CDynodePing dnp(outpoint);
     dnp.nSentinelVersion = nSentinelVersion;
     dnp.fSentinelIsCurrent =
             (abs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
@@ -122,14 +122,14 @@ bool CActiveDynode::SendDynodePing()
     }
 
     // Update lastPing for our Dynode in Dynode list
-    if(dnodeman.IsDynodePingedWithin(vin, DYNODE_MIN_DNP_SECONDS, dnp.sigTime)) {
+    if(dnodeman.IsDynodePingedWithin(outpoint, DYNODE_MIN_DNP_SECONDS, dnp.sigTime)) {
         LogPrintf("CActiveDynode::SendDynodePing -- Too early to send Dynode Ping\n");
         return false;
     }
 
-    dnodeman.SetDynodeLastPing(vin, dnp);
+    dnodeman.SetDynodeLastPing(outpoint, dnp);
 
-    LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", vin.ToString());
+    LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", outpoint.ToStringShort());
     dnp.Relay();
 
     return true;
@@ -247,7 +247,7 @@ void CActiveDynode::ManageStateInitial()
     CKey keyCollateral;
 
     // If collateral is found switch to LOCAL mode
-    if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
+    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
         eType = DYNODE_LOCAL;
     }
 
@@ -260,8 +260,8 @@ void CActiveDynode::ManageStateRemote()
              GetStatus(), fPingerEnabled, GetTypeString(), pubKeyDynode.GetID().ToString());
 
     dnodeman.CheckDynode(pubKeyDynode, true);
-    dynode_info_t infoDn = dnodeman.GetDynodeInfo(pubKeyDynode);
-    if(infoDn.fInfoValid) {
+    dynode_info_t infoDn;
+    if(dnodeman.GetDynodeInfo(pubKeyDynode, infoDn)) {
         if(infoDn.nProtocolVersion != PROTOCOL_VERSION) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
             strNotCapableReason = "Invalid protocol version";
@@ -282,7 +282,7 @@ void CActiveDynode::ManageStateRemote()
         }
         if(nState != ACTIVE_DYNODE_STARTED) {
             LogPrintf("CActiveDynode::ManageStateRemote -- STARTED!\n");
-            vin = infoDn.vin;
+            outpoint = infoDn.vin.prevout;
             service = infoDn.addr;
             fPingerEnabled = true;
             nState = ACTIVE_DYNODE_STARTED;
@@ -306,8 +306,8 @@ void CActiveDynode::ManageStateLocal()
     CPubKey pubKeyCollateral;
     CKey keyCollateral;
 
-    if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
-        int nPrevoutAge = GetUTXOConfirmations(vin.prevout);
+    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
+        int nPrevoutAge = GetUTXOConfirmations(outpoint);
         if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
             nState = ACTIVE_DYNODE_INPUT_TOO_NEW;
             strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nPrevoutAge);
@@ -317,12 +317,12 @@ void CActiveDynode::ManageStateLocal()
 
         {
             LOCK(pwalletMain->cs_wallet);
-            pwalletMain->LockCoin(vin.prevout);
+            pwalletMain->LockCoin(outpoint);
         }
 
         CDynodeBroadcast dnb;
         std::string strError;
-        if(!CDynodeBroadcast::Create(vin, service, keyCollateral, pubKeyCollateral, keyDynode, pubKeyDynode, strError, dnb)) {
+        if(!CDynodeBroadcast::Create(outpoint, service, keyCollateral, pubKeyCollateral, keyDynode, pubKeyDynode, strError, dnb)) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
             strNotCapableReason = "Error creating Dynode broadcast: " + strError;
             LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
@@ -338,7 +338,7 @@ void CActiveDynode::ManageStateLocal()
         dnodeman.NotifyDynodeUpdates();
 
         //send to all peers
-        LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, vin=%s\n", vin.ToString());
+        LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, collateral=%s\n", outpoint.ToStringShort());
         dnb.Relay();
     }
 }

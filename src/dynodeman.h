@@ -42,7 +42,7 @@ private:
     int nCachedBlockHeight;
 
     // map to hold all DNs
-    std::vector<CDynode> vDynodes;
+    std::map<COutPoint, CDynode> mapDynodes;
     // who's asked for the Dynode list and the last time
     std::map<CNetAddr, int64_t> mAskedUsForDynodeList;
     // who we asked for the Dynode list and the last time
@@ -68,6 +68,9 @@ private:
     int64_t nLastWatchdogVoteTime;
 
     friend class CDynodeSync;
+    /// Find an entry
+    CDynode* Find(const COutPoint& outpoint);
+
 
 public:
     // Keep track of all broadcasts I've seen
@@ -94,7 +97,7 @@ public:
             READWRITE(strVersion);
         }
 
-        READWRITE(vDynodes);
+        READWRITE(mapDynodes);
         READWRITE(mAskedUsForDynodeList);
         READWRITE(mWeAskedForDynodeList);
         READWRITE(mWeAskedForDynodeListEntry);
@@ -116,8 +119,12 @@ public:
     bool Add(CDynode &dn);
 
     /// Ask (source) node for dnb
-    void AskForDN(CNode *pnode, const CTxIn &vin);
+    void AskForDN(CNode *pnode, const COutPoint& outpoint);
     void AskForDnb(CNode *pnode, const uint256 &hash);
+
+    bool PoSeBan(const COutPoint &outpoint);
+    bool AllowMixing(const COutPoint &outpoint);
+    bool DisallowMixing(const COutPoint &outpoint);
 
     /// Check all Dynodes
     void Check();
@@ -140,32 +147,26 @@ public:
 
     void PsegUpdate(CNode* pnode);
 
-    /// Find an entry
-    CDynode* Find(const CScript &payee);
-    CDynode* Find(const CTxIn& vin);
-    CDynode* Find(const CPubKey& pubKeyDynode);
-
     /// Versions of Find that are safe to use from outside the class
-    bool Get(const CPubKey& pubKeyDynode, CDynode& dynode);
-    bool Get(const CTxIn& vin, CDynode& dynode);
-    bool Has(const CTxIn& vin);
+    bool Get(const COutPoint& outpoint, CDynode& dynodeRet);
+    bool Has(const COutPoint& outpoint);
 
-    dynode_info_t GetDynodeInfo(const CTxIn& vin);
+    bool GetDynodeInfo(const COutPoint& outpoint, dynode_info_t& dnInfoRet);
 
-    dynode_info_t GetDynodeInfo(const CPubKey& pubKeyDynode);
+    bool GetDynodeInfo(const CPubKey& pubKeyDynode, dynode_info_t& dnInfoRet);
 
     /// Find an entry in the Dynode list that is next to be paid
-    CDynode* GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount);
+    bool GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet);
     /// Same as above but use current block height
-    CDynode* GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCount);
+    bool GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet);
 
     /// Find a random entry
-    dynode_info_t FindRandomNotInVec(const std::vector<CTxIn> &vecToExclude, int nProtocolVersion = -1);
+    dynode_info_t FindRandomNotInVec(const std::vector<COutPoint> &vecToExclude, int nProtocolVersion = -1);
 
-    std::vector<CDynode> GetFullDynodeVector() { return vDynodes; }
+    std::map<COutPoint, CDynode> GetFullDynodeMap() { return mapDynodes; }
 
     std::vector<std::pair<int, CDynode> > GetDynodeRanks(int nBlockHeight = -1, int nMinProtocol=0);
-    int GetDynodeRank(const CTxIn &vin, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
+    int GetDynodeRank(const COutPoint &outpoint, int nBlockHeight, int nMinProtocol=0, bool fOnlyActive=true);
     bool GetDynodeByRank(int nRank, int nBlockHeight, int nMinProtocol, bool fOnlyActive, dynode_info_t& dnInfoRet);
 
     void ProcessDynodeConnections();
@@ -181,7 +182,7 @@ public:
     void ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification& dnv);
 
     /// Return the number of (unique) Dynodes
-    int size() { return vDynodes.size(); }
+    int size() { return mapDynodes.size(); }
 
     std::string ToString() const;
 
@@ -209,18 +210,14 @@ public:
     }
 
     bool IsWatchdogActive();
-    void UpdateWatchdogVoteTime(const CTxIn& vin);
-    void AddGovernanceVote(const CTxIn& vin, uint256 nGovernanceObjectHash);
+    void UpdateWatchdogVoteTime(const COutPoint& outpoint);
+    bool AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash);
     void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
 
-    void CheckDynode(const CTxIn& vin, bool fForce = false);
-    void CheckDynode(const CPubKey& pubKeyDynode, bool fForce = false);
+    void CheckDynode(const CPubKey& pubKeyDynode, bool fForce);
 
-    int GetDynodeState(const CTxIn& vin);
-    int GetDynodeState(const CPubKey& pubKeyDynode);
-
-    bool IsDynodePingedWithin(const CTxIn& vin, int nSeconds, int64_t nTimeToCheckAt = -1);
-    void SetDynodeLastPing(const CTxIn& vin, const CDynodePing& dnp);
+    bool IsDynodePingedWithin(const COutPoint& outpoint, int nSeconds, int64_t nTimeToCheckAt = -1);
+    void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& mnp);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
 

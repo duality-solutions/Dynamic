@@ -53,7 +53,7 @@ public:
     CKey keyDynode;
 
     // Initialized while registering Dynode
-    CTxIn vin;
+    COutPoint outpoint;
     CService service;
 
     int nState; // should be one of ACTIVE_DYNODE_XXXX
@@ -64,7 +64,7 @@ public:
           fPingerEnabled(false),
           pubKeyDynode(),
           keyDynode(),
-          vin(),
+          outpoint(),
           service(),
           nState(ACTIVE_DYNODE_INITIAL)
     {}

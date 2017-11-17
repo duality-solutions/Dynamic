@@ -120,8 +120,8 @@ public:
         vchSig()
         {}
 
-    CDynodePaymentVote(CTxIn vinDynode, int nBlockHeight, CScript payee) :
-        vinDynode(vinDynode),
+    CDynodePaymentVote(COutPoint outpointDynode, int nBlockHeight, CScript payee) :
+        vinDynode(outpointDynode),
         nBlockHeight(nBlockHeight),
         payee(payee),
         vchSig()
@@ -207,7 +207,7 @@ public:
     int GetMinDynodePaymentsProto();
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew);
+    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutMasternodeRet);
     std::string ToString() const;
 
     int GetBlockCount() { return mapDynodeBlocks.size(); }

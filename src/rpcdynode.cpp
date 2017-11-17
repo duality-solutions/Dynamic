@@ -173,7 +173,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
             return dnodeman.CountEnabled();
 
         int nCount;
-        dnodeman.GetNextDynodeInQueueForPayment(true, nCount);
+        dynode_info_t dnInfo;
+        dnodeman.GetNextDynodeInQueueForPayment(true, nCount, dnInfo);
 
         if (strMode == "qualify")
             return nCount;
@@ -188,7 +189,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
     {
         int nCount;
         int nHeight;
-        CDynode* winner = NULL;
+        dynode_info_t dnInfo;
         CBlockIndex* pindex = NULL;
         {
             LOCK(cs_main);
@@ -196,20 +197,19 @@ UniValue dynode(const UniValue& params, bool fHelp)
         }
         nHeight = pindex->nHeight + (strCommand == "current" ? 1 : 10);
         dnodeman.UpdateLastPaid(pindex);
-        winner = dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount);
-        if(!winner) return "unknown";
+
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount, dnInfo))
+            return "unknown";
 
         UniValue obj(UniValue::VOBJ);
 
         obj.push_back(Pair("height",        nHeight));
-        obj.push_back(Pair("IP:port",       winner->addr.ToString()));
-        obj.push_back(Pair("protocol",      (int64_t)winner->nProtocolVersion));
-        obj.push_back(Pair("vin",           winner->vin.prevout.ToStringShort()));
-        obj.push_back(Pair("payee",         CDynamicAddress(winner->pubKeyCollateralAddress.GetID()).ToString()));
-        obj.push_back(Pair("lastseen",      (winner->lastPing == CDynodePing()) ? winner->sigTime :
-                                                    winner->lastPing.sigTime));
-        obj.push_back(Pair("activeseconds", (winner->lastPing == CDynodePing()) ? 0 :
-                                                    (winner->lastPing.sigTime - winner->sigTime)));
+        obj.push_back(Pair("IP:port",       dnInfo.addr.ToString()));
+        obj.push_back(Pair("protocol",      (int64_t)dnInfo.nProtocolVersion));
+        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("payee",         CDynamicAddress(dnInfo.pubKeyCollateralAddress.GetID()).ToString()));
+        obj.push_back(Pair("lastseen",      dnInfo.nTimeLastPing));
+        obj.push_back(Pair("activeseconds", dnInfo.nTimeLastPing - dnInfo.sigTime));
         return obj;
     }
 
@@ -218,11 +218,11 @@ UniValue dynode(const UniValue& params, bool fHelp)
         if(activeDynode.nState != ACTIVE_DYNODE_INITIAL || !dynodeSync.IsBlockchainSynced())
             return activeDynode.GetStatus();
 
-        CTxIn vin;
+        COutPoint outpoint;
         CPubKey pubkey;
         CKey key;
 
-        if(!pwalletMain || !pwalletMain->GetDynodeVinAndKeys(vin, pubkey, key))
+        if(!pwalletMain || !pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubkey, key))
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Missing Dynode input, please look at the documentation for instructions on Dynode creation");
 
         return activeDynode.GetStatus();
@@ -311,12 +311,13 @@ UniValue dynode(const UniValue& params, bool fHelp)
         BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
             std::string strError;
 
-            CTxIn vin = CTxIn(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
-            CDynode *pdn = dnodeman.Find(vin);
+            COutPoint outpoint = COutPoint(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
+            CDynode dn;
+            bool fFound = dnodeman.Get(outpoint, dn);
             CDynodeBroadcast dnb;
 
-            if(strCommand == "start-missing" && pdn) continue;
-            if(strCommand == "start-disabled" && pdn && pdn->IsEnabled()) continue;
+            if(strCommand == "start-missing" && fFound) continue;
+            if(strCommand == "start-disabled" && fFound && dn.IsEnabled()) continue;
 
             bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
@@ -357,10 +358,11 @@ UniValue dynode(const UniValue& params, bool fHelp)
         UniValue resultObj(UniValue::VOBJ);
 
         BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
-            CTxIn vin = CTxIn(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
-            CDynode *pdn = dnodeman.Find(vin);
+            COutPoint outpoint = COutPoint(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
+            CDynode dn;
+            bool fFound = dnodeman.Get(outpoint, dn);
 
-            std::string strStatus = pdn ? pdn->GetStatus() : "MISSING";
+            std::string strStatus = fFound ? dn.GetStatus() : "MISSING";
 
             UniValue dnObj(UniValue::VOBJ);
             dnObj.push_back(Pair("alias", dne.getAlias()));
@@ -396,11 +398,11 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         UniValue dnObj(UniValue::VOBJ);
 
-        dnObj.push_back(Pair("vin", activeDynode.vin.ToString()));
+        dnObj.push_back(Pair("vin", activeDynode.outpoint.ToStringShort()));
         dnObj.push_back(Pair("service", activeDynode.service.ToString()));
 
         CDynode dn;
-        if(dnodeman.Get(activeDynode.vin, dn)) {
+        if(dnodeman.Get(activeDynode.outpoint, dn)) {
             dnObj.push_back(Pair("payee", CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
         }
 
@@ -507,9 +509,10 @@ UniValue dynodelist(const UniValue& params, bool fHelp)
             obj.push_back(Pair(strOutpoint, s.first));
         }
     } else {
-        std::vector<CDynode> vDynodes = dnodeman.GetFullDynodeVector();
-        BOOST_FOREACH(CDynode& dn, vDynodes) {
-            std::string strOutpoint = dn.vin.prevout.ToStringShort();
+        std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
+        for (auto& dnpair : mapDynodes) {
+            CDynode dn = dnpair.second;
+            std::string strOutpoint = dnpair.first.ToStringShort();
             if (strMode == "activeseconds") {
                 if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, (int64_t)(dn.lastPing.sigTime - dn.sigTime)));

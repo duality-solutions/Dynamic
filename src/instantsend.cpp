@@ -193,10 +193,10 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
 
         int nLockInputHeight = nPrevoutHeight + 4;
 
-        int n = dnodeman.GetDynodeRank(activeDynode.vin, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
+        int n = dnodeman.GetDynodeRank(activeDynode.outpoint, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
         if(n == -1) {
-            LogPrint("instantsend", "CInstantSend::Vote -- Unknown Dynode %s\n", activeDynode.vin.prevout.ToStringShort());
+            LogPrint("instantsend", "CInstantSend::Vote -- Can't calculate rank for Dynode %s\n", activeDynode.outpoint.ToStringShort());
             ++itOutpointLock;
             continue;
         }
@@ -218,7 +218,7 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
         if(itVoted != mapVotedOutpoints.end()) {
             BOOST_FOREACH(const uint256& hash, itVoted->second) {
                 std::map<uint256, CTxLockCandidate>::iterator it2 = mapTxLockCandidates.find(hash);
-                if(it2->second.HasDynodeVoted(itOutpointLock->first, activeDynode.vin.prevout)) {
+                if(it2->second.HasDynodeVoted(itOutpointLock->first, activeDynode.outpoint)) {
                     // we already voted for this outpoint to be included either in the same tx or in a competing one,
                     // skip it anyway
                     fAlreadyVoted = true;
@@ -234,7 +234,7 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
         }
 
         // we haven't voted for this outpoint yet, let's try to do this now
-        CTxLockVote vote(txHash, itOutpointLock->first, activeDynode.vin.prevout);
+        CTxLockVote vote(txHash, itOutpointLock->first, activeDynode.outpoint);
 
         if(!vote.Sign()) {
             LogPrintf("CInstantSend::Vote -- Failed to sign consensus vote\n");
@@ -347,7 +347,7 @@ bool CInstantSend::ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote)
         BOOST_FOREACH(const uint256& hash, it1->second) {
             if(hash != txHash) {
                 // same outpoint was already voted to be locked by another tx lock request,
-                // find out if the same mn voted on this outpoint before
+                // find out if the same DN voted on this outpoint before
                 std::map<uint256, CTxLockCandidate>::iterator it2 = mapTxLockCandidates.find(hash);
                 if(it2->second.HasDynodeVoted(vote.GetOutpoint(), vote.GetDynodeOutpoint())) {
                     // yes, it did, refuse to accept a vote to include the same outpoint in another tx
@@ -986,9 +986,9 @@ bool CTxLockRequest::IsTimedOut() const
 
 bool CTxLockVote::IsValid(CNode* pnode) const
 {
-    if(!dnodeman.Has(CTxIn(outpointDynode))) {
+    if(!dnodeman.Has(outpointDynode)) {
         LogPrint("instantsend", "CTxLockVote::IsValid -- Unknown dynode %s\n", outpointDynode.ToStringShort());
-        dnodeman.AskForDN(pnode, CTxIn(outpointDynode));
+        dnodeman.AskForDN(pnode, outpointDynode);
         return false;
     }
 
@@ -1015,7 +1015,7 @@ bool CTxLockVote::IsValid(CNode* pnode) const
 
     int nLockInputHeight = nPrevoutHeight + 4;
 
-    int n = dnodeman.GetDynodeRank(CTxIn(outpointDynode), nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
+    int n = dnodeman.GetDynodeRank(outpointDynode, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
     if(n == -1) {
         //can be caused by past versions trying to vote with an invalid protocol
@@ -1053,14 +1053,14 @@ bool CTxLockVote::CheckSignature() const
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    dynode_info_t infoSn = dnodeman.GetDynodeInfo(CTxIn(outpointDynode));
+    dynode_info_t infoDn;
 
-    if(!infoSn.fInfoValid) {
+    if(!dnodeman.GetDynodeInfo(outpointDynode, infoDn)) {
         LogPrintf("CTxLockVote::CheckSignature -- Unknown Dynode: dynode=%s\n", outpointDynode.ToString());
         return false;
     }
 
-    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

@@ -48,12 +48,12 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
         if(psq.IsExpired()) return;
 
-        dynode_info_t infoDn = dnodeman.GetDynodeInfo(psq.vin);
-        if(!infoDn.fInfoValid) return;
+        dynode_info_t infoDn;
+        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) return;
 
         if(!psq.CheckSignature(infoDn.pubKeyDynode)) {
             // we probably have outdated info
-            dnodeman.AskForDN(pfrom, psq.vin);
+            dnodeman.AskForDN(pfrom, psq.vin.prevout);
             return;
         }
 
@@ -85,9 +85,8 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                 LogPrint("privatesend", "DSQUEUE -- Dynode %s is sending too many psq messages\n", infoDn.addr.ToString());
                 return;
             }
-            dnodeman.nPsqCount++;
 
-            if(!dnodeman.UpdateLastPsq(psq.vin)) return;
+            if(!dnodeman.AllowMixing(psq.vin.prevout)) return;
 
             LogPrint("privatesend", "DSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
             if(infoMixingDynode.fInfoValid && infoMixingDynode.vin.prevout == psq.vin.prevout) {
@@ -826,9 +825,9 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
 
         if(psq.IsExpired()) continue;
 
-        dynode_info_t infoDn = dnodeman.GetDynodeInfo(psq.vin);
+        dynode_info_t infoDn;
 
-        if(!infoDn.fInfoValid) {
+        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- psq dynode is not in dynode list, dynode=%s\n", psq.vin.prevout.ToStringShort());
             continue;
         }
@@ -857,7 +856,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized)
             continue;
         }
 
-        vecDynodesUsed.push_back(psq.vin);
+        vecDynodesUsed.push_back(psq.vin.prevout);
 
         CNode* pnodeFound = NULL;
         bool fDisconnect = false;
@@ -923,7 +922,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
             strAutoDenomResult = _("Can't find random Dynode.");
             return false;
         }
-        vecDynodesUsed.push_back(infoDn.vin);
+        vecDynodesUsed.push_back(infoDn.vin.prevout);
 
         if(infoDn.nLastPsq != 0 && infoDn.nLastPsq + nDnCountEnabled/5 > dnodeman.nPsqCount) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- Too early to mix on this dynode!"

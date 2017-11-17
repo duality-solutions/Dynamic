@@ -36,7 +36,7 @@ private:
     mutable CCriticalSection cs_privatesend;
 
     // Keep track of the used Dynodes
-    std::vector<CTxIn> vecDynodesUsed;
+    std::vector<COutPoint> vecDynodesUsed;
 
     std::vector<CAmount> vecDenominationsSkipped;
     std::vector<COutPoint> vecOutPointLocked;

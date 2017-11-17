@@ -166,9 +166,9 @@ public:
         fTried(false)
         {}
 
-    CPrivatesendQueue(int nDenom, CTxIn vin, int64_t nTime, bool fReady) :
+    CPrivatesendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
         nDenom(nDenom),
-        vin(vin),
+        vin(CTxIn(outpoint)),
         nTime(nTime),
         fReady(fReady),
         vchSig(std::vector<unsigned char>()),
@@ -237,10 +237,10 @@ public:
         sigTime(0)
         {}
 
-    CPrivatesendBroadcastTx(CTransaction tx, CTxIn vin, int64_t sigTime) :
+    CPrivatesendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
         nConfirmedHeight(-1),
         tx(tx),
-        vin(vin),
+        vin(CTxIn(outpoint)),
         vchSig(),
         sigTime(sigTime)
         {}

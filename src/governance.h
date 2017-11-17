@@ -1,12 +1,11 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef GOVERNANCE_H
 #define GOVERNANCE_H
 
-//#define ENABLE_DYNAMIC_DEBUG
+//#define ENABLE_DASH_DEBUG
 
 #include "bloom.h"
 #include "cachemap.h"
@@ -70,7 +69,7 @@ public:
     int64_t GetMinTimestamp()
     {
         int nIndex = nDataStart;
-        int64_t nMin = std::numeric_limits<int64_t>::max();
+        int64_t nMin = numeric_limits<int64_t>::max();
         if(fBufferEmpty) {
             return nMin;
         }
@@ -310,7 +309,7 @@ public:
     CGovernanceObject *FindGovernanceObject(const uint256& nHash);
 
     std::vector<CGovernanceVote> GetMatchingVotes(const uint256& nParentHash);
-    std::vector<CGovernanceVote> GetCurrentVotes(const uint256& nParentHash, const CTxIn& dnCollateralOutpointFilter);
+    std::vector<CGovernanceVote> GetCurrentVotes(const uint256& nParentHash, const COutPoint& dnCollateralOutpointFilter);
     std::vector<CGovernanceObject*> GetAllNewerThan(int64_t nMoreThanTime);
 
     bool IsBudgetPaymentBlock(int nBlockHeight);

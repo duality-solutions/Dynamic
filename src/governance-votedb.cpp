@@ -1,5 +1,4 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -54,11 +53,12 @@ std::vector<CGovernanceVote> CGovernanceObjectVoteFile::GetVotes() const
     return vecResult;
 }
 
-void CGovernanceObjectVoteFile::RemoveVotesFromDynode(const CTxIn& vinDynode)
+void CGovernanceObjectVoteFile::RemoveVotesFromDynode(const COutPoint& outpointDynode)
 {
     vote_l_it it = listVotes.begin();
     while(it != listVotes.end()) {
-        if(it->GetVinDynode() == vinDynode) {
+        if(it->GetDynodeOutpoint() == outpointDynode) {
+            --nMemoryVotes;
             mapVoteIndex.erase(it->GetHash());
             listVotes.erase(it++);
         }
@@ -79,8 +79,18 @@ CGovernanceObjectVoteFile& CGovernanceObjectVoteFile::operator=(const CGovernanc
 void CGovernanceObjectVoteFile::RebuildIndex()
 {
     mapVoteIndex.clear();
-    for(vote_l_it it = listVotes.begin(); it != listVotes.end(); ++it) {
+    nMemoryVotes = 0;
+    vote_l_it it = listVotes.begin();
+    while(it != listVotes.end()) {
         CGovernanceVote& vote = *it;
-        mapVoteIndex[vote.GetHash()] = it;
+        uint256 nHash = vote.GetHash();
+        if(mapVoteIndex.find(nHash) == mapVoteIndex.end()) {
+            mapVoteIndex[nHash] = it;
+            ++nMemoryVotes;
+            ++it;
+        }
+        else {
+            listVotes.erase(it++);
+        }
     }
 }

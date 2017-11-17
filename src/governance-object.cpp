@@ -1,14 +1,12 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#include "governance-object.h"
 
 #include "core_io.h"
 #include "dynodeman.h"
 #include "governance.h"
 #include "governance-classes.h"
+#include "governance-object.h"
 #include "governance-vote.h"
 #include "instantsend.h"
 #include "messagesigner.h"
@@ -101,39 +99,39 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
                                     const CGovernanceVote& vote,
                                     CGovernanceException& exception)
 {
-    if(!dnodeman.Has(vote.GetVinDynode())) {
+    if(!dnodeman.Has(vote.GetDynodeOutpoint())) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Dynode index not found\n";
+        ostr << "CGovernanceObject::ProcessVote -- Dynode index not found";
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
-        if(mapOrphanVotes.Insert(vote.GetVinDynode(), vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
+        if(mapOrphanVotes.Insert(vote.GetDynodeOutpoint(), vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
             if(pfrom) {
-                dnodeman.AskForDN(pfrom, vote.GetVinDynode());
+                dnodeman.AskForDN(pfrom, vote.GetDynodeOutpoint());
             }
-            LogPrintf(ostr.str().c_str());
+            LogPrintf("%s\n", ostr.str());
         }
         else {
-            LogPrint("gobject", ostr.str().c_str());
+            LogPrint("gobject", "%s\n", ostr.str());
         }
         return false;
     }
 
-    vote_m_it it = mapCurrentDNVotes.find(vote.GetVinDynode());
+    vote_m_it it = mapCurrentDNVotes.find(vote.GetDynodeOutpoint());
     if(it == mapCurrentDNVotes.end()) {
-        it = mapCurrentDNVotes.insert(vote_m_t::value_type(vote.GetVinDynode(), vote_rec_t())).first;
+        it = mapCurrentDNVotes.insert(vote_m_t::value_type(vote.GetDynodeOutpoint(), vote_rec_t())).first;
     }
     vote_rec_t& recVote = it->second;
     vote_signal_enum_t eSignal = vote.GetSignal();
     if(eSignal == VOTE_SIGNAL_NONE) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Vote signal: none" << "\n";
-        LogPrint("gobject", ostr.str().c_str());
+        ostr << "CGovernanceObject::ProcessVote -- Vote signal: none";
+        LogPrint("gobject", "%s\n", ostr.str());
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
         return false;
     }
     if(eSignal > MAX_SUPPORTED_VOTE_SIGNAL) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Unsupported vote signal:" << CGovernanceVoting::ConvertSignalToString(vote.GetSignal()) << "\n";
-        LogPrintf(ostr.str().c_str());
+        ostr << "CGovernanceObject::ProcessVote -- Unsupported vote signal: " << CGovernanceVoting::ConvertSignalToString(vote.GetSignal());
+        LogPrintf("%s\n", ostr.str());
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
         return false;
     }
@@ -146,8 +144,8 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     // Reject obsolete votes
     if(vote.GetTimestamp() < voteInstance.nCreationTime) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Obsolete vote" << "\n";
-        LogPrint("gobject", ostr.str().c_str());
+        ostr << "CGovernanceObject::ProcessVote -- Obsolete vote";
+        LogPrint("gobject", "%s\n", ostr.str());
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_NONE);
         return false;
     }
@@ -158,11 +156,11 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         int64_t nTimeDelta = nNow - voteInstance.nTime;
         if(nTimeDelta < GOVERNANCE_UPDATE_MIN) {
             std::ostringstream ostr;
-            ostr << "CGovernanceObject::ProcessVote -- Dynode voting too often "
-                 << ", DN outpoint = " << vote.GetVinDynode().prevout.ToStringShort()
+            ostr << "CGovernanceObject::ProcessVote -- Dynode voting too often"
+                 << ", DN outpoint = " << vote.GetDynodeOutpoint().ToStringShort()
                  << ", governance object hash = " << GetHash().ToString()
-                 << ", time delta = " << nTimeDelta << "\n";
-            LogPrint("gobject", ostr.str().c_str());
+                 << ", time delta = " << nTimeDelta;
+            LogPrint("gobject", "%s\n", ostr.str());
             exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_TEMPORARY_ERROR);
             nVoteTimeUpdate = nNow;
             return false;
@@ -171,18 +169,28 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     // Finally check that the vote is actually valid (done last because of cost of signature verification)
     if(!vote.IsValid(true)) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Invalid vote "
-                << ", DN outpoint = " << vote.GetVinDynode().prevout.ToStringShort()
+        ostr << "CGovernanceObject::ProcessVote -- Invalid vote"
+                << ", DN outpoint = " << vote.GetDynodeOutpoint().ToStringShort()
                 << ", governance object hash = " << GetHash().ToString()
-                << ", vote hash = " << vote.GetHash().ToString() << "\n";
-        LogPrintf(ostr.str().c_str());
+                << ", vote hash = " << vote.GetHash().ToString();
+        LogPrintf("%s\n", ostr.str());
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
         governance.AddInvalidVote(vote);
         return false;
     }
+    if(!dnodeman.AddGovernanceVote(vote.GetDynodeOutpoint(), vote.GetParentHash())) {
+        std::ostringstream ostr;
+        ostr << "CGovernanceObject::ProcessVote -- Unable to add governance vote"
+             << ", DN outpoint = " << vote.GetDynodeOutpoint().ToStringShort()
+             << ", governance object hash = " << GetHash().ToString();
+        LogPrint("gobject", "%s\n", ostr.str());
+        exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_PERMANENT_ERROR);
+        return false;
+    }
     voteInstance = vote_instance_t(vote.GetOutcome(), nVoteTimeUpdate, vote.GetTimestamp());
-    fileVotes.AddVote(vote);
-    dnodeman.AddGovernanceVote(vote.GetVinDynode(), vote.GetParentHash());
+    if(!fileVotes.HasVote(vote.GetHash())) {
+        fileVotes.AddVote(vote);
+    }
     fDirtyCache = true;
     return true;
 }
@@ -214,9 +222,9 @@ std::string CGovernanceObject::GetSignatureMessage() const
     return strMessage;
 }
 
-void CGovernanceObject::SetDynodeInfo(const CTxIn& vin)
+void CGovernanceObject::SetDynodeVin(const COutPoint& outpoint)
 {
-    vinDynode = vin;
+    vinDynode = CTxIn(outpoint);
 }
 
 bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
@@ -260,6 +268,9 @@ bool CGovernanceObject::CheckSignature(CPubKey& pubKeyDynode)
 
 int CGovernanceObject::GetObjectSubtype()
 {
+    // todo - 12.1
+    //   - detect subtype from strData json, obj["subtype"]
+
     if(nObjectType == GOVERNANCE_OBJECT_TRIGGER) return TRIGGER_SUPERBLOCK;
     return -1;
 }
@@ -273,6 +284,8 @@ uint256 CGovernanceObject::GetHash() const
     ss << nRevision;
     ss << nTime;
     ss << strData;
+    ss << vinDynode;
+    ss << vchSig;
     // fee_tx is left out on purpose
     uint256 h1 = ss.GetHash();
 
@@ -313,6 +326,9 @@ UniValue CGovernanceObject::GetJSONObject()
 
 void CGovernanceObject::LoadData()
 {
+    // todo : 12.1 - resolved
+    //return;
+
     if(strData.empty()) {
         return;
     }
@@ -329,13 +345,13 @@ void CGovernanceObject::LoadData()
         UniValue obj = GetJSONObject();
         nObjectType = obj["type"].get_int();
     }
-    catch(const std::exception& e) {
+    catch(std::exception& e) {
         fUnparsable = true;
         std::ostringstream ostr;
         ostr << "CGovernanceObject::LoadData Error parsing JSON"
              << ", e.what() = " << e.what();
         DBG( cout << ostr.str() << endl; );
-        LogPrintf( ostr.str().c_str() );
+        LogPrintf("%s\n", ostr.str());
         return;
     }
     catch(...) {
@@ -343,7 +359,7 @@ void CGovernanceObject::LoadData()
         std::ostringstream ostr;
         ostr << "CGovernanceObject::LoadData Unknown Error parsing JSON";
         DBG( cout << ostr.str() << endl; );
-        LogPrintf( ostr.str().c_str() );
+        LogPrintf("%s\n", ostr.str());
         return;
     }
 }
@@ -426,17 +442,19 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
     if(fCheckCollateral) { 
         if((nObjectType == GOVERNANCE_OBJECT_TRIGGER) || (nObjectType == GOVERNANCE_OBJECT_WATCHDOG)) {
             std::string strOutpoint = vinDynode.prevout.ToStringShort();
-            dynode_info_t infoDn = dnodeman.GetDynodeInfo(vinDynode);
-            if(!infoDn.fInfoValid) {
-                 CDynode::CollateralStatus err = CDynode::CheckCollateral(GetDynodeVin());
+            dynode_info_t infoDn;
+            if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
+
+                CDynode::CollateralStatus err = CDynode::CheckCollateral(vinDynode.prevout);
                 if (err == CDynode::COLLATERAL_OK) {
                     fMissingDynode = true;
                     strError = "Dynode not found: " + strOutpoint;
                 } else if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
-                    strError = "Failed to find Dynode UTXO, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                    strError = "Failed to find Dynode UTXO, missing dynode=" + strOutpoint + "\n";
                 } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
-                    strError = "Dynode UTXO should have 1000 DYN, missing dynode=" + GetDynodeVin().prevout.ToStringShort() + "\n";
+                    strError = "Dynode UTXO should have 1000 DASH, missing dynode=" + strOutpoint + "\n";
                 }
+
                 return false;
             }
 
@@ -445,12 +463,26 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
                 strError = "Invalid dynode signature for: " + strOutpoint + ", pubkey id = " + infoDn.pubKeyDynode.GetID().ToString();
                 return false;
             }
+
             return true;
         }
 
         if (!IsCollateralValid(strError, fMissingConfirmations))
             return false;
     }
+
+    /*
+        TODO
+
+        - There might be an issue with multisig in the coinbase on mainnet, we will add support for it in a future release.
+        - Post 12.2+ (test multisig coinbase transaction)
+    */
+
+    // 12.1 - todo - compile error
+    // if(address.IsPayToScriptHash()) {
+    //     strError = "Governance system - multisig is not currently supported";
+    //     return false;
+    // }
 
     return true;
 }
@@ -552,6 +584,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
             strError += ", rejected -- try again later";
         }
         LogPrintf ("CGovernanceObject::IsCollateralValid -- %s\n", strError);
+
         return false;
     }
 
@@ -605,7 +638,7 @@ int CGovernanceObject::GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const
     return CountMatchingVotes(eVoteSignalIn, VOTE_OUTCOME_ABSTAIN);
 }
 
-bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord)
+bool CGovernanceObject::GetCurrentDNVotes(const COutPoint& dnCollateralOutpoint, vote_rec_t& voteRecord)
 {
     vote_m_it it = mapCurrentDNVotes.find(dnCollateralOutpoint);
     if (it == mapCurrentDNVotes.end()) {
@@ -630,14 +663,16 @@ void CGovernanceObject::UpdateSentinelVariables()
 
     // CALCULATE THE MINUMUM VOTE COUNT REQUIRED FOR FULL SIGNAL
 
+    // todo - 12.1 - should be set to `10` after governance vote compression is implemented
     int nAbsVoteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, nDnCount / 10);
     int nAbsDeleteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, (2 * nDnCount) / 3);
+    // todo - 12.1 - Temporarily set to 1 for testing - reverted
+    //nAbsVoteReq = 1;
 
     // SET SENTINEL FLAGS TO FALSE
 
     fCachedFunding = false;
     fCachedValid = true; //default to valid
-
     fCachedEndorsed = false;
     fDirtyCache = false;
 
@@ -687,13 +722,13 @@ void CGovernanceObject::CheckOrphanVotes()
     vote_mcache_t::list_cit it = listVotes.begin();
     while(it != listVotes.end()) {
         bool fRemove = false;
-        const CTxIn& key = it->key;
+        const COutPoint& key = it->key;
         const vote_time_pair_t& pairVote = it->value;
         const CGovernanceVote& vote = pairVote.first;
         if(pairVote.second < nNow) {
             fRemove = true;
         }
-        else if(!dnodeman.Has(vote.GetVinDynode())) {
+        else if(!dnodeman.Has(vote.GetDynodeOutpoint())) {
             ++it;
             continue;
         }
