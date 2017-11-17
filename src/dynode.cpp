@@ -787,8 +787,10 @@ bool CDynodePing::SimpleCheck(int& nDos)
         dnodeman.mapSeenDynodeBroadcast[hash].second.lastPing = *this;
     }
 
-    pdn->Check(true); // force update, ignoring cache
-    if (!pdn->IsEnabled()) return false;
+    // force update, ignoring cache
+    pdn->Check(true);
+    // relay ping for nodes in ENABLED/EXPIRED/WATCHDOG_EXPIRED state only, skip everyone else
+    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsWatchdogExpired()) return false;
 
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping acceepted and relayed, Dynode=%s\n", vin.prevout.ToStringShort());
     Relay(connman);
