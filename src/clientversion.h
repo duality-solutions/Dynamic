@@ -23,7 +23,7 @@
 #define CLIENT_VERSION_BUILD 0
 
 //! Set to true for release, false for prerelease or test build
-#define CLIENT_VERSION_IS_RELEASE true
+#define CLIENT_VERSION_IS_RELEASE false
 
 #define COPYRIGHT_YEAR 2017
 
@@ -37,7 +37,7 @@
 #define DO_STRINGIZE(X) #X
 
 //! Copyright string used in Windows .rc files
-#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2015-" STRINGIZE(COPYRIGHT_YEAR) " Duality Blockchain Solutions, 2016-"
+#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " Duality Blockchain Solutions, 2016-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2015-"
 
 /**
  * dynamicd-res.rc includes this file, but it cannot cope with real c++ code.

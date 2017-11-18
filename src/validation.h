@@ -147,7 +147,7 @@ static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
 static const CAmount PHASE_1_POW_REWARD = COIN * 1;
 static const CAmount PHASE_1_DYNODE_PAYMENT = COIN * 0.382;
 static const CAmount PHASE_2_DYNODE_PAYMENT = COIN * 1.618;
-static const CAmount INITIAL_SUPERBLOCK_PAYMENT = 10000000 * COIN;
+static const CAmount INITIAL_SUPERBLOCK_PAYMENT = 11500000 * COIN;
 
 struct BlockHasher
 {
