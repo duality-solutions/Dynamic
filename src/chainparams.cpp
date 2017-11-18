@@ -157,7 +157,7 @@ public:
         pchMessageStart[1] = 0x42;
         pchMessageStart[2] = 0x55;
         pchMessageStart[3] = 0x61;
-        vAlertPubKey = ParseHex("04ef8953c900b317001e01ae8e97793bd48a0316cc7fd99c19e1a5634e51d8c77ba98c267de3deb997d91595795148789979fe64c610a8de03d355f474bfb20a2f");
+        vAlertPubKey = ParseHex("046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646");
         nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -203,7 +203,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "04ef8953c900b317001e01ae8e97793bd48a0316cc7fd99c19e1a5634e51d8c77ba98c267de3deb997d91595795148789979fe64c610a8de03d355f474bfb20a2f";
+        strSporkPubKey = "046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
