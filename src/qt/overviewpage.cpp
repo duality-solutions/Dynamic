@@ -39,8 +39,8 @@ class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(const PlatformStyle *_platformStyle):
-        QAbstractItemDelegate(), unit(DynamicUnits::DYN),
+    TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
+        QAbstractItemDelegate(parent), unit(DynamicUnits::DYN),
         platformStyle(_platformStyle)
     {
 
@@ -134,8 +134,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     currentWatchOnlyBalance(-1),
     currentWatchUnconfBalance(-1),
     currentWatchImmatureBalance(-1),
-    txdelegate(new TxViewDelegate(platformStyle)),
-    filter(0)
+    txdelegate(new TxViewDelegate(platformStyle, this))
 {
     ui->setupUi(this);
     QString theme = GUIUtil::getThemeName();
@@ -353,21 +352,9 @@ void OverviewPage::updatePrivateSendProgress()
         return;
     }
 
-    CAmount nDenominatedConfirmedBalance;
-    CAmount nDenominatedUnconfirmedBalance;
-    CAmount nAnonymizableBalance;
-    CAmount nNormalizedAnonymizedBalance;
-    float nAverageAnonymizedRounds;
+    CAmount nAnonymizableBalance = pwalletMain->GetAnonymizableBalance(false, false);
 
-    {
-        nDenominatedConfirmedBalance = pwalletMain->GetDenominatedBalance();
-        nDenominatedUnconfirmedBalance = pwalletMain->GetDenominatedBalance(true);
-        nAnonymizableBalance = pwalletMain->GetAnonymizableBalance();
-        nNormalizedAnonymizedBalance = pwalletMain->GetNormalizedAnonymizedBalance();
-        nAverageAnonymizedRounds = pwalletMain->GetAverageAnonymizedRounds();
-    }
-
-    CAmount nMaxToAnonymize = nAnonymizableBalance + currentAnonymizedBalance + nDenominatedUnconfirmedBalance;
+    CAmount nMaxToAnonymize = nAnonymizableBalance + currentAnonymizedBalance;
 
     // If it's more than the anon threshold, limit to that.
     if(nMaxToAnonymize > privateSendClient.nPrivateSendAmount*COIN) nMaxToAnonymize = privateSendClient.nPrivateSendAmount*COIN;
@@ -391,6 +378,18 @@ void OverviewPage::updatePrivateSendProgress()
                 " / " + tr("%n Rounds", "", privateSendClient.nPrivateSendRounds) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
+
+    if (!fShowAdvancedPSUI) return;
+
+    CAmount nDenominatedConfirmedBalance;
+    CAmount nDenominatedUnconfirmedBalance;
+    CAmount nNormalizedAnonymizedBalance;
+    float nAverageAnonymizedRounds;
+
+    nDenominatedConfirmedBalance = pwalletMain->GetDenominatedBalance();
+    nDenominatedUnconfirmedBalance = pwalletMain->GetDenominatedBalance(true);
+    nNormalizedAnonymizedBalance = pwalletMain->GetNormalizedAnonymizedBalance();
+    nAverageAnonymizedRounds = pwalletMain->GetAverageAnonymizedRounds();
 
     // calculate parts of the progress, each of them shouldn't be higher than 1
     // progress of denominating
@@ -576,7 +575,7 @@ void OverviewPage::privateSendStatus()
 }
 
 void OverviewPage::privateSendAuto(){
-    privateSendClient.DoAutomaticDenominating();
+    privateSendClient.DoAutomaticDenominating(*g_connman);
 }
 
 void OverviewPage::privateSendReset(){
@@ -656,7 +655,7 @@ void OverviewPage::SetupTransactionList(int nNumItems) {
 
     if(walletModel && walletModel->getOptionsModel()) {
         // Set up transaction list
-        filter = new TransactionFilterProxy();
+        filter.reset(new TransactionFilterProxy());
         filter->setSourceModel(walletModel->getTransactionTableModel());
         filter->setLimit(nNumItems);
         filter->setDynamicSortFilter(true);
@@ -664,7 +663,7 @@ void OverviewPage::SetupTransactionList(int nNumItems) {
         filter->setShowInactive(false);
         filter->sort(TransactionTableModel::Date, Qt::DescendingOrder);
 
-        ui->listTransactions->setModel(filter);
+        ui->listTransactions->setModel(filter.get());
         ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
     }
 }

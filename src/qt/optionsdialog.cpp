@@ -16,7 +16,7 @@
 #include "guiutil.h"
 #include "optionsmodel.h"
 
-#include "main.h" // for DEFAULT_SCRIPTCHECK_THREADS and MAX_SCRIPTCHECK_THREADS
+#include "validation.h" // for DEFAULT_SCRIPTCHECK_THREADS and MAX_SCRIPTCHECK_THREADS
 #include "netbase.h"
 #include "privatesend-client.h"
 #include "txdb.h" // for -dbcache defaults
@@ -219,6 +219,7 @@ void OptionsDialog::setMapper()
 
     /* Window */
 #ifndef Q_OS_MAC
+	mapper->addMapping(ui->hideTrayIcon, OptionsModel::HideTrayIcon);
     mapper->addMapping(ui->minimizeToTray, OptionsModel::MinimizeToTray);
     mapper->addMapping(ui->minimizeOnClose, OptionsModel::MinimizeOnClose);
 #endif
@@ -267,6 +268,19 @@ void OptionsDialog::on_okButton_clicked()
 void OptionsDialog::on_cancelButton_clicked()
 {
     reject();
+}
+
+void OptionsDialog::on_hideTrayIcon_stateChanged(int fState)
+{
+    if(fState)
+    {
+        ui->minimizeToTray->setChecked(false);
+        ui->minimizeToTray->setEnabled(false);
+    }
+    else
+    {
+        ui->minimizeToTray->setEnabled(true);
+    }
 }
 
 void OptionsDialog::showRestartWarning(bool fPersistent)

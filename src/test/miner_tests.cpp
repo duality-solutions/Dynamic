@@ -7,7 +7,7 @@
 #include "consensus/consensus.h"
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
-#include "main.h"
+#include "validation.h"
 #include "dynode-payments.h"
 #include "miner.h"
 #include "pubkey.h"
@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     LOCK(cs_main);
     fCheckpointsEnabled = false;
 
-    // force UpdatedBlockTip to initialize pCurrentBlockIndex
-    dnpayments.UpdatedBlockTip(chainActive.Tip());
+    // force UpdatedBlockTip to initialize nCachedBlockHeight
+    dnpayments.UpdatedBlockTip(chainActive.Tip(), *connman);
 
     // Simple block creation, nothing special yet:
     BOOST_CHECK(pblocktemplate = CreateNewBlock(chainparams, scriptPubKey));
@@ -119,9 +119,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             txFirst.push_back(new CTransaction(pblock->vtx[0]));
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
         pblock->nNonce = blockinfo[i].nonce;
-        CValidationState state;
-        BOOST_CHECK(ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL));
-        BOOST_CHECK(state.IsValid());
+        BOOST_CHECK(ProcessNewBlock(chainparams, pblock, true, NULL, NULL));
         pblock->hashPrevBlock = pblock->GetHash();
     }
 

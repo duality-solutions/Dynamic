@@ -41,7 +41,7 @@ private:
     bool fPingerEnabled;
 
     /// Ping Dynode
-    bool SendDynodePing();
+    bool SendDynodePing(CConnman& connman);
 
     //  sentinel ping data
     int64_t nSentinelPingTime;
@@ -53,7 +53,7 @@ public:
     CKey keyDynode;
 
     // Initialized while registering Dynode
-    CTxIn vin;
+    COutPoint outpoint;
     CService service;
 
     int nState; // should be one of ACTIVE_DYNODE_XXXX
@@ -64,13 +64,13 @@ public:
           fPingerEnabled(false),
           pubKeyDynode(),
           keyDynode(),
-          vin(),
+          outpoint(),
           service(),
           nState(ACTIVE_DYNODE_INITIAL)
     {}
 
     /// Manage state of active Dynode
-    void ManageState();
+    void ManageState(CConnman& connman);
 
     std::string GetStateString() const;
     std::string GetStatus() const;
@@ -79,9 +79,9 @@ public:
     bool UpdateSentinelPing(int version);
 
 private:
-    void ManageStateInitial();
+    void ManageStateInitial(CConnman& connman);
     void ManageStateRemote();
-    void ManageStateLocal();
+    void ManageStateLocal(CConnman& connman);
 };
 
 #endif // DYNAMIC_ACTIVEDYNODE_H

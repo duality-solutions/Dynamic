@@ -11,7 +11,7 @@
 
 #include "core_io.h"
 #include "init.h"
-#include "main.h"
+#include "validation.h"
 #include "utilstrencodings.h"
 
 #include <univalue.h>
@@ -537,7 +537,7 @@ CAmount CSuperblock::GetPaymentsLimit(int nBlockHeight)
     // min subsidy for high diff networks and vice versa
     //int nBits = consensusParams.fPowAllowMinDifficultyBlocks ? UintToArith256(consensusParams.powLimit).GetCompact() : 1;
     // some part of all blocks issued during the cycle goes to superblock, see GetBlockSubsidy
-    //CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBits, nBlockHeight, consensusParams, true);
+    //CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBits, nBlockHeight - 1, consensusParams, true);
     CAmount nPaymentsLimit = STATIC_SUPERBLOCK_AMOUNT;
     LogPrint("gobject", "CSuperblock::GetPaymentsLimit -- Valid superblock height %d, payments max %lld\n", nBlockHeight, nPaymentsLimit);
 

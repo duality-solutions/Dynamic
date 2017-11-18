@@ -14,8 +14,8 @@
 class CDynodeSync;
 
 static const int DYNODE_SYNC_FAILED          = -1;
-static const int DYNODE_SYNC_INITIAL         = 0;
-static const int DYNODE_SYNC_SPORKS          = 1;
+static const int DYNODE_SYNC_INITIAL         = 0; // sync just started, was reset recently or still in IDB
+static const int DYNODE_SYNC_WAITING         = 1; // waiting after initial to see if we can get more headers/blocks
 static const int DYNODE_SYNC_LIST            = 2;
 static const int DYNODE_SYNC_DNW             = 3;
 static const int DYNODE_SYNC_GOVERNANCE      = 4;
@@ -45,47 +45,42 @@ private:
     // Time when current Dynode asset sync started
     int64_t nTimeAssetSyncStarted;
 
-    // Last time when we received some Dynode asset ...
-    int64_t nTimeLastDynodeList;
-    int64_t nTimeLastPaymentVote;
-    int64_t nTimeLastGovernanceItem;
+    // ... last bumped
+    int64_t nTimeLastBumped;
+
     // ... or failed
     int64_t nTimeLastFailure;
 
-    // Keep track of current block index
-    const CBlockIndex *pCurrentBlockIndex;
-
-    bool CheckNodeHeight(CNode* pnode, bool fDisconnectStuckNodes = false);
     void Fail();
-    void ClearFulfilledRequests();
+    void ClearFulfilledRequests(CConnman& connman);
 
 public:
     CDynodeSync() { Reset(); }
 
-    void AddedDynodeList() { nTimeLastDynodeList = GetTime(); }
-    void AddedPaymentVote() { nTimeLastPaymentVote = GetTime(); }
-    void AddedGovernanceItem() { nTimeLastGovernanceItem = GetTime(); };
-
-    void SendGovernanceSyncRequest(CNode* pnode);
+    void SendGovernanceSyncRequest(CNode* pnode, CConnman& connman);
 
     bool IsFailed() { return nRequestedDynodeAssets == DYNODE_SYNC_FAILED; }
-    bool IsBlockchainSynced(bool fBlockAccepted = false);
+    bool IsBlockchainSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_WAITING; }
     bool IsDynodeListSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_LIST; }
     bool IsWinnersListSynced() { return nRequestedDynodeAssets > DYNODE_SYNC_DNW; }
     bool IsSynced() { return nRequestedDynodeAssets == DYNODE_SYNC_FINISHED; }
 
     int GetAssetID() { return nRequestedDynodeAssets; }
     int GetAttempt() { return nRequestedDynodeAttempt; }
+
+    void BumpAssetLastTime(std::string strFuncName);
     std::string GetAssetName();
     std::string GetSyncStatus();
 
     void Reset();
-    void SwitchToNextAsset();
+    void SwitchToNextAsset(CConnman& connman);
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
-    void ProcessTick();
+    void ProcessTick(CConnman& connman);
 
-    void UpdatedBlockTip(const CBlockIndex *pindex);
+    void AcceptedBlockHeader(const CBlockIndex *pindexNew);
+    void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman& connman);
+    void UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman& connman);
 };
 
 #endif // DYNAMIC_DYNODE_SYNC_H

@@ -1,17 +1,19 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
+
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#ifndef DYNAMIC_GOVERNANCE_VOTE_H
-#define DYNAMIC_GOVERNANCE_VOTE_H
+#ifndef GOVERNANCE_VOTE_H
+#define GOVERNANCE_VOTE_H
 
 #include "key.h"
 #include "primitives/transaction.h"
 
 #include <boost/lexical_cast.hpp>
 
+using namespace std;
+
 class CGovernanceVote;
+class CConnman;
 
 // INTENTION OF DYNODES REGARDING ITEM
 enum vote_outcome_enum_t  {
@@ -80,7 +82,7 @@ public:
 };
 
 //
-// CGovernanceVote - Allow a Dynode node to vote and broadcast throughout the network
+// CGovernanceVote - Allow a Dynode to vote and broadcast throughout the network
 //
 
 class CGovernanceVote
@@ -101,7 +103,7 @@ private:
 
 public:
     CGovernanceVote();
-    CGovernanceVote(CTxIn vinDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
+    CGovernanceVote(COutPoint outpointDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn);
 
     bool IsValid() const { return fValid; }
 
@@ -121,15 +123,13 @@ public:
 
     bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
     bool IsValid(bool fSignatureCheck) const;
-    void Relay() const;
+    void Relay(CConnman& connman) const;
 
     std::string GetVoteString() const {
         return CGovernanceVoting::ConvertOutcomeToString(GetOutcome());
     }
 
-    CTxIn& GetVinDynode() { return vinDynode; }
-
-    const CTxIn& GetVinDynode() const { return vinDynode; }
+    const COutPoint& GetDynodeOutpoint() const { return vinDynode.prevout; }
 
     /**
     *   GetHash()
@@ -219,4 +219,4 @@ public:
 
 */
 
-#endif // DYNAMIC_GOVERNANCE_VOTE_H
+#endif

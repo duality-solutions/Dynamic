@@ -567,7 +567,7 @@ static void WriteConfigFile(FILE* configFile)
     std::string rpcPort = streamRPCPort.str();
     // Gets Default Protocol Port
     std::stringstream streamPort;
-    streamPort << "port=" << BaseParams(CBaseChainParams::MAIN).Port()  << "\n";
+    streamPort << "port=" << DEFAULT_P2P_PORT  << "\n";
     std::string port = streamPort.str();
 
     fputs ("#Do not use special characters with username/password\n", configFile);
@@ -1030,6 +1030,6 @@ std::string SafeIntVersionToString(uint32_t nVersion)
     }
     catch(const std::bad_cast&)
     {
-        return "Invalid version";
+        return "invalid_version";
     }
 }

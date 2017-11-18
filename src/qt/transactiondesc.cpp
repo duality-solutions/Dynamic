@@ -15,7 +15,7 @@
 #include "base58.h"
 #include "consensus/consensus.h"
 #include "instantsend.h"
-#include "main.h"
+#include "validation.h"
 #include "script/script.h"
 #include "timedata.h"
 #include "util.h"
@@ -45,6 +45,8 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
 
         if (fOffline) {
             strTxStatus = tr("%1/offline").arg(nDepth);
+        } else if (nDepth == 0) {
+            strTxStatus = tr("0/unconfirmed, %1").arg((wtx.InMempool() ? tr("in memory pool") : tr("not in memory pool"))) + (wtx.isAbandoned() ? ", "+tr("abandoned") : "");;
         } else if (nDepth < 10) {
             strTxStatus = tr("%1/unconfirmed").arg(nDepth);
         } else {
@@ -55,12 +57,11 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
 
         int nSignatures = instantsend.GetTransactionLockSignatures(wtx.GetHash());
         int nSignaturesMax = CTxLockRequest(wtx).GetMaxSignatures();
-
         // InstantSend
         strTxStatus += " (";
         if(instantsend.IsLockedInstantSendTransaction(wtx.GetHash())) {
             strTxStatus += tr("verified via InstantSend");
-        } else if(!instantsend.IsTxLockRequestTimedOut(wtx.GetHash())) {
+        } else if(!instantsend.IsTxLockCandidateTimedOut(wtx.GetHash())) {
             strTxStatus += tr("InstantSend verification in progress - %1 of %2 signatures").arg(nSignatures).arg(nSignaturesMax);
         } else {
             strTxStatus += tr("InstantSend verification failed");
@@ -70,7 +71,6 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
         return strTxStatus;
     }
 }
-
 QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionRecord *rec, int unit)
 {
     QString strHTML;
@@ -265,6 +265,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
         strHTML += "<br><b>" + tr("Comment") + ":</b><br>" + GUIUtil::HtmlEscape(wtx.mapValue["comment"], true) + "<br>";
 
     strHTML += "<b>" + tr("Transaction ID") + ":</b> " + TransactionRecord::formatSubTxId(wtx.GetHash(), rec->idx) + "<br>";
+	strHTML += "<b>" + tr("Transaction total size") + ":</b> " + QString::number(wtx.GetTotalSize()) + " bytes<br>";
 
     // Message from normal dynamic:URI (dynamic:XyZ...?message=example)
     Q_FOREACH (const PAIRTYPE(std::string, std::string)& r, wtx.vOrderForm)

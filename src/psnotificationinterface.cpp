@@ -12,22 +12,37 @@
 #include "instantsend.h"
 #include "privatesend-client.h"
 
-CPSNotificationInterface::CPSNotificationInterface()
+void CPSNotificationInterface::InitializeCurrentBlockTip()
 {
+    LOCK(cs_main);
+    UpdatedBlockTip(chainActive.Tip(), NULL, IsInitialBlockDownload());
 }
 
-CPSNotificationInterface::~CPSNotificationInterface()
+void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 {
+    dynodeSync.AcceptedBlockHeader(pindexNew);
+}
+
+void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
+{
+    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload, connman);
 }
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
+    if (pindexNew == pindexFork) // blocks were disconnected without any new ones
+        return;
+
+    dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
+
+    if (fInitialDownload)
+        return;
+
     dnodeman.UpdatedBlockTip(pindexNew);
     privateSendClient.UpdatedBlockTip(pindexNew);
     instantsend.UpdatedBlockTip(pindexNew);
-    dnpayments.UpdatedBlockTip(pindexNew);
-    governance.UpdatedBlockTip(pindexNew);
-    dynodeSync.UpdatedBlockTip(pindexNew);
+    dnpayments.UpdatedBlockTip(pindexNew, connman);
+    governance.UpdatedBlockTip(pindexNew, connman);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)

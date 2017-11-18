@@ -21,6 +21,7 @@
 #include "rpcconsole.h"
 #include "utilitydialog.h"
 #include "multisigdialog.h"
+#include "modaloverlay.h"
 #ifdef ENABLE_WALLET
 #include "walletframe.h"
 #include "walletmodel.h"
@@ -644,6 +645,7 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
         setNumConnections(_clientModel->getNumConnections());
         connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
 
+        modalOverlay->setKnownBestHeight(clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(clientModel->getHeaderTipTime()));
         setNumBlocks(_clientModel->getNumBlocks(), _clientModel->getLastBlockDate(), _clientModel->getVerificationProgress(NULL), false);
         connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(setNumBlocks(int,QDateTime,double,bool)));
 
@@ -663,8 +665,17 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
         }
 #endif // ENABLE_WALLET
         unitDisplayControl->setOptionsModel(_clientModel->getOptionsModel());
+        
+        OptionsModel* optionsModel = clientModel->getOptionsModel();
+        if(optionsModel)
+        {
+            // be aware of the tray icon disable state change reported by the OptionsModel object.
+            connect(optionsModel,SIGNAL(hideTrayIconChanged(bool)),this,SLOT(setTrayIconVisible(bool)));
+        
+            // initialize the disable state of the tray icon with the current value in the model.
+            setTrayIconVisible(optionsModel->getHideTrayIcon());
+        }
     } else {
-        modalOverlay->setKnownBestHeight(clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(clientModel->getHeaderTipTime()));
         // Disable possibility to show main window via action
         toggleHideAction->setEnabled(false);
         if(trayIconMenu)
@@ -679,6 +690,12 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
             dockIconMenu->clear();
         }
 #endif
+        // Propagate cleared model to child objects
+        rpcConsole->setClientModel(nullptr);
+#ifdef ENABLE_WALLET
+        walletFrame->setClientModel(nullptr);
+#endif // ENABLE_WALLET
+        unitDisplayControl->setOptionsModel(nullptr);
     }
 }
 
@@ -734,7 +751,7 @@ void DynamicGUI::createTrayIcon(const NetworkStyle *networkStyle)
     QString toolTip = tr("Dynamic client") + " " + networkStyle->getTitleAddText();
     trayIcon->setToolTip(toolTip);
     trayIcon->setIcon(networkStyle->getTrayAndWindowIcon());
-    trayIcon->show();
+    trayIcon->hide();
     notificator = new Notificator(QApplication::applicationName(), trayIcon, this);
 }
 
@@ -1013,7 +1030,7 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     if(!dynodeSync.IsBlockchainSynced())
     {
         // Represent time from last generated block in human readable text
-        QString timeBehindText;
+        QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
         const int HOUR_IN_SECONDS = 60*60;
         const int DAY_IN_SECONDS = 24*60*60;
         const int WEEK_IN_SECONDS = 7*24*60*60;
@@ -1078,6 +1095,10 @@ void DynamicGUI::setAdditionalDataSyncProgress(double nSyncProgress)
     if(!clientModel)
         return;
 
+    // No additional data sync should be happening while blockchain is not synced, nothing to update
+    if(!dynodeSync.IsBlockchainSynced())
+        return;
+
     // Prevent orphan statusbar messages (e.g. hover Quit in main menu, wait until chain-sync starts -> garbelled text)
     statusBar()->clearMessage();
 
@@ -1086,39 +1107,36 @@ void DynamicGUI::setAdditionalDataSyncProgress(double nSyncProgress)
     // Set icon state: spinning if catching up, tick otherwise
     QString theme = GUIUtil::getThemeName();
 
-    if(dynodeSync.IsBlockchainSynced())
-    {
-        QString strSyncStatus;
-        tooltip = tr("Up to date") + QString(".<br>") + tooltip;
+    QString strSyncStatus;
+    tooltip = tr("Up to date") + QString(".<br>") + tooltip;
 
-        if(dynodeSync.IsSynced()) {
-            progressBarLabel->setVisible(false);
-            progressBar->setVisible(false);
-            labelBlocksIcon->setPixmap(QIcon(":/icons/" + theme + "/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-        } else {
+    if(dynodeSync.IsSynced()) {
+        progressBarLabel->setVisible(false);
+        progressBar->setVisible(false);
+        labelBlocksIcon->setPixmap(QIcon(":/icons/" + theme + "/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+    } else {
 
-            labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(QString(
-                ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
-                .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-            spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
+        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(QString(
+            ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
+            .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
 
 #ifdef ENABLE_WALLET
-            if(walletFrame)
+        if(walletFrame)
         {
             walletFrame->showOutOfSyncWarning(false);
             modalOverlay->showHide(true, true);
         }
 #endif // ENABLE_WALLET
 
-            progressBar->setFormat(tr("Synchronizing additional data: %p%"));
-            progressBar->setMaximum(1000000000);
-            progressBar->setValue(nSyncProgress * 1000000000.0 + 0.5);
-        }
-
-        strSyncStatus = QString(dynodeSync.GetSyncStatus().c_str());
-        progressBarLabel->setText(strSyncStatus);
-        tooltip = strSyncStatus + QString("<br>") + tooltip;
+        progressBar->setFormat(tr("Synchronizing additional data: %p%"));
+        progressBar->setMaximum(1000000000);
+        progressBar->setValue(nSyncProgress * 1000000000.0 + 0.5);
     }
+
+    strSyncStatus = QString(dynodeSync.GetSyncStatus().c_str());
+    progressBarLabel->setText(strSyncStatus);
+    tooltip = strSyncStatus + QString("<br>") + tooltip;
 
     // Don't word-wrap this (fixed-width) tooltip
     tooltip = QString("<nobr>") + tooltip + QString("</nobr>");
@@ -1417,6 +1435,14 @@ void DynamicGUI::showProgress(const QString &title, int nProgress)
         progressDialog->setValue(nProgress);
 }
 
+void DynamicGUI::setTrayIconVisible(bool fHideTrayIcon)
+{
+    if (trayIcon)
+    {
+        trayIcon->setVisible(!fHideTrayIcon);
+    }
+}
+
 void DynamicGUI::showModalOverlay()
 {
     if (modalOverlay)
@@ -1444,12 +1470,14 @@ void DynamicGUI::subscribeToCoreSignals()
 {
     // Connect signals to client
     uiInterface.ThreadSafeMessageBox.connect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+	uiInterface.ThreadSafeQuestion.connect(boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
 }
 
 void DynamicGUI::unsubscribeFromCoreSignals()
 {
     // Disconnect signals from client
     uiInterface.ThreadSafeMessageBox.disconnect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
+	uiInterface.ThreadSafeQuestion.disconnect(boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
 }
 
 /** Get restart command-line parameters and request restart */
@@ -1486,7 +1514,7 @@ void UnitDisplayStatusBarControl::mousePressEvent(QMouseEvent *event)
 /** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */
 void UnitDisplayStatusBarControl::createContextMenu()
 {
-    menu = new QMenu();
+    menu = new QMenu(this);
     Q_FOREACH(DynamicUnits::Unit u, DynamicUnits::availableUnits())
     {
         QAction *menuAction = new QAction(QString(DynamicUnits::name(u)), this);

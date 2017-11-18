@@ -13,7 +13,7 @@
 #include "walletmodel.h"
 
 #include "init.h"
-#include "main.h" // For minRelayTxFee
+#include "validation.h" // For minRelayTxFee
 #include "protocol.h"
 #include "script/script.h"
 #include "script/standard.h"
@@ -304,17 +304,11 @@ void copyEntryData(QAbstractItemView *view, int column, int role)
     }
 }
 
-QString getEntryData(QAbstractItemView *view, int column, int role)
+QList<QModelIndex> getEntryData(QAbstractItemView *view, int column)
 {
     if(!view || !view->selectionModel())
-        return QString();
-    QModelIndexList selection = view->selectionModel()->selectedRows(column);
-
-    if(!selection.isEmpty()) {
-        // Return first item
-        return (selection.at(0).data(role).toString());
-    }
-    return QString();
+        return QList<QModelIndex>();
+    return view->selectionModel()->selectedRows(column);
 }
 
 QString getSaveFileName(QWidget *parent, const QString &caption, const QString &dir,
@@ -634,7 +628,8 @@ void TableViewLastColumnResizingFixer::on_geometriesChanged()
  * Initializes all internal variables and prepares the
  * the resize modes of the last 2 columns of the table and
  */
-TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* table, int lastColMinimumWidth, int allColsMinimumWidth) :
+TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* table, int lastColMinimumWidth, int allColsMinimumWidth, QObject *parent) :
+    QObject(parent),
     tableView(table),
     lastColumnMinimumWidth(lastColMinimumWidth),
     allColumnsMinimumWidth(allColsMinimumWidth)
@@ -1015,7 +1010,7 @@ QString formatServicesStr(quint64 mask)
 
 QString formatPingTime(double dPingTime)
 {
-    return dPingTime == 0 ? QObject::tr("N/A") : QString(QObject::tr("%1 ms")).arg(QString::number((int)(dPingTime * 1000), 10));
+    return (dPingTime == std::numeric_limits<int64_t>::max()/1e6 || dPingTime == 0) ? QObject::tr("N/A") : QString(QObject::tr("%1 ms")).arg(QString::number((int)(dPingTime * 1000), 10));
 }
 
 QString formatTimeOffset(int64_t nTimeOffset)

@@ -19,7 +19,7 @@
 #include "dbwrapper.h"
 #include "dns/dns.h"
 #include "key.h"
-#include "main.h"
+#include "validation.h"
 #include "policy/policy.h"
 #include "rpcserver.h"
 #include "script/script.h"
@@ -665,7 +665,7 @@ void MultisigDialog::on_copySignedTransactionButton_clicked()
     QApplication::clipboard()->setText(ui->signedTransaction->text());
 }
 
-void MultisigDialog::on_sendTransactionButton_clicked()
+void MultisigDialog::on_sendTransactionButton_clicked(CConnman& connman)
 {
     int64_t transactionSize = ui->signedTransaction->text().size() / 2;
     if(transactionSize == 0)
@@ -715,9 +715,8 @@ uint256 blockHash = uint256S("0");
     //   CTxDB txdb("r");
     if(!cmt.AcceptToMemoryPool(false))
     return;
-    SyncWithWallets(tx, NULL);
-    //(CInv(MSG_TX, txHash), tx);
-    RelayTransaction(tx);
+    // TODO::
+    //connman.RelayTransaction(tx);
 }
 
 MultisigInputEntry * MultisigDialog::addInput()

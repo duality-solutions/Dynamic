@@ -4,7 +4,7 @@
 
 #include "zmqnotificationinterface.h"
 
-#include "main.h"
+#include "validation.h"
 #include "streams.h"
 #include "util.h"
 #include "version.h"

@@ -78,6 +78,11 @@ bool CProposalValidator::ValidateName()
         return false;
     }
 
+    if(strName.size() > 40) {
+        strErrorMessages += "name exceeds 40 characters;";
+        return false;
+    }
+
     std::string strNameStripped = StripWhitespace(strName);
 
     if(strNameStripped.empty()) {
@@ -85,7 +90,7 @@ bool CProposalValidator::ValidateName()
         return false;
     }
 
-    static const std::string strAllowedChars = "-_abcdefghijklmnopqrstuvwxyz012345789";
+    static const std::string strAllowedChars = "-_abcdefghijklmnopqrstuvwxyz0123456789";
 
     std::transform(strName.begin(), strName.end(), strName.begin(), ::tolower);
 
@@ -246,13 +251,6 @@ bool CProposalValidator::GetDataValue(const std::string& strKey, int64_t& nValue
             nValue = uValue.get_int64();
             fOK = true;
             break;
-        case UniValue::VSTR:
-        {
-            std::istringstream istr(uValue.get_str());
-            istr >> nValue;
-            fOK = ! istr.fail();
-        }
-        break;
         default:
             break;
         }
@@ -276,13 +274,6 @@ bool CProposalValidator::GetDataValue(const std::string& strKey, double& dValue)
             dValue = uValue.get_real();
             fOK = true;
             break;
-        case UniValue::VSTR:
-        {
-            std::istringstream istr(uValue.get_str());
-            istr >> dValue;
-            fOK = ! istr.fail();
-        }
-        break;
         default:
             break;
         }

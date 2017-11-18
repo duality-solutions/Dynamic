@@ -29,6 +29,7 @@
 
 #include "dns/dns.h"
 #include "hooks.h"
+#include "random.h"
 #include "util.h"
 
 #include <ctype.h>

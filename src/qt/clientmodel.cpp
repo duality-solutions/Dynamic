@@ -15,6 +15,7 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "clientversion.h"
+#include "validation.h"
 #include "net.h"
 #include "txmempool.h"
 #include "ui_interface.h"
@@ -43,6 +44,8 @@ ClientModel::ClientModel(OptionsModel *_optionsModel, QObject *parent) :
     banTableModel(0),
     pollTimer(0)
 {
+    cachedBestHeaderHeight = -1;
+    cachedBestHeaderTime = -1;
     peerTableModel = new PeerTableModel(this);
     banTableModel = new BanTableModel(this);
     pollTimer = new QTimer(this);
@@ -64,16 +67,18 @@ ClientModel::~ClientModel()
 
 int ClientModel::getNumConnections(unsigned int flags) const
 {
-    LOCK(cs_vNodes);
-    if (flags == CONNECTIONS_ALL) // Shortcut if we want total
-        return vNodes.size();
+    CConnman::NumConnections connections = CConnman::CONNECTIONS_NONE;
 
-    int nNum = 0;
-    BOOST_FOREACH(const CNode* pnode, vNodes)
-        if (flags & (pnode->fInbound ? CONNECTIONS_IN : CONNECTIONS_OUT))
-            nNum++;
+    if(flags == CONNECTIONS_IN)
+        connections = CConnman::CONNECTIONS_IN;
+    else if (flags == CONNECTIONS_OUT)
+        connections = CConnman::CONNECTIONS_OUT;
+    else if (flags == CONNECTIONS_ALL)
+        connections = CConnman::CONNECTIONS_ALL;
 
-    return nNum;
+    if(g_connman)
+         return g_connman->GetNodeCount(connections);
+    return 0;
 }
 
 QString ClientModel::getDynodeCountString() const
@@ -96,28 +101,42 @@ int ClientModel::getNumBlocks() const
 
 int ClientModel::getHeaderTipHeight() const
 {
-    LOCK(cs_main);
-    if (!pindexBestHeader)
-        return 0;
-    return pindexBestHeader->nHeight;
+    if (cachedBestHeaderHeight == -1) {
+        // make sure we initially populate the cache via a cs_main lock
+        // otherwise we need to wait for a tip update
+        LOCK(cs_main);
+        if (pindexBestHeader) {
+            cachedBestHeaderHeight = pindexBestHeader->nHeight;
+            cachedBestHeaderTime = pindexBestHeader->GetBlockTime();
+         }
+    }
+    return cachedBestHeaderHeight;
 }
 
 int64_t ClientModel::getHeaderTipTime() const
 {
-    LOCK(cs_main);
-    if (!pindexBestHeader)
-        return 0;
-    return pindexBestHeader->GetBlockTime();
+    if (cachedBestHeaderTime == -1) {
+        LOCK(cs_main);
+        if (pindexBestHeader) {
+            cachedBestHeaderHeight = pindexBestHeader->nHeight;
+            cachedBestHeaderTime = pindexBestHeader->GetBlockTime();
+        }
+    }
+    return cachedBestHeaderTime;
 }
 
 quint64 ClientModel::getTotalBytesRecv() const
 {
-    return CNode::GetTotalBytesRecv();
+    if(!g_connman)
+        return 0;
+    return g_connman->GetTotalBytesRecv();
 }
 
 quint64 ClientModel::getTotalBytesSent() const
 {
-    return CNode::GetTotalBytesSent();
+    if(!g_connman)
+        return 0;
+    return g_connman->GetTotalBytesSent();
 }
 
 QDateTime ClientModel::getLastBlockDate() const
@@ -240,11 +259,6 @@ QString ClientModel::formatSubVersion() const
     return QString::fromStdString(strSubVersion);
 }
 
-QString ClientModel::formatBuildDate() const
-{
-    return QString::fromStdString(CLIENT_DATE);
-}
-
 bool ClientModel::isReleaseVersion() const
 {
     return CLIENT_VERSION_IS_RELEASE;
@@ -258,6 +272,11 @@ QString ClientModel::clientName() const
 QString ClientModel::formatClientStartupTime() const
 {
     return QDateTime::fromTime_t(nClientStartupTime).toString();
+}
+
+QString ClientModel::dataDir() const
+{
+    return QString::fromStdString(GetDataDir().string());
 }
 
 void ClientModel::updateBanlist()
@@ -305,6 +324,12 @@ static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, const CB
         now = GetTimeMillis();
 
     int64_t& nLastUpdateNotification = fHeader ? nLastHeaderTipUpdateNotification : nLastBlockTipUpdateNotification;
+
+    if (fHeader) {
+        // cache best headers time and height to reduce future cs_main locks
+        clientmodel->cachedBestHeaderHeight = pIndex->nHeight;
+        clientmodel->cachedBestHeaderTime = pIndex->GetBlockTime();
+    }
 
     // if we are in-sync, update the UI regardless of last update time
     if (!initialSync || now - nLastUpdateNotification > MODEL_UPDATE_DELAY) {

@@ -6,77 +6,32 @@
 #include "dynode.h"
 
 #include "activedynode.h"
-#include "governance.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "init.h"
 #include "messagesigner.h"
 #include "util.h"
-#include "consensus/validation.h"
 
 #include <boost/lexical_cast.hpp>
 
 CDynode::CDynode() :
-    vin(),
-    addr(),
-    pubKeyCollateralAddress(),
-    pubKeyDynode(),
-    lastPing(),
-    vchSig(),
-    sigTime(GetAdjustedTime()),
-    nLastPsq(0),
-    nTimeLastChecked(0),
-    nTimeLastPaid(0),
-    nTimeLastWatchdogVote(0),
-    nActiveState(DYNODE_ENABLED),
-    nCacheCollateralBlock(0),
-    nBlockLastPaid(0),
-    nProtocolVersion(PROTOCOL_VERSION),
-    nPoSeBanScore(0),
-    nPoSeBanHeight(0),
-    fAllowMixingTx(true),
-    fUnitTest(false)
+    dynode_info_t{ DYNODE_ENABLED, PROTOCOL_VERSION, GetAdjustedTime()},
+    fAllowMixingTx(true)
 {}
 
-CDynode::CDynode(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn) :
-    vin(vinNew),
-    addr(addrNew),
-    pubKeyCollateralAddress(pubKeyCollateralAddressNew),
-    pubKeyDynode(pubKeyDynodeNew),
-    lastPing(),
-    vchSig(),
-    sigTime(GetAdjustedTime()),
-    nLastPsq(0),
-    nTimeLastChecked(0),
-    nTimeLastPaid(0),
-    nTimeLastWatchdogVote(0),
-    nActiveState(DYNODE_ENABLED),
-    nCacheCollateralBlock(0),
-    nBlockLastPaid(0),
-    nProtocolVersion(nProtocolVersionIn),
-    nPoSeBanScore(0),
-    nPoSeBanHeight(0),
-    fAllowMixingTx(true),
-    fUnitTest(false)
+CDynode::CDynode(CService addr, COutPoint outpoint, CPubKey pubKeyCollateralAddress, CPubKey pubKeyDynode, int nProtocolVersionIn) :
+    dynode_info_t{ DYNODE_ENABLED, nProtocolVersionIn, GetAdjustedTime(),
+                       outpoint, addr, pubKeyCollateralAddress, pubKeyDynode},
+    fAllowMixingTx(true)
 {}
 
 CDynode::CDynode(const CDynode& other) :
-    vin(other.vin),
-    addr(other.addr),
-    pubKeyCollateralAddress(other.pubKeyCollateralAddress),
-    pubKeyDynode(other.pubKeyDynode),
+    dynode_info_t{other},
     lastPing(other.lastPing),
     vchSig(other.vchSig),
-    sigTime(other.sigTime),
-    nLastPsq(other.nLastPsq),
-    nTimeLastChecked(other.nTimeLastChecked),
-    nTimeLastPaid(other.nTimeLastPaid),
-    nTimeLastWatchdogVote(other.nTimeLastWatchdogVote),
-    nActiveState(other.nActiveState),
-    nCacheCollateralBlock(other.nCacheCollateralBlock),
+    nCollateralMinConfBlockHash(other.nCollateralMinConfBlockHash),
     nBlockLastPaid(other.nBlockLastPaid),
-    nProtocolVersion(other.nProtocolVersion),
     nPoSeBanScore(other.nPoSeBanScore),
     nPoSeBanHeight(other.nPoSeBanHeight),
     fAllowMixingTx(other.fAllowMixingTx),
@@ -84,31 +39,18 @@ CDynode::CDynode(const CDynode& other) :
 {}
 
 CDynode::CDynode(const CDynodeBroadcast& dnb) :
-    vin(dnb.vin),
-    addr(dnb.addr),
-    pubKeyCollateralAddress(dnb.pubKeyCollateralAddress),
-    pubKeyDynode(dnb.pubKeyDynode),
+    dynode_info_t{ dnb.nActiveState, dnb.nProtocolVersion, dnb.sigTime,
+                       dnb.vin.prevout, dnb.addr, dnb.pubKeyCollateralAddress, dnb.pubKeyDynode,
+                       dnb.sigTime /*nTimeLastWatchdogVote*/},
     lastPing(dnb.lastPing),
     vchSig(dnb.vchSig),
-    sigTime(dnb.sigTime),
-    nLastPsq(0),
-    nTimeLastChecked(0),
-    nTimeLastPaid(0),
-    nTimeLastWatchdogVote(dnb.sigTime),
-    nActiveState(dnb.nActiveState),
-    nCacheCollateralBlock(0),
-    nBlockLastPaid(0),
-    nProtocolVersion(dnb.nProtocolVersion),
-    nPoSeBanScore(0),
-    nPoSeBanHeight(0),
-    fAllowMixingTx(true),
-    fUnitTest(false)
+    fAllowMixingTx(true)
 {}
 
 //
 // When a new Dynode broadcast is sent, update our information
 //
-bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
+bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman)
 {
     if(dnb.sigTime <= sigTime && !dnb.fRecovery) return false;
 
@@ -121,7 +63,7 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
     nPoSeBanHeight = 0;
     nTimeLastChecked = 0;
     int nDos = 0;
-    if(dnb.lastPing == CDynodePing() || (dnb.lastPing != CDynodePing() && dnb.lastPing.CheckAndUpdate(this, true, nDos))) {
+    if(dnb.lastPing == CDynodePing() || (dnb.lastPing != CDynodePing() && dnb.lastPing.CheckAndUpdate(this, true, nDos, connman))) {
         lastPing = dnb.lastPing;
         dnodeman.mapSeenDynodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
@@ -130,7 +72,7 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
         nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
         if(nProtocolVersion == PROTOCOL_VERSION) {
             // ... and PROTOCOL_VERSION, then we've been remotely activated ...
-            activeDynode.ManageState();
+            activeDynode.ManageState(connman);
         } else {
             // ... otherwise we need to reactivate our node, do not add it to the list and do not relay
             // but also do not ban the node we get this message from
@@ -148,18 +90,33 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb)
 //
 arith_uint256 CDynode::CalculateScore(const uint256& blockHash)
 {
-    uint256 aux = ArithToUint256(UintToArith256(vin.prevout.hash) + vin.prevout.n);
+        // Deterministically calculate a "score" for a Dynode based on any given (block)hash
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << vin.prevout << nCollateralMinConfBlockHash << blockHash;
+        return UintToArith256(ss.GetHash());
+}
 
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << blockHash;
-    arith_uint256 hash2 = UintToArith256(ss.GetHash());
+CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint)
+{
+    int nHeight;
+    return CheckCollateral(outpoint, nHeight);
+}
 
-    CHashWriter ss2(SER_GETHASH, PROTOCOL_VERSION);
-    ss2 << blockHash;
-    ss2 << aux;
-    arith_uint256 hash3 = UintToArith256(ss2.GetHash());
+CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, int& nHeightRet)
+{
+    AssertLockHeld(cs_main);
 
-    return (hash3 > hash2 ? hash3 - hash2 : hash2 - hash3);
+    CCoins coins;
+    if(!GetUTXOCoins(outpoint, coins)) {
+        return COLLATERAL_UTXO_NOT_FOUND;
+    }
+
+    if(coins.vout[outpoint.n].nValue != 1000 * COIN) {
+        return COLLATERAL_INVALID_AMOUNT;
+    }
+
+    nHeightRet = coins.nHeight;
+    return COLLATERAL_OK;
 }
 
 void CDynode::Check(bool fForce)
@@ -171,7 +128,7 @@ void CDynode::Check(bool fForce)
     if(!fForce && (GetTime() - nTimeLastChecked < DYNODE_CHECK_SECONDS)) return;
     nTimeLastChecked = GetTime();
 
-   LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state\n", vin.prevout.ToStringShort(), GetStateString());
+    LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state\n", vin.prevout.ToStringShort(), GetStateString());
 
     //once spent, stop doing the checks
     if(IsOutpointSpent()) return;
@@ -181,10 +138,8 @@ void CDynode::Check(bool fForce)
         TRY_LOCK(cs_main, lockMain);
         if(!lockMain) return;
 
-        CCoins coins;
-        if(!pcoinsTip->GetCoins(vin.prevout.hash, coins) ||
-           (unsigned int)vin.prevout.n>=coins.vout.size() ||
-           coins.vout[vin.prevout.n].IsNull()) {
+        CollateralStatus err = CheckCollateral(vin.prevout);
+        if (err == COLLATERAL_UTXO_NOT_FOUND) {
             nActiveState = DYNODE_OUTPOINT_SPENT;
             LogPrint("Dynode", "CDynode::Check -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
             return;
@@ -247,10 +202,10 @@ void CDynode::Check(bool fForce)
 
         /*
         bool fWatchdogActive = dynodeSync.IsSynced() && dnodeman.IsWatchdogActive();
-        bool fWatchdogExpired = (fWatchdogActive && ((GetTime() - nTimeLastWatchdogVote) > DYNODE_WATCHDOG_MAX_SECONDS));
+        bool fWatchdogExpired = (fWatchdogActive && ((GetAdjustedTime() - nTimeLastWatchdogVote) > DYNODE_WATCHDOG_MAX_SECONDS));
 
-        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetTime()=%d, fWatchdogExpired=%d\n",
-                vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetTime(), fWatchdogExpired);
+        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetAdjustedTime()=%d, fWatchdogExpired=%d\n",
+                vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetAdjustedTime(), fWatchdogExpired);
 
 
         if(fWatchdogExpired) {
@@ -300,19 +255,8 @@ bool CDynode::IsValidNetAddr(CService addrIn)
 
 dynode_info_t CDynode::GetInfo()
 {
-    dynode_info_t info;
-    info.vin = vin;
-    info.addr = addr;
-    info.pubKeyCollateralAddress = pubKeyCollateralAddress;
-    info.pubKeyDynode = pubKeyDynode;
-    info.sigTime = sigTime;
-    info.nLastPsq = nLastPsq;
-    info.nTimeLastChecked = nTimeLastChecked;
-    info.nTimeLastPaid = nTimeLastPaid;
-    info.nTimeLastWatchdogVote = nTimeLastWatchdogVote;
+    dynode_info_t info{*this};
     info.nTimeLastPing = lastPing.sigTime;
-    info.nActiveState = nActiveState;
-    info.nProtocolVersion = nProtocolVersion;
     info.fInfoValid = true;
     return info;
 }
@@ -341,27 +285,6 @@ std::string CDynode::GetStatus() const
 {
     // TODO: return smth a bit more human readable here
     return GetStateString();
-}
-
-int CDynode::GetCollateralAge()
-{
-    int nHeight;
-    {
-        TRY_LOCK(cs_main, lockMain);
-        if(!lockMain || !chainActive.Tip()) return -1;
-        nHeight = chainActive.Height();
-    }
-
-    if (nCacheCollateralBlock == 0) {
-        int nInputAge = GetInputAge(vin);
-        if(nInputAge > 0) {
-            nCacheCollateralBlock = nHeight - nInputAge;
-        } else {
-            return nInputAge;
-        }
-    }
-
-    return nHeight - nCacheCollateralBlock;
 }
 
 void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack)
@@ -405,56 +328,41 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
 
 bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline)
 {
-    CTxIn txin;
+    COutPoint outpoint;
     CPubKey pubKeyCollateralAddressNew;
     CKey keyCollateralAddressNew;
     CPubKey pubKeyDynodeNew;
     CKey keyDynodeNew;
 
+    auto Log = [&strErrorRet](std::string sErr)->bool
+    {
+        strErrorRet = sErr;
+        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
+        return false;
+    };
+
     //need correct blocks to send ping
-    if(!fOffline && !dynodeSync.IsBlockchainSynced()) {
-        strErrorRet = "Sync in progress. Must wait until sync is complete to start Dynode";
-        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-        return false;
-    }
+    if (!fOffline && !dynodeSync.IsBlockchainSynced())
+        return Log("Sync in progress. Must wait until sync is complete to start Dynode");
 
-    if(!CMessageSigner::GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew)) {
-        strErrorRet = strprintf("Invalid Dynode key %s", strKeyDynode);
-        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-        return false;
-    }
+    if (!CMessageSigner::GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew))
+        return Log(strprintf("Invalid Dynode key %s", strKeyDynode));
 
-    if(!pwalletMain->GetDynodeVinAndKeys(txin, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex)) {
-        strErrorRet = strprintf("Could not allocate txin %s:%s for Dynode %s", strTxHash, strOutputIndex, strService);
-        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-        return false;
-    }
+    if (!pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex))
+        return Log(strprintf("Could not allocate outpoint %s:%s for dynode %s", strTxHash, strOutputIndex, strService));
 
     CService service = CService(strService);
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        if(service.GetPort() != mainnetDefaultPort) {
-            strErrorRet = strprintf("Invalid port %u for Dynode %s, only %d is supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort);
-            LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-            return false;
-        }
-    } else if (service.GetPort() == mainnetDefaultPort) {
-        strErrorRet = strprintf("Invalid port %u for Dynode %s, %d is the only supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort);
-        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-        return false;
-    }
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
+        if (service.GetPort() != mainnetDefaultPort)
+            return Log(strprintf("Invalid port %u for Dynode %s, only %d is supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
+    } else if (service.GetPort() == mainnetDefaultPort)
+        return Log(strprintf("Invalid port %u for Dynode %s, %d is the only supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
 
-    BOOST_FOREACH(CNode* pnode, vNodes) {
-    if (pnode->addr.IsIPv6()) {
-        LogPrintf("Invalid protocol for Dynode, only IPv4 is supported.");
-        return false;
-        }
-    }
-
-    return Create(txin, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyDynodeNew, pubKeyDynodeNew, strErrorRet, dnbRet);
+    return Create(outpoint, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyDynodeNew, pubKeyDynodeNew, strErrorRet, dnbRet);
 }
 
-bool CDynodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyDynodeNew, CPubKey pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet)
+bool CDynodeBroadcast::Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet)
 {
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
@@ -463,27 +371,26 @@ bool CDynodeBroadcast::Create(CTxIn txin, CService service, CKey keyCollateralAd
              CDynamicAddress(pubKeyCollateralAddressNew.GetID()).ToString(),
              pubKeyDynodeNew.GetID().ToString());
 
-
-    CDynodePing dnp(txin);
-    if(!dnp.Sign(keyDynodeNew, pubKeyDynodeNew)) {
-        strErrorRet = strprintf("Failed to sign ping, Dynode=%s", txin.prevout.ToStringShort());
+    auto Log = [&strErrorRet,&dnbRet](std::string sErr)->bool
+    {
+        strErrorRet = sErr;
         LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
         dnbRet = CDynodeBroadcast();
         return false;
-    }
+    };
 
-    dnbRet = CDynodeBroadcast(service, txin, pubKeyCollateralAddressNew, pubKeyDynodeNew, PROTOCOL_VERSION);
+    CDynodePing dnp(outpoint);
+    if (!dnp.Sign(keyDynodeNew, pubKeyDynodeNew))
+        return Log(strprintf("Failed to sign ping, dynode=%s", outpoint.ToStringShort()));
 
-    if(!dnbRet.IsValidNetAddr()) {
-        strErrorRet = strprintf("Invalid IP address, Dynode=%s", txin.prevout.ToStringShort());
-        LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
-        dnbRet = CDynodeBroadcast();
-        return false;
-    }
+    dnbRet = CDynodeBroadcast(service, outpoint, pubKeyCollateralAddressNew, pubKeyDynodeNew, PROTOCOL_VERSION);
+
+    if (!dnbRet.IsValidNetAddr())
+        return Log(strprintf("Invalid IP address, dynode=%s", outpoint.ToStringShort()));
 
     dnbRet.lastPing = dnp;
     if(!dnbRet.Sign(keyCollateralAddressNew)) {
-        strErrorRet = strprintf("Failed to sign broadcast, Dynode=%s", txin.prevout.ToStringShort());
+        return Log(strprintf("Failed to sign broadcast, dynode=%s", outpoint.ToStringShort()));
         LogPrintf("CDynodeBroadcast::Create -- %s\n", strErrorRet);
         dnbRet = CDynodeBroadcast();
         return false;
@@ -545,7 +452,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
         return false;
     }
 
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(addr.GetPort() != mainnetDefaultPort) return false;
     } else if(addr.GetPort() == mainnetDefaultPort) return false;
@@ -553,7 +460,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     return true;
 }
 
-bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos)
+bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 {
     nDos = 0;
 
@@ -595,11 +502,11 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos)
     if(!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDyNode && pubKeyDynode == activeDynode.pubKeyDynode)) {
         // take the newest entry
         LogPrintf("CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
-        if(pdn->UpdateFromNewBroadcast((*this))) {
+        if(pdn->UpdateFromNewBroadcast(*this, connman)) {
             pdn->Check();
-            Relay();
+            Relay(connman);
         }
-        dynodeSync.AddedDynodeList();
+        dynodeSync.BumpAssetLastTime("CDynodeBroadcast::Update");
     }
 
     return true;
@@ -609,7 +516,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
 {
     // we are a Dynode with the same vin (i.e. already activated) and this dnb is ours (matches our Dynodes privkey)
     // so nothing to do here for us
-    if(fDyNode && vin.prevout == activeDynode.vin.prevout && pubKeyDynode == activeDynode.pubKeyDynode) {
+    if(fDyNode && vin.prevout == activeDynode.outpoint && pubKeyDynode == activeDynode.pubKeyDynode) {
         return false;
     }
 
@@ -627,24 +534,26 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
             return false;
         }
 
-        CCoins coins;
-        if(!pcoinsTip->GetCoins(vin.prevout.hash, coins) ||
-           (unsigned int)vin.prevout.n>=coins.vout.size() ||
-           coins.vout[vin.prevout.n].IsNull()) {
+        int nHeight;
+        CollateralStatus err = CheckCollateral(vin.prevout, nHeight);
+        if (err == COLLATERAL_UTXO_NOT_FOUND) {
             LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
             return false;
         }
-        if(coins.vout[vin.prevout.n].nValue != 1000 * COIN) {
+        if (err == COLLATERAL_INVALID_AMOUNT) {
             LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO should have 1000 DYN, Dynode=%s\n", vin.prevout.ToStringShort());
             return false;
         }
-        if(chainActive.Height() - coins.nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
+
+        if(chainActive.Height() - nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
             LogPrintf("CDynodeBroadcast::CheckOutpoint -- Dynode UTXO must have at least %d confirmations, Dynode=%s\n",
                     Params().GetConsensus().nDynodeMinimumConfirmations, vin.prevout.ToStringShort());
             // maybe we miss few blocks, let this dnb to be checked again later
             dnodeman.mapSeenDynodeBroadcast.erase(GetHash());
             return false;
         }
+        // remember the hash of the block where dynode collateral had minimum required confirmations
+        nCollateralMinConfBlockHash = chainActive[nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
     }
 
     LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO verified\n");
@@ -694,7 +603,7 @@ bool CDynodeBroadcast::IsVinAssociatedWithPubkey(const CTxIn& txin, const CPubKe
     return false;
 }
 
-bool CDynodeBroadcast::Sign(CKey& keyCollateralAddress)
+bool CDynodeBroadcast::Sign(const CKey& keyCollateralAddress)
 {
     std::string strError;
     std::string strMessage;
@@ -739,26 +648,23 @@ bool CDynodeBroadcast::CheckSignature(int& nDos)
     return true;
 }
 
-void CDynodeBroadcast::Relay()
+void CDynodeBroadcast::Relay(CConnman& connman)
 {
     CInv inv(MSG_DYNODE_ANNOUNCE, GetHash());
-    RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
-CDynodePing::CDynodePing(CTxIn& vinNew) :
-    fSentinelIsCurrent(false),
-    nSentinelVersion(DEFAULT_SENTINEL_VERSION)
+CDynodePing::CDynodePing(const COutPoint& outpoint)
 {
     LOCK(cs_main);
     if (!chainActive.Tip() || chainActive.Height() < 12) return;
 
-    vin = vinNew;
+    vin = CTxIn(outpoint);
     blockHash = chainActive[chainActive.Height() - 12]->GetBlockHash();
     sigTime = GetAdjustedTime();
-    vchSig = std::vector<unsigned char>();
 }
 
-bool CDynodePing::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
+bool CDynodePing::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 {
     std::string strError;
     std::string strDyNodeSignMessage;
@@ -821,7 +727,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
      return true;
  }
  
- bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos)
+ bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman)
  {
      // don't ban by default
      nDos = 0;
@@ -867,7 +773,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     if(!dynodeSync.IsDynodeListSynced() && !pdn->IsPingedWithin(DYNODE_EXPIRATION_SECONDS/2)) {
         // let's bump sync timeout
         LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- bumping sync timeout, dynode=%s\n", vin.prevout.ToStringShort());
-        dynodeSync.AddedDynodeList();
+        dynodeSync.BumpAssetLastTime("CDynodePing::CheckAndUpdate");
     }
 
     // let's store this ping as the last one
@@ -881,19 +787,21 @@ bool CDynodePing::SimpleCheck(int& nDos)
         dnodeman.mapSeenDynodeBroadcast[hash].second.lastPing = *this;
     }
 
-    pdn->Check(true); // force update, ignoring cache
-    if (!pdn->IsEnabled()) return false;
+    // force update, ignoring cache
+    pdn->Check(true);
+    // relay ping for nodes in ENABLED/EXPIRED/WATCHDOG_EXPIRED state only, skip everyone else
+    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsWatchdogExpired()) return false;
 
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping acceepted and relayed, Dynode=%s\n", vin.prevout.ToStringShort());
-    Relay();
+    Relay(connman);
 
     return true;
 }
 
-void CDynodePing::Relay()
+void CDynodePing::Relay(CConnman& connman)
 {
     CInv inv(MSG_DYNODE_PING, GetHash());
-    RelayInv(inv);
+    connman.RelayInv(inv);
 }
 
 void CDynode::AddGovernanceVote(uint256 nGovernanceObjectHash)
@@ -917,7 +825,7 @@ void CDynode::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
 void CDynode::UpdateWatchdogVoteTime(uint64_t nVoteTime)
 {
     LOCK(cs);
-    nTimeLastWatchdogVote = (nVoteTime == 0) ? GetTime() : nVoteTime;
+    nTimeLastWatchdogVote = (nVoteTime == 0) ? GetAdjustedTime() : nVoteTime;
 }
 
 /**

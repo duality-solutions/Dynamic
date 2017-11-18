@@ -18,7 +18,7 @@ extern CWallet* pwalletMain;
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
 
-void CActiveDynode::ManageState()
+void CActiveDynode::ManageState(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
     if(!fDyNode) {
@@ -39,7 +39,7 @@ void CActiveDynode::ManageState()
     LogPrint("Dynode", "CActiveDynode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 
     if(eType == DYNODE_UNKNOWN) {
-        ManageStateInitial();
+        ManageStateInitial(connman);
     }
 
     if(eType == DYNODE_REMOTE) {
@@ -48,10 +48,10 @@ void CActiveDynode::ManageState()
         // Try Remote Start first so the started local Dynode can be restarted without recreate Dynode broadcast.
         ManageStateRemote();
         if(nState != ACTIVE_DYNODE_STARTED)
-            ManageStateLocal();
+            ManageStateLocal(connman);
     }
 
-    SendDynodePing();
+    SendDynodePing(connman);
 }
 
 std::string CActiveDynode::GetStateString() const
@@ -98,21 +98,21 @@ std::string CActiveDynode::GetTypeString() const
     return strType;
 }
 
-bool CActiveDynode::SendDynodePing()
+bool CActiveDynode::SendDynodePing(CConnman& connman)
 {
     if(!fPingerEnabled) {
         LogPrint("Dynode", "CActiveDynode::SendDynodePing -- %s: Dynode ping service is disabled, skipping...\n", GetStateString());
         return false;
     }
 
-    if(!dnodeman.Has(vin)) {
+    if(!dnodeman.Has(outpoint)) {
         strNotCapableReason = "Dynode not in Dynode list";
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         LogPrintf("CActiveDynode::SendDynodePing -- %s: %s\n", GetStateString(), strNotCapableReason);
         return false;
     }
 
-    CDynodePing dnp(vin);
+    CDynodePing dnp(outpoint);
     dnp.nSentinelVersion = nSentinelVersion;
     dnp.fSentinelIsCurrent =
             (abs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
@@ -122,15 +122,15 @@ bool CActiveDynode::SendDynodePing()
     }
 
     // Update lastPing for our Dynode in Dynode list
-    if(dnodeman.IsDynodePingedWithin(vin, DYNODE_MIN_DNP_SECONDS, dnp.sigTime)) {
+    if(dnodeman.IsDynodePingedWithin(outpoint, DYNODE_MIN_DNP_SECONDS, dnp.sigTime)) {
         LogPrintf("CActiveDynode::SendDynodePing -- Too early to send Dynode Ping\n");
         return false;
     }
 
-    dnodeman.SetDynodeLastPing(vin, dnp);
+    dnodeman.SetDynodeLastPing(outpoint, dnp);
 
-    LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", vin.ToString());
-    dnp.Relay();
+    LogPrintf("CActiveDynode::SendDynodePing -- Relaying ping, collateral=%s\n", outpoint.ToStringShort());
+    dnp.Relay(connman);
 
     return true;
 }
@@ -143,7 +143,7 @@ bool CActiveDynode::UpdateSentinelPing(int version)
     return true;
 }
 
-void CActiveDynode::ManageStateInitial()
+void CActiveDynode::ManageStateInitial(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
@@ -155,37 +155,23 @@ void CActiveDynode::ManageStateInitial()
         return;
     }
 
-    LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
-    // Check that our local network configuration is correct
-    BOOST_FOREACH(CNode* pnode, vNodes) {
-    if (pnode->addr.IsIPv6()) {
-        // listen option is probably overwritten by smth else, no good
-        LogPrintf("Dynodes cannot use IPv6, you must use IPv4 for Dynode connectivity.");
-        return;
-        }
-    }
-
-    bool fFoundLocal = false;
-    {
-        LOCK(cs_vNodes);
-
-        // First try to find whatever local address is specified by externalip option
-        fFoundLocal = GetLocal(service) && CDynode::IsValidNetAddr(service);
-        if(!fFoundLocal) {
-            // nothing and no live connections, can't do anything for now
-            if (vNodes.empty()) {
-                nState = ACTIVE_DYNODE_NOT_CAPABLE;
-                strNotCapableReason = "Can't detect valid external address. Will retry when there are some connections available.";
-                LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
-                return;
-            }
-            // We have some peers, let's try to find our local address from one of them
-            BOOST_FOREACH(CNode* pnode, vNodes) {
-                if (pnode->fSuccessfullyConnected && pnode->addr.IsIPv4()) {
-                    fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);
-                    if(fFoundLocal) break;
-                }
-            }
+    // First try to find whatever local address is specified by externalip option
+    bool fFoundLocal = GetLocal(service) && CDynode::IsValidNetAddr(service);
+    if(!fFoundLocal) {
+        bool empty = true;
+        // If we have some peers, let's try to find our local address from one of them
+        connman.ForEachNodeContinueIf(CConnman::AllNodes, [&fFoundLocal, &empty, this](CNode* pnode) {
+            empty = false;
+            if (pnode->addr.IsIPv4())
+                fFoundLocal = GetLocal(service, &pnode->addr) && CDynode::IsValidNetAddr(service);
+            return !fFoundLocal;
+        });
+        // nothing and no live connections, can't do anything for now
+        if (empty) {
+            nState = ACTIVE_DYNODE_NOT_CAPABLE;
+            strNotCapableReason = "Can't detect valid external address. Will retry when there are some connections available.";
+            LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+            return;
         }
     }
 
@@ -196,9 +182,9 @@ void CActiveDynode::ManageStateInitial()
         return;
     }
     
-    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    int testnetDefaultPort = Params(CBaseChainParams::TESTNET).GetDefaultPort();
-    int regTestnetDefaultPort = Params(CBaseChainParams::REGTEST).GetDefaultPort();
+    int mainnetDefaultPort = DEFAULT_P2P_PORT;
+    int testnetDefaultPort = DEFAULT_P2P_PORT + 100;
+    int regTestnetDefaultPort = DEFAULT_P2P_PORT + 200;
 
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
@@ -229,7 +215,7 @@ void CActiveDynode::ManageStateInitial()
 
     LogPrintf("CActiveDynode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
 
-    if(!ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
+    if(!connman.ConnectNode(CAddress(service, NODE_NETWORK), NULL, true)) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = "Could not connect to " + service.ToString();
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
@@ -260,7 +246,7 @@ void CActiveDynode::ManageStateInitial()
     CKey keyCollateral;
 
     // If collateral is found switch to LOCAL mode
-    if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
+    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
         eType = DYNODE_LOCAL;
     }
 
@@ -273,8 +259,8 @@ void CActiveDynode::ManageStateRemote()
              GetStatus(), fPingerEnabled, GetTypeString(), pubKeyDynode.GetID().ToString());
 
     dnodeman.CheckDynode(pubKeyDynode, true);
-    dynode_info_t infoDn = dnodeman.GetDynodeInfo(pubKeyDynode);
-    if(infoDn.fInfoValid) {
+    dynode_info_t infoDn;
+    if(dnodeman.GetDynodeInfo(pubKeyDynode, infoDn)) {
         if(infoDn.nProtocolVersion != PROTOCOL_VERSION) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
             strNotCapableReason = "Invalid protocol version";
@@ -295,7 +281,7 @@ void CActiveDynode::ManageStateRemote()
         }
         if(nState != ACTIVE_DYNODE_STARTED) {
             LogPrintf("CActiveDynode::ManageStateRemote -- STARTED!\n");
-            vin = infoDn.vin;
+            outpoint = infoDn.vin.prevout;
             service = infoDn.addr;
             fPingerEnabled = true;
             nState = ACTIVE_DYNODE_STARTED;
@@ -308,7 +294,7 @@ void CActiveDynode::ManageStateRemote()
     }
 }
 
-void CActiveDynode::ManageStateLocal()
+void CActiveDynode::ManageStateLocal(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageStateLocal -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     if(nState == ACTIVE_DYNODE_STARTED) {
@@ -319,27 +305,33 @@ void CActiveDynode::ManageStateLocal()
     CPubKey pubKeyCollateral;
     CKey keyCollateral;
 
-    if(pwalletMain->GetDynodeVinAndKeys(vin, pubKeyCollateral, keyCollateral)) {
-        int nInputAge = GetInputAge(vin);
-        if(nInputAge < Params().GetConsensus().nDynodeMinimumConfirmations){
+    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
+        int nPrevoutAge = GetUTXOConfirmations(outpoint);
+        if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
             nState = ACTIVE_DYNODE_INPUT_TOO_NEW;
-            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nInputAge);
+            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nPrevoutAge);
             LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
 
         {
             LOCK(pwalletMain->cs_wallet);
-            pwalletMain->LockCoin(vin.prevout);
+            pwalletMain->LockCoin(outpoint);
         }
 
         CDynodeBroadcast dnb;
         std::string strError;
-        if(!CDynodeBroadcast::Create(vin, service, keyCollateral, pubKeyCollateral, keyDynode, pubKeyDynode, strError, dnb)) {
+        if(!CDynodeBroadcast::Create(outpoint, service, keyCollateral, pubKeyCollateral, keyDynode, pubKeyDynode, strError, dnb)) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
             strNotCapableReason = "Error creating Dynode broadcast: " + strError;
             LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
+        }
+
+        {
+            LOCK(cs_main);
+            // remember the hash of the block where dynode collateral had minimum required confirmations
+            dnb.nCollateralMinConfBlockHash = chainActive[GetUTXOHeight(outpoint) + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
         }
 
         fPingerEnabled = true;
@@ -347,11 +339,11 @@ void CActiveDynode::ManageStateLocal()
 
         //update to Dynode list
         LogPrintf("CActiveDynode::ManageStateLocal -- Update Dynode List\n");
-        dnodeman.UpdateDynodeList(dnb);
-        dnodeman.NotifyDynodeUpdates();
+        dnodeman.UpdateDynodeList(dnb, connman);
+        dnodeman.NotifyDynodeUpdates(connman);
 
         //send to all peers
-        LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, vin=%s\n", vin.ToString());
-        dnb.Relay();
+        LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, collateral=%s\n", outpoint.ToStringShort());
+        dnb.Relay(connman);
     }
 }
