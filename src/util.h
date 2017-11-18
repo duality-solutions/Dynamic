@@ -56,7 +56,7 @@ static const bool DEFAULT_LOGTHREADNAMES = false;
 /**
  * Default average PoW block span time.
  */
-static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Dynamic average block span time is set to 256 seconds
+static const int64_t DEFAULT_AVERAGE_POW_BLOCK_TIME = 2 * 64; // Dynamic average block span time is set to 128 seconds
 /**
  * Maximum amount of time that a block timestamp is allowed to exceed the
  * current network-adjusted time before the block will be accepted.
