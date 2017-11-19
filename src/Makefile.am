@@ -109,6 +109,7 @@ DYNAMIC_CORE_H = \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -220,6 +221,7 @@ libdynamic_server_a_SOURCES = \
   dbwrapper.cpp \
   dns/dns.cpp \
   dns/dyndns.cpp \
+  fluid.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -251,6 +253,7 @@ libdynamic_server_a_SOURCES = \
   rpcnet.cpp \
   rpcrawtransaction.cpp \
   rpcserver.cpp \
+  rpcfluid.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   timedata.cpp \

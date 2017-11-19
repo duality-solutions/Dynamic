@@ -14,6 +14,8 @@
 #include "netfulfilledman.h"
 #include "spork.h"
 #include "util.h"
+#include "fluid.h"
+#include "chain.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -298,31 +300,26 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
         }
     }
 
-    CAmount blockValue;
-    CAmount dynodePayment;
+    CAmount blockValue, dynodePayment, fluidIssuance;
+	CDynamicAddress addressX;
+	
+	if (fluid.GetMintingInstructions(pindexPrev, addressX, fluidIssuance)) {
+	    blockValue = 	getBlockSubsidyWithOverride(pindexPrev->nHeight, chainActive.Tip()->fluidParams.blockReward) + 
+						fluidIssuance;
+	} else {
+		blockValue = 	getBlockSubsidyWithOverride(pindexPrev->nHeight, chainActive.Tip()->fluidParams.blockReward);
+	}
+	
+	dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
 
-    if (chainActive.Height() == 0) { blockValue = INITIAL_SUPERBLOCK_PAYMENT; }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
-    else { blockValue = BLOCKCHAIN_INIT_REWARD; }
-
-    if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_1_DYNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_2_DYNODE_PAYMENT; }
-    else { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-
-    txNew.vout[0].nValue = blockValue;
+//    txNew.vout[0].nValue = blockValue;
 
     if(hasPayment){
         txNew.vout.resize(2);
 
+        // txNew.vout[0].nValue = blockValue;
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = dynodePayment;
-
-        if (chainActive.Height() == 0) { txNew.vout[0].nValue = INITIAL_SUPERBLOCK_PAYMENT; }
-        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
-        else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
 
         CTxDestination address1;
         ExtractDestination(payee, address1);
@@ -585,7 +582,8 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
-    CAmount nDynodePayment = GetDynodePayment();
+    /* Dirtiest trick in the book */
+	CAmount nDynodePayment = getDynodeSubsidyWithOverride(chainActive.Tip()->fluidParams.dynodeReward);
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 

@@ -1,0 +1,588 @@
+// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#include "fluid.h"
+
+#include "chain.h"
+#include "core_io.h"
+#include "keepass.h"
+#include "net.h"
+#include "netbase.h"
+#include "timedata.h"
+#include "util.h"
+#include "utilmoneystr.h"
+#include "utiltime.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+#include "wallet/walletdb.h"
+
+Fluid fluid;
+extern CWallet* pwalletMain;
+
+bool IsTransactionFluid(CScript txOut) {
+    return (txOut.IsProtocolInstruction(MINT_TX)
+            || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX)
+            || txOut.IsProtocolInstruction(MINING_MODIFY_TX)
+           );
+}
+
+/** Does client instance own address for engaging in processes - required for RPC (PS: NEEDS wallet) */
+bool Fluid::InitiateFluidVerify(CDynamicAddress dynamicAddress) {
+#ifdef ENABLE_WALLET
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    CDynamicAddress address(dynamicAddress);
+
+    if (address.IsValid()) {
+        CTxDestination dest = address.Get();
+        CScript scriptPubKey = GetScriptForDestination(dest);
+        isminetype mine = pwalletMain ? IsMine(*pwalletMain, dest) : ISMINE_NO;
+
+        return ((mine & ISMINE_SPENDABLE) ? true : false);
+    }
+
+    return false;
+#else
+    // Wallet cannot be accessed, cannot continue ahead!
+    return false;
+#endif
+}
+
+/** Checks if any given address is a current master key (invoked by RPC) */
+bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
+    std::vector<std::string> fluidManagers;
+    GetLastBlockIndex(chainActive.Tip());
+    CBlockIndex* pindex = chainActive.Tip();
+
+    if (pindex != NULL)
+        fluidManagers = pindex->fluidParams.fluidManagers;
+    else
+        fluidManagers = InitialiseAddresses();
+
+    for (const std::string& address : fluidManagers) {
+        CDynamicAddress attemptKey;
+        attemptKey.SetString(address);
+        if (inputKey.IsValid() && attemptKey.IsValid() && inputKey == attemptKey)
+            return true;
+    }
+
+    return false;
+}
+
+/** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
+bool Fluid::CheckIfQuorumExists(std::string token, std::string &message, bool individual) {
+    std::vector<std::string> fluidManagers;
+    std::pair<CDynamicAddress, bool> keyOne;
+    std::pair<CDynamicAddress, bool> keyTwo;
+    std::pair<CDynamicAddress, bool> keyThree;
+    keyOne.second = false, keyTwo.second = false;
+    keyThree.second = false;
+
+    GetLastBlockIndex(chainActive.Tip());
+    CBlockIndex* pindex = chainActive.Tip();
+
+    if (pindex != NULL)
+        fluidManagers = pindex->fluidParams.fluidManagers;
+    else
+        fluidManagers = InitialiseAddresses();
+
+    for (const std::string& address : fluidManagers) {
+        CDynamicAddress attemptKey, xKey(address);
+
+        if (!xKey.IsValid())
+            return false;
+
+        if (GenericVerifyInstruction(token, attemptKey, message, 1) && xKey == attemptKey) {
+            keyOne = std::make_pair(attemptKey.ToString(), true);
+        }
+
+        if (GenericVerifyInstruction(token, attemptKey, message, 2) && xKey == attemptKey) {
+            keyTwo = std::make_pair(attemptKey.ToString(), true);
+        }
+
+        if (GenericVerifyInstruction(token, attemptKey, message, 3) && xKey == attemptKey) {
+            keyThree = std::make_pair(attemptKey.ToString(), true);
+        }
+    }
+
+    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
+                   && keyOne.first.ToString() != keyThree.first.ToString());
+
+    LogPrintf("CheckIfQuorumExists(): Addresses validating this token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
+
+    if (individual)
+        return (keyOne.second || keyTwo.second || keyThree.second);
+    else if (fValid)
+        return (keyOne.second && keyTwo.second && keyThree.second);
+
+    return false;
+}
+
+
+/** Checks whether as to parties have actually signed it - please use this with ones **without** the OP_CODE */
+bool Fluid::CheckNonScriptQuorum(std::string token, std::string &message, bool individual) {
+    std::string result = "12345 " + token;
+    return CheckIfQuorumExists(result, message, individual);
+}
+
+/** Because some things in life are meant to be intimate, like socks in a drawer */
+bool Fluid::SignIntimateMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch) {
+
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << unsignedMessage;
+
+    CDynamicAddress addr(address);
+
+    CKeyID keyID;
+    if (!addr.GetKeyID(keyID))
+        return false;
+
+    CKey key;
+    if (!pwalletMain->GetKey(keyID, key))
+        return false;
+
+    std::vector<unsigned char> vchSig;
+    if (!key.SignCompact(ss.GetHash(), vchSig))
+        return false;
+    else if(stitch)
+        stitchedMessage = StitchString(unsignedMessage, EncodeBase64(&vchSig[0], vchSig.size()), false);
+    else
+        stitchedMessage = EncodeBase64(&vchSig[0], vchSig.size());
+
+    return true;
+}
+
+/** It will perform basic message signing functions */
+bool Fluid::GenericSignMessage(std::string message, std::string &signedString, CDynamicAddress signer) {
+    if(!SignIntimateMessage(signer, message, signedString, true))
+        return false;
+    else
+        ConvertToHex(signedString);
+
+    return true;
+}
+
+/** It will append a signature of the new information */
+bool Fluid::GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer) {
+    std::string token, digest;
+
+    if (!IsHex(message))
+        return false;
+
+    if(!CheckNonScriptQuorum(message, token, true))
+        return false;
+
+    if(token == "")
+        return false;
+
+    ConvertToString(message);
+
+    if(!SignIntimateMessage(signer, token, digest, false))
+        return false;
+
+    signedString = StitchString(message, digest, false);
+
+    ConvertToHex(signedString);
+
+    return true;
+}
+
+/** Extract timestamp from a Fluid Transaction */
+bool Fluid::ExtractCheckTimestamp(std::string scriptString, int64_t timeStamp) {
+    std::string r = getRidOfScriptStatement(scriptString);
+    scriptString = r;
+    std::string dehexString = HexToString(scriptString);
+    std::vector<std::string> strs, ptrs;
+    SeperateString(dehexString, strs, false);
+    SeperateString(strs.at(0), ptrs, true);
+
+    if(1 >= (int)strs.size())
+        return false;
+
+    std::string ls = ptrs.at(1);
+    ScrubString(ls, true);
+
+    if (timeStamp > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT)
+        return false;
+
+    return true;
+}
+
+bool Fluid::ProcessFluidToken(std::string &scriptString, std::vector<std::string> &ptrs, int strVecNo) {
+    std::string r = getRidOfScriptStatement(scriptString);
+    scriptString = r;
+
+    std::string message;
+    if (!CheckNonScriptQuorum(scriptString, message))
+        return false;
+
+    std::string dehexString = HexToString(scriptString);
+    scriptString = dehexString;
+
+    std::vector<std::string> strs;
+    SeperateString(dehexString, strs, false);
+    SeperateString(strs.at(0), ptrs, true);
+
+    if(strVecNo >= (int)strs.size())
+        return false;
+
+    return true;
+}
+
+/** It gets a number from the ASM of an OP_CODE without signature verification */
+bool Fluid::GenericParseNumber(std::string scriptString, int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose) {
+    std::vector<std::string> ptrs;
+
+    if (!ProcessFluidToken(scriptString, ptrs, 1))
+        return false;
+
+    std::string lr = ptrs.at(0);
+    ScrubString(lr, true);
+    std::string ls = ptrs.at(1);
+    ScrubString(ls, true);
+
+    if (timeStamp > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+        return false;
+
+    howMuch			 	= stringToInteger(lr) * COIN;
+
+    return true;
+}
+
+/** Individually checks the validity of an instruction */
+bool Fluid::GenericVerifyInstruction(std::string uniqueIdentifier, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
+{
+    std::string r = getRidOfScriptStatement(uniqueIdentifier);
+    uniqueIdentifier = r;
+    messageTokenKey = "";
+    std::vector<std::string> strs;
+
+    ConvertToString(uniqueIdentifier);
+    SeperateString(uniqueIdentifier, strs, false);
+
+    messageTokenKey = strs.at(0);
+
+    /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */
+    if(whereToLook >= (int)strs.size() || whereToLook == 0)
+        return false;
+
+    std::string digestSignature = strs.at(whereToLook);
+
+    bool fInvalid = false;
+    std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
+
+    if (fInvalid) {
+        LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
+        return false;
+    }
+
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << messageTokenKey;
+
+    CPubKey pubkey;
+
+    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
+        return false;
+    }
+
+    signer = CDynamicAddress(pubkey.GetID());
+
+    return true;
+}
+
+bool Fluid::ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
+    std::vector<std::string> ptrs;
+
+    if (!ProcessFluidToken(uniqueIdentifier, ptrs, 1))
+        return false;
+
+    if(2 >= (int)ptrs.size())
+        return false;
+
+    std::string lr = ptrs.at(0);
+    ScrubString(lr, true);
+    std::string ls = ptrs.at(1);
+    ScrubString(ls, true);
+
+    if (nTime > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+        return false;
+
+    coinAmount			 	= stringToInteger(lr) * COIN;
+
+    std::string recipientAddress = ptrs.at(2);
+    destination.SetString(recipientAddress);
+
+    if(!destination.IsValid())
+        return false;
+
+    LogPrintf("ParseMintKey(): Token Data -- Address %s | Coins to be minted: %s | Time: %s\n", ptrs.at(2), coinAmount / COIN, ls);
+
+    return true;
+}
+
+bool Fluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress &toMintAddress, CAmount& mintAmount) {
+    CBlock block;
+
+    if (pblockindex != nullptr) {
+        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
+        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+            if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
+                std::string message;
+                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                    return ParseMintKey(block.nTime, toMintAddress, mintAmount, ScriptToAsmStr(txout.scriptPubKey));
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Fluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch) {
+
+    CBlock block;
+    if (pblockindex != nullptr) {
+        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+            return false;
+        }
+    }  else {
+        return false;
+    }
+
+    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
+        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+            if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
+                std::string message;
+                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, howMuch);
+            }
+        }
+    }
+    return false;
+}
+
+bool Fluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch) {
+    CBlock block;
+
+    if (pblockindex != nullptr) {
+        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
+        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+            if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
+                std::string message;
+                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, howMuch);
+            }
+        }
+    }
+    return false;
+}
+
+void Fluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord) {
+    CBlock block;
+    std::string message;
+
+    if (pblockindex != nullptr) {
+        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+            return;
+        }
+    } else {
+        return;
+    }
+
+    for (const CTransaction& tx : block.vtx) {
+        for (const CTxOut& txout : tx.vout) {
+            if (IsTransactionFluid(txout.scriptPubKey)) {
+                if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
+                    LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
+                }
+            }
+        }
+    }
+}
+
+/* Check if transaction exists in record */
+bool Fluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
+    std::string verificationString;
+    CFluidEntry fluidIndex;
+    if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT)
+        return false;
+    else if (pindex == nullptr) {
+        GetLastBlockIndex(chainActive.Tip());
+        fluidIndex = chainActive.Tip()->fluidParams;
+    } else
+        fluidIndex = pindex->fluidParams;
+
+    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
+
+    if (IsTransactionFluid(fluidInstruction)) {
+        verificationString = ScriptToAsmStr(fluidInstruction);
+
+        std::string message;
+        if (CheckIfQuorumExists(verificationString, message)) {
+            BOOST_FOREACH(const std::string& existingRecord, transactionRecord)
+            {
+                if (existingRecord == verificationString) {
+                    LogPrintf("CheckTransactionInRecord(): Attempt to repeat Fluid Transaction: %s\n", existingRecord);
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+/* Insertion of transaction script to record */
+bool Fluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord) {
+    std::string verificationString;
+
+    if (IsTransactionFluid(fluidInstruction)) {
+        verificationString = ScriptToAsmStr(fluidInstruction);
+
+        std::string message;
+        if (CheckIfQuorumExists(verificationString, message)) {
+            BOOST_FOREACH(const std::string& existingRecord, transactionRecord)
+            {
+                if (existingRecord == verificationString) {
+                    return false;
+                }
+            }
+            transactionRecord.push_back(verificationString);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+CAmount GetPoWBlockPayment(const int& nHeight)
+{
+    if (chainActive.Height() == 0) {
+        CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
+        LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
+        return nSubsidy;
+    }
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
+        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
+        return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
+    }
+    else
+        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
+}
+
+CAmount GetDynodePayment(bool fDynode)
+{   
+    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
+        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
+    }
+    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+        return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
+    }
+    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+        return BLOCKCHAIN_INIT_REWARD;
+    }
+    else
+        return BLOCKCHAIN_INIT_REWARD;
+}
+
+/** Passover code that will act as a switch to check if override did occur for Proof of Work Rewards **/
+CAmount getBlockSubsidyWithOverride(const int& nHeight, CAmount lastOverrideCommand) {
+    if (lastOverrideCommand != 0) {
+        return lastOverrideCommand;
+    } else {
+        return GetPoWBlockPayment(nHeight);
+    }
+}
+
+/** Passover code that will act as a switch to check if override did occur for Dynode Rewards **/
+CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode) {
+    if (lastOverrideCommand != 0) {
+        return lastOverrideCommand;
+    } else {
+        return GetDynodePayment(fDynode);
+    }
+}
+
+bool Fluid::ValidationProcesses(CValidationState &state, CScript txOut, CAmount txValue) {
+    std::string message;
+    CAmount mintAmount;
+    CDynamicAddress toMintAddress;
+
+    if (IsTransactionFluid(txOut)) {
+        if (!CheckIfQuorumExists(ScriptToAsmStr(txOut), message)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-auth-failure");
+        }
+
+        if (txOut.IsProtocolInstruction(MINT_TX) &&
+                !ParseMintKey(0, toMintAddress, mintAmount, ScriptToAsmStr(txOut), true)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-mint-auth-failure");
+        }
+
+        if ((txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) ||
+                txOut.IsProtocolInstruction(MINING_MODIFY_TX)) &&
+                !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-modify-parse-failure");
+        }
+    }
+
+    return true;
+}
+
+bool Fluid::ProvisionalCheckTransaction(const CTransaction &transaction) {
+    BOOST_FOREACH(const CTxOut& txout, transaction.vout) {
+        CScript txOut = txout.scriptPubKey;
+
+        if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut)) {
+            LogPrintf("ProvisionalCheckTransaction(): Fluid Transaction %s has already been executed!\n", transaction.GetHash().ToString());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Fluid::CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader) {
+    uint256 hash = blockHeader.GetHash();
+    if (mapBlockIndex.count(hash) == 0)
+        return true;
+
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+
+    BOOST_FOREACH(const CTxOut& txout, transaction.vout) {
+        CScript txOut = txout.scriptPubKey;
+
+        if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut, pblockindex)) {
+            LogPrintf("CheckTransactionToBlock(): Fluid Transaction %s has already been executed!\n", transaction.GetHash().ToString());
+            return false;
+        }
+    }
+
+    return true;
+}
