@@ -48,7 +48,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 "  list               - List governance objects (can be filtered by signal and/or object type)\n"
                 "  diff               - List differences since last diff\n"
                 "  vote-alias         - Vote on a governance object by dynode alias (using dynode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by dynode configured in dash.conf\n"
+                "  vote-conf          - Vote on a governance object by dynode configured in dynamic.conf\n"
                 "  vote-many          - Vote on a governance object by all dynodes (using dynode.conf setup)\n"
                 );
 
@@ -191,11 +191,10 @@ UniValue gobject(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Must wait for client to sync with dynode network. Try again in a minute or so.");
         }
 
-        CDynode dn;
-        bool fDnFound = dnodeman.Get(activeDynode.vin, dn);
+        bool fDnFound = dnodeman.Has(activeDynode.outpoint);
 
         DBG( cout << "gobject: submit activeDynode.pubKeyDynode = " << activeDynode.pubKeyDynode.GetHash().ToString()
-             << ", vin = " << activeDynode.vin.prevout.ToStringShort()
+             << ", outpoint = " << activeDynode.outpoint.ToStringShort()
              << ", params.size() = " << params.size()
              << ", fDnFound = " << fDnFound << endl; );
 
@@ -240,7 +239,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
             if(fDnFound) {
-                govobj.SetDynodeInfo(dn.vin);
+                govobj.SetDynodeVin(activeDynode.outpoint);
                 govobj.Sign(activeDynode.keyDynode, activeDynode.pubKeyDynode);
             }
             else {
@@ -279,9 +278,9 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         if(fMissingConfirmations) {
             governance.AddPostponedObject(govobj);
-            govobj.Relay();
+            govobj.Relay(*g_connman);
         } else {
-            governance.AddGovernanceObject(govobj);
+            governance.AddGovernanceObject(govobj, *g_connman);
         }
 
         return govobj.GetHash().ToString();
@@ -323,31 +322,31 @@ UniValue gobject(const UniValue& params, bool fHelp)
         UniValue returnObj(UniValue::VOBJ);
 
         CDynode dn;
-        bool fDnFound = dnodeman.Get(activeDynode.vin, dn);
+        bool fDnFound = dnodeman.Get(activeDynode.outpoint, dn);
 
         if(!fDnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
             statusObj.push_back(Pair("errorMessage", "Can't find dynode by collateral output"));
-            resultsObj.push_back(Pair("dash.conf", statusObj));
+            resultsObj.push_back(Pair("dynamic.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
             return returnObj;
         }
 
-        CGovernanceVote vote(dn.vin, hash, eVoteSignal, eVoteOutcome);
+        CGovernanceVote vote(dn.vin.prevout, hash, eVoteSignal, eVoteOutcome);
         if(!vote.Sign(activeDynode.keyDynode, activeDynode.pubKeyDynode)) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
             statusObj.push_back(Pair("errorMessage", "Failure to sign."));
-            resultsObj.push_back(Pair("dash.conf", statusObj));
+            resultsObj.push_back(Pair("dynamic.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));
             return returnObj;
         }
 
         CGovernanceException exception;
-        if(governance.ProcessVoteAndRelay(vote, exception)) {
+        if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
             nSuccessful++;
             statusObj.push_back(Pair("result", "success"));
         }
@@ -357,7 +356,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             statusObj.push_back(Pair("errorMessage", exception.GetMessage()));
         }
 
-        resultsObj.push_back(Pair("dash.conf", statusObj));
+        resultsObj.push_back(Pair("dynamic.conf", statusObj));
 
         returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
         returnObj.push_back(Pair("detail", resultsObj));
@@ -426,10 +425,10 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 continue;
             }
 
-            CTxIn vin(COutPoint(nTxHash, nOutputIndex));
+            COutPoint outpoint(nTxHash, nOutputIndex);
 
             CDynode dn;
-            bool fDnFound = dnodeman.Get(vin, dn);
+            bool fDnFound = dnodeman.Get(outpoint, dn);
 
             if(!fDnFound) {
                 nFailed++;
@@ -439,7 +438,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 continue;
             }
 
-            CGovernanceVote vote(dn.vin, hash, eVoteSignal, eVoteOutcome);
+            CGovernanceVote vote(dn.vin.prevout, hash, eVoteSignal, eVoteOutcome);
             if(!vote.Sign(keyDynode, pubKeyDynode)){
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
@@ -449,7 +448,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             }
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception)) {
+            if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             }
@@ -547,10 +546,10 @@ UniValue gobject(const UniValue& params, bool fHelp)
                 continue;
             }
 
-            CTxIn vin(COutPoint(nTxHash, nOutputIndex));
+            COutPoint outpoint(nTxHash, nOutputIndex);
 
             CDynode dn;
-            bool fDnFound = dnodeman.Get(vin, dn);
+            bool fDnFound = dnodeman.Get(outpoint, dn);
 
             if(!fDnFound) {
                 nFailed++;
@@ -562,7 +561,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
             // CREATE NEW GOVERNANCE OBJECT VOTE WITH OUTCOME/SIGNAL
 
-            CGovernanceVote vote(vin, hash, eVoteSignal, eVoteOutcome);
+            CGovernanceVote vote(outpoint, hash, eVoteSignal, eVoteOutcome);
             if(!vote.Sign(keyDynode, pubKeyDynode)) {
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
@@ -574,7 +573,7 @@ UniValue gobject(const UniValue& params, bool fHelp)
             // UPDATE LOCAL DATABASE WITH NEW OBJECT SETTINGS
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception)) {
+            if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
                 nSuccessful++;
                 statusObj.push_back(Pair("result", "success"));
             }
@@ -800,12 +799,12 @@ UniValue gobject(const UniValue& params, bool fHelp)
 
         uint256 hash = ParseHashV(params[1], "Governance hash");
 
-        CTxIn dnCollateralOutpoint;
+        COutPoint dnCollateralOutpoint;
         if (params.size() == 4) {
             uint256 txid = ParseHashV(params[2], "Dynode Collateral hash");
             std::string strVout = params[3].get_str();
             uint32_t vout = boost::lexical_cast<uint32_t>(strVout);
-            dnCollateralOutpoint = CTxIn(txid, vout);
+            dnCollateralOutpoint = COutPoint(txid, vout);
         }
 
         // FIND OBJECT USER IS LOOKING FOR
@@ -845,7 +844,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
 
     uint256 hashDnTx = ParseHashV(params[0], "dn tx hash");
     int nDnTxIndex = params[1].get_int();
-    CTxIn vin = CTxIn(hashDnTx, nDnTxIndex);
+    COutPoint outpoint = COutPoint(hashDnTx, nDnTxIndex);
 
     uint256 hashGovObj = ParseHashV(params[2], "Governance hash");
     std::string strVoteSignal = params[3].get_str();
@@ -873,13 +872,13 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     }
 
     CDynode dn;
-    bool fDnFound = dnodeman.Get(vin, dn);
+    bool fDnFound = dnodeman.Get(outpoint, dn);
 
     if(!fDnFound) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find dynode in list : " + vin.prevout.ToStringShort());
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Failure to find dynode in list : " + outpoint.ToStringShort());
     }
 
-    CGovernanceVote vote(vin, hashGovObj, eVoteSignal, eVoteOutcome);
+    CGovernanceVote vote(outpoint, hashGovObj, eVoteSignal, eVoteOutcome);
     vote.SetTime(nTime);
     vote.SetSignature(vchSig);
 
@@ -888,7 +887,7 @@ UniValue voteraw(const UniValue& params, bool fHelp)
     }
 
     CGovernanceException exception;
-    if(governance.ProcessVoteAndRelay(vote, exception)) {
+    if(governance.ProcessVoteAndRelay(vote, exception, *g_connman)) {
         return "Voted successfully";
     }
     else {

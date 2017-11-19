@@ -1,28 +1,41 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#ifndef INSTANTSEND_H
-#define INSTANTSEND_H
+#ifndef INSTANTX_H
+#define INSTANTX_H
 
 #include "chain.h"
 #include "net.h"
 #include "primitives/transaction.h"
 
-class CInstantSend;
-class COutPointLock;
-class CTxLockCandidate;
-class CTxLockRequest;
 class CTxLockVote;
+class COutPointLock;
+class CTxLockRequest;
+class CTxLockCandidate;
+class CInstantSend;
 
 extern CInstantSend instantsend;
 
-static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 10;
+/*
+    At 15 signatures, 1/2 of the dynode network can be owned by
+    one party without comprimising the security of InstantSend
+    (1000/2150.0)**10 = 0.00047382219560689856
+    (1000/2900.0)**10 = 2.3769498616783657e-05
 
-static const int DEFAULT_INSTANTSEND_DEPTH          = 9;
+    ### getting 5 of 10 signatures w/ 1000 nodes of 2900
+    (1000/2900.0)**5 = 0.004875397277841433
+*/
+static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 6;
+static const int DEFAULT_INSTANTSEND_DEPTH          = 5;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70500;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70206;
+
+// For how long we are going to accept votes/locks
+// after we saw the first one for a specific transaction
+static const int INSTANTSEND_LOCK_TIMEOUT_SECONDS   = 15;
+// For how long we are going to keep invalid votes and votes for failed lock attempts,
+// must be greater than INSTANTSEND_LOCK_TIMEOUT_SECONDS
+static const int INSTANTSEND_FAILED_TIMEOUT_SECONDS = 60;
 
 extern bool fEnableInstantSend;
 extern int nInstantSendDepth;
@@ -31,8 +44,6 @@ extern int nCompleteTXLocks;
 class CInstantSend
 {
 private:
-static const int ORPHAN_VOTE_SECONDS            = 60;
-
     // Keep track of current block height
     int nCachedBlockHeight;
 
@@ -48,21 +59,23 @@ static const int ORPHAN_VOTE_SECONDS            = 60;
     std::map<COutPoint, uint256> mapLockedOutpoints; // utxo - tx hash
 
     //track dynodes who voted with no txreq (for DOS protection)
-    std::map<COutPoint, int64_t> mapDynodeOrphanVotes; // mn outpoint - time
+    std::map<COutPoint, int64_t> mapDynodeOrphanVotes; // dn outpoint - time
 
     bool CreateTxLockCandidate(const CTxLockRequest& txLockRequest);
-    void Vote(CTxLockCandidate& txLockCandidate);
+    void CreateEmptyTxLockCandidate(const uint256& txHash);
+    void Vote(CTxLockCandidate& txLockCandidate, CConnman& connman);
 
     //process consensus vote message
-    bool ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote);
-    void ProcessOrphanTxLockVotes();
+    bool ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote, CConnman& connman);
+    void ProcessOrphanTxLockVotes(CConnman& connman);
     bool IsEnoughOrphanVotesForTx(const CTxLockRequest& txLockRequest);
     bool IsEnoughOrphanVotesForTxAndOutPoint(const uint256& txHash, const COutPoint& outpoint);
     int64_t GetAverageDynodeOrphanVoteTime();
 
+    void TryToFinalizeLockCandidate(const CTxLockCandidate& txLockCandidate);
     void LockTransactionInputs(const CTxLockCandidate& txLockCandidate);
     //update UI and notify external script if any
-    void UpdateLockedTransaction(CTxLockCandidate& txLockCandidate, bool fForceNotification = false);
+    void UpdateLockedTransaction(const CTxLockCandidate& txLockCandidate);
     bool ResolveConflicts(const CTxLockCandidate& txLockCandidate);
 
     bool IsInstantSendReadyToLock(const uint256 &txHash);
@@ -70,9 +83,9 @@ static const int ORPHAN_VOTE_SECONDS            = 60;
 public:
     CCriticalSection cs_instantsend;
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
+    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
-    bool ProcessTxLockRequest(const CTxLockRequest& txLockRequest);
+    bool ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman& connman);
 
     bool AlreadyHave(const uint256& hash);
 
@@ -87,47 +100,43 @@ public:
 
     // verify if transaction is currently locked
     bool IsLockedInstantSendTransaction(const uint256& txHash);
-    // get the actual uber og accepted lock signatures
+    // get the actual number of accepted lock signatures
     int GetTransactionLockSignatures(const uint256& txHash);
-
     // get instantsend confirmations (only)
     int GetConfirmations(const uint256 &nTXHash);
 
     // remove expired entries from maps
     void CheckAndRemove();
     // verify if transaction lock timed out
-    bool IsTxLockRequestTimedOut(const uint256& txHash);
+    bool IsTxLockCandidateTimedOut(const uint256& txHash);
 
-    void Relay(const uint256& txHash) const;
+    void Relay(const uint256& txHash, CConnman& connman);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
     void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
+
+    std::string ToString();
 };
 
 class CTxLockRequest : public CTransaction
 {
 private:
-    static const int TIMEOUT_SECONDS        = 5 * 60;
     static const CAmount MIN_FEE            = 0.001 * COIN;
-
-    int64_t nTimeCreated;
 
 public:
     static const int WARN_MANY_INPUTS       = 100;
 
-    CTxLockRequest() :
-        CTransaction(),
-        nTimeCreated(GetTime())
-        {}
-    CTxLockRequest(const CTransaction& tx) :
-        CTransaction(tx),
-        nTimeCreated(GetTime())
-        {}
+    CTxLockRequest() = default;
+    CTxLockRequest(const CTransaction& tx) : CTransaction(tx) {};
 
-    bool IsValid(bool fRequireUnspent = true) const;
+    bool IsValid() const;
     CAmount GetMinFee() const;
     int GetMaxSignatures() const;
-    bool IsTimedOut() const;
+
+    explicit operator bool() const
+    {
+        return *this != CTxLockRequest();
+    }
 };
 
 class CTxLockVote
@@ -137,7 +146,7 @@ private:
     COutPoint outpoint;
     COutPoint outpointDynode;
     std::vector<unsigned char> vchDynodeSignature;
-// local memory only
+    // local memory only
     int nConfirmedHeight; // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
     int64_t nTimeCreated;
 
@@ -160,31 +169,32 @@ public:
         nTimeCreated(GetTime())
         {}
 
-ADD_SERIALIZE_METHODS;
+    ADD_SERIALIZE_METHODS;
 
-template <typename Stream, typename Operation>
-inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-    READWRITE(txHash);
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+        READWRITE(txHash);
         READWRITE(outpoint);
         READWRITE(outpointDynode);
         READWRITE(vchDynodeSignature);
-}
+    }
 
-uint256 GetHash() const;
+    uint256 GetHash() const;
 
     uint256 GetTxHash() const { return txHash; }
     COutPoint GetOutpoint() const { return outpoint; }
     COutPoint GetDynodeOutpoint() const { return outpointDynode; }
-    int64_t GetTimeCreated() const { return nTimeCreated; }
 
-    bool IsValid(CNode* pnode) const;
+    bool IsValid(CNode* pnode, CConnman& connman) const;
     void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }
     bool IsExpired(int nHeight) const;
+    bool IsTimedOut() const;
+    bool IsFailed() const;
 
-bool Sign();
-bool CheckSignature() const;
+    bool Sign();
+    bool CheckSignature() const;
 
-    void Relay() const;
+    void Relay(CConnman& connman) const;
 };
 
 class COutPointLock
@@ -192,10 +202,11 @@ class COutPointLock
 private:
     COutPoint outpoint; // utxo
     std::map<COutPoint, CTxLockVote> mapDynodeVotes; // dynode outpoint - vote
+    bool fAttacked = false;
 
 public:
-    static const int SIGNATURES_REQUIRED        = 10;
-    static const int SIGNATURES_TOTAL           = 20;
+    static const int SIGNATURES_REQUIRED        = 6;
+    static const int SIGNATURES_TOTAL           = 10;
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),
@@ -207,20 +218,23 @@ public:
     bool AddVote(const CTxLockVote& vote);
     std::vector<CTxLockVote> GetVotes() const;
     bool HasDynodeVoted(const COutPoint& outpointDynodeIn) const;
-    int CountVotes() const { return mapDynodeVotes.size(); }
-    bool IsReady() const { return CountVotes() >= SIGNATURES_REQUIRED; }
+    int CountVotes() const { return fAttacked ? 0 : mapDynodeVotes.size(); }
+    bool IsReady() const { return !fAttacked && CountVotes() >= SIGNATURES_REQUIRED; }
+    void MarkAsAttacked() { fAttacked = true; }
 
-    void Relay() const;
+    void Relay(CConnman& connman) const;
 };
 
 class CTxLockCandidate
 {
 private:
     int nConfirmedHeight; // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
+    int64_t nTimeCreated;
 
 public:
     CTxLockCandidate(const CTxLockRequest& txLockRequestIn) :
         nConfirmedHeight(-1),
+        nTimeCreated(GetTime()),
         txLockRequest(txLockRequestIn),
         mapOutPointLocks()
         {}
@@ -231,6 +245,7 @@ public:
     uint256 GetHash() const { return txLockRequest.GetHash(); }
 
     void AddOutPointLock(const COutPoint& outpoint);
+    void MarkOutpointAsAttacked(const COutPoint& outpoint);
     bool AddVote(const CTxLockVote& vote);
     bool IsAllOutPointsReady() const;
 
@@ -239,8 +254,9 @@ public:
 
     void SetConfirmedHeight(int nConfirmedHeightIn) { nConfirmedHeight = nConfirmedHeightIn; }
     bool IsExpired(int nHeight) const;
+    bool IsTimedOut() const;
 
-    void Relay() const;
+    void Relay(CConnman& connman) const;
 };
 
-#endif // INSTANTSEND_H
+#endif

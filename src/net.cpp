@@ -631,6 +631,7 @@ void CNode::copyStats(CNodeStats &stats)
 {
     stats.nodeid = this->GetId();
     X(nServices);
+    X(addr);
     X(fRelayTxes);
     X(nLastSend);
     X(nLastRecv);
@@ -658,9 +659,9 @@ void CNode::copyStats(CNodeStats &stats)
         nPingUsecWait = GetTimeMicros() - nPingUsecStart;
     }
 
-    // Raw ping time is in microseconds, but show it to user as whole seconds (Dash users should be well used to small numbers with many decimal places by now :)
+    // Raw ping time is in microseconds, but show it to user as whole seconds (Dynamic users should be well used to small numbers with many decimal places by now :)
     stats.dPingTime = (((double)nPingUsecTime) / 1e6);
-    stats.dPingMin  = (((double)nMinPingUsecTime) / 1e6);
+    stats.dMinPing  = (((double)nMinPingUsecTime) / 1e6);
     stats.dPingWait = (((double)nPingUsecWait) / 1e6);
 
     // Leave string empty if addrLocal invalid (not filled in yet)
@@ -1158,8 +1159,13 @@ void CConnman::ThreadSocketHandler()
                 }
             }
         }
-        if(vNodes.size() != nPrevNodeCount) {
-            nPrevNodeCount = vNodes.size();
+        size_t vNodesSize;
+        {
+            LOCK(cs_vNodes);
+            vNodesSize = vNodes.size();
+        }
+        if(vNodesSize != nPrevNodeCount) {
+            nPrevNodeCount = vNodesSize;
             if(clientInterface)
                 clientInterface->NotifyNumConnectionsChanged(nPrevNodeCount);
         }
@@ -1422,7 +1428,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "Dash Core " + FormatFullVersion();
+        std::string strDesc = "Dynamic" + FormatFullVersion();
 
         try {
             while (true) {
@@ -1659,8 +1665,7 @@ void CConnman::ThreadOpenConnections()
                 }
             }
         }
-        assert(nOutbound <= (nMaxOutbound + nMaxFeeler));
-
+        
         // Feeler Connections
         //
         // Design goals:
@@ -1831,13 +1836,12 @@ void CConnman::ThreadDnbRequestConnections()
         std::pair<CService, std::set<uint256> > p = dnodeman.PopScheduledDnbRequestConnection();
         if(p.first == CService() || p.second.empty()) continue;
 
-        CNode* pnode = NULL;
-        {
-            LOCK2(cs_main, cs_vNodes);
-            pnode = ConnectNode(CAddress(p.first, NODE_NETWORK), NULL, true);
-            if(!pnode) continue;
-            pnode->AddRef();
-        }
+        ConnectNode(CAddress(p.first, NODE_NETWORK), NULL, true);
+
+        LOCK(cs_vNodes);
+
+        CNode *pnode = FindNode(p.first);
+        if(!pnode || pnode->fDisconnect) continue;
 
         grant.MoveTo(pnode->grantDynodeOutbound);
 
@@ -1854,8 +1858,6 @@ void CConnman::ThreadDnbRequestConnections()
 
         // ask for data
         PushMessage(pnode, NetMsgType::GETDATA, vToFetch);
-
-        pnode->Release();
     }
 }
 

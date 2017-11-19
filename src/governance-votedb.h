@@ -1,17 +1,16 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_GOVERNANCE_VOTEDB_H
-#define DYNAMIC_GOVERNANCE_VOTEDB_H
+#ifndef GOVERNANCE_VOTEDB_H
+#define GOVERNANCE_VOTEDB_H
+
+#include <list>
+#include <map>
 
 #include "governance-vote.h"
 #include "serialize.h"
 #include "uint256.h"
-
-#include <list>
-#include <map>
 
 /**
  * Represents the collection of votes associated with a given CGovernanceObject
@@ -73,7 +72,7 @@ public:
 
     CGovernanceObjectVoteFile& operator=(const CGovernanceObjectVoteFile& other);
 
-    void RemoveVotesFromDynode(const CTxIn& vinDynode);
+    void RemoveVotesFromDynode(const COutPoint& outpointDynode);
 
     ADD_SERIALIZE_METHODS;
 
@@ -91,4 +90,4 @@ private:
 
 };
 
-#endif // DYNAMIC_GOVERNANCE_VOTEDB_H
+#endif

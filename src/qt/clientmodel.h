@@ -10,6 +10,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <atomic>
 
 class AddressTableModel;
 class BanTableModel;
@@ -78,10 +79,14 @@ public:
 
     QString formatFullVersion() const;
     QString formatSubVersion() const;
-    QString formatBuildDate() const;
     bool isReleaseVersion() const;
     QString clientName() const;
     QString formatClientStartupTime() const;
+	QString dataDir() const;
+
+    // caches for the best header
+    mutable std::atomic<int> cachedBestHeaderHeight;
+    mutable std::atomic<int64_t> cachedBestHeaderTime;
 
 private:
     OptionsModel *optionsModel;

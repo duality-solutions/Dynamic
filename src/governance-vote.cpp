@@ -1,10 +1,9 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "governance-vote.h"
-
+#include "governance-object.h"
 #include "dynodeman.h"
 #include "messagesigner.h"
 #include "util.h"
@@ -29,7 +28,7 @@ std::string CGovernanceVoting::ConvertOutcomeToString(vote_outcome_enum_t nOutco
 
 std::string CGovernanceVoting::ConvertSignalToString(vote_signal_enum_t nSignal)
 {
-    std::string strReturn = "NONE";
+    string strReturn = "NONE";
     switch(nSignal)
     {
         case VOTE_SIGNAL_NONE:
@@ -214,21 +213,21 @@ CGovernanceVote::CGovernanceVote()
       vchSig()
 {}
 
-CGovernanceVote::CGovernanceVote(CTxIn vinDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn)
+CGovernanceVote::CGovernanceVote(COutPoint outpointDynodeIn, uint256 nParentHashIn, vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn)
     : fValid(true),
       fSynced(false),
       nVoteSignal(eVoteSignalIn),
-      vinDynode(vinDynodeIn),
+      vinDynode(outpointDynodeIn),
       nParentHash(nParentHashIn),
       nVoteOutcome(eVoteOutcomeIn),
       nTime(GetAdjustedTime()),
       vchSig()
 {}
 
-void CGovernanceVote::Relay() const
+void CGovernanceVote::Relay(CConnman& connman) const
 {
     CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, GetHash());
-    g_connman->RelayInv(inv, PROTOCOL_VERSION);
+    connman.RelayInv(inv, MIN_GOVERNANCE_PEER_PROTO_VERSION);
 }
 
 bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
@@ -275,8 +274,8 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
         return false;
     }
 
-    dynode_info_t infoSn = dnodeman.GetDynodeInfo(vinDynode);
-    if(!infoSn.fInfoValid) {
+    dynode_info_t infoDn;
+    if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
         LogPrint("gobject", "CGovernanceVote::IsValid -- Unknown Dynode - %s\n", vinDynode.prevout.ToStringShort());
         return false;
     }
@@ -287,7 +286,7 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
     std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
-    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }

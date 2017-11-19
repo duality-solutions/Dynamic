@@ -42,7 +42,7 @@ public:
 
     CDynodePing() = default;
 
-    CDynodePing(CTxIn& vinNew);
+    CDynodePing(const COutPoint& outpoint);
 
     ADD_SERIALIZE_METHODS;
 
@@ -71,11 +71,11 @@ public:
     }
 
     bool IsExpired() const { return GetAdjustedTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
-    bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
+    bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
     bool CheckSignature(CPubKey& pubKeyDynode, int &nDos);
     bool SimpleCheck(int& nDos);
-    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos);
-    void Relay();
+    bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
+    void Relay(CConnman& connman);
 
 };
 
@@ -99,11 +99,11 @@ struct dynode_info_t
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
 
     dynode_info_t(int activeState, int protoVer, int64_t sTime,
-                      CTxIn const& vin, CService const& addr,
+                      COutPoint const& outpoint, CService const& addr,
                       CPubKey const& pkCollAddr, CPubKey const& pkDN,
                       int64_t tWatchdogV = 0) :
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
-        vin{vin}, addr{addr},
+        vin{outpoint}, addr{addr},
         pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN},
         nTimeLastWatchdogVote{tWatchdogV} {}
 
@@ -156,7 +156,7 @@ public:
     CDynodePing lastPing{};
     std::vector<unsigned char> vchSig{};
 
-    int nCacheCollateralBlock{};
+    uint256 nCollateralMinConfBlockHash{};
     int nBlockLastPaid{};
     int nPoSeBanScore{};
     int nPoSeBanHeight{};
@@ -169,7 +169,7 @@ public:
     CDynode();
     CDynode(const CDynode& other);
     CDynode(const CDynodeBroadcast& dnb);
-    CDynode(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn);
+    CDynode(CService addrNew, COutPoint outpointNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn);
 
     ADD_SERIALIZE_METHODS;
 
@@ -188,7 +188,7 @@ public:
         READWRITE(nTimeLastPaid);
         READWRITE(nTimeLastWatchdogVote);
         READWRITE(nActiveState);
-        READWRITE(nCacheCollateralBlock);
+        READWRITE(nCollateralMinConfBlockHash);
         READWRITE(nBlockLastPaid);
         READWRITE(nProtocolVersion);
         READWRITE(nPoSeBanScore);
@@ -201,10 +201,10 @@ public:
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
     arith_uint256 CalculateScore(const uint256& blockHash);
 
-    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb);
+    bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman);
 
-    static CollateralStatus CheckCollateral(CTxIn vin);
-    static CollateralStatus CheckCollateral(CTxIn vin, int& nHeight);
+    static CollateralStatus CheckCollateral(const COutPoint& outpoint);
+    static CollateralStatus CheckCollateral(const COutPoint& outpoint, int& nHeightRet);
     void Check(bool fForce = false);
 
     bool IsBroadcastedWithin(int nSeconds) { return GetAdjustedTime() - sigTime < nSeconds; }
@@ -256,6 +256,7 @@ public:
 
     void IncreasePoSeBanScore() { if(nPoSeBanScore < DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
+    void PoSeBan() { nPoSeBanScore = DYNODE_POSE_BAN_MAX_SCORE; }
 
     dynode_info_t GetInfo();
 
@@ -283,7 +284,7 @@ public:
         static_cast<dynode_info_t&>(*this)=from;
         lastPing = from.lastPing;
         vchSig = from.vchSig;
-        nCacheCollateralBlock = from.nCacheCollateralBlock;
+        nCollateralMinConfBlockHash = from.nCollateralMinConfBlockHash;
         nBlockLastPaid = from.nBlockLastPaid;
         nPoSeBanScore = from.nPoSeBanScore;
         nPoSeBanHeight = from.nPoSeBanHeight;
@@ -314,8 +315,8 @@ public:
     bool fRecovery;
     CDynodeBroadcast() : CDynode(), fRecovery(false) {}
     CDynodeBroadcast(const CDynode& dn) : CDynode(dn), fRecovery(false) {}
-    CDynodeBroadcast(CService addrNew, CTxIn vinNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn) :
-        CDynode(addrNew, vinNew, pubKeyCollateralAddressNew, pubKeyDynodeNew, nProtocolVersionIn), fRecovery(false) {}
+    CDynodeBroadcast(CService addrNew, COutPoint outpointNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn) :
+        CDynode(addrNew, outpointNew, pubKeyCollateralAddressNew, pubKeyDynodeNew, nProtocolVersionIn), fRecovery(false) {}
 
     ADD_SERIALIZE_METHODS;
 
@@ -341,18 +342,18 @@ public:
     }
 
     /// Create Dynode broadcast, needs to be relayed manually after that
-    static bool Create(CTxIn vin, CService service, CKey keyCollateralAddressNew, CPubKey pubKeyCollateralAddressNew, CKey keyDynodeNew, CPubKey pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet);
+    static bool Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet);
     static bool Create(std::string strService, std::string strKey, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
-    bool Update(CDynode* pdn, int& nDos);
+    bool Update(CDynode* pdn, int& nDos, CConnman& connman);
     bool CheckOutpoint(int& nDos);
     /// Is the input associated with this public key? (and there is 1000 DYN - checking if valid Dynode)
     bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
 
-    bool Sign(CKey& keyCollateralAddress);
+    bool Sign(const CKey& keyCollateralAddress);
     bool CheckSignature(int& nDos);
-    void Relay();
+    void Relay(CConnman& connman);
 };
 
 class CDynodeVerification

@@ -1577,7 +1577,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         // Process custom logic, no matter if tx will be accepted to mempool later or not
         if (strCommand == NetMsgType::TXLOCKREQUEST) {
-            if(!instantsend.ProcessTxLockRequest(txLockRequest)) {
+            if(!instantsend.ProcessTxLockRequest(txLockRequest, connman)) {
                 LogPrint("instantsend", "TXLOCKREQUEST -- failed %s\n", txLockRequest.GetHash().ToString());
                 return false;
             }
@@ -1588,27 +1588,28 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 return true; // not an error
             }
 
-            CDynode* pdn = dnodeman.Find(pstx.vin);
-            if(pdn == NULL) {
+            CDynode dn;
+
+            if(!dnodeman.Get(pstx.vin.prevout, dn)) {
                 LogPrint("privatesend", "PSTX -- Can't find dynode %s to verify %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return false;
             }
 
-            if(!pdn->fAllowMixingTx) {
+            if(!dn.fAllowMixingTx) {
                 LogPrint("privatesend", "PSTX -- Dynode %s is sending too many transactions %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return true;
                 // TODO: Not an error? Could it be that someone is relaying old PSTXes
                 // we have no idea about (e.g we were offline)? How to handle them?
             }
 
-            if(!pstx.CheckSignature(pdn->pubKeyDynode)) {
+            if(!pstx.CheckSignature(dn.pubKeyDynode)) {
                 LogPrint("privatesend", "PSTX -- CheckSignature() failed for %s\n", hashTx.ToString());
                 return false;
             }
 
             LogPrintf("PSTX -- Got Dynode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
-            pdn->fAllowMixingTx = false;
+            dnodeman.DisallowMixing(pstx.vin.prevout);
         }
 
         LOCK(cs_main);
@@ -2159,14 +2160,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (found)
         {
             //probably one the extensions
-            privateSendClient.ProcessMessage(pfrom, strCommand, vRecv);
-            privateSendServer.ProcessMessage(pfrom, strCommand, vRecv);
-            dnodeman.ProcessMessage(pfrom, strCommand, vRecv);
-            dnpayments.ProcessMessage(pfrom, strCommand, vRecv);
-            instantsend.ProcessMessage(pfrom, strCommand, vRecv);
+            privateSendClient.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            privateSendServer.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            dnodeman.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            dnpayments.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            instantsend.ProcessMessage(pfrom, strCommand, vRecv, connman);
             sporkManager.ProcessSpork(pfrom, strCommand, vRecv, connman);
             dynodeSync.ProcessMessage(pfrom, strCommand, vRecv);
-            governance.ProcessMessage(pfrom, strCommand, vRecv);
+            governance.ProcessMessage(pfrom, strCommand, vRecv, connman);
         }
         else
         {

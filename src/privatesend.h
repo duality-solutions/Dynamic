@@ -14,6 +14,7 @@
 #include "timedata.h"
 
 class CPrivateSend;
+class CConnman;
 
 // timeouts
 static const int PRIVATESEND_AUTO_TIMEOUT_MIN       = 5;
@@ -166,9 +167,9 @@ public:
         fTried(false)
         {}
 
-    CPrivatesendQueue(int nDenom, CTxIn vin, int64_t nTime, bool fReady) :
+    CPrivatesendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
         nDenom(nDenom),
-        vin(vin),
+        vin(CTxIn(outpoint)),
         nTime(nTime),
         fReady(fReady),
         vchSig(std::vector<unsigned char>()),
@@ -197,7 +198,7 @@ public:
     /// Check if we have a valid Dynode address
     bool CheckSignature(const CPubKey& pubKeyDynode);
 
-    bool Relay();
+    bool Relay(CConnman& connman);
 
     /// Is this queue expired?
     bool IsExpired() { return GetAdjustedTime() - nTime > PRIVATESEND_QUEUE_TIMEOUT; }
@@ -237,10 +238,10 @@ public:
         sigTime(0)
         {}
 
-    CPrivatesendBroadcastTx(CTransaction tx, CTxIn vin, int64_t sigTime) :
+    CPrivatesendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
         nConfirmedHeight(-1),
         tx(tx),
-        vin(vin),
+        vin(CTxIn(outpoint)),
         vchSig(),
         sigTime(sigTime)
         {}
@@ -328,7 +329,7 @@ public:
     static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
     static CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
 
-    /// Get the denominations for a specific amount of dash.
+    /// Get the denominations for a specific amount of Dynamic.
     static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
 
     /// Get the denominations for a list of outputs (returns a bitshifted integer)
@@ -356,6 +357,6 @@ public:
     static void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
 };
 
-void ThreadCheckPrivateSend();
+void ThreadCheckPrivateSend(CConnman& connman);
 
 #endif

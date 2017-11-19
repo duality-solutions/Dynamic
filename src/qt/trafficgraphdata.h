@@ -65,6 +65,7 @@ public:
     void switchRange(GraphRange newRange);
     SampleQueue getRangeQueue(GraphRange range);
     SampleQueue getCurrentRangeQueue();
+    SampleQueue getCurrentRangeQueueWithAverageBandwidth();
     void clear();
     void setLastBytes(quint64 nLastBytesIn, quint64 nLastBytesOut);
 
@@ -90,6 +91,7 @@ private:
     SampleQueue sumEach3Samples(const SampleQueue &rangeQueue, GraphRange range);
 
 
+    float converSampletoBandwith(float dataAmount);
     TrafficGraphData(const TrafficGraphData& that);
     TrafficGraphData& operator=(TrafficGraphData const&);
 };

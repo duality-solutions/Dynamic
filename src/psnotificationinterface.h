@@ -11,7 +11,7 @@
 class CPSNotificationInterface : public CValidationInterface
 {
 public:
-    CPSNotificationInterface() = default;
+    CPSNotificationInterface(CConnman& connmanIn): connman(connmanIn) {}
     virtual ~CPSNotificationInterface() = default;
 
     // a small helper to initialize current block height in sub-modules on startup
@@ -25,6 +25,7 @@ protected:
     void SyncTransaction(const CTransaction &tx, const CBlock *pblock) override;
 
 private:
+    CConnman& connman;
 };
 
 #endif // DYNAMIC_PSNOTIFICATIONINTERFACE_H

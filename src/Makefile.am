@@ -147,7 +147,8 @@ DYNAMIC_CORE_H = \
   primitives/transaction.h \
   privatesend-client.h \
   privatesend.h \
-  privatesend-server.h \    
+  privatesend-server.h \
+  privatesend-util.h \
   psnotificationinterface.h \
   protocol.h \
   pubkey.h \
@@ -292,6 +293,7 @@ libdynamic_wallet_a_SOURCES = \
   keepass.cpp \
   policy/rbf.cpp \
   privatesend-client.cpp \
+  privatesend-util.cpp \
   psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \

@@ -25,19 +25,24 @@ void CPSNotificationInterface::AcceptedBlockHeader(const CBlockIndex *pindexNew)
 
 void CPSNotificationInterface::NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload)
 {
-    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload);
+    dynodeSync.NotifyHeaderTip(pindexNew, fInitialDownload, connman);
 }
 
 void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)
 {
-    if (fInitialDownload || pindexNew == pindexFork) // In IBD or blocks were disconnected without any new ones
+    if (pindexNew == pindexFork) // blocks were disconnected without any new ones
+        return;
+
+    dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
+
+    if (fInitialDownload)
         return;
 
     dnodeman.UpdatedBlockTip(pindexNew);
     privateSendClient.UpdatedBlockTip(pindexNew);
     instantsend.UpdatedBlockTip(pindexNew);
-    dnpayments.UpdatedBlockTip(pindexNew);
-    governance.UpdatedBlockTip(pindexNew);
+    dnpayments.UpdatedBlockTip(pindexNew, connman);
+    governance.UpdatedBlockTip(pindexNew, connman);
 }
 
 void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlock *pblock)

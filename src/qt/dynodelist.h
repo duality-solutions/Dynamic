@@ -10,7 +10,7 @@
 
 #include "platformstyle.h"
 
-#include "dynode.h"
+#include "primitives/transaction.h"
 #include "sync.h"
 #include "util.h"
 
@@ -53,7 +53,7 @@ private:
     bool fFilterUpdated;
 
 public Q_SLOTS:
-    void updateMyDynodeInfo(QString strAlias, QString strAddr, dynode_info_t& infoDn);
+    void updateMyDynodeInfo(QString strAlias, QString strAddr, const COutPoint& outpoint);
     void updateMyNodeList(bool fForce = false);
     void updateNodeList();
 
