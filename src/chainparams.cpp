@@ -128,7 +128,7 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 		consensus.nPowAveragingWindow = 5;
@@ -138,7 +138,7 @@ public:
 		consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
-        consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -162,7 +162,7 @@ public:
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 20545;
-        startNewChain = false;
+        startNewChain = true;
 
         genesis = CreateGenesisBlock(0, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
@@ -243,7 +243,7 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 
@@ -251,7 +251,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
-        consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
 		consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -352,7 +352,7 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 
@@ -360,7 +360,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
-        consensus.nMinerConfirmationWindow = 338; // Faster than normal for regtest (144 instead of 2016)
+        consensus.nMinerConfirmationWindow = 30; // Faster than normal for regtest (144 instead of 2016)
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 999999999999ULL;
