@@ -82,6 +82,7 @@ public:
 };
 
 /** Standard Reward Payment Determination Functions */
+CAmount GetPoWBlockPayment(const int& nHeight);
 CAmount GetDynodePayment(bool fDynode = true);
 
 /** Override Logic Switch for Reward Payment Determination Functions */

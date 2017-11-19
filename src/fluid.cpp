@@ -4,8 +4,8 @@
 
 #include "fluid.h"
 
-#include "main.h"
-
+#include "chain.h"
+#include "core_io.h"
 #include "keepass.h"
 #include "net.h"
 #include "netbase.h"
@@ -14,7 +14,7 @@
 #include "utilmoneystr.h"
 #include "core_io.h"
 #include "utiltime.h"
-#include "chain.h"
+#include "validation.h"
 
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"

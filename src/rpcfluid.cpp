@@ -24,9 +24,8 @@
 
 #include "fluid.h"
 
+#include "chain.h"
 #include "core_io.h"
-#include "wallet/wallet.h"
-#include "wallet/walletdb.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -36,8 +35,9 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
-#include "main.h"
-#include "chain.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+#include "wallet/walletdb.h"
 
 #include <univalue.h>
 

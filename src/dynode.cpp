@@ -6,15 +6,15 @@
 #include "dynode.h"
 
 #include "activedynode.h"
+#include "chain.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "fluid.h"
 #include "init.h"
 #include "messagesigner.h"
 #include "util.h"
-#include "consensus/validation.h"
-#include "fluid.h"
-#include "chain.h"
+#include "validation.h"
 
 #include <boost/lexical_cast.hpp>
 
