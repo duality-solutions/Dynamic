@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -820,7 +820,7 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
 
     CDynodeMan::rank_pair_vec_t dns;
     if (!dnodeman.GetDynodeRanks(dns, nPrevBlockHeight - 101, GetMinDynodePaymentsProto())) {
-        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetMasternodeRanks failed\n";
+        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetDynodeRanks failed\n";
         LogPrint("dnpayments", "%s", debugStr);
         return;
     }

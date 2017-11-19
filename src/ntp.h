@@ -1,7 +1,7 @@
-// Copyright (c) 2013-2016 The NovaCoin developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2013-2016 The NovaCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or https://opensource.org/licenses/mit-license.php
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_NTP_H
 #define DYNAMIC_NTP_H
