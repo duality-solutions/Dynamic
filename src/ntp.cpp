@@ -457,7 +457,7 @@ void ThreadNtpSamples() {
     vnThreadsRunning[THREAD_NTP]++;
 
     // Make this thread recognisable as time synchronization thread
-    RenameThread("novacoin-ntp-samples");
+    RenameThread("dynamic-ntp-samples");
 
     CMedianFilter<int64_t> vTimeOffsets(200,0);
 
@@ -513,7 +513,7 @@ void ThreadNtpSamples() {
         if (GetNodesOffset() == numeric_limits<int64_t>::max() && abs(nNtpOffset) > 40 * 60)
         {
             // If there is not enough node offsets data and NTP time offset is greater than 40 minutes then give a warning.
-            string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong NovaCoin will not work properly.");
+            string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
             strMiscWarning = strMessage;
             LogPrintf("*** %s\n", strMessage.c_str());
             uiInterface.ThreadSafeMessageBox(strMessage+" ", string("Dynamic"), CClientUIInterface::BTN_OK | CClientUIInterface::ICON_WARNING);
