@@ -310,14 +310,13 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
 		blockValue = 	getBlockSubsidyWithOverride(pindexPrev->nHeight, chainActive.Tip()->fluidParams.blockReward);
 	}
 	
-	dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
-
-//    txNew.vout[0].nValue = blockValue;
+    txNew.vout[0].nValue = blockValue;
 
     if(hasPayment){
         txNew.vout.resize(2);
 
-        // txNew.vout[0].nValue = blockValue;
+        dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = dynodePayment;
 
