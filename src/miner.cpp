@@ -447,6 +447,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         nLastBlockSize = nBlockSize;
         LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
 
+        // Do we want the ability to redirect fees to company address?
+        /*
         // Send fees to company address
         if (pindexPrev->nHeight + 1 > fluid.FEE_REDIRECT_HEIGHT) {
             CDynamicAddress feeRedirAddress(fluid.FEE_REDIRECT_ADDRESS);
@@ -459,7 +461,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
             txNew.vout.push_back(CTxOut(nFees, script));
         }
-
+        */
 		LogPrintf("CreateNewBlock(): Computed Block Reward is: %s DYN\n", std::to_string((blockReward + fluidIssuance) / COIN));
 
         // Update block coinbase
