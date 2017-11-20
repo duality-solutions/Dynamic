@@ -102,6 +102,7 @@ class CFluidEntry
 public:
 	CAmount blockReward;
 	CAmount dynodeReward;
+    unsigned int dynodeRecipientCount;
 	std::vector<std::string> fluidHistory;
 	std::vector<std::string> fluidManagers;
 
@@ -114,6 +115,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
 		READWRITE(VARINT(blockReward));
 		READWRITE(VARINT(dynodeReward));
+        READWRITE(VARINT(dynodeRecipientCount));
 		READWRITE(fluidHistory);
 		READWRITE(fluidManagers);
 	}
@@ -124,6 +126,7 @@ public:
 			&& a.fluidManagers == b.fluidManagers
 			&& a.blockReward == b.blockReward
 			&& a.dynodeReward == b.dynodeReward
+            && a.dynodeRecipientCount == b.dynodeRecipientCount
 			);
     }
 
@@ -132,6 +135,7 @@ public:
 		fluidManagers = b.fluidManagers;
 		blockReward = b.blockReward;
 		dynodeReward = b.dynodeReward;
+        dynodeRecipientCount = b.dynodeRecipientCount;
 		return *this;
     }
 
@@ -144,10 +148,11 @@ public:
 		fluidManagers = InitialiseAddresses();
 		blockReward = 0;
 		dynodeReward = 0;
+        dynodeRecipientCount = 1;
 	}
 
     inline bool IsNull() const { 
-		return (fluidHistory.empty() && fluidManagers == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0); 
+		return (fluidHistory.empty() && fluidManagers == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
 	}
 };
 
