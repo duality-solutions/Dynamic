@@ -48,6 +48,10 @@ opcodetype getOpcodeFromString(std::string input) {
     if (input == "OP_MINT") return OP_MINT;
     else if (input == "OP_REWARD_DYNODE") return OP_REWARD_DYNODE;
     else if (input == "OP_REWARD_MINING") return OP_REWARD_MINING;
+    else if (input == "OP_SWAP_SOVEREIGN_ADDRESS") return OP_SWAP_SOVEREIGN_ADDRESS;
+    else if (input == "OP_UPDATE_FEES") return OP_UPDATE_FEES;
+    else if (input == "OP_FREEZE_ADDRESS") return OP_FREEZE_ADDRESS;
+    else if (input == "OP_RELEASE_ADDRESS") return OP_RELEASE_ADDRESS;
     else return OP_RETURN;
 
     return OP_RETURN;
@@ -159,7 +163,7 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 2)
         throw std::runtime_error(
             "sendfluidtransaction \"OP_MINT || OP_REWARD_DYNODE || OP_REWARD_MINING\" \"hexstring\"\n"
-            "\Send Fluid transactions to the network\n"
+            "\nSend Fluid transactions to the network\n"
             "\nArguments:\n"
             "1. \"opcode\"  (string, required) The Fluid operation to be executed.\n"
             "2. \"hexstring\" (string, required) The token for that opearation.\n"
@@ -211,7 +215,7 @@ UniValue signtoken(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
     if (!fluid.IsGivenKeyMaster(address))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not Fluid Protocol Sovreign address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
     if (!fluid.InitiateFluidVerify(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
@@ -274,7 +278,7 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Hex string is invalid! Token incorrect");
 
     if (!fluid.IsGivenKeyMaster(address))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not Fluid Protocol Sovreign address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
     if (!fluid.InitiateFluidVerify(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
