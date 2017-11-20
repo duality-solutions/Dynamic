@@ -34,11 +34,11 @@ public:
 
     std::vector<std::string> InitialiseAddresses() {
         std::vector<std::string> x;
-        x.push_back("D875Zfawgu8C2UeEzAEeUjy3xYPh1SVkdb"); // importprivkey QRk4PoYbvhyi1D1o8jMNcV6yLYKMa5cX1zRciSninmFQhX6vuAYg
-        x.push_back("DBeJZkf8wjdkkxHQ2m2by9zPjdGHeMqy54"); // importprivkey QVHkqDiaZLgy1KZAkfyTNpVQtLEdg6hMBgi2SZ3khUZpVM5H64Aw
-        x.push_back("DTbo2v1mCHnGA84JvitSdkGbRMrWVSm6u4"); // importprivkey QUyWN3JKSLZGLnKjYr6ZqY4hmRyzSQnBysknCv8pa2W31JrwsyC4
-        x.push_back("DKBrQhZjVT6yeo16S4JsecFqtSQV8pojxR"); // importprivkey QRpJmBAZmu6hhBdsP5F2f45zZTs1us2SJofRrug7sJFAoogB2ytV
-        x.push_back("DPish8VPe9iNrkb4dgXpx52z6XWjNQBXyC"); // importprivkey QTT7jTY72xmo2LHRHLqwUPYoDs7f9Je5hCrkRs1J7r9rE5NczbSd
+        x.push_back("DSZcL75kYD6hWWoU1xecuZ9gMVB8fqccP6"); // importprivkey 5hUhjdy2JgVgSrye7nB8SWkSTTMjW7rRDjkH1HcPh9q6DexXPdh
+        x.push_back("DPTotn3YNajtyAvAx9KQrKa98JwuKZKceD"); // importprivkey 5iUn32hTbpQhH11rFrtkSZXxAjLcF81znxTsnQLhdFiG42cdKr8
+        x.push_back("DJW7o975ycmJWBzzXQSP2nLSnECyGLTozM"); // importprivkey 5ihNmnWmvLRSDcwA4aFUXNjXakNTcDjpUGTXYuedwB2Xzp58CPo
+        x.push_back("DAhJS4uWw2dfr2h3mofoi9ffBrhgqkrHbD"); // importprivkey 5hvA5xQEtH1CUzhxTCBrjgiQhPwrmenMGPL23DruYoduASR4wWm
+        x.push_back("DJsGhpDtA9z4yquAFXiy48sgtQQcYhhq1K"); // importprivkey 5i2rPucptq3ojq5gccpa8FkdXuF1jiBiG4fvHB2bGUMQng1Y2iM
         return x;
     }
 
