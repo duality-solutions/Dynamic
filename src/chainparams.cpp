@@ -280,8 +280,8 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x"));
-            assert(genesis.hashMerkleRoot == uint256S("0x"));
+            //assert(consensus.hashGenesisBlock == uint256S("0x"));
+            //assert(genesis.hashMerkleRoot == uint256S("0x"));
         }
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -386,8 +386,8 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if(!startNewChain)
-            assert(consensus.hashGenesisBlock == uint256S("0x"));
-            assert(genesis.hashMerkleRoot == uint256S("0x"));
+            //assert(consensus.hashGenesisBlock == uint256S("0x"));
+            //assert(genesis.hashMerkleRoot == uint256S("0x"));
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
