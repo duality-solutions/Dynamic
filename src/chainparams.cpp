@@ -164,13 +164,13 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511025744, 425243, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1511136535, 1738446, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x00000cb915b3be92f01dae911255095f659474aaa52d439864e25774bc00b52f"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000004ecc1a0b057dd991d4e8849815f056f890bcda7bf707c3b43df7a72001b"));
             assert(genesis.hashMerkleRoot == uint256S("0x9f7ed8cbabf13252143cb3c497ee404cfb5e86f7f52bee63e2c80bba7475dc68"));
 		}
 
@@ -195,7 +195,7 @@ public:
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
-        fMiningRequiresPeers = true;
+        fMiningRequiresPeers = false;
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
@@ -207,7 +207,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x00000cb915b3be92f01dae911255095f659474aaa52d439864e25774bc00b52f")),
+	        (        0, uint256S("0x000004ecc1a0b057dd991d4e8849815f056f890bcda7bf707c3b43df7a72001b")),
             1511025744, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
