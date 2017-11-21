@@ -188,10 +188,23 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
     if(!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
         throw std::runtime_error("Instruction does not meet required quorum for validity");
 
-    CWalletTx wtx;
-    SendCustomTransaction(finalScript, wtx);
-
-    return wtx.GetHash().GetHex();
+    if (opcode == OP_MINT) {
+        CWalletTx wtx;
+        SendCustomTransaction(finalScript, wtx);
+        return wtx.GetHash().GetHex();
+    }
+    else if (opcode == OP_REWARD_MINING)
+    {
+        throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", params[0].get_str()));
+    }
+    else if (opcode == OP_REWARD_DYNODE)
+    {
+        throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", params[0].get_str()));
+    }
+    else
+    {
+        throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", params[0].get_str()));
+    }
 }
 
 UniValue signtoken(const UniValue& params, bool fHelp)

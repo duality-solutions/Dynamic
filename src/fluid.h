@@ -28,9 +28,10 @@ class CParameters {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
     static const int MAX_FLUID_TIME_DISTORT = 8 * 60;
-    static const int FEE_REDIRECT_HEIGHT = 10;
+    static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
 
-    std::string FEE_REDIRECT_ADDRESS = "D8bMJRb7QaLAATMbMy6218gUoRXitipWzB"; // importprivkey QQMokyLh3HLNqV1XuTSnw9U5mq12qFSqaythSFoYGm1erSYSCSCi
+    //TODO (Amir): Change address and remove private keys below.
+    std::string FEE_REDIRECT_ADDRESS = "DGkRapsj7yQSvYaf46pHYUPwJrakpMd3Sh"; // importprivkey 5iw3QNmomgDceCTEZCLtEaeqSsyJXvKf28fc9rCi1iymYzokt4L
 
     std::vector<std::string> InitialiseAddresses() {
         std::vector<std::string> x;
