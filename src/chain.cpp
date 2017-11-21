@@ -114,6 +114,6 @@ void CBlockIndex::BuildSkip()
 }
 
 std::vector<std::string> InitialiseAddresses() {
-	CParameters params;
+	CFluidParameters params;
 	return params.InitialiseAddresses();
 }

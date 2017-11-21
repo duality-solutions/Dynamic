@@ -24,11 +24,13 @@ class CBlock;
 class CBlockTemplate;
 
 /** Configuration Framework */
-class CParameters {
+class CFluidParameters {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
     static const int MAX_FLUID_TIME_DISTORT = 8 * 60;
     static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
+    static const CAmount MAX_FLUID_MINER_REWARD = 3; // Maximum DYN miner block reward amount 
+    static const CAmount MAX_FLUID_DYNODE_REWARD = 5; // Maximum DYN Dynode block reward amount 
 
     //TODO (Amir): Change address and remove private keys below.
     std::string FEE_REDIRECT_ADDRESS = "DGkRapsj7yQSvYaf46pHYUPwJrakpMd3Sh"; // importprivkey 5iw3QNmomgDceCTEZCLtEaeqSsyJXvKf28fc9rCi1iymYzokt4L
@@ -55,7 +57,7 @@ public:
 };
 
 /** Fluid Asset Management Framework */
-class Fluid : public CParameters, public HexFunctions {
+class Fluid : public CFluidParameters, public HexFunctions {
 public:
     void AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord);
     void ReplaceFluidMasters(const CBlockHeader& blockHeader, std::vector<std::string>& fluidManagers);
