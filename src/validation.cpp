@@ -3399,7 +3399,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
     }
     
     // Check if fee is redirected to company address
-    if (nHeight > fluid.FEE_REDIRECT_HEIGHT) {
+    if (nHeight > fluid.FEE_REDIRECT_HEIGHT && sporkManager.IsSporkActive(SPORK_15_REDIRECT_FEES)) {
         bool found = false;
 		
 		CDynamicAddress feeRedirAddress(fluid.FEE_REDIRECT_ADDRESS);  CScript script;
