@@ -157,7 +157,7 @@ public:
         pchMessageStart[1] = 0x42;
         pchMessageStart[2] = 0x55;
         pchMessageStart[3] = 0x61;
-        vAlertPubKey = ParseHex("046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646");
+        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
         nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -203,7 +203,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646";
+        strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -265,7 +265,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        vAlertPubKey = ParseHex("046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646");
+        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -372,7 +372,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
-        vAlertPubKey = ParseHex("046f93f9a9989d671db0aa56c33c776c7a0df046d353ed4fb998a983f2aef7713565bf0ba797dd9edc09e6fa330599037f16c24236ffc58a3efbe7da6126b4d646");
+        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 0; // never delay
         nDefaultPort = DEFAULT_P2P_PORT + 200;
