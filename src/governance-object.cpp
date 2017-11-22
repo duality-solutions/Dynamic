@@ -454,7 +454,7 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
                 } else if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
                     strError = "Failed to find Dynode UTXO, missing dynode=" + strOutpoint + "\n";
                 } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
-                    strError = "Dynode UTXO should have 1000 DASH, missing dynode=" + strOutpoint + "\n";
+                    strError = "Dynode UTXO should have 1000 DYN, missing dynode=" + strOutpoint + "\n";
                 }
 
                 return false;

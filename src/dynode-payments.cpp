@@ -298,6 +298,13 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
         }
     }
 
+    // No Dynodes on network
+    int nDnCount = dnodeman.CountDynodes();
+    if(nDnCount <= Params().GetConsensus().MinCountDynodesPaymentStart) {
+        LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
+        hasPayment = false;       
+    }
+
     CAmount blockValue;
     CAmount dynodePayment;
 
