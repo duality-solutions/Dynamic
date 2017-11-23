@@ -760,14 +760,14 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
     
-    if(!dynodeSync.IsBlockchainSynced()) return;
-
     if (strCommand == NetMsgType::DNANNOUNCE) { //Dynode Broadcast
 
         CDynodeBroadcast dnb;
         vRecv >> dnb;
 
         pfrom->setAskFor.erase(dnb.GetHash());
+
+        if(!dynodeSync.IsBlockchainSynced()) return;
 
         LogPrint("Dynode", "DNANNOUNCE -- Dynode announce, Dynode=%s\n", dnb.vin.prevout.ToStringShort());
 
@@ -790,6 +790,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         uint256 nHash = dnp.GetHash();
 
         pfrom->setAskFor.erase(nHash);
+
+        if(!dynodeSync.IsBlockchainSynced()) return;
 
         LogPrint("Dynode", "DNPING -- Dynode ping, Dynode=%s\n", dnp.vin.prevout.ToStringShort());
 
@@ -897,6 +899,10 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         CDynodeVerification dnv;
         vRecv >> dnv;
+
+        pfrom->setAskFor.erase(dnv.GetHash());
+
+        if(!dynodeSync.IsDynodeListSynced()) return;
 
         if(dnv.vchSig1.empty()) {
             // CASE 1: someone asked me to verify myself /IP we are using/
