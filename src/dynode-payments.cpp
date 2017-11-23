@@ -264,81 +264,6 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
     return true;
 }
 
-/**
-*   FillBlockPayee
-*
-*   Fill Dynode ONLY payment block
-*/
-
-void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet)
-{
-    CBlockIndex* pindexPrev = chainActive.Tip();       
-    if(!pindexPrev) return;        
-
-    bool hasPayment = true;
-    CScript payee;
-
-    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock){
-            if (fDebug)
-                LogPrintf("CreateNewBlock: No Dynode payments prior to block 20,546\n");
-            hasPayment = false;
-    }
-
-    //spork
-    if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
-        //no Dynode detected
-        int nCount = 0;
-        dynode_info_t dnInfo;
-        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
-        payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
-        } else {
-            if (fDebug)
-                LogPrintf("CreateNewBlock: Failed to detect Dynode to pay\n");
-            hasPayment = false;
-        }
-    }
-
-    // No Dynodes on network
-    int nDnCount = dnodeman.CountDynodes();
-    if(nDnCount <= Params().GetConsensus().MinCountDynodesPaymentStart) {
-        LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
-        hasPayment = false;       
-    }
-
-    CAmount blockValue;
-    CAmount dynodePayment;
-
-    if (chainActive.Height() == 0) { blockValue = INITIAL_SUPERBLOCK_PAYMENT; }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
-    else { blockValue = BLOCKCHAIN_INIT_REWARD; }
-
-    if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_1_DYNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_2_DYNODE_PAYMENT; }
-    else { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-
-    txNew.vout[0].nValue = blockValue;
-
-    if(hasPayment){
-        txNew.vout.resize(2);
-
-        txNew.vout[1].scriptPubKey = payee;
-        txNew.vout[1].nValue = dynodePayment;
-
-        if (chainActive.Height() == 0) { txNew.vout[0].nValue = INITIAL_SUPERBLOCK_PAYMENT; }
-        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
-        else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
-
-        CTxDestination address1;
-        ExtractDestination(payee, address1);
-        CDynamicAddress address2(address1);
-
-        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
-    }
-}
-
 int CDynodePayments::GetMinDynodePaymentsProto() {
     return sporkManager.IsSporkActive(SPORK_10_DYNODE_PAY_UPDATED_NODES);
 }
@@ -661,6 +586,94 @@ std::string CDynodePayments::GetRequiredPaymentsString(int nBlockHeight)
     }
 
     return "Unknown";
+}
+
+/**
+*   FillBlockPayee
+*
+*   Fill Dynode ONLY payment block
+*/
+
+void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet)
+{
+    CBlockIndex* pindexPrev = chainActive.Tip();       
+    if(!pindexPrev) return;        
+
+    bool hasPayment = true;
+    CScript payee;
+
+    // Do not start Dynode payments until after block 20,545
+    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock)
+    {
+        if (fDebug)
+            LogPrintf("CreateNewBlock: No Dynode payments prior to block 20,546\n");
+            hasPayment = false;
+    }
+
+    // Do not start Dynode payments until 500 Dynodes are listed
+    int nDnCount = dnodeman.CountDynodes();
+    if(nDnCount < Params().GetConsensus().nMinCountDynodesPaymentStart) {
+        LogPrintf("CreateNewBlock: No Dynode(s) listed to pay\n");
+        hasPayment = false;       
+    }
+
+    // Do not pay if no Dynodes detected
+    int nCount = 0;
+    dynode_info_t dnInfo;
+    if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) 
+    {
+        LogPrintf("CreateNewBlock: Unknown Dynode, payment refused.\n");
+        hasPayment = false;       
+    }
+
+    //spork
+    if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee))
+    {       
+        //No Dynode detected
+        int nCount = 0;
+        dynode_info_t dnInfo;
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) 
+        {
+        payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
+        } else {
+            if (fDebug)
+                LogPrintf("CreateNewBlock: Failed to detect Dynode to pay\n");
+                hasPayment = false;
+        }
+    }
+
+    CAmount blockValue;
+    CAmount dynodePayment;
+
+    if (chainActive.Height() == 0) { blockValue = INITIAL_SUPERBLOCK_PAYMENT; }
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
+    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
+    else { blockValue = BLOCKCHAIN_INIT_REWARD; }
+
+    if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
+    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_1_DYNODE_PAYMENT; }
+    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_2_DYNODE_PAYMENT; }
+    else { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
+
+    txNew.vout[0].nValue = blockValue;
+
+    if(hasPayment){
+        txNew.vout.resize(2);
+
+        txNew.vout[1].scriptPubKey = payee;
+        txNew.vout[1].nValue = dynodePayment;
+
+        if (chainActive.Height() == 0) { txNew.vout[0].nValue = INITIAL_SUPERBLOCK_PAYMENT; }
+        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
+        else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
+        else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
+
+        CTxDestination address1;
+        ExtractDestination(payee, address1);
+        CDynamicAddress address2(address1);
+
+        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
+    }
 }
 
 bool CDynodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight)

@@ -32,7 +32,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1511216261 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1511464477 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -99,7 +99,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "Wednesday November 22nd Internal Algo Tests";
+    const char* pszTimestamp = "Wednesday November 23rd Internal Algo Tests";
     const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
@@ -114,7 +114,7 @@ public:
         strNetworkID = "main";
         consensus.nRewardsStart = 0; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
         consensus.nDynodePaymentsStartBlock = 0; // Dynode Payments begin on block 20546
-        consensus.MinCountDynodesPaymentStart = 200; // Dynode Payments begin once 200 Dynodes exist or more.
+        consensus.nMinCountDynodesPaymentStart = 500; // Dynode Payments begin once 500 Dynodes exist or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 0; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
@@ -165,14 +165,14 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511216301, 249877, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1511464522, 257095, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x000009106192e27426e5d01b3ff081700f005aefe86e49a37db1ca77bb4ac734"));
-            assert(genesis.hashMerkleRoot == uint256S("0xd2111ae373e5f681ae0d36511c340201fc7fee2e6c4a0b651d2927132a7c6186"));
+            assert(consensus.hashGenesisBlock == uint256S("0x000003438953cc86dc6ad2b3ca97ceb445bb8eef7672b8efd029322b340c3b49"));
+            assert(genesis.hashMerkleRoot == uint256S("0xc158d6bcfb415bedb201e14a1e0f017361b88e5de2bcf4b292ccd2aa9bfcdddc"));
 		}
 
 /*		
@@ -208,8 +208,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x000009106192e27426e5d01b3ff081700f005aefe86e49a37db1ca77bb4ac734")),
-            1511216301, // * UNIX timestamp of last checkpoint block
+	        (        0, uint256S("0x000003438953cc86dc6ad2b3ca97ceb445bb8eef7672b8efd029322b340c3b49")),
+            1511464522, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
@@ -227,7 +227,7 @@ public:
         strNetworkID = "test";
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
-        consensus.MinCountDynodesPaymentStart = 1;
+        consensus.nMinCountDynodesPaymentStart = 1;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
@@ -337,7 +337,7 @@ public:
         strNetworkID = "regtest";
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
-        consensus.MinCountDynodesPaymentStart = 1;
+        consensus.nMinCountDynodesPaymentStart = 1;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
