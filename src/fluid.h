@@ -31,6 +31,7 @@ public:
     static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
     static const CAmount MAX_FLUID_MINER_REWARD = 3; // Maximum DYN miner block reward amount 
     static const CAmount MAX_FLUID_DYNODE_REWARD = 5; // Maximum DYN Dynode block reward amount 
+    static const CAmount MAX_FLUID_DYNODE_RECIPIENT_COUNT = 5; // Maximum Dynode recipient count per block
 
     //TODO (Amir): Change address and remove private keys below.
     std::string FEE_REDIRECT_ADDRESS = "DGkRapsj7yQSvYaf46pHYUPwJrakpMd3Sh"; // importprivkey 5iw3QNmomgDceCTEZCLtEaeqSsyJXvKf28fc9rCi1iymYzokt4L
