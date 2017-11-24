@@ -410,8 +410,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
 
 void SendCustomTransaction(CScript generatedScript, CWalletTx& wtxNew, CAmount nValue = COIN)
 {
-    // TODO (Amir): Fix this function for OP_MINT
-    /*
+    // TODO (Amir): Add minimum height and spork activate OP_MINT.  Add checks to mempool and create transaction as well
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amount
@@ -441,9 +440,8 @@ void SendCustomTransaction(CScript generatedScript, CWalletTx& wtxNew, CAmount n
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, NetMsgType::TX))
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), NetMsgType::TX))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if the timstamp of a Fluid transaction has expired or this might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
-    */
 }
 
 UniValue sendtoaddress(const UniValue& params, bool fHelp)
