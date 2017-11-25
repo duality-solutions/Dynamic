@@ -16,6 +16,8 @@
 
 #include <vector>
 
+std::vector<std::string> InitialiseAddresses();
+
 struct CDiskBlockPos
 {
     int nFile;
@@ -94,6 +96,66 @@ enum BlockStatus {
     BLOCK_FAILED_MASK        =   BLOCK_FAILED_VALID | BLOCK_FAILED_CHILD,
 };
 
+/** Fluid Protocol Entry Corresponding to Each Block */
+class CFluidEntry
+{
+public:
+	CAmount blockReward;
+	CAmount dynodeReward;
+    unsigned int dynodeRecipientCount;
+	std::vector<std::string> fluidHistory;
+	std::vector<std::string> fluidManagers;
+
+	CFluidEntry() {
+        SetNull();
+    }
+
+	ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+		READWRITE(VARINT(blockReward));
+		READWRITE(VARINT(dynodeReward));
+        READWRITE(VARINT(dynodeRecipientCount));
+		READWRITE(fluidHistory);
+		READWRITE(fluidManagers);
+	}
+
+    inline friend bool operator==(const CFluidEntry &a, const CFluidEntry &b) {
+        return (
+			a.fluidHistory == b.fluidHistory
+			&& a.fluidManagers == b.fluidManagers
+			&& a.blockReward == b.blockReward
+			&& a.dynodeReward == b.dynodeReward
+            && a.dynodeRecipientCount == b.dynodeRecipientCount
+			);
+    }
+
+    inline CFluidEntry operator=(const CFluidEntry &b) {
+		fluidHistory = b.fluidHistory;
+		fluidManagers = b.fluidManagers;
+		blockReward = b.blockReward;
+		dynodeReward = b.dynodeReward;
+        dynodeRecipientCount = b.dynodeRecipientCount;
+		return *this;
+    }
+
+    inline friend bool operator!=(const CFluidEntry &a, const CFluidEntry &b) {
+        return !(a == b);
+    }
+    
+    inline void SetNull() { 
+		fluidHistory.clear(); 
+		fluidManagers = InitialiseAddresses();
+		blockReward = 0;
+		dynodeReward = 0;
+        dynodeRecipientCount = 1;
+	}
+
+    inline bool IsNull() const { 
+		return (fluidHistory.empty() && fluidManagers == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
+	}
+};
+
 /** The block chain is a tree shaped structure starting with the
  * genesis block at the root, with each block potentially having multiple
  * candidates to be the next block. A blockindex may have multiple pprev pointing
@@ -148,6 +210,9 @@ public:
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId;
 
+	//! Fluid Entry
+	CFluidEntry fluidParams;
+
     void SetNull()
     {
         phashBlock = NULL;
@@ -162,6 +227,7 @@ public:
         nChainTx = 0;
         nStatus = 0;
         nSequenceId = 0;
+		fluidParams.SetNull();
 
         nVersion       = 0;
         hashMerkleRoot = uint256();
@@ -309,13 +375,16 @@ public:
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nStatus));
         READWRITE(VARINT(nTx));
-        if (nStatus & (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO))
+        
+		if (nStatus & (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO))
             READWRITE(VARINT(nFile));
         if (nStatus & BLOCK_HAVE_DATA)
             READWRITE(VARINT(nDataPos));
         if (nStatus & BLOCK_HAVE_UNDO)
             READWRITE(VARINT(nUndoPos));
-
+        
+        READWRITE(fluidParams);
+		
         // block hash
         READWRITE(hash);
         // block header

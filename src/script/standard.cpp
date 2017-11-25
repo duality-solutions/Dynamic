@@ -54,7 +54,7 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
 
         // Sender provides N pubkeys, receivers provides M signatures
         // TODO (amir): Is this correct???
-        mTemplates.insert(std::make_pair(TX_NAME, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_NAME_NEW));
+        mTemplates.insert(std::make_pair(TX_NAME, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_IDENTITY_NEW));
     }
 
     vSolutionsRet.clear();

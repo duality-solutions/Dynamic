@@ -129,12 +129,13 @@ bool CSporkManager::IsSporkActive(int nSporkID)
             case SPORK_2_INSTANTSEND_ENABLED:               r = SPORK_2_INSTANTSEND_ENABLED_DEFAULT; break;
             case SPORK_3_INSTANTSEND_BLOCK_FILTERING:       r = SPORK_3_INSTANTSEND_BLOCK_FILTERING_DEFAULT; break;
             case SPORK_5_INSTANTSEND_MAX_VALUE:             r = SPORK_5_INSTANTSEND_MAX_VALUE_DEFAULT; break;
-            case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:    r = SPORK_8_DYNODE_PAYMENT_ENFORCEMENT_DEFAULT; break;
+            case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:        r = SPORK_8_DYNODE_PAYMENT_ENFORCEMENT_DEFAULT; break;
             case SPORK_9_SUPERBLOCKS_ENABLED:               r = SPORK_9_SUPERBLOCKS_ENABLED_DEFAULT; break;
-            case SPORK_10_DYNODE_PAY_UPDATED_NODES:     r = SPORK_10_DYNODE_PAY_UPDATED_NODES_DEFAULT; break;
+            case SPORK_10_DYNODE_PAY_UPDATED_NODES:         r = SPORK_10_DYNODE_PAY_UPDATED_NODES_DEFAULT; break;
             case SPORK_12_RECONSIDER_BLOCKS:                r = SPORK_12_RECONSIDER_BLOCKS_DEFAULT; break;
             case SPORK_13_OLD_SUPERBLOCK_FLAG:              r = SPORK_13_OLD_SUPERBLOCK_FLAG_DEFAULT; break;
             case SPORK_14_REQUIRE_SENTINEL_FLAG:            r = SPORK_14_REQUIRE_SENTINEL_FLAG_DEFAULT; break;
+            case SPORK_15_REDIRECT_FEES:                    r = SPORK_15_REDIRECT_FEES_DEFAULT; break;
             default:
                 LogPrint("spork", "CSporkManager::IsSporkActive -- Unknown Spork ID %d\n", nSporkID);
                 r = 4070908800; // 2099-1-1 i.e. off by default
@@ -155,12 +156,13 @@ int64_t CSporkManager::GetSporkValue(int nSporkID)
         case SPORK_2_INSTANTSEND_ENABLED:               return SPORK_2_INSTANTSEND_ENABLED_DEFAULT;
         case SPORK_3_INSTANTSEND_BLOCK_FILTERING:       return SPORK_3_INSTANTSEND_BLOCK_FILTERING_DEFAULT;
         case SPORK_5_INSTANTSEND_MAX_VALUE:             return SPORK_5_INSTANTSEND_MAX_VALUE_DEFAULT;
-        case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:    return SPORK_8_DYNODE_PAYMENT_ENFORCEMENT_DEFAULT;
+        case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:        return SPORK_8_DYNODE_PAYMENT_ENFORCEMENT_DEFAULT;
         case SPORK_9_SUPERBLOCKS_ENABLED:               return SPORK_9_SUPERBLOCKS_ENABLED_DEFAULT;
-        case SPORK_10_DYNODE_PAY_UPDATED_NODES:     return SPORK_10_DYNODE_PAY_UPDATED_NODES_DEFAULT;
+        case SPORK_10_DYNODE_PAY_UPDATED_NODES:         return SPORK_10_DYNODE_PAY_UPDATED_NODES_DEFAULT;
         case SPORK_12_RECONSIDER_BLOCKS:                return SPORK_12_RECONSIDER_BLOCKS_DEFAULT;
         case SPORK_13_OLD_SUPERBLOCK_FLAG:              return SPORK_13_OLD_SUPERBLOCK_FLAG_DEFAULT;
         case SPORK_14_REQUIRE_SENTINEL_FLAG:            return SPORK_14_REQUIRE_SENTINEL_FLAG_DEFAULT;
+        case SPORK_15_REDIRECT_FEES:                    return SPORK_15_REDIRECT_FEES_DEFAULT;
         default:
             LogPrint("spork", "CSporkManager::GetSporkValue -- Unknown Spork ID %d\n", nSporkID);
             return -1;
@@ -173,13 +175,13 @@ int CSporkManager::GetSporkIDByName(std::string strName)
     if (strName == "SPORK_2_INSTANTSEND_ENABLED")               return SPORK_2_INSTANTSEND_ENABLED;
     if (strName == "SPORK_3_INSTANTSEND_BLOCK_FILTERING")       return SPORK_3_INSTANTSEND_BLOCK_FILTERING;
     if (strName == "SPORK_5_INSTANTSEND_MAX_VALUE")             return SPORK_5_INSTANTSEND_MAX_VALUE;
-    if (strName == "SPORK_8_DYNODE_PAYMENT_ENFORCEMENT")    return SPORK_8_DYNODE_PAYMENT_ENFORCEMENT;
+    if (strName == "SPORK_8_DYNODE_PAYMENT_ENFORCEMENT")        return SPORK_8_DYNODE_PAYMENT_ENFORCEMENT;
     if (strName == "SPORK_9_SUPERBLOCKS_ENABLED")               return SPORK_9_SUPERBLOCKS_ENABLED;
-    if (strName == "SPORK_10_DYNODE_PAY_UPDATED_NODES")     return SPORK_10_DYNODE_PAY_UPDATED_NODES;
+    if (strName == "SPORK_10_DYNODE_PAY_UPDATED_NODES")         return SPORK_10_DYNODE_PAY_UPDATED_NODES;
     if (strName == "SPORK_12_RECONSIDER_BLOCKS")                return SPORK_12_RECONSIDER_BLOCKS;
     if (strName == "SPORK_13_OLD_SUPERBLOCK_FLAG")              return SPORK_13_OLD_SUPERBLOCK_FLAG;
     if (strName == "SPORK_14_REQUIRE_SENTINEL_FLAG")            return SPORK_14_REQUIRE_SENTINEL_FLAG;
-
+    if (strName == "SPORK_15_REDIRECT_FEES")                    return SPORK_15_REDIRECT_FEES;
     LogPrint("spork", "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
 }
@@ -190,12 +192,13 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         case SPORK_2_INSTANTSEND_ENABLED:               return "SPORK_2_INSTANTSEND_ENABLED";
         case SPORK_3_INSTANTSEND_BLOCK_FILTERING:       return "SPORK_3_INSTANTSEND_BLOCK_FILTERING";
         case SPORK_5_INSTANTSEND_MAX_VALUE:             return "SPORK_5_INSTANTSEND_MAX_VALUE";
-        case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:    return "SPORK_8_DYNODE_PAYMENT_ENFORCEMENT";
+        case SPORK_8_DYNODE_PAYMENT_ENFORCEMENT:        return "SPORK_8_DYNODE_PAYMENT_ENFORCEMENT";
         case SPORK_9_SUPERBLOCKS_ENABLED:               return "SPORK_9_SUPERBLOCKS_ENABLED";
-        case SPORK_10_DYNODE_PAY_UPDATED_NODES:     return "SPORK_10_DYNODE_PAY_UPDATED_NODES";
+        case SPORK_10_DYNODE_PAY_UPDATED_NODES:         return "SPORK_10_DYNODE_PAY_UPDATED_NODES";
         case SPORK_12_RECONSIDER_BLOCKS:                return "SPORK_12_RECONSIDER_BLOCKS";
         case SPORK_13_OLD_SUPERBLOCK_FLAG:              return "SPORK_13_OLD_SUPERBLOCK_FLAG";
         case SPORK_14_REQUIRE_SENTINEL_FLAG:            return "SPORK_14_REQUIRE_SENTINEL_FLAG";
+        case SPORK_15_REDIRECT_FEES:                    return "SPORK_15_REDIRECT_FEES";
         default:
             LogPrint("spork", "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
             return "Unknown";

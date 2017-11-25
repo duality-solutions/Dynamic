@@ -319,6 +319,17 @@ extern UniValue reconsiderblock(const UniValue& params, bool fHelp);
 extern UniValue getspentinfo(const UniValue& params, bool fHelp);
 extern UniValue sentinelping(const UniValue& params, bool fHelp);
 
+extern UniValue sendfluidtransaction(const UniValue& params, bool fHelp); // in fluid.cpp
+extern UniValue gettime(const UniValue& params, bool fHelp);
+extern UniValue signtoken(const UniValue& params, bool fHelp);
+extern UniValue consenttoken(const UniValue& params, bool fHelp);
+extern UniValue getrawpubkey(const UniValue& params, bool fHelp);
+extern UniValue verifyquorum(const UniValue& params, bool fHelp);
+extern UniValue maketoken(const UniValue& params, bool fHelp);
+extern UniValue stringtohash(const UniValue& params, bool fHelp);
+extern UniValue fluidcommandshistory(const UniValue& params, bool fHelp);
+extern UniValue getfluidmasters(const UniValue& params, bool fHelp);
+
 bool StartRPC();
 void InterruptRPC();
 void StopRPC();
