@@ -27,6 +27,8 @@
 #include "encoding.h"
 #include "core.h"
 
+#include "../blake2/blamka-round-opt.h"
+
 const char *argon2_type2string(argon2_type type, int uppercase) {
     switch (type) {
         case Argon2_d:
