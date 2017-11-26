@@ -592,6 +592,8 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
                               std::vector<uint256>& vHashTxnToUncache, bool fDryRun)
 {
     AssertLockHeld(cs_main);
+
+    bool fluidTransaction = false;
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
@@ -601,9 +603,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
     if (!fluid.ProvisionalCheckTransaction(tx))
 		return false;
 
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime()))
-			return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
+    for (const CTxOut& txout : tx.vout)	{	
+		if (IsTransactionFluid(txout.scriptPubKey))
+        {
+            fluidTransaction = true;
+            if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())){
+                return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
+            }
+        }
 	}
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -623,7 +630,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
+    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx && !fluidTransaction)
         return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Only accept nLockTime-using transactions that can be mined in the next
