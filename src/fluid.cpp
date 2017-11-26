@@ -72,7 +72,7 @@ bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
 }
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
-bool Fluid::CheckIfQuorumExists(std::string token, std::string &message, bool individual) {
+bool Fluid::CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual) {
     std::vector<std::string> fluidManagers;
     std::pair<CDynamicAddress, bool> keyOne;
     std::pair<CDynamicAddress, bool> keyTwo;
@@ -94,15 +94,15 @@ bool Fluid::CheckIfQuorumExists(std::string token, std::string &message, bool in
         if (!xKey.IsValid())
             return false;
 
-        if (GenericVerifyInstruction(token, attemptKey, message, 1) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 1) && xKey == attemptKey) {
             keyOne = std::make_pair(attemptKey.ToString(), true);
         }
 
-        if (GenericVerifyInstruction(token, attemptKey, message, 2) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 2) && xKey == attemptKey) {
             keyTwo = std::make_pair(attemptKey.ToString(), true);
         }
 
-        if (GenericVerifyInstruction(token, attemptKey, message, 3) && xKey == attemptKey) {
+        if (GenericVerifyInstruction(consentToken, attemptKey, message, 3) && xKey == attemptKey) {
             keyThree = std::make_pair(attemptKey.ToString(), true);
         }
     }
@@ -110,7 +110,7 @@ bool Fluid::CheckIfQuorumExists(std::string token, std::string &message, bool in
     bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
                    && keyOne.first.ToString() != keyThree.first.ToString());
 
-    LogPrintf("CheckIfQuorumExists(): Addresses validating this token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
+    LogPrintf("CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
 
     if (individual)
         return (keyOne.second || keyTwo.second || keyThree.second);
@@ -122,8 +122,8 @@ bool Fluid::CheckIfQuorumExists(std::string token, std::string &message, bool in
 
 
 /** Checks whether as to parties have actually signed it - please use this with ones **without** the OP_CODE */
-bool Fluid::CheckNonScriptQuorum(std::string token, std::string &message, bool individual) {
-    std::string result = "12345 " + token;
+bool Fluid::CheckNonScriptQuorum(const std::string consentToken, std::string &message, bool individual) {
+    std::string result = "12345 " + consentToken;
     return CheckIfQuorumExists(result, message, individual);
 }
 
@@ -156,7 +156,7 @@ bool Fluid::SignIntimateMessage(CDynamicAddress address, std::string unsignedMes
 }
 
 /** It will perform basic message signing functions */
-bool Fluid::GenericSignMessage(std::string message, std::string &signedString, CDynamicAddress signer) {
+bool Fluid::GenericSignMessage(const std::string message, std::string &signedString, CDynamicAddress signer) {
     if(!SignIntimateMessage(signer, message, signedString, true))
         return false;
     else
@@ -191,10 +191,9 @@ bool Fluid::GenericConsentMessage(std::string message, std::string &signedString
 }
 
 /** Extract timestamp from a Fluid Transaction */
-bool Fluid::ExtractCheckTimestamp(std::string scriptString, int64_t timeStamp) {
-    std::string r = getRidOfScriptStatement(scriptString);
-    scriptString = r;
-    std::string dehexString = HexToString(scriptString);
+bool Fluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp) {
+    std::string consentTokenNoScript = getRidOfScriptStatement(consentToken);
+    std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
     SeperateString(dehexString, strs, false);
     SeperateString(strs.at(0), ptrs, true);
@@ -211,16 +210,14 @@ bool Fluid::ExtractCheckTimestamp(std::string scriptString, int64_t timeStamp) {
     return true;
 }
 
-bool Fluid::ProcessFluidToken(std::string &scriptString, std::vector<std::string> &ptrs, int strVecNo) {
-    std::string r = getRidOfScriptStatement(scriptString);
-    scriptString = r;
+bool Fluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string> &ptrs, int strVecNo) {
+    std::string consentTokenNoScript = getRidOfScriptStatement(consentToken);
 
     std::string message;
-    if (!CheckNonScriptQuorum(scriptString, message))
+    if (!CheckNonScriptQuorum(consentTokenNoScript, message))
         return false;
 
-    std::string dehexString = HexToString(scriptString);
-    scriptString = dehexString;
+    std::string dehexString = HexToString(consentTokenNoScript);
 
     std::vector<std::string> strs;
     SeperateString(dehexString, strs, false);
@@ -233,10 +230,10 @@ bool Fluid::ProcessFluidToken(std::string &scriptString, std::vector<std::string
 }
 
 /** It gets a number from the ASM of an OP_CODE without signature verification */
-bool Fluid::GenericParseNumber(std::string scriptString, int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose) {
+bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose) {
     std::vector<std::string> ptrs;
 
-    if (!ProcessFluidToken(scriptString, ptrs, 1))
+    if (!ProcessFluidToken(consentToken, ptrs, 1))
         return false;
 
     std::string lr = ptrs.at(0);
@@ -247,7 +244,7 @@ bool Fluid::GenericParseNumber(std::string scriptString, int64_t timeStamp, CAmo
     if (timeStamp > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
-    howMuch			 	= stringToInteger(lr) * COIN;
+    howMuch	= stringToInteger(lr) * COIN;
 
     return true;
 }
