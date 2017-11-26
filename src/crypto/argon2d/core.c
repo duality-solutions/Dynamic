@@ -33,6 +33,7 @@
 #include "thread.h"
 #include "../blake2/blake2.h"
 #include "../blake2/blake2-impl.h"
+#include "../blake2/blamka-round-opt.h"
 
 #if defined(__clang__)
 #if __has_attribute(optnone)
