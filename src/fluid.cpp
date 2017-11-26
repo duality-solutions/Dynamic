@@ -337,8 +337,8 @@ bool Fluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddre
         return false;
     }
 
-    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
-        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+    for (const CTransaction& tx : block.vtx) {
+        for (const CTxOut& txout : tx.vout) {
             if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
                 std::string message;
                 if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -362,8 +362,8 @@ bool Fluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &how
         return false;
     }
 
-    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
-        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+    for (const CTransaction& tx : block.vtx) {
+        for (const CTxOut& txout : tx.vout) {
             if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
                 std::string message;
                 if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -386,8 +386,8 @@ bool Fluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &ho
         return false;
     }
 
-    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
-        BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+    for (const CTransaction& tx : block.vtx) {
+        for (const CTxOut& txout : tx.vout) {
             if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
                 std::string message;
                 if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -441,7 +441,7 @@ bool Fluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pind
 
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
-            BOOST_FOREACH(const std::string& existingRecord, transactionRecord)
+            for (const std::string& existingRecord : transactionRecord)
             {
                 if (existingRecord == verificationString) {
                     LogPrintf("CheckTransactionInRecord(): Attempt to repeat Fluid Transaction: %s\n", existingRecord);
@@ -463,7 +463,7 @@ bool Fluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std:
 
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
-            BOOST_FOREACH(const std::string& existingRecord, transactionRecord)
+            for (const std::string& existingRecord : transactionRecord)
             {
                 if (existingRecord == verificationString) {
                     return false;
@@ -558,7 +558,7 @@ bool Fluid::ValidationProcesses(CValidationState &state, CScript txOut, CAmount 
 }
 
 bool Fluid::ProvisionalCheckTransaction(const CTransaction &transaction) {
-    BOOST_FOREACH(const CTxOut& txout, transaction.vout) {
+    for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
         if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut)) {
@@ -577,7 +577,7 @@ bool Fluid::CheckTransactionToBlock(const CTransaction &transaction, const CBloc
 
     CBlockIndex* pblockindex = mapBlockIndex[hash];
 
-    BOOST_FOREACH(const CTxOut& txout, transaction.vout) {
+    for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
         if (IsTransactionFluid(txOut) && CheckTransactionInRecord(txOut, pblockindex)) {
