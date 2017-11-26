@@ -32,7 +32,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1511722411 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1511730213 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -165,14 +165,14 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511722745, 328810, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1511730737, 313028, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x000004b10399abbbaf23ae12f019ea089dd24abe02948b32b4741306bd5c566a"));
-            assert(genesis.hashMerkleRoot == uint256S("0x075622558b60ece72b6861b5c00f9ec95d2fe27f4c886c5bf8025e2cdaa91134"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0000001f44275e2bc3809090de6fda1b8a572520ae43925bea0e571cc72815f6"));
+            assert(genesis.hashMerkleRoot == uint256S("0xcddde9aacbe01d6a4cf0bdc0ee39a340ca4d44d6db1080cb0067e4aa918b2e8d"));
 		}
 
 /*		
@@ -208,8 +208,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x000004b10399abbbaf23ae12f019ea089dd24abe02948b32b4741306bd5c566a")),
-            1511722745, // * UNIX timestamp of last checkpoint block
+	        (        0, uint256S("0x0000001f44275e2bc3809090de6fda1b8a572520ae43925bea0e571cc72815f6")),
+            1511730737, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
