@@ -188,7 +188,7 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
     if(!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
         throw std::runtime_error("Instruction does not meet required quorum for validity");
 
-    if (opcode == OP_MINT || OP_REWARD_MINING || OP_REWARD_DYNODE) {
+    if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
         SendCustomTransaction(finalScript, wtx);
         return wtx.GetHash().GetHex();
