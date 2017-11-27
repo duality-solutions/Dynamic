@@ -299,19 +299,6 @@ static BLAKE2_INLINE __m128i fBlaMka(__m128i x, __m128i y) {
         D1 = _mm256_permute4x64_epi64(tmp2, _MM_SHUFFLE(2,3,0,1)); \
     } while((void)0, 0);
 
-#define BLAKE2_ROUND(A0, B0, C0, D0, A1, B1, C1, D1) \
-    do { \
-        G1_AVX2(A0, B0, C0, D0, A1, B1, C1, D1); \
-        G2_AVX2(A0, B0, C0, D0, A1, B1, C1, D1); \
-        \
-        DIAGONALIZE_1(A0, B0, C0, D0, A1, B1, C1, D1); \
-        \
-        G1_AVX2(A0, B0, C0, D0, A1, B1, C1, D1); \
-        G2_AVX2(A0, B0, C0, D0, A1, B1, C1, D1); \
-        \
-        UNDIAGONALIZE_1(A0, B0, C0, D0, A1, B1, C1, D1); \
-    } while ((void)0, 0)
-
 #define BLAKE2_ROUND_1(A0, A1, B0, B1, C0, C1, D0, D1) \
     do{ \
         G1_AVX2(A0, A1, B0, B1, C0, C1, D0, D1) \
