@@ -27,8 +27,6 @@
 #include "encoding.h"
 #include "core.h"
 
-#include "../blake2/blamka-round-opt.h"
-
 const char *argon2_type2string(argon2_type type, int uppercase) {
     switch (type) {
         case Argon2_d:
@@ -394,6 +392,7 @@ size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost, uint32_t parallelism,
 #include <pthread.h>
 #include <x86intrin.h>
 #include "../blake2/blake2.h"
+#include "../blake2/blamka-round-opt.h"
 
 typedef struct _Argon2d_Block
 {
@@ -538,8 +537,6 @@ void Argon2dFillFirstBlocks(Argon2d_Block *Matrix, void *InitHash)
 		blake2b_long(Matrix[lane * LANE_LENGTH + 1].data, 1024, InitHash, 72);
 	}
 }
-
-#include "../blake2/blamka-round-opt.h"
 
 void Argon2dFillSingleBlock(Argon2d_Block *State, Argon2d_Block *RefBlock, Argon2d_Block *NextBlock)
 {	
