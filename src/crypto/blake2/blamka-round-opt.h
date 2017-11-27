@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0
+ * You may use this work under the terms of a Creative Commons CC0 1.0 
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -178,6 +178,7 @@ static BLAKE2_INLINE __m128i fBlaMka(__m128i x, __m128i y) {
                                                                                \
         UNDIAGONALIZE(A0, B0, C0, D0, A1, B1, C1, D1);                         \
     } while ((void)0, 0)
+
 #else /* __AVX2__ */
 
 #include <immintrin.h>

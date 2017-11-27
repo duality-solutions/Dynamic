@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0
+ * You may use this work under the terms of a Creative Commons CC0 1.0 
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -325,18 +325,6 @@ ARGON2_PUBLIC const char *argon2_error_message(int error_code);
 ARGON2_PUBLIC size_t argon2_encodedlen(uint32_t t_cost, uint32_t m_cost,
                                        uint32_t parallelism, uint32_t saltlen,
                                        uint32_t hashlen, argon2_type type);
-
-#ifdef __AVX2__
-
-///////////////////////////
-// Wolf's Additions
-///////////////////////////
-
-void WolfArgon2dPoWHash(void *Output, void *Matrix, const void *BlkHdr);
-void WolfArgon2dAllocateCtx(void **Matrix);
-void WolfArgon2dFreeCtx(void *Matrix);
-
-#endif
 
 #if defined(__cplusplus)
 }

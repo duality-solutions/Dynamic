@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,8 +25,8 @@ typedef uint256 ChainCode;
 static const size_t INPUT_BYTES = 80;  // Lenth of a block header in bytes. Input Length = Salt Length (salt = input)
 static const size_t OUTPUT_BYTES = 32; // Length of output needed for a 256-bit hash
 static const unsigned int DEFAULT_ARGON2_FLAG = 2; //Same as ARGON2_DEFAULT_FLAGS
-/* ----------- Dynamic Hash ------------------------------------------------- */
-/** A hasher class for Dynamic's 256-bit hash (double SHA-256). */
+/* ----------- Bitcoin Hash ------------------------------------------------- */
+/** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
 class CHash256 {
 private:
     CSHA256 sha;
@@ -50,7 +50,7 @@ public:
     }
 };
 
-/** A hasher class for Dynamic's 160-bit hash (SHA-256 + RIPEMD-160). */
+/** A hasher class for Bitcoin's 160-bit hash (SHA-256 + RIPEMD-160). */
 class CHash160 {
 private:
     CSHA256 sha;
@@ -256,14 +256,14 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
     /// Lanes: 8 parallel threads
     /// Threads: 1 threads
     /// Time Constraint: 1 iteration
-inline int Argon2d_Phase1_Hash(const void *in, const size_t size, const void *out) {
-	argon2_context context;
+inline int Argon2d_Phase1_Hash(const void *in, void *out) {
+    argon2_context context;
     context.out = (uint8_t *)out;
     context.outlen = (uint32_t)OUTPUT_BYTES;
     context.pwd = (uint8_t *)in;
-    context.pwdlen = (uint32_t)size;
+    context.pwdlen = (uint32_t)INPUT_BYTES;
     context.salt = (uint8_t *)in; //salt = input
-    context.saltlen = (uint32_t)size;
+    context.saltlen = (uint32_t)INPUT_BYTES;
     context.secret = NULL;
     context.secretlen = 0;
     context.ad = NULL;
@@ -272,23 +272,13 @@ inline int Argon2d_Phase1_Hash(const void *in, const size_t size, const void *ou
     context.free_cbk = NULL;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
-    context.m_cost = 2000; // Memory in KiB (2048KB)
-    context.lanes = 8;     // Degree of Parallelism
-    context.threads = 1;   // Threads
-    context.t_cost = 1;    // Iterations
+    context.m_cost = 2000; // Memory in KiB (2056KB)
+    context.lanes = 8;    // Degree of Parallelism
+    context.threads = 1;  // Threads
+    context.t_cost = 1;   // Iterations
 
     return argon2_ctx(&context, Argon2_d);
 }
-
-#ifdef __AVX2__
-
-inline int Argon2d_Phase1_Hash_Ctx(const void *in, void *Matrix, void *out) {        
-    WolfArgon2dPoWHash(out, Matrix, in);
-        
-    return(0);
-}
-
-#endif
 
     /// Argon2d Phase 2 Hash parameters for the next 5 years after phase 1
     /// Salt and password are the block header.
@@ -301,18 +291,18 @@ inline int Argon2d_Phase1_Hash_Ctx(const void *in, void *Matrix, void *out) {
     /// Secret length: 0
     /// Associated data: None
     /// Associated data length: 0
-    /// Memory cost: 1000 kibibytes
+    /// Memory cost: 8000 kibibytes
     /// Lanes: 64 parallel threads
-    /// Threads: 4 threads
-    /// Time Constraint: 8 iterations
-inline int Argon2d_Phase2_Hash(const void *in, const size_t size, void *out) {
+    /// Threads: 1 threads
+    /// Time Constraint: 1 iterations
+inline int Argon2d_Phase2_Hash(const void *in, void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;
     context.outlen = (uint32_t)OUTPUT_BYTES;
     context.pwd = (uint8_t *)in;
-    context.pwdlen = (uint32_t)size;
+    context.pwdlen = (uint32_t)INPUT_BYTES;
     context.salt = (uint8_t *)in; //salt = input
-    context.saltlen = (uint32_t)size;
+    context.saltlen = (uint32_t)INPUT_BYTES;
     context.secret = NULL;
     context.secretlen = 0;
     context.ad = NULL;
@@ -320,10 +310,10 @@ inline int Argon2d_Phase2_Hash(const void *in, const size_t size, void *out) {
     context.allocate_cbk = NULL;
     context.free_cbk = NULL;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
-    // main configurable Argon2 hash parameters, need amending (made more difficult)
-    context.m_cost = 8000; // Memory in KiB
+    // main configurable Argon2 hash parameters
+    context.m_cost = 8000; // Memory in KiB (~250KB)
     context.lanes = 64;    // Degree of Parallelism
-    context.threads = 1;   // Threads
+    context.threads = 1;  // Threads
     context.t_cost = 1;    // Iterations
     
     return argon2_ctx(&context, Argon2_d);
@@ -337,52 +327,7 @@ inline uint256 hash_Argon2d(const void* input, const unsigned int& hashPhase) {
     }
     
     if (hashPhase == 1) {
-        Argon2d_Phase1_Hash((const uint8_t*)input, INPUT_BYTES, (uint8_t*)&hashResult);
-    }
-    else if (hashPhase == 2) {
-        Argon2d_Phase2_Hash((const uint8_t*)input, INPUT_BYTES, (uint8_t*)&hashResult);
-    }
-    else {
-        Argon2d_Phase1_Hash((const uint8_t*)input, INPUT_BYTES, (uint8_t*)&hashResult);
-    }
-    return hashResult;
-}
-
-template<typename T1>
-inline uint256 hash_Argon2d(const T1 pbegin, const T1 pend, const unsigned int& hashPhase) {
-    static unsigned char pblank[1];
-    const void* input = (pbegin == pend ? pblank : static_cast<const void*>(&pbegin[0]));
-    const size_t size = (pend - pbegin) * sizeof(pbegin[0]);
-
-    uint256 hashResult;
-    const uint32_t MaxInt32 = std::numeric_limits<uint32_t>::max();
-    if (INPUT_BYTES > MaxInt32 || OUTPUT_BYTES > MaxInt32) {
-        return hashResult;
-    }
-    
-    if (hashPhase == 1) {
-        Argon2d_Phase1_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
-    }
-    else if (hashPhase == 2) {
-        Argon2d_Phase2_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
-    }
-    else {
-        Argon2d_Phase1_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
-    }
-    return hashResult;
-}
-
-#ifdef __AVX2__
-
-inline uint256 hash_Argon2d_ctx(const void* input, void *Matrix, const unsigned int& hashPhase) {
-    uint256 hashResult;
-    const uint32_t MaxInt32 = std::numeric_limits<uint32_t>::max();
-    if (INPUT_BYTES > MaxInt32 || OUTPUT_BYTES > MaxInt32) {
-        return hashResult;
-    }
-    
-    if (hashPhase == 1) {
-        Argon2d_Phase1_Hash_Ctx((const uint8_t*)input, Matrix, (uint8_t*)&hashResult);
+        Argon2d_Phase1_Hash((const uint8_t*)input, (uint8_t*)&hashResult);
     }
     else if (hashPhase == 2) {
         Argon2d_Phase2_Hash((const uint8_t*)input, (uint8_t*)&hashResult);
@@ -392,7 +337,5 @@ inline uint256 hash_Argon2d_ctx(const void* input, void *Matrix, const unsigned 
     }
     return hashResult;
 }
-
-#endif
 
 #endif // DYNAMIC_HASH_H
