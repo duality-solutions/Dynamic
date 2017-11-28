@@ -125,8 +125,7 @@
 * Documentation: Add spork message / details to protocol-documentation
 * Validate proposals on prepare and submit
 
-**Dynamic v1.4.0.0**
-
+**Dynamic v1.4.0.0
 * Securely erase potentially sensitive keys/values
 * Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
