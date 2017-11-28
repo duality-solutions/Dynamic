@@ -236,7 +236,7 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
 
 
     /* ----------- Dynamic Hash ------------------------------------------------ */
-    /// Argon2i, Argon2d, and Argon2id are parametrized by:
+    /// Argon2d are parametrized by:
     /// A time cost, which defines the amount of computation realized and therefore the execution time, given in number of iterations
     /// A memory cost, which defines the memory usage, given in kibibytes (1 kibibytes = kilobytes 1.024)
     /// A parallelism degree, which defines the number of parallel threads
@@ -252,7 +252,7 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
     /// Secret length: 0
     /// Associated data: None
     /// Associated data length: 0
-    /// Memory cost: 8096 kibibytes
+    /// Memory cost: 4096 kibibytes
     /// Lanes: 16 parallel threads
     /// Threads: 1 threads
     /// Time Constraint: 1 iteration
@@ -272,7 +272,7 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     context.free_cbk = NULL;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
-    context.m_cost = 8000; // Memory in KiB (8096KB)
+    context.m_cost = 4000; // Memory in KiB (4096KB)
     context.lanes = 16;     // Degree of Parallelism
     context.threads = 1;   // Threads
     context.t_cost = 1;    // Iterations
@@ -280,7 +280,7 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     return argon2_ctx(&context, Argon2_d);
 }
 
-    /// Argon2d Phase 2 Hash parameters for the next 5 years after phase 1
+    /// Argon2d Phase 2 Hash parameters
     /// Salt and password are the block header.
     /// Output length: 32 bytes.
     /// Input length (in the case of a block header): 80 bytes.
@@ -313,7 +313,7 @@ inline int Argon2d_Phase2_Hash(const void *in, void *out) {
     // main configurable Argon2 hash parameters
     context.m_cost = 8000; // Memory in KiB (~250KB)
     context.lanes = 64;    // Degree of Parallelism
-    context.threads = 1;  // Threads
+    context.threads = 1;   // Threads
     context.t_cost = 1;    // Iterations
     
     return argon2_ctx(&context, Argon2_d);
