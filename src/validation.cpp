@@ -41,7 +41,6 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
-#include "checkforks.h"
 
 #include <atomic>
 #include <sstream>
@@ -3250,10 +3249,14 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
-        if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
-            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                         REJECT_INVALID, "bad-diffbits");
+    if(Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                            REJECT_INVALID, "bad-diffbits");
+    } else {
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
+                        REJECT_INVALID, "bad-diffbits");
     }
 
     // Check timestamp against prev
