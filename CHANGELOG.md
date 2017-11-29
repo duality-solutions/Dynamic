@@ -125,6 +125,7 @@
 * Documentation: Add spork message / details to protocol-documentation
 * Validate proposals on prepare and submit
 * Fix signal/slot in GUI
+* Fix PS/IS/Balance display in SendCoinsDialog
 
 **Dynamic v1.4.0.0
 * Securely erase potentially sensitive keys/values
