@@ -31,14 +31,6 @@ unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE b
   if (pindexLast == NULL)     
       return nProofOfWorkLimit; // genesis block      
       
-  const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast);      
-  if (pindexPrev->pprev == NULL)      
-      return nProofOfWorkLimit; // first block        
-              
-  const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev);       
-  if (pindexPrevPrev->pprev == NULL)      
-      return nProofOfWorkLimit; // second block
-
     // Find the first block in the averaging interval
     const CBlockIndex* pindexFirst = pindexLast;
     arith_uint256 bnTot {0};
