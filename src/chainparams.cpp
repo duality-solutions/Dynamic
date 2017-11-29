@@ -32,7 +32,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1511965746 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1511968661 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -99,7 +99,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "Tuesday November 28th Internal Algo Tests";
+    const char* pszTimestamp = "Tuesday November 29th Internal Algo Testing";
     const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
@@ -165,14 +165,14 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511966038, 469148, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1511968676, 441728, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x0000005d170623f14e57b479dc3689671f8e2f9817236bfbea26c5708a111de5"));
-            assert(genesis.hashMerkleRoot == uint256S("0x85c7e906d9de72dae7ff3283bc7e299c754aba43eb7f9ec3a467315b4bc2cd82"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0000095dd9ec97134907d27bd3bf3e4e4d37790bca75e6ece38ba72387d32c91"));
+            assert(genesis.hashMerkleRoot == uint256S("0x1a17ae97ef26d1ec53f69c8d9224c4a33c32af95b5cbd5a52dc9c2eabcd6d1fe"));
 		}
 
 /*		
@@ -208,8 +208,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x0000005d170623f14e57b479dc3689671f8e2f9817236bfbea26c5708a111de5")),
-            1511966038, // * UNIX timestamp of last checkpoint block
+	        (        0, uint256S("0x0000095dd9ec97134907d27bd3bf3e4e4d37790bca75e6ece38ba72387d32c91")),
+            1511968676, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
