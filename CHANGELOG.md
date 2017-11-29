@@ -16,7 +16,7 @@
 * Fix edge case for IS (skip inputs that are too large)
 * allow up to 40 chars in proposal name
 * Multiple Fixes/Implement connman broadly
-* Add more logging for MN votes and MNs missing votes
+* Add more logging for DN votes and DNs missing votes
 * Remove bogus assert on number of oubound connections.
 * update nCollateralMinConfBlockHash for local (hot) dynode on dn start
 * Fix sync reset on lack of activity
@@ -26,7 +26,7 @@
 * RPC help formatting updates
 * Relay govobj and govvote to every compatible peer, not only to the one with the same version
 * remove send addresses from listreceivedbyaddress output
-* Remove cs_main from ThreadMnbRequestConnections
+* Remove cs_main from ThreadDnbRequestConnections
 * do not calculate stuff that are not going to be visible in simple PSUI anyway & fix fSkipUnconfirmed
 * Keep track of wallet UTXOs and use them for PS balances and rounds calculations
 * speedup MakeCollateralAmounts by skiping denominated inputs early
