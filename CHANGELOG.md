@@ -124,6 +124,7 @@
 * Don't try to create empty datadir before the real path is known
 * Documentation: Add spork message / details to protocol-documentation
 * Validate proposals on prepare and submit
+* Fix signal/slot in GUI
 
 **Dynamic v1.4.0.0
 * Securely erase potentially sensitive keys/values
