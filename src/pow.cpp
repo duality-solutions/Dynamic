@@ -24,53 +24,112 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex)
     return pindex;
 }
 
-unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
-{       
+bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTableFlip) {      
+  bool booleanParam;      
+  const Consensus::Params& consensusParams = Params().GetConsensus();       
+      
+  // Check if we are handling a valid fork        
+  if (identifier == DELTA_RETARGET || identifier == PRE_DELTA_RETARGET) {        
+      // Have we forked to the DELTA Retargeting Algorithm? (We're using pindexLast here because of logical reason)       
+      if((pindexLast->nHeight + 1) > consensusParams.nUpdateDiffAlgoHeight && identifier == DELTA_RETARGET) { booleanParam = true; }      
+      // Are we using the reward system before DELTA Retargeting's Fork?      
+      else if (chainActive.Height() < consensusParams.nUpdateDiffAlgoHeight && identifier == PRE_DELTA_RETARGET) { booleanParam = true; }   
+      // All parameters do not lead to forks!     
+      else { booleanParam = false; }      
+  // There seems to be an invalid entry!      
+  } else { throw std::runtime_error(strprintf("%s: Unknown Fork Verification Cause! %s.", __func__, identifier)); }       
+      
+  return booleanParam;        
+}
+
+unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)      
+{     
   unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();      
       
   if (pindexLast == NULL)     
       return nProofOfWorkLimit; // genesis block      
       
-    // Find the first block in the averaging interval
-    const CBlockIndex* pindexFirst = pindexLast;
-    arith_uint256 bnTot {0};
-    for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
-        arith_uint256 bnTmp;
-        bnTmp.SetCompact(pindexFirst->nBits);
-        bnTot += bnTmp;
-        pindexFirst = pindexFirst->pprev;
-    }
-    arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
-    
-    // Use medians to prevent time-warp attacks
-    int64_t nLastBlockTime = pindexLast->GetMedianTimePast();
-    int64_t nFirstBlockTime = pindexFirst->GetMedianTimePast();
-    int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
-    LogPrint("pow", "  nActualTimespan = %d  before dampening\n", nActualTimespan);
-    nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan())/4;
-    LogPrint("pow", "  nActualTimespan = %d  before bounds\n", nActualTimespan);
+  const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast);      
+  if (pindexPrev->pprev == NULL)      
+      return nProofOfWorkLimit; // first block        
+              
+  const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev);       
+  if (pindexPrevPrev->pprev == NULL)      
+      return nProofOfWorkLimit; // second block       
+          
+  int64_t nTargetSpacing = params.nPowTargetTimespan;     
+  int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();       
+      
+  if (nActualSpacing < 0) {       
+      nActualSpacing = nTargetSpacing;        
+  }       
+  else if (nActualSpacing > nTargetSpacing * 10) {        
+      nActualSpacing = nTargetSpacing * 10;       
+  }       
+      
+  // target change every block        
+  // retarget with exponential moving toward target spacing       
+  // Includes fix for wrong retargeting difficulty by Mammix2     
+  arith_uint256 bnNew;        
+  bnNew.SetCompact(pindexPrev->nBits);        
+      
+  int64_t nInterval = 10;     
+  bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);      
+  bnNew /= ((nInterval + 1) * nTargetSpacing);        
+      
+    if (bnNew <= 0 || bnNew > nProofOfWorkLimit)      
+    bnNew = nProofOfWorkLimit;        
+      
+  return bnNew.GetCompact();      
+      
+} 
 
-    if (nActualTimespan < params.MinActualTimespan())
-        nActualTimespan = params.MinActualTimespan();
-    if (nActualTimespan > params.MaxActualTimespan())
-        nActualTimespan = params.MaxActualTimespan();
+unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params& params)
+{
+    if (CheckForkIsTrue(DELTA_RETARGET, pindexLast)) {
+        
+        // Find the first block in the averaging interval
+        const CBlockIndex* pindexFirst = pindexLast;
+        arith_uint256 bnTot {0};
+        for (int i = 0; pindexFirst && i < params.nPowAveragingWindow; i++) {
+            arith_uint256 bnTmp;
+            bnTmp.SetCompact(pindexFirst->nBits);
+            bnTot += bnTmp;
+            pindexFirst = pindexFirst->pprev;
+        }
+        arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
+        
+        // Use medians to prevent time-warp attacks
+        int64_t nLastBlockTime = pindexLast->GetMedianTimePast();
+        int64_t nFirstBlockTime = pindexFirst->GetMedianTimePast();
+        int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
+        LogPrint("pow", "  nActualTimespan = %d  before dampening\n", nActualTimespan);
+        nActualTimespan = params.AveragingWindowTimespan() + (nActualTimespan - params.AveragingWindowTimespan())/4;
+        LogPrint("pow", "  nActualTimespan = %d  before bounds\n", nActualTimespan);
 
-    // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    arith_uint256 bnNew {bnAvg};
-    bnNew /= params.AveragingWindowTimespan();
-    bnNew *= nActualTimespan;
+        if (nActualTimespan < params.MinActualTimespan())
+            nActualTimespan = params.MinActualTimespan();
+        if (nActualTimespan > params.MaxActualTimespan())
+            nActualTimespan = params.MaxActualTimespan();
 
-    if (bnNew > bnPowLimit)
-        bnNew = bnPowLimit;
+        // Retarget
+        const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+        arith_uint256 bnNew {bnAvg};
+        bnNew /= params.AveragingWindowTimespan();
+        bnNew *= nActualTimespan;
 
-    /// debug print
-    LogPrint("pow", "GetNextWorkRequired RETARGET\n");
-    LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
-    LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
-    LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
+        if (bnNew > bnPowLimit)
+            bnNew = bnPowLimit;
 
-    return bnNew.GetCompact();
+        /// debug print
+        LogPrint("pow", "GetNextWorkRequired RETARGET\n");
+        LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
+        LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
+        LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
+
+        return bnNew.GetCompact();
+
+    } else { return LegacyRetargetBlock(pindexLast, block, params); }
 }
 
 
