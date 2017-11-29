@@ -32,7 +32,7 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     txNew.nVersion = 1;
     txNew.vin.resize(1);
     txNew.vout.resize(1);
-    txNew.vin[0].scriptSig = CScript() << 1511979200 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    txNew.vin[0].scriptSig = CScript() << 1511987368 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.vout[0].nValue = genesisReward;
     txNew.vout[0].scriptPubKey = genesisOutputScript;
 
@@ -131,7 +131,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
-        consensus.nUpdateDiffAlgoHeight = 4;
+        consensus.nUpdateDiffAlgoHeight = 3;
 		consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
@@ -165,14 +165,14 @@ public:
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511979221, 873641, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1511987409, 148984, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x000008ae6b11721921c6332be2fc6a3588216a65620883e688ef780af5caba8e"));
-            assert(genesis.hashMerkleRoot == uint256S("0x71839b0aafc60c0c406ed24d187158bc2cbb74133915dc32c923ec56991ede8a"));
+            assert(consensus.hashGenesisBlock == uint256S("0x00000da29502dad142eda2e0accb927aeb0d23b4b7d8baa74411d10c7fe7fcf6"));
+            assert(genesis.hashMerkleRoot == uint256S("0xd9eabe7aac861229ebc76caa8dafc98c30e1c881f70dee0baa68687c03992618"));
 		}
 
 /*		
@@ -208,8 +208,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x000008ae6b11721921c6332be2fc6a3588216a65620883e688ef780af5caba8e")),
-            1511979221, // * UNIX timestamp of last checkpoint block
+	        (        0, uint256S("0x00000da29502dad142eda2e0accb927aeb0d23b4b7d8baa74411d10c7fe7fcf6")),
+            1511987409, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
@@ -247,7 +247,7 @@ public:
         consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nUpdateDiffAlgoHeight = 4;
+        consensus.nUpdateDiffAlgoHeight = 3;
 
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -357,7 +357,7 @@ public:
         consensus.nPowMaxAdjustDown = 48;
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
-        consensus.nUpdateDiffAlgoHeight = 4;
+        consensus.nUpdateDiffAlgoHeight = 3;
 
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
         consensus.fPowAllowMinDifficultyBlocks = true;
