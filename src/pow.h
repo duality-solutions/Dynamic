@@ -37,8 +37,16 @@ class uint256;
 #define BIGINT_DIVIDE(x, y) x / y
 #define BIGINT_GREATER_THAN(x, y) (x > y)
 
+enum ForkID {		
+	DELTA_RETARGET = 1,		
+	PRE_DELTA_RETARGET = 2,
+};
+
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex);
 
+bool CheckForkIsTrue(ForkID identifier, const CBlockIndex* pindexLast, bool fTableFlip=false);
+
+unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
 unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params&);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
