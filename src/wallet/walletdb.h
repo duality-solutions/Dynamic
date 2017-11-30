@@ -142,16 +142,17 @@ public:
     bool WriteCryptedHDChain(const CHDChain& chain);
     bool WriteHDPubKey(const CHDPubKey& hdPubKey, const CKeyMetadata& keyMeta);
 
+    static void IncrementUpdateCounter();
+    static unsigned int GetUpdateCounter();
+
 private:
     CWalletDB(const CWalletDB&);
     void operator=(const CWalletDB&);
-
     bool WriteAccountingEntry(const uint64_t nAccEntryNum, const CAccountingEntry& acentry);
 };
 
 bool BackupWallet(const CWallet& wallet, const std::string& strDest);
 void ThreadFlushWalletDB(const std::string& strFile);
-
 bool AutoBackupWallet (CWallet* wallet, std::string strWalletFile, std::string& strBackupWarning, std::string& strBackupError);
 
 #endif // DYNAMIC_WALLET_WALLETDB_H
