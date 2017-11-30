@@ -112,8 +112,8 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nRewardsStart = 0; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
-        consensus.nDynodePaymentsStartBlock = 0; // Dynode Payments begin on block 20546
+        consensus.nRewardsStart = 10; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
+        consensus.nDynodePaymentsStartBlock = 10; // Dynode Payments begin on block 20546
         consensus.nMinCountDynodesPaymentStart = 500; // Dynode Payments begin once 500 Dynodes exist or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 0; // actual historical value
@@ -131,7 +131,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
-        consensus.nUpdateDiffAlgoHeight = 3;
+        consensus.nUpdateDiffAlgoHeight = 10;
 		consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
@@ -158,20 +158,20 @@ public:
         pchMessageStart[1] = 0x52;
         pchMessageStart[2] = 0x65;
         pchMessageStart[3] = 0x71;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
         nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1511987409, 148984, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1512016835, 206206, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
         		
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x00000da29502dad142eda2e0accb927aeb0d23b4b7d8baa74411d10c7fe7fcf6"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0000088e07d55a983ffbd9ac467eab1b7d22572ad21a0d0016c11caa292c564e"));
             assert(genesis.hashMerkleRoot == uint256S("0xd9eabe7aac861229ebc76caa8dafc98c30e1c881f70dee0baa68687c03992618"));
 		}
 
@@ -204,12 +204,12 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "";
+        strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-	        (        0, uint256S("0x00000da29502dad142eda2e0accb927aeb0d23b4b7d8baa74411d10c7fe7fcf6")),
-            1511987409, // * UNIX timestamp of last checkpoint block
+	        (        0, uint256S("0x0000088e07d55a983ffbd9ac467eab1b7d22572ad21a0d0016c11caa292c564e")),
+            1512016835, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
