@@ -112,8 +112,8 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nRewardsStart = 0; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
-        consensus.nDynodePaymentsStartBlock = 0; // Dynode Payments begin on block 20546
+        consensus.nRewardsStart = 10; // PoW Rewards begin on block 20546 // TODO: (Amir) Change back to 20546
+        consensus.nDynodePaymentsStartBlock = 10; // Dynode Payments begin on block 20546
         consensus.nMinCountDynodesPaymentStart = 500; // Dynode Payments begin once 500 Dynodes exist or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 0; // actual historical value
@@ -131,7 +131,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
-        consensus.nUpdateDiffAlgoHeight = 3;
+        consensus.nUpdateDiffAlgoHeight = 10;
 		consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
