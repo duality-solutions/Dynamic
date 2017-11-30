@@ -192,7 +192,7 @@ bool Fluid::GenericConsentMessage(std::string message, std::string &signedString
 
 /** Extract timestamp from a Fluid Transaction */
 bool Fluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp) {
-    std::string consentTokenNoScript = getRidOfScriptStatement(consentToken);
+    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
     SeperateString(dehexString, strs, false);
@@ -204,14 +204,14 @@ bool Fluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t 
     std::string ls = ptrs.at(1);
     ScrubString(ls, true);
 
-    if (timeStamp > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT)
+    if (timeStamp > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT)
         return false;
 
     return true;
 }
 
 bool Fluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string> &ptrs, int strVecNo) {
-    std::string consentTokenNoScript = getRidOfScriptStatement(consentToken);
+    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
 
     std::string message;
     if (!CheckNonScriptQuorum(consentTokenNoScript, message))
@@ -241,24 +241,23 @@ bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t tim
     std::string ls = ptrs.at(1);
     ScrubString(ls, true);
 
-    if (timeStamp > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    if (timeStamp > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
-    howMuch	= stringToInteger(lr) * COIN;
+    howMuch	= (int64_t)(StringToFloat(lr) * (float)COIN);
 
     return true;
 }
 
 /** Individually checks the validity of an instruction */
-bool Fluid::GenericVerifyInstruction(std::string uniqueIdentifier, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
+bool Fluid::GenericVerifyInstruction(const std::string uniqueIdentifier, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
 {
-    std::string r = getRidOfScriptStatement(uniqueIdentifier);
-    uniqueIdentifier = r;
+    std::string consentTokenNoScript = GetRidOfScriptStatement(uniqueIdentifier);
     messageTokenKey = "";
     std::vector<std::string> strs;
 
-    ConvertToString(uniqueIdentifier);
-    SeperateString(uniqueIdentifier, strs, false);
+    ConvertToString(consentTokenNoScript);
+    SeperateString(consentTokenNoScript, strs, false);
 
     messageTokenKey = strs.at(0);
 
@@ -306,10 +305,10 @@ bool Fluid::ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &c
     std::string ls = ptrs.at(1);
     ScrubString(ls, true);
 
-    if (nTime > stringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    if (nTime > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
-    coinAmount			 	= stringToInteger(lr) * COIN;
+    coinAmount = (int64_t)(StringToFloat(lr) * (float)COIN);
 
     std::string recipientAddress = ptrs.at(2);
     destination.SetString(recipientAddress);

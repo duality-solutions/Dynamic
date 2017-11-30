@@ -71,7 +71,7 @@ public:
     bool SignIntimateMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch = true);
     bool GenericSignMessage(const std::string message, std::string &signedString, CDynamicAddress signer);
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose=false);
-    bool GenericVerifyInstruction(std::string uniqueIdentifier, CDynamicAddress &signer, std::string &messageTokenKey, int whereToLook=1);
+    bool GenericVerifyInstruction(const std::string uniqueIdentifier, CDynamicAddress &signer, std::string &messageTokenKey, int whereToLook=1);
     bool ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose=false);
     bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress &toMintAddress, CAmount& mintAmount);
     bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch);
