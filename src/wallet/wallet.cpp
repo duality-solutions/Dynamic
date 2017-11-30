@@ -958,7 +958,7 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFromLoadWallet, CWalletD
                              wtxIn.hashBlock.ToString());
             }
             AddToSpends(hash);
-            for(int i = 0; i < wtx.vout.size(); ++i) {
+            for(unsigned int i = 0; i < wtx.vout.size(); ++i) {
                 if (IsMine(wtx.vout[i]) && !IsSpent(hash, i)) {
                     setWalletUTXO.insert(COutPoint(hash, i));
                 }
@@ -3653,7 +3653,7 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
     {
         LOCK2(cs_main, cs_wallet);
         for (auto& pair : mapWallet) {
-            for(int i = 0; i < pair.second.vout.size(); ++i) {
+            for(unsigned int i = 0; i < pair.second.vout.size(); ++i) {
                 if (IsMine(pair.second.vout[i]) && !IsSpent(pair.first, i)) {
                     setWalletUTXO.insert(COutPoint(pair.first, i));
                 }
