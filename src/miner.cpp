@@ -439,7 +439,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
         // Update coinbase transaction with additional info about dynode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutDynode, pblock->voutSuperblock);
+        FillBlockPayments(txNew, nHeight, pblock->txoutDynode, pblock->voutSuperblock);
         // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
         //             nHeight, blockReward, pblock->txoutDynode.ToString(), txNew.ToString());
 

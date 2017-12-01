@@ -216,7 +216,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
     return true;
 }
 
-void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet, std::vector<CTxOut>& voutSuperblockRet)
+void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet, std::vector<CTxOut>& voutSuperblockRet)
 {
     // only create superblocks if spork is enabled AND if superblock is actually triggered
     // (height should be validated inside)
@@ -229,9 +229,10 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
 
     if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
         // FILL BLOCK PAYEE WITH DYNODE PAYMENT OTHERWISE
-        dnpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutDynodeRet);
-        LogPrint("dnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutDynodeRet %s txNew %s",
-                                nBlockHeight, blockReward, txoutDynodeRet.ToString(), txNew.ToString());
+        dnpayments.FillBlockPayee(txNew, nBlockHeight, txoutDynodeRet);
+        //LogPrint("dnpayments", "FillBlockPayments -- nBlockHeight %d txoutDynodeRet %s txNew %s",
+        //                        nBlockHeight, txoutDynodeRet.ToString(), txNew.ToString());
+        return;
     }
 }
 
@@ -272,7 +273,7 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
 *   Fill Dynode ONLY payment block
 */
 
-void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet)
+void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet)
 {
     CBlockIndex* pindexPrev = chainActive.Tip();       
     if(!pindexPrev) return;        
@@ -280,45 +281,41 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
     bool hasPayment = true;
     CScript payee;
 
-    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock){
-            if (fDebug)
-                LogPrintf("CreateNewBlock: No Dynode payments prior to block 20,546\n");
-            hasPayment = false;
+    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrintf("CDynodePayments::FillBlockPayee: No Dynode payments prior to block %u\n", Params().GetConsensus().nDynodePaymentsStartBlock);
+        hasPayment = false;
     }
 
-    //spork
-    if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
-        //no Dynode detected
+    if(hasPayment && !dnpayments.GetBlockPayee(nBlockHeight, payee)){       
         int nCount = 0;
         dynode_info_t dnInfo;
+        // Do not pay if no Dynodes detected
         if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
-        payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
-        } else {
-            if (fDebug)
-                LogPrintf("CreateNewBlock: Failed to detect Dynode to pay\n");
             hasPayment = false;
+            LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
+        } 
+        else {
+            // get winning Dynode payment script
+            payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
+            LogPrintf("CDynodePayments::FillBlockPayee: Found Dynode to pay!\n");
         }
     }
-
-    CAmount blockValue, dynodePayment, fluidIssuance;
-	CDynamicAddress addressX;
-	
-	if (fluid.GetMintingInstructions(pindexPrev, addressX, fluidIssuance)) {
-	    blockValue = 	getBlockSubsidyWithOverride(pindexPrev->nHeight, chainActive.Tip()->fluidParams.blockReward) + 
-						fluidIssuance;
-	} else {
-		blockValue = 	getBlockSubsidyWithOverride(pindexPrev->nHeight, chainActive.Tip()->fluidParams.blockReward);
-	}
-	
-    txNew.vout[0].nValue = blockValue;
+    else {
+        LogPrintf("CDynodePayments::FillBlockPayee: Dynode payee found.\n"); //TODO (Amir): Remove logging.
+    }
 
     if(hasPayment){
-        txNew.vout.resize(2);
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if(!pindexPrev) 
+            return;
 
-        dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+        // make sure it's not filled yet
+        txoutDynodeRet = CTxOut();
 
-        txNew.vout[1].scriptPubKey = payee;
-        txNew.vout[1].nValue = dynodePayment;
+        CAmount dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+        
+        txoutDynodeRet = CTxOut(dynodePayment, payee);
+        txNew.vout.push_back(txoutDynodeRet);
 
         CTxDestination address1;
         ExtractDestination(payee, address1);

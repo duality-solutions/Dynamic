@@ -479,10 +479,14 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
     dnInfoRet = dynode_info_t();
     nCountRet = 0;
 
+    int nCheckBlockHeight = nBlockHeight - 101;
+    if (nCheckBlockHeight < 1) {
+        return false;
+    }
+
     if (!dynodeSync.IsWinnersListSynced()) {
         // without winner list we can't reliably find the next winner anyway
         return false;
-
     }
 
     // Need LOCK2 here to ensure consistent locking order because the GetBlockHash call below locks cs_main
@@ -524,8 +528,8 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
     sort(vecDynodeLastPaid.begin(), vecDynodeLastPaid.end(), CompareLastPaidBlock());
 
     uint256 blockHash;
-    if(!GetBlockHash(blockHash, nBlockHeight - 101)) {
-        LogPrintf("CDynode::GetNextDynodeInQueueForPayment -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nBlockHeight - 101);
+    if(!GetBlockHash(blockHash, nCheckBlockHeight)) {
+        LogPrintf("CDynode::GetNextDynodeInQueueForPayment -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nCheckBlockHeight);
         return false;
     }
     // Look at 1/10 of the oldest nodes (by last payment), calculate their scores and pay the best one
@@ -623,6 +627,9 @@ bool CDynodeMan::GetDynodeRank(const COutPoint& outpoint, int& nRankRet, int nBl
 {
     nRankRet = -1;
 
+    if (nBlockHeight < 1)
+        return false;
+
     if (!dynodeSync.IsDynodeListSynced())
         return false;
 
@@ -655,6 +662,9 @@ bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, 
 {
     vecDynodeRanksRet.clear();
 
+    if (nBlockHeight < 1)
+        return false;
+    
     if (!dynodeSync.IsDynodeListSynced())
         return false;
 
