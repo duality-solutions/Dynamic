@@ -3396,6 +3396,8 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
 				const COutPoint &prevout = tx.vin[i].prevout;
 				const CCoins *coins = inputs.AccessCoins(prevout.hash);
 
+                assert(coins != nullptr); //check if coins is null, Segfault here instead of next line.
+
 				// Check for negative or overflow input values
 				nValueIn += coins->vout[prevout.n].nValue;
 			}
