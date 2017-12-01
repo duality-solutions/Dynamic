@@ -1,5 +1,15 @@
 **Dynamic v1.5.0.0**
 * Fix Network Time Protocol (NTP)
+Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol
+* Add string generation/parsing system to generate tokens for Fluid Protocol
+* Set authentication keys for token generation to statically-defined addresses
+* Update CBlockIndex and CChain models for storing Fluid Protocol derived variables
+* Allow opcodes to carry token instruction and to detect tokens
+* Implement derivation of token data into datasets
+* Derive parameters (One-Time Reward, Dynode & PoW Reward) from datasets
+* Implement token-history indexing and prevent replay attacks
+* Change statically-defined addresses to identity-derived addresses (dynamic)
+* Introduce RPC Calls maketoken, getrawpubkey, burndynamic, sendfluidtransaction, signtoken, consenttoken, verifyquorum, fluidcommandshistory, getfluidmasters
 * Update secp256k1
 * Remove block 300,000 fork data
 * New Hash Settings
