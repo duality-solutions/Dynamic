@@ -710,7 +710,7 @@ bool CDynodeMan::GetDynodeByRank(int nRankIn, dynode_info_t& dnInfoRet, int nBlo
     if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
         return false;
 
-    if (vecDynodeScores.size() < nRankIn)
+    if ((int)vecDynodeScores.size() < nRankIn)
         return false;
 
     int nRank = 0;
