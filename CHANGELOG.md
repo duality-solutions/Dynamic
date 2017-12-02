@@ -1,6 +1,6 @@
 **Dynamic v1.5.0.0**
 * Fix Network Time Protocol (NTP)
-* Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol
+Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol
 * Add string generation/parsing system to generate tokens for Fluid Protocol
 * Set authentication keys for token generation to statically-defined addresses
 * Update CBlockIndex and CChain models for storing Fluid Protocol derived variables
@@ -10,6 +10,138 @@
 * Implement token-history indexing and prevent replay attacks
 * Change statically-defined addresses to identity-derived addresses (dynamic)
 * Introduce RPC Calls maketoken, getrawpubkey, burndynamic, sendfluidtransaction, signtoken, consenttoken, verifyquorum, fluidcommandshistory, getfluidmasters
+* Update secp256k1
+* Remove block 300,000 fork data
+* New Hash Settings
+* Amend CPU Core Count
+* Revert/Update and Strip Argon2d code
+* Update LevelDB to 1.20
+* Add Dynode checks to prevent payments until 500 are active
+* Reduce nPowTargetTimespan to 1920 seconds
+* Reduce nMinerConfirmationWindow to 30 blocks
+* [Qt] Reduce a significant cs_main lock freeze 
+* remove InstantSend votes for failed lock attemts after some timeout
+* Fix dnp relay bug
+* fix trafficgraphdatatests for qt4
+* Fix edge case for IS (skip inputs that are too large)
+* allow up to 40 chars in proposal name
+* Multiple Fixes/Implement connman broadly
+* Add more logging for DN votes and DNs missing votes
+* Remove bogus assert on number of oubound connections.
+* update nCollateralMinConfBlockHash for local (hot) dynode on dn start
+* Fix sync reset on lack of activity
+* fix nLastWatchdogVoteTime updates
+* Fix bug: nCachedBlockHeight was not updated on start
+* Fix compilation with qt < 5.2
+* RPC help formatting updates
+* Relay govobj and govvote to every compatible peer, not only to the one with the same version
+* remove send addresses from listreceivedbyaddress output
+* Remove cs_main from ThreadDnbRequestConnections
+* do not calculate stuff that are not going to be visible in simple PSUI anyway & fix fSkipUnconfirmed
+* Keep track of wallet UTXOs and use them for PS balances and rounds calculations
+* speedup MakeCollateralAmounts by skiping denominated inputs early
+* Reduce min relay tx fee
+* more vin -> outpoint in dynode rpc output
+* Move some (spamy) CDynodeSync log messages to new log category
+* Eliminate g_connman use in InstantSend module.
+* Remove some recursive locks
+* Fix dynode score/rank calculations (#1620)
+* InstandSend overhaul & TXMempool Fixes
+* fix TrafficGraphData bandwidth calculation
+* Fix losing keys on PrivateSend
+* Refactor masternode management
+* Multiple Selection for peer and ban tables
+* qt: Fixing division by zero in time remaining
+* [qt] sync-overlay: Don't show progress twice
+* qt: Plug many memory leaks
+* [GUI] Backport Bitcoin Qt/Gui changes up to 0.14.x
+* Fix Unlocked Access to vNodes
+* Fix Sync
+* Fix empty tooltip during sync under specific conditions
+* fix SPORK_5_INSTANTSEND_MAX_VALUE validation in CWallet::CreateTransaction
+* Eliminate g_connman use in spork module. 
+* Use connman passed to ThreadSendAlert() instead of g_connman global.
+* Fix duplicate headers download in initial sync
+* fix off-by-1 in CSuperblock::GetPaymentsLimit
+* fix number of blocks to wait after successful mixing tx
+* Backport Bitcoin PR#7868: net: Split DNS resolving functionality out of net structures
+* net: require lookup functions to specify all arguments to make it clear where DNS resolves are happening
+* net: manually resolve dns seed sources
+* net: resolve outside of storage structures
+* net: disable resolving from storage structures
+* net: No longer send local address in addrMe
+* safe version of GetDynodeByRank
+* Do not add random inbound peers to addrman.
+* Partially backport Bitcoin PR#9626: Clean up a few CConnman cs_vNodes/CNode things
+* Delete some unused (and broken) functions in CConnman
+* Ensure cs_vNodes is held when using the return value from FindNode
+* Use GetAdjustedTime instead of GetTime when dealing with network-wide timestamps
+* slightly refactor CPSNotificationInterface
+* drop masternode index
+* drop pCurrentBlockIndex and use cached block height instead (nCachedBlockHeight)
+* add/use GetUTXO[Coins/Confirmations] helpers instead of GetInputAge[InstantSend]
+* net: Consistently use GetTimeMicros() for inactivity checks 
+* Fix DynodeRateCheck
+* Always good to initialise
+* Necessary split of main.h to validation.cpp/net_processing.cpp
+* Relay tx in sendrawtransaction according to its inv.type
+* Fix : Reject invalid instantsend transaction
+* fix instantsendtoaddress param convertion
+* Fix potential deadlock in CInstantSend::UpdateLockedTransaction (#1571) 
+* limit UpdatedBlockTip in IBD
+* Pass reference when calling HasPayeeWithVotes
+* Sync overhaul
+* Make sure mixing messages are relayed/accepted properly
+* backport 9008: Remove assert(nMaxInbound > 0)
+* Backport Bitcoin PR#8049: Expose information on whether transaction relay is enabled in (#1545)
+* fix potential deadlock in CDynodeMan::CheckDnbAndUpdateDynodeList
+* fix potential deadlock in CGovernanceManager::ProcessVote
+* add 6 to strAllowedChars
+* Backport Bitcoin PR#8085: p2p: Begin encapsulation
+* change invalid version string constant
+* Added feeler connections increasing good addrs in the tried table.
+* Backport Bitcoin PR#8113: Rework addnode behaviour (#1525) 
+* Fix vulnerability with mapDynodeOrphanObjects
+* Remove bad chain alert partition check
+* Fix potential deadlocks in InstantSend
+* fix CDSNotificationInterface::UpdatedBlockTip signature to match the one in CValidationInterface
+* fix a bug in CommitFinalTransaction
+* fixed potential deadlock in CSuperblockManager::IsSuperblockTriggered
+* Fix issues with mapSeenGovernanceObjects
+* Backport Bitcoin PR#8084: Add recently accepted blocks and txn to AttemptToEvictConnection
+* Backport Bitcoin PR#7906: net: prerequisites for p2p encapsulation changes
+* fix race that could fail to persist a ban
+* Remove non-determinism which is breaking net_tests
+* Implement BIP69 outside of CTxIn/CTxOut 
+* fix MakeCollateralAmounts
+* Removal of Unused Files and CleanUp
+* Further fixes to PrivateSend
+* New rpc call 'dynodelist info'
+* Backport Bitcoin PR#7749: Enforce expected outbound services
+* Backport Bitcoin PR#7696: Fix de-serialization bug where AddrMan is corrupted after exception
+* Fixed issues with propagation of governance objects and update governance
+* Backport Bitcoin PR#7458 : [Net] peers.dat, banlist.dat recreated when missing
+* Backport Bitcoin PR#7350: Banlist updates
+* Replace watchdogs with ping 
+* Update timedata.h
+* Trivial Fixes
+* Eliminate unnecessary call to CheckBlock 
+* PrivateSend: dont waste keys from keypool on failure in CreateDenominated
+* Refactor PS and fix minor build issues preventing Travis-CI from completing previously
+* Fix Governance Test File
+* Increase test coverage for addrman and addrinfo
+* Backport Bitcoin PRs #6589, #7180 and remaining part of #7181
+* Don't try to create empty datadir before the real path is known
+* Documentation: Add spork message / details to protocol-documentation
+* Validate proposals on prepare and submit
+* Fix signal/slot in GUI
+* Fix PS/IS/Balance display in SendCoinsDialog
+* Make CBlockIndex param const
+* Explicitly pass const CChainParams& to UpdateTip()
+* Change Class to Struct/Change int to unsigned int
+* Fix copy elision warning
+* Fix comparison of integers of different signs in dynodeman
+* Remove unused int
 
 **Dynamic v1.4.0.0**
 
