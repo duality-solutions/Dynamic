@@ -21,7 +21,7 @@
 #include <boost/algorithm/string.hpp>
 
 class CBlock;
-class CBlockTemplate;
+struct CBlockTemplate;
 
 /** Configuration Framework */
 class CFluidParameters {
