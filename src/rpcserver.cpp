@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -407,6 +407,18 @@ static const CRPCCommand vRPCCommands[] =
     { "Wallet",             "walletlock",             &walletlock,             true  },
     { "Wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
     { "Wallet",             "walletpassphrase",       &walletpassphrase,       true  },
+
+    /* Fluid Protocol */
+    { "Protocol",           "sendfluidtransaction",	  &sendfluidtransaction,   true  },
+    { "Protocol",           "signtoken",			  &signtoken,			   true  },
+    { "Protocol",           "consenttoken",			  &consenttoken,		   true  },
+    { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
+    { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
+    { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
+    { "Protocol",           "fluidcommandshistory",	  &fluidcommandshistory,   true  },
+    { "Protocol",           "getfluidmasters",	      &getfluidmasters,   	   true  },
+    { "Protocol",           "gettime",	      		  &gettime,   	   			true  },
+
      /* Decentralised DNS */
     { "DDNS",               "name_scan",              &name_scan,              true  },
     { "DDNS",               "name_filter",            &name_filter,            true  },

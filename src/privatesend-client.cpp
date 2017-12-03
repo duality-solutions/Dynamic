@@ -1,6 +1,8 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "privatesend-client.h"
 
 #include "coincontrol.h"
@@ -1216,7 +1218,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
         // If we failed then most likeky there are not enough funds on this address.
         if(fTryDenominated) {
             // Try to also use denominated coins (we can't mix denominated without collaterals anyway).
-            // MN-like funds should not be touched in any case.
+            // DN-like funds should not be touched in any case.
             if(!pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
                                 nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NOT1000IFDN)) {
                 LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NOT1000IFDN Error: %s\n", strFail);
