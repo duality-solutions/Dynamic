@@ -275,9 +275,6 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
 
 void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet)
 {
-    CBlockIndex* pindexPrev = chainActive.Tip();       
-    if(!pindexPrev) return;        
-
     bool hasPayment = true;
     CScript payee;
 
