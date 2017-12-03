@@ -337,9 +337,6 @@ int CDynodePayments::GetMinDynodePaymentsProto() {
 
 void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    // Ignore any payments messages until Dynode list is synced
-    if(!dynodeSync.IsDynodeListSynced()) return;
-
     if(fLiteMode) return; // disable all Dynamic specific functionality
 
     if (strCommand == NetMsgType::DYNODEPAYMENTSYNC) { //Dynode Payments Request Sync
@@ -378,6 +375,11 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         uint256 nHash = vote.GetHash();
 
         pfrom->setAskFor.erase(nHash);
+
+        // TODO: clear setAskFor for MSG_DYNODE_PAYMENT_BLOCK too
+
+        // Ignore any payments messages until dynode list is synced
+        if(!dynodeSync.IsDynodeListSynced()) return;
 
         {
             LOCK(cs_mapDynodePaymentVotes);
