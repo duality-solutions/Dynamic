@@ -32,7 +32,7 @@ public:
     static const CAmount MAX_FLUID_MINER_REWARD = 3 * COIN; // Maximum DYN miner block reward amount 
     static const CAmount MAX_FLUID_DYNODE_REWARD = 5 * COIN; // Maximum DYN Dynode block reward amount 
     static const CAmount MAX_FLUID_DYNODE_RECIPIENT_COUNT = 5; // Maximum Dynode recipient count per block
-
+    static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN; // Cost to send a fluid transaction
     //TODO (Amir): Change address and remove private keys below.
     std::string FEE_REDIRECT_ADDRESS = "DGkRapsj7yQSvYaf46pHYUPwJrakpMd3Sh"; // importprivkey 5iw3QNmomgDceCTEZCLtEaeqSsyJXvKf28fc9rCi1iymYzokt4L
 
