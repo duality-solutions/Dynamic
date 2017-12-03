@@ -983,7 +983,11 @@ void SetThreadPriority(int nPriority)
 
 int GetNumCores()
 {
-    return std::thread::hardware_concurrency();
+#if BOOST_VERSION >= 105600
+    return boost::thread::physical_concurrency();
+#else // Must fall back to hardware_concurrency, which unfortunately counts virtual cores
+    return boost::thread::hardware_concurrency();
+#endif
 }
 
 uint32_t StringVersionToInt(const std::string& strVersion)
