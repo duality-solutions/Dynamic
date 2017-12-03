@@ -363,6 +363,7 @@ HEADERS += \
     src/chainparams.h \
     src/chainparamsbase.h \
     src/chainparamsseeds.h \
+    src/checkforks.h \
     src/checkpoints.h \
     src/checkqueue.h \
     src/clientversion.h \
@@ -549,6 +550,7 @@ SOURCES += \
     src/chain.cpp \
     src/chainparams.cpp \
     src/chainparamsbase.cpp \
+    src/checkforks.cpp \
     src/checkpoints.cpp \
     src/clientversion.cpp \
     src/coins.cpp \

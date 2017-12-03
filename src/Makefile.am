@@ -82,6 +82,7 @@ DYNAMIC_CORE_H = \
   chainparams.h \
   chainparamsbase.h \
   chainparamsseeds.h \
+  checkforks.h \
   checkpoints.h \
   checkqueue.h \
   clientversion.h \
@@ -215,6 +216,7 @@ libdynamic_server_a_SOURCES = \
   alert.cpp \
   bloom.cpp \
   chain.cpp \
+  checkforks.cpp \
   checkpoints.cpp \
   dbwrapper.cpp \
   dns/dns.cpp \
