@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2017 Plaxton/Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers   
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
