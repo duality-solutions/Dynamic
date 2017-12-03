@@ -114,6 +114,7 @@ public:
         strNetworkID = "main";
         consensus.nRewardsStart = 10; // PoW Rewards begin on block 5137 // TODO: (Amir) Change back to 5137
         consensus.nDynodePaymentsStartBlock = 10; // Dynode Payments begin on block 10273
+        consensus.MinCountDynodesPaymentStart = 1; // Dynode Payments begin once 500 Dynodes exist or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 2055; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
@@ -230,6 +231,7 @@ public:
         strNetworkID = "test";
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
+        consensus.MinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
@@ -343,6 +345,7 @@ public:
         strNetworkID = "regtest";
         consensus.nRewardsStart = 0; // Rewards starts on block 0
         consensus.nDynodePaymentsStartBlock = 0;
+        consensus.MinCountDynodesPaymentStart = 1; // Dynode Payments begin once 1 Dynode exists or more.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;

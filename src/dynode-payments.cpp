@@ -286,6 +286,8 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
         hasPayment = false;
     }
 
+    int nDnCount = dnodeman.CountDynodes();
+
     if(hasPayment && !dnpayments.GetBlockPayee(nBlockHeight, payee)){       
         int nCount = 0;
         dynode_info_t dnInfo;
@@ -294,6 +296,10 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
             hasPayment = false;
             LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
         } 
+        else if (nDnCount <= Params().GetConsensus().MinCountDynodesPaymentStart) {
+        hasPayment = false;
+        LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
+        }
         else {
             // get winning Dynode payment script
             payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
