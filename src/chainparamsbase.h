@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-static const int DEFAULT_P2P_PORT = 32300;
+static const int DEFAULT_P2P_PORT = 33300;
 
 /**
  * CBaseChainParams defines the base parameters (shared between dynamic-cli and dynamicd)

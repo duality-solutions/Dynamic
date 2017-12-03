@@ -1318,16 +1318,16 @@ bool checkNameValues(NameTxInfo& ret)
     if (ret.value.size() > MAX_VALUE_LENGTH)
         ret.err_msg.append("value is too long.\n");
 
-    if (ret.op == OP_NAME_NEW && ret.nRentalDays < 1)
+    if (ret.op == OP_IDENTITY_NEW && ret.nRentalDays < 1)
         ret.err_msg.append("rental days must be greater than 0.\n");
 
-    if (ret.op == OP_NAME_UPDATE && ret.nRentalDays < 0)
+    if (ret.op == OP_IDENTITY_UPDATE && ret.nRentalDays < 0)
         ret.err_msg.append("rental days must be greater or equal 0.\n");
 
     if (ret.nRentalDays > MAX_RENTAL_DAYS)
         ret.err_msg.append("rental days value is too large.\n");
 
-    if (ret.op == OP_NAME_MULTISIG && !(AddressMatchesPubKey(ret.name, ret.value, ret.err_msg)))
+    if (ret.op == OP_IDENTITY_MULTISIG && !(AddressMatchesPubKey(ret.name, ret.value, ret.err_msg)))
         ret.err_msg.append("invalid multisig name or value.\n");
 
     if (ret.err_msg != "")
@@ -1380,7 +1380,7 @@ bool DecodeNameScript(const CScript& script, NameTxInfo& ret, CScript::const_ite
         return false;
     ret.op = opcode - OP_1 + 1;
 
-    if (ret.op != OP_NAME_NEW && ret.op != OP_NAME_UPDATE && ret.op != OP_NAME_DELETE && ret.op != OP_NAME_MULTISIG)
+    if (ret.op != OP_IDENTITY_NEW && ret.op != OP_IDENTITY_UPDATE && ret.op != OP_IDENTITY_DELETE && ret.op != OP_IDENTITY_MULTISIG)
         return false;
 
     ret.err_msg = "failed to read OP_DROP after op_type";
@@ -1399,8 +1399,8 @@ bool DecodeNameScript(const CScript& script, NameTxInfo& ret, CScript::const_ite
         return false;
     ret.name = vch;
 
-    // if name_delete - read OP_DROP after name and exit.
-    if (ret.op == OP_NAME_DELETE)
+    // if identity_delete - read OP_DROP after name and exit.
+    if (ret.op == OP_IDENTITY_DELETE)
     {
         ret.err_msg = "failed to read OP2_DROP in name_delete";
         if (!script.GetOp(pc, opcode))

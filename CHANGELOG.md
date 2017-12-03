@@ -136,8 +136,15 @@ Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Proto
 * Validate proposals on prepare and submit
 * Fix signal/slot in GUI
 * Fix PS/IS/Balance display in SendCoinsDialog
+* Make CBlockIndex param const
+* Explicitly pass const CChainParams& to UpdateTip()
+* Change Class to Struct/Change int to unsigned int
+* Fix copy elision warning
+* Fix comparison of integers of different signs in dynodeman
+* Remove unused int
 
-**Dynamic v1.4.0.0
+**Dynamic v1.4.0.0**
+
 * Securely erase potentially sensitive keys/values
 * Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
