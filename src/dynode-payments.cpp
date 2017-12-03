@@ -814,7 +814,7 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
 
     CDynodeMan::rank_pair_vec_t dns;
     if (!dnodeman.GetDynodeRanks(dns, nPrevBlockHeight - 101, GetMinDynodePaymentsProto())) {
-        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetMasternodeRanks failed\n";
+        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetDynodeRanks failed\n";
         LogPrint("dnpayments", "%s", debugStr);
         return;
     }

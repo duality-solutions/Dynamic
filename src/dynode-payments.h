@@ -209,7 +209,7 @@ public:
     int GetMinDynodePaymentsProto();
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutMasternodeRet);
+    void FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet);
     std::string ToString() const;
 
     int GetBlockCount() { return mapDynodeBlocks.size(); }
