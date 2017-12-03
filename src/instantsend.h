@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef INSTANTX_H
-#define INSTANTX_H
+
+#ifndef INSTANTSEND_H
+#define INSTANTSEND_H
 
 #include "chain.h"
 #include "net.h"
@@ -259,4 +261,4 @@ public:
     void Relay(CConnman& connman) const;
 };
 
-#endif
+#endif // INSTANTSEND_H
