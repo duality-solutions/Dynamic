@@ -32,6 +32,9 @@
 #include "wallet/wallet.h"
 #endif
 
+#include "dynode-payments.h"
+#include "governance-classes.h"
+
 #include <univalue.h>
 
 #include <memory>
@@ -706,6 +709,18 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
+
+    CScript payee;
+    if (sporkManager.IsSporkActive(SPORK_8_DYNODE_PAYMENT_ENFORCEMENT)
+        && !dynodeSync.IsWinnersListSynced()
+        && !dnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading Dynode winners...");
+
+    // next block is a superblock and we need governance info to correctly construct it
+    if (sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)
+        && !dynodeSync.IsSynced()
+        && CSuperblock::IsValidBlockHeight(chainActive.Height() + 1))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is syncing with network...");
 
     static unsigned int nTransactionsUpdatedLast;
 
