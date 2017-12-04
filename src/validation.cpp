@@ -41,7 +41,6 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
-#include "checkforks.h"
 #include "fluid.h"
 
 #include <atomic>
