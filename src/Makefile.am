@@ -80,7 +80,6 @@ DYNAMIC_CORE_H = \
   cachemultimap.h \
   chain.h \
   chainparams.h \
-  checkforks.h \
   chainparamsbase.h \
   chainparamsseeds.h \
   checkpoints.h \
@@ -109,6 +108,7 @@ DYNAMIC_CORE_H = \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -216,10 +216,10 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  checkforks.cpp \
   dbwrapper.cpp \
   dns/dns.cpp \
   dns/dyndns.cpp \
+  fluid.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -251,6 +251,7 @@ libdynamic_server_a_SOURCES = \
   rpcnet.cpp \
   rpcrawtransaction.cpp \
   rpcserver.cpp \
+  rpcfluid.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   timedata.cpp \
@@ -421,6 +422,7 @@ dynamicd_LDADD = \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
   $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 

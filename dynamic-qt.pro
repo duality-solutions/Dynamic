@@ -365,7 +365,6 @@ HEADERS += \
     src/chainparamsseeds.h \
     src/checkpoints.h \
     src/checkqueue.h \
-    src/checkforks.h \
     src/clientversion.h \
     src/coincontrol.h \
     src/coins.h \
@@ -548,7 +547,6 @@ SOURCES += \
     src/base58.cpp \
     src/bloom.cpp \
     src/chain.cpp \
-    src/checkforks.cpp \
     src/chainparams.cpp \
     src/chainparamsbase.cpp \
     src/checkpoints.cpp \

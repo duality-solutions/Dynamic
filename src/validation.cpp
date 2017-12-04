@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -41,7 +41,7 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
-#include "checkforks.h"
+#include "fluid.h"
 
 #include <atomic>
 #include <sstream>
@@ -201,10 +201,26 @@ CBlockTreeDB *pblocktree = NULL;
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 {
+	CBlockIndex* pblockindex = chainActive[nBlockHeight-1];
+	
     if (tx.nLockTime == 0)
         return true;
     if ((int64_t)tx.nLockTime < ((int64_t)tx.nLockTime < LOCKTIME_THRESHOLD ? (int64_t)nBlockHeight : nBlockTime))
         return true;
+    
+    if (nBlockHeight >= fluid.FLUID_ACTIVATE_HEIGHT) {
+		if (!fluid.ProvisionalCheckTransaction(tx))
+			return false;
+		
+		if (!fluid.CheckTransactionToBlock(tx, pblockindex->GetBlockHeader()))
+			return false;
+		
+		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
+			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), nBlockTime))
+				return false;
+		}
+	}
+	
     BOOST_FOREACH(const CTxIn& txin, tx.vin) {
         if (!(txin.nSequence == CTxIn::SEQUENCE_FINAL))
             return false;
@@ -482,7 +498,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
 
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)
+    for (const CTxOut& txout : tx.vout)
     {
         if (txout.nValue < 0)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-vout-negative");
@@ -491,6 +507,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
         nValueOut += txout.nValue;
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
+        if (IsTransactionFluid(txout.scriptPubKey)) {
+            if (fluid.FLUID_TRANSACTION_COST > txout.nValue)
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-vout-amount-toolow");
+            if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
+        }
     }
 
     // Check for duplicate inputs
@@ -572,11 +594,26 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
                               std::vector<uint256>& vHashTxnToUncache, bool fDryRun)
 {
     AssertLockHeld(cs_main);
+
+    bool fluidTransaction = false;
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
     if (!CheckTransaction(tx, state))
         return false;
+
+    if (!fluid.ProvisionalCheckTransaction(tx))
+		return false;
+
+    for (const CTxOut& txout : tx.vout)	{	
+		if (IsTransactionFluid(txout.scriptPubKey))
+        {
+            fluidTransaction = true;
+            if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())){
+                return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
+            }
+        }
+	}
 
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
@@ -595,7 +632,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
+    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx && !fluidTransaction)
         return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Only accept nLockTime-using transactions that can be mined in the next
@@ -1052,11 +1089,22 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransa
 {
     std::vector<uint256> vHashTxToUncache;
     bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, fOverrideMempoolLimit, fRejectAbsurdFee, vHashTxToUncache, fDryRun);
-    if (!res || fDryRun) {
+    bool fluidTimestampCheck = true;
+    
+    if (!fluid.ProvisionalCheckTransaction(tx))
+		return false;
+
+    BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
+		if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime()))
+			fluidTimestampCheck = false;
+	}
+
+    if (!res || fDryRun || !fluidTimestampCheck) {
         if(!res) LogPrint("mempool", "%s: %s %s\n", __func__, tx.GetHash().ToString(), state.GetRejectReason());
         BOOST_FOREACH(const uint256& hashTx, vHashTxToUncache)
             pcoinsTip->Uncache(hashTx);
     }
+
     return res;
 }
 
@@ -1140,6 +1188,8 @@ bool GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::P
                 return error("%s: txid mismatch", __func__);
             return true;
         }
+        // transaction not found in index, nothing more can be done
+        return false;
     }
 
     if (fAllowSlow) { // use coin database to locate block that contains transaction, and scan it
@@ -1238,43 +1288,6 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 {
     return ReadBlockFromDisk(block, pindex, Params().GetConsensus());
-}
-
-CAmount GetPoWBlockPayment(const int& nHeight)
-{
-    if (chainActive.Height() == 0) {
-        CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
-        LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
-        return nSubsidy;
-    }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
-        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
-        return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
-    }
-    else
-        return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
-}
-
-CAmount GetDynodePayment(bool fDynode)
-{   
-    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
-        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
-    }
-    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
-        return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
-    }
-    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
-    }
-    else
-        return BLOCKCHAIN_INIT_REWARD;
 }
 
 bool IsInitialBlockDownload()
@@ -2169,20 +2182,78 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fDynodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetDynodePayment(fDynodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight); // Burn transaction fees
-    std::string strError = "";
+	CAmount nExpectedBlockValue;
+	std::string strError = "";
+	{
+		CBlockIndex* prevIndex = pindex->pprev;
+		CFluidEntry prevFluidIndex = pindex->pprev->fluidParams;
+		
+		CFluidEntry FluidIndex;
+		
+		CAmount fluidIssuance, newReward = 0, newDynodeReward = 0;
+		CDynamicAddress mintAddress;
+		
+		if (!fluid.GetProofOverrideRequest(pindex->pprev, newReward) 
+		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
+				FluidIndex.blockReward = (prevIndex? prevFluidIndex.blockReward : 0);
+		} else {
+				FluidIndex.blockReward = newReward;
+		}
 
-    if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
-        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
-    }
+		if (!fluid.GetDynodeOverrideRequest(pindex->pprev, newDynodeReward) 
+		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
+				FluidIndex.dynodeReward = (prevIndex? prevFluidIndex.dynodeReward : 0);
+		} else {
+				FluidIndex.dynodeReward = newDynodeReward;
+		}
+		
+		if (fluid.GetMintingInstructions(pindex->pprev, mintAddress, fluidIssuance) 
+		&& pindex->nHeight  >= fluid.FLUID_ACTIVATE_HEIGHT) {
+			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
+									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward) + 
+									fluidIssuance;
+		} else {
+			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
+									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward);
+		}
+		
+		std::vector<std::string> fluidHistory, fluidManagers;
+		
+		if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
+			return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+		}
+		
+		if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
+			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+			return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
+									REJECT_INVALID, "bad-cb-payee");
+		}
+		
+		if (prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {	
+			fluidHistory.insert(fluidHistory.end(), prevFluidIndex.fluidHistory.begin(), prevFluidIndex.fluidHistory.end());
+			fluid.AddFluidTransactionsToRecord(prevIndex, fluidHistory);
+			std::set<std::string> setX(fluidHistory.begin(), fluidHistory.end());
+			fluidHistory.assign(setX.begin(), setX.end());
+			
+			FluidIndex.fluidHistory = fluidHistory;
+			
+			for (uint32_t x = 0; x != fluid.InitialiseIdentities().size(); x++) {
+				std::string error;
+				CDynamicAddress inputKey; // Reinitialise at each iteration to reset value
+				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
+				
+				if (!GetNameCurrentAddress(val, inputKey, error))
+					fluidManagers.push_back(inputKey.ToString());
+				else
+					fluidManagers.push_back(prevFluidIndex.fluidManagers.at(x));
+			}
+		}
+		
+		pindex->fluidParams = FluidIndex;
+	}
 
-    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
-        mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-        return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
-                                REJECT_INVALID, "bad-cb-payee");
-    }
     // END DYNAMIC
-
+    
     if (!control.Wait())
         return state.DoS(100, false);
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
@@ -2388,8 +2459,8 @@ void PruneAndFlush() {
 }
 
 /** Update chainActive and related internal data structures. */
-void static UpdateTip(CBlockIndex *pindexNew) {
-    const CChainParams& chainParams = Params();
+void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
+
     chainActive.SetTip(pindexNew);
 
     // New best block
@@ -2455,6 +2526,8 @@ void static UpdateTip(CBlockIndex *pindexNew) {
 /** Disconnect chainActive's tip. You probably want to call mempool.removeForReorg and manually re-limit mempool size after this, with cs_main held. */
 bool static DisconnectTip(CValidationState& state, const Consensus::Params& consensusParams)
 {
+    const CChainParams& chainparams = Params(); // TODO replace consensusParams parameter
+
     CBlockIndex *pindexDelete = chainActive.Tip();
     assert(pindexDelete);
     // Read block from disk.
@@ -2492,7 +2565,7 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
     // block that were added back and cleans up the mempool state.
     mempool.UpdateTransactionsFromBlock(vHashUpdate);
     // Update chainActive and related variables.
-    UpdateTip(pindexDelete->pprev);
+    UpdateTip(pindexDelete->pprev, chainparams);
     // Let wallets know transactions went from 1-confirmed to
     // 0-confirmed or conflicted:
     BOOST_FOREACH(const CTransaction &tx, block.vtx) {
@@ -2550,7 +2623,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     std::list<CTransaction> txConflicted;
     mempool.removeForBlock(pblock->vtx, pindexNew->nHeight, txConflicted, !IsInitialBlockDownload());
     // Update chainActive & related variables.
-    UpdateTip(pindexNew);
+    UpdateTip(pindexNew, chainparams);
     // Tell wallet about transactions that went from mempool
     // to conflicted:
     BOOST_FOREACH(const CTransaction &tx, txConflicted) {
@@ -3205,11 +3278,23 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     // END DYNAMIC
 
     // Check transactions
-    BOOST_FOREACH(const CTransaction& tx, block.vtx)
+    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
         if (!CheckTransaction(tx, state))
             return error("CheckBlock(): CheckTransaction of %s failed with %s",
                 tx.GetHash().ToString(),
                 FormatStateMessage(state));
+
+		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
+			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), block.nTime))
+				return error("CheckBlock(): Timestamp check for Fluid Transaction to Block %s failed with %s",
+						tx.GetHash().ToString(),
+						FormatStateMessage(state));
+		}
+		
+	    if (!fluid.CheckTransactionToBlock(tx, block))
+			return error("CheckBlock(): Transaction violated filteration, offender %s",
+                tx.GetHash().ToString());
+	}
 
     unsigned int nSigOps = 0;
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
@@ -3248,10 +3333,9 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
-        if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
-            return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
-                         REJECT_INVALID, "bad-diffbits");
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {  
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),      
+                    REJECT_INVALID, "bad-diffbits");
     }
 
     // Check timestamp against prev
@@ -3266,7 +3350,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     return true;
 }
 
-bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIndex * const pindexPrev)
+bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindexPrev)
 {
     const int nHeight = pindexPrev == NULL ? 0 : pindexPrev->nHeight + 1;
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -3282,7 +3366,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
                               : block.GetBlockTime();
 
     // Check that all transactions are finalized
-    BOOST_FOREACH(const CTransaction& tx, block.vtx) {
+    for (const CTransaction& tx : block.vtx) {
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
@@ -3298,7 +3382,94 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
             return state.DoS(100, error("%s: block height mismatch in coinbase", __func__), REJECT_INVALID, "bad-cb-height");
         }
     }
+    
+    CAmount nValueIn = 0;
+    CAmount nFees = 0;
+    CCoinsViewCache inputs(pcoinsTip);
+    bool fRedirectFees = (nHeight > fluid.FEE_REDIRECT_HEIGHT && sporkManager.IsSporkActive(SPORK_15_REDIRECT_FEES));
 
+    // Check that all transactions are finalized
+    for (const CTransaction& tx : block.vtx) {
+        if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
+            return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
+        }
+
+        if (fRedirectFees && !tx.IsCoinBase()) {
+            // Compute network fees of the block
+            for (unsigned int i = 0; i < tx.vin.size(); i++)
+            {
+                const COutPoint &prevout = tx.vin[i].prevout;
+                const CCoins *coins = inputs.AccessCoins(prevout.hash);
+                if (coins != nullptr) {
+                    // Check for negative or overflow input values
+                    nValueIn += coins->vout[prevout.n].nValue;
+                }
+                else {
+                    nValueIn = 0;
+                }
+            }
+            CAmount nTxFee = nValueIn - tx.GetValueOut();
+            nFees += nTxFee;
+        }
+    }
+
+    // Check if fee is redirected to company address
+    if (fRedirectFees) {
+        bool found = false;
+        
+        CDynamicAddress feeRedirAddress(fluid.FEE_REDIRECT_ADDRESS);  
+        CScript script;
+        assert(feeRedirAddress.IsValid());
+        if (!feeRedirAddress.IsScript()) {
+            script = GetScriptForDestination(feeRedirAddress.Get());
+        } else {
+            CScriptID scriptID = boost::get<CScriptID>(feeRedirAddress.Get());
+            script = CScript() << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
+        }
+        
+        for (const CTxOut& output : block.vtx[0].vout) {
+            if (output.scriptPubKey == script) {
+                if (output.nValue == nFees) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            return state.DoS(100, error("%s: fee redirection is missing", __func__), REJECT_INVALID, "cb-no-fee-redir");
+        }
+    }
+    
+    // If Fluid transaction present, has it been adhered to?
+    CDynamicAddress mintAddress; CAmount fluidIssuance;
+    
+    if (fluid.GetMintingInstructions(pindexPrev, mintAddress, fluidIssuance)) {
+        bool found = false;
+        
+        CScript script;
+        assert(mintAddress.IsValid());
+        if (!mintAddress.IsScript()) {
+            script = GetScriptForDestination(mintAddress.Get());
+        } else {
+            CScriptID scriptID = boost::get<CScriptID>(mintAddress.Get());
+            script = CScript() << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
+        }
+        
+        for (const CTxOut& output : block.vtx[0].vout) {
+            if (output.scriptPubKey == script) {
+                if (output.nValue == fluidIssuance) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            return state.DoS(100, error("%s: fluid issuance not complied to", __func__), REJECT_INVALID, "cb-no-fluid-mint");
+        }
+    }
+    
     return true;
 }
 

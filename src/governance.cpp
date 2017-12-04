@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -149,19 +150,19 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     {
         // MAKE SURE WE HAVE A VALID REFERENCE TO THE TIP BEFORE CONTINUING
 
+        CGovernanceObject govobj;
+        vRecv >> govobj;
+
+        uint256 nHash = govobj.GetHash();
+
+        pfrom->setAskFor.erase(nHash);
 
         if(!dynodeSync.IsDynodeListSynced()) {
             LogPrint("gobject", "DNGOVERNANCEOBJECT -- dynode list not synced\n");
             return;
         }
 
-        CGovernanceObject govobj;
-        vRecv >> govobj;
-
-        uint256 nHash = govobj.GetHash();
         std::string strHash = nHash.ToString();
-
-        pfrom->setAskFor.erase(nHash);
 
         LogPrint("gobject", "DNGOVERNANCEOBJECT -- Received object: %s\n", strHash);
 
@@ -233,21 +234,21 @@ void CGovernanceManager::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     // A NEW GOVERNANCE OBJECT VOTE HAS ARRIVED
     else if (strCommand == NetMsgType::DNGOVERNANCEOBJECTVOTE)
     {
+        CGovernanceVote vote;
+        vRecv >> vote;
+
+        uint256 nHash = vote.GetHash();
+
+        pfrom->setAskFor.erase(nHash);
         // Ignore such messages until dynode list is synced
         if(!dynodeSync.IsDynodeListSynced()) {
             LogPrint("gobject", "DNGOVERNANCEOBJECTVOTE -- dynode list not synced\n");
             return;
         }
 
-        CGovernanceVote vote;
-        vRecv >> vote;
-
         LogPrint("gobject", "DNGOVERNANCEOBJECTVOTE -- Received vote: %s\n", vote.ToString());
 
-        uint256 nHash = vote.GetHash();
         std::string strHash = nHash.ToString();
-
-        pfrom->setAskFor.erase(nHash);
 
         if(!AcceptVoteMessage(nHash)) {
             LogPrint("gobject", "DNGOVERNANCEOBJECTVOTE -- Received unrequested vote object: %s, hash: %s, peer = %d\n",
