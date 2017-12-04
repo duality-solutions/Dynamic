@@ -499,7 +499,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
 
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)
+    for (const CTxOut& txout : tx.vout)
     {
         if (txout.nValue < 0)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-vout-negative");
@@ -508,9 +508,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
         nValueOut += txout.nValue;
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
-   		if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
-			return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
-
+        if (IsTransactionFluid(txout.scriptPubKey)) {
+            if (fluid.FLUID_TRANSACTION_COST > txout.nValue)
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-vout-amount-toolow");
+            if (!fluid.ValidationProcesses(state, txout.scriptPubKey, txout.nValue))
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-validate-failure");
+        }
     }
 
     // Check for duplicate inputs

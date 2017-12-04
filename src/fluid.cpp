@@ -230,7 +230,7 @@ bool Fluid::ProcessFluidToken(const std::string consentToken, std::vector<std::s
 }
 
 /** It gets a number from the ASM of an OP_CODE without signature verification */
-bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose) {
+bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &coinAmount, bool txCheckPurpose) {
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(consentToken, ptrs, 1))
@@ -244,7 +244,7 @@ bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t tim
     if (timeStamp > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
-    howMuch	= (int64_t)(StringToFloat(lr) * (float)COIN);
+    ParseFixedPoint(lr, 8, &coinAmount);
 
     return true;
 }
@@ -308,7 +308,7 @@ bool Fluid::ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &c
     if (nTime > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
-    coinAmount = (int64_t)(StringToFloat(lr) * (float)COIN);
+    ParseFixedPoint(lr, 8, &coinAmount);
 
     std::string recipientAddress = ptrs.at(2);
     destination.SetString(recipientAddress);
@@ -346,7 +346,7 @@ bool Fluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddre
     return false;
 }
 
-bool Fluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch) {
+bool Fluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &coinAmount) {
 
     CBlock block;
     if (pblockindex != nullptr) {
@@ -363,14 +363,14 @@ bool Fluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &how
             if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
                 std::string message;
                 if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, howMuch);
+                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
             }
         }
     }
     return false;
 }
 
-bool Fluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch) {
+bool Fluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &coinAmount) {
     CBlock block;
 
     if (pblockindex != nullptr) {
@@ -387,7 +387,7 @@ bool Fluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &ho
             if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
                 std::string message;
                 if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, howMuch);
+                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
             }
         }
     }
@@ -434,12 +434,15 @@ bool Fluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pind
 
     if (IsTransactionFluid(fluidInstruction)) {
         verificationString = ScriptToAsmStr(fluidInstruction);
-
+        std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
             for (const std::string& existingRecord : transactionRecord)
             {
-                if (existingRecord == verificationString) {
+                std::string existingWithoutOpCode = GetRidOfScriptStatement(existingRecord);
+                LogPrint("fluid", "CheckTransactionInRecord(): operation code removed. existingRecord  = %s verificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
+                LogPrintf("CheckTransactionInRecord(): operation code removed.\nexistingRecord  = %s\nverificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
+                if (existingWithoutOpCode == verificationWithoutOpCode) {
                     LogPrintf("CheckTransactionInRecord(): Attempt to repeat Fluid Transaction: %s\n", existingRecord);
                     return true;
                 }

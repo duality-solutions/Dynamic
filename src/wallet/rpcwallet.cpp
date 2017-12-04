@@ -408,7 +408,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }
 
-void SendCustomTransaction(CScript generatedScript, CWalletTx& wtxNew, CAmount nValue = COIN)
+void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue)
 {
     // TODO (Amir): Add minimum height and spork activate OP_MINT.  Add checks to mempool and create transaction as well
     CAmount curBalance = pwalletMain->GetBalance();

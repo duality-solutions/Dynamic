@@ -721,13 +721,3 @@ std::string GetRidOfScriptStatement(std::string input) {
 	
 	return output.at(1);
 }
-
-float StringToFloat(std::string input) {
-  float result;
-  
-  ScrubString(input, true);
-  std::stringstream stream(input);
-  stream >> result;
-  
-  return result;
-}

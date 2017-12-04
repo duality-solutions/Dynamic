@@ -42,7 +42,7 @@
 #include <univalue.h>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(CScript generatedScript, CWalletTx& wtxNew, CAmount nValue = (1*COIN));
+extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue);
 
 opcodetype getOpcodeFromString(std::string input) {
     if (input == "OP_MINT") return OP_MINT;
@@ -190,7 +190,7 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx);
+        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST);
         return wtx.GetHash().GetHex();
     }
     else {
