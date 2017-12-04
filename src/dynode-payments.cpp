@@ -293,7 +293,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
             hasPayment = false;
             LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
         } 
-        else if (nDnCount <= Params().GetConsensus().MinCountDynodesPaymentStart) {
+        else if (nDnCount < Params().GetConsensus().nMinCountDynodesPaymentStart) {
             hasPayment = false;
             LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
         }
