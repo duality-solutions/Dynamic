@@ -434,12 +434,15 @@ bool Fluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pind
 
     if (IsTransactionFluid(fluidInstruction)) {
         verificationString = ScriptToAsmStr(fluidInstruction);
-
+        std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
             for (const std::string& existingRecord : transactionRecord)
             {
-                if (existingRecord == verificationString) {
+                std::string existingWithoutOpCode = GetRidOfScriptStatement(existingRecord);
+                LogPrint("fluid", "CheckTransactionInRecord(): operation code removed. existingRecord  = %s verificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
+                LogPrintf("CheckTransactionInRecord(): operation code removed.\nexistingRecord  = %s\nverificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
+                if (existingWithoutOpCode == verificationWithoutOpCode) {
                     LogPrintf("CheckTransactionInRecord(): Attempt to repeat Fluid Transaction: %s\n", existingRecord);
                     return true;
                 }
