@@ -690,41 +690,6 @@ bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, 
     return true;
 }
 
-bool CDynodeMan::GetDynodeByRank(int nRankIn, dynode_info_t& dnInfoRet, int nBlockHeight, int nMinProtocol)
-{
-    dnInfoRet = dynode_info_t();
-
-    if (!dynodeSync.IsDynodeListSynced())
-        return false;
-
-    // make sure we know about this block
-    uint256 nBlockHash = uint256();
-    if (!GetBlockHash(nBlockHash, nBlockHeight)) {
-        LogPrintf("CDynodeMan::%s -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", __func__, nBlockHeight);
-        return false;
-    }
-
-    LOCK(cs);
-
-    score_pair_vec_t vecDynodeScores;
-    if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
-        return false;
-
-    if ((int)vecDynodeScores.size() < nRankIn)
-        return false;
-
-    int nRank = 0;
-    for (auto& scorePair : vecDynodeScores) {
-        nRank++;
-        if(nRank == nRankIn) {
-            dnInfoRet = *scorePair.second;
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
 {
     //we don't care about this for regtest

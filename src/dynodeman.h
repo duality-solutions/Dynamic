@@ -174,7 +174,6 @@ public:
 
     bool GetDynodeRanks(rank_pair_vec_t& vecDynodeRanksRet, int nBlockHeight = -1, int nMinProtocol = 0);
     bool GetDynodeRank(const COutPoint &outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
-    bool GetDynodeByRank(int nRank, dynode_info_t& dnInfoRet, int nBlockHeight = -1, int nMinProtocol = 0);
 
     void ProcessDynodeConnections(CConnman& connman);
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();
