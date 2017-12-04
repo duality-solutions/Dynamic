@@ -39,7 +39,7 @@ struct Params {
     uint256 hashGenesisBlock;
     int nRewardsStart;
     int nDynodePaymentsStartBlock;
-    int MinCountDynodesPaymentStart;
+    int nMinCountDynodesPaymentStart;
     int nInstantSendKeepLock; // in blocks
     int nBudgetPaymentsStartBlock;
     int nBudgetPaymentsCycleBlocks;

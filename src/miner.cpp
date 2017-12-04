@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -578,14 +578,6 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
 	
-	#ifdef __AVX2__
-	
-	void *Ctx;
-	
-	WolfArgon2dAllocateCtx(&Ctx);
-	
-	#endif
-	
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -643,11 +635,7 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
                 uint256 hash;
                 while (true)
                 {
-					#ifdef __AVX2__
-                    hash = pblock->GetHashWithCtx(Ctx);
-                    #else
                     hash = pblock->GetHash();
-                    #endif
                     
                     if (UintToArith256(hash) <= hashTarget)
                     {
@@ -730,24 +718,13 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
-        
-        #ifdef __AVX2__
-        WolfArgon2dFreeCtx(Ctx);
-        #endif
         throw;
     }
     catch (const std::runtime_error &e)
     {
         LogPrintf("DynamicMiner -- runtime error: %s\n", e.what());
-        #ifdef __AVX2__
-        WolfArgon2dFreeCtx(Ctx);
-        #endif
         return;
     }
-    
-    #ifdef __AVX2__
-    WolfArgon2dFreeCtx(Ctx);
-    #endif
 }
 
 void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams, CConnman& connman)

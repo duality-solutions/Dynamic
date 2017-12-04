@@ -80,7 +80,6 @@ DYNAMIC_CORE_H = \
   cachemultimap.h \
   chain.h \
   chainparams.h \
-  checkforks.h \
   chainparamsbase.h \
   chainparamsseeds.h \
   checkpoints.h \
@@ -217,7 +216,6 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  checkforks.cpp \
   dbwrapper.cpp \
   dns/dns.cpp \
   dns/dyndns.cpp \
@@ -424,6 +422,7 @@ dynamicd_LDADD = \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
   $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 

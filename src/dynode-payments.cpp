@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -294,8 +294,8 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
             LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
         } 
         else if (nDnCount <= Params().GetConsensus().MinCountDynodesPaymentStart) {
-        hasPayment = false;
-        LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
+            hasPayment = false;
+            LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
         }
         else {
             // get winning Dynode payment script
