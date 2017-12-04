@@ -129,7 +129,9 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
-        //replace at launch with this nPowTargetTimespan
+        //consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //TODO (Amir): Use this before release
+
+        //TODO (Amir): replace at launch with this nPowTargetTimespan
         // consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
@@ -245,7 +247,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 510;
         consensus.nMajorityRejectBlockOutdated = 750;
         consensus.nMajorityWindow = 1000;
-        consensus.powLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
+        consensus.powLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
@@ -359,7 +361,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.powLimit = uint256S("000fffff00000000000000000000000000000000000000000000000000000000");
+        consensus.powLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
