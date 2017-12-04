@@ -267,6 +267,67 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
     return true;
 }
 
+/**
+*   FillBlockPayee
+*
+*   Fill Dynode ONLY payment block
+*/
+
+void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet)
+{
+    bool hasPayment = true;
+    CScript payee;
+
+    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrintf("CDynodePayments::FillBlockPayee: No Dynode payments prior to block %u\n", Params().GetConsensus().nDynodePaymentsStartBlock);
+        hasPayment = false;
+    }
+
+    int nDnCount = dnodeman.CountDynodes();
+
+    if(hasPayment && !dnpayments.GetBlockPayee(nBlockHeight, payee)){       
+        int nCount = 0;
+        dynode_info_t dnInfo;
+        // Do not pay if no Dynodes detected
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
+            hasPayment = false;
+            LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
+        } 
+        else if (nDnCount < Params().GetConsensus().nMinCountDynodesPaymentStart) {
+            hasPayment = false;
+            LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
+        }
+        else {
+            // get winning Dynode payment script
+            payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
+            LogPrintf("CDynodePayments::FillBlockPayee: Found Dynode to pay!\n");
+        }
+    }
+    else {
+        LogPrintf("CDynodePayments::FillBlockPayee: Dynode payee found.\n"); //TODO (Amir): Remove logging.
+    }
+
+    if(hasPayment){
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if(!pindexPrev) 
+            return;
+
+        // make sure it's not filled yet
+        txoutDynodeRet = CTxOut();
+
+        CAmount dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+        
+        txoutDynodeRet = CTxOut(dynodePayment, payee);
+        txNew.vout.push_back(txoutDynodeRet);
+
+        CTxDestination address1;
+        ExtractDestination(payee, address1);
+        CDynamicAddress address2(address1);
+
+        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
+    }
+}
+
 int CDynodePayments::GetMinDynodePaymentsProto() {
     return sporkManager.IsSporkActive(SPORK_10_DYNODE_PAY_UPDATED_NODES);
 }
@@ -592,64 +653,6 @@ std::string CDynodePayments::GetRequiredPaymentsString(int nBlockHeight)
     }
 
     return "Unknown";
-}
-
-/**
-*   FillBlockPayee
-*
-*   Fill Dynode ONLY payment block
-*/
-
-void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet)
-{
-    CBlockIndex* pindexPrev = chainActive.Tip();       
-    if(!pindexPrev) return;        
-
-    bool hasPayment = true;
-    CScript payee;
-
-    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrintf("CDynodePayments::FillBlockPayee: No Dynode payments prior to block %u\n", Params().GetConsensus().nDynodePaymentsStartBlock);
-        hasPayment = false;
-    }
-
-    if(hasPayment && !dnpayments.GetBlockPayee(nBlockHeight, payee)){       
-        int nCount = 0;
-        dynode_info_t dnInfo;
-        // Do not pay if no Dynodes detected
-        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
-            hasPayment = false;
-            LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
-        } 
-        else {
-            // get winning Dynode payment script
-            payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
-            LogPrintf("CDynodePayments::FillBlockPayee: Found Dynode to pay!\n");
-        }
-    }
-    else {
-        LogPrintf("CDynodePayments::FillBlockPayee: Dynode payee found.\n"); //TODO (Amir): Remove logging.
-    }
-
-    if(hasPayment){
-        CBlockIndex* pindexPrev = chainActive.Tip();
-        if(!pindexPrev) 
-            return;
-
-        // make sure it's not filled yet
-        txoutDynodeRet = CTxOut();
-
-        CAmount dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
-        
-        txoutDynodeRet = CTxOut(dynodePayment, payee);
-        txNew.vout.push_back(txoutDynodeRet);
-
-        CTxDestination address1;
-        ExtractDestination(payee, address1);
-        CDynamicAddress address2(address1);
-
-        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
-    }
 }
 
 bool CDynodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight)

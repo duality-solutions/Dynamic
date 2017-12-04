@@ -29,10 +29,7 @@ public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
     static const int MAX_FLUID_TIME_DISTORT = 60 * 60; // Maximum time distort = 1 hour.
     static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
-    static const CAmount MAX_FLUID_MINER_REWARD = 3 * COIN; // Maximum DYN miner block reward amount 
-    static const CAmount MAX_FLUID_DYNODE_REWARD = 5 * COIN; // Maximum DYN Dynode block reward amount 
-    static const CAmount MAX_FLUID_DYNODE_RECIPIENT_COUNT = 5; // Maximum Dynode recipient count per block
-
+    static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN; // Cost to send a fluid transaction
     //TODO (Amir): Change address and remove private keys below.
     std::string FEE_REDIRECT_ADDRESS = "DGkRapsj7yQSvYaf46pHYUPwJrakpMd3Sh"; // importprivkey 5iw3QNmomgDceCTEZCLtEaeqSsyJXvKf28fc9rCi1iymYzokt4L
 
