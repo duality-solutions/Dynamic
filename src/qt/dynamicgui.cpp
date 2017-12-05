@@ -556,6 +556,7 @@ void DynamicGUI::createMenuBar()
 
 void DynamicGUI::createToolBars()
 {
+#ifdef ENABLE_WALLET
     if(walletFrame)
     {
         QToolBar *toolbar = new QToolBar(tr("Tabs toolbar"));
@@ -578,6 +579,7 @@ void DynamicGUI::createToolBars()
         containerWidget->setLayout(layout);
         setCentralWidget(containerWidget);
     }
+#endif // ENABLE_WALLET
 }
 
 void DynamicGUI::setClientModel(ClientModel *_clientModel)

@@ -12,7 +12,9 @@
 #include "walletmodeltransaction.h"
 
 #include "support/allocators/secure.h"
+#ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <map>
 #include <vector>
@@ -52,7 +54,9 @@ public:
     // Todo: This is a hack, should be replaced with a cleaner solution!
     QString address;
     QString label;
+#ifdef ENABLE_WALLET
     AvailableCoinsType inputType;
+#endif // ENABLE_WALLET
     bool fUseInstantSend;
     CAmount amount;
     // If from a payment request, this is used for storing the memo

@@ -12,8 +12,9 @@
 #include "dynodeman.h"
 #include "protocol.h"
 
-
+#ifdef ENABLE_WALLET
 extern CWallet* pwalletMain;
+#endif //ENABLE_WALLET
 
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
@@ -225,6 +226,7 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     // Default to REMOTE
     eType = DYNODE_REMOTE;
 
+#ifdef ENABLE_WALLET
     // Check if wallet funds are available
     if(!pwalletMain) {
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: Wallet not available\n", GetStateString());
@@ -249,6 +251,7 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
         eType = DYNODE_LOCAL;
     }
+#endif //ENABLE_WALLET
 
     LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 }
@@ -305,6 +308,7 @@ void CActiveDynode::ManageStateLocal(CConnman& connman)
     CPubKey pubKeyCollateral;
     CKey keyCollateral;
 
+#ifdef ENABLE_WALLET
     if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
         int nPrevoutAge = GetUTXOConfirmations(outpoint);
         if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
@@ -346,4 +350,5 @@ void CActiveDynode::ManageStateLocal(CConnman& connman)
         LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, collateral=%s\n", outpoint.ToStringShort());
         dnb.Relay(connman);
     }
+#endif //ENABLE_WALLET
 }

@@ -11,6 +11,7 @@
 #include "init.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "script/interpreter.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"

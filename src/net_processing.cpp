@@ -37,7 +37,9 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#ifdef ENABLE_WALLET
 #include "privatesend-client.h"
+#endif // ENABLE_WALLET
 #include "privatesend-server.h"
 
 #include <boost/thread.hpp>
@@ -2162,7 +2164,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (found)
         {
             //probably one the extensions
+#ifdef ENABLE_WALLET
             privateSendClient.ProcessMessage(pfrom, strCommand, vRecv, connman);
+#endif // ENABLE_WALLET
             privateSendServer.ProcessMessage(pfrom, strCommand, vRecv, connman);
             dnodeman.ProcessMessage(pfrom, strCommand, vRecv, connman);
             dnpayments.ProcessMessage(pfrom, strCommand, vRecv, connman);

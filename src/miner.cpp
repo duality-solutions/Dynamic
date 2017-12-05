@@ -606,11 +606,8 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
             std::unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
             
-#ifdef ENABLE_WALLET
             pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
-#else
-            pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
-#endif
+
             if (!pblocktemplate.get())
             {
                 LogPrintf("DynamicMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");

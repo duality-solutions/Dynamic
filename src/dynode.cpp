@@ -6,6 +6,7 @@
 #include "dynode.h"
 
 #include "activedynode.h"
+#include "base58.h"
 #include "chain.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
@@ -13,8 +14,12 @@
 #include "fluid.h"
 #include "init.h"
 #include "messagesigner.h"
+#include "script/standard.h"
 #include "util.h"
 #include "validation.h"
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <boost/lexical_cast.hpp>
 
@@ -329,6 +334,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
     // LogPrint("Dynode", "CDynode::UpdateLastPaidBlock -- searching for block with payment to %s -- keeping old %d\n", vin.prevout.ToStringShort(), nBlockLastPaid);
 }
 
+#ifdef ENABLE_WALLET
 bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline)
 {
     COutPoint outpoint;
@@ -401,6 +407,7 @@ bool CDynodeBroadcast::Create(const COutPoint& outpoint, const CService& service
 
     return true;
 }
+#endif // ENABLE_WALLET
 
 bool CDynodeBroadcast::SimpleCheck(int& nDos)
 {

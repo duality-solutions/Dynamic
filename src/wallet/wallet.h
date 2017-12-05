@@ -42,9 +42,6 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
 
-extern bool fLargeWorkForkFound;
-extern bool fLargeWorkInvalidChainFound;
-
 //! -keypool default
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default

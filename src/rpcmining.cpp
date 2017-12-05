@@ -11,9 +11,6 @@
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "core_io.h"
-#ifdef ENABLE_WALLET
-#include "dynode-sync.h"
-#endif
 #include "init.h"
 #include "validation.h"
 #include "consensus/merkle.h"
@@ -33,6 +30,7 @@
 #endif
 
 #include "dynode-payments.h"
+#include "dynode-sync.h"
 #include "governance-classes.h"
 
 #include <univalue.h>
@@ -48,6 +46,7 @@
  * getblock
  **/
  
+#ifdef ENABLE_WALLET       
 // Key used by getwork miners.
 // Allocated in InitRPCMining, free'd in ShutdownRPCMining
 static CReserveKey* pMiningKey = NULL;
@@ -68,6 +67,7 @@ void ShutdownRPCMining()
 
     delete pMiningKey; pMiningKey = NULL;
 }
+#endif //ENABLE_WALLET       
 
 UniValue getpowrewardstart(const UniValue& params, bool fHelp)
 {
@@ -217,11 +217,8 @@ UniValue generate(const UniValue& params, bool fHelp)
     UniValue blockHashes(UniValue::VARR);
     while (nHeight < nHeightEnd)
     {
-#ifdef ENABLE_WALLET
-            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
-#else
-            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params()));
-#endif
+        std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
+
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
         CBlock *pblock = &pblocktemplate->block;
@@ -540,9 +537,11 @@ UniValue getwork(const UniValue& params, bool fHelp)
         pblock->vtx[0] = newTx;
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
+#ifdef ENABLE_WALLET       
         assert(pwalletMain != NULL);
         const CChainParams& chainParams = Params();
         return CheckWork(chainParams, pblock, *pwalletMain, *pMiningKey, g_connman.get());
+#endif //ENABLE_WALLET       
     }
 }
 

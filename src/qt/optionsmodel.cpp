@@ -21,7 +21,9 @@
 #include "init.h"
 #include "validation.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #include "net.h"
+#ifdef ENABLE_WALLET
 #include "privatesend-client.h"
+#endif
 #include "txdb.h" // for -dbcache defaults
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -81,14 +83,16 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("strThirdPartyTxUrls", "");
     strThirdPartyTxUrls = settings.value("strThirdPartyTxUrls", "").toString();
 
+    if (!settings.contains("theme"))
+        settings.setValue("theme", "");
+
+#ifdef ENABLE_WALLET
     if (!settings.contains("fCoinControlFeatures"))
         settings.setValue("fCoinControlFeatures", true);
     fCoinControlFeatures = settings.value("fCoinControlFeatures", true).toBool();
 
     if (!settings.contains("digits"))
         settings.setValue("digits", "2");
-    if (!settings.contains("theme"))
-        settings.setValue("theme", "");
 
     if (!settings.contains("fShowDynodesTab"))
         settings.setValue("fShowDynodesTab", true);
@@ -99,6 +103,7 @@ void OptionsModel::Init(bool resetSettings)
 
     if (!settings.contains("fLowKeysWarning"))
         settings.setValue("fLowKeysWarning", true);
+#endif // ENABLE_WALLET
 
     // These are shared with the core or have a command-line parameter
     // and we want command-line parameters to overwrite the GUI settings.
@@ -280,14 +285,18 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return nDisplayUnit;
         case ThirdPartyTxUrls:
             return strThirdPartyTxUrls;
+#ifdef ENABLE_WALLET
         case Digits:
             return settings.value("digits");
+#endif // ENABLE_WALLET
         case Theme:
             return settings.value("theme");
         case Language:
             return settings.value("language");
+#ifdef ENABLE_WALLET
         case CoinControlFeatures:
             return fCoinControlFeatures;
+#endif // ENABLE_WALLET
         case DatabaseCache:
             return settings.value("nDatabaseCache");
         case ThreadsScriptVerif:
@@ -450,12 +459,14 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
+#ifdef ENABLE_WALLET
         case Digits:
             if (settings.value("digits") != value) {
                 settings.setValue("digits", value);
                 setRestartRequired(true);
             }
-            break;            
+            break;
+#endif // ENABLE_WALLET
         case Theme:
             if (settings.value("theme") != value) {
                 settings.setValue("theme", value);
@@ -468,11 +479,13 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
+#ifdef ENABLE_WALLET
         case CoinControlFeatures:
             fCoinControlFeatures = value.toBool();
             settings.setValue("fCoinControlFeatures", fCoinControlFeatures);
             Q_EMIT coinControlFeaturesChanged(fCoinControlFeatures);
             break;
+#endif // ENABLE_WALLET
         case DatabaseCache:
             if (settings.value("nDatabaseCache") != value) {
                 settings.setValue("nDatabaseCache", value);

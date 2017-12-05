@@ -14,6 +14,7 @@
 #include "validation.h"
 #include "netfulfilledman.h"
 #include "spork.h"
+#include "ui_interface.h"
 #include "util.h"
 
 class CDynodeSync;
