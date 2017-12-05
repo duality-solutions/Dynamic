@@ -70,18 +70,19 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "getpoolinfo\n"
             "Returns an object containing mixing pool related information.\n");
 
-    CPrivateSendBase privateSend = fDyNode ? (CPrivateSendBase)privateSendServer : (CPrivateSendBase)privateSendClient;
+    CPrivateSendBase* pprivateSendBase = fDyNode ? (CPrivateSendBase*)&privateSendServer : (CPrivateSendBase*)&privateSendClient;
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             privateSend.GetStateString()));
+    obj.push_back(Pair("state",             pprivateSendBase->GetStateString()));
     obj.push_back(Pair("mixing_mode",       (!fDyNode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             privateSend.GetQueueSize()));
-    obj.push_back(Pair("entries",           privateSend.GetEntriesCount()));
+    obj.push_back(Pair("queue",             pprivateSendBase->GetQueueSize()));
+    obj.push_back(Pair("entries",           pprivateSendBase->GetEntriesCount()));
     obj.push_back(Pair("status",            privateSendClient.GetStatus()));
 
-    if (privateSendClient.infoMixingDynode.fInfoValid) {
-        obj.push_back(Pair("outpoint",      privateSendClient.infoMixingDynode.vin.prevout.ToStringShort()));
-        obj.push_back(Pair("addr",          privateSendClient.infoMixingDynode.addr.ToString()));
+    dynode_info_t dnInfo;
+    if (privateSendClient.GetMixingDynodeInfo(dnInfo)) {
+        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          dnInfo.addr.ToString()));
     }
 
     if (pwalletMain) {

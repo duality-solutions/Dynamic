@@ -49,7 +49,7 @@ Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Proto
 * InstandSend overhaul & TXMempool Fixes
 * fix TrafficGraphData bandwidth calculation
 * Fix losing keys on PrivateSend
-* Refactor masternode management
+* Refactor dynode management
 * Multiple Selection for peer and ban tables
 * qt: Fixing division by zero in time remaining
 * [qt] sync-overlay: Don't show progress twice
@@ -77,7 +77,7 @@ Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Proto
 * Ensure cs_vNodes is held when using the return value from FindNode
 * Use GetAdjustedTime instead of GetTime when dealing with network-wide timestamps
 * slightly refactor CPSNotificationInterface
-* drop masternode index
+* drop dynode index
 * drop pCurrentBlockIndex and use cached block height instead (nCachedBlockHeight)
 * add/use GetUTXO[Coins/Confirmations] helpers instead of GetInputAge[InstantSend]
 * net: Consistently use GetTimeMicros() for inactivity checks 

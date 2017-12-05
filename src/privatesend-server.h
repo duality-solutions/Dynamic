@@ -19,8 +19,6 @@ extern CPrivateSendServer privateSendServer;
 class CPrivateSendServer : public CPrivateSendBase
 {
 private:
-    mutable CCriticalSection cs_privatesend;
-
     // Mixing uses collateral transactions to trust parties entering the pool
     // to behave honestly. If they don't it takes their money.
     std::vector<CTransaction> vecSessionCollaterals;
@@ -55,7 +53,7 @@ private:
     /// Check to make sure a given input matches an input in the pool and its scriptSig is valid
     bool IsInputScriptSigValid(const CTxIn& txin);
     /// Are these outputs compatible with other client in the pool?
-    bool IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut);
+    bool IsOutputsCompatibleWithSessionDenom(const std::vector<CTxOut>& vecTxOut);
 
     // Set the 'state' value, with some logging and capturing when the state changed
     void SetState(PoolState nStateNew);
