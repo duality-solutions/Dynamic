@@ -10,14 +10,4 @@
 
 extern FastRandomContext insecure_rand_ctx;
 
-static inline void seed_insecure_rand(bool fDeterministic = false)
-{
-    insecure_rand_ctx = FastRandomContext(fDeterministic);
-}
-
-static inline uint32_t insecure_rand(void)
-{
-    return insecure_rand_ctx.rand32();
-}
-
 #endif //DYNAMIC_TEST_RANDOM_H
