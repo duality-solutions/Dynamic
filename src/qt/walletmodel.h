@@ -20,7 +20,6 @@
 #include <QObject>
 
 class AddressTableModel;
-class NameTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
@@ -138,7 +137,6 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
-    NameTableModel *getNameTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
     CAmount getUnconfirmedBalance() const;
@@ -230,7 +228,6 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
-    NameTableModel *nameTableModel;
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;

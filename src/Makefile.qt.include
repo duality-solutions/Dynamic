@@ -24,7 +24,6 @@ QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/coincontroldialog.ui \
-  qt/forms/dnspage.ui \
   qt/forms/dynodelist.ui \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
@@ -51,13 +50,11 @@ QT_MOC_CPP = \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
   qt/moc_csvmodelwriter.cpp \
-  qt/moc_dnspage.cpp \
   qt/moc_dynamicaddressvalidator.cpp \
   qt/moc_dynamicamountfield.cpp \
   qt/moc_dynamicgui.cpp \
   qt/moc_dynamicunits.cpp \
   qt/moc_dynodelist.cpp \
-  qt/moc_dnstablemodel.cpp \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
@@ -122,8 +119,6 @@ DYNAMIC_QT_H = \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
   qt/csvmodelwriter.h \
-  qt/dnspage.h \
-  qt/dnstablemodel.h \
   qt/dynamicaddressvalidator.h \
   qt/dynamicamountfield.h \
   qt/dynamicgui.h \
@@ -244,8 +239,6 @@ DYNAMIC_QT_CPP = \
   qt/bantablemodel.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
-  qt/dnspage.cpp \
-  qt/dnstablemodel.cpp \
   qt/dynamicaddressvalidator.cpp \
   qt/dynamicamountfield.cpp \
   qt/dynamicgui.cpp \

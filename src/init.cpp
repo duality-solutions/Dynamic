@@ -17,7 +17,6 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
-#include "dns/dyndns.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -25,7 +24,6 @@
 #include "flat-database.h"
 #include "governance.h"
 #include "instantsend.h"
-#include "dns/hooks.h"
 #include "httpserver.h"
 #include "httprpc.h"
 #include "key.h"
@@ -92,8 +90,6 @@ CWallet* pwalletMain = NULL;
 #endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false;  // true: restart false: shutdown
-
-DynDns* dyndns = NULL; //DDNS
 
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
@@ -210,8 +206,6 @@ void PrepareShutdown()
 {
     fRequestShutdown = true; // Needed when we shutdown the wallet
     fRestartRequested = true; // Needed when we restart the wallet
-    if (dyndns)
-        delete dyndns;
 
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
@@ -434,7 +428,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-listenonion", strprintf(_("Automatically create Tor hidden service (default: %d)"), DEFAULT_LISTEN_ONION));
     strUsage += HelpMessageOpt("-maxconnections=<n>", strprintf(_("Maintain at most <n> connections to peers (temporary service connections excluded) (default: %u)"), DEFAULT_MAX_PEER_CONNECTIONS));
     strUsage += HelpMessageOpt("-maxreceivebuffer=<n>", strprintf(_("Maximum per-connection receive buffer, <n>*1000 bytes (default: %u)"), DEFAULT_MAXRECEIVEBUFFER));
-    strUsage += HelpMessageOpt("-maxsendbuffer=<n>", strprintf(_("Maximum per-connection send buffer, <n>*1000 bytes (default: %u)"), DEFAULT_MAXSENDBUFFER));
+    strUsage += HelpMessageOpt("-maxsenFdbuffer=<n>", strprintf(_("Maximum per-connection send buffer, <n>*1000 bytes (default: %u)"), DEFAULT_MAXSENDBUFFER));
     strUsage += HelpMessageOpt("-onion=<ip:port>", strprintf(_("Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)"), "-proxy"));
     strUsage += HelpMessageOpt("-onlynet=<net>", _("Only connect to nodes in network <net> (ipv4, ipv6 or onion)"));
     strUsage += HelpMessageOpt("-permitbaremultisig", strprintf(_("Relay non-P2SH multisig (default: %u)"), DEFAULT_PERMIT_BAREMULTISIG));
@@ -1287,9 +1281,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("Unable to start HTTP server. See debug log for details."));
     }
 
-    // do not use hooks below this line
-    // hooks = InitHook();
-
     int64_t nStart;
 
     // ********************************************************* Step 5: Backup wallet and verify wallet database integrity
@@ -1636,15 +1627,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return false;
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
-
-    // Dynamic: check in nameindex need to be created or recreated
-    // we should have block index fully loaded by now
-    extern bool createNameIndexFile();
-    if (!boost::filesystem::exists(GetDataDir() / "ddns.dat") && !createNameIndexFile())
-    {
-        LogPrintf("Fatal error: Failed to create nameindex (ddns.dat) file.\n");
-        return false;
-    }
 
     boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
     CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
@@ -2082,25 +2064,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         threadGroup.create_thread(boost::bind(&ThreadFlushWalletDB, boost::ref(pwalletMain->strWalletFile)));
     }
 #endif
-
-    // init dyndns. WARNING: this should be done after hooks initialization
-    if (GetBoolArg("-dyndns", false))
-    {
-        #define DYNDNS_PORT 5335
-        int port = GetArg("-dyndnsport", DYNDNS_PORT);
-        int verbose = GetArg("-dyndnsverbose", 1);
-        if (port <= 0)
-            port = DYNDNS_PORT;
-        std::string suffix  = GetArg("-dyndnssuffix", "");
-        std::string bind_ip = GetArg("-dyndnsbindip", "");
-        std::string allowed = GetArg("-dyndnsallowed", "");
-        std::string localcf = GetArg("-dyndnslocalcf", "");
-        std::string enums   = GetArg("-enumtrust", "");
-        std::string tf      = GetArg("-enumtollfree", "");
-        dyndns = new DynDns(bind_ip.c_str(), port,
-        suffix.c_str(), allowed.c_str(), localcf.c_str(), enums.c_str(), tf.c_str(), verbose);
-        LogPrintf("dDNS server started\n");
-    }
 
     threadGroup.create_thread(boost::bind(&ThreadSendAlert, boost::ref(connman)));
 
