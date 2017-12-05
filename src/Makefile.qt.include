@@ -30,9 +30,6 @@ QT_FORMS_UI = \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
   qt/forms/modaloverlay.ui \
-  qt/forms/multisigaddressentry.ui \
-  qt/forms/multisigdialog.ui \
-  qt/forms/multisiginputentry.ui \
   qt/forms/openuridialog.ui \
   qt/forms/optionsdialog.ui \
   qt/forms/overviewpage.ui \
@@ -67,9 +64,6 @@ QT_MOC_CPP = \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
   qt/moc_modaloverlay.cpp \
-  qt/moc_multisigaddressentry.cpp \
-  qt/moc_multisigdialog.cpp \
-  qt/moc_multisiginputentry.cpp  \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
   qt/moc_optionsdialog.cpp \
@@ -142,9 +136,6 @@ DYNAMIC_QT_H = \
   qt/macdockiconhandler.h \
   qt/macnotificationhandler.h \
   qt/modaloverlay.h \
-  qt/multisigaddressentry.h \
-  qt/multisigdialog.h \
-  qt/multisiginputentry.h \
   qt/networkstyle.h \
   qt/notificator.h \
   qt/openuridialog.h \
@@ -226,7 +217,6 @@ RES_ICONS = \
   qt/res/icons/drk/key.png \
   qt/res/icons/drk/lock_closed.png \
   qt/res/icons/drk/lock_open.png \
-  qt/res/icons/drk/multisig.png \
   qt/res/icons/drk/notsynced.png \
   qt/res/icons/drk/overview.png \
   qt/res/icons/drk/quit.png \
@@ -290,9 +280,6 @@ DYNAMIC_QT_CPP += \
   qt/coincontroltreewidget.cpp \
   qt/dynodelist.cpp \
   qt/editaddressdialog.cpp \
-  qt/multisigaddressentry.cpp \
-  qt/multisigdialog.cpp \
-  qt/multisiginputentry.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
   qt/paymentrequestplus.cpp \

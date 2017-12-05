@@ -20,7 +20,6 @@
 #include "platformstyle.h"
 #include "rpcconsole.h"
 #include "utilitydialog.h"
-#include "multisigdialog.h"
 #include "modaloverlay.h"
 #ifdef ENABLE_WALLET
 #include "walletframe.h"
@@ -100,7 +99,6 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     receiveCoinsAction(0),
     receiveCoinsMenuAction(0),
     historyAction(0),
-    multiSigAction(0),
     dynodeAction(0),
     dnsAction(0),
     quitAction(0),
@@ -347,17 +345,6 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(historyAction);
 
-    multiSigAction = new QAction(QIcon(":/icons/" + theme + "/multisig"), tr("&MultiSig"), this);
-    multiSigAction->setStatusTip(tr("Generate and Utilize Multiple Signature Addresses"));
-    multiSigAction->setToolTip(multiSigAction->statusTip());
-    multiSigAction->setCheckable(true);
-#ifdef Q_OS_MAC
-    multiSigAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
-#else
-    multiSigAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-#endif
-    tabGroup->addAction(multiSigAction);
-
 #ifdef ENABLE_WALLET
     dynodeAction = new QAction(QIcon(":/icons/" + theme + "/dynodes"), tr("&Dynodes"), this);
     dynodeAction->setStatusTip(tr("Browse Dynodes"));
@@ -396,8 +383,6 @@ void DynamicGUI::createActions()
     connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
-    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(gotoMultiSigPage()));
-    connect(multiSigAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
     connect(dnsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -594,7 +579,6 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
-        toolbar->addAction(multiSigAction);
         toolbar->addAction(dynodeAction);
         toolbar->addAction(dnsAction);
  
@@ -732,7 +716,6 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
-    multiSigAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
     dnsAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
@@ -770,7 +753,6 @@ void DynamicGUI::createIconMenu(QMenu *pmenu)
     pmenu->addAction(sendCoinsAction);
     pmenu->addAction(receiveCoinsAction);
     pmenu->addAction(historyAction);
-    pmenu->addAction(multiSigAction);
     pmenu->addAction(dynodeAction);
     pmenu->addAction(dnsAction);
 	pmenu->addSeparator();
@@ -919,12 +901,6 @@ void DynamicGUI::gotoHistoryPage()
 {
     historyAction->setChecked(true);
     if (walletFrame) walletFrame->gotoHistoryPage();
-}
-
-void DynamicGUI::gotoMultiSigPage()
-{
-    multiSigAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoMultiSigPage();
 }
 
 void DynamicGUI::gotoDynodePage()
