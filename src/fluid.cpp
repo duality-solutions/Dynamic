@@ -110,7 +110,7 @@ bool Fluid::CheckIfQuorumExists(const std::string consentToken, std::string &mes
     bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
                    && keyOne.first.ToString() != keyThree.first.ToString());
 
-    LogPrintf("CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
+    LogPrint("fluid", "CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
 
     if (individual)
         return (keyOne.second || keyTwo.second || keyThree.second);
@@ -441,7 +441,6 @@ bool Fluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pind
             {
                 std::string existingWithoutOpCode = GetRidOfScriptStatement(existingRecord);
                 LogPrint("fluid", "CheckTransactionInRecord(): operation code removed. existingRecord  = %s verificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
-                LogPrintf("CheckTransactionInRecord(): operation code removed.\nexistingRecord  = %s\nverificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
                 if (existingWithoutOpCode == verificationWithoutOpCode) {
                     LogPrintf("CheckTransactionInRecord(): Attempt to repeat Fluid Transaction: %s\n", existingRecord);
                     return true;
