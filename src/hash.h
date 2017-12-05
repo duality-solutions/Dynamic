@@ -253,17 +253,17 @@ void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char he
     /// Associated data: None
     /// Associated data length: 0
     /// Memory cost: 500 kibibytes
-    /// Lanes: 4 parallel thread
+    /// Lanes: 8 parallel thread
     /// Threads: 1 threads
     /// Time Constraint: 2 iteration
-inline int Argon2d_Phase1_Hash(const void *in, void *out) {
+inline int Argon2d_Phase1_Hash(const void *in, const size_t size, const void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;
     context.outlen = (uint32_t)OUTPUT_BYTES;
     context.pwd = (uint8_t *)in;
-    context.pwdlen = (uint32_t)INPUT_BYTES;
+    context.pwdlen = (uint32_t)size;
     context.salt = (uint8_t *)in; //salt = input
-    context.saltlen = (uint32_t)INPUT_BYTES;
+    context.saltlen = (uint32_t)size;
     context.secret = NULL;
     context.secretlen = 0;
     context.ad = NULL;
@@ -301,15 +301,15 @@ inline int Argon2d_Phase1_Hash(const void *in, void *out) {
     /// Memory cost: 8000 kibibytes
     /// Lanes: 64 parallel threads
     /// Threads: 1 threads
-    /// Time Constraint: 1 iterations
-inline int Argon2d_Phase2_Hash(const void *in, void *out) {
+    /// Time Constraint: 2 iterations
+inline int Argon2d_Phase2_Hash(const void *in, const size_t size, const void *out) {
     argon2_context context;
     context.out = (uint8_t *)out;
     context.outlen = (uint32_t)OUTPUT_BYTES;
     context.pwd = (uint8_t *)in;
-    context.pwdlen = (uint32_t)INPUT_BYTES;
+    context.pwdlen = (uint32_t)size;
     context.salt = (uint8_t *)in; //salt = input
-    context.saltlen = (uint32_t)INPUT_BYTES;
+    context.saltlen = (uint32_t)size;
     context.secret = NULL;
     context.secretlen = 0;
     context.ad = NULL;
@@ -321,28 +321,32 @@ inline int Argon2d_Phase2_Hash(const void *in, void *out) {
     context.m_cost = 8000; // Memory in KiB (~250KB)
     context.lanes = 64;    // Degree of Parallelism
     context.threads = 1;   // Threads
-    context.t_cost = 1;    // Iterations
+    context.t_cost = 2;    // Iterations
     
     return argon2_ctx(&context, Argon2_d);
 }
 
-inline uint256 hash_Argon2d(const void* input, const unsigned int& hashPhase) {
-    uint256 hashResult;
-    const uint32_t MaxInt32 = std::numeric_limits<uint32_t>::max();
-    if (INPUT_BYTES > MaxInt32 || OUTPUT_BYTES > MaxInt32) {
-        return hashResult;
-    }
-    
-    if (hashPhase == 1) {
-        Argon2d_Phase1_Hash((const uint8_t*)input, (uint8_t*)&hashResult);
-    }
-    else if (hashPhase == 2) {
-        Argon2d_Phase2_Hash((const uint8_t*)input, (uint8_t*)&hashResult);
-    }
-    else {
-        Argon2d_Phase1_Hash((const uint8_t*)input, (uint8_t*)&hashResult);
-    }
-    return hashResult;
+template<typename T1>
+inline uint256 hash_Argon2d(const T1 pbegin, const T1 pend, const unsigned int& hashPhase) {
+     static unsigned char pblank[1];
+     const void* input = (pbegin == pend ? pblank : static_cast<const void*>(&pbegin[0]));
+     const size_t size = (pend - pbegin) * sizeof(pbegin[0]);
+ 
+     uint256 hashResult;
+     const uint32_t MaxInt32 = std::numeric_limits<uint32_t>::max();
+     if (INPUT_BYTES > MaxInt32 || OUTPUT_BYTES > MaxInt32) {
+         return hashResult;
+     }
+     
+     if (hashPhase == 1) {
+         Argon2d_Phase1_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
+     }
+     else if (hashPhase == 2) {
+         Argon2d_Phase2_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
+     }
+     else {
+         Argon2d_Phase1_Hash((const uint8_t*)input, size, (uint8_t*)&hashResult);
+    }           
+    return hashResult;             
 }
-
 #endif // DYNAMIC_HASH_H
