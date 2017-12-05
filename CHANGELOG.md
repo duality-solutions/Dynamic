@@ -142,9 +142,17 @@ Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Proto
 * Fix copy elision warning
 * Fix comparison of integers of different signs in dynodeman
 * Remove unused int
+* Drop GetDynodeByRank
+* [GUI] Remove Multiple Signatures GUI from Client
+* [DDNS] Remove DDNS and DynDNS System from Dynamic
+* Fix Conflicts/Remove Files from qt.pro
+* PrivateSend Refactor
+* Enable build with --disable-wallet
+* Update Logos
+* Remove remaining usage of 'namespace std;'
+
 
 **Dynamic v1.4.0.0**
-
 * Securely erase potentially sensitive keys/values
 * Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
