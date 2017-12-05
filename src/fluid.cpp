@@ -20,7 +20,10 @@
 #include "wallet/walletdb.h"
 
 Fluid fluid;
+
+#ifdef ENABLE_WALLET
 extern CWallet* pwalletMain;
+#endif //ENABLE_WALLET
 
 bool IsTransactionFluid(CScript txOut) {
     return (txOut.IsProtocolInstruction(MINT_TX)
@@ -129,7 +132,7 @@ bool Fluid::CheckNonScriptQuorum(const std::string consentToken, std::string &me
 
 /** Because some things in life are meant to be intimate, like socks in a drawer */
 bool Fluid::SignIntimateMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch) {
-
+#ifdef ENABLE_WALLET
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << unsignedMessage;
@@ -153,6 +156,9 @@ bool Fluid::SignIntimateMessage(CDynamicAddress address, std::string unsignedMes
         stitchedMessage = EncodeBase64(&vchSig[0], vchSig.size());
 
     return true;
+#else
+    return false;
+#endif //ENABLE_WALLET
 }
 
 /** It will perform basic message signing functions */

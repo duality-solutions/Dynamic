@@ -5,12 +5,16 @@
 
 #include "psnotificationinterface.h"
 
+#include "chainparams.h"
 #include "dynodeman.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "governance.h"
 #include "instantsend.h"
+#include "privatesend.h"
+#ifdef ENABLE_WALLET
 #include "privatesend-client.h"
+#endif // ENABLE_WALLET
 
 void CPSNotificationInterface::InitializeCurrentBlockTip()
 {
@@ -39,7 +43,9 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
         return;
 
     dnodeman.UpdatedBlockTip(pindexNew);
+#ifdef ENABLE_WALLET
     privateSendClient.UpdatedBlockTip(pindexNew);
+#endif // ENABLE_WALLET
     instantsend.UpdatedBlockTip(pindexNew);
     dnpayments.UpdatedBlockTip(pindexNew, connman);
     governance.UpdatedBlockTip(pindexNew, connman);

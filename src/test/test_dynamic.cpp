@@ -31,9 +31,8 @@
 #include <boost/thread.hpp>
 
 CWallet* pwalletMain;
-FastRandomContext insecure_rand_ctx(true);
-
 std::unique_ptr<CConnman> g_connman;
+FastRandomContext insecure_rand_ctx(true);
 
 extern bool fPrintToConsole;
 extern void noui_connect();

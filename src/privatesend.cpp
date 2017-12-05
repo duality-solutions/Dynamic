@@ -21,24 +21,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-CPrivateSendEntry::CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
-    txCollateral(txCollateral), addr(CService())
-{
-    BOOST_FOREACH(CTxIn txin, vecTxIn)
-        vecTxPSIn.push_back(txin);
-    BOOST_FOREACH(CTxOut txout, vecTxOut)
-        vecTxPSOut.push_back(txout);
-}
-
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
-    BOOST_FOREACH(CTxPSIn& txdsin, vecTxPSIn) {
-        if(txdsin.prevout == txin.prevout && txdsin.nSequence == txin.nSequence) {
-            if(txdsin.fHasSig) return false;
+    BOOST_FOREACH(CTxPSIn& txpsin, vecTxPSIn) {
+        if(txpsin.prevout == txin.prevout && txpsin.nSequence == txin.nSequence) {
+            if(txpsin.fHasSig) return false;
 
-            txdsin.scriptSig = txin.scriptSig;
-            txdsin.prevPubKey = txin.prevPubKey;
-            txdsin.fHasSig = true;
+            txpsin.scriptSig = txin.scriptSig;
+            txpsin.fHasSig = true;
 
             return true;
         }
@@ -130,6 +120,21 @@ void CPrivateSendBase::SetNull()
     nTimeLastSuccessfulStep = GetTimeMillis();
 }
 
+void CPrivateSendBase::CheckQueue()
+{
+    TRY_LOCK(cs_privatesend, lockPS);
+    if(!lockPS) return; // it's ok to fail here, we run this quite frequently
+
+    // check mixing queue objects for timeouts
+    std::vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
+    while(it != vecPrivatesendQueue.end()) {
+        if((*it).IsExpired()) {
+            LogPrint("privatesend", "CPrivateSendBase::%s -- Removing expired queue (%s)\n", __func__, (*it).ToString());
+            it = vecPrivatesendQueue.erase(it);
+        } else ++it;
+    }
+}
+
 std::string CPrivateSendBase::GetStateString() const
 {
     switch(nState) {
@@ -219,6 +224,14 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     return true;
 }
 
+bool CPrivateSend::IsCollateralAmount(CAmount nInputAmount)
+{
+    // collateral inputs should always be a 2x..4x of mixing collateral
+    return  nInputAmount >  GetCollateralAmount() &&
+            nInputAmount <= GetMaxCollateralAmount() &&
+            nInputAmount %  GetCollateralAmount() == 0;
+}
+
 /*  Create a nice string to show the denominations
     Function returns as follows (for 4 denominations):
         ( bit on if present )
@@ -249,16 +262,6 @@ std::string CPrivateSend::GetDenominationsToString(int nDenom)
     }
 
     return strDenom;
-}
-
-int CPrivateSend::GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut)
-{
-    std::vector<CTxOut> vecTxOut;
-
-    BOOST_FOREACH(CTxPSOut out, vecTxPSOut)
-        vecTxOut.push_back(out);
-
-    return GetDenominations(vecTxOut);
 }
 
 /*  Return a bitshifted integer representing the denominations in this list
@@ -336,6 +339,14 @@ int CPrivateSend::GetDenominationsByAmounts(const std::vector<CAmount>& vecAmoun
     }
 
     return GetDenominations(vecTxOut, true);
+}
+
+bool CPrivateSend::IsDenominatedAmount(CAmount nInputAmount)
+{
+    for (const auto& nDenomValue : vecStandardDenominations)
+        if(nInputAmount == nDenomValue)
+            return true;
+    return false;
 }
 
 std::string CPrivateSend::GetMessageByID(PoolMessage nMessageID)

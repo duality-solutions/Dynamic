@@ -8,9 +8,14 @@
 #ifndef DYNAMIC_ACTIVEDYNODE_H
 #define DYNAMIC_ACTIVEDYNODE_H
 
+#include "chainparams.h"
 #include "key.h"
 #include "net.h"
-#include "wallet/wallet.h"
+#include "primitives/transaction.h"
+
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"     
+#endif //ENABLE_WALLET
 
 class CActiveDynode;
 

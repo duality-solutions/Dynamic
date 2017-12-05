@@ -21,9 +21,7 @@
 #include "transactiontablemodel.h"
 #include "transactionview.h"
 #include "walletmodel.h"
-#include "multisigdialog.h"
 
-#include "dnspage.h"
 #include "dynodeconfig.h"
 #include "ui_interface.h"
 
@@ -83,22 +81,16 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     vbox->addLayout(hbox_buttons);
     transactionsPage->setLayout(vbox);
 
-
-    multiSigPage = new MultisigDialog(platformStyle);
-
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
         dynodeListPage = new DynodeList(platformStyle);
     }
 
-    dnsPage = new DNSPage();
-
     addWidget(overviewPage);
     addWidget(sendCoinsPage);
     addWidget(receiveCoinsPage);
     addWidget(transactionsPage);
-    addWidget(multiSigPage);
-    addWidget(dnsPage);
+
     if (settings.value("fShowDynodesTab").toBool()) {
         addWidget(dynodeListPage);
     }
@@ -173,12 +165,10 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     usedReceivingAddressesPage->setModel(_walletModel->getAddressTableModel());
     usedSendingAddressesPage->setModel(_walletModel->getAddressTableModel());
     transactionView->setModel(_walletModel);
-    multiSigPage->setModel(_walletModel);
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
         dynodeListPage->setWalletModel(_walletModel);
     }
-    dnsPage->setModel(_walletModel);
 
     if (_walletModel)
     {
@@ -247,22 +237,12 @@ void WalletView::gotoHistoryPage()
     setCurrentWidget(transactionsPage);
 }
 
-void WalletView::gotoMultiSigPage()
-{
-    setCurrentWidget(multiSigPage);
-}
-
 void WalletView::gotoDynodePage()
 {
     QSettings settings;
     if (settings.value("fShowDynodesTab").toBool()) {
         setCurrentWidget(dynodeListPage);
     }
-}
-
-void WalletView::gotoDNSPage()
-{
-    setCurrentWidget(dnsPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

@@ -4,13 +4,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activedynode.h"
+#include "base58.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "init.h"
 #include "validation.h"
+#ifdef ENABLE_WALLET
 #include "privatesend-client.h"
+#endif // ENABLE_WALLET
 #include "privatesend-server.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -21,6 +24,7 @@
 #include <fstream>
 #include <iomanip>
 
+#ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
 
 UniValue privatesend(const UniValue& params, bool fHelp)
@@ -62,6 +66,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
 
     return "Unknown command, please see \"help privatesend\"";
 }
+#endif // ENABLE_WALLET
 
 UniValue getpoolinfo(const UniValue& params, bool fHelp)
 {
@@ -70,18 +75,20 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
             "getpoolinfo\n"
             "Returns an object containing mixing pool related information.\n");
 
-    CPrivateSendBase privateSend = fDyNode ? (CPrivateSendBase)privateSendServer : (CPrivateSendBase)privateSendClient;
+#ifdef ENABLE_WALLET
+    CPrivateSendBase* pprivateSendBase = fDyNode ? (CPrivateSendBase*)&privateSendServer : (CPrivateSendBase*)&privateSendClient;
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             privateSend.GetStateString()));
+    obj.push_back(Pair("state",             pprivateSendBase->GetStateString()));
     obj.push_back(Pair("mixing_mode",       (!fDyNode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             privateSend.GetQueueSize()));
-    obj.push_back(Pair("entries",           privateSend.GetEntriesCount()));
+    obj.push_back(Pair("queue",             pprivateSendBase->GetQueueSize()));
+    obj.push_back(Pair("entries",           pprivateSendBase->GetEntriesCount()));
     obj.push_back(Pair("status",            privateSendClient.GetStatus()));
 
-    if (privateSendClient.infoMixingDynode.fInfoValid) {
-        obj.push_back(Pair("outpoint",      privateSendClient.infoMixingDynode.vin.prevout.ToStringShort()));
-        obj.push_back(Pair("addr",          privateSendClient.infoMixingDynode.addr.ToString()));
+    dynode_info_t dnInfo;
+    if (privateSendClient.GetMixingDynodeInfo(dnInfo)) {
+        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("addr",          dnInfo.addr.ToString()));
     }
 
     if (pwalletMain) {
@@ -89,6 +96,13 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
         obj.push_back(Pair("warnings",      pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
                                                 ? "WARNING: keypool is almost depleted!" : ""));
     }
+#else // ENABLE_WALLET
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("state",             privateSendServer.GetStateString()));
+    obj.push_back(Pair("queue",             privateSendServer.GetQueueSize()));
+    obj.push_back(Pair("entries",           privateSendServer.GetEntriesCount()));
+#endif // ENABLE_WALLET
+
     return obj;
 }
 
@@ -100,14 +114,20 @@ UniValue dynode(const UniValue& params, bool fHelp)
         strCommand = params[0].get_str();
     }
 
+#ifdef ENABLE_WALLET
     if (strCommand == "start-many")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "DEPRECATED, please use start-all instead");
+#endif // ENABLE_WALLET
 
     if (fHelp  ||
-        (strCommand != "start" && strCommand != "start-alias" && strCommand != "start-all" && strCommand != "start-missing" &&
-         strCommand != "start-disabled" && strCommand != "list" && strCommand != "list-conf" && strCommand != "count" &&
+        (
+#ifdef ENABLE_WALLET
+            strCommand != "start-alias" && strCommand != "start-all" && strCommand != "start-missing" &&
+         strCommand != "start-disabled" && strCommand != "outputs" &&
+#endif // ENABLE_WALLET
+         strCommand != "list" && strCommand != "list-conf" && strCommand != "count" &&
          strCommand != "debug" && strCommand != "current" && strCommand != "winner" && strCommand != "winners" && strCommand != "genkey" &&
-         strCommand != "connect" && strCommand != "outputs" && strCommand != "status"))
+         strCommand != "connect" && strCommand != "status"))
             throw std::runtime_error(
                 "dynode \"command\"...\n"
                 "Set of commands to execute dynode-sync related actions\n"
@@ -118,10 +138,12 @@ UniValue dynode(const UniValue& params, bool fHelp)
                 "  current      - Print info on current Dynode winner to be paid the next block (calculated locally)\n"
                 "  debug        - Print Dynode status\n"
                 "  genkey       - Generate new dynodeprivkey\n"
+#ifdef ENABLE_WALLET
                 "  outputs      - Print Dynode compatible outputs\n"
                 "  start        - Start local Hot Dynode configured in dynamic.conf\n"
                 "  start-alias  - Start single remote Dynode by assigned alias configured in dynode.conf\n"
                 "  start-<mode> - Start remote Dynodes configured in dynode.conf (<mode>: 'all', 'missing', 'disabled')\n"
+#endif // ENABLE_WALLET
                 "  status       - Print Dynode status information\n"
                 "  list         - Print list of all known Dynodes (see dynodelist for more info)\n"
                 "  list-conf    - Print dynode.conf in JSON format\n"
@@ -213,6 +235,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
         return obj;
     }
 
+#ifdef ENABLE_WALLET       
     if (strCommand == "debug")
     {
         if(activeDynode.nState != ACTIVE_DYNODE_INITIAL || !dynodeSync.IsBlockchainSynced())
@@ -221,10 +244,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
         COutPoint outpoint;
         CPubKey pubkey;
         CKey key;
-
         if(!pwalletMain || !pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubkey, key))
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Missing Dynode input, please look at the documentation for instructions on Dynode creation");
-
         return activeDynode.GetStatus();
     }
 
@@ -245,7 +266,9 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         return activeDynode.GetStatus();
     }
+#endif //ENABLE_WALLET       
 
+#ifdef ENABLE_WALLET
     if (strCommand == "start-alias")
     {
         if (params.size() < 2)
@@ -344,6 +367,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         return returnObj;
     }
+#endif // ENABLE_WALLET
 
     if (strCommand == "genkey")
     {
@@ -377,6 +401,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
         return resultObj;
     }
 
+#ifdef ENABLE_WALLET
     if (strCommand == "outputs") {
         // Find possible candidates
         std::vector<COutput> vPossibleCoins;
@@ -388,8 +413,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
         }
 
         return obj;
-
     }
+#endif // ENABLE_WALLET
 
     if (strCommand == "status")
     {
@@ -609,19 +634,26 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
         strCommand = params[0].get_str();
 
     if (fHelp  ||
-        (strCommand != "create-alias" && strCommand != "create-all" && strCommand != "decode" && strCommand != "relay"))
+        (
+#ifdef ENABLE_WALLET
+            strCommand != "create-alias" && strCommand != "create-all" &&
+#endif // ENABLE_WALLET
+            strCommand != "decode" && strCommand != "relay"))
         throw std::runtime_error(
                 "dynodebroadcast \"command\"...\n"
                 "Set of commands to create and relay Dynode broadcast messages\n"
                 "\nArguments:\n"
                 "1. \"command\"        (string or set of strings, required) The command to execute\n"
                 "\nAvailable commands:\n"
+#ifdef ENABLE_WALLET
                 "  create-alias  - Create single remote Dynode broadcast message by assigned alias configured in dynode.conf\n"
                 "  create-all    - Create remote Dynode broadcast messages for all Dynodes configured in dynode.conf\n"
+#endif // ENABLE_WALLET
                 "  decode        - Decode Dynode broadcast message\n"
                 "  relay         - Relay Dynode broadcast message to the network\n"
                 );
 
+#ifdef ENABLE_WALLET
     if (strCommand == "create-alias")
     {
         // wait for reindex and/or import to finish
@@ -724,6 +756,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
         return returnObj;
     }
+#endif // ENABLE_WALLET
 
     if (strCommand == "decode")
     {

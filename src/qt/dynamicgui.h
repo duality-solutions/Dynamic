@@ -123,9 +123,7 @@ private:
     QAction *receiveCoinsAction;
     QAction *receiveCoinsMenuAction;
     QAction *historyAction;
-    QAction *multiSigAction;
     QAction *dynodeAction;
-    QAction *dnsAction;
     QAction *quitAction;
     QAction *usedSendingAddressesAction;
     QAction *usedReceivingAddressesAction;
@@ -241,12 +239,8 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to MultiSig page */
-	void gotoMultiSigPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
-    /** Switch to DNS page */
-    void gotoDNSPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

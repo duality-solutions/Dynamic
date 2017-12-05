@@ -39,8 +39,10 @@ struct CBlockTemplate
 uint32_t ByteReverse(uint32_t value);
 /** Do mining precalculation */
 void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1);
+#ifdef ENABLE_WALLET
 /** Check mined block */
 bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman);
+#endif //ENABLE_WALLET
 /** Base sha256 mining transform */
 void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 

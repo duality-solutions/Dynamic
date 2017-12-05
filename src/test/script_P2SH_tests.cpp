@@ -19,8 +19,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace std;
-
 // Helpers:
 static std::vector<unsigned char>
 Serialize(const CScript& s)
@@ -82,7 +80,7 @@ BOOST_AUTO_TEST_CASE(sign)
     }
 
     CMutableTransaction txFrom;  // Funding transaction:
-    string reason;
+    std::string reason;
     txFrom.vout.resize(8);
     for (int i = 0; i < 4; i++)
     {
@@ -180,7 +178,7 @@ BOOST_AUTO_TEST_CASE(set)
     }
 
     CMutableTransaction txFrom;  // Funding transaction:
-    string reason;
+    std::string reason;
     txFrom.vout.resize(4);
     for (int i = 0; i < 4; i++)
     {

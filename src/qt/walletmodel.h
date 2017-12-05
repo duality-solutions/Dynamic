@@ -12,7 +12,9 @@
 #include "walletmodeltransaction.h"
 
 #include "support/allocators/secure.h"
+#ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <map>
 #include <vector>
@@ -20,7 +22,6 @@
 #include <QObject>
 
 class AddressTableModel;
-class NameTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
@@ -53,7 +54,9 @@ public:
     // Todo: This is a hack, should be replaced with a cleaner solution!
     QString address;
     QString label;
+#ifdef ENABLE_WALLET
     AvailableCoinsType inputType;
+#endif // ENABLE_WALLET
     bool fUseInstantSend;
     CAmount amount;
     // If from a payment request, this is used for storing the memo
@@ -138,7 +141,6 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
-    NameTableModel *getNameTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
     CAmount getUnconfirmedBalance() const;
@@ -230,7 +232,6 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
-    NameTableModel *nameTableModel;
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
