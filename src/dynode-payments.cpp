@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,6 +14,8 @@
 #include "netfulfilledman.h"
 #include "spork.h"
 #include "util.h"
+#include "fluid.h"
+#include "chain.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -214,7 +216,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
     return true;
 }
 
-void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet, std::vector<CTxOut>& voutSuperblockRet)
+void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet, std::vector<CTxOut>& voutSuperblockRet)
 {
     // only create superblocks if spork is enabled AND if superblock is actually triggered
     // (height should be validated inside)
@@ -227,9 +229,10 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
 
     if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
         // FILL BLOCK PAYEE WITH DYNODE PAYMENT OTHERWISE
-        dnpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutDynodeRet);
-        LogPrint("dnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutDynodeRet %s txNew %s",
-                                nBlockHeight, blockReward, txoutDynodeRet.ToString(), txNew.ToString());
+        dnpayments.FillBlockPayee(txNew, nBlockHeight, txoutDynodeRet);
+        //LogPrint("dnpayments", "FillBlockPayments -- nBlockHeight %d txoutDynodeRet %s txNew %s",
+        //                        nBlockHeight, txoutDynodeRet.ToString(), txNew.ToString());
+        return;
     }
 }
 
@@ -270,59 +273,52 @@ bool CDynodePayments::CanVote(COutPoint outDynode, int nBlockHeight)
 *   Fill Dynode ONLY payment block
 */
 
-void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet)
+void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CTxOut& txoutDynodeRet)
 {
-    CBlockIndex* pindexPrev = chainActive.Tip();       
-    if(!pindexPrev) return;        
-
     bool hasPayment = true;
     CScript payee;
 
-    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock){
-            if (fDebug)
-                LogPrintf("CreateNewBlock: No Dynode payments prior to block 20,546\n");
-            hasPayment = false;
+    if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrintf("CDynodePayments::FillBlockPayee: No Dynode payments prior to block %u\n", Params().GetConsensus().nDynodePaymentsStartBlock);
+        hasPayment = false;
     }
 
-    //spork
-    if(!dnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
-        //no Dynode detected
+    int nDnCount = dnodeman.CountDynodes();
+
+    if(hasPayment && !dnpayments.GetBlockPayee(nBlockHeight, payee)){       
         int nCount = 0;
         dynode_info_t dnInfo;
+        // Do not pay if no Dynodes detected
         if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
-        payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
-        } else {
-            if (fDebug)
-                LogPrintf("CreateNewBlock: Failed to detect Dynode to pay\n");
             hasPayment = false;
+            LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
+        } 
+        else if (nDnCount < Params().GetConsensus().nMinCountDynodesPaymentStart) {
+            hasPayment = false;
+            LogPrintf("CreateNewBlock: Not enough Dynodes to begin payments\n");
+        }
+        else {
+            // get winning Dynode payment script
+            payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
+            LogPrintf("CDynodePayments::FillBlockPayee: Found Dynode to pay!\n");
         }
     }
-
-    CAmount blockValue;
-    CAmount dynodePayment;
-
-    if (chainActive.Height() == 0) { blockValue = INITIAL_SUPERBLOCK_PAYMENT; }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { blockValue = BLOCKCHAIN_INIT_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { blockValue = PHASE_1_POW_REWARD; }
-    else { blockValue = BLOCKCHAIN_INIT_REWARD; }
-
-    if (!hasPayment && hasPayment && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_1_DYNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {dynodePayment = PHASE_2_DYNODE_PAYMENT; }
-    else { dynodePayment = BLOCKCHAIN_INIT_REWARD; }
-
-    txNew.vout[0].nValue = blockValue;
+    else {
+        LogPrintf("CDynodePayments::FillBlockPayee: Dynode payee found.\n"); //TODO (Amir): Remove logging.
+    }
 
     if(hasPayment){
-        txNew.vout.resize(2);
+        CBlockIndex* pindexPrev = chainActive.Tip();
+        if(!pindexPrev) 
+            return;
 
-        txNew.vout[1].scriptPubKey = payee;
-        txNew.vout[1].nValue = dynodePayment;
+        // make sure it's not filled yet
+        txoutDynodeRet = CTxOut();
 
-        if (chainActive.Height() == 0) { txNew.vout[0].nValue = INITIAL_SUPERBLOCK_PAYMENT; }
-        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) { txNew.vout[0].nValue = PHASE_1_POW_REWARD; }
-        else { txNew.vout[0].nValue = BLOCKCHAIN_INIT_REWARD; }
+        CAmount dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+        
+        txoutDynodeRet = CTxOut(dynodePayment, payee);
+        txNew.vout.push_back(txoutDynodeRet);
 
         CTxDestination address1;
         ExtractDestination(payee, address1);
@@ -338,9 +334,6 @@ int CDynodePayments::GetMinDynodePaymentsProto() {
 
 void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    // Ignore any payments messages until Dynode list is synced
-    if(!dynodeSync.IsDynodeListSynced()) return;
-
     if(fLiteMode) return; // disable all Dynamic specific functionality
 
     if (strCommand == NetMsgType::DYNODEPAYMENTSYNC) { //Dynode Payments Request Sync
@@ -379,6 +372,11 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         uint256 nHash = vote.GetHash();
 
         pfrom->setAskFor.erase(nHash);
+
+        // TODO: clear setAskFor for MSG_DYNODE_PAYMENT_BLOCK too
+
+        // Ignore any payments messages until dynode list is synced
+        if(!dynodeSync.IsDynodeListSynced()) return;
 
         {
             LOCK(cs_mapDynodePaymentVotes);
@@ -585,7 +583,8 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
-    CAmount nDynodePayment = GetDynodePayment();
+    /* Dirtiest trick in the book */
+	CAmount nDynodePayment = getDynodeSubsidyWithOverride(chainActive.Tip()->fluidParams.dynodeReward);
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 
@@ -820,7 +819,7 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
 
     CDynodeMan::rank_pair_vec_t dns;
     if (!dnodeman.GetDynodeRanks(dns, nPrevBlockHeight - 101, GetMinDynodePaymentsProto())) {
-        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetMasternodeRanks failed\n";
+        debugStr += "CDynodePayments::CheckPreviousBlockVotes -- GetDynodeRanks failed\n";
         LogPrint("dnpayments", "%s", debugStr);
         return;
     }

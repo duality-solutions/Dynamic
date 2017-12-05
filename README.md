@@ -10,8 +10,6 @@ Graph on Pull Request History
 
 # **Dynamic (DYN) v1.5.0.0**
 
-# **Dynamic (DYN) v1.4.0.0**
-
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
 **Copyright (c) 2016-2017 Duality Blockchain Solutions**
