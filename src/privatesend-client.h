@@ -54,7 +54,6 @@ private:
     std::string strAutoDenomResult;
 
     dynode_info_t infoMixingDynode;
-
     CMutableTransaction txMyCollateral; // client side collateral
 
     CKeyHolderStorage keyHolderStorage; // storage for keys used in PrepareDenominate
