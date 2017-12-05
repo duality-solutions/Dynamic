@@ -65,7 +65,7 @@ public:
 
     uint256 GetHash() const
     {
-        return hash_Argon2d(UVOIDBEGIN(nVersion), 1);
+        return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
     }
     
     int64_t GetBlockTime() const
