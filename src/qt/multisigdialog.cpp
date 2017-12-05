@@ -17,7 +17,6 @@
 #include "chainparamsbase.h"
 #include "core_io.h"
 #include "dbwrapper.h"
-#include "dns/dns.h"
 #include "key.h"
 #include "validation.h"
 #include "policy/policy.h"
@@ -109,7 +108,7 @@ bool MultisigDialog::AdvertisePublicKeyForMultiSig(const std::string& address, c
 CPubKey MultisigDialog::SearchForPubKeyByAddress(const std::string& address)
 {
     CPubKey emptyPubKey;
-    std::string strFindPubKey = MultiSigGetPubKeyFromAddress(address);
+/*    std::string strFindPubKey = MultiSigGetPubKeyFromAddress(address);
     if (strFindPubKey.size() > 0)
     {
         if (IsHex(strFindPubKey))
@@ -124,7 +123,7 @@ CPubKey MultisigDialog::SearchForPubKeyByAddress(const std::string& address)
                 return vchPubKey;
         }
     }
-    return emptyPubKey;
+*/    return emptyPubKey;
 }
 
 
@@ -301,14 +300,6 @@ void MultisigDialog::on_createAddressButton_clicked()
         CDynamicAddress multiSigAddress(scriptID);
         ui->multisigAddress->setText(multiSigAddress.ToString().c_str());
         ui->redeemScript->setText(HexStr(script.begin(), script.end()).c_str());
-    }
-    else
-    {
-        for(std::map<std::string,std::string>::iterator iter = myAddressList.begin(); iter != myAddressList.end(); ++iter)
-        {
-            // TODO (Amir): If user agrees to advertise their public key using DDNS as a multisig name (fee = 0.001 SLK)
-            AdvertisePublicKeyForMultiSig(iter->first, iter->second);
-        }
     }
 }
 
