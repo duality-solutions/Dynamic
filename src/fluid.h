@@ -28,9 +28,12 @@ class CFluidParameters {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
     static const int64_t MAX_FLUID_TIME_DISTORT = 60 * 60; // Maximum time distort = 1 hour.
-    static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
     static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN; // Cost to send a fluid transaction
-    
+    static const CAmount FLUID_MAX_REWARD_FOR_DYNODE_ = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
+    static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
+    static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN; // Max minting amount per fluid transaction
+
+
     //TODO (Amir): Change address and remove private keys below.
     std::vector<std::string> InitialiseAddresses() {
         std::vector<std::string> x;
