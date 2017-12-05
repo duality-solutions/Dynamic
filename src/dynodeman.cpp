@@ -696,11 +696,8 @@ void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
     connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
- #ifdef ENABLE_WALLET
-        if(pnode->fDynode && !privateSendClient.IsMixingDynode(pnode)) {
-#else
         if(pnode->fDynode) {
-#endif // ENABLE_WALLET
+            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr)
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
