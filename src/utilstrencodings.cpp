@@ -705,16 +705,6 @@ std::string StitchString(std::string stringOne, std::string stringTwo, std::stri
 		return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
 }
 
-int64_t StringToInteger(std::string input) {
-	int64_t result;
-	
-	ScrubString(input, true);
-	std::stringstream stream(input);
-	stream >> result;
-	
-	return result;
-}
-
 std::string GetRidOfScriptStatement(std::string input) {
 	std::vector<std::string> output;
 	boost::split(output, input, boost::is_any_of(" "));
