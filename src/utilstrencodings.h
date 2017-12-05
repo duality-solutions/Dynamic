@@ -174,7 +174,6 @@ void ScrubString(std::string &input, bool forInteger = false);
 void SeperateString(std::string input, std::vector<std::string> &output, bool subDelimiter = false);
 std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter = false);
 std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter = false);
-int64_t StringToInteger(std::string input);
 std::string GetRidOfScriptStatement(std::string input);
 
 extern std::string PrimaryDelimiter;

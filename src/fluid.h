@@ -27,7 +27,7 @@ struct CBlockTemplate;
 class CFluidParameters {
 public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
-    static const int MAX_FLUID_TIME_DISTORT = 60 * 60; // Maximum time distort = 1 hour.
+    static const int64_t MAX_FLUID_TIME_DISTORT = 60 * 60; // Maximum time distort = 1 hour.
     static const int FEE_REDIRECT_HEIGHT = 100; //TODO (Amir): Change this to 250000
     static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN; // Cost to send a fluid transaction
     

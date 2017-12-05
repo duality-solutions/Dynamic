@@ -202,9 +202,12 @@ bool Fluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t 
         return false;
 
     std::string ls = ptrs.at(1);
+    
     ScrubString(ls, true);
+    int64_t tokenTimeStamp;
+    ParseInt64(ls, &tokenTimeStamp);
 
-    if (timeStamp > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT)
+    if (timeStamp > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT)
         return false;
 
     return true;
@@ -240,8 +243,10 @@ bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t tim
     ScrubString(lr, true);
     std::string ls = ptrs.at(1);
     ScrubString(ls, true);
+    int64_t tokenTimeStamp;
+    ParseInt64(ls, &tokenTimeStamp);
 
-    if (timeStamp > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    if (timeStamp > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
     ParseFixedPoint(lr, 8, &coinAmount);
@@ -304,8 +309,10 @@ bool Fluid::ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &c
     ScrubString(lr, true);
     std::string ls = ptrs.at(1);
     ScrubString(ls, true);
-
-    if (nTime > StringToInteger(ls) + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
+    int64_t tokenTimeStamp;
+    ParseInt64(ls, &tokenTimeStamp);
+    
+    if (nTime > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
     ParseFixedPoint(lr, 8, &coinAmount);
