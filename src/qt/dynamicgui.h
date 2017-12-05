@@ -123,7 +123,6 @@ private:
     QAction *receiveCoinsAction;
     QAction *receiveCoinsMenuAction;
     QAction *historyAction;
-    QAction *multiSigAction;
     QAction *dynodeAction;
     QAction *quitAction;
     QAction *usedSendingAddressesAction;
@@ -240,8 +239,6 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to MultiSig page */
-	void gotoMultiSigPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
 

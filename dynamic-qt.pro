@@ -438,14 +438,6 @@ HEADERS += \
     src/versionbits.h \
     src/compat/endian.h \
     src/crypto/common.h \
-    src/dns/dns.h \
-    src/dns/hooks.h \
-    src/dns/dyndns.h \
-    src/qt/dnspage.h \
-    src/qt/dnstablemodel.h \
-    src/qt/multisigaddressentry.h \
-    src/qt/multisigdialog.h \
-    src/qt/multisiginputentry.h \
     src/support/lockedpool.h \
     src/messagesigner.h \
     src/qt/modaloverlay.h \
@@ -613,13 +605,6 @@ SOURCES += \
     src/validationinterface.cpp \
     src/versionbits.cpp \
     src/qt/paymentrequest.pb.cc \
-    src/dns/dns.cpp \
-    src/dns/dyndns.cpp \
-    src/qt/dnspage.cpp \
-    src/qt/dnstablemodel.cpp \
-    src/qt/multisigaddressentry.cpp \
-    src/qt/multisigdialog.cpp \
-    src/qt/multisiginputentry.cpp \
     src/support/lockedpool.cpp \
     src/ui_interface.cpp \
     src/messagesigner.cpp \
@@ -640,7 +625,6 @@ FORMS += \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/coincontroldialog.ui \
-    src/qt/forms/dnspage.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/helpmessagedialog.ui \
     src/qt/forms/intro.ui \
@@ -656,7 +640,4 @@ FORMS += \
     src/qt/forms/signverifymessagedialog.ui \
     src/qt/forms/dynodelist.ui \
     src/qt/forms/transactiondescdialog.ui \
-    src/qt/forms/multisigaddressentry.ui \
-    src/qt/forms/multisigdialog.ui \
-    src/qt/forms/multisiginputentry.ui \
     src/qt/forms/modaloverlay.ui

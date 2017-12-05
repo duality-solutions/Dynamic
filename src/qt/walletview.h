@@ -23,7 +23,6 @@ class SendCoinsRecipient;
 class ReceiveCoinsDialog;
 class AddressBookPage;
 class TransactionView;
-class MultisigDialog;
 class WalletModel;
 
 QT_BEGIN_NAMESPACE
@@ -72,7 +71,6 @@ private:
     AddressBookPage *usedReceivingAddressesPage;
     QWidget *transactionsPage;
     TransactionView *transactionView;
-    MultisigDialog *multiSigPage;
     DynodeList *dynodeListPage;
 
     QProgressDialog *progressDialog;
@@ -88,8 +86,6 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to MultiSig page */
-    void gotoMultiSigPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
 
