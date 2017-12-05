@@ -446,21 +446,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
         LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
-
-        // Do we want the ability to redirect fees to company address?
-
-        // Send fees to company address
-        if (pindexPrev->nHeight + 1 > fluid.FEE_REDIRECT_HEIGHT && sporkManager.IsSporkActive(SPORK_15_REDIRECT_FEES)) {
-            CDynamicAddress feeRedirAddress(fluid.FEE_REDIRECT_ADDRESS);
-            assert(feeRedirAddress.IsValid());
-            if (!feeRedirAddress.IsScript()) {
-                script = GetScriptForDestination(feeRedirAddress.Get());
-            } else {
-                CScriptID scriptID = boost::get<CScriptID>(feeRedirAddress.Get());
-                script = CScript() << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
-            }
-            txNew.vout.push_back(CTxOut(nFees, script));
-        }
+ 
         CAmount blockAmount;
         ParseFixedPoint(std::to_string((blockReward + fluidIssuance) / COIN), 8, &blockAmount);
 		LogPrintf("CreateNewBlock(): Computed Block Reward is: %ld DYN\n", &blockAmount);

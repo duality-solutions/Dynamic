@@ -3382,65 +3382,14 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
             return state.DoS(100, error("%s: block height mismatch in coinbase", __func__), REJECT_INVALID, "bad-cb-height");
         }
     }
-    
-    CAmount nValueIn = 0;
-    CAmount nFees = 0;
-    CCoinsViewCache inputs(pcoinsTip);
-    bool fRedirectFees = (nHeight > fluid.FEE_REDIRECT_HEIGHT && sporkManager.IsSporkActive(SPORK_15_REDIRECT_FEES));
 
     // Check that all transactions are finalized
     for (const CTransaction& tx : block.vtx) {
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
-
-        if (fRedirectFees && !tx.IsCoinBase()) {
-            // Compute network fees of the block
-            for (unsigned int i = 0; i < tx.vin.size(); i++)
-            {
-                const COutPoint &prevout = tx.vin[i].prevout;
-                const CCoins *coins = inputs.AccessCoins(prevout.hash);
-                if (coins != nullptr) {
-                    // Check for negative or overflow input values
-                    nValueIn += coins->vout[prevout.n].nValue;
-                }
-                else {
-                    nValueIn = 0;
-                }
-            }
-            CAmount nTxFee = nValueIn - tx.GetValueOut();
-            nFees += nTxFee;
-        }
     }
 
-    // Check if fee is redirected to company address
-    if (fRedirectFees) {
-        bool found = false;
-        
-        CDynamicAddress feeRedirAddress(fluid.FEE_REDIRECT_ADDRESS);  
-        CScript script;
-        assert(feeRedirAddress.IsValid());
-        if (!feeRedirAddress.IsScript()) {
-            script = GetScriptForDestination(feeRedirAddress.Get());
-        } else {
-            CScriptID scriptID = boost::get<CScriptID>(feeRedirAddress.Get());
-            script = CScript() << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
-        }
-        
-        for (const CTxOut& output : block.vtx[0].vout) {
-            if (output.scriptPubKey == script) {
-                if (output.nValue == nFees) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if (!found) {
-            return state.DoS(100, error("%s: fee redirection is missing", __func__), REJECT_INVALID, "cb-no-fee-redir");
-        }
-    }
-    
     // If Fluid transaction present, has it been adhered to?
     CDynamicAddress mintAddress; CAmount fluidIssuance;
     
