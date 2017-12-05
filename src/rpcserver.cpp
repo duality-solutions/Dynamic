@@ -418,20 +418,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Protocol",           "fluidcommandshistory",	  &fluidcommandshistory,   true  },
     { "Protocol",           "getfluidmasters",	      &getfluidmasters,   	   true  },
     { "Protocol",           "gettime",	      		  &gettime,   	   			true  },
-
-     /* Decentralised DNS */
-    { "DDNS",               "name_scan",              &name_scan,              true  },
-    { "DDNS",               "name_filter",            &name_filter,            true  },
-    { "DDNS",               "name_show",              &name_show,              true  },
-    { "DDNS",               "name_history",           &name_history,           true  },
-    { "DDNS",               "name_mempool",           &name_mempool,           true  },
-    { "DDNS",               "name_new",               &name_new,               true  },
-    { "DDNS",               "name_update",            &name_update,            true  },
-    { "DDNS",               "name_delete",            &name_delete,            true  },
-    { "DDNS",               "name_list",              &name_list,              true  },
 #endif // ENABLE_WALLET
-    /* Not shown in help */
-    { "Hidden", "name_debug", &name_debug, false },
 };
 
 CRPCTable::CRPCTable()

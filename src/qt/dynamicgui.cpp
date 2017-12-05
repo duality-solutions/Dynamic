@@ -102,7 +102,6 @@ DynamicGUI::DynamicGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     historyAction(0),
     multiSigAction(0),
     dynodeAction(0),
-    dnsAction(0),
     quitAction(0),
     usedSendingAddressesAction(0),
     usedReceivingAddressesAction(0),
@@ -370,18 +369,6 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(dynodeAction);    
 
-    dnsAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&dDNS"), this);
-    dnsAction->setStatusTip(tr("Manage values registered via Dynamic"));
-    dnsAction->setToolTip(dnsAction->statusTip());
-    dnsAction->setCheckable(true);
-#ifdef Q_OS_MAC
-    dnsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
-#else
-    dnsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
-#endif
-    tabGroup->addAction(dnsAction);
-
-
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -400,8 +387,6 @@ void DynamicGUI::createActions()
     connect(multiSigAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
-    connect(dnsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(dnsAction, SIGNAL(triggered()), this, SLOT(gotoDNSPage()));
 
 #endif // ENABLE_WALLET
 
@@ -596,7 +581,6 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(historyAction);
         toolbar->addAction(multiSigAction);
         toolbar->addAction(dynodeAction);
-        toolbar->addAction(dnsAction);
  
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -734,7 +718,6 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     historyAction->setEnabled(enabled);
     multiSigAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
-    dnsAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -772,7 +755,6 @@ void DynamicGUI::createIconMenu(QMenu *pmenu)
     pmenu->addAction(historyAction);
     pmenu->addAction(multiSigAction);
     pmenu->addAction(dynodeAction);
-    pmenu->addAction(dnsAction);
 	pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
@@ -932,12 +914,6 @@ void DynamicGUI::gotoDynodePage()
     dynodeAction->setChecked(true);
     if (walletFrame) walletFrame->gotoDynodePage();
 }
-
-void DynamicGUI::gotoDNSPage()
-{
-    dnsAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoDNSPage();
-} 
 
 void DynamicGUI::gotoSignMessageTab(QString addr)
 {

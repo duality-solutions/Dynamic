@@ -13,7 +13,6 @@
 #include "checkpoints.h"
 #include "checkqueue.h"
 #include "consensus/consensus.h"
-#include "dns/dns.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "hash.h"
@@ -110,8 +109,6 @@ std::map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
  */
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
-
-CHooks* hooks = InitHook(); //this adds ddns hooks which allow splicing of code inside standard dynamic functions.
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
@@ -559,7 +556,6 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
-// Added for DDNS
 static CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowFree)
 {
     {
@@ -627,12 +623,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
     }
 
-    // Added for DDNS
-    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
-
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx && !fluidTransaction)
+    if (fRequireStandard && !IsStandardTx(tx, reason) && !fluidTransaction)
         return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Only accept nLockTime-using transactions that can be mined in the next
@@ -771,7 +764,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         }
 
         // Check for non-standard pay-to-script-hash in inputs
-        if (fRequireStandard && !AreInputsStandard(tx, view) && !isNameTx)
+        if (fRequireStandard && !AreInputsStandard(tx, view))
             return state.Invalid(false, REJECT_NONSTANDARD, "bad-txns-nonstandard-inputs");
 
         unsigned int nSigOps = GetLegacySigOpCount(tx);
@@ -800,10 +793,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
         CTxMemPoolEntry entry(tx, nFees, GetTime(), dPriority, chainActive.Height(), pool.HasNoInputsOf(tx), inChainInputValue, fSpendsCoinbase, nSigOps, lp);
         unsigned int nSize = entry.GetTxSize();
-        // Added for DDNS
-        // Don't accept it if it can't get into a block
+
         CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
-        if ((fLimitFree && nFees < txMinFee) || (isNameTx && !hooks->IsNameFeeEnough(tx, nFees)))
+        if ((fLimitFree && nFees < txMinFee))
             return state.DoS(0, error("AcceptToMemoryPool : not enough fees %s, %d < %d",
                                       hash.ToString(), nFees, txMinFee),
                              REJECT_INSUFFICIENTFEE, "insufficient fee");
@@ -847,11 +839,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
             LogPrint("mempool", "Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount+nSize);
             dFreeCount += nSize;
         }
-        // Added for DDNS
-        if (!isNameTx && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
-                        return error("AcceptToMemoryPool: : insane fees %s, %d > %d",
-                                 hash.ToString(),
-                                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
         if (fRejectAbsurdFee && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
             return state.Invalid(false,
@@ -1809,12 +1796,6 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
                 }
 
             }
-
-            // Dynamic: undo name transactions in reverse order
-            if (fWriteNames)
-                for (int i = block.vtx.size() - 1; i >= 0; i--)
-                    hooks->DisconnectInputs(block.vtx[i]);
-
         }
     }
 
@@ -2238,13 +2219,13 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 			FluidIndex.fluidHistory = fluidHistory;
 			
 			for (uint32_t x = 0; x != fluid.InitialiseIdentities().size(); x++) {
-				std::string error;
+				/* std::string error;
 				CDynamicAddress inputKey; // Reinitialise at each iteration to reset value
 				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
 				
 				if (!GetNameCurrentAddress(val, inputKey, error))
 					fluidManagers.push_back(inputKey.ToString());
-				else
+				else */
 					fluidManagers.push_back(prevFluidIndex.fluidManagers.at(x));
 			}
 		}
@@ -2261,19 +2242,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (fJustCheck)
         return true;
-
-    // Added for DDNS
-    // Dynamic: collect valid name tx
-    // NOTE: tx.UpdateCoins should not affect this loop, probably...
-    std::vector<CAmount> vFees (block.vtx.size(), 0);
-    std::vector<nameTempProxy> vName;
-    if (fWriteNames)
-        for (unsigned int i=0; i<block.vtx.size(); i++)
-        {
-            const CTransaction &tx = block.vtx[i];
-            if (!tx.IsCoinBase())
-                hooks->CheckInputs(tx, pindex, vName, vPos[i].second, vFees[i]); // collect valid name tx to vName
-        }
 
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
@@ -2329,10 +2297,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime6 - nTime5), nTimeCallbacks * 0.000001);
-
-    // Dynamic DDNS: add names to ddns.dat
-    if (fWriteNames)
-        hooks->ConnectBlock(pindex, vName);
 
     return true;
 }

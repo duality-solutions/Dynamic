@@ -99,9 +99,6 @@ DYNAMIC_CORE_H = \
   core_io.h \
   core_memusage.h \
   dbwrapper.h \
-  dns/dns.h \
-  dns/dyndns.h \
-  dns/hooks.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
@@ -217,8 +214,6 @@ libdynamic_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   dbwrapper.cpp \
-  dns/dns.cpp \
-  dns/dyndns.cpp \
   fluid.cpp \
   governance.cpp \
   governance-classes.cpp \

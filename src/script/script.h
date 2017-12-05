@@ -22,7 +22,6 @@
 #include <vector>
 
 // Identification codes for Fluid Protocol Transactions
-
 enum ProtocolCodes {
 	MINT_TX 			= 1,
 	DYNODE_MODFIY_TX 	= 2,
@@ -202,7 +201,7 @@ enum opcodetype
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-     // identity alias system
+    // identity alias system
     OP_IDENTITY_NEW = 0xd1,
     OP_IDENTITY_DELETE = 0xd2,
     OP_IDENTITY_PAYMENT = 0xd3,
@@ -238,12 +237,6 @@ enum opcodetype
 };
 
 const char* GetOpName(opcodetype opcode);
-
-// TODO (Amir): Remove OP_NAME operation codes.
-static const int OP_NAME_NEW = 0x01;
-static const int OP_NAME_UPDATE = 0x02;
-static const int OP_NAME_DELETE = 0x03;
-static const int OP_NAME_MULTISIG = 0x04;
 
 class scriptnum_error : public std::runtime_error
 {

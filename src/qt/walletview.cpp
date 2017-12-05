@@ -23,7 +23,6 @@
 #include "walletmodel.h"
 #include "multisigdialog.h"
 
-#include "dnspage.h"
 #include "dynodeconfig.h"
 #include "ui_interface.h"
 
@@ -91,14 +90,12 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
         dynodeListPage = new DynodeList(platformStyle);
     }
 
-    dnsPage = new DNSPage();
-
     addWidget(overviewPage);
     addWidget(sendCoinsPage);
     addWidget(receiveCoinsPage);
     addWidget(transactionsPage);
     addWidget(multiSigPage);
-    addWidget(dnsPage);
+
     if (settings.value("fShowDynodesTab").toBool()) {
         addWidget(dynodeListPage);
     }
@@ -178,7 +175,6 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     if (settings.value("fShowDynodesTab").toBool()) {
         dynodeListPage->setWalletModel(_walletModel);
     }
-    dnsPage->setModel(_walletModel);
 
     if (_walletModel)
     {
@@ -258,11 +254,6 @@ void WalletView::gotoDynodePage()
     if (settings.value("fShowDynodesTab").toBool()) {
         setCurrentWidget(dynodeListPage);
     }
-}
-
-void WalletView::gotoDNSPage()
-{
-    setCurrentWidget(dnsPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

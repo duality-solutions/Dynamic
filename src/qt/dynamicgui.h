@@ -125,7 +125,6 @@ private:
     QAction *historyAction;
     QAction *multiSigAction;
     QAction *dynodeAction;
-    QAction *dnsAction;
     QAction *quitAction;
     QAction *usedSendingAddressesAction;
     QAction *usedReceivingAddressesAction;
@@ -245,8 +244,6 @@ private Q_SLOTS:
 	void gotoMultiSigPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
-    /** Switch to DNS page */
-    void gotoDNSPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
