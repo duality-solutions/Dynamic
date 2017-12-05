@@ -23,7 +23,6 @@ class SendCoinsRecipient;
 class ReceiveCoinsDialog;
 class AddressBookPage;
 class TransactionView;
-class MultisigDialog;
 class DNSPage;
 class WalletModel;
 
@@ -73,7 +72,6 @@ private:
     AddressBookPage *usedReceivingAddressesPage;
     QWidget *transactionsPage;
     TransactionView *transactionView;
-    MultisigDialog *multiSigPage;
     DynodeList *dynodeListPage;
     DNSPage *dnsPage;
 
@@ -90,8 +88,6 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to MultiSig page */
-    void gotoMultiSigPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
     /** Switch to DNS page */
