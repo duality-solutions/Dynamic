@@ -150,7 +150,7 @@
 * Enable build with --disable-wallet
 * Update Logos
 * Remove remaining usage of 'namespace std;'
-
+* Fix missing initializer in ntp.cpp
 
 **Dynamic v1.4.0.0**
 * Securely erase potentially sensitive keys/values
