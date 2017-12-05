@@ -698,6 +698,7 @@ void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
     connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
         if(pnode->fDynode) {
             if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr)
+                return;
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
