@@ -762,6 +762,7 @@ static void RelayAddress(const CAddress& addr, bool fReachable, CConnman& connma
     uint256 hashRand = ArithToUint256(UintToArith256(hashSalt) ^ (hashAddr<<32) ^ ((GetTime()+hashAddr)/(24*60*60)));
     hashRand = Hash(BEGIN(hashRand), END(hashRand));
     std::multimap<uint256, CNode*> mapMix;
+    FastRandomContext insecure_rand;
 
     auto sortfunc = [&mapMix, &hashRand](CNode* pnode) {
         if (pnode->nVersion >= CADDR_TIME_VERSION) {
@@ -773,9 +774,9 @@ static void RelayAddress(const CAddress& addr, bool fReachable, CConnman& connma
         }
     };
 
-    auto pushfunc = [&addr, &mapMix, &nRelayNodes] {
+    auto pushfunc = [&addr, &mapMix, &nRelayNodes, &insecure_rand] {
         for (auto mi = mapMix.begin(); mi != mapMix.end() && nRelayNodes-- > 0; ++mi)
-            mi->second->PushAddress(addr);
+            mi->second->PushAddress(addr, insecure_rand);
     };
 
     connman.ForEachNodeThen(std::move(sortfunc), std::move(pushfunc));
@@ -1213,14 +1214,15 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             if (fListen && !IsInitialBlockDownload())
             {
                 CAddress addr = GetLocalAddress(&pfrom->addr, pfrom->GetLocalServices());
+                FastRandomContext insecure_rand;
                 if (addr.IsRoutable())
                 {
                     LogPrintf("ProcessMessages: advertising address %s\n", addr.ToString());
-                    pfrom->PushAddress(addr);
+                    pfrom->PushAddress(addr, insecure_rand);
                 } else if (IsPeerAddrLocalGood(pfrom)) {
                     addr.SetIP(pfrom->addrLocal);
                     LogPrintf("ProcessMessages: advertising address %s\n", addr.ToString());
-                    pfrom->PushAddress(addr);
+                    pfrom->PushAddress(addr, insecure_rand);
                 }
             }
 
@@ -1923,8 +1925,9 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
 
         pfrom->vAddrToSend.clear();
         std::vector<CAddress> vAddr = connman.GetAddresses();
+        FastRandomContext insecure_rand;
         BOOST_FOREACH(const CAddress &addr, vAddr)
-            pfrom->PushAddress(addr);
+            pfrom->PushAddress(addr, insecure_rand);
     }
 
 
