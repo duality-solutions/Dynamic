@@ -420,8 +420,13 @@ CFeeRate CBlockPolicyEstimator::estimateSmartFee(int confTarget, int *answerFoun
     if (answerFoundAtTarget)
         *answerFoundAtTarget = confTarget;
     // Return failure if trying to analyze a target we're not tracking
-    if (confTarget <= 0 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
+    // It's not possible to get reasonable estimates for confTarget of 1
+    if (confTarget <= 1 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
         return CFeeRate(0);
+
+    // It's not possible to get reasonable estimates for confTarget of 1
+    if (confTarget == 1)
+        confTarget = 2;
 
     // It's not possible to get reasonable estimates for confTarget of 1
     if (confTarget == 1)
