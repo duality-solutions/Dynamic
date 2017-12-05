@@ -2184,7 +2184,7 @@ CAmount CWallet::GetAnonymizedBalance() const
         if (setWalletTxesCounted.find(outpoint.hash) != setWalletTxesCounted.end()) continue;
         setWalletTxesCounted.insert(outpoint.hash);
 
-        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash); it != mapWallet.end() && it->first == outpoint.hash; ++it) {
+        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash); it != mapWallet.end() && it->first == outpoint.hash; ++it) {
             if (it->second.IsTrusted())
                 nTotal += it->second.GetAnonymizedCredit();
         }
@@ -2225,7 +2225,7 @@ CAmount CWallet::GetNormalizedAnonymizedBalance() const
 
     LOCK2(cs_main, cs_wallet);
     for (auto& outpoint : setWalletUTXO) {
-        map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash);
+        std::map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash);
         if (it == mapWallet.end()) continue;
         if (!IsDenominated(outpoint)) continue;
         if (it->second.GetDepthInMainChain() < 0) continue;
@@ -2417,7 +2417,7 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
 }
 
 static void ApproximateBestSubset(std::vector<std::pair<CAmount, std::pair<const CWalletTx*,unsigned int> > >vValue, const CAmount& nTotalLower, const CAmount& nTargetValue,
-                                  vector<char>& vfBest, CAmount& nBest, int iterations = 1000, bool fUseInstantSend = false)
+                                  std::vector<char>& vfBest, CAmount& nBest, int iterations = 1000, bool fUseInstantSend = false)
 {
     std::vector<char> vfIncluded;
 

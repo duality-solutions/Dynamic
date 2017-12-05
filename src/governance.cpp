@@ -1006,7 +1006,7 @@ void CGovernanceManager::CheckDynodeOrphanObjects(CConnman& connman)
         CGovernanceObject& govobj = pair.first;
 
         if(pair.second.nExpirationTime >= nNow) {
-            string strError;
+            std::string strError;
             bool fDynodeMissing = false;
             bool fConfirmationsMissing = false;
             bool fIsValid = govobj.IsValidLocally(strError, fDynodeMissing, fConfirmationsMissing, true);

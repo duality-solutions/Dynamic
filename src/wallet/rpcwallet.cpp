@@ -29,8 +29,6 @@
 
 #include <boost/assign/list_of.hpp>
 
-using namespace std;
-
 int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
@@ -799,7 +797,7 @@ CAmount GetAccountBalance(CWalletDB& walletdb, const std::string& strAccount, in
     CAmount nBalance = 0;
 
     // Tally wallet transactions
-    for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+    for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const CWalletTx& wtx = (*it).second;
         if (!CheckFinalTx(wtx) || wtx.GetBlocksToMaturity() > 0 || wtx.GetDepthInMainChain(fAddLockConf) < 0)

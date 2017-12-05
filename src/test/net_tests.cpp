@@ -12,8 +12,6 @@
 #include "net.h"
 #include "chainparams.h"
 
-using namespace std;
-
 class CAddrManSerializationMock : public CAddrMan
 {
 public:
@@ -63,7 +61,7 @@ CDataStream AddrmanToStream(CAddrManSerializationMock& addrman)
     ssPeersIn << FLATDATA(Params().MessageStart());
     ssPeersIn << addrman;
     std::string str = ssPeersIn.str();
-    vector<unsigned char> vchData(str.begin(), str.end());
+    std::vector<unsigned char> vchData(str.begin(), str.end());
     return CDataStream(vchData, SER_DISK, CLIENT_VERSION);
 }
 
