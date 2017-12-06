@@ -50,7 +50,7 @@ bool Fluid::InitiateFluidVerify(CDynamicAddress dynamicAddress) {
 #else
     // Wallet cannot be accessed, cannot continue ahead!
     return false;
-#endif
+#endif //ENABLE_WALLET
 }
 
 /** Checks if any given address is a current master key (invoked by RPC) */

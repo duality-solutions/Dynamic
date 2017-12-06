@@ -450,7 +450,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
  
         CAmount blockAmount = blockReward + fluidIssuance;
-		LogPrintf("CreateNewBlock(): Computed Block Reward is: %ld DYN\n", FormatMoney(blockAmount));
+		LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
         // Update block coinbase
         pblock->vtx[0] = txNew;

@@ -3256,8 +3256,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 		}
 		
 	    if (!fluid.CheckTransactionToBlock(tx, block))
-			return error("CheckBlock(): Transaction violated filteration, offender %s",
-                tx.GetHash().ToString());
+			return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
 	}
 
     unsigned int nSigOps = 0;
