@@ -6,16 +6,17 @@
 #include "dynode-payments.h"
 
 #include "activedynode.h"
-#include "policy/fees.h"
-#include "governance-classes.h"
+#include "chain.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "policy/fees.h"
+#include "fluid.h"
+#include "governance-classes.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
 #include "spork.h"
 #include "util.h"
-#include "fluid.h"
-#include "chain.h"
+#include "utilmoneystr.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -324,7 +325,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
         ExtractDestination(payee, address1);
         CDynamicAddress address2(address1);
 
-        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %lld to %s\n", dynodePayment, address2.ToString());
+        LogPrintf("CDynodePayments::FillBlockPayee -- Dynode payment %s to %s\n", FormatMoney(dynodePayment), address2.ToString());
     }
 }
 
