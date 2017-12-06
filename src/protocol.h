@@ -216,14 +216,14 @@ extern const char *REJECT;
 /**
  * Indicates that a node prefers to receive new block announcements via a
  * "headers" message rather than an "inv".
- * @since protocol version 70500 as described by BIP130.
+ * @since protocol version 70600 as described by BIP130.
  * @see https://bitcoin.org/en/developer-reference#sendheaders
  */
 extern const char *SENDHEADERS;
 /**
  * The feefilter message tells the receiving peer not to inv us any txs
  * which do not meet the specified min fee rate.
- * @since protocol version 70500 as described by BIP133
+ * @since protocol version 70600 as described by BIP133
  */
 extern const char *FEEFILTER;
 // Dynamic message types
