@@ -1239,7 +1239,7 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror, const bool fDDNS)
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
 {
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 
