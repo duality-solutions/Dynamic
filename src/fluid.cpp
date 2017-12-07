@@ -74,6 +74,56 @@ bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     return false;
 }
 
+/** Checks fluid transactoin operation script amount for invalid values. */
+bool Fluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, std::string& errorMessage) {
+    std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
+    std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
+    std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
+    if (!ExtractCheckTimestamp(strFluidOpScript, GetTime())) {
+        errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
+        return false;
+    }
+    if (IsHex(verificationWithoutOpCode))
+    {
+        std::string strAmount;
+        std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
+        std::vector<std::string> vecSplitScript;
+        SeperateString(strUnHexedFluidOpScript, vecSplitScript, "$");
+        if (vecSplitScript.size() > 1) {
+            strAmount = vecSplitScript[0];
+            CAmount fluidAmount;
+            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                if (fluidAmount < 0) {
+                    errorMessage = "CheckFluidOperationScript fluid amount is less than zero: " + strAmount;
+                    return false;
+                }
+                if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+                if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+                if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
+                    errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
+                    return false;
+                }
+            }
+        }
+        else {
+            errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
+            return false;
+        }
+    }
+    else {
+        errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
+        return false;
+    }
+
+    return true;
+}
+
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
 bool Fluid::CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual) {
     std::vector<std::string> fluidManagers;
@@ -261,9 +311,9 @@ bool Fluid::GenericParseNumber(const std::string consentToken, const int64_t tim
 }
 
 /** Individually checks the validity of an instruction */
-bool Fluid::GenericVerifyInstruction(const std::string uniqueIdentifier, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
+bool Fluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
 {
-    std::string consentTokenNoScript = GetRidOfScriptStatement(uniqueIdentifier);
+    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     messageTokenKey = "";
     std::vector<std::string> strs;
 
@@ -302,7 +352,7 @@ bool Fluid::GenericVerifyInstruction(const std::string uniqueIdentifier, CDynami
     return true;
 }
 
-bool Fluid::ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
+bool Fluid::ParseMintKey(const int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(uniqueIdentifier, ptrs, 1))

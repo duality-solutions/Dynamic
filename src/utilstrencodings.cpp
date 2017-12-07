@@ -705,9 +705,9 @@ std::string StitchString(std::string stringOne, std::string stringTwo, std::stri
 		return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
 }
 
-std::string GetRidOfScriptStatement(std::string input) {
+std::string GetRidOfScriptStatement(std::string input, int position) {
 	std::vector<std::string> output;
 	boost::split(output, input, boost::is_any_of(" "));
 	
-	return output.at(1);
+	return output.at(position);
 }

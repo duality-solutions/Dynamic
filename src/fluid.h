@@ -29,7 +29,7 @@ public:
     static const int FLUID_ACTIVATE_HEIGHT = 10;
     static const int64_t MAX_FLUID_TIME_DISTORT = 60 * 60; // Maximum time distort = 1 hour.
     static const CAmount FLUID_TRANSACTION_COST = 100000 * COIN; // Cost to send a fluid transaction
-    static const CAmount FLUID_MAX_REWARD_FOR_DYNODE_ = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
+    static const CAmount FLUID_MAX_REWARD_FOR_DYNODE = 1000 * COIN; // Max dynode block reward using fluid OP_REWARD_DYNODE
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN; // Max minting amount per fluid transaction
 
@@ -63,6 +63,7 @@ public:
     void ReplaceFluidMasters(const CBlockHeader& blockHeader, std::vector<std::string>& fluidManagers);
 
     bool IsGivenKeyMaster(CDynamicAddress inputKey);
+    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, std::string& errorMessage);
     bool CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual = false);
     bool GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer);
     bool CheckNonScriptQuorum(const std::string consentToken, std::string &message, bool individual = false);
@@ -70,8 +71,8 @@ public:
     bool SignIntimateMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch = true);
     bool GenericSignMessage(const std::string message, std::string &signedString, CDynamicAddress signer);
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose=false);
-    bool GenericVerifyInstruction(const std::string uniqueIdentifier, CDynamicAddress &signer, std::string &messageTokenKey, int whereToLook=1);
-    bool ParseMintKey(int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose=false);
+    bool GenericVerifyInstruction(const std::string consentToken, CDynamicAddress &signer, std::string &messageTokenKey, int whereToLook=1);
+    bool ParseMintKey(const int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose=false);
     bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress &toMintAddress, CAmount& mintAmount);
     bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch);
     bool GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch);
@@ -98,4 +99,3 @@ bool IsTransactionFluid(CScript txOut);
 extern Fluid fluid;
 
 #endif // FLUID_PROTOCOL_H
-

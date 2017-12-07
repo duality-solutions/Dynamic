@@ -13,6 +13,7 @@
 #include "chain.h"
 #include "coincontrol.h"
 #include "consensus/consensus.h"
+#include "fluid.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"
@@ -3243,6 +3244,13 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
                     
+                    if (IsTransactionFluid(recipient.scriptPubKey)) {
+                        // Check the validity of the fluid transaction's public script.
+                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, strFailReason)) {
+                            return false;
+                        }
+                    }
+
                     if (recipient.fSubtractFeeFromAmount)
                     {
                         txout.nValue -= nFeeRet / nSubtractFeeFromAmount; // Subtract fee equally from each selected recipient
