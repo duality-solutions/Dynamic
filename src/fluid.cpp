@@ -75,16 +75,17 @@ bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */
-bool Fluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, std::string& errorMessage) {
+bool Fluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck) {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
     std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
-    if (!ExtractCheckTimestamp(strFluidOpScript, GetTime())) {
-        errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
-        return false;
+    if (!fSkipTimeStampCheck) {
+        if (!ExtractCheckTimestamp(strFluidOpScript, timeStamp)) {
+            errorMessage = "CheckFluidOperationScript fluid timestamp is too old.";
+            return false;
+        }
     }
-    if (IsHex(verificationWithoutOpCode))
-    {
+    if (IsHex(verificationWithoutOpCode)) {
         std::string strAmount;
         std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
         std::vector<std::string> vecSplitScript;
@@ -97,15 +98,15 @@ bool Fluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, std::str
                     errorMessage = "CheckFluidOperationScript fluid amount is less than zero: " + strAmount;
                     return false;
                 }
-                if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
+                else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
                     return false;
                 }
-                if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
+                else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
                     return false;
                 }
-                if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
+                else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
                     return false;
                 }

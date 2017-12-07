@@ -63,7 +63,7 @@ public:
     void ReplaceFluidMasters(const CBlockHeader& blockHeader, std::vector<std::string>& fluidManagers);
 
     bool IsGivenKeyMaster(CDynamicAddress inputKey);
-    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, std::string& errorMessage);
+    bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck = false);
     bool CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual = false);
     bool GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer);
     bool CheckNonScriptQuorum(const std::string consentToken, std::string &message, bool individual = false);

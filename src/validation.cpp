@@ -213,8 +213,12 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 			return false;
 		
 		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), nBlockTime))
-				return false;
+			if (IsTransactionFluid(txout.scriptPubKey)) {
+                std::string strErrorMessage;
+                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, nBlockTime, strErrorMessage)) {
+                    return false;
+                }
+            }
 		}
 	}
 	
@@ -605,8 +609,13 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 		if (IsTransactionFluid(txout.scriptPubKey))
         {
             fluidTransaction = true;
+
             if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())){
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
+            }
+            std::string strErrorMessage;
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
+                return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
 	}
@@ -1082,8 +1091,12 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransa
 		return false;
 
     BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime()))
-			fluidTimestampCheck = false;
+		if (IsTransactionFluid(txout.scriptPubKey)) {
+            std::string strErrorMessage;
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage)) {
+                fluidTimestampCheck = false;
+            }
+        }
 	}
 
     if (!res || fDryRun || !fluidTimestampCheck) {
@@ -3249,10 +3262,15 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                 FormatStateMessage(state));
 
 		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), block.nTime))
-				return error("CheckBlock(): Timestamp check for Fluid Transaction to Block %s failed with %s",
-						tx.GetHash().ToString(),
-						FormatStateMessage(state));
+			if (IsTransactionFluid(txout.scriptPubKey)) {
+                std::string strErrorMessage;
+                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime, strErrorMessage)) {
+                    return error("CheckBlock(): %s, Block %s failed with %s",
+                        strErrorMessage, 
+                        tx.GetHash().ToString(),
+                        FormatStateMessage(state));
+                }
+			}	
 		}
 		
 	    if (!fluid.CheckTransactionToBlock(tx, block))

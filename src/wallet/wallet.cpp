@@ -3246,7 +3246,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     
                     if (IsTransactionFluid(recipient.scriptPubKey)) {
                         // Check the validity of the fluid transaction's public script.
-                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, strFailReason)) {
+                        if (!fluid.CheckFluidOperationScript(recipient.scriptPubKey, GetTime(), strFailReason)) {
                             return false;
                         }
                     }
