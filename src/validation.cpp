@@ -609,11 +609,15 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 		if (IsTransactionFluid(txout.scriptPubKey))
         {
             fluidTransaction = true;
-
+            std::string strErrorMessage;
+            // Check if fluid transaction is already in the mempool
+            if (fluid.CheckIfExistsInMemPool(pool, txout.scriptPubKey, strErrorMessage)) {
+                // fluid transaction is already in the mempool.  Reject tx.
+                return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
+            }
             if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())){
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
             }
-            std::string strErrorMessage;
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }

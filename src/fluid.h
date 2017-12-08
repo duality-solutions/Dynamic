@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 
 class CBlock;
+class CTxMemPool;
 struct CBlockTemplate;
 
 /** Configuration Framework */
@@ -64,6 +65,7 @@ public:
 
     bool IsGivenKeyMaster(CDynamicAddress inputKey);
     bool CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck = false);
+    bool CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage);
     bool CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual = false);
     bool GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer);
     bool CheckNonScriptQuorum(const std::string consentToken, std::string &message, bool individual = false);

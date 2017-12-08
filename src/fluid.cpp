@@ -10,9 +10,9 @@
 #include "net.h"
 #include "netbase.h"
 #include "timedata.h"
+#include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
-#include "core_io.h"
 #include "utiltime.h"
 #include "validation.h"
 
@@ -123,6 +123,29 @@ bool Fluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const in
     }
 
     return true;
+}
+
+/** Checks whether fluid transaction is in the memory pool already */
+bool Fluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage) {
+
+    for (const CTxMemPoolEntry& e : pool.mapTx) {
+        const CTransaction& tx = e.GetTx();
+        for (const CTxOut& txOut : tx.vout) {
+            if (IsTransactionFluid(txOut.scriptPubKey)) {
+                std::string strNewFluidScript = ScriptToAsmStr(fluidScriptPubKey);
+                std::string strMemPoolFluidScript = ScriptToAsmStr(txOut.scriptPubKey);
+                std::string strNewTxWithoutOpCode = GetRidOfScriptStatement(strNewFluidScript);
+                std::string strMemPoolTxWithoutOpCode = GetRidOfScriptStatement(strMemPoolFluidScript);
+                if (strNewTxWithoutOpCode == strMemPoolTxWithoutOpCode) {
+                    errorMessage = "CheckIfExistsInMemPool: fluid transaction is already in the memory pool!";
+                    LogPrintf("CheckIfExistsInMemPool: fluid transaction, %s is already in the memory pool! %s\n", tx.GetHash().ToString(), strNewTxWithoutOpCode);
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
