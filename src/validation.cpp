@@ -213,8 +213,12 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 			return false;
 		
 		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), nBlockTime))
-				return false;
+			if (IsTransactionFluid(txout.scriptPubKey)) {
+                std::string strErrorMessage;
+                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, nBlockTime, strErrorMessage)) {
+                    return false;
+                }
+            }
 		}
 	}
 	
@@ -605,8 +609,17 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 		if (IsTransactionFluid(txout.scriptPubKey))
         {
             fluidTransaction = true;
+            std::string strErrorMessage;
+            // Check if fluid transaction is already in the mempool
+            if (fluid.CheckIfExistsInMemPool(pool, txout.scriptPubKey, strErrorMessage)) {
+                // fluid transaction is already in the mempool.  Reject tx.
+                return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
+            }
             if (!fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime())){
                 return state.DoS(100, false, REJECT_INVALID, "fluid-tx-timestamp-error");
+            }
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage, true)) {
+                return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
 	}
@@ -1082,8 +1095,12 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransa
 		return false;
 
     BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), GetTime()))
-			fluidTimestampCheck = false;
+		if (IsTransactionFluid(txout.scriptPubKey)) {
+            std::string strErrorMessage;
+            if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage)) {
+                fluidTimestampCheck = false;
+            }
+        }
 	}
 
     if (!res || fDryRun || !fluidTimestampCheck) {
@@ -1448,7 +1465,7 @@ void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCach
 
 bool CScriptCheck::operator()() {
     const CScript &scriptSig = ptxTo->vin[nIn].scriptSig;
-    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error, ptxTo->nVersion == NAMECOIN_TX_VERSION)) {
+    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error)) {
         return false;
     }
     return true;
@@ -3249,15 +3266,19 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                 FormatStateMessage(state));
 
 		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey) && !fluid.ExtractCheckTimestamp(ScriptToAsmStr(txout.scriptPubKey), block.nTime))
-				return error("CheckBlock(): Timestamp check for Fluid Transaction to Block %s failed with %s",
-						tx.GetHash().ToString(),
-						FormatStateMessage(state));
+			if (IsTransactionFluid(txout.scriptPubKey)) {
+                std::string strErrorMessage;
+                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime, strErrorMessage)) {
+                    return error("CheckBlock(): %s, Block %s failed with %s",
+                        strErrorMessage, 
+                        tx.GetHash().ToString(),
+                        FormatStateMessage(state));
+                }
+			}	
 		}
 		
 	    if (!fluid.CheckTransactionToBlock(tx, block))
-			return error("CheckBlock(): Transaction violated filteration, offender %s",
-                tx.GetHash().ToString());
+			return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
 	}
 
     unsigned int nSigOps = 0;
