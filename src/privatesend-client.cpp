@@ -1386,13 +1386,13 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
     nCachedBlockHeight = pindex->nHeight;
     LogPrint("privatesend", "CPrivateSendClient::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 
-    CPrivateSend::CheckPSTXes(pindex->nHeight);
 }
 
 //TODO: Rename/move to core
 void ThreadCheckPrivateSendClient(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
+    if(fDyNode) return; // no client-side mixing on dynodes
 
     static bool fOneThread;
     if(fOneThread) return;

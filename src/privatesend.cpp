@@ -405,6 +405,13 @@ void CPrivateSend::CheckPSTXes(int nHeight)
     LogPrint("privatesend", "CPrivateSend::CheckPSTXes -- mapPSTX.size()=%llu\n", mapPSTX.size());
 }
 
+void CPrivateSend::UpdatedBlockTip(const CBlockIndex *pindex)
+{
+    if(pindex && !fLiteMode && dynodeSync.IsDynodeListSynced()) {
+        CheckPSTXes(pindex->nHeight);
+    }
+}
+
 void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
 {
     if (tx.IsCoinBase()) return;
