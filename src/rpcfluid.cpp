@@ -61,7 +61,7 @@ UniValue maketoken(const UniValue& params, bool fHelp)
 {
 	std::string result;
 	
-    if (fHelp || params.size() != 3) {
+    if (fHelp || params.size() < 2) {
         throw std::runtime_error(
             "maketoken \"string\"\n"
             "\nConvert String to Hexadecimal Format\n"
