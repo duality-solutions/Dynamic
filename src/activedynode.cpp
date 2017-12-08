@@ -45,11 +45,6 @@ void CActiveDynode::ManageState(CConnman& connman)
 
     if(eType == DYNODE_REMOTE) {
         ManageStateRemote();
-    } else if(eType == DYNODE_LOCAL) {
-        // Try Remote Start first so the started local Dynode can be restarted without recreate Dynode broadcast.
-        ManageStateRemote();
-        if(nState != ACTIVE_DYNODE_STARTED)
-            ManageStateLocal(connman);
     }
 
     SendDynodePing(connman);
@@ -83,14 +78,8 @@ std::string CActiveDynode::GetTypeString() const
 {
     std::string strType;
     switch(eType) {
-    case DYNODE_UNKNOWN:
-        strType = "UNKNOWN";
-        break;
     case DYNODE_REMOTE:
         strType = "REMOTE";
-        break;
-    case DYNODE_LOCAL:
-        strType = "LOCAL";
         break;
     default:
         strType = "UNKNOWN";
@@ -147,6 +136,7 @@ bool CActiveDynode::UpdateSentinelPing(int version)
 void CActiveDynode::ManageStateInitial(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    
     // Check that our local network configuration is correct
     if (!fListen) {
         // listen option is probably overwritten by smth else, no good
@@ -226,33 +216,6 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     // Default to REMOTE
     eType = DYNODE_REMOTE;
 
-#ifdef ENABLE_WALLET
-    // Check if wallet funds are available
-    if(!pwalletMain) {
-        LogPrintf("CActiveDynode::ManageStateInitial -- %s: Wallet not available\n", GetStateString());
-        return;
-    }
-
-    if(pwalletMain->IsLocked()) {
-        LogPrintf("CActiveDynode::ManageStateInitial -- %s: Wallet is locked\n", GetStateString());
-        return;
-    }
-
-    if(pwalletMain->GetBalance() < 1000*COIN) {
-        LogPrintf("CActiveDynode::ManageStateInitial -- %s: Wallet balance is < 1000 DYN\n", GetStateString());
-        return;
-    }
-
-    // Choose coins to use
-    CPubKey pubKeyCollateral;
-    CKey keyCollateral;
-
-    // If collateral is found switch to LOCAL mode
-    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
-        eType = DYNODE_LOCAL;
-    }
-#endif //ENABLE_WALLET
-
     LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 }
 
@@ -295,60 +258,4 @@ void CActiveDynode::ManageStateRemote()
         strNotCapableReason = "Dynode not in Dynode list";
         LogPrintf("CActiveDynode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);
     }
-}
-
-void CActiveDynode::ManageStateLocal(CConnman& connman)
-{
-    LogPrint("Dynode", "CActiveDynode::ManageStateLocal -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
-    if(nState == ACTIVE_DYNODE_STARTED) {
-        return;
-    }
-
-    // Choose coins to use
-    CPubKey pubKeyCollateral;
-    CKey keyCollateral;
-
-#ifdef ENABLE_WALLET
-    if(pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateral, keyCollateral)) {
-        int nPrevoutAge = GetUTXOConfirmations(outpoint);
-        if(nPrevoutAge < Params().GetConsensus().nDynodeMinimumConfirmations){
-            nState = ACTIVE_DYNODE_INPUT_TOO_NEW;
-            strNotCapableReason = strprintf(_("%s - %d confirmations"), GetStatus(), nPrevoutAge);
-            LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
-            return;
-        }
-
-        {
-            LOCK(pwalletMain->cs_wallet);
-            pwalletMain->LockCoin(outpoint);
-        }
-
-        CDynodeBroadcast dnb;
-        std::string strError;
-        if(!CDynodeBroadcast::Create(outpoint, service, keyCollateral, pubKeyCollateral, keyDynode, pubKeyDynode, strError, dnb)) {
-            nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = "Error creating Dynode broadcast: " + strError;
-            LogPrintf("CActiveDynode::ManageStateLocal -- %s: %s\n", GetStateString(), strNotCapableReason);
-            return;
-        }
-
-        {
-            LOCK(cs_main);
-            // remember the hash of the block where dynode collateral had minimum required confirmations
-            dnb.nCollateralMinConfBlockHash = chainActive[GetUTXOHeight(outpoint) + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
-        }
-
-        fPingerEnabled = true;
-        nState = ACTIVE_DYNODE_STARTED;
-
-        //update to Dynode list
-        LogPrintf("CActiveDynode::ManageStateLocal -- Update Dynode List\n");
-        dnodeman.UpdateDynodeList(dnb, connman);
-        dnodeman.NotifyDynodeUpdates(connman);
-
-        //send to all peers
-        LogPrintf("CActiveDynode::ManageStateLocal -- Relay broadcast, collateral=%s\n", outpoint.ToStringShort());
-        dnb.Relay(connman);
-    }
-#endif //ENABLE_WALLET
 }
