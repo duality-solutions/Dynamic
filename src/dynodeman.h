@@ -163,9 +163,9 @@ public:
     bool GetDynodeInfo(const CPubKey& pubKeyDynode, dynode_info_t& dnInfoRet);
 
     /// Find an entry in the Dynode list that is next to be paid
-    bool GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet);
+    bool GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, bool fFilterScheduled, int& nCountRet, dynode_info_t& dnInfoRet);
     /// Same as above but use current block height
-    bool GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet);
+    bool GetNextDynodeInQueueForPayment(bool fFilterSigTime, bool fFilterScheduled, int& nCountRet, dynode_info_t& dnInfoRet);
 
     /// Find a random entry
     dynode_info_t FindRandomNotInVec(const std::vector<COutPoint> &vecToExclude, int nProtocolVersion = -1);
