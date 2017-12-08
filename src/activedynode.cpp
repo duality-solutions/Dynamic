@@ -116,7 +116,7 @@ bool CActiveDynode::SendDynodePing(CConnman& connman)
     CDynodePing dnp(outpoint);
     dnp.nSentinelVersion = nSentinelVersion;
     dnp.fSentinelIsCurrent =
-            (abs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
+            (llabs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
     if(!dnp.Sign(keyDynode, pubKeyDynode)) {
         LogPrintf("CActiveDynode::SendDynodePing -- ERROR: Couldn't sign Dynode Ping\n");
         return false;

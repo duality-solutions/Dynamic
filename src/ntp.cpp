@@ -469,7 +469,7 @@ void ThreadNtpSamples() {
             // Trying to get new offset sample from trusted NTP server.
             int64_t nClockOffset = NtpGetTime(strTrustedUpstream) - GetTime();
 
-            if (abs(nClockOffset) < nMaxOffset) {
+            if (llabs(nClockOffset) < nMaxOffset) {
                 // Everything seems right, remember new trusted offset.
                 LogPrintf("ThreadNtpSamples: new offset sample from %s, offset=%u.\n", strTrustedUpstream.c_str(), nClockOffset);
                 nNtpOffset = nClockOffset;
@@ -494,7 +494,7 @@ void ThreadNtpSamples() {
                 CNetAddr ip;
                 int64_t nClockOffset = NtpGetTime(ip) - GetTime();
 
-                if (abs(nClockOffset) < nMaxOffset) { // Skip the deliberately wrong timestamps
+                if (llabs(nClockOffset) < nMaxOffset) { // Skip the deliberately wrong timestamps
                     LogPrintf("ThreadNtpSamples: new offset sample from %s, offset=%u\n", ip.ToString().c_str(), nClockOffset);
                     vTimeOffsets.input(nClockOffset);
                 }
@@ -513,7 +513,7 @@ void ThreadNtpSamples() {
             }
         }
 
-        if (GetNodesOffset() == std::numeric_limits<int64_t>::max() && abs(nNtpOffset) > 40 * 60)
+        if (GetNodesOffset() == std::numeric_limits<int64_t>::max() && std::llabs(nNtpOffset) > 40 * 60)
         {
             // If there is not enough node offsets data and NTP time offset is greater than 40 minutes then give a warning.
             std::string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
