@@ -676,7 +676,7 @@ void CInstantSend::CheckAndRemove()
         }
     }
 
-    // remove expired orphan votes
+    // remove timed out orphan votes
     std::map<uint256, CTxLockVote>::iterator itOrphanVote = mapTxLockVotesOrphan.begin();
     while(itOrphanVote != mapTxLockVotesOrphan.end()) {
         if(itOrphanVote->second.IsTimedOut()) {
@@ -689,11 +689,23 @@ void CInstantSend::CheckAndRemove()
         }
     }
 
-    // remove expired dynode orphan votes (DOS protection)
+    // remove invalid votes and votes for failed lock attempts
+    itVote = mapTxLockVotes.begin();
+    while(itVote != mapTxLockVotes.end()) {
+        if(itVote->second.IsFailed()) {
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing vote for failed lock attempt: txid=%s  dynode=%s\n",
+                    itVote->second.GetTxHash().ToString(), itVote->second.GetDynodeOutpoint().ToStringShort());
+            mapTxLockVotes.erase(itVote++);
+        } else {
+            ++itVote;
+        }
+    }
+
+    // remove timed out dynode orphan votes (DOS protection)
     std::map<COutPoint, int64_t>::iterator itDynodeOrphan = mapDynodeOrphanVotes.begin();
     while(itDynodeOrphan != mapDynodeOrphanVotes.end()) {
         if(itDynodeOrphan->second < GetTime()) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan dynode vote: dynode=%s\n",
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing timed out orphan dynode vote: dynode=%s\n",
                     itDynodeOrphan->first.ToStringShort());
             mapDynodeOrphanVotes.erase(itDynodeOrphan++);
         } else {
@@ -1086,6 +1098,11 @@ bool CTxLockVote::IsTimedOut() const
 {
     return GetTime() - nTimeCreated > INSTANTSEND_LOCK_TIMEOUT_SECONDS;
 }
+
+bool CTxLockVote::IsFailed() const
+{
+    return (GetTime() - nTimeCreated > INSTANTSEND_FAILED_TIMEOUT_SECONDS) && !instantsend.IsLockedInstantSendTransaction(GetTxHash());
+}       
 
 //
 // COutPointLock
