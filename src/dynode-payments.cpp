@@ -289,7 +289,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
         int nCount = 0;
         dynode_info_t dnInfo;
         // Do not pay if no Dynodes detected
-        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, true, nCount, dnInfo)) {
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
             hasPayment = false;
             LogPrintf("CDynodePayments::FillBlockPayee: Failed to detect Dynode to pay\n");
         } 
@@ -777,7 +777,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
     int nCount = 0;
     dynode_info_t dnInfo;
 
-    if (!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, true, nCount, dnInfo)) {
+    if (!dnodeman.GetNextDynodeInQueueForPayment(nBlockHeight, true, nCount, dnInfo)) {
         LogPrintf("CDynodePayments::ProcessBlock -- ERROR: Failed to find Dynode to pay\n");
         return false;
     }

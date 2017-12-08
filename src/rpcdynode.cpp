@@ -147,7 +147,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
                 "  status       - Print Dynode status information\n"
                 "  list         - Print list of all known Dynodes (see dynodelist for more info)\n"
                 "  list-conf    - Print dynode.conf in JSON format\n"
-                "  winner       - Print info on next Dynode winner to vote for (calculated locally)\n"
+                "  winner       - Print info on next dynode winner to vote for\n"
                 "  winners      - Print list of Dynode winners\n"
                 );
 
@@ -196,7 +196,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         int nCount;
         dynode_info_t dnInfo;
-        dnodeman.GetNextDynodeInQueueForPayment(true, true, nCount, dnInfo);
+        dnodeman.GetNextDynodeInQueueForPayment(true, nCount, dnInfo);
 
         if (strMode == "qualify")
             return nCount;
@@ -219,7 +219,8 @@ UniValue dynode(const UniValue& params, bool fHelp)
         }
         nHeight = pindex->nHeight + (strCommand == "current" ? 1 : 10);
         dnodeman.UpdateLastPaid(pindex);
-        if(!dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, false, nCount, dnInfo))
+
+        if(!dnodeman.GetNextDynodeInQueueForPayment(nHeight, true, nCount, dnInfo))
             return "unknown";
 
         UniValue obj(UniValue::VOBJ);
