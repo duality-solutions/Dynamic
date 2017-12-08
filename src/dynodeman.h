@@ -223,7 +223,7 @@ public:
     void CheckDynode(const CPubKey& pubKeyDynode, bool fForce);
 
     bool IsDynodePingedWithin(const COutPoint& outpoint, int nSeconds, int64_t nTimeToCheckAt = -1);
-    void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& mnp);
+    void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& dnp);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
 

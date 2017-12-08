@@ -189,7 +189,7 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     BOOST_FOREACH(const CTxOut txout, txCollateral.vout) {
         nValueOut += txout.nValue;
 
-        if(!txout.scriptPubKey.IsNormalPaymentScript()) {
+        if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
             LogPrintf ("CPrivateSend::IsCollateralValid -- Invalid Script, txCollateral=%s", txCollateral.ToString());
             return false;
         }
@@ -403,6 +403,13 @@ void CPrivateSend::CheckPSTXes(int nHeight)
         }
     }
     LogPrint("privatesend", "CPrivateSend::CheckPSTXes -- mapPSTX.size()=%llu\n", mapPSTX.size());
+}
+
+void CPrivateSend::UpdatedBlockTip(const CBlockIndex *pindex)
+{
+    if(pindex && !fLiteMode && dynodeSync.IsDynodeListSynced()) {
+        CheckPSTXes(pindex->nHeight);
+    }
 }
 
 void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)

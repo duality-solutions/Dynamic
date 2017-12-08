@@ -132,7 +132,8 @@ public:
 
     void insert(iterator it, std::vector<char>::const_iterator first, std::vector<char>::const_iterator last)
     {
-        assert(last - first >= 0);
+        if (last == first) return;
+        assert(last - first > 0);
         if (it == vch.begin() + nReadPos && (unsigned int)(last - first) <= nReadPos)
         {
             // special case for inserting at the front when there's room
@@ -146,7 +147,8 @@ public:
 #if !defined(_MSC_VER) || _MSC_VER >= 1300
     void insert(iterator it, const char* first, const char* last)
     {
-        assert(last - first >= 0);
+        if (last == first) return;
+        assert(last - first > 0);
         if (it == vch.begin() + nReadPos && (unsigned int)(last - first) <= nReadPos)
         {
             // special case for inserting at the front when there's room
@@ -227,6 +229,8 @@ public:
 
     CDataStream& read(char* pch, size_t nSize)
     {
+        if (nSize == 0) return (*this);
+
         // Read from the beginning of the buffer
         unsigned int nReadPosNext = nReadPos + nSize;
         if (nReadPosNext >= vch.size())

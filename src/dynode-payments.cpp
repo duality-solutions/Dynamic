@@ -733,7 +733,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         // It's common to have dynodes mistakenly think they are in the top 10
         // We don't want to print all of these messages in normal mode, debug mode should print though
         strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL, nRank);
-        // Only ban for new dnw which is out of bounds, for old mnw DN list itself might be way too much off
+        // Only ban for new dnw which is out of bounds, for old dnw DN list itself might be way too much off
         if(nRank > DNPAYMENTS_SIGNATURES_TOTAL*2 && nBlockHeight > nValidationHeight) {
             strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL*2, nRank);
             LogPrintf("CDynodePaymentVote::IsValid -- Error: %s\n", strError);
