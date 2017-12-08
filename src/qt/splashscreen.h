@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_QT_SPLASHSCREEN_H
 #define DYNAMIC_QT_SPLASHSCREEN_H
 
+#include <functional>
 #include <QSplashScreen>
 
 class NetworkStyle;
@@ -36,6 +37,11 @@ public Q_SLOTS:
 
     /** Show message and progress */
     void showMessage(const QString &message, int alignment, const QColor &color);
+     
+    /** Sets the break action */
+    void setBreakAction(const std::function<void(void)> &action);
+protected:
+    bool eventFilter(QObject * obj, QEvent * ev);
 
 private:
     /** Connect core signals to splash screen */
@@ -47,6 +53,8 @@ private:
     QString curMessage;
     QColor curColor;
     int curAlignment;
+
+    std::function<void(void)> breakAction;
 };
 
 #endif // DYNAMIC_QT_SPLASHSCREEN_H
