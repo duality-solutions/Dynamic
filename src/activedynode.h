@@ -33,8 +33,7 @@ class CActiveDynode
 public:
     enum dynode_type_enum_t {
         DYNODE_UNKNOWN = 0,
-        DYNODE_REMOTE  = 1,
-        DYNODE_LOCAL   = 2
+        DYNODE_REMOTE  = 1
     };
 
 private:
@@ -86,7 +85,6 @@ public:
 private:
     void ManageStateInitial(CConnman& connman);
     void ManageStateRemote();
-    void ManageStateLocal(CConnman& connman);
 };
 
 #endif // DYNAMIC_ACTIVEDYNODE_H

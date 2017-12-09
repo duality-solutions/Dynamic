@@ -1199,16 +1199,16 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
         coinControl.Select(txin.prevout);
 
     bool fSuccess = pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-            nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED_NOT1000IFDN);
+            nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
-        LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NONDENOMINATED_NOT1000IFDN Error: %s\n", strFail);
+        LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NONDENOMINATED Error: %s\n", strFail);
         // If we failed then most likeky there are not enough funds on this address.
         if(fTryDenominated) {
             // Try to also use denominated coins (we can't mix denominated without collaterals anyway).
             // DN-like funds should not be touched in any case.
             if(!pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-                                nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NOT1000IFDN)) {
-                LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NOT1000IFDN Error: %s\n", strFail);
+                                nFeeRet, nChangePosRet, strFail, &coinControl, true, ALL_COINS)) {
+                LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ALL_COINS Error: %s\n", strFail);
                 reservekeyCollateral.ReturnKey();
                 return false;
             }
@@ -1343,7 +1343,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
     CReserveKey reservekeyChange(pwalletMain);
 
     bool fSuccess = pwalletMain->CreateTransaction(vecSend, wtx, reservekeyChange,
-            nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED_NOT1000IFDN);
+            nFeeRet, nChangePosRet, strFail, &coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
         LogPrintf("CPrivateSendClient::CreateDenominated -- Error: %s\n", strFail);
         keyHolderStorageDenom.ReturnAll();
