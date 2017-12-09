@@ -318,7 +318,7 @@ extern UniValue maketoken(const UniValue& params, bool fHelp);
 extern UniValue stringtohash(const UniValue& params, bool fHelp);
 extern UniValue getfluidhistory(const UniValue& params, bool fHelp);
 extern UniValue getfluidhistoryraw(const UniValue& params, bool fHelp);
-extern UniValue getfluidmasters(const UniValue& params, bool fHelp);
+extern UniValue getfluidsovereigns(const UniValue& params, bool fHelp);
 
 bool StartRPC();
 void InterruptRPC();

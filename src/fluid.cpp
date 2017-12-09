@@ -55,16 +55,16 @@ bool Fluid::InitiateFluidVerify(CDynamicAddress dynamicAddress) {
 
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
-    std::vector<std::string> fluidManagers;
+    std::vector<std::string> fluidSovereigns;
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL)
-        fluidManagers = pindex->fluidParams.fluidManagers;
+        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
     else
-        fluidManagers = InitialiseAddresses();
+        fluidSovereigns = InitialiseAddresses();
 
-    for (const std::string& address : fluidManagers) {
+    for (const std::string& address : fluidSovereigns) {
         CDynamicAddress attemptKey;
         attemptKey.SetString(address);
         if (inputKey.IsValid() && attemptKey.IsValid() && inputKey == attemptKey)
@@ -150,7 +150,7 @@ bool Fluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidS
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
 bool Fluid::CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual) {
-    std::vector<std::string> fluidManagers;
+    std::vector<std::string> fluidSovereigns;
     std::pair<CDynamicAddress, bool> keyOne;
     std::pair<CDynamicAddress, bool> keyTwo;
     std::pair<CDynamicAddress, bool> keyThree;
@@ -161,11 +161,11 @@ bool Fluid::CheckIfQuorumExists(const std::string consentToken, std::string &mes
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL)
-        fluidManagers = pindex->fluidParams.fluidManagers;
+        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
     else
-        fluidManagers = InitialiseAddresses();
+        fluidSovereigns = InitialiseAddresses();
 
-    for (const std::string& address : fluidManagers) {
+    for (const std::string& address : fluidSovereigns) {
         CDynamicAddress attemptKey, xKey(address);
 
         if (!xKey.IsValid())

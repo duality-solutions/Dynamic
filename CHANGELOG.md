@@ -9,7 +9,7 @@
 * Derive parameters (One-Time Reward, Dynode & PoW Reward) from datasets
 * Implement token-history indexing and prevent replay attacks
 * Change statically-defined addresses to identity-derived addresses (dynamic)
-* Introduce RPC Calls maketoken, getrawpubkey, burndynamic, sendfluidtransaction, signtoken, consenttoken, verifyquorum, fluidcommandshistory, getfluidmasters
+* Introduce RPC Calls maketoken, getrawpubkey, burndynamic, sendfluidtransaction, signtoken, consenttoken, verifyquorum, fluidcommandshistory, getfluidsovereigns
 * Update secp256k1
 * Remove block 300,000 fork data
 * New Hash Settings

@@ -1883,6 +1883,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     
     // ********************************************************* Step 11a: setup PrivateSend
     fDyNode = GetBoolArg("-dynode", false);
+    // TODO: dynode should have no wallet
 
     if((fDyNode || dynodeConfig.getCount() > -1) && fTxIndex == false) {
         return InitError("Enabling Dynode support requires turning on transaction indexing."
@@ -1891,12 +1892,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if(fDyNode) {
         LogPrintf("DYNODE:\n");
-
-        if(!GetArg("-dynodeaddr", "").empty()) {
-            // Hot Dynode (either local or remote) should get its address in
-            // CActiveDynode::ManageState() automatically and no longer relies on dynodeaddr.
-            return InitError(_("dynodeaddr option is deprecated. Please use dynode.conf to manage your remote Dynodes."));
-        }
 
         std::string strDyNodePrivKey = GetArg("-dynodeprivkey", "");
         if(!strDyNodePrivKey.empty()) {

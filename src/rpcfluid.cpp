@@ -369,17 +369,17 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     return ret;
 }
 
-UniValue getfluidmasters(const UniValue& params, bool fHelp) {
+UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;
 
-    std::vector<std::string> managerLogs = fluidIndex.fluidManagers;
+    std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
 
     UniValue obj(UniValue::VOBJ);
 
-    for (const std::string& manager : managerLogs) {
-        obj.push_back(Pair("manager", manager));
+    for (const std::string& sovereign : sovereignLogs) {
+        obj.push_back(Pair("sovereign address", sovereign));
     }
 
     return obj;
