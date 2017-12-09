@@ -283,11 +283,11 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
 UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
     if (fHelp || params.size() != 0)
         throw std::runtime_error(
-            "getfluidhistory\n"
+            "getfluidhistoryraw\n"
             "\nReturns raw data about each fluid command confirmed on the Dynamic blockchain.\n"
             "\nResult:\n"
             "{                   (json array of string)\n"
-            "  \"raw_command\"     (string) The operation code and raw fluid script command\n"
+            "  \"fluid command\"     (string) The operation code and raw fluid script command\n"
             "}, ...\n"
             "\nExamples\n"
             + HelpExampleCli("getfluidhistoryraw", "")
@@ -302,7 +302,7 @@ UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
     UniValue obj(UniValue::VOBJ);
 
     BOOST_FOREACH(const std::string& existingRecord, transactionRecord) {
-        obj.push_back(Pair("raw_command", existingRecord));
+        obj.push_back(Pair("fluid command", existingRecord));
     }
 
     return obj;
@@ -320,7 +320,7 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
             "  \"operation\"       (string) The fluid operation code.\n"
             "  \"amount\"          (string) The fluid operation amount.\n"
             "  \"timestamp\"       (string) The fluid operation timestamp\n"
-            "  \"payment_address\" (string) The fluid operation payment address\n"
+            "  \"payment address\" (string) The fluid operation payment address\n"
             "  }, ...\n"
             "]\n"
             "\nExamples\n"
@@ -358,7 +358,7 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
                 obj.push_back(Pair("timestamp", strTimeStamp)); 
             }
             if (strOperationCode == "OP_MINT" && vecSplitScript.size() > 2) {
-                obj.push_back(Pair("payment_address", vecSplitScript[2]));
+                obj.push_back(Pair("payment address", vecSplitScript[2]));
             }
             // TODO (Amir): Add signature addresses
         }
@@ -370,6 +370,19 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
 }
 
 UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getfluidsovereigns\n"
+            "\nReturns the active sovereign addresses.\n"
+            "\nResult:\n"
+            "{                         (json array of string)\n"
+            "  \"sovereign address\"     (string) A sovereign address with permission to co-sign a fluid command\n"
+            "}, ...\n"
+            "\nExamples\n"
+            + HelpExampleCli("getfluidsovereigns", "")
+            + HelpExampleRpc("getfluidsovereigns", "")
+        );
+
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;

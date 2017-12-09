@@ -410,16 +410,15 @@ static const CRPCCommand vRPCCommands[] =
 
     /* Fluid Protocol */
     { "Protocol",           "sendfluidtransaction",	  &sendfluidtransaction,   true  },
-    { "Protocol",           "signtoken",			        &signtoken,			         true  },
-    { "Protocol",           "consenttoken",			      &consenttoken,		       true  },
-    { "Protocol",           "getrawpubkey",	 		      &getrawpubkey,		       true  },
-    { "Protocol",           "verifyquorum",	 		      &verifyquorum,		       true  },
-    { "Protocol",           "maketoken",	 		        &maketoken,		  	       true  },
+    { "Protocol",           "signtoken",			  &signtoken,			   true  },
+    { "Protocol",           "consenttoken",			  &consenttoken,		   true  },
+    { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
+    { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
+    { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
     { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
-    { "Protocol",           "getfluidhistoryraw",	    &getfluidhistoryraw,     true  },
-    { "Protocol",           "getfluidmasters",	      &getfluidsovereigns,     true  },
-    { "Protocol",           "fluidcommandshistory",	  &fluidcommandshistory,   true  },
-    { "Protocol",           "gettime",	      		    &gettime,   	   		     true  },
+    { "Protocol",           "getfluidhistoryraw",	  &getfluidhistoryraw,     true  },
+    { "Protocol",           "getfluidsovereigns",	      &getfluidsovereigns,     true  },
+    { "Protocol",           "gettime",	      		  &gettime,   	   		   true  },
 #endif // ENABLE_WALLET
 };
 
