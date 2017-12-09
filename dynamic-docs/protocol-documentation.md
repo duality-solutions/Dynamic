@@ -281,6 +281,6 @@ Get Dynode list or specific entry
 
 Sync Status Count
 
-### DYNODEPAYMENTSYNC - "mnget"
+### DYNODEPAYMENTSYNC - "dnget"
 
 Dynode Payment Sync

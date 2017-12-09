@@ -114,16 +114,16 @@ CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, in
 {
     AssertLockHeld(cs_main);
 
-    CCoins coins;
-    if(!GetUTXOCoins(outpoint, coins)) {
+    Coin coin;
+    if(!GetUTXOCoin(outpoint, coin)) {
         return COLLATERAL_UTXO_NOT_FOUND;
     }
 
-    if(coins.vout[outpoint.n].nValue != 1000 * COIN) {
+    if(coin.out.nValue != 1000 * COIN) {
         return COLLATERAL_INVALID_AMOUNT;
     }
 
-    nHeightRet = coins.nHeight;
+    nHeightRet = coin.nHeight;
     return COLLATERAL_OK;
 }
 
