@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 #define UVOIDBEGIN(a)       ((void*)&(a))
 #define BEGIN(a)            ((char*)&(a))
