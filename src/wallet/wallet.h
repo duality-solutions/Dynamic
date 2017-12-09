@@ -100,12 +100,11 @@ enum WalletFeature
 
 enum AvailableCoinsType
 {
-    ALL_COINS = 1,
-    ONLY_DENOMINATED = 2,
-    ONLY_NOT1000IFDN = 3,
-    ONLY_NONDENOMINATED_NOT1000IFDN = 4,
-    ONLY_1000 = 5, // find Dynode outputs including locked ones (use with caution)
-    ONLY_PRIVATESEND_COLLATERAL = 6
+    ALL_COINS,
+    ONLY_DENOMINATED,
+    ONLY_NONDENOMINATED,
+    ONLY_1000, // find dynode outputs including locked ones (use with caution)
+    ONLY_PRIVATESEND_COLLATERAL
 };
 
 struct CompactTallyItem
@@ -817,9 +816,6 @@ public:
     bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosRet,
                            std::string& strFailReason, const CCoinControl *coinControl = NULL, bool sign = true, AvailableCoinsType nCoinType=ALL_COINS, bool fUseInstantSend=false);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CConnman* connman, std::string strCommand="tx");
-
-    bool CreateNameTx(CScript scriptPubKey, const CAmount& nValue, CWalletTx wtxNameIn, CAmount nFeeInput,
-                       CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int nSplitBlock, std::string& strFailReason, const CCoinControl *coinControl = NULL);
         
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
     bool ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecAmounts);
@@ -1104,9 +1100,5 @@ public:
 private:
     std::vector<char> _ssExtra;
 };
-
-// Needed for DDNS
-void SendMoney(const CTxDestination &address, CAmount nValue, CWalletTx& wtxNew);
-void SendName(CScript scriptPubKey, CAmount nValue, CWalletTx& wtxNew, const CWalletTx& wtxNameIn, CAmount nFeeInput);
 
 #endif // DYNAMIC_WALLET_WALLET_H

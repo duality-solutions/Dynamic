@@ -184,7 +184,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                     PushStatus(pfrom, STATUS_REJECTED, ERR_NON_STANDARD_PUBKEY, connman);
                     return;
                 }
-                if(!txout.scriptPubKey.IsNormalPaymentScript()) {
+                if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
                     LogPrintf("PSVIN -- invalid script! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
                     PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_SCRIPT, connman);
                     return;
@@ -196,9 +196,9 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
                 LogPrint("privatesend", "PSVIN -- txin=%s\n", txin.ToString());
 
-                CCoins coins;
-                if(GetUTXOCoins(txin.prevout, coins)) {
-                    nValueIn += coins.vout[txin.prevout.n].nValue;
+                Coin coin;
+                if(GetUTXOCoin(txin.prevout, coin)) {
+                    nValueIn += coin.out.nValue;
                 } else {
                     LogPrintf("PSVIN -- missing input! tx=%s", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_MISSING_TX, connman);

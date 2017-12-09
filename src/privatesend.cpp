@@ -189,19 +189,19 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     BOOST_FOREACH(const CTxOut txout, txCollateral.vout) {
         nValueOut += txout.nValue;
 
-        if(!txout.scriptPubKey.IsNormalPaymentScript()) {
+        if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
             LogPrintf ("CPrivateSend::IsCollateralValid -- Invalid Script, txCollateral=%s", txCollateral.ToString());
             return false;
         }
     }
 
     BOOST_FOREACH(const CTxIn txin, txCollateral.vin) {
-        CCoins coins;
-        if(!GetUTXOCoins(txin.prevout, coins)) {
+        Coin coin;
+        if(!GetUTXOCoin(txin.prevout, coin)) {
             LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- Unknown inputs in collateral transaction, txCollateral=%s", txCollateral.ToString());
             return false;
         }
-        nValueIn += coins.vout[txin.prevout.n].nValue;
+        nValueIn += coin.out.nValue;
     }
 
     //collateral transactions are required to pay out a small fee to the miners
@@ -403,6 +403,13 @@ void CPrivateSend::CheckPSTXes(int nHeight)
         }
     }
     LogPrint("privatesend", "CPrivateSend::CheckPSTXes -- mapPSTX.size()=%llu\n", mapPSTX.size());
+}
+
+void CPrivateSend::UpdatedBlockTip(const CBlockIndex *pindex)
+{
+    if(pindex && !fLiteMode && dynodeSync.IsDynodeListSynced()) {
+        CheckPSTXes(pindex->nHeight);
+    }
 }
 
 void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)

@@ -18,6 +18,60 @@
 
 std::vector<std::string> InitialiseAddresses();
 
+class CBlockFileInfo
+{
+public:
+    unsigned int nBlocks;      //!< number of blocks stored in file
+    unsigned int nSize;        //!< number of used bytes of block file
+    unsigned int nUndoSize;    //!< number of used bytes in the undo file
+    unsigned int nHeightFirst; //!< lowest height of block in file
+    unsigned int nHeightLast;  //!< highest height of block in file
+    uint64_t nTimeFirst;       //!< earliest time of block in file
+    uint64_t nTimeLast;        //!< latest time of block in file
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+        READWRITE(VARINT(nBlocks));
+        READWRITE(VARINT(nSize));
+        READWRITE(VARINT(nUndoSize));
+        READWRITE(VARINT(nHeightFirst));
+        READWRITE(VARINT(nHeightLast));
+        READWRITE(VARINT(nTimeFirst));
+        READWRITE(VARINT(nTimeLast));
+    }
+
+     void SetNull() {
+         nBlocks = 0;
+         nSize = 0;
+         nUndoSize = 0;
+         nHeightFirst = 0;
+         nHeightLast = 0;
+         nTimeFirst = 0;
+         nTimeLast = 0;
+     }
+
+     CBlockFileInfo() {
+         SetNull();
+     }
+
+     std::string ToString() const;
+
+     /** update statistics (does not update nSize) */
+     void AddBlock(unsigned int nHeightIn, uint64_t nTimeIn) {
+         if (nBlocks==0 || nHeightFirst > nHeightIn)
+             nHeightFirst = nHeightIn;
+         if (nBlocks==0 || nTimeFirst > nTimeIn)
+             nTimeFirst = nTimeIn;
+         nBlocks++;
+         if (nHeightIn > nHeightLast)
+             nHeightLast = nHeightIn;
+         if (nTimeIn > nTimeLast)
+             nTimeLast = nTimeIn;
+     }
+};
+
 struct CDiskBlockPos
 {
     int nFile;
@@ -104,7 +158,7 @@ public:
 	CAmount dynodeReward;
     unsigned int dynodeRecipientCount;
 	std::vector<std::string> fluidHistory;
-	std::vector<std::string> fluidManagers;
+	std::vector<std::string> fluidSovereigns;
 
 	CFluidEntry() {
         SetNull();
@@ -117,13 +171,13 @@ public:
 		READWRITE(VARINT(dynodeReward));
         READWRITE(VARINT(dynodeRecipientCount));
 		READWRITE(fluidHistory);
-		READWRITE(fluidManagers);
+		READWRITE(fluidSovereigns);
 	}
 
     inline friend bool operator==(const CFluidEntry &a, const CFluidEntry &b) {
         return (
 			a.fluidHistory == b.fluidHistory
-			&& a.fluidManagers == b.fluidManagers
+			&& a.fluidSovereigns == b.fluidSovereigns
 			&& a.blockReward == b.blockReward
 			&& a.dynodeReward == b.dynodeReward
             && a.dynodeRecipientCount == b.dynodeRecipientCount
@@ -132,7 +186,7 @@ public:
 
     inline CFluidEntry operator=(const CFluidEntry &b) {
 		fluidHistory = b.fluidHistory;
-		fluidManagers = b.fluidManagers;
+		fluidSovereigns = b.fluidSovereigns;
 		blockReward = b.blockReward;
 		dynodeReward = b.dynodeReward;
         dynodeRecipientCount = b.dynodeRecipientCount;
@@ -145,14 +199,14 @@ public:
     
     inline void SetNull() { 
 		fluidHistory.clear(); 
-		fluidManagers = InitialiseAddresses();
+		fluidSovereigns = InitialiseAddresses();
 		blockReward = 0;
 		dynodeReward = 0;
         dynodeRecipientCount = 1;
 	}
 
     inline bool IsNull() const { 
-		return (fluidHistory.empty() && fluidManagers == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
+		return (fluidHistory.empty() && fluidSovereigns == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
 	}
 };
 

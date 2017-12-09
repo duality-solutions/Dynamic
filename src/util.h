@@ -156,6 +156,7 @@ bool TryCreateDirectory(const boost::filesystem::path& p);
 boost::filesystem::path GetDefaultDataDir();
 const boost::filesystem::path &GetDataDir(bool fNetSpecific = true);
 const boost::filesystem::path &GetBackupsDir();
+std::string GenerateRandomString(unsigned int len);
 void ClearDatadirCache();
 boost::filesystem::path GetConfigFile();
 boost::filesystem::path GetDynodeConfigFile();

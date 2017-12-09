@@ -247,7 +247,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
     std::vector<bool> vfExec;
     std::vector<valtype> altstack;
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
-    if (script.size() > 10000)
+    if (script.size() > MAX_SCRIPT_SIZE)
         return set_error(serror, SCRIPT_ERR_SCRIPT_SIZE);
     int nOpCount = 0;
     bool fRequireMinimal = (flags & SCRIPT_VERIFY_MINIMALDATA) != 0;
@@ -1239,7 +1239,7 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror, const bool fDDNS)
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
 {
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 

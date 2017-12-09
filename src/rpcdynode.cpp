@@ -140,7 +140,6 @@ UniValue dynode(const UniValue& params, bool fHelp)
                 "  genkey       - Generate new dynodeprivkey\n"
 #ifdef ENABLE_WALLET
                 "  outputs      - Print Dynode compatible outputs\n"
-                "  start        - Start local Hot Dynode configured in dynamic.conf\n"
                 "  start-alias  - Start single remote Dynode by assigned alias configured in dynode.conf\n"
                 "  start-<mode> - Start remote Dynodes configured in dynode.conf (<mode>: 'all', 'missing', 'disabled')\n"
 #endif // ENABLE_WALLET
@@ -249,26 +248,6 @@ UniValue dynode(const UniValue& params, bool fHelp)
         return activeDynode.GetStatus();
     }
 
-    if (strCommand == "start")
-    {
-        if(!fDyNode)
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "You must set dynode=1 in the configuration");
-
-        {
-            LOCK(pwalletMain->cs_wallet);
-            EnsureWalletIsUnlocked();
-        }
-
-        if(activeDynode.nState != ACTIVE_DYNODE_STARTED){
-            activeDynode.nState = ACTIVE_DYNODE_INITIAL; // TODO: consider better way
-            activeDynode.ManageState(*g_connman);
-        }
-
-        return activeDynode.GetStatus();
-    }
-#endif //ENABLE_WALLET       
-
-#ifdef ENABLE_WALLET
     if (strCommand == "start-alias")
     {
         if (params.size() < 2)

@@ -61,7 +61,7 @@ UniValue maketoken(const UniValue& params, bool fHelp)
 {
 	std::string result;
 	
-    if (fHelp)
+    if (fHelp || params.size() < 2) {
         throw std::runtime_error(
             "maketoken \"string\"\n"
             "\nConvert String to Hexadecimal Format\n"
@@ -71,12 +71,14 @@ UniValue maketoken(const UniValue& params, bool fHelp)
             + HelpExampleCli("maketoken", "\"Hello World!\"")
             + HelpExampleRpc("maketoken", "\"Hello World!\"")
         );
-
-	for (uint32_t iter = 0; iter != params.size(); iter++) {
+    }
+    
+	for(uint32_t iter = 0; iter != params.size(); iter++) {
 		result += params[iter].get_str() + SubDelimiter;
 	}
 
-	result.pop_back(); fluid.ConvertToHex(result);
+	result.pop_back(); 
+    fluid.ConvertToHex(result);
 
     return result;
 }
@@ -313,17 +315,17 @@ UniValue fluidcommandshistory(const UniValue& params, bool fHelp) {
     return obj;
 }
 
-UniValue getfluidmasters(const UniValue& params, bool fHelp) {
+UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;
 
-    std::vector<std::string> managerLogs = fluidIndex.fluidManagers;
+    std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
 
     UniValue obj(UniValue::VOBJ);
 
-    for (const std::string& manager : managerLogs) {
-        obj.push_back(Pair("manager", manager));
+    for (const std::string& sovereign : sovereignLogs) {
+        obj.push_back(Pair("sovereign address", sovereign));
     }
 
     return obj;

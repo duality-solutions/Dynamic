@@ -791,7 +791,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         // we shoud update nTimeLastWatchdogVote here if sentinel
         // ping flag is actual
         if(pdn && dnp.fSentinelIsCurrent)
-            pdn->UpdateWatchdogVoteTime(dnp.sigTime);
+            UpdateWatchdogVoteTime(dnp.vin.prevout, dnp.sigTime);
 
         // too late, new DNANNOUNCE is required
         if(pdn && pdn->IsNewStartRequired()) return;
