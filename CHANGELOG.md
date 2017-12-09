@@ -238,7 +238,8 @@
 * [Fluid] Remove fee direction
 * [Mining] Fix floating point accuracy when printing CreateNewBlock amount
 * [Fluid] Remove fluid quorumcheck from debug.log file
-
+* DELTA swapped for Digishield V3
+* Fixed a bug where the DAA wasn't using the parameters set in chainparams
 
 **Dynamic v1.4.0.0**
 * Securely erase potentially sensitive keys/values
