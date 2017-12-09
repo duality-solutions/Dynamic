@@ -18,7 +18,7 @@ What is Dynamic?
 ----------------
 * Coin Suffix: DYN
 * PoW Mining Algorithm: Argon2d
-* PoW Difficulty Algorithm: Delta
+* PoW Difficulty Algorithm: Digishield V3
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: 1 DYN
