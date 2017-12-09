@@ -151,6 +151,94 @@
 * Update Logos
 * Remove remaining usage of 'namespace std;'
 * Fix missing initializer in ntp.cpp
+* [Fluid] Add help and example to getfluidsovereigns command 
+* Add undocumented -forcecompactdb to force LevelDB compactions
+* Remove ability to run Hot/Local Dynodes
+* [Fluid] Add fluid history RPC command in clear text 
+* make CheckPSTXes() private, execute it on both client and server
+* Use IsPayToPublicKeyHash
+* upgrade qrencode 4.0.0
+* Amend maketoken
+* Fix SpendCoin in CCoinsViewCache
+* upgrade mac alias 2.0.1
+* upgrade ds store 1.1.2
+* Suppress warning with GenerateRandomString
+* Guard 'if' statement
+* add params.size() !=1 to maketocken in rpcfluid
+* upgrade protobuf 3.5.0
+* upgrade ccache 3.3.4
+* upgrade miniupnpc 2.0.20171102
+* upgrade xcb proto 1.12
+* upgrade xproto 7.0.31
+* upgrade libxcb 1.12
+* upgrade libXext 1.3.3
+* upgrade libX11 1.6.5
+* upgrade freetype 2.8.1
+* Update fontconfig.mk
+* upgrade expat 2.2.5
+* Fix upgrade cancel warnings
+* Force on-the-fly compaction during pertxout upgrade
+* Allow to cancel the txdb upgrade via splashscreen keypress
+* Address nits from per-utxo change
+* Simplify return values of GetCoin/HaveCoin(InCache)
+* Change semantics of HaveCoinInCache to match HaveCoin
+* Few Minor per-utxo assert-semantics re-adds and tweak
+* upgrade dbus 1.12.2
+* Don't return stale data from CCoinsViewCache::Cursor()
+* Switch chainstate db and cache to per-txout model 
+* fix abs warnings
+* Change boost usage in coins.h to standard
+* remove InstantSend votes for failed lock attempts
+* Fix some empty vector references
+* Add COMPACTSIZE wrapper similar to VARINT for serialization
+* Fix: make CCoinsViewDbCursor::Seek work for missing keys
+* Simplify DisconnectBlock arguments/return value
+* Make DisconnectBlock and ConnectBlock static in validation.cpp
+* Clean up calculations of pcoinsTip memory usage
+* Compensate for memory peak at flush time
+* Plug leveldb logs to Dynamic logs
+* Add data() method to CDataStream (and use it)
+* Share unused mempool memory with coincache
+* Assert FRESH validity in CCoinsViewCache::BatchWrite
+* Fix dangerous condition in ModifyNewCoins.
+* [Fluid] Check if fluid transaction is already in the memory pool
+* boost 1.65.1
+* [test] Add CCoinsViewCache Access/Modify/Write tests
+* Batch construct batches
+* Remove undefined FetchCoins method declaration
+* Use fixed preallocation instead of costly GetSerializeSize
+* Fix OOM when deserializing UTXO entries with invalid length
+* Avoid unnecessary database access for unknown transactions
+* Use C++11 thread-safe static initializers in coins.h/coins.cpp
+* Use SipHash-2-4 for CCoinsCache index 
+* Add missing int
+* Add SipHash-2-4 primitives to hash
+* Move index structures into spentindex.h
+* Break circular dependency main ↔ txdb
+* Minor changes to dbwrapper to simplify support for other databases
+* Fix assert crash in new UTXO set cursor
+* Add cursor to iterate over utxo set, use this in
+* Save the last unnecessary database read
+* fix nLastWatchdogVoteTime
+* fix Examples section of the RPC output for listreceivedbyaccount, lis…
+* [Fluid] Add fluid amount check to consensus validation
+* Allow IS for all txes, not only for txes with p2pkh and data outputs
+* add `maxgovobjdatasize` field to the output of `getgovernanceinfo`
+* [Fluid] check if exceeds maximum fluid amount and negative amount.
+* [DDNS] Remove existing dDNS code 
+* Update verbiage in debug log and add missing ENABLE_WALLET comment
+* [DebugLog] Fix block reward debug output logging
+* [Fluid] Stub maximum fluid operation amounts
+* Remove extraneous LogPrint from fee estimation
+* fix a bug if the min fee is 0 for FeeFilterRounder
+* Disable fee estimates for a confirm target of 1 block
+* Remove priority estimation
+* Kill insecure_random and associated global state
+* [Fluid] Use ParseInt64 instead of new convert function
+* [Fluid] Remove fee direction
+* [Mining] Fix floating point accuracy when printing CreateNewBlock amount
+* [Fluid] Remove fluid quorumcheck from debug.log file
+
 
 **Dynamic v1.4.0.0**
 * Securely erase potentially sensitive keys/values
