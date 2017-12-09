@@ -2212,7 +2212,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward);
 		}
 		
-		std::vector<std::string> fluidHistory, fluidManagers;
+		std::vector<std::string> fluidHistory, fluidSovereigns;
 		
 		if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
 			return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
@@ -2238,9 +2238,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
 				
 				if (!GetNameCurrentAddress(val, inputKey, error))
-					fluidManagers.push_back(inputKey.ToString());
+					fluidSovereigns.push_back(inputKey.ToString());
 				else */
-					fluidManagers.push_back(prevFluidIndex.fluidManagers.at(x));
+					fluidSovereigns.push_back(prevFluidIndex.fluidSovereigns.at(x));
 			}
 		}
 		
