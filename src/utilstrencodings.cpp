@@ -689,7 +689,26 @@ void SeperateString(std::string input, std::vector<std::string> &output, bool su
 		boost::split(output, input, boost::is_any_of(SubDelimiter));
 	else
 		boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
-};
+}
+
+void SeperateFluidOpString(std::string input, std::vector<std::string> &output) {
+  std::vector<std::string> firstSplit;
+  SeperateString(input, firstSplit);
+  if (firstSplit.size() > 1) {
+    std::vector<std::string> secondSplit;
+    SeperateString(firstSplit[0], secondSplit, true);
+    for (const std::string& item : secondSplit) {
+      output.push_back(item);
+    }
+    unsigned int n = 0;
+    for (const std::string& item : firstSplit) {
+      if (n != 0) {
+        output.push_back(item);
+      }
+      n =+1;
+    }
+  }
+}
 
 std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter) {
 	if(subDelimiter)

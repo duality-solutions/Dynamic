@@ -1,26 +1,6 @@
-/**
- * Copyright 2017 Everybody and Nobody (Empinel/Plaxton)
- *
- * This file is a portion of the DynamicX Protocol
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation files
- * (the "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject
- * to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
- * USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "fluid.h"
 
@@ -300,7 +280,20 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
     return result;
 }
 
-UniValue fluidcommandshistory(const UniValue& params, bool fHelp) {
+UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getfluidhistoryraw\n"
+            "\nReturns raw data about each fluid command confirmed on the Dynamic blockchain.\n"
+            "\nResult:\n"
+            "{                   (json array of string)\n"
+            "  \"fluid command\"     (string) The operation code and raw fluid script command\n"
+            "}, ...\n"
+            "\nExamples\n"
+            + HelpExampleCli("getfluidhistoryraw", "")
+            + HelpExampleRpc("getfluidhistoryraw", "")
+        );
+
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;
@@ -309,13 +302,87 @@ UniValue fluidcommandshistory(const UniValue& params, bool fHelp) {
     UniValue obj(UniValue::VOBJ);
 
     BOOST_FOREACH(const std::string& existingRecord, transactionRecord) {
-        obj.push_back(Pair("fluidCommand", existingRecord)); // We will make it a pair with timestamp later
+        obj.push_back(Pair("fluid command", existingRecord));
     }
 
     return obj;
 }
 
+UniValue getfluidhistory(const UniValue& params, bool fHelp) {
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getfluidhistory\n"
+            "\nReturns data about each fluid command confirmed on the Dynamic blockchain.\n"
+            "\nResult:\n"
+            "[                   (json array of object)\n"
+            "  {                 (json object)\n"
+            "  \"order\"           (string) order of execution.\n"
+            "  \"operation\"       (string) The fluid operation code.\n"
+            "  \"amount\"          (string) The fluid operation amount.\n"
+            "  \"timestamp\"       (string) The fluid operation timestamp\n"
+            "  \"payment address\" (string) The fluid operation payment address\n"
+            "  }, ...\n"
+            "]\n"
+            "\nExamples\n"
+            + HelpExampleCli("getfluidhistory", "")
+            + HelpExampleRpc("getfluidhistory", "")
+        );
+
+    GetLastBlockIndex(chainActive.Tip());
+    CBlockIndex* pindex = chainActive.Tip();
+    CFluidEntry fluidIndex = pindex->fluidParams;
+    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
+
+    UniValue ret(UniValue::VARR);
+    unsigned int order = 1;
+    HexFunctions hexConvert;
+    for (const std::string& existingRecord : transactionRecord) {
+        UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("order", strprintf("%u", order)));
+        std::string strOperationCode = GetRidOfScriptStatement(existingRecord, 0);
+        obj.push_back(Pair("operation", strOperationCode));
+        std::string verificationWithoutOpCode = GetRidOfScriptStatement(existingRecord);
+
+        std::string strUnHexedFluidOpScript = hexConvert.HexToString(verificationWithoutOpCode);
+        std::vector<std::string> vecSplitScript;
+        SeperateFluidOpString(strUnHexedFluidOpScript, vecSplitScript);
+        if (vecSplitScript.size() > 1) {
+            std::string strAmount = vecSplitScript[0];
+            std::string strTimeStamp = vecSplitScript[1];
+            CAmount fluidAmount;
+            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                obj.push_back(Pair("amount", strAmount));
+            }
+            int64_t tokenTimeStamp;
+            if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
+                obj.push_back(Pair("timestamp", strTimeStamp)); 
+            }
+            if (strOperationCode == "OP_MINT" && vecSplitScript.size() > 2) {
+                obj.push_back(Pair("payment address", vecSplitScript[2]));
+            }
+            // TODO (Amir): Add signature addresses
+        }
+        ret.push_back(obj);
+        order +=1;
+    }
+    
+    return ret;
+}
+
 UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getfluidsovereigns\n"
+            "\nReturns the active sovereign addresses.\n"
+            "\nResult:\n"
+            "{                         (json array of string)\n"
+            "  \"sovereign address\"     (string) A sovereign address with permission to co-sign a fluid command\n"
+            "}, ...\n"
+            "\nExamples\n"
+            + HelpExampleCli("getfluidsovereigns", "")
+            + HelpExampleRpc("getfluidsovereigns", "")
+        );
+
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;

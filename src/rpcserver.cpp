@@ -415,8 +415,9 @@ static const CRPCCommand vRPCCommands[] =
     { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
     { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
     { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
-    { "Protocol",           "fluidcommandshistory",	  &fluidcommandshistory,   true  },
-    { "Protocol",           "getfluidsovereigns",	  &getfluidsovereigns,     true  },
+    { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
+    { "Protocol",           "getfluidhistoryraw",	  &getfluidhistoryraw,     true  },
+    { "Protocol",           "getfluidsovereigns",	      &getfluidsovereigns,     true  },
     { "Protocol",           "gettime",	      		  &gettime,   	   		   true  },
 #endif // ENABLE_WALLET
 };
