@@ -37,7 +37,7 @@ public:
     std::vector<std::string> InitialiseAddresses() {
         std::vector<std::string> x;
         x.push_back("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu"); // CEO
-        x.push_back(""); // CTO
+        x.push_back("DBwfYAiK2FPDDvoFXQFWaL4rU76KjEckkG"); // CTO
         x.push_back("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t"); // CFO
         x.push_back("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH"); // COO
         x.push_back("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP"); // CDOO
