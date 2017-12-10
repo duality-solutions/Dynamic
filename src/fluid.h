@@ -34,15 +34,13 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN; // Max minting amount per fluid transaction
 
-
-    //TODO (Amir): Change address and remove private keys below.
     std::vector<std::string> InitialiseAddresses() {
         std::vector<std::string> x;
-        x.push_back("DSZcL75kYD6hWWoU1xecuZ9gMVB8fqccP6"); // CEO
-        x.push_back("DPTotn3YNajtyAvAx9KQrKa98JwuKZKceD"); // CTO
-        x.push_back("DJW7o975ycmJWBzzXQSP2nLSnECyGLTozM"); // CFO
-        x.push_back("DAhJS4uWw2dfr2h3mofoi9ffBrhgqkrHbD"); // COO
-        x.push_back("DJsGhpDtA9z4yquAFXiy48sgtQQcYhhq1K"); // CDOO
+        x.push_back("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu"); // CEO
+        x.push_back(""); // CTO
+        x.push_back("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t"); // CFO
+        x.push_back("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH"); // COO
+        x.push_back("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP"); // CDOO
         return x;
     }
 
