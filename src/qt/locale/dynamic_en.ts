@@ -4790,8 +4790,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="+6"/>
-        <source>(32300 could be used only on mainnet)</source>
-        <translation>(32300 could be used only on mainnet)</translation>
+        <source>(33300 could be used only on mainnet)</source>
+        <translation>(33300 could be used only on mainnet)</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5312,8 +5312,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="-88"/>
-        <source>(must be 32300 for mainnet)</source>
-        <translation>(must be 32300 for mainnet)</translation>
+        <source>(must be 33300 for mainnet)</source>
+        <translation>(must be 33300 for mainnet)</translation>
     </message>
     <message>
         <location line="+13"/>

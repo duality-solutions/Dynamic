@@ -99,7 +99,7 @@ static void MineGenesis(CBlockHeader& genesisBlock, const uint256& powLimit, boo
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "Saturday 18th Nov 2017: Testing mining in 1.5 prior to full testing and release of 1.5";
+    const char* pszTimestamp = "Sunday 10th Dec 2017: Phase 2 Testing";
     const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
@@ -128,12 +128,9 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000");
-        //consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //TODO (Amir): Use this before release
+        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //TODO (Amir): Use this before release
 
-        //TODO (Amir): replace at launch with this nPowTargetTimespan
-        // consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
         consensus.nPowAveragingWindow = 5;
@@ -143,9 +140,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 321; // 95% of nMinerConfirmationWindow
-        //replace at launch with this nMinerConfirmationWindow
-        //consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -160,26 +155,25 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0x3f;
-        pchMessageStart[1] = 0x42;
-        pchMessageStart[2] = 0x55;
-        pchMessageStart[3] = 0x61;
-        //TODO (Amir): Change alert public key
-        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
+        pchMessageStart[0] = 0x5e;
+        pchMessageStart[1] = 0x61;
+        pchMessageStart[2] = 0x74;
+        pchMessageStart[3] = 0x80;
+        vAlertPubKey = ParseHex("");
         nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 20545;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1512764539, 1029496, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(0, 0, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) { MineGenesis(genesis, consensus.powLimit, true); }
 
         consensus.hashGenesisBlock = genesis.GetHash();
                 
         if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x00000d54d2695dcb0d45beaae536061cb5e24750ca6f446f849b84d4b8f525e5"));
-            assert(genesis.hashMerkleRoot == uint256S("0xcfb7b6bf1d8417d9ce2e5558de6cde43a4f623642d4b94e37302806cd4307dac"));
+            assert(consensus.hashGenesisBlock == uint256S("0x"));
+            assert(genesis.hashMerkleRoot == uint256S("0x"));
         }
 
         //TODO (Amir): Put back DNS seeders
@@ -212,13 +206,12 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
-        //TODO (Amir): Change spork public key
-        strSporkPubKey = "048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae";
+        strSporkPubKey = "";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (        0, uint256S("0x0x00000d54d2695dcb0d45beaae536061cb5e24750ca6f446f849b84d4b8f525e5")),
-            1512764539, // * UNIX timestamp of last checkpoint block
+            (        0, uint256S("0x")),
+            0, // * UNIX timestamp of last checkpoint block
             0,          // * total number of transactions between genesis and last checkpoint
             //   (the tx=... number in the SetBestChain debug.log lines)
             2000        // * estimated number of transactions per day after checkpoint
@@ -254,9 +247,7 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        //replace at launch with this nPowTargetTimespan
-        // consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 
@@ -264,9 +255,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
-        //replace at launch with this nMinerConfirmationWindow
-        //consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -280,7 +269,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
+        vAlertPubKey = ParseHex("");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -326,7 +315,6 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        // DQibPzNCKAGRzPUs55uAW7nr7UfU1T7ATi
         strSporkPubKey = "";
 
         checkpointData = (CCheckpointData) {
@@ -368,9 +356,7 @@ public:
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
-        //replace at launch with this nPowTargetTimespan
-        // consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // Dynamic: 24 hours
+        consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME;
         consensus.nUpdateDiffAlgoHeight = 10; // Dynamic: Algorithm fork block
 
@@ -378,9 +364,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
-        //replace at launch with this nMinerConfirmationWindow
-        //consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.nMinerConfirmationWindow = 338; // Faster than normal for regtest (144 instead of 2016)
+        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 999999999999ULL;
@@ -392,7 +376,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
-        vAlertPubKey = ParseHex("048459e70138ccb109b38de57aa87b5b49b1b7c92550ee29b25e8eca195063d8872cc256bb35688ff6159112b802989f4b87a87d5ee1d6c1747c6e4bcdb68a3dae");
+        vAlertPubKey = ParseHex("");
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 0; // never delay
         nDefaultPort = DEFAULT_P2P_PORT + 200;
@@ -421,7 +405,6 @@ public:
         fTestnetToBeDeprecatedFieldRPC = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        // DQibPzNCKAGRzPUs55uAW7nr7UfU1T7ATi
         strSporkPubKey = "";
 
         checkpointData = (CCheckpointData) {
