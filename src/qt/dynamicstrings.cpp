@@ -210,10 +210,10 @@ QT_TRANSLATE_NOOP("dynamic", ""
 QT_TRANSLATE_NOOP("dynamic", ""
 "You must specify a dynodeprivkey in the configuration. Please see "
 "documentation for help."),
-QT_TRANSLATE_NOOP("dynamic", "(32300 could be used only on mainnet)"),
+QT_TRANSLATE_NOOP("dynamic", "(33300 could be used only on mainnet)"),
 QT_TRANSLATE_NOOP("dynamic", "(default: %s)"),
 QT_TRANSLATE_NOOP("dynamic", "(default: 1)"),
-QT_TRANSLATE_NOOP("dynamic", "(must be 32300 for mainnet)"),
+QT_TRANSLATE_NOOP("dynamic", "(must be 33300 for mainnet)"),
 QT_TRANSLATE_NOOP("dynamic", "<category> can be:\n"),
 QT_TRANSLATE_NOOP("dynamic", "Accept command line and JSON-RPC commands"),
 QT_TRANSLATE_NOOP("dynamic", "Accept connections from outside (default: 1 if no -proxy or -connect)"),

@@ -3765,8 +3765,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Luotettaviksi merkittyjä peers:ejä ei voida DoS estää, ja niiden siirtotapahtumat välitetään aina, vaikka ne olisvatkin jo muistivarannossa, käyttökelpoinen esim. yhdyskäytävään</translation>
     </message>
     <message>
-        <source>(32300 could be used only on mainnet)</source>
-        <translation>(32300 voidaan käyttää vain pääverkossa)</translation>
+        <source>(33300 could be used only on mainnet)</source>
+        <translation>(33300 voidaan käyttää vain pääverkossa)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4183,8 +4183,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Virheellinen dynoden yksityisavain (dynodeprivkey). Katso lisätietoja dokumentaatiosta.</translation>
     </message>
     <message>
-        <source>(must be 32300 for mainnet)</source>
-        <translation>(oltava 32300 pääverkossa)</translation>
+        <source>(must be 33300 for mainnet)</source>
+        <translation>(oltava 33300 pääverkossa)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>

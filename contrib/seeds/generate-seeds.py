@@ -127,10 +127,10 @@ def main():
     g.write(' * IPv4 as well as onion addresses are wrapped inside a IPv6 address accordingly.\n')
     g.write(' */\n')
     with open(os.path.join(indir,'nodes_main.txt'),'r') as f:
-        process_nodes(g, f, 'pnSeed6_main', 32300)
+        process_nodes(g, f, 'pnSeed6_main', 33300)
     g.write('\n')
     with open(os.path.join(indir,'nodes_test.txt'),'r') as f:
-        process_nodes(g, f, 'pnSeed6_test', 32450)
+        process_nodes(g, f, 'pnSeed6_test', 33450)
     g.write('#endif // DYNAMIC_CHAINPARAMSSEEDS_H\n')
             
 if __name__ == '__main__':

@@ -52,11 +52,11 @@ reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equiv
 config file):
 
 	HiddenServiceDir /var/lib/tor/dynamic-service/
-	HiddenServicePort 32300 127.0.0.1:32300
-	HiddenServicePort 32400 127.0.0.1:32400
+	HiddenServicePort 33300 127.0.0.1:33300
+	HiddenServicePort 33400 127.0.0.1:33400
 
 The directory can be different of course, but (both) port numbers should be equal to
-your dynamicd's P2P listen port (32300 by default).
+your dynamicd's P2P listen port (33300 by default).
 
 	-externalip=X   You can tell dynamic about its publicly reachable address using
 	                this option, and this can be a .onion address. Given the above
@@ -86,7 +86,7 @@ specify:
 
 	./dynamicd ... -discover
 
-and open port 32300 on your firewall (or use -upnp).
+and open port 33300 on your firewall (or use -upnp).
 
 If you only want to use Tor to reach onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:
