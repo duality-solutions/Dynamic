@@ -128,7 +128,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //TODO (Amir): Use this before release
+        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
         consensus.nPowTargetTimespan = 30 * 64; // Dynamic: 1920 seconds
         consensus.nPowTargetSpacing = DEFAULT_AVERAGE_POW_BLOCK_TIME; 
@@ -147,8 +147,8 @@ public:
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1510999800; // Nov 18th 2017 10:10:00
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1542542400; // Nov 18th 2018 12:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1512900600; // Dec 10th 2017 10:10:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1544443200; // Dec 10th 2018 12:00:00
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -159,7 +159,7 @@ public:
         pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x74;
         pchMessageStart[3] = 0x80;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex("04bf1391ff0c61a5d9a02cd2e997b707ced89bb48514e26d89f2464c98295ffef3f587263c94e6024d4e455802ad73e1e9694f3e482ff6e074736cb2327f9cd3e7");
         nDefaultPort = DEFAULT_P2P_PORT;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -206,7 +206,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "";
+        strSporkPubKey = "04bf1391ff0c61a5d9a02cd2e997b707ced89bb48514e26d89f2464c98295ffef3f587263c94e6024d4e455802ad73e1e9694f3e482ff6e074736cb2327f9cd3e7";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -262,14 +262,14 @@ public:
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1489831800; // Mar 18th 2017 10:10:00
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1489827458; // Mar 18th 2018 12:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1512900600; // Dec 10th 2017 10:10:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1544443200; // Dec 10th 2018 12:00:00
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex("04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 24 * 60 * 60;
@@ -315,7 +315,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        strSporkPubKey = "";
+        strSporkPubKey = "04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -376,7 +376,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
-        vAlertPubKey = ParseHex("");
+        vAlertPubKey = ParseHex("04e8118b469667861157f3b2b28056ae92581ce61ce2db80d04a701f5ec5391b751e6136bafdcca7b8d0b564a5afce213e8069bdd1d17131f61d116b73dbf7e2d6");
         nMaxTipAge = 24 * 60 * 64;
         nDelayGetHeadersTime = 0; // never delay
         nDefaultPort = DEFAULT_P2P_PORT + 200;
@@ -405,7 +405,7 @@ public:
         fTestnetToBeDeprecatedFieldRPC = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        strSporkPubKey = "";
+        strSporkPubKey = "04e8118b469667861157f3b2b28056ae92581ce61ce2db80d04a701f5ec5391b751e6136bafdcca7b8d0b564a5afce213e8069bdd1d17131f61d116b73dbf7e2d6";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
