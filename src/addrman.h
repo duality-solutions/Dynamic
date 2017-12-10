@@ -1,8 +1,8 @@
-// Copyright (c) 2012 Pieter Wuille
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2012-2017 Pieter Wuille
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -179,9 +179,6 @@ private:
     //! critical section to protect the inner data structures
     mutable CCriticalSection cs;
 
-    //! Source of random numbers for randomization in inner loops
-    FastRandomContext insecure_rand;
-
     //! last used nId
     int nIdCount;
 
@@ -209,6 +206,9 @@ private:
 protected:
     //! secret key to randomize bucket select with
     uint256 nKey;
+
+    //! Source of random numbers for randomization in inner loops
+    FastRandomContext insecure_rand;
 
     //! Find an entry.
     CAddrInfo* Find(const CNetAddr& addr, int *pnId = NULL);

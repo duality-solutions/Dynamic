@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -201,17 +201,6 @@ extern UniValue dumpwallet(const UniValue& params, bool fHelp);
 extern UniValue dumphdinfo(const UniValue& params, bool fHelp);
 extern UniValue importwallet(const UniValue& params, bool fHelp);
 
-extern UniValue name_scan(const UniValue& params, bool fHelp); // for DDNS
-extern UniValue name_filter(const UniValue& params, bool fHelp);
-extern UniValue name_show(const UniValue& params, bool fHelp);
-extern UniValue name_history(const UniValue& params, bool fHelp);
-extern UniValue name_mempool(const UniValue& params, bool fHelp);
-extern UniValue name_new(const UniValue& params, bool fHelp);
-extern UniValue name_update(const UniValue& params, bool fHelp);
-extern UniValue name_delete(const UniValue& params, bool fHelp);
-extern UniValue name_list(const UniValue& params, bool fHelp);
-extern UniValue name_debug(const UniValue& params, bool fHelp);
-
 extern UniValue getgenerate(const UniValue& params, bool fHelp); // in rpcmining.cpp
 extern UniValue setgenerate(const UniValue& params, bool fHelp);
 extern UniValue getwork(const UniValue& params, bool fHelp);
@@ -318,6 +307,18 @@ extern UniValue invalidateblock(const UniValue& params, bool fHelp);
 extern UniValue reconsiderblock(const UniValue& params, bool fHelp);
 extern UniValue getspentinfo(const UniValue& params, bool fHelp);
 extern UniValue sentinelping(const UniValue& params, bool fHelp);
+
+extern UniValue sendfluidtransaction(const UniValue& params, bool fHelp); // in fluid.cpp
+extern UniValue gettime(const UniValue& params, bool fHelp);
+extern UniValue signtoken(const UniValue& params, bool fHelp);
+extern UniValue consenttoken(const UniValue& params, bool fHelp);
+extern UniValue getrawpubkey(const UniValue& params, bool fHelp);
+extern UniValue verifyquorum(const UniValue& params, bool fHelp);
+extern UniValue maketoken(const UniValue& params, bool fHelp);
+extern UniValue stringtohash(const UniValue& params, bool fHelp);
+extern UniValue getfluidhistory(const UniValue& params, bool fHelp);
+extern UniValue getfluidhistoryraw(const UniValue& params, bool fHelp);
+extern UniValue getfluidsovereigns(const UniValue& params, bool fHelp);
 
 bool StartRPC();
 void InterruptRPC();

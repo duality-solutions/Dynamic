@@ -1,13 +1,14 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_QT_SPLASHSCREEN_H
 #define DYNAMIC_QT_SPLASHSCREEN_H
 
+#include <functional>
 #include <QSplashScreen>
 
 class NetworkStyle;
@@ -36,6 +37,11 @@ public Q_SLOTS:
 
     /** Show message and progress */
     void showMessage(const QString &message, int alignment, const QColor &color);
+     
+    /** Sets the break action */
+    void setBreakAction(const std::function<void(void)> &action);
+protected:
+    bool eventFilter(QObject * obj, QEvent * ev);
 
 private:
     /** Connect core signals to splash screen */
@@ -47,6 +53,8 @@ private:
     QString curMessage;
     QColor curColor;
     int curAlignment;
+
+    std::function<void(void)> breakAction;
 };
 
 #endif // DYNAMIC_QT_SPLASHSCREEN_H

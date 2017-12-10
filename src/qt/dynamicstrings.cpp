@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -210,10 +210,10 @@ QT_TRANSLATE_NOOP("dynamic", ""
 QT_TRANSLATE_NOOP("dynamic", ""
 "You must specify a dynodeprivkey in the configuration. Please see "
 "documentation for help."),
-QT_TRANSLATE_NOOP("dynamic", "(32300 could be used only on mainnet)"),
+QT_TRANSLATE_NOOP("dynamic", "(33300 could be used only on mainnet)"),
 QT_TRANSLATE_NOOP("dynamic", "(default: %s)"),
 QT_TRANSLATE_NOOP("dynamic", "(default: 1)"),
-QT_TRANSLATE_NOOP("dynamic", "(must be 32300 for mainnet)"),
+QT_TRANSLATE_NOOP("dynamic", "(must be 33300 for mainnet)"),
 QT_TRANSLATE_NOOP("dynamic", "<category> can be:\n"),
 QT_TRANSLATE_NOOP("dynamic", "Accept command line and JSON-RPC commands"),
 QT_TRANSLATE_NOOP("dynamic", "Accept connections from outside (default: 1 if no -proxy or -connect)"),

@@ -1,11 +1,12 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef GOVERNANCE_H
 #define GOVERNANCE_H
 
-//#define ENABLE_DASH_DEBUG
+//#define ENABLE_DYNAMIC_DEBUG
 
 #include "bloom.h"
 #include "cachemap.h"
@@ -69,7 +70,7 @@ public:
     int64_t GetMinTimestamp()
     {
         int nIndex = nDataStart;
-        int64_t nMin = numeric_limits<int64_t>::max();
+        int64_t nMin = std::numeric_limits<int64_t>::max();
         if(fBufferEmpty) {
             return nMin;
         }

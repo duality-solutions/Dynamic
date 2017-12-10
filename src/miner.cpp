@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -30,6 +30,7 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "wallet/wallet.h"
+#include "fluid.h"
 
 #include <queue>
 #include <utility>
@@ -167,6 +168,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
     memcpy(phash1, &tmp.hash1, 64);
 }
 
+#ifdef ENABLE_WALLET
 bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman)
 {
     uint256 hash = pblock->GetHash();
@@ -198,6 +200,7 @@ bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet,
 
     return true;
 }
+#endif //ENABLE_WALLET
 
 std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
@@ -207,12 +210,12 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         return nullptr;
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
 
-    // Create coinbase tx
+    // Create coinbase tx with fluid issuance
+    // TODO: Can this be made any more elegant?
     CMutableTransaction txNew;
     txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull();
     txNew.vout.resize(1);
-    txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 
     // Largest block you're willing to create:
     unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
@@ -267,15 +270,15 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
         int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
-                                ? nMedianTimePast
-                                : pblock->GetBlockTime();
+                                  ? nMedianTimePast
+                                  : pblock->GetBlockTime();
 
 
         bool fPriorityBlock = nBlockPrioritySize > 0;
         if (fPriorityBlock) {
             vecPriority.reserve(mempool.mapTx.size());
             for (CTxMemPool::indexed_transaction_set::iterator mi = mempool.mapTx.begin();
-                 mi != mempool.mapTx.end(); ++mi)
+                    mi != mempool.mapTx.end(); ++mi)
             {
                 double dPriority = mi->GetPriority(nHeight);
                 CAmount dummy;
@@ -330,12 +333,12 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
             unsigned int nTxSize = iter->GetTxSize();
             if (fPriorityBlock &&
-                (nBlockSize + nTxSize >= nBlockPrioritySize || !AllowFree(actualPriority))) {
+                    (nBlockSize + nTxSize >= nBlockPrioritySize || !AllowFree(actualPriority))) {
                 fPriorityBlock = false;
                 waitPriMap.clear();
             }
             if (!priorityTx &&
-                (iter->GetModifiedFee() < ::minRelayTxFee.GetFee(nTxSize) && nBlockSize >= nBlockMinSize)) {
+                    (iter->GetModifiedFee() < ::minRelayTxFee.GetFee(nTxSize) && nBlockSize >= nBlockMinSize)) {
                 break;
             }
             if (nBlockSize + nTxSize >= nBlockMaxSize) {
@@ -362,8 +365,8 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
 
             CAmount nTxFees = iter->GetFee();
-            // Added
             pblock->vtx.push_back(tx);
+
             pblocktemplate->vTxFees.push_back(nTxFees);
             pblocktemplate->vTxSigOps.push_back(nTxSigOps);
             nBlockSize += nTxSize;
@@ -377,7 +380,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 CAmount dummy;
                 mempool.ApplyDeltas(tx.GetHash(), dPriority, dummy);
                 LogPrintf("priority %.1f fee %s txid %s\n",
-                          dPriority , CFeeRate(iter->GetModifiedFee(), nTxSize).ToString(), tx.GetHash().ToString());
+                          dPriority, CFeeRate(iter->GetModifiedFee(), nTxSize).ToString(), tx.GetHash().ToString());
             }
 
             inBlock.insert(iter);
@@ -402,21 +405,52 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
         }
 
-        CAmount blockReward = GetPoWBlockPayment(nHeight); // Burn transaction fees
+        CDynamicAddress address;
+        CFluidEntry prevFluidIndex = pindexPrev->fluidParams;
+		CAmount fluidIssuance = 0, blockReward = getBlockSubsidyWithOverride(nHeight, prevFluidIndex.blockReward);
+        bool areWeMinting = fluid.GetMintingInstructions(pindexPrev, address, fluidIssuance);
 
         // Compute regular coinbase transaction.
-        txNew.vout[0].nValue = blockReward;
+        txNew.vout[0].scriptPubKey = scriptPubKeyIn;
+
+        if (areWeMinting) {
+            txNew.vout[0].nValue = blockReward + fluidIssuance;
+        } else {
+            txNew.vout[0].nValue = blockReward;
+        }
+		
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
+
+        CScript script;
+        
+        if (areWeMinting) {		
+            // Pick out the amount of issuance
+            txNew.vout[0].nValue -= fluidIssuance;
+
+            assert(address.IsValid());
+            if (!address.IsScript()) {
+                script = GetScriptForDestination(address.Get());
+            } else {
+                CScriptID fluidScriptID = boost::get<CScriptID>(address.Get());
+                script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
+            }
+
+            txNew.vout.push_back(CTxOut(fluidIssuance, script));
+            LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
+        }
 
         // Update coinbase transaction with additional info about dynode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutDynode, pblock->voutSuperblock);
+        FillBlockPayments(txNew, nHeight, pblock->txoutDynode, pblock->voutSuperblock);
         // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
         //             nHeight, blockReward, pblock->txoutDynode.ToString(), txNew.ToString());
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u txs: %u fees burned: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
+        LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
+ 
+        CAmount blockAmount = blockReward + fluidIssuance;
+		LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
         // Update block coinbase
         pblock->vtx[0] = txNew;
@@ -425,17 +459,17 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         // Fill in header
         pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
         UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-        pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
-        pblock->nNonce         = 0;
+        pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
+        pblock->nNonce = 0;
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(pblock->vtx[0]);
-
-        CValidationState state;
+		CValidationState state;
         if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
+            LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", txNew.ToString());
             throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
         }
     }
 
-    return std::move(pblocktemplate);
+    return pblocktemplate;
 }
 
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
@@ -532,14 +566,6 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
 	
-	#ifdef __AVX2__
-	
-	void *Ctx;
-	
-	WolfArgon2dAllocateCtx(&Ctx);
-	
-	#endif
-	
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -568,11 +594,8 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
             std::unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
             
-#ifdef ENABLE_WALLET
             pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
-#else
-            pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
-#endif
+
             if (!pblocktemplate.get())
             {
                 LogPrintf("DynamicMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
@@ -597,11 +620,7 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
                 uint256 hash;
                 while (true)
                 {
-					#ifdef __AVX2__
-                    hash = pblock->GetHashWithCtx(Ctx);
-                    #else
                     hash = pblock->GetHash();
-                    #endif
                     
                     if (UintToArith256(hash) <= hashTarget)
                     {
@@ -684,24 +703,13 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("DynamicMiner -- terminated\n");
-        
-        #ifdef __AVX2__
-        WolfArgon2dFreeCtx(Ctx);
-        #endif
         throw;
     }
     catch (const std::runtime_error &e)
     {
         LogPrintf("DynamicMiner -- runtime error: %s\n", e.what());
-        #ifdef __AVX2__
-        WolfArgon2dFreeCtx(Ctx);
-        #endif
         return;
     }
-    
-    #ifdef __AVX2__
-    WolfArgon2dFreeCtx(Ctx);
-    #endif
 }
 
 void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams, CConnman& connman)

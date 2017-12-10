@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,6 +15,62 @@
 #include "uint256.h"
 
 #include <vector>
+
+std::vector<std::string> InitialiseAddresses();
+
+class CBlockFileInfo
+{
+public:
+    unsigned int nBlocks;      //!< number of blocks stored in file
+    unsigned int nSize;        //!< number of used bytes of block file
+    unsigned int nUndoSize;    //!< number of used bytes in the undo file
+    unsigned int nHeightFirst; //!< lowest height of block in file
+    unsigned int nHeightLast;  //!< highest height of block in file
+    uint64_t nTimeFirst;       //!< earliest time of block in file
+    uint64_t nTimeLast;        //!< latest time of block in file
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+        READWRITE(VARINT(nBlocks));
+        READWRITE(VARINT(nSize));
+        READWRITE(VARINT(nUndoSize));
+        READWRITE(VARINT(nHeightFirst));
+        READWRITE(VARINT(nHeightLast));
+        READWRITE(VARINT(nTimeFirst));
+        READWRITE(VARINT(nTimeLast));
+    }
+
+     void SetNull() {
+         nBlocks = 0;
+         nSize = 0;
+         nUndoSize = 0;
+         nHeightFirst = 0;
+         nHeightLast = 0;
+         nTimeFirst = 0;
+         nTimeLast = 0;
+     }
+
+     CBlockFileInfo() {
+         SetNull();
+     }
+
+     std::string ToString() const;
+
+     /** update statistics (does not update nSize) */
+     void AddBlock(unsigned int nHeightIn, uint64_t nTimeIn) {
+         if (nBlocks==0 || nHeightFirst > nHeightIn)
+             nHeightFirst = nHeightIn;
+         if (nBlocks==0 || nTimeFirst > nTimeIn)
+             nTimeFirst = nTimeIn;
+         nBlocks++;
+         if (nHeightIn > nHeightLast)
+             nHeightLast = nHeightIn;
+         if (nTimeIn > nTimeLast)
+             nTimeLast = nTimeIn;
+     }
+};
 
 struct CDiskBlockPos
 {
@@ -94,6 +150,66 @@ enum BlockStatus {
     BLOCK_FAILED_MASK        =   BLOCK_FAILED_VALID | BLOCK_FAILED_CHILD,
 };
 
+/** Fluid Protocol Entry Corresponding to Each Block */
+class CFluidEntry
+{
+public:
+	CAmount blockReward;
+	CAmount dynodeReward;
+    unsigned int dynodeRecipientCount;
+	std::vector<std::string> fluidHistory;
+	std::vector<std::string> fluidSovereigns;
+
+	CFluidEntry() {
+        SetNull();
+    }
+
+	ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+		READWRITE(VARINT(blockReward));
+		READWRITE(VARINT(dynodeReward));
+        READWRITE(VARINT(dynodeRecipientCount));
+		READWRITE(fluidHistory);
+		READWRITE(fluidSovereigns);
+	}
+
+    inline friend bool operator==(const CFluidEntry &a, const CFluidEntry &b) {
+        return (
+			a.fluidHistory == b.fluidHistory
+			&& a.fluidSovereigns == b.fluidSovereigns
+			&& a.blockReward == b.blockReward
+			&& a.dynodeReward == b.dynodeReward
+            && a.dynodeRecipientCount == b.dynodeRecipientCount
+			);
+    }
+
+    inline CFluidEntry operator=(const CFluidEntry &b) {
+		fluidHistory = b.fluidHistory;
+		fluidSovereigns = b.fluidSovereigns;
+		blockReward = b.blockReward;
+		dynodeReward = b.dynodeReward;
+        dynodeRecipientCount = b.dynodeRecipientCount;
+		return *this;
+    }
+
+    inline friend bool operator!=(const CFluidEntry &a, const CFluidEntry &b) {
+        return !(a == b);
+    }
+    
+    inline void SetNull() { 
+		fluidHistory.clear(); 
+		fluidSovereigns = InitialiseAddresses();
+		blockReward = 0;
+		dynodeReward = 0;
+        dynodeRecipientCount = 1;
+	}
+
+    inline bool IsNull() const { 
+		return (fluidHistory.empty() && fluidSovereigns == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
+	}
+};
+
 /** The block chain is a tree shaped structure starting with the
  * genesis block at the root, with each block potentially having multiple
  * candidates to be the next block. A blockindex may have multiple pprev pointing
@@ -148,6 +264,9 @@ public:
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId;
 
+	//! Fluid Entry
+	CFluidEntry fluidParams;
+
     void SetNull()
     {
         phashBlock = NULL;
@@ -162,6 +281,7 @@ public:
         nChainTx = 0;
         nStatus = 0;
         nSequenceId = 0;
+		fluidParams.SetNull();
 
         nVersion       = 0;
         hashMerkleRoot = uint256();
@@ -309,13 +429,16 @@ public:
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nStatus));
         READWRITE(VARINT(nTx));
-        if (nStatus & (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO))
+        
+		if (nStatus & (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO))
             READWRITE(VARINT(nFile));
         if (nStatus & BLOCK_HAVE_DATA)
             READWRITE(VARINT(nDataPos));
         if (nStatus & BLOCK_HAVE_UNDO)
             READWRITE(VARINT(nUndoPos));
-
+        
+        READWRITE(fluidParams);
+		
         // block hash
         READWRITE(hash);
         // block header

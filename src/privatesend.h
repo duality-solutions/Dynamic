@@ -1,11 +1,12 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef PRIVATESEND_H
 #define PRIVATESEND_H
 
+#include "chain.h"
 #include "chainparams.h"
 #include "primitives/transaction.h"
 #include "pubkey.h"
@@ -23,7 +24,7 @@ static const int PRIVATESEND_QUEUE_TIMEOUT          = 30;
 static const int PRIVATESEND_SIGNING_TIMEOUT        = 15;
 
 //! minimum peer version accepted by mixing pool
-static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70500;
+static const int MIN_PRIVATESEND_PEER_PROTO_VERSION = 70600;
 
 static const CAmount PRIVATESEND_ENTRY_MAX_SIZE     = 9;
 
@@ -78,36 +79,22 @@ enum PoolStatusUpdate {
 class CTxPSIn : public CTxIn
 {
 public:
+    // memory only
+    CScript prevPubKey;
     bool fHasSig; // flag to indicate if signed
     int nSentTimes; //times we've sent this anonymously
 
-    CTxPSIn(const CTxIn& txin) :
+    CTxPSIn(const CTxIn& txin, const CScript& script) :
         CTxIn(txin),
+        prevPubKey(script),
         fHasSig(false),
         nSentTimes(0)
         {}
 
     CTxPSIn() :
         CTxIn(),
+        prevPubKey(),
         fHasSig(false),
-        nSentTimes(0)
-        {}
-};
-
-/** Holds an mixing output
- */
-class CTxPSOut : public CTxOut
-{
-public:
-    int nSentTimes; //times we've sent this anonymously
-
-    CTxPSOut(const CTxOut& out) :
-        CTxOut(out),
-        nSentTimes(0)
-        {}
-
-    CTxPSOut() :
-        CTxOut(),
         nSentTimes(0)
         {}
 };
@@ -117,19 +104,24 @@ class CPrivateSendEntry
 {
 public:
     std::vector<CTxPSIn> vecTxPSIn;
-    std::vector<CTxPSOut> vecTxPSOut;
+    std::vector<CTxOut> vecTxOut;
     CTransaction txCollateral;
     // memory only
     CService addr;
 
     CPrivateSendEntry() :
         vecTxPSIn(std::vector<CTxPSIn>()),
-        vecTxPSOut(std::vector<CTxPSOut>()),
+        vecTxOut(std::vector<CTxOut>()),
         txCollateral(CTransaction()),
         addr(CService())
         {}
 
-    CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral);
+    CPrivateSendEntry(const std::vector<CTxPSIn>& vecTxPSIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
+        vecTxPSIn(vecTxPSIn),
+        vecTxOut(vecTxOut),
+        txCollateral(txCollateral),
+        addr(CService())
+        {}
 
     ADD_SERIALIZE_METHODS;
 
@@ -137,7 +129,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(vecTxPSIn);
         READWRITE(txCollateral);
-        READWRITE(vecTxPSOut);
+        READWRITE(vecTxOut);
     }
 
     bool AddScriptSig(const CTxIn& txin);
@@ -280,6 +272,8 @@ public:
 class CPrivateSendBase
 {
 protected:
+    mutable CCriticalSection cs_privatesend;
+
     // The current mixing sessions in progress on the network
     std::vector<CPrivatesendQueue> vecPrivatesendQueue;
 
@@ -293,6 +287,7 @@ protected:
     CMutableTransaction finalMutableTransaction; // the finalized transaction ready for signing
 
     void SetNull();
+    void CheckQueue();
 
 public:
     int nSessionDenom; //Users must submit an denom matching this
@@ -324,6 +319,8 @@ private:
 
     static CCriticalSection cs_mappstx;
 
+    static void CheckPSTXes(int nHeight);
+
 public:
     static void InitStandardDenominations();
     static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
@@ -332,9 +329,10 @@ public:
     /// Get the denominations for a specific amount of Dynamic.
     static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
 
+    static bool IsDenominatedAmount(CAmount nInputAmount);
+
     /// Get the denominations for a list of outputs (returns a bitshifted integer)
     static int GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSingleRandomDenom = false);
-    static int GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut);
     static std::string GetDenominationsToString(int nDenom);
     static bool GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet);
 
@@ -350,9 +348,12 @@ public:
     static CAmount GetCollateralAmount() { return COLLATERAL; }
     static CAmount GetMaxCollateralAmount() { return COLLATERAL*4; }
 
+    static bool IsCollateralAmount(CAmount nInputAmount);
+
     static void AddPSTX(const CPrivatesendBroadcastTx& pstx);
     static CPrivatesendBroadcastTx GetPSTX(const uint256& hash);
-    static void CheckPSTXes(int nHeight);
+
+    static void UpdatedBlockTip(const CBlockIndex *pindex);
 
     static void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
 };

@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,9 +11,6 @@
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "core_io.h"
-#ifdef ENABLE_WALLET
-#include "dynode-sync.h"
-#endif
 #include "init.h"
 #include "validation.h"
 #include "consensus/merkle.h"
@@ -32,6 +29,10 @@
 #include "wallet/wallet.h"
 #endif
 
+#include "dynode-payments.h"
+#include "dynode-sync.h"
+#include "governance-classes.h"
+
 #include <univalue.h>
 
 #include <memory>
@@ -45,6 +46,7 @@
  * getblock
  **/
  
+#ifdef ENABLE_WALLET       
 // Key used by getwork miners.
 // Allocated in InitRPCMining, free'd in ShutdownRPCMining
 static CReserveKey* pMiningKey = NULL;
@@ -65,6 +67,7 @@ void ShutdownRPCMining()
 
     delete pMiningKey; pMiningKey = NULL;
 }
+#endif //ENABLE_WALLET       
 
 UniValue getpowrewardstart(const UniValue& params, bool fHelp)
 {
@@ -214,11 +217,8 @@ UniValue generate(const UniValue& params, bool fHelp)
     UniValue blockHashes(UniValue::VARR);
     while (nHeight < nHeightEnd)
     {
-#ifdef ENABLE_WALLET
-            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
-#else
-            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params()));
-#endif
+        std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
+
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
         CBlock *pblock = &pblocktemplate->block;
@@ -537,9 +537,11 @@ UniValue getwork(const UniValue& params, bool fHelp)
         pblock->vtx[0] = newTx;
         pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
+#ifdef ENABLE_WALLET       
         assert(pwalletMain != NULL);
         const CChainParams& chainParams = Params();
         return CheckWork(chainParams, pblock, *pwalletMain, *pMiningKey, g_connman.get());
+#endif //ENABLE_WALLET       
     }
 }
 
@@ -706,6 +708,18 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
+
+    CScript payee;
+    if (sporkManager.IsSporkActive(SPORK_8_DYNODE_PAYMENT_ENFORCEMENT)
+        && !dynodeSync.IsWinnersListSynced()
+        && !dnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading Dynode winners...");
+
+    // next block is a superblock and we need governance info to correctly construct it
+    if (sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)
+        && !dynodeSync.IsSynced()
+        && CSuperblock::IsValidBlockHeight(chainActive.Height() + 1))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is syncing with network...");
 
     static unsigned int nTransactionsUpdatedLast;
 
@@ -1058,7 +1072,7 @@ UniValue estimatepriority(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 1)
         throw std::runtime_error(
             "estimatepriority nblocks\n"
-            "\nEstimates the approximate priority a zero-fee transaction needs to begin\n"
+            "\nDEPRECATED. Estimates the approximate priority a zero-fee transaction needs to begin\n"
             "confirmation within nblocks blocks.\n"
             "\nArguments:\n"
             "1. nblocks     (numeric)\n"
@@ -1121,7 +1135,7 @@ UniValue estimatesmartpriority(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 1)
         throw std::runtime_error(
             "estimatesmartpriority nblocks\n"
-            "\nWARNING: This interface is unstable and may disappear or change!\n"
+            "\nDEPRECATED. WARNING: This interface is unstable and may disappear or change!\n"
             "\nEstimates the approximate priority a zero-fee transaction needs to begin\n"
             "confirmation within nblocks blocks if possible and return the number of blocks\n"
             "for which the estimate is valid.\n"

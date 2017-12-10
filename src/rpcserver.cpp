@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -407,19 +407,19 @@ static const CRPCCommand vRPCCommands[] =
     { "Wallet",             "walletlock",             &walletlock,             true  },
     { "Wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
     { "Wallet",             "walletpassphrase",       &walletpassphrase,       true  },
-     /* Decentralised DNS */
-    { "DDNS",               "name_scan",              &name_scan,              true  },
-    { "DDNS",               "name_filter",            &name_filter,            true  },
-    { "DDNS",               "name_show",              &name_show,              true  },
-    { "DDNS",               "name_history",           &name_history,           true  },
-    { "DDNS",               "name_mempool",           &name_mempool,           true  },
-    { "DDNS",               "name_new",               &name_new,               true  },
-    { "DDNS",               "name_update",            &name_update,            true  },
-    { "DDNS",               "name_delete",            &name_delete,            true  },
-    { "DDNS",               "name_list",              &name_list,              true  },
+
+    /* Fluid Protocol */
+    { "Protocol",           "sendfluidtransaction",	  &sendfluidtransaction,   true  },
+    { "Protocol",           "signtoken",			  &signtoken,			   true  },
+    { "Protocol",           "consenttoken",			  &consenttoken,		   true  },
+    { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
+    { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
+    { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
+    { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
+    { "Protocol",           "getfluidhistoryraw",	  &getfluidhistoryraw,     true  },
+    { "Protocol",           "getfluidsovereigns",	      &getfluidsovereigns,     true  },
+    { "Protocol",           "gettime",	      		  &gettime,   	   		   true  },
 #endif // ENABLE_WALLET
-    /* Not shown in help */
-    { "Hidden", "name_debug", &name_debug, false },
 };
 
 CRPCTable::CRPCTable()

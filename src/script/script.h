@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2009-2017 The Syscoin Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,6 +21,15 @@
 #include <string>
 #include <vector>
 
+// Identification codes for Fluid Protocol Transactions
+enum ProtocolCodes {
+	MINT_TX 			= 1,
+	DYNODE_MODFIY_TX 	= 2,
+	MINING_MODIFY_TX 	= 3,
+	
+	NO_TX = 0
+};
+
 // Maximum number of bytes pushable to the stack
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520;
 
@@ -27,6 +38,9 @@ static const int MAX_OPS_PER_SCRIPT = 201;
 
 // Maximum number of public keys per multisig
 static const int MAX_PUBKEYS_PER_MULTISIG = 20;
+
+// Maximum script length in bytes
+static const int MAX_SCRIPT_SIZE = 10000;
 
 // Threshold for nLockTime: below this value it is interpreted as block number,
 // otherwise as UNIX timestamp.
@@ -175,22 +189,57 @@ enum opcodetype
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
-
     // template matching params
     OP_SMALLINTEGER = 0xfa,
     OP_PUBKEYS = 0xfb,
     OP_PUBKEYHASH = 0xfd,
     OP_PUBKEY = 0xfe,
 
+	// Fluid Autonomus Monetary Management System (FAM2S)
+    OP_MINT = 0xc0,
+	OP_REWARD_DYNODE = 0xc3,
+	OP_REWARD_MINING = 0xc4,
+    OP_SWAP_SOVEREIGN_ADDRESS = 0xc5,
+    OP_UPDATE_FEES = 0xc6,
+    OP_FREEZE_ADDRESS = 0xc7,
+    OP_RELEASE_ADDRESS = 0xc8,
+
+    // identity alias system
+    OP_IDENTITY_NEW = 0xd1,
+    OP_IDENTITY_DELETE = 0xd2,
+    OP_IDENTITY_PAYMENT = 0xd3,
+    OP_IDENTITY_ACTIVATE = 0xd4,
+    OP_IDENTITY_UPDATE = 0xd5,
+    OP_IDENTITY_MULTISIG = 0xd6,
+
+    // distributed exchange
+    OP_OFFER_ACTIVATE = 0x04,
+    OP_OFFER_UPDATE = 0x05,
+    OP_OFFER_ACCEPT = 0x06,
+    OP_OFFER_ACCEPT_FEEDBACK = 0x07,
+
+    // distributed licensing system
+    OP_CERT_ACTIVATE = 0x08,
+    OP_CERT_UPDATE = 0x09,
+    OP_CERT_TRANSFER = 0x0a,
+
+    // distributed escrow system
+    OP_ESCROW_ACTIVATE = 0x0b,
+    OP_ESCROW_RELEASE = 0x0c,
+    OP_ESCROW_REFUND = 0x0d,
+    OP_ESCROW_COMPLETE = 0x0e,
+
+    // encrypted messaging
+    OP_MESSAGE_ACTIVATE = 0x0f,
+
+    // dynamic extended reserved 
+    OP_DYNAMIC_EXTENDED = 0x10,
+
+    // invalid operation code
     OP_INVALIDOPCODE = 0xff,
 };
 
 const char* GetOpName(opcodetype opcode);
-
-static const int OP_NAME_NEW = 0x01;
-static const int OP_NAME_UPDATE = 0x02;
-static const int OP_NAME_DELETE = 0x03;
-static const int OP_NAME_MULTISIG = 0x04;
 
 class scriptnum_error : public std::runtime_error
 {
@@ -623,7 +672,6 @@ public:
      */
     unsigned int GetSigOpCount(const CScript& scriptSig) const;
 
-    bool IsNormalPaymentScript() const;
     bool IsPayToPublicKeyHash() const;
 
     bool IsPayToScriptHash() const;
@@ -639,7 +687,25 @@ public:
      */
     bool IsUnspendable() const
     {
-        return (size() > 0 && *begin() == OP_RETURN);
+        return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
+    }
+
+	bool IsProtocolInstruction(ProtocolCodes code) const
+    {
+		switch(code) {
+			case MINT_TX:
+				return (size() > 0 && *begin() == OP_MINT);
+				break;
+			case DYNODE_MODFIY_TX:
+				return (size() > 0 && *begin() == OP_REWARD_DYNODE);
+				break;
+			case MINING_MODIFY_TX:
+				return (size() > 0 && *begin() == OP_REWARD_MINING);
+				break;
+			default:
+				throw std::runtime_error("Protocol code is invalid!");
+		}
+		return false;
     }
 
     void clear()

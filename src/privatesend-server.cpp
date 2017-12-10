@@ -1,6 +1,8 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "privatesend-server.h"
 
 #include "activedynode.h"
@@ -9,6 +11,7 @@
 #include "init.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "script/interpreter.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -106,7 +109,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if(!psq.fReady) {
             BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
                 if(q.vin == psq.vin) {
-                    // no way same mn can send another "not yet ready" psq this soon
+                    // no way same dn can send another "not yet ready" psq this soon
                     LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", dnInfo.addr.ToString());
                     return;
                 }
@@ -152,14 +155,14 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
-        if(entry.vecTxPSOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
-            LogPrintf("PSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxPSOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
+        if(entry.vecTxOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
+            LogPrintf("PSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
             PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM, connman);
             return;
         }
 
         //do we have the same denominations as the current session?
-        if(!IsOutputsCompatibleWithSessionDenom(entry.vecTxPSOut)) {
+        if(!IsOutputsCompatibleWithSessionDenom(entry.vecTxOut)) {
             LogPrintf("PSVIN -- not compatible with existing transactions!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_EXISTING_TX, connman);
             return;
@@ -172,7 +175,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
             CMutableTransaction tx;
 
-            BOOST_FOREACH(const CTxOut txout, entry.vecTxPSOut) {
+            for (const auto& txout : entry.vecTxOut) {
                 nValueOut += txout.nValue;
                 tx.vout.push_back(txout);
 
@@ -181,7 +184,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                     PushStatus(pfrom, STATUS_REJECTED, ERR_NON_STANDARD_PUBKEY, connman);
                     return;
                 }
-                if(!txout.scriptPubKey.IsNormalPaymentScript()) {
+                if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
                     LogPrintf("PSVIN -- invalid script! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
                     PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_SCRIPT, connman);
                     return;
@@ -193,9 +196,9 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
 
                 LogPrint("privatesend", "PSVIN -- txin=%s\n", txin.ToString());
 
-                CCoins coins;
-                if(GetUTXOCoins(txin.prevout, coins)) {
-                    nValueIn += coins.vout[txin.prevout.n].nValue;
+                Coin coin;
+                if(GetUTXOCoin(txin.prevout, coin)) {
+                    nValueIn += coin.out.nValue;
                 } else {
                     LogPrintf("PSVIN -- missing input! tx=%s", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_MISSING_TX, connman);
@@ -310,8 +313,8 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
 
     // make our new transaction
     for(int i = 0; i < GetEntriesCount(); i++) {
-        BOOST_FOREACH(const CTxPSOut& txpsout, vecEntries[i].vecTxPSOut)
-            txNew.vout.push_back(txpsout);
+        for (const auto& txout : vecEntries[i].vecTxOut)
+            txNew.vout.push_back(txout);
 
         BOOST_FOREACH(const CTxPSIn& txpsin, vecEntries[i].vecTxPSIn)
             txNew.vin.push_back(txpsin);
@@ -494,19 +497,7 @@ void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
 //
 void CPrivateSendServer::CheckTimeout(CConnman& connman)
 {
-    {
-        TRY_LOCK(cs_privatesend, lockPS);
-        if(!lockPS) return; // it's ok to fail here, we run this quite frequently
-
-        // check mixing queue objects for timeouts
-        std::vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
-        while(it != vecPrivatesendQueue.end()) {
-            if((*it).IsExpired()) {
-                LogPrint("privatesend", "CPrivateSendServer::CheckTimeout -- Removing expired queue (%s)\n", (*it).ToString());
-                it = vecPrivatesendQueue.erase(it);
-            } else ++it;
-        }
-    }
+    CheckQueue();
 
     if(!fDyNode) return;
 
@@ -555,8 +546,8 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
 
     BOOST_FOREACH(CPrivateSendEntry& entry, vecEntries) {
 
-        BOOST_FOREACH(const CTxPSOut& txpsout, entry.vecTxPSOut)
-            txNew.vout.push_back(txpsout);
+        for (const auto& txout : entry.vecTxOut)
+            txNew.vout.push_back(txout);
 
         BOOST_FOREACH(const CTxPSIn& txpsin, entry.vecTxPSIn) {
             txNew.vin.push_back(txpsin);
@@ -657,7 +648,6 @@ bool CPrivateSendServer::AddScriptSig(const CTxIn& txinNew)
     BOOST_FOREACH(CTxIn& txin, finalMutableTransaction.vin) {
         if(txinNew.prevout == txin.prevout && txin.nSequence == txinNew.nSequence) {
             txin.scriptSig = txinNew.scriptSig;
-            txin.prevPubKey = txinNew.prevPubKey;
             LogPrint("privatesend", "CPrivateSendServer::AddScriptSig -- adding to finalMutableTransaction, scriptSig=%s\n", ScriptToAsmStr(txinNew.scriptSig).substr(0,24));
         }
     }
@@ -682,14 +672,14 @@ bool CPrivateSendServer::IsSignaturesComplete()
     return true;
 }
 
-bool CPrivateSendServer::IsOutputsCompatibleWithSessionDenom(const std::vector<CTxPSOut>& vecTxPSOut)
+bool CPrivateSendServer::IsOutputsCompatibleWithSessionDenom(const std::vector<CTxOut>& vecTxOut)
 {
-    if(CPrivateSend::GetDenominations(vecTxPSOut) == 0) return false;
+    if(CPrivateSend::GetDenominations(vecTxOut) == 0) return false;
 
     BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-        LogPrintf("CPrivateSendServer::IsOutputsCompatibleWithSessionDenom -- vecTxPSOut denom %d, entry.vecTxPSOut denom %d\n",
-                CPrivateSend::GetDenominations(vecTxPSOut), CPrivateSend::GetDenominations(entry.vecTxPSOut));
-        if(CPrivateSend::GetDenominations(vecTxPSOut) != CPrivateSend::GetDenominations(entry.vecTxPSOut)) return false;
+        LogPrintf("CPrivateSendServer::IsOutputsCompatibleWithSessionDenom -- vecTxOut denom %d, entry.vecTxOut denom %d\n",
+                CPrivateSend::GetDenominations(vecTxOut), CPrivateSend::GetDenominations(entry.vecTxOut));
+        if(CPrivateSend::GetDenominations(vecTxOut) != CPrivateSend::GetDenominations(entry.vecTxOut)) return false;
     }
 
     return true;

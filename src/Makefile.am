@@ -80,7 +80,6 @@ DYNAMIC_CORE_H = \
   cachemultimap.h \
   chain.h \
   chainparams.h \
-  checkforks.h \
   chainparamsbase.h \
   chainparamsseeds.h \
   checkpoints.h \
@@ -100,15 +99,13 @@ DYNAMIC_CORE_H = \
   core_io.h \
   core_memusage.h \
   dbwrapper.h \
-  dns/dns.h \
-  dns/dyndns.h \
-  dns/hooks.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
+  fluid.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -210,16 +207,20 @@ libdynamic_util_a-clientversion.$(OBJEXT): obj/build.h
 libdynamic_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libdynamic_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_server_a_SOURCES = \
+  activedynode.cpp \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  checkforks.cpp \
   dbwrapper.cpp \
-  dns/dns.cpp \
-  dns/dyndns.cpp \
+  dynode.cpp \
+  dynode-payments.cpp\
+  dynode-sync.cpp \
+  dynodeconfig.cpp \
+  dynodeman.cpp \
+  fluid.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -229,6 +230,7 @@ libdynamic_server_a_SOURCES = \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
+  instantsend.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
   miner.cpp \
@@ -242,6 +244,7 @@ libdynamic_server_a_SOURCES = \
   pow.cpp \
   privatesend.cpp \
   privatesend-server.cpp \
+  psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
   rpcdynode.cpp \
@@ -251,8 +254,10 @@ libdynamic_server_a_SOURCES = \
   rpcnet.cpp \
   rpcrawtransaction.cpp \
   rpcserver.cpp \
+  rpcfluid.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
+  spork.cpp \
   timedata.cpp \
   torcontrol.cpp \
   txdb.cpp \
@@ -280,18 +285,10 @@ endif
 libdynamic_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 libdynamic_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdynamic_wallet_a_SOURCES = \
-  activedynode.cpp \
-  dynode.cpp \
-  dynode-payments.cpp \
-  dynode-sync.cpp \
-  dynodeconfig.cpp \
-  dynodeman.cpp \
-  instantsend.cpp \
   keepass.cpp \
   policy/rbf.cpp \
   privatesend-client.cpp \
   privatesend-util.cpp \
-  psnotificationinterface.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/rpcdump.cpp \
@@ -363,7 +360,6 @@ libdynamic_common_a_SOURCES = \
   script/script_error.cpp \
   script/sign.cpp \
   script/standard.cpp \
-  spork.cpp \
   $(DYNAMIC_CORE_H)
 
 # util: shared between all executables.
@@ -421,6 +417,7 @@ dynamicd_LDADD = \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
   $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \    
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 

@@ -1,16 +1,21 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_ACTIVEDYNODE_H
 #define DYNAMIC_ACTIVEDYNODE_H
 
+#include "chainparams.h"
 #include "key.h"
 #include "net.h"
-#include "wallet/wallet.h"
+#include "primitives/transaction.h"
+
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"     
+#endif //ENABLE_WALLET
 
 class CActiveDynode;
 
@@ -28,8 +33,7 @@ class CActiveDynode
 public:
     enum dynode_type_enum_t {
         DYNODE_UNKNOWN = 0,
-        DYNODE_REMOTE  = 1,
-        DYNODE_LOCAL   = 2
+        DYNODE_REMOTE  = 1
     };
 
 private:
@@ -81,7 +85,6 @@ public:
 private:
     void ManageStateInitial(CConnman& connman);
     void ManageStateRemote();
-    void ManageStateLocal(CConnman& connman);
 };
 
 #endif // DYNAMIC_ACTIVEDYNODE_H

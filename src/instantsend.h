@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef INSTANTX_H
-#define INSTANTX_H
+
+#ifndef INSTANTSEND_H
+#define INSTANTSEND_H
 
 #include "chain.h"
 #include "net.h"
@@ -28,7 +30,7 @@ extern CInstantSend instantsend;
 static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 6;
 static const int DEFAULT_INSTANTSEND_DEPTH          = 5;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70500;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70600;
 
 // For how long we are going to accept votes/locks
 // after we saw the first one for a specific transaction
@@ -259,4 +261,4 @@ public:
     void Relay(CConnman& connman) const;
 };
 
-#endif
+#endif // INSTANTSEND_H

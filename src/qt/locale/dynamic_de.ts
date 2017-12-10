@@ -3761,8 +3761,8 @@ zum Beispiel: alertnotify=echo %%s | mail -s \"DYN Alert\" admin@foo.com</transl
         <translation>Erlaubte Gegenstellen können nicht wegen DoS ausgeschlossen werden und ihre Transaktionen werden immer weitergeleitet, sogar wenn sie schon im Memory-Pool sind. Dies ist z.B. für Gateways nützlich.</translation>
     </message>
     <message>
-        <source>(32300 could be used only on mainnet)</source>
-        <translation>(32300 kann nur im Standardnetz benutzt werden)</translation>
+        <source>(33300 could be used only on mainnet)</source>
+        <translation>(33300 kann nur im Standardnetz benutzt werden)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -4180,8 +4180,8 @@ DYN Core wird heruntergefahren.</translation>
         <translation>dynode-Geheimschlüssel (dynodeprivkey) ist ungültig. Siehe Dokumentation. </translation>
     </message>
     <message>
-        <source>(must be 32300 for mainnet)</source>
-        <translation>(muss für Standardnetz 32300 sein)</translation>
+        <source>(must be 33300 for mainnet)</source>
+        <translation>(muss für Standardnetz 33300 sein)</translation>
     </message>
     <message>
         <source>Can't find random dynode.</source>

@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,7 +28,7 @@ private:
 
     static const int LAST_PAID_SCAN_BLOCKS      = 100;
 
-    static const int MIN_POSE_PROTO_VERSION     = 70500;
+    static const int MIN_POSE_PROTO_VERSION     = 70600;
     static const int MAX_POSE_CONNECTIONS       = 10;
     static const int MAX_POSE_RANK              = 10;
     static const int MAX_POSE_BLOCKS            = 10;
@@ -174,7 +174,6 @@ public:
 
     bool GetDynodeRanks(rank_pair_vec_t& vecDynodeRanksRet, int nBlockHeight = -1, int nMinProtocol = 0);
     bool GetDynodeRank(const COutPoint &outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
-    bool GetDynodeByRank(int nRank, dynode_info_t& dnInfoRet, int nBlockHeight = -1, int nMinProtocol = 0);
 
     void ProcessDynodeConnections(CConnman& connman);
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();
@@ -224,7 +223,7 @@ public:
     void CheckDynode(const CPubKey& pubKeyDynode, bool fForce);
 
     bool IsDynodePingedWithin(const COutPoint& outpoint, int nSeconds, int64_t nTimeToCheckAt = -1);
-    void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& mnp);
+    void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& dnp);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
 

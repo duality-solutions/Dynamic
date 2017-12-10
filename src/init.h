@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,14 +11,18 @@
 #include <string>
 
 class CScheduler;
+#ifdef ENABLE_WALLET		
 class CWallet;
+#endif //ENABLE_WALLET		
 
 namespace boost
 {
 class thread_group;
 } // namespace boost
 
+#ifdef ENABLE_WALLET		
 extern CWallet* pwalletMain;
+#endif //ENABLE_WALLET		
 
 void StartShutdown();
 bool ShutdownRequested();

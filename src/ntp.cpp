@@ -1,3 +1,8 @@
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2013-2016 The NovaCoin developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -8,8 +13,6 @@
 #include "timedata.h"
 #include "utiltime.h"
 #include "init.h"
-
-using namespace std;
 
 extern int GetRandInt(int nMax);
 
@@ -77,7 +80,7 @@ struct pkt {
 
 const int nServersCount = 162;
 
-string NtpServers[162] = {
+std::string NtpServers[162] = {
     // Microsoft
     "time.windows.com",
 
@@ -275,17 +278,17 @@ string NtpServers[162] = {
     // ... To be continued
 };
 
-bool InitWithHost(const string &strHostName, SOCKET &sockfd, socklen_t &servlen, struct sockaddr *pcliaddr) {
+bool InitWithHost(const std::string &strHostName, SOCKET &sockfd, socklen_t &servlen, struct sockaddr *pcliaddr) {
   
     sockfd = INVALID_SOCKET;
 
-    vector<CNetAddr> vIP;
+    std::vector<CNetAddr> vIP;
     bool fRet = LookupHost(strHostName.c_str(), vIP, 10, true);
     if (!fRet) {
         return false;
     }
 
-    struct sockaddr_in servaddr = {};
+    struct sockaddr_in servaddr;
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(123);
 
@@ -395,7 +398,7 @@ int64_t NtpGetTime(CNetAddr& ip) {
     return nTime;
 }
 
-int64_t NtpGetTime(const string &strHostName)
+int64_t NtpGetTime(const std::string &strHostName)
 {
     struct sockaddr cliaddr;
 
@@ -431,10 +434,10 @@ int64_t NtpGetTime() {
 
 // NTP server, which we unconditionally trust. This may be your own installation of ntpd somewhere, for example. 
 // "localhost" means "trust no one"
-string strTrustedUpstream = "localhost";
+std::string strTrustedUpstream = "localhost";
 
 // Current offset
-int64_t nNtpOffset = numeric_limits<int64_t>::max();
+int64_t nNtpOffset = std::numeric_limits<int64_t>::max();
 
 int64_t GetNtpOffset() {
     return nNtpOffset;
@@ -445,7 +448,7 @@ void ThreadNtpSamples() {
 
     LogPrintf("Trying to find NTP server at localhost...\n");
 
-    string strLocalHost = "127.0.0.1";
+    std::string strLocalHost = "127.0.0.1";
     if (NtpGetTime(strLocalHost) == GetTime()) {
         LogPrintf("There is NTP server active at localhost,  we don't need NTP thread.\n");
 
@@ -466,14 +469,14 @@ void ThreadNtpSamples() {
             // Trying to get new offset sample from trusted NTP server.
             int64_t nClockOffset = NtpGetTime(strTrustedUpstream) - GetTime();
 
-            if (abs(nClockOffset) < nMaxOffset) {
+            if (llabs(nClockOffset) < nMaxOffset) {
                 // Everything seems right, remember new trusted offset.
                 LogPrintf("ThreadNtpSamples: new offset sample from %s, offset=%u.\n", strTrustedUpstream.c_str(), nClockOffset);
                 nNtpOffset = nClockOffset;
             }
             else {
                 // Something went wrong, disable trusted offset sampling.
-                nNtpOffset = numeric_limits<int64_t>::max();
+                nNtpOffset = std::numeric_limits<int64_t>::max();
                 strTrustedUpstream = "localhost";
 
                 int nSleepMinutes = 1 + GetRandInt(9); // Sleep for 1-10 minutes.
@@ -491,7 +494,7 @@ void ThreadNtpSamples() {
                 CNetAddr ip;
                 int64_t nClockOffset = NtpGetTime(ip) - GetTime();
 
-                if (abs(nClockOffset) < nMaxOffset) { // Skip the deliberately wrong timestamps
+                if (llabs(nClockOffset) < nMaxOffset) { // Skip the deliberately wrong timestamps
                     LogPrintf("ThreadNtpSamples: new offset sample from %s, offset=%u\n", ip.ToString().c_str(), nClockOffset);
                     vTimeOffsets.input(nClockOffset);
                 }
@@ -502,7 +505,7 @@ void ThreadNtpSamples() {
             }
             else {
                 // Not enough offsets yet, try to collect additional samples later.
-                nNtpOffset = numeric_limits<int64_t>::max();
+                nNtpOffset = std::numeric_limits<int64_t>::max();
                 int nSleepMinutes = 1 + GetRandInt(4); // Sleep for 1-5 minutes.
                 for (int i = 0; i < nSleepMinutes * 60 && !ShutdownRequested(); i++) 
                     MilliSleep(1000);
@@ -510,13 +513,13 @@ void ThreadNtpSamples() {
             }
         }
 
-        if (GetNodesOffset() == numeric_limits<int64_t>::max() && abs(nNtpOffset) > 40 * 60)
+        if (GetNodesOffset() == std::numeric_limits<int64_t>::max() && std::llabs(nNtpOffset) > 40 * 60)
         {
             // If there is not enough node offsets data and NTP time offset is greater than 40 minutes then give a warning.
-            string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
+            std::string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
             strMiscWarning = strMessage;
             LogPrintf("*** %s\n", strMessage.c_str());
-            uiInterface.ThreadSafeMessageBox(strMessage+" ", string("Dynamic"), CClientUIInterface::BTN_OK | CClientUIInterface::ICON_WARNING);
+            uiInterface.ThreadSafeMessageBox(strMessage+" ", std::string("Dynamic"), CClientUIInterface::BTN_OK | CClientUIInterface::ICON_WARNING);
         }
 
         LogPrintf("nNtpOffset = %u (+%u minutes)\n", nNtpOffset, nNtpOffset/60);

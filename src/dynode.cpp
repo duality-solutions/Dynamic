@@ -1,17 +1,25 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "dynode.h"
 
 #include "activedynode.h"
+#include "base58.h"
+#include "chain.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "fluid.h"
 #include "init.h"
 #include "messagesigner.h"
+#include "script/standard.h"
 #include "util.h"
+#include "validation.h"
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"
+#endif // ENABLE_WALLET
 
 #include <boost/lexical_cast.hpp>
 
@@ -106,16 +114,16 @@ CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, in
 {
     AssertLockHeld(cs_main);
 
-    CCoins coins;
-    if(!GetUTXOCoins(outpoint, coins)) {
+    Coin coin;
+    if(!GetUTXOCoin(outpoint, coin)) {
         return COLLATERAL_UTXO_NOT_FOUND;
     }
 
-    if(coins.vout[outpoint.n].nValue != 1000 * COIN) {
+    if(coin.out.nValue != 1000 * COIN) {
         return COLLATERAL_INVALID_AMOUNT;
     }
 
-    nHeightRet = coins.nHeight;
+    nHeightRet = coin.nHeight;
     return COLLATERAL_OK;
 }
 
@@ -306,7 +314,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
             if(!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
 
-            CAmount nDynodePayment = GetDynodePayment();
+            CAmount nDynodePayment = getDynodeSubsidyWithOverride(BlockReading->fluidParams.dynodeReward);
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
                 if(dnpayee == txout.scriptPubKey && nDynodePayment == txout.nValue) {
@@ -326,6 +334,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
     // LogPrint("Dynode", "CDynode::UpdateLastPaidBlock -- searching for block with payment to %s -- keeping old %d\n", vin.prevout.ToStringShort(), nBlockLastPaid);
 }
 
+#ifdef ENABLE_WALLET
 bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline)
 {
     COutPoint outpoint;
@@ -398,6 +407,7 @@ bool CDynodeBroadcast::Create(const COutPoint& outpoint, const CService& service
 
     return true;
 }
+#endif // ENABLE_WALLET
 
 bool CDynodeBroadcast::SimpleCheck(int& nDos)
 {

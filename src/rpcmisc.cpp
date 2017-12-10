@@ -1,17 +1,14 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
+// Copyright (c) 2009-2017 The Bitcoin Developers
+// Copyright (c) 2009-2017 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
 #include "clientversion.h"
-#ifdef ENABLE_WALLET
 #include "dynode-sync.h"
-#endif
 #include "init.h"
-#include "validation.h"
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"
@@ -20,6 +17,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "validation.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
@@ -241,7 +239,9 @@ UniValue spork(const UniValue& params, bool fHelp)
                 ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.IsSporkActive(nSporkID)));
         }
         return ret;
-    } else if (params.size() == 2){
+    }
+#ifdef ENABLE_WALLET
+    else if (params.size() == 2){
         int nSporkID = sporkManager.GetSporkIDByName(params[0].get_str());
         if(nSporkID == -1){
             return "Invalid spork name";
@@ -265,9 +265,15 @@ UniValue spork(const UniValue& params, bool fHelp)
 
     throw std::runtime_error(
         "spork <name> [<value>]\n"
-        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active"
-        "<value> is a epoch datetime to enable or disable spork"
+        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active\n"
+        "<value> is a epoch datetime to enable or disable spork\n"
         + HelpRequiringPassphrase());
+#else // ENABLE_WALLET
+    throw std::runtime_error(
+        "spork <name>\n"
+        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active\n");
+#endif // ENABLE_WALLET
+
 }
 
 UniValue validateaddress(const UniValue& params, bool fHelp)

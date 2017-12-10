@@ -139,6 +139,15 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP9                   : return "OP_NOP9";
     case OP_NOP10                  : return "OP_NOP10";
 
+	// fluid
+    case OP_MINT                   : return "OP_MINT";
+    case OP_REWARD_DYNODE          : return "OP_REWARD_DYNODE";
+    case OP_REWARD_MINING          : return "OP_REWARD_MINING";
+    case OP_SWAP_SOVEREIGN_ADDRESS : return "OP_SWAP_SOVEREIGN_ADDRESS";
+    case OP_UPDATE_FEES            : return "OP_UPDATE_FEES";
+    case OP_FREEZE_ADDRESS         : return "OP_FREEZE_ADDRESS";
+    case OP_RELEASE_ADDRESS        : return "OP_RELEASE_ADDRESS";
+
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
     // Note:
@@ -197,30 +206,6 @@ unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
     /// ... and return its opcount:
     CScript subscript(data.begin(), data.end());
     return subscript.GetSigOpCount(true);
-}
-
-bool CScript::IsNormalPaymentScript() const
-{
-    if(this->size() != 25) return false;
-
-    std::string str;
-    opcodetype opcode;
-    const_iterator pc = begin();
-    int i = 0;
-    while (pc < end())
-    {
-        GetOp(pc, opcode);
-
-        if(     i == 0 && opcode != OP_DUP) return false;
-        else if(i == 1 && opcode != OP_HASH160) return false;
-        else if(i == 3 && opcode != OP_EQUALVERIFY) return false;
-        else if(i == 4 && opcode != OP_CHECKSIG) return false;
-        else if(i == 5) return false;
-
-        i++;
-    }
-
-    return true;
 }
 
 bool CScript::IsPayToPublicKeyHash() const

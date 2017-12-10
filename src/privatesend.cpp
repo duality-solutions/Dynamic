@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,24 +21,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-CPrivateSendEntry::CPrivateSendEntry(const std::vector<CTxIn>& vecTxIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
-    txCollateral(txCollateral), addr(CService())
-{
-    BOOST_FOREACH(CTxIn txin, vecTxIn)
-        vecTxPSIn.push_back(txin);
-    BOOST_FOREACH(CTxOut txout, vecTxOut)
-        vecTxPSOut.push_back(txout);
-}
-
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
-    BOOST_FOREACH(CTxPSIn& txdsin, vecTxPSIn) {
-        if(txdsin.prevout == txin.prevout && txdsin.nSequence == txin.nSequence) {
-            if(txdsin.fHasSig) return false;
+    BOOST_FOREACH(CTxPSIn& txpsin, vecTxPSIn) {
+        if(txpsin.prevout == txin.prevout && txpsin.nSequence == txin.nSequence) {
+            if(txpsin.fHasSig) return false;
 
-            txdsin.scriptSig = txin.scriptSig;
-            txdsin.prevPubKey = txin.prevPubKey;
-            txdsin.fHasSig = true;
+            txpsin.scriptSig = txin.scriptSig;
+            txpsin.fHasSig = true;
 
             return true;
         }
@@ -129,6 +120,21 @@ void CPrivateSendBase::SetNull()
     nTimeLastSuccessfulStep = GetTimeMillis();
 }
 
+void CPrivateSendBase::CheckQueue()
+{
+    TRY_LOCK(cs_privatesend, lockPS);
+    if(!lockPS) return; // it's ok to fail here, we run this quite frequently
+
+    // check mixing queue objects for timeouts
+    std::vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
+    while(it != vecPrivatesendQueue.end()) {
+        if((*it).IsExpired()) {
+            LogPrint("privatesend", "CPrivateSendBase::%s -- Removing expired queue (%s)\n", __func__, (*it).ToString());
+            it = vecPrivatesendQueue.erase(it);
+        } else ++it;
+    }
+}
+
 std::string CPrivateSendBase::GetStateString() const
 {
     switch(nState) {
@@ -183,19 +189,19 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     BOOST_FOREACH(const CTxOut txout, txCollateral.vout) {
         nValueOut += txout.nValue;
 
-        if(!txout.scriptPubKey.IsNormalPaymentScript()) {
+        if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
             LogPrintf ("CPrivateSend::IsCollateralValid -- Invalid Script, txCollateral=%s", txCollateral.ToString());
             return false;
         }
     }
 
     BOOST_FOREACH(const CTxIn txin, txCollateral.vin) {
-        CCoins coins;
-        if(!GetUTXOCoins(txin.prevout, coins)) {
+        Coin coin;
+        if(!GetUTXOCoin(txin.prevout, coin)) {
             LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- Unknown inputs in collateral transaction, txCollateral=%s", txCollateral.ToString());
             return false;
         }
-        nValueIn += coins.vout[txin.prevout.n].nValue;
+        nValueIn += coin.out.nValue;
     }
 
     //collateral transactions are required to pay out a small fee to the miners
@@ -216,6 +222,14 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     }
 
     return true;
+}
+
+bool CPrivateSend::IsCollateralAmount(CAmount nInputAmount)
+{
+    // collateral inputs should always be a 2x..4x of mixing collateral
+    return  nInputAmount >  GetCollateralAmount() &&
+            nInputAmount <= GetMaxCollateralAmount() &&
+            nInputAmount %  GetCollateralAmount() == 0;
 }
 
 /*  Create a nice string to show the denominations
@@ -248,16 +262,6 @@ std::string CPrivateSend::GetDenominationsToString(int nDenom)
     }
 
     return strDenom;
-}
-
-int CPrivateSend::GetDenominations(const std::vector<CTxPSOut>& vecTxPSOut)
-{
-    std::vector<CTxOut> vecTxOut;
-
-    BOOST_FOREACH(CTxPSOut out, vecTxPSOut)
-        vecTxOut.push_back(out);
-
-    return GetDenominations(vecTxOut);
 }
 
 /*  Return a bitshifted integer representing the denominations in this list
@@ -337,6 +341,14 @@ int CPrivateSend::GetDenominationsByAmounts(const std::vector<CAmount>& vecAmoun
     return GetDenominations(vecTxOut, true);
 }
 
+bool CPrivateSend::IsDenominatedAmount(CAmount nInputAmount)
+{
+    for (const auto& nDenomValue : vecStandardDenominations)
+        if(nInputAmount == nDenomValue)
+            return true;
+    return false;
+}
+
 std::string CPrivateSend::GetMessageByID(PoolMessage nMessageID)
 {
     switch (nMessageID) {
@@ -391,6 +403,13 @@ void CPrivateSend::CheckPSTXes(int nHeight)
         }
     }
     LogPrint("privatesend", "CPrivateSend::CheckPSTXes -- mapPSTX.size()=%llu\n", mapPSTX.size());
+}
+
+void CPrivateSend::UpdatedBlockTip(const CBlockIndex *pindex)
+{
+    if(pindex && !fLiteMode && dynodeSync.IsDynodeListSynced()) {
+        CheckPSTXes(pindex->nHeight);
+    }
 }
 
 void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)

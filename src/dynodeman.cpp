@@ -1,5 +1,5 @@
-// Copyright (c) 2014-2017 The Dash Core Developers
 // Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,7 +12,10 @@
 #include "dynode-sync.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
+#ifdef ENABLE_WALLET
 #include "privatesend-client.h"
+#endif // ENABLE_WALLET
+#include "script/standard.h"
 #include "util.h"
 
 /** Dynode manager */
@@ -479,10 +482,14 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
     dnInfoRet = dynode_info_t();
     nCountRet = 0;
 
+    int nCheckBlockHeight = nBlockHeight - 101;
+    if (nCheckBlockHeight < 1) {
+        return false;
+    }
+
     if (!dynodeSync.IsWinnersListSynced()) {
         // without winner list we can't reliably find the next winner anyway
         return false;
-
     }
 
     // Need LOCK2 here to ensure consistent locking order because the GetBlockHash call below locks cs_main
@@ -524,8 +531,8 @@ bool CDynodeMan::GetNextDynodeInQueueForPayment(int nBlockHeight, bool fFilterSi
     sort(vecDynodeLastPaid.begin(), vecDynodeLastPaid.end(), CompareLastPaidBlock());
 
     uint256 blockHash;
-    if(!GetBlockHash(blockHash, nBlockHeight - 101)) {
-        LogPrintf("CDynode::GetNextDynodeInQueueForPayment -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nBlockHeight - 101);
+    if(!GetBlockHash(blockHash, nCheckBlockHeight)) {
+        LogPrintf("CDynode::GetNextDynodeInQueueForPayment -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", nCheckBlockHeight);
         return false;
     }
     // Look at 1/10 of the oldest nodes (by last payment), calculate their scores and pay the best one
@@ -623,6 +630,9 @@ bool CDynodeMan::GetDynodeRank(const COutPoint& outpoint, int& nRankRet, int nBl
 {
     nRankRet = -1;
 
+    if (nBlockHeight < 1)
+        return false;
+
     if (!dynodeSync.IsDynodeListSynced())
         return false;
 
@@ -655,6 +665,9 @@ bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, 
 {
     vecDynodeRanksRet.clear();
 
+    if (nBlockHeight < 1)
+        return false;
+    
     if (!dynodeSync.IsDynodeListSynced())
         return false;
 
@@ -680,49 +693,17 @@ bool CDynodeMan::GetDynodeRanks(CDynodeMan::rank_pair_vec_t& vecDynodeRanksRet, 
     return true;
 }
 
-bool CDynodeMan::GetDynodeByRank(int nRankIn, dynode_info_t& dnInfoRet, int nBlockHeight, int nMinProtocol)
-{
-    dnInfoRet = dynode_info_t();
-
-    if (!dynodeSync.IsDynodeListSynced())
-        return false;
-
-    // make sure we know about this block
-    uint256 nBlockHash = uint256();
-    if (!GetBlockHash(nBlockHash, nBlockHeight)) {
-        LogPrintf("CDynodeMan::%s -- ERROR: GetBlockHash() failed at nBlockHeight %d\n", __func__, nBlockHeight);
-        return false;
-    }
-
-    LOCK(cs);
-
-    score_pair_vec_t vecDynodeScores;
-    if (!GetDynodeScores(nBlockHash, vecDynodeScores, nMinProtocol))
-        return false;
-
-    if (vecDynodeScores.size() < nRankIn)
-        return false;
-
-    int nRank = 0;
-    for (auto& scorePair : vecDynodeScores) {
-        nRank++;
-        if(nRank == nRankIn) {
-            dnInfoRet = *scorePair.second;
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
 {
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
     connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
+#ifdef ENABLE_WALLET
+        if(pnode->fDynode && !privateSendClient.IsMixingDynode(pnode)) {
+#else
         if(pnode->fDynode) {
-            if(privateSendClient.infoMixingDynode.fInfoValid && pnode->addr == privateSendClient.infoMixingDynode.addr)
+#endif // ENABLE_WALLET
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;
         }
@@ -760,14 +741,14 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
     
-    if(!dynodeSync.IsBlockchainSynced()) return;
-
     if (strCommand == NetMsgType::DNANNOUNCE) { //Dynode Broadcast
 
         CDynodeBroadcast dnb;
         vRecv >> dnb;
 
         pfrom->setAskFor.erase(dnb.GetHash());
+
+        if(!dynodeSync.IsBlockchainSynced()) return;
 
         LogPrint("Dynode", "DNANNOUNCE -- Dynode announce, Dynode=%s\n", dnb.vin.prevout.ToStringShort());
 
@@ -791,6 +772,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         pfrom->setAskFor.erase(nHash);
 
+        if(!dynodeSync.IsBlockchainSynced()) return;
+
         LogPrint("Dynode", "DNPING -- Dynode ping, Dynode=%s\n", dnp.vin.prevout.ToStringShort());
 
         // Need LOCK2 here to ensure consistent locking order because the CheckAndUpdate call below locks cs_main
@@ -808,7 +791,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         // we shoud update nTimeLastWatchdogVote here if sentinel
         // ping flag is actual
         if(pdn && dnp.fSentinelIsCurrent)
-            pdn->UpdateWatchdogVoteTime(dnp.sigTime);
+            UpdateWatchdogVoteTime(dnp.vin.prevout, dnp.sigTime);
 
         // too late, new DNANNOUNCE is required
         if(pdn && pdn->IsNewStartRequired()) return;
@@ -897,6 +880,10 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         CDynodeVerification dnv;
         vRecv >> dnv;
+
+        pfrom->setAskFor.erase(dnv.GetHash());
+
+        if(!dynodeSync.IsDynodeListSynced()) return;
 
         if(dnv.vchSig1.empty()) {
             // CASE 1: someone asked me to verify myself /IP we are using/
