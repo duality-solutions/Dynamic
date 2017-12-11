@@ -207,8 +207,8 @@ private:
     bool fAttacked = false;
 
 public:
-    static const int SIGNATURES_REQUIRED        = 10;
-    static const int SIGNATURES_TOTAL           = 11;
+    static const int SIGNATURES_REQUIRED        = 11;
+    static const int SIGNATURES_TOTAL           = 20;
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),
