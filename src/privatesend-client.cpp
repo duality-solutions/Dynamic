@@ -508,6 +508,7 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
                     nMyInputIndex = i;
                     prevPubKey = txpsin.prevPubKey;
                     txin = txpsin;
+                }
             }
 
             if(nMyInputIndex >= 0) { //might have to do this one input at a time?
