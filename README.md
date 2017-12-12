@@ -12,9 +12,9 @@ Graph on Pull Request History
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2017 Duality Blockchain Solutions**
+**Copyright (c) 2016-2017 [Duality Blockchain Solutions](https://duality.solutions/)**
 
-What is Dynamic?
+What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------
 * Coin Suffix: DYN
 * PoW Mining Algorithm: Argon2d
@@ -33,37 +33,37 @@ What is Dynamic?
 * Min TX Fee: 0.0001 DYN
 
 
-[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) is Duality’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. Duality uses company proceeds to place buy back orders on the Dynamic(DYN) market to keep inflation within acceptable bounds.
+[Dynamic(DYN)](https://duality.solutions/dynamic) is [Duality](https://duality.solutions/)’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. [Duality](https://duality.solutions/) uses company proceeds to place buy back orders on the [Dynamic(DYN)](https://duality.solutions/dynamic) market to keep inflation within acceptable bounds.
 
-Dynamic(DYN) lays the groundwork for offering Blockchain as a Service by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by Duality to adjust to a maturing market. 
+[Dynamic(DYN)](https://duality.solutions/dynamic) lays the groundwork for offering BaaS(Blockchain as a Service) by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by [Duality](https://duality.solutions/) to adjust to a maturing market.
 
-As a modern currency Dynamic (DYN) will be actively maintained to keep up with the latest market trends. Dynamic features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
+As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
 
-Dynamic utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
+[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
 
 
 **MainNet Parameters**
 P2P Port = 33300
 RPC Port = 33350
 Dynodes = 33300
-Magic Bytes: 0x5e 0x61 0x74 0x80
+Magic Bytes: 0x6e 0x71 0x84 0x90
 
 **TestNet Parameters**
 P2P Port = 33400
 RPC Port = 33450
 Dynodes = 33400
-Magic Bytes: 0x2f 0x32 0x15 0x40
+Magic Bytes: 0x3f 0x42 0x25 0x50
 
 **RegTest Parameters**
 P2P Port = 33500
 RPC Port = 33550
 Dynodes = 33500
-Magic Bytes = 0x2f 0x32 0x15 0x3f
+Magic Bytes = 0x3f 0x42 0x25 0x4f
 
 
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Dynamic in Unix. 
+Some notes on how to build [Dynamic](https://duality.solutions/dynamic) in Unix. 
 
 Note
 ---------------------
