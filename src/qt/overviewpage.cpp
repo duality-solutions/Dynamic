@@ -458,12 +458,12 @@ void OverviewPage::privateSendStatus()
 {
     if(!dynodeSync.IsBlockchainSynced() || ShutdownRequested()) return;
 
-    static int64_t nLastDSProgressBlockTime = 0;
+    static int64_t nLastPSProgressBlockTime = 0;
     int nBestHeight = clientModel->getNumBlocks();
 
     // We are processing more then 1 block per second, we'll just leave
-    if(((nBestHeight - privateSendClient.nCachedNumBlocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
-    nLastDSProgressBlockTime = GetTimeMillis();
+    if(((nBestHeight - privateSendClient.nCachedNumBlocks) / (GetTimeMillis() - nLastPSProgressBlockTime + 1) > 1)) return;
+    nLastPSProgressBlockTime = GetTimeMillis();
 
     QString strKeysLeftText(tr("keys left: %1").arg(pwalletMain->nKeysLeftSinceAutoBackup));
     if(pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING) {
