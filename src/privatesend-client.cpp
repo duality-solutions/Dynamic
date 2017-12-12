@@ -497,18 +497,17 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
 
     //make sure my inputs/outputs are present, otherwise refuse to sign
     BOOST_FOREACH(const CPrivateSendEntry entry, vecEntries) {
-        BOOST_FOREACH(const CTxPSIn txdsin, entry.vecTxPSIn) {
+        BOOST_FOREACH(const CTxPSIn txpsin, entry.vecTxPSIn) {
             /* Sign my transaction and all outputs */
             int nMyInputIndex = -1;
             CScript prevPubKey = CScript();
             CTxIn txin = CTxIn();
 
             for(unsigned int i = 0; i < finalMutableTransaction.vin.size(); i++) {
-                if(finalMutableTransaction.vin[i] == txdsin) {
+                if(finalMutableTransaction.vin[i] == txpsin) {
                     nMyInputIndex = i;
-                    prevPubKey = txdsin.prevPubKey;
-                    txin = txdsin;
-                }
+                    prevPubKey = txpsin.prevPubKey;
+                    txin = txpsin;
             }
 
             if(nMyInputIndex >= 0) { //might have to do this one input at a time?
