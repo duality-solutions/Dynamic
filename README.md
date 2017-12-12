@@ -37,7 +37,7 @@ What is Dynamic?
 
 [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) is Duality’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. Duality uses company proceeds to place buy back orders on the Dynamic(DYN) market to keep inflation within acceptable bounds.
 
-Dynamic(DYN) lays the groundwork for offering Blockchain as a Service by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by Duality to adjust to a maturing market. The total theoretical supply, which is the maximum amount of Dynamic(DYN) that can ever be created, is 2<sup>63</sup> - 1.
+Dynamic(DYN) lays the groundwork for offering Blockchain as a Service by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by Duality to adjust to a maturing market. 
 
 As a modern currency Dynamic (DYN) will be actively maintained to keep up with the latest market trends. Dynamic features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
 
