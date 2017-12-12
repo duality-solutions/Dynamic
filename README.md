@@ -22,13 +22,13 @@ What is Dynamic?
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: Controlled via Fluid Protocol
-* PoW Reward Start Height: Block 20,546
+* PoW Reward Start Height: Block 5,137
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 10 Blocks
 * Dynode Reward: Controlled via Fluid Protocol
-* Dynode Reward Start Height: Block 20,546
+* Dynode Reward Start Height: Block 10,273
 * Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DYN, 20 confirmations (~45 minutes)
 * Total Coins: 2<sup>63</sup> - 1
