@@ -714,7 +714,7 @@ bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun
 
     CAmount nValueMin = CPrivateSend::GetSmallestDenomination();
 
-    // if there are no confirmed DS collateral inputs yet
+    // if there are no confirmed PS collateral inputs yet
     if(!pwalletMain->HasCollateralInputs()) {
         // should have some additional amount for them
         nValueMin += CPrivateSend::GetMaxCollateralAmount();
@@ -1223,7 +1223,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
 
     LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- txid=%s\n", wtx.GetHash().GetHex());
 
-    // use the same nCachedLastSuccessBlock as for DS mixinx to prevent race
+    // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman)) {
         LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- CommitTransaction failed!\n");
         return false;
@@ -1357,7 +1357,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
         return false;
     }
 
-    // use the same nCachedLastSuccessBlock as for DS mixing to prevent race
+    // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
     nCachedLastSuccessBlock = nCachedBlockHeight;
     LogPrintf("CPrivateSendClient::CreateDenominated -- txid=%s\n", wtx.GetHash().GetHex());
 
