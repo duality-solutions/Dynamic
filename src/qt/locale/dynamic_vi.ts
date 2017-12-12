@@ -1187,7 +1187,7 @@ Kiểu: %3
     </message>
     <message>
         <source>This setting determines the amount of individual dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>Thiết lập này xác định số tiền cho mỗi master nodes mà đầu vào thông qua đó được ẩn danh.&lt;br/&gt;Càng có nhiều vòng ẩn danh thì sẽ cho mức độ riêng tư càng cao, nhưng nó cũng tốn nhiều phí hơn.</translation>
+        <translation>Thiết lập này xác định số tiền cho mỗi Dynodes mà đầu vào thông qua đó được ẩn danh.&lt;br/&gt;Càng có nhiều vòng ẩn danh thì sẽ cho mức độ riêng tư càng cao, nhưng nó cũng tốn nhiều phí hơn.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -4004,7 +4004,7 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>No Dynodes detected.</source>
-        <translation>Không tìm thấy các Master node.</translation>
+        <translation>Không tìm thấy các Dynode.</translation>
     </message>
     <message>
         <source>No compatible Dynode found.</source>
