@@ -68,29 +68,29 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             }
 
             if(nState == POOL_STATE_QUEUE) {
-                LogPrint("privatesend", "DSQUEUE -- PrivateSend queue (%s) is ready on dynode %s\n", psq.ToString(), infoDn.addr.ToString());
+                LogPrint("privatesend", "PSQUEUE -- PrivateSend queue (%s) is ready on dynode %s\n", psq.ToString(), infoDn.addr.ToString());
                 SubmitDenominate(connman);
             }
         } else {
             BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
                 if(q.vin == psq.vin) {
                     // no way same dn can send another "not yet ready" psq this soon
-                    LogPrint("privatesend", "DSQUEUE -- Dynode %s is sending WAY too many psq messages\n", infoDn.addr.ToString());
+                    LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", infoDn.addr.ToString());
                     return;
                 }
             }
 
             int nThreshold = infoDn.nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5;
-            LogPrint("privatesend", "DSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", infoDn.nLastPsq, nThreshold, dnodeman.nPsqCount);
+            LogPrint("privatesend", "PSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", infoDn.nLastPsq, nThreshold, dnodeman.nPsqCount);
             //don't allow a few nodes to dominate the queuing process
             if(infoDn.nLastPsq != 0 && nThreshold > dnodeman.nPsqCount) {
-                LogPrint("privatesend", "DSQUEUE -- Dynode %s is sending too many psq messages\n", infoDn.addr.ToString());
+                LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending too many psq messages\n", infoDn.addr.ToString());
                 return;
             }
 
             if(!dnodeman.AllowMixing(psq.vin.prevout)) return;
 
-            LogPrint("privatesend", "DSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
+            LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
             if(infoMixingDynode.fInfoValid && infoMixingDynode.vin.prevout == psq.vin.prevout) {
                 psq.fTried = true;
             }
@@ -845,7 +845,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
             continue;
         }
 
-        // mixing rate limit i.e. nLastPsq check should already pass in DSQUEUE ProcessMessage
+        // mixing rate limit i.e. nLastPsq check should already pass in PSQUEUE ProcessMessage
         // in order for psq to get into vecPrivatesendQueue, so we should be safe to mix already,
         // no need for additional verification here
 
