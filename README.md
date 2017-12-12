@@ -8,7 +8,7 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
-# **Dynamic (DYN) v1.5.0.0**
+# **Dynamic (DYN) v2.0.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
@@ -27,7 +27,7 @@ What is Dynamic?
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 10 Blocks
-* Dynode Reward: 0.618 DYN Static Reward
+* Dynode Reward: 1.618 DYN
 * Dynode Reward Start Height: Block 20,546
 * Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
 * Budget Proposal Fee: 100 DYN, 20 confirmations (~45 minutes)
@@ -35,17 +35,14 @@ What is Dynamic?
 * Min TX Fee: 0.0001 DYN
 
 
-The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
+[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) is Duality’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. Duality uses company proceeds to place buy back orders on the Dynamic(DYN) market to keep inflation within acceptable bounds.
 
-Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
+Dynamic(DYN) lays the groundwork for offering Blockchain as a Service by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by Duality to adjust to a maturing market. The total theoretical supply, which is the maximum amount of Dynamic(DYN) that can ever be created, is 2<sup>63</sup> - 1.
 
-Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
+As a modern currency Dynamic (DYN) will be actively maintained to keep up with the latest market trends. Dynamic features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
 
+Dynamic utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
 
-**Dynode/Privatesend Network Information**
-Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend ported and rebranded as Privatesend.
-Utilisation of InstantSend for near-instant transactions.
 
 **MainNet Parameters**
 P2P Port = 33300
