@@ -689,8 +689,8 @@ bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun
         return false;
     }
 
-    TRY_LOCK(cs_privatesend, lockDS);
-    if(!lockDS) {
+    TRY_LOCK(cs_privatesend, lockPS);
+    if(!lockPS) {
         strAutoDenomResult = _("Lock is already in place.");
         return false;
     }
