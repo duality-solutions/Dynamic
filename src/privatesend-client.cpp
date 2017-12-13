@@ -879,7 +879,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to dynode from queue, addr=%s\n", infoDn.addr.ToString());
         // connect to Dynode and submit the queue request
-+       CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
         if(pnode) {
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
