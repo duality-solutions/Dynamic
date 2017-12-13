@@ -55,6 +55,10 @@ bool Fluid::InitiateFluidVerify(CDynamicAddress dynamicAddress) {
 
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
+    if (!inputKey.IsValid()) {
+        return false;
+    }
+
     std::vector<std::string> fluidSovereigns;
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
@@ -64,14 +68,22 @@ bool Fluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     else
         fluidSovereigns = InitialiseAddresses();
 
-    for (const std::string& address : fluidSovereigns) {
-        CDynamicAddress attemptKey;
-        attemptKey.SetString(address);
-        if (inputKey.IsValid() && attemptKey.IsValid() && inputKey == attemptKey)
+    for (const std::string& strAddress : fluidSovereigns) {
+        CDynamicAddress attemptKey(strAddress);
+        if (attemptKey.IsValid() && inputKey == attemptKey)
             return true;
     }
 
     return false;
+}
+
+std::vector<std::string> CFluidParameters::InitialiseAddresses() {
+    std::vector<std::string> initialSovereignAddresses;
+    std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
+    for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
+        initialSovereignAddresses.push_back(sovereignId.second.ToString());
+    }
+    return initialSovereignAddresses;
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */

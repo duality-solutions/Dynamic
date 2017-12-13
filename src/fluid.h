@@ -34,25 +34,17 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN; // Max minting amount per fluid transaction
 
-    std::vector<std::string> InitialiseAddresses() {
-        std::vector<std::string> x;
-        x.push_back("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu"); // CEO
-        x.push_back("DBwfYAiK2FPDDvoFXQFWaL4rU76KjEckkG"); // CTO
-        x.push_back("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t"); // CFO
-        x.push_back("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH"); // COO
-        x.push_back("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP"); // CDOO
+    std::vector<std::pair<std::string, CDynamicAddress>> InitialiseSovereignIdentities() {
+        std::vector<std::pair<std::string, CDynamicAddress>> x;
+        x.push_back(std::make_pair("CEO",   CDynamicAddress("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu")));
+        x.push_back(std::make_pair("CTO",   CDynamicAddress("DBwfYAiK2FPDDvoFXQFWaL4rU76KjEckkG")));
+        x.push_back(std::make_pair("CFO",   CDynamicAddress("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t")));
+        x.push_back(std::make_pair("COO",   CDynamicAddress("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH")));
+        x.push_back(std::make_pair("CDOO",  CDynamicAddress("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP")));
         return x;
     }
 
-    std::vector<std::string> InitialiseIdentities() {
-        std::vector<std::string> x;
-        x.push_back("ChickenFishAndChips");
-        x.push_back("AvanaTheMermaid");
-        x.push_back("PomphretFish");
-        x.push_back("LudicrousLunch");
-        x.push_back("PromiscuousPanda");
-        return x;
-    }
+    std::vector<std::string> InitialiseAddresses();
 };
 
 /** Fluid Asset Management Framework */
