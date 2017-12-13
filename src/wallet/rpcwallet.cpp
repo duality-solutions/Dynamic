@@ -408,7 +408,6 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
 
 void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue)
 {
-    // TODO (Amir): Add minimum height and spork activate OP_MINT.  Add checks to mempool and create transaction as well
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amount
