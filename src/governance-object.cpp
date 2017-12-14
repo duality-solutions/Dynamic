@@ -447,14 +447,17 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             dynode_info_t infoDn;
             if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
 
-                CDynode::CollateralStatus err = CDynode::CheckCollateral(vinDynode.prevout);
-                if (err == CDynode::COLLATERAL_OK) {
-                    fMissingDynode = true;
-                    strError = "Dynode not found: " + strOutpoint;
-                } else if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
+                CDynode::CollateralStatus err = CDynode::CheckCollateral(vinDynode.prevout, CPubKey());
+                if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
                     strError = "Failed to find Dynode UTXO, missing dynode=" + strOutpoint + "\n";
                 } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
                     strError = "Dynode UTXO should have 1000 DYN, missing dynode=" + strOutpoint + "\n";
+                } else if (err == CDynode::COLLATERAL_INVALID_PUBKEY) {
+                    fMissingDynode = true;
+                    strError = "Dynode not found: " + strOutpoint;
+                } else if (err == CDynode::COLLATERAL_OK) {
+                    // this should never happen with CPubKey() as a param
+                    strError = "CheckCollateral critical failure! Dynode: " + strOutpoint;
                 }
 
                 return false;

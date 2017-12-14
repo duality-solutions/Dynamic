@@ -104,13 +104,13 @@ arith_uint256 CDynode::CalculateScore(const uint256& blockHash)
         return UintToArith256(ss.GetHash());
 }
 
-CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint)
+CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey)
 {
     int nHeight;
-    return CheckCollateral(outpoint, nHeight);
+    return CheckCollateral(outpoint, pubkey, nHeight);
 }
 
-CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, int& nHeightRet)
+CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey, int& nHeightRet)
 {
     AssertLockHeld(cs_main);
 
@@ -121,6 +121,10 @@ CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, in
 
     if(coin.out.nValue != 1000 * COIN) {
         return COLLATERAL_INVALID_AMOUNT;
+    }
+
+    if(pubkey == CPubKey() || coin.out.scriptPubKey != GetScriptForDestination(pubkey.GetID())) {
+        return COLLATERAL_INVALID_PUBKEY;
     }
 
     nHeightRet = coin.nHeight;
@@ -146,8 +150,8 @@ void CDynode::Check(bool fForce)
         TRY_LOCK(cs_main, lockMain);
         if(!lockMain) return;
 
-        CollateralStatus err = CheckCollateral(vin.prevout);
-        if (err == COLLATERAL_UTXO_NOT_FOUND) {
+        Coin coin;
+        if(!GetUTXOCoin(vin.prevout, coin)) {
             nActiveState = DYNODE_OUTPOINT_SPENT;
             LogPrint("Dynode", "CDynode::Check -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
             return;
@@ -503,8 +507,12 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
         return false;
     }
 
-    if (!CheckSignature(nDos)) {
-        LogPrintf("CDynodeBroadcast::Update -- CheckSignature() failed, Dynode=%s\n", vin.prevout.ToStringShort());
+    AssertLockHeld(cs_main);
+
+    int nHeight;
+    CollateralStatus err = CheckCollateral(vin.prevout, pubKeyCollateralAddress, nHeight);
+    if (err == COLLATERAL_UTXO_NOT_FOUND) {
+        LogPrint("dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to find Dynode UTXO, dynode=%s\n", vin.prevout.ToStringShort());
         return false;
     }
 
@@ -535,65 +543,46 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
         return false;
     }
 
-    {
-        TRY_LOCK(cs_main, lockMain);
-        if(!lockMain) {
-            // not dnb fault, let it to be checked again later
-            LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to aquire lock, addr=%s", addr.ToString());
-            dnodeman.mapSeenDynodeBroadcast.erase(GetHash());
-            return false;
-        }
-
-        int nHeight;
-        CollateralStatus err = CheckCollateral(vin.prevout, nHeight);
-        if (err == COLLATERAL_UTXO_NOT_FOUND) {
-            LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to find Dynode UTXO, Dynode=%s\n", vin.prevout.ToStringShort());
-            return false;
-        }
-        if (err == COLLATERAL_INVALID_AMOUNT) {
-            LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO should have 1000 DYN, Dynode=%s\n", vin.prevout.ToStringShort());
-            return false;
-        }
-
-        if(chainActive.Height() - nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
-            LogPrintf("CDynodeBroadcast::CheckOutpoint -- Dynode UTXO must have at least %d confirmations, Dynode=%s\n",
-                    Params().GetConsensus().nDynodeMinimumConfirmations, vin.prevout.ToStringShort());
-            // maybe we miss few blocks, let this dnb to be checked again later
-            dnodeman.mapSeenDynodeBroadcast.erase(GetHash());
-            return false;
-        }
-        // remember the hash of the block where dynode collateral had minimum required confirmations
-        nCollateralMinConfBlockHash = chainActive[nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]->GetBlockHash();
-    }
-
-    LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO verified\n");
-
-    // make sure the vout that was signed is related to the transaction that spawned the Dynode
-    //  - this is expensive, so it's only done once per Dynode
-    if(!IsVinAssociatedWithPubkey(vin, pubKeyCollateralAddress)) {
-        LogPrintf("CDynodeMan::CheckOutpoint -- Got mismatched pubKeyCollateralAddress and vin\n");
+    if (err == COLLATERAL_INVALID_AMOUNT) {
+        LogPrint("dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO should have 1000 DYN, dynode=%s\n", vin.prevout.ToStringShort());
         nDos = 33;
         return false;
     }
 
-    // verify that sig time is legit in past
-    // should be at least not earlier than block when 1000 DYN tx got nDynodeMinimumConfirmations
-    uint256 hashBlock = uint256();
-    CTransaction tx2;
-    GetTransaction(vin.prevout.hash, tx2, Params().GetConsensus(), hashBlock, true);
-    {
-        LOCK(cs_main);
-        BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
-        if (mi != mapBlockIndex.end() && (*mi).second) {
-            CBlockIndex* pDNIndex = (*mi).second; // block for 1000 DYN tx -> 1 confirmation
-            CBlockIndex* pConfIndex = chainActive[pDNIndex->nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]; // block where tx got nDynodeMinimumConfirmations
-            if(pConfIndex->GetBlockTime() > sigTime) {
-                LogPrintf("CDynodeBroadcast::CheckOutpoint -- Bad sigTime %d (%d conf block is at %d) for Dynode %s %s\n",
-                          sigTime, Params().GetConsensus().nDynodeMinimumConfirmations, pConfIndex->GetBlockTime(), vin.prevout.ToStringShort(), addr.ToString());
-                return false;
-            }
-        }
+    if(err == COLLATERAL_INVALID_PUBKEY) {
+        LogPrint("dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO should match pubKeyCollateralAddress, dynode=%s\n", vin.prevout.ToStringShort());
+        nDos = 33;
+        return false;
     }
+
+    if(chainActive.Height() - nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
+        LogPrintf("CDynodeBroadcast::CheckOutpoint -- Masternode UTXO must have at least %d confirmations, dynode=%s\n",
+                Params().GetConsensus().nDynodeMinimumConfirmations, vin.prevout.ToStringShort());
+        // UTXO is legit but has not enough confirmations.
+        // Maybe we miss few blocks, let this dnb be checked again later.
+        dnodeman.mapSeenDynodeBroadcast.erase(GetHash());
+        return false;
+    }
+
+    LogPrint("Dynode", "CDynodeBroadcast::CheckOutpoint -- Dynode UTXO verified\n");
+
+    // Verify that sig time is legit, should be at least not earlier than the timestamp of the block
+    // at which collateral became nDynodeMinimumConfirmations blocks deep.
+    // NOTE: this is not accurate because block timestamp is NOT guaranteed to be 100% correct one.
+    CBlockIndex* pRequredConfIndex = chainActive[nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]; // block where tx got nDynodeMinimumConfirmations
+    if(pRequredConfIndex->GetBlockTime() > sigTime) {
+        LogPrintf("CDynodeBroadcast::CheckOutpoint -- Bad sigTime %d (%d conf block is at %d) for Dynode %s %s\n",
+                  sigTime, Params().GetConsensus().nMasternodeMinimumConfirmations, pRequredConfIndex->GetBlockTime(), vin.prevout.ToStringShort(), addr.ToString());
+       return false;
+    }
+
+    if (!CheckSignature(nDos)) {
+        LogPrintf("CDynodeBroadcast::CheckOutpoint -- CheckSignature() failed, dynode=%s\n", vin.prevout.ToStringShort());
+        return false;
+    }
+
+    // remember the block hash when collateral for this masternode had minimum required confirmations
+    nCollateralMinConfBlockHash = pRequredConfIndex->GetBlockHash();
 
     return true;
 }
