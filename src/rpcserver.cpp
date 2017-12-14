@@ -351,6 +351,20 @@ static const CRPCCommand vRPCCommands[] =
     { "Dynamic",                "spork",                  &spork,                  true  },
     { "Dynamic",                "getpoolinfo",            &getpoolinfo,            true  },
     { "Dynamic",                "sentinelping",           &sentinelping,           true  },
+
+#ifdef ENABLE_WALLET
+    /* Fluid Protocol */
+    { "Protocol",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
+    { "Protocol",           "signtoken",                &signtoken,                true  },
+    { "Protocol",           "consenttoken",             &consenttoken,             true  },
+    { "Protocol",           "getrawpubkey",             &getrawpubkey,             true  },
+    { "Protocol",           "verifyquorum",             &verifyquorum,             true  },
+    { "Protocol",           "maketoken",                &maketoken,                true  },
+    { "Protocol",           "getfluidhistory",          &getfluidhistory,          true  },
+    { "Protocol",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
+    { "Protocol",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
+    { "Protocol",           "gettime",                  &gettime,                  true  },
+#endif //ENABLE_WALLET
 };
 
 CRPCTable::CRPCTable()

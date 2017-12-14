@@ -2828,18 +2828,6 @@ extern UniValue importelectrumwallet(const UniValue& params, bool fHelp);
 extern UniValue instantsendtoaddress(const UniValue& params, bool fHelp);
 extern UniValue keepass(const UniValue& params, bool fHelp);
 
-extern UniValue sendfluidtransaction(const UniValue& params, bool fHelp); // in fluid.cpp
-extern UniValue gettime(const UniValue& params, bool fHelp);
-extern UniValue signtoken(const UniValue& params, bool fHelp);
-extern UniValue consenttoken(const UniValue& params, bool fHelp);
-extern UniValue getrawpubkey(const UniValue& params, bool fHelp);
-extern UniValue verifyquorum(const UniValue& params, bool fHelp);
-extern UniValue maketoken(const UniValue& params, bool fHelp);
-extern UniValue stringtohash(const UniValue& params, bool fHelp);
-extern UniValue getfluidhistory(const UniValue& params, bool fHelp);
-extern UniValue getfluidhistoryraw(const UniValue& params, bool fHelp);
-extern UniValue getfluidsovereigns(const UniValue& params, bool fHelp);
-
 const CRPCCommand vWalletRPCCommands[] =
 { //  category              name                        actor (function)           okSafeMode
     //  --------------------- ------------------------    -----------------------    ----------
@@ -2892,18 +2880,6 @@ const CRPCCommand vWalletRPCCommands[] =
     { "wallet",             "dumphdinfo",               &dumphdinfo,               true  },
 
     { "Dynamic",            "privatesend",              &privatesend,              false },
- 
-    /* Fluid Protocol */
-    { "Protocol",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
-    { "Protocol",           "signtoken",                &signtoken,                true  },
-    { "Protocol",           "consenttoken",             &consenttoken,             true  },
-    { "Protocol",           "getrawpubkey",             &getrawpubkey,             true  },
-    { "Protocol",           "verifyquorum",             &verifyquorum,             true  },
-    { "Protocol",           "maketoken",                &maketoken,                true  },
-    { "Protocol",           "getfluidhistory",          &getfluidhistory,          true  },
-    { "Protocol",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
-    { "Protocol",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
-    { "Protocol",           "gettime",                  &gettime,                  true  },
 };
 
 void walletRegisterRPCCommands()
