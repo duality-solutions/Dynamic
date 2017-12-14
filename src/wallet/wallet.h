@@ -17,6 +17,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
+#include "wallet/rpcwallet.h"
 #include "wallet/wallet_ismine.h"
 #include "wallet/walletdb.h"
 

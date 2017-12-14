@@ -316,9 +316,6 @@ static const CRPCCommand vRPCCommands[] =
     { "Raw Transactions",    "getrawtransaction",      &getrawtransaction,      true  },
     { "Raw Transactions",    "sendrawtransaction",     &sendrawtransaction,     false },
     { "Raw Transactions",    "signrawtransaction",     &signrawtransaction,     false }, /* uses wallet if enabled */
-#ifdef ENABLE_WALLET
-    { "Raw Transactions",    "fundrawtransaction",     &fundrawtransaction,     false },
-#endif
 
     /* Address index */
     { "Address Index",       "getaddressmempool",      &getaddressmempool,      true  },
@@ -340,9 +337,6 @@ static const CRPCCommand vRPCCommands[] =
     { "Hidden",             "invalidateblock",        &invalidateblock,        true  },
     { "Hidden",             "reconsiderblock",        &reconsiderblock,        true  },
     { "Hidden",             "setmocktime",            &setmocktime,            true  },
-#ifdef ENABLE_WALLET
-    { "Hidden",                 "resendwallettransactions", &resendwallettransactions, true},
-#endif
 
     /* Dynamic features */
     { "Dynamic",                "dynode",                 &dynode,                 true  },
@@ -357,69 +351,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Dynamic",                "spork",                  &spork,                  true  },
     { "Dynamic",                "getpoolinfo",            &getpoolinfo,            true  },
     { "Dynamic",                "sentinelping",           &sentinelping,           true  },
-#ifdef ENABLE_WALLET
     { "Dynamic",                "privatesend",            &privatesend,            false },
-
-    /* Wallet */
-    { "Wallet",             "keepass",                &keepass,                true },
-    { "Wallet",             "instantsendtoaddress",   &instantsendtoaddress,   false },
-    { "Wallet",             "addmultisigaddress",     &addmultisigaddress,     true  },
-    { "Wallet",             "backupwallet",           &backupwallet,           true  },
-    { "Wallet",             "dumpprivkey",            &dumpprivkey,            true  },
-    { "Wallet",             "dumpwallet",             &dumpwallet,             true  },
-    { "Wallet",             "dumphdinfo",             &dumphdinfo,             true  },
-    { "Wallet",             "encryptwallet",          &encryptwallet,          true  },
-    { "Wallet",             "getaccountaddress",      &getaccountaddress,      true  },
-    { "Wallet",             "getaccount",             &getaccount,             true  },
-    { "Wallet",             "getaddressesbyaccount",  &getaddressesbyaccount,  true  },
-    { "Wallet",             "getbalance",             &getbalance,             false },
-    { "Wallet",             "getnewaddress",          &getnewaddress,          true  },
-    { "Wallet",             "getrawchangeaddress",    &getrawchangeaddress,    true  },
-    { "Wallet",             "getreceivedbyaccount",   &getreceivedbyaccount,   false },
-    { "Wallet",             "getreceivedbyaddress",   &getreceivedbyaddress,   false },
-    { "Wallet",             "gettransaction",         &gettransaction,         false },
-    { "Wallet",             "abandontransaction",     &abandontransaction,     false },
-    { "Wallet",             "getunconfirmedbalance",  &getunconfirmedbalance,  false },
-    { "Wallet",             "getwalletinfo",          &getwalletinfo,          false },
-    { "Wallet",             "importprivkey",          &importprivkey,          true  },
-    { "Wallet",             "importwallet",           &importwallet,           true  },
-    { "Wallet",             "importaddress",          &importaddress,          true  },
-    { "Wallet",             "importpubkey",           &importpubkey,           true  },
-    { "Wallet",             "keypoolrefill",          &keypoolrefill,          true  },
-    { "Wallet",             "listaccounts",           &listaccounts,           false },
-    { "Wallet",             "listaddressgroupings",   &listaddressgroupings,   false },
-    { "Wallet",             "listlockunspent",        &listlockunspent,        false },
-    { "Wallet",             "listreceivedbyaccount",  &listreceivedbyaccount,  false },
-    { "Wallet",             "listreceivedbyaddress",  &listreceivedbyaddress,  false },
-    { "Wallet",             "listsinceblock",         &listsinceblock,         false },
-    { "Wallet",             "listtransactions",       &listtransactions,       false },
-    { "Wallet",             "listunspent",            &listunspent,            false },
-    { "Wallet",             "lockunspent",            &lockunspent,            true  },
-    { "Wallet",             "makekeypair",            &makekeypair,            false },
-    { "Wallet",             "convertrawprivkey",      &convertrawprivkey,      false },
-    { "Wallet",             "move",                   &movecmd,                false },
-    { "Wallet",             "sendfrom",               &sendfrom,               false },
-    { "Wallet",             "sendmany",               &sendmany,               false },
-    { "Wallet",             "sendtoaddress",          &sendtoaddress,          false },
-    { "Wallet",             "setaccount",             &setaccount,             true  },
-    { "Wallet",             "settxfee",               &settxfee,               true  },
-    { "Wallet",             "signmessage",            &signmessage,            true  },
-    { "Wallet",             "walletlock",             &walletlock,             true  },
-    { "Wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
-    { "Wallet",             "walletpassphrase",       &walletpassphrase,       true  },
-
-    /* Fluid Protocol */
-    { "Protocol",           "sendfluidtransaction",	  &sendfluidtransaction,   true  },
-    { "Protocol",           "signtoken",			  &signtoken,			   true  },
-    { "Protocol",           "consenttoken",			  &consenttoken,		   true  },
-    { "Protocol",           "getrawpubkey",	 		  &getrawpubkey,		   true  },
-    { "Protocol",           "verifyquorum",	 		  &verifyquorum,		   true  },
-    { "Protocol",           "maketoken",	 		  &maketoken,		  	   true  },
-    { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
-    { "Protocol",           "getfluidhistoryraw",	  &getfluidhistoryraw,     true  },
-    { "Protocol",           "getfluidsovereigns",	      &getfluidsovereigns,     true  },
-    { "Protocol",           "gettime",	      		  &gettime,   	   		   true  },
-#endif // ENABLE_WALLET
 };
 
 CRPCTable::CRPCTable()
@@ -440,6 +372,20 @@ const CRPCCommand *CRPCTable::operator[](const std::string &name) const
     if (it == mapCommands.end())
         return NULL;
     return (*it).second;
+}
+
+bool CRPCTable::appendCommand(const std::string& name, const CRPCCommand* pcmd)
+{
+    if (IsRPCRunning())
+        return false;
+
+    // don't allow overwriting for now
+    std::map<std::string, const CRPCCommand*>::const_iterator it = mapCommands.find(name);
+    if (it != mapCommands.end())
+        return false;
+
+    mapCommands[name] = pcmd;
+    return true;
 }
 
 bool StartRPC()
@@ -630,4 +576,4 @@ void RPCRunLater(const std::string& name, boost::function<void(void)> func, int6
     deadlineTimers.emplace(name, std::unique_ptr<RPCTimerBase>(timerInterface->NewTimer(func, nSeconds*1000)));
 }
 
-const CRPCTable tableRPC;
+CRPCTable tableRPC;

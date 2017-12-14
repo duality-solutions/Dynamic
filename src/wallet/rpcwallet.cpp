@@ -2815,3 +2815,106 @@ UniValue convertrawprivkey(const UniValue& params, bool fHelp)
     
     return result;
 }
+
+extern UniValue dumpprivkey(const UniValue& params, bool fHelp); // in rpcdump.cpp
+extern UniValue importprivkey(const UniValue& params, bool fHelp);
+extern UniValue importaddress(const UniValue& params, bool fHelp);
+extern UniValue importpubkey(const UniValue& params, bool fHelp);
+extern UniValue dumpwallet(const UniValue& params, bool fHelp);
+extern UniValue importwallet(const UniValue& params, bool fHelp);
+
+extern UniValue dumphdinfo(const UniValue& params, bool fHelp);
+extern UniValue importelectrumwallet(const UniValue& params, bool fHelp);
+
+extern UniValue instantsendtoaddress(const UniValue& params, bool fHelp);
+extern UniValue keepass(const UniValue& params, bool fHelp);
+
+extern UniValue sendfluidtransaction(const UniValue& params, bool fHelp); // in fluid.cpp
+extern UniValue gettime(const UniValue& params, bool fHelp);
+extern UniValue signtoken(const UniValue& params, bool fHelp);
+extern UniValue consenttoken(const UniValue& params, bool fHelp);
+extern UniValue getrawpubkey(const UniValue& params, bool fHelp);
+extern UniValue verifyquorum(const UniValue& params, bool fHelp);
+extern UniValue maketoken(const UniValue& params, bool fHelp);
+extern UniValue stringtohash(const UniValue& params, bool fHelp);
+extern UniValue getfluidhistory(const UniValue& params, bool fHelp);
+extern UniValue getfluidhistoryraw(const UniValue& params, bool fHelp);
+extern UniValue getfluidsovereigns(const UniValue& params, bool fHelp);
+
+const CRPCCommand vWalletRPCCommands[] =
+{ //  category              name                        actor (function)           okSafeMode
+    //  --------------------- ------------------------    -----------------------    ----------
+    { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       false },
+    { "hidden",             "resendwallettransactions", &resendwallettransactions, true  },
+    { "wallet",             "abandontransaction",       &abandontransaction,       false },
+    { "wallet",             "addmultisigaddress",       &addmultisigaddress,       true  },
+    { "wallet",             "backupwallet",             &backupwallet,             true  },
+    { "wallet",             "dumpprivkey",              &dumpprivkey,              true  },
+    { "wallet",             "dumpwallet",               &dumpwallet,               true  },
+    { "wallet",             "encryptwallet",            &encryptwallet,            true  },
+    { "wallet",             "getaccountaddress",        &getaccountaddress,        true  },
+    { "wallet",             "getaccount",               &getaccount,               true  },
+    { "wallet",             "getaddressesbyaccount",    &getaddressesbyaccount,    true  },
+    { "wallet",             "getbalance",               &getbalance,               false },
+    { "wallet",             "getnewaddress",            &getnewaddress,            true  },
+    { "wallet",             "getrawchangeaddress",      &getrawchangeaddress,      true  },
+    { "wallet",             "getreceivedbyaccount",     &getreceivedbyaccount,     false },
+    { "wallet",             "getreceivedbyaddress",     &getreceivedbyaddress,     false },
+    { "wallet",             "gettransaction",           &gettransaction,           false },
+    { "wallet",             "getunconfirmedbalance",    &getunconfirmedbalance,    false },
+    { "wallet",             "getwalletinfo",            &getwalletinfo,            false },
+    { "wallet",             "importprivkey",            &importprivkey,            true  },
+    { "wallet",             "importwallet",             &importwallet,             true  },
+    { "wallet",             "importaddress",            &importaddress,            true  },
+    { "wallet",             "importpubkey",             &importpubkey,             true  },
+    { "wallet",             "keypoolrefill",            &keypoolrefill,            true  },
+    { "wallet",             "listaccounts",             &listaccounts,             false },
+    { "wallet",             "listaddressgroupings",     &listaddressgroupings,     false },
+    { "wallet",             "listlockunspent",          &listlockunspent,          false },
+    { "wallet",             "listreceivedbyaccount",    &listreceivedbyaccount,    false },
+    { "wallet",             "listreceivedbyaddress",    &listreceivedbyaddress,    false },
+    { "wallet",             "listsinceblock",           &listsinceblock,           false },
+    { "wallet",             "listtransactions",         &listtransactions,         false },
+    { "wallet",             "listunspent",              &listunspent,              false },
+    { "wallet",             "lockunspent",              &lockunspent,              true  },
+    { "wallet",             "move",                     &movecmd,                  false },
+    { "wallet",             "sendfrom",                 &sendfrom,                 false },
+    { "wallet",             "sendmany",                 &sendmany,                 false },     
+    { "wallet",             "sendtoaddress",            &sendtoaddress,            false },
+    { "wallet",             "setaccount",               &setaccount,               true  },
+    { "wallet",             "settxfee",                 &settxfee,                 true  },
+    { "wallet",             "signmessage",              &signmessage,              true  },
+    { "wallet",             "walletlock",               &walletlock,               true  },
+    { "wallet",             "walletpassphrasechange",   &walletpassphrasechange,   true  },
+    { "wallet",             "walletpassphrase",         &walletpassphrase,         true  },
+
+    { "wallet",             "keepass",                  &keepass,                  true },
+    { "wallet",             "instantsendtoaddress",     &instantsendtoaddress,     false },
+    { "wallet",             "dumphdinfo",               &dumphdinfo,               true  },
+    { "wallet",             "importelectrumwallet",     &importelectrumwallet,     true  },
+ 
+    /* Fluid Protocol */
+    { "Protocol",           "sendfluidtransaction",   &sendfluidtransaction,   true  },
+    { "Protocol",           "signtoken",              &signtoken,              true  },
+    { "Protocol",           "consenttoken",           &consenttoken,           true  },
+    { "Protocol",           "getrawpubkey",           &getrawpubkey,           true  },
+    { "Protocol",           "verifyquorum",           &verifyquorum,           true  },
+    { "Protocol",           "maketoken",              &maketoken,              true  },
+    { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
+    { "Protocol",           "getfluidhistoryraw",     &getfluidhistoryraw,     true  },
+    { "Protocol",           "getfluidsovereigns",         &getfluidsovereigns,     true  },
+    { "Protocol",           "gettime",                &gettime,                true  },
+};
+
+void walletRegisterRPCCommands()
+{
+    unsigned int vcidx;
+    for (vcidx = 0; vcidx < ARRAYLEN(vWalletRPCCommands); vcidx++)
+    {
+        const CRPCCommand *pcmd;
+
+        pcmd = &vWalletRPCCommands[vcidx];
+        tableRPC.appendCommand(pcmd->name, pcmd);
+    }
+}
+

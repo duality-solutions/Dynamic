@@ -289,7 +289,7 @@ int CommandLineRPC(int argc, char *argv[])
                 args.push_back(line);
         }
         if (args.size() < 1)
-            throw runtime_error("too few parameters (need at least command)");
+            throw std::runtime_error("too few parameters (need at least command)");
         std::string strMethod = args[0];
         UniValue params = RPCConvertValues(strMethod, std::vector<std::string>(args.begin()+1, args.end()));
 
