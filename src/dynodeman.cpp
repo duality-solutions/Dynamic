@@ -1208,11 +1208,12 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
         // increase ban score for everyone else
         BOOST_FOREACH(CDynode* pdn, vpDynodesToBan) {
             pdn->IncreasePoSeBanScore();
-            LogPrint("Dynode", "CDynodeMan::ProcessVerifyBroadcast -- increased PoSe ban score for %s addr %s, new score %d\n",
+            LogPrint("dynode", "CDynodeMan::ProcessVerifyReply -- increased PoSe ban score for %s addr %s, new score %d\n",
                         prealDynode->vin.prevout.ToStringShort(), pnode->addr.ToString(), pdn->nPoSeBanScore);
         }
-        LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- PoSe score increased for %d fake Dynodes, addr %s\n",
-                    (int)vpDynodesToBan.size(), pnode->addr.ToString());
+        if(!vpDynodesToBan.empty())
+            LogPrintf("CDynodeMan::ProcessVerifyReply -- PoSe score increased for %d fake dynodes, addr %s\n",
+                        (int)vpDynodesToBan.size(), pnode->addr.ToString());
     }
 }
 
@@ -1283,7 +1284,7 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
         }
 
         if(pdn1->addr != dnv.addr) {
-            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- addr %s do not match %s\n", dnv.addr.ToString(), pnode->addr.ToString());
+            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- addr %s does not match %s\n", dnv.addr.ToString(), pdn1->addr.ToString());
             return;
         }
 
@@ -1303,7 +1304,7 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
         dnv.Relay();
 
         LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- verified Dynode %s for addr %s\n",
-                    pdn1->vin.prevout.ToStringShort(), pnode->addr.ToString());
+                    pdn1->vin.prevout.ToStringShort(), pdn1->addr.ToString());
 
         // increase ban score for everyone else with the same addr
         int nCount = 0;
@@ -1314,8 +1315,9 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
             LogPrint("Dynode", "CDynodeMan::ProcessVerifyBroadcast -- increased PoSe ban score for %s addr %s, new score %d\n",
                         dnpair.first.ToStringShort(), dnpair.second.addr.ToString(), dnpair.second.nPoSeBanScore);
         }
-        LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- PoSe score incresed for %d fake Dynodes, addr %s\n",
-                    nCount, pnode->addr.ToString());
+        if(nCount)
+            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- PoSe score increased for %d fake dynodes, addr %s\n",
+                        nCount, pdn1->addr.ToString());
     }
 }
 
