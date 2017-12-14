@@ -165,7 +165,7 @@ CDynamicAddress GetAccountAddress(std::string strAccount, bool bForceNew=false)
         else {
             // Check if the current key has been used
             CScript scriptPubKey = GetScriptForDestination(account.vchPubKey.GetID());
-            for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin();
+            for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin();
                  it != pwalletMain->mapWallet.end() && account.vchPubKey.IsValid();
                  ++it)
                 BOOST_FOREACH(const CTxOut& txout, (*it).second.vout)

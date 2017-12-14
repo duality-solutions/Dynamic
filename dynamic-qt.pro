@@ -390,7 +390,6 @@ HEADERS += \
     src/key.h \
     src/keystore.h \
     src/limitedmap.h \
-    src/main.h \
     src/memusage.h \
     src/merkleblock.h \
     src/miner.h \
