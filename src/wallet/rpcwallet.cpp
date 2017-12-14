@@ -2890,19 +2890,20 @@ const CRPCCommand vWalletRPCCommands[] =
     { "wallet",             "keepass",                  &keepass,                  true },
     { "wallet",             "instantsendtoaddress",     &instantsendtoaddress,     false },
     { "wallet",             "dumphdinfo",               &dumphdinfo,               true  },
-    { "wallet",             "importelectrumwallet",     &importelectrumwallet,     true  },
+
+    { "Dynamic",            "privatesend",              &privatesend,              false },
  
     /* Fluid Protocol */
-    { "Protocol",           "sendfluidtransaction",   &sendfluidtransaction,   true  },
-    { "Protocol",           "signtoken",              &signtoken,              true  },
-    { "Protocol",           "consenttoken",           &consenttoken,           true  },
-    { "Protocol",           "getrawpubkey",           &getrawpubkey,           true  },
-    { "Protocol",           "verifyquorum",           &verifyquorum,           true  },
-    { "Protocol",           "maketoken",              &maketoken,              true  },
-    { "Protocol",           "getfluidhistory",        &getfluidhistory,        true  },
-    { "Protocol",           "getfluidhistoryraw",     &getfluidhistoryraw,     true  },
-    { "Protocol",           "getfluidsovereigns",         &getfluidsovereigns,     true  },
-    { "Protocol",           "gettime",                &gettime,                true  },
+    { "Protocol",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
+    { "Protocol",           "signtoken",                &signtoken,                true  },
+    { "Protocol",           "consenttoken",             &consenttoken,             true  },
+    { "Protocol",           "getrawpubkey",             &getrawpubkey,             true  },
+    { "Protocol",           "verifyquorum",             &verifyquorum,             true  },
+    { "Protocol",           "maketoken",                &maketoken,                true  },
+    { "Protocol",           "getfluidhistory",          &getfluidhistory,          true  },
+    { "Protocol",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
+    { "Protocol",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
+    { "Protocol",           "gettime",                  &gettime,                  true  },
 };
 
 void walletRegisterRPCCommands()

@@ -351,7 +351,6 @@ static const CRPCCommand vRPCCommands[] =
     { "Dynamic",                "spork",                  &spork,                  true  },
     { "Dynamic",                "getpoolinfo",            &getpoolinfo,            true  },
     { "Dynamic",                "sentinelping",           &sentinelping,           true  },
-    { "Dynamic",                "privatesend",            &privatesend,            false },
 };
 
 CRPCTable::CRPCTable()
