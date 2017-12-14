@@ -538,8 +538,13 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
         return false;
     }
 
-    if (!CheckSignature(nDos)) {
-        LogPrintf("CDynodeBroadcast::CheckOutpoint -- CheckSignature() failed, Dynode=%s\n", vin.prevout.ToStringShort());
+
+    AssertLockHeld(cs_main);
+
+    int nHeight;
+    CollateralStatus err = CheckCollateral(vin.prevout, pubKeyCollateralAddress, nHeight);
+    if (err == COLLATERAL_UTXO_NOT_FOUND) {
+        LogPrint("dynode", "CDynodeBroadcast::CheckOutpoint -- Failed to find Dynode UTXO, dynode=%s\n", vin.prevout.ToStringShort());
         return false;
     }
 
@@ -556,7 +561,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
     }
 
     if(chainActive.Height() - nHeight + 1 < Params().GetConsensus().nDynodeMinimumConfirmations) {
-        LogPrintf("CDynodeBroadcast::CheckOutpoint -- Masternode UTXO must have at least %d confirmations, dynode=%s\n",
+        LogPrintf("CDynodeBroadcast::CheckOutpoint -- Dynode UTXO must have at least %d confirmations, dynode=%s\n",
                 Params().GetConsensus().nDynodeMinimumConfirmations, vin.prevout.ToStringShort());
         // UTXO is legit but has not enough confirmations.
         // Maybe we miss few blocks, let this dnb be checked again later.
@@ -572,7 +577,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
     CBlockIndex* pRequredConfIndex = chainActive[nHeight + Params().GetConsensus().nDynodeMinimumConfirmations - 1]; // block where tx got nDynodeMinimumConfirmations
     if(pRequredConfIndex->GetBlockTime() > sigTime) {
         LogPrintf("CDynodeBroadcast::CheckOutpoint -- Bad sigTime %d (%d conf block is at %d) for Dynode %s %s\n",
-                  sigTime, Params().GetConsensus().nMasternodeMinimumConfirmations, pRequredConfIndex->GetBlockTime(), vin.prevout.ToStringShort(), addr.ToString());
+                  sigTime, Params().GetConsensus().nDynodeMinimumConfirmations, pRequredConfIndex->GetBlockTime(), vin.prevout.ToStringShort(), addr.ToString());
        return false;
     }
 
@@ -581,7 +586,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
         return false;
     }
 
-    // remember the block hash when collateral for this masternode had minimum required confirmations
+    // remember the block hash when collateral for this dynode had minimum required confirmations
     nCollateralMinConfBlockHash = pRequredConfIndex->GetBlockHash();
 
     return true;
