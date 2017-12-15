@@ -18,6 +18,10 @@
 #ifndef BLAKE_ROUND_MKA_OPT_H
 #define BLAKE_ROUND_MKA_OPT_H
 
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
+
 #include "blake2-impl.h"
 
 #include <emmintrin.h>
