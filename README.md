@@ -341,7 +341,7 @@ At configure time:
 CPU's with AVX512 support:
 
     Intel
-        Xeon Phi x200 processor, 2016
+        Xeon Phi x200/Knights Landing processor, 2016
         Knights Mill processor, 2017
         Skylake-SP processor, 2017
         Skylake-X processor, 2017
