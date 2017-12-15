@@ -177,6 +177,11 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=$enableval],
   [use_zmq=yes])
 
+AC_ARG_ENABLE([sse3],
+    AC_HELP_STRING([--enable-sse3],[enable SSE3 optimizations (defaults is no)]),
+    [have_sse3=${enableval}],
+    [have_sse3=no])
+
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
 # Enable debug
@@ -556,7 +561,11 @@ if test x$use_reduce_exports = xyes; then
   [AC_MSG_ERROR([Cannot set default symbol visibility. Use --disable-reduce-exports.])])
 fi
 
-AX_CHECK_COMPILE_FLAG([-mssse3],[CFLAGS="$CFLAGS -mssse3"])
+
+if test "$have_sse3" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-mssse3],[CFLAGS="$CFLAGS -mssse3"])
+fi
+
 AX_CHECK_COMPILE_FLAG([-msse2],[CFLAGS="$CFLAGS -msse2"])
 
 dnl This can go away when we require c++11
