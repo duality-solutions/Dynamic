@@ -556,6 +556,9 @@ if test x$use_reduce_exports = xyes; then
   [AC_MSG_ERROR([Cannot set default symbol visibility. Use --disable-reduce-exports.])])
 fi
 
+AX_CHECK_COMPILE_FLAG([-mssse3],[CFLAGS="$CFLAGS -mssse3"])
+AX_CHECK_COMPILE_FLAG([-msse2],[CFLAGS="$CFLAGS -msse2"])
+
 dnl This can go away when we require c++11
 TEMP_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="$CXXFLAGS -std=c++0x"
