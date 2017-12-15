@@ -240,7 +240,7 @@
 * [Fluid] Remove fluid quorumcheck from debug.log file
 * DELTA swapped for Digishield V3
 * Fixed a bug where the DAA wasn't using the parameters set in chainparams
-* Remove unused enu
+* Remove unused enum
 * Remove unneeded check for enum
 * Add CEO/CFO/COO/CDOO Sovereigns
 * Make sure additional indexes are recalculated correctly in VerifyDB
