@@ -177,10 +177,17 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=$enableval],
   [use_zmq=yes])
 
-AC_ARG_ENABLE([sse3],
-    AC_HELP_STRING([--enable-sse3],[enable SSE3 optimizations (defaults is no)]),
-    [have_sse3=${enableval}],
-    [have_sse3=no])
+AC_ARG_ENABLE([ssse3],
+  [AC_HELP_STRING([--enable-ssse3],
+  [enable SSE3 optimizations (defaults is no)])],
+  [have_ssse3=${enableval}],
+  [have_ssse3=no])
+
+AC_ARG_ENABLE([avx2],
+  [AC_HELP_STRING([--enable-avx2],
+  [enable AVX2 optimizations (defaults is no)])],
+  [have_avx2=${enableval}],
+  [have_avx2=no])
 
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
@@ -562,8 +569,12 @@ if test x$use_reduce_exports = xyes; then
 fi
 
 
-if test "$have_sse3" = "yes"; then
+if test "$have_ssse3" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-mssse3],[CFLAGS="$CFLAGS -mssse3"])
+fi
+
+if test "$have_avx2" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-mavx2],[CFLAGS="$CFLAGS -mavx2"])
 fi
 
 AX_CHECK_COMPILE_FLAG([-msse2],[CFLAGS="$CFLAGS -msse2"])
