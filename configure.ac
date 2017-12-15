@@ -574,7 +574,7 @@ if test "$have_ssse3" = "yes"; then
 fi
 
 if test "$have_avx2" = "yes"; then
-    AX_CHECK_COMPILE_FLAG([-mavx2],[CFLAGS="$CFLAGS -mavx2"])
+    AX_CHECK_COMPILE_FLAG([-mavx2],[CFLAGS="$CFLAGS -mavx2" && CXXFLAGS="$CXXFLAGS -mavx2"])
 fi
 
 AX_CHECK_COMPILE_FLAG([-msse2],[CFLAGS="$CFLAGS -msse2"])
