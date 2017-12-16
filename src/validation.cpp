@@ -2232,7 +2232,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 			
 			FluidIndex.fluidHistory = fluidHistory;
 			
-			for (uint32_t x = 0; x != fluid.InitialiseIdentities().size(); x++) {
+			for (uint32_t x = 0; x != fluid.InitialiseSovereignIdentities().size(); x++) {
 				/* std::string error;
 				CDynamicAddress inputKey; // Reinitialise at each iteration to reset value
 				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
