@@ -850,14 +850,15 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
             LogPrint("dynode", "PSEG -- Sending Dynode entry: dynode=%s  addr=%s\n", dnpair.first.ToStringShort(), dnpair.second.addr.ToString());
             CDynodeBroadcast dnb = CDynodeBroadcast(dnpair.second);
-            uint256 hash = dnb.GetHash();
-            pfrom->PushInventory(CInv(MSG_DYNODE_ANNOUNCE, hash));
-            pfrom->PushInventory(CInv(MSG_DYNODE_PING, dnpair.second.lastPing.GetHash()));
+            CDynodePing dnp = dnpair.second.lastPing;
+            uint256 hashDNB = dnb.GetHash();
+            uint256 hashDNP = dnp.GetHash();
+            pfrom->PushInventory(CInv(MSG_DYNODE_ANNOUNCE, hashDNB));
+            pfrom->PushInventory(CInv(MSG_DYNODE_PING, hashDNP));
             nInvCount++;
 
-            if (!mapSeenDynodeBroadcast.count(hash)) {
-                mapSeenDynodeBroadcast.insert(std::make_pair(hash, std::make_pair(GetTime(), dnb)));
-            }
+            mapSeenDynodeBroadcast.insert(std::make_pair(hashDNB, std::make_pair(GetTime(), dnb)));
+            mapSeenDynodePing.insert(std::make_pair(hashDNP, dnp));
 
             if (vin.prevout == dnpair.first) {
                 LogPrintf("PSEG -- Sent 1 Dynode inv to peer %d\n", pfrom->id);
@@ -1188,6 +1189,7 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
                     }
 
                     mWeAskedForVerification[pnode->addr] = dnv;
+                    mapSeenDynodeVerification.insert(std::make_pair(dnv.GetHash(), dnv));
                     dnv.Relay();
 
                 } else {
