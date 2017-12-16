@@ -286,7 +286,7 @@ void CPrivateSendServer::CheckPool(CConnman& connman)
         // If entries are full, create finalized transaction
         if(nState == POOL_STATE_ACCEPTING_ENTRIES && GetEntriesCount() >= CPrivateSend::GetMaxPoolTransactions()) {
             LogPrint("privatesend", "CPrivateSendServer::CheckPool -- FINALIZE TRANSACTIONS\n");
-            CommitFinalTransaction(connman);
+            CreateFinalTransaction(connman);
             return;
         }
 
