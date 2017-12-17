@@ -66,12 +66,12 @@ bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 
 bool CPrivatesendQueue::Relay(CConnman& connman)
 {
-    std::vector<CNode*> vNodesCopy = g_connman->CopyNodeVector();
+    std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            g_connman->PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
+            connman.PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
 
-    g_connman->ReleaseNodeVector(vNodesCopy);
+    connman.ReleaseNodeVector(vNodesCopy);
     return true;
 }
 

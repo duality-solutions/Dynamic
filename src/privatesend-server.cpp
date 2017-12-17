@@ -452,7 +452,7 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            g_connman->RelayTransaction(vecOffendersCollaterals[0]);
+            connman.RelayTransaction(vecOffendersCollaterals[0]);
         }
     }
 }
@@ -487,7 +487,7 @@ void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeRandomFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
-            g_connman->RelayTransaction(txCollateral);
+            connman.RelayTransaction(txCollateral);
         }
     }
 }
@@ -787,8 +787,8 @@ void CPrivateSendServer::RelayFinalTransaction(const CTransaction& txFinal, CCon
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto entry : vecEntries) {
-        bool fOk = g_connman->ForNode(entry.addr, [&txFinal, this](CNode* pnode) {
-            g_connman->PushMessage(pnode, NetMsgType::PSFINALTX, nSessionID, txFinal);
+        bool fOk = connman.ForNode(entry.addr, [&txFinal, &connman, this](CNode* pnode) {
+            connman.PushMessage(pnode, NetMsgType::PSFINALTX, nSessionID, txFinal);
             return true;
         });
         if(!fOk) {
