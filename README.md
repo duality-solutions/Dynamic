@@ -1,12 +1,12 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
+[![Build Status](https://travis-ci.org/duality-solutions/Dynamic-2.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic-2)
+[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic-2.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic-2)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic-2/throughput.svg)](https://waffle.io/duality-solutions/Dynamic-2/metrics/throughput)  
 
 # **Dynamic (DYN) v1.5.0.0**
 
