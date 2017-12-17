@@ -178,19 +178,19 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=yes])
 
 AC_ARG_ENABLE([ssse3],
-  [AC_HELP_STRING([--enable-ssse3],
+  [AS_HELP_STRING([--enable-ssse3],
   [enable SSE3 optimizations (defaults is no)])],
   [have_ssse3=${enableval}],
   [have_ssse3=no])
 
 AC_ARG_ENABLE([avx2],
-  [AC_HELP_STRING([--enable-avx2],
+  [AS_HELP_STRING([--enable-avx2],
   [enable AVX2 optimizations (defaults is no)])],
   [have_avx2=${enableval}],
   [have_avx2=no])
 
 AC_ARG_ENABLE([avx512f],
-  [AC_HELP_STRING([--enable-avx512f],
+  [AS_HELP_STRING([--enable-avx512f],
   [enable AVX512F optimizations (defaults is no)])],
   [have_avx512f=${enableval}],
   [have_avx512f=no])
