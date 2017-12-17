@@ -18,6 +18,10 @@
 #ifndef ARGON2_H
 #define ARGON2_H
 
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 #include <limits.h>

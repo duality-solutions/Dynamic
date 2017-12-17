@@ -311,9 +311,9 @@ AVX2 Mining Optimisations
 -------------------------
 For increased performance when mining, AVX2 optimisations can be enabled. 
 
-Prior to running the build commands:
+At configure time:
 
-    CPPFLAGS=-march=native
+    --enable-avx2
     
 CPU's with AVX2 support:
 
@@ -325,10 +325,28 @@ CPU's with AVX2 support:
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
         Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2017
+        Cannonlake processor, expected in 2018
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
+
+AVX512 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX512 optimisations can be enabled. 
+
+At configure time:
+
+    --enable-avx512f
+    
+CPU's with AVX512 support:
+
+    Intel
+        Xeon Phi x200/Knights Landing processor, 2016
+        Knights Mill processor, 2017
+        Skylake-SP processor, 2017
+        Skylake-X processor, 2017
+        Cannonlake processor, expected in 2018
+        Ice Lake processor, expected in 2018
 
 Example Build Command
 --------------------
