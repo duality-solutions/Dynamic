@@ -8,67 +8,62 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic-2/throughput.svg)](https://waffle.io/duality-solutions/Dynamic-2/metrics/throughput)  
 
-# **Dynamic (DYN) v1.5.0.0**
+# **Dynamic (DYN) v2.0.0.0**
 
-![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
+![DYN logo](https://github.com/duality-solutions/Dynamic-2/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2017 Duality Blockchain Solutions**
+**Copyright (c) 2016-2017 [Duality Blockchain Solutions](https://duality.solutions/)**
 
-What is Dynamic?
+What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------
 * Coin Suffix: DYN
 * PoW Mining Algorithm: Argon2d
 * PoW Difficulty Algorithm: Digishield V3
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
-* PoW Reward per Block: 1 DYN
-* PoW Reward Start Height: Block 20,546
+* PoW Reward per Block: Controlled via Fluid Protocol
+* PoW Reward Start Height: Block 5,137
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
 * Dynode Min Confirmation: 10 Blocks
-* Dynode Reward: 0.618 DYN Static Reward
-* Dynode Reward Start Height: Block 20,546
-* Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
-* Budget Proposal Fee: 100 DYN, 20 confirmations (~45 minutes)
+* Dynode Reward: Controlled via Fluid Protocol
+* Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
 
 
-The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
+[Dynamic(DYN)](https://duality.solutions/dynamic) is [Duality](https://duality.solutions/)’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. [Duality](https://duality.solutions/) uses company proceeds to place buy back orders on the [Dynamic(DYN)](https://duality.solutions/dynamic) market to keep inflation within acceptable bounds.
 
-Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
+[Dynamic(DYN)](https://duality.solutions/dynamic) lays the groundwork for offering BaaS(Blockchain as a Service) by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by [Duality](https://duality.solutions/) to adjust to a maturing market.
 
-Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
+As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic-2) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
 
+[Dynamic(DYN)](https://github.com/duality-solutions/dynamic-2) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
 
-**Dynode/Privatesend Network Information**
-Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend ported and rebranded as Privatesend.
-Utilisation of InstantSend for near-instant transactions.
 
 **MainNet Parameters**
 P2P Port = 33300
 RPC Port = 33350
 Dynodes = 33300
-Magic Bytes: 0x5e 0x61 0x74 0x80
+Magic Bytes: 0x6e 0x71 0x84 0x90
 
 **TestNet Parameters**
 P2P Port = 33400
 RPC Port = 33450
 Dynodes = 33400
-Magic Bytes: 0x2f 0x32 0x15 0x40
+Magic Bytes: 0x3f 0x42 0x25 0x50
 
 **RegTest Parameters**
 P2P Port = 33500
 RPC Port = 33550
 Dynodes = 33500
-Magic Bytes = 0x2f 0x32 0x15 0x3f
+Magic Bytes = 0x3f 0x42 0x25 0x4f
 
 
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Dynamic in Unix. 
+Some notes on how to build [Dynamic](https://duality.solutions/dynamic) in Unix. 
 
 Note
 ---------------------

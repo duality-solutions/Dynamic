@@ -1,4 +1,4 @@
-**Dynamic v1.5.0.0**
+**Dynamic v2.0.0.0**
 * Fix Network Time Protocol (NTP)
 * Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol
 * Add string generation/parsing system to generate tokens for Fluid Protocol
