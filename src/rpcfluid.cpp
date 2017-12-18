@@ -308,6 +308,29 @@ UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
     return obj;
 }
 
+static std::string GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey) {
+    bool fInvalid = false;
+    std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
+
+    if (fInvalid) {
+        LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
+        return false;
+    }
+
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << messageTokenKey;
+
+    CPubKey pubkey;
+
+    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
+        return false;
+    }
+    CDynamicAddress address = CDynamicAddress(pubkey.GetID());
+    return address.ToString();
+}
+
 UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     if (fHelp || params.size() != 0)
         throw std::runtime_error(
@@ -334,36 +357,52 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
 
     UniValue ret(UniValue::VARR);
-    unsigned int order = 1;
     HexFunctions hexConvert;
     for (const std::string& existingRecord : transactionRecord) {
         UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("order", strprintf("%u", order)));
         std::string strOperationCode = GetRidOfScriptStatement(existingRecord, 0);
         obj.push_back(Pair("operation", strOperationCode));
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(existingRecord);
-
-        std::string strUnHexedFluidOpScript = hexConvert.HexToString(verificationWithoutOpCode);
+        std::vector<std::string> splitString;
+        hexConvert.ConvertToString(verificationWithoutOpCode);
+        SeperateString(verificationWithoutOpCode, splitString, false);
+        std::string messageTokenKey = splitString.at(0);
         std::vector<std::string> vecSplitScript;
-        SeperateFluidOpString(strUnHexedFluidOpScript, vecSplitScript);
+        SeperateFluidOpString(verificationWithoutOpCode, vecSplitScript);
         if (vecSplitScript.size() > 1) {
-            std::string strAmount = vecSplitScript[0];
-            std::string strTimeStamp = vecSplitScript[1];
-            CAmount fluidAmount;
-            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                obj.push_back(Pair("amount", strAmount));
-            }
-            int64_t tokenTimeStamp;
-            if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                obj.push_back(Pair("timestamp", strTimeStamp)); 
-            }
-            if (strOperationCode == "OP_MINT" && vecSplitScript.size() > 2) {
+            if (strOperationCode == "OP_MINT" && vecSplitScript.size() == 6) {
+                std::string strAmount = vecSplitScript[0];
+                std::string strTimeStamp = vecSplitScript[1];
+                CAmount fluidAmount;
+                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                    obj.push_back(Pair("amount", strAmount));
+                }
+                int64_t tokenTimeStamp;
+                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
+                    obj.push_back(Pair("timestamp", strTimeStamp)); 
+                }
                 obj.push_back(Pair("payment address", vecSplitScript[2]));
+                obj.push_back(Pair("sig address1", GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey)));
+                obj.push_back(Pair("sig address2", GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey)));
+                obj.push_back(Pair("sig address3", GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey)));
             }
-            // TODO (Amir): Add signature addresses
+            else if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && vecSplitScript.size() == 5) {
+                std::string strAmount = vecSplitScript[0];
+                std::string strTimeStamp = vecSplitScript[1];
+                CAmount fluidAmount;
+                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                    obj.push_back(Pair("amount", strAmount));
+                }
+                int64_t tokenTimeStamp;
+                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
+                    obj.push_back(Pair("timestamp", strTimeStamp)); 
+                }
+                obj.push_back(Pair("sig address1", GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey)));
+                obj.push_back(Pair("sig address2", GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey)));
+                obj.push_back(Pair("sig address3", GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey)));
+            }
         }
         ret.push_back(obj);
-        order +=1;
     }
     
     return ret;
