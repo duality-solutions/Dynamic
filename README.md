@@ -1,16 +1,16 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Build Status](https://travis-ci.org/duality-solutions/Dynamic-2.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic-2)
-[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic-2.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic-2)
+[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic-2/throughput.svg)](https://waffle.io/duality-solutions/Dynamic-2/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
 # **Dynamic (DYN) v2.0.0.0**
 
-![DYN logo](https://github.com/duality-solutions/Dynamic-2/blob/master/src/qt/res/icons/drk/about.png)
+![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
 **Copyright (c) 2016-2017 [Duality Blockchain Solutions](https://duality.solutions/)**
 
@@ -37,9 +37,9 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 
 [Dynamic(DYN)](https://duality.solutions/dynamic) lays the groundwork for offering BaaS(Blockchain as a Service) by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by [Duality](https://duality.solutions/) to adjust to a maturing market.
 
-As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic-2) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
+As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and Instantsend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using Privatesend.
 
-[Dynamic(DYN)](https://github.com/duality-solutions/dynamic-2) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
+[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
 
 
 **MainNet Parameters**
