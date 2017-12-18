@@ -159,6 +159,7 @@ public:
     unsigned int dynodeRecipientCount;
 	std::vector<std::string> fluidHistory;
 	std::vector<std::string> fluidSovereigns;
+	std::vector<std::string> fluidFrozenAccounts;
 
 	CFluidEntry() {
         SetNull();
@@ -172,6 +173,7 @@ public:
         READWRITE(VARINT(dynodeRecipientCount));
 		READWRITE(fluidHistory);
 		READWRITE(fluidSovereigns);
+		READWRITE(fluidFrozenAccounts);
 	}
 
     inline friend bool operator==(const CFluidEntry &a, const CFluidEntry &b) {
@@ -180,7 +182,8 @@ public:
 			&& a.fluidSovereigns == b.fluidSovereigns
 			&& a.blockReward == b.blockReward
 			&& a.dynodeReward == b.dynodeReward
-            && a.dynodeRecipientCount == b.dynodeRecipientCount
+			&& a.dynodeRecipientCount == b.dynodeRecipientCount
+			&& a.fluidFrozenAccounts == b.fluidFrozenAccounts
 			);
     }
 
@@ -189,7 +192,8 @@ public:
 		fluidSovereigns = b.fluidSovereigns;
 		blockReward = b.blockReward;
 		dynodeReward = b.dynodeReward;
-        dynodeRecipientCount = b.dynodeRecipientCount;
+		dynodeRecipientCount = b.dynodeRecipientCount;
+		fluidFrozenAccounts = b.fluidFrozenAccounts;
 		return *this;
     }
 
@@ -198,15 +202,16 @@ public:
     }
     
     inline void SetNull() { 
-		fluidHistory.clear(); 
+		fluidHistory.clear();
 		fluidSovereigns = InitialiseAddresses();
+		fluidFrozenAccounts.clear();
 		blockReward = 0;
 		dynodeReward = 0;
-        dynodeRecipientCount = 1;
+		dynodeRecipientCount = 1;
 	}
 
     inline bool IsNull() const { 
-		return (fluidHistory.empty() && fluidSovereigns == InitialiseAddresses() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
+		return (fluidHistory.empty() && fluidSovereigns == InitialiseAddresses() && fluidFrozenAccounts.empty() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
 	}
 };
 
