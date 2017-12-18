@@ -240,6 +240,33 @@
 * [Fluid] Remove fluid quorumcheck from debug.log file
 * DELTA swapped for Digishield V3
 * Fixed a bug where the DAA wasn't using the parameters set in chainparams
+* Remove unused enum
+* Remove unneeded check for enum
+* Add CEO/CFO/COO/CDOO Sovereigns
+* Make sure additional indexes are recalculated correctly in VerifyDB
+* Remove global use of g_connman
+* InstantSend txes should never qualify to be 0-fee txes
+* rpc: Input-from-stdin mode for dynamic-cli
+* Move RPC dispatch table registration to wallet/rpcwallet
+* Switch to a more efficient rolling Bloom filter
+* remove cs_main lock from
+* Combine common error strings for different options so translations can be shared and reused
+* Removed comment about IsStandard for P2SH scripts
+* Fix typo, wrong information in gettxout help text.
+* amend -? help message
+* Improved readability of ApproximateBestSubset
+* [Qt] rename 'amount' to 'requested amount' in receive coins table
+* Reduce inefficiency of GetAccountAddress()
+* GUI: Disable tab navigation for peers tables.
+* limitfreerelay edge case bugfix
+* Move non-consensus functions out of pow
+* mempool: Replace maxFeeRate of (10000 x minRelayTxFee) with maxTxFee
+* Move maxTxFee out of mempool
+* include the chaintip blockindex in the SyncTransaction signal, add signal UpdateTip()
+* Common argument defaults for NODE_BLOOM stuff and -wallet
+* Move privatesend to rpcwallet.cpp
+* Optimize CheckOutpoint
+
 
 **Dynamic v1.4.0.0**
 * Securely erase potentially sensitive keys/values
