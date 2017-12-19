@@ -308,29 +308,6 @@ UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
     return obj;
 }
 
-static std::string GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey) {
-    bool fInvalid = false;
-    std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
-
-    if (fInvalid) {
-        LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
-        return false;
-    }
-
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << messageTokenKey;
-
-    CPubKey pubkey;
-
-    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
-        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
-        return false;
-    }
-    CDynamicAddress address = CDynamicAddress(pubkey.GetID());
-    return address.ToString();
-}
-
 UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     if (fHelp || params.size() != 0)
         throw std::runtime_error(
@@ -339,11 +316,14 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
             "\nResult:\n"
             "[                   (json array of object)\n"
             "  {                 (json object)\n"
-            "  \"order\"           (string) order of execution.\n"
-            "  \"operation\"       (string) The fluid operation code.\n"
-            "  \"amount\"          (string) The fluid operation amount.\n"
-            "  \"timestamp\"       (string) The fluid operation timestamp\n"
-            "  \"payment address\" (string) The fluid operation payment address\n"
+            "  \"order\"               (string) order of execution.\n"
+            "  \"operation\"           (string) The fluid operation code.\n"
+            "  \"amount\"              (string) The fluid operation amount.\n"
+            "  \"timestamp\"           (string) The fluid operation timestamp\n"
+            "  \"payment address\"     (string) The fluid operation payment address\n"
+            "  \"sovereign address 1\" (string) First sovereign signature address used\n"
+            "  \"sovereign address 2\" (string) Second sovereign signature address used\n"
+            "  \"sovereign address 3\" (string) Third sovereign signature address used\n"
             "  }, ...\n"
             "]\n"
             "\nExamples\n"
@@ -382,9 +362,9 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
                     obj.push_back(Pair("timestamp", strTimeStamp)); 
                 }
                 obj.push_back(Pair("payment address", vecSplitScript[2]));
-                obj.push_back(Pair("sig address1", GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey)));
-                obj.push_back(Pair("sig address2", GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey)));
-                obj.push_back(Pair("sig address3", GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey)));
+                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
+                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
+                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
             }
             else if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && vecSplitScript.size() == 5) {
                 std::string strAmount = vecSplitScript[0];
@@ -397,9 +377,9 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
                 if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
                     obj.push_back(Pair("timestamp", strTimeStamp)); 
                 }
-                obj.push_back(Pair("sig address1", GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey)));
-                obj.push_back(Pair("sig address2", GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey)));
-                obj.push_back(Pair("sig address3", GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey)));
+                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
+                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
+                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
             }
         }
         ret.push_back(obj);
