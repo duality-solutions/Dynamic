@@ -346,24 +346,7 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     return true;
 }
 
-/** Individually checks the validity of an instruction */
-bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
-{
-    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
-    messageTokenKey = "";
-    std::vector<std::string> strs;
-
-    ConvertToString(consentTokenNoScript);
-    SeperateString(consentTokenNoScript, strs, false);
-
-    messageTokenKey = strs.at(0);
-
-    /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */
-    if(whereToLook >= (int)strs.size() || whereToLook == 0)
-        return false;
-
-    std::string digestSignature = strs.at(whereToLook);
-
+CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey) {
     bool fInvalid = false;
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
 
@@ -382,8 +365,28 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
         LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
         return false;
     }
+    return CDynamicAddress(pubkey.GetID());
+}
 
-    signer = CDynamicAddress(pubkey.GetID());
+/** Individually checks the validity of an instruction */
+bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
+{
+    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
+    messageTokenKey = "";
+    std::vector<std::string> strs;
+
+    ConvertToString(consentTokenNoScript);
+    SeperateString(consentTokenNoScript, strs, false);
+
+    messageTokenKey = strs.at(0);
+
+    /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */
+    if(whereToLook >= (int)strs.size() || whereToLook == 0)
+        return false;
+
+    std::string digestSignature = strs.at(whereToLook);
+
+    signer = GetAddressFromDigestSignature(digestSignature, messageTokenKey);
 
     return true;
 }
