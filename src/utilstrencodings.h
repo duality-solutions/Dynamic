@@ -8,6 +8,7 @@
 /**
  * Utilities for converting data from/to strings.
  */
+
 #ifndef DYNAMIC_UTILSTRENCODINGS_H
 #define DYNAMIC_UTILSTRENCODINGS_H
 
@@ -137,49 +138,5 @@ bool TimingResistantEqual(const T& a, const T& b)
  * @note The result must be in the range (-10^18,10^18), otherwise an overflow error will trigger.
  */
 bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out);
-class HexFunctions {
-public:
-	std::string StringToHex(std::string input) {
-		static const char* const lut = "0123456789ABCDEF";
-		size_t len = input.length();
-		std::string output;
-		output.reserve(2 * len);
-		for (size_t i = 0; i < len; ++i)
-		{
-			const unsigned char c = input[i];
-			output.push_back(lut[c >> 4]);
-			output.push_back(lut[c & 15]);
-		}
-		
-		return output;
-	}
-	
-	std::string HexToString(std::string hex) {
-		int len = hex.length();
-		std::string newString;
-		for(int i=0; i< len; i+=2)
-		{
-			std::string byte = hex.substr(i,2);
-			char chr = (char) (int)strtol(byte.c_str(), nullptr, 16);
-			newString.push_back(chr);
-		}
-                
-		return newString;
-	}
-	
-	void ConvertToHex(std::string &input) { std::string output = StringToHex(input); input = output; }
-	void ConvertToString(std::string &input) { std::string output = HexToString(input); input = output; }
-};
-
-void ScrubString(std::string &input, bool forInteger = false);
-void SeperateString(std::string input, std::vector<std::string> &output, bool subDelimiter = false);
-void SeperateFluidOpString(std::string input, std::vector<std::string> &output);
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter = false);
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter = false);
-std::string GetRidOfScriptStatement(std::string input, int position = 1);
-
-extern std::string PrimaryDelimiter;
-extern std::string SubDelimiter;
-extern std::string SignatureDelimiter;
 
 #endif // DYNAMIC_UTILSTRENCODINGS_H

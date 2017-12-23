@@ -32,27 +32,6 @@ bool IsTransactionFluid(CScript txOut) {
            );
 }
 
-/** Does client instance own address for engaging in processes - required for RPC (PS: NEEDS wallet) */
-bool CFluid::InitiateFluidVerify(CDynamicAddress dynamicAddress) {
-#ifdef ENABLE_WALLET
-    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
-    CDynamicAddress address(dynamicAddress);
-
-    if (address.IsValid()) {
-        CTxDestination dest = address.Get();
-        CScript scriptPubKey = GetScriptForDestination(dest);
-        isminetype mine = pwalletMain ? IsMine(*pwalletMain, dest) : ISMINE_NO;
-
-        return ((mine & ISMINE_SPENDABLE) ? true : false);
-    }
-
-    return false;
-#else
-    // Wallet cannot be accessed, cannot continue ahead!
-    return false;
-#endif //ENABLE_WALLET
-}
-
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     if (!inputKey.IsValid()) {
@@ -216,47 +195,6 @@ bool CFluid::CheckNonScriptQuorum(const std::string consentToken, std::string &m
     return CheckIfQuorumExists(result, message, individual);
 }
 
-/** Because some things in life are meant to be intimate, like socks in a drawer */
-bool CFluid::SignIntimateMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch) {
-#ifdef ENABLE_WALLET
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << unsignedMessage;
-
-    CDynamicAddress addr(address);
-
-    CKeyID keyID;
-    if (!addr.GetKeyID(keyID))
-        return false;
-
-    CKey key;
-    if (!pwalletMain->GetKey(keyID, key))
-        return false;
-
-    std::vector<unsigned char> vchSig;
-    if (!key.SignCompact(ss.GetHash(), vchSig))
-        return false;
-    else if(stitch)
-        stitchedMessage = StitchString(unsignedMessage, EncodeBase64(&vchSig[0], vchSig.size()), false);
-    else
-        stitchedMessage = EncodeBase64(&vchSig[0], vchSig.size());
-
-    return true;
-#else
-    return false;
-#endif //ENABLE_WALLET
-}
-
-/** It will perform basic message signing functions */
-bool CFluid::GenericSignMessage(const std::string message, std::string &signedString, CDynamicAddress signer) {
-    if(!SignIntimateMessage(signer, message, signedString, true))
-        return false;
-    else
-        ConvertToHex(signedString);
-
-    return true;
-}
-
 /** It will append a signature of the new information */
 bool CFluid::GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer) {
     std::string token, digest;
@@ -272,7 +210,7 @@ bool CFluid::GenericConsentMessage(std::string message, std::string &signedStrin
 
     ConvertToString(message);
 
-    if(!SignIntimateMessage(signer, token, digest, false))
+    if(!SignTokenMessage(signer, token, digest, false))
         return false;
 
     signedString = StitchString(message, digest, false);

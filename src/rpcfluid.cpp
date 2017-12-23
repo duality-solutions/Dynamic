@@ -200,10 +200,10 @@ UniValue signtoken(const UniValue& params, bool fHelp)
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
-    if (!fluid.IsGivenKeyMaster(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.InitiateFluidVerify(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string r = params[1].get_str();
@@ -266,7 +266,7 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
     if (!fluid.IsGivenKeyMaster(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.InitiateFluidVerify(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string message;
