@@ -75,7 +75,6 @@ public:
     bool ProvisionalCheckTransaction(const CTransaction &transaction);
     bool CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader);
     bool ProcessFluidToken(const std::string consentToken, std::vector<std::string> &ptrs, int strVecNo);
-    CDynamicAddress GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey);
 };
 
 /** Standard Reward Payment Determination Functions */

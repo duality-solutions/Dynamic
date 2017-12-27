@@ -39,8 +39,8 @@ opcodetype getOpcodeFromString(std::string input) {
 
 UniValue maketoken(const UniValue& params, bool fHelp)
 {
-	std::string result;
-	
+    std::string result;
+    
     if (fHelp || params.size() < 2) {
         throw std::runtime_error(
             "maketoken \"string\"\n"
@@ -53,11 +53,11 @@ UniValue maketoken(const UniValue& params, bool fHelp)
         );
     }
     
-	for(uint32_t iter = 0; iter != params.size(); iter++) {
-		result += params[iter].get_str() + SubDelimiter;
-	}
+    for(uint32_t iter = 0; iter != params.size(); iter++) {
+        result += params[iter].get_str() + SubDelimiter;
+    }
 
-	result.pop_back(); 
+    result.pop_back(); 
     fluid.ConvertToHex(result);
 
     return result;
@@ -316,14 +316,11 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
             "\nResult:\n"
             "[                   (json array of object)\n"
             "  {                 (json object)\n"
-            "  \"order\"               (string) order of execution.\n"
-            "  \"operation\"           (string) The fluid operation code.\n"
-            "  \"amount\"              (string) The fluid operation amount.\n"
-            "  \"timestamp\"           (string) The fluid operation timestamp\n"
-            "  \"payment address\"     (string) The fluid operation payment address\n"
-            "  \"sovereign address 1\" (string) First sovereign signature address used\n"
-            "  \"sovereign address 2\" (string) Second sovereign signature address used\n"
-            "  \"sovereign address 3\" (string) Third sovereign signature address used\n"
+            "  \"order\"           (string) order of execution.\n"
+            "  \"operation\"       (string) The fluid operation code.\n"
+            "  \"amount\"          (string) The fluid operation amount.\n"
+            "  \"timestamp\"       (string) The fluid operation timestamp\n"
+            "  \"payment address\" (string) The fluid operation payment address\n"
             "  }, ...\n"
             "]\n"
             "\nExamples\n"
@@ -337,52 +334,36 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
 
     UniValue ret(UniValue::VARR);
+    unsigned int order = 1;
     HexFunctions hexConvert;
     for (const std::string& existingRecord : transactionRecord) {
         UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("order", strprintf("%u", order)));
         std::string strOperationCode = GetRidOfScriptStatement(existingRecord, 0);
         obj.push_back(Pair("operation", strOperationCode));
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(existingRecord);
-        std::vector<std::string> splitString;
-        hexConvert.ConvertToString(verificationWithoutOpCode);
-        SeperateString(verificationWithoutOpCode, splitString, false);
-        std::string messageTokenKey = splitString.at(0);
+
+        std::string strUnHexedFluidOpScript = hexConvert.HexToString(verificationWithoutOpCode);
         std::vector<std::string> vecSplitScript;
-        SeperateFluidOpString(verificationWithoutOpCode, vecSplitScript);
+        SeperateFluidOpString(strUnHexedFluidOpScript, vecSplitScript);
         if (vecSplitScript.size() > 1) {
-            if (strOperationCode == "OP_MINT" && vecSplitScript.size() == 6) {
-                std::string strAmount = vecSplitScript[0];
-                std::string strTimeStamp = vecSplitScript[1];
-                CAmount fluidAmount;
-                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    obj.push_back(Pair("amount", strAmount));
-                }
-                int64_t tokenTimeStamp;
-                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", strTimeStamp)); 
-                }
+            std::string strAmount = vecSplitScript[0];
+            std::string strTimeStamp = vecSplitScript[1];
+            CAmount fluidAmount;
+            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                obj.push_back(Pair("amount", strAmount));
+            }
+            int64_t tokenTimeStamp;
+            if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
+                obj.push_back(Pair("timestamp", strTimeStamp)); 
+            }
+            if (strOperationCode == "OP_MINT" && vecSplitScript.size() > 2) {
                 obj.push_back(Pair("payment address", vecSplitScript[2]));
-                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
             }
-            else if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && vecSplitScript.size() == 5) {
-                std::string strAmount = vecSplitScript[0];
-                std::string strTimeStamp = vecSplitScript[1];
-                CAmount fluidAmount;
-                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    obj.push_back(Pair("amount", strAmount));
-                }
-                int64_t tokenTimeStamp;
-                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", strTimeStamp)); 
-                }
-                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-            }
+            // TODO (Amir): Add signature addresses
         }
         ret.push_back(obj);
+        order +=1;
     }
     
     return ret;

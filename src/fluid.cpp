@@ -346,13 +346,30 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     return true;
 }
 
-CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey) {
+/** Individually checks the validity of an instruction */     
+bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)      
+{     
+    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);     
+    messageTokenKey = "";     
+    std::vector<std::string> strs;        
+      
+    ConvertToString(consentTokenNoScript);        
+    SeperateString(consentTokenNoScript, strs, false);        
+      
+    messageTokenKey = strs.at(0);     
+      
+    /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */       
+    if(whereToLook >= (int)strs.size() || whereToLook == 0)       
+        return false;     
+      
+    std::string digestSignature = strs.at(whereToLook);
+
     bool fInvalid = false;
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
 
     if (fInvalid) {
         LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
-        return NULL;
+        return false;
     }
 
     CHashWriter ss(SER_GETHASH, 0);
@@ -362,31 +379,10 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignatur
     CPubKey pubkey;
 
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
-        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s \n", ss.GetHash().ToString());
-        return NULL;
-    }
-    return CDynamicAddress(pubkey.GetID());
-}
-
-/** Individually checks the validity of an instruction */
-bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
-{
-    std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
-    messageTokenKey = "";
-    std::vector<std::string> strs;
-
-    ConvertToString(consentTokenNoScript);
-    SeperateString(consentTokenNoScript, strs, false);
-
-    messageTokenKey = strs.at(0);
-
-    /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */
-    if(whereToLook >= (int)strs.size() || whereToLook == 0)
+        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
         return false;
-
-    std::string digestSignature = strs.at(whereToLook);
-
-    signer = GetAddressFromDigestSignature(digestSignature, messageTokenKey);
+    }
+    signer = CDynamicAddress(pubkey.GetID());      
 
     return true;
 }

@@ -346,7 +346,7 @@ void CBlockPolicyEstimator::processTransaction(const CTxMemPoolEntry& entry, boo
 {
     unsigned int txHeight = entry.GetHeight();
     uint256 hash = entry.GetTx().GetHash();
-    if (mapMemPoolTxs.count(hash)) {
+    if (mapMemPoolTxs[hash].stats != NULL) {
         LogPrint("estimatefee", "Blockpolicy error mempool tx %s already being tracked\n", hash.ToString());
         return;
     }
@@ -369,11 +369,30 @@ void CBlockPolicyEstimator::processTransaction(const CTxMemPoolEntry& entry, boo
         return;
     }
 
-    // Feerates are stored and reported as DYN-per-kb:
+    // Fees are stored and reported as BTC-per-kb:
     CFeeRate feeRate(entry.GetFee(), entry.GetTxSize());
 
+    // Want the priority of the tx at confirmation. However we don't know
+    // what that will be and its too hard to continue updating it
+    // so use starting priority as a proxy
+    double curPri = entry.GetPriority(txHeight);
     mapMemPoolTxs[hash].blockHeight = txHeight;
-    mapMemPoolTxs[hash].bucketIndex = feeStats.NewTx(txHeight, (double)feeRate.GetFeePerK());
+
+    LogPrint("estimatefee", "Blockpolicy mempool tx %s ", hash.ToString().substr(0,10));
+    // Record this as a priority estimate
+    if (entry.GetFee() == 0 || isPriDataPoint(feeRate, curPri)) {
+        mapMemPoolTxs[hash].stats = &priStats;
+        mapMemPoolTxs[hash].bucketIndex =  priStats.NewTx(txHeight, curPri);
+    }
+    // Record this as a fee estimate
+    else if (isFeeDataPoint(feeRate, curPri)) {
+        mapMemPoolTxs[hash].stats = &feeStats;
+        mapMemPoolTxs[hash].bucketIndex = feeStats.NewTx(txHeight, (double)feeRate.GetFeePerK());
+    }
+    else {
+        LogPrint("estimatefee", "not adding");
+    }
+    LogPrint("estimatefee", "\n");
 }
 
 void CBlockPolicyEstimator::processBlockTx(unsigned int nBlockHeight, const CTxMemPoolEntry& entry)
@@ -396,10 +415,21 @@ void CBlockPolicyEstimator::processBlockTx(unsigned int nBlockHeight, const CTxM
         return;
     }
 
-    // Feerates are stored and reported as DYN-per-kb:
+    // Fees are stored and reported as BTC-per-kb:
     CFeeRate feeRate(entry.GetFee(), entry.GetTxSize());
 
-    feeStats.Record(blocksToConfirm, (double)feeRate.GetFeePerK());
+    // Want the priority of the tx at confirmation.  The priority when it
+    // entered the mempool could easily be very small and change quickly
+    double curPri = entry.GetPriority(nBlockHeight);
+
+    // Record this as a priority estimate
+    if (entry.GetFee() == 0 || isPriDataPoint(feeRate, curPri)) {
+        priStats.Record(blocksToConfirm, curPri);
+    }
+    // Record this as a fee estimate
+    else if (isFeeDataPoint(feeRate, curPri)) {
+        feeStats.Record(blocksToConfirm, (double)feeRate.GetFeePerK());
+    }
 }
 
 void CBlockPolicyEstimator::processBlock(unsigned int nBlockHeight,
@@ -420,15 +450,41 @@ void CBlockPolicyEstimator::processBlock(unsigned int nBlockHeight,
     if (!fCurrentEstimate)
         return;
 
-    // Clear the current block state
+    // Update the dynamic cutoffs
+    // a fee/priority is "likely" the reason your tx was included in a block if >85% of such tx's
+    // were confirmed in 2 blocks and is "unlikely" if <50% were confirmed in 10 blocks
+    LogPrint("estimatefee", "Blockpolicy recalculating dynamic cutoffs:\n");
+    priLikely = priStats.EstimateMedianVal(2, SUFFICIENT_PRITXS, MIN_SUCCESS_PCT, true, nBlockHeight);
+    if (priLikely == -1)
+        priLikely = INF_PRIORITY;
+
+    double feeLikelyEst = feeStats.EstimateMedianVal(2, SUFFICIENT_FEETXS, MIN_SUCCESS_PCT, true, nBlockHeight);
+    if (feeLikelyEst == -1)
+        feeLikely = CFeeRate(INF_FEERATE);
+    else
+        feeLikely = CFeeRate(feeLikelyEst);
+
+    priUnlikely = priStats.EstimateMedianVal(10, SUFFICIENT_PRITXS, UNLIKELY_PCT, false, nBlockHeight);
+    if (priUnlikely == -1)
+        priUnlikely = 0;
+
+    double feeUnlikelyEst = feeStats.EstimateMedianVal(10, SUFFICIENT_FEETXS, UNLIKELY_PCT, false, nBlockHeight);
+    if (feeUnlikelyEst == -1)
+        feeUnlikely = CFeeRate(0);
+    else
+        feeUnlikely = CFeeRate(feeUnlikelyEst);
+
+    // Clear the current block states
     feeStats.ClearCurrent(nBlockHeight);
+    priStats.ClearCurrent(nBlockHeight);
 
     // Repopulate the current block states
     for (unsigned int i = 0; i < entries.size(); i++)
         processBlockTx(nBlockHeight, entries[i]);
 
-    // Update all exponential averages with the current block state
+    // Update all exponential averages with the current block states
     feeStats.UpdateMovingAverages();
+    priStats.UpdateMovingAverages();
 
     LogPrint("estimatefee", "Blockpolicy after updating estimates for %u confirmed entries, new mempool map size %u\n",
              entries.size(), mapMemPoolTxs.size());
@@ -437,8 +493,7 @@ void CBlockPolicyEstimator::processBlock(unsigned int nBlockHeight,
 CFeeRate CBlockPolicyEstimator::estimateFee(int confTarget)
 {
     // Return failure if trying to analyze a target we're not tracking
-    // It's not possible to get reasonable estimates for confTarget of 1
-    if (confTarget <= 1 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
+    if (confTarget <= 0 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
         return CFeeRate(0);
 
     double median = feeStats.EstimateMedianVal(confTarget, SUFFICIENT_FEETXS, MIN_SUCCESS_PCT, true, nBestSeenHeight);
@@ -454,17 +509,8 @@ CFeeRate CBlockPolicyEstimator::estimateSmartFee(int confTarget, int *answerFoun
     if (answerFoundAtTarget)
         *answerFoundAtTarget = confTarget;
     // Return failure if trying to analyze a target we're not tracking
-    // It's not possible to get reasonable estimates for confTarget of 1
-    if (confTarget <= 1 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
+    if (confTarget <= 0 || (unsigned int)confTarget > feeStats.GetMaxConfirms())
         return CFeeRate(0);
-
-    // It's not possible to get reasonable estimates for confTarget of 1
-    if (confTarget == 1)
-        confTarget = 2;
-
-    // It's not possible to get reasonable estimates for confTarget of 1
-    if (confTarget == 1)
-        confTarget = 2;
 
     double median = -1;
     while (median < 0 && (unsigned int)confTarget <= feeStats.GetMaxConfirms()) {
@@ -474,7 +520,7 @@ CFeeRate CBlockPolicyEstimator::estimateSmartFee(int confTarget, int *answerFoun
     if (answerFoundAtTarget)
         *answerFoundAtTarget = confTarget - 1;
 
-    // If mempool is limiting txs , return at least the min feerate from the mempool
+    // If mempool is limiting txs , return at least the min fee from the mempool
     CAmount minPoolFee = pool.GetMinFee(GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFeePerK();
     if (minPoolFee > 0 && minPoolFee > median)
         return CFeeRate(minPoolFee);
@@ -518,7 +564,6 @@ double CBlockPolicyEstimator::estimateSmartPriority(int confTarget, int *answerF
     return median;
 }
 
-
 void CBlockPolicyEstimator::Write(CAutoFile& fileout)
 {
     fileout << nBestSeenHeight;
@@ -537,7 +582,7 @@ void CBlockPolicyEstimator::Read(CAutoFile& filein)
 
 FeeFilterRounder::FeeFilterRounder(const CFeeRate& minIncrementalFee)
 {
-    CAmount minFeeLimit = std::max(CAmount(1), minIncrementalFee.GetFeePerK() / 2);
+    CAmount minFeeLimit = minIncrementalFee.GetFeePerK() / 2;
     feeset.insert(0);
     for (double bucketBoundary = minFeeLimit; bucketBoundary <= MAX_FEERATE; bucketBoundary *= FEE_SPACING) {
         feeset.insert(bucketBoundary);
@@ -547,8 +592,9 @@ FeeFilterRounder::FeeFilterRounder(const CFeeRate& minIncrementalFee)
 CAmount FeeFilterRounder::round(CAmount currentMinFee)
 {
     std::set<double>::iterator it = feeset.lower_bound(currentMinFee);
-    if ((it != feeset.begin() && insecure_rand.rand32() % 3 != 0) || it == feeset.end()) {
+    if ((it != feeset.begin() && insecure_rand() % 3 != 0) || it == feeset.end()) {
         it--;
     }
     return *it;
 }
+

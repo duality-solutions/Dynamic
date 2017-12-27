@@ -1,7 +1,3 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 // tinyformat.h
 // Copyright (C) 2011, Chris Foster [chris42f (at) gmail (d0t) com]
 //
@@ -102,8 +98,8 @@
 // Overload formatValue() for more control.
 
 
-#ifndef DYNAMIC_TINYFORMAT_H
-#define DYNAMIC_TINYFORMAT_H
+#ifndef TINYFORMAT_H_INCLUDED
+#define TINYFORMAT_H_INCLUDED
 
 namespace tinyformat {}
 //------------------------------------------------------------------------------
@@ -117,7 +113,7 @@ namespace tfm = tinyformat;
 
 // Define for C++11 variadic templates which make the code shorter & more
 // general.  If you don't define this, C++11 support is autodetected below.
-// #define TINYFORMAT_USE_VARIADIC_TEMPLATES
+#define TINYFORMAT_USE_VARIADIC_TEMPLATES
 
 
 //------------------------------------------------------------------------------
@@ -1014,4 +1010,4 @@ TINYFORMAT_WRAP_FORMAT_N(16, returnType, funcName, funcDeclSuffix, bodyPrefix, s
 
 #define strprintf tfm::format
 
-#endif // DYNAMIC_TINYFORMAT_H
+#endif // TINYFORMAT_H_INCLUDED
