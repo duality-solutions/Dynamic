@@ -18,7 +18,13 @@
 * Only send one GetAddr response per connection
 * [Qt] Make it possible to show details for multiple transactions
 * bump versions
-* Update getfluidhistory RPC output, Adds Sovereign Addresses
+* deadlock fix in ProcessGetData & Change mapRelay to store CTransactions
+* Add Header Timeouts
+* Several performance and privacy improvements to inv/mempool handling
+* Send non-tx/non-block inventory items
+* Remove unneeded feerate params
+* Mempool/Fee Improvements
+* Update tinyformat/fees/txmempool/validation/fix assert
 * Update CHANGELOG.md
 
 
