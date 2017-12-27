@@ -18,7 +18,8 @@
 * Only send one GetAddr response per connection
 * [Qt] Make it possible to show details for multiple transactions
 * bump versions
-* update changelog
+* Update getfluidhistory RPC output, Adds Sovereign Addresses
+* Update CHANGELOG.md
 
 
 **Dynamic v2.0.0.0**
