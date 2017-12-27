@@ -598,7 +598,7 @@ static CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool 
 }
 
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
-                              bool* pfMissingInputs, CFeeRate* txFeeRate, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
+                              bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
 {
     AssertLockHeld(cs_main);
@@ -814,9 +814,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         CTxMemPoolEntry entry(tx, nFees, GetTime(), dPriority, chainActive.Height(), pool.HasNoInputsOf(tx), inChainInputValue, fSpendsCoinbase, nSigOps, lp);
         unsigned int nSize = entry.GetTxSize();
-        if (txFeeRate) {
-            *txFeeRate = CFeeRate(nFees, nSize);
-        }
 
         CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
         if ((fLimitFree && nFees < txMinFee))
@@ -1099,10 +1096,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 }
 
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, CFeeRate* txFeeRate, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+                        bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
     std::vector<COutPoint> coins_to_uncache;
-    bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, txFeeRate, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
+    bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
     bool fluidTimestampCheck = true;
     
     if (!fluid.ProvisionalCheckTransaction(tx))
@@ -2543,7 +2540,7 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
         // ignore validation errors in resurrected transactions
         std::list<CTransaction> removed;
         CValidationState stateDummy;
-        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, NULL, true)) {
+        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
             mempool.remove(tx, removed, true);
         } else if (mempool.exists(tx.GetHash())) {
             vHashUpdate.push_back(tx.GetHash());
