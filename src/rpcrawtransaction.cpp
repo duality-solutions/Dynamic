@@ -874,6 +874,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
         fHaveChain = !existingCoin.IsSpent();
     }
     bool fHaveMempool = mempool.exists(hashTx);
+    CFeeRate txFeeRate = CFeeRate(0);
     if (!fHaveMempool && !fHaveChain) {
         // push to local node and sync with wallets
         if (fInstantSend && !instantsend.ProcessTxLockRequest(tx, *g_connman)) {
