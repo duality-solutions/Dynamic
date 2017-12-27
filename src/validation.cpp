@@ -1279,11 +1279,6 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
-{
-    return ReadBlockFromDisk(block, pindex, Params().GetConsensus());
-}
-
 bool IsInitialBlockDownload()
 {
     static bool lockIBDState = false;
