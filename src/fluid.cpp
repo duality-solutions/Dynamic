@@ -352,7 +352,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignatur
 
     if (fInvalid) {
         LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
-        return false;
+        return NULL;
     }
 
     CHashWriter ss(SER_GETHASH, 0);
@@ -362,8 +362,8 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignatur
     CPubKey pubkey;
 
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
-        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
-        return false;
+        LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s \n", ss.GetHash().ToString());
+        return NULL;
     }
     return CDynamicAddress(pubkey.GetID());
 }

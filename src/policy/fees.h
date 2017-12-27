@@ -96,6 +96,7 @@ private:
     // Combine the conf counts with tx counts to calculate the confirmation % for each Y,X
     // Combine the total value with the tx counts to calculate the avg feerate per bucket
 
+    std::string dataTypeString;
     double decay;
 
     // Mempool counts of outstanding transactions
@@ -112,8 +113,9 @@ public:
      * @param defaultBuckets contains the upper limits for the bucket boundaries
      * @param maxConfirms max number of confirms to track
      * @param decay how much to decay the historical moving average per block
+     * @param dataTypeString for logging purposes
      */
-    void Initialize(std::vector<double>& defaultBuckets, unsigned int maxConfirms, double decay);
+    void Initialize(std::vector<double>& defaultBuckets, unsigned int maxConfirms, double decay, std::string dataTypeString);
 
     /** Clear the state of the curBlock variables to start counting for the new block */
     void ClearCurrent(unsigned int nBlockHeight);
@@ -179,10 +181,15 @@ static const double UNLIKELY_PCT = .5;
 /** Require an avg of 1 tx in the combined feerate bucket per block to have stat significance */
 static const double SUFFICIENT_FEETXS = 1;
 
-// Minimum and Maximum values for tracking feerates
-static constexpr double MIN_FEERATE = 10;
+/** Require only an avg of 1 tx every 5 blocks in the combined pri bucket (way less pri txs) */
+static const double SUFFICIENT_PRITXS = .2;
+
+// Minimum and Maximum values for tracking fees and priorities
+static const double MIN_FEERATE = 10;
 static const double MAX_FEERATE = 1e7;
 static const double INF_FEERATE = MAX_MONEY;
+static const double MIN_PRIORITY = 10;
+static const double MAX_PRIORITY = 1e16;
 static const double INF_PRIORITY = 1e9 * MAX_MONEY;
 
 // We have to lump transactions into buckets based on feerate, but we want to be able
@@ -190,6 +197,9 @@ static const double INF_PRIORITY = 1e9 * MAX_MONEY;
 // Therefore it makes sense to exponentially space the buckets
 /** Spacing of FeeRate buckets */
 static const double FEE_SPACING = 1.1;
+
+/** Spacing of Priority buckets */
+static const double PRI_SPACING = 2;
 
 /**
  *  We want to be able to estimate feerates that are needed on tx's to be included in
@@ -213,7 +223,13 @@ public:
     void processTransaction(const CTxMemPoolEntry& entry, bool fCurrentEstimate);
 
     /** Remove a transaction from the mempool tracking stats*/
-    bool removeTx(uint256 hash);
+    void removeTx(uint256 hash);
+
+    /** Is this transaction likely included in a block because of its fee?*/
+    bool isFeeDataPoint(const CFeeRate &fee, double pri);
+
+    /** Is this transaction likely included in a block because of its priority?*/
+    bool isPriDataPoint(const CFeeRate &fee, double pri);
 
     /** Return a feerate estimate */
     CFeeRate estimateFee(int confTarget);
@@ -242,16 +258,18 @@ public:
     void Write(CAutoFile& fileout);
 
     /** Read estimation data from a file */
-    void Read(CAutoFile& filein, int nFileVersion);
+    void Read(CAutoFile& filein);
 
 private:
-    CFeeRate minTrackedFee; //! Passed to constructor to avoid dependency on main
+    CFeeRate minTrackedFee;    //!< Passed to constructor to avoid dependency on main
+    double minTrackedPriority; //!< Set to AllowFreeThreshold
     unsigned int nBestSeenHeight;
     struct TxStatsInfo
     {
+        TxConfirmStats *stats;
         unsigned int blockHeight;
         unsigned int bucketIndex;
-        TxStatsInfo() : blockHeight(0), bucketIndex(0) {}
+        TxStatsInfo() : stats(NULL), blockHeight(0), bucketIndex(0) {}
     };
 
     FastRandomContext insecure_rand;
@@ -260,7 +278,11 @@ private:
     std::map<uint256, TxStatsInfo> mapMemPoolTxs;
 
     /** Classes to track historical data on transaction confirmations */
-    TxConfirmStats feeStats;
+    TxConfirmStats feeStats, priStats;
+
+    /** Breakpoints to help determine whether a transaction was confirmed by priority or Fee */
+    CFeeRate feeLikely, feeUnlikely;
+    double priLikely, priUnlikely;
 };
 
 class FeeFilterRounder
