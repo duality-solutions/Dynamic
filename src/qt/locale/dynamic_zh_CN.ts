@@ -3375,7 +3375,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>警告: 钱包档wallet.dat 损坏，但资料被拯救回来了！原来的wallet.dat 会改储存在%s, 档名是wallet.{timestamp}.bak. 如果余额或交易资料有误，你应该要用备份资料复原回来。</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
         <translation>您必须在配置中指定一个主节点密钥。请参阅文档以获得帮助。</translation>
     </message>
     <message>
@@ -3959,7 +3959,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>即将重试...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
         <translation>无效主节点私钥。请查阅文件材料。</translation>
     </message>
     <message>

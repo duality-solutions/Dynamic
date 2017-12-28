@@ -77,8 +77,8 @@ Shut down the daemon and then edit the file.
 
 ```sudo nano .dynamic/dynamic.conf```
 
-### Edit the dynodeprivkey
-If you generated a new Dynode private key, you will need to update the dynodeprivkey value in your remote dynamic.conf file.
+### Edit the dynodepairingkey
+If you generated a new Dynode private key, you will need to update the dynodepairingkey value in your remote dynamic.conf file.
 
 ## Start your Dynodes
 

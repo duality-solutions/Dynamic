@@ -3398,8 +3398,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aviso: wallet.dar corrompido mas os dados foram recuperados! A carteira original foi gravada como wallet{data/hora}.bak in %s; se o seu saldo ou transacções forem incorrectos deverá recuperar a partir de uma cópia de segurança.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Tem que especificar uma dynodeprivkey na configuração. Por favor verifique a documentação para ajuda.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Tem que especificar uma dynodepairingkey na configuração. Por favor verifique a documentação para ajuda.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4060,8 +4060,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Tentar de novo...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>dynodeprivkey inválida. Por favor reveja a documentação.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>dynodepairingkey inválida. Por favor reveja a documentação.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

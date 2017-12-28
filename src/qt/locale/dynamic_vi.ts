@@ -3414,8 +3414,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Cảnh báo: wallet.dat đã bị hỏng, dữ liệu đã được cứu! Tệp gốc wallet.dat đã được lưu thành wallet.{timestamp}.bak trong %s; nếu số dư hoặc các giao dịch của bạn không chính xác, bạn có thể khôi phục từ bản sao lưu.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Bạn cần chỉ rõ dynodeprivkey trong tệp cấu hình. Hãy xem tài liệu để có hướng dẫn.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Bạn cần chỉ rõ dynodepairingkey trong tệp cấu hình. Hãy xem tài liệu để có hướng dẫn.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4171,8 +4171,8 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Sẽ thử lại...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>Dynodeprivkey không hợp lệ. Hãy xem lại tài liệu.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>dynodepairingkey không hợp lệ. Hãy xem lại tài liệu.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

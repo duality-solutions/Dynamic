@@ -3414,8 +3414,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Uwaga: plik wallet.dat jest uszkodzony, ale dane zostały odzyskane! Oryginalny plik wallet.dat został zapisany jako wallet.{timestamp}.bak w %s; jeżeli twoje saldo lub transakcje są nieprawidłowe powinieneś przwyrócić ten plik z kopi zapasowej.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Musisz sprecyzować dynodeprivkey w konfiguracji. Proszę przeglądnij dokumentacje w celu pomocy.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Musisz sprecyzować dynodepairingkey w konfiguracji. Proszę przeglądnij dokumentacje w celu pomocy.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4171,7 +4171,7 @@ Zaleca się również aby ustawić alarm powiadomień tzw. alertnotify, aby dać
         <translation>Spróbuje ponownie...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
         <translation>Nieprawidłowy klucz prywatny masternoda. Przeczytaj dokumentację.</translation>
     </message>
     <message>

@@ -137,7 +137,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
                 "  count        - Print number of all known Dynodes (optional: 'ps', 'enabled', 'all', 'qualify')\n"
                 "  current      - Print info on current Dynode winner to be paid the next block (calculated locally)\n"
                 "  debug        - Print Dynode status\n"
-                "  genkey       - Generate new Dynode Pairing Key\n"
+                "  genkey       - Generate new dynodepairingkey\n"
 #ifdef ENABLE_WALLET
                 "  outputs      - Print Dynode compatible outputs\n"
                 "  start-alias  - Start single remote Dynode by assigned alias configured in dynode.conf\n"

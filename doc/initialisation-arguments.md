@@ -162,7 +162,7 @@ DYNODE OPTIONS
 * "-dynode=[n]" ("Enable the client to act as a Dynode (0-1)")
 * "-dnconf=[file]" ("Specify Dynode configuration file", "dynode.conf")
 * "-dnconflock=[n]" ("Lock Dynodes from Dynode configuration file")
-* "-dynodeprivkey=[n]" ("Set the Dynode private key")
+* "-dynodepairingkey=[n]" ("Set the Dynode private key")
 
 PRIVATESEND OPTIONS
 -------------------

@@ -2750,7 +2750,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Varning: wallet.dat är korrumperad, data räddad! Den ursprungliga wallet.dat är sparad som wallet.{timestamp}.bak i %s; om ditt saldo eller transaktioner är felaktiga kanske du måste återställa från en säkerhetskopia.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
         <translation>Du måste specificera en dynodepriv-nyckel i konfigurationen. Vänligen se dokumentationen för hjälp.</translation>
     </message>
     <message>
@@ -2978,7 +2978,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Ogiltig mängd för -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
         <translation>Ogiltig dynodepriv-nyckel. Vänligen se dokumentationen.</translation>
     </message>
     <message>

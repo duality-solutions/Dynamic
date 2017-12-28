@@ -3413,8 +3413,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Upozornenie: wallet.dat poškodený, údaje zachránené! Pôvodný wallet.dat bol uložený ako wallet.{timestamp}.bak v %s; ak váš zostatok alebo transakcie nie sú správne, mali by ste obnoviť zo zálohy.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>V konfigurácii musíte špecifikovať dynodeprivkey. Pre pomoc sa prosím pozrite do dokumentácie.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>V konfigurácii musíte špecifikovať dynodepairingkey. Pre pomoc sa prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4171,8 +4171,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Skúsime znovu...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>Neplatný dynodeprivkey. Prosím pozrite do dokumentácie.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>Neplatný dynodepairingkey. Prosím pozrite do dokumentácie.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

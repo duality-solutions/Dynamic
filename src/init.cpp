@@ -532,7 +532,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-dynode=<n>", strprintf(_("Enable the client to act as a Dynode (0-1, default: %u)"), 0));
     strUsage += HelpMessageOpt("-dnconf=<file>", strprintf(_("Specify Dynode configuration file (default: %s)"), "dynode.conf"));
     strUsage += HelpMessageOpt("-dnconflock=<n>", strprintf(_("Lock Dynodes from Dynode configuration file (default: %u)"), 1));
-    strUsage += HelpMessageOpt("-dynodeprivkey=<n>", _("Set the Dynode private key"));
+    strUsage += HelpMessageOpt("-dynodepairingkey=<n>", _("Set the Dynode private key"));
 
 #ifdef ENABLE_WALLET
     strUsage += HelpMessageGroup(_("PrivateSend options:"));
@@ -1715,14 +1715,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if(fDyNode) {
         LogPrintf("DYNODE:\n");
 
-        std::string strDyNodePrivKey = GetArg("-dynodeprivkey", "");
-        if(!strDyNodePrivKey.empty()) {
-            if(!CMessageSigner::GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
-                return InitError(_("Invalid dynodeprivkey. Please see documenation."));
+        std::string strdynodepairingkey = GetArg("-dynodepairingkey", "");
+        if(!strdynodepairingkey.empty()) {
+            if(!CMessageSigner::GetKeysFromSecret(strdynodepairingkey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
+                return InitError(_("Invalid dynodepairingkey. Please see documenation."));
 
             LogPrintf("  pubKeyDynode: %s\n", CDynamicAddress(activeDynode.pubKeyDynode.GetID()).ToString());
         } else {
-            return InitError(_("You must specify a dynodeprivkey in the configuration. Please see documentation for help."));
+            return InitError(_("You must specify a dynodepairingkey in the configuration. Please see documentation for help."));
         }
     }
 
