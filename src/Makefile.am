@@ -153,6 +153,7 @@ DYNAMIC_CORE_H = \
   reverselock.h \
   rpcclient.h \
   rpcprotocol.h \
+  rpcregister.h \
   rpcserver.h \
   scheduler.h \
   script/interpreter.h \

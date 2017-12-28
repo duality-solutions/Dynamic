@@ -397,3 +397,26 @@ UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
 
     return obj;
 }
+
+static const CRPCCommand commands[] =
+{   //  category         name                        actor (function)           okSafeMode
+#ifdef ENABLE_WALLET
+    /* Fluid Protocol */
+    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
+    { "fluid",           "signtoken",                &signtoken,                true  },
+    { "fluid",           "consenttoken",             &consenttoken,             true  },
+    { "fluid",           "getrawpubkey",             &getrawpubkey,             true  },
+    { "fluid",           "verifyquorum",             &verifyquorum,             true  },
+    { "fluid",           "maketoken",                &maketoken,                true  },
+    { "fluid",           "getfluidhistory",          &getfluidhistory,          true  },
+    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
+    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
+    { "fluid",           "gettime",                  &gettime,                  true  },
+#endif //ENABLE_WALLET
+};
+
+void RegisterFluidRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}

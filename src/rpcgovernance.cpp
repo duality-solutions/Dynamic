@@ -992,3 +992,20 @@ UniValue getsuperblockbudget(const UniValue& params, bool fHelp)
 
     return strBudget;
 }
+
+static const CRPCCommand commands[] =
+{   //  category              name                      actor (function)         okSafeMode
+    /* Dynamic features */
+    { "dynamic",               "getgovernanceinfo",      &getgovernanceinfo,      true  },
+    { "dynamic",               "getsuperblockbudget",    &getsuperblockbudget,    true  },
+    { "dynamic",               "gobject",                &gobject,                true  },
+    { "dynamic",               "voteraw",                &voteraw,                true  },
+
+};
+
+void RegisterGovernanceRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}
+

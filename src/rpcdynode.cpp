@@ -27,6 +27,8 @@
 #ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
 
+UniValue dynodelist(const UniValue& params, bool fHelp);
+
 UniValue privatesend(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
@@ -863,3 +865,19 @@ UniValue sentinelping(const UniValue& params, bool fHelp)
     return true;
 }
 
+static const CRPCCommand commands[] =
+{ //  category                  name                    actor (function)     okSafeMode
+    /* Dynamic features */
+    { "dynamic",               "dynode",                &dynode,             true  },
+    { "dynamic",               "dynodelist",            &dynodelist,         true  },
+    { "dynamic",               "dynodebroadcast",       &dynodebroadcast,    true  },
+    { "dynamic",               "getpoolinfo",           &getpoolinfo,        true  },
+    { "dynamic",               "sentinelping",          &sentinelping,       true  },
+    { "dynamic",               "privatesend",           &privatesend,        false },
+};
+
+void RegisterDynodeRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}

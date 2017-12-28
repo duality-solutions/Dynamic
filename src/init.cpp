@@ -40,6 +40,7 @@
 #endif // ENABLE_WALLET
 #include "privatesend-server.h"
 #include "psnotificationinterface.h"
+#include "rpcregister.h"
 #include "rpcserver.h"
 #include "compat/sanity.h"
 #include "script/standard.h"
@@ -1080,10 +1081,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         fPruneMode = true;
     }
 
+    RegisterAllCoreRPCCommands(tableRPC);
 #ifdef ENABLE_WALLET
     bool fDisableWallet = GetBoolArg("-disablewallet", false);
     if (!fDisableWallet)
-        walletRegisterRPCCommands();
+        RegisterWalletRPCCommands(tableRPC);
 #endif
 
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);

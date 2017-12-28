@@ -15,6 +15,8 @@
 #include "net_processing.h"
 #include "pubkey.h"
 #include "random.h"
+#include "rpcserver.h"
+#include "rpcregister.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "ui_interface.h"
@@ -58,9 +60,12 @@ BasicTestingSetup::~BasicTestingSetup()
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
 {
     const CChainParams& chainparams = Params();
+        // Ideally we'd move all the RPC tests to the functional testing framework
+        // instead of unit tests, but for now we need these here.
+        RegisterAllCoreRPCCommands(tableRPC);
 #ifdef ENABLE_WALLET
         bitdb.MakeMock();
-        walletRegisterRPCCommands();
+        RegisterWalletRPCCommands(tableRPC);
 #endif
         ClearDatadirCache();
         pathTemp = GetTempPath() / strprintf("test_dynamic_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
