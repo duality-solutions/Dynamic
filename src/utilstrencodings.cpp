@@ -14,12 +14,6 @@
 #include <errno.h>
 #include <limits>
 
-#include <boost/algorithm/string.hpp>
-
-std::string SignatureDelimiter = " ";
-std::string PrimaryDelimiter = "@";
-std::string SubDelimiter = "$";
-
 static const std::string CHARS_ALPHA_NUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 static const std::string SAFE_CHARS[] =
@@ -675,58 +669,4 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
         *amount_out = mantissa;
 
     return true;
-}
-
-void ScrubString(std::string &input, bool forInteger) {
-	input.erase(std::remove(input.begin(), input.end(), '@'), input.end());
-	input.erase(std::remove(input.begin(), input.end(), '$'), input.end());
-	if (forInteger)
-		input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
-}
-
-void SeperateString(std::string input, std::vector<std::string> &output, bool subDelimiter) {
-	if(subDelimiter)
-		boost::split(output, input, boost::is_any_of(SubDelimiter));
-	else
-		boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
-}
-
-void SeperateFluidOpString(std::string input, std::vector<std::string> &output) {
-  std::vector<std::string> firstSplit;
-  SeperateString(input, firstSplit);
-  if (firstSplit.size() > 1) {
-    std::vector<std::string> secondSplit;
-    SeperateString(firstSplit[0], secondSplit, true);
-    for (const std::string& item : secondSplit) {
-      output.push_back(item);
-    }
-    unsigned int n = 0;
-    for (const std::string& item : firstSplit) {
-      if (n != 0) {
-        output.push_back(item);
-      }
-      n =+1;
-    }
-  }
-}
-
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter) {
-	if(subDelimiter)
-		return stringOne + SubDelimiter + stringTwo;
-	else 
-		return stringOne + PrimaryDelimiter + stringTwo;
-}
-
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter) {
-	if(subDelimiter)
-		return stringOne + SubDelimiter + stringTwo + SubDelimiter + stringThree;
-	else 
-		return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
-}
-
-std::string GetRidOfScriptStatement(std::string input, int position) {
-	std::vector<std::string> output;
-	boost::split(output, input, boost::is_any_of(" "));
-	
-	return output.at(position);
 }

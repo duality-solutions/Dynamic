@@ -212,26 +212,6 @@ enum opcodetype
     OP_IDENTITY_UPDATE = 0xd5,
     OP_IDENTITY_MULTISIG = 0xd6,
 
-    // distributed exchange
-    OP_OFFER_ACTIVATE = 0x04,
-    OP_OFFER_UPDATE = 0x05,
-    OP_OFFER_ACCEPT = 0x06,
-    OP_OFFER_ACCEPT_FEEDBACK = 0x07,
-
-    // distributed licensing system
-    OP_CERT_ACTIVATE = 0x08,
-    OP_CERT_UPDATE = 0x09,
-    OP_CERT_TRANSFER = 0x0a,
-
-    // distributed escrow system
-    OP_ESCROW_ACTIVATE = 0x0b,
-    OP_ESCROW_RELEASE = 0x0c,
-    OP_ESCROW_REFUND = 0x0d,
-    OP_ESCROW_COMPLETE = 0x0e,
-
-    // encrypted messaging
-    OP_MESSAGE_ACTIVATE = 0x0f,
-
     // dynamic extended reserved 
     OP_DYNAMIC_EXTENDED = 0x10,
 

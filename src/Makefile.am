@@ -134,6 +134,7 @@ DYNAMIC_CORE_H = \
   net_processing.h \
   noui.h \
   ntp.h \
+  operations.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -240,6 +241,7 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
+  operations.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
