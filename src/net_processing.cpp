@@ -888,15 +888,16 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
             {
                 // Send stream from relay memory
                 bool pushed = false;
-                {
-                    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                    {
-                        LOCK(cs_mapRelay);
-                        std::map<uint256, CTransaction>::iterator mi = mapRelay.find(inv.hash);
-                        if (mi != mapRelay.end()) {
+                // Only serve MSG_TX from mapRelay.
+                // Otherwise we may send out a normal TX instead of a InstandSend transaction
+                if (inv.type == MSG_TX) {
+                    LOCK(cs_mapRelay);
+                    std::map<CInv, CDataStream>::iterator mi = mapRelay.find(inv);
+                    if (mi != mapRelay.end()) {
+                        pfrom->PushMessage(inv.GetCommand(), (*mi).second);
+                        pushed = true;
                             connman.PushMessage(pfrom, inv.GetCommand(), (*mi).second);
                             pushed = true;
-                        }
                     }
                 }
 
