@@ -340,7 +340,8 @@ UniValue verifytxoutproof(const UniValue& params, bool fHelp)
     UniValue res(UniValue::VARR);
 
     std::vector<uint256> vMatch;
-    if (merkleBlock.txn.ExtractMatches(vMatch) != merkleBlock.header.hashMerkleRoot)
+    std::vector<unsigned int> vIndex;
+    if (merkleBlock.txn.ExtractMatches(vMatch, vIndex) != merkleBlock.header.hashMerkleRoot)
         return res;
 
     LOCK(cs_main);
