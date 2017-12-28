@@ -39,8 +39,8 @@ opcodetype getOpcodeFromString(std::string input) {
 
 UniValue maketoken(const UniValue& params, bool fHelp)
 {
-	std::string result;
-	
+    std::string result;
+    
     if (fHelp || params.size() < 2) {
         throw std::runtime_error(
             "maketoken \"string\"\n"
@@ -53,11 +53,11 @@ UniValue maketoken(const UniValue& params, bool fHelp)
         );
     }
     
-	for(uint32_t iter = 0; iter != params.size(); iter++) {
-		result += params[iter].get_str() + SubDelimiter;
-	}
+    for(uint32_t iter = 0; iter != params.size(); iter++) {
+        result += params[iter].get_str() + SubDelimiter;
+    }
 
-	result.pop_back(); 
+    result.pop_back(); 
     fluid.ConvertToHex(result);
 
     return result;

@@ -1,3 +1,33 @@
+**Dynamic v2.1.0.0**
+* Add tags to mempool's mapTx indices
+* remove unused NOBLKS_VERSION_{START,END} constants
+* mempool: Re-remove ERROR logging for mempool rejects
+* [Wallet] move wallet help string creation to CWallet
+* Fix calculation of balances and available coins.
+* [BUG]dynamic-qt crash
+* Fix crash on exit when -createwalletbackups=0
+* Implement feefilter
+* Improve COutPoint less operator
+* Prevent multiple calls to CWallet::AvailableCoins
+* [Qt] remove trailing output-index from transaction-id
+* Put hex-encoded version in UpdateTip
+* Net: Add IPv6 Link-Local Address Support
+* Globals: Explicitly pass const CChainParams& to ProcessMessage()
+* Clean up lockorder data of destroyed mutexes
+* Tiny refactor of rbf to avoid exception
+* Only send one GetAddr response per connection
+* [Qt] Make it possible to show details for multiple transactions
+* bump versions
+* deadlock fix in ProcessGetData & Change mapRelay to store CTransactions
+* Add Header Timeouts
+* Several performance and privacy improvements to inv/mempool handling
+* Send non-tx/non-block inventory items
+* Remove unneeded feerate params
+* Mempool/Fee Improvements
+* Update tinyformat/fees/txmempool/validation/fix assert
+* Update CHANGELOG.md
+
+
 **Dynamic v2.0.0.0**
 * Fix Network Time Protocol (NTP)
 * Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol

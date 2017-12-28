@@ -22,7 +22,7 @@ secp256k1_context* secp256k1_context_verify = NULL;
  *
  *  Supported violations include negative integers, excessive padding, garbage
  *  at the end, and overly long length descriptors. This is safe to use in
- *  Bitcoin because since the activation of BIP66, signatures are verified to be
+ *  Dynamic because since genesis, signatures are verified to be
  *  strict DER before being passed to this module, and we know it supports all
  *  violations present in the blockchain before that point.
  */
@@ -181,8 +181,8 @@ bool CPubKey::Verify(const uint256 &hash, const std::vector<unsigned char>& vchS
     if (!ecdsa_signature_parse_der_lax(secp256k1_context_verify, &sig, &vchSig[0], vchSig.size())) {
         return false;
     }
-    /* libsecp256k1's ECDSA verification requires lower-S signatures, which have
-     * not historically been enforced in Bitcoin, so normalize them first. */
+    /* libsecp256k1's ECDSA verification requires lower-S signatures */
+    /* Normalize to be sure */
     secp256k1_ecdsa_signature_normalize(secp256k1_context_verify, &sig, &sig);
     return secp256k1_ecdsa_verify(secp256k1_context_verify, &sig, hash.begin(), &pubkey);
 }
