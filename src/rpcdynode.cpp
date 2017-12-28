@@ -24,10 +24,10 @@
 #include <fstream>
 #include <iomanip>
 
+UniValue dynodelist(const UniValue& params, bool fHelp);
+
 #ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
-
-UniValue dynodelist(const UniValue& params, bool fHelp);
 
 UniValue privatesend(const UniValue& params, bool fHelp)
 {
@@ -873,7 +873,9 @@ static const CRPCCommand commands[] =
     { "dynamic",               "dynodebroadcast",       &dynodebroadcast,    true  },
     { "dynamic",               "getpoolinfo",           &getpoolinfo,        true  },
     { "dynamic",               "sentinelping",          &sentinelping,       true  },
+#ifdef ENABLE_WALLET
     { "dynamic",               "privatesend",           &privatesend,        false },
+#endif // ENABLE_WALLET
 };
 
 void RegisterDynodeRPCCommands(CRPCTable &tableRPC)
