@@ -20,10 +20,6 @@ namespace boost
 class thread_group;
 } // namespace boost
 
-#ifdef ENABLE_WALLET		
-extern CWallet* pwalletMain;
-#endif //ENABLE_WALLET		
-
 void StartShutdown();
 bool ShutdownRequested();
 /** Interrupt threads */

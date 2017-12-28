@@ -90,9 +90,6 @@
 
 extern void ThreadSendAlert(CConnman& connman);
 
-#ifdef ENABLE_WALLET
-CWallet* pwalletMain = NULL;
-#endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false;  // true: restart false: shutdown
 
@@ -1113,63 +1110,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
 
 #ifdef ENABLE_WALLET
-    if (::minRelayTxFee.GetFeePerK() > HIGH_TX_FEE_PER_KB)
-        InitWarning(AmountHighWarn("-minrelaytxfee") + " " +
-                    _("The wallet will avoid paying less than the minimum relay fee."));
-
-    if (mapArgs.count("-mintxfee"))
-    {
-        CAmount n = 0;
-        if (!ParseMoney(mapArgs["-mintxfee"], n))
-            return InitError(AmountErrMsg("mintxfee", mapArgs["-mintxfee"]));
-        if (n > HIGH_TX_FEE_PER_KB)
-            InitWarning(AmountHighWarn("-mintxfee") + " " +
-                        _("This is the minimum transaction fee you pay on every transaction."));
-        CWallet::minTxFee = CFeeRate(n); 
-    }
-    if (mapArgs.count("-fallbackfee"))
-    {
-        CAmount nFeePerK = 0;
-        if (!ParseMoney(mapArgs["-fallbackfee"], nFeePerK))
-            return InitError(AmountErrMsg("fallbackfee", mapArgs["-fallbackfee"]));
-        if (nFeePerK > HIGH_TX_FEE_PER_KB)
-            InitWarning(AmountHighWarn("-fallbackfee") + " " +
-                        _("This is the transaction fee you may pay when fee estimates are not available."));
-        CWallet::fallbackFee = CFeeRate(nFeePerK);
-    }
-    if (mapArgs.count("-paytxfee"))
-    {
-        CAmount nFeePerK = 0;
-        if (!ParseMoney(mapArgs["-paytxfee"], nFeePerK))
-            return InitError(AmountErrMsg("paytxfee", mapArgs["-paytxfee"]));
-        if (nFeePerK > HIGH_TX_FEE_PER_KB)
-            InitWarning(AmountHighWarn("-paytxfee") + " " +
-                        _("This is the transaction fee you will pay if you send a transaction."));
-        payTxFee = CFeeRate(nFeePerK, 1000);
-        if (payTxFee < ::minRelayTxFee)
-        {
-            return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s' (must be at least %s)"),
-                                       mapArgs["-paytxfee"], ::minRelayTxFee.ToString()));
-        }
-    }
-    if (mapArgs.count("-maxtxfee"))
-    {
-        CAmount nMaxFee = 0;
-        if (!ParseMoney(mapArgs["-maxtxfee"], nMaxFee))
-            return InitError(AmountErrMsg("maxtxfee", mapArgs["-maxtxfee"]));
-        if (nMaxFee > HIGH_MAX_TX_FEE)
-            InitWarning(_("-maxtxfee is set very high! Fees this large could be paid on a single transaction."));
-        maxTxFee = nMaxFee;
-        if (CFeeRate(maxTxFee, 1000) < ::minRelayTxFee)
-        {
-            return InitError(strprintf(_("Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)"),
-                                       mapArgs["-maxtxfee"], ::minRelayTxFee.ToString()));
-        }
-    }
-    nTxConfirmTarget = GetArg("-txconfirmtarget", DEFAULT_TX_CONFIRM_TARGET);
-    bSpendZeroConfChange = GetBoolArg("-spendzeroconfchange", DEFAULT_SPEND_ZEROCONF_CHANGE);
-    fSendFreeTransactions = GetBoolArg("-sendfreetransactions", DEFAULT_SEND_FREE_TRANSACTIONS);
-
+    if (!CWallet::ParameterInteraction())
+        return false;
     std::string strWalletFile = GetArg("-wallet", DEFAULT_WALLET_DAT);
 #endif // ENABLE_WALLET
 
@@ -1208,11 +1150,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError(_("Initialization sanity check failed. Dynamic is shutting down."));
 
     std::string strDataDir = GetDataDir().string();
-#ifdef ENABLE_WALLET
-    // Wallet file must be a plain filename without a directory
-    if (strWalletFile != boost::filesystem::basename(strWalletFile) + boost::filesystem::extension(strWalletFile))
-        return InitError(strprintf(_("Wallet %s resides outside data directory %s"), strWalletFile, strDataDir));
-#endif
+
     // Make sure only a single Dynamic process is using the data directory.
     boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
@@ -1292,20 +1230,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                 return InitError(strError);
         }
 
-        LogPrintf("Using wallet %s\n", strWalletFile);
-        uiInterface.InitMessage(_("Verifying wallet..."));
-
-        // reset warning string
-        strWarning = "";
-
-        if (!CWallet::Verify(strWalletFile, strWarning, strError))
+        if (!CWallet::Verify())
             return false;
-
-        if (!strWarning.empty())
-            InitWarning(strWarning);
-        if (!strError.empty())
-            return InitError(strError);
-
 
     // Initialize KeePass Integration
     keePassInt.init();
@@ -1642,16 +1568,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         pwalletMain = NULL;
         LogPrintf("Wallet disabled!\n");
     } else {
-        std::string warningString;
-        std::string errorString;
-        pwalletMain = CWallet::InitLoadWallet(fDisableWallet, strWalletFile, warningString, errorString);
-        if (!warningString.empty())
-            InitWarning(warningString);
-        if (!errorString.empty())
-        {
-            LogPrintf("%s", errorString);
-            return InitError(errorString);
-        }
+        CWallet::InitLoadWallet();
         if (!pwalletMain)
             return false;
     }
