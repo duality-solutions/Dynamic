@@ -2661,6 +2661,7 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     nNextAddrSend = 0;
     nNextInvSend = 0;
     fRelayTxes = false;
+    fSentAddr = false;
     pfilter = new CBloomFilter();
     nLastBlockTime = 0;
     nLastTXTime = 0;
