@@ -284,13 +284,13 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     return true;
 }
 
-CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignature, std::string messageTokenKey) {
+CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey) {
     bool fInvalid = false;
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
-
+    
     if (fInvalid) {
         LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
-        return false;
+        return nullptr;
     }
 
     CHashWriter ss(SER_GETHASH, 0);
@@ -301,9 +301,11 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(std::string digestSignatur
 
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
         LogPrintf("GenericVerifyInstruction(): Public Key Recovery Failed! Hash: %s\n", ss.GetHash().ToString());
-        return false;
+        return nullptr;
     }
-    return CDynamicAddress(pubkey.GetID());
+    CDynamicAddress newAddress;
+    newAddress.Set(pubkey.GetID());
+    return newAddress;
 }
 
 /** Individually checks the validity of an instruction */

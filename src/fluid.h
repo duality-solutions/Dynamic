@@ -79,6 +79,7 @@ public:
     bool CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader);
     bool ProvisionalCheckTransaction(const CTransaction &transaction);
     bool InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord);
+    CDynamicAddress GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey);
 };
 
 /** Standard Reward Payment Determination Functions */
