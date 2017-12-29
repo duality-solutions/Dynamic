@@ -4124,6 +4124,37 @@ std::set< std::set<CTxDestination> > CWallet::GetAddressGroupings()
     return ret;
 }
 
+CAmount CWallet::GetAccountBalance(const std::string& strAccount, int nMinDepth, const isminefilter& filter, bool fAddLockConf)
+{
+    CWalletDB walletdb(strWalletFile);
+    return GetAccountBalance(walletdb, strAccount, nMinDepth, filter, fAddLockConf);
+}
+
+CAmount CWallet::GetAccountBalance(CWalletDB& walletdb, const std::string& strAccount, int nMinDepth, const isminefilter& filter, bool fAddLockConf)
+{
+    CAmount nBalance = 0;
+
+    // Tally wallet transactions
+    for (std::map<uint256, CWalletTx>::iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+    {
+        const CWalletTx& wtx = (*it).second;
+        if (!CheckFinalTx(wtx) || wtx.GetBlocksToMaturity() > 0 || wtx.GetDepthInMainChain(fAddLockConf) < 0)
+            continue;
+
+        CAmount nReceived, nSent, nFee;
+        wtx.GetAccountAmounts(strAccount, nReceived, nSent, nFee, filter);
+
+        if (nReceived != 0 && wtx.GetDepthInMainChain(fAddLockConf) >= nMinDepth)
+            nBalance += nReceived;
+        nBalance -= nSent + nFee;
+    }
+
+    // Tally internal accounting entries
+    nBalance += walletdb.GetAccountCreditDebit(strAccount);
+
+    return nBalance;
+}
+
 std::set<CTxDestination> CWallet::GetAccountAddresses(const std::string& strAccount) const
 {
     LOCK(cs_wallet);
@@ -4698,6 +4729,165 @@ bool CWallet::ParameterInteraction()
     fSendFreeTransactions = GetBoolArg("-sendfreetransactions", DEFAULT_SEND_FREE_TRANSACTIONS);
 
     return true;
+}
+
+bool CWallet::BackupWallet(const std::string& strDest)
+{
+    if (!fFileBacked)
+        return false;
+    while (true)
+    {
+        {
+            LOCK(bitdb.cs_db);
+            if (!bitdb.mapFileUseCount.count(strWalletFile) || bitdb.mapFileUseCount[strWalletFile] == 0)
+            {
+                // Flush log data to the dat file
+                bitdb.CloseDb(strWalletFile);
+                bitdb.CheckpointLSN(strWalletFile);
+                bitdb.mapFileUseCount.erase(strWalletFile);
+
+                // Copy wallet file
+                boost::filesystem::path pathSrc = GetDataDir() / strWalletFile;
+                boost::filesystem::path pathDest(strDest);
+                if (boost::filesystem::is_directory(pathDest))
+                    pathDest /= strWalletFile;
+
+                try {
+#if BOOST_VERSION >= 104000
+                    boost::filesystem::copy_file(pathSrc, pathDest, boost::filesystem::copy_option::overwrite_if_exists);
+#else
+                    boost::filesystem::copy_file(pathSrc, pathDest);
+#endif
+                    LogPrintf("copied %s to %s\n", strWalletFile, pathDest.string());
+                    return true;
+                } catch (const boost::filesystem::filesystem_error& e) {
+                    LogPrintf("error copying %s to %s - %s\n", strWalletFile, pathDest.string(), e.what());
+                    return false;
+                }
+            }
+        }
+        MilliSleep(100);
+    }
+    return false;
+}
+
+// This should be called carefully:
+// either supply "wallet" (if already loaded) or "strWalletFile" (if wallet wasn't loaded yet)
+bool AutoBackupWallet (CWallet* wallet, std::string strWalletFile, std::string& strBackupWarning, std::string& strBackupError)
+{
+    namespace fs = boost::filesystem;
+
+    strBackupWarning = strBackupError = "";
+
+    if(nWalletBackups > 0)
+    {
+        fs::path backupsDir = GetBackupsDir();
+
+        if (!fs::exists(backupsDir))
+        {
+            // Always create backup folder to not confuse the operating system's file browser
+            LogPrintf("Creating backup folder %s\n", backupsDir.string());
+            if(!fs::create_directories(backupsDir)) {
+                // smth is wrong, we shouldn't continue until it's resolved
+                strBackupError = strprintf(_("Wasn't able to create wallet backup folder %s!"), backupsDir.string());
+                LogPrintf("%s\n", strBackupError);
+                nWalletBackups = -1;
+                return false;
+            }
+        }
+
+        // Create backup of the ...
+        std::string dateTimeStr = DateTimeStrFormat(".%Y-%m-%d-%H-%M", GetTime());
+        if (wallet)
+        {
+            // ... opened wallet
+            LOCK2(cs_main, wallet->cs_wallet);
+            strWalletFile = wallet->strWalletFile;
+            fs::path backupFile = backupsDir / (strWalletFile + dateTimeStr);
+            if(!wallet->BackupWallet(backupFile.string())) {
+                strBackupWarning = strprintf(_("Failed to create backup %s!"), backupFile.string());
+                LogPrintf("%s\n", strBackupWarning);
+                nWalletBackups = -1;
+                return false;
+            }
+            // Update nKeysLeftSinceAutoBackup using current external keypool size
+            wallet->nKeysLeftSinceAutoBackup = wallet->KeypoolCountExternalKeys();
+            LogPrintf("nKeysLeftSinceAutoBackup: %d\n", wallet->nKeysLeftSinceAutoBackup);
+            if(wallet->IsLocked(true)) {
+                strBackupWarning = _("Wallet is locked, can't replenish keypool! Automatic backups and mixing are disabled, please unlock your wallet to replenish keypool.");
+                LogPrintf("%s\n", strBackupWarning);
+                nWalletBackups = -2;
+                return false;
+            }
+        } else {
+            // ... strWalletFile file
+            fs::path sourceFile = GetDataDir() / strWalletFile;
+            fs::path backupFile = backupsDir / (strWalletFile + dateTimeStr);
+            sourceFile.make_preferred();
+            backupFile.make_preferred();
+            if (fs::exists(backupFile))
+            {
+                strBackupWarning = _("Failed to create backup, file already exists! This could happen if you restarted wallet in less than 60 seconds. You can continue if you are ok with this.");
+                LogPrintf("%s\n", strBackupWarning);
+                return false;
+            }
+            if(fs::exists(sourceFile)) {
+                try {
+                    fs::copy_file(sourceFile, backupFile);
+                    LogPrintf("Creating backup of %s -> %s\n", sourceFile.string(), backupFile.string());
+                } catch(fs::filesystem_error &error) {
+                    strBackupWarning = strprintf(_("Failed to create backup, error: %s"), error.what());
+                    LogPrintf("%s\n", strBackupWarning);
+                    nWalletBackups = -1;
+                    return false;
+                }
+            }
+        }
+
+        // Keep only the last 10 backups, including the new one of course
+        typedef std::multimap<std::time_t, fs::path> folder_set_t;
+        folder_set_t folder_set;
+        fs::directory_iterator end_iter;
+        backupsDir.make_preferred();
+        // Build map of backup files for current(!) wallet sorted by last write time
+        fs::path currentFile;
+        for (fs::directory_iterator dir_iter(backupsDir); dir_iter != end_iter; ++dir_iter)
+        {
+            // Only check regular files
+            if ( fs::is_regular_file(dir_iter->status()))
+            {
+                currentFile = dir_iter->path().filename();
+                // Only add the backups for the current wallet, e.g. wallet.dat.*
+                if(dir_iter->path().stem().string() == strWalletFile)
+                {
+                    folder_set.insert(folder_set_t::value_type(fs::last_write_time(dir_iter->path()), *dir_iter));
+                }
+            }
+        }
+
+        // Loop backward through backup files and keep the N newest ones (1 <= N <= 10)
+        int counter = 0;
+        BOOST_REVERSE_FOREACH(PAIRTYPE(const std::time_t, fs::path) file, folder_set)
+        {
+            counter++;
+            if (counter > nWalletBackups)
+            {
+                // More than nWalletBackups backups: delete oldest one(s)
+                try {
+                    fs::remove(file.second);
+                    LogPrintf("Old backup deleted: %s\n", file.second);
+                } catch(fs::filesystem_error &error) {
+                    strBackupWarning = strprintf(_("Failed to delete backup, error: %s"), error.what());
+                    LogPrintf("%s\n", strBackupWarning);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    LogPrintf("Automatic wallet backups are disabled!\n");
+    return false;
 }
 
 CKeyPool::CKeyPool()
