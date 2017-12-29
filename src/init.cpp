@@ -913,7 +913,7 @@ void InitLogging()
     fLogIPs = GetBoolArg("-logips", DEFAULT_LOGIPS);
 
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Dynamic version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
+    LogPrintf("Dynamic version %s\n", FormatFullVersion());
 }
 
 /** Initialize Dynamic.
