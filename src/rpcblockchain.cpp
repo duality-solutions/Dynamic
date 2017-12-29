@@ -1086,7 +1086,7 @@ UniValue invalidateblock(const UniValue& params, bool fHelp)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
 
         CBlockIndex* pblockindex = mapBlockIndex[hash];
-        InvalidateBlock(state, Params(), pblockindex);
+        InvalidateBlock(state, Params().GetConsensus(), pblockindex);      
     }
 
     if (state.IsValid()) {
