@@ -401,7 +401,7 @@ static bool Socks5(const std::string& strDest, int port, const ProxyCredentials 
         return error("Proxy failed to accept request");
     }
     if (pchRet2[1] != 0x00) {
-+        // Failures to connect to a peer that are not proxy errors
+        // Failures to connect to a peer that are not proxy errors
         CloseSocket(hSocket);
         LogPrintf("Socks5() connect to %s:%d failed: %s\n", strDest, port, Socks5ErrorString(pchRet2[1]));
     }
