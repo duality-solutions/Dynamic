@@ -1347,8 +1347,6 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             if (interruptMsgProc)
                 return true;
 
-            pfrom->AddInventoryKnown(inv);
-
             bool fAlreadyHave = AlreadyHave(inv);
             LogPrint("net", "got inv: %s  %s peer=%d\n", inv.ToString(), fAlreadyHave ? "have" : "new", pfrom->id);
 
