@@ -764,9 +764,8 @@ static void RelayAddress(const CAddress& addr, bool fReachable, CConnman& connma
         GetRandBytes((unsigned char*)&salt1, sizeof(salt1));
     }
     uint64_t hashAddr = addr.GetHash();
-    multimap<uint64_t, CNode*> mapMix;
+    std::multimap<uint64_t, CNode*> mapMix;
     const CSipHasher hasher = CSipHasher(salt0, salt1).Write(hashAddr << 32).Write((GetTime() + hashAddr) / (24*60*60));
-    std::multimap<uint256, CNode*> mapMix;
     FastRandomContext insecure_rand;
 
     auto sortfunc = [&mapMix, &hasher](CNode* pnode) {
