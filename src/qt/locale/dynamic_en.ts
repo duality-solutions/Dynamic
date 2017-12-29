@@ -4365,8 +4365,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -5307,8 +5307,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="-136"/>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>Invalid dynodeprivkey. Please see documenation.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>Invalid dynodepairingkey. Please see documenation.</translation>
     </message>
     <message>
         <location line="-88"/>

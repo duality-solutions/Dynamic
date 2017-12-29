@@ -50,6 +50,8 @@
 
 int64_t nTimeBestReceived = 0; // Used only to inform the wallet of when we last received a block
 
+extern FeeFilterRounder filterRounder;
+
 struct COrphanTx {
     CTransaction tx;
     NodeId fromPeer;
@@ -756,21 +758,19 @@ static void RelayAddress(const CAddress& addr, bool fReachable, CConnman& connma
     // Relay to a limited number of other nodes
     // Use deterministic randomness to send to the same nodes for 24 hours
     // at a time so the addrKnowns of the chosen nodes prevent repeats
-    static uint256 hashSalt;
-    if (hashSalt.IsNull())
-        hashSalt = GetRandHash();
+    static uint64_t salt0 = 0, salt1 = 0;
+    while (salt0 == 0 && salt1 == 0) {
+        GetRandBytes((unsigned char*)&salt0, sizeof(salt0));
+        GetRandBytes((unsigned char*)&salt1, sizeof(salt1));
+    }
     uint64_t hashAddr = addr.GetHash();
-    uint256 hashRand = ArithToUint256(UintToArith256(hashSalt) ^ (hashAddr<<32) ^ ((GetTime()+hashAddr)/(24*60*60)));
-    hashRand = Hash(BEGIN(hashRand), END(hashRand));
-    std::multimap<uint256, CNode*> mapMix;
+    std::multimap<uint64_t, CNode*> mapMix;
+    const CSipHasher hasher = CSipHasher(salt0, salt1).Write(hashAddr << 32).Write((GetTime() + hashAddr) / (24*60*60));
     FastRandomContext insecure_rand;
 
-    auto sortfunc = [&mapMix, &hashRand](CNode* pnode) {
+    auto sortfunc = [&mapMix, &hasher](CNode* pnode) {
         if (pnode->nVersion >= CADDR_TIME_VERSION) {
-            unsigned int nPointer;
-            memcpy(&nPointer, &pnode, sizeof(nPointer));
-            uint256 hashKey = ArithToUint256(UintToArith256(hashRand) ^ nPointer);
-            hashKey = Hash(BEGIN(hashKey), END(hashKey));
+            uint64_t hashKey = CSipHasher(hasher).Write(pnode->id).Finalize();
             mapMix.emplace(hashKey, pnode);
         }
     };
@@ -883,27 +883,24 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
             {
                 // Send stream from relay memory
                 bool pushed = false;
-                {
-                    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                    {
-                        LOCK(cs_mapRelay);
-                        std::map<CInv, CDataStream>::iterator mi = mapRelay.find(inv);
-                        if (mi != mapRelay.end()) {
-                            ss += (*mi).second;
-                            pushed = true;
-                        }
+
+                // Only serve MSG_TX from mapRelay.
+                // Otherwise we may send out a normal TX instead of a IX
+                if (inv.type == MSG_TX) {                    LOCK(cs_mapRelay);
+                    std::map<uint256, CTransaction>::iterator mi = mapRelay.find(inv.hash);
+                    if (mi != mapRelay.end()) {
+                        connman.PushMessage(pfrom, inv.GetCommand(), (*mi).second);
+                        pushed = true;
                     }
-                    if(pushed)
-                        connman.PushMessage(pfrom, inv.GetCommand(), ss);
                 }
 
                 if (!pushed && inv.type == MSG_TX) {
                     CTransaction tx;
-                    if (mempool.lookup(inv.hash, tx)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << tx;
-                        connman.PushMessage(pfrom, NetMsgType::TX, ss);
+                    int64_t txtime;
+                    // To protect privacy, do not answer getdata using the mempool when
+                    // that TX couldn't have been INVed in reply to a MEMPOOL request.
+                    if (mempool.lookup(inv.hash, tx, txtime) && txtime <= pfrom->timeLastMempoolReq) {
+                        connman.PushMessage(pfrom, NetMsgType::TX, tx);
                         pushed = true;
                     }
                 }
@@ -911,10 +908,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_TXLOCK_REQUEST) {
                     CTxLockRequest txLockRequest;
                     if(instantsend.GetTxLockRequest(inv.hash, txLockRequest)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << txLockRequest;
-                        connman.PushMessage(pfrom, NetMsgType::TXLOCKREQUEST, ss);
+                        connman.PushMessage(pfrom, NetMsgType::TXLOCKREQUEST, txLockRequest);
                         pushed = true;
                     }
                 }
@@ -922,30 +916,21 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_TXLOCK_VOTE) {
                     CTxLockVote vote;
                     if(instantsend.GetTxLockVote(inv.hash, vote)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << vote;
-                        connman.PushMessage(pfrom, NetMsgType::TXLOCKVOTE, ss);
+                        connman.PushMessage(pfrom, NetMsgType::TXLOCKVOTE, vote);
                         pushed = true;
                     }
                 }
 
                 if (!pushed && inv.type == MSG_SPORK) {
                     if(mapSporks.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << mapSporks[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::SPORK, ss);
+                        connman.PushMessage(pfrom, NetMsgType::SPORK, mapSporks[inv.hash]);
                         pushed = true;
                     }
                 }
 
                 if (!pushed && inv.type == MSG_DYNODE_PAYMENT_VOTE) {
                     if(dnpayments.HasVerifiedPaymentVote(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnpayments.mapDynodePaymentVotes[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, dnpayments.mapDynodePaymentVotes[inv.hash]);
                         pushed = true;
                     }
                 }
@@ -958,10 +943,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             BOOST_FOREACH(uint256& hash, vecVoteHashes) {
                                 if(dnpayments.HasVerifiedPaymentVote(hash)) {
-                                    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                                    ss.reserve(1000);
-                                    ss << dnpayments.mapDynodePaymentVotes[hash];
-                                    connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, ss);
+                                    connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, dnpayments.mapDynodePaymentVotes[hash]);
                                 }
                             }
                         }
@@ -981,10 +963,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
 
                 if (!pushed && inv.type == MSG_DYNODE_PING) {
                     if(dnodeman.mapSeenDynodePing.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodePing[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DNPING, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DNPING, dnodeman.mapSeenDynodePing[inv.hash]);
                         pushed = true;
                     }
                 }
@@ -992,10 +971,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_PSTX) {
                     CPrivatesendBroadcastTx pstx = CPrivateSend::GetPSTX(inv.hash);
                     if(pstx) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << pstx;
-                        connman.PushMessage(pfrom, NetMsgType::PSTX, ss);
+                        connman.PushMessage(pfrom, NetMsgType::PSTX, pstx);
                         pushed = true;
                     }
                 }
@@ -1039,10 +1015,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
 
                 if (!pushed && inv.type == MSG_DYNODE_VERIFY) {
                     if(dnodeman.mapSeenDynodeVerification.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodeVerification[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DNVERIFY, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DNVERIFY, dnodeman.mapSeenDynodeVerification[inv.hash]);
                         pushed = true;
                     }
                 }
@@ -1073,9 +1046,8 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
     }
 }
 
-bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vRecv, int64_t nTimeReceived, CConnman& connman, std::atomic<bool>& interruptMsgProc)
+bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman& connman, std::atomic<bool>& interruptMsgProc)
 {
-    const CChainParams& chainparams = Params();
     RandAddSeedPerfmon();
 
     LogPrint("net", "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->id);
@@ -1095,7 +1067,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             LOCK(cs_main);
             Misbehaving(pfrom->GetId(), 100);
             return false;
-        } else if (GetBoolArg("-enforcenodebloom", DEFAULT_ENFORCENODEBLOOM)) {
+        } else {
             pfrom->fDisconnect = true;
             return false;
         }
@@ -1375,8 +1347,6 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             if (interruptMsgProc)
                 return true;
 
-            pfrom->AddInventoryKnown(inv);
-
             bool fAlreadyHave = AlreadyHave(inv);
             LogPrint("net", "got inv: %s  %s peer=%d\n", inv.ToString(), fAlreadyHave ? "have" : "new", pfrom->id);
 
@@ -1416,6 +1386,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             }
             else
             {
+                pfrom->AddInventoryKnown(inv);
                 if (fBlocksOnly)
                     LogPrint("net", "transaction (%s) inv sent in violation of protocol peer=%d\n", inv.hash.ToString(), pfrom->id);
                 else if (!fAlreadyHave && !fImporting && !fReindex && !IsInitialBlockDownload())
@@ -1624,8 +1595,8 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
 
         mapAlreadyAskedFor.erase(inv.hash);
 
-        if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs))
-        {
+        CFeeRate txFeeRate = CFeeRate(0);
+        if (!AlreadyHave(inv) && AcceptToMemoryPool(mempool, state, tx, true, &fMissingInputs, &txFeeRate)) {
             // Process custom txes, this changes AlreadyHave to "true"
             if (strCommand == NetMsgType::PSTX) {
                 LogPrintf("PSTX -- Dynode transaction accepted, txid=%s, peer=%d\n",
@@ -1638,7 +1609,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             }
 
             mempool.check(pcoinsTip);
-            connman.RelayTransaction(tx);
+            connman.RelayTransaction(tx, txFeeRate);
             vWorkQueue.push_back(inv.hash);
 
             pfrom->nLastTXTime = GetTime();
@@ -1671,10 +1642,11 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
 
                     if (setMisbehaving.count(fromPeer))
                         continue;
-                    if (AcceptToMemoryPool(mempool, stateDummy, orphanTx, true, &fMissingInputs2))
+                    CFeeRate orphanFeeRate = CFeeRate(0);
+                    if (AcceptToMemoryPool(mempool, stateDummy, orphanTx, true, &fMissingInputs2, &orphanFeeRate))
                     {
                         LogPrint("mempool", "   accepted orphan tx %s\n", orphanHash.ToString());
-                        connman.RelayTransaction(orphanTx);
+                        connman.RelayTransaction(orphanTx, orphanFeeRate);
                         vWorkQueue.push_back(orphanHash);
                         vEraseQueue.push_back(orphanHash);
                     }
@@ -1725,7 +1697,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
                 instantsend.RejectLockRequest(txLockRequest);
                 // this lets other nodes to create lock request candidate i.e.
                 // this allows multiple conflicting lock requests to compete for votes
-                connman.RelayTransaction(tx);
+                connman.RelayTransaction(tx, txFeeRate);
             }
 
             if (pfrom->fWhitelisted && GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY)) {
@@ -1740,7 +1712,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
                 int nDoS = 0;
                 if (!state.IsInvalid(nDoS) || nDoS == 0) {
                     LogPrintf("Force relaying tx %s from whitelisted peer=%d\n", tx.GetHash().ToString(), pfrom->id);
-                    connman.RelayTransaction(tx);
+                    connman.RelayTransaction(tx, txFeeRate);
                 } else {
                     LogPrintf("Not relaying invalid transaction %s from whitelisted peer=%d (%s)\n", tx.GetHash().ToString(), pfrom->id, FormatStateMessage(state));
                 }
@@ -1885,10 +1857,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
         CBlock block;
         vRecv >> block;
 
-        CInv inv(MSG_BLOCK, block.GetHash());
-        LogPrint("net", "received block %s peer=%d\n", inv.hash.ToString(), pfrom->id);
-
-        pfrom->AddInventoryKnown(inv);
+        LogPrint("net", "received block %s peer=%d\n", block.GetHash().ToString(), pfrom->id);
 
         // Process all blocks from whitelisted peers, even if not requested,
         // unless we're still syncing with the network.
@@ -1924,6 +1893,14 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             return true;
         }
 
+        // Only send one GetAddr response per connection to reduce resource waste
+        //  and discourage addr stamping of INV announcements.
+        if (pfrom->fSentAddr) {
+            LogPrint("net", "Ignoring repeated \"getaddr\". peer=%d\n", pfrom->id);
+            return true;
+        }
+        pfrom->fSentAddr = true;
+
         pfrom->vAddrToSend.clear();
         std::vector<CAddress> vAddr = connman.GetAddresses();
         FastRandomContext insecure_rand;
@@ -1934,6 +1911,13 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
 
     else if (strCommand == NetMsgType::MEMPOOL)
     {
+        if (!(pfrom->GetLocalServices() & NODE_BLOOM) && !pfrom->fWhitelisted)
+        {
+            LogPrint("net", "mempool request with bloom filters disabled, disconnect peer=%d\n", pfrom->GetId());
+            pfrom->fDisconnect = true;
+            return true;
+        }
+
         if (connman.OutboundTargetReached(false) && !pfrom->fWhitelisted)
         {
             LogPrint("net", "mempool request with bandwidth limit reached, disconnect peer=%d\n", pfrom->GetId());
@@ -1952,6 +1936,13 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
                 bool fInMemPool = mempool.lookup(hash, tx);
                 if (!fInMemPool) continue; // another thread removed since queryHashes, maybe...
                 if (!pfrom->pfilter->IsRelevantAndUpdate(tx)) continue;
+            }
+            if (pfrom->minFeeFilter) {
+                CFeeRate feeRate;
+                mempool.lookupFeeRate(hash, feeRate);
+                LOCK(pfrom->cs_feeFilter);
+                if (feeRate.GetFeePerK() < pfrom->minFeeFilter)
+                    continue;
             }
             vInv.push_back(inv);
             if (vInv.size() == MAX_INV_SZ) {
@@ -2152,8 +2143,19 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             }
         }
     }
-    else
-    {
+    else if (strCommand == NetMsgType::FEEFILTER) {
+        CAmount newFeeFilter = 0;
+        vRecv >> newFeeFilter;
+        if (MoneyRange(newFeeFilter)) {
+            {
+                LOCK(pfrom->cs_feeFilter);
+                pfrom->minFeeFilter = newFeeFilter;
+            }
+            LogPrint("net", "received: feefilter of %s from peer=%d\n", CFeeRate(newFeeFilter).ToString(), pfrom->id);
+        }
+    }
+
+    else {
         bool found = false;
         const std::vector<std::string> &allMessages = getAllNetMessageTypes();
         BOOST_FOREACH(const std::string msg, allMessages) {
@@ -2264,7 +2266,7 @@ bool ProcessMessages(CNode* pfrom, CConnman& connman, std::atomic<bool>& interru
         bool fRet = false;
         try
         {
-            fRet = ProcessMessage(pfrom, strCommand, vRecv, msg.nTime, connman, interruptMsgProc);
+            fRet = ProcessMessage(pfrom, strCommand, vRecv, msg.nTime, chainparams, connman, interruptMsgProc);
             if (interruptMsgProc)
                 return false;
             if (!pfrom->vRecvGetData.empty())
@@ -2522,9 +2524,7 @@ bool SendMessages(CNode* pto, CConnman& connman, std::atomic<bool>& interruptMsg
                             hashToAnnounce.ToString(), chainActive.Tip()->GetBlockHash().ToString());
                     }
 
-                    // If the peer announced this block to us, don't inv it back.
-                    // (Since block announcements may not be via inv's, we can't solely rely on
-                    // setInventoryKnown to track this.)
+                    // If the peer's chain has this block, don't inv it back.
                     if (!PeerHasHeader(&state, pindex)) {
                         pto->PushInventory(CInv(MSG_BLOCK, hashToAnnounce));
                         LogPrint("net", "%s: sending inv peer=%d hash=%s\n", __func__,
@@ -2676,6 +2676,29 @@ bool SendMessages(CNode* pto, CConnman& connman, std::atomic<bool>& interruptMsg
             LogPrint("net", "SendMessages -- GETDATA -- pushed size = %lu peer=%d\n", vGetData.size(), pto->id);
         }
 
+        //
+        // Message: feefilter
+        //
+        // We don't want white listed peers to filter txs to us if we have -whitelistforcerelay
+        if (pto->nVersion >= FEEFILTER_VERSION && GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
+            !(pto->fWhitelisted && GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY))) {
+            CAmount currentFilter = mempool.GetMinFee(GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFeePerK();
+            int64_t timeNow = GetTimeMicros();
+            if (timeNow > pto->nextSendTimeFeeFilter) {
+                CAmount filterToSend = filterRounder.round(currentFilter);
+                if (filterToSend != pto->lastSentFeeFilter) {
+                    connman.PushMessage(pto, NetMsgType::FEEFILTER, filterToSend);
+                    pto->lastSentFeeFilter = filterToSend;
+                }
+                pto->nextSendTimeFeeFilter = PoissonNextSend(timeNow, AVG_FEEFILTER_BROADCAST_INTERVAL);
+            }
+            // If the fee filter has changed substantially and it's still more than MAX_FEEFILTER_CHANGE_DELAY
+            // until scheduled broadcast, then move the broadcast to within MAX_FEEFILTER_CHANGE_DELAY.
+            else if (timeNow + MAX_FEEFILTER_CHANGE_DELAY * 1000000 < pto->nextSendTimeFeeFilter &&
+                     (currentFilter < 3 * pto->lastSentFeeFilter / 4 || currentFilter > 4 * pto->lastSentFeeFilter / 3)) {
+                pto->nextSendTimeFeeFilter = timeNow + (insecure_rand() % MAX_FEEFILTER_CHANGE_DELAY) * 1000000;
+            }
+        }
     }
     return true;
 }

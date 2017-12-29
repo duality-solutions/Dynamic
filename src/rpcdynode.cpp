@@ -24,6 +24,8 @@
 #include <fstream>
 #include <iomanip>
 
+UniValue dynodelist(const UniValue& params, bool fHelp);
+
 #ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
 
@@ -137,7 +139,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
                 "  count        - Print number of all known Dynodes (optional: 'ps', 'enabled', 'all', 'qualify')\n"
                 "  current      - Print info on current Dynode winner to be paid the next block (calculated locally)\n"
                 "  debug        - Print Dynode status\n"
-                "  genkey       - Generate new dynodeprivkey\n"
+                "  genkey       - Generate new dynodepairingkey\n"
 #ifdef ENABLE_WALLET
                 "  outputs      - Print Dynode compatible outputs\n"
                 "  start-alias  - Start single remote Dynode by assigned alias configured in dynode.conf\n"
@@ -863,3 +865,21 @@ UniValue sentinelping(const UniValue& params, bool fHelp)
     return true;
 }
 
+static const CRPCCommand commands[] =
+{ //  category                  name                    actor (function)     okSafeMode
+    /* Dynamic features */
+    { "dynamic",               "dynode",                &dynode,             true  },
+    { "dynamic",               "dynodelist",            &dynodelist,         true  },
+    { "dynamic",               "dynodebroadcast",       &dynodebroadcast,    true  },
+    { "dynamic",               "getpoolinfo",           &getpoolinfo,        true  },
+    { "dynamic",               "sentinelping",          &sentinelping,       true  },
+#ifdef ENABLE_WALLET
+    { "dynamic",               "privatesend",           &privatesend,        false },
+#endif // ENABLE_WALLET
+};
+
+void RegisterDynodeRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}

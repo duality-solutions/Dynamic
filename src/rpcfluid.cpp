@@ -200,10 +200,10 @@ UniValue signtoken(const UniValue& params, bool fHelp)
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
-    if (!fluid.IsGivenKeyMaster(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.InitiateFluidVerify(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string r = params[1].get_str();
@@ -266,7 +266,7 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
     if (!fluid.IsGivenKeyMaster(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not fluid protocol sovereign address");
 
-    if (!fluid.InitiateFluidVerify(address))
+    if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
     std::string message;
@@ -415,4 +415,27 @@ UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
     }
 
     return obj;
+}
+
+static const CRPCCommand commands[] =
+{   //  category         name                        actor (function)           okSafeMode
+#ifdef ENABLE_WALLET
+    /* Fluid Protocol */
+    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
+    { "fluid",           "signtoken",                &signtoken,                true  },
+    { "fluid",           "consenttoken",             &consenttoken,             true  },
+    { "fluid",           "getrawpubkey",             &getrawpubkey,             true  },
+    { "fluid",           "verifyquorum",             &verifyquorum,             true  },
+    { "fluid",           "maketoken",                &maketoken,                true  },
+    { "fluid",           "getfluidhistory",          &getfluidhistory,          true  },
+    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
+    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
+    { "fluid",           "gettime",                  &gettime,                  true  },
+#endif //ENABLE_WALLET
+};
+
+void RegisterFluidRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }

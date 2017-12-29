@@ -3414,8 +3414,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Внимание: wallet.dat  е развален, данните са спасени! Оригиналния wallet.dat е запазен като wallet.{timestamp}.bak в %s; ако твоят баланс или транзакции са неверни трябва да възстановите от резервното копие.</translation>
     </message>
     <message>
-        <source>You must specify a Dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Трябва да посочите Dynodeprivkey в конфигурацията. Моля прочетете документацията за помощ.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Трябва да посочите dynodepairingkey в конфигурацията. Моля прочетете документацията за помощ.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4163,7 +4163,7 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Ще опита отново...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
         <translation>Невалиден частен ключ на Dynode. Моля вижте документацията.</translation>
     </message>
     <message>

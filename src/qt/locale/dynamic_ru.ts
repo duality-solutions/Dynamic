@@ -3418,8 +3418,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Внимание: wallet.dat повреждён, данные спасены! Оригинальный wallet.dat сохранён как wallet.{timestamp}.bak в %s. Если Ваш баланс или транзакции некорректны, Вы должны восстановить файл из резервной копии.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Необходимо указать dynodeprivkey в файле конфигурации. Пожалуйста, ознакомьтесь с документацией.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Необходимо указать dynodepairingkey в файле конфигурации. Пожалуйста, ознакомьтесь с документацией.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4176,8 +4176,8 @@ rpcpassword=%s
         <translation>Попробуем еще раз...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>Неправильное значение dynodeprivkey. Пожалуйста, ознакомьтесь с документацией.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>Неправильное значение dynodepairingkey. Пожалуйста, ознакомьтесь с документацией.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

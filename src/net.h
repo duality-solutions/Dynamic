@@ -10,6 +10,7 @@
 
 #include "addrdb.h"
 #include "addrman.h"
+#include "amount.h"
 #include "bloom.h"
 #include "compat.h"
 #include "limitedmap.h"
@@ -143,14 +144,14 @@ public:
     void Stop();
     void Interrupt();
     bool BindListenPort(const CService &bindAddr, std::string& strError, bool fWhitelisted = false);
-    bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false, bool fFeeler = false);
+    bool OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false, bool fFeeler = false);
     bool CheckIncomingNonce(uint64_t nonce);
 
     // fConnectToDynode should be 'true' only if you want this node to allow to connect to itself
     // and/or you want it to be disconnected on CDynodeMan::ProcessDynodeConnections()
     // Unfortunately, can't make this method private like in Bitcoin,
     // because it's used in many Dynamic-specific places (dynode, privatesend).
-    CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToDynode = false);
+    CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fCountFailure = false, bool fConnectToDynode = false);
 
     struct CFullyConnectedOnly {
         bool operator() (const CNode* pnode) const {
@@ -311,8 +312,8 @@ public:
     std::vector<CNode*> CopyNodeVector();
     void ReleaseNodeVector(const std::vector<CNode*>& vecNodes);
 
-    void RelayTransaction(const CTransaction& tx);
-    void RelayTransaction(const CTransaction& tx, const CDataStream& ss);
+    void RelayTransaction(const CTransaction& tx, CFeeRate feerate);
+    void RelayTransaction(const CTransaction& tx, CFeeRate feerate, const CDataStream& ss);
     void RelayInv(CInv &inv, const int minProtoVersion = MIN_PEER_PROTO_VERSION);
 
     // Addrman functions
@@ -578,8 +579,8 @@ extern bool fDiscover;
 extern bool fListen;
 extern bool fRelayTxes;
 
-extern std::map<CInv, CDataStream> mapRelay;
-extern std::deque<std::pair<int64_t, CInv> > vRelayExpiration;
+extern std::map<uint256, CTransaction> mapRelay;
+extern std::deque<std::pair<int64_t, uint256> > vRelayExpiration;
 extern CCriticalSection cs_mapRelay;
 extern limitedmap<uint256, int64_t> mapAlreadyAskedFor;
 
@@ -715,6 +716,7 @@ public:
     // b) the peer may tell us in its version message that we should not relay tx invs
     //    unless it loads a bloom filter.
     bool fRelayTxes;
+    bool fSentAddr;
     // If 'true' this node will be disconnected on CDynodeMan::ProcessDynodeConnections()
     bool fDynode;
     CSemaphoreGrant grantOutbound;
@@ -761,6 +763,8 @@ public:
     std::atomic<int64_t> nLastBlockTime;
     std::atomic<int64_t> nLastTXTime;
 
+    // Last time a "MEMPOOL" request was serviced.
+    std::atomic<int64_t> timeLastMempoolReq;
     // Ping time measurement:
     // The pong reply we're expecting, or 0 if no pong expected.
     uint64_t nPingNonceSent;
@@ -772,6 +776,11 @@ public:
     int64_t nMinPingUsecTime;
     // Whether a ping is requested.
     bool fPingQueued;
+    // Minimum fee rate with which to filter inv's to this node
+    CAmount minFeeFilter;
+    CCriticalSection cs_feeFilter;
+    CAmount lastSentFeeFilter;
+    int64_t nextSendTimeFeeFilter;
 
     std::vector<unsigned char> vchKeyedNetGroup;
 

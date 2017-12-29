@@ -591,7 +591,7 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
             return false;
         } else if (mempool.mapNextTx.count(txin.prevout)) {
             // check if it's in mempool
-            hashConflicting = mempool.mapNextTx[txin.prevout].ptx->GetHash();
+            hashConflicting = mempool.mapNextTx.find(txin.prevout)->second->GetHash();
             if(txHash == hashConflicting) continue; // matches current, not a conflict, skip to next txin
             // conflicts with tx in mempool
             LogPrintf("CInstantSend::ResolveConflicts -- ERROR: Failed to complete Transaction Lock, conflicts with mempool, txid=%s\n", txHash.ToString());
@@ -1207,7 +1207,9 @@ bool CTxLockCandidate::IsTimedOut() const
 
 void CTxLockCandidate::Relay(CConnman& connman) const
 {
-    connman.RelayTransaction(txLockRequest);
+    CFeeRate txFeeRate;
+    mempool.lookupFeeRate(txLockRequest.GetHash(), txFeeRate);
+    connman.RelayTransaction(txLockRequest, txFeeRate);
     std::map<COutPoint, COutPointLock>::const_iterator itOutpointLock = mapOutPointLocks.begin();
     while(itOutpointLock != mapOutPointLocks.end()) {
         itOutpointLock->second.Relay(connman);

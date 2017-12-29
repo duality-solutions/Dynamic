@@ -3419,8 +3419,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Varoitus: Wallet.dat lompakkotiedosto on vioittunut, tiedot pelastettu. Alkuperäinen wallet.dat lompakkotiedosto on tallennettu wallet.{timestamp}.bak kansioon %s, jos saldosi tai siirtohistoria on virheellinen, sinun tulisi palauttaa lompakkotiedosto varmuuskopiosta.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Sinun täytyy määritellä dynodeprivkey asetustiedostoon. Katso lisätietoja dokumentaatiosta.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Sinun täytyy määritellä dynodepairingkey asetustiedostoon. Katso lisätietoja dokumentaatiosta.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4179,8 +4179,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Yritetään uudelleen...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>Virheellinen dynoden yksityisavain (dynodeprivkey). Katso lisätietoja dokumentaatiosta.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>Virheellinen dynoden yksityisavain (dynodepairingkey). Katso lisätietoja dokumentaatiosta.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>
