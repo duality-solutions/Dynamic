@@ -21,6 +21,7 @@
 #include "tinyformat.h"
 #include "utiltime.h"
 
+#include <atomic>
 #include <exception>
 #include <map>
 #include <stdint.h>
@@ -86,7 +87,7 @@ extern bool fLogTimestamps;
 extern bool fLogTimeMicros;
 extern bool fLogThreadNames;
 extern bool fLogIPs;
-extern volatile sig_atomic_t fReopenDebugLog;
+extern std::atomic<bool> fReopenDebugLog;
 extern CTranslationInterface translationInterface;
 
 extern const char * const DYNAMIC_CONF_FILENAME;
