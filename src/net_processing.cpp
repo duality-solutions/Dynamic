@@ -908,10 +908,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_TXLOCK_REQUEST) {
                     CTxLockRequest txLockRequest;
                     if(instantsend.GetTxLockRequest(inv.hash, txLockRequest)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << txLockRequest;
-                        connman.PushMessage(pfrom, NetMsgType::TXLOCKREQUEST, ss);
+                        connman.PushMessage(pfrom, NetMsgType::TXLOCKREQUEST, txLockRequest);
                         pushed = true;
                     }
                 }
@@ -919,30 +916,21 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_TXLOCK_VOTE) {
                     CTxLockVote vote;
                     if(instantsend.GetTxLockVote(inv.hash, vote)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << vote;
-                        connman.PushMessage(pfrom, NetMsgType::TXLOCKVOTE, ss);
+                        connman.PushMessage(pfrom, NetMsgType::TXLOCKVOTE, vote);
                         pushed = true;
                     }
                 }
 
                 if (!pushed && inv.type == MSG_SPORK) {
                     if(mapSporks.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << mapSporks[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::SPORK, ss);
+                        connman.PushMessage(pfrom, NetMsgType::SPORK, mapSporks[inv.hash]);
                         pushed = true;
                     }
                 }
 
                 if (!pushed && inv.type == MSG_DYNODE_PAYMENT_VOTE) {
                     if(dnpayments.HasVerifiedPaymentVote(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnpayments.mapDynodePaymentVotes[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, dnpayments.mapDynodePaymentVotes[inv.hash]);
                         pushed = true;
                     }
                 }
@@ -955,10 +943,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             BOOST_FOREACH(uint256& hash, vecVoteHashes) {
                                 if(dnpayments.HasVerifiedPaymentVote(hash)) {
-                                    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                                    ss.reserve(1000);
-                                    ss << dnpayments.mapDynodePaymentVotes[hash];
-                                    connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, ss);
+                                    connman.PushMessage(pfrom, NetMsgType::DYNODEPAYMENTVOTE, dnpayments.mapDynodePaymentVotes[hash]);
                                 }
                             }
                         }
@@ -978,10 +963,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
 
                 if (!pushed && inv.type == MSG_DYNODE_PING) {
                     if(dnodeman.mapSeenDynodePing.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodePing[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DNPING, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DNPING, dnodeman.mapSeenDynodePing[inv.hash]);
                         pushed = true;
                     }
                 }
@@ -989,10 +971,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 if (!pushed && inv.type == MSG_PSTX) {
                     CPrivatesendBroadcastTx pstx = CPrivateSend::GetPSTX(inv.hash);
                     if(pstx) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << pstx;
-                        connman.PushMessage(pfrom, NetMsgType::PSTX, ss);
+                        connman.PushMessage(pfrom, NetMsgType::PSTX, pstx);
                         pushed = true;
                     }
                 }
@@ -1036,10 +1015,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
 
                 if (!pushed && inv.type == MSG_DYNODE_VERIFY) {
                     if(dnodeman.mapSeenDynodeVerification.count(inv.hash)) {
-                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
-                        ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodeVerification[inv.hash];
-                        connman.PushMessage(pfrom, NetMsgType::DNVERIFY, ss);
+                        connman.PushMessage(pfrom, NetMsgType::DNVERIFY, dnodeman.mapSeenDynodeVerification[inv.hash]);
                         pushed = true;
                     }
                 }
