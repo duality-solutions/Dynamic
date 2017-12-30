@@ -346,6 +346,10 @@ AC_DEFUN([_DYNAMIC_QT_FIND_STATIC_PLUGINS],[
          fi
        elif test x$TARGET_OS = xdarwin; then
          PKG_CHECK_MODULES([QTPRINT], [Qt5PrintSupport], [QT_LIBS="$QTPRINT_LIBS $QT_LIBS"])
+     else
+       if ${PKG_CONFIG} --exists "Qt5Core >= 5.6" 2>/dev/null; then
+         QT_LIBS="-lQt5PlatformSupport $QT_LIBS"
+       fi
        fi
      ])
      else
