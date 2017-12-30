@@ -64,9 +64,9 @@ static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 2 * 1024 * 1024;
 /** Maximum length of strSubVer in `version` message */
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;
 /** Maximum number of outgoing nodes */
-static const int MAX_OUTBOUND_CONNECTIONS = 8;
+static const int MAX_OUTBOUND_CONNECTIONS = 16;
 /** Maximum number if outgoing dynodes */
-static const int MAX_OUTBOUND_DYNODE_CONNECTIONS = 20;
+static const int MAX_OUTBOUND_DYNODE_CONNECTIONS = 21;
 /** -listen default */
 static const bool DEFAULT_LISTEN = true;
 /** -upnp default */
