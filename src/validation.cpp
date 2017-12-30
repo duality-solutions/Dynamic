@@ -105,6 +105,10 @@ struct IteratorComparator
     }
 };
 
+// TODO temporary hack for backporting
+void LoopMapOrphanTransactionsByPrev(const CTransaction &tx, std::vector<uint256> &vOrphanErase);
+int EraseOrphanTx(uint256 hash);
+
 /**
  * Returns true if there are nRequired or more blocks of minVersion or above
  * in the last Consensus::Params::nMajorityWindow blocks, starting at pstart and going backwards.
@@ -2053,6 +2057,22 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 prevheights[j] = view.AccessCoin(tx.vin[j].prevout).nHeight;
             }
 
+            // Which orphan pool entries must we evict?
+            //for (size_t j = 0; j < tx.vin.size(); j++) {
+            //    auto itByPrev = mapOrphanTransactionsByPrev.find(tx.vin[j].prevout);
+            //    if (itByPrev == mapOrphanTransactionsByPrev.end()) continue;
+            //    for (auto mi = itByPrev->second.begin(); mi != itByPrev->second.end(); ++mi) {
+            //        const CTransaction& orphanTx = (*mi)->second.tx;
+            //        const uint256& orphanHash = orphanTx.GetHash();
+            //        vOrphanErase.push_back(orphanHash);
+            //    }
+            //}
+            // TODO This is a temporary solution while backporting Bitcoin 0.13 changes into Dash
+            //      It is needed because the splitting of main.cpp into validation.cpp/net_processing.cpp was done out of order
+            //      When we catch up with backporting, the above loop will be at the correct place in net_processing.cpp
+            //      and this hack can be removed
+            LoopMapOrphanTransactionsByPrev(tx, vOrphanErase);
+
             if (!SequenceLocks(tx, nLockTimeFlags, &prevheights, *pindex)) {
                 return state.DoS(100, error("%s: contains a non-BIP68-final transaction", __func__),
                                  REJECT_INVALID, "bad-txns-nonfinal");
@@ -2305,6 +2325,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     static uint256 hashPrevBestCoinBase;
     GetMainSignals().UpdatedTransaction(hashPrevBestCoinBase);
     hashPrevBestCoinBase = block.vtx[0].GetHash();
+
+    // Erase orphan transactions include or precluded by this block
+    if (vOrphanErase.size()) {
+        int nErased = 0;
+        BOOST_FOREACH(uint256 &orphanHash, vOrphanErase) {
+            nErased += EraseOrphanTx(orphanHash);
+        }
+        LogPrint("mempool", "Erased %d orphan tx included or conflicted by block\n", nErased);
+    }
 
     int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime6 - nTime5), nTimeCallbacks * 0.000001);
