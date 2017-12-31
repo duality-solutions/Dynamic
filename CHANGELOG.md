@@ -74,6 +74,12 @@
 * Remove unnecessary call to AddInventoryKnown in INV message handling
 * Fix crash on exit when -createwalletbackups=0
 * introduced a fix for a instant send related edge case. Somehow the parameters got mixed up and fUseInstantSend was passed as iterations
+* Add dynamic address label to request payment QR code
+* [Qt] Bump to Qt5.6.1
+* Stop treating importaddress'ed scripts as change
+* increase connection limits for outbound
+* Fix calls to AcceptToMemoryPool in PS submodules
+* Improve handling of unconnecting headers
 
 
 **Dynamic v2.0.0.0**
