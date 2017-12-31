@@ -86,15 +86,11 @@ void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
     std::string rbfStatus = "no";
     if (confirms <= 0) {
         LOCK(mempool.cs);
-        if (!mempool.exists(hash)) {
-            if (SignalsOptInRBF(wtx)) {
-                rbfStatus = "yes";
-            } else {
-                rbfStatus = "unknown";
-            }
-        } else if (IsRBFOptIn(*mempool.mapTx.find(hash), mempool)) {
+        RBFTransactionState rbfState = IsRBFOptIn(wtx, mempool);
+        if (rbfState == RBF_TRANSACTIONSTATE_UNKNOWN)
+            rbfStatus = "unknown";
+        else if (rbfState == RBF_TRANSACTIONSTATE_REPLACEABLE_BIP125)
             rbfStatus = "yes";
-        }
     }
     entry.push_back(Pair("bip125-replaceable", rbfStatus));
 
@@ -402,7 +398,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of the wallet and coins were spent in the copy but not marked as spent here.");
 }
 
 void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue)
@@ -790,37 +786,6 @@ UniValue getreceivedbyaccount(const UniValue& params, bool fHelp)
     return ValueFromAmount(nAmount);
 }
 
-CAmount GetAccountBalance(CWalletDB& walletdb, const std::string& strAccount, int nMinDepth, const isminefilter& filter, bool fAddLockConf)
-{
-    CAmount nBalance = 0;
-
-    // Tally wallet transactions
-    for (std::map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
-    {
-        const CWalletTx& wtx = (*it).second;
-        if (!CheckFinalTx(wtx) || wtx.GetBlocksToMaturity() > 0 || wtx.GetDepthInMainChain(fAddLockConf) < 0)
-            continue;
-
-        CAmount nReceived, nSent, nFee;
-        wtx.GetAccountAmounts(strAccount, nReceived, nSent, nFee, filter);
-
-        if (nReceived != 0 && wtx.GetDepthInMainChain(fAddLockConf) >= nMinDepth)
-            nBalance += nReceived;
-        nBalance -= nSent + nFee;
-    }
-
-    // Tally internal accounting entries
-    nBalance += walletdb.GetAccountCreditDebit(strAccount);
-
-    return nBalance;
-}
-
-CAmount GetAccountBalance(const std::string& strAccount, int nMinDepth, const isminefilter& filter, bool fAddLockConf)
-{
-    CWalletDB walletdb(pwalletMain->strWalletFile);
-    return GetAccountBalance(walletdb, strAccount, nMinDepth, filter, fAddLockConf);
-}
-
 UniValue getbalance(const UniValue& params, bool fHelp)
 {
     if (!EnsureWalletIsAvailable(fHelp))
@@ -893,7 +858,7 @@ UniValue getbalance(const UniValue& params, bool fHelp)
 
     std::string strAccount = AccountFromValue(params[0]);
 
-    CAmount nBalance = GetAccountBalance(strAccount, nMinDepth, filter, fAddLockConf);
+    CAmount nBalance = pwalletMain->GetAccountBalance(strAccount, nMinDepth, filter, fAddLockConf);
 
     return ValueFromAmount(nBalance);
 }
@@ -954,33 +919,7 @@ UniValue movecmd(const UniValue& params, bool fHelp)
     if (params.size() > 4)
         strComment = params[4].get_str();
 
-    CWalletDB walletdb(pwalletMain->strWalletFile);
-    if (!walletdb.TxnBegin())
-        throw JSONRPCError(RPC_DATABASE_ERROR, "database error");
-
-    int64_t nNow = GetAdjustedTime();
-
-    // Debit
-    CAccountingEntry debit;
-    debit.nOrderPos = pwalletMain->IncOrderPosNext(&walletdb);
-    debit.strAccount = strFrom;
-    debit.nCreditDebit = -nAmount;
-    debit.nTime = nNow;
-    debit.strOtherAccount = strTo;
-    debit.strComment = strComment;
-    pwalletMain->AddAccountingEntry(debit, walletdb);
-
-    // Credit
-    CAccountingEntry credit;
-    credit.nOrderPos = pwalletMain->IncOrderPosNext(&walletdb);
-    credit.strAccount = strTo;
-    credit.nCreditDebit = nAmount;
-    credit.nTime = nNow;
-    credit.strOtherAccount = strFrom;
-    credit.strComment = strComment;
-    pwalletMain->AddAccountingEntry(credit, walletdb);
-
-    if (!walletdb.TxnCommit())
+    if (!pwalletMain->AccountMove(strFrom, strTo, nAmount, strComment))
         throw JSONRPCError(RPC_DATABASE_ERROR, "database error");
 
     return true;
@@ -1043,7 +982,7 @@ UniValue sendfrom(const UniValue& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     // Check funds
-    CAmount nBalance = GetAccountBalance(strAccount, nMinDepth, ISMINE_SPENDABLE, fAddLockConf);
+    CAmount nBalance = pwalletMain->GetAccountBalance(strAccount, nMinDepth, ISMINE_SPENDABLE, fAddLockConf);
     if (nAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
@@ -1151,7 +1090,7 @@ UniValue sendmany(const UniValue& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     // Check funds
-    CAmount nBalance = GetAccountBalance(strAccount, nMinDepth, ISMINE_SPENDABLE, fAddLockConf);
+    CAmount nBalance = pwalletMain->GetAccountBalance(strAccount, nMinDepth, ISMINE_SPENDABLE, fAddLockConf);
     if (totalAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
@@ -1578,6 +1517,7 @@ UniValue listtransactions(const UniValue& params, bool fHelp)
             "    \"vout\": n,                (numeric) the vout value\n"
             "    \"fee\": x.xxx,             (numeric) The amount of the fee in " + CURRENCY_UNIT + ". This is negative and only available for the \n"
             "                                         'send' category of transactions.\n"
+            "    \"abandoned\": xxx          (bool) 'true' if the transaction has been abandoned (inputs are respendable).\n"
             "    \"instantlock\" : true|false, (bool) Current transaction lock state. Available for 'send' and 'receive' category of transactions.\n"
             "    \"confirmations\": n,       (numeric) The number of blockchain confirmations for the transaction. Available for 'send' and \n"
             "                                         'receive' category of transactions. Negative confirmations indicate the\n"
@@ -1974,7 +1914,7 @@ UniValue backupwallet(const UniValue& params, bool fHelp)
     if (fHelp || params.size() != 1)
         throw std::runtime_error(
             "backupwallet \"destination\"\n"
-            "\nSafely copies wallet.dat to destination, which can be a directory or a path with filename.\n"
+            "\nSafely copies current wallet file to destination, which can be a directory or a path with filename.\n"
             "\nArguments:\n"
             "1. \"destination\"   (string) The destination directory or file\n"
             "\nExamples:\n"
@@ -1985,7 +1925,7 @@ UniValue backupwallet(const UniValue& params, bool fHelp)
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
     std::string strDest = params[0].get_str();
-    if (!BackupWallet(*pwalletMain, strDest))
+    if (!pwalletMain->BackupWallet(strDest))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet backup failed!");
 
     return NullUniValue;
@@ -2252,16 +2192,17 @@ UniValue lockunspent(const UniValue& params, bool fHelp)
     
     if (fHelp || params.size() < 1 || params.size() > 2)
         throw std::runtime_error(
-            "lockunspent unlock [{\"txid\":\"txid\",\"vout\":n},...]\n"
+            "lockunspent unlock ([{\"txid\":\"txid\",\"vout\":n},...])\n"
             "\nUpdates list of temporarily unspendable outputs.\n"
             "Temporarily lock (unlock=false) or unlock (unlock=true) specified transaction outputs.\n"
+            "If no transaction outputs are specified when unlocking then all current locked transaction outputs are unlocked.\n"
             "A locked transaction output will not be chosen by automatic coin selection, when spending Dynamic.\n"
             "Locks are stored in memory only. Nodes start with zero locked outputs, and the locked output list\n"
             "is always cleared (by virtue of process exit) when a node stops or fails.\n"
             "Also see the listunspent call\n"
             "\nArguments:\n"
             "1. unlock            (boolean, required) Whether to unlock (true) or lock (false) the specified transactions\n"
-            "2. \"transactions\"  (string, required) A json array of objects. Each object the txid (string) vout (numeric)\n"
+            "2. \"transactions\"  (string, optional) A json array of objects. Each object the txid (string) vout (numeric)\n"
             "     [           (json array of json objects)\n"
             "       {\n"
             "         \"txid\":\"id\",    (string) The transaction id\n"
@@ -2595,9 +2536,10 @@ UniValue listunspent(const UniValue& params, bool fHelp)
             "    \"scriptPubKey\" : \"key\",   (string) the script key\n"
             "    \"amount\" : x.xxx,         (numeric) the transaction amount in " + CURRENCY_UNIT + "\n"
             "    \"confirmations\" : n       (numeric) The number of confirmations\n"
-            "    \"ps_rounds\" : n           (numeric) The number of PS round\n"
+            "    \"redeemScript\" : n        (string) The redeemScript if scriptPubKey is P2SH\n"
             "    \"spendable\" : xxx,        (bool) Whether we have the private keys to spend this output\n"
             "    \"solvable\" : xxx          (bool) Whether we know how to spend this output, ignoring the lack of keys\n" 
+            "    \"ps_rounds\" : n           (numeric) The number of PS round\n"
             "  }\n"
             "  ,...\n"
             "]\n"
@@ -2641,41 +2583,40 @@ UniValue listunspent(const UniValue& params, bool fHelp)
         if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
             continue;
 
-        if (setAddress.size()) {
-            CTxDestination address;
-            if (!ExtractDestination(out.tx->vout[out.i].scriptPubKey, address))
-                continue;
+        CTxDestination address;
+        const CScript& scriptPubKey = out.tx->vout[out.i].scriptPubKey;
+        bool fValidAddress = ExtractDestination(scriptPubKey, address);
 
-            if (!setAddress.count(address))
-                continue;
-        }
+        if (setAddress.size() && (!fValidAddress || !setAddress.count(address)))
+            continue;
 
-        CAmount nValue = out.tx->vout[out.i].nValue;
-        const CScript& pk = out.tx->vout[out.i].scriptPubKey;
         UniValue entry(UniValue::VOBJ);
         entry.push_back(Pair("txid", out.tx->GetHash().GetHex()));
         entry.push_back(Pair("vout", out.i));
-        CTxDestination address;
-        if (ExtractDestination(out.tx->vout[out.i].scriptPubKey, address)) {
+
+        if (fValidAddress) {
             entry.push_back(Pair("address", CDynamicAddress(address).ToString()));
+
             if (pwalletMain->mapAddressBook.count(address))
                 entry.push_back(Pair("account", pwalletMain->mapAddressBook[address].name));
-        }
-        entry.push_back(Pair("scriptPubKey", HexStr(pk.begin(), pk.end())));
-        if (pk.IsPayToScriptHash()) {
-            CTxDestination address;
-            if (ExtractDestination(pk, address)) {
+
+            if (scriptPubKey.IsPayToScriptHash()) {
+
+
+
                 const CScriptID& hash = boost::get<CScriptID>(address);
                 CScript redeemScript;
                 if (pwalletMain->GetCScript(hash, redeemScript))
                     entry.push_back(Pair("redeemScript", HexStr(redeemScript.begin(), redeemScript.end())));
             }
         }
-        entry.push_back(Pair("amount",ValueFromAmount(nValue)));
-        entry.push_back(Pair("confirmations",out.nDepth));
-        entry.push_back(Pair("ps_rounds", pwalletMain->GetOutpointPrivateSendRounds(COutPoint(out.tx->GetHash(), out.i))));
+
+        entry.push_back(Pair("scriptPubKey", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
+        entry.push_back(Pair("amount", ValueFromAmount(out.tx->vout[out.i].nValue)));
+        entry.push_back(Pair("confirmations", out.nDepth));
         entry.push_back(Pair("spendable", out.fSpendable));
         entry.push_back(Pair("solvable", out.fSolvable));
+        entry.push_back(Pair("ps_rounds", pwalletMain->GetOutpointPrivateSendRounds(COutPoint(out.tx->GetHash(), out.i))));
         results.push_back(entry);
     }
 
@@ -2695,7 +2636,7 @@ UniValue fundrawtransaction(const UniValue& params, bool fHelp)
                             "Note that inputs which were signed may need to be resigned after completion since in/outputs have been added.\n"
                             "The inputs added will not be signed, use signrawtransaction for that.\n"
                             "Note that all existing inputs must have their previous output transaction be in the wallet.\n"
-                            "Note that all inputs selected must be of standard form and P2SH scripts must be"
+                            "Note that all inputs selected must be of standard form and P2SH scripts must be\n"
                             "in the wallet using importaddress or addmultisigaddress (to calculate fees).\n"
                             "You can see whether this is the case by checking the \"solvable\" field in the listunspent output.\n"
                             "Only pay-to-pubkey, multisig, and P2SH versions thereof are currently supported for watch-only\n"
@@ -2820,14 +2761,17 @@ extern UniValue importaddress(const UniValue& params, bool fHelp);
 extern UniValue importpubkey(const UniValue& params, bool fHelp);
 extern UniValue dumpwallet(const UniValue& params, bool fHelp);
 extern UniValue importwallet(const UniValue& params, bool fHelp);
+extern UniValue importprunedfunds(const UniValue& params, bool fHelp);
+extern UniValue removeprunedfunds(const UniValue& params, bool fHelp);
 
 extern UniValue dumphdinfo(const UniValue& params, bool fHelp);
 extern UniValue importelectrumwallet(const UniValue& params, bool fHelp);
 
 extern UniValue instantsendtoaddress(const UniValue& params, bool fHelp);
+extern UniValue privatesend(const UniValue& params, bool fHelp);
 extern UniValue keepass(const UniValue& params, bool fHelp);
 
-const CRPCCommand vWalletRPCCommands[] =
+static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           okSafeMode
     //  --------------------- ------------------------    -----------------------    ----------
     { "rawtransactions",    "fundrawtransaction",       &fundrawtransaction,       false },
@@ -2852,6 +2796,7 @@ const CRPCCommand vWalletRPCCommands[] =
     { "wallet",             "importprivkey",            &importprivkey,            true  },
     { "wallet",             "importwallet",             &importwallet,             true  },
     { "wallet",             "importaddress",            &importaddress,            true  },
+    { "wallet",             "importprunedfunds",        &importprunedfunds,        true  },
     { "wallet",             "importpubkey",             &importpubkey,             true  },
     { "wallet",             "keypoolrefill",            &keypoolrefill,            true  },
     { "wallet",             "listaccounts",             &listaccounts,             false },
@@ -2873,6 +2818,7 @@ const CRPCCommand vWalletRPCCommands[] =
     { "wallet",             "walletlock",               &walletlock,               true  },
     { "wallet",             "walletpassphrasechange",   &walletpassphrasechange,   true  },
     { "wallet",             "walletpassphrase",         &walletpassphrase,         true  },
+    { "wallet",             "removeprunedfunds",        &removeprunedfunds,        true  },
 
     { "wallet",             "keepass",                  &keepass,                  true },
     { "wallet",             "instantsendtoaddress",     &instantsendtoaddress,     false },
@@ -2881,15 +2827,9 @@ const CRPCCommand vWalletRPCCommands[] =
     { "Dynamic",            "privatesend",              &privatesend,              false },
 };
 
-void walletRegisterRPCCommands()
+void RegisterWalletRPCCommands(CRPCTable &tableRPC)
 {
-    unsigned int vcidx;
-    for (vcidx = 0; vcidx < ARRAYLEN(vWalletRPCCommands); vcidx++)
-    {
-        const CRPCCommand *pcmd;
-
-        pcmd = &vWalletRPCCommands[vcidx];
-        tableRPC.appendCommand(pcmd->name, pcmd);
-    }
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
 

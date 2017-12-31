@@ -7,6 +7,8 @@
 #ifndef DYNAMIC_WALLET_RPCWALLET_H
 #define DYNAMIC_WALLET_RPCWALLET_H
 
-void walletRegisterRPCCommands();
+class CRPCTable;
+
+void RegisterWalletRPCCommands(CRPCTable &tableRPC);
 
 #endif //DYNAMIC_WALLET_RPCWALLET_H

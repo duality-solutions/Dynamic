@@ -134,6 +134,7 @@ DYNAMIC_CORE_H = \
   net_processing.h \
   noui.h \
   ntp.h \
+  operations.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -152,6 +153,7 @@ DYNAMIC_CORE_H = \
   reverselock.h \
   rpcclient.h \
   rpcprotocol.h \
+  rpcregister.h \
   rpcserver.h \
   scheduler.h \
   script/interpreter.h \
@@ -240,6 +242,7 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
+  operations.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
@@ -328,7 +331,6 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
-  crypto/sha512.h \
   crypto/sha512.cpp \
   crypto/sha512.h
 

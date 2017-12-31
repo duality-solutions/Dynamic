@@ -1,3 +1,81 @@
+**Dynamic v2.1.0.0**
+* [Trivial] Shift non-Fluid specific operations to seperate file
+* [Script] Remove OPCODES from non-existent features
+* Add tags to mempool's mapTx indices
+* remove unused NOBLKS_VERSION_{START,END} constants
+* mempool: Re-remove ERROR logging for mempool rejects
+* [Wallet] move wallet help string creation to CWallet
+* Move GetTempPath() to testutil
+* [Wallet] move 'load wallet phase' to CWallet
+* use cached block hash in blockToJSON()
+* [wallet] Move hardcoded file name out of log messages
+* Mempool: Add tracking of ancestor packages
+* De-neuter NODE_BLOOM
+* Improve COutPoint less operator
+* Correct importaddress help reference to importpubkey
+* Implement feefilter P2P message
+* Bump Versioning
+* Prevent multiple calls to CWallet::AvailableCoins
+* [RPC] Add generatetoaddress rpc to mine to an address
+* Fix calculation of balances and available coins.
+* Fix lockunspent help message
+* [RPC] add missing abandon status documentation
+* [RPC] Add import/removeprunedfunds rpc call
+* [RPC] Rename dynodeprivkey->Dynode Pairing Key
+* P2P: add maxtimeadjustment command line option
+* dynodeprivkey->dynodepairingkey
+* [Qt] remove trailing output-index from transaction-id
+* [build-aux] Update Boost & check macros to latest serials
+* Strip colour profiles from png's
+* rpc: Register calls where they are defined
+* [Wallet] refactor wallet/init interaction
+* RPC: fix generatetoaddress failing to parse address and add unit test
+* Fix no-wallet build after backports refactored RPCs
+* Net: Add IPv6 Link-Local Address Support
+* trivial: Globals: Explicitly pass const CChainParams& to ProcessMessage()
+* Clean up lockorder data of destroyed mutexes
+* Refactor IsRBFOptIn, avoid exception
+* Only send one GetAddr response per connection.
+* crypto: bytes counts are 64 bit
+* Add missing new line
+* Speed up getchaintips.
+* Clean up warning/error handling
+* qt: Add transaction hash to details window title & make it possible to show details of multiple transactions
+* Log invalid block hash to make debugging easier.
+* chain: define enum used as bit field as uint32_t
+* Return from main instead of calling exit()
+* tinyformat: force USE_VARIADIC_TEMPLATES
+* util: switch LogPrint and error to variadic templates
+* [trivial] Add missing const qualifiers.
+* Create signmessagewithprivkey
+* Improve rolling bloom filter performance and benchmark
+* Fix insanity of CWalletDB::WriteTx and CWalletTx::WriteToDisk
+* fReopenDebugLog and fRequestShutdown should be type sig_atomic_t
+* Use SipHash-2-4 for various non-cryptographic hashes
+* remove unneeded declaration and standardise
+* Fix Socks5() connect failures to be less noisy and less unnecessarily scary
+* [Wallet] Improve Wallet encapsulation
+* remove unneeded logging
+* Change mapRelay to store CTransactions
+* Do not use mempool for GETDATA for tx accepted after the last mempool request
+* Directly push messages instead of using CDataStream first
+* Only use AddInventoryKnown for transactions
+* Use std::atomic for fRequestShutdown and fReopenDebugLog
+* Prevent multiple calls to ExtractDestination
+* replace mapNextTx with slimmer setSpends
+* Put back generation commands and implement Account Move
+* Log/report in 10% steps during VerifyDB
+* [RPC] Add support for sequence number
+* Disable the mempool P2P command when bloom filters disabled
+* Addrman offline attempts
+* tor: Change auth order to only use HASHEDPASSWORD if -torpassword
+* Remove CLIENT_DATE
+* Revert BLOCK_DOWNLOAD_TIMEOUT_*
+* Remove unnecessary call to AddInventoryKnown in INV message handling
+* Fix crash on exit when -createwalletbackups=0
+* introduced a fix for a instant send related edge case. Somehow the parameters got mixed up and fUseInstantSend was passed as iterations
+
+
 **Dynamic v2.0.0.0**
 * Fix Network Time Protocol (NTP)
 * Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol

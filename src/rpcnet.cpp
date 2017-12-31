@@ -211,7 +211,7 @@ UniValue addnode(const UniValue& params, bool fHelp)
     if (strCommand == "onetry")
     {
         CAddress addr;
-        g_connman->OpenNetworkConnection(addr, NULL, strNode.c_str());
+        g_connman->OpenNetworkConnection(addr, false, NULL, strNode.c_str());
         return NullUniValue;
     }
 
@@ -600,3 +600,26 @@ UniValue ntptime(const UniValue& params, bool fHelp)
     obj.push_back(Pair("time", DurationToDHMS(nTime)));
     return obj;
 }
+
+static const CRPCCommand commands[] =
+{ //  category              name                      actor (function)         okSafeMode
+  //  --------------------- ------------------------  -----------------------  ----------
+    { "network",            "getconnectioncount",     &getconnectioncount,     true  },
+    { "network",            "ping",                   &ping,                   true  },
+    { "network",            "getpeerinfo",            &getpeerinfo,            true  },
+    { "network",            "addnode",                &addnode,                true  },
+    { "network",            "disconnectnode",         &disconnectnode,         true  },
+    { "network",            "getaddednodeinfo",       &getaddednodeinfo,       true  },
+    { "network",            "getnettotals",           &getnettotals,           true  },
+    { "network",            "getnetworkinfo",         &getnetworkinfo,         true  },
+    { "network",            "setban",                 &setban,                 true  },
+    { "network",            "listbanned",             &listbanned,             true  },
+    { "network",            "clearbanned",            &clearbanned,            true  },
+};
+
+void RegisterNetRPCCommands(CRPCTable &tableRPC)
+{
+    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
+        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}
+

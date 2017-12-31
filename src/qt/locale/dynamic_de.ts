@@ -3418,8 +3418,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Warnung: wallet.dat beschädigt, Datenrettung erfolgreich! Original wallet.dat wurde als wallet.{Zeitstempel}.dat in %s gespeichert. Falls ihr Kontostand oder Transaktionen nicht korrekt sind, sollten Sie dem vorangegangenen Zustand durch die Datensicherung wiederherstellen.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Es muss ein dynode-Geheimschlüssel (dynodeprivkey) in der Konfiguration angegeben werden. Für weitere Informationen siehe Dokumentation.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Es muss ein dynode-Geheimschlüssel (dynodepairingkey) in der Konfiguration angegeben werden. Für weitere Informationen siehe Dokumentation.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4176,8 +4176,8 @@ DYN Core wird heruntergefahren.</translation>
         <translation>Versuche erneut...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>dynode-Geheimschlüssel (dynodeprivkey) ist ungültig. Siehe Dokumentation. </translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>dynode-Geheimschlüssel (dynodepairingkey) ist ungültig. Siehe Dokumentation. </translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

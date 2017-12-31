@@ -3418,8 +3418,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Avertissement : wallet.dat corrompu, données récupérées ! Le fichier wallet.dat original a été enregistré en tant que wallet.{timestamp}.bak dans %s ; si votre solde ou transactions sont incorrects vous devriez effectuer une restauration depuis une sauvegarde.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Vous devez définir dynodeprivkey dans la configuration. Veuillez consulter la documentation pour plus d'aide.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Vous devez définir dynodepairingkey dans la configuration. Veuillez consulter la documentation pour plus d'aide.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4176,8 +4176,8 @@ Pour exemple: alertnotify=echo %%s | mail -s "Alerte Dynamic" admin@foo.com
         <translation>Va réessayer ...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
-        <translation>dynodeprivkey invalide. Veuillez vous référer à la documentation.</translation>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
+        <translation>dynodepairingkey invalide. Veuillez vous référer à la documentation.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>

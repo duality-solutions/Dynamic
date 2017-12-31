@@ -11,10 +11,10 @@
 #include "data/alertTests.raw.h"
 #include "serialize.h"
 #include "streams.h"
-#include "util.h"
 #include "utilstrencodings.h"
 
 #include "test/test_dynamic.h"
+#include "test/testutil.h"
 
 #include <fstream>
 

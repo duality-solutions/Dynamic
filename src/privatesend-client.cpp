@@ -421,7 +421,7 @@ bool CPrivateSendClient::SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, c
 
         mempool.PrioritiseTransaction(tx.GetHash(), tx.GetHash().ToString(), 1000, 0.1*COIN);
         TRY_LOCK(cs_main, lockMain);
-        if(!lockMain || !AcceptToMemoryPool(mempool, validationState, CTransaction(tx), false, NULL, false, true, true)) {
+        if(!lockMain || !AcceptToMemoryPool(mempool, validationState, CTransaction(tx), false, NULL, NULL, false, maxTxFee, true)) {
             LogPrintf("CPrivateSendClient::SendDenominate -- AcceptToMemoryPool() failed! tx=%s", tx.ToString());
             UnlockCoins();
             keyHolderStorage.ReturnAll();
@@ -879,7 +879,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to dynode from queue, addr=%s\n", infoDn.addr.ToString());
         // connect to Dynode and submit the queue request
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
         if(pnode) {
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
@@ -954,7 +954,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Dynode %s\n", nTries, infoDn.addr.ToString());
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, true);
+        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
         if(pnode) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoDn.addr.ToString());
             infoMixingDynode = infoDn;

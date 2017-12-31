@@ -15,14 +15,17 @@
 #include "net_processing.h"
 #include "pubkey.h"
 #include "random.h"
+#include "rpcserver.h"
+#include "rpcregister.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "ui_interface.h"
-#include "util.h"
 #ifdef ENABLE_WALLET
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #endif
+
+#include "test/testutil.h"
 
 #include <memory>
 
@@ -30,7 +33,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-CWallet* pwalletMain;
 std::unique_ptr<CConnman> g_connman;
 FastRandomContext insecure_rand_ctx(true);
 
@@ -57,14 +59,18 @@ BasicTestingSetup::~BasicTestingSetup()
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
 {
     const CChainParams& chainparams = Params();
+        // Ideally we'd move all the RPC tests to the functional testing framework
+        // instead of unit tests, but for now we need these here.
+        RegisterAllCoreRPCCommands(tableRPC);
 #ifdef ENABLE_WALLET
         bitdb.MakeMock();
-        walletRegisterRPCCommands();
+        RegisterWalletRPCCommands(tableRPC);
 #endif
         ClearDatadirCache();
         pathTemp = GetTempPath() / strprintf("test_dynamic_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
         boost::filesystem::create_directories(pathTemp);
         mapArgs["-datadir"] = pathTemp.string();
+        mempool.setSanityCheck(1.0);
         pblocktree = new CBlockTreeDB(1 << 20, true);
         pcoinsdbview = new CCoinsViewDB(1 << 23, true);
         pcoinsTip = new CCoinsViewCache(pcoinsdbview);

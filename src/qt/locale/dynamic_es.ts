@@ -3418,8 +3418,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aviso: ¡Recuperados datos de wallet.dat corrupto! El wallet.dat original se ha guardado como wallet.{timestamp}.bak en %s; si hubiera errores en su saldo o transacciones, deberá restaurar una copia de seguridad.</translation>
     </message>
     <message>
-        <source>You must specify a dynodeprivkey in the configuration. Please see documentation for help.</source>
-        <translation>Debe declarar la variable dynodeprivkey o clave privada para el nodo maestro en la configuración. Por favor, consulte la documentación para obtener ayuda.</translation>
+        <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
+        <translation>Debe declarar la variable dynodepairingkey o clave privada para el nodo maestro en la configuración. Por favor, consulte la documentación para obtener ayuda.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -4177,7 +4177,7 @@ por ejemplo: alertnotify=echo %%s | mail -s "Alerta de Dynamic" admin@foo.com
         <translation>Se volverá a intentar...</translation>
     </message>
     <message>
-        <source>Invalid dynodeprivkey. Please see documenation.</source>
+        <source>Invalid dynodepairingkey. Please see documenation.</source>
         <translation>La clave prinvada del nodo maestro no es válida. Por favor, consulte la  documentación.</translation>
     </message>
     <message>
