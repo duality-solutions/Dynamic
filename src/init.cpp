@@ -1609,7 +1609,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     threadGroup.create_thread(boost::bind(&ThreadImport, vImportFiles));
     // Wait for genesis block to be processed
     {
-        LogPrintf("Waiting for genesis block to be imported...\n");
         boost::unique_lock<boost::mutex> lock(cs_GenesisWait);
         while (!fHaveGenesis) {
             condvar_GenesisWait.wait(lock);
