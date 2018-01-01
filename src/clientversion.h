@@ -25,7 +25,7 @@
 //! Set to true for release, false for prerelease or test build
 #define CLIENT_VERSION_IS_RELEASE true
 
-#define COPYRIGHT_YEAR 2017
+#define COPYRIGHT_YEAR 2018
 
 #endif //HAVE_CONFIG_H
 
