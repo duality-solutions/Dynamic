@@ -1,4 +1,4 @@
-**Dynamic Changelog**
+**Dynamic CHANGELOG**
 -------------------------
 
 **Dynamic v2.2.0.0**
