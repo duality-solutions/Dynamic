@@ -1,3 +1,27 @@
+**Dynamic Changelog**
+-------------------------
+
+**Dynamic v2.2.0.0**
+* Add dynamic address label to request payment QR code
+* [RPC] Fix createrawtx sequence number unsigned int parsing
+* [Qt] Bump to Qt5.6.1
+* Stop treating importaddress'ed scripts as change
+* inline further with bitcoin
+* increase connection limits for outbound
+* Remove old unused function
+* [Qt] Add dbcache migration path
+* util: Update tinyformat
+* net: Ignore P2P messages
+* Mempool: Use Consensus::CheckTxInputs direclty over main::CheckInputs
+* [Wallet] Remove CWalletDB* parameter from CWallet::AddToWallet
+* Make CWallet::fFileBacked private
+* Clean up init of wallet
+* Update Copyrights
+* Bump Version and Copyright Year
+* Update Proto Version
+* Update secp256k1
+
+
 **Dynamic v2.1.0.0**
 * [Trivial] Shift non-Fluid specific operations to seperate file
 * [Script] Remove OPCODES from non-existent features
