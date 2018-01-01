@@ -1,3 +1,3 @@
-Dynamic 2.1.0.0
+Dynamic 2.2.0.0
 ==================
-- [v2.1.0.0](release-notes/dynamic/release-notes.md)
+- [v2.2.0.0](release-notes/dynamic/release-notes.md)
