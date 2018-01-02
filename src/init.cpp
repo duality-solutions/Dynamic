@@ -872,8 +872,6 @@ void InitParameterInteraction()
     if (nLiqProvTmp > 0) {
         mapArgs["-enableprivatesend"] = "1";
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -enableprivatesend=1\n", __func__, nLiqProvTmp);
-        mapArgs["-privatesendrounds"] = "99999";
-        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendrounds=99999\n", __func__, nLiqProvTmp);
         mapArgs["-privatesendamount"] = "999999";
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendamount=999999\n", __func__, nLiqProvTmp);
         mapArgs["-privatesendmultisession"] = "0";
@@ -1670,7 +1668,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     privateSendClient.fEnablePrivateSend = GetBoolArg("-enableprivatesend", false);
     privateSendClient.fPrivateSendMultiSession = GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
-    privateSendClient.nPrivateSendRounds = std::min(std::max((int)GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), privateSendClient.nLiquidityProvider ? 99999 : 16);
+    privateSendClient.nPrivateSendRounds = std::min(std::max((int)GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), 16);
     privateSendClient.nPrivateSendAmount = std::min(std::max((int)GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), 2), 999999);
 #endif // ENABLE_WALLET
 
