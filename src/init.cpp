@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -872,8 +872,6 @@ void InitParameterInteraction()
     if (nLiqProvTmp > 0) {
         mapArgs["-enableprivatesend"] = "1";
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -enableprivatesend=1\n", __func__, nLiqProvTmp);
-        mapArgs["-privatesendrounds"] = "99999";
-        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendrounds=99999\n", __func__, nLiqProvTmp);
         mapArgs["-privatesendamount"] = "999999";
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendamount=999999\n", __func__, nLiqProvTmp);
         mapArgs["-privatesendmultisession"] = "0";
@@ -1609,7 +1607,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     threadGroup.create_thread(boost::bind(&ThreadImport, vImportFiles));
     // Wait for genesis block to be processed
     {
-        LogPrintf("Waiting for genesis block to be imported...\n");
         boost::unique_lock<boost::mutex> lock(cs_GenesisWait);
         while (!fHaveGenesis) {
             condvar_GenesisWait.wait(lock);
@@ -1671,7 +1668,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     privateSendClient.fEnablePrivateSend = GetBoolArg("-enableprivatesend", false);
     privateSendClient.fPrivateSendMultiSession = GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
-    privateSendClient.nPrivateSendRounds = std::min(std::max((int)GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), privateSendClient.nLiquidityProvider ? 99999 : 16);
+    privateSendClient.nPrivateSendRounds = std::min(std::max((int)GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), 16);
     privateSendClient.nPrivateSendAmount = std::min(std::max((int)GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), 2), 999999);
 #endif // ENABLE_WALLET
 

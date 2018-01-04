@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -348,8 +348,21 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCache &inputs, int nHeight);
 
+/** Transaction validation functions */
+
 /** Context-independent validity checks */
 bool CheckTransaction(const CTransaction& tx, CValidationState& state);
+
+namespace Consensus {
+
+/**
+ * Check whether all inputs of this transaction are valid (no double spends and amounts)
+ * This does not modify the UTXO set. This does not check scripts and sigs.
+ * Preconditions: tx.IsCoinBase() is false.
+ */
+bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight);
+
+} // namespace Consensus
 
 /**
  * Check if transaction is final and can be included in a block with the

@@ -1,4 +1,30 @@
+**Dynamic CHANGELOG**
+-------------------------
+
+**Dynamic v2.2.0.0**
+
+* Add dynamic address label to request payment QR code
+* [RPC] Fix createrawtx sequence number unsigned int parsing
+* [Qt] Bump to Qt5.6.1
+* Stop treating importaddress'ed scripts as change
+* inline further with bitcoin
+* increase connection limits for outbound
+* Remove old unused function
+* [Qt] Add dbcache migration path
+* util: Update tinyformat
+* net: Ignore P2P messages
+* Mempool: Use Consensus::CheckTxInputs direclty over main::CheckInputs
+* [Wallet] Remove CWalletDB* parameter from CWallet::AddToWallet
+* Make CWallet::fFileBacked private
+* Clean up init of wallet
+* Update Copyrights
+* Bump Version and Copyright Year
+* Update Proto Version
+* Update secp256k1
+
+
 **Dynamic v2.1.0.0**
+
 * [Trivial] Shift non-Fluid specific operations to seperate file
 * [Script] Remove OPCODES from non-existent features
 * Add tags to mempool's mapTx indices
@@ -83,6 +109,7 @@
 
 
 **Dynamic v2.0.0.0**
+
 * Fix Network Time Protocol (NTP)
 * Introduce, OP_MINT, OP_REWARD_DYNODE and OP_REWARD_MINING opcode for Fluid Protocol
 * Add string generation/parsing system to generate tokens for Fluid Protocol
@@ -353,6 +380,7 @@
 
 
 **Dynamic v1.4.0.0**
+
 * Securely erase potentially sensitive keys/values
 * Fix issue where config was created at launch but not read
 * [BUILD] quiet annoying warnings without adding new ones
@@ -414,6 +442,7 @@
 
 
 **Dynamic v1.3.0.2**
+
 * [Sync] Fix issue with headers first sync
 * [Sync] [Consensus] Shift Fork Logic to its own file
 * [Qt] Add CheckForks in the Qt Project File
@@ -425,16 +454,19 @@
 
 
 **Dynamic v1.3.0.1**
+
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 
 
-**Dynamic v1.3.0.0**	
+**Dynamic v1.3.0.0**
+
 * c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 
 
-**Dynamic v1.2.0.0**	
+**Dynamic v1.2.0.0**
+
 * Make RelayWalletTransaction attempt to AcceptToMemoryPool
 * Update tests for Byteswap
 * Ensure is in valid range
@@ -476,7 +508,8 @@
 * Added IPv4 seed nodes to chainparamsseeds.h
 
 
-**Dynamic v1.1.0.0**			
+**Dynamic v1.1.0.0**
+
 * Inline with BTC 0.12		
 * HD Wallet Code Improvements		
 * Remove/Replace Boost usage for c++11		
@@ -494,3 +527,6 @@
 * [RPC] remove the option of having multiple timer interfaces		
 * Fix memory leak in httprpc.cpp		
 * Make KEY_SIZE a compile-time constant
+
+** Initial Fork from Dash 
+

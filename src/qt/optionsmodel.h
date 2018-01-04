@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -98,9 +98,11 @@ private:
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;
 
-    /// Add option to list of GUI options overridden through command line/config file
+    // Add option to list of GUI options overridden through command line/config file
     void addOverriddenOption(const std::string &option);
 
+    // Check settings version and upgrade default values if required
+    void checkAndMigrate();
 Q_SIGNALS:
     void displayUnitChanged(int unit);
     void privateSendRoundsChanged();

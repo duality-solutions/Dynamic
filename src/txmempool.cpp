@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -777,6 +777,7 @@ void CTxMemPool::check(const CCoinsViewCache *pcoins) const
     uint64_t innerUsage = 0;
 
     CCoinsViewCache mempoolDuplicate(const_cast<CCoinsViewCache*>(pcoins));
+    const int64_t nSpendHeight = GetSpendHeight(mempoolDuplicate);
 
     LOCK(cs);
     std::list<const CTxMemPoolEntry*> waitingOnDependants;
@@ -856,7 +857,9 @@ void CTxMemPool::check(const CCoinsViewCache *pcoins) const
             waitingOnDependants.push_back(&(*it));
         else {
             CValidationState state;
-            assert(CheckInputs(tx, state, mempoolDuplicate, false, 0, false, NULL));
+            bool fCheckResult = tx.IsCoinBase() ||
+                Consensus::CheckTxInputs(tx, state, mempoolDuplicate, nSpendHeight);
+            assert(fCheckResult);
             UpdateCoins(tx, state, mempoolDuplicate, 1000000);
         }
     }
@@ -870,7 +873,9 @@ void CTxMemPool::check(const CCoinsViewCache *pcoins) const
             stepsSinceLastRemove++;
             assert(stepsSinceLastRemove < waitingOnDependants.size());
         } else {
-            assert(CheckInputs(entry->GetTx(), state, mempoolDuplicate, false, 0, false, NULL));
+            bool fCheckResult = entry->GetTx().IsCoinBase() ||
+                Consensus::CheckTxInputs(entry->GetTx(), state, mempoolDuplicate, nSpendHeight);
+            assert(fCheckResult);
             UpdateCoins(entry->GetTx(), state, mempoolDuplicate, 1000000);
             stepsSinceLastRemove = 0;
         }

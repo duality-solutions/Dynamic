@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -50,6 +50,8 @@ void OptionsModel::Init(bool resetSettings)
 {
     if (resetSettings)
         Reset();
+
+    checkAndMigrate();
 
     this->resetSettings = resetSettings;
 
@@ -555,3 +557,23 @@ bool OptionsModel::isRestartRequired()
     QSettings settings;
     return settings.value("fRestartRequired", false).toBool();
 }
+
+void OptionsModel::checkAndMigrate()
+{
+    // Migration of default values
+    // Check if the QSettings container was already loaded with this client version
+    QSettings settings;
+    static const char strSettingsVersionKey[] = "nSettingsVersion";
+    int settingsVersion = settings.contains(strSettingsVersionKey) ? settings.value(strSettingsVersionKey).toInt() : 0;
+    if (settingsVersion < CLIENT_VERSION)
+    {
+        // -dbcache was bumped from 100 to 300 in 0.13
+        // see https://github.com/bitcoin/bitcoin/pull/8273
+        // force people to upgrade to the new value if they are using 100MB
+        if (settingsVersion < 130000 && settings.contains("nDatabaseCache") && settings.value("nDatabaseCache").toLongLong() == 100)
+            settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);
+
+        settings.setValue(strSettingsVersionKey, CLIENT_VERSION);
+    }
+}
+

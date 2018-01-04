@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -578,6 +578,7 @@ private:
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal /*= false*/);
 
+    bool fFileBacked;
 public:
     /*
      * Main wallet lock.
@@ -588,7 +589,6 @@ public:
      */
     mutable CCriticalSection cs_wallet;
 
-    bool fFileBacked;
     const std::string strWalletFile;
 
     void LoadKeyPool(int nIndex, const CKeyPool &keypool)
@@ -779,7 +779,8 @@ public:
     bool AccountMove(std::string strFrom, std::string strTo, CAmount nAmount, std::string strComment = "");
 
     void MarkDirty();
-    bool AddToWallet(const CWalletTx& wtxIn, bool fFromLoadWallet, CWalletDB* pwalletdb);
+    bool AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose=true);
+    bool LoadToWallet(const CWalletTx& wtxIn);
     void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, const CBlock* pblock);
     bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblock, bool fUpdate);
     int ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate = false);

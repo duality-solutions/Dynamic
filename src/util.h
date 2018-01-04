@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -113,33 +113,17 @@ int LogPrintStr(const std::string &str);
 
 #define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
 
-template<typename T1, typename... Args>
-static inline int LogPrint(const char* category, const char* fmt, const T1& v1, const Args&... args)
+template<typename... Args>
+static inline int LogPrint(const char* category, const char* fmt, const Args&... args)
 {
     if(!LogAcceptCategory(category)) return 0;                            \
-    return LogPrintStr(tfm::format(fmt, v1, args...));
+    return LogPrintStr(tfm::format(fmt, args...));
 }
 
-template<typename T1, typename... Args>
-bool error(const char* fmt, const T1& v1, const Args&... args)
+template<typename... Args>
+bool error(const char* fmt, const Args&... args)
 {
-    LogPrintStr("ERROR: " + tfm::format(fmt, v1, args...) + "\n");
-    return false;
-}
-
-/**
- * Zero-arg versions of logging and error, these are not covered by
- * the variadic templates above (and don't take format arguments but
- * bare strings).
- */
-static inline int LogPrint(const char* category, const char* s)
-{
-    if(!LogAcceptCategory(category)) return 0;
-    return LogPrintStr(s);
-}
-static inline bool error(const char* s)
-{
-    LogPrintStr(std::string("ERROR: ") + s + "\n");
+    LogPrintStr("ERROR: " + tfm::format(fmt, args...) + "\n");
     return false;
 }
 

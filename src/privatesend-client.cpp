@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -856,7 +856,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
         std::vector<COutput> vCoinsTmp;
 
         // Try to match their denominations if possible, select at least 1 denominations
-        if(!pwalletMain->SelectCoinsByDenominations(psq.nDenom, vecStandardDenoms[vecBits.front()], nBalanceNeedsAnonymized, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, nPrivateSendRounds)) {
+        if(!pwalletMain->SelectCoinsByDenominations(psq.nDenom, vecStandardDenoms[vecBits.front()], nBalanceNeedsAnonymized, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, nPrivateSendRounds + (bool)nLiquidityProvider)) {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- Couldn't match denominations %d %d (%s)\n", vecBits.front(), psq.nDenom, CPrivateSend::GetDenominationsToString(psq.nDenom));
             continue;
         }
@@ -993,7 +993,7 @@ bool CPrivateSendClient::SubmitDenominate(CConnman& connman)
 
     // Submit transaction to the pool if we get here
     // Try to use only inputs with the same number of rounds starting from the highest number of rounds possible
-    for(int i = nPrivateSendRounds; i > 0; i--) {
+    for(int i = nPrivateSendRounds + (bool)nLiquidityProvider; i > 0; i--) {
         if(PrepareDenominate(i - 1, i, strError, vecTxPSInRet, vecTxOutRet)) {
             LogPrintf("CPrivateSendClient::SubmitDenominate -- Running PrivateSend denominate for %d rounds, success\n", i);
             return SendDenominate(vecTxPSInRet, vecTxOutRet, connman);
@@ -1002,7 +1002,7 @@ bool CPrivateSendClient::SubmitDenominate(CConnman& connman)
     }
 
     // We failed? That's strange but let's just make final attempt and try to mix everything
-    if(PrepareDenominate(0, nPrivateSendRounds, strError, vecTxPSInRet, vecTxOutRet)) {
+    if(PrepareDenominate(0, nPrivateSendRounds + (bool)nLiquidityProvider, strError, vecTxPSInRet, vecTxOutRet)) {
         LogPrintf("CPrivateSendClient::SubmitDenominate -- Running PrivateSend denominate for all rounds, success\n");
         return SendDenominate(vecTxPSInRet, vecTxOutRet, connman);
     }

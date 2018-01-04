@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2009-2017 Satoshi Nakamoto
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,7 +18,7 @@
 
 //! These need to be macros, as clientversion.cpp's and dynamic*-res.rc's voodoo requires it
 #define CLIENT_VERSION_MAJOR 2
-#define CLIENT_VERSION_MINOR 1
+#define CLIENT_VERSION_MINOR 2
 #define CLIENT_VERSION_REVISION 0
 #define CLIENT_VERSION_BUILD 0
 
