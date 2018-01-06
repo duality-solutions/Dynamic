@@ -35,6 +35,7 @@
 * Bump Version and Copyright Year
 * Update Proto Version
 * Update secp256k1
+* Fix fixed seeds
 
 
 **Dynamic v2.1.0.0**
