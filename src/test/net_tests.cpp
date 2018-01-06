@@ -3,24 +3,27 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "addrman.h"
 #include "test/test_dynamic.h"
-#include "test/test_random.h"
 #include <string>
 #include <boost/test/unit_test.hpp>
 #include "hash.h"
 #include "serialize.h"
 #include "streams.h"
 #include "net.h"
+#include "netbase.h"
 #include "chainparams.h"
+
+using namespace std;
 
 class CAddrManSerializationMock : public CAddrMan
 {
 public:
     virtual void Serialize(CDataStream& s, int nType, int nVersionDummy) const = 0;
+
     //! Ensure that bucket placement is always the same for testing purposes.
     void MakeDeterministic()
     {
         nKey.SetNull();
-        insecure_rand = FastRandomContext(true);
+        seed_insecure_rand(true);
     }
 };
 
@@ -49,8 +52,12 @@ public:
         int nUBuckets = ADDRMAN_NEW_BUCKET_COUNT ^ (1 << 30);
         s << nUBuckets;
 
-        CAddress addr = CAddress(CService("252.1.1.1", 7777), NODE_NONE);
-        CAddrInfo info = CAddrInfo(addr, CNetAddr("252.2.2.2"));
+        CService serv;
+        Lookup("252.1.1.1", serv, 7777, false);
+        CAddress addr = CAddress(serv, NODE_NONE);
+        CNetAddr resolved;
+        LookupHost("252.2.2.2", resolved, false);
+        CAddrInfo info = CAddrInfo(addr, resolved);
         s << info;
     }
 };
@@ -61,7 +68,7 @@ CDataStream AddrmanToStream(CAddrManSerializationMock& addrman)
     ssPeersIn << FLATDATA(Params().MessageStart());
     ssPeersIn << addrman;
     std::string str = ssPeersIn.str();
-    std::vector<unsigned char> vchData(str.begin(), str.end());
+    vector<unsigned char> vchData(str.begin(), str.end());
     return CDataStream(vchData, SER_DISK, CLIENT_VERSION);
 }
 
@@ -72,14 +79,17 @@ BOOST_AUTO_TEST_CASE(caddrdb_read)
     CAddrManUncorrupted addrmanUncorrupted;
     addrmanUncorrupted.MakeDeterministic();
 
-    CService addr1 = CService("250.7.1.1", 8333);
-    CService addr2 = CService("250.7.2.2", 9999);
-    CService addr3 = CService("250.7.3.3", 9999);
+    CService addr1, addr2, addr3;
+    Lookup("250.7.1.1", addr1, 8333, false);
+    Lookup("250.7.2.2", addr2, 9999, false);
+    Lookup("250.7.3.3", addr3, 9999, false);
 
     // Add three addresses to new table.
-    addrmanUncorrupted.Add(CAddress(addr1, NODE_NONE), CService("252.5.1.1", 8333));
-    addrmanUncorrupted.Add(CAddress(addr2, NODE_NONE), CService("252.5.1.1", 8333));
-    addrmanUncorrupted.Add(CAddress(addr3, NODE_NONE), CService("252.5.1.1", 8333));
+    CService source;
+    Lookup("252.5.1.1", source, 8333, false);
+    addrmanUncorrupted.Add(CAddress(addr1, NODE_NONE), source);
+    addrmanUncorrupted.Add(CAddress(addr2, NODE_NONE), source);
+    addrmanUncorrupted.Add(CAddress(addr3, NODE_NONE), source);
 
     // Test that the de-serialization does not throw an exception.
     CDataStream ssPeers1 = AddrmanToStream(addrmanUncorrupted);
@@ -126,7 +136,7 @@ BOOST_AUTO_TEST_CASE(caddrdb_read_corrupted)
     } catch (const std::exception& e) {
         exceptionThrown = true;
     }
-    // Even through de-serialization failed adddrman is not left in a clean state.
+    // Even through de-serialization failed addrman is not left in a clean state.
     BOOST_CHECK(addrman1.size() == 1);
     BOOST_CHECK(exceptionThrown);
 
