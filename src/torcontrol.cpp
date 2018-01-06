@@ -10,6 +10,7 @@
 #include "crypto/hmac_sha256.h"
 
 #include "net.h"
+#include "netbase.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
@@ -430,10 +431,10 @@ TorController::~TorController()
     }
 }
 
-void TorController::add_onion_cb(TorControlConnection& _conn, const TorControlReply& reply)
+void TorController::add_onion_cb(TorControlConnection& conn, const TorControlReply& reply)
 {
     if (reply.code == 250) {
-        LogPrint("tor", "tor: ADD_ONION succesful\n");
+        LogPrint("tor", "tor: ADD_ONION successful\n");
         BOOST_FOREACH(const std::string &s, reply.lines) {
             std::map<std::string,std::string> m = ParseTorReplyMapping(s);
             std::map<std::string,std::string>::iterator i;
@@ -442,8 +443,7 @@ void TorController::add_onion_cb(TorControlConnection& _conn, const TorControlRe
             if ((i = m.find("PrivateKey")) != m.end())
                 private_key = i->second;
         }
-
-        service = CService(service_id+".onion", GetListenPort());
+        service = LookupNumeric(std::string(service_id+".onion").c_str(), GetListenPort());
         LogPrintf("tor: Got service ID %s, advertising service %s\n", service_id, service.ToString());
         if (WriteBinaryFile(GetPrivateKeyFile(), private_key)) {
             LogPrint("tor", "tor: Cached service private key to %s\n", GetPrivateKeyFile());
@@ -459,15 +459,16 @@ void TorController::add_onion_cb(TorControlConnection& _conn, const TorControlRe
     }
 }
 
-void TorController::auth_cb(TorControlConnection& _conn, const TorControlReply& reply)
+void TorController::auth_cb(TorControlConnection& conn, const TorControlReply& reply)
 {
     if (reply.code == 250) {
-        LogPrint("tor", "tor: Authentication succesful\n");
+        LogPrint("tor", "tor: Authentication successful\n");
 
         // Now that we know Tor is running setup the proxy for onion addresses
         // if -onion isn't set to something else.
         if (GetArg("-onion", "") == "") {
-            proxyType addrOnion = proxyType(CService("127.0.0.1", 9050), true);
+            CService resolved(LookupNumeric("127.0.0.1", 9050));
+            proxyType addrOnion = proxyType(resolved, true);
             SetProxy(NET_TOR, addrOnion);
             SetLimited(NET_TOR, false);
         }
@@ -478,7 +479,7 @@ void TorController::auth_cb(TorControlConnection& _conn, const TorControlReply& 
         // Request hidden service, redirect port.
         // Note that the 'virtual' port doesn't have to be the same as our internal port, but this is just a convenient
         // choice.  TODO; refactor the shutdown sequence some day.
-        _conn.Command(strprintf("ADD_ONION %s Port=%i,127.0.0.1:%i", private_key, GetListenPort(), GetListenPort()),
+        conn.Command(strprintf("ADD_ONION %s Port=%i,127.0.0.1:%i", private_key, GetListenPort(), GetListenPort()),
             boost::bind(&TorController::add_onion_cb, this, _1, _2));
     } else {
         LogPrintf("tor: Authentication failed\n");

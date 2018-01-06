@@ -202,6 +202,15 @@ CCoinsViewDB *pcoinsdbview = NULL;
 CCoinsViewCache *pcoinsTip = NULL;
 CBlockTreeDB *pblocktree = NULL;
 
+enum FlushStateMode {
+    FLUSH_STATE_NONE,
+    FLUSH_STATE_IF_NEEDED,
+    FLUSH_STATE_PERIODIC,
+    FLUSH_STATE_ALWAYS
+};
+
+// See definition for documentation
+bool static FlushStateToDisk(CValidationState &state, FlushStateMode mode);
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 {
@@ -571,37 +580,8 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
-static CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowFree)
-{
-    {
-        LOCK(mempool.cs);
-        uint256 hash = tx.GetHash();
-        double dPriorityDelta = 0;
-        CAmount nFeeDelta = 0;
-        mempool.ApplyDeltas(hash, dPriorityDelta, nFeeDelta);
-        if (dPriorityDelta > 0 || nFeeDelta > 0)
-            return 0;
-    }
-
-    CAmount nMinFee = ::minRelayTxFee.GetFee(nBytes);
-
-    if (fAllowFree)
-    {
-        // There is a free transaction area in blocks created by most miners,
-        // * If we are relaying we allow transactions up to DEFAULT_BLOCK_PRIORITY_SIZE - 1000
-        //   to be considered to fall into this category. We don't want to encourage sending
-        //   multiple transactions instead of one big transaction to avoid fees.
-        if (nBytes < (DEFAULT_BLOCK_PRIORITY_SIZE - 1000))
-            nMinFee = 0;
-    }
-
-    if (!MoneyRange(nMinFee))
-        nMinFee = MAX_MONEY;
-    return nMinFee;
-}
-
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
-                              bool* pfMissingInputs, CFeeRate* txFeeRate, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
+                              bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
 {
     AssertLockHeld(cs_main);
@@ -818,16 +798,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
         CTxMemPoolEntry entry(tx, nFees, GetTime(), dPriority, chainActive.Height(), pool.HasNoInputsOf(tx), inChainInputValue, fSpendsCoinbase, nSigOps, lp);
         unsigned int nSize = entry.GetTxSize();
-
-        if (txFeeRate) {
-            *txFeeRate = CFeeRate(nFees, nSize);
-        }
-
-        CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
-        if ((fLimitFree && nFees < txMinFee))
-            return state.DoS(0, error("AcceptToMemoryPool : not enough fees %s, %d < %d",
-                                      hash.ToString(), nFees, txMinFee),
-                             REJECT_INSUFFICIENTFEE, "insufficient fee");
 
         // Check that the transaction doesn't have an excessive number of
         // sigops, making it impossible to mine. Since the coinbase transaction
@@ -1090,30 +1060,32 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 }
 
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, CFeeRate* txFeeRate, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+                        bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
     std::vector<COutPoint> coins_to_uncache;
-    bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, txFeeRate, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
+    bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
     bool fluidTimestampCheck = true;
     
     if (!fluid.ProvisionalCheckTransaction(tx))
-		return false;
+        return false;
 
-    BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey)) {
+    BOOST_FOREACH(const CTxOut& txout, tx.vout) {   
+        if (IsTransactionFluid(txout.scriptPubKey)) {
             std::string strErrorMessage;
             if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, GetTime(), strErrorMessage)) {
                 fluidTimestampCheck = false;
             }
         }
-	}
-
-    if (!res || fDryRun || !fluidTimestampCheck) {
+    }
+    
+    if (!res || fDryRun) {
         if(!res) LogPrint("mempool", "%s: %s %s\n", __func__, tx.GetHash().ToString(), state.GetRejectReason());
         BOOST_FOREACH(const COutPoint& hashTx, coins_to_uncache)
             pcoinsTip->Uncache(hashTx);
     }
-
+    // After we've (potentially) uncached entries, ensure our coins cache is still within its size limits
+    CValidationState stateDummy;
+    FlushStateToDisk(stateDummy, FLUSH_STATE_PERIODIC);
     return res;
 }
 
@@ -1173,8 +1145,10 @@ bool GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::P
 
     LOCK(cs_main);
 
-    if (mempool.lookup(hash, txOut))
+    std::shared_ptr<const CTransaction> ptx = mempool.get(hash);
+    if (ptx)
     {
+        txOut = *ptx;
         return true;
     }
 
@@ -1421,7 +1395,7 @@ void static InvalidBlockFound(CBlockIndex *pindex, const CValidationState &state
     }
 }
 
-void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCache &inputs, CTxUndo &txundo, int nHeight)
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txundo, int nHeight)
 {
     // mark inputs spent
     if (!tx.IsCoinBase()) {
@@ -1436,10 +1410,10 @@ void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCach
     AddCoins(inputs, tx, nHeight);
 }
 
-void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCache &inputs, int nHeight)
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight)
 {
     CTxUndo txundo;
-    UpdateCoins(tx, state, inputs, txundo, nHeight);
+    UpdateCoins(tx, inputs, txundo, nHeight);
 }
 
 bool CScriptCheck::operator()() {
@@ -2169,7 +2143,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (i > 0) {
             blockundo.vtxundo.push_back(CTxUndo());
         }
-        UpdateCoins(tx, state, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight);
+        UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight);
 
         vPos.push_back(std::make_pair(tx.GetHash(), pos));
         pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
@@ -2341,21 +2315,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     return true;
 }
 
-enum FlushStateMode {
-    FLUSH_STATE_NONE,
-    FLUSH_STATE_IF_NEEDED,
-    FLUSH_STATE_PERIODIC,
-    FLUSH_STATE_ALWAYS
-};
-
 /**
  * Update the on-disk chain state.
  * The caches and indexes are flushed depending on the mode we're called with
  * if they're too large, if it's been a while since the last write,
  * or always and in all cases if we're in prune mode and are deleting files.
  */
-bool static FlushStateToDisk(CValidationState &state, FlushStateMode mode) 
-{
+bool static FlushStateToDisk(CValidationState &state, FlushStateMode mode) {
     int64_t nMempoolUsage = mempool.DynamicMemoryUsage();
     const CChainParams& chainparams = Params();
     LOCK2(cs_main, cs_LastBlockFile);
@@ -2555,7 +2521,7 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
         // ignore validation errors in resurrected transactions
         std::list<CTransaction> removed;
         CValidationState stateDummy;
-        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, NULL, true)) {
+        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
             mempool.removeRecursive(tx, removed);
         } else if (mempool.exists(tx.GetHash())) {
             vHashUpdate.push_back(tx.GetHash());

@@ -129,9 +129,10 @@ DYNAMIC_CORE_H = \
   messagesigner.h \
   miner.h \
   net.h \
+  net_processing.h \
+  netaddress.h \
   netbase.h \
   netfulfilledman.h \
-  net_processing.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -352,6 +353,7 @@ libdynamic_common_a_SOURCES = \
   hdchain.cpp \
   key.cpp \
   keystore.cpp \
+  netaddress.cpp \
   netbase.cpp \
   primitives/block.cpp \
   primitives/transaction.cpp \

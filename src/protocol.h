@@ -12,7 +12,7 @@
 #ifndef DYNAMIC_PROTOCOL_H
 #define DYNAMIC_PROTOCOL_H
 
-#include "netbase.h"
+#include "netaddress.h"
 #include "serialize.h"
 #include "uint256.h"
 #include "version.h"

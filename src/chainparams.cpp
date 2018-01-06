@@ -200,6 +200,7 @@ public:
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = false;
+        fAllowMultipleAddressesFromGroup = false;
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
@@ -309,6 +310,7 @@ public:
         fRequireStandard = false;
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = true;
+        fAllowMultipleAddressesFromGroup = false;
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
@@ -400,6 +402,7 @@ public:
         fRequireStandard = false;
         fMineBlocksOnDemand = true;
         fTestnetToBeDeprecatedFieldRPC = false;
+        fAllowMultipleAddressesFromGroup = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
         strSporkPubKey = "04e8118b469667861157f3b2b28056ae92581ce61ce2db80d04a701f5ec5391b751e6136bafdcca7b8d0b564a5afce213e8069bdd1d17131f61d116b73dbf7e2d6";

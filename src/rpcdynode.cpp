@@ -169,12 +169,14 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
         std::string strAddress = params[1].get_str();
 
-        CService addr = CService(strAddress);
+        CService addr;
+        if (!Lookup(strAddress.c_str(), addr, 0, false))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Incorrect dynode address %s", strAddress));
 
         // TODO: Pass CConnman instance somehow and don't use global variable.
         CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
         if(!pnode)
-            throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to Dynode %s", strAddress));
+            throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to dynode %s", strAddress));
 
         return "successfully connected";
     }

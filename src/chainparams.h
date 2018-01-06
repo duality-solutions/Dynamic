@@ -17,7 +17,8 @@
 
 struct CDNSSeedData {
     std::string name, host;
-    CDNSSeedData(const std::string &strName, const std::string &strHost) : name(strName), host(strHost) {}
+    bool supportsServiceBitsFiltering;
+    CDNSSeedData(const std::string &strName, const std::string &strHost, bool supportsServiceBitsFilteringIn = false) : name(strName), host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
 };
 
 struct SeedSpec6 {
@@ -73,6 +74,8 @@ public:
     bool MineBlocksOnDemand() const { return fMineBlocksOnDemand; }
     /** In the future use NetworkIDString() for RPC fields */
     bool TestnetToBeDeprecatedFieldRPC() const { return fTestnetToBeDeprecatedFieldRPC; }
+    /** Allow multiple addresses to be selected from the same network group (e.g. 192.168.x.x) */
+    bool AllowMultipleAddressesFromGroup() const { return fAllowMultipleAddressesFromGroup; }
     /** Return the BIP70 network string (main, test or regtest) */
     std::string NetworkIDString() const { return strNetworkID; }
     const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
@@ -105,6 +108,7 @@ protected:
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
     bool fTestnetToBeDeprecatedFieldRPC;
+    bool fAllowMultipleAddressesFromGroup;
     bool startNewChain;
     CCheckpointData checkpointData;
     int nPoolMaxTransactions;

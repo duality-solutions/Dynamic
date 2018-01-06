@@ -14,6 +14,7 @@
 #include "fluid.h"
 #include "init.h"
 #include "messagesigner.h"
+#include "netbase.h"
 #include "script/standard.h"
 #include "util.h"
 #include "validation.h"
@@ -364,15 +365,17 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
     if (!pwalletMain->GetDynodeOutpointAndKeys(outpoint, pubKeyCollateralAddressNew, keyCollateralAddressNew, strTxHash, strOutputIndex))
         return Log(strprintf("Could not allocate outpoint %s:%s for dynode %s", strTxHash, strOutputIndex, strService));
 
-    CService service = CService(strService);
-    int mainnetDefaultPort = DEFAULT_P2P_PORT;
+    CService service;
+    if (!Lookup(strService.c_str(), service, 0, false))
+        return Log(strprintf("Invalid address %s for dynode.", strService));
+    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
     if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if (service.GetPort() != mainnetDefaultPort)
-            return Log(strprintf("Invalid port %u for Dynode %s, only %d is supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
+            return Log(strprintf("Invalid port %u for dynode %s, only %d is supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
     } else if (service.GetPort() == mainnetDefaultPort)
-        return Log(strprintf("Invalid port %u for Dynode %s, %d is the only supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
+        return Log(strprintf("Invalid port %u for dynode %s, %d is the only supported on mainnet.", service.GetPort(), strService, mainnetDefaultPort));
 
-    return Create(outpoint, CService(strService), keyCollateralAddressNew, pubKeyCollateralAddressNew, keyDynodeNew, pubKeyDynodeNew, strErrorRet, dnbRet);
+    return Create(outpoint, service, keyCollateralAddressNew, pubKeyCollateralAddressNew, keyDynodeNew, pubKeyDynodeNew, strErrorRet, dnbRet);
 }
 
 bool CDynodeBroadcast::Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet)
