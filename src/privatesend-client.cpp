@@ -863,23 +863,19 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         vecDynodesUsed.push_back(psq.vin.prevout);
 
-        CNode* pnodeFound = NULL;
-        bool fDisconnect = false;
-        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&pnodeFound, &fDisconnect](CNode* pnode) {
-            pnodeFound = pnode;
-            if(pnodeFound->fDisconnect) {
-                fDisconnect = true;
-            } else {
-                pnodeFound->AddRef();
-            }
+        bool fSkip = false;
+        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&fSkip](CNode* pnode) {
+            fSkip = pnode->fDisconnect || pnode->fDynode;
             return true;
         });
-        if (fDisconnect)
+        if (fSkip) {
+            LogPrintf("CPrivateSendClient::JoinExistingQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
             continue;
+        }
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to dynode from queue, addr=%s\n", infoDn.addr.ToString());
         // connect to Dynode and submit the queue request
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
+        CNode* pnode = connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
         if(pnode) {
             infoMixingDynode = infoDn;
             nSessionDenom = psq.nDenom;
@@ -890,9 +886,6 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
             strAutoDenomResult = _("Mixing in progress...");
             SetState(POOL_STATE_QUEUE);
             nTimeLastSuccessfulStep = GetTimeMillis();
-            if(pnodeFound) {
-                pnodeFound->Release();
-            }
             return true;
         } else {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- can't connect, addr=%s\n", infoDn.addr.ToString());
@@ -937,24 +930,19 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
             continue;
         }
 
-        CNode* pnodeFound = NULL;
-        bool fDisconnect = false;
-        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&pnodeFound, &fDisconnect](CNode* pnode) {
-            pnodeFound = pnode;
-            if(pnodeFound->fDisconnect) {
-                fDisconnect = true;
-            } else {
-                pnodeFound->AddRef();
-            }
+        bool fSkip = false;
+        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&fSkip](CNode* pnode) {
+            fSkip = pnode->fDisconnect || pnode->fDynode;
             return true;
         });
-        if (fDisconnect) {
+        if (fSkip) {
+            LogPrintf("CPrivateSendClient::StartNewQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
             nTries++;
             continue;
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Dynode %s\n", nTries, infoDn.addr.ToString());
-        CNode* pnode = (pnodeFound && pnodeFound->fDynode) ? pnodeFound : connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
+        CNode* pnode = connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
         if(pnode) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoDn.addr.ToString());
             infoMixingDynode = infoDn;
@@ -972,9 +960,6 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
             strAutoDenomResult = _("Mixing in progress...");
             SetState(POOL_STATE_QUEUE);
             nTimeLastSuccessfulStep = GetTimeMillis();
-            if(pnodeFound) {
-                pnodeFound->Release();
-            }
             return true;
         } else {
             LogPrintf("CPrivateSendClient::StartNewQueue -- can't connect, addr=%s\n", infoDn.addr.ToString());
