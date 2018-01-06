@@ -8,6 +8,10 @@
 * Fix Boost 1.66 Compatibility
 * Net Overhaul and BTC Inlining
 * Bump Versions/Protocol
+* Update Tests
+* util: Add ParseUInt32 and ParseUInt64
+* [RPC] getmempoolancestors/getmempooldescendants
+* [RPC] setnetworkactive
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**

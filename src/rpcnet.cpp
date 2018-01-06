@@ -577,6 +577,24 @@ UniValue clearbanned(const UniValue& params, bool fHelp)
     return NullUniValue;
 }
 
+UniValue setnetworkactive(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1) {
+        throw std::runtime_error(
+            "setnetworkactive true|false\n"
+            "Disable/enable all p2p network activity."
+        );
+    }
+
+    if (!g_connman) {
+        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+    }
+
+    g_connman->SetNetworkActive(params[0].get_bool());
+
+    return g_connman->GetNetworkActive();
+}
+
 UniValue ntptime(const UniValue& params, bool fHelp)       
 {
     if (fHelp || params.size() > 1)
@@ -618,6 +636,7 @@ static const CRPCCommand commands[] =
     { "network",            "setban",                 &setban,                 true  },
     { "network",            "listbanned",             &listbanned,             true  },
     { "network",            "clearbanned",            &clearbanned,            true  },
+    { "network",            "setnetworkactive",       &setnetworkactive,       true, },
 };
 
 void RegisterNetRPCCommands(CRPCTable &tableRPC)
