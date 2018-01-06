@@ -152,7 +152,7 @@ public:
     // fConnectToDynode should be 'true' only if you want this node to allow to connect to itself
     // and/or you want it to be disconnected on CDynodeMan::ProcessDynodeConnections()
     // Unfortunately, can't make this method private like in Bitcoin,
-    // because it's used in many Dash-specific places (dynode, privatesend).
+    // because it's used in many Dynamic-specific places (dynode, privatesend).
     CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fCountFailure = false, bool fConnectToDynode = false);
 
     struct CFullyConnectedOnly {
