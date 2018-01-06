@@ -12,6 +12,7 @@
 * util: Add ParseUInt32 and ParseUInt64
 * [RPC] getmempoolancestors/getmempooldescendants
 * [RPC] setnetworkactive
+* httpserver: drop boost
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
