@@ -1,6 +1,15 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.3.0.0**
+
+* Skip existing Dynodes connections on mixing
+* Protect CKeyHolderStorage via mutex
+* Fix Boost 1.66 Compatibility
+* Net Overhaul and BTC Inlining
+* Bump Versions/Protocol
+* Update CHANGELOG
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
