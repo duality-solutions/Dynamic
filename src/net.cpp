@@ -344,14 +344,14 @@ bool CConnman::CheckIncomingNonce(uint64_t nonce)
 CNode* CConnman::ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool fConnectToDynode)
 {
     // TODO: This is different from what we have in Bitcoin which only calls ConnectNode from OpenNetworkConnection
-    //       If we ever switch to using OpenNetworkConnection for MNs as well, this can be removed
+    //       If we ever switch to using OpenNetworkConnection for DNs as well, this can be removed
     if (!fNetworkActive) {
         return NULL;
     }
 
     if (pszDest == NULL) {
         // we clean dynode connections in CDynodeMan::ProcessDynodeConnections()
-        // so should be safe to skip this and connect to local Hot MN on CActiveDynode::ManageState()
+        // so should be safe to skip this and connect to local Hot DN on CActiveDynode::ManageState()
         if (IsLocal(addrConnect) && !fConnectToDynode)
             return NULL;
 

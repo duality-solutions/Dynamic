@@ -12,8 +12,6 @@
 #include "netbase.h"
 #include "chainparams.h"
 
-using namespace std;
-
 class CAddrManSerializationMock : public CAddrMan
 {
 public:
@@ -68,7 +66,7 @@ CDataStream AddrmanToStream(CAddrManSerializationMock& addrman)
     ssPeersIn << FLATDATA(Params().MessageStart());
     ssPeersIn << addrman;
     std::string str = ssPeersIn.str();
-    vector<unsigned char> vchData(str.begin(), str.end());
+    std::vector<unsigned char> vchData(str.begin(), str.end());
     return CDataStream(vchData, SER_DISK, CLIENT_VERSION);
 }
 
@@ -81,8 +79,8 @@ BOOST_AUTO_TEST_CASE(caddrdb_read)
 
     CService addr1, addr2, addr3;
     Lookup("250.7.1.1", addr1, 8333, false);
-    Lookup("250.7.2.2", addr2, 9999, false);
-    Lookup("250.7.3.3", addr3, 9999, false);
+    Lookup("250.7.2.2", addr2, 33300, false);
+    Lookup("250.7.3.3", addr3, 33300, false);
 
     // Add three addresses to new table.
     CService source;
