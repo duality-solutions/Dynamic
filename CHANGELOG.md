@@ -13,6 +13,7 @@
 * [RPC] getmempoolancestors/getmempooldescendants
 * [RPC] setnetworkactive
 * httpserver: drop boost
+* Deprecate GetWork()
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
@@ -36,7 +37,7 @@
 * Update Proto Version
 * Update secp256k1
 * Fix fixed seeds
-
+* Update CHANGELOG
 
 **Dynamic v2.1.0.0**
 
@@ -121,7 +122,7 @@
 * increase connection limits for outbound
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
-
+* Update CHANGELOG
 
 **Dynamic v2.0.0.0**
 
@@ -392,7 +393,7 @@
 * Common argument defaults for NODE_BLOOM stuff and -wallet
 * Move privatesend to rpcwallet.cpp
 * Optimize CheckOutpoint
-
+* Update CHANGELOG
 
 **Dynamic v1.4.0.0**
 
@@ -454,7 +455,7 @@
 * Reduce Keypool to 1000
 * Optimise Reindex
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.2**
 
@@ -466,19 +467,19 @@
 * Reduce nDefaultDbCache to 512MiB
 * Bump Proto and ONLY connect to 1.3.0.1 (Proto 70200)
 * Bump Governance/Core Proto/Versions
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.0**
 
 * c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
-
+* Update CHANGELOG
 
 **Dynamic v1.2.0.0**
 
@@ -521,7 +522,7 @@
 * Watchdog check removed until Sentinel is updated/compatible fully
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
-
+* Update CHANGELOG
 
 **Dynamic v1.1.0.0**
 
@@ -542,6 +543,6 @@
 * [RPC] remove the option of having multiple timer interfaces		
 * Fix memory leak in httprpc.cpp		
 * Make KEY_SIZE a compile-time constant
+* Update CHANGELOG
 
-** Initial Fork from Dash 
-
+** Initial Fork from Dash
