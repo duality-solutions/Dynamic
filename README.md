@@ -26,7 +26,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
-* Dynode Min Confirmation: 10 Blocks
+* Dynode Min Confirmation: 17 Blocks
 * Dynode Reward: Controlled via Fluid Protocol
 * Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
