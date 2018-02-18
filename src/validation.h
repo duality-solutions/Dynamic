@@ -39,6 +39,7 @@ class CBloomFilter;
 class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
+class Coin;
 class CCoinsViewDB;
 class CInv;
 class CConnman;
@@ -158,6 +159,8 @@ static const CAmount PHASE_2_DYNODE_PAYMENT = COIN * 1.618;
 static const CAmount INITIAL_SUPERBLOCK_PAYMENT = 11500000 * COIN;
 
 static const bool DEFAULT_PEERBLOOMFILTERS = true;
+
+static const bool DEFAULT_INDEXPORT = 0;
 
 struct BlockHasher
 {

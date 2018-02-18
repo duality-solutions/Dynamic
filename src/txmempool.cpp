@@ -944,6 +944,15 @@ void CTxMemPool::queryHashes(std::vector<uint256>& vtxid)
     }
 }
 
+bool CTxMemPool::lookup(uint256 hash, CTransaction& result) const
+{
+    LOCK(cs);
+    indexed_transaction_set::const_iterator i = mapTx.find(hash);
+    if (i == mapTx.end()) return false;
+    result = i->GetTx();
+    return true;
+}
+
 std::vector<TxMempoolInfo> CTxMemPool::infoAll() const
 {
     LOCK(cs);

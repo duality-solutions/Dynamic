@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue
+DIST_SUBDIRS = secp256k1 univalue mongodb
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -8,7 +8,7 @@ EXTRA_LIBRARIES =
 DYNAMIC_CONFIG_INCLUDES=-I$(builddir)/config
 DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
-DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
+DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include -I$(srcdir)/mongodb/src/mongoc -I$(srcdir)/mongodb/src/libbson/src/bson
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
 
 LIBDYNAMIC_SERVER=libdynamic_server.a
@@ -20,11 +20,19 @@ LIBDYNAMIC_CRYPTO=crypto/libdynamic_crypto.a
 LIBDYNAMICQT=qt/libdynamicqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
+LIBMONGODB=mongodb/libmongoc.la
+LIBBSON=mongodb/src/libbson/libbson-1.0.la
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 $(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+$(LIBBSON):
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+$(LIBMONGODB):
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
@@ -70,14 +78,18 @@ DYNAMIC_CORE_H = \
   addressindex.h \
   addrman.h \
   alert.h \
+  alias.h \
   amount.h \
   arith_uint256.h \
+  asset.h \
+  assetallocation.h \
   base58.h \
   bip39_english.h \
   bip39.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
+  cert.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \
@@ -104,6 +116,8 @@ DYNAMIC_CORE_H = \
   dynode-sync.h \
   dynodeman.h \
   dynodeconfig.h \
+  escrow.h \
+  feedback.h \
   flat-database.h \
   fluid.h \
   governance.h \
@@ -113,6 +127,7 @@ DYNAMIC_CORE_H = \
   governance-validators.h \
   governance-vote.h \
   governance-votedb.h \
+  graph.h \
   hash.h \
   hdchain.h \
   httprpc.h \
@@ -135,6 +150,7 @@ DYNAMIC_CORE_H = \
   netfulfilledman.h \
   noui.h \
   ntp.h \
+  offer.h \
   operations.h \
   policy/fees.h \
   policy/policy.h \
@@ -151,6 +167,7 @@ DYNAMIC_CORE_H = \
   protocol.h \
   pubkey.h \
   random.h \
+  ranges.h \
   reverselock.h \
   rpcclient.h \
   rpcprotocol.h \
@@ -215,7 +232,11 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  alias.cpp \
+  asset.cpp \
+  assetallocation.cpp \
   bloom.cpp \
+  cert.cpp \
   chain.cpp \
   checkpoints.cpp \
   dbwrapper.cpp \
@@ -224,6 +245,7 @@ libdynamic_server_a_SOURCES = \
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
+  escrow.cpp \
   fluid.cpp \
   governance.cpp \
   governance-classes.cpp \
@@ -231,6 +253,7 @@ libdynamic_server_a_SOURCES = \
   governance-validators.cpp \
   governance-vote.cpp \
   governance-votedb.cpp \
+  graph.cpp \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
@@ -243,6 +266,7 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
+  offer.cpp \
   operations.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
@@ -250,6 +274,7 @@ libdynamic_server_a_SOURCES = \
   privatesend.cpp \
   privatesend-server.cpp \
   psnotificationinterface.cpp \
+  ranges.cpp \
   rest.cpp \
   rpcblockchain.cpp \
   rpcdynode.cpp \
@@ -416,15 +441,17 @@ dynamicd_SOURCES += dynamicd-res.rc
 endif
 
 dynamicd_LDADD = \
-  $(LIBDYNAMIC_SERVER) \
-  $(LIBDYNAMIC_COMMON) \
-  $(LIBUNIVALUE) \
-  $(LIBDYNAMIC_UTIL) \
-  $(LIBDYNAMIC_CRYPTO) \
-  $(LIBLEVELDB) \
-  $(LIBLEVELDB_SSE42) \
-  $(LIBMEMENV) \
-  $(LIBSECP256K1)
+	$(LIBDYNAMIC_SERVER) \
+	$(LIBDYNAMIC_COMMON) \
+	$(LIBUNIVALUE) \
+	$(LIBDYNAMIC_UTIL) \
+	$(LIBDYNAMIC_CRYPTO) \
+	$(LIBLEVELDB) \
+	$(LIBLEVELDB_SSE42) \
+	$(LIBMEMENV) \
+	$(LIBSECP256K1) \
+	$(LIBBSON) \
+	$(LIBMONGODB)
 
 if ENABLE_ZMQ
 dynamicd_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)

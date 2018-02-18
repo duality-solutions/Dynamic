@@ -46,6 +46,16 @@ class CChainParams
 {
 public:
     enum Base58Type {
+        PUBKEY_ADDRESS_DYN,
+        PUBKEY_ADDRESS_SEQ,
+        PUBKEY_ADDRESS_BTC,
+        SCRIPT_ADDRESS_DYN,
+        SCRIPT_ADDRESS_SEQ,
+        SCRIPT_ADDRESS_BTC,
+        SECRET_KEY_DYN,
+        SECRET_KEY_SEQ,
+        SECRET_KEY_BTC,
+
         PUBKEY_ADDRESS,
         SCRIPT_ADDRESS,
         SECRET_KEY,     // BIP16
@@ -53,6 +63,12 @@ public:
         EXT_SECRET_KEY, // BIP32
 
         MAX_BASE58_TYPES
+    };
+    enum AddressType {
+        ADDRESS_DYN,
+        ADDRESS_SEQ,
+        ADDRESS_BTC,
+        MAX_ADDRESS_TYPES
     };
 
     const Consensus::Params& GetConsensus() const { return consensus; }

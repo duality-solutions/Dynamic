@@ -57,6 +57,47 @@ enum opcodetype
 {
     // push value
     OP_0 = 0x00,
+    // DYNAMIC aliases
+    OP_ALIAS_ACTIVATE = 0x01,
+    OP_ALIAS_UPDATE = 0x02,
+
+    // distributed exchange
+    OP_OFFER_ACTIVATE = 0x01,
+    OP_OFFER_UPDATE = 0x02,
+
+    // distributed licensing system
+    OP_CERT_ACTIVATE = 0x01,
+    OP_CERT_UPDATE = 0x02,
+    OP_CERT_TRANSFER = 0x03,
+
+    // distributed escrow system
+    OP_ESCROW_ACTIVATE = 0x01,
+    OP_ESCROW_RELEASE = 0x02,
+    OP_ESCROW_REFUND = 0x03,
+    OP_ESCROW_REFUND_COMPLETE = 0x04,
+    OP_ESCROW_RELEASE_COMPLETE = 0x05,
+    OP_ESCROW_BID = 0x06,
+    OP_ESCROW_ACKNOWLEDGE = 0x07,
+    OP_ESCROW_ADD_SHIPPING = 0x08,
+    OP_ESCROW_FEEDBACK = 0x09,
+
+    // distributed asset system
+    OP_ASSET_ACTIVATE = 0x01,
+    OP_ASSET_MINT = 0x02,
+    OP_ASSET_UPDATE = 0x03,
+    OP_ASSET_TRANSFER = 0x04,
+    OP_ASSET_SEND = 0x05,
+
+    OP_ASSET_ALLOCATION_SEND = 0x01,
+
+    // syscoin extended reserved 
+    OP_DYNAMIC_ALIAS = 0x01,
+    OP_DYNAMIC_CERT = 0x02,
+    OP_DYNAMIC_ESCROW = 0x03,
+    OP_DYNAMIC_OFFER = 0x04,
+    OP_DYNAMIC_ASSET = 0x05,
+    OP_DYNAMIC_ASSET_ALLOCATION = 0x06,
+
     OP_FALSE = OP_0,
     OP_PUSHDATA1 = 0x4c,
     OP_PUSHDATA2 = 0x4d,

@@ -105,14 +105,24 @@ public:
  */
 class CDynamicAddress : public CBase58Data {
 public:
-    bool Set(const CKeyID &id);
-    bool Set(const CScriptID &id);
-    bool Set(const CTxDestination &dest);
+    // SYSCOIN
+    bool isAlias;
+    std::string aliasName;
+    std::vector<unsigned char> vchPubKey;
+
+    //bool Set(const CKeyID &id);
+    //bool Set(const CScriptID &id);
+    //bool Set(const CTxDestination &dest);
+
+    bool Set(const CKeyID &id, CChainParams::AddressType sysVer = CChainParams::ADDRESS_DYN);
+    bool Set(const CScriptID &id, CChainParams::AddressType sysVer = CChainParams::ADDRESS_DYN);
+    bool Set(const CTxDestination &dest, CChainParams::AddressType sysVer = CChainParams::ADDRESS_DYN);
+
     bool IsValid() const;
     bool IsValid(const CChainParams &params) const;
 
     CDynamicAddress() {}
-    CDynamicAddress(const CTxDestination &dest) { Set(dest); }
+    CDynamicAddress(const CTxDestination &dest, CChainParams::AddressType sysVer = CChainParams::ADDRESS_DYN);
     CDynamicAddress(const std::string& strAddress) { SetString(strAddress); }
     CDynamicAddress(const char* pszAddress) { SetString(pszAddress); }
 

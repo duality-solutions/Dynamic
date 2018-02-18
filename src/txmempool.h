@@ -654,6 +654,8 @@ public:
         auto it = mapTx.find(outpoint.hash);
         return (it != mapTx.end() && outpoint.n < it->GetTx().vout.size());
     }
+    
+    bool lookup(uint256 hash, CTransaction& result) const;
 
     std::shared_ptr<const CTransaction> get(const uint256& hash) const;
     TxMempoolInfo info(const uint256& hash) const;

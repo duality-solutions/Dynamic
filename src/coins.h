@@ -31,27 +31,37 @@
 class Coin
 {
 public:
+    //TODO: (Amir) combine out and vout, remove out.
+
     //! unspent transaction output
     CTxOut out;
 
-    //! whether containing transaction was a coinbase
-    unsigned int fCoinBase : 1;
+    //! unspent transaction outputs; spent outputs are .IsNull(); spent outputs at the end of the array are dropped
+    std::vector<CTxOut> vout;
 
     //! at which height this containing transaction was included in the active block chain
-    uint32_t nHeight : 31;
+    uint32_t nHeight;
 
+    //! whether containing transaction was a coinbase
+    bool fCoinBase;
+
+    //! version of the CTransaction; accesses to this value should probably check for nHeight as well,
+    //! as new tx version will probably only be introduced at certain heights
+    int nVersion;
+
+    //! empty constructor
+    Coin() : vout(0), nHeight(0), fCoinBase(false), nVersion(0) { }
     //! construct a Coin from a CTxOut and height/coinbase information.
-    Coin(CTxOut&& outIn, int nHeightIn, bool fCoinBaseIn) : out(std::move(outIn)), fCoinBase(fCoinBaseIn), nHeight(nHeightIn) {}
-    Coin(const CTxOut& outIn, int nHeightIn, bool fCoinBaseIn) : out(outIn), fCoinBase(fCoinBaseIn),nHeight(nHeightIn) {}
+    //Coin(CTxOut&& outIn, uint32_t nHeightIn, bool fCoinBaseIn) : vout(std::move(outIn)), nHeight(nHeightIn), fCoinBase(fCoinBaseIn) {}
+    Coin(const CTxOut& outIn, uint32_t nHeightIn, bool fCoinBaseIn) : out(outIn), nHeight(nHeightIn), fCoinBase(fCoinBaseIn) {}
+
 
     void Clear() {
         out.SetNull();
         fCoinBase = false;
         nHeight = 0;
+        nVersion = 0;
     }
-
-    //! empty constructor
-    Coin() : fCoinBase(false), nHeight(0) { }
 
     bool IsCoinBase() const {
         return fCoinBase;
@@ -60,7 +70,7 @@ public:
     template<typename Stream>
     void Serialize(Stream &s, int nType, int nVersion) const {
         assert(!IsSpent());
-        uint32_t code = nHeight * 2 + fCoinBase;
+        uint32_t code = nHeight * 2 + (fCoinBase ? 1 : 0);
         ::Serialize(s, VARINT(code), nType, nVersion);
         ::Serialize(s, CTxOutCompressor(REF(out)), nType, nVersion);
     }
@@ -74,12 +84,39 @@ public:
         ::Unserialize(s, REF(CTxOutCompressor(out)), nType, nVersion);
     }
 
+    void swap(Coin &to) {
+        std::swap(to.fCoinBase, fCoinBase);
+        to.vout.swap(vout);
+        std::swap(to.nHeight, nHeight);
+        std::swap(to.nVersion, nVersion);
+    }
+
     bool IsSpent() const {
         return out.IsNull();
     }
 
+    //! check whether a particular output is still available
+    bool IsAvailable(unsigned int nPos) const {
+        return (nPos < vout.size() && !vout[nPos].IsNull());
+    }
+
     size_t DynamicMemoryUsage() const {
         return memusage::DynamicUsage(out.scriptPubKey);
+    }
+
+    //! check whether the entire Coin is spent
+    //! note that only !IsPruned() Coin can be serialized
+    bool IsPruned() const {
+        BOOST_FOREACH(const CTxOut &out, vout)
+            if (!out.IsNull())
+                return false;
+        return true;
+    }
+
+    bool IsNull() const {
+        if (out.IsNull() && fCoinBase == false && nHeight == 0 && nVersion == 0)
+            return true;
+        return false;
     }
 };
 
@@ -223,7 +260,6 @@ public:
      * the backing CCoinsView are made.
      */
     bool HaveCoinInCache(const COutPoint &outpoint) const;
-
     /**
      * Return a reference to Coin in the cache, or a pruned one if not found. This is
      * more efficient than GetCoin.
@@ -235,7 +271,6 @@ public:
      * calls to this cache.
       */
     const Coin& AccessCoin(const COutPoint &output) const;
-
     /**
      * Add a coin. Set potential_overwrite to true if a non-pruned version may
      * already exist.

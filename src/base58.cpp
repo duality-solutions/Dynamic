@@ -220,9 +220,10 @@ class CDynamicAddressVisitor : public boost::static_visitor<bool>
 {
 private:
     CDynamicAddress* addr;
-
+    CChainParams::AddressType nSysVer;
 public:
     CDynamicAddressVisitor(CDynamicAddress* addrIn) : addr(addrIn) {}
+    CDynamicAddressVisitor(CDynamicAddress* addrIn, CChainParams::AddressType nSysVer) : addr(addrIn), nSysVer(nSysVer) {}
 
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
@@ -231,6 +232,42 @@ public:
 
 } // anon namespace
 
+CDynamicAddress::CDynamicAddress(const CTxDestination &dest, CChainParams::AddressType sysVer) {
+    isAlias = false;
+    aliasName = "";
+    vchPubKey.clear();
+    Set(dest, sysVer);
+}
+
+// SYSCOIN support old sys
+bool CDynamicAddress::Set(const CKeyID& id, CChainParams::AddressType sysVer)
+{
+    if (sysVer == CChainParams::ADDRESS_DYN)
+        SetData(Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS_DYN), &id, 20);
+    else if (sysVer == CChainParams::ADDRESS_SEQ)
+        SetData(Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS_SEQ), &id, 20);
+    else if (sysVer == CChainParams::ADDRESS_BTC)
+        SetData(Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS_BTC), &id, 20);
+    return true;
+}
+
+bool CDynamicAddress::Set(const CScriptID& id, CChainParams::AddressType sysVer)
+{
+    if (sysVer == CChainParams::ADDRESS_DYN)
+        SetData(Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS_DYN), &id, 20);
+    else if (sysVer == CChainParams::ADDRESS_SEQ)
+        SetData(Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS_SEQ), &id, 20);
+    else if (sysVer == CChainParams::ADDRESS_BTC)
+        SetData(Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS_BTC), &id, 20);
+    return true;
+}
+// SYSCOIN support old sys
+bool CDynamicAddress::Set(const CTxDestination& dest, CChainParams::AddressType sysVer)
+{
+    return boost::apply_visitor(CDynamicAddressVisitor(this, sysVer), dest);
+}
+
+/*
 bool CDynamicAddress::Set(const CKeyID& id)
 {
     SetData(Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS), &id, 20);
@@ -247,7 +284,7 @@ bool CDynamicAddress::Set(const CTxDestination& dest)
 {
     return boost::apply_visitor(CDynamicAddressVisitor(this), dest);
 }
-
+*/
 bool CDynamicAddress::IsValid() const
 {
     return IsValid(Params());
