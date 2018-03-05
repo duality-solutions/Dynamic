@@ -1,4 +1,5 @@
 // Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Syscoin Core developers
 // Copyright (c) 2014-2018 The Dash Core Developers
 // Copyright (c) 2009-2018 The Bitcoin Developers
 // Copyright (c) 2009-2018 Satoshi Nakamoto
@@ -22,12 +23,42 @@
 #include "utilmoneystr.h"
 #include "wallet.h"
 #include "walletdb.h"
+// SYSCOIN
+#include "alias.h"
+#include "asset.h"
+#include "cert.h"
+#include "offer.h"
+#include "escrow.h"
+#include "assetallocation.h"
+#include "graph.h"
+#include "coincontrol.h"
 
 #include <univalue.h>
 
 #include <stdint.h>
 
 #include <boost/assign/list_of.hpp>
+
+// SYSCOIN
+extern bool DecodeAliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool DecodeOfferTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool DecodeCertTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool DecodeAssetTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool DecodeAssetAllocationTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool DecodeEscrowTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch);
+extern bool CheckAliasInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, bool fJustCheck, int nHeight, string &errorMessage, bool &bDestCheckFailed, bool dontaddtodb);
+extern bool CheckOfferInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<unsigned char> &vvchAlias, bool fJustCheck, int nHeight, sorted_vector<std::vector<unsigned char> > &revertedOffers, string &errorMessage, bool dontaddtodb);
+extern bool CheckCertInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<unsigned char> &vvchAlias, bool fJustCheck, int nHeight, sorted_vector<std::vector<unsigned char> > &revertedCerts, string &errorMessage, bool dontaddtodb);
+extern bool CheckEscrowInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<std::vector<unsigned char> > &vvchAliasArgs, bool fJustCheck, int nHeight, string &errorMessage, bool dontaddtodb);
+extern bool DecodeAliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
+extern bool CheckAssetInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<unsigned char> &vvchAlias, bool fJustCheck, int nHeight, sorted_vector<CAssetAllocationTuple> &revertedAssetAllocations, string &errorMessage, bool dontaddtodb);
+extern bool CheckAssetAllocationInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<unsigned char> &vvchAlias, bool fJustCheck, int nHeight, sorted_vector<CAssetAllocationTuple> &revertedAssetAllocations, string &errorMessage, bool dontaddtodb);
+extern int aliasunspent(const vector<unsigned char> &vchAlias, COutPoint& outPoint);
+extern std::string stringFromVch(const std::vector<unsigned char> &vch);
+extern std::vector<unsigned char> vchFromString(const std::string &str);
+extern unsigned int MAX_ALIAS_UPDATES_PER_BLOCK;
+extern bool IsSyscoinScript(const CScript& scriptPubKey, int &op, vector<vector<unsigned char> > &vvchArgs);
+extern int aliasselectpaymentcoins(const vector<unsigned char> &vchAlias, const CAmount &nAmount, vector<COutPoint>& outPoints, bool& bIsFunded, CAmount &nRequiredAmount, bool bSelectFeePlacement, bool bSelectAll, bool bNoAliasRecipient);
 
 int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
@@ -399,6 +430,268 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
     }
     if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of the wallet and coins were spent in the copy but not marked as spent here.");
+}
+
+// SYSCOIN: Send service transactions
+CAmount GetCoinControlInputTotal(const CCoinControl* coinControl)
+{
+    if (coinControl == nullptr)
+        return 0;
+    CCoinsViewCache view(pcoinsTip);
+    
+    CAmount nValueRet = 0;
+    std::vector<COutPoint> vInputs;
+    coinControl->ListSelected(vInputs);
+    for(const COutPoint& outpoint: vInputs)
+    {
+        const Coin& coin = view.AccessCoin(outpoint);
+        if (&coin == nullptr) //TODO (Amir): test this line code
+            continue;
+        // Clearly invalid input, fail
+        if (coin.vout.size() <= outpoint.n)
+            return false;
+        nValueRet += coin.vout[outpoint.n].nValue;
+    }
+    return nValueRet;
+}
+// SYSCOIN
+/*There are three modes of payments with aliases:
+
+Pay with alias balance (utxo's are stored in alias payment db)
+When to pay with this method:
+- Anything that pays money to someone (escrow, offer accept), or changing an alias address (alias transfer, multisig updates, alias renewal)
+- When alias fee placeholders run out
+- if fee placeholder was used to create up to 5 fee placeholders, create minimum of 1
+Pay with alias fee placeholders (utxo's that are stored in alias payment db but are only used as fees for allowing multiple updates to an alias per block)
+When to pay with this method:
+- When not paying with alias balance
+Pay with alias utxo (stored in the alias db and transaction db, used to prove that you own an alias)
+When to pay with this method:
+- every time
+
+1) pay with utxo, create up to 5 total new outputs
+2) If not escrow or alias transfer
+2a) Get fee placeholders, if transaction is is not funded save amount required and goto step 3.
+2b) transaction completely funded
+3) if alias balance is non zero
+3a) if fee placeholders was used, create outputs(1 minimum) up to 5 total and save new total amount summing all outputs
+3b) use total amount + required amount from 2a (if non zero) to find outputs in alias balance, if not enough balance throw error
+3c) transaction completely funded
+4) if transaction completely funded, try to sign and send to network*/
+void SendMoneySyscoin(const vector<unsigned char> &vchAlias, const vector<unsigned char> &vchWitness, const CRecipient &aliasRecipient, CRecipient &aliasFeePlaceholderRecipient, vector<CRecipient> &vecSend, CWalletTx& wtxNew, CCoinControl* coinControl, bool fUseInstantSend=false, bool transferAlias = false)
+{
+    int op;
+    vector<vector<unsigned char> > vvch;
+    vector<vector<unsigned char> > vvchAlias;
+    DecodeAliasScript(aliasRecipient.scriptPubKey, op, vvch);
+
+    bool bAliasRegistration = op == OP_ALIAS_ACTIVATE && vvch.size() == 1;
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    int nChangePosRet = -1;
+    // step 1
+    // if witness is specified attach witness input, don't worry about creating another output for the witness alias they can do a manual update later to create new outputs
+    if (!vchWitness.empty())
+    {
+        COutPoint aliasOutPointWitness;
+        unsigned int numResultsWitness = aliasunspent(vchWitness, aliasOutPointWitness);
+        if (numResultsWitness <= 1 || aliasOutPointWitness.IsNull())
+        {
+            throw runtime_error("SYSCOIN_RPC_ERROR ERRCODE: 9000 - " + _("This transaction requires a witness but not enough outputs found for witness alias: ") + stringFromVch(vchWitness));
+        }
+        coinControl->Select(aliasOutPointWitness);
+    }
+    COutPoint aliasOutPoint;
+    int numResults = 0;
+    // if alias inputs used, need to ensure new alias utxo's are created as prev ones need to be used for proof of ownership
+    if (!aliasRecipient.scriptPubKey.empty()) {
+        numResults = aliasunspent(vchAlias, aliasOutPoint) - 1;
+        if (numResults < 0)
+            numResults = 0;
+        if (numResults > 0 || bAliasRegistration)
+            numResults = MAX_ALIAS_UPDATES_PER_BLOCK - 1;
+        if (transferAlias)
+            numResults = 0;
+        // for the alias utxo (1 per transaction is used)
+        if (!aliasRecipient.scriptPubKey.empty())
+        {
+            for (unsigned int i = numResults; i < MAX_ALIAS_UPDATES_PER_BLOCK; i++)
+                vecSend.push_back(aliasRecipient);
+            if (!aliasOutPoint.IsNull() && !bAliasRegistration)
+                coinControl->Select(aliasOutPoint);
+        }
+    }
+
+    CWalletTx wtxNew1, wtxNew2;
+    // get total output required
+    // if aliasRecipient.scriptPubKey.empty() then it is not a syscoin tx, so don't set tx flag for syscoin tx in createtransaction()
+    // this is because aliasRecipient means an alias utxo was used to create a transaction, common to every syscoin service transaction, aliaspay doesn't use an alias utxo it just sends money from address to address but uses alias outputs to fund it and sign externally using zero knowledge auth.
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew1, reservekey, nFeeRequired, nChangePosRet, strError, coinControl, false, ALL_COINS, fUseInstantSend, !aliasRecipient.scriptPubKey.empty())) {
+        throw runtime_error(strError);
+    }
+
+    CAmount nTotal = nFeeRequired;
+    BOOST_FOREACH(const CRecipient& recp, vecSend)
+    {
+        nTotal += recp.nAmount;
+    }
+
+    // step 2
+    CAmount nRequiredFeePlaceholderFunds = 0;
+    CAmount nRequiredPaymentFunds = 0;
+    bool bAreFeePlaceholdersFunded = false;
+    bool bIsAliasPaymentFunded = false;
+    int numFeeCoinsLeft = -1;
+    vector<COutPoint> outPoints;
+    // if alias input is used, we need to use fees to pay the data portion of the service tx
+    if (!aliasRecipient.scriptPubKey.empty()) {
+        // select coins from alias to pay for this tx
+        numFeeCoinsLeft = aliasselectpaymentcoins(vchAlias, nTotal, outPoints, bAreFeePlaceholdersFunded, nRequiredFeePlaceholderFunds, true, transferAlias, false);
+        if (transferAlias)
+            numFeeCoinsLeft = 0;
+        if (!bAliasRegistration)
+        {
+            BOOST_FOREACH(const COutPoint& outpoint, outPoints)
+            {
+                if (!coinControl->IsSelected(outpoint))
+                    coinControl->Select(outpoint);
+            }
+        }
+    }
+
+    // step 3
+    UniValue param(UniValue::VARR);
+    param.push_back(stringFromVch(vchAlias));
+    const UniValue &result = tableRPC.execute("aliasbalance", param);
+    CAmount nBalance = AmountFromValue(find_value(result.get_obj(), "balance"));
+    // if fee placement utxo's have been used up (or we are creating a new alias) use balance(alias or wallet) for funding as well as create more fee placeholders
+    bool bNeedNewAliasPaymentInputs = numFeeCoinsLeft <= 0;
+    if (bNeedNewAliasPaymentInputs && !bAliasRegistration && !aliasRecipient.scriptPubKey.empty())
+    {
+        for (unsigned int i = 0; i<MAX_ALIAS_UPDATES_PER_BLOCK; i++)
+        {
+            vecSend.push_back(aliasFeePlaceholderRecipient);
+        }
+    }
+    if (nBalance > 0 && !bAliasRegistration)
+    {
+        // get total output required
+        if (!pwalletMain->CreateTransaction(vecSend, wtxNew2, reservekey, nFeeRequired, nChangePosRet, strError, coinControl, false, ALL_COINS, fUseInstantSend, !aliasRecipient.scriptPubKey.empty())) {
+            throw runtime_error(strError);
+        }
+        CAmount nOutputTotal = 0;
+        BOOST_FOREACH(const CRecipient& recp, vecSend)
+        {
+            nOutputTotal += recp.nAmount;
+        }
+        nTotal = (nOutputTotal - GetCoinControlInputTotal(coinControl)) + nFeeRequired;
+        // if transferring alias, move entire balance of alias to new address
+        if (transferAlias && !aliasRecipient.scriptPubKey.empty())
+        {
+            CTxDestination aliasDest;
+            if (ExtractDestination(aliasRecipient.scriptPubKey, aliasDest))
+            {
+                CScript scriptChangeOrig = GetScriptForDestination(aliasDest);
+                CRecipient recipient = { scriptChangeOrig, nBalance - nOutputTotal - nFeeRequired, false };
+                if (recipient.nAmount > 0)
+                    vecSend.push_back(recipient);
+            }
+        }
+        if (nTotal > 0 || transferAlias)
+        {
+            vector<COutPoint> outPoints;
+            // select all if alias transferred otherwise just get enough outputs to fund nTotal
+            aliasselectpaymentcoins(vchAlias, nTotal, outPoints, bIsAliasPaymentFunded, nRequiredPaymentFunds, false, transferAlias, aliasRecipient.scriptPubKey.empty());
+            if (!bIsAliasPaymentFunded || transferAlias)
+            {
+                vector<COutPoint> feeOutPoints;
+                aliasselectpaymentcoins(vchAlias, nRequiredPaymentFunds, feeOutPoints, bAreFeePlaceholdersFunded, nRequiredFeePlaceholderFunds, true, transferAlias, aliasRecipient.scriptPubKey.empty());
+                if (!bAreFeePlaceholdersFunded)
+                    throw runtime_error("SYSCOIN_RPC_ERROR ERRCODE: 9000 - " + _("The Syscoin Alias does not have enough funds to complete this transaction. You need to deposit the following amount of coins in order for the transaction to succeed: ") + ValueFromAmount(nRequiredFeePlaceholderFunds).write());
+                BOOST_FOREACH(const COutPoint& outpoint, feeOutPoints)
+                {
+                    if(!coinControl->IsSelected(outpoint))
+                        coinControl->Select(outpoint);
+                }
+            }
+            BOOST_FOREACH(const COutPoint& outpoint, outPoints)
+            {
+                if (!coinControl->IsSelected(outpoint))
+                    coinControl->Select(outpoint);
+            }
+        }
+    }
+    // now create the transaction and fake sign with enough funding from alias utxo's (if coinControl specified fAllowOtherInputs(true) then and only then are wallet inputs are allowed)
+    // actual signing happens in signrawtransaction outside of this function call after the wtxNew raw transaction is returned back to it
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strError, coinControl, false, ALL_COINS, fUseInstantSend, !aliasRecipient.scriptPubKey.empty())) {
+        throw runtime_error(strError);
+    }
+    // run a check on the inputs without putting them into the db, just to ensure it will go into the mempool without issues
+    int nOut;
+    bool fJustCheck = true;
+    string errorMessage = "";
+    bool bCheckDestError = false;
+    sorted_vector<CAssetAllocationTuple> revertedAssetAllocations;
+    sorted_vector<vector<unsigned char> > revertedOffers;
+    sorted_vector<vector<unsigned char> > revertedCerts;
+    if (wtxNew.nVersion == DYNAMIC_TX_VERSION) {
+        if (DecodeAliasTx(wtxNew, op, nOut, vvchAlias))
+        {
+            CheckAliasInputs(wtxNew, op, nOut, vvchAlias, fJustCheck, chainActive.Tip()->nHeight, errorMessage, bCheckDestError, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckAliasInputs(wtxNew, op, nOut, vvchAlias, !fJustCheck, chainActive.Tip()->nHeight, errorMessage, bCheckDestError, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+        }
+        if (DecodeCertTx(wtxNew, op, nOut, vvch))
+        {
+            CheckCertInputs(wtxNew, op, nOut, vvch, vvchAlias[0], fJustCheck, chainActive.Tip()->nHeight, revertedCerts, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckCertInputs(wtxNew, op, nOut, vvch, vvchAlias[0], !fJustCheck, chainActive.Tip()->nHeight, revertedCerts, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+        }
+        if (DecodeAssetTx(wtxNew, op, nOut, vvch))
+        {
+            CheckAssetInputs(wtxNew, op, nOut, vvch, vvchAlias[0], fJustCheck, chainActive.Tip()->nHeight, revertedAssetAllocations, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckAssetInputs(wtxNew, op, nOut, vvch, vvchAlias[0], !fJustCheck, chainActive.Tip()->nHeight, revertedAssetAllocations, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+        }
+        if (DecodeAssetAllocationTx(wtxNew, op, nOut, vvch))
+        {
+            CheckAssetAllocationInputs(wtxNew, op, nOut, vvch, vvchAlias[0], fJustCheck, chainActive.Tip()->nHeight, revertedAssetAllocations, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckAssetAllocationInputs(wtxNew, op, nOut, vvch, vvchAlias[0], !fJustCheck, chainActive.Tip()->nHeight, revertedAssetAllocations, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+        }
+        if (DecodeEscrowTx(wtxNew, op, nOut, vvch))
+        {
+            CheckEscrowInputs(wtxNew, op, nOut, vvch, vvchAlias, fJustCheck, chainActive.Tip()->nHeight, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckEscrowInputs(wtxNew, op, nOut, vvch, vvchAlias, !fJustCheck, chainActive.Tip()->nHeight, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+        }
+        if (DecodeOfferTx(wtxNew, op, nOut, vvch))
+        {
+            CheckOfferInputs(wtxNew, op, nOut, vvch, vvchAlias[0], fJustCheck, chainActive.Tip()->nHeight, revertedOffers, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+            CheckOfferInputs(wtxNew, op, nOut, vvch, vvchAlias[0], !fJustCheck, chainActive.Tip()->nHeight, revertedOffers, errorMessage, true);
+            if (!errorMessage.empty())
+                throw runtime_error(errorMessage.c_str());
+
+        }
+    }
 }
 
 void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue)

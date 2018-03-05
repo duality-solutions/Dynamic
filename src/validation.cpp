@@ -1,4 +1,5 @@
 // Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2018 The Syscoin Core developers
 // Copyright (c) 2014-2018 The Dash Core Developers
 // Copyright (c) 2009-2018 The Bitcoin Developers
 // Copyright (c) 2009-2018 Satoshi Nakamoto
@@ -44,6 +45,17 @@
 #include "versionbits.h"
 #include "fluid.h"
 
+// SYSCOIN
+#include "offer.h"
+#include "cert.h"
+#include "alias.h"
+#include "asset.h"
+#include "assetallocation.h"
+#include "escrow.h"
+#include "graph.h"
+#include "base58.h"
+#include "rpcserver.h"
+
 #include <atomic>
 #include <sstream>
 
@@ -74,6 +86,7 @@ int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 bool fReindex = false;
 bool fTxIndex = true;
+int nIndexPort = 0;
 bool fAddressIndex = false;
 bool fTimestampIndex = false;
 bool fSpentIndex = false;
@@ -580,6 +593,174 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+// SYSCOIN
+bool CheckSyscoinInputs(const CTransaction& tx, bool fJustCheck, int nHeight, const CAmount& nFees, const CBlock& block)
+{
+    vector<vector<unsigned char> > vvchArgs;
+    vector<vector<unsigned char> > vvchAliasArgs;
+    sorted_vector<CAssetAllocationTuple> revertedAssetAllocations;
+    sorted_vector<vector<unsigned char> > revertedOffers;
+    sorted_vector<vector<unsigned char> > revertedCerts;
+    int op;
+    int nOut;
+    if (nHeight == 0)
+        nHeight = chainActive.Height();
+    string errorMessage;
+    bool good = false;
+    string statusRpc = "";
+    CAmount nDescrepency;
+    if (fJustCheck && (IsInitialBlockDownload() || RPCIsInWarmup(&statusRpc)))
+        return true;
+    if (block.vtx.empty() && tx.nVersion == DYNAMIC_TX_VERSION) {
+        const CAmount nExpectedFee = ::minRelayTxFee.GetFee(tx.GetTotalSize()*1.5);
+        if (nFees > nExpectedFee)
+            nDescrepency = nFees - nExpectedFee;
+        else
+            nDescrepency = nExpectedFee - nFees;
+        if ((nDescrepency - (tx.vin.size() + 1)) < 0) {
+            LogPrintf("CheckSyscoinInputs: fees not correct for Syscoin transaction nFees %s vs nExpectedFee %s", ValueFromAmount(nFees).write().c_str(), ValueFromAmount(nExpectedFee).write().c_str());
+            return false;
+        }
+        bool bDestCheckFailed = false;
+        if (DecodeAliasTx(tx, op, nOut, vvchAliasArgs))
+        {
+            errorMessage.clear();
+            good = CheckAliasInputs(tx, op, nOut, vvchAliasArgs, fJustCheck, nHeight, errorMessage, bDestCheckFailed);
+            if (fDebug && !errorMessage.empty())
+                LogPrintf("%s\n", errorMessage.c_str());
+        }
+        if (!bDestCheckFailed && !vvchAliasArgs.empty() && good && errorMessage.empty())
+        {
+            if (DecodeCertTx(tx, op, nOut, vvchArgs))
+            {
+                errorMessage.clear();
+                good = CheckCertInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedCerts, errorMessage);
+                if (fDebug && !errorMessage.empty())
+                    LogPrintf("%s\n", errorMessage.c_str());
+            }
+            if (DecodeAssetTx(tx, op, nOut, vvchArgs))
+            {
+                errorMessage.clear();
+                good = CheckAssetInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedAssetAllocations, errorMessage);
+                if (fDebug && !errorMessage.empty())
+                    LogPrintf("%s\n", errorMessage.c_str());
+            }
+            else if (DecodeAssetAllocationTx(tx, op, nOut, vvchArgs))
+            {
+                errorMessage.clear();
+                good = CheckAssetAllocationInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedAssetAllocations, errorMessage);
+                if (fDebug && !errorMessage.empty())
+                    LogPrintf("%s\n", errorMessage.c_str());
+            }
+            else if (DecodeEscrowTx(tx, op, nOut, vvchArgs))
+            {
+                errorMessage.clear();
+                good = CheckEscrowInputs(tx, op, nOut, vvchArgs, vvchAliasArgs, fJustCheck, nHeight, errorMessage);
+                if (fDebug && !errorMessage.empty())
+                    LogPrintf("%s\n", errorMessage.c_str());
+            }
+            else if (DecodeOfferTx(tx, op, nOut, vvchArgs))
+            {
+                errorMessage.clear();
+                good = CheckOfferInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedOffers, errorMessage);
+                if (fDebug && !errorMessage.empty())
+                    LogPrintf("%s\n", errorMessage.c_str());
+            }
+        }
+        if (!good)
+        {
+            return false;
+        }
+    }
+    else if (!block.vtx.empty()) {
+        CBlock sortedBlock;
+        sortedBlock.vtx = block.vtx;
+        Graph graph;
+        std::vector<vertex_descriptor> vertices;
+        IndexMap mapTxIndex;
+        if (CreateGraphFromVTX(sortedBlock.vtx, graph, vertices, mapTxIndex)) {
+            std::vector<int> conflictedIndexes;
+            GraphRemoveCycles(sortedBlock.vtx, conflictedIndexes, graph, vertices, mapTxIndex);
+            if (!sortedBlock.vtx.empty()) {
+                if (!DAGTopologicalSort(sortedBlock.vtx, conflictedIndexes, graph, mapTxIndex)) {
+                    return false;
+                }
+            }
+        }
+        if (fJustCheck)
+            return true;
+        
+        good = true;
+        for (unsigned int i = 0; i < sortedBlock.vtx.size(); i++)
+        {
+            const CTransaction &tx = sortedBlock.vtx[i];
+            if (tx.nVersion == DYNAMIC_TX_VERSION)
+            {
+                bool bDestCheckFailed = false;
+                good = false;
+                if (DecodeAliasTx(tx, op, nOut, vvchAliasArgs))
+                {
+                    errorMessage.clear();
+                    good = CheckAliasInputs(tx, op, nOut, vvchAliasArgs, fJustCheck, nHeight, errorMessage, bDestCheckFailed);
+                    if (fDebug && !errorMessage.empty())
+                        LogPrintf("%s\n", errorMessage.c_str());
+                }
+                if (!bDestCheckFailed && !vvchAliasArgs.empty() && good && errorMessage.empty())
+                {
+                    if (DecodeCertTx(tx, op, nOut, vvchArgs))
+                    {
+                        errorMessage.clear();
+                        good = CheckCertInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedCerts, errorMessage);
+                        if (fDebug && !errorMessage.empty())
+                            LogPrintf("%s\n", errorMessage.c_str());
+                    }
+                    if (DecodeAssetTx(tx, op, nOut, vvchArgs))
+                    {
+                        errorMessage.clear();
+                        good = CheckAssetInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedAssetAllocations, errorMessage);
+                        if (fDebug && !errorMessage.empty())
+                            LogPrintf("%s\n", errorMessage.c_str());
+                    }
+                    else if (DecodeAssetAllocationTx(tx, op, nOut, vvchArgs))
+                    {
+                        errorMessage.clear();
+                        good = CheckAssetAllocationInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedAssetAllocations, errorMessage);
+                        if (fDebug && !errorMessage.empty())
+                            LogPrintf("%s\n", errorMessage.c_str());
+
+                    }
+                    else if (DecodeEscrowTx(tx, op, nOut, vvchArgs))
+                    {
+                        errorMessage.clear();
+                        good = CheckEscrowInputs(tx, op, nOut, vvchArgs, vvchAliasArgs, fJustCheck, nHeight, errorMessage);
+                        if (fDebug && !errorMessage.empty())
+                            LogPrintf("%s\n", errorMessage.c_str());
+                    }
+                    else if (DecodeOfferTx(tx, op, nOut, vvchArgs))
+                    {
+                        errorMessage.clear();
+                        good = CheckOfferInputs(tx, op, nOut, vvchArgs, vvchAliasArgs[0], fJustCheck, nHeight, revertedOffers, errorMessage);
+                        if (fDebug && !errorMessage.empty())
+                            LogPrintf("%s\n", errorMessage.c_str());
+                    }
+                }
+                if (!good)
+                {
+                    break;
+                }
+            }
+        }
+        if (!good)
+        {
+            return false;
+        }
+    }
+
+
+    return true;
+
+}
+
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
                               bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
@@ -1020,6 +1201,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s, %s",
                 __func__, hash.ToString(), FormatStateMessage(state));
         }
+
+        // SYSCOIN
+        if (!CheckSyscoinInputs(tx, true, chainActive.Height(), nFees, CBlock()))
+            return false;
 
         // Remove conflicting transactions from the mempool
         BOOST_FOREACH(const CTxMemPool::txiter it, allConflicting)
@@ -2148,6 +2333,11 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         vPos.push_back(std::make_pair(tx.GetHash(), pos));
         pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
     }
+    // SYSCOIN
+    if (!CheckSyscoinInputs(block.vtx[0], fJustCheck, pindex->nHeight, nFees, block))
+        return error("ConnectBlock(): CheckSyscoinInputs on block %s failed",
+            block.GetHash().ToString());
+
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
