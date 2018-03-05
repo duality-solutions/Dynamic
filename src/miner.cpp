@@ -32,6 +32,9 @@
 #include "wallet/wallet.h"
 #include "fluid.h"
 
+//SYSCOIN
+#include "graph.h"
+
 #include <queue>
 #include <utility>
 
