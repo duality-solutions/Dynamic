@@ -5,28 +5,35 @@
 #ifndef ESCROW_H
 #define ESCROW_H
 
-#include "rpcserver.h"
 #include "dbwrapper.h"
 #include "feedback.h"
+#include "rpcserver.h"
+
 class CWalletTx;
 class CTransaction;
 class CReserveKey;
 class CCoinsViewCache;
 class Coin;
 class CBlock;
+
 bool CheckEscrowInputs(const CTransaction &tx, int op, int nOut, const std::vector<std::vector<unsigned char> > &vvchArgs, const std::vector<std::vector<unsigned char> > &vvchAliasArgs, bool fJustCheck, int nHeight, std::string &errorMessage, bool dontaddtodb=false);
 bool DecodeEscrowTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
 bool DecodeAndParseEscrowTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch, char &type);
 bool DecodeEscrowScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch);
 bool IsEscrowOp(int op);
+
 void EscrowTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry);
+
 std::string escrowFromOp(int op);
+
 bool RemoveEscrowScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
+
 enum EscrowRoles {
 	BUYER = 1,
 	SELLER = 2,
 	ARBITER = 3,
 };
+
 class CEscrow {
 public:
 	std::vector<unsigned char> vchEscrow;
@@ -156,7 +163,6 @@ public:
 	void Serialize(std::vector<unsigned char>& vchData);
 };
 
-
 class CEscrowDB : public CDBWrapper {
 public:
     CEscrowDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "escrow", nCacheSize, fMemory, fWipe) {}
@@ -206,4 +212,5 @@ int64_t GetEscrowArbiterFee(const int64_t &escrowValue, const float &fEscrowFee)
 int64_t GetEscrowWitnessFee(const int64_t &escrowValue, const float &fWitnessFee);
 int64_t GetEscrowDepositFee(const int64_t &escrowValue, const float &fDepositPercentage);
 uint64_t GetEscrowExpiration(const CEscrow& escrow);
+
 #endif // ESCROW_H
