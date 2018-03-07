@@ -1,7 +1,9 @@
 #ifndef RANGES_H
 #define RANGES_H
+
 #include "script/script.h"
 #include "serialize.h"
+
 using namespace std;
 
 // An range has start and end index
@@ -46,4 +48,5 @@ public:
 bool compareRange(const CRange &i1, const CRange &i2);
 void mergeRanges(vector<CRange> &arr, vector<CRange> &output);
 void subtractRanges(vector<CRange> &arr, const vector<CRange> &del, vector<CRange> &output);
+
 #endif // RANGES_H
