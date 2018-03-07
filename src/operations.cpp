@@ -3,8 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "operations.h"
-#include "validation.h"
 
+#include "validation.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
