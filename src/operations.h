@@ -7,10 +7,10 @@
 
 #include "base58.h"
 
-#include <vector>
+#include <algorithm>
 #include <stdint.h>
 #include <string.h>
-#include <algorithm>
+#include <vector>
 
 class HexFunctions {
 public:
