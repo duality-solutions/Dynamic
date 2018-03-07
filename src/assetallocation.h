@@ -5,13 +5,14 @@
 #ifndef ASSETALLOCATION_H
 #define ASSETALLOCATION_H
 
-#include "rpcserver.h"
+#include "graph.h"
 #include "dbwrapper.h"
 #include "feedback.h"
-#include "primitives/transaction.h"
 #include "ranges.h"
+#include "rpcserver.h"
+#include "primitives/transaction.h"
+
 #include <unordered_map>
-#include "graph.h"
 
 class CWalletTx;
 class CTransaction;
