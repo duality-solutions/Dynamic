@@ -3,19 +3,21 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "assetallocation.h"
+
 #include "alias.h"
 #include "asset.h"
-#include "init.h"
-#include "validation.h"
-#include "txmempool.h"
-#include "util.h"
-#include "random.h"
 #include "base58.h"
-#include "core_io.h"
-#include "rpcserver.h"
-#include "wallet/wallet.h"
 #include "chainparams.h"
 #include "coincontrol.h"
+#include "core_io.h"
+#include "init.h"
+#include "random.h"
+#include "rpcserver.h"
+#include "txmempool.h"
+#include "util.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+
 #include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
 #include <boost/foreach.hpp>
@@ -23,11 +25,13 @@
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+
 #include <mongoc.h>
 #include <chrono>
 
 using namespace std::chrono;
 using namespace std;
+
 extern mongoc_collection_t *assetallocation_collection;
 extern mongoc_collection_t *aliastxhistory_collection;
 extern void SendMoneySyscoin(const vector<unsigned char> &vchAlias, const vector<unsigned char> &vchWitness, const CRecipient &aliasRecipient, CRecipient &aliasPaymentRecipient, vector<CRecipient> &vecSend, CWalletTx& wtxNew, CCoinControl* coinControl, bool fUseInstantSend = false, bool transferAlias = false);
