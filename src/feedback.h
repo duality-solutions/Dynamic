@@ -4,14 +4,17 @@
 
 #ifndef FEEDBACK_H
 #define FEEDBACK_H
+
 #include "script/script.h"
 #include "serialize.h"
+
 enum FeedbackUser {
 	FEEDBACKNONE=0,
     FEEDBACKBUYER=1,
 	FEEDBACKSELLER=2,
 	FEEDBACKARBITER=3
 };
+
 class CFeedback {
 public:
 	std::vector<unsigned char> vchFeedback;
@@ -63,4 +66,5 @@ public:
     void SetNull() {  nRating = 0; nFeedbackUserFrom = 0; nFeedbackUserTo = 0; vchFeedback.clear();}
     bool IsNull() const { return (  nRating == 0 && nFeedbackUserFrom == 0 && nFeedbackUserTo == 0 && vchFeedback.empty()); }
 };
+
 #endif // FEEDBACK_H
