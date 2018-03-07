@@ -3,39 +3,44 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "offer.h"
+
 #include "alias.h"
-#include "escrow.h"
-#include "cert.h"
-#include "init.h"
-#include "validation.h"
-#include "util.h"
-#include "random.h"
 #include "base58.h"
-#include "core_io.h"
-#include "rpcserver.h"
-#include "wallet/wallet.h"
-#include "consensus/validation.h"
+#include "cert.h"
 #include "chainparams.h"
+#include "core_io.h"
 #include "coincontrol.h"
-#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
-#include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/hex.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <mongoc.h>
+#include "escrow.h"
+#include "init.h"
+#include "random.h"
+#include "rpcserver.h"
+#include "util.h"
+#include "consensus/validation.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+
 #include <chrono>
+#include <mongoc.h>
+
+#include <boost/algorithm/hex.hpp>
+#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/thread.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace std::chrono;
 using namespace std;
+
 extern mongoc_collection_t *offer_collection;
 extern mongoc_collection_t *offerhistory_collection;
 extern void SendMoneySyscoin(const vector<unsigned char> &vchAlias, const vector<unsigned char> &vchWitness, const CRecipient &aliasRecipient, CRecipient &aliasPaymentRecipient, vector<CRecipient> &vecSend, CWalletTx& wtxNew, CCoinControl* coinControl, bool fUseInstantSend=false, bool transferAlias=false);
+
 bool IsOfferOp(int op) {
 	return op == OP_OFFER_ACTIVATE
         || op == OP_OFFER_UPDATE;
