@@ -4,38 +4,41 @@
 //
 #include "alias.h"
 
-#include "validation.h"
-#include "offer.h"
-#include "escrow.h"
-#include "cert.h"
 #include "asset.h"
 #include "assetallocation.h"
-#include "init.h"
-#include "util.h"
-#include "random.h"
-#include "wallet/wallet.h"
-#include "rpcserver.h"
 #include "base58.h"
-#include "txmempool.h"
-#include "txdb.h"
+#include "cert.h"
 #include "chainparams.h"
-#include "core_io.h"
-#include "policy/policy.h"
-#include "utiltime.h"
 #include "coincontrol.h"
+#include "core_io.h"
+#include "escrow.h"
+#include "init.h"
+#include "instantsend.h"
+#include "offer.h"
+#include "policy/policy.h"
+#include "random.h"
+#include "rpcserver.h"
+#include "txdb.h"
+#include "txmempool.h"
+#include "util.h"
+#include "utiltime.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+
+#include <mongoc.h>
+
+#include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
-#include <boost/xpressive/xpressive_dynamic.hpp>
+#include <boost/algorithm/string/find.hpp>
+#include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
-#include <boost/algorithm/hex.hpp>
-#include <boost/algorithm/string/find.hpp>
-#include <boost/assign/list_of.hpp>
-#include <mongoc.h>
-#include "instantsend.h"
+#include <boost/xpressive/xpressive_dynamic.hpp>
 
 using namespace std;
+
 CAliasDB *paliasdb = NULL;
 COfferDB *pofferdb = NULL;
 CCertDB *pcertdb = NULL;
