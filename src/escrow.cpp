@@ -3,35 +3,40 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "escrow.h"
-#include "offer.h"
+
 #include "alias.h"
-#include "cert.h"
-#include "init.h"
-#include "validation.h"
-#include "core_io.h"
-#include "util.h"
 #include "base58.h"
-#include "core_io.h"
-#include "rpcserver.h"
-#include "wallet/wallet.h"
-#include "policy/policy.h"
-#include "script/script.h"
+#include "cert.h"
 #include "chainparams.h"
 #include "coincontrol.h"
-#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/hex.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/range/adaptor/reversed.hpp>
+#include "core_io.h"
+#include "init.h"
+#include "offer.h"
+#include "policy/policy.h"
+#include "rpcserver.h"
+#include "script/script.h"
+#include "util.h"
+#include "validation.h"
+#include "wallet/wallet.h"
+
 #include <mongoc.h>
+
+#include <boost/algorithm/hex.hpp>
+#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/thread.hpp>
+
 using namespace std;
+
 extern mongoc_collection_t *escrow_collection;
 extern mongoc_collection_t *escrowbid_collection;
 extern mongoc_collection_t *feedback_collection;
 extern CScript _createmultisig_redeemScript(const UniValue& params);
 extern void SendMoneySyscoin(const vector<unsigned char> &vchAlias, const vector<unsigned char> &vchWitness, const CRecipient &aliasRecipient, CRecipient &aliasPaymentRecipient, vector<CRecipient> &vecSend, CWalletTx& wtxNew, CCoinControl* coinControl, bool fUseInstantSend=false, bool transferAlias=false);
+
 void PutToEscrowList(std::vector<CEscrow> &escrowList, CEscrow& index) {
 	int i = escrowList.size() - 1;
 	BOOST_REVERSE_FOREACH(CEscrow &o, escrowList) {
@@ -43,6 +48,7 @@ void PutToEscrowList(std::vector<CEscrow> &escrowList, CEscrow& index) {
 	}
     escrowList.push_back(index);
 }
+
 bool IsEscrowOp(int op) {
     return op == OP_ESCROW_ACTIVATE
         || op == OP_ESCROW_RELEASE
@@ -54,6 +60,7 @@ bool IsEscrowOp(int op) {
 		|| op == OP_ESCROW_ACKNOWLEDGE
 		|| op == OP_ESCROW_ADD_SHIPPING;
 }
+
 // % fee on escrow value for arbiter
 int64_t GetEscrowArbiterFee(const int64_t &escrowValue, const float &fEscrowFee) {
 
@@ -76,6 +83,7 @@ int64_t GetEscrowWitnessFee(const int64_t &escrowValue, const float &fWitnessFee
 	int64_t nFee = escrowValue / fee;
 	return nFee;
 }
+
 // Minimum amount of deposit per auction bid
 int64_t GetEscrowDepositFee(const int64_t &escrowValue, const float &fDepositPercentage) {
 	if (fDepositPercentage <= 0)
@@ -84,11 +92,13 @@ int64_t GetEscrowDepositFee(const int64_t &escrowValue, const float &fDepositPer
 	int64_t nMinDep = escrowValue / fee;
 	return nMinDep;
 }
+
 // check that the minimum arbiter fee is found
 bool ValidateArbiterFee(const CEscrow &escrow) {
 	CAmount nTotalWithoutFee = escrow.nAmountOrBidPerUnit*escrow.nQty;
 	return GetEscrowArbiterFee(nTotalWithoutFee, 0.005) <= escrow.nArbiterFee;
 }
+
 // check that the minimum deposit is found
 bool ValidateDepositFee(const float &fDepositPercentage, const CEscrow &escrow) {
 	CAmount nTotalWithoutFee = escrow.nAmountOrBidPerUnit*escrow.nQty;
@@ -125,7 +135,6 @@ uint64_t GetEscrowExpiration(const CEscrow& escrow) {
 	return nTime;
 }
 
-
 string escrowFromOp(int op) {
     switch (op) {
     case OP_ESCROW_ACTIVATE:
@@ -151,6 +160,7 @@ string escrowFromOp(int op) {
     }
 	return "<unknown escrow op>";
 }
+
 string EscrowRoleToString(int role) {
 	switch (role) {
 	case EscrowRoles::BUYER:
@@ -164,6 +174,7 @@ string EscrowRoleToString(int role) {
 	}
 	return "unknown";
 }
+
 bool CEscrow::UnserializeFromData(const vector<unsigned char> &vchData, const vector<unsigned char> &vchHash) {
     try {
         CDataStream dsEscrow(vchData, SER_NETWORK, PROTOCOL_VERSION);
@@ -184,6 +195,7 @@ bool CEscrow::UnserializeFromData(const vector<unsigned char> &vchData, const ve
     }
 	return true;
 }
+
 bool CEscrow::UnserializeFromTx(const CTransaction &tx) {
 	vector<unsigned char> vchData;
 	vector<unsigned char> vchHash;
@@ -199,12 +211,14 @@ bool CEscrow::UnserializeFromTx(const CTransaction &tx) {
 	}
     return true;
 }
+
 void CEscrow::Serialize(vector<unsigned char>& vchData) {
     CDataStream dsEscrow(SER_NETWORK, PROTOCOL_VERSION);
     dsEscrow << *this;
 	vchData = vector<unsigned char>(dsEscrow.begin(), dsEscrow.end());
 
 }
+
 void CEscrowDB::WriteEscrowIndex(const CEscrow& escrow, const std::vector<std::vector<unsigned char> > &vvchArgs) {
 	if (!escrow_collection)
 		return;
@@ -231,6 +245,7 @@ void CEscrowDB::WriteEscrowIndex(const CEscrow& escrow, const std::vector<std::v
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::EraseEscrowIndex(const std::vector<unsigned char>& vchEscrow, bool cleanup) {
 	if (!escrow_collection)
 		return;
@@ -250,6 +265,7 @@ void CEscrowDB::EraseEscrowIndex(const std::vector<unsigned char>& vchEscrow, bo
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::WriteEscrowFeedbackIndex(const CEscrow& escrow) {
 	if (!feedback_collection)
 		return;
@@ -270,6 +286,7 @@ void CEscrowDB::WriteEscrowFeedbackIndex(const CEscrow& escrow) {
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::EraseEscrowFeedbackIndex(const std::vector<unsigned char>& vchEscrow, bool cleanup) {
 	if (!feedback_collection)
 		return;
@@ -291,6 +308,7 @@ void CEscrowDB::EraseEscrowFeedbackIndex(const std::vector<unsigned char>& vchEs
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::EraseEscrowFeedbackIndex(const std::string& id) {
 	if (!feedback_collection)
 		return;
@@ -310,6 +328,7 @@ void CEscrowDB::EraseEscrowFeedbackIndex(const std::string& id) {
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::WriteEscrowBidIndex(const CEscrow& escrow, const string& status) {
 	if (!escrowbid_collection || escrow.op != OP_ESCROW_ACTIVATE)
 		return;
@@ -330,6 +349,7 @@ void CEscrowDB::WriteEscrowBidIndex(const CEscrow& escrow, const string& status)
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::RefundEscrowBidIndex(const std::vector<unsigned char>& vchEscrow, const string& status) {
 	if (!escrowbid_collection)
 		return;
@@ -355,6 +375,7 @@ void CEscrowDB::RefundEscrowBidIndex(const std::vector<unsigned char>& vchEscrow
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::EraseEscrowBidIndex(const std::vector<unsigned char>& vchEscrow, bool cleanup) {
 	if (!escrowbid_collection)
 		return;
@@ -374,6 +395,7 @@ void CEscrowDB::EraseEscrowBidIndex(const std::vector<unsigned char>& vchEscrow,
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 void CEscrowDB::EraseEscrowBidIndex(const std::string& id) {
 	if (!escrowbid_collection)
 		return;
@@ -393,6 +415,7 @@ void CEscrowDB::EraseEscrowBidIndex(const std::string& id) {
 	if (write_concern)
 		mongoc_write_concern_destroy(write_concern);
 }
+
 bool CEscrowDB::CleanupDatabase(int &servicesCleaned)
 {
 	boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
@@ -428,6 +451,7 @@ bool GetEscrow(const vector<unsigned char> &vchEscrow,
     }
     return true;
 }
+
 bool DecodeAndParseEscrowTx(const CTransaction& tx, int& op, int& nOut,
 	vector<vector<unsigned char> >& vvch, char& type)
 {
@@ -440,6 +464,7 @@ bool DecodeAndParseEscrowTx(const CTransaction& tx, int& op, int& nOut,
 	}
 	return false;
 }
+
 bool DecodeEscrowTx(const CTransaction& tx, int& op, int& nOut,
         vector<vector<unsigned char> >& vvch) {
     bool found = false;
@@ -499,6 +524,7 @@ bool DecodeEscrowScript(const CScript& script, int& op,
 	pc--;
 	return found;
 }
+
 bool DecodeEscrowScript(const CScript& script, int& op,
         vector<vector<unsigned char> > &vvch) {
     CScript::const_iterator pc = script.begin();
@@ -515,6 +541,7 @@ bool RemoveEscrowScriptPrefix(const CScript& scriptIn, CScript& scriptOut) {
 	scriptOut = CScript(pc, scriptIn.end());
 	return true;
 }
+
 bool ValidateExternalPayment(const CEscrow& theEscrow, const bool &dontaddtodb, string& errorMessage)
 {
 
@@ -533,6 +560,7 @@ bool ValidateExternalPayment(const CEscrow& theEscrow, const bool &dontaddtodb, 
 	}
 	return true;
 }
+
 bool CheckEscrowInputs(const CTransaction &tx, int op, int nOut, const vector<vector<unsigned char> > &vvchArgs, const std::vector<std::vector<unsigned char> > &vvchAliasArgs, bool fJustCheck, int nHeight, string &errorMessage, bool dontaddtodb) {
 	if (!pescrowdb || !paliasdb)
 		return false;
@@ -1340,6 +1368,7 @@ UniValue escrowbid(const UniValue& params, bool fHelp) {
 	res.push_back(EncodeHexTx(wtx));
 	return res;
 }
+
 UniValue escrowaddshipping(const UniValue& params, bool fHelp) {
 	if (fHelp || params.size() != 3)
 		throw runtime_error(
@@ -1425,6 +1454,7 @@ UniValue escrowaddshipping(const UniValue& params, bool fHelp) {
 	res.push_back(EncodeHexTx(wtx));
 	return res;
 }
+
 UniValue escrownew(const UniValue& params, bool fHelp) {
     if (fHelp || params.size() != 16)
         throw runtime_error(
@@ -1700,6 +1730,7 @@ UniValue escrownew(const UniValue& params, bool fHelp) {
 	res.push_back(stringFromVch(vchEscrow));
 	return res;
 }
+
 UniValue escrowacknowledge(const UniValue& params, bool fHelp) {
 	if (fHelp || params.size() != 2)
 		throw runtime_error(
@@ -1786,6 +1817,7 @@ UniValue escrowacknowledge(const UniValue& params, bool fHelp) {
 	return res;
 
 }
+
 UniValue escrowcreaterawtransaction(const UniValue& params, bool fHelp) {
 	if (fHelp || params.size() != 4)
 		throw runtime_error(
@@ -1943,6 +1975,7 @@ UniValue escrowcreaterawtransaction(const UniValue& params, bool fHelp) {
 	res.push_back(ValueFromAmount(nBalance));
 	return res;
 }
+
 UniValue escrowrelease(const UniValue& params, bool fHelp) {
     if (fHelp || params.size() != 4)
         throw runtime_error(
@@ -2145,6 +2178,7 @@ UniValue escrowcompleterelease(const UniValue& params, bool fHelp) {
 	res.push_back(EncodeHexTx(wtx));
 	return res;
 }
+
 UniValue escrowrefund(const UniValue& params, bool fHelp) {
 	if (fHelp || params.size() != 4)
 		throw runtime_error(
@@ -2533,6 +2567,7 @@ UniValue escrowfeedback(const UniValue& params, bool fHelp) {
 	res.push_back(EncodeHexTx(wtx));
 	return res;
 }
+
 UniValue escrowinfo(const UniValue& params, bool fHelp) {
     if (fHelp || 1 != params.size())
         throw runtime_error("escrowinfo <guid>\n"
@@ -2549,6 +2584,7 @@ UniValue escrowinfo(const UniValue& params, bool fHelp) {
 		throw runtime_error("DYNAMIC_ESCROW_RPC_ERROR: ERRCODE: 4605 - " + _("Could not find this escrow"));
     return oEscrow;
 }
+
 void BuildFeedbackJson(const CEscrow& escrow, UniValue& oFeedback) {
 	string sFeedbackTime;
 	if (escrow.feedback.IsNull())
@@ -2570,6 +2606,7 @@ void BuildFeedbackJson(const CEscrow& escrow, UniValue& oFeedback) {
 	oFeedback.push_back(Pair("feedbackuserto", escrow.feedback.nFeedbackUserTo));
 	oFeedback.push_back(Pair("feedback", stringFromVch(escrow.feedback.vchFeedback)));
 }
+
 void BuildEscrowBidJson(const CEscrow& escrow, const string& status, UniValue& oBid) {
 	oBid.push_back(Pair("_id", escrow.txHash.GetHex()));
 	oBid.push_back(Pair("offer", stringFromVch(escrow.vchOffer)));
@@ -2581,6 +2618,7 @@ void BuildEscrowBidJson(const CEscrow& escrow, const string& status, UniValue& o
 	oBid.push_back(Pair("witness", stringFromVch(escrow.vchWitness)));
 	oBid.push_back(Pair("status", status));
 }
+
 bool BuildEscrowJson(const CEscrow &escrow, UniValue& oEscrow)
 {
 	COffer theOffer;
@@ -2658,6 +2696,7 @@ bool BuildEscrowJson(const CEscrow &escrow, UniValue& oEscrow)
 	oEscrow.push_back(Pair("status", status));
 	return true;
 }
+
 bool BuildEscrowIndexerJson(const CEscrow &escrow, UniValue& oEscrow)
 {
 	oEscrow.push_back(Pair("_id", stringFromVch(escrow.vchEscrow)));
@@ -2668,6 +2707,7 @@ bool BuildEscrowIndexerJson(const CEscrow &escrow, UniValue& oEscrow)
 	oEscrow.push_back(Pair("buyer", stringFromVch(escrow.vchBuyerAlias)));
 	return true;
 }
+
 void EscrowTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry)
 {
 	
