@@ -5,12 +5,13 @@
 #ifndef ALIAS_H
 #define ALIAS_H
 
-#include "rpcserver.h"
 #include "dbwrapper.h"
 #include "consensus/params.h"
-#include "sync.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "serialize.h"
+#include "sync.h"
+
 class CWalletTx;
 class CTransaction;
 class CTxOut;
@@ -22,13 +23,16 @@ class CBlock;
 class CDynamicAddress;
 class COutPoint;
 class CCoinControl;
+
 struct CRecipient;
+
 static const unsigned int MAX_GUID_LENGTH = 71;
 static const unsigned int MAX_NAME_LENGTH = 256;
 static const unsigned int MAX_VALUE_LENGTH = 512;
 static const unsigned int MAX_ID_LENGTH = 20;
 static const unsigned int MAX_ENCRYPTED_GUID_LENGTH = MAX_GUID_LENGTH + 85;
 static const uint64_t ONE_YEAR_IN_SECONDS = 31536000;
+
 enum {
 	ALIAS=0,
 	OFFER, 
@@ -37,12 +41,14 @@ enum {
 	ASSET,
 	ASSETALLOCATION
 };
+
 enum {
 	ACCEPT_TRANSFER_NONE=0,
 	ACCEPT_TRANSFER_CERTIFICATES,
 	ACCEPT_TRANSFER_ASSETS,
 	ACCEPT_TRANSFER_ALL,
 };
+
 class CAliasUnprunable
 {
 	public:
@@ -79,6 +85,7 @@ class CAliasUnprunable
 	inline void SetNull() { vchGUID.clear(); nExpireTime = 0; }
     inline bool IsNull() const { return (vchGUID.empty()); }
 };
+
 class COfferLinkWhitelistEntry {
 public:
 	std::vector<unsigned char> aliasLinkVchRand;
@@ -118,7 +125,9 @@ public:
 	inline bool IsNull() const { return (aliasLinkVchRand.empty()); }
 
 };
+
 typedef std::map<std::vector<unsigned char>, COfferLinkWhitelistEntry> whitelistMap_t;
+
 class COfferLinkWhitelist {
 public:
 	whitelistMap_t entries;
@@ -162,6 +171,7 @@ public:
 	inline bool IsNull() const { return (entries.empty()); }
 
 };
+
 class CAliasIndex {
 public:
 	std::vector<unsigned char> vchAlias;
@@ -290,6 +300,7 @@ class CCertDB;
 class CEscrowDB;
 class CAssetDB;
 class CAssetAllocationDB;
+
 extern CAliasDB *paliasdb;
 extern COfferDB *pofferdb;
 extern CCertDB *pcertdb;
@@ -301,14 +312,18 @@ std::string stringFromVch(const std::vector<unsigned char> &vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);
 std::vector<unsigned char> vchFromString(const std::string &str);
 std::string stringFromValue(const UniValue& value);
+
 const int DYNAMIC_TX_VERSION = 0x7700;
+
 bool IsValidAliasName(const std::vector<unsigned char> &vchAlias);
 bool CheckAliasInputs(const CTransaction &tx, int op, int nOut, const std::vector<std::vector<unsigned char> > &vvchArgs, bool fJustCheck, int nHeight, std::string &errorMessage, bool & bDestCheckFailed,bool dontaddtodb=false);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void CreateFeeRecipient(CScript& scriptPubKey, const std::vector<unsigned char>& data, CRecipient& recipient);
 void CreateAliasRecipient(const CScript& scriptPubKey, CRecipient& recipient);
+
 int aliasselectpaymentcoins(const std::vector<unsigned char> &vchAlias, const CAmount &nAmount, std::vector<COutPoint>& outPoints, bool& bIsFunded, CAmount &nRequiredAmount, bool bSelectFeePlacement, bool bSelectAll=false, bool bNoAliasRecipient=false);
 CAmount GetDataFee(const CScript& scriptPubKey);
+
 bool IsAliasOp(int op);
 bool GetAlias(const std::vector<unsigned char> &vchAlias, CAliasIndex& alias);
 bool CheckParam(const UniValue& params, const unsigned int index);
@@ -320,12 +335,18 @@ bool DecodeAliasScript(const CScript& script, int& op,
 		std::vector<std::vector<unsigned char> > &vvch);
 bool GetAddressFromAlias(const std::string& strAlias, std::string& strAddress, std::vector<unsigned char> &vchPubKey);
 bool GetAliasFromAddress(const std::string& strAddress, std::string& strAlias, std::vector<unsigned char> &vchPubKey);
+
 int getFeePerByte(const uint64_t &paymentOptionMask);
+
 float getEscrowFee();
+
 std::string aliasFromOp(int op);
 std::string GenerateSyscoinGuid();
+
 bool RemoveAliasScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
+
 int GetSyscoinDataOutput(const CTransaction& tx);
+
 bool IsSyscoinDataOutput(const CTxOut& out);
 bool GetSyscoinData(const CTransaction &tx, std::vector<unsigned char> &vchData, std::vector<unsigned char> &vchHash, int& nOut);
 bool GetSyscoinData(const CScript &scriptPubKey, std::vector<unsigned char> &vchData, std::vector<unsigned char> &vchHash);
@@ -335,15 +356,23 @@ bool GetSyscoinTransaction(int nHeight, const uint256 &hash, CTransaction &txOut
 bool GetSyscoinTransaction(int nHeight, const uint256 &hash, CTransaction &txOut, uint256& hashBlock, const Consensus::Params& consensusParams);
 bool IsSyscoinScript(const CScript& scriptPubKey, int &op, std::vector<std::vector<unsigned char> > &vvchArgs);
 bool RemoveSyscoinScript(const CScript& scriptPubKeyIn, CScript& scriptPubKeyOut);
+
 void PutToAliasList(std::vector<CAliasIndex> &aliasList, CAliasIndex& index);
 void SysTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry, const char& type);
 void AliasTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry);
+
 bool BuildAliasJson(const CAliasIndex& alias, UniValue& oName);
+
 void CleanupSyscoinServiceDatabases(int &servicesCleaned);
+
 int aliasunspent(const std::vector<unsigned char> &vchAlias, COutPoint& outPoint);
+
 void GetAddress(const CAliasIndex &alias, CDynamicAddress* address, CScript& script, const uint32_t nPaymentOption=1);
 void startMongoDB();
 void stopMongoDB();
+
 std::string GetSyscoinTransactionDescription(const int op, std::string& responseEnglish, const char &type);
+
 bool BuildAliasIndexerHistoryJson(const CAliasIndex& alias, UniValue& oName);
+
 #endif // ALIAS_H
