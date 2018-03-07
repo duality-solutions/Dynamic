@@ -5,11 +5,12 @@
 #ifndef CERT_H
 #define CERT_H
 
-#include "rpcserver.h"
+#include "assetallocation.h"
 #include "dbwrapper.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "serialize.h"
-#include "assetallocation.h"
+
 class CWalletTx;
 class CTransaction;
 class CReserveKey;
@@ -17,14 +18,18 @@ class CCoinsViewCache;
 class Coin;
 class CBlock;
 class CAliasIndex;
+
 bool CheckCertInputs(const CTransaction &tx, int op, int nOut, const std::vector<std::vector<unsigned char> > &vvchArgs, const std::vector<unsigned char> &vvchAlias, bool fJustCheck, int nHeight, sorted_vector<std::vector<unsigned char> > &revertedCerts, std::string &errorMessage, bool dontaddtodb=false);
 bool DecodeCertTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
 bool DecodeAndParseCertTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch, char& type);
 bool DecodeCertScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch);
 bool IsCertOp(int op);
-void CertTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry);
-std::string certFromOp(int op);
 bool RemoveCertScriptPrefix(const CScript& scriptIn, CScript& scriptOut);
+
+void CertTxToJSON(const int op, const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash, UniValue &entry);
+
+std::string certFromOp(int op);
+
 class CCert {
 public:
 	std::vector<unsigned char> vchCert;
