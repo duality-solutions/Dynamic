@@ -5,13 +5,15 @@
 #ifndef OFFER_H
 #define OFFER_H
 
-#include <math.h>
-#include "rpcserver.h"
-#include "dbwrapper.h"
+#include "assetallocation.h"
 #include "chainparams.h"
+#include "dbwrapper.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "serialize.h"
-#include "assetallocation.h"
+
+#include <math.h>
+
 class CWalletTx;
 class CTransaction;
 class CReserveKey;
