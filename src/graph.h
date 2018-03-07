@@ -1,6 +1,11 @@
 #ifndef GRAPH_H
 #define GRAPH_H
+
+#include "miner.h"
+
+#include <unordered_map>
 #include <vector>
+
 #include <boost/graph/directed_graph.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/hawick_circuits.hpp>
@@ -8,9 +13,7 @@
 #include <boost/property_map/property_map.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
-#include <unordered_map>
-#include <vector>
-#include "miner.h"
+
 typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS > Graph;
 typedef boost::graph_traits<Graph> Traits;
 typedef typename Traits::vertex_descriptor vertex_descriptor;
