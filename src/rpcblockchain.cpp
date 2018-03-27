@@ -720,7 +720,6 @@ UniValue gettxout(const UniValue& params, bool fHelp)
             return NullUniValue;
         }
     }
-        return NullUniValue;
 
     BlockMap::iterator it = mapBlockIndex.find(pcoinsTip->GetBestBlock());
     CBlockIndex *pindex = it->second;
