@@ -348,7 +348,7 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
         std::vector<std::string> vecSplitScript;
         SeperateFluidOpString(verificationWithoutOpCode, vecSplitScript);
         if (vecSplitScript.size() > 1) {
-            if (strOperationCode == "OP_MINT" && vecSplitScript.size() == 6) {
+            if (strOperationCode == "OP_MINT" && vecSplitScript.size() >= 6) {
                 std::string strAmount = vecSplitScript[0];
                 std::string strTimeStamp = vecSplitScript[1];
                 CAmount fluidAmount;
@@ -357,7 +357,7 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
                 }
                 int64_t tokenTimeStamp;
                 if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", strTimeStamp)); 
+                    obj.push_back(Pair("timestamp", tokenTimeStamp)); 
                 }
                 obj.push_back(Pair("payment address", vecSplitScript[2]));
                 obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
@@ -373,7 +373,7 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
                 }
                 int64_t tokenTimeStamp;
                 if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", strTimeStamp)); 
+                    obj.push_back(Pair("timestamp", tokenTimeStamp)); 
                 }
                 obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
                 obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));

@@ -30,6 +30,33 @@ bool IsTransactionFluid(CScript txOut) {
            );
 }
 
+/** Initialise sovereign identities that are able to run fluid commands */
+std::vector<std::pair<std::string, CDynamicAddress>> CFluidParameters::InitialiseSovereignIdentities() {
+    std::vector<std::pair<std::string, CDynamicAddress>> x;
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
+        x.push_back(std::make_pair("CEO",       CDynamicAddress("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu")));
+        x.push_back(std::make_pair("CTO",       CDynamicAddress("DRoyjRoxP4qfeAiiZHX1dmSkbUJiBSXBt7")));
+        x.push_back(std::make_pair("CFO",       CDynamicAddress("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t")));
+        x.push_back(std::make_pair("COO",       CDynamicAddress("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH")));
+        x.push_back(std::make_pair("CDOO",      CDynamicAddress("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP")));
+    }
+    else if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+        x.push_back(std::make_pair("Test01",    CDynamicAddress("DSCex4e189aULrig3nLd42gVf7AbjTwnP5"))); //importprivatekey QVKXuZ2hSo2cT9BhkN3CApLuZYVsuzNvidJRt1ucyniHheZ2Pfq5
+        x.push_back(std::make_pair("Test02",    CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1 
+        x.push_back(std::make_pair("Test03",    CDynamicAddress("DN4KvqtXyygooPV3oha72TyBB5nqBbkxwj"))); //importprivatekey QWjTe6sCFVtKBsXfrYDyrHzn7eBeJktsQnWzfiANkMd9PhVM4Qnp
+        x.push_back(std::make_pair("Test04",    CDynamicAddress("DHVmS621KBBZJTJSxGDdLxoU7LCmpexWDa"))); //importprivatekey QScWuazWgWDTj8cXXz1YFKJW7mNJHJgMFY2FB6hkNyh3SJDUhPZt
+        x.push_back(std::make_pair("Test05",    CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU
+    }
+    else if (Params().NetworkIDString() == CBaseChainParams::REGTEST) {
+        x.push_back(std::make_pair("RegTest01", CDynamicAddress("DSCex4e189aULrig3nLd42gVf7AbjTwnP5"))); //importprivatekey QVKXuZ2hSo2cT9BhkN3CApLuZYVsuzNvidJRt1ucyniHheZ2Pfq5
+        x.push_back(std::make_pair("RegTest02", CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1 
+        x.push_back(std::make_pair("RegTest03", CDynamicAddress("DN4KvqtXyygooPV3oha72TyBB5nqBbkxwj"))); //importprivatekey QWjTe6sCFVtKBsXfrYDyrHzn7eBeJktsQnWzfiANkMd9PhVM4Qnp
+        x.push_back(std::make_pair("RegTest04", CDynamicAddress("DHVmS621KBBZJTJSxGDdLxoU7LCmpexWDa"))); //importprivatekey QScWuazWgWDTj8cXXz1YFKJW7mNJHJgMFY2FB6hkNyh3SJDUhPZt
+        x.push_back(std::make_pair("RegTest05", CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU 
+    }
+    return x;
+}
+
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     if (!inputKey.IsValid()) {
