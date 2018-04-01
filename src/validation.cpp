@@ -1255,26 +1255,32 @@ bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHea
 
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams)
 {
-    block.SetNull();
+    // Check for invalid block position and file.
+    if (pos.nFile > -1 && pos.nPos > 0) {
+        block.SetNull();
 
-    // Open history file to read
-    CAutoFile filein(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION);
-    if (filein.IsNull())
-        return error("ReadBlockFromDisk: OpenBlockFile failed for %s", pos.ToString());
+        // Open history file to read
+        CAutoFile filein(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION);
+        if (filein.IsNull())
+            return error("ReadBlockFromDisk: OpenBlockFile failed for %s", pos.ToString());
 
-    // Read block
-    try {
-        filein >> block;
+        // Read block
+        try {
+            filein >> block;
+        }
+        catch (const std::exception& e) {
+            return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
+        }
+
+        // Check the header
+        if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+
+        return true;
     }
-    catch (const std::exception& e) {
-        return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
+    else {
+        return false;
     }
-
-    // Check the header
-    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
-        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
-
-    return true;
 }
 
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
