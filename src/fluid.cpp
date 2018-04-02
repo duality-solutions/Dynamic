@@ -610,8 +610,12 @@ bool CFluid::ProvisionalCheckTransaction(const CTransaction &transaction) {
     return true;
 }
 
-bool CFluid::CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader) {
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader) {
     uint256 hash = blockHeader.GetHash();
+    return CheckTransactionToBlock(transaction, hash);
+}
+
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash) {
     if (mapBlockIndex.count(hash) == 0)
         return true;
 

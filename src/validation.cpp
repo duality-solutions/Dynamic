@@ -205,18 +205,14 @@ CBlockTreeDB *pblocktree = NULL;
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 {
-	CBlockIndex* pblockindex = chainActive[nBlockHeight-1];
-	
     if (tx.nLockTime == 0)
         return true;
+
     if ((int64_t)tx.nLockTime < ((int64_t)tx.nLockTime < LOCKTIME_THRESHOLD ? (int64_t)nBlockHeight : nBlockTime))
         return true;
     
     if (nBlockHeight >= fluid.FLUID_ACTIVATE_HEIGHT) {
 		if (!fluid.ProvisionalCheckTransaction(tx))
-			return false;
-		
-		if (!fluid.CheckTransactionToBlock(tx, pblockindex->GetBlockHeader()))
 			return false;
 		
 		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
@@ -3374,6 +3370,9 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
 
     // Check that all transactions are finalized
     for (const CTransaction& tx : block.vtx) {
+        if (!fluid.CheckTransactionToBlock(tx, pindexPrev->GetBlockHeader()))
+            return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
+
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
@@ -3387,13 +3386,6 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
         if (block.vtx[0].vin[0].scriptSig.size() < expect.size() ||
             !std::equal(expect.begin(), expect.end(), block.vtx[0].vin[0].scriptSig.begin())) {
             return state.DoS(100, error("%s: block height mismatch in coinbase", __func__), REJECT_INVALID, "bad-cb-height");
-        }
-    }
-
-    // Check that all transactions are finalized
-    for (const CTransaction& tx : block.vtx) {
-        if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
-            return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
     }
 

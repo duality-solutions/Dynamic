@@ -76,7 +76,9 @@ public:
 
     bool ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue);
 
-    bool CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader);
+    bool CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader);
+    bool CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash);
+
     bool ProvisionalCheckTransaction(const CTransaction &transaction);
     bool InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord);
     CDynamicAddress GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey);
