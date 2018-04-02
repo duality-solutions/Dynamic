@@ -64,20 +64,22 @@ public:
 
     bool GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer);
     bool GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &howMuch, bool txCheckPurpose=false);
-    bool GenericVerifyInstruction(const std::string consentToken, CDynamicAddress &signer, std::string &messageTokenKey, int whereToLook=1);
+    bool GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string& messageTokenKey, int whereToLook=1);
 
     bool ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp);
-    bool ParseMintKey(const int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose=false);
-    bool ProcessFluidToken(const std::string consentToken, std::vector<std::string> &ptrs, int strVecNo);
+    bool ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose=false);
+    bool ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo);
 
-    bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress &toMintAddress, CAmount& mintAmount);
-    bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch);
-    bool GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &howMuch);
+    bool GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount);
+    bool GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
+    bool GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& howMuch);
 
     bool ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue);
 
-    bool CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader);
-    bool ProvisionalCheckTransaction(const CTransaction &transaction);
+    bool CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader);
+    bool CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash);
+
+    bool ProvisionalCheckTransaction(const CTransaction& transaction);
     bool InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord);
     CDynamicAddress GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey);
 };

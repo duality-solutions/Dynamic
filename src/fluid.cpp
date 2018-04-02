@@ -243,7 +243,7 @@ bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t
     return true;
 }
 
-bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string> &ptrs, int strVecNo) {
+bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo) {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
 
     std::string message;
@@ -263,7 +263,7 @@ bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::
 }
 
 /** It gets a number from the ASM of an OP_CODE without signature verification */
-bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount &coinAmount, bool txCheckPurpose) {
+bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& coinAmount, bool txCheckPurpose) {
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(consentToken, ptrs, 1))
@@ -309,7 +309,7 @@ CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSi
 }
 
 /** Individually checks the validity of an instruction */
-bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string &messageTokenKey, int whereToLook)
+bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAddress& signer, std::string& messageTokenKey, int whereToLook)
 {
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     messageTokenKey = "";
@@ -331,7 +331,7 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
     return true;
 }
 
-bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress &destination, CAmount &coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
+bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(uniqueIdentifier, ptrs, 1))
@@ -363,73 +363,71 @@ bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress &destination, CAm
     return true;
 }
 
-bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress &toMintAddress, CAmount& mintAmount) {
-    CBlock block;
-
+static bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
+{
     if (pblockindex != nullptr) {
-        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
-            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+        // Check for invalid block position and file. 
+        const CDiskBlockPos pos = pblockindex->GetBlockPos();
+        if (pos.nFile > -1 && pos.nPos > 0) {
+            if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+                LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
+                return false;
+            }
+        }
+        else {
             return false;
         }
     } else {
         return false;
     }
-
-    for (const CTransaction& tx : block.vtx) {
-        for (const CTxOut& txout : tx.vout) {
-            if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
-                std::string message;
-                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                    return ParseMintKey(block.nTime, toMintAddress, mintAmount, ScriptToAsmStr(txout.scriptPubKey));
-            }
-        }
-    }
-
-    return false;
+    return true;
 }
 
-bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount &coinAmount) {
+bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount) {
 
     CBlock block;
-    if (pblockindex != nullptr) {
-        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
-            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
-            return false;
-        }
-    }  else {
-        return false;
-    }
-
-    for (const CTransaction& tx : block.vtx) {
-        for (const CTxOut& txout : tx.vout) {
-            if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
-                std::string message;
-                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
+    if (GetFluidBlock(pblockindex, block)) {
+        for (const CTransaction& tx : block.vtx) {
+            for (const CTxOut& txout : tx.vout) {
+                if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
+                    std::string message;
+                    if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                        return ParseMintKey(block.nTime, toMintAddress, mintAmount, ScriptToAsmStr(txout.scriptPubKey));
+                }
             }
         }
     }
     return false;
 }
 
-bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &coinAmount) {
+bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount) {
+
     CBlock block;
-
-    if (pblockindex != nullptr) {
-        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
-            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
-            return false;
+    if (GetFluidBlock(pblockindex, block)) {
+        for (const CTransaction& tx : block.vtx) {
+            for (const CTxOut& txout : tx.vout) {
+                if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
+                    std::string message;
+                    if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                        return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
+                }
+            }
         }
-    } else {
-        return false;
     }
+    return false;
+}
 
-    for (const CTransaction& tx : block.vtx) {
-        for (const CTxOut& txout : tx.vout) {
-            if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
-                std::string message;
-                if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
-                    return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
+bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount) {
+
+    CBlock block;
+    if (GetFluidBlock(pblockindex, block)) {
+        for (const CTransaction& tx : block.vtx) {
+            for (const CTxOut& txout : tx.vout) {
+                if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
+                    std::string message;
+                    if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
+                        return GenericParseNumber(ScriptToAsmStr(txout.scriptPubKey), block.nTime, coinAmount);
+                }
             }
         }
     }
@@ -437,23 +435,15 @@ bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount &c
 }
 
 void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord) {
+    
     CBlock block;
-    std::string message;
-
-    if (pblockindex != nullptr) {
-        if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
-            LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
-            return;
-        }
-    } else {
-        return;
-    }
-
-    for (const CTransaction& tx : block.vtx) {
-        for (const CTxOut& txout : tx.vout) {
-            if (IsTransactionFluid(txout.scriptPubKey)) {
-                if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
-                    LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
+    if (GetFluidBlock(pblockindex, block)) {
+        for (const CTransaction& tx : block.vtx) {
+            for (const CTxOut& txout : tx.vout) {
+                if (IsTransactionFluid(txout.scriptPubKey)) {
+                    if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
+                        LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
+                    }
                 }
             }
         }
@@ -572,7 +562,7 @@ CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode) 
     }
 }
 
-bool CFluid::ValidationProcesses(CValidationState &state, CScript txOut, CAmount txValue) {
+bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue) {
     std::string message;
     CAmount mintAmount;
     CDynamicAddress toMintAddress;
@@ -597,7 +587,7 @@ bool CFluid::ValidationProcesses(CValidationState &state, CScript txOut, CAmount
     return true;
 }
 
-bool CFluid::ProvisionalCheckTransaction(const CTransaction &transaction) {
+bool CFluid::ProvisionalCheckTransaction(const CTransaction& transaction) {
     for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
@@ -610,8 +600,12 @@ bool CFluid::ProvisionalCheckTransaction(const CTransaction &transaction) {
     return true;
 }
 
-bool CFluid::CheckTransactionToBlock(const CTransaction &transaction, const CBlockHeader& blockHeader) {
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader) {
     uint256 hash = blockHeader.GetHash();
+    return CheckTransactionToBlock(transaction, hash);
+}
+
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash) {
     if (mapBlockIndex.count(hash) == 0)
         return true;
 
