@@ -23,11 +23,18 @@
 
 // Identification codes for Fluid Protocol Transactions
 enum ProtocolCodes {
-	MINT_TX 			= 1,
-	DYNODE_MODFIY_TX 	= 2,
-	MINING_MODIFY_TX 	= 3,
-	
-	NO_TX = 0
+    MINT_TX                 =  1,
+    DYNODE_MODFIY_TX        =  2,
+    MINING_MODIFY_TX        =  3,
+    IDENTITY_NEW_TX         =  4,
+    IDENTITY_UPDATE_TX      =  5,
+    IDENTITY_DELETE_TX      =  6,
+    IDENTITY_ACTIVATE_TX    =  7,
+    CERTIFICATE_NEW_TX      =  8,
+    CERTIFICATE_UPDATE_TX   =  9,
+    CERTIFICATE_DELETE_TX   = 10,
+    CERTIFICATE_ACTIVATE_TX = 11,
+    NO_TX                   =  0
 };
 
 // Maximum number of bytes pushable to the stack
@@ -195,23 +202,27 @@ enum opcodetype
     OP_PUBKEYHASH = 0xfd,
     OP_PUBKEY = 0xfe,
 
-	// Fluid Autonomus Monetary Management System (FAM2S)
+    // Fluid Autonomus Monetary Management System (FAM2S)
     OP_MINT = 0xc0,
-	OP_REWARD_DYNODE = 0xc3,
-	OP_REWARD_MINING = 0xc4,
+    OP_REWARD_DYNODE = 0xc3,
+    OP_REWARD_MINING = 0xc4,
     OP_SWAP_SOVEREIGN_ADDRESS = 0xc5,
     OP_UPDATE_FEES = 0xc6,
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-    // identity alias system
+    // identity and certificate system
     OP_IDENTITY_NEW = 0xd1,
     OP_IDENTITY_DELETE = 0xd2,
     OP_IDENTITY_PAYMENT = 0xd3,
     OP_IDENTITY_ACTIVATE = 0xd4,
     OP_IDENTITY_UPDATE = 0xd5,
     OP_IDENTITY_MULTISIG = 0xd6,
-
+    OP_CERTIFICATE_NEW = 0xd7,
+    OP_CERTIFICATE_UPDATE = 0xd8,
+    OP_CERTIFICATE_DELETE = 0xd9,
+    OP_CERTIFICATE_ACTIVATE = 0xda,
+    OP_CERTIFICATE_MULTISIG = 0xdb,
     // dynamic extended reserved 
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -670,22 +681,64 @@ public:
         return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
     }
 
-	bool IsProtocolInstruction(ProtocolCodes code) const
+    bool IsProtocolInstruction(ProtocolCodes code) const
     {
-		switch(code) {
-			case MINT_TX:
-				return (size() > 0 && *begin() == OP_MINT);
-				break;
-			case DYNODE_MODFIY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_DYNODE);
-				break;
-			case MINING_MODIFY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_MINING);
-				break;
-			default:
-				throw std::runtime_error("Protocol code is invalid!");
-		}
-		return false;
+        switch(code) {
+            case MINT_TX:
+                return (size() > 0 && *begin() == OP_MINT);
+                break;
+            case DYNODE_MODFIY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_DYNODE);
+                break;
+            case MINING_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_MINING);
+                break;
+            default:
+                throw std::runtime_error("Protocol code is invalid!");
+        }
+        return false;
+    }
+    
+    bool IsIdentityScript(ProtocolCodes code) const
+    {
+        switch(code) {
+            case IDENTITY_NEW_TX:
+                return (size() > 0 && *begin() == OP_IDENTITY_NEW);
+                break;
+            case IDENTITY_UPDATE_TX:
+                return (size() > 0 && *begin() == OP_IDENTITY_UPDATE);
+                break;
+            case IDENTITY_DELETE_TX:
+                return (size() > 0 && *begin() == OP_IDENTITY_DELETE);
+                break;
+            case IDENTITY_ACTIVATE_TX:
+                return (size() > 0 && *begin() == OP_IDENTITY_ACTIVATE);
+                break;
+            default:
+                throw std::runtime_error("Identity code is invalid!");
+        }
+        return false;
+    }
+    
+    bool IsCertificateScript(ProtocolCodes code) const
+    {
+        switch(code) {
+            case CERTIFICATE_NEW_TX:
+                return (size() > 0 && *begin() == OP_CERTIFICATE_NEW);
+                break;
+            case CERTIFICATE_UPDATE_TX:
+                return (size() > 0 && *begin() == OP_CERTIFICATE_UPDATE);
+                break;
+            case CERTIFICATE_DELETE_TX:
+                return (size() > 0 && *begin() == OP_CERTIFICATE_DELETE);
+                break;
+            case CERTIFICATE_ACTIVATE_TX:
+                return (size() > 0 && *begin() == OP_CERTIFICATE_ACTIVATE);
+                break;
+            default:
+                throw std::runtime_error("Certificate code is invalid!");
+        }
+        return false;
     }
 
     void clear()

@@ -117,6 +117,7 @@ DYNAMIC_CORE_H = \
   hdchain.h \
   httprpc.h \
   httpserver.h \
+  identity.h \
   indirectmap.h \
   init.h \
   instantsend.h \
@@ -233,6 +234,7 @@ libdynamic_server_a_SOURCES = \
   governance-votedb.cpp \
   httprpc.cpp \
   httpserver.cpp \
+  identity.cpp \
   init.cpp \
   instantsend.cpp \
   merkleblock.cpp \
