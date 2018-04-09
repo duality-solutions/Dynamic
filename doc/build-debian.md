@@ -1,7 +1,7 @@
 # Debian 9 (Stretch) build guide for Dynamic
 
-NOTE: Lines ending in \ are part of a shell command that spreads over multiple 
-      lines, these can be copypasted as a whole (as opposed to line-by-line).
+**NOTE: Lines ending in \ are part of a shell command that spreads over multiple 
+lines, these can be copypasted as a whole (as opposed to line-by-line).**
 
 ## Update the system
 
@@ -16,7 +16,7 @@ apt-get -y dist-upgrade
 apt-get install build-essential autoconf automake libtool pkg-config git
 ```
 
-Reboot, autoconf for Dynamic might bitch about pkg-config otherwise
+Reboot, autoconf for Dynamic might complain about pkg-config otherwise.
 
 ```
 shutdown -r now
@@ -42,7 +42,7 @@ cd src
               --with-gui=no
 ```
 
-** NOTE: BUILDING Dynamic WITH LESS THAN 2GB OF RAM DOES NOT WORK!!! **
+**NOTE: BUILDING Dynamic WITH LESS THAN 2GB OF RAM DOES NOT WORK!!!**
 
 On systems with very little RAM (2GB) this CXXFLAGS cheat should fix
 memory-related build issues (i.e. Cannot allocate and the likes).
@@ -94,4 +94,23 @@ in the getinfo-output. If the numbers match, the installation is completed.
 
 ```
 dynamic-cli getinfo
+{
+  "version": 2020000,
+  "protocolversion": 70800,
+  "walletversion": 120200,
+  "balance": 0.00000000,
+  "privatesend_balance": 0.00000000,
+  "blocks": 73731, <- we're looking for this line right here
+  "timeoffset": 0,
+  "connections": 16,
+  "proxy": "127.0.0.1:9050",
+  "difficulty": 0.5382088449061717,
+  "testnet": false,
+  "keypoololdest": 1522174973,
+  "keypoolsize": 1999,
+  "paytxfee": 0.00000000,
+  "relayfee": 0.00001000,
+  "errors": ""
+}
+
 ```
