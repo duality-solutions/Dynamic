@@ -2765,7 +2765,6 @@ extern UniValue importprunedfunds(const UniValue& params, bool fHelp);
 extern UniValue removeprunedfunds(const UniValue& params, bool fHelp);
 
 extern UniValue dumphdinfo(const UniValue& params, bool fHelp);
-extern UniValue importelectrumwallet(const UniValue& params, bool fHelp);
 
 extern UniValue instantsendtoaddress(const UniValue& params, bool fHelp);
 extern UniValue privatesend(const UniValue& params, bool fHelp);
