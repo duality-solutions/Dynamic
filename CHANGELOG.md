@@ -14,6 +14,51 @@
 * [RPC] setnetworkactive
 * httpserver: drop boost
 * Deprecate GetWork()
+* [Fluid] Update sovereign identities addresses for testnet
+* Update guiutil.cpp
+* [RPC] Fix gettxout
+* Update ReadBlockFromDisk
+* Fix Fluid Check
+* First version of Debian build howto
+* Formatting fixes, corrections
+* Removed exec flags where unneeded
+* trivial: remove unnecessary variable fDaemon
+* Fix some locks in net_processing.cpp
+* Tiny cleanup in configure.ac
+* Fix init segfault where InitLoadWallet() calls ATMP before genesis
+* remove new int and make i an unsigned int to supress build warning
+* fix op order to append first alert
+* Remove recommendedMinimum from SetMaxOutboundTarget
+* [init, wallet] ParameterInteraction() if wallet enabled
+* Specify Protobuf version 2 in paymentrequest.proto
+* net: fix maxuploadtarget setting
+* Trivial: UndoReadFromDisk works on undo files (rev), not on block files
+* Move static global randomizer seeds into CConnman
+* [init] Get rid of some ENABLE_WALLET
+* Remove last reference to CWalletDB from accounting_tests.cpp/Remove pwalletdb parameter from CWallet::AddAccountingEntry/Add CWallet::ReorderTransactions and use in accounting_tests.cpp/Add CWallet::ListAccountCreditDebit
+* [Qt] RPC-Console: support nested commands and simple value queries
+* [Wallet] remove unused ThreadFlushWalletDB from removeprunedfunds
+* init: Get rid of fDisableWallet
+* [qt] WalletModel: Expose disablewallet
+* Do not set an addr time penalty when a peer advertises itself.
+* Check for high-entropy ASLR
+* Move AutoBackup initialization into CWallet::InitAutoBackup
+* [mempool] Fix relaypriority calculation error
+* [depends] Fix Qt compilation with Xcode 8
+* [rpc] throw JSONRPCError when utxo set can not be read
+* Remove unused statements in serialization
+* dynamicd: Daemonize using daemon(3)
+* Decouple GetConfigFile and ReadConfigFile from global mapArgs
+* deprecate begin/end ptrs
+* net: fix a few cases where messages were sent rather than dropped upon disconnection
+* Trivial: RPC: getblockchaininfo help: pruneheight is the lowest, not highest, block
+* Sync dynamic-tx with tx version policy
+* RPC: Chainparams: Remove Chainparams::fTestnetToBeDeprecatedFieldRPC
+* Kill insecure_random and associated global state
+* Cleanup enums in protocol.h
+* Add preciousblock RPC
+* Report NodeId in misbehaving debug
+* Remove InsecureRand
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
