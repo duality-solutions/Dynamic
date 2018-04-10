@@ -50,8 +50,6 @@ esac
 
 dnl Require C++11 compiler (no GNU extensions)
 AX_CXX_COMPILE_STDCXX([11], [ext], [mandatory], [nodefault])
-
-
 dnl Check if -latomic is required for <std::atomic>
 CHECK_ATOMIC
  
