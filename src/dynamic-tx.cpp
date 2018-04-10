@@ -171,7 +171,7 @@ static void RegisterLoad(const std::string& strInput)
 static void MutateTxVersion(CMutableTransaction& tx, const std::string& cmdVal)
 {
     int64_t newVersion = atoi64(cmdVal);
-    if (newVersion < 1 || newVersion > CTransaction::CURRENT_VERSION)
+    if (newVersion < 1 || newVersion > CTransaction::MAX_STANDARD_VERSION)
         throw std::runtime_error("Invalid TX version requested");
 
     tx.nVersion = (int) newVersion;
