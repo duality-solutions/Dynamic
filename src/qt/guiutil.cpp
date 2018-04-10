@@ -435,7 +435,7 @@ void openDebugLogfile()
 
 void openConfigfile()
 {
-    boost::filesystem::path pathConfig = GetConfigFile();
+    boost::filesystem::path pathConfig = GetConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
 
     /* Open dynamic.conf with the associated application */
     if (boost::filesystem::exists(pathConfig))

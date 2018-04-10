@@ -632,7 +632,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     try {
-        ReadConfigFile(mapArgs, mapMultiArgs);
+        ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME), mapArgs, mapMultiArgs);
     } catch (const std::exception& e) {
         QMessageBox::critical(0, QObject::tr("Dynamic"),
                               QObject::tr("Error: Cannot parse configuration file: %1. Only use key=value syntax.").arg(e.what()));
