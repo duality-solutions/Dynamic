@@ -199,7 +199,6 @@ public:
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
-        fTestnetToBeDeprecatedFieldRPC = false;
         fAllowMultipleAddressesFromGroup = false;
 
         nPoolMaxTransactions = 3;
@@ -309,7 +308,6 @@ public:
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
         fMineBlocksOnDemand = false;
-        fTestnetToBeDeprecatedFieldRPC = true;
         fAllowMultipleAddressesFromGroup = false;
 
         nPoolMaxTransactions = 3;
@@ -401,7 +399,6 @@ public:
         fDefaultConsistencyChecks = true;
         fRequireStandard = false;
         fMineBlocksOnDemand = true;
-        fTestnetToBeDeprecatedFieldRPC = false;
         fAllowMultipleAddressesFromGroup = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
