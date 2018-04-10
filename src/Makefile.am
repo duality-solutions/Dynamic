@@ -98,6 +98,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  directory.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -117,7 +118,6 @@ DYNAMIC_CORE_H = \
   hdchain.h \
   httprpc.h \
   httpserver.h \
-  identity.h \
   indirectmap.h \
   init.h \
   instantsend.h \
@@ -219,6 +219,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  directory.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -234,7 +235,6 @@ libdynamic_server_a_SOURCES = \
   governance-votedb.cpp \
   httprpc.cpp \
   httpserver.cpp \
-  identity.cpp \
   init.cpp \
   instantsend.cpp \
   merkleblock.cpp \

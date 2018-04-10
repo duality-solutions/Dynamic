@@ -26,10 +26,10 @@ enum ProtocolCodes {
     MINT_TX                 =  1,
     DYNODE_MODFIY_TX        =  2,
     MINING_MODIFY_TX        =  3,
-    IDENTITY_NEW_TX         =  4,
-    IDENTITY_UPDATE_TX      =  5,
-    IDENTITY_DELETE_TX      =  6,
-    IDENTITY_ACTIVATE_TX    =  7,
+    DIRECTORY_NEW_TX        =  4,
+    DIRECTORY_UPDATE_TX     =  5,
+    DIRECTORY_DELETE_TX     =  6,
+    DIRECTORY_ACTIVATE_TX   =  7,
     CERTIFICATE_NEW_TX      =  8,
     CERTIFICATE_UPDATE_TX   =  9,
     CERTIFICATE_DELETE_TX   = 10,
@@ -211,13 +211,13 @@ enum opcodetype
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-    // identity and certificate system
-    OP_IDENTITY_NEW = 0xd1,
-    OP_IDENTITY_DELETE = 0xd2,
-    OP_IDENTITY_PAYMENT = 0xd3,
-    OP_IDENTITY_ACTIVATE = 0xd4,
-    OP_IDENTITY_UPDATE = 0xd5,
-    OP_IDENTITY_MULTISIG = 0xd6,
+    // directory access, user identity and certificate system
+    OP_DIRECTORY_NEW = 0xd1,
+    OP_DIRECTORY_DELETE = 0xd2,
+    OP_DIRECTORY_PAYMENT = 0xd3,
+    OP_DIRECTORY_ACTIVATE = 0xd4,
+    OP_DIRECTORY_UPDATE = 0xd5,
+    OP_DIRECTORY_MULTISIG = 0xd6,
     OP_CERTIFICATE_NEW = 0xd7,
     OP_CERTIFICATE_UPDATE = 0xd8,
     OP_CERTIFICATE_DELETE = 0xd9,
@@ -699,23 +699,23 @@ public:
         return false;
     }
     
-    bool IsIdentityScript(ProtocolCodes code) const
+    bool IsDirectoryScript(ProtocolCodes code) const
     {
         switch(code) {
-            case IDENTITY_NEW_TX:
-                return (size() > 0 && *begin() == OP_IDENTITY_NEW);
+            case DIRECTORY_NEW_TX:
+                return (size() > 0 && *begin() == OP_DIRECTORY_NEW);
                 break;
-            case IDENTITY_UPDATE_TX:
-                return (size() > 0 && *begin() == OP_IDENTITY_UPDATE);
+            case DIRECTORY_UPDATE_TX:
+                return (size() > 0 && *begin() == OP_DIRECTORY_UPDATE);
                 break;
-            case IDENTITY_DELETE_TX:
-                return (size() > 0 && *begin() == OP_IDENTITY_DELETE);
+            case DIRECTORY_DELETE_TX:
+                return (size() > 0 && *begin() == OP_DIRECTORY_DELETE);
                 break;
-            case IDENTITY_ACTIVATE_TX:
-                return (size() > 0 && *begin() == OP_IDENTITY_ACTIVATE);
+            case DIRECTORY_ACTIVATE_TX:
+                return (size() > 0 && *begin() == OP_DIRECTORY_ACTIVATE);
                 break;
             default:
-                throw std::runtime_error("Identity code is invalid!");
+                throw std::runtime_error("Directory code is invalid!");
         }
         return false;
     }

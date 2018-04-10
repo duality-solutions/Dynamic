@@ -2,22 +2,22 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "identity.h"
+#include "directory.h"
 
 #include "fluid.h"
 #include "validation.h"
 
-CIdentityDB *pIdentityDB = NULL;
+CDirectoryDB *pDirectoryDB = NULL;
 
-bool IsIdentityTransaction(CScript txOut) {
-    return (txOut.IsIdentityScript(IDENTITY_NEW_TX)
-            || txOut.IsIdentityScript(IDENTITY_UPDATE_TX)
-            || txOut.IsIdentityScript(IDENTITY_DELETE_TX)
-            || txOut.IsIdentityScript(IDENTITY_ACTIVATE_TX)
+bool IsDirectoryTransaction(CScript txOut) {
+    return (txOut.IsDirectoryScript(DIRECTORY_NEW_TX)
+            || txOut.IsDirectoryScript(DIRECTORY_UPDATE_TX)
+            || txOut.IsDirectoryScript(DIRECTORY_DELETE_TX)
+            || txOut.IsDirectoryScript(DIRECTORY_ACTIVATE_TX)
            );
 }
 
-bool GetIdentityTransaction(int nHeight, const uint256 &hash, CTransaction &txOut, const Consensus::Params& consensusParams)
+bool GetDirectoryTransaction(int nHeight, const uint256 &hash, CTransaction &txOut, const Consensus::Params& consensusParams)
 {
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
@@ -39,7 +39,7 @@ bool GetIdentityTransaction(int nHeight, const uint256 &hash, CTransaction &txOu
 }
 
 /*
-std::vector<std::pair<std::string, std::vector<unsigned char>>> CIdentityParameters::InitialiseCoreIdentities()
+std::vector<std::pair<std::string, std::vector<unsigned char>>> CIdentityParameters::InitialiseAdminOwners()
 {
 
 
