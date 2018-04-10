@@ -576,10 +576,10 @@ dynode_info_t CDynodeMan::FindRandomNotInVec(const std::vector<COutPoint> &vecTo
         vpDynodesShuffled.push_back(&dnpair.second);
     }
 
-    InsecureRand insecureRand;
+    FastRandomContext insecure_rand;
 
     // shuffle pointers
-    std::random_shuffle(vpDynodesShuffled.begin(), vpDynodesShuffled.end(), insecureRand);
+    std::random_shuffle(vpDynodesShuffled.begin(), vpDynodesShuffled.end(), insecure_rand);
     bool fExclude;
 
     // loop through
