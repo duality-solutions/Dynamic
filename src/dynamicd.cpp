@@ -40,8 +40,6 @@
  * Use the buttons <code>Namespaces</code>, <code>Classes</code> or <code>Files</code> at the top of the page to start navigating the code.
  */
 
-static bool fDaemon;
-
 void WaitForShutdown(boost::thread_group* threadGroup)
 {
     bool fShutdown = ShutdownRequested();
@@ -143,8 +141,7 @@ bool AppInit(int argc, char* argv[])
             exit(EXIT_FAILURE);
         }
 #ifndef WIN32
-        fDaemon = GetBoolArg("-daemon", false);
-        if (fDaemon)
+        if (GetBoolArg("-daemon", false))
         {
             fprintf(stdout, "Dynamic server starting\n");
 
