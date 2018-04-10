@@ -986,8 +986,7 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
                          wtxIn.hashBlock.ToString());
         }
         AddToSpends(hash);
-        int size = wtx.vout.size();
-        for(int i = 0; i < size; ++i) {
+        for(unsigned int i = 0; i < wtx.vout.size(); ++i) {
             if (IsMine(wtx.vout[i]) && !IsSpent(hash, i)) {
                 setWalletUTXO.insert(COutPoint(hash, i));
             }
