@@ -777,6 +777,7 @@ public:
      * @return next transaction order id
      */
     int64_t IncOrderPosNext(CWalletDB *pwalletdb = NULL);
+    DBErrors ReorderTransactions();
     bool AccountMove(std::string strFrom, std::string strTo, CAmount nAmount, std::string strComment = "");
 
     void MarkDirty();
@@ -822,7 +823,9 @@ public:
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
     bool ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecAmounts);
 
-    bool AddAccountingEntry(const CAccountingEntry&, CWalletDB & pwalletdb);
+    void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& entries);
+    bool AddAccountingEntry(const CAccountingEntry&);
+    bool AddAccountingEntry(const CAccountingEntry&, CWalletDB *pwalletdb);
 
     static CFeeRate minTxFee;
     static CFeeRate fallbackFee;
