@@ -966,6 +966,9 @@ public:
     /* Wallets parameter interaction */
     static bool ParameterInteraction();
 
+    /* Initialize AutoBackup functionality */
+    static bool InitAutoBackup();
+
     bool BackupWallet(const std::string& strDest);
 
     /**
