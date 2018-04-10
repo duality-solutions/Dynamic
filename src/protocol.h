@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <string>
 
-#define MESSAGE_START_SIZE 4
-
 /** Message header.
  * (4) message start.
  * (12) command.
@@ -31,6 +29,16 @@
 class CMessageHeader
 {
 public:
+    enum {
+        MESSAGE_START_SIZE = 4,
+        COMMAND_SIZE = 12,
+        MESSAGE_SIZE_SIZE = 4,
+        CHECKSUM_SIZE = 4,
+
+        MESSAGE_SIZE_OFFSET = MESSAGE_START_SIZE + COMMAND_SIZE,
+        CHECKSUM_OFFSET = MESSAGE_SIZE_OFFSET + MESSAGE_SIZE_SIZE,
+        HEADER_SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE
+    };
     typedef unsigned char MessageStartChars[MESSAGE_START_SIZE];
 
     CMessageHeader(const MessageStartChars& pchMessageStartIn);
@@ -50,17 +58,6 @@ public:
         READWRITE(FLATDATA(pchChecksum));
     }
 
-    // TODO: make private (improves encapsulation)
-public:
-    enum {
-        COMMAND_SIZE = 12,
-        MESSAGE_SIZE_SIZE = sizeof(int),
-        CHECKSUM_SIZE = sizeof(int),
-
-        MESSAGE_SIZE_OFFSET = MESSAGE_START_SIZE + COMMAND_SIZE,
-        CHECKSUM_OFFSET = MESSAGE_SIZE_OFFSET + MESSAGE_SIZE_SIZE,
-        HEADER_SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE
-    };
     char pchMessageStart[MESSAGE_START_SIZE];
     char pchCommand[COMMAND_SIZE];
     unsigned int nMessageSize;
@@ -313,6 +310,36 @@ public:
     unsigned int nTime;
 };
 
+/** getdata / inv message types.
+ * These numbers are defined by the protocol. When adding a new value, be sure
+ * to mention it in the respective BIP.
+ */
+enum GetDataMsg {
+    UNDEFINED = 0,
+    MSG_TX = 1,
+    MSG_BLOCK = 2,
+    // The following can only occur in getdata. Invs always use TX or BLOCK.
+    MSG_FILTERED_BLOCK = 3,
+    // Dash message types
+    // NOTE: declare non-implmented here, we must keep this enum consistent and backwards compatible
+    MSG_TXLOCK_REQUEST = 4,
+    MSG_TXLOCK_VOTE = 5,
+    MSG_SPORK = 6,
+    MSG_DYNODE_PAYMENT_VOTE = 7,
+    MSG_DYNODE_PAYMENT_BLOCK = 8, // reusing, was MSG_DYNODE_SCANNING_ERROR previously
+    MSG_BUDGET_VOTE = 9, // depreciated 
+    MSG_BUDGET_PROPOSAL = 10, // depreciated
+    MSG_BUDGET_FINALIZED = 11, // depreciated
+    MSG_BUDGET_FINALIZED_VOTE = 12, // depreciated
+    MSG_DYNODE_QUORUM = 13, // not implemented
+    MSG_DYNODE_ANNOUNCE = 14,
+    MSG_DYNODE_PING = 15,
+    MSG_PSTX = 16,
+    MSG_GOVERNANCE_OBJECT = 17,
+    MSG_GOVERNANCE_OBJECT_VOTE = 18,
+    MSG_DYNODE_VERIFY = 19,
+};
+
 /** inv message data */
 class CInv
 {
@@ -340,28 +367,6 @@ public:
 public:
     int type;
     uint256 hash;
-};
-
-enum {
-    MSG_TX = 1,
-    MSG_BLOCK,
-    // Nodes may always request a MSG_FILTERED_BLOCK in a getdata, however,
-    // MSG_FILTERED_BLOCK should not appear in any invs except as a part of getdata.
-    MSG_FILTERED_BLOCK,
-    // Dynamic message types
-    // NOTE: declare non-implmented here, we must keep this enum consistent and backwards compatible
-    MSG_TXLOCK_REQUEST,
-    MSG_TXLOCK_VOTE,
-    MSG_SPORK,
-    MSG_DYNODE_PAYMENT_VOTE,
-    MSG_DYNODE_PAYMENT_BLOCK,
-    MSG_DYNODE_QUORUM, // not implemented
-    MSG_DYNODE_ANNOUNCE,
-    MSG_DYNODE_PING,
-    MSG_PSTX,
-    MSG_GOVERNANCE_OBJECT,
-    MSG_GOVERNANCE_OBJECT_VOTE,
-    MSG_DYNODE_VERIFY,
 };
 
 #endif // DYNAMIC_PROTOCOL_H
