@@ -1060,9 +1060,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     RegisterAllCoreRPCCommands(tableRPC);
 #ifdef ENABLE_WALLET
-    bool fDisableWallet = GetBoolArg("-disablewallet", false);
-    if (!fDisableWallet)
-        RegisterWalletRPCCommands(tableRPC);
+    RegisterWalletRPCCommands(tableRPC);
 #endif
 
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
@@ -1090,9 +1088,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
 
 #ifdef ENABLE_WALLET
-    if (!fDisableWallet && !CWallet::ParameterInteraction())
+    if (!CWallet::ParameterInteraction())
         return false;
-    std::string strWalletFile = GetArg("-wallet", DEFAULT_WALLET_DAT);
 #endif // ENABLE_WALLET
 
     fIsBareMultisigStd = GetBoolArg("-permitbaremultisig", DEFAULT_PERMIT_BAREMULTISIG);
@@ -1196,27 +1193,26 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 5: Backup wallet and verify wallet database integrity
 #ifdef ENABLE_WALLET
-    if (!fDisableWallet) {
-        std::string strWarning;
-        std::string strError;
+    std::string strWarning;
+    std::string strError;
 
-        nWalletBackups = GetArg("-createwalletbackups", 10);
-        nWalletBackups = std::max(0, std::min(10, nWalletBackups));
+    nWalletBackups = GetArg("-createwalletbackups", 10);
+    nWalletBackups = std::max(0, std::min(10, nWalletBackups));
 
-        if(!AutoBackupWallet(NULL, strWalletFile, strWarning, strError)) {
-            if (!strWarning.empty())
-                InitWarning(strWarning);
-            if (!strError.empty())
-                return InitError(strError);
-        }
+    std::string strWalletFile = GetArg("-wallet", DEFAULT_WALLET_DAT);
 
-        if (!CWallet::Verify())
-            return false;
+    if(!AutoBackupWallet(NULL, strWalletFile, strWarning, strError)) {
+        if (!strWarning.empty())
+            InitWarning(strWarning);
+        if (!strError.empty())
+            return InitError(strError);
+    }
+
+    if (!CWallet::Verify())
+        return false;
 
     // Initialize KeePass Integration
     keePassInt.init();
-
-    } // (!fDisableWallet)
 #endif // ENABLE_WALLET
     // ********************************************************* Step 6: network initialization
 
@@ -1550,17 +1546,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
-    if (fDisableWallet) {
-        pwalletMain = NULL;
-        LogPrintf("Wallet disabled!\n");
-    } else {
-        CWallet::InitLoadWallet();
-        if (!pwalletMain)
-            return false;
-    }
-#else // ENABLE_WALLET
+    if (!CWallet::InitLoadWallet())
+        return false;
+#else
     LogPrintf("No wallet support compiled in!\n");
-#endif // !ENABLE_WALLET
+#endif
 
     // ********************************************************* Step 9: data directory maintenance
 
