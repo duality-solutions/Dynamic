@@ -581,7 +581,7 @@ static void WriteConfigFile(FILE* configFile)
     fputs (rpcPort.c_str(), configFile);
     fputs (port.c_str(), configFile);
     fclose(configFile);
-    ReadConfigFile(mapArgs, mapMultiArgs);
+    ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME), mapArgs, mapMultiArgs);
 }
 
 const boost::filesystem::path &GetDataDir(bool fNetSpecific)
@@ -648,9 +648,9 @@ void ClearDatadirCache()
     pathCachedNetSpecific = boost::filesystem::path();
 }
 
-boost::filesystem::path GetConfigFile()
+boost::filesystem::path GetConfigFile(const std::string& confPath)
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
+    boost::filesystem::path pathConfigFile(confPath);
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir(false) / pathConfigFile;
 
@@ -660,18 +660,19 @@ boost::filesystem::path GetConfigFile()
 boost::filesystem::path GetDynodeConfigFile()
 {
     boost::filesystem::path pathConfigFile(GetArg("-dnconf", "dynode.conf"));
-    if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir() / pathConfigFile;
+    if (!pathConfigFile.is_complete())
+        pathConfigFile = GetDataDir() / pathConfigFile;
     return pathConfigFile;
 }
 
-void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
+void ReadConfigFile(const std::string& confPath,
+                    std::map<std::string, std::string>& mapSettingsRet,
                     std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet)
 {
-    boost::filesystem::ifstream streamConfig(GetConfigFile());
-
+    boost::filesystem::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good()){
         // Create dynamic.conf if it does not exist
-        FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
+        FILE* configFile = fopen(GetConfigFile(confPath).string().c_str(), "a");
         if (configFile != NULL) {
             // Write dynamic.conf file with random username and password.
             WriteConfigFile(configFile);
