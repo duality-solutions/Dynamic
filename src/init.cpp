@@ -385,7 +385,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-conf=<file>", strprintf(_("Specify configuration file (default: %s)"), DYNAMIC_CONF_FILENAME));
     if (mode == HMM_DYNAMICD)
     {
-#ifndef WIN32
+#if HAVE_DECL_DAEMON
         strUsage += HelpMessageOpt("-daemon", _("Run in the background as a daemon and accept commands"));
 #endif
     }
