@@ -40,58 +40,17 @@ public:
         Rw = 18000 * (Rw & 65535) + (Rw >> 16);
         return (Rw << 16) + Rz;
     }
+
+    uint32_t rand32(uint32_t nMax) {
+        return rand32() % nMax;
+    }
+
+    uint32_t operator()(uint32_t nMax) {
+        return rand32(nMax);
+    }
+
     uint32_t Rz;
     uint32_t Rw;
 };
-
-/**
- * Seed insecure_rand using the random pool.
- * @param Deterministic Use a deterministic seed
- */
-void seed_insecure_rand(bool fDeterministic = false);
-
-/**
- * MWC RNG of George Marsaglia
- * This is intended to be fast. It has a period of 2^59.3, though the
- * least significant 16 bits only have a period of about 2^30.1.
- *
- * @return random value
- */
-extern uint32_t insecure_rand_Rz;
-extern uint32_t insecure_rand_Rw;
-static inline uint32_t insecure_rand(void)
-{
-    insecure_rand_Rz = 36969 * (insecure_rand_Rz & 65535) + (insecure_rand_Rz >> 16);
-    insecure_rand_Rw = 18000 * (insecure_rand_Rw & 65535) + (insecure_rand_Rw >> 16);
-    return (insecure_rand_Rw << 16) + insecure_rand_Rz;
-}
-
-/**
- * PRNG initialized from secure entropy based RNG
- */
-class InsecureRand
-{
-private:
-    uint32_t nRz;
-    uint32_t nRw;
-    bool fDeterministic;
- 
- public:
-     InsecureRand(bool _fDeterministic = false);
- 
-    /**
-     * MWC RNG of George Marsaglia
-     * This is intended to be fast. It has a period of 2^59.3, though the
-     * least significant 16 bits only have a period of about 2^30.1.
-     *
-     * @return random value < nMax
-     */
-     int64_t operator()(int64_t nMax)
-     {
-         nRz = 36969 * (nRz & 65535) + (nRz >> 16);
-         nRw = 18000 * (nRw & 65535) + (nRw >> 16);
-         return ((nRw << 16) + nRz) % nMax;
-     }
- };
 
 #endif // DYNAMIC_RANDOM_H
