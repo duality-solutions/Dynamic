@@ -65,7 +65,6 @@ public:
     {
         LOCK(cs_accounts);
         READWRITE(this->nVersion);
-        nVersion = this->nVersion;
         READWRITE(id);
         READWRITE(fCrypted);
         READWRITE(vchSeed);
