@@ -876,7 +876,7 @@ UniValue processImport(const UniValue& data) {
                 CDynamicAddress pubKeyAddress = CDynamicAddress(pubKey.GetID());
 
                 // Consistency check.
-                if (!isScript && pubKeyAddress.Get() != address.Get()) {
+                if (!isScript && !(pubKeyAddress.Get() == address.Get())) {
                     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Consistency check failed");
                 }
 
@@ -887,7 +887,7 @@ UniValue processImport(const UniValue& data) {
 
                     if (ExtractDestination(script, destination)) {
                         scriptAddress = CDynamicAddress(destination);
-                        if (scriptAddress.Get() != pubKeyAddress.Get()) {
+                        if (!(scriptAddress.Get() == pubKeyAddress.Get())) {
                             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Consistency check failed");
                         }
                     }
@@ -949,7 +949,7 @@ UniValue processImport(const UniValue& data) {
                 CDynamicAddress pubKeyAddress = CDynamicAddress(pubKey.GetID());
 
                 // Consistency check.
-                if (!isScript && pubKeyAddress.Get() != address.Get()) {
+                if (!isScript && !(pubKeyAddress.Get() == address.Get())) {
                     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Consistency check failed");
                 }
 
@@ -960,7 +960,7 @@ UniValue processImport(const UniValue& data) {
 
                     if (ExtractDestination(script, destination)) {
                         scriptAddress = CDynamicAddress(destination);
-                        if (scriptAddress.Get() != pubKeyAddress.Get()) {
+                        if (!(scriptAddress.Get() == pubKeyAddress.Get())) {
                             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Consistency check failed");
                         }
                     }
