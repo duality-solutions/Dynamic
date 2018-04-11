@@ -1,15 +1,15 @@
 #include "miningpage.h"
 #include "ui_miningpage.h"
 
-#include "rpcserver.h"
+#include "miner.h"
+#include "net.h"
 #include "util.h"
+#include "utiltime.h"
 #include "validation.h"
 #include "walletmodel.h"
 
 #include <boost/thread.hpp>
 #include <stdio.h>
-
-extern UniValue GetNetworkHashPS(int lookup, int height);
 
 MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
@@ -80,29 +80,9 @@ void MiningPage::updateUI()
 void MiningPage::restartMining(bool fGenerate)
 {
     int nThreads = ui->sliderCores->value();
-
     mapArgs["-genproclimit"] = QString("%1").arg(nThreads).toUtf8().data();
 
-    // unlock wallet before mining
-    if (fGenerate && !hasMiningprivkey && !unlockContext.get())
-    {
-        this->unlockContext.reset(new WalletModel::UnlockContext(model->requestUnlock()));
-        if (!unlockContext->isValid())
-        {
-            unlockContext.reset(NULL);
-            return;
-        }
-    }
-
-    json_spirit::Array Args;
-    Args.push_back(fGenerate);
-    Args.push_back(nThreads);
-    setgenerate(Args, false);
-
-    // lock wallet after mining
-    if (!fGenerate && !hasMiningprivkey)
-        unlockContext.reset(NULL);
-
+    GenerateDynamics(true, nThreads, Params(), *g_connman);
     updateUI();
 }
 
@@ -116,7 +96,7 @@ void MiningPage::switchMining()
     restartMining(!GetBoolArg("-gen", false));
 }
 
-static QString formatTimeInterval(CBigNum t)
+static QString formatTimeInterval(arith_uint256 time)
 {
     enum  EUnit { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, NUM_UNITS };
 
@@ -140,14 +120,14 @@ static QString formatTimeInterval(CBigNum t)
         "second"
     };
 
-    if (t > 0xFFFFFFFF)
+    if (time > 0xFFFFFFFF)
     {
-        t /= SecondsPerUnit[YEAR];
-        return QString("%1 years").arg(t.ToString(10).c_str());
+        time /= SecondsPerUnit[YEAR];
+        return QString("%1 years").arg(time.ToString().c_str());
     }
     else
     {
-        unsigned int t32 = t.getuint();
+        unsigned int t32 = (unsigned int)time.GetCompact();
 
         int Values[NUM_UNITS];
         for (int i = 0; i < NUM_UNITS; i++)
@@ -185,23 +165,68 @@ static QString formatHashrate(qint64 n)
     return QString("%1 %2H/s").arg(v, 0, 'f', 2).arg(prefix);
 }
 
+static int64_t GetNetworkHashPS(int lookup, int height) {
+    CBlockIndex *pb = chainActive.Tip();
+
+    if (height >= 0 && height < chainActive.Height())
+        pb = chainActive[height];
+
+    if (pb == NULL || !pb->nHeight)
+        return 0;
+
+    // If lookup is -1, then use blocks since last difficulty change.
+    if (lookup <= 0)
+        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+
+    // If lookup is larger than chain, then set it to chain length.
+    if (lookup > pb->nHeight)
+        lookup = pb->nHeight;
+
+    CBlockIndex *pb0 = pb;
+    int64_t minTime = pb0->GetBlockTime();
+    int64_t maxTime = minTime;
+    for (int i = 0; i < lookup; i++) {
+        pb0 = pb0->pprev;
+        int64_t time = pb0->GetBlockTime();
+        minTime = std::min(time, minTime);
+        maxTime = std::max(time, maxTime);
+    }
+
+    // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
+    if (minTime == maxTime)
+        return 0;
+
+    arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
+    int64_t timeDiff = maxTime - minTime;
+
+    return workDiff.getdouble() / timeDiff;
+}
+
+static int64_t GetHashRate(){
+
+    if (GetTimeMillis() - nHPSTimerStart > 8000)
+        return (int64_t)0;
+    return (int64_t)dHashesPerSec;
+}
+
 void MiningPage::timerEvent(QTimerEvent *)
 {
-    qint64 NetworkHashrate = GetNetworkHashPS(120, -1).get_int64();
-    qint64 Hashrate = GetBoolArg("-gen", false)? gethashespersec(json_spirit::Array(), false).get_int64() : 0;
-
+    qint64 NetworkHashrate = GetNetworkHashPS(120, -1);
+    qint64 Hashrate = GetHashRate();
+   
+    ui->labelNethashrate->setText(formatHashrate(NetworkHashrate));
+    ui->labelYourHashrate->setText(formatHashrate(Hashrate));
+    
     QString NextBlockTime;
     if (Hashrate == 0)
         NextBlockTime = QChar(L'∞');
     else
     {
-        CBigNum Target;
+        arith_uint256 Target;
         Target.SetCompact(chainActive.Tip()->nBits);
-        CBigNum ExpectedTime = (CBigNum(1) << 256)/(Target*Hashrate);
+        arith_uint256 ExpectedTime = (arith_uint256(1) << 256)/(Target*Hashrate);
         NextBlockTime = formatTimeInterval(ExpectedTime);
     }
-
-    ui->labelNethashrate->setText(formatHashrate(NetworkHashrate));
-    ui->labelYourHashrate->setText(formatHashrate(Hashrate));
+    
     ui->labelNextBlock->setText(NextBlockTime);
 }
