@@ -59,6 +59,23 @@
 * Add preciousblock RPC
 * Report NodeId in misbehaving debug
 * Remove InsecureRand
+* Fix logging in PushInventory
+* Actually honor fMiningRequiresPeers in getblocktemplate
+* Remove extern
+* Bump LevelDB/UniValue/secp256k1 versions
+* RPC changeover to JSONRPCRequest
+* Qt refactors to better abstract wallet access
+* [RPC] Add ImportMulti
+* [RPC] importmulti: Avoid using boost::variant::operator!=, which is only in newer boost versions
+* Move coincontrol.h to walletfolder
+* Remove unnecessary function prototypes
+* Eliminating Inconsistencies in Textual Output
+* Make connect=0 disable automatic outbound connections.
+* Repair rpc_wallet_tests.cpp and remove unused variable in coins_tests.cpp to remove build warning
+* Repair final instance of mem pool to mempool
+* [RPC] Remove invalid explanation from wallet fee message
+* Return useful error message on ATMP failure/Deprecate Test
+* Fix Build Warnings
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
