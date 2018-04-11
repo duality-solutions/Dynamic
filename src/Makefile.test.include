@@ -103,8 +103,7 @@ DYNAMIC_TESTS =\
 if ENABLE_WALLET
 DYNAMIC_TESTS += \
   test/accounting_tests.cpp \
-  wallet/test/wallet_tests.cpp \
-  test/rpc_wallet_tests.cpp
+  wallet/test/wallet_tests.cpp
 endif
 
 test_test_dynamic_SOURCES = $(DYNAMIC_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)

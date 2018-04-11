@@ -1207,8 +1207,9 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
     LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- txid=%s\n", wtx.GetHash().GetHex());
 
     // use the same nCachedLastSuccessBlock as for PS mixing to prevent race
-    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman)) {
-        LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- CommitTransaction failed!\n");
+    CValidationState state;
+    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
+        LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
 
@@ -1335,8 +1336,9 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
 
     keyHolderStorageDenom.KeepAll();
 
-    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman)) {
-        LogPrintf("CPrivateSendClient::CreateDenominated -- CommitTransaction failed!\n");
+    CValidationState state;
+    if(!pwalletMain->CommitTransaction(wtx, reservekeyChange, &connman, state)) {
+        LogPrintf("CPrivateSendClient::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
 

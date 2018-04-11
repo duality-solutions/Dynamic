@@ -20,7 +20,7 @@
 #include <univalue.h>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue);
+extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false);
 
 opcodetype getOpcodeFromString(std::string input) {
     if (input == "OP_MINT") return OP_MINT;
