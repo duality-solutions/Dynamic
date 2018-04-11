@@ -12,6 +12,7 @@
 #include "dynamicgui.h"
 #include "clientmodel.h"
 #include "guiutil.h"
+#include "miningpage.h"
 #include "optionsmodel.h"
 #include "overviewpage.h"
 #include "platformstyle.h"
@@ -48,6 +49,8 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     sendCoinsPage = new SendCoinsDialog(platformStyle);
 
     receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
+
+    miningPage = new MiningPage(platformStyle);
 
     usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
     usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
@@ -90,10 +93,10 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     addWidget(sendCoinsPage);
     addWidget(receiveCoinsPage);
     addWidget(transactionsPage);
-
     if (settings.value("fShowDynodesTab").toBool()) {
         addWidget(dynodeListPage);
     }
+    addWidget(miningPage);
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -169,6 +172,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     if (settings.value("fShowDynodesTab").toBool()) {
         dynodeListPage->setWalletModel(_walletModel);
     }
+    miningPage->setModel(_walletModel);
 
     if (_walletModel)
     {
@@ -243,6 +247,11 @@ void WalletView::gotoDynodePage()
     if (settings.value("fShowDynodesTab").toBool()) {
         setCurrentWidget(dynodeListPage);
     }
+}
+
+void WalletView::gotoMiningPage()
+{
+    setCurrentWidget(miningPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

@@ -16,6 +16,7 @@
 
 class DynamicGUI;
 class ClientModel;
+class MiningPage;
 class OverviewPage;
 class PlatformStyle;
 class SendCoinsDialog;
@@ -72,6 +73,7 @@ private:
     QWidget *transactionsPage;
     TransactionView *transactionView;
     DynodeList *dynodeListPage;
+    MiningPage *miningPage;
 
     QProgressDialog *progressDialog;
     QLabel *transactionSum;
@@ -88,7 +90,9 @@ public Q_SLOTS:
     void gotoHistoryPage();
     /** Switch to Dynode page */
     void gotoDynodePage();
-
+    /** Switch to mining page */
+    void gotoMiningPage();
+    
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
