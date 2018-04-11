@@ -353,7 +353,7 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(dynodeAction);    
 
-    miningAction = new QAction(QIcon(QIcon(":/icons/" + theme + "/tx_mined"), tr("&Mining"), this);
+    miningAction = new QAction(QIcon(":/icons/" + theme + "/tx_mined"), tr("&Mining"), this);
     miningAction->setStatusTip(tr("Mine Dynamic(DYN)"));
     miningAction->setToolTip(miningAction->statusTip());
     miningAction->setCheckable(true);
