@@ -24,14 +24,14 @@
 #include <fstream>
 #include <iomanip>
 
-UniValue dynodelist(const UniValue& params, bool fHelp);
+UniValue dynodelist(const JSONRPCRequest& request);
 
 #ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
 
-UniValue privatesend(const UniValue& params, bool fHelp)
+UniValue privatesend(const JSONRPCRequest& request)
 {
-    if (fHelp || params.size() != 1)
+    if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "privatesend \"command\"\n"
             "\nArguments:\n"
@@ -42,7 +42,7 @@ UniValue privatesend(const UniValue& params, bool fHelp)
             "  reset       - Reset mixing\n"
             );
 
-    if(params[0].get_str() == "start") {
+    if(request.params[0].get_str() == "start") {
         {
             LOCK(pwalletMain->cs_wallet);
             EnsureWalletIsUnlocked();
@@ -56,12 +56,12 @@ UniValue privatesend(const UniValue& params, bool fHelp)
         return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
     }
 
-    if(params[0].get_str() == "stop") {
+    if(request.params[0].get_str() == "stop") {
         privateSendClient.fEnablePrivateSend = false;
         return "Mixing was stopped";
     }
 
-    if(params[0].get_str() == "reset") {
+    if(request.params[0].get_str() == "reset") {
         privateSendClient.ResetPool();
         return "Mixing was reset";
     }
@@ -70,9 +70,9 @@ UniValue privatesend(const UniValue& params, bool fHelp)
 }
 #endif // ENABLE_WALLET
 
-UniValue getpoolinfo(const UniValue& params, bool fHelp)
+UniValue getpoolinfo(const JSONRPCRequest& request)
 {
-    if (fHelp || params.size() != 0)
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getpoolinfo\n"
             "Returns an object containing mixing pool related information.\n");
@@ -109,11 +109,11 @@ UniValue getpoolinfo(const UniValue& params, bool fHelp)
 }
 
 
-UniValue dynode(const UniValue& params, bool fHelp)
+UniValue dynode(const JSONRPCRequest& request)
 {
     std::string strCommand;
-    if (params.size() >= 1) {
-        strCommand = params[0].get_str();
+    if (request.params.size() >= 1) {
+        strCommand = request.params[0].get_str();
     }
 
 #ifdef ENABLE_WALLET
@@ -121,7 +121,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "DEPRECATED, please use start-all instead");
 #endif // ENABLE_WALLET
 
-    if (fHelp  ||
+    if (request.fHelp  ||
         (
 #ifdef ENABLE_WALLET
             strCommand != "start-alias" && strCommand != "start-all" && strCommand != "start-missing" &&
@@ -154,20 +154,21 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
     if (strCommand == "list")
     {
-        UniValue newParams(UniValue::VARR);
+        JSONRPCRequest newRequest = request;
+        newRequest.params.clear();
         // forward params but skip "list"
-        for (unsigned int i = 1; i < params.size(); i++) {
-            newParams.push_back(params[i]);
+        for (unsigned int i = 1; i < request.params.size(); i++) {
+            newRequest.params.push_back(request.params[i]);
         }
-        return dynodelist(newParams, fHelp);
+        return dynodelist(newRequest);
     }
 
     if(strCommand == "connect")
     {
-        if (params.size() < 2)
+        if (request.params.size() < 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Dynode address required");
 
-        std::string strAddress = params[1].get_str();
+        std::string strAddress = request.params[1].get_str();
 
         CService addr;
         if (!Lookup(strAddress.c_str(), addr, 0, false))
@@ -183,13 +184,13 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
     if (strCommand == "count")
     {
-        if (params.size() > 2)
+        if (request.params.size() > 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Too many parameters");
 
-        if (params.size() == 1)
+        if (request.params.size() == 1)
             return dnodeman.size();
 
-        std::string strMode = params[1].get_str();
+        std::string strMode = request.params[1].get_str();
 
         if (strMode == "ps")
             return dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
@@ -254,7 +255,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
 
     if (strCommand == "start-alias")
     {
-        if (params.size() < 2)
+        if (request.params.size() < 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Please specify an alias");
 
         {
@@ -262,7 +263,7 @@ UniValue dynode(const UniValue& params, bool fHelp)
             EnsureWalletIsUnlocked();
         }
 
-        std::string strAlias = params[1].get_str();
+        std::string strAlias = request.params[1].get_str();
 
         bool fFound = false;
 
@@ -432,15 +433,15 @@ UniValue dynode(const UniValue& params, bool fHelp)
         int nLast = 10;
         std::string strFilter = "";
 
-        if (params.size() >= 2) {
-            nLast = atoi(params[1].get_str());
+        if (request.params.size() >= 2) {
+            nLast = atoi(request.params[1].get_str());
         }
 
-        if (params.size() == 3) {
-            strFilter = params[2].get_str();
+        if (request.params.size() == 3) {
+            strFilter = request.params[2].get_str();
         }
 
-        if (params.size() > 3)
+        if (request.params.size() > 3)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'dynode winners ( \"count\" \"filter\" )'");
 
         UniValue obj(UniValue::VOBJ);
@@ -457,15 +458,15 @@ UniValue dynode(const UniValue& params, bool fHelp)
     return NullUniValue;
 }
 
-UniValue dynodelist(const UniValue& params, bool fHelp)
+UniValue dynodelist(const JSONRPCRequest& request)
 {
     std::string strMode = "status";
     std::string strFilter = "";
 
-    if (params.size() >= 1) strMode = params[0].get_str();
-    if (params.size() == 2) strFilter = params[1].get_str();
+    if (request.params.size() >= 1) strMode = request.params[0].get_str();
+    if (request.params.size() == 2) strFilter = request.params[1].get_str();
 
-    if (fHelp || (
+    if (request.fHelp || (
                 strMode != "activeseconds" && strMode != "addr" && strMode != "full" && strMode != "info" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
                 strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
@@ -610,13 +611,13 @@ bool DecodeHexVecDnb(std::vector<CDynodeBroadcast>& vecDnb, std::string strHexDn
     return true;
 }
 
-UniValue dynodebroadcast(const UniValue& params, bool fHelp)
+UniValue dynodebroadcast(const JSONRPCRequest& request)
 {
     std::string strCommand;
-    if (params.size() >= 1)
-        strCommand = params[0].get_str();
+    if (request.params.size() >= 1)
+        strCommand = request.params[0].get_str();
 
-    if (fHelp  ||
+    if (request.fHelp  ||
         (
 #ifdef ENABLE_WALLET
             strCommand != "create-alias" && strCommand != "create-all" &&
@@ -643,7 +644,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
         if (fImporting || fReindex)
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Wait for reindex and/or import to finish");
 
-        if (params.size() < 2)
+        if (request.params.size() < 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Please specify an alias");
 
         {
@@ -652,7 +653,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
         }
 
         bool fFound = false;
-        std::string strAlias = params[1].get_str();
+        std::string strAlias = request.params[1].get_str();
 
         UniValue statusObj(UniValue::VOBJ);
         std::vector<CDynodeBroadcast> vecDnb;
@@ -743,12 +744,12 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
     if (strCommand == "decode")
     {
-        if (params.size() != 2)
+        if (request.params.size() != 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'dynodebroadcast decode \"hexstring\"'");
 
         std::vector<CDynodeBroadcast> vecDnb;
 
-        if (!DecodeHexVecDnb(vecDnb, params[1].get_str()))
+        if (!DecodeHexVecDnb(vecDnb, request.params[1].get_str()))
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Dynode broadcast message decode failed");
 
         int nSuccessful = 0;
@@ -792,7 +793,7 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
     if (strCommand == "relay")
     {
-        if (params.size() < 2 || params.size() > 3)
+        if (request.params.size() < 2 || request.params.size() > 3)
             throw JSONRPCError(RPC_INVALID_PARAMETER,   "dynodebroadcast relay \"hexstring\" ( fast )\n"
                                                         "\nArguments:\n"
                                                         "1. \"hex\"      (string, required) Broadcast messages hex string\n"
@@ -800,12 +801,12 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
 
         std::vector<CDynodeBroadcast> vecDnb;
 
-        if (!DecodeHexVecDnb(vecDnb, params[1].get_str()))
+        if (!DecodeHexVecDnb(vecDnb, request.params[1].get_str()))
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Dynode broadcast message decode failed");
 
         int nSuccessful = 0;
         int nFailed = 0;
-        bool fSafe = params.size() == 2;
+        bool fSafe = request.params.size() == 2;
         UniValue returnObj(UniValue::VOBJ);
 
         // verify all signatures first, bailout if any of them broken
@@ -847,9 +848,9 @@ UniValue dynodebroadcast(const UniValue& params, bool fHelp)
     return NullUniValue;
 }
 
-UniValue sentinelping(const UniValue& params, bool fHelp)
+UniValue sentinelping(const JSONRPCRequest& request)
 {
-    if (fHelp || params.size() != 1) {
+    if (request.fHelp || request.params.size() != 1) {
         throw std::runtime_error(
             "sentinelping version\n"
             "\nSentinel ping.\n"
@@ -863,7 +864,7 @@ UniValue sentinelping(const UniValue& params, bool fHelp)
         );
     }
 
-    activeDynode.UpdateSentinelPing(StringVersionToInt(params[0].get_str()));
+    activeDynode.UpdateSentinelPing(StringVersionToInt(request.params[0].get_str()));
     return true;
 }
 

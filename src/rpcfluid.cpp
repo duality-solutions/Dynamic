@@ -35,11 +35,11 @@ opcodetype getOpcodeFromString(std::string input) {
     return OP_RETURN;
 };
 
-UniValue maketoken(const UniValue& params, bool fHelp)
+UniValue maketoken(const JSONRPCRequest& request)
 {
 	std::string result;
 	
-    if (fHelp || params.size() < 2) {
+    if (request.fHelp || request.params.size() < 2) {
         throw std::runtime_error(
             "maketoken \"string\"\n"
             "\nConvert String to Hexadecimal Format\n"
@@ -51,8 +51,8 @@ UniValue maketoken(const UniValue& params, bool fHelp)
         );
     }
     
-	for(uint32_t iter = 0; iter != params.size(); iter++) {
-		result += params[iter].get_str() + SubDelimiter;
+	for(uint32_t iter = 0; iter != request.params.size(); iter++) {
+		result += request.params[iter].get_str() + SubDelimiter;
 	}
 
 	result.pop_back(); 
@@ -61,16 +61,16 @@ UniValue maketoken(const UniValue& params, bool fHelp)
     return result;
 }
 
-UniValue gettime(const UniValue& params, bool fHelp)
+UniValue gettime(const JSONRPCRequest& request)
 {
     return GetTime();
 }
 
-UniValue getrawpubkey(const UniValue& params, bool fHelp)
+UniValue getrawpubkey(const JSONRPCRequest& request)
 {
     UniValue ret(UniValue::VOBJ);
 
-    if (fHelp || params.size() != 1)
+    if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "getrawpubkey \"address\"\n"
             "\nGet (un)compressed raw public key of an address of the wallet\n"
@@ -81,7 +81,7 @@ UniValue getrawpubkey(const UniValue& params, bool fHelp)
             + HelpExampleRpc("burndynamic", "123.456")
         );
 
-    CDynamicAddress address(params[0].get_str());
+    CDynamicAddress address(request.params[0].get_str());
     bool isValid = address.IsValid();
 
     if (isValid)
@@ -133,14 +133,14 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
 
 opcodetype negatif = OP_RETURN;
 
-UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
+UniValue sendfluidtransaction(const JSONRPCRequest& request)
 {
     CScript finalScript;
 
-    if (!EnsureWalletIsAvailable(fHelp))
+    if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (fHelp || params.size() != 2)
+    if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
             "sendfluidtransaction \"OP_MINT || OP_REWARD_DYNODE || OP_REWARD_MINING\" \"hexstring\"\n"
             "\nSend Fluid transactions to the network\n"
@@ -153,15 +153,15 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
         );
 
     EnsureWalletIsUnlocked();
-    opcodetype opcode = getOpcodeFromString(params[0].get_str());
+    opcodetype opcode = getOpcodeFromString(request.params[0].get_str());
 
     if (negatif == opcode)
         throw std::runtime_error("OP_CODE is either not a Fluid OP_CODE or is invalid");
 
-    if(!IsHex(params[1].get_str()))
+    if(!IsHex(request.params[1].get_str()))
         throw std::runtime_error("Hex isn't even valid!");
     else
-        finalScript = CScript() << opcode << ParseHex(params[1].get_str());
+        finalScript = CScript() << opcode << ParseHex(request.params[1].get_str());
 
     std::string message;
 
@@ -174,15 +174,15 @@ UniValue sendfluidtransaction(const UniValue& params, bool fHelp)
         return wtx.GetHash().GetHex();
     }
     else {
-        throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", params[0].get_str()));
+        throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", request.params[0].get_str()));
     }
 }
 
-UniValue signtoken(const UniValue& params, bool fHelp)
+UniValue signtoken(const JSONRPCRequest& request)
 {
     std::string result;
 
-    if (fHelp || params.size() != 2)
+    if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
             "signtoken \"address\" \"tokenkey\"\n"
             "\nSign a Fluid Protocol Token\n"
@@ -194,7 +194,7 @@ UniValue signtoken(const UniValue& params, bool fHelp)
             + HelpExampleRpc("signtoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
         );
 
-    CDynamicAddress address(params[0].get_str());
+    CDynamicAddress address(request.params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
@@ -204,7 +204,7 @@ UniValue signtoken(const UniValue& params, bool fHelp)
     if (!fluid.VerifyAddressOwnership(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Address is not possessed by wallet!");
 
-    std::string r = params[1].get_str();
+    std::string r = request.params[1].get_str();
 
     if(!IsHex(r))
         throw std::runtime_error("Hex isn't even valid! Cannot process ahead...");
@@ -217,11 +217,11 @@ UniValue signtoken(const UniValue& params, bool fHelp)
     return result;
 }
 
-UniValue verifyquorum(const UniValue& params, bool fHelp)
+UniValue verifyquorum(const JSONRPCRequest& request)
 {
     std::string message;
 
-    if (fHelp || params.size() != 1)
+    if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "verifyquorum \"tokenkey\"\n"
             "\nVerify if the token provided has required quorum\n"
@@ -232,17 +232,17 @@ UniValue verifyquorum(const UniValue& params, bool fHelp)
             + HelpExampleRpc("consenttoken", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
         );
 
-    if (!fluid.CheckNonScriptQuorum(params[0].get_str(), message, false))
+    if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
         throw std::runtime_error("Instruction does not meet minimum quorum for validity");
 
     return "Quorum is present!";
 }
 
-UniValue consenttoken(const UniValue& params, bool fHelp)
+UniValue consenttoken(const JSONRPCRequest& request)
 {
     std::string result;
 
-    if (fHelp || params.size() != 2)
+    if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
             "consenttoken \"address\" \"tokenkey\"\n"
             "\nGive consent to a Fluid Protocol Token as a second party\n"
@@ -254,11 +254,11 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
             + HelpExampleRpc("consenttoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
         );
 
-    CDynamicAddress address(params[0].get_str());
+    CDynamicAddress address(request.params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
 
-    if (!IsHex(params[1].get_str()))
+    if (!IsHex(request.params[1].get_str()))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Hex string is invalid! Token incorrect");
 
     if (!fluid.IsGivenKeyMaster(address))
@@ -269,17 +269,18 @@ UniValue consenttoken(const UniValue& params, bool fHelp)
 
     std::string message;
 
-    if (!fluid.CheckNonScriptQuorum(params[1].get_str(), message, true))
+    if (!fluid.CheckNonScriptQuorum(request.params[1].get_str(), message, true))
         throw std::runtime_error("Instruction does not meet minimum quorum for validity");
 
-    if (!fluid.GenericConsentMessage(params[1].get_str(), result, address))
+    if (!fluid.GenericConsentMessage(request.params[1].get_str(), result, address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Message signing failed");
 
     return result;
 }
 
-UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 0)
+UniValue getfluidhistoryraw(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getfluidhistoryraw\n"
             "\nReturns raw data about each fluid command confirmed on the Dynamic blockchain.\n"
@@ -306,8 +307,9 @@ UniValue getfluidhistoryraw(const UniValue& params, bool fHelp) {
     return obj;
 }
 
-UniValue getfluidhistory(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 0)
+UniValue getfluidhistory(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getfluidhistory\n"
             "\nReturns data about each fluid command confirmed on the Dynamic blockchain.\n"
@@ -386,8 +388,9 @@ UniValue getfluidhistory(const UniValue& params, bool fHelp) {
     return ret;
 }
 
-UniValue getfluidsovereigns(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 0)
+UniValue getfluidsovereigns(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getfluidsovereigns\n"
             "\nReturns the active sovereign addresses.\n"
