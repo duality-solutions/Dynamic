@@ -2768,9 +2768,7 @@ extern UniValue importmulti(const JSONRPCRequest& request);
 
 extern UniValue dumphdinfo(const JSONRPCRequest& request);
 
-extern UniValue instantsendtoaddress(const JSONRPCRequest& request);
 extern UniValue privatesend(const JSONRPCRequest& request);
-extern UniValue keepass(const JSONRPCRequest& request);
 
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           okSafeMode
