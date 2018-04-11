@@ -859,24 +859,12 @@ size_t CConnman::SocketSendData(CNode *pnode)
 
 struct NodeEvictionCandidate
 {
-    NodeEvictionCandidate(CNode* pnode)
-        : id(pnode->id),
-          nTimeConnected(pnode->nTimeConnected),
-          nMinPingUsecTime(pnode->nMinPingUsecTime),
-          nLastBlockTime(pnode->nLastBlockTime),
-          nLastTXTime(pnode->nLastTXTime),
-          fNetworkNode(pnode->fNetworkNode),
-          fRelayTxes(pnode->fRelayTxes),
-          fBloomFilter(pnode->pfilter != NULL),
-          nKeyedNetGroup(pnode->nKeyedNetGroup)
-        {}
-
     NodeId id;
     int64_t nTimeConnected;
     int64_t nMinPingUsecTime;
     int64_t nLastBlockTime;
     int64_t nLastTXTime;
-    bool fNetworkNode;
+    bool fRelevantServices;
     bool fRelayTxes;
     bool fBloomFilter;
     uint64_t nKeyedNetGroup;
@@ -900,7 +888,7 @@ static bool CompareNodeBlockTime(const NodeEvictionCandidate &a, const NodeEvict
 {
     // There is a fall-through here because it is common for a node to have many peers which have not yet relayed a block.
     if (a.nLastBlockTime != b.nLastBlockTime) return a.nLastBlockTime < b.nLastBlockTime;
-    if (a.fNetworkNode != b.fNetworkNode) return b.fNetworkNode;
+    if (a.fRelevantServices != b.fRelevantServices) return b.fRelevantServices;
     return a.nTimeConnected > b.nTimeConnected;
 }
 
@@ -927,15 +915,18 @@ bool CConnman::AttemptToEvictConnection()
     {
         LOCK(cs_vNodes);
 
-        for(size_t i = 0; i < vNodes.size(); ++i) {
-            CNode* pnode = vNodes[i];
-            if (pnode->fWhitelisted)
+        BOOST_FOREACH(CNode *node, vNodes) {
+            if (node->fWhitelisted)
                 continue;
-            if (!pnode->fInbound)
+            if (!node->fInbound)
                 continue;
-            if (pnode->fDisconnect)
+            if (node->fDisconnect)
                 continue;
-            vEvictionCandidates.push_back(NodeEvictionCandidate(pnode));
+            NodeEvictionCandidate candidate = {node->id, node->nTimeConnected, node->nMinPingUsecTime,
+                                               node->nLastBlockTime, node->nLastTXTime,
+                                               (node->nServices & nRelevantServices) == nRelevantServices,
+                                               node->fRelayTxes, node->pfilter != NULL, node->nKeyedNetGroup};
+            vEvictionCandidates.push_back(candidate);
         }
     }
 
