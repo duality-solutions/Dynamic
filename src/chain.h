@@ -541,6 +541,9 @@ public:
 
     /** Find the last common block between this chain and a block index entry. */
     const CBlockIndex *FindFork(const CBlockIndex *pindex) const;
+
+    /** Find the most recent block with timestamp lower than the given. */
+    CBlockIndex* FindLatestBefore(int64_t nTime) const;
 };
 
 #endif // DYNAMIC_CHAIN_H
