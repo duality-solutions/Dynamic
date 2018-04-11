@@ -2249,8 +2249,9 @@ bool CConnman::Start(CScheduler& scheduler, std::string& strNodeError, Options c
     // Initiate outbound connections from -addnode
     threadOpenAddedConnections = std::thread(&TraceThread<std::function<void()> >, "addcon", std::function<void()>(std::bind(&CConnman::ThreadOpenAddedConnections, this)));
 
-    // Initiate outbound connections
-    threadOpenConnections = std::thread(&TraceThread<std::function<void()> >, "opencon", std::function<void()>(std::bind(&CConnman::ThreadOpenConnections, this)));
+    // Initiate outbound connections unless connect=0
+    if (!mapArgs.count("-connect") || mapMultiArgs["-connect"].size() != 1 || mapMultiArgs["-connect"][0] != "0")
+        threadOpenConnections = std::thread(&TraceThread<std::function<void()> >, "opencon", std::function<void()>(std::bind(&CConnman::ThreadOpenConnections, this)));
 
     // Initiate dynode connections
     threadDnbRequestConnections = std::thread(&TraceThread<std::function<void()> >, "dnbcon", std::function<void()>(std::bind(&CConnman::ThreadDnbRequestConnections, this)));
