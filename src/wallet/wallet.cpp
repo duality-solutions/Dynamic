@@ -11,7 +11,7 @@
 #include "primitives/block.h"
 #include "checkpoints.h"
 #include "chain.h"
-#include "coincontrol.h"
+#include "wallet/coincontrol.h"
 #include "consensus/consensus.h"
 #include "fluid.h"
 #include "governance.h"

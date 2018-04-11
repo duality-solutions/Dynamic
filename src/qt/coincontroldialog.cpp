@@ -15,7 +15,7 @@
 #include "platformstyle.h"
 #include "walletmodel.h"
 
-#include "coincontrol.h"
+#include "wallet/coincontrol.h"
 #include "init.h"
 #include "instantsend.h"
 #include "validation.h" // For minRelayTxFee
