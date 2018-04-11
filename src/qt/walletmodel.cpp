@@ -782,3 +782,8 @@ CWallet* WalletModel::getWallet()
 {
     return wallet;
 }
+
+int WalletModel::getDefaultConfirmTarget() const
+{
+    return nTxConfirmTarget;
+}
