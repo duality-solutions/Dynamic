@@ -76,6 +76,26 @@
 * [RPC] Remove invalid explanation from wallet fee message
 * Return useful error message on ATMP failure/Deprecate Test
 * Fix Build Warnings
+* [Qt] overhaul smart-fee slider, adjust default confirmation target
+* keypoololdest denote Unix epoch, not GMT
+* [qt] Return useful error message on ATMP failure
+* Store mempool and prioritization data to disk
+* Throw exception in gobject prepare when CommitTransaction fails
+* Move CWalletDB::ReorderTransactions to CWallet
+* [rpc] ParseHash: Fail when length is not 64
+* Trivial: Explicitly pass const CChainParams& to LoadBlockIndexDB()
+* [Wallet] Refactor wallet/init interaction (Reaccept wtx, flush thread)
+* Change DEFAULT_TX_CONFIRM_TARGET from 2 to 10
+* Declare wallet.h functions inline
+* net: make a few values immutable, and use deterministic randomness for the localnonce
+* Add common failure cases for rpc server connection failure
+* Remove unused CTxOut::GetHash()
+* new var DIST_CONTRIB adds useful things for packagers from contrib/ to EXTRA_DIST
+* Use RelevantServices instead of node_network in AttemptToEvict and cleanup NodeEvictionCandidate
+* Allow filterclear messages for enabling TX relay only.
+* Use nPowTargetSpacing in SendCoinsDialog::updateGlobalFeeVariables
+* qt: Use correct conversion function for boost::path datadir
+* Hash P2P messages as they are received instead of at process-time
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
