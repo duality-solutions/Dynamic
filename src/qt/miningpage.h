@@ -8,10 +8,12 @@
 #ifndef MININGPAGE_H
 #define MININGPAGE_H
 
-#include <QWidget>
-#include <memory>
+#include "platformstyle.h"
 
 #include "walletmodel.h"
+
+#include <QWidget>
+#include <memory>
 
 namespace Ui {
 class MiningPage;
@@ -22,7 +24,7 @@ class MiningPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit MiningPage(QWidget *parent = 0);
+    explicit MiningPage(const PlatformStyle *platformStyle, QWidget *parent = 0);
     ~MiningPage();
 
     void setModel(WalletModel *model);

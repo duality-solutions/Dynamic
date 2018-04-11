@@ -11,14 +11,18 @@
 
 extern UniValue GetNetworkHashPS(int lookup, int height);
 
-MiningPage::MiningPage(QWidget *parent) :
+MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MiningPage),
     hasMiningprivkey(false)
 {
     ui->setupUi(this);
 
+#if BOOST_VERSION >= 105600
+    int nThreads =  boost::thread::physical_concurrency();
+#else // Must fall back to hardware_concurrency, which unfortunately counts virtual cores
     int nThreads = boost::thread::hardware_concurrency();
+#endif
 
     int nUseThreads = GetArg("-genproclimit", -1);
     if (nUseThreads < 0)
