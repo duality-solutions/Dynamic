@@ -96,6 +96,21 @@
 * Use nPowTargetSpacing in SendCoinsDialog::updateGlobalFeeVariables
 * qt: Use correct conversion function for boost::path datadir
 * Hash P2P messages as they are received instead of at process-time
+* Addition of mining tab
+* Initialize variable to prevent compiler warning
+* fix getnettotals RPC description about timemillis
+* Remove redundant duplicate-input check from CheckTransaction
+* Serialization simplification/optimisation
+* fNetworkActive is not protected by a lock, use an atomic
+* Unset fImporting for loading mempool
+* net: don't send feefilter messages before the version handshake is complete
+* Remove block-request logic from INV message processing
+* [Qt] fix coincontrol sort issue
+* getrawtransaction should take a bool for verbose
+* Move -salvagewallet, -zap(wtx) to where they belong
+* Do not fully sort all nodes for addr relay
+* fix CreateTransaction error messages
+* Add check to IsCollateralValid
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
