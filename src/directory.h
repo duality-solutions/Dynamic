@@ -5,6 +5,7 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
+#include "amount.h"
 #include "consensus/params.h"
 #include "dbwrapper.h"
 #include "script/script.h"
@@ -26,37 +27,54 @@ static const std::string  DEFAULT_ADMIN_DOMAIN        = INTERNAL_DOMAIN_PREFIX +
 static const std::string  DEFAULT_PUBLIC_DOMAIN       = INTERNAL_DOMAIN_PREFIX + "public";
 
 typedef std::vector<unsigned char> CharString;
+typedef std::vector<CharString> vchCharString;
+
+enum DirectoryObjectType {
+    USER_ACCOUNT = 0,
+    DEVICE_ACCOUNT = 1,
+    GROUP = 2,
+    DOMAIN_CONTROLLER = 3,
+    ORGANIZATIONAL_UNIT = 4,
+    CERTIFICATE = 5,
+    CODE = 6
+};
 
 /* Blockchain Directory Access Framework
 
   ***** Design Notes *****
-- Modeling after X.500 Directory and LDAP
-- Top level domain objects do not have an ObjectName
-- Sub level directory objects need permission from parent domain.
+- Modeling after X.500 Directory and LDAP (RFC 4512): https://docs.ldap.com/specs/rfc4512.txt
+- Top level domain objects do not have an ObjectName and are considered controlers.
+- OID canonical identifiers like 1.23.456.7.89
+- Sub level directory objects need permission from parent domain object.
 - Top level domain objects can run side chains, sub level can with permission from parent
 - Torrent network link used to store and transmit sharded and encrypted data.
 - Side chains secured by Proof of Stake tokens issued by directory domain owner/creator
-- Top level domains require collateral and more expensive than 
+- Top level domains require collateral and more expensive than
+- Recommended to store lower level domain object data as encrypted shards on Torrent network and not on the chain.
 */
 
 class CDirectoryDefaultParameters {
 public:
-    std::vector<std::pair<std::string, std::vector<unsigned char>>> InitialiseAdminOwners();
+    void InitialiseAdminOwners(); //DEFAULT_ADMIN_DOMAIN
+    void InitialisePublicDomain(); //DEFAULT_PUBLIC_DOMAIN
 };
 
 class CDirectory {
 public:
-    std::vector<CharString> DomainName; // required. controls child objects
+    static const int CURRENT_VERSION=1;
+    int nVersion;
+    CharString OID; // Object ID
+    vchCharString DomainName; // required. controls child objects
     CharString ObjectName; // blank for top level domain directories
-    unsigned int intObjectType; // 0 = root domain account, 1 = user account, 2 = device or computer account
-    CharString WalletAddress; // used to send collateral funds for this directory record.
+    DirectoryObjectType Type; // see enum above
+    CharString WalletAddress; // used to send collateral funds for this directory record. This is the multisig wallet address made from the SignWalletAddresses
     unsigned int fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
     CharString EncryptPrivateKey; // used to decrypt messages and data for this directory record
-    CharString SignPublicKey; // used to verify authorized update transaction 
-    CharString SignPrivateKey;  // used for updating the Directory record.
+    vchCharString SignWalletAddresses; // used to verify authorized update transaction
+    unsigned int nSigaturesRequired; // number of SignWalletAddresses needed to sign a transaction.  Default = 1
     CharString TorrentNetworkAddress; // used for temp storage and transmision of sharded and encrypted data.
-
+    
     uint256 txHash;
 
     unsigned int nHeight;
@@ -64,6 +82,8 @@ public:
 
     CharString PublicCertificate;
     CharString PrivateData;
+    CAmount transactionFee;
+    CAmount registrationFeePerDay;
 
     CDirectory() { 
         SetNull();
@@ -76,45 +96,54 @@ public:
 
     inline void SetNull()
     {
+        nVersion = CDirectory::CURRENT_VERSION;
+        OID.clear();
         DomainName.clear();
         ObjectName.clear();
-        intObjectType = 0;
+        Type = DirectoryObjectType::USER_ACCOUNT;
         WalletAddress.clear();
-        fPublicObject = 0; // by default set to private.
+        fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
         EncryptPrivateKey.clear();
-        SignPublicKey.clear();
-        SignPrivateKey.clear();
+        SignWalletAddresses.clear();
+        nSigaturesRequired = 1;
         TorrentNetworkAddress.clear();
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
         PublicCertificate.clear();
         PrivateData.clear();
+        transactionFee = 0;
+        registrationFeePerDay = 0;
     }
 
     ADD_SERIALIZE_METHODS;
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+        READWRITE(this->nVersion);
+        nVersion = this->nVersion;
+        READWRITE(OID);
         READWRITE(DomainName);
         READWRITE(ObjectName);
-        READWRITE(VARINT(intObjectType));   
+        READWRITE(static_cast<int>(Type));
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
         READWRITE(EncryptPrivateKey);
-        READWRITE(SignPublicKey);
-        READWRITE(SignPrivateKey);
+        READWRITE(SignWalletAddresses);
+        READWRITE(VARINT(nSigaturesRequired));
         READWRITE(TorrentNetworkAddress);
-        READWRITE(txHash);
         READWRITE(VARINT(nHeight));
+        READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
-        READWRITE(PublicCertificate);    
+        READWRITE(PublicCertificate);
         READWRITE(PrivateData);
+        READWRITE(transactionFee);
+        READWRITE(registrationFeePerDay);
     }
 
     inline friend bool operator==(const CDirectory &a, const CDirectory &b) {
-        return (a.DomainName == b.DomainName && a.ObjectName == b.ObjectName);
+        return (a.OID == b.OID && a.DomainName == b.DomainName && a.ObjectName == b.ObjectName);
     }
 
     inline friend bool operator!=(const CDirectory &a, const CDirectory &b) {
@@ -122,15 +151,16 @@ public:
     }
 
     inline CDirectory operator=(const CDirectory &b) {
+        OID = b.OID;
         DomainName = b.DomainName;
         ObjectName = b.ObjectName;
-        intObjectType = b.intObjectType;
+        Type = b.Type;
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
         EncryptPrivateKey = b.EncryptPrivateKey;
-        SignPublicKey = b.SignPublicKey;
-        SignPrivateKey = b.SignPrivateKey;
+        SignWalletAddresses = b.SignWalletAddresses;
+        nSigaturesRequired = b.nSigaturesRequired;
         TorrentNetworkAddress = b.TorrentNetworkAddress;
         txHash = b.txHash;
         nHeight = b.nHeight;
@@ -145,7 +175,7 @@ public:
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 
-    CDynamicAddress GetWalletAddress();
+    CDynamicAddress GetWalletAddress();  
 };
 
 class CDirectoryDB : public CDBWrapper {
