@@ -27,7 +27,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(hash);
         READWRITE(n);
     }
@@ -104,7 +104,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(prevout);
         READWRITE(*(CScriptBase*)(&scriptSig));
         READWRITE(nSequence);
@@ -150,7 +150,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(nValue);
         READWRITE(*(CScriptBase*)(&scriptPubKey));
     }
@@ -179,7 +179,7 @@ public:
         if (scriptPubKey.IsUnspendable())
             return 0;
 
-        size_t nSize = GetSerializeSize(SER_DISK,0)+148u;
+        size_t nSize = GetSerializeSize(*this, SER_DISK, 0)+148u;
         return 3*minRelayTxFee.GetFee(nSize);
     }
 
@@ -246,7 +246,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(*const_cast<int32_t*>(&this->nVersion));
         READWRITE(*const_cast<std::vector<CTxIn>*>(&vin));
         READWRITE(*const_cast<std::vector<CTxOut>*>(&vout));
@@ -316,7 +316,7 @@ struct CMutableTransaction
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
         READWRITE(vin);
         READWRITE(vout);

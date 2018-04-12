@@ -538,7 +538,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
 
     // Check for duplicate inputs - note that this check is slow so we skip it in CheckBlock
     if (fCheckDuplicateInputs) {
-        set<COutPoint> vInOutPoints;
+        std::set<COutPoint> vInOutPoints;
         for (const auto& txin : tx.vin)
         {
             if (!vInOutPoints.insert(txin.prevout).second)
@@ -1221,7 +1221,7 @@ bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHea
         return error("WriteBlockToDisk: OpenBlockFile failed");
 
     // Write index header
-    unsigned int nSize = fileout.GetSerializeSize(block);
+    unsigned int nSize = GetSerializeSize(fileout, block);
     fileout << FLATDATA(messageStart) << nSize;
 
     // Write block
@@ -1560,7 +1560,7 @@ bool UndoWriteToDisk(const CBlockUndo& blockundo, CDiskBlockPos& pos, const uint
         return error("%s: OpenUndoFile failed", __func__);
 
     // Write index header
-    unsigned int nSize = fileout.GetSerializeSize(blockundo);
+    unsigned int nSize = GetSerializeSize(fileout, blockundo);
     fileout << FLATDATA(messageStart) << nSize;
 
     // Write undo data
