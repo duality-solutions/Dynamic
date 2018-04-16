@@ -317,28 +317,24 @@ public:
  */
 enum GetDataMsg {
     UNDEFINED = 0,
-    MSG_TX = 1,
-    MSG_BLOCK = 2,
-    // The following can only occur in getdata. Invs always use TX or BLOCK.
-    MSG_FILTERED_BLOCK = 3,
-    // Dash message types
-    // NOTE: declare non-implmented here, we must keep this enum consistent and backwards compatible
-    MSG_TXLOCK_REQUEST = 4,
-    MSG_TXLOCK_VOTE = 5,
-    MSG_SPORK = 6,
-    MSG_DYNODE_PAYMENT_VOTE = 7,
-    MSG_DYNODE_PAYMENT_BLOCK = 8, // reusing, was MSG_DYNODE_SCANNING_ERROR previously
-    MSG_BUDGET_VOTE = 9, // depreciated 
-    MSG_BUDGET_PROPOSAL = 10, // depreciated
-    MSG_BUDGET_FINALIZED = 11, // depreciated
-    MSG_BUDGET_FINALIZED_VOTE = 12, // depreciated
-    MSG_DYNODE_QUORUM = 13, // not implemented
-    MSG_DYNODE_ANNOUNCE = 14,
-    MSG_DYNODE_PING = 15,
-    MSG_PSTX = 16,
-    MSG_GOVERNANCE_OBJECT = 17,
-    MSG_GOVERNANCE_OBJECT_VOTE = 18,
-    MSG_DYNODE_VERIFY = 19,
+    MSG_TX = 1,    
+    MSG_BLOCK = 2, 
+    // Nodes may always request a MSG_FILTERED_BLOCK in a getdata, however,    
+    // MSG_FILTERED_BLOCK should not appear in any invs except as a part of getdata.   
+    MSG_FILTERED_BLOCK = 3,    
+    // Dynamic message types   
+    MSG_TXLOCK_REQUEST = 4,    
+    MSG_TXLOCK_VOTE = 5,   
+    MSG_SPORK = 6, 
+    MSG_DYNODE_PAYMENT_VOTE = 7,   
+    MSG_DYNODE_PAYMENT_BLOCK = 8,  
+    MSG_DYNODE_QUORUM = 9, // not implemented  
+    MSG_DYNODE_ANNOUNCE = 10,   
+    MSG_DYNODE_PING = 11,   
+    MSG_PSTX = 12,  
+    MSG_GOVERNANCE_OBJECT = 13, 
+    MSG_GOVERNANCE_OBJECT_VOTE = 14,    
+    MSG_DYNODE_VERIFY = 15,
 };
 
 /** inv message data */

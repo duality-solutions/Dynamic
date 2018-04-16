@@ -2049,7 +2049,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             //        vOrphanErase.push_back(orphanHash);
             //    }
             //}
-            // TODO This is a temporary solution while backporting Bitcoin 0.13 changes into Dash
+            // TODO This is a temporary solution while backporting Bitcoin 0.13 changes into Dynamic
             //      It is needed because the splitting of main.cpp into validation.cpp/net_processing.cpp was done out of order
             //      When we catch up with backporting, the above loop will be at the correct place in net_processing.cpp
             //      and this hack can be removed
