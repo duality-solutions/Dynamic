@@ -28,8 +28,7 @@ DIST_DOCS = $(wildcard doc/*.md) $(wildcard doc/release-notes/*.md)
 DIST_CONTRIB = $(top_srcdir)/contrib/dynamic-cli.bash-completion \
 	       $(top_srcdir)/contrib/dynamic-tx.bash-completion \
 	       $(top_srcdir)/contrib/dynamicd.bash-completion \
-	       $(top_srcdir)/contrib/init \
-	       $(top_srcdir)/contrib/rpm
+	       $(top_srcdir)/contrib/init
 
 BIN_CHECKS=$(top_srcdir)/contrib/devtools/symbol-check.py \
            $(top_srcdir)/contrib/devtools/security-check.py
