@@ -4110,7 +4110,7 @@ std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
         {
             CWalletTx *pcoin = &walletEntry.second;
 
-            if (!CheckFinalTx(*pcoin) || !pcoin->IsTrusted())
+            if (!pcoin->IsTrusted())
                 continue;
 
             if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
