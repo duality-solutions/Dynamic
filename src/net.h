@@ -725,7 +725,6 @@ public:
     bool fOneShot;
     bool fClient;
     const bool fInbound;
-    bool fNetworkNode;
     std::atomic_bool fSuccessfullyConnected;
     bool fDisconnect;
     // We use fRelayTxes for two purposes -
@@ -811,7 +810,7 @@ public:
     CAmount lastSentFeeFilter;
     int64_t nextSendTimeFeeFilter;
 
-    CNode(NodeId id, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress &addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const std::string &addrNameIn = "", bool fInboundIn = false, bool fNetworkNodeIn = false);
+    CNode(NodeId id, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress &addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const std::string &addrNameIn = "", bool fInboundIn = false);
     ~CNode();
 
 private:
