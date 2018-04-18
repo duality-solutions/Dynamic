@@ -1303,8 +1303,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     {
         pfrom->SetRecvVersion(std::min(pfrom->nVersion.load(), PROTOCOL_VERSION));
 
-        if (!pfrom->fInbound) {
-            // Mark this node as currently connected, so we update its timestamp later.
+        // Mark this node as currently connected, so we update its timestamp later.    
+        if (pfrom->fNetworkNode) { 
             LOCK(cs_main);
             State(pfrom->GetId())->fCurrentlyConnected = true;
         }
