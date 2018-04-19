@@ -49,8 +49,7 @@ CDynode::CDynode(const CDynode& other) :
 
 CDynode::CDynode(const CDynodeBroadcast& dnb) :
     dynode_info_t{ dnb.nActiveState, dnb.nProtocolVersion, dnb.sigTime,
-                       dnb.vin.prevout, dnb.addr, dnb.pubKeyCollateralAddress, dnb.pubKeyDynode,
-                       dnb.sigTime /*nTimeLastWatchdogVote*/},
+                       dnb.vin.prevout, dnb.addr, dnb.pubKeyCollateralAddress, dnb.pubKeyDynode},
     lastPing(dnb.lastPing),
     vchSig(dnb.vchSig),
     fAllowMixingTx(true)
@@ -197,7 +196,7 @@ void CDynode::Check(bool fForce)
 
     if(fWaitForPing && !fOurDynode) {
         // ...but if it was already expired before the initial check - return right away
-        if(IsExpired() || IsWatchdogExpired() || IsNewStartRequired()) {
+        if(IsExpired() || IsSentinelPingExpired() || IsNewStartRequired()) {
             LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state, waiting for ping\n", vin.prevout.ToStringShort(), GetStateString());
             return;
         }
@@ -213,23 +212,6 @@ void CDynode::Check(bool fForce)
             }
             return;
         }
-
-        /*
-        bool fWatchdogActive = dynodeSync.IsSynced() && dnodeman.IsWatchdogActive();
-        bool fWatchdogExpired = (fWatchdogActive && ((GetAdjustedTime() - nTimeLastWatchdogVote) > DYNODE_WATCHDOG_MAX_SECONDS));
-
-        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetAdjustedTime()=%d, fWatchdogExpired=%d\n",
-                vin.prevout.ToStringShort(), nTimeLastWatchdogVote, GetAdjustedTime(), fWatchdogExpired);
-
-
-        if(fWatchdogExpired) {
-            nActiveState = DYNODE_WATCHDOG_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
-                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", vin.prevout.ToStringShort(), GetStateString());
-            }
-            return;
-        }
-        */
 
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {
             nActiveState = DYNODE_EXPIRED;
@@ -283,7 +265,7 @@ std::string CDynode::StateToString(int nStateIn)
         case DYNODE_EXPIRED:                return "EXPIRED";
         case DYNODE_OUTPOINT_SPENT:         return "OUTPOINT_SPENT";
         case DYNODE_UPDATE_REQUIRED:        return "UPDATE_REQUIRED";
-        case DYNODE_WATCHDOG_EXPIRED:       return "WATCHDOG_EXPIRED";
+        case DYNODE_SENTINEL_PING_EXPIRED:       return "SENTINEL_PING_EXPIRED";
         case DYNODE_NEW_START_REQUIRED:     return "NEW_START_REQUIRED";
         case DYNODE_POSE_BAN:               return "POSE_BAN";
         default:                               return "UNKNOWN";
@@ -809,8 +791,8 @@ bool CDynodePing::SimpleCheck(int& nDos)
 
     // force update, ignoring cache
     pdn->Check(true);
-    // relay ping for nodes in ENABLED/EXPIRED/WATCHDOG_EXPIRED state only, skip everyone else
-    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsWatchdogExpired()) return false;
+    // relay ping for nodes in ENABLED/EXPIRED/SENTINEL_PING_EXPIRED state only, skip everyone else
+    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsSentinelPingExpired()) return false;
 
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping acceepted and relayed, Dynode=%s\n", vin.prevout.ToStringShort());
     Relay(connman);
@@ -846,12 +828,6 @@ void CDynode::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
         return;
     }
     mapGovernanceObjectsVotedOn.erase(it);
-}
-
-void CDynode::UpdateWatchdogVoteTime(uint64_t nVoteTime)
-{
-    LOCK(cs);
-    nTimeLastWatchdogVote = (nVoteTime == 0) ? GetAdjustedTime() : nVoteTime;
 }
 
 /**

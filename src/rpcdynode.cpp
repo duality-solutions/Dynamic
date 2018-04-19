@@ -495,7 +495,7 @@ UniValue dynodelist(const JSONRPCRequest& request)
                 "  protocol       - Print protocol of a Dynode (can be additionally filtered, exact match))\n"
                 "  pubkey         - Print the Dynode (not collateral) public key\n"
                 "  rank           - Print rank of a Dynode based on current block\n"
-                "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / WATCHDOG_EXPIRED / NEW_START_REQUIRED /\n"
+                "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / SENTINEL_PING_EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
                 );
     }

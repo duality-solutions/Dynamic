@@ -69,7 +69,7 @@ private:
 
     std::vector<uint256> vecDirtyGovernanceObjectHashes;
 
-    int64_t nLastWatchdogVoteTime;
+    int64_t nLastSentinelPingTime;
 
     friend class CDynodeSync;
     /// Find an entry
@@ -108,7 +108,7 @@ public:
         READWRITE(mWeAskedForDynodeListEntry);
         READWRITE(mDnbRecoveryRequests);
         READWRITE(mDnbRecoveryGoodReplies);
-        READWRITE(nLastWatchdogVoteTime);
+        READWRITE(nLastSentinelPingTime);
         READWRITE(nPsqCount);
 
         READWRITE(mapSeenDynodeBroadcast);
@@ -215,8 +215,8 @@ public:
         return vecTmp;
     }
 
-    bool IsWatchdogActive();
-    void UpdateWatchdogVoteTime(const COutPoint& outpoint, uint64_t nVoteTime = 0);
+    bool IsSentinelPingActive();
+    void UpdateLastSentinelPingTime();
     bool AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash);
     void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
 
