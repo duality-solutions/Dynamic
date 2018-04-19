@@ -35,9 +35,10 @@ private:
     std::auto_ptr<WalletModel::UnlockContext> unlockContext;
     bool hasMiningprivkey;
 
-    void restartMining(bool fGenerate);
     void timerEvent(QTimerEvent *event);
     void updateUI();
+    void StartMiner();
+    void StopMiner();
 
 private Q_SLOTS:
 
