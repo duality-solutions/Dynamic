@@ -134,6 +134,7 @@ CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, co
 
 void CDynode::Check(bool fForce)
 {
+    AssertLockHeld(cs_main);
     LOCK(cs);
 
     if(ShutdownRequested()) return;
@@ -420,6 +421,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 {
     nDos = 0;
 
+    AssertLockHeld(cs_main);
+
     // make sure addr is valid
     if(!IsValidNetAddr()) {
         LogPrintf("CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
@@ -480,6 +483,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 {
     nDos = 0;
+
+    AssertLockHeld(cs_main);
 
     if(pdn->sigTime == sigTime && !fRecovery) {
         // mapSeenDynodeBroadcast in CDynodeMan::CheckDnbAndUpdateDynodeList should filter legit duplicates
@@ -657,6 +662,12 @@ bool CDynodeBroadcast::CheckSignature(int& nDos)
 
 void CDynodeBroadcast::Relay(CConnman& connman)
 {
+    // Do not relay until fully synced
+    if(!dynodeSync.IsSynced()) {
+        LogPrint("dynode", "CDynodeBroadcast::Relay -- won't relay until fully synced\n");
+        return;
+    }
+
     CInv inv(MSG_DYNODE_ANNOUNCE, GetHash());
     connman.RelayInv(inv);
 }
@@ -736,10 +747,12 @@ bool CDynodePing::SimpleCheck(int& nDos)
  
  bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman)
  {
-     // don't ban by default
-     nDos = 0;
+    AssertLockHeld(cs_main);
+
+    // don't ban by default
+    nDos = 0;
  
-     if (!SimpleCheck(nDos)) {
+    if (!SimpleCheck(nDos)) {
         return false;
     }
 
@@ -807,6 +820,12 @@ bool CDynodePing::SimpleCheck(int& nDos)
 
 void CDynodePing::Relay(CConnman& connman)
 {
+    // Do not relay until fully synced
+    if(!dynodeSync.IsSynced()) {
+        LogPrint("dynode", "CDynodePing::Relay -- won't relay until fully synced\n");
+        return;
+    }
+
     CInv inv(MSG_DYNODE_PING, GetHash());
     connman.RelayInv(inv);
 }
