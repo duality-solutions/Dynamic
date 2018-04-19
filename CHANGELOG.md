@@ -123,6 +123,8 @@
 * Return txid even if ATMP fails for new transaction
 * Do not run functions with necessary side-effects in assert()
 * Use EXIT_FAILURE when calling exit()
+* Stop DynodeBroadcast::Relay() when not synced
+* Add missing locks to dynode.cpp
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
