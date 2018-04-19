@@ -111,6 +111,18 @@
 * Do not fully sort all nodes for addr relay
 * fix CreateTransaction error messages
 * Add check to IsCollateralValid
+* Credit should be CAmount
+* Update bench.cpp
+* remove unnecessary calls to CheckFinalTx
+* Split up AppInit2 into multiple phases
+* Daemonize after datadir lock
+* Get rid of fServer flag
+* Trivial refactor: Remove extern keyword from function declarations, as they are extern by default.
+* SendMoney: use already-calculated balance
+* Disable fee estimates for a confirm target of 1 block
+* Return txid even if ATMP fails for new transaction
+* Do not run functions with necessary side-effects in assert()
+* Use EXIT_FAILURE when calling exit()
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
