@@ -1059,6 +1059,8 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
 
 void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman& connman)
 {
+    AssertLockHeld(cs_main);
+
     int nDnCount = dnodeman.CountDynodes();
 
     // only Dynodes can sign this, why would someone ask regular node?
@@ -1068,14 +1070,11 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
         return;
     }
 
-    if(nDnCount > 200) 
-    {
-        if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
-            // peer should not ask us that often
-            LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
-            Misbehaving(pnode->id, 20);
-            return;
-        }
+    if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
+        // peer should not ask us that often
+        LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
+        Misbehaving(pnode->id, 20);
+        return;
     }
 
     uint256 blockHash;
@@ -1104,6 +1103,8 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
 
 void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 {
+    AssertLockHeld(cs_main);
+
     std::string strError;
 
     int nDnCount = dnodeman.CountDynodes();
@@ -1217,6 +1218,8 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 
 void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification& dnv)
 {
+    AssertLockHeld(cs_main);
+
     std::string strError;
 
     if(mapSeenDynodeVerification.find(dnv.GetHash()) != mapSeenDynodeVerification.end()) {
