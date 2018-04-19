@@ -125,6 +125,7 @@
 * Use EXIT_FAILURE when calling exit()
 * Stop DynodeBroadcast::Relay() when not synced
 * Add missing locks to dynode.cpp
+* Move over to Sentinel Ping from Watchdog
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
