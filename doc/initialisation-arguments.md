@@ -81,7 +81,6 @@ WALLET OPTIONS
 * "-paytxfee=[amt]" ("Fee (in kB) to add to transactions you send"),
 * "-rescan" ("Rescan the block chain for missing wallet transactions on startup")
 * "-salvagewallet" ("Attempt to recover private keys from a corrupt wallet.dat on startup")
-* "-sendfreetransactions" ("Send transactions as zero-fee transactions if possible")
 * "-spendzeroconfchange" ("Spend unconfirmed change when sending transactions")
 * "-txconfirmtarget=[n]" ("If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks")
 * "-maxtxfee=[amt]" ("Maximum total fees to use in a single wallet transaction setting this too low may abort large transactions"),

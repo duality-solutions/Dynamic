@@ -126,6 +126,7 @@
 * Stop DynodeBroadcast::Relay() when not synced
 * Add missing locks to dynode.cpp
 * Move over to Sentinel Ping from Watchdog
+* Remove zero-fee transactions as an option
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
