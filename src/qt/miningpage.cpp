@@ -1,6 +1,7 @@
 #include "miningpage.h"
 #include "ui_miningpage.h"
 
+#include "dynode-sync.h"
 #include "miner.h"
 #include "net.h"
 #include "util.h"
@@ -161,6 +162,8 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     ui->sliderCores->setMinimum(0);
     ui->sliderCores->setMaximum(nMaxUseThreads);
     ui->sliderCores->setValue(nMaxUseThreads);
+    ui->sliderCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
+
     ui->labelNCores->setText(QString("%1").arg(nMaxUseThreads));
 
     connect(ui->sliderCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCores(int)));
@@ -186,8 +189,10 @@ void MiningPage::updateUI()
     qint64 Hashrate = GetHashRate();
 
     ui->labelNethashrate->setText(formatHashrate(NetworkHashrate));
+    ui->labelNethashrate->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
     ui->labelYourHashrate->setText(formatHashrate(Hashrate));
-    
+    ui->labelYourHashrate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
+
     QString NextBlockTime;
     if (Hashrate == 0)
         NextBlockTime = QChar(L'∞');
@@ -200,11 +205,22 @@ void MiningPage::updateUI()
     }
     
     ui->labelNextBlock->setText(NextBlockTime);
-    if (GetHashRate() == 0) {
+    ui->labelNextBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
+
+    if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
+        ui->pushSwitchMining->setToolTip(tr("Blockchain/Dynodes are not synced, please wait until fully synced before mining!"));
+        ui->pushSwitchMining->setText(tr("Disabled"));
+        ui->pushSwitchMining->setEnabled(false);
+    } 
+    else if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced() && GetHashRate() == 0) {
+        ui->pushSwitchMining->setToolTip(tr("Click 'Start' to begin mining!"));
         ui->pushSwitchMining->setText(tr("Start mining"));
+        ui->pushSwitchMining->setEnabled(true);
     }
     else {
+        ui->pushSwitchMining->setToolTip(tr("Click 'Stop' to finish mining!"));
         ui->pushSwitchMining->setText(tr("Stop mining"));
+        ui->pushSwitchMining->setEnabled(true);
     }
 }
 
