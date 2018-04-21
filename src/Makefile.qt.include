@@ -59,6 +59,7 @@ QT_MOC_CPP = \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
+  qt/moc_hashrategraphwidget.cpp \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
   qt/moc_miningpage.cpp \
@@ -129,6 +130,7 @@ DYNAMIC_QT_H = \
   qt/editaddressdialog.h \
   qt/guiconstants.h \
   qt/guiutil.h \
+  qt/hashrategraphwidget.h \
   qt/intro.h \
   qt/macdockiconhandler.h \
   qt/macnotificationhandler.h \
@@ -276,6 +278,7 @@ DYNAMIC_QT_CPP += \
   qt/coincontroltreewidget.cpp \
   qt/dynodelist.cpp \
   qt/editaddressdialog.cpp \
+  qt/hashrategraphwidget.cpp \
   qt/miningpage.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \

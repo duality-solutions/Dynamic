@@ -32,7 +32,7 @@ public:
 private:
     Ui::MiningPage *ui;
     WalletModel *model;
-    std::auto_ptr<WalletModel::UnlockContext> unlockContext;
+    std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     bool hasMiningprivkey;
 
     void timerEvent(QTimerEvent *event);

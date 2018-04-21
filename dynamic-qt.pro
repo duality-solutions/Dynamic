@@ -440,7 +440,9 @@ HEADERS += \
     src/support/lockedpool.h \
     src/messagesigner.h \
     src/qt/modaloverlay.h \
-    src/indirectmap.h
+    src/indirectmap.h \
+    src/qt/miningpage.h \
+    src/qt/hashrategraphwidget.h
 
 SOURCES += \
     src/compat/glibcxx_sanity.cpp \
@@ -608,7 +610,9 @@ SOURCES += \
     src/ui_interface.cpp \
     src/messagesigner.cpp \
     src/qt/modaloverlay.cpp \
-    src/sendalert.cpp
+    src/sendalert.cpp \
+    src/qt/miningpage.cpp \
+    src/qt/hashrategraphwidget.cpp
 
 
 OTHER_FILES += \
@@ -639,4 +643,5 @@ FORMS += \
     src/qt/forms/signverifymessagedialog.ui \
     src/qt/forms/dynodelist.ui \
     src/qt/forms/transactiondescdialog.ui \
-    src/qt/forms/modaloverlay.ui
+    src/qt/forms/modaloverlay.ui \
+    src/qt/forms/miningpage.ui
