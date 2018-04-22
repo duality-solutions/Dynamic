@@ -272,6 +272,11 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
             + HelpExampleCli("generatetoaddress", "11 \"myaddress\"")
         );
 
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Error: generatetoaddress only works on REGTEST");
+    else if (Params().NetworkIDString() == CBaseChainParams::TESTNET)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Error: generatetoaddress only works on REGTEST");
+
     int nGenerate = request.params[0].get_int();
     uint64_t nMaxTries = 1000000;
     if (request.params.size() > 2) {
