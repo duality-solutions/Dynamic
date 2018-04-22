@@ -7,7 +7,7 @@
 * Protect CKeyHolderStorage via mutex
 * Fix Boost 1.66 Compatibility
 * Net Overhaul and BTC Inlining
-* Bump Versions/Protocol
+* Bump Versions/Protocol (Updated Dynodes must get a fresh "Start" Signal with the new Binaries)
 * Update Tests
 * util: Add ParseUInt32 and ParseUInt64
 * [RPC] getmempoolancestors/getmempooldescendants
