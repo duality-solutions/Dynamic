@@ -1061,8 +1061,6 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
 {
     AssertLockHeld(cs_main);
 
-    int nDnCount = dnodeman.CountDynodes();
-
     // only Dynodes can sign this, why would someone ask regular node?
     if(!fDyNode) {
         // do not ban, malicious node might be using my IP
