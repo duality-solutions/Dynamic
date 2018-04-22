@@ -130,6 +130,7 @@
 * Update miningpage for out of sync situation + add tooltips
 * Add Sexy Sliders
 * Remove unused declaration in dynodeman.cpp
+* Add check to ensure that generatetoaddress doesn't function on Main or TestNet
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
