@@ -7,7 +7,7 @@
 * Protect CKeyHolderStorage via mutex
 * Fix Boost 1.66 Compatibility
 * Net Overhaul and BTC Inlining
-* Bump Versions/Protocol
+* Bump Versions/Protocol (Updated Dynodes must get a fresh "Start" Signal with the new Binaries)
 * Update Tests
 * util: Add ParseUInt32 and ParseUInt64
 * [RPC] getmempoolancestors/getmempooldescendants
@@ -127,6 +127,9 @@
 * Add missing locks to dynode.cpp
 * Move over to Sentinel Ping from Watchdog
 * Remove zero-fee transactions as an option
+* Update miningpage for out of sync situation + add tooltips
+* Add Sexy Sliders
+* Remove unused declaration in dynodeman.cpp
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
