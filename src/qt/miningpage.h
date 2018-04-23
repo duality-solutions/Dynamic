@@ -39,11 +39,15 @@ private:
     void updateUI();
     void StartMiner();
     void StopMiner();
+    void showHashMeterControls(bool show);
 
 private Q_SLOTS:
 
     void changeNumberOfCores(int i);
     void switchMining();
+    void showHashRate(int i);
+    void changeSampleTime(int i);
+
 };
 
 #endif // MININGPAGE_H

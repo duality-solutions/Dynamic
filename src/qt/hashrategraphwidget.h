@@ -20,22 +20,41 @@ class HashRateGraphWidget : public QWidget
 
 public:
     explicit HashRateGraphWidget(QWidget *parent = 0);
+
+    enum GraphType
+    {
+        MINER_HASHRATE = 0,
+        NETWORK_HASHRATE
+    };
+
+    enum SampleTime
+    {
+        FIVE_MINUTES = 0,
+        TEN_MINUTES,
+        THIRTY_MINUTES,
+        ONE_HOUR,
+        EIGHT_HOURS,
+        TWELVE_HOURS,
+        ONE_DAY
+    };
+
+    GraphType graphType;
     
 public Q_SLOTS:
-    void updateHashRateGraph();
-    void stopHashMeter();
-    void startHashMeter();
+    void StopHashMeter();
+    void StartHashMeter();
+    void UpdateSampleTime(SampleTime time);
 
 private:
+    void timerEvent(QTimerEvent *event);
+    void updateHashRateGraph();
     void initGraph(QPainter& painter);
-    void plotMyHashRate(QPainter& painter);
-    void plotNetworkHashRate(QPainter& painter);
+    void drawHashRate(QPainter& painter);
     void clear();
 
-    int64_t iMaxMyHashRate;
-    int64_t iMaxNetworkHashRate;
-    QQueue<int64_t> vSampleMyHashRate;
-    QQueue<int64_t> vSampleNetworkHashRate;
+    unsigned int iDesiredSamples;
+    int64_t iMaxHashRate;
+    QQueue<int64_t> vSampleHashRate;
     bool fPlotHashRate;
 
 protected :

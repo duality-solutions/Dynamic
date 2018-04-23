@@ -40,15 +40,22 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     ui->sliderCores->setMaximum(nMaxUseThreads);
     ui->sliderCores->setValue(nMaxUseThreads);
     ui->labelNCores->setText(QString("%1").arg(nMaxUseThreads));
+    ui->sliderGraphSampleTime->setMaximum(0);
+    ui->sliderGraphSampleTime->setMaximum(6);
 
     ui->sliderCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
-    ui->labelNethashrate->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
-    ui->labelYourHashrate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
+    ui->labelNetHashRate->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
+    ui->labelMinerHashRate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
     ui->labelNextBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
 
     connect(ui->sliderCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCores(int)));
+    connect(ui->sliderGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeSampleTime(int)));
     connect(ui->pushSwitchMining, SIGNAL(clicked()), this, SLOT(switchMining()));
+    connect(ui->checkBoxShowGraph, SIGNAL(stateChanged(int)), this, SLOT(showHashRate(int)));
+    ui->minerHashRateWidget->graphType = HashRateGraphWidget::GraphType::MINER_HASHRATE;
+    ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
     
+    showHashMeterControls(false);
     updateUI();
     startTimer(3511);
 }
@@ -68,8 +75,8 @@ void MiningPage::updateUI()
     qint64 NetworkHashrate = GUIUtil::GetNetworkHashPS(120, -1);
     qint64 Hashrate = GUIUtil::GetHashRate();
 
-    ui->labelNethashrate->setText(GUIUtil::FormatHashRate(NetworkHashrate));
-    ui->labelYourHashrate->setText(GUIUtil::FormatHashRate(Hashrate));
+    ui->labelNetHashRate->setText(GUIUtil::FormatHashRate(NetworkHashrate));
+    ui->labelMinerHashRate->setText(GUIUtil::FormatHashRate(Hashrate));
     
     QString NextBlockTime;
     if (Hashrate == 0)
@@ -93,13 +100,11 @@ void MiningPage::updateUI()
         ui->pushSwitchMining->setToolTip(tr("Click 'Start' to begin mining!"));
         ui->pushSwitchMining->setText(tr("Start mining"));
         ui->pushSwitchMining->setEnabled(true);
-        ui->ShowHashRateWidget->updateHashRateGraph();
      }
      else {
         ui->pushSwitchMining->setToolTip(tr("Click 'Stop' to finish mining!"));
         ui->pushSwitchMining->setText(tr("Stop mining"));
         ui->pushSwitchMining->setEnabled(true);
-        ui->ShowHashRateWidget->updateHashRateGraph();
     }
 }
 
@@ -150,4 +155,64 @@ void MiningPage::switchMining()
 void MiningPage::timerEvent(QTimerEvent *)
 {
     updateUI();
+}
+
+void MiningPage::showHashRate(int i)
+{
+    if (i == 0) {
+        ui->minerHashRateWidget->StopHashMeter();
+        showHashMeterControls(false);
+    }
+    else {
+        ui->minerHashRateWidget->StartHashMeter();
+        showHashMeterControls(true);
+    }
+}
+
+void MiningPage::showHashMeterControls(bool show)
+{
+    if (show == false) {
+        ui->sliderGraphSampleTime->setVisible(false);
+        ui->labelGraphSampleSize->setVisible(false);
+    }
+    else {
+        ui->sliderGraphSampleTime->setVisible(true);
+        ui->labelGraphSampleSize->setVisible(true);
+    }
+}
+
+void MiningPage::changeSampleTime(int i)
+{
+    if (i == 0) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("5 minutes"));
+    }
+    else if (i == 1) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::TEN_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("10 minutes"));
+    }
+    else if (i == 2) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::THIRTY_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("30 minutes"));
+    }
+    else if (i == 3) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_HOUR);
+        ui->labelGraphSampleSize->setText(QString("1 hour"));
+    }
+    else if (i == 4) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::EIGHT_HOURS);
+        ui->labelGraphSampleSize->setText(QString("8 hours"));
+    }
+    else if (i == 5) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::TWELVE_HOURS);
+        ui->labelGraphSampleSize->setText(QString("12 hour"));
+    }
+    else if (i == 6) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);
+        ui->labelGraphSampleSize->setText(QString("1 day"));
+    }
+    else {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);
+        ui->labelGraphSampleSize->setText(QString("1 day"));
+    }
 }
