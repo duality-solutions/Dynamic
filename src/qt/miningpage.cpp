@@ -2,6 +2,7 @@
 #include "ui_miningpage.h"
 
 #include "dynode-sync.h"
+#include "guiutil.h"
 #include "miner.h"
 #include "net.h"
 #include "util.h"
@@ -12,130 +13,6 @@
 #include <boost/thread.hpp>
 #include <stdio.h>
 
-
-static int MaxThreads() {
-    int nThreads = boost::thread::hardware_concurrency();
-
-    int nUseThreads = GetArg("-genproclimit", -1);
-    if (nUseThreads < 0)
-        nUseThreads = nThreads;
-
-        return nUseThreads;
-}
-
-static int64_t GetHashRate() {
-
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
-        return (int64_t)0;
-    return (int64_t)dHashesPerSec;
-}
-
-static QString formatHashrate(qint64 n)
-{
-    if (n == 0)
-        return "0 H/s";
-
-    int i = (int)floor(log(n)/log(1000));
-    float v = n*pow(1000.0f, -i);
-
-    QString prefix = "";
-    if (i >= 1 && i < 9)
-        prefix = " kMGTPEZY"[i];
-
-    return QString("%1 %2H/s").arg(v, 0, 'f', 2).arg(prefix);
-}
-
-static int64_t GetNetworkHashPS(int lookup, int height) {
-    CBlockIndex *pb = chainActive.Tip();
-
-    if (height >= 0 && height < chainActive.Height())
-        pb = chainActive[height];
-
-    if (pb == NULL || !pb->nHeight)
-        return 0;
-
-    // If lookup is -1, then use blocks since last difficulty change.
-    if (lookup <= 0)
-        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
-
-    // If lookup is larger than chain, then set it to chain length.
-    if (lookup > pb->nHeight)
-        lookup = pb->nHeight;
-
-    CBlockIndex *pb0 = pb;
-    int64_t minTime = pb0->GetBlockTime();
-    int64_t maxTime = minTime;
-    for (int i = 0; i < lookup; i++) {
-        pb0 = pb0->pprev;
-        int64_t time = pb0->GetBlockTime();
-        minTime = std::min(time, minTime);
-        maxTime = std::max(time, maxTime);
-    }
-
-    // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
-    if (minTime == maxTime)
-        return 0;
-
-    arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
-    int64_t timeDiff = maxTime - minTime;
-
-    return workDiff.getdouble() / timeDiff;
-}
-
-static QString formatTimeInterval(arith_uint256 time)
-{
-    enum  EUnit { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, NUM_UNITS };
-
-    const int SecondsPerUnit[NUM_UNITS] =
-    {
-        31556952, // average number of seconds in gregorian year
-        31556952/12, // average number of seconds in gregorian month
-        24*60*60, // number of seconds in a day
-        60*60, // number of seconds in an hour
-        60, // number of seconds in a minute
-        1
-    };
-
-    const char* UnitNames[NUM_UNITS] =
-    {
-        "year",
-        "month",
-        "day",
-        "hour",
-        "minute",
-        "second"
-    };
-
-    if (time > 0xFFFFFFFF)
-    {
-        time /= SecondsPerUnit[YEAR];
-        return QString("%1 years").arg(time.ToString().c_str());
-    }
-    else
-    {
-        unsigned int t32 = (unsigned int)time.GetCompact();
-
-        int Values[NUM_UNITS];
-        for (int i = 0; i < NUM_UNITS; i++)
-        {
-            Values[i] = t32/SecondsPerUnit[i];
-            t32 %= SecondsPerUnit[i];
-        }
-
-        int FirstNonZero = 0;
-        while (FirstNonZero < NUM_UNITS && Values[FirstNonZero] == 0)
-            FirstNonZero++;
-
-        QString TimeStr;
-        for (int i = FirstNonZero; i < std::min(FirstNonZero + 3, (int)NUM_UNITS); i++)
-        {
-            int Value = Values[i];
-            TimeStr += QString("%1 %2%3 ").arg(Value).arg(UnitNames[i]).arg((Value == 1)? "" : "s"); // FIXME: this is English specific
-        }
-        return TimeStr;
-    }
-}
-
 MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MiningPage),
@@ -143,7 +20,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    int nMaxUseThreads = MaxThreads();
+    int nMaxUseThreads = GUIUtil::MaxThreads();
 
     std::string PrivAddress = GetArg("-miningprivkey", "");
     if (!PrivAddress.empty())
@@ -162,15 +39,25 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     ui->sliderCores->setMinimum(0);
     ui->sliderCores->setMaximum(nMaxUseThreads);
     ui->sliderCores->setValue(nMaxUseThreads);
-    ui->sliderCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
-
     ui->labelNCores->setText(QString("%1").arg(nMaxUseThreads));
+    ui->sliderGraphSampleTime->setMaximum(0);
+    ui->sliderGraphSampleTime->setMaximum(6);
+
+    ui->sliderCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
+    ui->labelNetHashRate->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
+    ui->labelMinerHashRate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
+    ui->labelNextBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
 
     connect(ui->sliderCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCores(int)));
+    connect(ui->sliderGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeSampleTime(int)));
     connect(ui->pushSwitchMining, SIGNAL(clicked()), this, SLOT(switchMining()));
-
+    connect(ui->checkBoxShowGraph, SIGNAL(stateChanged(int)), this, SLOT(showHashRate(int)));
+    ui->minerHashRateWidget->graphType = HashRateGraphWidget::GraphType::MINER_HASHRATE;
+    ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
+    
+    showHashMeterControls(false);
     updateUI();
-    startTimer(487);
+    startTimer(3511);
 }
 
 MiningPage::~MiningPage()
@@ -185,14 +72,12 @@ void MiningPage::setModel(WalletModel *model)
 
 void MiningPage::updateUI()
 {
-    qint64 NetworkHashrate = GetNetworkHashPS(120, -1);
-    qint64 Hashrate = GetHashRate();
+    qint64 NetworkHashrate = GUIUtil::GetNetworkHashPS(120, -1);
+    qint64 Hashrate = GUIUtil::GetHashRate();
 
-    ui->labelNethashrate->setText(formatHashrate(NetworkHashrate));
-    ui->labelNethashrate->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
-    ui->labelYourHashrate->setText(formatHashrate(Hashrate));
-    ui->labelYourHashrate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
-
+    ui->labelNetHashRate->setText(GUIUtil::FormatHashRate(NetworkHashrate));
+    ui->labelMinerHashRate->setText(GUIUtil::FormatHashRate(Hashrate));
+    
     QString NextBlockTime;
     if (Hashrate == 0)
         NextBlockTime = QChar(L'∞');
@@ -201,23 +86,22 @@ void MiningPage::updateUI()
         arith_uint256 Target;
         Target.SetCompact(chainActive.Tip()->nBits);
         arith_uint256 ExpectedTime = (arith_uint256(1) << 256)/(Target*Hashrate);
-        NextBlockTime = formatTimeInterval(ExpectedTime);
+        NextBlockTime = GUIUtil::FormatTimeInterval(ExpectedTime);
     }
     
     ui->labelNextBlock->setText(NextBlockTime);
-    ui->labelNextBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
 
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->pushSwitchMining->setToolTip(tr("Blockchain/Dynodes are not synced, please wait until fully synced before mining!"));
         ui->pushSwitchMining->setText(tr("Disabled"));
         ui->pushSwitchMining->setEnabled(false);
     } 
-    else if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced() && GetHashRate() == 0) {
+    else if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced() && GUIUtil::GetHashRate() == 0) {
         ui->pushSwitchMining->setToolTip(tr("Click 'Start' to begin mining!"));
         ui->pushSwitchMining->setText(tr("Start mining"));
         ui->pushSwitchMining->setEnabled(true);
-    }
-    else {
+     }
+     else {
         ui->pushSwitchMining->setToolTip(tr("Click 'Stop' to finish mining!"));
         ui->pushSwitchMining->setText(tr("Stop mining"));
         ui->pushSwitchMining->setEnabled(true);
@@ -243,19 +127,21 @@ void MiningPage::changeNumberOfCores(int i)
     if (i == 0) {
         StopMiner();
     }
-    else if (i > 0 && GetHashRate() > 0) {  
+    else if (i > 0 && GUIUtil::GetHashRate() > 0) {  
         StartMiner();
     }
 }
 
 void MiningPage::switchMining()
 {
+    int64_t hashRate = GUIUtil::GetHashRate();
     int nThreads = (int)ui->sliderCores->value();
-    if (GetHashRate() > 0) {
+    
+    if (hashRate > 0) {
         ui->pushSwitchMining->setText(tr("Stopping"));
         StopMiner();
     }
-    else if (nThreads == 0 && GetHashRate() == 0){
+    else if (nThreads == 0 && hashRate == 0){
         ui->sliderCores->setValue(1);
         ui->pushSwitchMining->setText(tr("Starting"));
         StartMiner();
@@ -269,4 +155,64 @@ void MiningPage::switchMining()
 void MiningPage::timerEvent(QTimerEvent *)
 {
     updateUI();
+}
+
+void MiningPage::showHashRate(int i)
+{
+    if (i == 0) {
+        ui->minerHashRateWidget->StopHashMeter();
+        showHashMeterControls(false);
+    }
+    else {
+        ui->minerHashRateWidget->StartHashMeter();
+        showHashMeterControls(true);
+    }
+}
+
+void MiningPage::showHashMeterControls(bool show)
+{
+    if (show == false) {
+        ui->sliderGraphSampleTime->setVisible(false);
+        ui->labelGraphSampleSize->setVisible(false);
+    }
+    else {
+        ui->sliderGraphSampleTime->setVisible(true);
+        ui->labelGraphSampleSize->setVisible(true);
+    }
+}
+
+void MiningPage::changeSampleTime(int i)
+{
+    if (i == 0) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("5 minutes"));
+    }
+    else if (i == 1) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::TEN_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("10 minutes"));
+    }
+    else if (i == 2) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::THIRTY_MINUTES);
+        ui->labelGraphSampleSize->setText(QString("30 minutes"));
+    }
+    else if (i == 3) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_HOUR);
+        ui->labelGraphSampleSize->setText(QString("1 hour"));
+    }
+    else if (i == 4) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::EIGHT_HOURS);
+        ui->labelGraphSampleSize->setText(QString("8 hours"));
+    }
+    else if (i == 5) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::TWELVE_HOURS);
+        ui->labelGraphSampleSize->setText(QString("12 hour"));
+    }
+    else if (i == 6) {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);
+        ui->labelGraphSampleSize->setText(QString("1 day"));
+    }
+    else {
+        ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);
+        ui->labelGraphSampleSize->setText(QString("1 day"));
+    }
 }
