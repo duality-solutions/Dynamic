@@ -47,7 +47,7 @@ private Q_SLOTS:
     void switchMining();
     void showHashRate(int i);
     void changeSampleTime(int i);
-
+    void clearHashRateData();
 };
 
 #endif // MININGPAGE_H

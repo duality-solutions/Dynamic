@@ -151,14 +151,11 @@ void HashRateGraphWidget::UpdateSampleTime(SampleTime time)
 void HashRateGraphWidget::StopHashMeter()
 {
     fPlotHashRate = false;
-    clear();
     update();
 }
 
 void HashRateGraphWidget::StartHashMeter()
 {
     fPlotHashRate = true;
-    clear();
     update();
 }
-

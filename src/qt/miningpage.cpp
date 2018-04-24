@@ -51,7 +51,9 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     connect(ui->sliderCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCores(int)));
     connect(ui->sliderGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeSampleTime(int)));
     connect(ui->pushSwitchMining, SIGNAL(clicked()), this, SLOT(switchMining()));
+    connect(ui->pushButtonClearData, SIGNAL(clicked()), this, SLOT(clearHashRateData()));
     connect(ui->checkBoxShowGraph, SIGNAL(stateChanged(int)), this, SLOT(showHashRate(int)));
+    //
     ui->minerHashRateWidget->graphType = HashRateGraphWidget::GraphType::MINER_HASHRATE;
     ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
     
@@ -174,10 +176,12 @@ void MiningPage::showHashMeterControls(bool show)
     if (show == false) {
         ui->sliderGraphSampleTime->setVisible(false);
         ui->labelGraphSampleSize->setVisible(false);
+        ui->pushButtonClearData->setVisible(false);
     }
     else {
         ui->sliderGraphSampleTime->setVisible(true);
         ui->labelGraphSampleSize->setVisible(true);
+        ui->pushButtonClearData->setVisible(true);
     }
 }
 
@@ -215,4 +219,9 @@ void MiningPage::changeSampleTime(int i)
         ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);
         ui->labelGraphSampleSize->setText(QString("1 day"));
     }
+}
+
+void MiningPage::clearHashRateData()
+{
+    ui->minerHashRateWidget->clear();
 }
