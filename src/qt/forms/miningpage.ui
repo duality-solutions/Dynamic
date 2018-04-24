@@ -201,7 +201,7 @@ border-radius: 4px;
      <item>
       <widget class="QCheckBox" name="checkBoxShowGraph">
        <property name="text">
-        <string>Show Hash Meter</string>
+        <string>Show Hash Meter Graph</string>
        </property>
       </widget>
      </item>
@@ -347,6 +347,13 @@ border-radius: 4px;
        </property>
        <property name="text">
         <string>5 m</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonClearData">
+       <property name="text">
+        <string>Clear</string>
        </property>
       </widget>
      </item>
