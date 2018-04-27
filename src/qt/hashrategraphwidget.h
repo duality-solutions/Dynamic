@@ -51,7 +51,8 @@ private:
     void updateHashRateGraph();
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
-    
+    void truncateSampleQueue();
+
     unsigned int iDesiredSamples;
     int64_t iMaxHashRate;
     QQueue<int64_t> vSampleHashRate;
