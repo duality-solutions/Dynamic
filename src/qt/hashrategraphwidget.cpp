@@ -19,6 +19,7 @@
 #define XMARGIN                     10
 #define YMARGIN                     10
 #define GRID_HEIGHT                 30
+#define MAX_SAMPLES                 60 * 60 * 24 // 24 hours
 
 HashRateGraphWidget::HashRateGraphWidget(QWidget *parent) :
     QWidget(parent),
@@ -93,6 +94,13 @@ void HashRateGraphWidget::paintEvent(QPaintEvent *)
     drawHashRate(painter);
 }
 
+void HashRateGraphWidget::truncateSampleQueue()
+{
+    while(vSampleHashRate.size() > MAX_SAMPLES) {
+        vSampleHashRate.pop_back();
+    }
+}
+
 void HashRateGraphWidget::updateHashRateGraph()
 {
     int64_t iCurrentHashRate = 0;
@@ -104,6 +112,11 @@ void HashRateGraphWidget::updateHashRateGraph()
     }
     
     vSampleHashRate.push_front(iCurrentHashRate);
+    
+    if (vSampleHashRate.size() > MAX_SAMPLES + DEFAULT_DESIRED_SAMPLES)
+    {
+        truncateSampleQueue();
+    }
 
     if (iMaxHashRate < iCurrentHashRate)
         iMaxHashRate = iCurrentHashRate;
@@ -151,14 +164,11 @@ void HashRateGraphWidget::UpdateSampleTime(SampleTime time)
 void HashRateGraphWidget::StopHashMeter()
 {
     fPlotHashRate = false;
-    clear();
     update();
 }
 
 void HashRateGraphWidget::StartHashMeter()
 {
     fPlotHashRate = true;
-    clear();
     update();
 }
-

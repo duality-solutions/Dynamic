@@ -44,13 +44,14 @@ public Q_SLOTS:
     void StopHashMeter();
     void StartHashMeter();
     void UpdateSampleTime(SampleTime time);
+    void clear();
 
 private:
     void timerEvent(QTimerEvent *event);
     void updateHashRateGraph();
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
-    void clear();
+    void truncateSampleQueue();
 
     unsigned int iDesiredSamples;
     int64_t iMaxHashRate;
