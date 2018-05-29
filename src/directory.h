@@ -12,8 +12,11 @@
 #include "serialize.h"
 #include "sync.h"
 
+#include <univalue.h>
+
 class CTransaction;
 class CDynamicAddress;
+class CTxOut;
 
 static const unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
 static const unsigned int MAX_DOMAIN_NAME_SIZE        = 32;
@@ -28,12 +31,13 @@ static const std::string  DEFAULT_PUBLIC_DOMAIN       = INTERNAL_DOMAIN_PREFIX +
 
 typedef std::vector<unsigned char> CharString;
 typedef std::vector<CharString> vchCharString;
+typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
 
 enum DirectoryObjectType {
     USER_ACCOUNT = 0,
     DEVICE_ACCOUNT = 1,
     GROUP = 2,
-    DOMAIN_CONTROLLER = 3,
+    DOMAIN_ACCOUNT = 3,
     ORGANIZATIONAL_UNIT = 4,
     CERTIFICATE = 5,
     CODE = 6
@@ -51,6 +55,8 @@ enum DirectoryObjectType {
 - Side chains secured by Proof of Stake tokens issued by directory domain owner/creator
 - Top level domains require collateral and more expensive than
 - Recommended to store lower level domain object data as encrypted shards on Torrent network and not on the chain.
+- The basic operations of DAP: Bind, Read, List, Search, Compare, Modify, Add, Delete and ModifyRDN
+- Implement file sharing using IPFS
 */
 
 class CDirectoryDefaultParameters {
@@ -63,27 +69,28 @@ class CDirectory {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
-    CharString OID; // Object ID
-    vchCharString DomainName; // required. controls child objects
+    CharString OID; // Canonical Object ID
+    CharString DomainName; // required. controls child objects
     CharString ObjectName; // blank for top level domain directories
-    DirectoryObjectType Type; // see enum above
+    DirectoryObjectType ObjectType; // see enum above
     CharString WalletAddress; // used to send collateral funds for this directory record. This is the multisig wallet address made from the SignWalletAddresses
     unsigned int fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
     CharString EncryptPrivateKey; // used to decrypt messages and data for this directory record
     vchCharString SignWalletAddresses; // used to verify authorized update transaction
     unsigned int nSigaturesRequired; // number of SignWalletAddresses needed to sign a transaction.  Default = 1
-    CharString TorrentNetworkAddress; // used for temp storage and transmision of sharded and encrypted data.
+    CharString IPFSAddress; // used for temp storage and transmision of sharded and encrypted data.
     
     uint256 txHash;
 
     unsigned int nHeight;
     uint64_t nExpireTime;
 
-    CharString PublicCertificate;
+    CharString Certificate;
     CharString PrivateData;
     CAmount transactionFee;
     CAmount registrationFeePerDay;
+    vCheckPoints CheckpointHashes; // used to store main chain hash checkpoints for added security
 
     CDirectory() { 
         SetNull();
@@ -100,21 +107,22 @@ public:
         OID.clear();
         DomainName.clear();
         ObjectName.clear();
-        Type = DirectoryObjectType::USER_ACCOUNT;
+        ObjectType = DirectoryObjectType::DOMAIN_ACCOUNT;
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
         EncryptPrivateKey.clear();
         SignWalletAddresses.clear();
         nSigaturesRequired = 1;
-        TorrentNetworkAddress.clear();
+        IPFSAddress.clear();
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
-        PublicCertificate.clear();
+        Certificate.clear();
         PrivateData.clear();
         transactionFee = 0;
         registrationFeePerDay = 0;
+        CheckpointHashes.clear();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -125,21 +133,22 @@ public:
         READWRITE(OID);
         READWRITE(DomainName);
         READWRITE(ObjectName);
-        READWRITE(static_cast<int>(Type));
+        //READWRITE(static_cast<int>(ObjectType));
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
         READWRITE(EncryptPrivateKey);
         READWRITE(SignWalletAddresses);
         READWRITE(VARINT(nSigaturesRequired));
-        READWRITE(TorrentNetworkAddress);
+        READWRITE(IPFSAddress);
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
-        READWRITE(PublicCertificate);
+        READWRITE(Certificate);
         READWRITE(PrivateData);
         READWRITE(transactionFee);
         READWRITE(registrationFeePerDay);
+        READWRITE(CheckpointHashes);
     }
 
     inline friend bool operator==(const CDirectory &a, const CDirectory &b) {
@@ -154,19 +163,20 @@ public:
         OID = b.OID;
         DomainName = b.DomainName;
         ObjectName = b.ObjectName;
-        Type = b.Type;
+        ObjectType = b.ObjectType;
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
         EncryptPrivateKey = b.EncryptPrivateKey;
         SignWalletAddresses = b.SignWalletAddresses;
         nSigaturesRequired = b.nSigaturesRequired;
-        TorrentNetworkAddress = b.TorrentNetworkAddress;
+        IPFSAddress = b.IPFSAddress;
         txHash = b.txHash;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
-        PublicCertificate = b.PublicCertificate;
+        Certificate = b.Certificate;
         PrivateData = b.PrivateData;
+        CheckpointHashes = b.CheckpointHashes;
         return *this;
     }
  
@@ -180,12 +190,22 @@ public:
 
 class CDirectoryDB : public CDBWrapper {
 public:
-    CDirectoryDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "directories", nCacheSize, fMemory, fWipe) {
+    CDirectoryDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "bdap", nCacheSize, fMemory, fWipe) {
     }
 
-    bool ReadDirectory();
+    // Add, Read, Modify, ModifyRDN, Delete, List, Search, Bind, and Compare
 
-    bool AddDirectory();
+    bool AddDirectory(const CDirectory& directory, const int& op) { 
+        bool writeState = Write(make_pair(std::string("domain_name"), directory.DomainName), directory) 
+                             && Write(make_pair(std::string("domain_wallet_address"), directory.WalletAddress), directory.DomainName);
+
+        AddDirectoryIndex(directory, op);
+        return writeState;
+    }
+
+    void AddDirectoryIndex(const CDirectory& directory, const int& op);
+
+    bool ReadDirectory();
 
     bool UpdateDirectory();
 
@@ -194,10 +214,20 @@ public:
     bool DirectoryExists();
 
     bool CleanupDirectoryDatabase();
+    
 
-    void WriteDirectoryIndex(const CDirectory& directory, const int &op);
-    void WriteDirectoryIndexHistory(const CDirectory& directory, const int &op);
+    void WriteDirectoryIndex(const CDirectory& directory, const int& op);
+    void WriteDirectoryIndexHistory(const CDirectory& directory, const int& op);
 };
+
+bool IsDirectoryDataOutput(const CTxOut& out);
+int GetDirectoryDataOutput(const CTransaction& tx);
+bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
+bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
+bool BuildBDAPJson(const CDirectory& directory, UniValue& oName);
+
+std::string stringFromVch(const CharString& vch);
+std::vector<unsigned char> vchFromValue(const UniValue& value);
 
 extern CDirectoryDB *pDirectoryDB;
 
