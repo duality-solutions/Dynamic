@@ -1706,19 +1706,19 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>%1 d</source>
-        <translation>%1 디</translation>
+        <translation>%1 일</translation>
     </message>
     <message>
         <source>%1 h</source>
-        <translation>%1 h</translation>
+        <translation>%1 시과</translation>
     </message>
     <message>
         <source>%1 m</source>
-        <translation>%1 엠</translation>
+        <translation>%1 분</translation>
     </message>
     <message>
         <source>%1 s</source>
-        <translation>%1 에스</translation>
+        <translation>%1 초</translation>
     </message>
     <message>
         <source>NETWORK</source>
