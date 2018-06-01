@@ -1683,58 +1683,58 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>PeerTableModel</name>
     <message>
         <source>Address/Hostname</source>
-        <translation>Адрес/Име на хост</translation>
+        <translation>주소 / 호스트 이름</translation>
     </message>
     <message>
         <source>User Agent</source>
-        <translation>Потребителски агент</translation>
+        <translation>사용자 에이전트</translation>
     </message>
     <message>
         <source>Ping Time</source>
-        <translation>Време пинг</translation>
+        <translation>핑 시간</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
         <source>Amount</source>
-        <translation>Сума</translation>
+        <translation>양</translation>
     </message>
     <message>
         <source>Enter a Dynamic address (e.g. %1)</source>
-        <translation>Въведете Dynamic адрес (напр.%1)</translation>
+        <translation>Dynamic 주소 입력 (예 :%1)</translation>
     </message>
     <message>
         <source>%1 d</source>
-        <translation>%1 дни</translation>
+        <translation>%1 디</translation>
     </message>
     <message>
         <source>%1 h</source>
-        <translation>%1 часа</translation>
+        <translation>%1 h</translation>
     </message>
     <message>
         <source>%1 m</source>
-        <translation>%1 минути</translation>
+        <translation>%1 엠</translation>
     </message>
     <message>
         <source>%1 s</source>
-        <translation>%1 сек.</translation>
+        <translation>%1 에스</translation>
     </message>
     <message>
         <source>NETWORK</source>
-        <translation>МРЕЖА</translation>
+        <translation>회로망</translation>
     </message>
     <message>
         <source>UNKNOWN</source>
-        <translation>НЕПОЗНАТ</translation>
+        <translation>알 수 없는</translation>
     </message>
     <message>
         <source>None</source>
-        <translation>няма</translation>
+        <translation>없음</translation>
     </message>
     <message>
         <source>N/A</source>
-        <translation>Не е налично</translation>
+        <translation>N/A<</translation>
     </message>
     <message>
         <source>%1 ms</source>
@@ -1745,42 +1745,42 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>QRImageWidget</name>
     <message>
         <source>&amp;Save Image...</source>
-        <translation>&amp;Запиши изображението...</translation>
+        <translation>&amp;이미지를 저장...</translation>
     </message>
     <message>
         <source>&amp;Copy Image</source>
-        <translation>&amp;Копирай изображението</translation>
+        <translation>&amp;복사 이미지</translation>
     </message>
     <message>
         <source>Save QR Code</source>
-        <translation>Запази QR Кода</translation>
+        <translation>QR 코드 저장</translation>
     </message>
     <message>
         <source>PNG Image (*.png)</source>
-        <translation>PNG Image (*.png)</translation>
+        <translation>PNG 이미지 (*.png)</translation>
     </message>
 </context>
 <context>
     <name>RPCConsole</name>
     <message>
         <source>Tools window</source>
-        <translation>Прозорец с инструменти</translation>
+        <translation>도구 창</translation>
     </message>
     <message>
         <source>&amp;Information</source>
-        <translation>Данни</translation>
+        <translation>정보</translation>
     </message>
     <message>
         <source>General</source>
-        <translation>Главен</translation>
+        <translation>일반</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation>Име</translation>
+        <translation>이름</translation>
     </message>
     <message>
         <source>Client name</source>
-        <translation>Име на клиента</translation>
+        <translation>고객 이름</translation>
     </message>
     <message>
         <source>N/A</source>
@@ -1788,267 +1788,267 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Number of connections</source>
-        <translation>Брой връзки</translation>
+        <translation>연결 수</translation>
     </message>
     <message>
         <source>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Отваря файла за откриване на грешки на Dynamic от текущата папка.  За по-големите файлове това може да отнеме няколко секунди.</translation>
+        <translation>현재 데이터 디렉토리에서 Dynamic 디버그 로그 파일을여십시오. 대용량 로그 파일의 경우 수 초가 걸릴 수 있습니다.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
-        <translation>&amp;Отвори</translation>
+        <translation>&amp;열다</translation>
     </message>
     <message>
         <source>Startup time</source>
-        <translation>Време за стартиране</translation>
+        <translation>시작 시간</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation>Мрежа</translation>
+        <translation>회로망</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Време на последния блок</translation>
+        <translation>마지막 블록 시간</translation>
     </message>
     <message>
         <source>Debug log file</source>
-        <translation>Лог-файл за откриване на грешки</translation>
+        <translation>디버그 로그 파일</translation>
     </message>
     <message>
         <source>Using OpenSSL version</source>
-        <translation>Използване на OpenSSL версия</translation>
+        <translation>OpenSSL 버전 사용</translation>
     </message>
     <message>
         <source>Build date</source>
-        <translation>Дата на създаване</translation>
+        <translation>빌드 날짜</translation>
     </message>
     <message>
         <source>Current number of blocks</source>
-        <translation>Текущ брой блокове</translation>
+        <translation>현재 블록 수</translation>
     </message>
     <message>
         <source>Client version</source>
-        <translation>Версия на клиента</translation>
+        <translation>클라이언트 버전</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
-        <translation>Използва BerkeleyDB версия</translation>
+        <translation>BerkeleyDB 버전 사용</translation>
     </message>
     <message>
         <source>Block chain</source>
-        <translation>Регистър на блокове</translation>
+        <translation>블록 체인</translation>
     </message>
     <message>
         <source>Number of Dynodes</source>
-        <translation>Брой на Dynodes</translation>
+        <translation>Dynodes의 수</translation>
     </message>
     <message>
         <source>&amp;Console</source>
-        <translation>&amp;Конзола</translation>
+        <translation>&amp;콘솔</translation>
     </message>
     <message>
         <source>Clear console</source>
-        <translation>Изчисти конзолата</translation>
+        <translation>콘솔 삭제</translation>
     </message>
     <message>
         <source>&amp;Network Traffic</source>
-        <translation>&amp;Мрежов трафик</translation>
+        <translation>&amp;네트워크 트래픽</translation>
     </message>
     <message>
         <source>&amp;Clear</source>
-        <translation>&amp;Изчисти</translation>
+        <translation>&amp;순수한</translation>
     </message>
     <message>
         <source>Totals</source>
-        <translation>Общо:</translation>
+        <translation>합계:</translation>
     </message>
     <message>
         <source>Received</source>
-        <translation>Получени</translation>
+        <translation>받은</translation>
     </message>
     <message>
         <source>Sent</source>
-        <translation>Изпратени</translation>
+        <translation>전송 됨</translation>
     </message>
     <message>
         <source>&amp;Peers</source>
-        <translation>&amp;Пиъри</translation>
+        <translation>&amp;동료</translation>
     </message>
     <message>
         <source>Select a peer to view detailed information.</source>
-        <translation>Избери пиър за подробна информация.</translation>
+        <translation>자세한 정보를 보려면 피어 선택.</translation>
     </message>
     <message>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation>방향</translation>
     </message>
     <message>
         <source>Version</source>
-        <translation>Версия</translation>
+        <translation>번역</translation>
     </message>
     <message>
         <source>User Agent</source>
-        <translation>Потребителски агент</translation>
+        <translation>사용자 에이전트</translation>
     </message>
     <message>
         <source>Services</source>
-        <translation>Услуги</translation>
+        <translation>서비스</translation>
     </message>
     <message>
         <source>Starting Height</source>
-        <translation>Стартираща височина</translation>
+        <translation>시작 높이</translation>
     </message>
     <message>
         <source>Sync Height</source>
-        <translation>Синхронизирана височина</translation>
+        <translation>동기화 높이</translation>
     </message>
     <message>
         <source>Ban Score</source>
-        <translation>Точки за бан</translation>
+        <translation>금지 점수</translation>
     </message>
     <message>
         <source>Connection Time</source>
-        <translation>Време на връзката</translation>
+        <translation>연결 시간</translation>
     </message>
     <message>
         <source>Last Send</source>
-        <translation>Последно изпратени</translation>
+        <translation>마지막으로 보내기</translation>
     </message>
     <message>
         <source>Last Receive</source>
-        <translation>Последно получени</translation>
+        <translation>마지막 수신</translation>
     </message>
     <message>
         <source>Bytes Sent</source>
-        <translation>Изпратени байтове</translation>
+        <translation>보낸 바이트 수</translation>
     </message>
     <message>
         <source>Bytes Received</source>
-        <translation>Получени байтове</translation>
+        <translation>받은 바이트 수</translation>
     </message>
     <message>
         <source>Ping Time</source>
-        <translation>Време пинг</translation>
+        <translation>핑 시간</translation>
     </message>
     <message>
         <source>&amp;Wallet Repair</source>
-        <translation>&amp;Поправяне на портфейла</translation>
+        <translation>&amp;지갑 수리</translation>
     </message>
     <message>
         <source>Salvage wallet</source>
-        <translation>Възстановен портфейл</translation>
+        <translation>인양 지갑</translation>
     </message>
     <message>
         <source>Rescan blockchain files</source>
-        <translation>Повторно сканиране на блокчейн файловете</translation>
+        <translation>블록 체인 파일 다시 검사</translation>
     </message>
     <message>
         <source>Recover transactions 1</source>
-        <translation>Възстановени транзакции 1</translation>
+        <translation>트랜잭션 복구 1</translation>
     </message>
     <message>
         <source>Recover transactions 2</source>
-        <translation>Възстановени транзакции 2</translation>
+        <translation>트랜잭션 복구 2</translation>
     </message>
     <message>
         <source>Upgrade wallet format</source>
-        <translation>Обновен формат на портфейла</translation>
+        <translation>지갑 형식 업그레이드</translation>
     </message>
     <message>
         <source>The buttons below will restart the wallet with command-line options to repair the wallet, fix issues with corrupt blockhain files or missing/obsolete transactions.</source>
-        <translation>Бутоните отдолу ще рестартират портфейла с опция от командния ред за поправка на портфейла,ще фиксира проблеми с неправилни блок-верига файлове или липсващи/остарели транзакции.</translation>
+        <translation>아래 단추는 지갑을 복구하는 명령 행 옵션으로 지갑을 다시 시작하고, 손상된 블록 체인 파일 또는 누락 된 / 쓸모없는 트랜잭션으로 인한 문제를 수정합니다.</translation>
     </message>
     <message>
         <source>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</source>
-        <translation>-salvagewallet: Опит да се възстановят частни ключове от повреден wallet.dat</translation>
+        <translation>-salvagewallet: 손상된 wallet.dat에서 개인 키를 복구하려고 시도합니다.</translation>
     </message>
     <message>
         <source>-rescan: Rescan the block chain for missing wallet transactions.</source>
-        <translation>-rescan: Повторно сканиране на регистъра от блокове за липсващи транзакции в портфейла.</translation>
+        <translation>-rescan: 누락 된 월렛 트랜잭션에 대한 블록 체인 다시 검색.</translation>
     </message>
     <message>
         <source>-zapwallettxes=1: Recover transactions from blockchain (keep meta-data, e.g. account owner).</source>
-        <translation>-zapwallettxes=1: Възстановява транзакции от блок веригата (запазва meta-data,напр. собственик на акаунта).</translation>
+        <translation>-zapwallettxes=1: 블록 체인에서 트랜잭션 복구 (계정 소유자 등 메타 데이터 보관).</translation>
     </message>
     <message>
         <source>-zapwallettxes=2: Recover transactions from blockchain (drop meta-data).</source>
-        <translation>-zapwallettxes=2: Възстановява транзакции от блок веригата(отпада meta-data).</translation>
+        <translation>-zapwallettxes=2: 블록 체인에서 트랜잭션 복구 (메타 데이터 삭제).</translation>
     </message>
     <message>
         <source>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
-        <translation>-upgradewallet: Надгражда до последната версия на портфейла при стартиране. (Белажка: това НЕ Е самообновяване на портфейла)</translation>
+        <translation>-upgradewallet: 시작할 때 지갑을 최신 형식으로 업그레이드하십시오. (참고 : 이것은 지갑 자체의 업데이트가 아닙니다!)</translation>
     </message>
     <message>
         <source>Wallet repair options.</source>
-        <translation>Опции за възстановяване на портфейла.</translation>
+        <translation>월렛 수리 옵션.</translation>
     </message>
     <message>
         <source>Rebuild index</source>
-        <translation>Възстановяване на индекса</translation>
+        <translation>색인 다시 작성</translation>
     </message>
     <message>
         <source>-reindex: Rebuild block chain index from current blk000??.dat files.</source>
-        <translation>-reindex: Възстановява блок индекс веригата от настоящия blk000??.dat файл.</translation>
+        <translation>-reindex: 현재 blk000??.dat 파일에서 블록 체인 인덱스 다시 작성.</translation>
     </message>
     <message>
         <source>In:</source>
-        <translation>Вход:</translation>
+        <translation>에서:</translation>
     </message>
     <message>
         <source>Out:</source>
-        <translation>Изход:</translation>
+        <translation>아웃:</translation>
     </message>
     <message>
         <source>Welcome to the Dynamic RPC console.</source>
-        <translation>Добре дошли в Dynamic RPC (Remote Procedure Call) конзолата.</translation>
+        <translation>Dynamic RPC 콘솔에 오신 것을 환영합니다.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Използвайте стрелки надолу и нагореза разглеждане на историятаот команди и &lt;b&gt;Ctrl-L&lt;/b&gt; за изчистване на конзолата.</translation>
+        <translation>기록을 탐색하려면 위 / 아래 화살표를 사용하고 화면을 지우려면 &lt;b&gt;Ctrl-L&lt;/b&gt; 를 사용하십시오.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
-        <translation>Напишете &lt;b&gt;help&lt;/b&gt;, за да прегледате възможните команди.</translation>
+        <translation>사용 가능한 명령의 개요는 &lt;b&gt;help&lt;/b&gt;, 를 입력하십시오.</translation>
     </message>
     <message>
         <source>%1 B</source>
-        <translation>%1 Б</translation>
+        <translation>%1 B</translation>
     </message>
     <message>
         <source>%1 KB</source>
-        <translation>%1 КБ</translation>
+        <translation>%1 KB</translation>
     </message>
     <message>
         <source>%1 MB</source>
-        <translation>%1 МБ</translation>
+        <translation>%1 MB</translation>
     </message>
     <message>
         <source>%1 GB</source>
-        <translation>%1 ГБ</translation>
+        <translation>%1 GB</translation>
     </message>
     <message>
         <source>via %1</source>
-        <translation>чрез %1</translation>
+        <translation>통하다 %1</translation>
     </message>
     <message>
         <source>never</source>
-        <translation>никога</translation>
+        <translation>못</translation>
     </message>
     <message>
         <source>Inbound</source>
-        <translation>Входящи</translation>
+        <translation>인바운드</translation>
     </message>
     <message>
         <source>Outbound</source>
-        <translation>Изходящи</translation>
+        <translation>배 밖으로</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation>Неизвестни</translation>
+        <translation>알 수 없는</translation>
     </message>
     <message>
         <source>Fetching...</source>
-        <translation>Привличане...</translation>
+        <translation>가져 오는 중...</translation>
     </message>
 </context>
 <context>
