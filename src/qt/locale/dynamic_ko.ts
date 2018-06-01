@@ -1856,7 +1856,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>&amp;Clear</source>
-        <translation>&amp;순수한</translation>
+        <translation>&amp;제거하다</translation>
     </message>
     <message>
         <source>Totals</source>
@@ -2055,87 +2055,87 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>Reuse one of the previously used receiving addresses.&lt;br&gt;Reusing addresses has security and privacy issues.&lt;br&gt;Do not use this unless re-generating a payment request made before.</source>
-        <translation>Повторна употреба на един от адресите за получаване.&lt;br&gt;При повторно използване на адреси са възможни проблеми със сигурността и личната неприкосновеност.&lt;br&gt;Не използвайте адреса, освен ако не ре-генерирате предишна заявка за плащане.</translation>
+        <translation>이전에 사용 된 수신 주소 중 하나를 다시 사용하십시오.&lt;br&gt;주소 재사용은 보안 및 개인 정보 보호 문제가 있습니다.&lt;br&gt;이전에 이루어진 지불 요청을 다시 생성하지 않는 한 이것을 사용하지 마십시오.</translation>
     </message>
     <message>
         <source>R&amp;euse an existing receiving address (not recommended)</source>
-        <translation>П&amp;овторно използване на съществуващ адрес за получаване (не се препоръчва)</translation>
+        <translation>기&amp;존 수신 주소 재사용 (권장하지 않음)</translation>
     </message>
     <message>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dynamic network.</source>
-        <translation>Възможност  да се прикрепи съобщение към заявката за плащане, което да бъде показано при отваряне на заявката. Забележка: съобщението няма да бъде изпратено с плащането по мрежата на Dynamic.</translation>
+        <translation>지불 요청에 첨부 할 선택적 메시지로서 요청이 열릴 때 표시됩니다. 참고 : Dynamic 네트워크를 통한 지불로는 메시지가 전송되지 않습니다.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
-        <translation>&amp;Съобщение:</translation>
+        <translation>&amp;메시지:</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
-        <translation>Възможност да се прикрепи наименование към новия адрес за получаване.</translation>
+        <translation>새 수신 주소와 연결할 선택적 레이블.</translation>
     </message>
     <message>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dynamic network.</source>
-        <translation>Възможност  да се прикрепи съобщение към заявката за плащане, което да бъде показано при отваряне на заявката. &lt;br&gt;Забележка: съобщението няма да бъде изпратено с плащането по мрежата на Dynamic.</translation>
+        <translation>지불 요청에 첨부 할 선택적 메시지로서 요청이 열릴 때 표시됩니다. &lt;br&gt;참고: Dynamic 네트워크를 통한 지불로는 메시지가 전송되지 않습니다.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
-        <translation>Използвате този формуляр за заявяване на плащания. Всички полета са &lt;b&gt;незадължителни&lt;/b&gt;.</translation>
+        <translation>지불을 요청하려면이 양식을 사용하십시오. 모든 필드는 선택 &lt;b&gt;사항입니다&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
-        <translation>&amp;Наименование:</translation>
+        <translation>&amp;상표:</translation>
     </message>
     <message>
         <source>An optional amount to request. Leave this empty or zero to not request a specific amount.</source>
-        <translation>Незадължително заявяване на сума. Оставете полето празно или нулево, за да не заявите конкретна сума.</translation>
+        <translation>요청할 선택적 금액. 특정 금액을 요청하지 않으려면이 항목을 비워 두거나 0으로 두십시오.</translation>
     </message>
     <message>
         <source>&amp;Amount:</source>
-        <translation>&amp;Сума</translation>
+        <translation>&amp;양</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
-        <translation>&amp;Заявка за плащане</translation>
+        <translation>&amp;지불 요청</translation>
     </message>
     <message>
         <source>Clear all fields of the form.</source>
-        <translation>Изчисти всички полета от формуляра.</translation>
+        <translation>폼의 모든 필드를 지 웁니다.</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Изчистване</translation>
+        <translation>제거하다</translation>
     </message>
     <message>
         <source>Requested payments history</source>
-        <translation>История на заявките за плащане</translation>
+        <translation>요청 된 지불 내역</translation>
     </message>
     <message>
         <source>Show the selected request (does the same as double clicking an entry)</source>
-        <translation>Покажи избраната заявка (прави същото като двойно щракане върху запис)</translation>
+        <translation>선택한 요청 표시 (항목을 두 번 클릭하는 것과 동일)</translation>
     </message>
     <message>
         <source>Show</source>
-        <translation>Показване</translation>
+        <translation>표시</translation>
     </message>
     <message>
         <source>Remove the selected entries from the list</source>
-        <translation>Премахни избраните позиции от списъка</translation>
+        <translation>선택한 항목을 목록에서 제거하십시오.</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation>Премахване</translation>
+        <translation>없애다</translation>
     </message>
     <message>
         <source>Copy label</source>
-        <translation>Копирай наименование</translation>
+        <translation>레이블 복사</translation>
     </message>
     <message>
         <source>Copy message</source>
-        <translation>Копиране на съобщението</translation>
+        <translation>메시지 복사</translation>
     </message>
     <message>
         <source>Copy amount</source>
-        <translation>Копирай сума</translation>
+        <translation>금액 복사</translation>
     </message>
 </context>
 <context>
@@ -3433,7 +3433,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Clear</source>
-        <translation>그래프 이력 삭제</translation>
+        <translation>제거하다</translation>
     </message>    
 </context>
 <context>
