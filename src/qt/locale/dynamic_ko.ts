@@ -1734,7 +1734,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>N/A</source>
-        <translation>N/A<</translation>
+        <translation>N/A</translation>
     </message>
     <message>
         <source>%1 ms</source>
@@ -2094,6 +2094,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>&amp;양</translation>
     </message>
     <message>
+        <source>&amp;Request InstantSend</source>
+        <translation>&amp;InstantSend 요청</translation>
+    </message>
+    <message>
         <source>&amp;Request payment</source>
         <translation>&amp;지불 요청</translation>
     </message>
@@ -2302,6 +2306,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <source>Choose...</source>
         <translation>고르다...</translation>
     </message>
+    <message>
+        <source>Hide</source>
+        <translation>숨는 장소</translation>
+    </message>    
     <message>
         <source>collapse fee-settings</source>
         <translation>축소비 설정</translation>
@@ -2537,6 +2545,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 </context>
 <context>
     <name>SendCoinsEntry</name>
+    <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>금&amp;액에서 수수료를 뺀다</translation>
+    </message>
     <message>
         <source>This is a normal payment.</source>
         <translation>이것은 정상 지불입니다.</translation>
@@ -3440,131 +3452,131 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>UnitDisplayStatusBarControl</name>
     <message>
         <source>Unit to show amounts in. Click to select another unit.</source>
-        <translation>Единица за показване на количеството.Клик за избиране на друга единица.</translation>
+        <translation>단위를 표시 할 단위. 다른 단위를 선택하려면 클릭하십시오.</translation>
     </message>
 </context>
 <context>
     <name>WalletFrame</name>
     <message>
         <source>No wallet has been loaded.</source>
-        <translation>Няма зареден портфейл.</translation>
+        <translation>지갑이 없습니다.</translation>
     </message>
 </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Изпращане</translation>
+        <translation>동전 보내기</translation>
     </message>
     <message>
         <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
-        <translation>InstantSend не поддържа изпращане на толкова големи суми. Транзакциите са ограничени до %1 DYN.</translation>
+        <translation>InstantSend는 아직 높은 값을 보내는 것을 지원하지 않습니다. 트랜잭션은 현재 %1 DYN으로 제한됩니다.</translation>
     </message>
 </context>
 <context>
     <name>WalletView</name>
     <message>
         <source>&amp;Export</source>
-        <translation>&amp;Изнеси</translation>
+        <translation>&amp;수출</translation>
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
-        <translation>Запишете данните от текущия раздел във файл</translation>
+        <translation>현재 탭의 데이터를 파일로 내보내기</translation>
     </message>
     <message>
         <source>Selected amount:</source>
-        <translation>Избрана сума:</translation>
+        <translation>선택한 금액:</translation>
     </message>
     <message>
         <source>Backup Wallet</source>
-        <translation>Запазване на портфейла</translation>
+        <translation>백업 월렛</translation>
     </message>
     <message>
         <source>Wallet Data (*.dat)</source>
-        <translation>Данните за портфейла(*.dat)</translation>
+        <translation>월렛 데이터 (* .dat)</translation>
     </message>
     <message>
         <source>Backup Failed</source>
-        <translation>Неуспешно запазване на портфейла</translation>
+        <translation>백업 실패</translation>
     </message>
     <message>
         <source>There was an error trying to save the wallet data to %1.</source>
-        <translation>Възникна грешка при опит за записване данните на портфейла в %1.</translation>
+        <translation>1% 에 지갑 데이터를 저장하는 동안 오류가 발생했습니다.</translation>
     </message>
     <message>
         <source>Backup Successful</source>
-        <translation>Успешно запазване на портфейла</translation>
+        <translation>백업 성공</translation>
     </message>
     <message>
         <source>The wallet data was successfully saved to %1.</source>
-        <translation>Базата на портфейла беше запазена успешно в %1.</translation>
+        <translation>지갑 데이터가 1% 에 성공적으로 저장되었습니다.</translation>
     </message>
 </context>
 <context>
     <name>dynamic</name>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
-        <translation>Свързва се с посочения адрес и винаги слуша за него. Използвайте [хост]:порт за изписване при IPv6</translation>
+        <translation>주어진 주소에 묶고 항상 그것에 귀 기울이십시오. IPv6의 경우 [host]:port 표기법 사용</translation>
     </message>
     <message>
         <source>Cannot obtain a lock on data directory %s. Dynamic is probably already running.</source>
-        <translation>Не може да се заключи дата директорията %s. Dynamic ядрото вече работи.</translation>
+        <translation>데이터 디렉토리 %s 에 대한 잠금을 가져올 수 없습니다. Dynamic이 이미 실행 중입니다.</translation>
     </message>
     <message>
         <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend използва всички деноминирани наличности за да изпрати сумата, може би ще е необходимо да бъдат анонимизирани  още монети.</translation>
+        <translation>Privatesend는 정확한 금액을 사용하여 자금을 송금합니다. 동전을 좀 더 익명화해야 할 수도 있습니다.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
-        <translation>Влиза в регресивен тестов режим, който използва специална верига в която блоковете могат да бъдат намерени мигновено.</translation>
+        <translation>블록을 즉시 해결할 수있는 특수 체인을 사용하는 회귀 테스트 모드로 들어갑니다.</translation>
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
-        <translation>Грешка: Очакването на входящи връзки е неуспешно (върната грешка %s)</translation>
+        <translation>오류 : 들어오는 연결을 듣지 못했습니다 (반환 된 오류 %s 듣기)</translation>
     </message>
     <message>
         <source>Execute command when a relevant alert is received or we see a really long fork (%s in cmd is replaced by message)</source>
-        <translation>Изпълни командата когато се получи съответното предупреждение или се появи друг проблем с мрежата (%s в cmd е подменено от съобщение)</translation>
+        <translation>관련 경고가 수신되거나 정말로 긴 포크 (cmd의 %s 가 메시지로 대체 됨)가 표시되면 명령을 실행하십시오.</translation>
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>
-        <translation>Изпълнете командата когато транзакцията в портфейла се променя  (%s в cmd е подменено с TxID)</translation>
+        <translation>지갑 트랜잭션이 변경되면 명령을 실행합니다 (cmd의 %s 는 TxID로 바뀜).</translation>
     </message>
     <message>
         <source>Execute command when the best block changes (%s in cmd is replaced by block hash)</source>
-        <translation>Изпълнете командата когато има промяна в най-добрият блок (%s в cmd е подменена от  block hash)</translation>
+        <translation>가장 좋은 블록이 변경되면 명령을 실행합니다 (cmd의 %s 는 블록 해시로 대체됩니다)</translation>
     </message>
     <message>
         <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>В този режим -genproclimit се контролира колко блока са генерирани моментално.</translation>
+        <translation>이 모드에서 -genproclimit은 즉시 생성되는 블록 수를 제어합니다.</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend изисква средства с поне 10 потвърждения, може да се наложи да почакате няколко минути и да опитате отново.</translation>
+        <translation>InstantSend는 최소 10 회의 확인이 필요한 입력을 필요로하므로 몇 분 기다렸다가 다시 시도해야 할 수 있습니다.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
-        <translation>Име за създаване на URL за KeePass входа , който съхранява паролата за портфейла</translation>
+        <translation>지갑 패스 프레이즈를 저장하는 KeePass 항목의 URL을 구성하는 이름입니다.</translation>
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect)</source>
-        <translation>Заявка за адреси на пиъри чрез DNS справка, ако адресите са недостатъчно (по-подразбиране: 1 освен ако -свързан)</translation>
+        <translation>DNS 조회를 통한 피어 주소 쿼리 (주소가 부족할 경우 기본값 : -connect가 아닌 경우 1)</translation>
     </message>
     <message>
         <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>Определя максималния размер на висок приоритет/ниска такса за транзакция в байтове (по подразбиране: %d)</translation>
+        <translation>우선 순위가 높거나 낮은 거래의 최대 크기를 바이트 단위로 설정합니다 (기본값 : %d)</translation>
     </message>
     <message>
         <source>Set the number of script verification threads (%u to %d, 0 = auto, &lt;0 = leave that many cores free, default: %d)</source>
-        <translation>Задаване броя на нишките потвърждаващи скрипта  (%u до %d, 0 = автоматично, &lt;0 = да се оставят толкова ядра свободни, по подразбиране: %d)</translation>
+        <translation>스크립트 확인 스레드 수 설정 (%u 에서 %d, 0 = 자동, &lt;0 = 많은 코어 해제, 기본값: %d)</translation>
     </message>
     <message>
         <source>This is a pre-release test build - use at your own risk - do not use for mining or merchant applications</source>
-        <translation>Това е предварителна тест версия - използвайте я на ваша отговорност - не използвайте за копане или за търговски приложения.</translation>
+        <translation>시험판입니다. - 위험에 따라 사용하십시오. - 광산 또는 상인 응용 프로그램에는 사용하지 마십시오.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer. Dynamic is probably already running.</source>
-        <translation>Не може да се свърже с %s на този компютър. Dynamic ядрото най-вероятно вече работи.</translation>
+        <translation>Не може да се свърже с %s на този компютър. Dynamic най-вероятно вече работи.</translation>
     </message>
     <message>
         <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
@@ -4077,7 +4089,7 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Initialization sanity check failed. Dynamic is shutting down.</source>
-        <translation>Инициализационната проверка не успешна. Dynamic ядрото се изключва.</translation>
+        <translation>Инициализационната проверка не успешна. Dynamic се изключва.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
@@ -4137,19 +4149,19 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Loading budget cache...</source>
-        <translation>Зареждане на бюджетния кеш...</translation>
+        <translation>예산 캐시로드 중...</translation>
     </message>
     <message>
         <source>Loading Dynode cache...</source>
-        <translation>Зареждане на Dynode кеш...</translation>
+        <translation>Dynode 캐시로드 중...</translation>
     </message>
     <message>
         <source>Loading Dynode payment cache...</source>
-        <translation>Зараждане на Dynode кеш за плащане</translation>
+        <translation>Dynode 지불 캐시로드 중</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
-        <translation>Заключването е вече налично.</translation>
+        <translation>자물쇠가 이미 제자리에 있습니다.</translation>
     </message>
     <message>
         <source>Lock Dynodes from Dynode configuration file (default: %u)</source>
@@ -4428,6 +4440,10 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>지갑로드 중...</translation>
     </message>
     <message>
+        <source>Loading banlist...</source>
+        <translation>불러 내기 목록...</translation>
+    </message>
+    <message>
         <source>Dynode options:</source>
         <translation>Dynode 옵션들:</translation>
     </message>
@@ -4661,27 +4677,27 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Verifying blocks...</source>
-        <translation>Проверка на блоковете...</translation>
+        <translation>블록 확인 중...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
-        <translation>Проверка на портфейла...</translation>
+        <translation>지갑 확인 중...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
-        <translation>Портфейла %s е разположен извън папката с данни %s</translation>
+        <translation>월렛 %s 이 (가) 데이터 디렉토리 %s 외부에 있습니다.</translation>
     </message>
     <message>
         <source>Wallet is locked.</source>
-        <translation>Портфейлът е заключен.</translation>
+        <translation>월렛이 잠겼습니다.</translation>
     </message>
     <message>
         <source>Wallet options:</source>
-        <translation>Настройки на портфейла:</translation>
+        <translation>월렛 옵션:</translation>
     </message>
     <message>
         <source>Wallet window title</source>
-        <translation>Заглавие на wallet прозореца</translation>
+        <translation>월렛 창 제목</translation>
     </message>
     <message>
         <source>Warning</source>
