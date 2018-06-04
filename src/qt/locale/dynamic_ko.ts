@@ -2715,11 +2715,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Copy the current signature to the system clipboard</source>
-        <translation>Копиране на текущия подпис в системния клипборд</translation>
+        <translation>현재 서명을 시스템 클립 보드로 복사하십시오</translation>
     </message>
     <message>
         <source>Sign the message to prove you own this Dynamic address</source>
-        <translation>현재 서명을 시스템 클립 보드로 복사하십시오</translation>
+        <translation>이 Dynamic 주소를 소유하고 있음을 증명하는 메시지에 서명하십시오</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2844,183 +2844,183 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Отворен за още %n блока</numerusform><numerusform>Отворен за още %n блока</numerusform></translation>
+        <translation><numerusform>%n 개의 추가 블록 열기</numerusform><numerusform>%n 개의 추가 블록 열기</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
-        <translation>Подлежи на промяна до %1</translation>
+        <translation>까지 영업 %1</translation>
     </message>
     <message>
         <source>conflicted</source>
-        <translation>конфликтно</translation>
+        <translation>갈등 한</translation>
     </message>
     <message>
         <source>%1/offline (verified via instantsend)</source>
-        <translation>%1/офлайн(проверено през instantsend)</translation>
+        <translation>%1/오프라인 (instantsend 통해 확인)</translation>
     </message>
     <message>
         <source>%1/confirmed (verified via instantsend)</source>
-        <translation>%1/потвърдени (проверено от instantsend)</translation>
+        <translation>%1/확인 됨 (instantsend를 통해 확인 됨)</translation>
     </message>
     <message>
         <source>%1 confirmations (verified via instantsend)</source>
-        <translation>%1 потвърждения (проверено от instantsend)</translation>
+        <translation>%1 확인 (instantsend를 통해 확인)</translation>
     </message>
     <message>
         <source>%1/offline</source>
-        <translation>%1/офлайн</translation>
+        <translation>%1/오프라인</translation>
     </message>
     <message>
         <source>%1/unconfirmed</source>
-        <translation>%1/непотвърдени</translation>
+        <translation>%1/미확인의</translation>
     </message>
     <message>
         <source>%1 confirmations</source>
-        <translation>включена в %1 блока</translation>
+        <translation>%1 확인</translation>
     </message>
     <message>
         <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/офлайн (InstantSend проверка в процес - %2 of %3 подписани)</translation>
+        <translation>%1/오프라인 (InstantSend 확인 진행 중) - %2 중 %3 서명)</translation>
     </message>
     <message>
         <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/потвърдени (InstantSend проверка в процес - %2 of %3 подписани )</translation>
+        <translation>%1/확인 됨 (InstantSend 확인 진행 중) - %2 중 %3 서명 )</translation>
     </message>
     <message>
         <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 потвърждения (InstantSend проверка в процес - %2 of %3 подписвания)</translation>
+        <translation>%1 확인 (InstantSend 확인 진행 중) - %2 중 %3 서명)</translation>
     </message>
     <message>
         <source>%1/offline (InstantSend verification failed)</source>
-        <translation>%1/офлайн (InstantSend проверката е неуспешна)</translation>
+        <translation>%1/오프라인 (InstantSend 확인 실패)</translation>
     </message>
     <message>
         <source>%1/confirmed (InstantSend verification failed)</source>
-        <translation>%1/потвърдени (InstantSend проверката е неуспешна)</translation>
+        <translation>%1/확인 됨 (InstantSend 확인 실패)</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation>Статус</translation>
+        <translation>지위</translation>
     </message>
     <message>
         <source>, has not been successfully broadcast yet</source>
-        <translation>, все още не е изпратено</translation>
+        <translation>, 아직 성공적으로 방송되지 않았다</translation>
     </message>
     <message numerus="yes">
         <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>, излъчено през %n нода</numerusform><numerusform>, излъчено през %n нода</numerusform></translation>
+        <translation><numerusform>, %n 노드를 통해 브로드 캐스트</numerusform><numerusform>, %n 노드를 통해 브로드 캐스트</numerusform></translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Дата</translation>
+        <translation>날짜</translation>
     </message>
     <message>
         <source>Source</source>
-        <translation>Източник</translation>
+        <translation>출처</translation>
     </message>
     <message>
         <source>Generated</source>
-        <translation>Издадени</translation>
+        <translation>생성 된</translation>
     </message>
     <message>
         <source>From</source>
-        <translation>От</translation>
+        <translation>에서</translation>
     </message>
     <message>
         <source>unknown</source>
-        <translation>неизвестен</translation>
+        <translation>알 수 없는</translation>
     </message>
     <message>
         <source>To</source>
-        <translation>За</translation>
+        <translation>에</translation>
     </message>
     <message>
         <source>own address</source>
-        <translation>собствен адрес</translation>
+        <translation>자기 주소</translation>
     </message>
     <message>
         <source>watch-only</source>
-        <translation>наблюдавани</translation>
+        <translation>시계 전용</translation>
     </message>
     <message>
         <source>label</source>
-        <translation>наименование</translation>
+        <translation>상표</translation>
     </message>
     <message>
         <source>Credit</source>
-        <translation>Кредит</translation>
+        <translation>신용</translation>
     </message>
     <message numerus="yes">
         <source>matures in %n more block(s)</source>
-        <translation><numerusform>отлежава след %n блока</numerusform><numerusform>отлежава след %n блока</numerusform></translation>
+        <translation><numerusform>%n 개의 블록이 더 이상 만기됩니다</numerusform><numerusform>%n 개의 블록이 더 이상 만기됩니다</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
-        <translation>не е приет</translation>
+        <translation>허용되지 않음</translation>
     </message>
     <message>
         <source>Debit</source>
-        <translation>Дебит</translation>
+        <translation>차변</translation>
     </message>
     <message>
         <source>Total debit</source>
-        <translation>Общо дебит</translation>
+        <translation>총 차변</translation>
     </message>
     <message>
         <source>Total credit</source>
-        <translation>Общо кредит</translation>
+        <translation>총 크레딧</translation>
     </message>
     <message>
         <source>Transaction fee</source>
-        <translation>Такса</translation>
+        <translation>거래 수수료</translation>
     </message>
     <message>
         <source>Net amount</source>
-        <translation>Нетна сума</translation>
+        <translation>순액</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation>Съобщение</translation>
+        <translation>메시지</translation>
     </message>
     <message>
         <source>Comment</source>
-        <translation>Коментар</translation>
+        <translation>논평</translation>
     </message>
     <message>
         <source>Transaction ID</source>
-        <translation>ID на транзакцията</translation>
+        <translation>거래 ID</translation>
     </message>
     <message>
         <source>Merchant</source>
-        <translation>Търговец</translation>
+        <translation>상인</translation>
     </message>
     <message>
         <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to "not accepted" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>Генерираните монети трябва да отлежат %1 блока преди да могат да се използват. Когато генерирате този блок той бива излъчен в мрежата, за да се добави в регистъра на блокове. Ако добавянето в регистъра е неуспешно, състоянието му ще е "неприет" и няма да можете да използвате тези монети. Това се случва понякога, когато друг възел генерира блок по същото време с вас.</translation>
+        <translation>생성 된 동전은 사용하기 전에 %1 블록을 성숙해야합니다. 이 블록을 생성하면 네트워크에 브로드 캐스팅되어 블록 체인에 추가됩니다. 사슬에 빠지면 상태가 "받아 들여지지 않음"으로 바뀌며 쓸모가 없습니다. 다른 노드가 몇 초 내에 블록을 생성하는 경우 가끔 이런 일이 발생할 수 있습니다.</translation>
     </message>
     <message>
         <source>Debug information</source>
-        <translation>Информация за грешки</translation>
+        <translation>디버그 정보</translation>
     </message>
     <message>
         <source>Transaction</source>
-        <translation>Транзакция</translation>
+        <translation>트랜잭션</translation>
     </message>
     <message>
         <source>Inputs</source>
-        <translation>Входящи</translation>
+        <translation>투입물</translation>
     </message>
     <message>
         <source>Amount</source>
-        <translation>Сума</translation>
+        <translation>양</translation>
     </message>
     <message>
         <source>true</source>
-        <translation>вярно</translation>
+        <translation>참된</translation>
     </message>
     <message>
         <source>false</source>
-        <translation>грешно</translation>
+        <translation>그릇된</translation>
     </message>
 </context>
 <context>
