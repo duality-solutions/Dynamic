@@ -2614,34 +2614,34 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>ShutdownWindow</name>
     <message>
         <source>Dynamic is shutting down...</source>
-        <translation>Dynamic ядрото се изключва...</translation>
+        <translation>Dynamic이 종료되고있다...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
-        <translation>Не изключвайте компютърът докато не изчезне този прозорец.</translation>
+        <translation>이 창이 사라질 때까지 컴퓨터를 종료하지 마십시오.</translation>
     </message>
 </context>
 <context>
     <name>SignVerifyMessageDialog</name>
     <message>
         <source>Signatures - Sign / Verify a Message</source>
-        <translation>Подписи - Подпиши / Провери съобщение</translation>
+        <translation>서명 - 메시지 서명 / 검증</translation>
     </message>
     <message>
         <source>&amp;Sign Message</source>
-        <translation>&amp;Подпиши</translation>
+        <translation>&amp;메시지 서명</translation>
     </message>
     <message>
         <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Можете да подпишете съобщение като доказателство, че притежавате определен адрес. Бъдете внимателни и не подписвайте съобщения, които биха разкрили лична информация без вашето съгласие.</translation>
+        <translation>자신의 주소로 메시지에 서명 할 수 있습니다. 피싱 (Phishing) 공격이 사용자를 속여 자신의 신원을 확인하도록 속일 수 있으므로 막연한 내용의 서명을하지 않도록주의하십시오. 귀하가 동의하는 완전한 진술에만 서명하십시오.</translation>
     </message>
     <message>
         <source>The Dynamic address to sign the message with</source>
-        <translation>Dynamic адресът да подпише съобщението</translation>
+        <translation>메시지에 서명 할 Dynamic 주소</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
-        <translation>Изберете използван преди адрес</translation>
+        <translation>이전에 사용한 주소 선택</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2649,7 +2649,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Paste address from clipboard</source>
-        <translation>Вмъкни адрес от клипборда</translation>
+        <translation>클립 보드에서 주소 붙여 넣기</translation>
     </message>
     <message>
         <source>Alt+P</source>
@@ -2657,11 +2657,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Enter the message you want to sign here</source>
-        <translation>Въведете съобщението тук</translation>
+        <translation>여기에 서명 할 메시지를 입력하십시오</translation>
     </message>
     <message>
         <source>Signature</source>
-        <translation>Подпис</translation>
+        <translation>서명</translation>
     </message>
     <message>
         <source>Copy the current signature to the system clipboard</source>
@@ -2669,114 +2669,114 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Sign the message to prove you own this Dynamic address</source>
-        <translation>Подпиши съобщението за да докажеш че притежаваш този Dynamic адрес</translation>
+        <translation>현재 서명을 시스템 클립 보드로 복사하십시오</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
-        <translation>Подпиши &amp;съобщение</translation>
+        <translation>메시지 &amp;서명</translation>
     </message>
     <message>
         <source>Reset all sign message fields</source>
-        <translation>Изчисти всички подписаните съобщения</translation>
+        <translation>모든 사인 메시지 필드 재설정</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
-        <translation>&amp;Изчисти</translation>
+        <translation>모두 &amp;지우기</translation>
     </message>
     <message>
         <source>&amp;Verify Message</source>
-        <translation>&amp;Провери съобщението</translation>
+        <translation>&amp;메시지 확인</translation>
     </message>
     <message>
         <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation>Въведете подписания адрес, съобщението (уверете се, че сте копирали редовете, спациите, табовете и другите точно) и подпишете отдолу, за да удостоверите съобщението. Внимавайте да не вмъкнете излишни символи в подписа от това, което е в самото съобщение, за да избегнете риска от злонамерна външа намеса.</translation>
+        <translation>메시지를 확인하기 위해 서명 주소, 메시지 (줄 바꿈, 공백, 탭 등을 정확하게 복사하십시오) 및 서명을 입력하십시오. 중간자 (man-in-the-middle) 공격에 의해 속임을 당하지 않으려면 서명 된 메시지 자체에있는 것보다 서명에 더 많은 것을 읽지 않도록주의하십시오.</translation>
     </message>
     <message>
         <source>The Dynamic address the message was signed with</source>
-        <translation>Dynamic адресът ,с който е подписано съобщението</translation>
+        <translation>메시지가 서명 된 Dynamic 주소</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Dynamic address</source>
-        <translation>Проверете съобщението, за да сте сигурни че е подписано с определен Dynamic адрес</translation>
+        <translation>지정된 Dynamic 주소로 서명되었는지 확인하기 위해 메시지를 확인하십시오</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
-        <translation>Провери &amp;Съобщение</translation>
+        <translation>메시지 &amp;확인</translation>
     </message>
     <message>
         <source>Reset all verify message fields</source>
-        <translation>Изчисти всички проверени съобщения в полето</translation>
+        <translation>모든 확인 메시지 필드 재설정</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>
-        <translation>Натиснете "Подписване на съобщение" за да създадете подпис</translation>
+        <translation>"메시지 서명"를 클릭하여 서명 생성</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
-        <translation>Въведеният адрес е невалиден.</translation>
+        <translation>입력 한 주소가 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Please check the address and try again.</source>
-        <translation>Моля проверете адреса и опитайте отново.</translation>
+        <translation>주소를 확인하고 다시 시도하십시오.</translation>
     </message>
     <message>
         <source>The entered address does not refer to a key.</source>
-        <translation>Въведеният адрес не може да се съпостави с валиден ключ.</translation>
+        <translation>입력 된 주소가 키를 참조하지 않습니다.</translation>
     </message>
     <message>
         <source>Wallet unlock was cancelled.</source>
-        <translation>Отключването на портфейла беше отменено.</translation>
+        <translation>월렛 잠금 해제가 취소되었습니다.</translation>
     </message>
     <message>
         <source>Private key for the entered address is not available.</source>
-        <translation>Не е наличен частен ключ за въведеният адрес.</translation>
+        <translation>입력 한 주소의 비공개 키를 사용할 수 없습니다.</translation>
     </message>
     <message>
         <source>Message signing failed.</source>
-        <translation>Подписването на съобщение беше неуспешно.</translation>
+        <translation>메시지 서명에 실패했습니다.</translation>
     </message>
     <message>
         <source>Message signed.</source>
-        <translation>Съобщението е подписано.</translation>
+        <translation>메시지가 서명되었습니다.</translation>
     </message>
     <message>
         <source>The signature could not be decoded.</source>
-        <translation>Подписът не може да бъде декодиран.</translation>
+        <translation>서명을 디코딩 할 수 없습니다.</translation>
     </message>
     <message>
         <source>Please check the signature and try again.</source>
-        <translation>Проверете подписа и опитайте отново.</translation>
+        <translation>서명을 확인하고 다시 시도하십시오.</translation>
     </message>
     <message>
         <source>The signature did not match the message digest.</source>
-        <translation>Подписът не отговаря на комбинацията от съобщение и адрес.</translation>
+        <translation>서명이 메시지 다이제스트와 일치하지 않습니다.</translation>
     </message>
     <message>
         <source>Message verification failed.</source>
-        <translation>Проверката на съобщението беше неуспешна.</translation>
+        <translation>메시지 확인에 실패했습니다.</translation>
     </message>
     <message>
         <source>Message verified.</source>
-        <translation>Съобщението е потвърдено.</translation>
+        <translation>메시지가 확인되었습니다.</translation>
     </message>
 </context>
 <context>
     <name>SplashScreen</name>
     <message>
         <source>Dynamic</source>
-        <translation>Dynamic Ядро</translation>
+        <translation>Dynamic</translation>
     </message>
     <message>
         <source>Version %1</source>
-        <translation>Версия %1</translation>
+        <translation>번역 %1</translation>
     </message>
     <message>
         <source>The Dynamic developers</source>
-        <translation>Водещи Dynamic разработчици</translation>
+        <translation>Dynamic 개발자</translation>
     </message>
     <message>
         <source>The Bitcoin Core developers</source>
-        <translation>Водещи Bitcoin разработчици</translation>
+        <translation>Bitcoin 핵심 개발자</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -2787,7 +2787,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>TrafficGraphWidget</name>
     <message>
         <source>KB/s</source>
-        <translation>КБ/с</translation>
+        <translation>KB/초</translation>
     </message>
 </context>
 <context>
