@@ -2539,19 +2539,19 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>SendCoinsEntry</name>
     <message>
         <source>This is a normal payment.</source>
-        <translation>Това е нормално плащане.</translation>
+        <translation>이것은 정상 지불입니다.</translation>
     </message>
     <message>
         <source>Pay &amp;To:</source>
-        <translation>Плати &amp;На:</translation>
+        <translation>~에 &amp;지불하다:</translation>
     </message>
     <message>
         <source>The Dynamic address to send the payment to</source>
-        <translation>Dynamic адресът да изпрати плащането към </translation>
+        <translation>지불을 보낼 Dynamic 주소</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
-        <translation>Изберете използван преди адрес</translation>
+        <translation>이전에 사용한 주소 선택</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2559,7 +2559,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Paste address from clipboard</source>
-        <translation>Вмъкни от клипборда</translation>
+        <translation>클립 보드에서 주소 붙여 넣기</translation>
     </message>
     <message>
         <source>Alt+P</source>
@@ -2567,47 +2567,47 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Remove this entry</source>
-        <translation>Премахване на този запис</translation>
+        <translation>이 항목 삭제</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
-        <translation>&amp;Наименование:</translation>
+        <translation>&amp;상표:</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to the list of used addresses</source>
-        <translation>Въведете наименование за този адрес, за да го добавите в списъка с адреси</translation>
+        <translation>이 주소의 라벨을 입력하여 사용 된 주소 목록에 추가하십시오</translation>
     </message>
     <message>
         <source>A&amp;mount:</source>
-        <translation>С&amp;ума:</translation>
+        <translation>&amp;양:</translation>
     </message>
     <message>
         <source>Message:</source>
-        <translation>Съобщение:</translation>
+        <translation>메시지:</translation>
     </message>
     <message>
         <source>A message that was attached to the dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dynamic network.</source>
-        <translation>Съобщението което беше прикрепено към dynamic: URI ще бъде запазено с транзакцията за ваше сведение. Забележка: Това съобщение няма да бъде изпратено през Dynamic мрежата.</translation>
+        <translation>참조 용 트랜잭션과 함께 저장 될 Dynamic : URI에 첨부 된 메시지. 참고 :이 메시지는 Dynamic 네트워크를 통해 전송되지 않습니다.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
-        <translation>Това е непроверена заявка за плащане.</translation>
+        <translation>확인되지 않은 지불 요청입니다.</translation>
     </message>
     <message>
         <source>Pay To:</source>
-        <translation>Плащане на:</translation>
+        <translation>에 지불하다:</translation>
     </message>
     <message>
         <source>Memo:</source>
-        <translation>Бележка:</translation>
+        <translation>메모:</translation>
     </message>
     <message>
         <source>This is a verified payment request.</source>
-        <translation>Това е валидно искане за плащане.</translation>
+        <translation>확인 된 지불 요청입니다.</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
-        <translation>Въведете наименование за този адрес, за да го добавите в списъка с адреси</translation>
+        <translation>주소록에 추가하려면이 주소의 레이블을 입력하십시오</translation>
     </message>
 </context>
 <context>
