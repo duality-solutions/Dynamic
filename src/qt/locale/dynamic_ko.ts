@@ -415,6 +415,22 @@
         <translation>지갑 복구 옵션 표시</translation>
     </message>
     <message>
+        <source>Open Wallet Configuration File</source>
+        <translation>월렛 구성 파일 열기</translation>
+    </message>
+    <message>
+        <source>Open configuration file</source>
+        <translation>열기 구성 파일</translation>
+    </message>
+    <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>&amp;Dynode 구성 파일 열기</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Dynode 구성 파일 열기</translation>
+    </message>
+    <message>
         <source>Open &amp;Configuration File</source>
         <translation>&amp;구성 파일 열기</translation>
     </message>
@@ -457,6 +473,10 @@
     <message>
         <source>&amp;Command-line options</source>
         <translation>명령행 옵션</translation>
+    </message>
+    <message>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;PrivateSend 정보</translation>
     </message>
     <message>
         <source>Dynamic client</source>
@@ -1474,8 +1494,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>완성:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Privatesend 잔액:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend 잔액:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -2246,6 +2266,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>상표</translation>
     </message>
     <message>
+        <source>Address</source>
+        <translation>주소</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>요청 됨</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>메시지</translation>
     </message>
@@ -2264,6 +2292,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>(no amount)</source>
         <translation>(금액 없음)</translation>
+    </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>금액 요청 없음</translation>
     </message>
 </context>
 <context>
@@ -2991,6 +3023,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>거래 ID</translation>
     </message>
     <message>
+        <source>Output index</source>
+        <translation>출력 색인</translation>
+    </message>
+    <message>
+        <source>Transaction total size</source>
+        <translation>거래 총액</translation>
+    </message>
+    <message>
         <source>Merchant</source>
         <translation>상인</translation>
     </message>
@@ -3026,115 +3066,123 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 <context>
     <name>TransactionDescDialog</name>
     <message>
+        <source>Details for %1</source>
+        <translation>%1 세부 정보</translation>
+    </message>
+    <message>
         <source>Transaction details</source>
-        <translation>Транзакция</translation>
+        <translation>상세 거래 내역</translation>
     </message>
     <message>
         <source>This pane shows a detailed description of the transaction</source>
-        <translation>Описание на транзакцията</translation>
+        <translation>이 창은 트랜잭션에 대한 자세한 설명을 표시합니다</translation>
     </message>
 </context>
 <context>
     <name>TransactionTableModel</name>
     <message>
         <source>Date</source>
-        <translation>Дата</translation>
+        <translation>날짜</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation>유형</translation>
     </message>
     <message>
         <source>Address</source>
-        <translation>Адрес</translation>
+        <translation>주소</translation>
+    </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>주소 / 상표</translation>
     </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Отворен за още %n блока</numerusform><numerusform>Отворен за още %n блока</numerusform></translation>
+        <translation><numerusform>%n 개의 추가 블록 열기</numerusform><numerusform>%n 개의 추가 블록 열기</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
-        <translation>Подлежи на промяна до %1</translation>
+        <translation>%1 까지 열기</translation>
     </message>
     <message>
         <source>Offline</source>
-        <translation>Офлайн</translation>
+        <translation>오프라인</translation>
     </message>
     <message>
         <source>Unconfirmed</source>
-        <translation>Непотвърдено</translation>
+        <translation>확인되지 않은</translation>
     </message>
     <message>
         <source>Confirming (%1 of %2 recommended confirmations)</source>
-        <translation>Потвърждаване (%1 от %2 препоръчвани потвърждения)</translation>
+        <translation>확인 됨 (%1 의 %2 권장 확인)</translation>
     </message>
     <message>
         <source>Confirmed (%1 confirmations)</source>
-        <translation>Потвърдени (%1 потвърждения)</translation>
+        <translation>확인 됨 (%1 확인)</translation>
     </message>
     <message>
         <source>Conflicted</source>
-        <translation>Конфликтно</translation>
+        <translation>갈등</translation>
     </message>
     <message>
         <source>Immature (%1 confirmations, will be available after %2)</source>
-        <translation>Неотлежал (%1 потвърждения, ще бъдат на разположение след %2)</translation>
+        <translation>미 성숙한 (%1 확인은 %2)</translation>
     </message>
     <message>
         <source>This block was not received by any other nodes and will probably not be accepted!</source>
-        <translation>Блокът не е получен от останалите участници и най-вероятно няма да бъде одобрен.</translation>
+        <translation>이 블록은 다른 노드에 의해 수신되지 않았으며 아마도 수용되지 않을 것입니다!</translation>
     </message>
     <message>
         <source>Generated but not accepted</source>
-        <translation>Генерирана, но отхвърлена </translation>
+        <translation>생성되었지만 수락되지 않음</translation>
     </message>
     <message>
         <source>Received with</source>
-        <translation>Получени с</translation>
+        <translation>받은 사람</translation>
     </message>
     <message>
         <source>Received from</source>
-        <translation>Получен от</translation>
+        <translation>접수처</translation>
     </message>
     <message>
         <source>Received via Privatesend</source>
-        <translation>Получени с Privatesend</translation>
+        <translation>PrivateSend를 통해 수신</translation>
     </message>
     <message>
         <source>Sent to</source>
-        <translation>Изпратени на</translation>
+        <translation>전송</translation>
     </message>
     <message>
         <source>Payment to yourself</source>
-        <translation>Плащане към себе си</translation>
+        <translation>자신에게 지불</translation>
     </message>
     <message>
         <source>Mined</source>
-        <translation>Емитирани</translation>
+        <translation>광산</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend деноминация</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Privatesend 교단</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend обезпечава плащането</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Privatesend 담보 지불</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend направи обезпечение на постъпленията</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>Privatesend 담보 입력 만들기</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend направени деноминации</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>Privatesend 교파 만들기</translation>
     </message>
     <message>
         <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <translation>PrivateSend를 통해 전송되었습니다</translation>
     </message>
     <message>
         <source>watch-only</source>
-        <translation>наблюдавани</translation>
+        <translation>시계 전용</translation>
     </message>
     <message>
         <source>(n/a)</source>
@@ -3142,194 +3190,194 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Transaction status. Hover over this field to show number of confirmations.</source>
-        <translation>Състояние на транзакцията. Задръжте върху това поле за да видите броя потвърждения.</translation>
+        <translation>트랜잭션 상태. 이 필드 위에 마우스를 올리면 확인 수가 표시됩니다.</translation>
     </message>
     <message>
         <source>Date and time that the transaction was received.</source>
-        <translation>Дата и час на получаване на транзакцията.</translation>
+        <translation>트랜잭션이 수신 된 날짜와 시간.</translation>
     </message>
     <message>
         <source>Type of transaction.</source>
-        <translation>Вид транзакция.</translation>
+        <translation>거래 유형.</translation>
     </message>
     <message>
         <source>Whether or not a watch-only address is involved in this transaction.</source>
-        <translation>Дали има или не наблюдаван/watch-only адрес участващ в тази транзакция.</translation>
+        <translation>시계 전용 주소가이 거래에 참여하는지 여부.</translation>
     </message>
     <message>
         <source>Destination address of transaction.</source>
-        <translation>Адрес на получател на транзакцията.</translation>
+        <translation>트랜잭션의 대상 주소입니다.</translation>
     </message>
     <message>
         <source>Amount removed from or added to balance.</source>
-        <translation>Сума извадена или добавена към баланса.</translation>
+        <translation>균형 금액에서 제거되거나 추가됩니다.</translation>
     </message>
 </context>
 <context>
     <name>TransactionView</name>
     <message>
         <source>All</source>
-        <translation>Всички</translation>
+        <translation>모든</translation>
     </message>
     <message>
         <source>Today</source>
-        <translation>Днес</translation>
+        <translation>오늘</translation>
     </message>
     <message>
         <source>This week</source>
-        <translation>Тази седмица</translation>
+        <translation>이번 주</translation>
     </message>
     <message>
         <source>This month</source>
-        <translation>Този месец</translation>
+        <translation>이번 달</translation>
     </message>
     <message>
         <source>Last month</source>
-        <translation>Предния месец</translation>
+        <translation>지난 달</translation>
     </message>
     <message>
         <source>This year</source>
-        <translation>Тази година</translation>
+        <translation>올해</translation>
     </message>
     <message>
         <source>Range...</source>
-        <translation>От - до...</translation>
+        <translation>범위...</translation>
     </message>
     <message>
         <source>Most Common</source>
-        <translation>Най-често</translation>
+        <translation>가장 흔한</translation>
     </message>
     <message>
         <source>Received with</source>
-        <translation>Получени</translation>
+        <translation>받은 사람</translation>
     </message>
     <message>
         <source>Sent to</source>
-        <translation>Изпратени на</translation>
+        <translation>전송</translation>
     </message>
     <message>
         <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <translation>PrivateSend를 통해 전송되었습니다</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend направи обезпечение на постъпленията</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>Privatesend 담보 입력 만들기</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend създава деноминации</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>Privatesend 교단 만들기</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend деноминация</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Privatesend 교단</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend обезпечава плащането</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Privatesend 담보 지불</translation>
     </message>
     <message>
         <source>To yourself</source>
-        <translation>За себе си</translation>
+        <translation>너 자신에게</translation>
     </message>
     <message>
         <source>Mined</source>
-        <translation>Емитирани</translation>
+        <translation>광산</translation>
     </message>
     <message>
         <source>Other</source>
-        <translation>Други</translation>
+        <translation>다른</translation>
     </message>
     <message>
         <source>Enter address or label to search</source>
-        <translation>Търсене по адрес или наименование</translation>
+        <translation>검색 할 주소 또는 레이블 입력</translation>
     </message>
     <message>
         <source>Min amount</source>
-        <translation>Минимална сума</translation>
+        <translation>최소 금액</translation>
     </message>
     <message>
         <source>Copy address</source>
-        <translation>Копирай адрес</translation>
+        <translation>주소 복사</translation>
     </message>
     <message>
         <source>Copy label</source>
-        <translation>Копирай наименование</translation>
+        <translation>레이블 복사</translation>
     </message>
     <message>
         <source>Copy amount</source>
-        <translation>Копирай сума</translation>
+        <translation>금액 복사</translation>
     </message>
     <message>
         <source>Copy transaction ID</source>
-        <translation>Копирай транзакция с ID</translation>
+        <translation>거래 ID 복사</translation>
     </message>
     <message>
         <source>Edit label</source>
-        <translation>Редактирай наименование</translation>
+        <translation>라벨 수정</translation>
     </message>
     <message>
         <source>Show transaction details</source>
-        <translation>Подробности за транзакцията</translation>
+        <translation>거래 세부 정보 표시</translation>
     </message>
     <message>
         <source>Export Transaction History</source>
-        <translation>Изнасяне историята на транзакциите</translation>
+        <translation>거래 내역 내보내기</translation>
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
-        <translation>CSV файл (*.csv)</translation>
+        <translation>쉼표로 구분 된 파일 (*.csv)</translation>
     </message>
     <message>
         <source>Confirmed</source>
-        <translation>Потвърдени</translation>
+        <translation>확인 됨</translation>
     </message>
     <message>
         <source>Watch-only</source>
-        <translation>Наблюдавани</translation>
+        <translation>시계 전용</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation>Дата</translation>
+        <translation>날짜</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation>유형</translation>
     </message>
     <message>
         <source>Label</source>
-        <translation>Наименование</translation>
+        <translation>상표</translation>
     </message>
     <message>
         <source>Address</source>
-        <translation>Адрес</translation>
+        <translation>주소</translation>
     </message>
     <message>
         <source>ID</source>
-        <translation>ИД</translation>
+        <translation>신분증</translation>
     </message>
     <message>
         <source>Exporting Failed</source>
-        <translation>Грешка при изнасянето</translation>
+        <translation>내보내기 실패</translation>
     </message>
     <message>
         <source>There was an error trying to save the transaction history to %1.</source>
-        <translation>Възникна грешка при опит за записване историята на транзакциите в %1.</translation>
+        <translation>거래 내역을 저장하려고하는 중에 오류가 발생했습니다 %1.</translation>
     </message>
     <message>
         <source>Exporting Successful</source>
-        <translation>Изнасянето е успешно</translation>
+        <translation>성공적인 내보내기</translation>
     </message>
     <message>
         <source>The transaction history was successfully saved to %1.</source>
-        <translation>Направените транзакции са запазени до %1.</translation>
+        <translation>거래 내역이에 저장되었습니다 %1.</translation>
     </message>
     <message>
         <source>Range:</source>
-        <translation>От:</translation>
+        <translation>범위:</translation>
     </message>
     <message>
         <source>to</source>
-        <translation>до</translation>
+        <translation>에</translation>
     </message>
 </context>
 <context>
@@ -3449,6 +3497,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Updating...</source>
         <translation>업데이트 중...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Dynode를 성공적으로 시작했습니다...</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>성공적으로 시작되었습니다 %d Dynodes, 시작하지 못했습니다 %d, 합계 %d</translation>
     </message>
 </context>
 <context>
@@ -3622,175 +3678,175 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Unable to bind to %s on this computer. Dynamic is probably already running.</source>
-        <translation>Не може да се свърже с %s на този компютър. Dynamic най-вероятно вече работи.</translation>
+        <translation>이 컴퓨터에서 %s 에 바인딩 할 수 없습니다. Dynamic이 이미 실행 중입니다.</translation>
     </message>
     <message>
         <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Не са намерени достатъчно Privatesend деноминирани средства за тази транзакция.</translation>
+        <translation>이 거래에 필요한 Privendsend 기금을 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Не са намерени достатъчно Privatesend неденоминирани средства за тази транзакция, които не са равни на 1000 DYN.</translation>
+        <translation>1000 DYN과 동등하지 않은이 거래에 대해 Privatesend 비표준 기금을 충분히 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
-        <translation>Внимание: -paytxfee е с много голяма зададена стойност! Това е транзакционната такса, която ще платите ако направите транзакция.</translation>
+        <translation>경고: -paytxfee가 매우 높게 설정되었습니다! 이것은 거래를 보낼 때 지불 할 거래 수수료입니다.</translation>
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
-        <translation>Внимание! Изглежда няма пълно съгласуване в мрежата! Някой копачи изглежда изпитват проблеми.</translation>
+        <translation>경고: 네트워크가 완전히 동의하지 않는 것 같습니다! 일부 광부가 문제를 겪고있는 것으로 보입니다.</translation>
     </message>
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>Внимание: Не е намерена пълна съвместимост с останалите в мрежата ! Може би се нуждаете от обновяване , или някой от другите нодове се нуждае от обновяване .</translation>
+        <translation>경고: 우리는 우리 동료들과 완전히 동의하지 않는 것처럼 보입니다! 업그레이드해야 할 수도 있고 다른 노드에서 업그레이드해야 할 수도 있습니다.</translation>
     </message>
     <message>
         <source>Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
-        <translation>Внимание: грешка при четене на wallet.dat! Всички ключове са прочетени коректно, но записи в данните за транзакциите или в адресната книга може би липсват или са грешни.</translation>
+        <translation>경고: wallet.dat을 읽는 중 오류가 발생했습니다! 모든 키가 올바르게 읽히지 만 트랜잭션 데이터 또는 주소록 항목이 누락되었거나 올바르지 않을 수 있습니다.</translation>
     </message>
     <message>
         <source>Warning: wallet.dat corrupt, data salvaged! Original wallet.dat saved as wallet.{timestamp}.bak in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>Внимание: wallet.dat  е развален, данните са спасени! Оригиналния wallet.dat е запазен като wallet.{timestamp}.bak в %s; ако твоят баланс или транзакции са неверни трябва да възстановите от резервното копие.</translation>
+        <translation>경고 : wallet.dat가 손상되어 데이터가 복구되었습니다! wallet.으로 저장된 원래 wallet.dat.{timestamp}.bak %s; 잔액 또는 거래가 올바르지 않은 경우 백업에서 복원해야합니다.</translation>
     </message>
     <message>
         <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
-        <translation>Трябва да посочите dynodepairingkey в конфигурацията. Моля прочетете документацията за помощ.</translation>
+        <translation>구성에서 dynodepairingkey를 지정해야합니다. 설명서를 참조하십시오.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
-        <translation>(по подразбиране 1)</translation>
+        <translation>(태만: 1)</translation>
     </message>
     <message>
         <source>Accept command line and JSON-RPC commands</source>
-        <translation>Приемай команден ред и JSON-RPC команди</translation>
+        <translation>명령 행 및 JSON-RPC 명령 적용</translation>
     </message>
     <message>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>
-        <translation>Приемай връзки отвън (по подразбиране: 1, ако няма  -proxy или -connect)</translation>
+        <translation>외부에서 연결 허용 (태만: 1, -proxy 또는 -connect가없는 경우)</translation>
     </message>
     <message>
         <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Добави възел, към който да се свърже и поддържай връзката отворена</translation>
+        <translation>연결 대상 노드 추가 및 연결 유지</translation>
     </message>
     <message>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
-        <translation>Разреши DNS справка за -addnode, -seednode и -connect</translation>
+        <translation>-addnode, -seednode 및 -connect에 대한 DNS 조회 허용</translation>
     </message>
     <message>
         <source>Already have that input.</source>
-        <translation>Вече има такъв вход.</translation>
+        <translation>이미 그 입력을했습니다.</translation>
     </message>
     <message>
         <source>Attempt to recover private keys from a corrupt wallet.dat</source>
-        <translation>Опит да се възстановят частни ключове от повреден wallet.dat</translation>
+        <translation>손상된 wallet.dat에서 개인 키를 복구하려고 시도합니다.</translation>
     </message>
     <message>
         <source>Block creation options:</source>
-        <translation>Опции за създаване на блок:</translation>
+        <translation>차단 생성 옵션:</translation>
     </message>
     <message>
         <source>Can't denominate: no compatible inputs left.</source>
-        <translation>Не може да бъде деноминирано: няма останали съвместими входящи средства.</translation>
+        <translation>연결할 수 없습니다: 호환 가능한 입력이 없습니다.</translation>
     </message>
     <message>
         <source>Cannot downgrade wallet</source>
-        <translation>Връщане към по-стара версия на портфейла е невъзможно</translation>
+        <translation>지갑을 다운 그레이드 할 수 없습니다</translation>
     </message>
     <message>
         <source>Cannot resolve -bind address: '%s'</source>
-        <translation>Не може да установи -bind адрес: '%s'</translation>
+        <translation>-bind 주소를 확인할 수 없습니다: '%s'</translation>
     </message>
     <message>
         <source>Cannot resolve -externalip address: '%s'</source>
-        <translation>Не може да установи -externalip адрес: '%s'</translation>
+        <translation>-externalip 주소를 확인할 수 없습니다: '%s'</translation>
     </message>
     <message>
         <source>Cannot write default address</source>
-        <translation>Не може да напише адреса по подразбиране</translation>
+        <translation>기본 주소를 쓸 수 없습니다</translation>
     </message>
     <message>
         <source>Collateral not valid.</source>
-        <translation>Обезпечението невалидно.</translation>
+        <translation>담보가 유효하지 않습니다.</translation>
     </message>
     <message>
         <source>Connect only to the specified node(s)</source>
-        <translation>Свързване само към определена възлова точка(и)</translation>
+        <translation>지정된 노드에만 연결</translation>
     </message>
     <message>
         <source>Connect to a node to retrieve peer addresses, and disconnect</source>
-        <translation>Свържи се с възел за зараждане на адреси на пиъри, след това прекъсни връзката</translation>
+        <translation>노드에 연결하여 피어 주소를 검색하고 연결을 끊습니다</translation>
     </message>
     <message>
         <source>Connection options:</source>
-        <translation>Настройки на връзката:</translation>
+        <translation>연결 옵션:</translation>
     </message>
     <message>
         <source>Corrupted block database detected</source>
-        <translation>Открита е повредена блок база данни</translation>
+        <translation>손상된 블록 데이터베이스가 발견되었습니다</translation>
     </message>
     <message>
         <source>Privatesend options:</source>
-        <translation>Опции на Privatesend:</translation>
+        <translation>Privatesend 옵션:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
-        <translation>Опции за Откриване на грешки/Тестване:</translation>
+        <translation>디버깅 / 테스트 옵션 :</translation>
     </message>
     <message>
         <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
-        <translation>Открий собствения IP адрес (по подразбиране: 1, когато слуша и няма -externalip)</translation>
+        <translation>자신의 IP 주소 찾기 (태만: 1, 듣고 없을 때 -externalip)</translation>
     </message>
     <message>
         <source>Do not load the wallet and disable wallet RPC calls</source>
-        <translation>Не зареждай портфейла и деактивирай RPC повикванията на портфейла</translation>
+        <translation>지갑을로드하지 말고 지갑 RPC 호출을 비활성화하십시오.</translation>
     </message>
     <message>
         <source>Do you want to rebuild the block database now?</source>
-        <translation>Искате ли да възстановяване блок базата данни сега?</translation>
+        <translation>지금 블록 데이터베이스를 다시 작성 하시겠습니까?</translation>
     </message>
     <message>
         <source>Done loading</source>
-        <translation>Зареждането е завършено</translation>
+        <translation>로딩 완료</translation>
     </message>
     <message>
         <source>Entries are full.</source>
-        <translation>Записите са пълни</translation>
+        <translation>항목이 꽉 찼습니다.</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
-        <translation>Грешка при инициализация на блок базата данни</translation>
+        <translation>블록 데이터베이스를 초기화하는 중 오류가 발생했습니다</translation>
     </message>
     <message>
         <source>Error initializing wallet database environment %s!</source>
-        <translation>Грешка при инициализиране на средата на базата данни на портфейла %s!</translation>
+        <translation>지갑 데이터베이스 환경 초기화 오류 %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
-        <translation>Грешка при зареждане на блок базата данни</translation>
+        <translation>블록 데이터베이스로드 중 오류가 발생했습니다</translation>
     </message>
     <message>
         <source>Error loading wallet.dat</source>
-        <translation>Грешка при зареждане на wallet.dat</translation>
+        <translation>wallet.dat로드 오류</translation>
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet corrupted</source>
-        <translation>Грешка при зареждане на wallet.dat: портфейлът е повреден</translation>
+        <translation>wallet.dat로드 오류 : 지갑이 손상되었습니다</translation>
     </message>
     <message>
         <source>Error opening block database</source>
-        <translation>Грешка при отваряне на блок базата данни</translation>
+        <translation>블록 데이터베이스 열기 오류</translation>
     </message>
     <message>
         <source>Error reading from database, shutting down.</source>
-        <translation>Грешка при четене от базата данни, изключване.</translation>
+        <translation>데이터베이스에서 읽는 중 오류가 발생했습니다. 종료 중입니다.</translation>
     </message>
     <message>
         <source>Error recovering public key.</source>
-        <translation>Грешка при възстановяване на публичния ключ.</translation>
+        <translation>공개 키를 복구하는 동안 오류가 발생했습니다.</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation>Грешка</translation>
+        <translation>오류</translation>
     </message>
     <message>
         <source>Error: Disk space is low!</source>
@@ -3798,19 +3854,19 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Грешка: Портфейлът е заключен, транзакцията е невъзможна!</translation>
+        <translation>오류: 디스크 공간이 부족합니다!</translation>
     </message>
     <message>
         <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Грешка: Вече имате чакащи вписвания в Privatesend басейна</translation>
+        <translation>오류: 이미 Privendsend 풀에 보류중인 항목이 있습니다.</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
-        <translation>Неуспешно "слушане" на всеки порт. Използвайте -listen=0 ако искате това.</translation>
-    </message>
+        <translation>모든 포트에서 수신 대기하지 못했습니다. 이것을 원한다면 -listen=0 을 사용하십시오.</translation>
+    </message> 
     <message>
         <source>Failed to read block</source>
-        <translation>Неуспешно четене на блок</translation>
+        <translation>블록을 읽지 못했습니다</translation>
     </message>
     <message>
         <source>If &lt;category&gt; is not supplied, output all debugging information.</source>
