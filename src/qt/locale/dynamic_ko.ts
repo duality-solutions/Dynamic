@@ -650,6 +650,10 @@ Address: %4
         <translation>잔돈:</translation>
     </message>
     <message>
+        <source>toggle lock state</source>
+        <translation>토글 잠금 상태</translation>
+    </message>
+    <message>
         <source>(un)select all</source>
         <translation>모두 선택(해제)</translation>
     </message>
@@ -2094,8 +2098,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>&amp;양</translation>
     </message>
     <message>
-        <source>&amp;Request InstantSend</source>
-        <translation>&amp;InstantSend 요청</translation>
+        <source>Request InstantSend</source>
+        <translation>InstantSend 요청</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -3299,6 +3303,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Form</source>
         <translation>Form</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>필터 목록:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>노드 수:</translation>
     </message>
     <message>
         <source>My Dynodes</source>
