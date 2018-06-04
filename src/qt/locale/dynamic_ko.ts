@@ -2142,7 +2142,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>ReceiveRequestDialog</name>
     <message>
         <source>QR Code</source>
-        <translation>QR Код</translation>
+        <translation>QR 코드</translation>
     </message>
     <message>
         <source>Copy &amp;URI</source>
@@ -2150,19 +2150,19 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Copy &amp;Address</source>
-        <translation>&amp;Копирай адрес</translation>
+        <translation>&amp;URI 복사</translation>
     </message>
     <message>
         <source>&amp;Save Image...</source>
-        <translation>&amp;Запиши изображението...</translation>
+        <translation>&amp;이미지를 저장...</translation>
     </message>
     <message>
         <source>Request payment to %1</source>
-        <translation>Заявка за плащане на %1</translation>
+        <translation>님에게 지불을 요청하십시오 %1</translation>
     </message>
     <message>
         <source>Payment information</source>
-        <translation>Данни за плащането</translation>
+        <translation>결제 정보</translation>
     </message>
     <message>
         <source>URI</source>
@@ -2170,225 +2170,225 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Address</source>
-        <translation>Адрес</translation>
+        <translation>주소</translation>
     </message>
     <message>
         <source>Amount</source>
-        <translation>Сума</translation>
+        <translation>양</translation>
     </message>
     <message>
         <source>Label</source>
-        <translation>Наименование</translation>
+        <translation>상표</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation>Съобщение</translation>
+        <translation>메시지</translation>
     </message>
     <message>
         <source>Resulting URI too long, try to reduce the text for label / message.</source>
-        <translation>Получения URI е твърде дълъг, опитайте да съкратите текста на наименованието / съобщението.</translation>
+        <translation>결과 URI가 너무 길면 레이블 / 메시지의 텍스트를 줄이십시오.</translation>
     </message>
     <message>
         <source>Error encoding URI into QR Code.</source>
-        <translation>Грешка при създаването на QR Code от URI.</translation>
+        <translation>URI를 QR 코드로 인코딩하는 중 오류가 발생했습니다.</translation>
     </message>
 </context>
 <context>
     <name>RecentRequestsTableModel</name>
     <message>
         <source>Date</source>
-        <translation>Дата</translation>
+        <translation>날짜</translation>
     </message>
     <message>
         <source>Label</source>
-        <translation>Наименование</translation>
+        <translation>상표</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation>Съобщение</translation>
+        <translation>메시지</translation>
     </message>
     <message>
         <source>Amount</source>
-        <translation>Сума</translation>
+        <translation>양</translation>
     </message>
     <message>
         <source>(no label)</source>
-        <translation>(няма наименование)</translation>
+        <translation>(레이블 없음)</translation>
     </message>
     <message>
         <source>(no message)</source>
-        <translation>(няма съобщение)</translation>
+        <translation>(메시지 없음)</translation>
     </message>
     <message>
         <source>(no amount)</source>
-        <translation>(липсва сума)</translation>
+        <translation>(금액 없음)</translation>
     </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
-        <translation>Изпращане на монети</translation>
+        <translation>동전 보내기</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
-        <translation>Функции за контрол на монетата</translation>
+        <translation>동전 제어 기능</translation>
     </message>
     <message>
         <source>Inputs...</source>
-        <translation>Входове...</translation>
+        <translation>투입물...</translation>
     </message>
     <message>
         <source>automatically selected</source>
-        <translation>автоматично избрано</translation>
+        <translation>자동 선택됨</translation>
     </message>
     <message>
         <source>Insufficient funds!</source>
-        <translation>Недостатъчно средства!</translation>
+        <translation>불충분 한 자금!</translation>
     </message>
     <message>
         <source>Quantity:</source>
-        <translation>Количество:</translation>
+        <translation>수량:</translation>
     </message>
     <message>
         <source>Bytes:</source>
-        <translation>Байтове:</translation>
+        <translation>바이트:</translation>
     </message>
     <message>
         <source>Amount:</source>
-        <translation>Сума:</translation>
+        <translation>양:</translation>
     </message>
     <message>
         <source>Priority:</source>
-        <translation>Приоритет:</translation>
+        <translation>우선 순위:</translation>
     </message>
     <message>
         <source>medium</source>
-        <translation>среден</translation>
+        <translation>매질</translation>
     </message>
     <message>
         <source>Fee:</source>
-        <translation>Такса:</translation>
+        <translation>보수:</translation>
     </message>
     <message>
         <source>Dust:</source>
-        <translation>Незначителен остатък:</translation>
+        <translation>먼지:</translation>
     </message>
     <message>
         <source>no</source>
-        <translation>не</translation>
+        <translation>아니</translation>
     </message>
     <message>
         <source>After Fee:</source>
-        <translation>След таксата:</translation>
+        <translation>수수료 후:</translation>
     </message>
     <message>
         <source>Change:</source>
-        <translation>Ресто:</translation>
+        <translation>변화:</translation>
     </message>
     <message>
         <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
-        <translation>Ако това е активирано, но адреса за рестото е неверен или празен, рестото ще бъде изпратено към новосъздаден адрес.</translation>
+        <translation>이 옵션이 활성화되었지만 변경 주소가 비어 있거나 유효하지 않은 경우 변경 사항은 새로 생성 된 주소로 전송됩니다.</translation>
     </message>
     <message>
         <source>Custom change address</source>
-        <translation>Адрес за ресто по избор</translation>
+        <translation>맞춤 주소 변경</translation>
     </message>
     <message>
         <source>Transaction Fee:</source>
-        <translation>Такса транзакция:</translation>
+        <translation>거래 수수료:</translation>
     </message>
     <message>
         <source>Choose...</source>
-        <translation>Избери...</translation>
+        <translation>고르다...</translation>
     </message>
     <message>
         <source>collapse fee-settings</source>
-        <translation>Показване настройки за такса</translation>
+        <translation>축소비 설정</translation>
     </message>
     <message>
         <source>Minimize</source>
-        <translation>Минимизиране</translation>
+        <translation>최소화</translation>
     </message>
     <message>
         <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Ако променената такса е 1000 satoshis и транзакцията е само 250 байта, тогава "за килобайт" само плаща такса 250 satoshis,,&lt;br /&gt; тогава"за последно" заплаща 1000 satoshis. За транзакции по-големи от килобайт едновременно се заплащат от килобайт.</translation>
+        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 "킬로바이트 당"은 수수료 250 원만 지불합니다,,&lt;br /&gt; "적어도"1000 표는 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
         <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Ако променената такса е 1000 satoshis и транзакцията е само 250 байта, тогава "за килобайт" само плаща такса 250 satoshis,&lt;br /&gt; тогава"за последно" заплаща 1000 satoshis. За транзакции по-големи от килобайт едновременно се заплащат от килобайт.</translation>
+        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 "킬로바이트 당"은 수수료 250 원만 지불합니다,&lt;br /&gt; "적어도 총"은 1000 개를 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dynamic transactions than the network can process.</source>
-        <translation>Разплащането само минималната такса ще продължи толкова дълго,докато транзакцията заема по-малък обем в блоковото пространство.&lt;br /&gt; Но имайте предвид, че транзакцията може да се окаже без първоначално потвърждение ако се появи голямо търсене на dynamic транзакции отколкото мрежата може да обработи.</translation>
+        <translation>블록에서 공간보다 거래량이 적은 한 최소 수수료 만 지불하면됩니다.&lt;br /&gt; 그러나 네트워크가 처리 할 수있는 것보다 동적 트랜잭션에 대한 요구가 많으면 트랜잭션을 확인하지 않아도됩니다.</translation>
     </message>
     <message>
         <source>per kilobyte</source>
-        <translation>за килобайт</translation>
+        <translation>킬로바이트 당</translation>
     </message>
     <message>
         <source>total at least</source>
-        <translation>сбор на края</translation>
+        <translation>적어도 총</translation>
     </message>
     <message>
         <source>(read the tooltip)</source>
-        <translation>(прочети пояснението)</translation>
+        <translation>(툴팁을 읽으십시오)</translation>
     </message>
     <message>
         <source>Recommended:</source>
-        <translation>Препоръчано:</translation>
+        <translation>추천:</translation>
     </message>
     <message>
         <source>Custom:</source>
-        <translation>Персонализиран:</translation>
+        <translation>관습:</translation>
     </message>
     <message>
         <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
-        <translation>(Смарт таксата не е разпозната все още.Това ще отнеме няколко блока... )</translation>
+        <translation>(아직 초기화되지 않은 스마트 수수료. 일반적으로 몇 블록 걸립니다... )</translation>
     </message>
     <message>
         <source>Confirmation time:</source>
-        <translation>Време за потвърждение:</translation>
+        <translation>확인 시간:</translation>
     </message>
     <message>
         <source>normal</source>
-        <translation>нормално</translation>
+        <translation>표준</translation>
     </message>
     <message>
         <source>fast</source>
-        <translation>бързо</translation>
+        <translation>빠른</translation>
     </message>
     <message>
         <source>Send as zero-fee transaction if possible</source>
-        <translation>Изпрати с нулева такса за транзакция ако е възможно</translation>
+        <translation>가능한 경우 제로 수수료 거래로 전송하십시오.</translation>
     </message>
     <message>
         <source>(confirmation may take longer)</source>
-        <translation>(потвърждението може да отнеме повече време)</translation>
+        <translation>(확인하는 데 더 오래 걸릴 수 있음)</translation>
     </message>
     <message>
         <source>Confirm the send action</source>
-        <translation>Потвърдете изпращането</translation>
+        <translation>전송 작업 확인</translation>
     </message>
     <message>
         <source>S&amp;end</source>
-        <translation>И&amp;зпрати</translation>
+        <translation>보&amp;내다</translation>
     </message>
     <message>
         <source>Clear all fields of the form.</source>
-        <translation>Изчисти всички полета от формуляра.</translation>
+        <translation>양식의 모든 필드 지우기.</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
-        <translation>Изчисти &amp;всичко</translation>
+        <translation>모두 &amp;지우기</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
-        <translation>Изпращане към повече от един получател</translation>
+        <translation>한 번에 여러 수신자에게 보내기</translation>
     </message>
     <message>
         <source>Add &amp;Recipient</source>
-        <translation>Добави &amp;получател</translation>
+        <translation>수신자 &amp;추가</translation>
     </message>
     <message>
         <source>Privatesend</source>
@@ -2400,139 +2400,139 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Balance:</source>
-        <translation>Баланс:</translation>
+        <translation>밸런스:</translation>
     </message>
     <message>
         <source>Copy quantity</source>
-        <translation>Копирай количеството</translation>
+        <translation>수량 복사</translation>
     </message>
     <message>
         <source>Copy amount</source>
-        <translation>Копирай сумата</translation>
+        <translation>금액 복사</translation>
     </message>
     <message>
         <source>Copy fee</source>
-        <translation>Копирай таксата</translation>
+        <translation>복사 수수료</translation>
     </message>
     <message>
         <source>Copy after fee</source>
-        <translation>Копирай след таксата</translation>
+        <translation>수수료 후 복사</translation>
     </message>
     <message>
         <source>Copy bytes</source>
-        <translation>Копирай байтовете</translation>
+        <translation>바이트 복사</translation>
     </message>
     <message>
         <source>Copy priority</source>
-        <translation>Копирай приоритета</translation>
+        <translation>바이트 복사</translation>
     </message>
     <message>
         <source>Copy dust</source>
-        <translation>Копирай остатъка</translation>
+        <translation>먼지를 복사하십시오</translation>
     </message>
     <message>
         <source>Copy change</source>
-        <translation>Копирай рестото</translation>
+        <translation>변경 사항 복사</translation>
     </message>
     <message>
         <source>using</source>
-        <translation>използвайки</translation>
+        <translation>~을 사용하여</translation>
     </message>
     <message>
         <source>anonymous funds</source>
-        <translation>анонимни средства</translation>
+        <translation>익명의 자금</translation>
     </message>
     <message>
         <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(privatesend изисква тази сума да бъде закръглена до най-близката %1).</translation>
+        <translation>(privatesend는이 금액을 가장 가까운 값으로 반올림해야합니다. %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
-        <translation>всякакви налични средства (не се препоръчва)</translation>
+        <translation>사용 가능한 모든 기금 (권장하지 않음)</translation>
     </message>
     <message>
         <source>and InstantSend</source>
-        <translation>и InstantSend</translation>
+        <translation>및 InstantSend</translation>
     </message>
     <message>
         <source>%1 to %2</source>
-        <translation>%1 до %2</translation>
+        <translation>%1 에 %2</translation>
     </message>
     <message>
         <source>Are you sure you want to send?</source>
-        <translation>Наистина ли искате да изпратите?</translation>
+        <translation>정말 보내시겠습니까?</translation>
     </message>
     <message>
         <source>are added as transaction fee</source>
-        <translation>се добавя като такса за транзакция</translation>
+        <translation>거래 수수료로 추가됩니다</translation>
     </message>
     <message>
         <source>Total Amount = &lt;b&gt;%1&lt;/b&gt;&lt;br /&gt;= %2</source>
-        <translation>Обща сума = &lt;b&gt;%1&lt;/b&gt;&lt;br /&gt;= %2</translation>
+        <translation>총 금액 = &lt;b&gt;%1&lt;/b&gt;&lt;br /&gt;= %2</translation>
     </message>
     <message>
         <source>Confirm send coins</source>
-        <translation>Потвърди изпращането на монетите</translation>
+        <translation>송금 확인</translation>
     </message>
     <message>
         <source>A fee %1 times higher than %2 per kB is considered an insanely high fee.</source>
-        <translation>Такса %1 е по-голяма от %2 за kB се счита за твърде висока такса.</translation>
+        <translation>비용 %1 시대보다 %2 kB 당 미친 높은 수수료로 간주됩니다.</translation>
     </message>
     <message numerus="yes">
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>Очаква се да започне потвърждение в %n блока.</numerusform><numerusform>Очаква се да започне потвърждение в %n блока.</numerusform></translation>
+        <translation><numerusform>%n 개의 블록 내에서 확인을 시작할 것으로 추정됩니다.</numerusform></translation>
     </message>
     <message>
         <source>The recipient address is not valid, please recheck.</source>
-        <translation>Невалиден адрес на получателя.</translation>
+        <translation>수신자 주소가 유효하지 않습니다. 다시 확인하십시오.</translation>
     </message>
     <message>
         <source>&lt;b&gt;(%1 of %2 entries displayed)&lt;/b&gt;</source>
-        <translation>&lt;b&gt;(%1 of %2 показани записи)&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;(%2 개의 항목 중 %1 이 표시되었습니다)&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The amount to pay must be larger than 0.</source>
-        <translation>Сумата трябва да е по-голяма от 0.</translation>
+        <translation>지불 할 금액은 0보다 커야합니다.</translation>
     </message>
     <message>
         <source>The amount exceeds your balance.</source>
-        <translation>Сумата надвишава текущия баланс</translation>
+        <translation>금액이 잔액을 초과합니다.</translation>
     </message>
     <message>
         <source>The total exceeds your balance when the %1 transaction fee is included.</source>
-        <translation>Общият сбор надхвърля вашия баланс, когато се добави  %1 такса за операцията.</translation>
+        <translation>%1 거래 수수료가 포함 된 경우 잔액이 잔액을 초과합니다.</translation>
     </message>
     <message>
         <source>Duplicate address found, can only send to each address once per send operation.</source>
-        <translation>Намерен е дублиран адрес, може да се изпраща само по веднъж до всеки адрес в рамките на едно изпращане.</translation>
+        <translation>중복 된 주소가 발견되었으므로 송신 작업 당 한 번만 각 주소로 보낼 수 있습니다.</translation>
     </message>
     <message>
         <source>Transaction creation failed!</source>
-        <translation>Грешка при създаването на транзакция!</translation>
+        <translation>거래 생성 실패!</translation>
     </message>
     <message>
         <source>The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation>Транзакцията беше отхвърлена! Това може да се случи, ако някои от монетите в портфейла ви, вече са изразходвани, например ако се използва копие от wallet.dat и монетите са изразходвани в копието, но не са отбелязани като изразходвани тук.</translation>
+        <translation>트랜잭션이 거부되었습니다! 지갑에있는 동전 중 일부가 이미 소비 된 경우 (예 : wallet.dat 사본을 사용하고 동전을 복사에 사용했지만 여기에서 사용한 것으로 표시되지 않은 경우).</translation>
     </message>
     <message>
         <source>Error: The wallet was unlocked only to anonymize coins.</source>
-        <translation>Грешка: Портфейлът е отключен само за анонимизиране на монети.</translation>
+        <translation>오류: 지갑은 동전 익명 처리를 위해서만 잠금 해제되었습니다.</translation>
     </message>
     <message>
         <source>Pay only the minimum fee of %1</source>
-        <translation>Плати само минималната такса от %1</translation>
+        <translation>최저 수수료 만 지불하십시오 %1</translation>
     </message>
     <message>
         <source>Warning: Invalid Dynamic address</source>
-        <translation>Внимание: Невалиден Dynamic адрес</translation>
+        <translation>경고: 잘못된 Dynamic 주소</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
-        <translation>Внимание: Непознат адрес за ресто</translation>
+        <translation>경고: 알 수없는 변경 주소</translation>
     </message>
     <message>
         <source>(no label)</source>
-        <translation>(без наименование)</translation>
+        <translation>(레이블 없음)</translation>
     </message>
 </context>
 <context>
@@ -3969,11 +3969,11 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Copyright (C) 2009-%i The Bitcoin Core Developers</source>
-        <translation>Запазени права (C) 2009-%i Bitcoin Core разработчици</translation>
+        <translation>저작권 (C) 2009-%i Bitcoin Core 개발자</translation>
     </message>
     <message>
         <source>Copyright (C) 2014-%i The Dynamic Developers</source>
-        <translation>Запазени права (C) 2014-%i Dynamic разработчиците</translation>
+        <translation>저작권 (C) 2014-%i Dynamic 개발자</translation>
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
@@ -3981,15 +3981,15 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Privatesend is idle.</source>
-        <translation>Privatesend бездейства.</translation>
+        <translation>Privatesend 유휴 상태.</translation>
     </message>
     <message>
         <source>Privatesend request complete:</source>
-        <translation>Privatesend заявката е завършена:</translation>
+        <translation>Privatesend 요청 완료:</translation>
     </message>
     <message>
         <source>Privatesend request incomplete:</source>
-        <translation>Privatesend заявката незавършена:</translation>
+        <translation>Privatesend 불완전한 요청:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -4001,7 +4001,7 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Error connecting to Dynode.</source>
-        <translation>Грешка при свързване с Dynode.</translation>
+        <translation>Dynode에 연결하는 중 오류가 발생했습니다.</translation>
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet requires newer version of Dynamic</source>
