@@ -464,7 +464,7 @@
     </message>
     <message numerus="yes">
         <source>Processed %n blocks of transaction history.</source>
-        <translation><numerusform>%n 블록의 거래내역 확인됨</numerusform></translation>
+        <translation><numerusform>%n 블록의 거래내역 확인됨.</numerusform></translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
@@ -4291,55 +4291,55 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Set minimum block size in bytes (default: %u)</source>
-        <translation>Задайте минимален размер на блок-а в байтове (подразбиране: %u)</translation>
+        <translation>최소 블록 크기를 바이트 단위로 설정합니다 (태만: %u)</translation>
     </message>
     <message>
         <source>Set the number of threads to service RPC calls (default: %d)</source>
-        <translation>Задай брой заявки обслужващи процеса RPC повикванията (по подразбиране:  %d)</translation>
+        <translation>RPC 호출을 처리 할 스레드 수 설정 (태만:  %d)</translation>
     </message>
     <message>
         <source>Sets the DB_PRIVATE flag in the wallet db environment (default: %u)</source>
-        <translation>Определете флага DB_PRIVATE в средата база от данни на портфейла (по подразбиране: %u)</translation>
+        <translation>wallet db 환경에서 DB_PRIVATE 플래그를 설정합니다 (태만: %u)</translation>
     </message>
     <message>
         <source>Signing timed out.</source>
-        <translation>Времето за подпис е изтекло.</translation>
+        <translation>서명 시간 초과.</translation>
     </message>
     <message>
         <source>Specify configuration file (default: %s)</source>
-        <translation>Посочете конфигурационен файл (по подразбиране: %s)</translation>
+        <translation>구성 파일 지정 (태만: %s)</translation>
     </message>
     <message>
         <source>Specify connection timeout in milliseconds (minimum: 1, default: %d)</source>
-        <translation>Определете таймаут за свързване в милисекунди (минимум: 1, подразбиране: %d)</translation>
+        <translation>연결 시간 제한을 밀리 초 단위로 지정하십시오 (최저한의: 1, 태만: %d)</translation>
     </message>
     <message>
         <source>Specify Dynode configuration file (default: %s)</source>
-        <translation>Посочете конфигурационен файл (по подразбиране: %s)</translation>
+        <translation>Dynode 구성 파일 지정 (태만: %s)</translation>
     </message>
     <message>
         <source>Specify pid file (default: %s)</source>
-        <translation>Посочете pid-файла (по подразбиране:  %s)</translation>
+        <translation>pid 파일 지정 (태만:  %s)</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
-        <translation>Изхарчете непотвърденото ресто при изпращане на транзакциите (по подразбиране: %u)</translation>
+        <translation>거래를 보낼 때 미확인 된 변화를 보냅니다 (태만: %u)</translation>
     </message>
     <message>
         <source>Stop running after importing blocks from disk (default: %u)</source>
-        <translation>Спри работата след импортиране на блоковете от диска (по подразбиране: %u)</translation>
+        <translation>디스크에서 블록을 가져온 후에 실행 중지 (태만: %u)</translation>
     </message>
     <message>
         <source>Submitted following entries to Dynode: %u / %d</source>
-        <translation>Изпратени са следните записи към Dynode: %u / %d</translation>
+        <translation>Dynode에 다음 항목을 제출했습니다: %u / %d</translation>
     </message>
     <message>
         <source>Submitted to Dynode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>Изпратено към Dynode, чака за още записи ( %u / %d ) %s</translation>
+        <translation>Dynode에 제출하여 추가 항목을 기다리는 중입니다 ( %u / %d ) %s</translation>
     </message>
     <message>
         <source>Submitted to Dynode, waiting in queue %s</source>
-        <translation>Изпратено към Мастернода, чака в опашката %s</translation>
+        <translation>Dynode에 제출되어 대기열에서 대기 중입니다 %s</translation>
     </message>
     <message>
         <source>Synchronization failed</source>
@@ -4379,99 +4379,99 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
-        <translation>Праг на прекъсване на връзката при непорядъчно държащи се пиъри (по подразбиране: %u)</translation>
+        <translation>오작동하는 동료와의 연결을 끊는 임계 값 (태만: %u)</translation>
     </message>
     <message>
         <source>Use KeePass 2 integration using KeePassHttp plugin (default: %u)</source>
-        <translation>Използвай KeePass 2 интеграция чрез плъгина KeePassHttp (по подразбиране: %u)</translation>
+        <translation>KeePassHttp 플러그인을 사용하여 KeePass 2 통합 사용 (태만: %u)</translation>
     </message>
     <message>
         <source>Use N separate Dynodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>Използвай N отделни Dynode за анонимизиране на средствата (2-8, по подразбиране: %u)</translation>
+        <translation>N 개의 개별 다이 노드를 사용하여 자금 익명 처리 (2-8, 태만: %u)</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
-        <translation>Използвай UPnP за определяне на порта за слушане (по подразбиране: %u)</translation>
+        <translation>UPnP를 사용하여 수신 대기 포트 매핑 (태만: %u)</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart Dynamic to complete</source>
-        <translation>Портфейлът трябва да бъде презаписан: рестартирайте Dynamic за да завършите</translation>
+        <translation>월렛을 다시 작성해야했습니다. 완료하려면 Dynamic을 다시 시작해야합니다</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
-        <translation>Внимание: Неподдържан аргумен -benchmark е игнориран, използвайте -debug=bench.</translation>
+        <translation>경고 : 지원되지 않는 인수 -benchmark ignored, -debug=bench 를 사용하십시오.</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -debugnet ignored, use -debug=net.</source>
-        <translation>Внимание: Аргументът -debugnet е невалиден, използвайте -debug=net .</translation>
+        <translation>경고 : 지원되지 않는 인수 -debugnet 무시, -debug=net 사용.</translation>
     </message>
     <message>
         <source>Will retry...</source>
-        <translation>Ще опита отново...</translation>
+        <translation>다시 시도 할 것입니다...</translation>
     </message>
     <message>
         <source>Invalid dynodepairingkey. Please see documenation.</source>
-        <translation>Невалиден частен ключ на Dynode. Моля вижте документацията.</translation>
+        <translation>잘못된 dynodepairingkey입니다. 문서를 참조하십시오.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>
-        <translation>(трябва да е 33300 за основната мрежа)</translation>
+        <translation>(메인 네트의 경우 33300이어야 함)</translation>
     </message>
     <message>
         <source>Can't find random Dynode.</source>
-        <translation>Не можете да намери случаен Dynode.</translation>
+        <translation>랜덤 다이 노스를 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Can't mix while sync in progress.</source>
-        <translation>Не може да се смесват, докато се синхронизира.</translation>
+        <translation>진행중인 동기화 중에는 혼합 할 수 없습니다.</translation>
     </message>
     <message>
         <source>Could not parse dynode.conf</source>
-        <translation>Несъвместимост в dynode.conf</translation>
+        <translation>dynode.conf를 분석 할 수 없습니다</translation>
     </message>
     <message>
         <source>Invalid netmask specified in -whitelist: '%s'</source>
-        <translation>Невалидна мрежова маска в -whitelist: '%s'</translation>
+        <translation>잘못된 넷 마스크가에서 지정되었습니다 -whitelist: '%s'</translation>
     </message>
     <message>
         <source>Invalid port detected in dynode.conf</source>
-        <translation>Открит е невалиден порт в dynode.conf</translation>
+        <translation>dynode.conf에서 잘못된 포트가 감지되었습니다</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
-        <translation>Невалиден личен ключ.</translation>
+        <translation>잘못된 개인 키.</translation>
     </message>
     <message>
         <source>Invalid script detected.</source>
-        <translation>Открит е невалиден скрипт.</translation>
+        <translation>잘못된 스크립트가 감지되었습니다.</translation>
     </message>
     <message>
         <source>KeePassHttp id for the established association</source>
-        <translation>KeePassHttp id за осъществяване на връзка</translation>
+        <translation>설정된 연결에 대한 KeePassHttp ID입니다</translation>
     </message>
     <message>
         <source>KeePassHttp key for AES encrypted communication with KeePass</source>
-        <translation>KeePassHttp ключ за  AES криптирана връзка с KeePass</translation>
+        <translation>KeePass KeePass와 AES 암호화 통신을위한 KeePassHttp 키</translation>
     </message>
     <message>
         <source>Keep N DYN anonymized (default: %u)</source>
-        <translation>Поддържай N Dynamic анонимизирани (по подразбиране: %u)</translation>
+        <translation>N DYN을 익명으로 유지 (태만: %u)</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
-        <translation>Пази поне &lt;n&gt; неосъществени транзакции в паметта (по подразбиране: %u)</translation>
+        <translation>최대한 유지 &lt;n&gt; 메모리에서 연결되지 않는 트랜잭션 (태만: %u)</translation>
     </message>
     <message>
         <source>Last Privatesend was too recent.</source>
-        <translation>Последния Derksend беше твърде скоро.</translation>
+        <translation>마지막 Privendsend가 너무 최근입니다.</translation>
     </message>
     <message>
         <source>Line: %d</source>
-        <translation>Линия: %d</translation>
+        <translation>선: %d</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
-        <translation>Зареждане на адреси...</translation>
+        <translation>주소로드 중...</translation>
     </message>
     <message>
         <source>Loading block index...</source>
@@ -4503,223 +4503,223 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Missing input transaction information.</source>
-        <translation>Липсва входяща информация за транзакцията.</translation>
+        <translation>누락 된 입력 트랜잭션 정보.</translation>
     </message>
     <message>
         <source>No funds detected in need of denominating.</source>
-        <translation>Не са открити суми нуждаещи се от деноминиране.</translation>
+        <translation>교단을 필요로하는 자금이 발견되지 않았습니다.</translation>
     </message>
     <message>
         <source>No matching denominations found for mixing.</source>
-        <translation>Няма съвпадащи деноминации за миксирането.</translation>
+        <translation>일치하는 교단이 없습니다.</translation>
     </message>
     <message>
         <source>Node relay options:</source>
-        <translation>Сменящи опции на node:</translation>
+        <translation>노드 릴레이 옵션:</translation>
     </message>
     <message>
         <source>Non-standard public key detected.</source>
-        <translation>Засечен е нестандартен публичен ключ.</translation>
+        <translation>비표준 공개 키가 발견되었습니다.</translation>
     </message>
     <message>
         <source>Not compatible with existing transactions.</source>
-        <translation>Несъвместим със съществуващите транзакции.</translation>
+        <translation>기존 트랜잭션과 호환되지 않습니다.</translation>
     </message>
     <message>
         <source>Not enough file descriptors available.</source>
-        <translation>Няма достатъчно налични файлови описания.</translation>
+        <translation>사용 가능한 파일 설명자가 충분하지 않습니다.</translation>
     </message>
     <message>
         <source>Options:</source>
-        <translation>Опции:</translation>
+        <translation>옵션:</translation>
     </message>
     <message>
         <source>Password for JSON-RPC connections</source>
-        <translation>Парола за  JSON-RPC връзките</translation>
+        <translation>JSON-RPC 연결을위한 비밀번호</translation>
     </message>
     <message>
         <source>RPC SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
-        <translation>RPC SSL опции: (виж Bitcoin Wiki за  SSL инструкции за настройка)</translation>
+        <translation>RPC SSL 옵션 : (SSL 설치 지침은 Bitcoin Wiki 참조)</translation>
     </message>
     <message>
         <source>RPC server options:</source>
-        <translation>Опции на RPC сървъра:</translation>
+        <translation>RPC 서버 옵션:</translation>
     </message>
     <message>
         <source>RPC support for HTTP persistent connections (default: %d)</source>
-        <translation>RPC поддръжка за HTTP постоянни връзки (по подразбиране: %d)</translation>
+        <translation>HTTP 영구 연결에 대한 RPC 지원 (태만: %d)</translation>
     </message>
     <message>
         <source>Randomly drop 1 of every &lt;n&gt; network messages</source>
-        <translation>Произволно спира 1 от всеки &lt;n&gt; мрежови съобщения</translation>
+        <translation>매번 무작위로 1 번 드롭 &lt;n&gt; 네트워크 메시지</translation>
     </message>
     <message>
         <source>Randomly fuzz 1 of every &lt;n&gt; network messages</source>
-        <translation>Произволно проверява 1 на всеки &lt;n&gt; мрежови съобщения</translation>
+        <translation>매 1 개씩 무작위로 퍼지기 &lt;n&gt; 네트워크 메시지</translation>
     </message>
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
-        <translation>Възстановяване индекса на блок регистъра от настоящия blk000??.dat файл</translation>
+        <translation>현재 blk000??.dat 파일에서 블록 체인 인덱스 다시 작성</translation>
     </message>
     <message>
         <source>Receive and display P2P network alerts (default: %u)</source>
-        <translation>Получаване и показване на P2P мрежови известия (по подразбиране: %u)</translation>
+        <translation>P2P 네트워크 알림 수신 및 표시 (태만: %u)</translation>
     </message>
     <message>
         <source>Relay and mine data carrier transactions (default: %u)</source>
-        <translation>Смени и изкопай носещите данни транзакции (по подразбиране: %u)</translation>
+        <translation>중계 및 광산 데이터 캐리어 거래 (태만: %u)</translation>
     </message>
     <message>
         <source>Relay non-P2SH multisig (default: %u)</source>
-        <translation>Смяна на не-P2SH многоподписани (по подразбиране: %u)</translation>
+        <translation>릴레이가 아닌 P2SH multisig (태만: %u)</translation>
     </message>
     <message>
         <source>Rescan the block chain for missing wallet transactions</source>
-        <translation>Повторно сканиране на регистъра на блокове за липсващи транзакции от портфейла</translation>
+        <translation>누락 된 월렛 트랜잭션에 대한 블록 체인 다시 검색</translation>
     </message>
     <message>
         <source>Rescanning...</source>
-        <translation>Повторно сканиране...</translation>
+        <translation>재검색...</translation>
     </message>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
-        <translation>Стартира във фонов режим като демон и приема команди</translation>
+        <translation>백그라운드에서 데몬으로 실행하고 명령을 수락합니다</translation>
     </message>
     <message>
         <source>Session not complete!</source>
-        <translation>Незавършена сесия!</translation>
+        <translation>세션이 완료되지 않았습니다!</translation>
     </message>
     <message>
         <source>Session timed out.</source>
-        <translation>Сесията е изтекла.</translation>
+        <translation>세션 시간이 초과되었습니다.</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
-        <translation>Определи размера на кеша на базата от данни в мегабайти (%d до %d, по подразбиране: %d)</translation>
+        <translation>데이터베이스 캐시 크기를 메가 바이트 단위로 설정하십시오 (%d 에 %d, 태만: %d)</translation>
     </message>
     <message>
         <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>Определи максималния размер на блока в байтове (по подразбиране: %d)</translation>
+        <translation>최대 블록 크기를 바이트 단위로 설정하십시오 (태만: %d)</translation>
     </message>
     <message>
         <source>Set the Dynode private key</source>
-        <translation>Задаване на личен ключ на Dynode</translation>
+        <translation>Dynode 개인 키 설정</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
-        <translation>Покажи всички опции за откриване на грешки  (синтаксис: --help -help-debug)</translation>
+        <translation>모든 디버깅 옵션 표시 (용법: --help -help-debug)</translation>
     </message>
     <message>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
-        <translation>Свий debug.log файла при стартиране на клиента (по подразбиране: 1, когато няма -debug)</translation>
+        <translation>클라이언트 시작시 debug.log 파일 축소 (아니 -debug가 없을 때 태만: 1)</translation>
     </message>
     <message>
         <source>Signing failed.</source>
-        <translation>Подписването неуспешно.</translation>
+        <translation>서명하지 못했습니다.</translation>
     </message>
     <message>
         <source>Signing transaction failed</source>
-        <translation>Подписването на транзакцията се провали</translation>
+        <translation>서명 거래에 실패했습니다</translation>
     </message>
     <message>
         <source>Specify data directory</source>
-        <translation>Определете директория за данните</translation>
+        <translation>데이터 디렉토리 지정</translation>
     </message>
     <message>
         <source>Specify wallet file (within data directory)</source>
-        <translation>Посочете файла с портфейла (в папката с данни)</translation>
+        <translation>지갑 파일을 지정하십시오 (데이터 디렉토리 내에서)</translation>
     </message>
     <message>
         <source>Specify your own public address</source>
-        <translation>Въведете Ваш публичен адрес</translation>
+        <translation>나만의 공개 주소 지정</translation>
     </message>
     <message>
         <source>Synchronization pending...</source>
-        <translation>Изчаква синхронизация ...</translation>
+        <translation>동기화 대기 중...</translation>
     </message>
     <message>
         <source>This help message</source>
-        <translation>Това помощно съобщение</translation>
+        <translation>이 도움말 메시지</translation>
     </message>
     <message>
         <source>This is experimental software.</source>
-        <translation>Това е експериментален софтуер.</translation>
+        <translation>이것은 실험적인 소프트웨어입니다.</translation>
     </message>
     <message>
         <source>This is intended for regression testing tools and app development.</source>
-        <translation>Това е предназначено за инструментите за регресивно тестване и разработка на приложението.</translation>
+        <translation>이것은 회귀 테스트 도구 및 앱 개발을위한 것입니다.</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
-        <translation>Сумата на транзакцията е твърде малка</translation>
+        <translation>거래 금액이 너무 작습니다</translation>
     </message>
     <message>
         <source>Transaction amounts must be positive</source>
-        <translation>Сумите на транзакциите трябва да са положителни</translation>
+        <translation>거래 금액은 양수 여야합니다</translation>
     </message>
     <message>
         <source>Transaction created successfully.</source>
-        <translation>Транзакцията създадена успешно.</translation>
+        <translation>트랜잭션이 성공적으로 생성되었습니다.</translation>
     </message>
     <message>
         <source>Transaction fees are too high.</source>
-        <translation>Таксите за транзакция са твърде високи.</translation>
+        <translation>거래 수수료가 너무 높습니다.</translation>
     </message>
     <message>
         <source>Transaction not valid.</source>
-        <translation>Транзакцията е невалидна.</translation>
+        <translation>유효하지 않은 거래입니다.</translation>
     </message>
     <message>
         <source>Transaction too large for fee policy</source>
-        <translation>Транзакцията е твърде голяма за таксовите политики.</translation>
+        <translation>거래가 수수료 정책에 비해 너무 큽니다</translation>
     </message>
     <message>
         <source>Transaction too large</source>
-        <translation>Транзакцията е твърде голяма</translation>
+        <translation>거래가 너무 큽니다</translation>
     </message>
     <message>
         <source>Transmitting final transaction.</source>
-        <translation>Предава окончателната транзакция.</translation>
+        <translation>최종 거래를 전송 중입니다.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
-        <translation>Не може да се свърже с %s на този компютър (връща грешка %s)</translation>
+        <translation>에 바인딩 할 수 없습니다 %s 이 컴퓨터에서 (바인드 반환 된 오류 %s)</translation>
     </message>
     <message>
         <source>Unable to sign spork message, wrong key?</source>
-        <translation>Неуспешно подписване на spork-съобщение. Грешен ключ?</translation>
+        <translation>spork 메시지에 서명 할 수 없습니다. 잘못된 키입니까?</translation>
     </message>
     <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
-        <translation>Неизвестна мрежа определена от -onlynet: '%s'</translation>
+        <translation>에 지정된 알 수없는 네트워크 -onlynet: '%s'</translation>
     </message>
     <message>
         <source>Unknown state: id = %u</source>
-        <translation>Неизвестно състояние: id = %u</translation>
+        <translation>알 수없는 상태: id = %u</translation>
     </message>
     <message>
         <source>Upgrade wallet to latest format</source>
-        <translation>Обновяване на портфейла до най-новия формат</translation>
+        <translation>지갑을 최신 형식으로 업그레이드하십시오</translation>
     </message>
     <message>
         <source>Use OpenSSL (https) for JSON-RPC connections</source>
-        <translation>Използвайте OpenSSL (https) за JSON-RPC връзките</translation>
+        <translation>JSON-RPC 연결에 OpenSSL (https) 사용</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: 1 when listening)</source>
-        <translation>Използвай UPnP за определяне на порта за слушане (по подразбиране: 1 когато слуша)</translation>
+        <translation>청취 포트를 매핑하려면 UPnP를 사용하십시오 (청취시 기본값 : 1)</translation>
     </message>
     <message>
         <source>Use the test network</source>
-        <translation>Използвайте тестовата мрежа</translation>
+        <translation>테스트 네트워크 사용</translation>
     </message>
     <message>
         <source>Username for JSON-RPC connections</source>
-        <translation>Потребителско име за JSON-RPC връзките</translation>
+        <translation>JSON-RPC 연결의 사용자 이름</translation>
     </message>
     <message>
         <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Стойност повече от максимално позволената в Privatesend басейна.</translation>
+        <translation>Privatesend pool maximum보다 많은 값이 허용됩니다.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
@@ -4747,35 +4747,35 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation>경고</translation>
     </message>
     <message>
         <source>Warning: This version is obsolete, upgrade required!</source>
-        <translation>Внимание: Използвате остаряла версия, необходимо е обновление!</translation>
+        <translation>경고: 이 버전은 더 이상 사용되지 않으며 업그레이드가 필요합니다!</translation>
     </message>
     <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
-        <translation>Необходимо е повторно изграждане на базата данни използвайки -reindex, за да промените -txindex</translation>
+        <translation>-txindex를 변경하려면 -reindex를 사용하여 데이터베이스를 다시 빌드해야합니다</translation>
     </message>
     <message>
         <source>Your entries added successfully.</source>
-        <translation>Вашите записи са добавени успешно.</translation>
+        <translation>항목이 성공적으로 추가되었습니다.</translation>
     </message>
     <message>
         <source>Your transaction was accepted into the pool!</source>
-        <translation> Вашата транзакция е била приета в басейна!</translation>
+        <translation>귀하의 거래가 수영장으로 접수되었습니다!</translation>
     </message>
     <message>
         <source>Zapping all transactions from wallet...</source>
-        <translation>Премахване на всички транзакции от портфейла ...</translation>
+        <translation>지갑에서 모든 트랜잭션 Zapping...</translation>
     </message>
     <message>
         <source>on startup</source>
-        <translation>при стартиране</translation>
+        <translation>시작에</translation>
     </message>
     <message>
         <source>wallet.dat corrupt, salvage failed</source>
-        <translation>wallet.dat е повреден, възстановяването неуспешно</translation>
+        <translation>wallet.dat가 손상되어 구조가 실패했습니다</translation>
     </message>
 </context>
 </TS>
