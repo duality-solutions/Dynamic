@@ -1195,6 +1195,20 @@ Address: %4
         <translation>&amp;SOCKS5 프록시를 통해 연결 (기본 프록시):</translation>
     </message>
     <message>
+        <source>Used for reaching peers via:</source>
+        <translation>다음을 통해 친구에게 연락하는 데 사용됩니다:</translation>
+    </message>
+    <message>
+        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
+        <translation>별도의 SOCKS5 프록시를 사용하여 Tor 숨겨진 서비스를 통해 피어에 도달합니다:</translation>
+    </message>
+    <message>
+        <source>Language missing or translation incomplete? Help contributing translations here:
+https://www.transifex.com/projects/p/dynamic/</source>
+        <translation>언어가 없거나 번역이 불완전한가요? 번역 기여 도움말:
+https://www.transifex.com/projects/p/dynamic/</translation>
+    </message>
+    <message>
         <source>Expert</source>
         <translation>전문적</translation>
     </message>
@@ -1209,6 +1223,26 @@ Address: %4
     <message>
         <source>Enable coin &amp;control features</source>
         <translation>코인 &amp;제어 기능 사용</translation>
+    </message>
+    <message>
+        <source>Show Dynodes Tab</source>
+        <translation>Dynodes 탭 표시</translation>
+    </message>
+    <message>
+        <source>Enable advanced PrivateSend interface</source>
+        <translation>고급 PrivateSend 인터페이스 사용</translation>
+    </message>
+    <message>
+        <source>Warn if PrivateSend is running out of keys</source>
+        <translation>PrivateSend의 키가 부족한 경우 경고</translation>
+    </message>
+    <message>
+        <source>Enable PrivateSend &amp;multi-session</source>
+        <translation>PrivateSend &amp;멀티 세션 사용</translation>
+    </message>
+    <message>
+        <source>PrivateSend rounds to use</source>
+        <translation>PrivateSend 라운드 사용</translation>
     </message>
     <message>
         <source>&amp;Spend unconfirmed change</source>
