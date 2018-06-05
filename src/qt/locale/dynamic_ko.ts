@@ -4951,7 +4951,11 @@ rpcpassword=%s
     </message>
 </context>
 <context>
-    <name>UtilityDialog</name>
+    <name>HelpMessageDialog</name>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>정보를 PrivateSend</translation>
+    </message>
     <message>
         <source>\
 &lt;h3&gt;PrivateSend Basics&lt;/h3&gt; \
