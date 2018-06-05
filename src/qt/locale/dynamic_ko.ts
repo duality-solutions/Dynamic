@@ -483,7 +483,7 @@
         <translation>Dynamic 클라이언트</translation>
     </message>
     <message numerus="yes">
-        <source>Processed %n blocks of transaction history.</source>
+        <source>Processed %n block(s) of transaction history.</source>
         <translation><numerusform>%n 블록의 거래내역 확인됨.</numerusform></translation>
     </message>
     <message>
@@ -605,6 +605,18 @@ Address: %4
 유형: %3
 주소: %4
 </translation>
+    </message>
+    <message numerus="yes">
+        <source>Processed %n block(s) of transaction history.</source>
+        <translation><numerusform>%n 블록의 거래내역 확인됨.</numerusform></translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>HD 키 생성이 &lt;b&gt;사용됨&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>HD 키 생성이 &lt;b&gt;비활성화 됨&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
@@ -1740,6 +1752,18 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 <context>
     <name>PeerTableModel</name>
     <message>
+        <source>NodeId</source>
+        <translation>노드 ID</translation>
+    </message>
+    <message>
+        <source>Node/Service</source>
+        <translation>노드 / 서비스</translation>
+    </message>
+    <message>
+        <source>Ping</source>
+        <translation>핑</translation>
+    </message>
+    <message>
         <source>Address/Hostname</source>
         <translation>주소 / 호스트 이름</translation>
     </message>
@@ -1869,6 +1893,18 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>마지막 블록 시간</translation>
     </message>
     <message>
+        <source>Memory Pool</source>
+        <translation>메모리 풀</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>현재 거래 수</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>메모리 사용량</translation>
+    </message>  
+    <message>
         <source>Debug log file</source>
         <translation>디버그 로그 파일</translation>
     </message>
@@ -1892,6 +1928,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <source>Using BerkeleyDB version</source>
         <translation>BerkeleyDB 버전 사용</translation>
     </message>
+    <message>
+        <source>Datadir</source>
+        <translation>데이터 디렉토리</translation>
+    </message>    
     <message>
         <source>Block chain</source>
         <translation>블록 체인</translation>
@@ -2057,16 +2097,20 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>아웃:</translation>
     </message>
     <message>
-        <source>Welcome to the Dynamic RPC console.</source>
-        <translation>Dynamic RPC 콘솔에 오신 것을 환영합니다.</translation>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>%1 RPC 콘솔에 오신 것을 환영합니다.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>기록을 탐색하려면 위 / 아래 화살표를 사용하고 화면을 지우려면 &lt;b&gt;Ctrl-L&lt;/b&gt; 를 사용하십시오.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>기록을 탐색하려면 위 / 아래 화살표를 사용하고 화면을 지우려면 %1 을 (를) 사용하십시오.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>사용 가능한 명령의 개요는 &lt;b&gt;help&lt;/b&gt;, 를 입력하십시오.</translation>
+    </message>
+    <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
+        <translation>경고: 사기꾼이 활성화되어 사용자에게 여기에 명령을 입력하고 지갑 내용을 훔쳐 보라고 안내합니다. 명령의 파생을 완전히 이해하지 않고이 콘솔을 사용하지 마십시오.</translation>
     </message>
     <message>
         <source>%1 B</source>
@@ -2300,6 +2344,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 </context>
 <context>
     <name>SendCoinsDialog</name>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>%1 의 필수 수수료 만 지불하십시오</translation>
+    </message>
     <message>
         <source>Send Coins</source>
         <translation>동전 보내기</translation>
@@ -3850,7 +3898,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Error: Disk space is low!</source>
-        <translation>Грешка: Мястото на твърдия диск е малко!</translation>
+        <translation>오류: 디스크 공간이 부족합니다!</translation>
     </message>
     <message>
         <source>Error: Wallet locked, unable to create transaction!</source>
@@ -3870,139 +3918,139 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>If &lt;category&gt; is not supplied, output all debugging information.</source>
-        <translation>Ако  &lt;category&gt; не е предоставена, изведи цялата информация за отстраняването на грешки.</translation>
+        <translation>범주가 &lt;제공되지&gt; 않으면 모든 디버깅 정보를 출력하십시오.</translation>
     </message>
     <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 =запазва tx meta data напр.акаунта на собственика и информация за искането за плащане,  2 = отпада tx meta data)</translation>
+        <translation>(1 =з 예를 들어 tx 메타 데이터를 유지합니다. 계정 소유자 및 지불 요청 정보,  2 = 드롭 tx 메타 데이터)</translation>
     </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
-        <translation>Позволява JSON-RPC връзки от определен източник. Важи за &lt;IP&gt; са един единствен IP (например 1.2.3.4), мрежа / мрежова маска (напр. 1.2.3.4/255.255.255.0) или мрежа / CIDR (напр. 1.2.3.4/24). Тази опция може да бъде променяна многократно</translation>
+        <translation>지정된 소스에서 JSON-RPC 연결을 허용합니다. 유효한 &lt;IP&gt; 단일 IP (예 : 1.2.3.4), 네트워크 / 넷 마스크 (예 : 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예 : 1.2.3.4/24)입니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
     </message>
     <message>
         <source>An error occurred while setting up the RPC address %s port %u for listening: %s</source>
-        <translation>Възникна грешка при настройване на RPC адрес %s порт %u за слушане: %s</translation>
+        <translation>수신을 위해 RPC 주소 %s 포트 %u 을 (를) 설정하는 동안 오류가 발생했습니다: %s</translation>
     </message>
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
-        <translation>Свързва се с посочения адрес и добави в whitelist свързаните към него пиъри. Използвайте [хост]:порт за изписване при IPv6</translation>
+        <translation>주어진 주소에 바인딩하고 그것에 접속하는 동료를 허용하십시오. IPv6의 경우 [host]:port 표기법 사용</translation>
     </message>
     <message>
         <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>Свързват с даден адрес, за да слушат за JSON-RPC връзки. Използвайте [host]: port нотация за IPv6. Тази опция може да бъде променяна многократно (по подразбиране: свързват с всички интерфейси)</translation>
+        <translation>주어진 주소에 바인드하여 JSON-RPC 연결을 기다립니다. IPv6의 경우 [host]:port 표기법을 사용하십시오. 이 옵션은 여러 번 지정할 수 있습니다 (기본값 : 모든 인터페이스에 바인드).</translation>
     </message>
     <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
-        <translation>Променете автоматичното финализиране гласуването на бюджет. Режим = Auto: Гласувайте само за точно финализиран съвпадащ с моят генериран бюджет. (string,, по подразбиране: auto)</translation>
+        <translation>자동 최종 예산 투표 행동을 변경하십시오. mode=auto: 생성 된 예산과 정확히 일치하는 예산 만 일치하도록 투표하십시오. (문자열, 기본값 : 자동)</translation>
     </message>
     <message>
         <source>Continuously rate-limit free transactions to &lt;n&gt;*1000 bytes per minute (default:%u)</source>
-        <translation>Непрекъснат лимит на безплатните транзакции до &lt;n&gt;*1000 байта в минута (по подразбиране:%u)</translation>
+        <translation>빈 트랜잭션을 분당 &lt;n&gt;*1000 바이트로 연속적으로 제한합니다 (기본값:%u)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
-        <translation>Създаване на нови файлове с достъп по подразбиране , вместо umask 077 (в сила само при изключена функционалност на портфейла)</translation>
+        <translation>umask 077 대신 시스템 기본 권한으로 새 파일 만들기 (비활성화 된 지갑 기능에서만 유효 함)</translation>
     </message>
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
-        <translation>Изтриване на всички транзакции на портфейла и  възстановява само тези части на блок веригата чрез -rescan при стартиране</translation>
+        <translation>모든 지갑 트랜잭션을 삭제하고 시작시 -rescan을 통해 블록 체인의 해당 부분 만 복구하십시오.</translation>
     </message>
     <message>
         <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Изключване на всички специфични Dynamic функции (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, по подразбиране: %u)</translation>
+        <translation>Dynodes, PrivateSend, InstantSend, 예산 편성) (0-1, 기본값: %u) Dynamic 특정 기능을 모두 비활성화합니다.</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
-        <translation>Разпространява се под MIT софтуерен лиценз,вижте придружаващият файл COPYING или&lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
+        <translation>РMIT 소프트웨어 라이센스에 따라 배포, 첨부 파일 COPYING 또는&lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
         <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Включен instantsend,покажи потвърждения за заключени транзакции (bool, по подразбиране: %s)</translation>
+        <translation>InstantSend 활성화, 잠긴 트랜잭션에 대한 확인 표시 (bool, 기본값: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Включено автоматично използване на privatesend за средствата в този портфейл (0-1, по подразбиране: %u)</translation>
+        <translation>이 지갑에 저장된 자금에 대한 자동화 된 PrivateSend 사용 (0-1, 기본값: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
-        <translation>Грешка: Открит е неподдържан аргумент -socks .настройка SOCKS версия вече не е възможна, само SOCKS5 прокси се поддържа.</translation>
+        <translation>오류: 지원되지 않는 인수 -socks가 발견되었습니다. SOCKS 버전 설정은 더 이상 가능하지 않으며 SOCKS5 프록시 만 지원됩니다.</translation>
     </message>
     <message>
         <source>Fees (in DYN/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Такси (в DYN/Kb) по-малки от това се считат за нулева такса за прилагане (по подразбиране: %s)</translation>
+        <translation>이것보다 작은 요금 (DYN/Kb)은 중계에 대한 제로 요금으로 간주됩니다 (기본값: %s)</translation>
     </message>
     <message>
         <source>Fees (in DYN/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Такси (в DYN/Kb) по-малки от това се считат за нулева такса при създаване на транзакция (по подразбиране: %s)</translation>
+        <translation>이보다 작은 수수료 (DYN/Kb)는 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
     </message>
     <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
-        <translation>Изчиствай активността по базата от паметта към лог на диска на всеки &lt;n&gt; мегабайта (по подразбиране: %u)</translation>
+        <translation>모든 &lt;n&gt; 메가 바이트 (기본값: %u)로 메모리 풀에서 디스크 로그로 데이터베이스 활동을 플러시</translation>
     </message>
     <message>
         <source>Found unconfirmed denominated outputs, will wait till they confirm to continue.</source>
-        <translation>Намерени са непотвърдени деноминирани средства, трябва да изчакате потвърждаването им за да продължите</translation>
+        <translation>확인되지 않은 명명 된 산출물을 발견하고, 그들이 계속하기를 기다릴 때까지 기다릴 것입니다.</translation>
     </message>
     <message>
         <source>How thorough the block verification of -checkblocks is (0-4, default: %u)</source>
-        <translation>Как цялостната проверка на блок от -checkblocks е (0-4, по подразбиране: %u)</translation>
+        <translation>-checkblocks의 블록 검증이 얼마나 철저한 지 (0-4, 기본값: %u)</translation>
     </message>
     <message>
         <source>If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks (default: %u)</source>
-        <translation>Ако paytxfee не е зададен,включва достатъчно такса, така транзакциите започват потвърждение средно в рамките n блокове(по подразбиране: %u)</translation>
+        <translation>paytxfee가 설정되지 않은 경우 거래가 n 블록 (평균: %u) 내에서 평균 확인을 시작하기에 충분한 수수료를 포함하십시오.</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
-        <translation>Невалидна сума за -maxtxfee=&lt;amount&gt;: '%s' (трябва да бъде най-малко от %s за да се избегне забиване на транзакциите)</translation>
+        <translation>-maxtxfee=&lt;금액&gt;: '%s' 의 금액이 잘못되었습니다 (적어도 거래가 발생하지 않도록 %s 의 minrelay 수수료가되어야합니다)</translation>
     </message>
     <message>
         <source>Log transaction priority and fee per kB when mining blocks (default: %u)</source>
-        <translation>Запиши в лога приоритета на транзакцията и таксата за КБ при добив на блокове (по подразбиране: %u)</translation>
+        <translation>마이닝 블록 (디폴트: %u)이있을 때 거래 우선 순위와 kB 당 요금을 기록하십시오.</translation>
     </message>
     <message>
         <source>Maintain a full transaction index, used by the getrawtransaction rpc call (default: %u)</source>
-        <translation>Поддържай пълен списък с транзакциите, използван от getrawtransaction rpc повикването (по подразбиране: %u)</translation>
+        <translation>getrawtransaction rpc 호출에서 사용되는 전체 트랜잭션 색인을 유지 관리합니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Maximum size of data in data carrier transactions we relay and mine (default: %u)</source>
-        <translation>Максимален размер на данните в данни съдържащите транзакции , които можем да предадем или изкопаем  (по подразбиране: %u)</translation>
+        <translation>우리가 중계 및 전송하는 데이터 캐리어 트랜잭션의 최대 데이터 크기 (기본값: %u)</translation>
     </message>
     <message>
         <source>Maximum total fees to use in a single wallet transaction, setting too low may abort large transactions (default: %s)</source>
-        <translation>Максимална крайна такса използвана в единична транзакция, ако настроите твърде малка няма да бъдят възможни големи транзакции (по подразбиране: %s)</translation>
+        <translation>단일 월렛 거래에 사용할 최대 총 수수료입니다. 너무 낮게 설정하면 큰 거래가 중단 될 수 있습니다 (기본값: %s).</translation>
     </message>
     <message>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: %u)</source>
-        <translation>Брой секунди до възтановяване на връзката за зле държащите се пиъри (по подразбиране %u)</translation>
+        <translation>오작동하는 피어가 재 연결하지 못하게하는 시간 (초) (기본값: %u)</translation>
     </message>
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>Изходяща информация за грешки (по подразбиране: %u, задаването на &lt;category&gt; е опция)</translation>
+        <translation>디버깅 정보 출력 (기본값 : % u, 공급 &lt;범주는&gt; 선택 사항 임)</translation>
     </message>
     <message>
         <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Осигуряване на ликвидност Privatesend от рядко смесване монети непрекъснато в съответствие (0-100, по подразбиране: %u, 1=много чести, високи такси, 100=твърде редки, ниски такси)</translation>
+        <translation>빈번하게 동전을 섞어주기 때문에 PrivateSend에 유동성을 제공합니다 (0-100, 기본값: %u, 1=매우 자주, 높은 수수료, 100=매우 드물게, 낮은 수수료)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
-        <translation>Определя максималния приоритет за свободно предаване или ниска такса за транзакция (по подразбиране:%u)</translation>
+        <translation>무료 또는 저렴한 요금의 거래를 중계하기 위해 높은 우선 순위를 요구합니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file (default: %u)</source>
-        <translation>Изпрати информацията за грешки към конзолата, вместо файла debug.log (по подразбиране: %u)</translation>
+        <translation>debug.log 파일 대신 콘솔에 추적 / 디버그 정보를 보냅니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)</source>
-        <translation>Задай брой заявки, когато се използва генериране (-1 =всички ядра, по подразбиране: %d)</translation>
+        <translation>사용 가능한 경우 동전 생성을위한 스레드 수 설정 (-1=모든 코어, 기본값: %d)</translation>
     </message>
     <message>
         <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Покажи N потвърждения при успешно заключена транзакция (0-9999, по подразбиране: %u)</translation>
+        <translation>성공적으로 잠긴 트랜잭션에 대한 N 개의 확인 표시 (0-9999, 기본값: %u)</translation>
     </message>
     <message>
         <source>This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit &lt;https://www.openssl.org/&gt; and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard.</source>
-        <translation>Този продукт включва софтуер, разработен от проекта OpenSSL за използване в OpenSSL Toolkit &lt;https://www.openssl.org/&gt; и криптографски софтуер, написан от Eric Young и UPnP софтуер, написан от Thomas Bernard.</translation>
+        <translation>이 제품에는 OpenSSL Toolkit &lt;https://www.openssl.org/&gt; 에서 사용하기 위해 OpenSSL Project에서 개발 한 소프트웨어가 포함되어 있습니다. Eric Young이 작성한 암호화 소프트웨어 및 Thomas Bernard가 작성한 UPnP 소프트웨어가 있습니다.</translation>
     </message>
     <message>
         <source>To use dynamicd, or the -server option to dynamic-qt, you must set an rpcpassword in the configuration file:
@@ -4016,70 +4064,79 @@ If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
 for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
 </source>
-        <translation>За използване на dynamicd, или the -server опция към dynamic-qt, трябва да зададете rpcpassword в конфигурационния файл: %s Препоръчително е да използвате следната произволна парола: rpcuser=dynamicrpc rpcpassword=%s (не е нужно да запомняте тази парола) Потребителя и паролата НЕ ТРЯБВА да са еднакви. Ако файла не съществува , създайте го с права за само за четене. Препоръчително е да създадете сигнал за уведомяване за да бъдете осведомени при проблем; Пример: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com 
+        <translation>dynamicd 또는 dynamic-qt에 -server 옵션을 사용하려면 구성 파일에 rpcpassword를 설정해야합니다.
+%에스
+다음 무작위 암호를 사용하는 것이 좋습니다.
+rpcuser=dynamicrpc
+rpcpassword=%s
+(이 암호는 기억할 필요가 없습니다)
+사용자 이름과 비밀번호는 동일하지 않아야합니다.
+파일이 없으면 소유자가 읽을 수있는 파일 권한으로 파일을 만듭니다.
+또한 문제 알림을받을 수 있도록 alertnotify를 설정하는 것이 좋습니다.
+예: alertnotify=echo %%s | mail -s "동적 경고" admin@foo.com
 </translation>
     </message>
     <message>
         <source>Unable to locate enough funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Не са намерени достатъчно  средства за тази транзакция, които не са равни на 1000 DYN.</translation>
+        <translation>1000 DYN이 아닌이 거래에 사용할 충분한 자금을 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
-        <translation>Използва отделен SOCKS5 прокси, за достигне на пиъри чрез Tor скрити услуги (по подразбиране: %s)</translation>
+        <translation>Tor 숨겨진 서비스 (기본값: %s)를 통해 피어에 도달하려면 별도의 SOCKS5 프록시를 사용하십시오</translation>
     </message>
     <message>
         <source>Warning: -maxtxfee is set very high! Fees this large could be paid on a single transaction.</source>
-        <translation>Внимание: -maxtxfee  е с много голяма зададена стойност! Това е транзакционната такса, която ще платите ако направите единична транзакция.</translation>
+        <translation>경고: -maxtxfee가 매우 높게 설정되었습니다! 이 금액은 단일 거래로 지불 할 수 있습니다.</translation>
     </message>
     <message>
         <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
-        <translation>Внимание: Моля проверете дали датата и часът на вашият компютър са верни! Ако часовникът ви не е сверен, Dynamic няма да работи правилно.</translation>
+        <translation>경고 : 컴퓨터의 날짜와 시간이 올바른지 확인하십시오! 시계가 틀리면 Dynamic이 제대로 작동하지 않습니다.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
-        <translation>Whitelist пиъри свързани от дадената мрежома маска или  IP адрес. Може да бъде определян многократно.</translation>
+        <translation>지정된 넷 마스크 또는 IP 주소에서 연결하는 화이트리스트 피어입니다. 여러 번 지정할 수 있습니다.</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
-        <translation>Whitelisted не могат да бъдат DoS забранени и техните транзакции ще бъдат винаги предадени, дори ако вече са в  mempool, полезно напр. за gateway</translation>
+        <translation>허용 목록에있는 동료는 DoS가 금지 될 수 없으며 거래가 항상 mempool에 있어도 항상 릴레이됩니다. 게이트웨이 용</translation>
     </message>
     <message>
         <source>(33300 could be used only on mainnet)</source>
-        <translation>(33300 може да бъде използван в основната мрежа)</translation>
+        <translation>(33300은 메인 네트에서만 사용 가능)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
-        <translation>(по подразбиране: %s)</translation>
+        <translation>(기본값: %s)</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:
 </source>
-        <translation>&lt;category&gt; може да бъде:
+        <translation>&lt;&gt; 카테고리는:
 </translation>
     </message>
     <message>
         <source>Accept public REST requests (default: %u)</source>
-        <translation>Приема публични REST заявки (по подразбиране: %u)</translation>
+        <translation>공개 REST 요청을 수락합니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Acceptable ciphers (default: %s)</source>
-        <translation>Приемливи шифри (по подразбиране: %s)</translation>
+        <translation>사용할 수있는 암호 (기본값: %s)</translation>
     </message>
     <message>
         <source>Always query for peer addresses via DNS lookup (default: %u)</source>
-        <translation>Винаги пускай заявка за адреси на пиъри през DNS справката (по подразбиране:  %u)</translation>
+        <translation>DNS 검색을 통해 피어 주소를 항상 쿼리합니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Cannot resolve -whitebind address: '%s'</source>
-        <translation>Не може да установи -whitebind адрес: '%s'</translation>
+        <translation>-whitebind 주소를 확인할 수 없습니다: '%s'</translation>
     </message>
     <message>
         <source>Connect through SOCKS5 proxy</source>
-        <translation>Свързване през SOCKS5 прокси</translation>
+        <translation>SOCKS5 프록시를 통해 연결</translation>
     </message>
     <message>
         <source>Connect to KeePassHttp on port &lt;port&gt; (default: %u)</source>
-        <translation>Свързване към KeePassHttp през порт &lt;port&gt; (по подразбиране: %u)</translation>
+        <translation>포트에서 KeePassHttp에 연결 &lt;포트&gt; (기본값: %u)</translation>
     </message>
     <message>
         <source>Copyright (C) 2009-%i The Bitcoin Core Developers</source>
@@ -4091,7 +4148,7 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
-        <translation>Не успя да се анализира -rpcbind стойност %s като мрежов адрес</translation>
+        <translation>네트워크 주소로 -rpcbind 값 %s 을 (를) 구문 분석하지 못했습니다.с</translation>
     </message>
     <message>
         <source>Privatesend is idle.</source>
@@ -4107,11 +4164,11 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
-        <translation>Деактивирай безопасен режим, замени събитието за истинския безопасен режим (по подразбиране: %u)</translation>
+        <translation>안전 모드를 해제하고 실제 안전 모드 이벤트를 무시하십시오 (기본값: %u)</translation>
     </message>
     <message>
         <source>Enable the client to act as a Dynode (0-1, default: %u)</source>
-        <translation>Активиране на клиента да работи като Dynode (0-1, по подразбиране: %u)</translation>
+        <translation>클라이언트가 Dynode (0-1, 기본값: %u)로 작동하도록 함</translation>
     </message>
     <message>
         <source>Error connecting to Dynode.</source>
@@ -4119,135 +4176,135 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet requires newer version of Dynamic</source>
-        <translation>Грешка при зареждане на wallet.dat: портфейлът изисква по-нова версия на Dynamic</translation>
+        <translation>wallet.dat로드 오류 : 월렛에 Dynamic의 최신 버전이 필요합니다</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
-        <translation>Грешка: Възникна сериозна вътрешна грешка, виж debug.log за подробности</translation>
+        <translation>오류: 치명적인 내부 오류가 발생했습니다. 자세한 내용은 debug.log를 참조하십시오.</translation>
     </message>
     <message>
         <source>Error: Can't select current denominated inputs</source>
-        <translation>Грешка: Не можете да изберете настоящите деноминирани входове</translation>
+        <translation>오류: 현재 표시된 입력을 선택할 수 없습니다.</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
-        <translation>Грешка:Открит е неподдържан аргумент -tor, моля използвай -onion.</translation>
+        <translation>오류: 지원되지 않는 인수 -tor가 발견되었습니다. -onion을 사용하십시오.</translation>
     </message>
     <message>
         <source>Fee (in DYN/kB) to add to transactions you send (default: %s)</source>
-        <translation>Такси (в DYN/Kb) добавена към направената транзакция(по подразбиране: %s)</translation>
+        <translation>전송 한 거래에 추가 할 요금 (기본: %s) (DYN/kB 단위)</translation>
     </message>
     <message>
         <source>Finalizing transaction.</source>
-        <translation>Приключване на транзакцията.</translation>
+        <translation>거래 완료.</translation>
     </message>
     <message>
         <source>Force safe mode (default: %u)</source>
-        <translation>Принудителен безопасен режим (по подразбиране: %u)</translation>
+        <translation>강제 안전 모드 (기본값: %u)</translation>
     </message>
     <message>
         <source>Found enough users, signing ( waiting %s )</source>
-        <translation>Открити са достатъчно потребители, подписване ( изчаква %s )</translation>
+        <translation>충분한 사용자를 찾았습니다 (서명 대기 중 (%s 대기 중)</translation>
     </message>
     <message>
         <source>Found enough users, signing ...</source>
-        <translation>Открити са достатъчно потребители, подписва...</translation>
+        <translation>충분한 사용자를 찾았습니다. 서명하는 중...</translation>
     </message>
     <message>
         <source>Generate coins (default: %u)</source>
-        <translation>Генериране на монети (по подразбиране: %u)</translation>
+        <translation>동전 생성 (기본값: %u)</translation>
     </message>
     <message>
         <source>How many blocks to check at startup (default: %u, 0 = all)</source>
-        <translation>Колко блока да проверява при стартиране (по подразбиране:  %u, 0 = всички)</translation>
+        <translation>시작시 검사 할 블록 수 (기본값: %u, 0 = 모두)</translation>
     </message>
     <message>
         <source>Importing...</source>
-        <translation>Внасяне...</translation>
+        <translation>가져 오는 중...</translation>
     </message>
     <message>
         <source>Imports blocks from external blk000??.dat file</source>
-        <translation>Внасяне на блокове от външен blk000??.dat файл</translation>
+        <translation>외부 BLK000??.dat 파일에서 블록을 가져옵니다</translation>
     </message>
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
-        <translation>Прикрепва IP адреси към debug записа (по подразбиране: %u)</translation>
+        <translation>디버그 출력에 IP 주소 포함 (기본값: %u)</translation>
     </message>
     <message>
         <source>Incompatible mode.</source>
-        <translation>Несъвместим режим.</translation>
+        <translation>호환되지 않는 모드.</translation>
     </message>
     <message>
         <source>Incompatible version.</source>
-        <translation>Несъвместима версия.</translation>
+        <translation>호환되지 않는 버전.</translation>
     </message>
     <message>
         <source>Incorrect or no genesis block found. Wrong datadir for network?</source>
-        <translation>Намерен е неправилен или не създаден блок. Грешна data директория за мрежата?</translation>
+        <translation>기원 블록이 잘못되었거나 발견되지 않았습니다. 네트워크에 잘못된 데이터 디렉토리가 있습니까?</translation>
     </message>
     <message>
         <source>Information</source>
-        <translation>Информация</translation>
+        <translation>정보</translation>
     </message>
     <message>
         <source>Initialization sanity check failed. Dynamic is shutting down.</source>
-        <translation>Инициализационната проверка не успешна. Dynamic се изключва.</translation>
+        <translation>초기화 온 전성 검사에 실패했습니다. Dynamic이 종료되었습니다.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
-        <translation>Въвеждането е невалидно.</translation>
+        <translation>입력이 올바르지 않습니다.</translation>
     </message>
     <message>
         <source>InstantSend options:</source>
-        <translation>InstantSend опции:</translation>
+        <translation>InstantSend 옵션:</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
-        <translation>Недостатъчно средства.</translation>
+        <translation>불충분 한 자금.</translation>
     </message>
     <message>
         <source>Invalid -onion address: '%s'</source>
-        <translation>Невалиден -onion адрес: '%s'</translation>
+        <translation>잘못된 -onion 주소: '%s'</translation>
     </message>
     <message>
         <source>Invalid -proxy address: '%s'</source>
-        <translation>Невалиден -proxy address: '%s'</translation>
+        <translation>잘못된 -proxy 주소: '%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Невалидна сума за -maxtxfee=&lt;amount&gt;: '%s'</translation>
+        <translation>-maxtxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Невалидна сума за -minrelaytxfee=&lt;amount&gt;: '%s'</translation>
+        <translation>-minrelaytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Invalid amount for -mintxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Невалидна сума за -mintxfee=&lt;amount&gt;: '%s'</translation>
+        <translation>-mintxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
-        <translation>Невалидна сума за -paytxfee=&lt;amount&gt;: '%s' (трябва да бъде най-малко %s)</translation>
+        <translation>-paytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다 (%s 이상이어야합니다).</translation>
     </message>
     <message>
         <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Невалидна сума за -paytxfee=&lt;amount&gt;: '%s'</translation>
+        <translation>-paytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Last successful Privatesend action was too recent.</source>
-        <translation>Последното успешно Privatesend действие беше твърде скоро.</translation>
+        <translation>마지막으로 성공한 Privatesend 작업이 너무 최근 버전입니다.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
-        <translation>Ограничение на размера на кеша за подпис до &lt;n&gt; реда (по подразбиране: %u)</translation>
+        <translation>서명 캐시의 크기를 &lt;n&gt; 항목 (기본값: %u)</translation>
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>Очаквай JSON-RPC входящи връзки на &lt;port&gt; (по подразбиране:%u или за тестовата мрежа: %u)</translation>
+        <translation>&lt;포트&gt;에서 JSON-RPC 연결을 수신합니다. (기본값: %u 또는 testnet: %u)</translation>
     </message>
     <message>
         <source>Listen for connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>Слушане за входящи връзки на &lt;port&gt; (по подразбиране:%u или за тестовата мрежа: %u)</translation>
+        <translation>&lt;포트&gt; 에서 연결을 청취하십시오. (기본값: %u 또는 testnet: %u)</translation>
     </message>
     <message>
         <source>Loading budget cache...</source>
@@ -4267,83 +4324,83 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     </message>
     <message>
         <source>Lock Dynodes from Dynode configuration file (default: %u)</source>
-        <translation>Заключване на Dynodes от конфигурационния файл(по подразбиране: %u)</translation>
+        <translation>Dynode 설정 파일의 Dynodes 잠금 (기본값: %u)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
-        <translation>Поддържай най-много &lt;n&gt; връзки към пиърите (по подразбиране: %u)</translation>
+        <translation>최대 &lt;n&gt; 피어에 대한 연결 (기본값: %u)</translation>
     </message>
     <message>
         <source>Maximum per-connection receive buffer, &lt;n&gt;*1000 bytes (default: %u)</source>
-        <translation>Максимален размер на буфера при получаване, &lt;n&gt;*1000 байта (по подразбиране: %u)</translation>
+        <translation>최대 연결 당 수신 버퍼, &lt;n&gt;*1000 바이트 (기본값: %u)</translation>
     </message>
     <message>
         <source>Maximum per-connection send buffer, &lt;n&gt;*1000 bytes (default: %u)</source>
-        <translation>Максимален размер на буфера при изпращане, &lt;n&gt;*1000 байта (по подразбиране:  %u)</translation>
+        <translation>최대 연결 당 송신 버퍼, &lt;n&gt;*1000 바이트 (기본값: %u)</translation>
     </message>
     <message>
         <source>Mixing in progress...</source>
-        <translation>В процес на смесване...</translation>
+        <translation>믹싱 진행 중...</translation>
     </message>
     <message>
         <source>Need to specify a port with -whitebind: '%s'</source>
-        <translation>Нужно е определяне на порта с -whitebind: '%s'</translation>
+        <translation>-whitebind: '%s'을 (를) 사용하여 포트를 지정해야합니다.</translation>
     </message>
     <message>
         <source>No Dynodes detected.</source>
-        <translation>Не са открити Dynodes.</translation>
+        <translation>Dynodes가 감지되지 않았습니다.</translation>
     </message>
     <message>
         <source>No compatible Dynode found.</source>
-        <translation>Не e намерен съвместим Dynode.</translation>
+        <translation>호환 가능한 Dynode를 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Not in the Dynode list.</source>
-        <translation>Не е в Dynode списъка.</translation>
+        <translation>Dynode 목록에 없습니다.</translation>
     </message>
     <message>
         <source>Number of automatic wallet backups (default: 10)</source>
-        <translation>Брой на автоматичните резервни копия (по подразбиране: 10)</translation>
+        <translation>자동 지갑 백업 수 (기본값: 10)</translation>
     </message>
     <message>
         <source>Only accept block chain matching built-in checkpoints (default: %u)</source>
-        <translation>Приема само блок регистъра съвпадащ с вградените контролни точки (по подразбиране: %u)</translation>
+        <translation>내장 체크 포인트와 일치하는 블록 체인 만 허용 (기본값: %u)</translation>
     </message>
     <message>
         <source>Only connect to nodes in network &lt;net&gt; (ipv4, ipv6 or onion)</source>
-        <translation>Свързване само към точки от мрежата &lt;net&gt; (IPv4, IPv6 или onion)</translation>
+        <translation>네트워크 &lt;net&gt;의 노드에만 연결하십시오. (ipv4, ipv6 또는 양파)</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
-        <translation>Прикрепва справката за грешки към времевия запис(по подразбиране:  %u)</translation>
+        <translation>타임 스탬프로 디버그 출력을 앞에 추가합니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Run a thread to flush wallet periodically (default: %u)</source>
-        <translation>Стартирай нишка за почистване на портфейла периодично (по подразбиране: %u)</translation>
+        <translation>정기적으로 지갑을 플러시하도록 스레드를 실행하십시오 (기본값: %u).</translation>
     </message>
     <message>
         <source>Send trace/debug info to debug.log file (default: %u)</source>
-        <translation>Изпрати информацията за грешки към  файла debug.log (по подразбиране: %u)</translation>
+        <translation>debug.log 파일에 추적 / 디버그 정보를 보냅니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Изпрати с нулева такса за транзакция ако е възможно (по подразбиране: %u)</translation>
+        <translation>가능한 경우 거래를 제로 수수료 거래로 보냅니다 (기본값: %u).</translation>
     </message>
     <message>
         <source>Server certificate file (default: %s)</source>
-        <translation>Сертификационен файл на сървъра (По подразбиране: %s)</translation>
+        <translation>서버 인증서 파일 (기본값: %s)</translation>
     </message>
     <message>
         <source>Server private key (default: %s)</source>
-        <translation>Частен ключ за сървъра (по подразбиране %s)</translation>
+        <translation>서버 개인 키 (기본값: %s)</translation>
     </message>
     <message>
         <source>Set external address:port to get to this Dynode (example: %s)</source>
-        <translation>Задаване на външен address:port на този Dynode (пример: %s)</translation>
+        <translation>외부 주소 설정 :이 Dynode로 가져올 포트 (예: %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
-        <translation>Задайте максимален брой на генерираните ключове до &lt;n&gt; (по подразбиране: %u)</translation>
+        <translation>키 풀 크기를 &lt;n&gt; (기본값: %u)</translation>
     </message>
     <message>
         <source>Set minimum block size in bytes (default: %u)</source>
@@ -4832,6 +4889,57 @@ for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
     <message>
         <source>wallet.dat corrupt, salvage failed</source>
         <translation>wallet.dat가 손상되어 구조가 실패했습니다</translation>
+    </message>
+</context>
+<context>
+<name>ModalOverlay</name>
+    <message>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
+        <translation>표시된 정보가 오래되었을 수 있습니다. 연결이 설정되면 지갑이 자동으로 Dynamic 네트워크와 동기화되지만이 프로세스는 아직 완료되지 않았습니다. 즉, 최근 거래가 표시되지 않고이 프로세스가 완료 될 때까지 잔액이 최신 상태가 아님을 의미합니다.</translation>
+    </message>
+    <message>
+        <source>Spending DYN may not be possible during that phase!</source>
+        <translation>해당 단계에서 DYN을 지출하지 못할 수도 있습니다!</translation>
+    </message>
+    <message>
+        <source>Amount of blocks left</source>
+        <translation>남아있는 블록의 양</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>알 수 없는</translation>
+    </message>
+    <message>
+        <source>Unknown...</source>
+        <translation>알 수 없는...</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>알 수 없는. 헤더 동기화 중 (%1)...</translation>
+    </message>
+    <message>
+        <source>Last block time</source>
+        <translation>마지막 블록 시간</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>진행</translation>
+    </message>
+    <message>
+        <source>Progress increase per Hour</source>
+        <translation>시간당 진행률 증가</translation>
+    </message>
+    <message>
+        <source>calculating...</source>
+        <translation>계산 중...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>동기화까지 남은 예상 시간</translation>
+    </message>
+    <message>
+        <source>&amp;Hide</source>
+        <translation>&amp;숨는 장소</translation>
     </message>
 </context>
 </TS>
