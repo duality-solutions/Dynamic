@@ -4941,5 +4941,9 @@ rpcpassword=%s
         <source>&amp;Hide</source>
         <translation>&amp;숨는 장소</translation>
     </message>
+    <message>
+        <source>Hide</source>
+        <translation>숨는 장소</translation>
+    </message>
 </context>
 </TS>
