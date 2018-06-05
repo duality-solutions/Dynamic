@@ -790,6 +790,10 @@ Address: %4
         <translation>변경 복사</translation>
     </message>
     <message>
+        <source>Please switch to 'List mode' to use this function.</source>
+        <translation>이 기능을 사용하려면 '목록 모드' 로 전환하십시오.</translation>
+    </message>
+    <message>
         <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-anonymized inputs first and then check Privatesend checkbox again.</source>
         <translation>익명 처리되지 않은 입력이 선택되었습니다. &lt;b&gt;Privatesend 사용 중지됨.&lt;/b&gt;&lt;br&gt;&lt;br&gt;여전히 Privatesend를 사용하려면 비 익명화 된 모든 입력을 먼저 선택 취소하고 Privatesend 확인란을 다시 선택하십시오.</translation>
     </message>
