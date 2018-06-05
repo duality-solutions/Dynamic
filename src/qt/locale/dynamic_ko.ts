@@ -4615,6 +4615,10 @@ rpcpassword=%s
         <translation>불러 내기 목록...</translation>
     </message>
     <message>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>지갑이 작동하는지 확인한 후 지갑을 암호화하고 암호화되지 않은 백업을 모두 삭제하십시오!</translation>
+    </message>
+    <message>
         <source>Dynode options:</source>
         <translation>Dynode 옵션들:</translation>
     </message>
