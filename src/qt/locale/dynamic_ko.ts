@@ -451,6 +451,10 @@
         <translation>&amp;주소 보내는중...</translation>
     </message>
     <message>
+        <source>Connecting to peers...</source>
+        <translation>동료와 연결...</translation>
+    </message>
+    <message>
         <source>Show the list of used sending addresses and labels</source>
         <translation>전송 된 주소 및 라벨 목록 표시</translation>
     </message>
@@ -4944,6 +4948,63 @@ rpcpassword=%s
     <message>
         <source>Hide</source>
         <translation>숨는 장소</translation>
+    </message>
+</context>
+<context>
+    <name>UtilityDialog</name>
+    <message>
+        <source>\
+&lt;h3&gt;PrivateSend Basics&lt;/h3&gt; \
+PrivateSend gives you true financial privacy by obscuring the origins of your funds. \
+All the Dynamic in your wallet is comprised of different \&quot;inputs\&quot; which you can think of as separate, discrete coins.&lt;br&gt; \
+PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. \
+You retain control of your money at all times..&lt;hr&gt; \
+&lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;\
+&lt;ol type=\&quot;1\&quot;&gt; \
+&lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations. \
+These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt; \
+&lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called \&quot;Dynodes.\&quot; \
+These Dynodes are informed then that you are interested in mixing a certain denomination. \
+No identifiable information is sent to the Dynodes, so they never know \&quot;who\&quot; you are.&lt;/li&gt; \
+&lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. \
+The Dynode mixes up the inputs and instructs all three users&#39; wallets to pay the now-transformed input back to themselves. \
+Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; \
+&lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. \
+Each time the process is completed, it&#39;s called a \&quot;round.\&quot; Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt; \
+&lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, \
+your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; \
+&lt;/ol&gt; &lt;hr&gt;\
+&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 2000 of these \&quot;change addresses.\&quot; Every time a mixing event happens, up to 9 of your addresses are used up. \
+This means those 2000 addresses last for about 200 mixing events. When 1900 of them are used, your wallet must create more addresses. \
+It can only do this, however, if you have automatic backups enabled.&lt;br&gt; \
+Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;\
+        </source>
+        <translation>\
+    &lt;h3&gt;기초 PrivateSend&lt;/h3&gt; \
+    PrivateSend는 자금의 기원을 불명료하게하여 진정한 금융 정보를 제공합니다. \
+    귀하의 지갑에있는 모든 Dynamic은 별도의 이산 동전로 생각할 수있는 다양한 \&quot;입력으로\&quot; 구성되어 있습니다.&lt;br&gt; \
+    PrivateSend는 혁신적인 프로세스를 사용하여 동전을 지갑에서 지우지 않고 입력 물과 다른 두 사람의 의견을 섞습니다. \
+    항상 돈 관리권을 유지합니다..&lt;hr&gt; \
+    &lt;b&gt;PrivateSend 프로세스는 다음과 같이 작동합니다:&lt;/b&gt;\
+    &lt;ol type=\&quot;1\&quot;&gt; \
+    &lt;li&gt;PrivateSend는 거래 입력을 표준 단위로 나누는 것으로 시작됩니다. \
+    이 금액은 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN입니다. 매일 사용하는 지폐와 비슷합니다.&lt;/li&gt; \
+    &lt;li&gt;그런 다음 지갑은 네트워크의 특수하게 구성된 소프트웨어 노드에 요청을 전송합니다 \&quot;Dynodes.\&quot; \
+    이러한 Dynodes는 특정 종파를 혼합하는 데 관심이 있다는 사실을 알립니다. \
+    식별 가능한 정보는 다이 노드로 전송되지 \&quot;않으므로\&quot; 사용자가.&lt;/li&gt; \
+    &lt;li&gt;다른 두 사람이 비슷한 메시지를 보내면 동일한 명칭을 혼합하려고한다는 것을 나타내며 믹싱 세션이 시작됩니다. \
+    Dynode는 입력을 혼합하여 3 명의 모든 사용자에게&#39; 이제는 변환 된 입력 값을 지불하기 위해 지갑을 사용하십시오. \
+    귀하의 지갑은 해당 액면가를 직접 지불하지만 다른 주소 (변경 주소라고 함)에 있습니다.&lt;/li&gt; \
+    &lt;li&gt;자금을 완전히 모호하게하기 위해 지갑은 각 종파마다이 과정을 여러 번 반복해야합니다. \
+    프로세스가 완료 될 때마다, \&quot;라운드라고합니다.\&quot; PrivateSend의 각 라운드는 자금 출처를 기하 급수적으로 판별하기가 더 어려워집니다.&lt;/li&gt; \
+    &lt;li&gt;이 믹싱 프로세스는 사용자의 개입없이 백그라운드에서 발생합니다. 거래를 할 때 \
+    자금은 이미 익명 처리됩니다. 추가 대기는 필요하지 않습니다.&lt;/li&gt; \
+    &lt;/ol&gt; &lt;hr&gt;\
+    &lt;b&gt;중대한:&lt;/b&gt; 지갑에는 2000 개의 변경 주소 \&quot;만 있습니다.\&quot; 믹싱 이벤트가 발생할 때마다 최대 9 개의 주소가 사용됩니다. \
+    이것은 2000 개의 주소가 약 200 개의 믹싱 이벤트에 대해 지속된다는 것을 의미합니다. 1900 개가 사용되면 지갑에서 더 많은 주소를 만들어야합니다. \
+    그러나 자동 백업을 사용하도록 설정 한 경우에만이 작업을 수행 할 수 있습니다.&lt;br&gt; \
+    따라서 백업이 비활성화 된 사용자는 PrivateSend도 비활성화됩니다. &lt;hr&gt;\
+            </translation>
     </message>
 </context>
 </TS>
