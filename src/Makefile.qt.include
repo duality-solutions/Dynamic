@@ -11,6 +11,7 @@ QT_TS = \
   qt/locale/dynamic_fr.ts \
   qt/locale/dynamic_it.ts \
   qt/locale/dynamic_ja.ts \
+  qt/locale/dynamic_ko.ts \
   qt/locale/dynamic_pl.ts \
   qt/locale/dynamic_pt.ts \
   qt/locale/dynamic_ru.ts \
