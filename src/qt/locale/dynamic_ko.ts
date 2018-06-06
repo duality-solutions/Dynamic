@@ -283,6 +283,14 @@
         <translation>트랜잭션 내역 보기</translation>
     </message>
     <message>
+        <source>Browse Dynodes</source>
+        <translation>Dynodes 찾아보기</translation>
+    </message>
+    <message>
+        <source>Mine Dynamic(DYN)</source>
+        <translation>광산 Dynamic(DYN)</translation>
+    </message>
+    <message>
         <source>E&amp;xit</source>
         <translation>종&amp;료</translation>
     </message>
@@ -2749,6 +2757,20 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
 </context>
 <context>
+    <name>payToLabel_is</name>
+    <message>
+        <source>Pay To:</source>
+        <translation>에 지불하다:</translation>
+    </message>
+</context>
+<context>
+    <name>payToLabel_s</name>
+    <message>
+        <source>Pay To:</source>
+        <translation>에 지불하다:</translation>
+    </message>
+</context>
+<context>
     <name>ShutdownWindow</name>
     <message>
         <source>Dynamic is shutting down...</source>
@@ -3608,7 +3630,32 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Clear</source>
         <translation>제거하다</translation>
-    </message>    
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>제거하다</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>슬라이더를 사용하여 사용할 CPU 스레드 수를 선택하십시오</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>마이닝이 진행되는 동안 CPU의 해쉬 레이트를 보여줍니다</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>이것은 Dynamic 네트워크의 전체 해쉬 레이트를 보여줍니다
+</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>이것은 채굴 한 블록 사이의 평균 시간을 보여줍니다</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain/Dynodes가 동기화되지 않았습니다. 광산 전에 완전히 동기화 될 때까지 기다려주세요!</translation>
+    </message>
 </context>
 <context>
     <name>UnitDisplayStatusBarControl</name>
