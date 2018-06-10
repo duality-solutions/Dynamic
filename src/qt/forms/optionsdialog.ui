@@ -2670,7 +2670,7 @@ QTabBar { alignment: left; }</string>
              </palette>
             </property>
             <property name="toolTip">
-             <string>Show warning dialog when PrivateSend detects that wallet has very low number of keys left.</string>
+             <string>Show warning dialog when PrivateSend detects that your wallet has very low number of keys left.</string>
             </property>
             <property name="text">
              <string>Warn if PrivateSend is running out of keys</string>

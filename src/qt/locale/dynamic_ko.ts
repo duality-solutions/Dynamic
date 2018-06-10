@@ -1196,7 +1196,7 @@ Address: %4
     </message>
     <message>
         <source>MB</source>
-        <translation>МБ</translation>
+        <translation>MB</translation>
     </message>
     <message>
         <source>Number of script &amp;verification threads</source>
@@ -1211,12 +1211,12 @@ Address: %4
         <translation>얼마나 많은 라운드 PrivateSend 사용</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>이 양은 일단 도달하면 Privatesend를 끄는 임계 값 역할을합니다.</translation>
-    </message>
-    <message>
         <source>Amount of Dynamic to keep anonymized</source>
         <translation>익명화를 유지할 Dynamic 양</translation>
+    </message>
+    <message>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>이 금액은 일단 도달하면 PrivateSend를 끄는 임계 값 역할을합니다.</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -1247,8 +1247,16 @@ Address: %4
         <translation>다음을 통해 친구에게 연락하는 데 사용됩니다:</translation>
     </message>
     <message>
+        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
+        <translation>제공된 기본 SOCKS5 프록시가이 네트워크 유형을 통해 피어에 도달하는 경우 표시합니다.</translation>
+    </message>
+    <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
         <translation>별도의 SOCKS5 프록시를 사용하여 Tor 숨겨진 서비스를 통해 피어에 도달합니다:</translation>
+    </message>
+    <message>
+        <source>Connect to the Dynamic network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Tor 숨겨진 서비스를위한 별도의 SOCKS5 프록시를 통해 Dynamic 네트워크에 연결하십시오.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
@@ -1277,16 +1285,32 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Dynodes 탭 표시</translation>
     </message>
     <message>
+        <source>Show additional tab listing all your Dynodes in first sub-tab&lt;br/&gt;and all Dynodes on the network in second sub-tab.</source>
+        <translation>두 번째 하위 탭에 첫 번째 하위 탭&lt;br/&gt;과 모든 네트워크의 모든 Dynodes에 모든 다이 노드를 나열하는 추가 탭을 표시하십시오.</translation>
+    </message>
+    <message>
         <source>Enable advanced PrivateSend interface</source>
         <translation>고급 PrivateSend 인터페이스 사용</translation>
+    </message>
+    <message>
+        <source>Show additional information and buttons for PrivateSend on overview screen.</source>
+        <translation>개요 화면에서 PrivateSend에 대한 추가 정보 및 버튼을 표시합니다.</translation>
     </message>
     <message>
         <source>Warn if PrivateSend is running out of keys</source>
         <translation>PrivateSend의 키가 부족한 경우 경고</translation>
     </message>
     <message>
+        <source>Show warning dialog when PrivateSend detects that your wallet has very low number of keys left.</source>
+        <translation>PrivateSend가 지갑의 키 수가 매우 적음을 감지하면 경고 대화 상자를 표시합니다.</translation>
+    </message>
+    <message>
         <source>Enable PrivateSend &amp;multi-session</source>
         <translation>PrivateSend &amp;멀티 세션 사용</translation>
+    </message>
+    <message>
+        <source>Whether to use experimental PrivateSend mode with multiple mixing sessions per block.&lt;br/&gt;Note: You must use this feature carefully.&lt;br/&gt;Make sure you always have recent wallet (auto)backup in a safe place!</source>
+        <translation>실험적인 PrivateSend 모드를 블록 당 여러 개의 혼합 세션과 함께 사용할지 여부.&lt;br/&gt;참고 :이 기능을 신중하게 사용해야합니다.&lt;br/&gt;항상 안전한 장소에 최근 지갑 (자동) 백업을했는지 확인하십시오!</translation>
     </message>
     <message>
         <source>PrivateSend rounds to use</source>
@@ -1296,6 +1320,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>&amp;Spend unconfirmed change</source>
         <translation>&amp;확인되지 않은 변경사항 전송</translation>
     </message>
+    <message>
+        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
+        <translation>이 양은 일단 도달하면 Privatesend를 끄는 임계 값 역할을합니다.</translation>
+    </message>    
     <message>
         <source>&amp;Network</source>
         <translation>&amp;네트워크</translation>
@@ -1381,6 +1409,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
         <translation>트랜잭션 탭에 컨텍스트 메뉴 항목으로 표시되는 서드파티 URL (예: 블록 탐색) URL의 %s 는 트랜잭션 해시로 대체됩니다. 여러 개의 URL은 세로 막대로 구분됩니다 |.</translation>
+    </message>
+    <message>
+        <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items.&lt;br/&gt;%s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
+        <translation>거래 탭에 문맥 메뉴 항목으로 표시되는 제 3 자 URL (예 : 차단 탐색기).&lt;br/&gt;URL의 %s는 트랜잭션 해시로 대체됩니다. 여러 개의 URL은 세로 막대로 구분됩니다 |.</translation>
     </message>
     <message>
         <source>Third party transaction URLs</source>
