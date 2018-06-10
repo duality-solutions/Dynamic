@@ -423,7 +423,7 @@
         <translation>지갑 복구 옵션 표시</translation>
     </message>
     <message>
-        <source>Open Wallet Configuration File</source>
+        <source>Open Wallet &amp;Configuration File</source>
         <translation>월렛 구성 파일 열기</translation>
     </message>
     <message>
