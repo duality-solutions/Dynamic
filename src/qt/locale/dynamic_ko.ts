@@ -1310,7 +1310,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Whether to use experimental PrivateSend mode with multiple mixing sessions per block.&lt;br/&gt;Note: You must use this feature carefully.&lt;br/&gt;Make sure you always have recent wallet (auto)backup in a safe place!</source>
-        <translation>실험적인 PrivateSend 모드를 블록 당 여러 개의 혼합 세션과 함께 사용할지 여부.&lt;br/&gt;참고 :이 기능을 신중하게 사용해야합니다.&lt;br/&gt;항상 안전한 장소에 최근 지갑 (자동) 백업을했는지 확인하십시오!</translation>
+        <translation>실험적인 PrivateSend 모드를 블록 당 여러 개의 혼합 세션과 함께 사용할지 여부.&lt;br/&gt;참고:이 기능을 신중하게 사용해야합니다.&lt;br/&gt;항상 안전한 장소에 최근 지갑 (자동) 백업을했는지 확인하십시오!</translation>
     </message>
     <message>
         <source>PrivateSend rounds to use</source>
@@ -1387,7 +1387,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
 https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</source>
-        <translation>지원 언어가 없거나 번역이 불완전한가요? 번역을 도와주세요 :
+        <translation>지원 언어가 없거나 번역이 불완전한가요? 번역을 도와주세요:
 https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</translation>
     </message>
     <message>
@@ -1412,7 +1412,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items.&lt;br/&gt;%s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
-        <translation>거래 탭에 문맥 메뉴 항목으로 표시되는 제 3 자 URL (예 : 차단 탐색기).&lt;br/&gt;URL의 %s는 트랜잭션 해시로 대체됩니다. 여러 개의 URL은 세로 막대로 구분됩니다 |.</translation>
+        <translation>거래 탭에 문맥 메뉴 항목으로 표시되는 제 3 자 URL (예: 차단 탐색기).&lt;br/&gt;URL의 %s는 트랜잭션 해시로 대체됩니다. 여러 개의 URL은 세로 막대로 구분됩니다 |.</translation>
     </message>
     <message>
         <source>Third party transaction URLs</source>
@@ -1547,7 +1547,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>keys left: %1</source>
-        <translation>왼쪽 키 : %1</translation>
+        <translation>왼쪽 키: %1</translation>
     </message>    
     <message>
         <source>Completion:</source>
@@ -1711,7 +1711,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Cannot start dynamic: click-to-pay handler</source>
-        <translation>dynamic을 시작할 수 없습니다 : 지불하려면 클릭하십시오 처리기
+        <translation>dynamic을 시작할 수 없습니다: 지불하려면 클릭하십시오 처리기
 </translation>
     </message>
     <message>
@@ -1830,7 +1830,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Enter a Dynamic address (e.g. %1)</source>
-        <translation>Dynamic 주소 입력 (예 :%1)</translation>
+        <translation>Dynamic 주소 입력 (예:%1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -2120,7 +2120,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
-        <translation>-upgradewallet: 시작할 때 지갑을 최신 형식으로 업그레이드하십시오. (참고 : 이것은 지갑 자체의 업데이트가 아닙니다!)</translation>
+        <translation>-upgradewallet: 시작할 때 지갑을 최신 형식으로 업그레이드하십시오. (참고: 이것은 지갑 자체의 업데이트가 아닙니다!)</translation>
     </message>
     <message>
         <source>Wallet repair options.</source>
@@ -2211,7 +2211,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dynamic network.</source>
-        <translation>지불 요청에 첨부 할 선택적 메시지로서 요청이 열릴 때 표시됩니다. 참고 : Dynamic 네트워크를 통한 지불로는 메시지가 전송되지 않습니다.</translation>
+        <translation>지불 요청에 첨부 할 선택적 메시지로서 요청이 열릴 때 표시됩니다. 참고: Dynamic 네트워크를 통한 지불로는 메시지가 전송되지 않습니다.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -2684,7 +2684,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation>트랜잭션이 거부되었습니다! 지갑에있는 동전 중 일부가 이미 소비 된 경우 (예 : wallet.dat 사본을 사용하고 동전을 복사에 사용했지만 여기에서 사용한 것으로 표시되지 않은 경우).</translation>
+        <translation>트랜잭션이 거부되었습니다! 지갑에있는 동전 중 일부가 이미 소비 된 경우 (예: wallet.dat 사본을 사용하고 동전을 복사에 사용했지만 여기에서 사용한 것으로 표시되지 않은 경우).</translation>
     </message>
     <message>
         <source>Error: The wallet was unlocked only to anonymize coins.</source>
@@ -2763,7 +2763,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>A message that was attached to the dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dynamic network.</source>
-        <translation>참조 용 트랜잭션과 함께 저장 될 Dynamic : URI에 첨부 된 메시지. 참고 :이 메시지는 Dynamic 네트워크를 통해 전송되지 않습니다.</translation>
+        <translation>참조 용 트랜잭션과 함께 저장 될 Dynamic: URI에 첨부 된 메시지. 참고:이 메시지는 Dynamic 네트워크를 통해 전송되지 않습니다.</translation>
     </message>
     <message>
         <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Dynamic than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
@@ -3524,7 +3524,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see "ENABLED" in "Status" field.</source>
-        <translation>참고 : 로컬 지갑의 Dynode 상태가 약간 잘못 될 수 있습니다.&lt;br /&gt; 추가 데이터를 동기화하려면 항상 Wallet을 기다린 다음 Dynode가&lt;br /&gt;실행되어야하지만 "ENABLED" 필드에 "터" 가 표시되지 않으면&lt;br /&gt;다른 노드에서 다시 확인하십시오.</translation>
+        <translation>참고: 로컬 지갑의 Dynode 상태가 약간 잘못 될 수 있습니다.&lt;br /&gt; 추가 데이터를 동기화하려면 항상 Wallet을 기다린 다음 Dynode가&lt;br /&gt;실행되어야하지만 "ENABLED" 필드에 "터" 가 표시되지 않으면&lt;br /&gt;다른 노드에서 다시 확인하십시오.</translation>
     </message>
     <message>
         <source>Start &amp;all</source>
@@ -3635,19 +3635,19 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Number of threads to use:</source>
-        <translation>사용할 스레드 수 :</translation>
+        <translation>사용할 스레드 수:</translation>
     </message>
     <message>
         <source>Your hashrate (built-in miner):</source>
-        <translation>귀하의 해시 레이트 (내장 된 광부) :</translation>
+        <translation>귀하의 해시 레이트 (내장 된 광부):</translation>
     </message>
     <message>
         <source>Network hashrate:</source>
-        <translation>네트워크 해시 트 :</translation>
+        <translation>네트워크 해시 트:</translation>
     </message>
     <message>
         <source>Average spacing between your blocks:</source>
-        <translation>블록 사이의 평균 간격 :</translation>
+        <translation>블록 사이의 평균 간격:</translation>
     </message>
     <message>
         <source>Start mining</source>
@@ -3829,7 +3829,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
-        <translation>오류 : 들어오는 연결을 듣지 못했습니다 (반환 된 오류 %s 듣기)</translation>
+        <translation>오류: 들어오는 연결을 듣지 못했습니다 (반환 된 오류 %s 듣기)</translation>
     </message>
     <message>
         <source>Execute command when a relevant alert is received or we see a really long fork (%s in cmd is replaced by message)</source>
@@ -3857,11 +3857,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect)</source>
-        <translation>DNS 조회를 통한 피어 주소 쿼리 (주소가 부족할 경우 기본값 : -connect가 아닌 경우 1)</translation>
+        <translation>DNS 조회를 통한 피어 주소 쿼리 (주소가 부족할 경우 기본값: -connect가 아닌 경우 1)</translation>
     </message>
     <message>
         <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>우선 순위가 높거나 낮은 거래의 최대 크기를 바이트 단위로 설정합니다 (기본값 : %d)</translation>
+        <translation>우선 순위가 높거나 낮은 거래의 최대 크기를 바이트 단위로 설정합니다 (기본값: %d)</translation>
     </message>
     <message>
         <source>Set the number of script verification threads (%u to %d, 0 = auto, &lt;0 = leave that many cores free, default: %d)</source>
@@ -3901,7 +3901,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Warning: wallet.dat corrupt, data salvaged! Original wallet.dat saved as wallet.{timestamp}.bak in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>경고 : wallet.dat가 손상되어 데이터가 복구되었습니다! wallet.으로 저장된 원래 wallet.dat.{timestamp}.bak %s; 잔액 또는 거래가 올바르지 않은 경우 백업에서 복원해야합니다.</translation>
+        <translation>경고: wallet.dat가 손상되어 데이터가 복구되었습니다! wallet.으로 저장된 원래 wallet.dat.{timestamp}.bak %s; 잔액 또는 거래가 올바르지 않은 경우 백업에서 복원해야합니다.</translation>
     </message>
     <message>
         <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
@@ -3985,7 +3985,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Debugging/Testing options:</source>
-        <translation>디버깅 / 테스트 옵션 :</translation>
+        <translation>디버깅 / 테스트 옵션:</translation>
     </message>
     <message>
         <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
@@ -4025,7 +4025,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet corrupted</source>
-        <translation>wallet.dat로드 오류 : 지갑이 손상되었습니다</translation>
+        <translation>wallet.dat로드 오류: 지갑이 손상되었습니다</translation>
     </message>
     <message>
         <source>Error opening block database</source>
@@ -4073,7 +4073,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
-        <translation>지정된 소스에서 JSON-RPC 연결을 허용합니다. 유효한 &lt;IP&gt; 단일 IP (예 : 1.2.3.4), 네트워크 / 넷 마스크 (예 : 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예 : 1.2.3.4/24)입니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
+        <translation>지정된 소스에서 JSON-RPC 연결을 허용합니다. 유효한 &lt;IP&gt; 단일 IP (예: 1.2.3.4), 네트워크 / 넷 마스크 (예: 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예: 1.2.3.4/24)입니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
     </message>
     <message>
         <source>An error occurred while setting up the RPC address %s port %u for listening: %s</source>
@@ -4085,11 +4085,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>주어진 주소에 바인드하여 JSON-RPC 연결을 기다립니다. IPv6의 경우 [host]:port 표기법을 사용하십시오. 이 옵션은 여러 번 지정할 수 있습니다 (기본값 : 모든 인터페이스에 바인드).</translation>
+        <translation>주어진 주소에 바인드하여 JSON-RPC 연결을 기다립니다. IPv6의 경우 [host]:port 표기법을 사용하십시오. 이 옵션은 여러 번 지정할 수 있습니다 (기본값: 모든 인터페이스에 바인드).</translation>
     </message>
     <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
-        <translation>자동 최종 예산 투표 행동을 변경하십시오. mode=auto: 생성 된 예산과 정확히 일치하는 예산 만 일치하도록 투표하십시오. (문자열, 기본값 : 자동)</translation>
+        <translation>자동 최종 예산 투표 행동을 변경하십시오. mode=auto: 생성 된 예산과 정확히 일치하는 예산 만 일치하도록 투표하십시오. (문자열, 기본값: 자동)</translation>
     </message>
     <message>
         <source>Continuously rate-limit free transactions to &lt;n&gt;*1000 bytes per minute (default:%u)</source>
@@ -4173,7 +4173,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>디버깅 정보 출력 (기본값 : % u, 공급 &lt;범주는&gt; 선택 사항 임)</translation>
+        <translation>디버깅 정보 출력 (기본값: % u, 공급 &lt;범주는&gt; 선택 사항 임)</translation>
     </message>
     <message>
         <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
@@ -4237,7 +4237,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
-        <translation>경고 : 컴퓨터의 날짜와 시간이 올바른지 확인하십시오! 시계가 틀리면 Dynamic이 제대로 작동하지 않습니다.</translation>
+        <translation>경고: 컴퓨터의 날짜와 시간이 올바른지 확인하십시오! 시계가 틀리면 Dynamic이 제대로 작동하지 않습니다.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
@@ -4323,7 +4323,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet requires newer version of Dynamic</source>
-        <translation>wallet.dat로드 오류 : 월렛에 Dynamic의 최신 버전이 필요합니다</translation>
+        <translation>wallet.dat로드 오류: 월렛에 Dynamic의 최신 버전이 필요합니다</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
@@ -4543,7 +4543,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Set external address:port to get to this Dynode (example: %s)</source>
-        <translation>외부 주소 설정 :이 Dynode로 가져올 포트 (예: %s)</translation>
+        <translation>외부 주소 설정:이 Dynode로 가져올 포트 (예: %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
@@ -4659,11 +4659,11 @@ rpcpassword=%s
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
-        <translation>경고 : 지원되지 않는 인수 -benchmark ignored, -debug=bench 를 사용하십시오.</translation>
+        <translation>경고: 지원되지 않는 인수 -benchmark ignored, -debug=bench 를 사용하십시오.</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -debugnet ignored, use -debug=net.</source>
-        <translation>경고 : 지원되지 않는 인수 -debugnet 무시, -debug=net 사용.</translation>
+        <translation>경고: 지원되지 않는 인수 -debugnet 무시, -debug=net 사용.</translation>
     </message>
     <message>
         <source>Will retry...</source>
@@ -4803,7 +4803,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>RPC SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
-        <translation>RPC SSL 옵션 : (SSL 설치 지침은 Bitcoin Wiki 참조)</translation>
+        <translation>RPC SSL 옵션: (SSL 설치 지침은 Bitcoin Wiki 참조)</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -4971,7 +4971,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: 1 when listening)</source>
-        <translation>청취 포트를 매핑하려면 UPnP를 사용하십시오 (청취시 기본값 : 1)</translation>
+        <translation>청취 포트를 매핑하려면 UPnP를 사용하십시오 (청취시 기본값: 1)</translation>
     </message>
     <message>
         <source>Use the test network</source>
