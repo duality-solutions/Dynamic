@@ -2567,8 +2567,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Đây là yêu cầu thanh toán chưa được xác thực.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Trả cho:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Trả &amp;cho:</translation>
     </message>
     <message>
         <source>Memo:</source>

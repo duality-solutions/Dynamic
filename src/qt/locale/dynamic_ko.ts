@@ -2778,8 +2778,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>확인되지 않은 지불 요청입니다.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>에 지불하다:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>에 &amp;지불하다:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2797,15 +2797,15 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 <context>
     <name>payToLabel_is</name>
     <message>
-        <source>Pay To:</source>
-        <translation>에 지불하다:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>에 &amp;지불하다:</translation>
     </message>
 </context>
 <context>
     <name>payToLabel_s</name>
     <message>
-        <source>Pay To:</source>
-        <translation>에 지불하다:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>에 &amp;지불하다:</translation>
     </message>
 </context>
 <context>

@@ -2571,7 +2571,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Dies is eine unverifizierte Zahlungsanforderung.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
+        <source>Pay &amp;To:</source>
         <translation>Empfänger:</translation>
     </message>
     <message>

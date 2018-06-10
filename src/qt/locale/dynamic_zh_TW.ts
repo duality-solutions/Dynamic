@@ -2519,8 +2519,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>這是個沒驗證過的付款要求。</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>付給:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>付給:(&amp;T)</translation>
     </message>
     <message>
         <source>Memo:</source>

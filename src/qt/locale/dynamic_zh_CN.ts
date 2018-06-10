@@ -2564,7 +2564,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>这是个非有效的支付请求。</translation>
     </message>
     <message>
-        <source>Pay To:</source>
+        <source>Pay &amp;To:</source>
         <translation>支付给:</translation>
     </message>
     <message>

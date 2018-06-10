@@ -2571,8 +2571,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Ceci est une demande de paiement non vérifiée.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Payer à :</translation>
+        <source>Pay &amp;To:</source>
+        <translation>&amp;Payer à :</translation>
     </message>
     <message>
         <source>Memo:</source>

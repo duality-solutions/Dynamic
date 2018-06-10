@@ -1966,8 +1966,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Detta är en obekräftad betalningsbegäran.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Betala Till:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Betala &amp;Till:</translation>
     </message>
     <message>
         <source>Memo:</source>

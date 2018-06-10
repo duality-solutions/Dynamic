@@ -1833,7 +1833,7 @@
     </message>
     <message>
         <source>Pay &amp;To:</source>
-        <translation>送り先 (&amp;T)：</translation>
+        <translation>送り先 (&amp;T):</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -1872,8 +1872,8 @@
         <translation>メッセージ：</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>支払先：</translation>
+        <source>Pay &amp;To:</source>
+        <translation>送り先 (&amp;T):</translation>
     </message>
     <message>
         <source>Memo:</source>

@@ -2571,7 +2571,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Это непроверенный запрос платежа.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
+        <source>Pay &amp;To:</source>
         <translation>Получатель:</translation>
     </message>
     <message>

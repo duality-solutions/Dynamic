@@ -2567,8 +2567,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Това е непроверена заявка за плащане.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Плащане на:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Плащане &amp;на:</translation>
     </message>
     <message>
         <source>Memo:</source>

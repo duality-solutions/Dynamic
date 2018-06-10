@@ -2409,8 +2409,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Questa è una richiesta di pagamento non verificata.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Pagare a:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Paga &amp;a:</translation>
     </message>
     <message>
         <source>Memo:</source>

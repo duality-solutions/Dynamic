@@ -2572,8 +2572,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tämä on vahvistamaton maksupyyntö</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Saaja:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Maksun &amp;saaja:</translation>
     </message>
     <message>
         <source>Memo:</source>

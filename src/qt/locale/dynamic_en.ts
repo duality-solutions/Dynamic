@@ -3314,8 +3314,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <location line="+18"/>
         <location line="+532"/>
-        <source>Pay To:</source>
-        <translation>Pay To:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Pay &amp;To:</translation>
     </message>
     <message>
         <location line="-498"/>

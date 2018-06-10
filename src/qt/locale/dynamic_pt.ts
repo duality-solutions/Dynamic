@@ -2551,8 +2551,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Este é um pedido de pagamento não verificado.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Pagar a:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Pagar &amp;a:</translation>
     </message>
     <message>
         <source>Memo:</source>

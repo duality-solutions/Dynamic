@@ -2567,8 +2567,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>To żądanie zapłaty nie zostało zweryfikowane.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Wpłać do:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Wpłać &amp;do:</translation>
     </message>
     <message>
         <source>Memo:</source>

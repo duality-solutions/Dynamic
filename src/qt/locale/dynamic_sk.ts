@@ -2566,8 +2566,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Toto je neoverená výzva k platbe.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Platba pre:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Platba &amp;pre:</translation>
     </message>
     <message>
         <source>Memo:</source>
