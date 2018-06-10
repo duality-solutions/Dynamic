@@ -31,7 +31,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
         {
             CDynamicAddress Address;
             Address.Set(Secret.GetKey().GetPubKey().GetID());
-            ui->labelAddress->setText(QString("All mined coins will go to to %1").arg(Address.ToString().c_str()));
+            ui->labelAddress->setText(QString("All mined coins will go to %1").arg(Address.ToString().c_str()));
             hasMiningprivkey = true;
         }
     }
@@ -99,12 +99,12 @@ void MiningPage::updateUI()
         ui->pushSwitchMining->setEnabled(false);
     } 
     else if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced() && GUIUtil::GetHashRate() == 0) {
-        ui->pushSwitchMining->setToolTip(tr("Click 'Start' to begin mining!"));
+        ui->pushSwitchMining->setToolTip(tr("Click 'Start mining' to begin mining!"));
         ui->pushSwitchMining->setText(tr("Start mining"));
         ui->pushSwitchMining->setEnabled(true);
      }
      else {
-        ui->pushSwitchMining->setToolTip(tr("Click 'Stop' to finish mining!"));
+        ui->pushSwitchMining->setToolTip(tr("Click 'Stop mining' to finish mining!"));
         ui->pushSwitchMining->setText(tr("Stop mining"));
         ui->pushSwitchMining->setEnabled(true);
     }
@@ -209,7 +209,7 @@ void MiningPage::changeSampleTime(int i)
     }
     else if (i == 5) {
         ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::TWELVE_HOURS);
-        ui->labelGraphSampleSize->setText(QString("12 hour"));
+        ui->labelGraphSampleSize->setText(QString("12 hours"));
     }
     else if (i == 6) {
         ui->minerHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::ONE_DAY);

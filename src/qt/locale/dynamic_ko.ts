@@ -3645,8 +3645,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>This shows the overall hashrate of the Dynamic network</source>
-        <translation>이것은 Dynamic 네트워크의 전체 해쉬 레이트를 보여줍니다
-</translation>
+        <translation>이것은 Dynamic 네트워크의 전체 해쉬 레이트를 보여줍니다</translation>
     </message>
     <message>
         <source>This shows the average time between the blocks you have mined</source>
@@ -3655,6 +3654,57 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
         <translation>Blockchain/Dynodes가 동기화되지 않았습니다. 광산 전에 완전히 동기화 될 때까지 기다려주세요!</translation>
+    </message>
+    <message>
+        <source>Click 'Start mining' to begin mining!</source>
+        <translation>마이닝을 시작하려면 '채광 시작' 을 클릭하십시오!</translation>
+    </message>
+    <message>
+        <source>Click 'Stop mining' to finish mining!</source>
+        <translation>마이닝을 시작하려면 '마이닝 중지' 을 클릭하십시오!</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>멎는</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>시작 중</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>모든 채굴 된 동전은 %1</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name> 
+    <message>
+        <source>5 minutes</source>
+        <translation>5 분</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 분</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 분</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 시간</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 시간</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 시간</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 일</translation>
     </message>
 </context>
 <context>
@@ -5046,4 +5096,3 @@ rpcpassword=%s
     </message>
 </context>
 </TS>
-
