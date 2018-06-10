@@ -1310,6 +1310,36 @@ Address: %4
         <source>Show splash screen on startup (default: 1)</source>
         <translation>Show splash screen on startup (default: 1)</translation>
     </message>
+	    <message>
+        <location line="+1"/>
+        <source>PrivateSend-LongText</source>
+        <translation>
+&lt;h3&gt;PrivateSend Basics&lt;/h3&gt;
+PrivateSend gives you true financial privacy by obscuring the origins of your funds.
+All the Dynamic in your wallet is comprised of different &#39;inputs&#39; which you can think of as separate, discrete coins.&lt;br&gt;
+PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet.
+You retain control of your money at all times..&lt;hr&gt;
+&lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations.
+These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
+&lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &#39;Dynodes&#39;.
+These Dynodes are informed then that you are interested in mixing a certain denomination.
+No identifiable information is sent to the Dynodes, so they never know &#39;who&#39; you are.&lt;/li&gt;
+&lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins.
+The Dynode mixes up the inputs and instructs all three users&#39; wallets to pay the now-transformed input back to themselves.
+Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt;
+&lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination.
+Each time the process is completed, it&#39;s called a &#39;round&#39;. Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt;
+&lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction,
+your funds will already be anonymized. No additional waiting is required.&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 2000 of these &#39;change addresses&#39;. Every time a mixing event happens, up to 9 of your addresses are used up.
+This means those 2000 addresses last for about 200 mixing events. When 1900 of them are used, your wallet must create more addresses.
+It can only do this, however, if you have automatic backups enabled.&lt;br&gt;
+Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;
+                </translation>
+    </message>
 </context>
 <context>
     <name>Intro</name>
