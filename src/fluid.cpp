@@ -105,7 +105,7 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
         std::string strAmount;
         std::string strUnHexedFluidOpScript = HexToString(verificationWithoutOpCode);
         std::vector<std::string> vecSplitScript;
-        SeperateString(strUnHexedFluidOpScript, vecSplitScript, "$");
+        SeparateString(strUnHexedFluidOpScript, vecSplitScript, "$");
         if (vecSplitScript.size() > 1) {
             strAmount = vecSplitScript[0];
             CAmount fluidAmount;
@@ -250,8 +250,8 @@ bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
-    SeperateString(dehexString, strs, false);
-    SeperateString(strs.at(0), ptrs, true);
+    SeparateString(dehexString, strs, false);
+    SeparateString(strs.at(0), ptrs, true);
 
     if(1 >= (int)strs.size())
         return false;
@@ -278,8 +278,8 @@ bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::
     std::string dehexString = HexToString(consentTokenNoScript);
 
     std::vector<std::string> strs;
-    SeperateString(dehexString, strs, false);
-    SeperateString(strs.at(0), ptrs, true);
+    SeparateString(dehexString, strs, false);
+    SeparateString(strs.at(0), ptrs, true);
 
     if(strVecNo >= (int)strs.size())
         return false;
@@ -341,7 +341,7 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
     std::vector<std::string> strs;
 
     ConvertToString(consentTokenNoScript);
-    SeperateString(consentTokenNoScript, strs, false);
+    SeparateString(consentTokenNoScript, strs, false);
 
     messageTokenKey = strs.at(0);
 

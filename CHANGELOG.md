@@ -160,7 +160,7 @@
 
 **Dynamic v2.1.0.0**
 
-* [Trivial] Shift non-Fluid specific operations to seperate file
+* [Trivial] Shift non-Fluid specific operations to separate file
 * [Script] Remove OPCODES from non-existent features
 * Add tags to mempool's mapTx indices
 * remove unused NOBLKS_VERSION_{START,END} constants

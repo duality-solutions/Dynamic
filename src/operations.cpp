@@ -31,19 +31,19 @@ void ScrubString(std::string &input, bool forInteger) {
 		input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
 }
 
-void SeperateString(std::string input, std::vector<std::string> &output, bool subDelimiter) {
+void SeparateString(std::string input, std::vector<std::string> &output, bool subDelimiter) {
 	if(subDelimiter)
 		boost::split(output, input, boost::is_any_of(SubDelimiter));
 	else
 		boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
 }
 
-void SeperateFluidOpString(std::string input, std::vector<std::string> &output) {
+void SeparateFluidOpString(std::string input, std::vector<std::string> &output) {
   std::vector<std::string> firstSplit;
-  SeperateString(input, firstSplit);
+  SeparateString(input, firstSplit);
   if (firstSplit.size() > 1) {
     std::vector<std::string> secondSplit;
-    SeperateString(firstSplit[0], secondSplit, true);
+    SeparateString(firstSplit[0], secondSplit, true);
     for (const std::string& item : secondSplit) {
       output.push_back(item);
     }

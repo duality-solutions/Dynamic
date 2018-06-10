@@ -345,10 +345,10 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(existingRecord);
         std::vector<std::string> splitString;
         hexConvert.ConvertToString(verificationWithoutOpCode);
-        SeperateString(verificationWithoutOpCode, splitString, false);
+        SeparateString(verificationWithoutOpCode, splitString, false);
         std::string messageTokenKey = splitString.at(0);
         std::vector<std::string> vecSplitScript;
-        SeperateFluidOpString(verificationWithoutOpCode, vecSplitScript);
+        SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
         if (vecSplitScript.size() > 1) {
             if (strOperationCode == "OP_MINT" && vecSplitScript.size() >= 6) {
                 std::string strAmount = vecSplitScript[0];
