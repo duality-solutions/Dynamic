@@ -1318,7 +1318,7 @@ Address: %4
 PrivateSend gives you true financial privacy by obscuring the origins of your funds.
 All the Dynamic in your wallet is comprised of different &#39;inputs&#39; which you can think of as separate, discrete coins.&lt;br&gt;
 PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet.
-You retain control of your money at all times..&lt;hr&gt;
+You retain control of your money at all times.&lt;hr&gt;
 &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;
 &lt;ol type=&#39;1&#39;&gt;
 &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations.

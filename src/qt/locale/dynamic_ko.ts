@@ -5072,7 +5072,7 @@ rpcpassword=%s
     PrivateSend는 자금의 기원을 불명료하게하여 진정한 금융 정보를 제공합니다.
     귀하의 지갑에있는 모든 Dynamic은 별도의 이산 동전로 생각할 수있는 다양한 \&quot;입력으로\&quot; 구성되어 있습니다.&lt;br&gt;
     PrivateSend는 혁신적인 프로세스를 사용하여 동전을 지갑에서 지우지 않고 입력 물과 다른 두 사람의 의견을 섞습니다.
-    항상 돈 관리권을 유지합니다..&lt;hr&gt;
+    항상 돈 관리권을 유지합니다.&lt;hr&gt;
     &lt;b&gt;PrivateSend 프로세스는 다음과 같이 작동합니다:&lt;/b&gt;
     &lt;ol type=\&quot;1\&quot;&gt;
     &lt;li&gt;PrivateSend는 거래 입력을 표준 단위로 나누는 것으로 시작됩니다.
