@@ -1647,10 +1647,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>사용</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
-</source>
-        <translation>마지막 Privatesend 메시지:
-</translation>
+        <source>Last Privatesend message:</source>
+        <translation>마지막 Privatesend 메시지:</translation>
     </message>
     <message>
         <source>N/A</source>
@@ -2461,8 +2459,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 "킬로바이트 당"은 수수료 250 원만 지불합니다,&lt;br /&gt; "적어도 총"은 1000 개를 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dynamic transactions than the network can process.</source>
-        <translation>블록에서 공간보다 거래량이 적은 한 최소 수수료 만 지불하면됩니다.&lt;br /&gt; 그러나 네트워크가 처리 할 수있는 것보다 동적 트랜잭션에 대한 요구가 많으면 트랜잭션을 확인하지 않아도됩니다.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for Dynamic transactions than the network can process.</source>
+        <translation>최소 수수료 만 지불하면 블록의 공간보다 거래량이 적 으면 좋습니다.&lt;br /&gt;그러나 ovsDynamic 트랜잭션에 대한 수요가 많아지면 확인 거래가 끝날 수 있습니다. 네트워크가 처리 할 수 ​​있습니다.</translation>
     </message>
     <message>
         <source>per kilobyte</source>
@@ -2734,6 +2732,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>A message that was attached to the dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dynamic network.</source>
         <translation>참조 용 트랜잭션과 함께 저장 될 Dynamic : URI에 첨부 된 메시지. 참고 :이 메시지는 Dynamic 네트워크를 통해 전송되지 않습니다.</translation>
+    </message>
+    <message>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Dynamic than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>수수료는 송금액에서 차감됩니다. 수령인은 금액 필드에 입력하는 것보다 적은 양의 Dynamic을 받게됩니다. 여러 명의 수신자가 선택되면 요금도 균등하게 분배됩니다.</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>관례 요금이 1000의 satoshis에 세트되고 거래가 단지 250 바이트 인 경우에, "적어도"는 1000의 satoshis를 지불하는 그러나, "킬로바이트 당"는 요금에서 250의 satoshis 만 지불한다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
