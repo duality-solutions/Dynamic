@@ -2460,7 +2460,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for Dynamic transactions than the network can process.</source>
-        <translation>최소 수수료 만 지불하면 블록의 공간보다 거래량이 적 으면 좋습니다.&lt;br /&gt;그러나 ovsDynamic 트랜잭션에 대한 수요가 많아지면 확인 거래가 끝날 수 있습니다. 네트워크가 처리 할 수 ​​있습니다.</translation>
+        <translation>최소 수수료 만 지불하면 블록의 공간보다 거래량이 적 으면 좋습니다.&lt;br /&gt;그러나 Dynamic 트랜잭션에 대한 수요가 많아지면 확인 거래가 끝날 수 있습니다. 네트워크가 처리 할 수 ​​있습니다.</translation>
     </message>
     <message>
         <source>per kilobyte</source>
