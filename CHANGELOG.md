@@ -131,8 +131,10 @@
 * Add Sexy Sliders
 * Remove unused declaration in dynodeman.cpp
 * Add check to ensure that generatetoaddress doesn't function on Main or TestNet
-* [Miner] check for dynode syn before mining
+* [Miner] check for dynode sync before mining
 * Hash Rate Widget for Mining Page
+* [Dynode] Remove lock in ReadBlockFromDisk
+* Initial complete Korean translation added
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
