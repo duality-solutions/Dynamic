@@ -1715,7 +1715,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     governance.InitOnLoad();
 
     strDBName = "netfulfilled.dat";
-    uiInterface.InitMessage(_("Loading fullfiled requests cache..."));
+    uiInterface.InitMessage(_("Loading fulfilled requests cache..."));
     CFlatDB<CNetFulfilledRequestManager> flatdb4(strDBName, "magicFulfilledCache");
     if(!flatdb4.Load(netfulfilledman)) {
         return InitError(_("Failed to load fulfilled requests cache from") + "\n" + (pathDB / strDBName).string());

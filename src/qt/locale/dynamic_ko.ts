@@ -3812,6 +3812,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
 <context>
     <name>dynamic</name>
     <message>
+        <source>Failed to create backup, file already exists! This could happen if you restarted wallet in less than 60 seconds. You can continue if you are ok with this.</source>
+        <translation>백업을 생성하지 못했습니다. 파일이 이미 존재합니다! 지갑을 60 초 이내에 다시 시작하면 이런 일이 발생할 수 있습니다. 당신이 이것을 좋아한다면 계속할 수 있습니다.</translation>
+    </message>
+    <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
         <translation>주어진 주소에 묶고 항상 그것에 귀 기울이십시오. IPv6의 경우 [host]:port 표기법 사용</translation>
     </message>
@@ -4172,8 +4176,20 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>오작동하는 피어가 재 연결하지 못하게하는 시간 (초) (기본값: %u)</translation>
     </message>
     <message>
+        <source>Dynamic (or specifically: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</source>
+        <translation>Dynamic (또는 구체적으로: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</translation>
+    </message>
+    <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
         <translation>디버깅 정보 출력 (기본값: % u, 공급 &lt;범주는&gt; 선택 사항 임)</translation>
+    </message>
+    <message>
+        <source>If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information.</source>
+        <translation>&lt;범주&gt; 가 제공되지 않거나 &lt;범주&gt; = 1 인 경우 모든 디버깅 정보를 출력합니다.</translation>
+    </message>
+    <message>
+        <source>&lt;category&gt; can be:</source>
+        <translation>&lt;범주&gt; 수 있습니다:</translation>
     </message>
     <message>
         <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
@@ -4464,6 +4480,14 @@ rpcpassword=%s
     <message>
         <source>Loading Dynode payment cache...</source>
         <translation>Dynode 지불 캐시로드 중</translation>
+    </message>
+    <message>
+        <source>Loading governance cache...</source>
+        <translation>거버넌스 캐시로드 중...</translation>
+    </message>
+    <message>
+        <source>Loading fulfilled requests cache...</source>
+        <translation>완료된 요청 캐시로드 중...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
@@ -4824,6 +4848,242 @@ rpcpassword=%s
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
         <translation>현재 blk000??.dat 파일에서 블록 체인 인덱스 다시 작성</translation>
+    </message>
+    <message>
+        <source>Print version and exit</source>
+        <translation>버전 인쇄 및 종료</translation>
+    </message>
+    <message>
+        <source>Print this help message and exit</source>
+        <translation>이 도움말 메시지를 인쇄하고 종료하십시오</translation>
+    </message>
+    <message>
+        <source>Receive and display P2P network alerts (default: true)</source>
+        <translation>P2P 네트워크 알림 수신 및 표시 (기본값: true)</translation>
+    </message>
+    <message>
+        <source>Tell other nodes to filter invs to us by our mempool min fee (default: %u)</source>
+        <translation>메모리 풀 최저 요금 (기본값: %u)으로 다른 노드에 인벤토리를 필터링하도록 알려주십시오</translation>
+    </message>
+    <message>
+        <source>Imports blocks from external blk000??.dat file on startup</source>
+        <translation>시작시 외부 blk000??.dat 파일에서 블록 가져 오기</translation>
+    </message>
+    <message>
+        <source>Keep the transaction memory pool below &lt;n&gt; megabytes (default: %u)</source>
+        <translation>트랜잭션 메모리 풀을 &lt;n&gt; 메가 바이트 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Do not keep transactions in the mempool longer than &lt;n&gt; hours (default: %u)</source>
+        <translation>&lt;n&gt; 시간 (기본값: %u)보다 긴 트랜잭션을 메모리 풀에 유지하지 마십시오</translation>
+    </message>
+    <message>
+        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. </source>
+        <translation>오래된 블록을 정리 (삭제)하여 스토리지 요구 사항을 줄입니다. 이 모드는 -txindex 및 -rescan과 호환되지 않습니다. </translation>
+    </message>
+    <message>
+        <source>Rebuild chain state from the currently indexed blocks</source>
+        <translation>현재 인덱싱 된 블록에서 체인 상태 재구성</translation>
+    </message>
+    <message>
+        <source>Rebuild chain state and block index from the blk*.dat files on disk</source>
+        <translation>디스크의 blk*.dat 파일에서 체인 상태를 재구성하고 인덱스를 차단합니다.</translation>
+    </message>
+    <message>
+        <source>Maintain a full address index, used to query for the balance, txids and unspent outputs for addresses (default: %u)</source>
+        <translation>잔액, 트랜잭션 ID 및 주소 용 미사용 출력을 쿼리하는 데 사용되는 전체 주소 색인을 유지 관리합니다 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Maintain a timestamp index for block hashes, used to query blocks hashes by a range of timestamps (default: %u)</source>
+        <translation>블록 해시를 타임 스탬프 범위 (기본값: %u)로 쿼리하는 데 사용되는 블록 해시에 대한 타임 스탬프 인덱스를 유지합니다</translation>
+    </message>
+    <message>
+        <source>Maintain a full spent index, used to query the spending txid and input index for an outpoint (default: %u)</source>
+        <translation>outpoint에 대한 지출 txid 및 입력 인덱스를 쿼리하는 데 사용되는 전체 지출 된 인덱스 유지 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
+        <translation>지정된 노드에만 연결하십시오. 자동 연결을 사용하지 않으려면 -noconnect 또는 -connect = 0을 단독으로 사용하십시오.</translation>
+    </message>
+    <message>
+        <source>Discover own IP addresses (default: 1 when listening and no -externalip or -proxy)</source>
+        <translation>자신의 IP 주소를 찾습니다 (기본값: 수신시 1, -externalip 또는 -proxy 없음).</translation>
+    </message>
+    <message>
+        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
+        <translation>DNS 조회를 통한 피어 주소 쿼리 (주소가 부족할 경우 기본값: -connect/-noconnect가 아닌 경우 1)</translation>
+    </message>
+    <message>
+        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
+        <translation>외부에서 연결을 허용합니다 (기본값: -proxy 또는 -connect/-noconnect가없는 경우 1).</translation>
+    </message>
+    <message>
+        <source>Automatically create Tor hidden service (default: %d)</source>
+        <translation>자동으로 Tor 숨김 서비스를 생성합니다 (기본값: %d).</translation>
+    </message>
+    <message>
+        <source>Maintain at most &lt;n&gt; connections to peers (temporary service connections excluded) (default: %u)</source>
+        <translation>최대 &lt;n&gt; 피어에 대한 연결 (임시 서비스 연결 제외) (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Maximum allowed median peer time offset adjustment. Local perspective of time may be influenced by peers forward or backward by this amount. (default: %u seconds)</source>
+        <translation>허용 된 최대 중간 피어 시간 오프셋 조정. 시간의 지역적 시각은 동료들에 의해이 금액만큼 앞뒤로 영향을받을 수 있습니다. (기본값: %u 초)</translation>
+    </message>
+    <message>
+        <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
+        <translation>bloom 필터를 사용하여 블록 및 트랜잭션 필터링 지원 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Randomize credentials for every proxy connection. This enables Tor stream isolation (default: %u)</source>
+        <translation>모든 프록시 연결마다 자격 증명 무작위 화. 이렇게하면 Tor 스트림을 격리 할 수 ​​있습니다 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Tor control port to use if onion listening enabled (default: %s)</source>
+        <translation>어니언 리스닝이 사용 가능할 때 사용할 토르 제어 포트 (기본값: %s)</translation>
+    </message>
+    <message>
+        <source>Tor control port password (default: empty)</source>
+        <translation>Tor 제어 포트 암호 (기본값: 비어 있음)</translation>
+    </message>
+    <message>
+        <source>Accept relayed transactions received from whitelisted peers even when not relaying transactions (default: %d)</source>
+        <translation>허용 목록에있는 피어로부터받은 릴레이 된 트랜잭션을 트랜잭션을 릴레이하지 않을 때도 허용합니다 (기본값: %d)</translation>
+    </message>
+    <message>
+        <source>Force relay of transactions from whitelisted peers even they violate local relay policy (default: %d)</source>
+        <translation>허용 목록에있는 동료의 트랜잭션을 강제로 릴레이하여 로컬 릴레이 정책을 위반하더라도 (기본값: %d)</translation>
+    </message>
+    <message>
+        <source>Tries to keep outbound traffic under the given target (in MiB per 24h), 0 = no limit (default: %d)</source>
+        <translation>지정된 대상 (24 시간당 MiB), 0 = 제한 없음 (기본값: %d)으로 아웃 바운드 트래픽을 유지하려고 시도합니다</translation>
+    </message>
+    <message>
+        <source>A fee rate (in %s/kB) that will be used when fee estimation has insufficient data (default: %s)</source>
+        <translation>요금 산정에 불충분 한 데이터가있을 때 사용되는 수수료율 (%s/kB 단위) (기본값: %s)</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
+        <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값:  %s)</translation>
+    </message>
+    <message>
+        <source>Fee (in %s/kB) to add to transactions you send (default: %s)</source>
+        <translation>보내는 거래에 추가 할 수수료 (%s/kB 단위) (기본값: %s)</translation>
+    </message>
+    <message>
+        <source>Rescan the block chain for missing wallet transactions on startup</source>
+        <translation>시작시 누락 된 지갑 트랜잭션에 대한 블록 체인 다시 검사</translation>
+    </message>
+    <message>
+        <source>Attempt to recover private keys from a corrupt wallet on startup</source>
+        <translation>시작시 손상된 지갑에서 개인 키 복구 시도</translation>
+    </message>
+    <message>
+        <source>Use hierarchical deterministic key generation (HD) after bip39/bip44. Only has effect during wallet creation/first start</source>
+        <translation>bip39/bip44 이후의 계층 적 결정 성 키 생성 (HD) 지갑 생성 / 처음 시작시에만 효과가 있습니다</translation>
+    </message>
+    <message>
+        <source>User defined mnemonic for HD wallet (bip39). Only has effect during wallet creation/first start (default: randomly generated)</source>
+        <translation>HD 지갑 (bip39)에 대한 사용자 정의 니모닉. 지갑 생성 / 처음 시작시에만 효과가 있습니다 (기본값 : 무작위로 생성됨)</translation>
+    </message>
+    <message>
+        <source>User defined mnemonic passphrase for HD wallet (bip39). Only has effect during wallet creation/first start (default: empty string)</source>
+        <translation>HD 지갑 (bip39) 용 사용자 정의 니모 닉 암호 문구. 지갑 생성 / 처음 시작시에만 효과가 있습니다 (기본값: 빈 문자열)</translation>
+    </message>
+    <message>
+        <source>User defined seed for HD wallet (should be in hex). Only has effect during wallet creation/first start (default: randomly generated)</source>
+        <translation>HD 지갑의 사용자 정의 시드 (16 진수 여야 함). 지갑 생성 / 처음 시작시에만 효과가 있습니다 (기본값: 무작위로 생성됨)</translation>
+    </message>
+    <message>
+        <source>Upgrade wallet to latest format on startup</source>
+        <translation>시작시 지갑을 최신 형식으로 업그레이드하십시오</translation>
+    </message>
+    <message>
+        <source>Make the wallet broadcast transactions</source>
+        <translation>지갑 브로드 캐스트 트랜잭션 만들기</translation>
+    </message>
+    <message>
+        <source>Number of automatic wallet backups (default: %u)</source>
+        <translation>자동 지갑 백업 수 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Specify full path to directory for automatic wallet backups (must exist)</source>
+        <translation>자동 지갑 백업을위한 디렉토리의 전체 경로 지정 (존재해야 함)</translation>
+    </message>
+    <message>
+        <source>Append comment to the user agent string</source>
+        <translation>사용자 에이전트 문자열에 주석 추가</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
+        <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
+    </message>
+    <message>
+        <source>Maximum total fees (in %s) to use in a single wallet transaction or raw transaction; setting this too low may abort large transactions (default: %s)</source>
+        <translation>단일 월렛 거래 또는 원시 거래에서 사용할 최대 총 수수료 (%s 로) 이 값을 너무 낮게 설정하면 큰 트랜잭션을 중단시킬 수 있습니다 (기본값: %s)</translation>
+    </message>
+    <message>
+        <source>Send trace/debug info to console instead of debug.log file</source>
+        <translation>debug.log 파일 대신 콘솔에 추적 / 디버그 정보 보내기</translation>
+    </message>
+    <message>
+        <source>Use the test chain</source>
+        <translation>테스트 체인 사용</translation>
+    </message>
+    <message>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Governance) (0-1, default: %u)</source>
+        <translation>모든 동적 특정 기능 (Dynodes, PrivateSend, InstantSend, Governance)을 사용하지 않음 (0-1, 기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>이 지갑에 저장된 금액에 대해 자동으로 PrivateSend를 사용하도록 설정합니다 (기본값: 0-1, 기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)</source>
+        <translation>블록 당 여러 개의 PrivateSend 믹싱 세션 사용, 실험적 (0-1, 기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Use N separate Dynodes for each denominated input to mix funds (2-16, default: %u)</source>
+        <translation>자금을 혼합하기 위해 각 입력에 대해 N 개의 개별 Dynode를 사용하십시오 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>빈번하게 동전을 혼합하여 (0-100, 기본값: %u, 1 =매우 자주, 높은 수수료, 100= 매우 드물게, 낮은 수수료) PrivateSend에 유동성을 제공하십시오.</translation>
+    </message>
+    <message>
+        <source>Enable InstantSend, show confirmations for locked transactions (0-1, default: %u)</source>
+        <translation>InstantSend 사용, 잠긴 트랜잭션에 대한 확인 표시 (0-1, default: %u)</translation>
+    </message>
+    <message>
+        <source>Execute command when a wallet InstantSend transaction is successfully locked (%s in cmd is replaced by TxID)</source>
+        <translation>InstantSend 트랜잭션이 성공적으로 잠겨있을 때이 명령을 실행하십시오 (cmd의 %s 는 TxID로 대체됩니다)</translation>
+    </message>
+    <message>
+        <source>Minimum bytes per sigop in transactions we relay and mine (default: %u)</source>
+        <translation>우리가 중계 및 거래하는 트랜잭션의시 당당 최소 바이트 (default: %u)</translation>
+    </message>
+    <message>
+        <source>Enable transaction replacement in the memory pool (default: %u)</source>
+        <translation>메모리 풀에서 트랜잭션 대체 사용 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Location of the auth cookie (default: data dir)</source>
+        <translation>인증 쿠키의 위치 (기본값: 데이터 디렉토리)</translation>
+    </message>
+    <message>
+        <source>Username and hashed password for JSON-RPC connections. The field&lt;userpw&gt; comes in the format: &lt;USERNAME&gt;:&lt;SALT&gt;$&lt;HASH&gt;. A canonical python script is included in share/rpcuser. This option can be specified multiple times</source>
+        <translation>JSON-RPC 연결을위한 사용자 이름과 해쉬 된 암호. &lt;userpw&gt; 필드는 &lt;USERNAME&gt; : &lt;SALT&gt; $ &lt;HASH&gt; 형식으로 제공됩니다. 정식 Python 스크립트는 share/rpcuser에 포함되어 있습니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %u)</source>
+        <translation>시작시 데이터 디렉토리 선택 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>시작시 스플래시 화면 표시 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
     </message>
     <message>
         <source>Receive and display P2P network alerts (default: %u)</source>
