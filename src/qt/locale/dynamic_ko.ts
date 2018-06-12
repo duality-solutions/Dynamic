@@ -1866,7 +1866,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>%1 ms</source>
-        <translation>%1 милисекунди</translation>
+        <translation>%1 밀리 세컨드</translation>
     </message>
 </context>
 <context>
