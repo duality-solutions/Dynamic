@@ -189,9 +189,6 @@ private:
     boost::thread_group threadGroup;
     CScheduler scheduler;
 
-    /// Flag indicating a restart
-    bool execute_restart;
-
     /// Pass fatal exception message to UI thread
     void handleRunawayException(const std::exception *e);
 };
@@ -273,8 +270,6 @@ void DynamicCore::handleRunawayException(const std::exception *e)
 
 void DynamicCore::initialize()
 {
-    execute_restart = true;
-
     try
     {
         qDebug() << __func__ << ": Running AppInit2 in thread";
@@ -304,13 +299,16 @@ void DynamicCore::initialize()
 
 void DynamicCore::restart(QStringList args)
 {
-    if(execute_restart) { // Only restart 1x, no matter how often a user clicks on a restart-button
-        execute_restart = false;
+    static bool executing_restart{false};
+
+    if(!executing_restart) { // Only restart 1x, no matter how often a user clicks on a restart-button
+       executing_restart = true;
         try
         {
             qDebug() << __func__ << ": Running Restart in thread";
-            threadGroup.interrupt_all();
+            Interrupt(threadGroup);
             threadGroup.join_all();
+            StartRestart();
             PrepareShutdown();
             qDebug() << __func__ << ": Shutdown finished";
             Q_EMIT shutdownResult(1);

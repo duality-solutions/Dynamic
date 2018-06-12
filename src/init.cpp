@@ -91,7 +91,6 @@
 extern void ThreadSendAlert(CConnman& connman);
 
 bool fFeeEstimatesInitialized = false;
-bool fRestartRequested = false;  // true: restart false: shutdown
 
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
@@ -157,14 +156,21 @@ static const char* FEE_ESTIMATES_FILENAME="fee_estimates.dat";
 //
 
 std::atomic<bool> fRequestShutdown(false);
+std::atomic<bool> fRequestRestart(false);
 
 void StartShutdown()
 {
     fRequestShutdown = true;
 }
+
+void StartRestart()
+{
+    fRequestShutdown = fRequestRestart = true;
+}
+
 bool ShutdownRequested()
 {
-    return fRequestShutdown || fRestartRequested;
+    return fRequestShutdown;
 }
 
 class CCoinsViewErrorCatcher : public CCoinsViewBacked
@@ -205,9 +211,6 @@ void Interrupt(boost::thread_group& threadGroup)
 /** Preparing steps before shutting down or restarting the wallet */
 void PrepareShutdown()
 {
-    fRequestShutdown = true; // Needed when we shutdown the wallet
-    fRestartRequested = true; // Needed when we restart the wallet
-
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
     TRY_LOCK(cs_Shutdown, lockShutdown);
@@ -313,7 +316,7 @@ void PrepareShutdown()
 void Shutdown()
 {
     // Shutdown part 1: prepare shutdown
-    if(!fRestartRequested){
+    if(!fRequestRestart) {
         PrepareShutdown();
     }
    // Shutdown part 2: Stop TOR thread and delete wallet instance
