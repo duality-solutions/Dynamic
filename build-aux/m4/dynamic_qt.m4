@@ -1,4 +1,4 @@
-dnl Copyright (c) 2013-2016 The Dynamic Core developers
+dnl Copyright (c) 2013-2016 The Dualiy Blockchain Solutions developers
 dnl Distributed under the MIT software license, see the accompanying
 dnl file COPYING or http://www.opensource.org/licenses/mit-license.php.
 

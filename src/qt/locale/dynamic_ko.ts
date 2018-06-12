@@ -504,7 +504,7 @@
     </message>
     <message>
         <source>Show the Dynamic help message to get a list with possible Dynamic command-line options</source>
-        <translation>Dynamic Core 도움말 메세지를 표시하여 사용 가능한 Dynamic 명령행 옵션 목록 표시</translation>
+        <translation>Dynamic 도움말 메세지를 표시하여 사용 가능한 Dynamic 명령행 옵션 목록 표시</translation>
     </message>
     <message>
         <source>&amp;File</source>
