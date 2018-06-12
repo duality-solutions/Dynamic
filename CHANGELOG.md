@@ -154,6 +154,7 @@
 * Force Dynodes to have listen=1 and maxconnections to be at least DEFAULT_MAX_PEER_CONNECTIONS
 * fix SelectCoinsByDenominations
 * [Init] Avoid segfault when called with -enableinstantsend=0
+* Use correct version for fee estimates db
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
