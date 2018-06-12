@@ -2903,13 +2903,6 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
 
             BOOST_FOREACH(int nBit, vecBits) {
                 if(out.tx->vout[out.i].nValue == vecPrivateSendDenominations[nBit]) {
-                    if(nValueRet >= nValueMin) {
-                        //randomly reduce the max amount we'll submit (for anonymity)
-                        nValueMax -= insecure_rand.rand32(nValueMax/5);
-                        //on average use 50% of the inputs or less
-                        int r = insecure_rand.rand32(vCoins.size());
-                        if((int)vecTxPSInRet.size() > r) return true;
-                    }
                     nValueRet += out.tx->vout[out.i].nValue;
                     vecTxPSInRet.push_back(CTxPSIn(txin, out.tx->vout[out.i].scriptPubKey));
                     vCoinsRet.push_back(out);
