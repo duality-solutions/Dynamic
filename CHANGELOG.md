@@ -135,6 +135,24 @@
 * Hash Rate Widget for Mining Page
 * [Dynode] Remove lock in ReadBlockFromDisk
 * Initial complete Korean translation added
+* add include to enable wallet to be built disabled
+* Fix Unlocking Error When Mixing
+* Refactor and fix restart
+* Fix segfault crash when shutdown the GUI in disablewallet mode
+* Increase mempool expiry time to 2 weeks
+* [CoinControl] Allow non-wallet owned change addresses
+* Allow shutdown during LoadMempool, dump only when necessary
+* Add IsArgSet, ForceSetArg, ForceSetMultiArgs, ForceRemoveArg & new critical section
+* [bugfix] save feeDelta instead of priorityDelta in DumpMempool
+* Add missing mempool lock for CalculateMemPoolAncestors
+* Qt/Intro: Various fixes
+* [net]Fix close socket loop
+* Bugfix: ancestor modifed fees were incorrect for descendants
+* Fix Dynode List
+* Remove some locking in net.h/net.cpp
+* Fix connectivity check in CActiveDynode::ManageStateInitial
+* Force Dynodes to have listen=1 and maxconnections to be at least DEFAULT_MAX_PEER_CONNECTIONS
+* fix SelectCoinsByDenominations
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
