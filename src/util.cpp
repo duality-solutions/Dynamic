@@ -109,6 +109,7 @@ int nWalletBackups = 10;
 const char * const DYNAMIC_CONF_FILENAME = "dynamic.conf";
 const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
+CCriticalSection cs_args;
 std::map<std::string, std::string> mapArgs;
 std::map<std::string, std::vector<std::string> > mapMultiArgs;
 bool fDebug = false;
@@ -252,6 +253,7 @@ bool LogAcceptCategory(const char* category)
 
         if (ptrCategory.get() == NULL)
         {
+            if (mapMultiArgs.count("-debug")) {
             std::string strThreadName = GetThreadName();
             LogPrintf("debug turned on:\n");
             for (int i = 0; i < (int)mapMultiArgs["-debug"].size(); ++i)
@@ -268,6 +270,9 @@ bool LogAcceptCategory(const char* category)
                 ptrCategory->insert(std::string("keepass"));
                 ptrCategory->insert(std::string("dnpayments"));
                 ptrCategory->insert(std::string("gobject"));
+                }
+            } else {
+                ptrCategory.reset(new std::set<std::string>());
             }
         }
         const std::set<std::string>& setCategories = *ptrCategory.get();
@@ -393,6 +398,7 @@ static void InterpretNegativeSetting(std::string& strKey, std::string& strValue)
 
 void ParseParameters(int argc, const char* const argv[])
 {
+    LOCK(cs_args);
     mapArgs.clear();
     mapMultiArgs.clear();
 
@@ -426,8 +432,15 @@ void ParseParameters(int argc, const char* const argv[])
     }
 }
 
+bool IsArgSet(const std::string& strArg)
+{
+    LOCK(cs_args);
+    return mapArgs.count(strArg);
+}
+
 std::string GetArg(const std::string& strArg, const std::string& strDefault)
 {
+    LOCK(cs_args);
     if (mapArgs.count(strArg))
         return mapArgs[strArg];
     return strDefault;
@@ -435,6 +448,7 @@ std::string GetArg(const std::string& strArg, const std::string& strDefault)
 
 int64_t GetArg(const std::string& strArg, int64_t nDefault)
 {
+    LOCK(cs_args);
     if (mapArgs.count(strArg))
         return atoi64(mapArgs[strArg]);
     return nDefault;
@@ -442,6 +456,7 @@ int64_t GetArg(const std::string& strArg, int64_t nDefault)
 
 bool GetBoolArg(const std::string& strArg, bool fDefault)
 {
+    LOCK(cs_args);
     if (mapArgs.count(strArg))
         return InterpretBool(mapArgs[strArg]);
     return fDefault;
@@ -449,6 +464,7 @@ bool GetBoolArg(const std::string& strArg, bool fDefault)
 
 bool SoftSetArg(const std::string& strArg, const std::string& strValue)
 {
+    LOCK(cs_args);
     if (mapArgs.count(strArg))
         return false;
     mapArgs[strArg] = strValue;
@@ -461,6 +477,25 @@ bool SoftSetBoolArg(const std::string& strArg, bool fValue)
         return SoftSetArg(strArg, std::string("1"));
     else
         return SoftSetArg(strArg, std::string("0"));
+}
+
+void ForceSetArg(const std::string& strArg, const std::string& strValue)
+{
+    LOCK(cs_args);
+    mapArgs[strArg] = strValue;
+}
+
+void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
+{
+    LOCK(cs_args);
+    mapMultiArgs[strArg] = values;
+}
+
+void ForceRemoveArg(const std::string& strArg)
+{
+    LOCK(cs_args);
+    mapArgs.erase(strArg);
+    mapMultiArgs.erase(strArg);
 }
 
 static const int screenWidth = 79;

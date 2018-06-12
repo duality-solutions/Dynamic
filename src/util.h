@@ -163,6 +163,14 @@ inline bool IsSwitchChar(char c)
 }
 
 /**
+ * Return true if the given argument has been manually set
+ *
+ * @param strArg Argument to get (e.g. "-foo")
+ * @return true if the argument has been set
+ */
+bool IsArgSet(const std::string& strArg);
+
+/**
  * Return string argument or default value
  *
  * @param strArg Argument to get (e.g. "-foo")
@@ -206,6 +214,11 @@ bool SoftSetArg(const std::string& strArg, const std::string& strValue);
  * @return true if argument gets set, false if it already had a value
  */
 bool SoftSetBoolArg(const std::string& strArg, bool fValue);
+
+// Forces a arg setting
+void ForceSetArg(const std::string& strArg, const std::string& strValue);
+void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values);
+void ForceRemoveArg(const std::string& strArg);
 
 /**
  * Format a string to be used as group of options in help messages
