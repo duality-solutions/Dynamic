@@ -696,6 +696,7 @@ public:
     uint64_t nSendBytes;
     std::deque<CSerializeData> vSendMsg;
     CCriticalSection cs_vSend;
+    CCriticalSection cs_hSocket;
 
     CCriticalSection cs_vProcessMsg;
     std::list<CNetMessage> vProcessMsg;
