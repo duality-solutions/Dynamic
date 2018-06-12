@@ -477,6 +477,8 @@ void DynamicApplication::requestShutdown()
     delete clientModel;
     clientModel = 0;
 
+    StartShutdown();
+
     // Show a simple window indicating shutdown status
     ShutdownWindow::showShutdownWindow(window);
 
