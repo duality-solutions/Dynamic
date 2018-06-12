@@ -156,7 +156,7 @@ UniValue dynode(const JSONRPCRequest& request)
     if (strCommand == "list")
     {
         JSONRPCRequest newRequest = request;
-        newRequest.params.clear();
+        newRequest.params.setArray();
         // forward params but skip "list"
         for (unsigned int i = 1; i < request.params.size(); i++) {
             newRequest.params.push_back(request.params[i]);
