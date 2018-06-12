@@ -631,8 +631,8 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
     if (!path.empty())
         return path;
 
-    if (mapArgs.count("-datadir")) {
-        path = fs::system_complete(mapArgs["-datadir"]);
+    if (IsArgSet("-datadir")) {
+        path = fs::system_complete(GetArg("-datadir", ""));
         if (!fs::is_directory(path)) {
             path = "";
             return path;
@@ -662,7 +662,7 @@ const boost::filesystem::path &GetBackupsDir()
     if (!backupsDir.empty())
         return backupsDir;
 
-    if (mapArgs.count("-walletbackupsdir")) {
+    if (!IsArgSet("-walletbackupsdir")) {
         backupsDir = fs::absolute(mapArgs["-walletbackupsdir"]);
         // Path must exist
         if (fs::is_directory(backupsDir)) return backupsDir;

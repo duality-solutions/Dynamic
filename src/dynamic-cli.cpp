@@ -75,9 +75,9 @@ static int AppInitRPC(int argc, char* argv[])
     // Parameters
     //
     ParseParameters(argc, argv);
-    if (argc<2 || mapArgs.count("-?") || mapArgs.count("-h") || mapArgs.count("-help") || mapArgs.count("-version")) {
+    if (argc<2 || IsArgSet("-?") || IsArgSet("-h") || IsArgSet("-help") || IsArgSet("-version")) {
         std::string strUsage = _("Dynamic RPC client version") + " " + FormatFullVersion() + "\n";
-        if (!mapArgs.count("-version")) {
+        if (!IsArgSet("-version")) {
             strUsage += "\n" + _("Usage:") + "\n" +
                   "  dynamic-cli [options] <command> [params]  " + _("Send command to Dynamic") + "\n" +
                   "  dynamic-cli [options] help                " + _("List commands") + "\n" +
@@ -93,7 +93,7 @@ static int AppInitRPC(int argc, char* argv[])
         }
         return EXIT_SUCCESS;
     }
-    bool datadirFromCmdLine = mapArgs.count("-datadir") != 0;
+    bool datadirFromCmdLine = IsArgSet("-datadir");
     if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false))) {
         fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", mapArgs["-datadir"].c_str());
         return EXIT_FAILURE;

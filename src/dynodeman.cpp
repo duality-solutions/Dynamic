@@ -196,6 +196,7 @@ void CDynodeMan::CheckAndRemove(CConnman& connman)
                             dynodeSync.IsSynced() &&
                             it->second.IsNewStartRequired() &&
                             !IsDnbRecoveryRequested(hash);
+                            !IsArgSet("-connect");
                 if(fAsk) {
                     // this DN is in a non-recoverable state and we haven't asked other nodes yet
                     std::set<CNetAddr> setRequested;

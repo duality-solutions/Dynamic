@@ -15,6 +15,7 @@
 #include "rpcserver.h"
 #include "scheduler.h"
 #include "util.h"
+#include "utilstrencodings.h"
 
 #include "dynodeconfig.h"
 
@@ -75,13 +76,13 @@ bool AppInit(int argc, char* argv[])
     ParseParameters(argc, argv);
 
     // Process help and version before taking care about datadir
-    if (mapArgs.count("-?") || mapArgs.count("-h") ||  mapArgs.count("-help") || mapArgs.count("-version"))
+    if (IsArgSet("-?") || IsArgSet("-h") ||  IsArgSet("-help") || IsArgSet("-version"))
     {
         std::string strUsage = _("Dynamic Daemon") + " " + _("version") + " " + FormatFullVersion() + "\n";
 
-        if (mapArgs.count("-version"))
+        if (IsArgSet("-version"))
         {
-            strUsage += LicenseInfo();
+            strUsage += FormatParagraph(LicenseInfo());
         }
         else
         {
@@ -97,7 +98,7 @@ bool AppInit(int argc, char* argv[])
 
     try
     {
-        bool datadirFromCmdLine = mapArgs.count("-datadir") != 0;
+        bool datadirFromCmdLine = IsArgSet("-datadir");
         if (datadirFromCmdLine && !boost::filesystem::is_directory(GetDataDir(false)))
         {
             fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", mapArgs["-datadir"].c_str());

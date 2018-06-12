@@ -1641,7 +1641,7 @@ void CConnman::ProcessOneShot()
 void CConnman::ThreadOpenConnections()
 {
     // Connect to specific addresses
-    if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
+    if (mapMultiArgs.count("-connect") && mapMultiArgs.at("-connect").size() > 0)
     {
         for (int64_t nLoop = 0;; nLoop++)
         {
@@ -1864,7 +1864,7 @@ void CConnman::ThreadOpenAddedConnections()
 void CConnman::ThreadDnbRequestConnections()
 {
     // Connecting to specific addresses, no dynode connections available
-    if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
+    if (IsArgSet("-connect") && mapMultiArgs.at("-connect").size() > 0)
         return;
 
     while (!interruptNet)
