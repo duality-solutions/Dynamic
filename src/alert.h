@@ -104,8 +104,8 @@ public:
     bool RelayTo(CNode* pnode, CConnman& connman) const;
     bool Sign();
     bool CheckSignature(const std::vector<unsigned char>& alertKey) const;
-    bool ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThread = true); // fThread means run -alertnotify in a free-running thread
-    static void Notify(const std::string& strMessage, bool fThread);
+    bool ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThread = true) const; // fThread means run -alertnotify in a free-running thread
+    static void Notify(const std::string& strMessage, bool fThread = true);
 
     /*
      * Get copy of (active) alert object by hash. Returns a null alert if it is not found.
