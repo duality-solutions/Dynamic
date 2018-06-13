@@ -155,6 +155,10 @@
 * fix SelectCoinsByDenominations
 * [Init] Avoid segfault when called with -enableinstantsend=0
 * Use correct version for fee estimates db
+* Fix args throughout wallet
+* Remove AddRef call in CNode constructor and do AddRef in AcceptConnection
+* Fix races, clean up args, move wallet backup dir check to wallet.cpp
+* Added check for open() returning a NULL pointer.
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
