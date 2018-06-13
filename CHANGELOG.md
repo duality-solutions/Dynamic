@@ -159,6 +159,8 @@
 * Remove AddRef call in CNode constructor and do AddRef in AcceptConnection
 * Fix races, clean up args, move wallet backup dir check to wallet.cpp
 * Added check for open() returning a NULL pointer.
+* Limit IS quorums by updated DNs only
+* Fix nStart warning and actually use it
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
