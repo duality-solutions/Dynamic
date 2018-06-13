@@ -1055,18 +1055,20 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
         return false;
     }
 
-    CNode* pnode = connman.ConnectNode(addr, NULL, false, true);
-    if(pnode == NULL) {
+    connman.OpenDynodeConnection(addr);
+    bool fSuccess = connman.ForNode(addr, CConnman::AllNodes, [&](CNode* pnode){
+        netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::DNVERIFY)+"-request");
+        // use random nonce, store it and require node to reply with correct one later
+        CDynodeVerification dnv(addr, GetRandInt(999999), nCachedBlockHeight - 1);
+        mWeAskedForVerification[addr] = dnv;
+        LogPrintf("CDynodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", dnv.nonce, addr.ToString());
+        connman.PushMessage(pnode, NetMsgType::DNVERIFY, dnv);
+        return true;
+    });
+    if (!fSuccess) {
         LogPrintf("CDynodeMan::SendVerifyRequest -- can't connect to node to verify it, addr=%s\n", addr.ToString());
         return false;
     }
-
-    netfulfilledman.AddFulfilledRequest(addr, strprintf("%s", NetMsgType::DNVERIFY)+"-request");
-    // use random nonce, store it and require node to reply with correct one later
-    CDynodeVerification dnv(addr, GetRandInt(999999), nCachedBlockHeight - 1);
-    mWeAskedForVerification[addr] = dnv;
-    LogPrintf("CDynodeMan::SendVerifyRequest -- verifying node using nonce %d addr=%s\n", dnv.nonce, addr.ToString());
-    connman.PushMessage(pnode, NetMsgType::DNVERIFY, dnv);
 
     return true;
 }

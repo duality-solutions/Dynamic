@@ -176,8 +176,8 @@ UniValue dynode(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Incorrect dynode address %s", strAddress));
 
         // TODO: Pass CConnman instance somehow and don't use global variable.
-        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
-        if(!pnode)
+        g_connman->OpenDynodeConnection(CAddress(addr, NODE_NETWORK));
+        if (!g_connman->IsConnected(CAddress(addr, NODE_NETWORK), CConnman::AllNodes))
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to dynode %s", strAddress));
 
         return "successfully connected";
