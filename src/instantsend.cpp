@@ -8,6 +8,7 @@
 #include "activedynode.h"
 #include "key.h"
 #include "validation.h"
+#include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "messagesigner.h"
@@ -217,7 +218,8 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate, CConnman& connman)
         int nLockInputHeight = nPrevoutHeight + 4;
 
         int nRank;
-        if(!dnodeman.GetDynodeRank(activeDynode.outpoint, nRank, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION)) {
+        int nMinRequiredProtocol = std::max(MIN_INSTANTSEND_PROTO_VERSION, dnpayments.GetMinDynodePaymentsProto());
+        if(!dnodeman.GetDynodeRank(activeDynode.outpoint, nRank, nLockInputHeight, nMinRequiredProtocol)) {
             LogPrint("instantsend", "CInstantSend::Vote -- Can't calculate rank for dynode %s\n", activeDynode.outpoint.ToStringShort());
             ++itOutpointLock;
             continue;
@@ -1024,8 +1026,8 @@ bool CTxLockVote::IsValid(CNode* pnode, CConnman& connman) const
     int nLockInputHeight = coin.nHeight + 4;
 
     int nRank;
-
-    if(!dnodeman.GetDynodeRank(outpointDynode, nRank, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION)) {
+    int nMinRequiredProtocol = std::max(MIN_INSTANTSEND_PROTO_VERSION, dnpayments.GetMinDynodePaymentsProto());
+    if(!dnodeman.GetDynodeRank(outpointDynode, nRank, nLockInputHeight, nMinRequiredProtocol)) {
         //can be caused by past versions trying to vote with an invalid protocol
         LogPrint("instantsend", "CTxLockVote::IsValid -- Can't calculate rank for dynode %s\n", outpointDynode.ToStringShort());
         return false;
