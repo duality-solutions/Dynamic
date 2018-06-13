@@ -4978,6 +4978,12 @@ bool AutoBackupWallet (CWallet* wallet, std::string strWalletFile, std::string& 
                 nWalletBackups = -1;
                 return false;
             }
+        } else if (!fs::is_directory(backupsDir)) {
+            // smth is wrong, we shouldn't continue until it's resolved
+            strBackupError = strprintf(_("%s is not a valid backup folder!"), backupsDir.string());
+            LogPrintf("%s\n", strBackupError);
+            nWalletBackups = -1;
+            return false;
         }
 
         // Create backup of the ...

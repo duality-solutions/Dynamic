@@ -196,6 +196,7 @@ DYNAMIC_CORE_H = \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
+  warnings.h \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
@@ -271,6 +272,7 @@ libdynamic_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  warnings.cpp \
   $(DYNAMIC_CORE_H)
 
 if ENABLE_ZMQ

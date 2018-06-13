@@ -116,7 +116,6 @@ const std::map<std::string, std::vector<std::string> >& mapMultiArgs = _mapMulti
 bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
-std::string strMiscWarning;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogThreadNames = DEFAULT_LOGTHREADNAMES;
@@ -649,32 +648,14 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
     return path;
 }
 
-static boost::filesystem::path backupsDirCached;
-static CCriticalSection csBackupsDirCached;
-
-const boost::filesystem::path &GetBackupsDir()
+boost::filesystem::path GetBackupsDir()
 {
     namespace fs = boost::filesystem;
 
-    LOCK(csBackupsDirCached);
+    if (!IsArgSet("-walletbackupsdir"))
+        return GetDataDir() / "backups";
 
-    fs::path &backupsDir = backupsDirCached;
-
-    if (!backupsDir.empty())
-        return backupsDir;
-
-    if (!IsArgSet("-walletbackupsdir")) {
-        backupsDir = fs::absolute(mapArgs["-walletbackupsdir"]);
-        // Path must exist
-        if (fs::is_directory(backupsDir)) return backupsDir;
-        // Fallback to default path if it doesn't
-        LogPrintf("%s: Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.\n", __func__);
-        strMiscWarning = _("Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.");
-    }
-    // Default path
-    backupsDir = GetDataDir() / "backups";
-
-    return backupsDir;
+    return fs::absolute(GetArg("-walletbackupsdir", ""));
 }
 
 void ClearDatadirCache()
