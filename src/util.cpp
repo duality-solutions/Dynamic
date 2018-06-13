@@ -111,7 +111,8 @@ const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
 
 CCriticalSection cs_args;
 std::map<std::string, std::string> mapArgs;
-std::map<std::string, std::vector<std::string> > mapMultiArgs;
+static std::map<std::string, std::vector<std::string> > _mapMultiArgs;
+const std::map<std::string, std::vector<std::string> >& mapMultiArgs = _mapMultiArgs;
 bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
@@ -254,22 +255,22 @@ bool LogAcceptCategory(const char* category)
         if (ptrCategory.get() == NULL)
         {
             if (mapMultiArgs.count("-debug")) {
-            std::string strThreadName = GetThreadName();
-            LogPrintf("debug turned on:\n");
-            for (int i = 0; i < (int)mapMultiArgs["-debug"].size(); ++i)
-                LogPrintf("  thread %s category %s\n", strThreadName, mapMultiArgs["-debug"][i]);
-            const std::vector<std::string>& categories = mapMultiArgs["-debug"];
-            ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
-            // thread_specific_ptr automatically deletes the set when the thread ends.
-            // "dynamic" is a composite category enabling all Dynamic-related debug output
-            if(ptrCategory->count(std::string("dynamic"))) {
-                ptrCategory->insert(std::string("privatesend"));
-                ptrCategory->insert(std::string("instantsend"));
-                ptrCategory->insert(std::string("dynode"));
-                ptrCategory->insert(std::string("spork"));
-                ptrCategory->insert(std::string("keepass"));
-                ptrCategory->insert(std::string("dnpayments"));
-                ptrCategory->insert(std::string("gobject"));
+                std::string strThreadName = GetThreadName();
+                LogPrintf("debug turned on:\n");
+                for (int i = 0; i < (int)mapMultiArgs.at("-debug").size(); ++i)
+                    LogPrintf("  thread %s category %s\n", strThreadName, mapMultiArgs.at("-debug")[i]);
+                const std::vector<std::string>& categories = mapMultiArgs.at("-debug");
+                ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
+                // thread_specific_ptr automatically deletes the set when the thread ends.
+                // "dynamic" is a composite category enabling all Dash-related debug output
+                if(ptrCategory->count(std::string("dynamic"))) {
+                    ptrCategory->insert(std::string("privatesend"));
+                    ptrCategory->insert(std::string("instantsend"));
+                    ptrCategory->insert(std::string("dynode"));
+                    ptrCategory->insert(std::string("spork"));
+                    ptrCategory->insert(std::string("keepass"));
+                    ptrCategory->insert(std::string("dnpayments"));
+                    ptrCategory->insert(std::string("gobject"));
                 }
             } else {
                 ptrCategory.reset(new std::set<std::string>());
@@ -400,7 +401,7 @@ void ParseParameters(int argc, const char* const argv[])
 {
     LOCK(cs_args);
     mapArgs.clear();
-    mapMultiArgs.clear();
+    _mapMultiArgs.clear();
 
     for (int i = 1; i < argc; i++)
     {
@@ -428,7 +429,7 @@ void ParseParameters(int argc, const char* const argv[])
         InterpretNegativeSetting(str, strValue);
 
         mapArgs[str] = strValue;
-        mapMultiArgs[str].push_back(strValue);
+        _mapMultiArgs[str].push_back(strValue);
     }
 }
 
@@ -488,14 +489,14 @@ void ForceSetArg(const std::string& strArg, const std::string& strValue)
 void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
 {
     LOCK(cs_args);
-    mapMultiArgs[strArg] = values;
+    _mapMultiArgs[strArg] = values;
 }
 
 void ForceRemoveArg(const std::string& strArg)
 {
     LOCK(cs_args);
     mapArgs.erase(strArg);
-    mapMultiArgs.erase(strArg);
+    _mapMultiArgs.erase(strArg);
 }
 
 static const int screenWidth = 79;
@@ -615,7 +616,7 @@ static void WriteConfigFile(FILE* configFile)
     fputs (rpcPort.c_str(), configFile);
     fputs (port.c_str(), configFile);
     fclose(configFile);
-    ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME), mapArgs, mapMultiArgs);
+    ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
 }
 
 const boost::filesystem::path &GetDataDir(bool fNetSpecific)
@@ -699,9 +700,7 @@ boost::filesystem::path GetDynodeConfigFile()
     return pathConfigFile;
 }
 
-void ReadConfigFile(const std::string& confPath,
-                    std::map<std::string, std::string>& mapSettingsRet,
-                    std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet)
+void ReadConfigFile(const std::string& confPath)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good()){
@@ -714,18 +713,21 @@ void ReadConfigFile(const std::string& confPath,
         }
     }
 
-    std::set<std::string> setOptions;
-    setOptions.insert("*");
-
-    for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
-        // Don't overwrite existing settings so command line settings override dynamic.conf
-        std::string strKey = std::string("-") + it->string_key;
-        std::string strValue = it->value[0];
-        InterpretNegativeSetting(strKey, strValue);
-        if (mapSettingsRet.count(strKey) == 0)
-            mapSettingsRet[strKey] = strValue;
-        mapMultiSettingsRet[strKey].push_back(strValue);
+        LOCK(cs_args);
+        std::set<std::string> setOptions;
+        setOptions.insert("*");
+
+        for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
+        {
+            // Don't overwrite existing settings so command line settings override dash.conf
+            std::string strKey = std::string("-") + it->string_key;
+            std::string strValue = it->value[0];
+            InterpretNegativeSetting(strKey, strValue);
+            if (mapArgs.count(strKey) == 0)
+                mapArgs[strKey] = strValue;
+            _mapMultiArgs[strKey].push_back(strValue);
+        }
     }
     // If datadir is changed in .conf file:
     ClearDatadirCache();

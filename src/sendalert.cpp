@@ -37,7 +37,7 @@ void ThreadSendAlert(CConnman& connman)
 
     // Wait one minute so we get well connected. If we only need to print
     // but not to broadcast - do this right away.
-    if (mapArgs.count("-sendalert"))
+    if (IsArgSet("-sendalert"))
         MilliSleep(60*1000);
 
     //

@@ -330,8 +330,8 @@ UniValue setgenerate(const JSONRPCRequest& request)
             fGenerate = false;
     }
 
-    mapArgs["-gen"] = (fGenerate ? "1" : "0");
-    mapArgs ["-genproclimit"] = itostr(nGenProcLimit);
+    GetArg("-gen", "") = (fGenerate ? "1" : "0");
+    GetArg("-genproclimit", "") = itostr(nGenProcLimit);
     GenerateDynamics(fGenerate, nGenProcLimit, Params(), *g_connman);
 
     return NullUniValue;
