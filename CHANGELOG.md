@@ -164,6 +164,7 @@
 * Switch dynode id in Dynamic data structures from CTxIn to COutPoint (including p2p level)
 * outpoint -> dynodeOutpoint in PSEG
 * Rename fDyNode to fDynodeMode to clarify its meaning and to avoid confusion with CNode::fDynode
+* Use OpenNetworkConnection instead of calling ConnectNode directly in Dynamic code
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
