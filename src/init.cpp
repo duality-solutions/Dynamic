@@ -1649,15 +1649,15 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // ********************************************************* Step 11a: setup PrivateSend
-    fDyNode = GetBoolArg("-dynode", false);
+    fDynodeMode = GetBoolArg("-dynode", false);
     // TODO: dynode should have no wallet
 
-    if((fDyNode || dynodeConfig.getCount() > -1) && fTxIndex == false) {
+    if((fDynodeMode || dynodeConfig.getCount() > -1) && fTxIndex == false) {
         return InitError("Enabling Dynode support requires turning on transaction indexing."
                   "Please add txindex=1 to your configuration and start with -reindex");
     }
 
-    if(fDyNode) {
+    if(fDynodeMode) {
         LogPrintf("DYNODE:\n");
 
         std::string strdynodepairingkey = GetArg("-dynodepairingkey", "");
@@ -1712,7 +1712,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     //lite mode disables all Dynode and Privatesend related functionality
     fLiteMode = GetBoolArg("-litemode", false);
-    if(fDyNode && fLiteMode){
+    if(fDynodeMode && fLiteMode){
         return InitError("You can not start a Dynode in litemode");
     }
 
@@ -1776,7 +1776,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // ********************************************************* Step 11d: start dynamic-ps-<smth> threads
 
     threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSend, boost::ref(*g_connman)));
-    if (fDyNode)
+    if (fDynodeMode)
         threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendServer, boost::ref(*g_connman)));
 #ifdef ENABLE_WALLET
      else

@@ -199,7 +199,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
         // they are temporary and should be considered unreliable for a sync process.
         // Inbound connection this early is most likely a "dynode" connection
         // initialted from another node, so skip it too.
-        if(pnode->fDynode || (fDyNode && pnode->fInbound)) continue;
+        if(pnode->fDynode || (fDynodeMode && pnode->fInbound)) continue;
         // QUICK MODE (REGTEST ONLY!)
         if(Params().NetworkIDString() == CBaseChainParams::REGTEST)
         {

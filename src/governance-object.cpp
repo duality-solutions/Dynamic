@@ -24,7 +24,7 @@ CGovernanceObject::CGovernanceObject()
   nDeletionTime(0),
   nCollateralHash(),
   strData(),
-  vinDynode(),
+  dynodeOutpoint(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -52,7 +52,7 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
   nDeletionTime(0),
   nCollateralHash(nCollateralHashIn),
   strData(strDataIn),
-  vinDynode(),
+  dynodeOutpoint(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -80,7 +80,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
   nDeletionTime(other.nDeletionTime),
   nCollateralHash(other.nCollateralHash),
   strData(other.strData),
-  vinDynode(other.vinDynode),
+  dynodeOutpoint(other.dynodeOutpoint),
   vchSig(other.vchSig),
   fCachedLocalValidity(other.fCachedLocalValidity),
   strLocalValidityError(other.strLocalValidityError),
@@ -218,15 +218,15 @@ std::string CGovernanceObject::GetSignatureMessage() const
         boost::lexical_cast<std::string>(nRevision) + "|" +
         boost::lexical_cast<std::string>(nTime) + "|" +
         strData + "|" +
-        vinDynode.prevout.ToStringShort() + "|" +
+        dynodeOutpoint.ToStringShort() + "|" +
         nCollateralHash.ToString();
 
     return strMessage;
 }
 
-void CGovernanceObject::SetDynodeVin(const COutPoint& outpoint)
+void CGovernanceObject::SetDynodeOutpoint(const COutPoint& outpoint)
 {
-    vinDynode = CTxIn(outpoint);
+    dynodeOutpoint = outpoint;
 }
 
 bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
@@ -246,8 +246,8 @@ bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
         return false;
     }
 
-    LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, vin = %s\n",
-             pubKeyDynode.GetID().ToString(), vinDynode.prevout.ToStringShort());
+    LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, dynode = %s\n",
+             pubKeyDynode.GetID().ToString(), dynodeOutpoint.ToStringShort());
 
 
     return true;
@@ -286,14 +286,13 @@ uint256 CGovernanceObject::GetHash() const
     ss << nRevision;
     ss << nTime;
     ss << strData;
-    ss << vinDynode;
+    ss << dynodeOutpoint << uint8_t{} << 0xffffffff;;
     ss << vchSig;
     // fee_tx is left out on purpose
-    uint256 h1 = ss.GetHash();
 
     DBG( printf("CGovernanceObject::GetHash %i %li %s\n", nRevision, nTime, strData.c_str()); );
 
-    return h1;
+    return ss.GetHash();
 }
 
 /**
@@ -443,11 +442,11 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
 
     if(fCheckCollateral) { 
         if((nObjectType == GOVERNANCE_OBJECT_TRIGGER) || (nObjectType == GOVERNANCE_OBJECT_WATCHDOG)) {
-            std::string strOutpoint = vinDynode.prevout.ToStringShort();
+            std::string strOutpoint = dynodeOutpoint.ToStringShort();
             dynode_info_t infoDn;
-            if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
+            if(!dnodeman.GetDynodeInfo(dynodeOutpoint, infoDn)) {
 
-                CDynode::CollateralStatus err = CDynode::CheckCollateral(vinDynode.prevout, CPubKey());
+                CDynode::CollateralStatus err = CDynode::CheckCollateral(dynodeOutpoint, CPubKey());
                 if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
                     strError = "Failed to find Dynode UTXO, missing dynode=" + strOutpoint + "\n";
                 } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {

@@ -253,7 +253,7 @@ UniValue gobject(const JSONRPCRequest& request)
         if((govobj.GetObjectType() == GOVERNANCE_OBJECT_TRIGGER) ||
            (govobj.GetObjectType() == GOVERNANCE_OBJECT_WATCHDOG)) {
             if(fDnFound) {
-                govobj.SetDynodeVin(activeDynode.outpoint);
+                govobj.SetDynodeOutpoint(activeDynode.outpoint);
                 govobj.Sign(activeDynode.keyDynode, activeDynode.pubKeyDynode);
             }
             else {
@@ -348,7 +348,7 @@ UniValue gobject(const JSONRPCRequest& request)
             return returnObj;
         }
 
-        CGovernanceVote vote(dn.vin.prevout, hash, eVoteSignal, eVoteOutcome);
+        CGovernanceVote vote(dn.outpoint, hash, eVoteSignal, eVoteOutcome);
         if(!vote.Sign(activeDynode.keyDynode, activeDynode.pubKeyDynode)) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
@@ -452,7 +452,7 @@ UniValue gobject(const JSONRPCRequest& request)
                 continue;
             }
 
-            CGovernanceVote vote(dn.vin.prevout, hash, eVoteSignal, eVoteOutcome);
+            CGovernanceVote vote(dn.outpoint, hash, eVoteSignal, eVoteOutcome);
             if(!vote.Sign(keyDynode, pubKeyDynode)){
                 nFailed++;
                 statusObj.push_back(Pair("result", "failed"));
@@ -663,9 +663,9 @@ UniValue gobject(const JSONRPCRequest& request)
             bObj.push_back(Pair("CollateralHash",  pGovObj->GetCollateralHash().ToString()));
             bObj.push_back(Pair("ObjectType", pGovObj->GetObjectType()));
             bObj.push_back(Pair("CreationTime", pGovObj->GetCreationTime()));
-            const CTxIn& dynodeVin = pGovObj->GetDynodeVin();
-            if(dynodeVin != CTxIn()) {
-                bObj.push_back(Pair("SigningDynode", dynodeVin.prevout.ToStringShort()));
+            const COutPoint& dynodeOutpoint = pGovObj->GetDynodeOutpoint();
+            if(dynodeOutpoint != COutPoint()) {
+                bObj.push_back(Pair("SigningDynode", dynodeOutpoint.ToStringShort()));
             }
 
             // REPORT STATUS FOR FUNDING VOTES SPECIFICALLY
@@ -715,9 +715,9 @@ UniValue gobject(const JSONRPCRequest& request)
         objResult.push_back(Pair("CollateralHash",  pGovObj->GetCollateralHash().ToString()));
         objResult.push_back(Pair("ObjectType", pGovObj->GetObjectType()));
         objResult.push_back(Pair("CreationTime", pGovObj->GetCreationTime()));
-        const CTxIn& dynodeVin = pGovObj->GetDynodeVin();
-        if(dynodeVin != CTxIn()) {
-            objResult.push_back(Pair("SigningDynode", dynodeVin.prevout.ToStringShort()));
+        const COutPoint& dynodeOutpoint = pGovObj->GetDynodeOutpoint();
+        if(dynodeOutpoint != COutPoint()) {
+            objResult.push_back(Pair("SigningDynode", dynodeOutpoint.ToStringShort()));
         }
 
         // SHOW (MUCH MORE) INFORMATION ABOUT VOTES FOR GOVERNANCE OBJECT (THAN LIST/DIFF ABOVE)

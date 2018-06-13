@@ -22,7 +22,7 @@ CPrivateSendClient privateSendClient;
 
 void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    if(fDyNode) return;
+    if(fDynodeMode) return;
     if(fLiteMode) return; // ignore all Dynamic related functionality
     if(!dynodeSync.IsBlockchainSynced()) return;
 
@@ -51,11 +51,11 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if(psq.IsExpired()) return;
 
         dynode_info_t infoDn;
-        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) return;
+        if(!dnodeman.GetDynodeInfo(psq.dynodeOutpoint, infoDn)) return;
 
         if(!psq.CheckSignature(infoDn.pubKeyDynode)) {
             // we probably have outdated info
-            dnodeman.AskForDN(pfrom, psq.vin.prevout, connman);
+            dnodeman.AskForDN(pfrom, psq.dynodeOutpoint, connman);
             return;
         }
 
@@ -73,7 +73,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             }
         } else {
             BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
-                if(q.vin == psq.vin) {
+                if(q.dynodeOutpoint == psq.dynodeOutpoint) {
                     // no way same dn can send another "not yet ready" psq this soon
                     LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", infoDn.addr.ToString());
                     return;
@@ -88,10 +88,10 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                 return;
             }
 
-            if(!dnodeman.AllowMixing(psq.vin.prevout)) return;
+            if(!dnodeman.AllowMixing(psq.dynodeOutpoint)) return;
 
             LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
-            if(infoMixingDynode.fInfoValid && infoMixingDynode.vin.prevout == psq.vin.prevout) {
+            if(infoMixingDynode.fInfoValid && infoMixingDynode.outpoint == psq.dynodeOutpoint) {
                 psq.fTried = true;
             }
             vecPrivatesendQueue.push_back(psq);
@@ -323,10 +323,10 @@ void CPrivateSendClient::CheckTimeout()
 {
     CheckQueue();
 
-    if(!fEnablePrivateSend && !fDyNode) return;
+    if(!fEnablePrivateSend && !fDynodeMode) return;
 
     // catching hanging sessions
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         switch(nState) {
             case POOL_STATE_ERROR:
                 LogPrint("privatesend", "CPrivateSendClient::CheckTimeout -- Pool error -- Running CheckPool\n");
@@ -341,7 +341,7 @@ void CPrivateSendClient::CheckTimeout()
         }
     }
 
-    int nLagTime = fDyNode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
+    int nLagTime = fDynodeMode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
     int nTimeout = (nState == POOL_STATE_SIGNING) ? PRIVATESEND_SIGNING_TIMEOUT : PRIVATESEND_QUEUE_TIMEOUT;
     bool fTimeout = GetTimeMillis() - nTimeLastSuccessfulStep >= nTimeout*1000 + nLagTime;
 
@@ -362,7 +362,7 @@ void CPrivateSendClient::CheckTimeout()
 //
 bool CPrivateSendClient::SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, const std::vector<CTxOut>& vecTxOut, CConnman& connman)
 {
-    if(fDyNode) {
+    if(fDynodeMode) {
         LogPrintf("CPrivateSendClient::SendDenominate -- PrivateSend from a Dynode is not supported currently.\n");
         return false;
     }
@@ -442,7 +442,7 @@ bool CPrivateSendClient::SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, c
 // Incoming message from Dynode updating the progress of mixing
 bool CPrivateSendClient::CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew)
 {
-    if(fDyNode) return false;
+    if(fDynodeMode) return false;
 
     // do not update state when mixing client state is one of these
     if(nState == POOL_STATE_IDLE || nState == POOL_STATE_ERROR || nState == POOL_STATE_SUCCESS) return false;
@@ -488,7 +488,7 @@ bool CPrivateSendClient::CheckPoolStateUpdate(PoolState nStateNew, int nEntriesC
 //
 bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman& connman)
 {
-    if(fDyNode || pnode == NULL) return false;
+    if(fDynodeMode || pnode == NULL) return false;
 
     finalMutableTransaction = finalTransactionNew;
     LogPrintf("CPrivateSendClient::SignFinalTransaction -- finalMutableTransaction=%s", finalMutableTransaction.ToString());
@@ -575,7 +575,7 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
 // mixing transaction was completed (failed or successful)
 void CPrivateSendClient::CompletedTransaction(PoolMessage nMessageID)
 {
-    if(fDyNode) return;
+    if(fDynodeMode) return;
 
     if(nMessageID == MSG_SUCCESS) {
         LogPrintf("CompletedTransaction -- success\n");
@@ -671,7 +671,7 @@ bool CPrivateSendClient::CheckAutomaticBackup()
 //
 bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
-    if(fDyNode) return false; // no client-side mixing on dynodes
+    if(fDynodeMode) return false; // no client-side mixing on dynodes
     if(!fEnablePrivateSend) return false;
     if(!pwalletMain || pwalletMain->IsLocked(true)) return false;
     if(nState != POOL_STATE_IDLE) return false;
@@ -832,8 +832,8 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         dynode_info_t infoDn;
 
-        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) {
-            LogPrintf("CPrivateSendClient::JoinExistingQueue -- psq dynode is not in dynode list, dynode=%s\n", psq.vin.prevout.ToStringShort());
+        if(!dnodeman.GetDynodeInfo(psq.dynodeOutpoint, infoDn)) {
+            LogPrintf("CPrivateSendClient::JoinExistingQueue -- psq dynode is not in dynode list, dynode=%s\n", psq.dynodeOutpoint.ToStringShort());
             continue;
         }
 
@@ -861,7 +861,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
             continue;
         }
 
-        vecDynodesUsed.push_back(psq.vin.prevout);
+        vecDynodesUsed.push_back(psq.dynodeOutpoint);
 
         bool fSkip = false;
         connman.ForNode(infoDn.addr, CConnman::AllNodes, [&fSkip](CNode* pnode) {
@@ -919,12 +919,12 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
             strAutoDenomResult = _("Can't find random Dynode.");
             return false;
         }
-        vecDynodesUsed.push_back(infoDn.vin.prevout);
+        vecDynodesUsed.push_back(infoDn.outpoint);
 
         if(infoDn.nLastPsq != 0 && infoDn.nLastPsq + nDnCountEnabled/5 > dnodeman.nPsqCount) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- Too early to mix on this dynode!"
                         " dynode=%s  addr=%s  nLastPsq=%d  CountEnabled/5=%d  nPsqCount=%d\n",
-                        infoDn.vin.prevout.ToStringShort(), infoDn.addr.ToString(), infoDn.nLastPsq,
+                        infoDn.outpoint.ToStringShort(), infoDn.addr.ToString(), infoDn.nLastPsq,
                         nDnCountEnabled/5, dnodeman.nPsqCount);
             nTries++;
             continue;
@@ -1376,7 +1376,7 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
 void ThreadCheckPrivateSendClient(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
-    if(fDyNode) return; // no client-side mixing on dynodes
+    if(fDynodeMode) return; // no client-side mixing on dynodes
 
     static bool fOneThread;
     if(fOneThread) return;
