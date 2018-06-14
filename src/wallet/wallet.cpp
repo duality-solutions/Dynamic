@@ -3200,7 +3200,7 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
     CTxOut txout = CTxOut(nValue - CPrivateSend::GetCollateralAmount(), scriptChange);
     txCollateral.vout.push_back(txout);
 
-    if(!SignSignature(*this, txpsinCollateral.prevPubKey, txCollateral, 0, int(SIGHASH_ALL|SIGHASH_ANYONECANPAY))) {
+    if (!SignSignature(*this, txpsinCollateral.prevPubKey, txCollateral, 0)) {
         strReason = "Unable to sign collateral transaction!";
         return false;
     }
