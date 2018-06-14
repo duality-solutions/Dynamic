@@ -24,6 +24,7 @@
 CDynodeMan dnodeman;
 
 const std::string CDynodeMan::SERIALIZATION_VERSION_STRING = "CDynodeMan-Version-2";
+const int CDynodeMan::LAST_PAID_SCAN_BLOCKS = 100;
 
 struct CompareLastPaidBlock
 {
@@ -1454,18 +1455,19 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
 
     if(fLiteMode || !dynodeSync.IsWinnersListSynced() || mapDynodes.empty()) return;
 
-    static bool IsFirstRun = true;
-    // Do full scan on first run or if we are not a Dynode
-    // (DNs should update this info on every block, so limited scan should be enough for them)
-    int nMaxBlocksToScanBack = (IsFirstRun || !fDynodeMode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
+    static int nLastRunBlockHeight = 0;
+    // Scan at least LAST_PAID_SCAN_BLOCKS but no more than dnpayments.GetStorageLimit()
+    int nMaxBlocksToScanBack = std::max(LAST_PAID_SCAN_BLOCKS, nCachedBlockHeight - nLastRunBlockHeight);
+    nMaxBlocksToScanBack = std::min(nMaxBlocksToScanBack, dnpayments.GetStorageLimit());
 
-    //                         nCachedBlockHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
+    LogPrint("Dynode", "CDynodeMan::UpdateLastPaid -- nCachedBlockHeight=%d, nLastRunBlockHeight=%d, nMaxBlocksToScanBack=%d\n",
+                            nCachedBlockHeight, nLastRunBlockHeight, nMaxBlocksToScanBack);
 
-    for (auto& dnpair: mapDynodes) {
+    for (auto& dnpair : mapDynodes) {
         dnpair.second.UpdateLastPaid(pindex, nMaxBlocksToScanBack);
     }
 
-    IsFirstRun = false;
+    nLastRunBlockHeight = nCachedBlockHeight;
 }
 
 void CDynodeMan::UpdateLastSentinelPingTime()
