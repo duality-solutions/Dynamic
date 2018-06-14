@@ -82,20 +82,17 @@ public:
     // memory only
     CScript prevPubKey;
     bool fHasSig; // flag to indicate if signed
-    int nSentTimes; //times we've sent this anonymously
 
     CTxPSIn(const CTxIn& txin, const CScript& script) :
         CTxIn(txin),
         prevPubKey(script),
-        fHasSig(false),
-        nSentTimes(0)
+        fHasSig(false)
         {}
 
     CTxPSIn() :
         CTxIn(),
         prevPubKey(),
-        fHasSig(false),
-        nSentTimes(0)
+        fHasSig(false)
         {}
 };
 

@@ -92,10 +92,6 @@ void CDynodeSync::SwitchToNextAsset(CConnman& connman)
             //try to activate our dynode if possible
             activeDynode.ManageState(connman);
 
-            // TODO: Find out whether we can just use LOCK instead of:
-            // TRY_LOCK(cs_vNodes, lockRecv);
-            // if(lockRecv) { ... }
-
             connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "full-sync");
             });
@@ -139,10 +135,6 @@ void CDynodeSync::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStr
 
 void CDynodeSync::ClearFulfilledRequests(CConnman& connman)
 {
-    // TODO: Find out whether we can just use LOCK instead of:
-    // TRY_LOCK(cs_vNodes, lockRecv);
-    // if(!lockRecv) return;
-
     connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
         netfulfilledman.RemoveFulfilledRequest(pnode->addr, "spork-sync");
         netfulfilledman.RemoveFulfilledRequest(pnode->addr, "dynode-list-sync");

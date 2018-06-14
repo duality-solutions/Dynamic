@@ -20,7 +20,7 @@ CGovernanceManager governance;
 
 int nSubmittedFinalBudget;
 
-const std::string CGovernanceManager::SERIALIZATION_VERSION_STRING = "CGovernanceManager-Version-23";
+const std::string CGovernanceManager::SERIALIZATION_VERSION_STRING = "CGovernanceManager-Version-12";
 const int CGovernanceManager::MAX_TIME_FUTURE_DEVIATION = 60*60;
 const int CGovernanceManager::RELIABLE_PROPAGATION_TIME = 60;
 
@@ -594,7 +594,7 @@ std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& 
 
     CDynode dn;
     std::map<COutPoint, CDynode> mapDynodes;
-    if(dnCollateralOutpointFilter == COutPoint()) {
+    if(dnCollateralOutpointFilter.IsNull()) {
         mapDynodes = dnodeman.GetFullDynodeMap();
     } else if (dnodeman.Get(dnCollateralOutpointFilter, dn)) {
         mapDynodes[dnCollateralOutpointFilter] = dn;

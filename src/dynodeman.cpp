@@ -51,8 +51,8 @@ struct CompareByAddr
     }
 };
 
-CDynodeMan::CDynodeMan()
-: cs(),
+CDynodeMan::CDynodeMan():
+  cs(),
   mapDynodes(),
   mAskedUsForDynodeList(),
   mWeAskedForDynodeList(),
@@ -160,6 +160,8 @@ void CDynodeMan::Check()
     LogPrint("Dynode", "CDynodeMan::Check -- nLastSentinelPingTime=%d, IsSentinelPingActive()=%d\n", nLastSentinelPingTime, IsSentinelPingActive());
 
     for (auto& dnpair : mapDynodes) {
+        // NOTE: internally it checks only every DYNODE_CHECK_SECONDS seconds
+        // since the last time, so expect some DNs to skip this
         dnpair.second.Check();
     }
 }
@@ -835,7 +837,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
         LOCK(cs);
 
-        if(dynodeOutpoint == COutPoint()) {
+        if(dynodeOutpoint.IsNull()) {
             //local network
             bool isLocal = (pfrom->addr.IsRFC1918() || pfrom->addr.IsLocal());
             int nDnCount = dnodeman.CountDynodes();
@@ -877,7 +879,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             }
         }
 
-        if(dynodeOutpoint == COutPoint()) {
+        if(dynodeOutpoint.IsNull()) {
             connman.PushMessage(pfrom, NetMsgType::SYNCSTATUSCOUNT, DYNODE_SYNC_LIST, nInvCount);
             LogPrintf("PSEG -- Sent %d Dynode invs to peer %d\n", nInvCount, pfrom->id);
             return;
@@ -887,7 +889,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
     } else if (strCommand == NetMsgType::DNVERIFY) { // Dynode Verify
 
-        // Need LOCK2 here to ensure consistent locking order because the all functions below call GetBlockHash which locks cs_main
+        // Need LOCK2 here to ensure consistent locking order because all functions below call GetBlockHash which locks cs_main
         LOCK2(cs_main, cs);
 
         CDynodeVerification dnv;
@@ -914,7 +916,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
 
 void CDynodeMan::DoFullVerificationStep(CConnman& connman)
 {
-    if(activeDynode.outpoint == COutPoint()) return;
+    if(activeDynode.outpoint.IsNull()) return;
     if(!dynodeSync.IsSynced()) return;
 
     rank_pair_vec_t vecDynodeRanks;
@@ -922,7 +924,7 @@ void CDynodeMan::DoFullVerificationStep(CConnman& connman)
     GetDynodeRanks(vecDynodeRanks, nCachedBlockHeight - 1, MIN_POSE_PROTO_VERSION);
 
     // Need LOCK2 here to ensure consistent locking order because the SendVerifyRequest call below locks cs_main
-    // through GetHeight() signal in ConnectNode
+    // through InitializeNode signal in OpenNetworkConnection
     LOCK2(cs_main, cs);
 
     int nCount = 0;
@@ -1179,7 +1181,7 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
                     netfulfilledman.AddFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-done");
 
                     // we can only broadcast it if we are an activated Dynode
-                    if(activeDynode.outpoint == COutPoint()) continue;
+                    if(activeDynode.outpoint.IsNull()) continue;
                     // update ...
                     dnv.addr = dnpair.second.addr;
                     dnv.dynodeOutpoint1 = dnpair.second.outpoint;

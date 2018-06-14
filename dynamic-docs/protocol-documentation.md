@@ -152,7 +152,7 @@ When queue is ready user is expected to send his entry to start actual mixing
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |
 | ? | vecTxPSIn | CTxPSIn[] | vector of users inputs (CTxPSIn serialization is equal to CTxIn serialization)
-| 8 | nAmount | int64_t | depreciated, can be removed with future protocol bump
+| 8 | nAmount | int64_t | deprecated, can be removed with future protocol bump
 | ? | txCollateral | CTransaction | Collateral transaction which is used to prevent misbehavior and also to charge fees randomly
 | ? | vecTxPSOut | CTxPSOut[] | vector of user outputs (CTxPSOut serialization is equal to CTxOut serialization)
 

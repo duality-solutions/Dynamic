@@ -1710,7 +1710,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    //lite mode disables all Dynode and Privatesend related functionality
+    //lite mode disables all Dynamic-specific functionality
     fLiteMode = GetBoolArg("-litemode", false);
     if(fDynodeMode && fLiteMode){
         return InitError("You can not start a Dynode in litemode");

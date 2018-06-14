@@ -15,8 +15,8 @@
 
 #include <univalue.h>
 
-CGovernanceObject::CGovernanceObject()
-: cs(),
+CGovernanceObject::CGovernanceObject():
+ cs(),
   nObjectType(GOVERNANCE_OBJECT_UNKNOWN),
   nHashParent(),
   nRevision(0),
@@ -43,8 +43,8 @@ CGovernanceObject::CGovernanceObject()
     LoadData();
 }
 
-CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int64_t nTimeIn, uint256 nCollateralHashIn, std::string strDataIn)
-: cs(),
+CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int64_t nTimeIn, uint256 nCollateralHashIn, std::string strDataIn):
+  cs(),
   nObjectType(GOVERNANCE_OBJECT_UNKNOWN),
   nHashParent(nHashParentIn),
   nRevision(nRevisionIn),
@@ -71,8 +71,8 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
     LoadData();
 }
 
-CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
-: cs(),
+CGovernanceObject::CGovernanceObject(const CGovernanceObject& other):
+  cs(),
   nObjectType(other.nObjectType),
   nHashParent(other.nHashParent),
   nRevision(other.nRevision),

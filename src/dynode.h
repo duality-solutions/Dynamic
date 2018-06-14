@@ -92,6 +92,7 @@ public:
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
 
+    explicit operator bool() const;
 };
 
 inline bool operator==(const CDynodePing& a, const CDynodePing& b)
@@ -101,6 +102,11 @@ inline bool operator==(const CDynodePing& a, const CDynodePing& b)
 inline bool operator!=(const CDynodePing& a, const CDynodePing& b)
 {
     return !(a == b);
+}
+
+inline CDynodePing::operator bool() const
+{
+    return *this != CDynodePing();
 }
 
 struct dynode_info_t 
@@ -237,7 +243,7 @@ public:
 
     bool IsPingedWithin(int nSeconds, int64_t nTimeToCheckAt = -1)
     {
-        if(lastPing == CDynodePing()) return false;
+        if(!lastPing) return false;
 
         if(nTimeToCheckAt == -1) {
             nTimeToCheckAt = GetAdjustedTime();
@@ -447,6 +453,7 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        // adding dummy values here to match old hashing format
         ss << dynodeOutpoint1 << uint8_t{} << 0xffffffff;
         ss << dynodeOutpoint2 << uint8_t{} << 0xffffffff;
         ss << addr;

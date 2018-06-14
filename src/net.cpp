@@ -1895,9 +1895,11 @@ bool CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFai
     if (interruptNet) {
         return false;
     }
+
     if (!fNetworkActive) {
         return false;
-    }   
+    }
+
     if (!pszDest) {
         if (IsLocal(addrConnect) ||
             FindNode((CNetAddr)addrConnect) || IsBanned(addrConnect) ||
