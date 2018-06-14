@@ -161,6 +161,10 @@
 * Added check for open() returning a NULL pointer.
 * Limit IS quorums by updated DNs only
 * Fix nStart warning and actually use it
+* Fix LevelDB warning in leveldb/util/logging.cc
+* Update univalue and secp256k1 libraries (June 2018)
+* Bump dynodeman versionCDynodeMan-Version to 2
+* Bump CGovernanceManager version to 23 to signify v2.3
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
