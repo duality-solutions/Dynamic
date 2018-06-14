@@ -771,6 +771,7 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
             // use announced Dynode as a peer
             connman.AddNewAddress(CAddress(dnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
             } else if(nDos > 0) {
+                LOCK(cs_main);
                 Misbehaving(pfrom->GetId(), nDos);
         }
         if(fDynodesAdded) {
@@ -838,10 +839,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         }
         LogPrint("Dynode", "PSEG -- Dynode list, Dynode=%s\n", dynodeOutpoint.ToStringShort());
 
-        LOCK(cs);
-
         if(dynodeOutpoint.IsNull()) {
-            //local network
+            // local network
             bool isLocal = (pfrom->addr.IsRFC1918() || pfrom->addr.IsLocal());
             int nDnCount = dnodeman.CountDynodes();
             // This is to prevent unnecessary banning of Dynodes whilst the network is in its infancy
@@ -858,6 +857,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         } //else, asking for a specific node which is ok
 
         int nInvCount = 0;
+
+        LOCK(cs);
 
         for (auto& dnpair : mapDynodes) {
             if (dynodeOutpoint != COutPoint() && dynodeOutpoint != dnpair.second.outpoint) continue; // asked for specific vin but we are not there yet

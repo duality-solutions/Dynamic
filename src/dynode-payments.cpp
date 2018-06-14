@@ -351,6 +351,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         if (nDnCount > 200) {
             if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
+                LOCK(cs_main);
                 // Asking for the payments list multiple times in a short period of time is no good
                 LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
                 Misbehaving(pfrom->GetId(), 20);
@@ -421,6 +422,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         int nDos = 0;
         if(!vote.CheckSignature(dnInfo.pubKeyDynode, nCachedBlockHeight, nDos)) {
             if(nDos) {
+                LOCK(cs_main);
                 LogPrintf("DYNODEPAYMENTVOTE -- ERROR: invalid signature\n");
                 Misbehaving(pfrom->GetId(), nDos);
             } else {
@@ -738,6 +740,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL, nRank);
         // Only ban for new dnw which is out of bounds, for old dnw DN list itself might be way too much off
         if(nRank > DNPAYMENTS_SIGNATURES_TOTAL*2 && nBlockHeight > nValidationHeight) {
+            LOCK(cs_main);
             strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL*2, nRank);
             LogPrintf("CDynodePaymentVote::IsValid -- Error: %s\n", strError);
         }
