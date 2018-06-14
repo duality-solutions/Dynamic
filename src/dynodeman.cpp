@@ -21,7 +21,7 @@
 /** Dynode manager */
 CDynodeMan dnodeman;
 
-const std::string CDynodeMan::SERIALIZATION_VERSION_STRING = "CDynodeMan-Version-1";
+const std::string CDynodeMan::SERIALIZATION_VERSION_STRING = "CDynodeMan-Version-2";
 
 struct CompareLastPaidBlock
 {
