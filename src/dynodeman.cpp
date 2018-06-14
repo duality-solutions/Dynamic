@@ -1351,28 +1351,6 @@ std::string CDynodeMan::ToString() const
     return info.str();
 }
 
-void CDynodeMan::UpdateDynodeList(CDynodeBroadcast dnb, CConnman& connman)
-{
-    LOCK2(cs_main, cs);
-    mapSeenDynodePing.insert(std::make_pair(dnb.lastPing.GetHash(), dnb.lastPing));
-    mapSeenDynodeBroadcast.insert(std::make_pair(dnb.GetHash(), std::make_pair(GetTime(), dnb)));
-
-    LogPrintf("CDynodeMan::UpdateDynodeList -- Dynode=%s  addr=%s\n", dnb.outpoint.ToStringShort(), dnb.addr.ToString());
-
-    CDynode* pdn = Find(dnb.outpoint);
-    if(pdn == NULL) {
-        if(Add(dnb)) {
-            dynodeSync.BumpAssetLastTime("CDynodeMan::UpdateDynodeList - new");
-        }
-    } else {
-        CDynodeBroadcast dnbOld = mapSeenDynodeBroadcast[CDynodeBroadcast(*pdn).GetHash()].second;
-        if(pdn->UpdateFromNewBroadcast(dnb, connman)) {
-            dynodeSync.BumpAssetLastTime("CDynodeMan::UpdateDynodeList - seen");
-            mapSeenDynodeBroadcast.erase(dnbOld.GetHash());
-        }
-    }
-}
-
 bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos, CConnman& connman)
 {
     // Need to lock cs_main here to ensure consistent locking order because the SimpleCheck call below locks cs_main

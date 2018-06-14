@@ -279,11 +279,14 @@ UniValue dynode(const JSONRPCRequest& request)
 
                 bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+                int nDoS;
+                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+                    strError = "Failed to verify DNB";
+                    fResult = false;
+                }
+
                 statusObj.push_back(Pair("result", fResult ? "successful" : "failed"));
-                if(fResult) {
-                    dnodeman.UpdateDynodeList(dnb, *g_connman);
-                    dnb.Relay(*g_connman);
-                } else {
+                if(!fResult) {
                     statusObj.push_back(Pair("errorMessage", strError));
                 }
                 dnodeman.NotifyDynodeUpdates(*g_connman);
@@ -329,14 +332,18 @@ UniValue dynode(const JSONRPCRequest& request)
 
             bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+            int nDoS;
+            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+                strError = "Failed to verify DNB";
+                fResult = false;
+            }
+
             UniValue statusObj(UniValue::VOBJ);
             statusObj.push_back(Pair("alias", dne.getAlias()));
             statusObj.push_back(Pair("result", fResult ? "successful" : "failed"));
 
             if (fResult) {
                 nSuccessful++;
-                dnodeman.UpdateDynodeList(dnb, *g_connman);
-                dnb.Relay(*g_connman);
             } else {
                 nFailed++;
                 statusObj.push_back(Pair("errorMessage", strError));
@@ -795,10 +802,9 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
     if (strCommand == "relay")
     {
         if (request.params.size() < 2 || request.params.size() > 3)
-            throw JSONRPCError(RPC_INVALID_PARAMETER,   "dynodebroadcast relay \"hexstring\" ( fast )\n"
+            throw JSONRPCError(RPC_INVALID_PARAMETER,   "dynodebroadcast relay \"hexstring\"\n"
                                                         "\nArguments:\n"
-                                                        "1. \"hex\"      (string, required) Broadcast messages hex string\n"
-                                                        "2. fast       (string, optional) If none, using safe method\n");
+                                                        "1. \"hex\"      (string, required) Broadcast messages hex string\n");
 
         std::vector<CDynodeBroadcast> vecDnb;
 
@@ -807,7 +813,6 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 
         int nSuccessful = 0;
         int nFailed = 0;
-        bool fSafe = request.params.size() == 2;
         UniValue returnObj(UniValue::VOBJ);
 
         // verify all signatures first, bailout if any of them broken
@@ -820,13 +825,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
             int nDos = 0;
             bool fResult;
             if (dnb.CheckSignature(nDos)) {
-                if (fSafe) {
-                    fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
-                } else {
-                    dnodeman.UpdateDynodeList(dnb, *g_connman);
-                    dnb.Relay(*g_connman);
-                    fResult = true;
-                }
+                fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
                 dnodeman.NotifyDynodeUpdates(*g_connman);
             } else fResult = false;
 
