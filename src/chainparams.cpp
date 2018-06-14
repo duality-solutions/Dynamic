@@ -119,7 +119,6 @@ public:
         consensus.nBudgetPaymentsStartBlock = 2055; // actual historical value
         consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
-        consensus.nBudgetProposalEstablishingTime = 24 * 60 * 60;
         consensus.nSuperblockStartBlock = 2055;
         consensus.nSuperblockCycle = 20545; // 675 (Blocks per day) x 365.25 (Days per Year) / 12 = 20545
         consensus.nGovernanceMinQuorum = 10;
@@ -238,7 +237,6 @@ public:
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
-        consensus.nBudgetProposalEstablishingTime = 60 * 20;
         consensus.nSuperblockStartBlock = 0;
         consensus.nSuperblockCycle = 24; // Superblocks can be issued hourly on testnet
         consensus.nGovernanceMinQuorum = 1;
@@ -347,7 +345,6 @@ public:
         consensus.nBudgetPaymentsStartBlock = 1000;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
-        consensus.nBudgetProposalEstablishingTime = 60 * 20;
         consensus.nSuperblockStartBlock = 0;
         consensus.nSuperblockCycle = 10;
         consensus.nGovernanceMinQuorum = 1;

@@ -1615,13 +1615,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
             CDynode dn;
 
-            if(!dnodeman.Get(pstx.vin.prevout, dn)) {
-                LogPrint("privatesend", "PSTX -- Can't find dynode %s to verify %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
+            if(!dnodeman.Get(pstx.dynodeOutpoint, dn)) {
+                LogPrint("privatesend", "PSTX -- Can't find dynode %s to verify %s\n", pstx.dynodeOutpoint.ToStringShort(), hashTx.ToString());
                 return false;
             }
 
             if(!dn.fAllowMixingTx) {
-                LogPrint("privatesend", "PSTX -- Dynode %s is sending too many transactions %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
+                LogPrint("privatesend", "PSTX -- Dynode %s is sending too many transactions %s\n", pstx.dynodeOutpoint.ToStringShort(), hashTx.ToString());
                 return true;
                 // TODO: Not an error? Could it be that someone is relaying old PSTXes
                 // we have no idea about (e.g we were offline)? How to handle them?
@@ -1634,7 +1634,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
             LogPrintf("PSTX -- Got Dynode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
-            dnodeman.DisallowMixing(pstx.vin.prevout);
+            dnodeman.DisallowMixing(pstx.dynodeOutpoint);
         }
 
         LOCK(cs_main);

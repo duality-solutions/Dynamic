@@ -26,7 +26,7 @@ private:
 
     static const int PSEG_UPDATE_SECONDS        = 3 * 60 * 60;
 
-    static const int LAST_PAID_SCAN_BLOCKS      = 100;
+    static const int LAST_PAID_SCAN_BLOCKS;
 
     static const int MIN_POSE_PROTO_VERSION     = 70600;
     static const int MAX_POSE_CONNECTIONS       = 10;
@@ -192,9 +192,7 @@ public:
 
     std::string ToString() const;
 
-    /// Update Dynode list and maps using provided CDynodeBroadcast
-    void UpdateDynodeList(CDynodeBroadcast dnb, CConnman& connman);
-    /// Perform complete check and only then update list and maps
+    /// Perform complete check and only then update dynode list and maps using provided CDynodeBroadcast
     bool CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb, int& nDos, CConnman& connman);
     bool IsDnbRecoveryRequested(const uint256& hash) { return mDnbRecoveryRequests.count(hash); }
 

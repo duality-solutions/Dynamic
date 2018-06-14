@@ -38,7 +38,7 @@ CCriticalSection cs_mapDynodePaymentVotes;
 *   - When non-superblocks are detected, the normal schedule should be maintained
 */
 
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward,std::string &strErrorRet)
+bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward,std::string& strErrorRet)
 {
     strErrorRet = "";
 
@@ -351,6 +351,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 
         if (nDnCount > 200) {
             if(netfulfilledman.HasFulfilledRequest(pfrom->addr, NetMsgType::DYNODEPAYMENTSYNC)) {
+                LOCK(cs_main);
                 // Asking for the payments list multiple times in a short period of time is no good
                 LogPrintf("DYNODEPAYMENTSYNC -- peer already asked me for the list, peer=%d\n", pfrom->id);
                 Misbehaving(pfrom->GetId(), 20);
@@ -405,22 +406,23 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
             return;
         }
 
-        if(!CanVote(vote.vinDynode.prevout, vote.nBlockHeight)) {
-            LogPrintf("DYNODEPAYMENTVOTE -- Dynode already voted, Dynode=%s\n", vote.vinDynode.prevout.ToStringShort());
+        if(!CanVote(vote.dynodeOutpoint, vote.nBlockHeight)) {
+            LogPrintf("DYNODEPAYMENTVOTE -- Dynode already voted, Dynode=%s\n", vote.dynodeOutpoint.ToStringShort());
             return;
         }
 
         dynode_info_t dnInfo;
-        if(!dnodeman.GetDynodeInfo(vote.vinDynode.prevout, dnInfo)) {
+        if(!dnodeman.GetDynodeInfo(vote.dynodeOutpoint, dnInfo)) {
             // dn was not found, so we can't check vote, some info is probably missing
-            LogPrintf("DYNODEPAYMENTVOTE -- Dynode is missing %s\n", vote.vinDynode.prevout.ToStringShort());
-            dnodeman.AskForDN(pfrom, vote.vinDynode.prevout, connman);
+            LogPrintf("DYNODEPAYMENTVOTE -- Dynode is missing %s\n", vote.dynodeOutpoint.ToStringShort());
+            dnodeman.AskForDN(pfrom, vote.dynodeOutpoint, connman);
             return;
         }
 
         int nDos = 0;
         if(!vote.CheckSignature(dnInfo.pubKeyDynode, nCachedBlockHeight, nDos)) {
             if(nDos) {
+                LOCK(cs_main);
                 LogPrintf("DYNODEPAYMENTVOTE -- ERROR: invalid signature\n");
                 Misbehaving(pfrom->GetId(), nDos);
             } else {
@@ -429,7 +431,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
             }
             // Either our info or vote info could be outdated.
             // In case our info is outdated, ask for an update,
-            dnodeman.AskForDN(pfrom, vote.vinDynode.prevout, connman);
+            dnodeman.AskForDN(pfrom, vote.dynodeOutpoint, connman);
             // but there is nothing we can do if vote info itself is outdated
             // (i.e. it was signed by a DN which changed its key),
             // so just quit here.
@@ -441,7 +443,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
         CDynamicAddress address2(address1);
 
         LogPrint("dnpayments", "DYNODEPAYMENTVOTE -- vote: address=%s, nBlockHeight=%d, nHeight=%d, prevout=%s, hash=%s new\n",
-                    address2.ToString(), vote.nBlockHeight, nCachedBlockHeight, vote.vinDynode.prevout.ToStringShort(), nHash.ToString());
+                    address2.ToString(), vote.nBlockHeight, nCachedBlockHeight, vote.dynodeOutpoint.ToStringShort(), nHash.ToString());
 
         if(AddPaymentVote(vote)){
             vote.Relay(connman);
@@ -453,7 +455,7 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, std::string& strCommand, CDat
 bool CDynodePaymentVote::Sign()
 {
     std::string strError;
-    std::string strMessage = vinDynode.prevout.ToStringShort() +
+    std::string strMessage = dynodeOutpoint.ToStringShort() +
                 boost::lexical_cast<std::string>(nBlockHeight) +
                 ScriptToAsmStr(payee);
 
@@ -627,7 +629,7 @@ std::string CDynodeBlockPayees::GetRequiredPaymentsString()
 {
     LOCK(cs_vecPayees);
 
-    std::string strRequiredPayments = "Unknown";
+    std::string strRequiredPayments = "";
 
     BOOST_FOREACH(CDynodePayee& payee, vecPayees)
     {
@@ -635,12 +637,14 @@ std::string CDynodeBlockPayees::GetRequiredPaymentsString()
         ExtractDestination(payee.GetPayee(), address1);
         CDynamicAddress address2(address1);
 
-        if (strRequiredPayments != "Unknown") {
-            strRequiredPayments += ", " + address2.ToString() + ":" + boost::lexical_cast<std::string>(payee.GetVoteCount());
-        } else {
-            strRequiredPayments = address2.ToString() + ":" + boost::lexical_cast<std::string>(payee.GetVoteCount());
-        }
+        if (!strRequiredPayments.empty())
+            strRequiredPayments += ", ";
+
+        strRequiredPayments += strprintf("%s:%d", address2.ToString(), payee.GetVoteCount());
     }
+
+    if (strRequiredPayments.empty())
+        return "Unknown";
 
     return strRequiredPayments;
 }
@@ -694,11 +698,11 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
 {
     dynode_info_t dnInfo;
 
-    if(!dnodeman.GetDynodeInfo(vinDynode.prevout, dnInfo)) {
-        strError = strprintf("Unknown Dynode: prevout=%s", vinDynode.prevout.ToStringShort());
+    if(!dnodeman.GetDynodeInfo(dynodeOutpoint, dnInfo)) {
+        strError = strprintf("Unknown Dynode=%s", dynodeOutpoint.ToStringShort());
         // Only ask if we are already synced and still have no idea about that Dynode
         if(dynodeSync.IsDynodeListSynced()) {
-            dnodeman.AskForDN(pnode, vinDynode.prevout, connman);
+            dnodeman.AskForDN(pnode, dynodeOutpoint, connman);
         }
 
         return false;
@@ -720,13 +724,13 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
 
     // Only dynodes should try to check dynode rank for old votes - they need to pick the right winner for future blocks.
     // Regular clients (miners included) need to verify dynode rank for future block votes only.
-    if(!fDyNode && nBlockHeight < nValidationHeight) return true;
+    if(!fDynodeMode && nBlockHeight < nValidationHeight) return true;
 
     int nRank;
 
-    if(!dnodeman.GetDynodeRank(vinDynode.prevout, nRank, nBlockHeight - 101, nMinRequiredProtocol)) {
+    if(!dnodeman.GetDynodeRank(dynodeOutpoint, nRank, nBlockHeight - 101, nMinRequiredProtocol)) {
         LogPrint("dnpayments", "CDynodePaymentVote::IsValid -- Can't calculate rank for dynode %s\n",
-                    vinDynode.prevout.ToStringShort());
+                    dynodeOutpoint.ToStringShort());
         return false;
     }
 
@@ -736,6 +740,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL, nRank);
         // Only ban for new dnw which is out of bounds, for old dnw DN list itself might be way too much off
         if(nRank > DNPAYMENTS_SIGNATURES_TOTAL*2 && nBlockHeight > nValidationHeight) {
+            LOCK(cs_main);
             strError = strprintf("Dynode is not in the top %d (%d)", DNPAYMENTS_SIGNATURES_TOTAL*2, nRank);
             LogPrintf("CDynodePaymentVote::IsValid -- Error: %s\n", strError);
         }
@@ -750,7 +755,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
 {
     // DETERMINE IF WE SHOULD BE VOTING FOR THE NEXT PAYEE
 
-    if(fLiteMode || !fDyNode) return false;
+    if(fLiteMode || !fDynodeMode) return false;
 
     // We have little chances to pick the right winner if winners list is out of sync
     // but we have no choice, so we'll try. However it doesn't make sense to even try to do so
@@ -783,7 +788,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
         return false;
     }
 
-    LogPrintf("CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", dnInfo.vin.prevout.ToStringShort());
+    LogPrintf("CDynodePayments::ProcessBlock -- Dynode found by GetNextDynodeInQueueForPayment(): %s\n", dnInfo.outpoint.ToStringShort());
 
     CScript payee = GetScriptForDestination(dnInfo.pubKeyCollateralAddress.GetID());
 
@@ -841,7 +846,7 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
                         continue;
                     }
                     auto vote = mapDynodePaymentVotes[voteHash];
-                    if (vote.vinDynode.prevout == dn.second.vin.prevout) {
+                    if (vote.dynodeOutpoint == dn.second.outpoint) {
                         payee = vote.payee;
                         found = true;
                         break;
@@ -852,8 +857,8 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
 
         if (!found) {
             debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   %s - no vote received\n",
-                                  dn.second.vin.prevout.ToStringShort());
-            mapDynodesDidNotVote[dn.second.vin.prevout]++;
+                                  dn.second.outpoint.ToStringShort());
+            mapDynodesDidNotVote[dn.second.outpoint]++;
             continue;
         }
 
@@ -862,7 +867,7 @@ void CDynodePayments::CheckPreviousBlockVotes(int nPrevBlockHeight)
         CDynamicAddress address2(address1);
 
         debugStr += strprintf("CDynodePayments::CheckPreviousBlockVotes --   %s - voted for %s\n",
-                              dn.second.vin.prevout.ToStringShort(), address2.ToString());
+                              dn.second.outpoint.ToStringShort(), address2.ToString());
     }
     debugStr += "CDynodePayments::CheckPreviousBlockVotes -- Dynodes which missed a vote in the past:\n";
     for (auto it : mapDynodesDidNotVote) {
@@ -885,7 +890,7 @@ bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValida
     // do not ban by default
     nDos = 0;
 
-    std::string strMessage = vinDynode.prevout.ToStringShort() +
+    std::string strMessage = dynodeOutpoint.ToStringShort() +
                 boost::lexical_cast<std::string>(nBlockHeight) +
                 ScriptToAsmStr(payee);
 
@@ -897,7 +902,7 @@ bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValida
         if(dynodeSync.IsDynodeListSynced() && nBlockHeight > nValidationHeight) {
             nDos = 20;
         }
-        return error("CDynodePaymentVote::CheckSignature -- Got bad Dynode payment signature, Dynode=%s, error: %s", vinDynode.prevout.ToStringShort().c_str(), strError);
+        return error("CDynodePaymentVote::CheckSignature -- Got bad Dynode payment signature, Dynode=%s, error: %s", dynodeOutpoint.ToStringShort(), strError);
     }
 
     return true;
@@ -907,7 +912,7 @@ std::string CDynodePaymentVote::ToString() const
 {
     std::ostringstream info;
 
-    info << vinDynode.prevout.ToStringShort() <<
+    info << dynodeOutpoint.ToStringShort() <<
             ", " << nBlockHeight <<
             ", " << ScriptToAsmStr(payee) <<
             ", " << (int)vchSig.size();

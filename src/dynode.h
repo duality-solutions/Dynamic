@@ -32,7 +32,7 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 class CDynodePing
 {
 public:
-    CTxIn vin{};
+    COutPoint dynodeOutpoint{};
     uint256 blockHash{};
     int64_t sigTime{}; //dnb message times
     std::vector<unsigned char> vchSig{};
@@ -48,7 +48,21 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(blockHash);
         READWRITE(sigTime);
         READWRITE(vchSig);
@@ -65,7 +79,7 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vin;
+        ss << dynodeOutpoint << uint8_t{} << 0xffffffff;
         ss << sigTime;
         return ss.GetHash();
     }
@@ -78,15 +92,21 @@ public:
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
 
+    explicit operator bool() const;
 };
 
 inline bool operator==(const CDynodePing& a, const CDynodePing& b)
 {
-    return a.vin == b.vin && a.blockHash == b.blockHash;
+    return a.dynodeOutpoint == b.dynodeOutpoint && a.blockHash == b.blockHash;
 }
 inline bool operator!=(const CDynodePing& a, const CDynodePing& b)
 {
     return !(a == b);
+}
+
+inline CDynodePing::operator bool() const
+{
+    return *this != CDynodePing();
 }
 
 struct dynode_info_t 
@@ -100,17 +120,17 @@ struct dynode_info_t
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
 
     dynode_info_t(int activeState, int protoVer, int64_t sTime,
-                      COutPoint const& outpoint, CService const& addr,
+                      COutPoint const& outpnt, CService const& addr,
                       CPubKey const& pkCollAddr, CPubKey const& pkDN) :
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
-        vin{outpoint}, addr{addr},
+        outpoint{outpnt}, addr{addr},
         pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN} {}
 
     int nActiveState = 0;
     int nProtocolVersion = 0;
     int64_t sigTime = 0; //dnb message time
 
-    CTxIn vin{};
+    COutPoint outpoint{};
     CService addr{};
     CPubKey pubKeyCollateralAddress{};
     CPubKey pubKeyDynode{};
@@ -175,7 +195,21 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         LOCK(cs);
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                outpoint = txin.prevout;
+            } else {
+                txin = CTxIn(outpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(outpoint);
+        }
         READWRITE(addr);
         READWRITE(pubKeyCollateralAddress);
         READWRITE(pubKeyDynode);
@@ -209,7 +243,7 @@ public:
 
     bool IsPingedWithin(int nSeconds, int64_t nTimeToCheckAt = -1)
     {
-        if(lastPing == CDynodePing()) return false;
+        if(!lastPing) return false;
 
         if(nTimeToCheckAt == -1) {
             nTimeToCheckAt = GetAdjustedTime();
@@ -293,11 +327,11 @@ public:
 
 inline bool operator==(const CDynode& a, const CDynode& b)
 {
-    return a.vin == b.vin;
+    return a.outpoint == b.outpoint;
 }
 inline bool operator!=(const CDynode& a, const CDynode& b)
 {
-    return !(a.vin == b.vin);
+    return !(a.outpoint == b.outpoint);
 }
 
 //
@@ -318,7 +352,21 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                outpoint = txin.prevout;
+            } else {
+                txin = CTxIn(outpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(outpoint);
+        }
         READWRITE(addr);
         READWRITE(pubKeyCollateralAddress);
         READWRITE(pubKeyDynode);
@@ -331,9 +379,9 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-            ss << vin;
-            ss << pubKeyCollateralAddress;
-            ss << sigTime;
+        ss << outpoint << uint8_t{} << 0xffffffff;
+        ss << pubKeyCollateralAddress;
+        ss << sigTime;
         return ss.GetHash();
     }
 
@@ -355,8 +403,8 @@ public:
 class CDynodeVerification
 {
 public:
-    CTxIn vin1{};
-    CTxIn vin2{};
+    COutPoint dynodeOutpoint1{};
+    COutPoint dynodeOutpoint2{};
     CService addr{};
     int nonce{};
     int nBlockHeight{};
@@ -375,9 +423,27 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin1);
-        READWRITE(vin2);
-        READWRITE(addr);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin1{};
+            CTxIn txin2{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin1);
+                READWRITE(txin2);
+                dynodeOutpoint1 = txin1.prevout;
+                dynodeOutpoint2 = txin2.prevout;
+            } else {
+                txin1 = CTxIn(dynodeOutpoint1);
+                txin2 = CTxIn(dynodeOutpoint2);
+                READWRITE(txin1);
+                READWRITE(txin2);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint1);
+            READWRITE(dynodeOutpoint2);
+        }        READWRITE(addr);
         READWRITE(nonce);
         READWRITE(nBlockHeight);
         READWRITE(vchSig1);
@@ -387,8 +453,9 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vin1;
-        ss << vin2;
+        // adding dummy values here to match old hashing format
+        ss << dynodeOutpoint1 << uint8_t{} << 0xffffffff;
+        ss << dynodeOutpoint2 << uint8_t{} << 0xffffffff;
         ss << addr;
         ss << nonce;
         ss << nBlockHeight;

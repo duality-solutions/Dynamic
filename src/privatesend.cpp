@@ -39,9 +39,9 @@ bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 
 bool CPrivatesendQueue::Sign()
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
 
     if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
         LogPrintf("CPrivatesendQueue::Sign -- SignMessage() failed, %s\n", ToString());
@@ -53,7 +53,7 @@ bool CPrivatesendQueue::Sign()
 
 bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 {
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
     std::string strError = "";
 
     if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
@@ -77,7 +77,7 @@ bool CPrivatesendQueue::Relay(CConnman& connman)
 
 bool CPrivatesendBroadcastTx::Sign()
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
 
@@ -476,7 +476,7 @@ void ThreadCheckPrivateSend(CConnman& connman)
                 dnpayments.CheckAndRemove();
                 instantsend.CheckAndRemove();
             }
-            if(fDyNode && (nTick % (60 * 5) == 0)) {
+            if(fDynodeMode && (nTick % (60 * 5) == 0)) {
                 dnodeman.DoFullVerificationStep(connman);
             }
 

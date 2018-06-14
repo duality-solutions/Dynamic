@@ -207,7 +207,7 @@ CGovernanceVote::CGovernanceVote()
     : fValid(true),
       fSynced(false),
       nVoteSignal(int(VOTE_SIGNAL_NONE)),
-      vinDynode(),
+      dynodeOutpoint(),
       nParentHash(),
       nVoteOutcome(int(VOTE_OUTCOME_NONE)),
       nTime(0),
@@ -218,7 +218,7 @@ CGovernanceVote::CGovernanceVote(COutPoint outpointDynodeIn, uint256 nParentHash
     : fValid(true),
       fSynced(false),
       nVoteSignal(eVoteSignalIn),
-      vinDynode(outpointDynodeIn),
+      dynodeOutpoint(outpointDynodeIn),
       nParentHash(nParentHashIn),
       nVoteOutcome(eVoteOutcomeIn),
       nTime(GetAdjustedTime()),
@@ -238,7 +238,7 @@ bool CGovernanceVote::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
     CKey keyCollateralAddress;
 
     std::string strError;
-    std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
     if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
@@ -276,15 +276,15 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
     }
 
     dynode_info_t infoDn;
-    if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
-        LogPrint("gobject", "CGovernanceVote::IsValid -- Unknown Dynode - %s\n", vinDynode.prevout.ToStringShort());
+    if(!dnodeman.GetDynodeInfo(dynodeOutpoint, infoDn)) {
+        LogPrint("gobject", "CGovernanceVote::IsValid -- Unknown Dynode - %s\n", dynodeOutpoint.ToStringShort());
         return false;
     }
 
     if(!fSignatureCheck) return true;
 
     std::string strError;
-    std::string strMessage = vinDynode.prevout.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
         boost::lexical_cast<std::string>(nVoteSignal) + "|" + boost::lexical_cast<std::string>(nVoteOutcome) + "|" + boost::lexical_cast<std::string>(nTime);
 
     if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchSig, strMessage, strError)) {
@@ -297,7 +297,7 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
 
 bool operator==(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 {
-    bool fResult = ((vote1.vinDynode == vote2.vinDynode) &&
+    bool fResult = ((vote1.dynodeOutpoint == vote2.dynodeOutpoint) &&
                     (vote1.nParentHash == vote2.nParentHash) &&
                     (vote1.nVoteOutcome == vote2.nVoteOutcome) &&
                     (vote1.nVoteSignal == vote2.nVoteSignal) &&
@@ -307,11 +307,11 @@ bool operator==(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 
 bool operator<(const CGovernanceVote& vote1, const CGovernanceVote& vote2)
 {
-    bool fResult = (vote1.vinDynode < vote2.vinDynode);
+    bool fResult = (vote1.dynodeOutpoint < vote2.dynodeOutpoint);
     if(!fResult) {
         return false;
     }
-    fResult = (vote1.vinDynode == vote2.vinDynode);
+    fResult = (vote1.dynodeOutpoint == vote2.dynodeOutpoint);
 
     fResult = fResult && (vote1.nParentHash < vote2.nParentHash);
     if(!fResult) {

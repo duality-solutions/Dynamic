@@ -82,20 +82,17 @@ public:
     // memory only
     CScript prevPubKey;
     bool fHasSig; // flag to indicate if signed
-    int nSentTimes; //times we've sent this anonymously
 
     CTxPSIn(const CTxIn& txin, const CScript& script) :
         CTxIn(txin),
         prevPubKey(script),
-        fHasSig(false),
-        nSentTimes(0)
+        fHasSig(false)
         {}
 
     CTxPSIn() :
         CTxIn(),
         prevPubKey(),
-        fHasSig(false),
-        nSentTimes(0)
+        fHasSig(false)
         {}
 };
 
@@ -143,7 +140,7 @@ class CPrivatesendQueue
 {
 public:
     int nDenom;
-    CTxIn vin;
+    COutPoint dynodeOutpoint;
     int64_t nTime;
     bool fReady; //ready for submit
     std::vector<unsigned char> vchSig;
@@ -152,7 +149,7 @@ public:
 
     CPrivatesendQueue() :
         nDenom(0),
-        vin(CTxIn()),
+        dynodeOutpoint(COutPoint()),
         nTime(0),
         fReady(false),
         vchSig(std::vector<unsigned char>()),
@@ -161,7 +158,7 @@ public:
 
     CPrivatesendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
         nDenom(nDenom),
-        vin(CTxIn(outpoint)),
+        dynodeOutpoint(outpoint),
         nTime(nTime),
         fReady(fReady),
         vchSig(std::vector<unsigned char>()),
@@ -173,7 +170,21 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(nDenom);
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(nTime);
         READWRITE(fReady);
         READWRITE(vchSig);
@@ -198,12 +209,12 @@ public:
     std::string ToString()
     {
         return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, dynode=%s",
-                        nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
+                        nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", dynodeOutpoint.ToStringShort());
     }
 
     friend bool operator==(const CPrivatesendQueue& a, const CPrivatesendQueue& b)
     {
-        return a.nDenom == b.nDenom && a.vin.prevout == b.vin.prevout && a.nTime == b.nTime && a.fReady == b.fReady;
+        return a.nDenom == b.nDenom && a.dynodeOutpoint == b.dynodeOutpoint && a.nTime == b.nTime && a.fReady == b.fReady;
     }
 };
 
@@ -218,14 +229,14 @@ private:
 
 public:
     CTransaction tx;
-    CTxIn vin;
+    COutPoint dynodeOutpoint;
     std::vector<unsigned char> vchSig;
     int64_t sigTime;
 
     CPrivatesendBroadcastTx() :
         nConfirmedHeight(-1),
         tx(),
-        vin(),
+        dynodeOutpoint(),
         vchSig(),
         sigTime(0)
         {}
@@ -233,7 +244,7 @@ public:
     CPrivatesendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
         nConfirmedHeight(-1),
         tx(tx),
-        vin(CTxIn(outpoint)),
+        dynodeOutpoint(outpoint),
         vchSig(),
         sigTime(sigTime)
         {}
@@ -243,7 +254,21 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(tx);
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(vchSig);
         READWRITE(sigTime);
     }

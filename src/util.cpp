@@ -95,7 +95,7 @@
 #include <boost/thread.hpp>
 
 //Dynamic only features
-bool fDyNode = false;
+bool fDynodeMode = false;
 bool fLiteMode = false;
 /**
     nWalletBackups:

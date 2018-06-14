@@ -23,7 +23,7 @@ CActiveDynode activeDynode;
 void CActiveDynode::ManageState(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         LogPrint("Dynode", "CActiveDynode::ManageState -- Not a Dynode, returning\n");
         return;
     }
@@ -251,7 +251,7 @@ void CActiveDynode::ManageStateRemote()
         }
         if(nState != ACTIVE_DYNODE_STARTED) {
             LogPrintf("CActiveDynode::ManageStateRemote -- STARTED!\n");
-            outpoint = infoDn.vin.prevout;
+            outpoint = infoDn.outpoint;
             service = infoDn.addr;
             fPingerEnabled = true;
             nState = ACTIVE_DYNODE_STARTED;

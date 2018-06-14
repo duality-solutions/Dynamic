@@ -94,7 +94,7 @@ private:
     bool fValid; //if the vote is currently valid / counted
     bool fSynced; //if we've sent this to our peers
     int nVoteSignal; // see VOTE_ACTIONS above
-    CTxIn vinDynode;
+    COutPoint dynodeOutpoint;
     uint256 nParentHash;
     int nVoteOutcome; // see VOTE_OUTCOMES above
     int64_t nTime;
@@ -128,7 +128,7 @@ public:
         return CGovernanceVoting::ConvertOutcomeToString(GetOutcome());
     }
 
-    const COutPoint& GetDynodeOutpoint() const { return vinDynode.prevout; }
+    const COutPoint& GetDynodeOutpoint() const { return dynodeOutpoint; }
 
     /**
     *   GetHash()
@@ -139,7 +139,7 @@ public:
     uint256 GetHash() const
     {
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinDynode;
+        ss << dynodeOutpoint << uint8_t{} << 0xffffffff;
         ss << nParentHash;
         ss << nVoteSignal;
         ss << nVoteOutcome;
@@ -150,46 +150,32 @@ public:
     std::string ToString() const
     {
         std::ostringstream ostr;
-        ostr << vinDynode.ToString() << ":"
+        ostr << dynodeOutpoint.ToStringShort() << ":"
              << nTime << ":"
              << CGovernanceVoting::ConvertOutcomeToString(GetOutcome()) << ":"
              << CGovernanceVoting::ConvertSignalToString(GetSignal());
         return ostr.str();
     }
 
-    /**
-    *   GetTypeHash()
-    *
-    *   GET HASH WITH DETERMINISTIC VALUE OF DYNODE-VIN/PARENT-HASH/VOTE-SIGNAL
-    *
-    *   This hash collides with previous Dynode votes when they update their votes on governance objects.
-    *   With 12.1 there's various types of votes (funding, valid, delete, etc), so this is the deterministic hash
-    *   that will collide with the previous vote and allow the system to update.
-    *
-    *   --
-    *
-    *   We do not include an outcome, because that can change when a Dynode updates their vote from yes to no
-    *   on funding a specific project for example.
-    *   We do not include a time because it will be updated each time the vote is updated, changing the hash
-    */
-    uint256 GetTypeHash() const
-    {
-        // CALCULATE HOW TO STORE VOTE IN governance.mapVotes
-
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vinDynode;
-        ss << nParentHash;
-        ss << nVoteSignal;
-        //  -- no outcome
-        //  -- timeless
-        return ss.GetHash();
-    }
-
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vinDynode);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70700) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(nParentHash);
         READWRITE(nVoteOutcome);
         READWRITE(nVoteSignal);

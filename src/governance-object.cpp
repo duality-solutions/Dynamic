@@ -15,8 +15,8 @@
 
 #include <univalue.h>
 
-CGovernanceObject::CGovernanceObject()
-: cs(),
+CGovernanceObject::CGovernanceObject():
+ cs(),
   nObjectType(GOVERNANCE_OBJECT_UNKNOWN),
   nHashParent(),
   nRevision(0),
@@ -24,7 +24,7 @@ CGovernanceObject::CGovernanceObject()
   nDeletionTime(0),
   nCollateralHash(),
   strData(),
-  vinDynode(),
+  dynodeOutpoint(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -43,8 +43,8 @@ CGovernanceObject::CGovernanceObject()
     LoadData();
 }
 
-CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int64_t nTimeIn, uint256 nCollateralHashIn, std::string strDataIn)
-: cs(),
+CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int64_t nTimeIn, uint256 nCollateralHashIn, std::string strDataIn):
+  cs(),
   nObjectType(GOVERNANCE_OBJECT_UNKNOWN),
   nHashParent(nHashParentIn),
   nRevision(nRevisionIn),
@@ -52,7 +52,7 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
   nDeletionTime(0),
   nCollateralHash(nCollateralHashIn),
   strData(strDataIn),
-  vinDynode(),
+  dynodeOutpoint(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -71,8 +71,8 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
     LoadData();
 }
 
-CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
-: cs(),
+CGovernanceObject::CGovernanceObject(const CGovernanceObject& other):
+  cs(),
   nObjectType(other.nObjectType),
   nHashParent(other.nHashParent),
   nRevision(other.nRevision),
@@ -80,7 +80,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
   nDeletionTime(other.nDeletionTime),
   nCollateralHash(other.nCollateralHash),
   strData(other.strData),
-  vinDynode(other.vinDynode),
+  dynodeOutpoint(other.dynodeOutpoint),
   vchSig(other.vchSig),
   fCachedLocalValidity(other.fCachedLocalValidity),
   strLocalValidityError(other.strLocalValidityError),
@@ -101,6 +101,18 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
                                     CGovernanceException& exception,
                                     CConnman& connman)
 {
+    LOCK(cs);
+
+    // do not process already known valid votes twice
+    if (fileVotes.HasVote(vote.GetHash())) {
+        // nothing to do here, not an error
+        std::ostringstream ostr;
+        ostr << "CGovernanceObject::ProcessVote -- Already known valid vote";
+        LogPrint("gobject", "%s\n", ostr.str());
+        exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_NONE);
+        return false;
+    }
+
     if(!dnodeman.Has(vote.GetDynodeOutpoint())) {
         std::ostringstream ostr;
         ostr << "CGovernanceObject::ProcessVote -- Dynode index not found";
@@ -190,9 +202,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         return false;
     }
     voteInstance = vote_instance_t(vote.GetOutcome(), nVoteTimeUpdate, vote.GetTimestamp());
-    if(!fileVotes.HasVote(vote.GetHash())) {
-        fileVotes.AddVote(vote);
-    }
+    fileVotes.AddVote(vote);
     fDirtyCache = true;
     return true;
 }
@@ -218,15 +228,15 @@ std::string CGovernanceObject::GetSignatureMessage() const
         boost::lexical_cast<std::string>(nRevision) + "|" +
         boost::lexical_cast<std::string>(nTime) + "|" +
         strData + "|" +
-        vinDynode.prevout.ToStringShort() + "|" +
+        dynodeOutpoint.ToStringShort() + "|" +
         nCollateralHash.ToString();
 
     return strMessage;
 }
 
-void CGovernanceObject::SetDynodeVin(const COutPoint& outpoint)
+void CGovernanceObject::SetDynodeOutpoint(const COutPoint& outpoint)
 {
-    vinDynode = CTxIn(outpoint);
+    dynodeOutpoint = outpoint;
 }
 
 bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
@@ -246,8 +256,8 @@ bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
         return false;
     }
 
-    LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, vin = %s\n",
-             pubKeyDynode.GetID().ToString(), vinDynode.prevout.ToStringShort());
+    LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, dynode = %s\n",
+             pubKeyDynode.GetID().ToString(), dynodeOutpoint.ToStringShort());
 
 
     return true;
@@ -286,14 +296,13 @@ uint256 CGovernanceObject::GetHash() const
     ss << nRevision;
     ss << nTime;
     ss << strData;
-    ss << vinDynode;
+    ss << dynodeOutpoint << uint8_t{} << 0xffffffff;;
     ss << vchSig;
     // fee_tx is left out on purpose
-    uint256 h1 = ss.GetHash();
 
     DBG( printf("CGovernanceObject::GetHash %i %li %s\n", nRevision, nTime, strData.c_str()); );
 
-    return h1;
+    return ss.GetHash();
 }
 
 /**
@@ -443,11 +452,11 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
 
     if(fCheckCollateral) { 
         if((nObjectType == GOVERNANCE_OBJECT_TRIGGER) || (nObjectType == GOVERNANCE_OBJECT_WATCHDOG)) {
-            std::string strOutpoint = vinDynode.prevout.ToStringShort();
+            std::string strOutpoint = dynodeOutpoint.ToStringShort();
             dynode_info_t infoDn;
-            if(!dnodeman.GetDynodeInfo(vinDynode.prevout, infoDn)) {
+            if(!dnodeman.GetDynodeInfo(dynodeOutpoint, infoDn)) {
 
-                CDynode::CollateralStatus err = CDynode::CheckCollateral(vinDynode.prevout, CPubKey());
+                CDynode::CollateralStatus err = CDynode::CheckCollateral(dynodeOutpoint, CPubKey());
                 if (err == CDynode::COLLATERAL_UTXO_NOT_FOUND) {
                     strError = "Failed to find Dynode UTXO, missing dynode=" + strOutpoint + "\n";
                 } else if (err == CDynode::COLLATERAL_INVALID_AMOUNT) {
@@ -475,19 +484,6 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
         if (!IsCollateralValid(strError, fMissingConfirmations))
             return false;
     }
-
-    /*
-        TODO
-
-        - There might be an issue with multisig in the coinbase on mainnet, we will add support for it in a future release.
-        - Post 12.2+ (test multisig coinbase transaction)
-    */
-
-    // 12.1 - todo - compile error
-    // if(address.IsPayToScriptHash()) {
-    //     strError = "Governance system - multisig is not currently supported";
-    //     return false;
-    // }
 
     return true;
 }
@@ -517,6 +513,12 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
 
     if(!GetTransaction(nCollateralHash, txCollateral, Params().GetConsensus(), nBlockHash, true)){
         strError = strprintf("Can't find collateral tx %s", txCollateral.ToString());
+        LogPrintf("CGovernanceObject::IsCollateralValid -- %s\n", strError);
+        return false;
+    }
+
+    if(nBlockHash == uint256()) {
+        strError = strprintf("Collateral tx %s is not mined yet", txCollateral.ToString());
         LogPrintf("CGovernanceObject::IsCollateralValid -- %s\n", strError);
         return false;
     }

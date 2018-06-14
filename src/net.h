@@ -151,14 +151,9 @@ public:
     bool BindListenPort(const CService &bindAddr, std::string& strError, bool fWhitelisted = false);
     bool GetNetworkActive() const { return fNetworkActive; };
     void SetNetworkActive(bool active);
-    bool OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false, bool fFeeler = false);
+    bool OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false, bool fFeeler = false, bool fConnectToDynode = false);
+    bool OpenDynodeConnection(const CAddress &addrConnect);
     bool CheckIncomingNonce(uint64_t nonce);
-
-    // fConnectToDynode should be 'true' only if you want this node to allow to connect to itself
-    // and/or you want it to be disconnected on CDynodeMan::ProcessDynodeConnections()
-    // Unfortunately, can't make this method private like in Bitcoin,
-    // because it's used in many Dynamic-specific places (dynode, privatesend).
-    CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fCountFailure = false, bool fConnectToDynode = false);
 
     struct CFullyConnectedOnly {
         bool operator() (const CNode* pnode) const {
@@ -188,6 +183,15 @@ public:
     {
         return ForNode(id, FullyConnectedOnly, func);
     }
+
+    bool IsConnected(const CService& addr, std::function<bool(const CNode* pnode)> cond)
+    {
+        return ForNode(addr, cond, [](CNode* pnode){
+            return true;
+        });
+    }
+
+    bool IsDynodeOrDisconnectRequested(const CService& addr);
 
     template <typename... Args>
     void PushMessageWithVersionAndFlag(CNode* pnode, int nVersion, int flag, const std::string& sCommand, Args&&... args)
@@ -431,6 +435,7 @@ private:
     CNode* FindNode(const CService& addr);
 
     bool AttemptToEvictConnection();
+    CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fCountFailure = false);
     bool IsWhitelistedRange(const CNetAddr &addr);
 
     void DeleteNode(CNode* pnode);
