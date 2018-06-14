@@ -7,6 +7,7 @@
 
 #include "activedynode.h"
 #include "addrman.h"
+#include "clientversion.h"
 #include "governance.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
@@ -16,6 +17,7 @@
 #include "privatesend-client.h"
 #endif // ENABLE_WALLET
 #include "script/standard.h"
+#include "ui_interface.h"
 #include "util.h"
 
 /** Dynode manager */
