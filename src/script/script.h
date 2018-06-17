@@ -26,14 +26,15 @@ enum ProtocolCodes {
     MINT_TX                 =  1,
     DYNODE_MODFIY_TX        =  2,
     MINING_MODIFY_TX        =  3,
-    DIRECTORY_NEW_TX        =  4,
-    DIRECTORY_UPDATE_TX     =  5,
-    DIRECTORY_DELETE_TX     =  6,
-    DIRECTORY_ACTIVATE_TX   =  7,
-    CERTIFICATE_NEW_TX      =  8,
-    CERTIFICATE_UPDATE_TX   =  9,
-    CERTIFICATE_DELETE_TX   = 10,
-    CERTIFICATE_ACTIVATE_TX = 11,
+    BDAP_NEW_TX             =  4,
+    BDAP_DELETE_TX          =  5,
+    BDAP_ACTIVATE_TX        =  6,
+    BDAP_MODIFY_TX          =  7,
+    BDAP_MODIFY_RDN_TX      =  8,
+    BDAP_EXECUTE_CODE_TX    =  9,
+    BDAP_BIND_TX            =  10,
+    BDAP_AUDIT_TX           =  11,
+    BDAP_VERIFICATION_TX    =  12,
     NO_TX                   =  0
 };
 
@@ -212,18 +213,14 @@ enum opcodetype
     OP_RELEASE_ADDRESS = 0xc8,
 
     // directory access, user identity and certificate system
-    OP_DIRECTORY_NEW = 0xd1,
-    OP_DIRECTORY_DELETE = 0xd2,
-    OP_DIRECTORY_PAYMENT = 0xd3,
-    OP_DIRECTORY_ACTIVATE = 0xd4,
-    OP_DIRECTORY_UPDATE = 0xd5,
-    OP_DIRECTORY_MULTISIG = 0xd6,
-    OP_CERTIFICATE_NEW = 0xd7,
-    OP_CERTIFICATE_UPDATE = 0xd8,
-    OP_CERTIFICATE_DELETE = 0xd9,
-    OP_CERTIFICATE_ACTIVATE = 0xda,
-    OP_CERTIFICATE_MULTISIG = 0xdb,
-    // dynamic extended reserved 
+    OP_BDAP_NEW = 0x01,
+    OP_BDAP_DELETE = 0x02,
+    OP_BDAP_ACTIVATE = 0x03,
+    OP_BDAP_MODIFY = 0x04,
+    OP_BDAP_MODIFY_RDN = 0x05,
+    OP_BDAP_EXECUTE_CODE = 0x06,
+    OP_BDAP_BIND = 0x07,
+    // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
     // invalid operation code
@@ -698,45 +695,33 @@ public:
         }
         return false;
     }
-    
+
     bool IsDirectoryScript(ProtocolCodes code) const
     {
         switch(code) {
-            case DIRECTORY_NEW_TX:
-                return (size() > 0 && *begin() == OP_DIRECTORY_NEW);
+            case BDAP_NEW_TX:
+                return (size() > 0 && *begin() == OP_BDAP_NEW);
                 break;
-            case DIRECTORY_UPDATE_TX:
-                return (size() > 0 && *begin() == OP_DIRECTORY_UPDATE);
+            case BDAP_DELETE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_DELETE);
                 break;
-            case DIRECTORY_DELETE_TX:
-                return (size() > 0 && *begin() == OP_DIRECTORY_DELETE);
+            case BDAP_ACTIVATE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_ACTIVATE);
                 break;
-            case DIRECTORY_ACTIVATE_TX:
-                return (size() > 0 && *begin() == OP_DIRECTORY_ACTIVATE);
+            case BDAP_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY);
                 break;
-            default:
-                throw std::runtime_error("Directory code is invalid!");
-        }
-        return false;
-    }
-    
-    bool IsCertificateScript(ProtocolCodes code) const
-    {
-        switch(code) {
-            case CERTIFICATE_NEW_TX:
-                return (size() > 0 && *begin() == OP_CERTIFICATE_NEW);
+            case BDAP_MODIFY_RDN_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
                 break;
-            case CERTIFICATE_UPDATE_TX:
-                return (size() > 0 && *begin() == OP_CERTIFICATE_UPDATE);
+            case BDAP_EXECUTE_CODE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_EXECUTE_CODE);
                 break;
-            case CERTIFICATE_DELETE_TX:
-                return (size() > 0 && *begin() == OP_CERTIFICATE_DELETE);
-                break;
-            case CERTIFICATE_ACTIVATE_TX:
-                return (size() > 0 && *begin() == OP_CERTIFICATE_ACTIVATE);
+            case BDAP_BIND_TX:
+                return (size() > 0 && *begin() == OP_BDAP_BIND);
                 break;
             default:
-                throw std::runtime_error("Certificate code is invalid!");
+                throw std::runtime_error("BDAP code is invalid!");
         }
         return false;
     }

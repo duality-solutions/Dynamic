@@ -14,9 +14,14 @@
 
 #include <univalue.h>
 
-class CTransaction;
 class CDynamicAddress;
+class CRecipient;
+class CTransaction;
 class CTxOut;
+
+typedef std::vector<unsigned char> CharString;
+typedef std::vector<CharString> vchCharString;
+typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
 
 static const unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
 static const unsigned int MAX_DOMAIN_NAME_SIZE        = 32;
@@ -25,13 +30,10 @@ static const unsigned int MAX_TORRENT_NETWORK_LENGTH  = 128;
 static const unsigned int MAX_KEY_LENGTH              = 156;
 static const unsigned int MAX_PUBLIC_VALUE_LENGTH     = 512;
 static const unsigned int MAX_SECRET_VALUE_LENGTH     = 49152; // Pay per byte for hosting on chain
-static const std::string  INTERNAL_DOMAIN_PREFIX      = "#";
-static const std::string  DEFAULT_ADMIN_DOMAIN        = INTERNAL_DOMAIN_PREFIX + "admin";
-static const std::string  DEFAULT_PUBLIC_DOMAIN       = INTERNAL_DOMAIN_PREFIX + "public";
-
-typedef std::vector<unsigned char> CharString;
-typedef std::vector<CharString> vchCharString;
-typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
+static const std::string INTERNAL_DOMAIN_PREFIX       = "#";
+static const std::string DEFAULT_ADMIN_DOMAIN         = "admin.bdap";
+static const std::string DEFAULT_PUBLIC_DOMAIN        = "public.bdap";
+static const int BDAP_TX_VERSION = 0x3500;
 
 enum DirectoryObjectType {
     USER_ACCOUNT = 0,
@@ -40,7 +42,8 @@ enum DirectoryObjectType {
     DOMAIN_ACCOUNT = 3,
     ORGANIZATIONAL_UNIT = 4,
     CERTIFICATE = 5,
-    CODE = 6
+    CODE = 6,
+    BINDING = 7
 };
 
 /* Blockchain Directory Access Framework
@@ -79,7 +82,7 @@ public:
     CharString EncryptPrivateKey; // used to decrypt messages and data for this directory record
     vchCharString SignWalletAddresses; // used to verify authorized update transaction
     unsigned int nSigaturesRequired; // number of SignWalletAddresses needed to sign a transaction.  Default = 1
-    CharString IPFSAddress; // used for temp storage and transmision of sharded and encrypted data.
+    CharString ResourcePointer; // used for temp storage and transmision of sharded and encrypted data.
     
     uint256 txHash;
 
@@ -114,7 +117,7 @@ public:
         EncryptPrivateKey.clear();
         SignWalletAddresses.clear();
         nSigaturesRequired = 1;
-        IPFSAddress.clear();
+        ResourcePointer.clear();
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
@@ -140,7 +143,7 @@ public:
         READWRITE(EncryptPrivateKey);
         READWRITE(SignWalletAddresses);
         READWRITE(VARINT(nSigaturesRequired));
-        READWRITE(IPFSAddress);
+        READWRITE(ResourcePointer);
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
@@ -170,7 +173,7 @@ public:
         EncryptPrivateKey = b.EncryptPrivateKey;
         SignWalletAddresses = b.SignWalletAddresses;
         nSigaturesRequired = b.nSigaturesRequired;
-        IPFSAddress = b.IPFSAddress;
+        ResourcePointer = b.ResourcePointer;
         txHash = b.txHash;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
@@ -228,6 +231,7 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName);
 
 std::string stringFromVch(const CharString& vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);
+void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 
 extern CDirectoryDB *pDirectoryDB;
 

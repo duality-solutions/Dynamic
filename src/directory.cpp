@@ -10,16 +10,20 @@
 #include "rpcserver.h"
 #include "validation.h"
 #include "validationinterface.h"
+#include "wallet/wallet.h"
 
 #include <univalue.h>
 
 CDirectoryDB *pDirectoryDB = NULL;
 
 bool IsDirectoryTransaction(CScript txOut) {
-    return (txOut.IsDirectoryScript(DIRECTORY_NEW_TX)
-            || txOut.IsDirectoryScript(DIRECTORY_UPDATE_TX)
-            || txOut.IsDirectoryScript(DIRECTORY_DELETE_TX)
-            || txOut.IsDirectoryScript(DIRECTORY_ACTIVATE_TX)
+    return (txOut.IsDirectoryScript(BDAP_NEW_TX)
+            || txOut.IsDirectoryScript(BDAP_DELETE_TX)
+            || txOut.IsDirectoryScript(BDAP_ACTIVATE_TX)
+            || txOut.IsDirectoryScript(BDAP_MODIFY_TX)
+            || txOut.IsDirectoryScript(BDAP_MODIFY_RDN_TX)
+            || txOut.IsDirectoryScript(BDAP_EXECUTE_CODE_TX)
+            || txOut.IsDirectoryScript(BDAP_BIND_TX)
            );
 }
 
@@ -164,6 +168,7 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     oName.push_back(Pair("version", directory.nVersion));
     oName.push_back(Pair("domain_name", stringFromVch(directory.DomainName)));
     oName.push_back(Pair("object_name", stringFromVch(directory.ObjectName)));
+    oName.push_back(Pair("object_full_path", stringFromVch(directory.ObjectName) + "@" + stringFromVch(directory.DomainName)));
     oName.push_back(Pair("object_type", directory.ObjectType));
     oName.push_back(Pair("address", EncodeBase58(directory.WalletAddress)));
     oName.push_back(Pair("public", (int)directory.fPublicObject));
@@ -173,7 +178,7 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
     oName.push_back(Pair("encryption_privatekey", HexStr(directory.EncryptPrivateKey)));
     //oName.push_back(Pair("sigatures_required", directory.nSigaturesRequired));
-    oName.push_back(Pair("ipfs_address", stringFromVch(directory.IPFSAddress)));
+    oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
     oName.push_back(Pair("txid", directory.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= directory.nHeight-1) {
         CBlockIndex *pindex = chainActive[directory.nHeight-1];
@@ -197,6 +202,36 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     //oName.push_back(Pair("registration_fee", directory.registrationFeePerDay);
     // loop CheckpointHashes
     return true;
+}
+
+void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient)
+{
+    CRecipient recp = {scriptPubKey, recipient.nAmount, false};
+    recipient = recp;
+    CTxOut txout(recipient.nAmount, scriptPubKey);
+    size_t nSize = GetSerializeSize(txout, SER_DISK, 0) + 148u;
+    recipient.nAmount = 3 * minRelayTxFee.GetFee(nSize);
+}
+
+void CreateFeeRecipient(CScript& scriptPubKey, const std::vector<unsigned char>& data, CRecipient& recipient)
+{
+    // add hash to data output (must match hash in inputs check with the tx scriptpubkey hash)
+    uint256 hash = Hash(data.begin(), data.end());
+    std::vector<unsigned char> vchHashRand = vchFromValue(hash.GetHex());
+    scriptPubKey << vchHashRand;
+    CRecipient recp = {scriptPubKey, 0, false};
+    recipient = recp;
+}
+
+CAmount GetDataFee(const CScript& scriptPubKey)
+{
+    CAmount nFee = 0;
+    CRecipient recp = {scriptPubKey, 0, false};
+    CTxOut txout(0, scriptPubKey);
+    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
+    nFee = CWallet::GetMinimumFee(nSize, nTxConfirmTarget, mempool);
+    recp.nAmount = nFee;
+    return recp.nAmount;
 }
 
 /*
