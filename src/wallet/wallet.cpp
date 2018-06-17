@@ -2976,7 +2976,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
             if(fAnonymizable) {
                 // ignore collaterals
                 if(CPrivateSend::IsCollateralAmount(wtx.vout[i].nValue)) continue;
-                if(fDyNode && wtx.vout[i].nValue == 1000*COIN) continue;
+                if(fDynodeMode && wtx.vout[i].nValue == 1000*COIN) continue;
                 // ignore outputs that are 10 times smaller then the smallest denomination
                 // otherwise they will just lead to higher fee / lower priority
                 if(wtx.vout[i].nValue <= nSmallestDenom/10) continue;
@@ -3041,7 +3041,7 @@ bool CWallet::SelectCoinsMix(CAmount nValueMin, const CAmount nValueMax, std::ve
         if(out.tx->vout[out.i].nValue < nValueMin/10) continue;
         //do not allow collaterals to be selected
         if(CPrivateSend::IsCollateralAmount(out.tx->vout[out.i].nValue)) continue;
-        if(fDyNode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //Dynode input
+        if(fDynodeMode && out.tx->vout[out.i].nValue == 1000*COIN) continue; //Dynode input
 
         if(nValueRet + out.tx->vout[out.i].nValue <= nValueMax){
             CTxIn txin = CTxIn(out.tx->GetHash(),out.i);

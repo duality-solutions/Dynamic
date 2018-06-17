@@ -23,7 +23,7 @@ CActiveDynode activeDynode;
 void CActiveDynode::ManageState(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         LogPrint("Dynode", "CActiveDynode::ManageState -- Not a Dynode, returning\n");
         return;
     }

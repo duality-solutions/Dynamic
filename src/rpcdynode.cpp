@@ -49,7 +49,7 @@ UniValue privatesend(const JSONRPCRequest& request)
             EnsureWalletIsUnlocked();
         }
 
-        if(fDyNode)
+        if(fDynodeMode)
             return "Mixing is not supported from Dynodes";
 
         privateSendClient.fEnablePrivateSend = true;
@@ -79,11 +79,11 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
             "Returns an object containing mixing pool related information.\n");
 
 #ifdef ENABLE_WALLET
-    CPrivateSendBase* pprivateSendBase = fDyNode ? (CPrivateSendBase*)&privateSendServer : (CPrivateSendBase*)&privateSendClient;
+    CPrivateSendBase* pprivateSendBase = fDynodeMode ? (CPrivateSendBase*)&privateSendServer : (CPrivateSendBase*)&privateSendClient;
 
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("state",             pprivateSendBase->GetStateString()));
-    obj.push_back(Pair("mixing_mode",       (!fDyNode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
+    obj.push_back(Pair("mixing_mode",       (!fDynodeMode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
     obj.push_back(Pair("queue",             pprivateSendBase->GetQueueSize()));
     obj.push_back(Pair("entries",           pprivateSendBase->GetEntriesCount()));
     obj.push_back(Pair("status",            privateSendClient.GetStatus()));
@@ -403,7 +403,7 @@ UniValue dynode(const JSONRPCRequest& request)
 
     if (strCommand == "status")
     {
-        if (!fDyNode)
+        if (!fDynodeMode)
             throw JSONRPCError(RPC_INTERNAL_ERROR, "This is not a Dynode");
 
         UniValue dnObj(UniValue::VOBJ);

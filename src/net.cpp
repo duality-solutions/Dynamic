@@ -1077,7 +1077,7 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
     }
 
     // don't accept incoming connections until fully synced
-    if(fDyNode && !dynodeSync.IsSynced()) {
+    if(fDynodeMode && !dynodeSync.IsSynced()) {
         LogPrintf("AcceptConnection -- dynode is not synced yet, skipping inbound connection attempt\n");
         CloseSocket(hSocket);
         return;

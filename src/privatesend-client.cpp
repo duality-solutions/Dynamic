@@ -22,7 +22,7 @@ CPrivateSendClient privateSendClient;
 
 void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    if(fDyNode) return;
+    if(fDynodeMode) return;
     if(fLiteMode) return; // ignore all Dynamic related functionality
     if(!dynodeSync.IsBlockchainSynced()) return;
 
@@ -323,10 +323,10 @@ void CPrivateSendClient::CheckTimeout()
 {
     CheckQueue();
 
-    if(!fEnablePrivateSend && !fDyNode) return;
+    if(!fEnablePrivateSend && !fDynodeMode) return;
 
     // catching hanging sessions
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         switch(nState) {
             case POOL_STATE_ERROR:
                 LogPrint("privatesend", "CPrivateSendClient::CheckTimeout -- Pool error -- Running CheckPool\n");
@@ -341,7 +341,7 @@ void CPrivateSendClient::CheckTimeout()
         }
     }
 
-    int nLagTime = fDyNode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
+    int nLagTime = fDynodeMode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
     int nTimeout = (nState == POOL_STATE_SIGNING) ? PRIVATESEND_SIGNING_TIMEOUT : PRIVATESEND_QUEUE_TIMEOUT;
     bool fTimeout = GetTimeMillis() - nTimeLastSuccessfulStep >= nTimeout*1000 + nLagTime;
 
@@ -362,7 +362,7 @@ void CPrivateSendClient::CheckTimeout()
 //
 bool CPrivateSendClient::SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, const std::vector<CTxOut>& vecTxOut, CConnman& connman)
 {
-    if(fDyNode) {
+    if(fDynodeMode) {
         LogPrintf("CPrivateSendClient::SendDenominate -- PrivateSend from a Dynode is not supported currently.\n");
         return false;
     }
@@ -442,7 +442,7 @@ bool CPrivateSendClient::SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, c
 // Incoming message from Dynode updating the progress of mixing
 bool CPrivateSendClient::CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew)
 {
-    if(fDyNode) return false;
+    if(fDynodeMode) return false;
 
     // do not update state when mixing client state is one of these
     if(nState == POOL_STATE_IDLE || nState == POOL_STATE_ERROR || nState == POOL_STATE_SUCCESS) return false;
@@ -488,7 +488,7 @@ bool CPrivateSendClient::CheckPoolStateUpdate(PoolState nStateNew, int nEntriesC
 //
 bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman& connman)
 {
-    if(fDyNode || pnode == NULL) return false;
+    if(fDynodeMode || pnode == NULL) return false;
 
     finalMutableTransaction = finalTransactionNew;
     LogPrintf("CPrivateSendClient::SignFinalTransaction -- finalMutableTransaction=%s", finalMutableTransaction.ToString());
@@ -575,7 +575,7 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
 // mixing transaction was completed (failed or successful)
 void CPrivateSendClient::CompletedTransaction(PoolMessage nMessageID)
 {
-    if(fDyNode) return;
+    if(fDynodeMode) return;
 
     if(nMessageID == MSG_SUCCESS) {
         LogPrintf("CompletedTransaction -- success\n");
@@ -671,7 +671,7 @@ bool CPrivateSendClient::CheckAutomaticBackup()
 //
 bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
-    if(fDyNode) return false; // no client-side mixing on dynodes
+    if(fDynodeMode) return false; // no client-side mixing on dynodes
     if(!fEnablePrivateSend) return false;
     if(!pwalletMain || pwalletMain->IsLocked(true)) return false;
     if(nState != POOL_STATE_IDLE) return false;
@@ -1376,7 +1376,7 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
 void ThreadCheckPrivateSendClient(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dynamic specific functionality
-    if(fDyNode) return; // no client-side mixing on dynodes
+    if(fDynodeMode) return; // no client-side mixing on dynodes
 
     static bool fOneThread;
     if(fOneThread) return;

@@ -76,7 +76,7 @@ bool CDynode::UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman)
         dnodeman.mapSeenDynodePing.insert(std::make_pair(lastPing.GetHash(), lastPing));
     }
     // if it matches our Dynode privkey...
-    if(fDyNode && pubKeyDynode == activeDynode.pubKeyDynode) {
+    if(fDynodeMode && pubKeyDynode == activeDynode.pubKeyDynode) {
         nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
         if(nProtocolVersion == PROTOCOL_VERSION) {
             // ... and PROTOCOL_VERSION, then we've been remotely activated ...
@@ -177,7 +177,7 @@ void CDynode::Check(bool fForce)
     }
 
     int nActiveStatePrev = nActiveState;
-    bool fOurDynode = fDyNode && activeDynode.pubKeyDynode == pubKeyDynode;
+    bool fOurDynode = fDynodeMode && activeDynode.pubKeyDynode == pubKeyDynode;
                    // Dynode doesn't meet payment protocol requirements ...
     bool fRequireUpdate = nProtocolVersion < dnpayments.GetMinDynodePaymentsProto() ||
                    // or it's our own node and we just updated it to the new protocol but we are still waiting for activation ...
@@ -507,7 +507,7 @@ bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
     }
 
     // if there was no Dynode broadcast recently or if it matches our Dynode privkey...
-    if(!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDyNode && pubKeyDynode == activeDynode.pubKeyDynode)) {
+    if(!pdn->IsBroadcastedWithin(DYNODE_MIN_DNB_SECONDS) || (fDynodeMode && pubKeyDynode == activeDynode.pubKeyDynode)) {
         // take the newest entry
         LogPrintf("CDynodeBroadcast::Update -- Got UPDATED Dynode entry: addr=%s\n", addr.ToString());
         if(pdn->UpdateFromNewBroadcast(*this, connman)) {
@@ -524,7 +524,7 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
 {
     // we are a Dynode with the same vin (i.e. already activated) and this dnb is ours (matches our Dynodes privkey)
     // so nothing to do here for us
-    if(fDyNode && vin.prevout == activeDynode.outpoint && pubKeyDynode == activeDynode.pubKeyDynode) {
+    if(fDynodeMode && vin.prevout == activeDynode.outpoint && pubKeyDynode == activeDynode.pubKeyDynode) {
         return false;
     }
 

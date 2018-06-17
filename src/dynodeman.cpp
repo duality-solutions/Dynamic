@@ -1062,7 +1062,7 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
     AssertLockHeld(cs_main);
 
     // only Dynodes can sign this, why would someone ask regular node?
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         // do not ban, malicious node might be using my IP
         // and trying to confuse the node which tries to verify it
         return;
@@ -1425,7 +1425,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
         Add(dnb);
         dynodeSync.BumpAssetLastTime("CDynodeMan::CheckDnbAndUpdateDynodeList - new");
         // if it matches our Dynode privkey...
-        if(fDyNode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
+        if(fDynodeMode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
             dnb.nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
             if(dnb.nProtocolVersion == PROTOCOL_VERSION) {
                 // ... and PROTOCOL_VERSION, then we've been remotely activated ...
@@ -1457,7 +1457,7 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a Dynode
     // (DNs should update this info on every block, so limited scan should be enough for them)
-    int nMaxBlocksToScanBack = (IsFirstRun || !fDyNode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
+    int nMaxBlocksToScanBack = (IsFirstRun || !fDynodeMode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
     //                         nCachedBlockHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
 
@@ -1545,7 +1545,7 @@ void CDynodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
 
     CheckSameAddr();
 
-    if(fDyNode) {
+    if(fDynodeMode) {
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
         UpdateLastPaid(pindex);
     }

@@ -20,7 +20,7 @@ CPrivateSendServer privateSendServer;
 
 void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    if(!fDyNode) return;
+    if(!fDynodeMode) return;
     if(fLiteMode) return; // ignore all Dynamic related functionality
     if(!dynodeSync.IsBlockchainSynced()) return;
 
@@ -280,7 +280,7 @@ void CPrivateSendServer::SetNull()
 //
 void CPrivateSendServer::CheckPool(CConnman& connman)
 {
-    if(fDyNode) {
+    if(fDynodeMode) {
         LogPrint("privatesend", "CPrivateSendServer::CheckPool -- entries count %lu\n", GetEntriesCount());
 
         // If entries are full, create finalized transaction
@@ -333,7 +333,7 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
 
 void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
 {
-    if(!fDyNode) return; // check and relay final tx only on dynode
+    if(!fDynodeMode) return; // check and relay final tx only on dynode
 
     CTransaction finalTransaction = CTransaction(finalMutableTransaction);
     uint256 hashTx = finalTransaction.GetHash();
@@ -394,7 +394,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
 //
 void CPrivateSendServer::ChargeFees(CConnman& connman)
 {
-    if(!fDyNode) return;
+    if(!fDynodeMode) return;
 
     //we don't need to charge collateral for every offence.
     if(GetRandInt(100) > 33) return;
@@ -471,7 +471,7 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
 */
 void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
 {
-    if(!fDyNode) return;
+    if(!fDynodeMode) return;
 
     LOCK(cs_main);
 
@@ -499,9 +499,9 @@ void CPrivateSendServer::CheckTimeout(CConnman& connman)
 {
     CheckQueue();
 
-    if(!fDyNode) return;
+    if(!fDynodeMode) return;
 
-    int nLagTime = fDyNode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
+    int nLagTime = fDynodeMode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
     int nTimeout = (nState == POOL_STATE_SIGNING) ? PRIVATESEND_SIGNING_TIMEOUT : PRIVATESEND_QUEUE_TIMEOUT;
     bool fTimeout = GetTimeMillis() - nTimeLastSuccessfulStep >= nTimeout*1000 + nLagTime;
 
@@ -521,7 +521,7 @@ void CPrivateSendServer::CheckTimeout(CConnman& connman)
 */
 void CPrivateSendServer::CheckForCompleteQueue(CConnman& connman)
 {
-    if(!fDyNode) return;
+    if(!fDynodeMode) return;
 
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
@@ -581,7 +581,7 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
 //
 bool CPrivateSendServer::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage& nMessageIDRet)
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
     BOOST_FOREACH(CTxIn txin, entryNew.vecTxPSIn) {
         if(txin.prevout.IsNull()) {
@@ -687,7 +687,7 @@ bool CPrivateSendServer::IsOutputsCompatibleWithSessionDenom(const std::vector<C
 
 bool CPrivateSendServer::IsAcceptableDenomAndCollateral(int nDenom, CTransaction txCollateral, PoolMessage& nMessageIDRet)
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
     // is denom even smth legit?
     std::vector<int> vecBits;
@@ -709,7 +709,7 @@ bool CPrivateSendServer::IsAcceptableDenomAndCollateral(int nDenom, CTransaction
 
 bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral, PoolMessage& nMessageIDRet, CConnman& connman)
 {
-    if(!fDyNode || nSessionID != 0) return false;
+    if(!fDynodeMode || nSessionID != 0) return false;
 
     // new session can only be started in idle mode
     if(nState != POOL_STATE_IDLE) {
@@ -748,7 +748,7 @@ bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral,
 
 bool CPrivateSendServer::AddUserToExistingSession(int nDenom, CTransaction txCollateral, PoolMessage& nMessageIDRet)
 {
-    if(!fDyNode || nSessionID == 0 || IsSessionReady()) return false;
+    if(!fDynodeMode || nSessionID == 0 || IsSessionReady()) return false;
 
     if(!IsAcceptableDenomAndCollateral(nDenom, txCollateral, nMessageIDRet)) {
         return false;
@@ -862,7 +862,7 @@ void CPrivateSendServer::RelayCompletedTransaction(PoolMessage nMessageID, CConn
 
 void CPrivateSendServer::SetState(PoolState nStateNew)
 {
-    if(fDyNode && (nStateNew == POOL_STATE_ERROR || nStateNew == POOL_STATE_SUCCESS)) {
+    if(fDynodeMode && (nStateNew == POOL_STATE_ERROR || nStateNew == POOL_STATE_SUCCESS)) {
         LogPrint("privatesend", "CPrivateSendServer::SetState -- Can't set state to ERROR or SUCCESS as a Dynode. \n");
         return;
     }

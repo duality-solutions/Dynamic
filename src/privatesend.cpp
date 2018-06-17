@@ -39,7 +39,7 @@ bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 
 bool CPrivatesendQueue::Sign()
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
     std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
 
@@ -77,7 +77,7 @@ bool CPrivatesendQueue::Relay(CConnman& connman)
 
 bool CPrivatesendBroadcastTx::Sign()
 {
-    if(!fDyNode) return false;
+    if(!fDynodeMode) return false;
 
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
 
@@ -476,7 +476,7 @@ void ThreadCheckPrivateSend(CConnman& connman)
                 dnpayments.CheckAndRemove();
                 instantsend.CheckAndRemove();
             }
-            if(fDyNode && (nTick % (60 * 5) == 0)) {
+            if(fDynodeMode && (nTick % (60 * 5) == 0)) {
                 dnodeman.DoFullVerificationStep(connman);
             }
 

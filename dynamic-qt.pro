@@ -435,6 +435,7 @@ HEADERS += \
     src/validationinterface.h \
     src/version.h \
     src/versionbits.h \
+    src/warnings.h \
     src/compat/endian.h \
     src/crypto/common.h \
     src/support/lockedpool.h \
@@ -605,6 +606,7 @@ SOURCES += \
     src/utiltime.cpp \
     src/validationinterface.cpp \
     src/versionbits.cpp \
+    src/warnings.cpp \
     src/qt/paymentrequest.pb.cc \
     src/support/lockedpool.cpp \
     src/ui_interface.cpp \

@@ -720,7 +720,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
 
     // Only dynodes should try to check dynode rank for old votes - they need to pick the right winner for future blocks.
     // Regular clients (miners included) need to verify dynode rank for future block votes only.
-    if(!fDyNode && nBlockHeight < nValidationHeight) return true;
+    if(!fDynodeMode && nBlockHeight < nValidationHeight) return true;
 
     int nRank;
 
@@ -750,7 +750,7 @@ bool CDynodePayments::ProcessBlock(int nBlockHeight, CConnman& connman)
 {
     // DETERMINE IF WE SHOULD BE VOTING FOR THE NEXT PAYEE
 
-    if(fLiteMode || !fDyNode) return false;
+    if(fLiteMode || !fDynodeMode) return false;
 
     // We have little chances to pick the right winner if winners list is out of sync
     // but we have no choice, so we'll try. However it doesn't make sense to even try to do so

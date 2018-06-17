@@ -49,7 +49,7 @@
 
 //Dynamic only features
 
-extern bool fDyNode;
+extern bool fDynodeMode;
 extern bool fLiteMode;
 extern int nWalletBackups;
 
