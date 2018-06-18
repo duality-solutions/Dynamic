@@ -410,13 +410,14 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
 
     std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
 
-    UniValue obj(UniValue::VOBJ);
-
+    UniValue ret(UniValue::VARR);
     for (const std::string& sovereign : sovereignLogs) {
+        UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("sovereign address", sovereign));
+        ret.push_back(obj);
     }
 
-    return obj;
+    return ret;
 }
 
 static const CRPCCommand commands[] =
