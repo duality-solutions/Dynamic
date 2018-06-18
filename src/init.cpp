@@ -1127,7 +1127,8 @@ bool AppInitParameterInteraction()
 
     fIsBareMultisigStd = GetBoolArg("-permitbaremultisig", DEFAULT_PERMIT_BAREMULTISIG);
     fAcceptDatacarrier = GetBoolArg("-datacarrier", DEFAULT_ACCEPT_DATACARRIER);
-    nMaxDatacarrierBytes = GetArg("-datacarriersize", nMaxDatacarrierBytes);
+    ForceSetArg("-datacarriersize", nMaxDatacarrierBytes);
+    //LogPrintf("nMaxDatacarrierBytes=%u \n", nMaxDatacarrierBytes);
 
     fAlerts = GetBoolArg("-alerts", DEFAULT_ALERTS);
 

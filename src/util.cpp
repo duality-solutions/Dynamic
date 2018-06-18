@@ -486,6 +486,12 @@ void ForceSetArg(const std::string& strArg, const std::string& strValue)
     mapArgs[strArg] = strValue;
 }
 
+void ForceSetArg(const std::string& strArg, const int64_t& nValue)
+{
+    LOCK(cs_args);
+    mapArgs[strArg] = i64tostr(nValue);
+}
+
 void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
 {
     LOCK(cs_args);
