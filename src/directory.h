@@ -24,15 +24,15 @@ typedef std::vector<CharString> vchCharString;
 typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
 
 static const unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
-static const unsigned int MAX_DOMAIN_NAME_SIZE        = 32;
-static const unsigned int MAX_ACCOUNT_NAME_SIZE       = 32;
-static const unsigned int MAX_TORRENT_NETWORK_LENGTH  = 128;
+static const unsigned int MAX_DOMAIN_NAME_LENGTH      = 128;
+static const unsigned int MAX_OBJECT_NAME_LENGTH      = 128;
+static const unsigned int MAX_RESOURCE_POINTER_LENGTH = 128;
 static const unsigned int MAX_KEY_LENGTH              = 156;
 static const unsigned int MAX_PUBLIC_VALUE_LENGTH     = 512;
-static const unsigned int MAX_SECRET_VALUE_LENGTH     = 49152; // Pay per byte for hosting on chain
-static const std::string INTERNAL_DOMAIN_PREFIX       = "#";
-static const std::string DEFAULT_ADMIN_DOMAIN         = "admin.bdap";
-static const std::string DEFAULT_PUBLIC_DOMAIN        = "public.bdap";
+static const unsigned int MAX_SECRET_VALUE_LENGTH     = 512; // Pay per byte for hosting on chain
+static const unsigned int MAX_NUMBER_CHECKPOINTS      = 1000; // Pay per byte for hosting on chain
+static const std::string DEFAULT_ADMIN_DOMAIN         = "admin.bdap.io";
+static const std::string DEFAULT_PUBLIC_DOMAIN        = "public.bdap.io";
 static const int BDAP_TX_VERSION = 0x3500;
 
 enum DirectoryObjectType {
@@ -49,6 +49,7 @@ enum DirectoryObjectType {
 /* Blockchain Directory Access Framework
 
   ***** Design Notes *****
+- BDAP root DNS entry is bdap.io.  It hosts the root public and admin domains for the BDAP system.
 - Modeling after X.500 Directory and LDAP (RFC 4512): https://docs.ldap.com/specs/rfc4512.txt
 - Top level domain objects do not have an ObjectName and are considered controlers.
 - OID canonical identifiers like 1.23.456.7.89
@@ -76,13 +77,13 @@ public:
     CharString DomainName; // required. controls child objects
     CharString ObjectName; // blank for top level domain directories
     DirectoryObjectType ObjectType; // see enum above
-    CharString WalletAddress; // used to send collateral funds for this directory record. This is the multisig wallet address made from the SignWalletAddresses
-    unsigned int fPublicObject; // public and private visibility is relative to other objects in its domain directory
+    CharString WalletAddress; // used to send collateral funds for this directory record.
+    int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
     CharString EncryptPrivateKey; // used to decrypt messages and data for this directory record
-    vchCharString SignWalletAddresses; // used to verify authorized update transaction
-    unsigned int nSigaturesRequired; // number of SignWalletAddresses needed to sign a transaction.  Default = 1
-    CharString ResourcePointer; // used for temp storage and transmision of sharded and encrypted data.
+    CharString SignWalletAddress; // used to verify authorized update transaction
+    unsigned int nSigaturesRequired; // number of signatures needed to approve a transaction.  Default = 1
+    CharString ResourcePointer; // used to point to a domain shared resource like a stream (video, audio, file sharing), P2P storage (BitTorrent or IPFS network), or private cloud storage
     
     uint256 txHash;
 
@@ -115,7 +116,7 @@ public:
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
         EncryptPrivateKey.clear();
-        SignWalletAddresses.clear();
+        SignWalletAddress.clear();
         nSigaturesRequired = 1;
         ResourcePointer.clear();
         txHash.SetNull();
@@ -141,7 +142,7 @@ public:
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
         READWRITE(EncryptPrivateKey);
-        READWRITE(SignWalletAddresses);
+        READWRITE(SignWalletAddress);
         READWRITE(VARINT(nSigaturesRequired));
         READWRITE(ResourcePointer);
         READWRITE(VARINT(nHeight));
@@ -171,7 +172,7 @@ public:
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
         EncryptPrivateKey = b.EncryptPrivateKey;
-        SignWalletAddresses = b.SignWalletAddresses;
+        SignWalletAddress = b.SignWalletAddress;
         nSigaturesRequired = b.nSigaturesRequired;
         ResourcePointer = b.ResourcePointer;
         txHash = b.txHash;
@@ -232,8 +233,10 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName);
 std::string stringFromVch(const CharString& vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
+void ToLowerCase(CharString& vchValue);
+void ToLowerCase(std::string& strValue);
+bool CheckIfNameExists(const CharString& vchObjectName, const CharString& vchDomainName);
 
 extern CDirectoryDB *pDirectoryDB;
-
 
 #endif // DIRECTORY_H

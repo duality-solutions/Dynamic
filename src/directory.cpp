@@ -170,14 +170,12 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     oName.push_back(Pair("object_name", stringFromVch(directory.ObjectName)));
     oName.push_back(Pair("object_full_path", stringFromVch(directory.ObjectName) + "@" + stringFromVch(directory.DomainName)));
     oName.push_back(Pair("object_type", directory.ObjectType));
-    oName.push_back(Pair("address", EncodeBase58(directory.WalletAddress)));
+    oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
+    oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
     oName.push_back(Pair("public", (int)directory.fPublicObject));
-    //loop SignWalletAddresses
-    //oName.push_back(Pair("sign address", EncodeBase58(directory.SignWalletAddresses)));
-
     oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
-    oName.push_back(Pair("encryption_privatekey", HexStr(directory.EncryptPrivateKey)));
-    //oName.push_back(Pair("sigatures_required", directory.nSigaturesRequired));
+    oName.push_back(Pair("encryption_privatekey", stringFromVch(directory.EncryptPrivateKey)));
+    oName.push_back(Pair("sigatures_required", (int)directory.nSigaturesRequired));
     oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
     oName.push_back(Pair("txid", directory.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= directory.nHeight-1) {
@@ -232,6 +230,31 @@ CAmount GetDataFee(const CScript& scriptPubKey)
     nFee = CWallet::GetMinimumFee(nSize, nTxConfirmTarget, mempool);
     recp.nAmount = nFee;
     return recp.nAmount;
+}
+
+void ToLowerCase(CharString& vchValue) {
+    std::string strValue;
+    CharString::const_iterator vi = vchValue.begin();
+    while (vi != vchValue.end()) 
+    {
+        strValue += std::tolower(*vi);
+        vi++;
+    }
+    CharString vchNewValue(strValue.begin(), strValue.end());
+    std::swap(vchValue, vchNewValue);
+}
+
+void ToLowerCase(std::string& strValue) {
+    for(unsigned short loop=0;loop < strValue.size();loop++)
+    {
+        strValue[loop]=std::tolower(strValue[loop]);
+    }
+}
+
+bool CheckIfNameExists(const CharString& vchObjectName, const CharString& vchDomainName) {
+
+
+    return false;
 }
 
 /*
