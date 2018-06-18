@@ -298,13 +298,14 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
     CFluidEntry fluidIndex = pindex->fluidParams;
     std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
 
-    UniValue obj(UniValue::VOBJ);
-
-    BOOST_FOREACH(const std::string& existingRecord, transactionRecord) {
+    UniValue ret(UniValue::VARR);
+    for(const std::string& existingRecord : transactionRecord) {
+        UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("fluid command", existingRecord));
+        ret.push_back(obj);
     }
 
-    return obj;
+    return ret;
 }
 
 UniValue getfluidhistory(const JSONRPCRequest& request)
@@ -409,13 +410,14 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
 
     std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
 
-    UniValue obj(UniValue::VOBJ);
-
+    UniValue ret(UniValue::VARR);
     for (const std::string& sovereign : sovereignLogs) {
+        UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("sovereign address", sovereign));
+        ret.push_back(obj);
     }
 
-    return obj;
+    return ret;
 }
 
 static const CRPCCommand commands[] =

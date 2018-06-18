@@ -110,8 +110,8 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
             strAmount = vecSplitScript[0];
             CAmount fluidAmount;
             if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                if (fluidAmount < 0) {
-                    errorMessage = "CheckFluidOperationScript fluid amount is less than zero: " + strAmount;
+                if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && fluidAmount < 0) {
+                    errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
                     return false;
                 }
                 else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
