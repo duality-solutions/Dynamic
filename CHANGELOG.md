@@ -193,6 +193,7 @@
 * Update Proto Version
 * Update secp256k1
 * Fix fixed seeds
+* fix copy address, issue #157
 * Update CHANGELOG
 
 **Dynamic v2.1.0.0**
