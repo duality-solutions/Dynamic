@@ -165,6 +165,11 @@
 * Update univalue and secp256k1 libraries (June 2018)
 * Bump dynodeman versionCDynodeMan-Version to 2
 * Bump CGovernanceManager version to 23 to signify v2.3
+* Change DyNode to DynodeMode to avoid confusion
+* [BDAP] Increase OP_RETURN relay size for larger DAP entries
+* [Fluid] Fix getfluidhistoryraw RPC command
+* [Fluid] Fix getfluidsovereigns RPC command
+* [Fluid] Allow negative fluid minting amounts
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
