@@ -4132,10 +4132,6 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>이것보다 작은 요금 (DYN/Kb)은 중계에 대한 제로 요금으로 간주됩니다 (기본값: %s)</translation>
     </message>
     <message>
-        <source>Fees (in DYN/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>이보다 작은 수수료 (DYN/Kb)는 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
-    </message>
-    <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
         <translation>모든 &lt;n&gt; 메가 바이트 (기본값: %u)로 메모리 풀에서 디스크 로그로 데이터베이스 활동을 플러시</translation>
     </message>
@@ -4174,10 +4170,6 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: %u)</source>
         <translation>오작동하는 피어가 재 연결하지 못하게하는 시간 (초) (기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Dynamic (or specifically: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</source>
-        <translation>Dynamic (또는 구체적으로: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</translation>
     </message>
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
@@ -4962,8 +4954,12 @@ rpcpassword=%s
         <translation>요금 산정에 불충분 한 데이터가있을 때 사용되는 수수료율 (%s/kB 단위) (기본값: %s)</translation>
     </message>
     <message>
+        <source>Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>이보다 작은 수수료 (%s/Kb)는 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
+    </message>    
+    <message>
         <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
-        <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값:  %s)</translation>
+        <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
     </message>
     <message>
         <source>Fee (in %s/kB) to add to transactions you send (default: %s)</source>
@@ -5012,10 +5008,6 @@ rpcpassword=%s
     <message>
         <source>Append comment to the user agent string</source>
         <translation>사용자 에이전트 문자열에 주석 추가</translation>
-    </message>
-    <message>
-        <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
-        <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
     </message>
     <message>
         <source>Maximum total fees (in %s) to use in a single wallet transaction or raw transaction; setting this too low may abort large transactions (default: %s)</source>
@@ -5070,20 +5062,8 @@ rpcpassword=%s
         <translation>인증 쿠키의 위치 (기본값: 데이터 디렉토리)</translation>
     </message>
     <message>
-        <source>Username and hashed password for JSON-RPC connections. The field&lt;userpw&gt; comes in the format: &lt;USERNAME&gt;:&lt;SALT&gt;$&lt;HASH&gt;. A canonical python script is included in share/rpcuser. This option can be specified multiple times</source>
+        <source>Username and hashed password for JSON-RPC connections. The field &lt;userpw&gt; comes in the format: &lt;USERNAME&gt;:&lt;SALT&gt;$&lt;HASH&gt;. A canonical python script is included in share/rpcuser. This option can be specified multiple times</source>
         <translation>JSON-RPC 연결을위한 사용자 이름과 해쉬 된 암호. &lt;userpw&gt; 필드는 &lt;USERNAME&gt; : &lt;SALT&gt; $ &lt;HASH&gt; 형식으로 제공됩니다. 정식 Python 스크립트는 share/rpcuser에 포함되어 있습니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
-    </message>
-    <message>
-        <source>Choose data directory on startup (default: %u)</source>
-        <translation>시작시 데이터 디렉토리 선택 (기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Show splash screen on startup (default: %u)</source>
-        <translation>시작시 스플래시 화면 표시 (기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Reset all settings changes made over the GUI</source>
-        <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
     </message>
     <message>
         <source>Receive and display P2P network alerts (default: %u)</source>
@@ -5391,6 +5371,22 @@ rpcpassword=%s
     그러나 자동 백업을 사용하도록 설정 한 경우에만이 작업을 수행 할 수 있습니다.&lt;br&gt;
     따라서 백업이 비활성화 된 사용자는 PrivateSend도 비활성화됩니다. &lt;hr&gt;
             </translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>시작시 데이터 디렉토리 선택 (기본값: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>시작시 스플래시 화면 표시 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
+    </message>
+    <message>
+        <source>Dynamic (or specifically: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</source>
+        <translation>Dynamic (또는 구체적으로: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</translation>
     </message>
 </context>
 </TS>
