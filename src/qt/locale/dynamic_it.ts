@@ -1417,7 +1417,7 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>(Ultimo messaggio)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Prova ad inserire una richiesta Privatesend manualmente.</translation>
     </message>
     <message>
@@ -1425,7 +1425,7 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Prova il Mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Resetta lo stato corrente del Privatesend (può interrompere il Privatesend se è nel processo di mixaggio, costandoti una perdita economica!)</translation>
     </message>
     <message>

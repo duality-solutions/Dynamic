@@ -1459,7 +1459,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(最近一次信息)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>嘗試手動提交匿名發送請求。</translation>
     </message>
     <message>
@@ -1467,12 +1467,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>嘗試混合</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>重置目前匿名發送狀態(此操作可能會影響您目前正在執行的混合過程，並且產生費用!)</translation>
     </message>
     <message>
         <source>Reset</source>
         <translation>重置</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>資訊</translation>
     </message>
     <message>
         <source>out of sync</source>

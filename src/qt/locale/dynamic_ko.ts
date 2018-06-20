@@ -1602,7 +1602,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>(마지막 메시지)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Privendsend 요청을 수동으로 제출하십시오.</translation>
     </message>
     <message>
@@ -1614,7 +1614,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>정보</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>PrivateSend 및 믹싱에 대한 정보</translation>
+    </message>
+    <message>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Privendsend의 현재 상태를 리셋합니다 (믹싱 중일 경우 Privatesend를 방해 할 수 있습니다. 비용이들 수도 있습니다).</translation>
     </message>
     <message>

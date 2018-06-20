@@ -1262,7 +1262,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Senaste meddelande)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Försök att lämna in en Privatesend-begäran manuellt.</translation>
     </message>
     <message>
@@ -1270,7 +1270,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Försök att mixa</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Återställ den nuvarande Privatesend-statusen (kan störa Privatesend om den håller på att mixa vilket kan kosta dig pengar!)</translation>
     </message>
     <message>

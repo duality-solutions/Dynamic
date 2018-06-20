@@ -1874,8 +1874,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>Try to manually submit a Privatesend request.</source>
-        <translation>Try to manually submit a Privatesend request.</translation>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>Try to manually submit a PrivateSend request.</translation>
     </message>
     <message>
         <location line="+3"/>

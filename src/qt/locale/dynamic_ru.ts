@@ -1463,7 +1463,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Последнее сообщение)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Попробовать отправить Privatesend-запрос вручную.</translation>
     </message>
     <message>
@@ -1471,7 +1471,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Попробовать вручную</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Сбросить текущий статус Privatesend (можно прервать процесс перемешивания Privatesend, но это может стоить Вам немного денег!)</translation>
     </message>
     <message>

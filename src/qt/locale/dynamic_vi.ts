@@ -1463,7 +1463,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Thông điệp cuối)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Thử gửi yêu cầu Privatesend bằng tay.</translation>
     </message>
     <message>
@@ -1471,7 +1471,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Thử Trộn</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Tái lập lại trạng thái hiện tại của Privatesend (có thể gián đoạn Privatesend nếu nó đang trong quá trình trộn, điều đó có thể làm bạn bị mất tiền!)</translation>
     </message>
     <message>

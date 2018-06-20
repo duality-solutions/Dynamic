@@ -1462,7 +1462,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Posledná správa)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
+        <source>Try to manually submit a PrivateSend request.</source>
         <translation>Skúsiť manuálne odoslať Privatesend požiadavku.</translation>
     </message>
     <message>
@@ -1470,7 +1470,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Výskúšať mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
         <translation>Vynulovať súčasný stav Privatesend (môže prerušiť Privatesend ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
     </message>
     <message>
