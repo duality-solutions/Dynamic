@@ -16,27 +16,38 @@
 using namespace boost::xpressive;
 
 UniValue addpublicname(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 1) {
-        throw std::runtime_error("addpublicname <publicname>\nAdd public name entry to blockchain directory.\n");
+    if (fHelp || params.size() != 2) {
+        throw std::runtime_error("addpublicname <userid> <common name>\nAdd public name entry to blockchain directory.\n");
     }
-    // Format object and domain names to lower case. 
-    std::string strObjectName = params[0].get_str();
-    ToLowerCase(strObjectName);
-    CharString vchObjectName = vchFromValue(params[0]);
-    ToLowerCase(vchObjectName);
-    CharString vchDomainName(DEFAULT_PUBLIC_DOMAIN.begin(), DEFAULT_PUBLIC_DOMAIN.end());
-    ToLowerCase(vchDomainName);
+    // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
+    // Format object and domain names to lower case.
+    std::string strObjectID = params[0].get_str();
+    ToLowerCase(strObjectID);
+    // Check if the object name is valid.
+    sregex regexValidName = sregex::compile("^((?!-)[a-z0-9-]{2,64}(?<!-)\\.)+[a-z]{2,6}$");
+    smatch sMatch;
+    //if (!regex_search(strObjectID, sMatch, regexValidName))
+    //    throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("Invalid BDAP name.  Regular expression failed."));
 
-    // Check if the new object and domain name are all alphanumeric, dash(-) or dot(.).  dash and dot are not allowed as the first or last charactor.
-    sregex regexValidName = sregex::compile("^((?!-)[a-z0-9-]{2,128}(?<!-)\\.)+[a-z]{2,6}$");
+    CharString vchObjectID = vchFromValue(params[0]);
+    ToLowerCase(vchObjectID);
+    CharString vchCommonName = vchFromValue(params[1]);
 
+    CharString vchDomainComponent(DEFAULT_PUBLIC_DOMAIN.begin(), DEFAULT_PUBLIC_DOMAIN.end());
+    CharString vchOrganizationalUnit(DEFAULT_PUBLIC_OU.begin(), DEFAULT_PUBLIC_OU.end());
+    CharString vchOrganizationName (DEFAULT_ORGANIZATION_NAME.begin(), DEFAULT_ORGANIZATION_NAME.end());
+    CharString vchOID (DEFAULT_OID_PREFIX.begin(), DEFAULT_OID_PREFIX.end());
     // Check if name already exists
-    if (CheckIfNameExists(vchObjectName, vchDomainName))
+    if (CheckIfNameExists(vchObjectID, vchOrganizationalUnit, vchDomainComponent))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3501 - " + _("This public name already exists"));
 
     CDirectory txDirectory;
-    txDirectory.DomainName = vchDomainName;
-    txDirectory.ObjectName = vchObjectName;
+    txDirectory.OID = vchOID;
+    txDirectory.DomainComponent = vchDomainComponent;
+    txDirectory.OrganizationalUnit = vchOrganizationalUnit;
+    txDirectory.CommonName = vchCommonName;
+    txDirectory.OrganizationName = vchOrganizationName;
+    txDirectory.ObjectID = vchObjectID;
     txDirectory.fPublicObject = 1; //make entry public
 
     // TODO: Add ability to pass in the wallet address and public key
@@ -48,7 +59,7 @@ UniValue addpublicname(const UniValue& params, bool fHelp) {
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
-    pwalletMain->SetAddressBook(keyWalletID, strObjectName, "receive");
+    pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
     std::string strWalletAddress = CDynamicAddress(keyWalletID).ToString();
     CharString vchWalletAddress(strWalletAddress.begin(), strWalletAddress.end());
     txDirectory.WalletAddress = vchWalletAddress;
@@ -62,7 +73,6 @@ UniValue addpublicname(const UniValue& params, bool fHelp) {
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
 
-    
     txDirectory.EncryptPublicKey = vchEncryptPubKey;
     txDirectory.EncryptPrivateKey = vchEncryptPriKey;
 
@@ -80,15 +90,16 @@ UniValue addpublicname(const UniValue& params, bool fHelp) {
 
     txDirectory.nVersion = BDAP_TX_VERSION;
     if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
-        throw std::runtime_error("Failed to read from BDAP database");
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + _("Failed to read from BDAP database"));
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDirectory, oName))
-        throw std::runtime_error("Failed to read from BDAP JSON object");
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
 
     CharString data; //TODO put serialized CDirectory in data
     CScript scriptPubKey;
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << vchObjectName << OP_2DROP;
+    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP;
     
     CScript scriptData;
     scriptData << OP_RETURN << data;

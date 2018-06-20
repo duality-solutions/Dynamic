@@ -149,14 +149,25 @@ bool CDirectory::UnserializeFromData(const std::vector<unsigned char>& vchData, 
     return true;
 }
 
+CDynamicAddress CDirectory::GetWalletAddress() const {
+    return CDynamicAddress(stringFromVch(WalletAddress));
+}
+
+std::string CDirectory::GetFullObjectPath() const {
+    return stringFromVch(ObjectID) + "@" + stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
+}
+
+std::vector<unsigned char> CDirectory::vchFullObjectPath() const {
+    std::vector<unsigned char> vchReturnValue(GetFullObjectPath().begin(), GetFullObjectPath().end());
+    return vchReturnValue;
+}
+
 void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int& op) {
     UniValue oName(UniValue::VOBJ);
-    std::string domainName = stringFromVch(directory.DomainName);
-    oName.push_back(Pair("_id", domainName));
-    //CDyamicAddress address(EncodeBase58(directory.vchAddress));
-    oName.push_back(Pair("domain_name", domainName));
-    GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "add.directory");
-    //WriteDirectoryIndexHistory(directory, op);
+    if (BuildBDAPJson(directory, oName)) {
+        GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "add.directory");
+        //WriteDirectoryIndexHistory(directory, op);  //TODO: implement local leveldb storage.
+    }
 }
 
 bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
@@ -166,9 +177,12 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     int64_t nTime = 0;
     oName.push_back(Pair("_id", stringFromVch(directory.OID)));
     oName.push_back(Pair("version", directory.nVersion));
-    oName.push_back(Pair("domain_name", stringFromVch(directory.DomainName)));
-    oName.push_back(Pair("object_name", stringFromVch(directory.ObjectName)));
-    oName.push_back(Pair("object_full_path", stringFromVch(directory.ObjectName) + "@" + stringFromVch(directory.DomainName)));
+    oName.push_back(Pair("domain_component", stringFromVch(directory.DomainComponent)));
+    oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
+    oName.push_back(Pair("organizational_unit", stringFromVch(directory.OrganizationalUnit)));
+    oName.push_back(Pair("organization_name", stringFromVch(directory.DomainComponent)));
+    oName.push_back(Pair("object_id", stringFromVch(directory.ObjectID)));
+    oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
     oName.push_back(Pair("object_type", directory.ObjectType));
     oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
     oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
@@ -251,7 +265,7 @@ void ToLowerCase(std::string& strValue) {
     }
 }
 
-bool CheckIfNameExists(const CharString& vchObjectName, const CharString& vchDomainName) {
+bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent) {
 
 
     return false;
