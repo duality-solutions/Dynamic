@@ -736,10 +736,10 @@ Adress: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Konfigurera Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Konfigurera PrivateSend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -786,20 +786,20 @@ Adress: %4
         <translation>Detta är det långsammaste och det säkraste alternativet. Användning av maximal anonymitet kommer att kosta</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Privatesend-konfiguration</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>PrivateSend-konfiguration</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend ställdes framgångsrikt om till grundläggande (%1 och 2 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend ställdes framgångsrikt in på hög (%1 och 8 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend ställdes framgångsrikt in på maximal (%1 och 16 omgångar). Du kan ändra detta när som helst genom att öppna Dynamic:s konfigurationsskärm</translation>
     </message>
 </context>
 <context>
@@ -1013,12 +1013,12 @@ Adress: %4
         <translation>(0 = auto, &lt;0 = lämna så många kärnor lediga)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Privatesend-omgångar att använda</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>PrivateSend-omgångar att använda</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Denna mängd fungerar som en tröskel att stänga av Privatesend då det har uppnåtts.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Denna mängd fungerar som en tröskel att stänga av PrivateSend då det har uppnåtts.</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1230,8 +1230,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Förlopp:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Privatesend-medel:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend-medel:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1250,8 +1250,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Start/Stop Mixing</source>
@@ -1263,7 +1263,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Försök att lämna in en Privatesend-begäran manuellt.</translation>
+        <translation>Försök att lämna in en PrivateSend-begäran manuellt.</translation>
     </message>
     <message>
         <source>Try Mix</source>
@@ -1271,7 +1271,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Återställ den nuvarande Privatesend-statusen (kan störa Privatesend om den håller på att mixa vilket kan kosta dig pengar!)</translation>
+        <translation>Återställ den nuvarande PrivateSend-statusen (kan störa PrivateSend om den håller på att mixa vilket kan kosta dig pengar!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1286,12 +1286,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Inaktiverad</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Påbörja Privatesend-mixning</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Påbörja PrivateSend-mixning</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Stoppa Privatesend-mixning</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Stoppa PrivateSend-mixning</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1302,9 +1302,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aktiverad</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Senaste Privatesend-meddelande:
+        <translation>Senaste PrivateSend-meddelande:
 
 
 
@@ -1316,16 +1316,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>E/t</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend återställdes framgångsrikt.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend återställdes framgångsrikt.</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend kräver åtminstone %1 att använda.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend kräver åtminstone %1 att använda.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Plånboken är låst och användaren avböjde upplåsning. Inaktiverar PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -1791,8 +1791,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Lägg till &amp;mottagare</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -2384,8 +2384,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Mottagen från</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Mottagen genom Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Mottagen genom PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -2400,24 +2400,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Utvunnen</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend-denomination</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend-denomination</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
+        <source>PrivateSend Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend-skapa säkerhetsinmatningar</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend-skapa denominationer</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend-skapa denominationer</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended-(skickat)</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended-(skickat)</translation>
     </message>
     <message>
         <source>(n/a)</source>
@@ -2483,23 +2483,23 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Skickad till</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended-(skickat)</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended-(skickat)</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend-skapa säkerhetsinmatningar</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend-skapa säkerhetsinmatningar</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend-skapa denominationer</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend-skapa denominationer</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend-denomination</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend-denomination</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
+        <source>PrivateSend Collateral Payment</source>
         <translation>Darskends-säkerhetsbetalning</translation>
     </message>
     <message>
@@ -2666,8 +2666,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Kan inte erhålla ett lås på datakatalog %s. Dynamic körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend använder exakta denominationsmängder för att skicka medel, du kanske måste anonymisera fler mynt.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -2722,12 +2722,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Det går inte att binda till %s till denna dator. Dynamic körs förmodligen redan.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Kunde inte hitta tillräckliga Privatesend-denominationsmedel för denna transaktion.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Kunde inte hitta tillräckliga PrivateSend-denominationsmedel för denna transaktion.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Kunde inte hitta tillräckliga Privatesend-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DYN.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Kunde inte hitta tillräckliga PrivateSend-icke-denominationsmedel för denna transaktion som inte är likvärdiga 1000 DYN.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -2826,8 +2826,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Korrumperad blockdatabas upptäcktes</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Privatesend-alternativ:</translation>
+        <source>PrivateSend options:</source>
+        <translation>PrivateSend-alternativ:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -2898,8 +2898,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Fel: Plånbok låst, kan inte skapa en transaktion!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Fel: Du har redan väntande inmatningar i Privatesend-poolen</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Fel: Du har redan väntande inmatningar i PrivateSend-poolen</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3002,8 +3002,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Bibehåll som mest &lt;n&gt; icke-anslutningsbara transaktioner i minnet (standardvärde: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
-        <translation>Senaste Privatesend gjordes för inte alltför länge sedan.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>Senaste PrivateSend gjordes för inte alltför länge sedan.</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
@@ -3206,8 +3206,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Användarnamn för JSON-RPC-anslutningar</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Värdera mer än vad Privatesends poolmaximum tillåter.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Värdera mer än vad PrivateSends poolmaximum tillåter.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

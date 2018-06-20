@@ -740,8 +740,8 @@ Adresse: %4</translation>
         <translation>Wechselgeld kopieren</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Nicht-anonymisierter Input ausgewählt. &lt;b&gt;Privatesend wird deaktiviert.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem Privatesend verwenden wollen, müssen Sie zuerst alle nicht-anonymisierten Inputs entmarkieren und  das Ankreuzfeld "Privatesend" erneut auswählen.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Nicht-anonymisierter Input ausgewählt. &lt;b&gt;PrivateSend wird deaktiviert.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem PrivateSend verwenden wollen, müssen Sie zuerst alle nicht-anonymisierten Inputs entmarkieren und  das Ankreuzfeld "PrivateSend" erneut auswählen.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -841,10 +841,10 @@ Adresse: %4</translation>
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Privatesend konfigurieren</translation>
+        <source>Configure PrivateSend</source>
+        <translation>PrivateSend konfigurieren</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -891,20 +891,20 @@ Adresse: %4</translation>
         <translation>Dies ist die langsamste und sicherste Option. Maximale Anonymität kostet</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Privatesend-Konfiguration</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>PrivateSend-Konfiguration</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>Privatesend wurde erfolgreich auf einfachen Datenschutz (%1 und 2 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DYN's configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf einfachen Datenschutz (%1 und 2 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>Privatesend wurde erfolgreich auf hohen Datenschutz (%1 und 8 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DYN's configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf hohen Datenschutz (%1 und 8 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>Privatesend wurde erfolgreich auf maximalen Datenschutz (%1 und 16 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DYN's configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf maximalen Datenschutz (%1 und 16 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
     </message>
 </context>
 <context>
@@ -1145,12 +1145,12 @@ Adresse: %4</translation>
         <translation>(0 = automatisch, &lt;0 = so viele Kerne frei lassen)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Privatesend Runden</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>PrivateSend Runden</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Beim Erreichen dieses Betrages wird Privatesend ausgeschaltet.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Beim Erreichen dieses Betrages wird PrivateSend ausgeschaltet.</translation>
     </message>
     <message>
         <source>Amount of DYN to keep anonymized</source>
@@ -1422,8 +1422,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Vollendet:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Privatesend Kontostand:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend Kontostand:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1442,8 +1442,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>k.A.</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1463,7 +1463,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Versuche eine Privatesendanfrage manuell abzusetzen.</translation>
+        <translation>Versuche eine PrivateSendanfrage manuell abzusetzen.</translation>
     </message>
     <message>
         <source>Try Mix</source>
@@ -1471,7 +1471,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Aktuellen Privatesend Status zurücksetzen (wenn der Prozess des Mixens bereits begonnen hat kann es passieren, dass Privatesend unterbrochen wird. Bereits gezahlte Gebühren werden einbehalten!) </translation>
+        <translation>Aktuellen PrivateSend Status zurücksetzen (wenn der Prozess des Mixens bereits begonnen hat kann es passieren, dass PrivateSend unterbrochen wird. Bereits gezahlte Gebühren werden einbehalten!) </translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1486,12 +1486,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Deaktiviert</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Starte Privatesend Mixen</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Starte PrivateSend Mixen</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Stoppe Privatesend Mixen</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Stoppe PrivateSend Mixen</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1534,9 +1534,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aktiviert</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Letzter Privatesend Status:
+        <translation>Letzter PrivateSend Status:
 </translation>
     </message>
     <message>
@@ -1544,20 +1544,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>k.A.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend wurde erfolgreich zurückgesetzt.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend wurde erfolgreich zurückgesetzt.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Wenn Sie keine internen Privatesend-Gebühren oder -Transaktionen sehen wollen wählen Sie "Gängigste" als Typ auf der "Transaktionen" Karteikarte.</translation>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Wenn Sie keine internen PrivateSend-Gebühren oder -Transaktionen sehen wollen wählen Sie "Gängigste" als Typ auf der "Transaktionen" Karteikarte.</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Zur Benutzung von Privatesend benötigt man mindestens %1</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>Zur Benutzung von PrivateSend benötigt man mindestens %1</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Das Wallet ist gesperrt und der Benutzer hat abgelehnt, es zu entsperren. Privatesend wird deaktiviert.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Das Wallet ist gesperrt und der Benutzer hat abgelehnt, es zu entsperren. PrivateSend wird deaktiviert.</translation>
     </message>
 </context>
 <context>
@@ -2367,8 +2367,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Empfänger &amp;hinzufügen</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -2420,7 +2420,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(Privatesend verlangt, dass dieser Betrag auf den nächsten %1 aufgerundet wird)</translation>
+        <translation>(PrivateSend verlangt, dass dieser Betrag auf den nächsten %1 aufgerundet wird)</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -3024,8 +3024,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Empfangen von</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>über/durch Privatesend empfangen</translation>
+        <source>Received via PrivateSend</source>
+        <translation>über/durch PrivateSend empfangen</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3040,24 +3040,24 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Erarbeitet</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Stückelung</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Stückelung</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Sicherheits-Zahlung</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Sicherheits-Zahlung</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Sicherheits-Eingänge machen</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Sicherheits-Eingänge machen</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Stückelungs-Gebühr</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Stückelungs-Gebühr</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3135,24 +3135,24 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Überwiesen an</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Sicherheits-Eingänge machen</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Sicherheits-Eingänge machen</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Stückelungs-Gebühr</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Stückelungs-Gebühr</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Stückelung</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Stückelung</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Sicherheits-Zahlung</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Sicherheits-Zahlung</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3334,8 +3334,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Das Programm kann das Daten-Verzeichnis %s nicht als "in Verwendung" markieren. Wahrscheinlich läuft das Programm bereits.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend benutzt exakt gestückelte Beträge zum Versenden, Sie müssen dafür möglicherweise noch mehr DYN anonymisieren.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend benutzt exakt gestückelte Beträge zum Versenden, Sie müssen dafür möglicherweise noch mehr DYN anonymisieren.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3390,12 +3390,12 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>DYN Core den Prozess %s auf dem Computer nicht an sich binden. Wahrscheinlich läuft das Programm bereits.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Für diese Transaktion konnten nicht genug mit Privatesend gestückelte Beträge gefunden werden.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Für diese Transaktion konnten nicht genug mit PrivateSend gestückelte Beträge gefunden werden.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Für diese Transaktion konnten nicht genug nicht mit Privatesend gestückelte Beträge gefunden werden, die ungleich 1000 DYN sind.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Für diese Transaktion konnten nicht genug nicht mit PrivateSend gestückelte Beträge gefunden werden, die ungleich 1000 DYN sind.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3494,8 +3494,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Beschädigte Blockdatenbank erkannt</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Privatesend Optionen:</translation>
+        <source>PrivateSend options:</source>
+        <translation>PrivateSend Optionen:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3566,8 +3566,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Fehler: Wallet gesperrt, Transaktion kann nicht erstellt werden!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Fehler: Es sind bereits anstehende Einträge im Privatesend-Pool</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Fehler: Es sind bereits anstehende Einträge im PrivateSend-Pool</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3618,8 +3618,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Lösche alle Wallet-Transaktionen stelle nur diese mittels -rescan beim nächsten Start des Wallets wieder her.</translation>
     </message>
     <message>
-        <source>Disable all DYN specific functionality (dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Deaktiviere all DYN-spezifischen Funktionen (dynodes, Privatesend, InstantSend, Budgeting) (0-1, Standard: %u)</translation>
+        <source>Disable all DYN specific functionality (dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Deaktiviere all DYN-spezifischen Funktionen (dynodes, PrivateSend, InstantSend, Budgeting) (0-1, Standard: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3631,7 +3631,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Aktiviere Privatesend automatisch (0-1, Standard: %u)</translation>
+        <translation>Aktiviere PrivateSend automatisch (0-1, Standard: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3651,7 +3651,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Found unconfirmed denominated outputs, will wait till they confirm to continue.</source>
-        <translation>Unbestätigte für Privatesend vorbereitete Ausgabebeträge gefunden, warte bis sie bestätigt sind bevor weitergemacht wird.</translation>
+        <translation>Unbestätigte für PrivateSend vorbereitete Ausgabebeträge gefunden, warte bis sie bestätigt sind bevor weitergemacht wird.</translation>
     </message>
     <message>
         <source>How thorough the block verification of -checkblocks is (0-4, default: %u)</source>
@@ -3690,8 +3690,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Debugging-Informationen ausgeben (Standard: %u, &lt;category&gt; anzugeben ist optional)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Durch diese Einstellung können Sie dem Privatesend-Netzwerk zusätzliche Liquidität zur Verfügung stellen in dem Sie von Zeit zu Zeit bereits anonymisierte DYN wieder dem Mixing-Prozess zuführen. (0-100, 0=aus, 1=sehr oft, 100=sehr selten (wenig Gebühren). Standard: %u)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Durch diese Einstellung können Sie dem PrivateSend-Netzwerk zusätzliche Liquidität zur Verfügung stellen in dem Sie von Zeit zu Zeit bereits anonymisierte DYN wieder dem Mixing-Prozess zuführen. (0-100, 0=aus, 1=sehr oft, 100=sehr selten (wenig Gebühren). Standard: %u)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3811,16 +3811,16 @@ zum Beispiel: alertnotify=echo %%s | mail -s \"DYN Alert\" admin@foo.com</transl
         <translation>-rpcbind Wert %s konnte nicht als Netzwerkadresse erkannt werden</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend ist untätig.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend ist untätig.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Privatesend-Anfrage vollständig:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>PrivateSend-Anfrage vollständig:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Privatesend-Anfrage unvollständig:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>PrivateSend-Anfrage unvollständig:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3952,8 +3952,8 @@ DYN Core wird heruntergefahren.</translation>
         <translation>Ungültiger Betrag für -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>Die letzte erfolgreiche Privatesend-Transaktion ist noch zu neu.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>Die letzte erfolgreiche PrivateSend-Transaktion ist noch zu neu.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4228,8 +4228,8 @@ DYN Core wird heruntergefahren.</translation>
         <translation>Maximal &lt;n&gt; (noch) nicht einsortierte Zahlungen zwischenspeichern (Voreinstellung: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
-        <translation>Letzte Privatesend-Transaktion ist noch zu neu.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>Letzte PrivateSend-Transaktion ist noch zu neu.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4480,8 +4480,8 @@ DYN Core wird heruntergefahren.</translation>
         <translation>Benutzername für JSON-RPC-Verbindungen</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Wert größer als der vom Privatesend Pool maximal erlaubte.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Wert größer als der vom PrivateSend Pool maximal erlaubte.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

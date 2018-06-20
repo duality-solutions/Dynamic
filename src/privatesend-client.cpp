@@ -35,11 +35,11 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
-        CPrivatesendQueue psq;
+        CPrivateSendQueue psq;
         vRecv >> psq;
 
         // process every psq only once
-        BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
+        BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
             if(q == psq) {
                 // LogPrint("privatesend", "PSQUEUE -- %s seen\n", psq.ToString());
                 return;
@@ -72,7 +72,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                 SubmitDenominate(connman);
             }
         } else {
-            BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
+            BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
                 if(q.vin == psq.vin) {
                     // no way same dn can send another "not yet ready" psq this soon
                     LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", infoDn.addr.ToString());
@@ -94,7 +94,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             if(infoMixingDynode.fInfoValid && infoMixingDynode.vin.prevout == psq.vin.prevout) {
                 psq.fTried = true;
             }
-            vecPrivatesendQueue.push_back(psq);
+            vecPrivateSendQueue.push_back(psq);
             psq.Relay(connman);
         }
 
@@ -823,7 +823,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 {
     std::vector<CAmount> vecStandardDenoms = CPrivateSend::GetStandardDenominations();
     // Look through the queues and see if anything matches
-    BOOST_FOREACH(CPrivatesendQueue& psq, vecPrivatesendQueue) {
+    BOOST_FOREACH(CPrivateSendQueue& psq, vecPrivateSendQueue) {
         // only try each queue once
         if(psq.fTried) continue;
         psq.fTried = true;
@@ -846,7 +846,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
         }
 
         // mixing rate limit i.e. nLastPsq check should already pass in PSQUEUE ProcessMessage
-        // in order for psq to get into vecPrivatesendQueue, so we should be safe to mix already,
+        // in order for psq to get into vecPrivateSendQueue, so we should be safe to mix already,
         // no need for additional verification here
 
         LogPrint("privatesend", "CPrivateSendClient::JoinExistingQueue -- found valid queue: %s\n", psq.ToString());

@@ -737,8 +737,8 @@ Endereço: %4
         <translation>Copiar troco</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Entrada não anonimizada seleccionada. &lt;b&gt;O Privatesend será desactivado.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se deseja usar o Privatesend, por favor desseleccione primeiro todas as entradas não anonimizadas e em seguida volte a marcar a opção Privatesend.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Entrada não anonimizada seleccionada. &lt;b&gt;O PrivateSend será desactivado.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se deseja usar o PrivateSend, por favor desseleccione primeiro todas as entradas não anonimizadas e em seguida volte a marcar a opção PrivateSend.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -838,10 +838,10 @@ Endereço: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Configurar Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Configurar PrivateSend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -888,20 +888,20 @@ Endereço: %4
         <translation>Esta é a opção mais lenta e mais segura. Usando anonimização máxima irá custar</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Configuração Privatesend</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>Configuração PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend foi colocado com sucesso no modo básico (%1 e 2 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend foi colocado com sucesso no modo básico (%1 e 2 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend foi colocado com sucesso no modo alto (%1 e 8 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend foi colocado com sucesso no modo alto (%1 e 8 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend foi colocado com sucesso no modo máximo (%1 e 16 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend foi colocado com sucesso no modo máximo (%1 e 16 voltas). Pode mudar esta definição em qualquer altura abrindo o ecrã de configuração Dynamic.</translation>
     </message>
 </context>
 <context>
@@ -1142,12 +1142,12 @@ Endereço: %4
         <translation>(0 = auto, &lt;0 = deixar este número de cores livres)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Número de voltas Privatesend a usar</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>Número de voltas PrivateSend a usar</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Esta quantia actua como um limite, a partir do qual o Privatesend é desligado.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Esta quantia actua como um limite, a partir do qual o PrivateSend é desligado.</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1419,8 +1419,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Progresso:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Saldo Privatesend:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>Saldo PrivateSend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1439,8 +1439,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>n/d</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1460,7 +1460,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Tentar submeter um pedido Privatesend manualmente.</translation>
+        <translation>Tentar submeter um pedido PrivateSend manualmente.</translation>
     </message>
     <message>
         <source>Try Mix</source>
@@ -1468,7 +1468,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Reinicia o estado actual Privatesend (pode interromper o Privatesend mesmo quando em processo de Mistura, o que pode ter custos!)</translation>
+        <translation>Reinicia o estado actual PrivateSend (pode interromper o PrivateSend mesmo quando em processo de Mistura, o que pode ter custos!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1483,12 +1483,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Desactivado</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Iniciar Mistura Privatesend</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Iniciar Mistura PrivateSend</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Parar Mistura Privatesend</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Parar Mistura PrivateSend</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1531,9 +1531,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Activado</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Última mensagem Privatesend:
+        <translation>Última mensagem PrivateSend:
 </translation>
     </message>
     <message>
@@ -1541,20 +1541,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>N/D</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend foi reposto com sucesso.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend foi reposto com sucesso.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Se não deseja visualizar as taxas/transacções internas Privatesend seleccione "Mais Comuns" como Tipo no separador "Transacções"</translation>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Se não deseja visualizar as taxas/transacções internas PrivateSend seleccione "Mais Comuns" como Tipo no separador "Transacções"</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend necessita de pelo menos %1 para ser usado.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend necessita de pelo menos %1 para ser usado.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>A carteira está bloqueada e o utilizador recusou o desbloqueamento. A desactivar Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>A carteira está bloqueada e o utilizador recusou o desbloqueamento. A desactivar PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -2348,8 +2348,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Adicionar &amp;Destinatário</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -3004,8 +3004,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Recebido de</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Recebido via Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Recebido via PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3020,24 +3020,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Minado</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Denominação Privatesend</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Denominação PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Pagamento Colateral Privatesend</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Pagamento Colateral PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Fazer Entradas Colaterais</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Fazer Entradas Colaterais</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Criar Denominações</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Criar Denominações</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3115,24 +3115,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Enviado para</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Fazer Entradas Colaterais</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Fazer Entradas Colaterais</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Criar Denominações</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Criar Denominações</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Denominação Privatesend</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Denominação PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Pagamento Colateral Privatesend</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Pagamento Colateral PrivateSend</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3314,8 +3314,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Não foi possível obter acesso exclusivo à pasta de dados %s. Possivelmente o Dynamic já se encontra em execução.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>O Privatesend usa denominações exactas para enviar fundos, pode necessitar simplesmente de anonimizar mais algumas moedas.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>O PrivateSend usa denominações exactas para enviar fundos, pode necessitar simplesmente de anonimizar mais algumas moedas.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3370,12 +3370,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Não foi possível vincular a %s neste computador. Provavelmente o Dynamic já está a ser executado.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Não foi possível localizar fundos Privatesend denominados suficientes para esta transacção.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Não foi possível localizar fundos PrivateSend denominados suficientes para esta transacção.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Não foi possível localizar fundos Privatesend não denominados suficientes para esta transacção que não sejam igual a 1000DRK.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Não foi possível localizar fundos PrivateSend não denominados suficientes para esta transacção que não sejam igual a 1000DRK.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3474,8 +3474,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Detectada corrupção na base de dados dos blocos</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Opções Privatesend:</translation>
+        <source>PrivateSend options:</source>
+        <translation>Opções PrivateSend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3546,8 +3546,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Erro: Carteira bloqueada, não foi possível criar a transacção!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Erro: Já tem entradas pendentes no conjunto Privatesend</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Erro: Já tem entradas pendentes no conjunto PrivateSend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3618,8 +3618,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Informação de depuração de saída (omissão: %u, fornecer &lt;category&gt; é opcional)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Providenciar liquidez para o Privatesend misturando moedas continuamente com baixa frequência (0-100, omissão: %u, 1=muito frequente taxas elevadas, 100=pouco frequente, taxas reduzidas)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Providenciar liquidez para o PrivateSend misturando moedas continuamente com baixa frequência (0-100, omissão: %u, 1=muito frequente taxas elevadas, 100=pouco frequente, taxas reduzidas)</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file (default: %u)</source>
@@ -3704,16 +3704,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Incapaz de analizar -rpcbind value %s como endereço de rede</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend está inactivo.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend está inactivo.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Pedido Privatesend completo:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>Pedido PrivateSend completo:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Pedido Privatesend incompleto:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>Pedido PrivateSend incompleto:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3844,8 +3844,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Quantia inválida para -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>Ultima acção Privatesend com sucesso é demasiado recente.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>Ultima acção PrivateSend com sucesso é demasiado recente.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4112,8 +4112,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Manter no máximo &lt;n&gt; transacções não conectáveis em memória (omissão: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
-        <translation>O último Privatesend é muito recente.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>O último PrivateSend é muito recente.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4360,8 +4360,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Utilizador para as ligações JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Valor mais elevado do que o máximo permitido pelo Privatesend.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Valor mais elevado do que o máximo permitido pelo PrivateSend.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

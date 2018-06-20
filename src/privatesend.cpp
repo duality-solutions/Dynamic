@@ -37,34 +37,34 @@ bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
     return false;
 }
 
-bool CPrivatesendQueue::Sign()
+bool CPrivateSendQueue::Sign()
 {
     if(!fDynodeMode) return false;
 
     std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
 
     if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-        LogPrintf("CPrivatesendQueue::Sign -- SignMessage() failed, %s\n", ToString());
+        LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
         return false;
     }
 
     return CheckSignature(activeDynode.pubKeyDynode);
 }
 
-bool CPrivatesendQueue::CheckSignature(const CPubKey& pubKeyDynode)
+bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 {
     std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
     std::string strError = "";
 
     if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-        LogPrintf("CPrivatesendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
+        LogPrintf("CPrivateSendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
         return false;
     }
 
     return true;
 }
 
-bool CPrivatesendQueue::Relay(CConnman& connman)
+bool CPrivateSendQueue::Relay(CConnman& connman)
 {
     std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
     BOOST_FOREACH(CNode* pnode, vNodesCopy)
@@ -75,34 +75,34 @@ bool CPrivatesendQueue::Relay(CConnman& connman)
     return true;
 }
 
-bool CPrivatesendBroadcastTx::Sign()
+bool CPrivateSendBroadcastTx::Sign()
 {
     if(!fDynodeMode) return false;
 
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
 
     if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-        LogPrintf("CPrivatesendBroadcastTx::Sign -- SignMessage() failed\n");
+        LogPrintf("CPrivateSendBroadcastTx::Sign -- SignMessage() failed\n");
         return false;
     }
 
     return CheckSignature(activeDynode.pubKeyDynode);
 }
 
-bool CPrivatesendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode)
+bool CPrivateSendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode)
 {
     std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
     std::string strError = "";
 
     if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-        LogPrintf("CPrivatesendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
+        LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
         return false;
     }
 
     return true;
 }
 
-bool CPrivatesendBroadcastTx::IsExpired(int nHeight)
+bool CPrivateSendBroadcastTx::IsExpired(int nHeight)
 {
     // expire confirmed PSTXes after ~1h since confirmation
     return (nConfirmedHeight != -1) && (nHeight - nConfirmedHeight > 24);
@@ -126,11 +126,11 @@ void CPrivateSendBase::CheckQueue()
     if(!lockPS) return; // it's ok to fail here, we run this quite frequently
 
     // check mixing queue objects for timeouts
-    std::vector<CPrivatesendQueue>::iterator it = vecPrivatesendQueue.begin();
-    while(it != vecPrivatesendQueue.end()) {
+    std::vector<CPrivateSendQueue>::iterator it = vecPrivateSendQueue.begin();
+    while(it != vecPrivateSendQueue.end()) {
         if((*it).IsExpired()) {
             LogPrint("privatesend", "CPrivateSendBase::%s -- Removing expired queue (%s)\n", __func__, (*it).ToString());
-            it = vecPrivatesendQueue.erase(it);
+            it = vecPrivateSendQueue.erase(it);
         } else ++it;
     }
 }
@@ -150,7 +150,7 @@ std::string CPrivateSendBase::GetStateString() const
 
 // Definitions for static data members
 std::vector<CAmount> CPrivateSend::vecStandardDenominations;
-std::map<uint256, CPrivatesendBroadcastTx> CPrivateSend::mapPSTX;
+std::map<uint256, CPrivateSendBroadcastTx> CPrivateSend::mapPSTX;
 CCriticalSection CPrivateSend::cs_mappstx;
 
 void CPrivateSend::InitStandardDenominations()
@@ -378,23 +378,23 @@ std::string CPrivateSend::GetMessageByID(PoolMessage nMessageID)
     }
 }
 
-void CPrivateSend::AddPSTX(const CPrivatesendBroadcastTx& pstx)
+void CPrivateSend::AddPSTX(const CPrivateSendBroadcastTx& pstx)
 {
     LOCK(cs_mappstx);
     mapPSTX.insert(std::make_pair(pstx.tx.GetHash(), pstx));
 }
 
-CPrivatesendBroadcastTx CPrivateSend::GetPSTX(const uint256& hash)
+CPrivateSendBroadcastTx CPrivateSend::GetPSTX(const uint256& hash)
 {
     LOCK(cs_mappstx);
     auto it = mapPSTX.find(hash);
-    return (it == mapPSTX.end()) ? CPrivatesendBroadcastTx() : it->second;
+    return (it == mapPSTX.end()) ? CPrivateSendBroadcastTx() : it->second;
 }
 
 void CPrivateSend::CheckPSTXes(int nHeight)
 {
     LOCK(cs_mappstx);
-    std::map<uint256, CPrivatesendBroadcastTx>::iterator it = mapPSTX.begin();
+    std::map<uint256, CPrivateSendBroadcastTx>::iterator it = mapPSTX.begin();
     while(it != mapPSTX.end()) {
         if (it->second.IsExpired(nHeight)) {
             mapPSTX.erase(it++);

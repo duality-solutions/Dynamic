@@ -36,14 +36,14 @@ What is Dynamic?
 
 The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
 
-Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
+Dynamic utilises Dynodes, PrivateSend and InstantSend to provide anonymous and near instant transaction confirmations.
 
 Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
 
 
-**Dynode/Privatesend Network Information**
+**Dynode/PrivateSend Network Information**
 Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend ported and rebranded as Privatesend.
+Darksend ported and rebranded as PrivateSend.
 Utilisation of InstantSend for near-instant transactions.
 
 **MainNet Parameters**

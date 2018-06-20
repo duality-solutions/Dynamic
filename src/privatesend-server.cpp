@@ -82,11 +82,11 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             return;
         }
 
-        CPrivatesendQueue psq;
+        CPrivateSendQueue psq;
         vRecv >> psq;
 
         // process every psq only once
-        BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
+        BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
             if(q == psq) {
                 // LogPrint("privatesend", "PSQUEUE -- %s seen\n", psq.ToString());
                 return;
@@ -107,7 +107,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         }
 
         if(!psq.fReady) {
-            BOOST_FOREACH(CPrivatesendQueue q, vecPrivatesendQueue) {
+            BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
                 if(q.vin == psq.vin) {
                     // no way same dn can send another "not yet ready" psq this soon
                     LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", dnInfo.addr.ToString());
@@ -125,7 +125,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, C
             dnodeman.AllowMixing(psq.vin.prevout);
 
             LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), dnInfo.addr.ToString());
-            vecPrivatesendQueue.push_back(psq);
+            vecPrivateSendQueue.push_back(psq);
             psq.Relay(connman);
         }
 
@@ -359,7 +359,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
 
     // create and sign dynode pstx transaction
     if(!CPrivateSend::GetPSTX(hashTx)) {
-        CPrivatesendBroadcastTx pstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
+        CPrivateSendBroadcastTx pstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
         pstxNew.Sign();
         CPrivateSend::AddPSTX(pstxNew);
     }
@@ -526,7 +526,7 @@ void CPrivateSendServer::CheckForCompleteQueue(CConnman& connman)
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
 
-        CPrivatesendQueue psq(nSessionDenom, activeDynode.outpoint, GetAdjustedTime(), true);
+        CPrivateSendQueue psq(nSessionDenom, activeDynode.outpoint, GetAdjustedTime(), true);
         LogPrint("privatesend", "CPrivateSendServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", psq.ToString());
         psq.Sign();
         psq.Relay(connman);
@@ -732,11 +732,11 @@ bool CPrivateSendServer::CreateNewSession(int nDenom, CTransaction txCollateral,
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CPrivatesendQueue psq(nDenom, activeDynode.outpoint, GetAdjustedTime(), false);
+        CPrivateSendQueue psq(nDenom, activeDynode.outpoint, GetAdjustedTime(), false);
         LogPrint("privatesend", "CPrivateSendServer::CreateNewSession -- signing and relaying new queue: %s\n", psq.ToString());
         psq.Sign();
         psq.Relay(connman);
-        vecPrivatesendQueue.push_back(psq);
+        vecPrivateSendQueue.push_back(psq);
     }
 
     vecSessionCollaterals.push_back(txCollateral);

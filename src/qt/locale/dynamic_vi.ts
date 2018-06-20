@@ -741,8 +741,8 @@ Kiểu: %3
         <translation>Sao chép tiền trả lại</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Đầu vào không ẩn danh được chọn. &lt;b&gt;Privatesend sẽ bị tắt.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nếu bạn vẫn muốn sử dụng Privatesend, hãy bỏ chọn tata cả các đầu vào không ẩn danh trước và đánh dấu vào hộp Privatesend lần nữa.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Đầu vào không ẩn danh được chọn. &lt;b&gt;PrivateSend sẽ bị tắt.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nếu bạn vẫn muốn sử dụng PrivateSend, hãy bỏ chọn tata cả các đầu vào không ẩn danh trước và đánh dấu vào hộp PrivateSend lần nữa.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Kiểu: %3
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Cấu hình Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Cấu hình PrivateSend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Kiểu: %3
         <translation>Đây là tuỳ chọn chậm nhất và an toàn nhất. Sử dụng mức vô danh cao nhất sẽ tốn kém</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Cấu hình Privatesend</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>Cấu hình PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend được thiết lập thành công về mức cơ bản (%1 và 2 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend được thiết lập thành công về mức cơ bản (%1 và 2 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend được thiết lập thành công về mức cao (%1 và 8 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend được thiết lập thành công về mức cao (%1 và 8 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend được thiết lập thành công về mức tối đa (%1 và 16 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend được thiết lập thành công về mức tối đa (%1 và 16 vòng). Bạn có thể thay đổi nó bất cứ thời gian nào bằng cách mở màn hình cấu hình Dynamic.</translation>
     </message>
 </context>
 <context>
@@ -1146,12 +1146,12 @@ Kiểu: %3
         <translation>(0 = tự động, &lt;0 = để đó rất nhiều lõi miễn phí)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Số vòng Privatesend sử dụng</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>Số vòng PrivateSend sử dụng</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Số lượng này hoạt động như là một ngưỡng để tắt Privatesend một khi nó đạt đến.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Số lượng này hoạt động như là một ngưỡng để tắt PrivateSend một khi nó đạt đến.</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1423,8 +1423,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Hoàn thành:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Số dư cho Privatesend:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>Số dư cho PrivateSend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1443,8 +1443,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>không áp dụng</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1464,7 +1464,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Thử gửi yêu cầu Privatesend bằng tay.</translation>
+        <translation>Thử gửi yêu cầu PrivateSend bằng tay.</translation>
     </message>
     <message>
         <source>Try Mix</source>
@@ -1472,7 +1472,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Tái lập lại trạng thái hiện tại của Privatesend (có thể gián đoạn Privatesend nếu nó đang trong quá trình trộn, điều đó có thể làm bạn bị mất tiền!)</translation>
+        <translation>Tái lập lại trạng thái hiện tại của PrivateSend (có thể gián đoạn PrivateSend nếu nó đang trong quá trình trộn, điều đó có thể làm bạn bị mất tiền!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1487,12 +1487,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Đã tắt</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Bắt đầu trộn Privatesend</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Bắt đầu trộn PrivateSend</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Tắt trộn Privatesend</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Tắt trộn PrivateSend</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1535,9 +1535,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Đã bật</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Thông điệp Privatesend cuối cùng:
+        <translation>Thông điệp PrivateSend cuối cùng:
 </translation>
     </message>
     <message>
@@ -1545,20 +1545,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Không áp dụng</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend vừa được tái lập thành công.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend vừa được tái lập thành công.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Nếu bạn không muốn thấy các thông tin bên trong về Privatesend phí/giao dịch thì hãy chọn "Thông dụng nhất" làm Kiểu trong trang "Giao dịch".</translation>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Nếu bạn không muốn thấy các thông tin bên trong về PrivateSend phí/giao dịch thì hãy chọn "Thông dụng nhất" làm Kiểu trong trang "Giao dịch".</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend cần ít nhất %1 để sử dụng.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend cần ít nhất %1 để sử dụng.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Ví đã được khoá và người dùng từ chối mở khoá. Đang tắt Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Ví đã được khoá và người dùng từ chối mở khoá. Đang tắt PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -2364,8 +2364,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Thêm &amp;Người nhận</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -3020,8 +3020,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Nhận từ</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Nhận qua Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Nhận qua PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3036,24 +3036,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Được đào</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominate</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominate</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Thanh toán Privatesend Collateral</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Thanh toán PrivateSend Collateral</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend tạo đầu vào Collateral</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend tạo đầu vào Collateral</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend tạo các mệnh giá</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend tạo các mệnh giá</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3131,24 +3131,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Gửi đến</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend tạo đầu vào Collateral</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend tạo đầu vào Collateral</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend tạo các mệnh giá</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend tạo các mệnh giá</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominate</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominate</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Thanh toán Privatesend Collateral</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Thanh toán PrivateSend Collateral</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3330,8 +3330,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Không nhận được một khoá trong thư mục %s. Dynamic có thể đã đang chạy.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend sử dụng số lượng mệnh giá nhất định để gửi tiền, bạn có thể chỉ cần đơn giản ẩn danh vài coin nữa.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend sử dụng số lượng mệnh giá nhất định để gửi tiền, bạn có thể chỉ cần đơn giản ẩn danh vài coin nữa.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3386,12 +3386,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Không thể để ràng buộc vào %s trên máy tính này. Dynamic có thể đã chạy.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Không tìm đủ ngân sách Privatesend denominated cho giao dịch này.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Không tìm đủ ngân sách PrivateSend denominated cho giao dịch này.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Không tìm đủ ngân sách Privatesend denominated cho giao dịch mà nó không bằng 1000 DYN</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Không tìm đủ ngân sách PrivateSend denominated cho giao dịch mà nó không bằng 1000 DYN</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3490,8 +3490,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Phát hiện ra dữ liệu khối bị hỏng</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Tuỳ chọn Privatesend:</translation>
+        <source>PrivateSend options:</source>
+        <translation>Tuỳ chọn PrivateSend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3562,8 +3562,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Lỗi: Ví đã bị khoá, không thể tạo giao dịch!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Lỗi: Bạn đã có các thành phần đang chờ trong Privatesend pool</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Lỗi: Bạn đã có các thành phần đang chờ trong PrivateSend pool</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3614,8 +3614,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Xoá hết tất cả các giao dịch ví và chỉ phục hồi những phần đó của blockchain qua -rescan khi khởi động</translation>
     </message>
     <message>
-        <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Tắt tất cả các chức năng đặc trưng của Dynamic (Dynode, Privatesend, InstantSend, Lập ngân sách) (0-1, ngầm định: %u)</translation>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Tắt tất cả các chức năng đặc trưng của Dynamic (Dynode, PrivateSend, InstantSend, Lập ngân sách) (0-1, ngầm định: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3686,8 +3686,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Thông tin gỡ rối đầu ra (ngầm định: %u, cung cấp &lt;category&gt;  là một tuỳ chọn)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Cung cấp thanh khoản cho Privatesend bằng việc thường xuyên trộn tiền một cách liên tục (0-100, ngầm định: %u, 1=rất thường xuyên, phí cao, 100=rất ít thường xuyên, phí thấp)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Cung cấp thanh khoản cho PrivateSend bằng việc thường xuyên trộn tiền một cách liên tục (0-100, ngầm định: %u, 1=rất thường xuyên, phí cao, 100=rất ít thường xuyên, phí thấp)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3807,16 +3807,16 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Không thể phân tích giá trị -rpcbind %s như là địa chỉ mạng</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend đang nghỉ.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend đang nghỉ.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Yêu cầu Privatesend hoàn thành:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>Yêu cầu PrivateSend hoàn thành:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Yêu cầu Privatesend chưa hoàn thành:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>Yêu cầu PrivateSend chưa hoàn thành:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3947,8 +3947,8 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Số tiền không hợp lệ cho -paytxfee =&lt;số tiền&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>Phiên giao dịch Privatesend thành công cuối cùng quá gần đây.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>Phiên giao dịch PrivateSend thành công cuối cùng quá gần đây.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4223,8 +4223,8 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Giữ nhiều nhất &lt;n&gt; các giao dịch không kết nối được trong bộ nhớ (ngầm định: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
-        <translation>Privatesend cuối cùng quá gần.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>PrivateSend cuối cùng quá gần.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4475,8 +4475,8 @@ ví dụ: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
         <translation>Username cho kết nối JSON-RPC</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Giá tri trị lớn hơn giá trị tối đa mà bể Privatesend cho phép.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Giá tri trị lớn hơn giá trị tối đa mà bể PrivateSend cho phép.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

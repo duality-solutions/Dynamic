@@ -642,7 +642,7 @@
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     </context>
 <context>
     <name>EditAddressDialog</name>

@@ -97,7 +97,7 @@ When a new block is found on the network, a Dynode quorum will be determined and
 
 ### PSTX - "pstx"
 
-CPrivatesendBroadcastTx
+CPrivateSendBroadcastTx
 
 Dynodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the PSTX message.
 
@@ -122,7 +122,7 @@ Mixing pool status update
 
 ### PSQUEUE - "psq"
 
-CPrivatesendQueue
+CPrivateSendQueue
 
 Asks users to sign final mixing tx message.
 
@@ -145,7 +145,7 @@ Response to PSQ message which allows the user to join a mixing pool
 
 ### PSVIN - "psi"
 
-CPrivatesendEntry
+CPrivateSendEntry
 
 When queue is ready user is expected to send his entry to start actual mixing
 
@@ -257,7 +257,7 @@ Dynode Verify
 
 ### PSFINALTX - "psf"
 
-Privatesend Final Transaction
+PrivateSend Final Transaction
 
 ### PSCOMPLETE - "psc"
 

@@ -802,8 +802,8 @@ Address: %4
         <translation>이 기능을 사용하려면 '목록 모드' 로 전환하십시오.</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-anonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>익명 처리되지 않은 입력이 선택되었습니다. &lt;b&gt;Privatesend 사용 중지됨.&lt;/b&gt;&lt;br&gt;&lt;br&gt;여전히 Privatesend를 사용하려면 비 익명화 된 모든 입력을 먼저 선택 취소하고 Privatesend 확인란을 다시 선택하십시오.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-anonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>익명 처리되지 않은 입력이 선택되었습니다. &lt;b&gt;PrivateSend 사용 중지됨.&lt;/b&gt;&lt;br&gt;&lt;br&gt;여전히 PrivateSend를 사용하려면 비 익명화 된 모든 입력을 먼저 선택 취소하고 PrivateSend 확인란을 다시 선택하십시오.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -903,9 +903,9 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
+        <source>Configure PrivateSend</source>
         <translation>Privendsend 구성</translation>
     </message>
     <message>
@@ -953,20 +953,20 @@ Address: %4
         <translation>이것은 가장 느리고 가장 안전한 옵션입니다. 최대 익명 성을 사용하면 비용이 발생합니다.</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Privatesend 구성</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>PrivateSend 구성</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend가 기본 (% 1 및 2 라운드)으로 설정되었습니다. Dynamic의 설정 화면을 열어 언제든지 변경할 수 있습니다.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend가 기본 (% 1 및 2 라운드)으로 설정되었습니다. Dynamic의 설정 화면을 열어 언제든지 변경할 수 있습니다.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
         <translation>PrivateSend가 성공적으로 높게 설정되었습니다 (% 1 및 8 라운드). Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend가 최대 (% 1 및 16 라운드)로 설정되었습니다. Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend가 최대 (% 1 및 16 라운드)로 설정되었습니다. Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -1207,7 +1207,7 @@ Address: %4
         <translation>(0 = 자동, &lt;0 = 많은 코어들을 여유롭게 두기)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
+        <source>PrivateSend rounds to use</source>
         <translation>얼마나 많은 라운드 PrivateSend 사용</translation>
     </message>
     <message>
@@ -1321,8 +1321,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>&amp;확인되지 않은 변경사항 전송</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>이 양은 일단 도달하면 Privatesend를 끄는 임계 값 역할을합니다.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>이 양은 일단 도달하면 PrivateSend를 끄는 임계 값 역할을합니다.</translation>
     </message>    
     <message>
         <source>&amp;Network</source>
@@ -1574,8 +1574,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>해당 없음</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1619,7 +1619,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Privendsend의 현재 상태를 리셋합니다 (믹싱 중일 경우 Privatesend를 방해 할 수 있습니다. 비용이들 수도 있습니다).</translation>
+        <translation>Privendsend의 현재 상태를 리셋합니다 (믹싱 중일 경우 PrivateSend를 방해 할 수 있습니다. 비용이들 수도 있습니다).</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1634,12 +1634,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>장애인</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>시작 Privatesend 믹싱</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>시작 PrivateSend 믹싱</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Privatesend 믹싱 중지</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>PrivateSend 믹싱 중지</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1683,27 +1683,27 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>사용</translation>
     </message>
     <message>
-        <source>Last Privatesend message:</source>
-        <translation>마지막 Privatesend 메시지:</translation>
+        <source>Last PrivateSend message:</source>
+        <translation>마지막 PrivateSend 메시지:</translation>
     </message>
     <message>
         <source>N/A</source>
         <translation>N/A</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend 가 성공적으로 재설정되었습니다.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend 가 성공적으로 재설정되었습니다.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
         <translation>내부 Privendsend 수수료 / 거래를보고 싶지 않으면 "거래"탭에서 유형으로 "가장 일반적"을 선택하십시오.</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend는 적어도 % 1을 (를) 사용하도록 요구합니다.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend는 적어도 % 1을 (를) 사용하도록 요구합니다.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
         <translation>월렛이 잠겼으며 사용자가 잠금 해제를 거부했습니다. Privendsend 사용 중지.</translation>
     </message>
 </context>
@@ -2567,8 +2567,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>수신자 &amp;추가</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -3265,7 +3265,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>접수처</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
+        <source>Received via PrivateSend</source>
         <translation>PrivateSend를 통해 수신</translation>
     </message>
     <message>
@@ -3282,22 +3282,22 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>PrivateSend Denominate</source>
-        <translation>Privatesend 교단</translation>
+        <translation>PrivateSend 교단</translation>
     </message>
     <message>
         <source>PrivateSend Collateral Payment</source>
-        <translation>Privatesend 담보 지불</translation>
+        <translation>PrivateSend 담보 지불</translation>
     </message>
     <message>
         <source>PrivateSend Make Collateral Inputs</source>
-        <translation>Privatesend 담보 입력 만들기</translation>
+        <translation>PrivateSend 담보 입력 만들기</translation>
     </message>
     <message>
         <source>PrivateSend Create Denominations</source>
-        <translation>Privatesend 교파 만들기</translation>
+        <translation>PrivateSend 교파 만들기</translation>
     </message>
     <message>
-        <source>Privatesended</source>
+        <source>PrivateSended</source>
         <translation>PrivateSend를 통해 전송되었습니다</translation>
     </message>
     <message>
@@ -3380,24 +3380,24 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>전송</translation>
     </message>
     <message>
-        <source>Privatesended</source>
+        <source>PrivateSended</source>
         <translation>PrivateSend를 통해 전송되었습니다</translation>
     </message>
     <message>
         <source>PrivateSend Make Collateral Inputs</source>
-        <translation>Privatesend 담보 입력 만들기</translation>
+        <translation>PrivateSend 담보 입력 만들기</translation>
     </message>
     <message>
         <source>PrivateSend Create Denominations</source>
-        <translation>Privatesend 교단 만들기</translation>
+        <translation>PrivateSend 교단 만들기</translation>
     </message>
     <message>
         <source>PrivateSend Denominate</source>
-        <translation>Privatesend 교단</translation>
+        <translation>PrivateSend 교단</translation>
     </message>
     <message>
         <source>PrivateSend Collateral Payment</source>
-        <translation>Privatesend 담보 지불</translation>
+        <translation>PrivateSend 담보 지불</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3828,8 +3828,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>데이터 디렉토리 %s 에 대한 잠금을 가져올 수 없습니다. Dynamic이 이미 실행 중입니다.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend는 정확한 금액을 사용하여 자금을 송금합니다. 동전을 좀 더 익명화해야 할 수도 있습니다.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend는 정확한 금액을 사용하여 자금을 송금합니다. 동전을 좀 더 익명화해야 할 수도 있습니다.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3884,12 +3884,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>이 컴퓨터에서 %s 에 바인딩 할 수 없습니다. Dynamic이 이미 실행 중입니다.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
         <translation>이 거래에 필요한 Privendsend 기금을 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>1000 DYN과 동등하지 않은이 거래에 대해 Privatesend 비표준 기금을 충분히 찾을 수 없습니다.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>1000 DYN과 동등하지 않은이 거래에 대해 PrivateSend 비표준 기금을 충분히 찾을 수 없습니다.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3988,8 +3988,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>손상된 블록 데이터베이스가 발견되었습니다</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Privatesend 옵션:</translation>
+        <source>PrivateSend options:</source>
+        <translation>PrivateSend 옵션:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -4060,7 +4060,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>오류: 디스크 공간이 부족합니다!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
         <translation>오류: 이미 Privendsend 풀에 보류중인 항목이 있습니다.</translation>
     </message>
     <message>
@@ -4112,7 +4112,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>모든 지갑 트랜잭션을 삭제하고 시작시 -rescan을 통해 블록 체인의 해당 부분 만 복구하십시오.</translation>
     </message>
     <message>
-        <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
         <translation>Dynodes, PrivateSend, InstantSend, 예산 편성) (0-1, 기본값: %u) Dynamic 특정 기능을 모두 비활성화합니다.</translation>
     </message>
     <message>
@@ -4188,7 +4188,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>&lt;범주&gt; 수 있습니다:</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
         <translation>빈번하게 동전을 섞어주기 때문에 PrivateSend에 유동성을 제공합니다 (0-100, 기본값: %u, 1=매우 자주, 높은 수수료, 100=매우 드물게, 낮은 수수료)</translation>
     </message>
     <message>
@@ -4310,16 +4310,16 @@ rpcpassword=%s
         <translation>네트워크 주소로 -rpcbind 값 %s 을 (를) 구문 분석하지 못했습니다.с</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend 유휴 상태.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend 유휴 상태.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Privatesend 요청 완료:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>PrivateSend 요청 완료:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Privatesend 불완전한 요청:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>PrivateSend 불완전한 요청:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -4450,8 +4450,8 @@ rpcpassword=%s
         <translation>-paytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>마지막으로 성공한 Privatesend 작업이 너무 최근 버전입니다.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>마지막으로 성공한 PrivateSend 작업이 너무 최근 버전입니다.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4742,7 +4742,7 @@ rpcpassword=%s
         <translation>최대한 유지 &lt;n&gt; 메모리에서 연결되지 않는 트랜잭션 (태만: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
+        <source>Last PrivateSend was too recent.</source>
         <translation>마지막 Privendsend가 너무 최근입니다.</translation>
     </message>
     <message>
@@ -5226,8 +5226,8 @@ rpcpassword=%s
         <translation>JSON-RPC 연결의 사용자 이름</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Privatesend pool maximum보다 많은 값이 허용됩니다.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>PrivateSend pool maximum보다 많은 값이 허용됩니다.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

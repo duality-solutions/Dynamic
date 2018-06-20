@@ -20,9 +20,9 @@
 #include <QPushButton>
 #include <QSettings>
 
-PrivatesendConfig::PrivatesendConfig(QWidget *parent) :
+PrivateSendConfig::PrivateSendConfig(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::PrivatesendConfig),
+    ui(new Ui::PrivateSendConfig),
     model(0)
 {
     ui->setupUi(this);
@@ -32,17 +32,17 @@ PrivatesendConfig::PrivatesendConfig(QWidget *parent) :
     connect(ui->buttonMax, SIGNAL(clicked()), this, SLOT(clickMax()));
 }
 
-PrivatesendConfig::~PrivatesendConfig()
+PrivateSendConfig::~PrivateSendConfig()
 {
     delete ui;
 }
 
-void PrivatesendConfig::setModel(WalletModel *model)
+void PrivateSendConfig::setModel(WalletModel *model)
 {
     this->model = model;
 }
 
-void PrivatesendConfig::clickBasic()
+void PrivateSendConfig::clickBasic()
 {
     configure(true, 1000, 2);
 
@@ -57,7 +57,7 @@ void PrivatesendConfig::clickBasic()
     close();
 }
 
-void PrivatesendConfig::clickHigh()
+void PrivateSendConfig::clickHigh()
 {
     configure(true, 1000, 8);
 
@@ -72,7 +72,7 @@ void PrivatesendConfig::clickHigh()
     close();
 }
 
-void PrivatesendConfig::clickMax()
+void PrivateSendConfig::clickMax()
 {
     configure(true, 1000, 16);
 
@@ -87,7 +87,7 @@ void PrivatesendConfig::clickMax()
     close();
 }
 
-void PrivatesendConfig::configure(bool enabled, int coins, int rounds) {
+void PrivateSendConfig::configure(bool enabled, int coins, int rounds) {
 
     QSettings settings;
 

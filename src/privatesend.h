@@ -139,7 +139,7 @@ public:
 /**
  * A currently inprogress mixing merge and denomination information
  */
-class CPrivatesendQueue
+class CPrivateSendQueue
 {
 public:
     int nDenom;
@@ -150,7 +150,7 @@ public:
     // memory only
     bool fTried;
 
-    CPrivatesendQueue() :
+    CPrivateSendQueue() :
         nDenom(0),
         vin(CTxIn()),
         nTime(0),
@@ -159,7 +159,7 @@ public:
         fTried(false)
         {}
 
-    CPrivatesendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
+    CPrivateSendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
         nDenom(nDenom),
         vin(CTxIn(outpoint)),
         nTime(nTime),
@@ -201,7 +201,7 @@ public:
                         nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
     }
 
-    friend bool operator==(const CPrivatesendQueue& a, const CPrivatesendQueue& b)
+    friend bool operator==(const CPrivateSendQueue& a, const CPrivateSendQueue& b)
     {
         return a.nDenom == b.nDenom && a.vin.prevout == b.vin.prevout && a.nTime == b.nTime && a.fReady == b.fReady;
     }
@@ -209,7 +209,7 @@ public:
 
 /** Helper class to store mixing transaction (tx) information.
  */
-class CPrivatesendBroadcastTx
+class CPrivateSendBroadcastTx
 {
 private:
     // memory only
@@ -222,7 +222,7 @@ public:
     std::vector<unsigned char> vchSig;
     int64_t sigTime;
 
-    CPrivatesendBroadcastTx() :
+    CPrivateSendBroadcastTx() :
         nConfirmedHeight(-1),
         tx(),
         vin(),
@@ -230,7 +230,7 @@ public:
         sigTime(0)
         {}
 
-    CPrivatesendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
+    CPrivateSendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
         nConfirmedHeight(-1),
         tx(tx),
         vin(CTxIn(outpoint)),
@@ -248,17 +248,17 @@ public:
         READWRITE(sigTime);
     }
 
-    friend bool operator==(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    friend bool operator==(const CPrivateSendBroadcastTx& a, const CPrivateSendBroadcastTx& b)
     {
         return a.tx == b.tx;
     }
-    friend bool operator!=(const CPrivatesendBroadcastTx& a, const CPrivatesendBroadcastTx& b)
+    friend bool operator!=(const CPrivateSendBroadcastTx& a, const CPrivateSendBroadcastTx& b)
     {
         return !(a == b);
     }
     explicit operator bool() const
     {
-        return *this != CPrivatesendBroadcastTx();
+        return *this != CPrivateSendBroadcastTx();
     }
 
     bool Sign();
@@ -275,7 +275,7 @@ protected:
     mutable CCriticalSection cs_privatesend;
 
     // The current mixing sessions in progress on the network
-    std::vector<CPrivatesendQueue> vecPrivatesendQueue;
+    std::vector<CPrivateSendQueue> vecPrivateSendQueue;
 
     std::vector<CPrivateSendEntry> vecEntries; // Dynode/clients entries
 
@@ -294,7 +294,7 @@ public:
 
     CPrivateSendBase() { SetNull(); }
 
-    int GetQueueSize() const { return vecPrivatesendQueue.size(); }
+    int GetQueueSize() const { return vecPrivateSendQueue.size(); }
     int GetState() const { return nState; }
     std::string GetStateString() const;
 
@@ -315,7 +315,7 @@ private:
 
     // static members
     static std::vector<CAmount> vecStandardDenominations;
-    static std::map<uint256, CPrivatesendBroadcastTx> mapPSTX;
+    static std::map<uint256, CPrivateSendBroadcastTx> mapPSTX;
 
     static CCriticalSection cs_mappstx;
 
@@ -350,8 +350,8 @@ public:
 
     static bool IsCollateralAmount(CAmount nInputAmount);
 
-    static void AddPSTX(const CPrivatesendBroadcastTx& pstx);
-    static CPrivatesendBroadcastTx GetPSTX(const uint256& hash);
+    static void AddPSTX(const CPrivateSendBroadcastTx& pstx);
+    static CPrivateSendBroadcastTx GetPSTX(const uint256& hash);
 
     static void UpdatedBlockTip(const CBlockIndex *pindex);
 

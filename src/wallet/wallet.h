@@ -492,7 +492,7 @@ public:
         tx = txIn; i = iIn; nDepth = nDepthIn; fSpendable = fSpendableIn; fSolvable = fSolvableIn;
     }
 
-    //Used with Privatesend. Will return largest nondenom, then denominations, then very small inputs
+    //Used with PrivateSend. Will return largest nondenom, then denominations, then very small inputs
     int Priority() const;
 
     std::string ToString() const;

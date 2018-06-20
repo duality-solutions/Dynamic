@@ -123,7 +123,7 @@ struct dynode_info_t
 };
 
 //
-// The Dynode Class. For managing the Privatesend process. It contains the input of the 1000DYN, signature to prove
+// The Dynode Class. For managing the PrivateSend process. It contains the input of the 1000DYN, signature to prove
 // it's the one who own that ip address and code for calculating the payment election.
 //
 class CDynode : public dynode_info_t

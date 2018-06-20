@@ -714,8 +714,8 @@ Indirizzo: %4
         <translation>Copia resto</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Selezionati input non anonimizzati.&lt;b&gt;Privatesend sará disabilitato.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se vuoi ancora usare Privatesend, per favore per prima cosa togli la selezione a tutti gli inputs non anonimizzati e dopo controlla il Privatesend checkbox di nuovo.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Selezionati input non anonimizzati.&lt;b&gt;PrivateSend sará disabilitato.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Se vuoi ancora usare PrivateSend, per favore per prima cosa togli la selezione a tutti gli inputs non anonimizzati e dopo controlla il PrivateSend checkbox di nuovo.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -811,10 +811,10 @@ Indirizzo: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Configura Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Configura PrivateSend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -861,20 +861,20 @@ Indirizzo: %4
         <translation>Questa è la più lenta ma più sicura opzione. Usare il massimo grado di anonimizzazione costerà</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Configurazione Privatesend</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>Configurazione PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend è statto correttamente impostato su base (%1 e 2 round). Puoi cambiare questa impostazione in qualsiasi momento tu lo voglia dalla finestra di configurazione.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend è statto correttamente impostato su base (%1 e 2 round). Puoi cambiare questa impostazione in qualsiasi momento tu lo voglia dalla finestra di configurazione.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend è stata impostata correttamente a elevato (%1 e 8 turni). È possibile modificare in qualsiasi momento aprendo schermata di configurazione di Dynamic.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend è stata impostata correttamente a elevato (%1 e 8 turni). È possibile modificare in qualsiasi momento aprendo schermata di configurazione di Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend è stato correttamente settato al massimo (%1 e 16 rounds). Puoi cambiarlo quando vuoi aprendo la finestra di configurazione di Dynamic</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend è stato correttamente settato al massimo (%1 e 16 rounds). Puoi cambiarlo quando vuoi aprendo la finestra di configurazione di Dynamic</translation>
     </message>
 </context>
 <context>
@@ -1111,12 +1111,12 @@ Indirizzo: %4
         <translation>(0 = automatico, &lt;0 = lascia questo numero di core liberi)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
+        <source>PrivateSend rounds to use</source>
         <translation>Round privatesend da utilizzare</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Tale importo si comporta come una soglia per spegnere Privatesend una volta che è raggiunto.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Tale importo si comporta come una soglia per spegnere PrivateSend una volta che è raggiunto.</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1377,8 +1377,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Completamento:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Bilancio Privatesend:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>Bilancio PrivateSend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1397,8 +1397,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>n/a</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1418,7 +1418,7 @@ Più URL vengono separati da una barra verticale |.</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Prova ad inserire una richiesta Privatesend manualmente.</translation>
+        <translation>Prova ad inserire una richiesta PrivateSend manualmente.</translation>
     </message>
     <message>
         <source>Try Mix</source>
@@ -1426,7 +1426,7 @@ Più URL vengono separati da una barra verticale |.</translation>
     </message>
     <message>
         <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Resetta lo stato corrente del Privatesend (può interrompere il Privatesend se è nel processo di mixaggio, costandoti una perdita economica!)</translation>
+        <translation>Resetta lo stato corrente del PrivateSend (può interrompere il PrivateSend se è nel processo di mixaggio, costandoti una perdita economica!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1441,12 +1441,12 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Disabilita</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Avvia Privatesend mix</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Avvia PrivateSend mix</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Ferma Privatesend mix</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Ferma PrivateSend mix</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1465,9 +1465,9 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Abilitato</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Ultimo messaggio Privatesend
+        <translation>Ultimo messaggio PrivateSend
 </translation>
     </message>
     <message>
@@ -1475,16 +1475,16 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>N/D</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend è stato resettato con successo</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend è stato resettato con successo</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend ha bisogno almeno dell' %1 per essere usato.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend ha bisogno almeno dell' %1 per essere usato.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Portafoglio è bloccato e l'utente ha rifiutato di sbloccare. Disattivazione Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Portafoglio è bloccato e l'utente ha rifiutato di sbloccare. Disattivazione PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -2218,8 +2218,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>&amp;Aggiungi beneficiario</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -2862,8 +2862,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Ricevuto da</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Ricevuto via Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Ricevuto via PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -2878,24 +2878,24 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Ottenuto dal mining</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominazione</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominazione</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Collaterale Pagamento</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Collaterale Pagamento</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Fa Ingressi Collaterali</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Fa Ingressi Collaterali</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Crea Denominazioni</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Crea Denominazioni</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -2973,24 +2973,24 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Inviato a</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Fa Ingressi Collaterali</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Fa Ingressi Collaterali</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Crea Denominazioni</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Crea Denominazioni</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominazione</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominazione</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Collaterale Pagamento</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Collaterale Pagamento</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3168,8 +3168,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Impossibile ottenere un blocco sulla data directory %s. Dynamic è probabilmente già in esecuzione.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend utilizza esatto denominato importo a inviare fondi, si potrebbe semplicemente bisogno di anonimizzare alcuni più monete.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend utilizza esatto denominato importo a inviare fondi, si potrebbe semplicemente bisogno di anonimizzare alcuni più monete.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3224,12 +3224,12 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Incapace di legare al %s su questo computer. Dynamic è probabilmente già funzionato.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Impossibile trovare fondi sufficienti Privatesend denominati per questa transazione.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Impossibile trovare fondi sufficienti PrivateSend denominati per questa transazione.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Impossibile trovare un numero sufficiente di non denominati fondi Privatesend per questa operazione che non sono uguali a 1000 DYN.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Impossibile trovare un numero sufficiente di non denominati fondi PrivateSend per questa operazione che non sono uguali a 1000 DYN.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3328,8 +3328,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Rilevato database blocchi corrotto</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Opzioni Privatesend:</translation>
+        <source>PrivateSend options:</source>
+        <translation>Opzioni PrivateSend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3400,8 +3400,8 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Errore: portafoglio bloccato, impossibile creare la transazione!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Errore: è già voci in sospeso in piscina Privatesend</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Errore: è già voci in sospeso in piscina PrivateSend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3452,16 +3452,16 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Uscite denominate non confermati trovati, saranno aspettare che confermano per continua.</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
+        <source>PrivateSend is idle.</source>
         <translation>Nessun Dynode trovato.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Richiesta di Privatesend completa:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>Richiesta di PrivateSend completa:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Richiesta di Privatesend incompleta:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>Richiesta di PrivateSend incompleta:</translation>
     </message>
     <message>
         <source>Error connecting to Dynode.</source>
@@ -3588,7 +3588,7 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Mantenere al massimo &lt;n&gt; le operazioni in collegabile in memoria (predefinito: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
+        <source>Last PrivateSend was too recent.</source>
         <translation>L'ultima privatesend è troppo recente</translation>
     </message>
     <message>
@@ -3797,8 +3797,8 @@ Più URL vengono separati da una barra verticale |.</translation>
 </translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Più valore di Privatesend piscina massima permette.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Più valore di PrivateSend piscina massima permette.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

@@ -643,7 +643,7 @@ void OverviewPage::togglePrivateSend(){
         /* show privatesend configuration if client has defaults set */
 
         if(privateSendClient.nPrivateSendAmount == 0){
-            PrivatesendConfig dlg(this);
+            PrivateSendConfig dlg(this);
             dlg.setModel(walletModel);
             dlg.exec();
         }

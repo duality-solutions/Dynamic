@@ -1032,7 +1032,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                 }
 
                 if (!push && inv.type == MSG_PSTX) {
-                    CPrivatesendBroadcastTx pstx = CPrivateSend::GetPSTX(inv.hash);
+                    CPrivateSendBroadcastTx pstx = CPrivateSend::GetPSTX(inv.hash);
                     if(pstx) {
                         connman.PushMessage(pfrom, NetMsgType::PSTX, pstx);
                         push = true;
@@ -1580,7 +1580,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         vector<uint256> vEraseQueue;
         CTransaction tx;
         CTxLockRequest txLockRequest;
-        CPrivatesendBroadcastTx pstx;
+        CPrivateSendBroadcastTx pstx;
         int nInvType = MSG_TX;
 
         // Read data and assign inv type
