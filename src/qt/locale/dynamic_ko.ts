@@ -2399,6 +2399,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>%1 의 필수 수수료 만 지불하십시오</translation>
     </message>
     <message>
+        <source>Confirmation time target:</source>
+        <translation>확인 시간 목표 :</translation>
+    </message>
+    <message>
         <source>Send Coins</source>
         <translation>동전 보내기</translation>
     </message>
@@ -4176,16 +4180,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>오작동하는 피어가 재 연결하지 못하게하는 시간 (초) (기본값: %u)</translation>
     </message>
     <message>
-        <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>디버깅 정보 출력 (기본값: % u, 공급 &lt;범주는&gt; 선택 사항 임)</translation>
-    </message>
-    <message>
-        <source>If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information.</source>
-        <translation>&lt;범주&gt; 가 제공되지 않거나 &lt;범주&gt; = 1 인 경우 모든 디버깅 정보를 출력합니다.</translation>
-    </message>
-    <message>
-        <source>&lt;category&gt; can be:</source>
-        <translation>&lt;범주&gt; 수 있습니다:</translation>
+        <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional). If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information. &lt;category&gt; can be: %u (or specifically: %u)%u.</source>
+        <translation>디버깅 정보 출력 (기본값: % u, 공급 &lt;범주는&gt; 선택 사항 임). &lt;범주&gt; 가 제공되지 않거나 &lt;범주&gt; = 1 인 경우 모든 디버깅 정보를 출력합니다. &lt;범주&gt; 수 있습니다: %u  (또는 구체적으로: %u)%u.</translation>
     </message>
     <message>
         <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
@@ -4874,8 +4870,8 @@ rpcpassword=%s
         <translation>&lt;n&gt; 시간 (기본값: %u)보다 긴 트랜잭션을 메모리 풀에 유지하지 마십시오</translation>
     </message>
     <message>
-        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. </source>
-        <translation>오래된 블록을 정리 (삭제)하여 스토리지 요구 사항을 줄입니다. 이 모드는 -txindex 및 -rescan과 호환되지 않습니다. </translation>
+        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, >%u = target size in MiB to use for block files)</source>
+        <translation>오래된 블록을 정리 (삭제)하여 스토리지 요구 사항을 줄입니다. 이 모드는 -txindex 및 -rescan과 호환되지 않습니다. 경고 :이 설정을 되돌리려면 전체 블록 체인을 다시 다운로드해야합니다. (기본값 : 0 = 잘라내 기 블록 사용 안 함,> %u = 블록 파일에 사용할 MiB의 대상 크기)</translation>
     </message>
     <message>
         <source>Rebuild chain state from the currently indexed blocks</source>
@@ -5387,10 +5383,6 @@ rpcpassword=%s
     <message>
         <source>Reset all settings changes made over the GUI</source>
         <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
-    </message>
-    <message>
-        <source>Dynamic (or specifically: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</source>
-        <translation>Dynamic (또는 구체적으로: gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork)</translation>
     </message>
 </context>
 </TS>
