@@ -369,6 +369,9 @@ qt_dynamic_qt_LDADD = qt/libdynamicqt.a $(LIBDYNAMIC_SERVER)
 if ENABLE_WALLET
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_WALLET)
 endif
+if ENABLE_GPU
+qt_dynamic_qt_LDADD += -L/usr/local/cuda-9.2/lib64 -L/usr/lib/x86_64-linux-gnu -lOpenCL $(argon2GPULIBS)
+endif
 if ENABLE_ZMQ
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif

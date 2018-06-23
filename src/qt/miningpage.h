@@ -38,16 +38,25 @@ private:
     void timerEvent(QTimerEvent *event);
     void updateUI();
     void StartMiner();
-    void StopMiner();
-    void showHashMeterControls(bool show);
+    void StopMiner(bool fGPU);
+    void showHashMeterControls(bool show, bool fGPU);
+    void updatePushSwitch(bool fGPU);
 
 private Q_SLOTS:
 
-    void changeNumberOfCores(int i);
-    void switchMining();
-    void showHashRate(int i);
-    void changeSampleTime(int i);
-    void clearHashRateData();
+    void changeNumberOfCPUThreads(int i);
+    void changeNumberOfGPUThreads(int i);
+    void switchMining(bool fGPU);
+    void switchCPUMining();
+    void switchGPUMining();
+    void showCPUHashRate(int i);
+    void showGPUHashRate(int i);
+    void showHashRate(int i, bool fGPU);
+    void changeCPUSampleTime(int i);
+    void changeGPUSampleTime(int i);
+    void changeSampleTime(int i, bool fGPU);
+    void clearCPUHashRateData();
+    void clearGPUHashRateData();
 };
 
 #endif // MININGPAGE_H

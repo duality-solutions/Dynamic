@@ -1,6 +1,6 @@
 DIST_SUBDIRS = secp256k1 univalue
 
-AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
+AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) -L/usr/lib/x86_64-linux-gnu -L/usr/local/cuda-9.2/lib64
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
 AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
@@ -8,6 +8,7 @@ EXTRA_LIBRARIES =
 DYNAMIC_CONFIG_INCLUDES=-I$(builddir)/config
 DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
+DYNAMIC_INCLUDES += -I$(top_srcdir)/contrib/argon2-gpu/include -I/usr/local/cuda-9.2/include
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
 
@@ -20,6 +21,12 @@ LIBDYNAMIC_CRYPTO=crypto/libdynamic_crypto.a
 LIBDYNAMICQT=qt/libdynamicqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
+
+argon2GPULIBS = \
+  -largon2 \
+  -largon2-gpu \
+  -largon2-opencl \
+  -largon2-cuda
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
@@ -126,6 +133,7 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
+  miner-gpu.h \
   miner.h \
   net.h \
   net_processing.h \
@@ -411,7 +419,7 @@ nodist_libdynamic_util_a_SOURCES = $(srcdir)/obj/build.h
 dynamicd_SOURCES = dynamicd.cpp
 dynamicd_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 dynamicd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dynamicd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+dynamicd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -Wl,-rpath=/usr/local/cuda-9.2/lib64
 
 if TARGET_WINDOWS
 dynamicd_SOURCES += dynamicd-res.rc
@@ -434,6 +442,10 @@ endif
 
 if ENABLE_WALLET
 dynamicd_LDADD += libdynamic_wallet.a
+endif
+
+if ENABLE_GPU
+dynamicd_LDADD += -L/usr/local/cuda-9.2/lib64 -L/usr/lib/x86_64-linux-gnu -lOpenCL $(argon2GPULIBS)
 endif
 
 dynamicd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)

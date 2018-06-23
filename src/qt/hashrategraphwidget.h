@@ -24,7 +24,9 @@ public:
     enum GraphType
     {
         MINER_HASHRATE = 0,
-        NETWORK_HASHRATE
+        NETWORK_HASHRATE,
+        MINER_CPU_HASHRATE,
+        MINER_GPU_HASHRATE
     };
 
     enum SampleTime
@@ -52,6 +54,7 @@ private:
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
     void truncateSampleQueue();
+    int64_t getHashRate();
 
     unsigned int iDesiredSamples;
     int64_t iMaxHashRate;

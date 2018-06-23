@@ -40,6 +40,8 @@
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include "miner-gpu.h"
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // DynamicMiner
@@ -408,8 +410,28 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 // Internal miner
 //
 //
-double dHashesPerSec = 0.0;
+double dCPUHashesPerSec = 0.0;
+double dGPUHashesPerSec = 0.0;
 int64_t nHPSTimerStart = 0;
+
+int64_t GetHashRate()
+{
+    return GetCPUHashRate() + GetGPUHashRate();
+}
+
+int64_t GetCPUHashRate()
+{
+    if (GetTimeMillis() - nHPSTimerStart > 8000)
+        return (int64_t)0;
+    return (int64_t)(dCPUHashesPerSec);
+}
+
+int64_t GetGPUHashRate()
+{
+    if (GetTimeMillis() - nHPSTimerStart > 8000)
+        return (int64_t)0;
+    return (int64_t)(dGPUHashesPerSec);
+}
 
 // ScanHash scans nonces looking for a hash with at least some zero bits.
 // The nonce is usually preserved between calls, but periodically or if the
@@ -466,18 +488,45 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     return true;
 }
 
-// ***TODO*** that part changed in bitcoin, we are using a mix with old one here for now
-void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
+static void WaitForNetworkInit(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrintf("DynamicMiner -- started\n");
+    if (chainparams.MiningRequiresPeers()) {
+        // Busy-wait for the network to come online so we don't waste time mining
+        // on an obsolete chain. In regtest mode we expect to fly solo.
+        while (true) {
+            bool fvNodesEmpty = connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
+            if (!fvNodesEmpty && !IsInitialBlockDownload()) {
+                break;
+            }
+            MilliSleep(1000);
+        }
+    }
+}
+
+// TODO: that part changed in bitcoin, we are using a mix with old one here for now
+static void DynamicMiner(const CChainParams& chainparams, CConnman& connman, std::size_t nDeviceIndex, bool fGPU)
+{
+    std::string dev = fGPU ? "GPU" : "CPU";
+    LogPrintf("DynamicMiner -- started #%u@%s\n", nDeviceIndex, dev);
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dynamic-miner");
 
+    double* dHashesPerSec = fGPU ? &dGPUHashesPerSec : &dCPUHashesPerSec;
     unsigned int nExtraNonce = 0;
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
-	
+
+#ifdef ENABLE_GPU
+    // Argon2GPU processingUnit = GetGPUProcessingUnit(nDeviceIndex);
+    Argon2GPUContext global;
+    auto& devices = global.getAllDevices();
+    auto& device = devices[nDeviceIndex];
+    Argon2GPUProgramContext context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10);
+    Argon2GPUParams params((std::size_t)OUTPUT_BYTES, 2, 500, 8);
+    Argon2GPU processingUnit(&context, &params, &device, 1, false, false);
+#endif // ENABLE_GPU
+
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -486,17 +535,8 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
             throw std::runtime_error("No coinbase script available (mining requires a wallet)");
 
         while (true) {
-            if (chainparams.MiningRequiresPeers()) {
-                // Busy-wait for the network to come online so we don't waste time mining
-                // on an obsolete chain. In regtest mode we expect to fly solo.
-                do {
-                    bool fvNodesEmpty = connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
-                    if (!fvNodesEmpty && !IsInitialBlockDownload() && dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced())
-                        break;
-                    MilliSleep(1000);
-                } while (true);
-            }
-
+            // Wait for blocks if required
+            WaitForNetworkInit(chainparams, connman);
 
             //
             // Create new block
@@ -510,13 +550,13 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
 
             if (!pblocktemplate.get())
             {
-                LogPrintf("DynamicMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", dev);
                 return;
             }
             CBlock *pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-            LogPrintf("DynamicMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            LogPrintf("DynamicMiner%s -- Running miner with %u transactions in block (%u bytes)\n", dev, pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
             
             //
@@ -530,10 +570,17 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
                 unsigned int nHashesDone = 0;
 
                 uint256 hash;
-                while (true)
-                {
+                while (true) {
+#ifdef ENABLE_GPU
+                    if (fGPU) {
+                        hash = GetBlockHashGPU(pblock, &processingUnit);
+                    } else {
+                        hash = pblock->GetHash();
+                    }
+#else
                     hash = pblock->GetHash();
-                    
+#endif // ENABLE_GPU
+
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
@@ -541,7 +588,7 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
                         //assert(hash == pblock->GetHash());
 
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                        LogPrintf("DynamicMiner:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("DynamicMiner%s:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", dev, hash.GetHex(), hashTarget.GetHex());
                         ProcessBlockFound(pblock, chainparams, &connman);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
@@ -576,13 +623,13 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
                         LOCK(cs);
                         if (GetTimeMillis() - nHPSTimerStart > 4000)
                         {
-                            dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
+                            *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
                             nHPSTimerStart = GetTimeMillis();
                             nHashCounter = 0;
                             if (GetTime() - nLogTime > 30 * 60)
                             {
                                 nLogTime = GetTime();
-                                LogPrintf("hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
+                                LogPrintf("hashmeter %6.0f khash/s\n", *dHashesPerSec / 1000.0);
                             }
                         }
                     }
@@ -624,25 +671,155 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
     }
 }
 
-void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams, CConnman& connman)
+static boost::thread_group* GetCPUMinerThreads(bool fInit = true, bool fRestart = true)
 {
-    static boost::thread_group* minerThreads = NULL;
+    static boost::thread_group* minerThreadsCPU = NULL;
+    if (fRestart && minerThreadsCPU != NULL) {
+        minerThreadsCPU->interrupt_all();
+        delete minerThreadsCPU;
+        minerThreadsCPU = NULL;
+    }
+    if (fInit && minerThreadsCPU == NULL) {
+        minerThreadsCPU = new boost::thread_group();
+    }
+    return minerThreadsCPU;
+}
 
-    if (nThreads < 0)
-        nThreads = GetNumCores(); // Uses std::thread::hardwareconcurrency to detect available cores
-                                  // Return the number of cores available on the current system.
-                                  // @note This does count virtual cores, such as those provided by HyperThreading.
-    if (minerThreads != NULL)
-    {
-        minerThreads->interrupt_all();
-        delete minerThreads;
-        minerThreads = NULL;
+static boost::thread_group* GetGPUMinerThreads(bool fInit = true, bool fRestart = true)
+{
+    static boost::thread_group* minerThreadsGPU = NULL;
+    if (fRestart && minerThreadsGPU != NULL) {
+        minerThreadsGPU->interrupt_all();
+        delete minerThreadsGPU;
+        minerThreadsGPU = NULL;
+    }
+    if (fInit && minerThreadsGPU == NULL) {
+        minerThreadsGPU = new boost::thread_group();
+    }
+    return minerThreadsGPU;
+}
+
+static boost::thread_group* GetMinerThreads(bool fGPU = false, bool fInit = true, bool fRestart = true)
+{
+    if (fGPU) {
+        return GetGPUMinerThreads(fInit, fRestart);
+    }
+    return GetCPUMinerThreads(fInit, fRestart);
+}
+
+void AutoTuneDeviceThreads(const CChainParams& chainparams, CConnman& connman, std::size_t nDeviceIndex = -1, bool fGPU = false)
+{
+    // Threads
+    boost::thread* lastThread = NULL;
+    boost::thread_group* minerThreads = GetMinerThreads(fGPU);
+
+    // Metrics
+    double nLastHashesPerSec = 0.0;
+    double* dHashesPerSec = fGPU ? &dGPUHashesPerSec : &dCPUHashesPerSec;
+
+    // Device name
+    std::string dev = fGPU ? "GPU" : "CPU";
+
+    LogPrintf("Autotune hashmeter: %6.0f\n", *dHashesPerSec / 1000.0);
+
+    // Start Dynamin miner threads on device
+    while (true) {
+        LogPrintf("Starting %s Miner thread #%u %6.0f khash/s\n", dev, minerThreads->size(), *dHashesPerSec / 1000.0);
+        std::size_t nThread = minerThreads->size();
+        std::size_t device = nDeviceIndex == -1 ? nThread : nDeviceIndex;
+        lastThread = minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), boost::cref(device), boost::cref(fGPU)));
+        MilliSleep(10000);
+
+        if (*dHashesPerSec > nLastHashesPerSec) {
+            nLastHashesPerSec = *dHashesPerSec;
+            continue;
+        }
+
+        LogPrintf("Removing %s Miner thread #%u %6.0f khash/s\n", dev, minerThreads->size(), *dHashesPerSec / 1000.0);
+        minerThreads->remove_thread(lastThread);
+        break;
     }
 
-    if (nThreads == 0 || !fGenerate)
-        return;
+    LogPrintf("Autotune %s finished with hashrate %6.0f\n khash/s", dev, *dHashesPerSec / 1000.0);
+}
 
-    minerThreads = new boost::thread_group();
-    for (int i = 0; i < nThreads; i++)
-        minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman)));
+void GenerateAutoTuneDevice(const CChainParams& chainparams, CConnman& connman, bool fGPU)
+{
+    if (!fGPU) {
+        AutoTuneDeviceThreads(chainparams, connman);
+    } else {
+        // Start GPU threads
+        for (std::size_t device = 0; device < GetGPUDeviceCount(); device++) {
+            AutoTuneDeviceThreads(chainparams, connman, device, true);
+        }
+    }
+}
+
+void GenerateDynamicsAutoTune(const CChainParams& chainparams, CConnman& connman)
+{
+    // Wait for blocks if required
+    WaitForNetworkInit(chainparams, connman);
+    MilliSleep(30000);
+
+    GenerateAutoTuneDevice(chainparams, connman, false);
+    GenerateAutoTuneDevice(chainparams, connman, true);
+}
+
+void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman, bool fAutotune)
+{
+    if (fAutotune) {
+        return GenerateDynamicsAutoTune(chainparams, connman);
+    }
+
+    std::size_t devices = GetGPUDeviceCount();
+#ifdef ENABLE_GPU
+    LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
+#else
+    LogPrintf("DynamicMiner -- GPU no support\n");
+#endif
+
+    if (nCPUThreads == 0 && (devices == 0 || nGPUThreads == 0)) {
+        LogPrintf("DynamicMiner -- disabled -- CPU Threads set to zero\n");
+        return;
+    }
+
+    boost::thread_group* minerThreads = GetCPUMinerThreads();
+
+    if (nCPUThreads < 0)
+        nCPUThreads = GetNumCores();
+
+    // Start CPU threads
+    while (minerThreads->size() < nCPUThreads) {
+        std::size_t nThread = minerThreads->size();
+        LogPrintf("Starting CPU Miner thread #%u\n", nThread);
+        minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), nThread, false));
+    }
+
+    if (nGPUThreads < 0)
+        nGPUThreads = 1;
+
+    // Start GPU threads
+    minerThreads = GetGPUMinerThreads();
+    for (std::size_t device = 0; device < devices; device++) {
+        for (int i = 0; i < nGPUThreads; i++) {
+            LogPrintf("Starting GPU Miner thread %u on device %u\n", i, device);
+            minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), device, true));
+        }
+    }
+}
+
+void ShutdownCPUMiners()
+{
+    GetCPUMinerThreads(false);
+}
+
+void ShutdownGPUMiners()
+{
+    GetGPUMinerThreads(false);
+}
+
+void ShutdownMiners()
+{
+    ShutdownCPUMiners();
+    ShutdownGPUMiners();
 }

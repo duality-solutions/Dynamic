@@ -1092,19 +1092,11 @@ int MaxThreads() {
     int nThreads = boost::thread::hardware_concurrency();
 
     int nUseThreads = GetArg("-genproclimit", -1);
-    if (nUseThreads < 0)
+    if (nUseThreads < 0) {
         nUseThreads = nThreads;
-
-        return nUseThreads;
+    }
+    return nUseThreads;
 }
-
-int64_t GetHashRate() {
-
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
-        return (int64_t)0;
-    return (int64_t)dHashesPerSec;
-}
-
 
 QString FormatHashRate(qint64 n)
 {

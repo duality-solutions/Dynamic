@@ -53,6 +53,18 @@ void HashRateGraphWidget::initGraph(QPainter& painter)
     }
 }
 
+int64_t HashRateGraphWidget::getHashRate()
+{
+    switch (graphType) {
+        case GraphType::MINER_CPU_HASHRATE:
+            return GetCPUHashRate();
+        case GraphType::MINER_GPU_HASHRATE:
+            return GetGPUHashRate();
+        default:
+            return GetHashRate();
+    }
+}
+
 void HashRateGraphWidget::drawHashRate(QPainter& painter)
 {
     QPainterPath path;
@@ -105,7 +117,7 @@ void HashRateGraphWidget::updateHashRateGraph()
 {
     int64_t iCurrentHashRate = 0;
     if (graphType == MINER_HASHRATE) {
-        iCurrentHashRate = GUIUtil::GetHashRate();
+        iCurrentHashRate = getHashRate();
     }
     else if (graphType == NETWORK_HASHRATE) {
         iCurrentHashRate = GUIUtil::GetNetworkHashPS(120, -1);

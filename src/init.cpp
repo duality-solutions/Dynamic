@@ -501,16 +501,25 @@ std::string HelpMessage(HelpMessageMode mode)
     std::string debugCategories1 = "addrman, alert, bench, coindb, db, http, leveldb, libevent, lock, mempool, mempoolrej, net, proxy, prune, rand, reindex, rpc, selectcoins, tor, zmq, Dynamic "; // Don't translate these and qt below
     std::string debugCategories2 = "gobject, instantsend, keepass, dynode, dnpayments, dnsync, privatesend, spork"; // Don't translate these and qt below
     std::string debugCategories3 = ""; // Don't translate these and qt below
-    if (mode == HMM_DYNAMIC_QT)
+
+    if (mode == HMM_DYNAMIC_QT) 
+    {
         debugCategories3 = ", qt"; // Don't translate this
         strUsage += HelpMessageOpt("-debug=<category>", strprintf(_("Output debugging information (default: %u, supplying <category> is optional). If <category> is not supplied or if <category> = 1, output all debugging information. <category> can be: %u (or specifically: %u)%u."), 0, debugCategories1, debugCategories2, debugCategories3));
+    }
     if (showDebug)
+    {
         strUsage += HelpMessageOpt("-nodebug", "Turn off debugging messages, same as -debug=0");
+    strUsage += HelpMessageOpt("-autotune", _("Autotune threads per device (default: false)"));
     strUsage += HelpMessageOpt("-gen", strprintf(_("Generate coins (default: %u)"), DEFAULT_GENERATE));
-    strUsage += HelpMessageOpt("-genproclimit=<n>", strprintf(_("Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)"), DEFAULT_GENERATE_THREADS));
+    strUsage += HelpMessageOpt("-genproclimit=<n>", strprintf(_("Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)"), DEFAULT_GENERATE_THREADS_CPU));
+#if ENABLE_GPU
+    strUsage += HelpMessageOpt("-genproclimit-gpu=<n>", strprintf(_("Set the number of threads per GPU for coin generation if enabled (default: %d)"), DEFAULT_GENERATE_THREADS_GPU));
+#endif
     strUsage += HelpMessageOpt("-help-debug", _("Show all debugging options (usage: --help -help-debug)"));
     strUsage += HelpMessageOpt("-logips", strprintf(_("Include IP addresses in debug output (default: %u)"), DEFAULT_LOGIPS));
     strUsage += HelpMessageOpt("-logtimestamps", strprintf(_("Prepend debug output with timestamp (default: %u)"), DEFAULT_LOGTIMESTAMPS));
+    }
     if (showDebug)
     {
         strUsage += HelpMessageOpt("-logtimemicros", strprintf("Add microsecond precision to debug timestamps (default: %u)", DEFAULT_LOGTIMEMICROS));
@@ -1823,7 +1832,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError(strNodeError);
 
     // Generate coins in the background
-    GenerateDynamics(GetBoolArg("-gen", DEFAULT_GENERATE), GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams, connman);
+    if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
+        GenerateDynamics(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman, GetBoolArg("-autotune", false));
+    }
 
     // ********************************************************* Step 13: finished
 

@@ -91,6 +91,13 @@ AC_ARG_ENABLE([wallet],
   [enable_wallet=$enableval],
   [enable_wallet=yes])
 
+# TODO: enable by default if CUDA is found
+# Enable GPU mining
+AC_ARG_ENABLE([gpu],
+    AS_HELP_STRING([--enable-gpu],[enable GPU mining (disabled by default)]),
+    [enable_gpu=$enableval],
+    [enable_gpu=yes])
+
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
   [enable UPNP (default is yes if libminiupnpc is found)])],
@@ -205,6 +212,10 @@ AC_ARG_ENABLE([debug],
 AC_LANG_PUSH([C++])
 AX_CHECK_COMPILE_FLAG([-Werror],[CXXFLAG_WERROR="-Werror"],[CXXFLAG_WERROR=""])
 
+if test x$enable_gpu_mining != xno; then
+  AC_SUBST(ENABLE_GPU, 1)
+fi
+
 if test "x$enable_debug" = xyes; then
     CPPFLAGS="$CPPFLAGS -DDEBUG"
     if test "x$GCC" = xyes; then
@@ -254,6 +265,14 @@ AC_ARG_WITH([daemon],
   [build dynamicd daemon (default=yes)])],
   [build_dynamicd=$withval],
   [build_dynamicd=yes])
+
+# AC_ARG_WITH([gpu],
+#   [AS_HELP_STRING([--enable-gpu],
+#   [enable GPU optimizations (defaults is yes)])],
+#   AC_SUBST(HAVE_CUDA, 1),
+#   AC_SUBST(ENABLE_GPU, 1),
+#   [have_gpu=${enableval}],
+#   [have_gpu=yes])
 
 use_pkgconfig=yes
 case $host in
@@ -528,7 +547,7 @@ fi
 AC_CHECK_HEADERS([endian.h sys/endian.h byteswap.h stdio.h stdlib.h unistd.h strings.h sys/types.h sys/stat.h sys/select.h sys/prctl.h])
 
 AC_CHECK_DECLS([strnlen])
-   
+
 # Check for daemon(3), unrelated to --with-daemon (although used by it)
 AC_CHECK_DECLS([daemon])
 
@@ -922,6 +941,8 @@ else
   AC_MSG_RESULT(no)
 fi
 
+AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable gpu functions])
+
 dnl enable upnp support
 AC_MSG_CHECKING([whether to build with support for UPnP])
 if test x$have_miniupnpc = xno; then
@@ -1014,6 +1035,7 @@ fi
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
 AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
+AM_CONDITIONAL([ENABLE_GPU],[test x$enable_gpu = xyes])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
 AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
 AM_CONDITIONAL([ENABLE_QT],[test x$dynamic_enable_qt = xyes])
