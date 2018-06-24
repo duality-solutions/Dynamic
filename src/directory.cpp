@@ -159,7 +159,8 @@ std::string CDirectory::GetFullObjectPath() const {
 }
 
 std::vector<unsigned char> CDirectory::vchFullObjectPath() const {
-    std::vector<unsigned char> vchReturnValue(GetFullObjectPath().begin(), GetFullObjectPath().end());
+    std::string strFullObjectPath = GetFullObjectPath();
+    std::vector<unsigned char> vchReturnValue(strFullObjectPath.begin(), strFullObjectPath.end());
     return vchReturnValue;
 }
 

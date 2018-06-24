@@ -5,11 +5,11 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
-#include "serialize.h"
 #include "amount.h"
 #include "consensus/params.h"
 #include "dbwrapper.h"
 #include "script/script.h"
+#include "serialize.h"
 #include "sync.h"
 
 #include <univalue.h>
