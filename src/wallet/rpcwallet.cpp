@@ -431,7 +431,7 @@ void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAm
     vecSend.push_back(recipient);
     
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-                                         strError, NULL, true, ALL_COINS, false)) {
+                                         strError, NULL, true, ALL_COINS, false, fIsBDAP)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
