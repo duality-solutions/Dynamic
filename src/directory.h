@@ -5,11 +5,11 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
+#include "serialize.h"
 #include "amount.h"
 #include "consensus/params.h"
 #include "dbwrapper.h"
 #include "script/script.h"
-#include "serialize.h"
 #include "sync.h"
 
 #include <univalue.h>
@@ -141,10 +141,10 @@ public:
     }
 
     ADD_SERIALIZE_METHODS;
+
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+    inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
-        nVersion = this->nVersion;
         READWRITE(OID);
         READWRITE(DomainComponent);
         READWRITE(CommonName);

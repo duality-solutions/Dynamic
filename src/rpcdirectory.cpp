@@ -15,13 +15,13 @@
 
 using namespace boost::xpressive;
 
-UniValue addpublicname(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 2) {
+UniValue addpublicname(const JSONRPCRequest& request) {
+    if (request.params.size() != 2) {
         throw std::runtime_error("addpublicname <userid> <common name>\nAdd public name entry to blockchain directory.\n");
     }
     // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
     // Format object and domain names to lower case.
-    std::string strObjectID = params[0].get_str();
+    std::string strObjectID = request.params[0].get_str();
     ToLowerCase(strObjectID);
     // Check if the object name is valid.
     sregex regexValidName = sregex::compile("^((?!-)[a-z0-9-]{2,64}(?<!-)\\.)+[a-z]{2,6}$");
@@ -29,9 +29,9 @@ UniValue addpublicname(const UniValue& params, bool fHelp) {
     //if (!regex_search(strObjectID, sMatch, regexValidName))
     //    throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("Invalid BDAP name.  Regular expression failed."));
 
-    CharString vchObjectID = vchFromValue(params[0]);
+    CharString vchObjectID = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID);
-    CharString vchCommonName = vchFromValue(params[1]);
+    CharString vchCommonName = vchFromValue(request.params[1]);
 
     CharString vchDomainComponent(DEFAULT_PUBLIC_DOMAIN.begin(), DEFAULT_PUBLIC_DOMAIN.end());
     CharString vchOrganizationalUnit(DEFAULT_PUBLIC_OU.begin(), DEFAULT_PUBLIC_OU.end());
@@ -120,12 +120,12 @@ UniValue addpublicname(const UniValue& params, bool fHelp) {
     return oName;
 }
 
-UniValue directorylist(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 1) {
+UniValue directorylist(const JSONRPCRequest& request) {
+    if (request.params.size() != 1) {
         throw std::runtime_error("directorylist <directoryname>\nAdd directory to blockchain.\n");
     }
 
-    std::vector<unsigned char> vchDirectoryName = vchFromValue(params[0]);
+    std::vector<unsigned char> vchDirectoryName = vchFromValue(request.params[0]);
     CDirectory txDirectory;
     if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
         throw std::runtime_error("Failed to read from BDAP database");
@@ -137,12 +137,12 @@ UniValue directorylist(const UniValue& params, bool fHelp) {
     return oName;
 }
 
-UniValue directoryupdate(const UniValue& params, bool fHelp) {
-    if (fHelp || params.size() != 1) {
+UniValue directoryupdate(const JSONRPCRequest& request) {
+    if (request.params.size() != 1) {
         throw std::runtime_error("directoryupdate <directoryname>\nAdd directory to blockchain.\n");
     }
 
-    std::vector<unsigned char> vchDirectoryName = vchFromValue(params[0]);
+    std::vector<unsigned char> vchDirectoryName = vchFromValue(request.params[0]);
     CDirectory txDirectory;
     if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
         throw std::runtime_error("Failed to read from BDAP database");
