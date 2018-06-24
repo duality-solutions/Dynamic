@@ -126,7 +126,7 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
 
-    SendCustomTransaction(destroyScript, wtx, nAmount, false);
+    SendCustomTransaction(destroyScript, wtx, nAmount, false, false);
 
     return wtx.GetHash().GetHex();
 }
@@ -170,7 +170,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
+        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false, false);
         return wtx.GetHash().GetHex();
     }
     else {

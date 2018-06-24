@@ -115,7 +115,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     // Send the transaction
     float fYears = 1.0; //TODO use a variable for registration years.
     CWalletTx wtx;
-    SendCustomTransaction(scriptPubKey, wtx, GetBDAPFee(scriptPubKey) * powf(3.1, fYears), true);
+    SendCustomTransaction(scriptPubKey, wtx, GetBDAPFee(scriptPubKey) * powf(3.1, fYears), false, true);
     txDirectory.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
