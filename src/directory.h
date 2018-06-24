@@ -36,7 +36,6 @@ static const std::string DEFAULT_PUBLIC_OU            = "public";
 static const std::string DEFAULT_ADMIN_OU             = "admin";
 static const std::string DEFAULT_ORGANIZATION_NAME    = "Duality Blockchain Solutions";
 static const std::string DEFAULT_OID_PREFIX           = "0.0.0"; //TODO.  Get a real OID prefix.
-static const int BDAP_TX_VERSION = 0x3500;
 
 /* Blockchain Directory Access Framework
 

@@ -88,7 +88,6 @@ UniValue addpublicname(const JSONRPCRequest& request) {
 
     txDirectory.SignWalletAddress = vchSignWalletAddress;
 
-    txDirectory.nVersion = BDAP_TX_VERSION;
     if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + _("Failed to read from BDAP database"));
 
