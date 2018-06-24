@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-// Identification codes for Fluid Protocol Transactions
+// Identification codes for Fluid and BDAP Transactions
 enum ProtocolCodes {
     MINT_TX                 =  1,
     DYNODE_MODFIY_TX        =  2,
@@ -35,6 +35,7 @@ enum ProtocolCodes {
     BDAP_BIND_TX            =  10,
     BDAP_AUDIT_TX           =  11,
     BDAP_VERIFICATION_TX    =  12,
+    BDAP_REVOKE_TX          =  13,
     NO_TX                   =  0
 };
 
@@ -220,6 +221,7 @@ enum opcodetype
     OP_BDAP_MODIFY_RDN = 0x05,
     OP_BDAP_EXECUTE_CODE = 0x06,
     OP_BDAP_BIND = 0x07,
+    OP_BDAP_REVOKE = 0x08,
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -719,6 +721,9 @@ public:
                 break;
             case BDAP_BIND_TX:
                 return (size() > 0 && *begin() == OP_BDAP_BIND);
+                break;
+            case BDAP_REVOKE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_REVOKE);
                 break;
             default:
                 throw std::runtime_error("BDAP code is invalid!");

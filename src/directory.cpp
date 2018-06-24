@@ -24,6 +24,7 @@ bool IsDirectoryTransaction(CScript txOut) {
             || txOut.IsDirectoryScript(BDAP_MODIFY_RDN_TX)
             || txOut.IsDirectoryScript(BDAP_EXECUTE_CODE_TX)
             || txOut.IsDirectoryScript(BDAP_BIND_TX)
+            || txOut.IsDirectoryScript(BDAP_REVOKE_TX)
            );
 }
 
