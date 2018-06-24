@@ -23,11 +23,19 @@
 
 // Identification codes for Fluid Protocol Transactions
 enum ProtocolCodes {
-	MINT_TX 			= 1,
-	DYNODE_MODFIY_TX 	= 2,
-	MINING_MODIFY_TX 	= 3,
-	
-	NO_TX = 0
+    MINT_TX                 =  1,
+    DYNODE_MODFIY_TX        =  2,
+    MINING_MODIFY_TX        =  3,
+    BDAP_NEW_TX             =  4,
+    BDAP_DELETE_TX          =  5,
+    BDAP_ACTIVATE_TX        =  6,
+    BDAP_MODIFY_TX          =  7,
+    BDAP_MODIFY_RDN_TX      =  8,
+    BDAP_EXECUTE_CODE_TX    =  9,
+    BDAP_BIND_TX            =  10,
+    BDAP_AUDIT_TX           =  11,
+    BDAP_VERIFICATION_TX    =  12,
+    NO_TX                   =  0
 };
 
 // Maximum number of bytes pushable to the stack
@@ -195,24 +203,24 @@ enum opcodetype
     OP_PUBKEYHASH = 0xfd,
     OP_PUBKEY = 0xfe,
 
-	// Fluid Autonomus Monetary Management System (FAM2S)
+    // Fluid Autonomus Monetary Management System (FAM2S)
     OP_MINT = 0xc0,
-	OP_REWARD_DYNODE = 0xc3,
-	OP_REWARD_MINING = 0xc4,
+    OP_REWARD_DYNODE = 0xc3,
+    OP_REWARD_MINING = 0xc4,
     OP_SWAP_SOVEREIGN_ADDRESS = 0xc5,
     OP_UPDATE_FEES = 0xc6,
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-    // identity alias system
-    OP_IDENTITY_NEW = 0xd1,
-    OP_IDENTITY_DELETE = 0xd2,
-    OP_IDENTITY_PAYMENT = 0xd3,
-    OP_IDENTITY_ACTIVATE = 0xd4,
-    OP_IDENTITY_UPDATE = 0xd5,
-    OP_IDENTITY_MULTISIG = 0xd6,
-
-    // dynamic extended reserved 
+    // directory access, user identity and certificate system
+    OP_BDAP_NEW = 0x01,
+    OP_BDAP_DELETE = 0x02,
+    OP_BDAP_ACTIVATE = 0x03,
+    OP_BDAP_MODIFY = 0x04,
+    OP_BDAP_MODIFY_RDN = 0x05,
+    OP_BDAP_EXECUTE_CODE = 0x06,
+    OP_BDAP_BIND = 0x07,
+    // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
     // invalid operation code
@@ -670,22 +678,52 @@ public:
         return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
     }
 
-	bool IsProtocolInstruction(ProtocolCodes code) const
+    bool IsProtocolInstruction(ProtocolCodes code) const
     {
-		switch(code) {
-			case MINT_TX:
-				return (size() > 0 && *begin() == OP_MINT);
-				break;
-			case DYNODE_MODFIY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_DYNODE);
-				break;
-			case MINING_MODIFY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_MINING);
-				break;
-			default:
-				throw std::runtime_error("Protocol code is invalid!");
-		}
-		return false;
+        switch(code) {
+            case MINT_TX:
+                return (size() > 0 && *begin() == OP_MINT);
+                break;
+            case DYNODE_MODFIY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_DYNODE);
+                break;
+            case MINING_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_MINING);
+                break;
+            default:
+                throw std::runtime_error("Protocol code is invalid!");
+        }
+        return false;
+    }
+
+    bool IsDirectoryScript(ProtocolCodes code) const
+    {
+        switch(code) {
+            case BDAP_NEW_TX:
+                return (size() > 0 && *begin() == OP_BDAP_NEW);
+                break;
+            case BDAP_DELETE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_DELETE);
+                break;
+            case BDAP_ACTIVATE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_ACTIVATE);
+                break;
+            case BDAP_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY);
+                break;
+            case BDAP_MODIFY_RDN_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
+                break;
+            case BDAP_EXECUTE_CODE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_EXECUTE_CODE);
+                break;
+            case BDAP_BIND_TX:
+                return (size() > 0 && *begin() == OP_BDAP_BIND);
+                break;
+            default:
+                throw std::runtime_error("BDAP code is invalid!");
+        }
+        return false;
     }
 
     void clear()

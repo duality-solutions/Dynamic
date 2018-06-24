@@ -97,6 +97,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  directory.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -219,6 +220,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  directory.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -253,6 +255,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
+  rpcdirectory.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
