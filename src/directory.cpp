@@ -271,6 +271,17 @@ bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrgan
     return false;
 }
 
+CAmount GetBDAPFee(const CScript& scriptPubKey)
+{
+    CAmount nFee = 0;
+    CRecipient recp = {scriptPubKey, 0, false};
+    CTxOut txout(0, scriptPubKey);
+    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
+    nFee = CWallet::GetMinimumFee(nSize, nTxConfirmTarget, mempool);
+    recp.nAmount = nFee;
+    return recp.nAmount;
+}
+
 /*
 SignWalletAddresses.clear();
 transactionFee = 0;

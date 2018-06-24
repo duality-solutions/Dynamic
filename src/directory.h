@@ -254,6 +254,7 @@ void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
 bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent);
+CAmount GetBDAPFee(const CScript& scriptPubKey);
 
 extern CDirectoryDB *pDirectoryDB;
 

@@ -405,7 +405,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false)
+void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false, bool fIsBDAP=false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 

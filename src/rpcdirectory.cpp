@@ -15,10 +15,15 @@
 
 using namespace boost::xpressive;
 
+extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false, bool fIsBDAP=false);
+
 UniValue addpublicname(const JSONRPCRequest& request) {
     if (request.params.size() != 2) {
         throw std::runtime_error("addpublicname <userid> <common name>\nAdd public name entry to blockchain directory.\n");
     }
+
+    EnsureWalletIsUnlocked();
+
     // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
@@ -60,7 +65,8 @@ UniValue addpublicname(const JSONRPCRequest& request) {
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
-    std::string strWalletAddress = CDynamicAddress(keyWalletID).ToString();
+    CDynamicAddress payWallet = CDynamicAddress(keyWalletID);
+    std::string strWalletAddress = payWallet.ToString();
     CharString vchWalletAddress(strWalletAddress.begin(), strWalletAddress.end());
     txDirectory.WalletAddress = vchWalletAddress;
 
@@ -82,7 +88,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     CKeyID keySignID = pubSignKey.GetID();
     std::string strSignWalletAddress = CDynamicAddress(keySignID).ToString();
     CharString vchSignWalletAddress(strSignWalletAddress.begin(), strSignWalletAddress.end());
-    
+
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privSignKey, pubSignKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding signature key to wallet for BDAP"));
 
@@ -91,31 +97,31 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + _("Failed to read from BDAP database"));
 
+    CharString data;
+    txDirectory.Serialize(data);
+    
+    // Create BDAP OP_RETURN Signature Scripts
+    CScript scriptPubKey;
+    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP;
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(payWallet.Get());
+    scriptPubKey += scriptDestination;
+
+    CScript scriptData;
+    scriptData << OP_RETURN << data;
+    scriptPubKey += scriptData;
+
+    // Send the transaction
+    float fYears = 1.0; //TODO use a variable for registration years.
+    CWalletTx wtx;
+    SendCustomTransaction(scriptPubKey, wtx, GetBDAPFee(scriptPubKey) * powf(3.1, fYears), true);
+    txDirectory.txHash = wtx.GetHash();
+
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDirectory, oName))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
 
-    CharString data; //TODO put serialized CDirectory in data
-    CScript scriptPubKey;
-    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP;
-    
-    CScript scriptData;
-    scriptData << OP_RETURN << data;
-
-    std::vector<CRecipient> vecSend;
-    CRecipient recipient;
-    CreateRecipient(scriptPubKey, recipient);
-    CMutableTransaction tx;
-    tx.nVersion = txDirectory.nVersion;
-    tx.vin.clear();
-    tx.vout.clear();
-
-    for (auto& recp : vecSend) {
-        tx.vout.push_back(CTxOut(recp.nAmount, recp.scriptPubKey));
-    }
-    
-    // create BDAP OP_RETURN transaction
     return oName;
 }
 
