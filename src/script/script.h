@@ -747,4 +747,10 @@ public:
     virtual ~CReserveScript() {}
 };
 
+// TODO: Use a seperate code file for these BDAP functions
+bool IsDirectoryOp(int op);
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);
+
 #endif // DYNAMIC_SCRIPT_SCRIPT_H

@@ -249,3 +249,76 @@ bool CScript::IsPushOnly() const
 {
     return this->IsPushOnly(begin());
 }
+
+bool IsDirectoryOp(int op) 
+{
+        return op == OP_BDAP_NEW
+            || op == OP_BDAP_DELETE
+            || op == OP_BDAP_ACTIVATE
+            || op == OP_BDAP_MODIFY
+            || op == OP_BDAP_MODIFY_RDN
+            || op == OP_BDAP_EXECUTE_CODE
+            || op == OP_BDAP_BIND
+            || op == OP_BDAP_REVOKE;
+}
+
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc) 
+{
+    opcodetype opcode;
+    vvch.clear();
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+    op = CScript::DecodeOP_N(opcode);
+    if (op != OP_BDAP_NEW)
+        return false;
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+    op = CScript::DecodeOP_N(opcode);
+    if (!IsDirectoryOp(op))
+        return false;
+    bool found = false;
+    for (;;) {
+        std::vector<unsigned char> vch;
+        if (!script.GetOp(pc, opcode, vch))
+            return false;
+        if (opcode == OP_DROP || opcode == OP_2DROP)
+        {
+            found = true;
+            break;
+        }
+        if (!(opcode >= 0 && opcode <= OP_PUSHDATA4))
+            return false;
+        vvch.push_back(vch);
+    }
+
+    // move the pc to after any DROP or NOP
+    while (opcode == OP_DROP || opcode == OP_2DROP) {
+        if (!script.GetOp(pc, opcode))
+            break;
+    }
+
+    pc--;
+    return found;
+}
+
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+{
+    CScript::const_iterator pc = script.begin();
+    return DecodeBDAPScript(script, op, vvch, pc);
+}
+
+bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut) 
+{
+    int op;
+    std::vector<std::vector<unsigned char> > vvch;
+    CScript::const_iterator pc = scriptIn.begin();
+
+    if (!DecodeBDAPScript(scriptIn, op, vvch, pc))
+        return false;
+    scriptOut = CScript(pc, scriptIn.end());
+    return true;
+}

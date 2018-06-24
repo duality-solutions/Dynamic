@@ -36,7 +36,7 @@ const char* GetTxnOutputType(txnouttype t)
 /**
  * Return public keys or hashes from scriptPubKey, for 'standard' transaction types.
  */
-bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
+bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
 {
     // Templates
     static std::multimap<txnouttype, CScript> mTemplates;
@@ -53,6 +53,16 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
     }
 
     vSolutionsRet.clear();
+
+    // Check to see if this is a BDAP service transaction, if so get the scriptPubKey by extracting service specific script information
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(scriptPubKeyIn, scriptPubKeyOut)) {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else {
+        scriptPubKey = scriptPubKeyIn;
+    }
 
     // Shortcut for pay-to-script-hash, which are more constrained than the other types:
     // it is always OP_HASH160 20 [20 byte hash] OP_EQUAL
