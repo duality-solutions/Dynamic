@@ -148,6 +148,16 @@ const char* GetOpName(opcodetype opcode)
     case OP_FREEZE_ADDRESS         : return "OP_FREEZE_ADDRESS";
     case OP_RELEASE_ADDRESS        : return "OP_RELEASE_ADDRESS";
 
+    // BDAP, directory access, user identity and certificate system
+    case OP_BDAP_NEW               : return "OP_BDAP_NEW";
+    case OP_BDAP_DELETE            : return "OP_BDAP_DELETE";
+    case OP_BDAP_ACTIVATE          : return "OP_BDAP_ACTIVATE";
+    case OP_BDAP_MODIFY            : return "OP_BDAP_MODIFY";
+    case OP_BDAP_MODIFY_RDN        : return "OP_BDAP_MODIFY_RDN";
+    case OP_BDAP_EXECUTE_CODE      : return "OP_BDAP_EXECUTE_CODE";
+    case OP_BDAP_BIND              : return "OP_BDAP_BIND";
+    case OP_BDAP_REVOKE            : return "OP_BDAP_REVOKE";
+
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
 
     // Note:
