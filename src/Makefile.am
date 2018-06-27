@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue
+DIST_SUBDIRS = secp256k1 univalue bdap
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -97,7 +97,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  directory.h \
+  bdap/directory.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -220,7 +220,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  directory.cpp \
+  bdap/directory.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -255,7 +255,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
-  rpcdirectory.cpp \
+  bdap/rpcdirectory.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \

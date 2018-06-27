@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "directory.h"
+#include "bdap/directory.h"
 
 #include "fluid.h"
 #include "policy/policy.h"

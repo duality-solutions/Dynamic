@@ -18,7 +18,7 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
-#include "directory.h"
+#include "bdap/directory.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"

@@ -9,7 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
-#include "directory.h"
+#include "bdap/directory.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"

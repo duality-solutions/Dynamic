@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "directory.h"
+#include "bdap/directory.h"
 
 #include "rpcprotocol.h"
 #include "rpcserver.h"
@@ -118,7 +118,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     CWalletTx wtx;
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
     txDirectory.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
