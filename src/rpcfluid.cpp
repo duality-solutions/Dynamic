@@ -20,7 +20,7 @@
 #include <univalue.h>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false, bool fIsBDAP=false);
+extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false);
 
 opcodetype getOpcodeFromString(std::string input) {
     if (input == "OP_MINT") return OP_MINT;
@@ -126,7 +126,7 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
 
-    SendCustomTransaction(destroyScript, wtx, nAmount, false, false);
+    SendCustomTransaction(destroyScript, wtx, nAmount, false);
 
     return wtx.GetHash().GetHex();
 }
@@ -170,7 +170,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false, false);
+        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
     }
     else {

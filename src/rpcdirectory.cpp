@@ -15,7 +15,7 @@
 
 using namespace boost::xpressive;
 
-extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false, bool fIsBDAP=false);
+extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue);
 
 UniValue addpublicname(const JSONRPCRequest& request) {
     if (request.params.size() != 2) {
@@ -54,6 +54,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     txDirectory.OrganizationName = vchOrganizationName;
     txDirectory.ObjectID = vchObjectID;
     txDirectory.fPublicObject = 1; //make entry public
+    txDirectory.transactionFee = 100;
 
     // TODO: Add ability to pass in the wallet address and public key
     CKey privWalletKey;
@@ -103,19 +104,21 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     // Create BDAP OP_RETURN Signature Scripts
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP << OP_DROP;
+
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(payWallet.Get());
     scriptPubKey += scriptDestination;
 
     CScript scriptData;
     scriptData << OP_RETURN << data;
-    scriptPubKey += scriptData;
 
     // Send the transaction
     float fYears = 1.0; //TODO use a variable for registration years.
     CWalletTx wtx;
-    SendCustomTransaction(scriptPubKey, wtx, GetBDAPFee(scriptPubKey) * powf(3.1, fYears), false, true);
+    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
+    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee);
     txDirectory.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);

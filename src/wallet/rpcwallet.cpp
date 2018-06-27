@@ -405,7 +405,46 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false, bool fIsBDAP=false)
+void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue)
+{
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nOPValue <= 0 || nDataValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount");
+
+    if (nOPValue + nDataValue > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosInOut = 0;
+
+    LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+
+    CRecipient recDataScript = {bdapDataScript, nDataValue, false};
+    vecSend.push_back(recDataScript);
+    CRecipient recOPScript = {bdapOPScript, nOPValue, false};
+    vecSend.push_back(recOPScript);
+
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
+                                         strError, NULL, true, ALL_COINS, false, true)) {
+        if (nOPValue + nDataValue + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+}
+
+void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -431,7 +470,7 @@ void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAm
     vecSend.push_back(recipient);
     
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-                                         strError, NULL, true, ALL_COINS, false, fIsBDAP)) {
+                                         strError, NULL, true, ALL_COINS, false)) {
         if (nValue + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
