@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "directory.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"
@@ -79,6 +80,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
+                if (IsDirectoryDataOutput(txout)) 
+                {
+                    // BDAP type
+                    sub.type = TransactionRecord::BDAP;
+                }
 
                 parts.append(sub);
             }
@@ -128,7 +134,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             // Payment to self by default
             sub.type = TransactionRecord::SendToSelf;
             sub.address = "";
-
             if(mapValue["PS"] == "1")
             {
                 sub.type = TransactionRecord::PrivateSend;
@@ -150,7 +155,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-
+                    if (IsDirectoryDataOutput(txout)) 
+                    {
+                        // BDAP type
+                        sub.type = TransactionRecord::BDAP;
+                    }
                     if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
                     if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
                     if(nDebit - wtx.GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
@@ -202,6 +211,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 if(mapValue["PS"] == "1")
                 {
                     sub.type = TransactionRecord::PrivateSend;
+                }
+
+                if(IsDirectoryDataOutput(txout)) 
+                {
+                    sub.type = TransactionRecord::BDAP;
                 }
 
                 CAmount nValue = txout.nValue;

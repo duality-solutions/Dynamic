@@ -84,6 +84,7 @@ public:
         RecvWithAddress,
         RecvFromOther,
         SendToSelf,
+        BDAP,
         RecvWithPrivateSend,
         PrivateSendDenominate,
         PrivateSendCollateralPayment,
