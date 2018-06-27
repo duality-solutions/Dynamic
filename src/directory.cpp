@@ -17,7 +17,8 @@
 CDirectoryDB *pDirectoryDB = NULL;
 
 bool IsDirectoryTransaction(CScript txOut) {
-    return (txOut.IsDirectoryScript(BDAP_NEW_TX)
+    return (txOut.IsDirectoryScript(BDAP_START)
+            || txOut.IsDirectoryScript(BDAP_NEW_TX)
             || txOut.IsDirectoryScript(BDAP_DELETE_TX)
             || txOut.IsDirectoryScript(BDAP_ACTIVATE_TX)
             || txOut.IsDirectoryScript(BDAP_MODIFY_TX)

@@ -26,16 +26,17 @@ enum ProtocolCodes {
     MINT_TX                 =  1,
     DYNODE_MODFIY_TX        =  2,
     MINING_MODIFY_TX        =  3,
-    BDAP_NEW_TX             =  4,
-    BDAP_DELETE_TX          =  5,
-    BDAP_ACTIVATE_TX        =  6,
-    BDAP_MODIFY_TX          =  7,
-    BDAP_MODIFY_RDN_TX      =  8,
-    BDAP_EXECUTE_CODE_TX    =  9,
-    BDAP_BIND_TX            =  10,
-    BDAP_AUDIT_TX           =  11,
-    BDAP_VERIFICATION_TX    =  12,
-    BDAP_REVOKE_TX          =  13,
+    BDAP_START              =  4,
+    BDAP_NEW_TX             =  5,
+    BDAP_DELETE_TX          =  6,
+    BDAP_ACTIVATE_TX        =  7,
+    BDAP_MODIFY_TX          =  8,
+    BDAP_MODIFY_RDN_TX      =  9,
+    BDAP_EXECUTE_CODE_TX    =  10,
+    BDAP_BIND_TX            =  11,
+    BDAP_AUDIT_TX           =  12,
+    BDAP_VERIFICATION_TX    =  13,
+    BDAP_REVOKE_TX          =  14,
     NO_TX                   =  0
 };
 
@@ -214,14 +215,15 @@ enum opcodetype
     OP_RELEASE_ADDRESS = 0xc8,
 
     // directory access, user identity and certificate system
-    OP_BDAP_NEW = 0x01,
-    OP_BDAP_DELETE = 0x02,
-    OP_BDAP_ACTIVATE = 0x03,
-    OP_BDAP_MODIFY = 0x04,
-    OP_BDAP_MODIFY_RDN = 0x05,
-    OP_BDAP_EXECUTE_CODE = 0x06,
-    OP_BDAP_BIND = 0x07,
-    OP_BDAP_REVOKE = 0x08,
+    OP_BDAP = 0x01,
+    OP_BDAP_NEW = 0x02,
+    OP_BDAP_DELETE = 0x03,
+    OP_BDAP_ACTIVATE = 0x04,
+    OP_BDAP_MODIFY = 0x05,
+    OP_BDAP_MODIFY_RDN = 0x06,
+    OP_BDAP_EXECUTE_CODE = 0x07,
+    OP_BDAP_BIND = 0x08,
+    OP_BDAP_REVOKE = 0x09,
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -701,6 +703,9 @@ public:
     bool IsDirectoryScript(ProtocolCodes code) const
     {
         switch(code) {
+            case BDAP_START:
+                return (size() > 0 && *begin() == OP_BDAP);
+                break;
             case BDAP_NEW_TX:
                 return (size() > 0 && *begin() == OP_BDAP_NEW);
                 break;

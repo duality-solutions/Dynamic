@@ -149,6 +149,7 @@ const char* GetOpName(opcodetype opcode)
     case OP_RELEASE_ADDRESS        : return "OP_RELEASE_ADDRESS";
 
     // BDAP, directory access, user identity and certificate system
+    case OP_BDAP                   : return "OP_BDAP";
     case OP_BDAP_NEW               : return "OP_BDAP_NEW";
     case OP_BDAP_DELETE            : return "OP_BDAP_DELETE";
     case OP_BDAP_ACTIVATE          : return "OP_BDAP_ACTIVATE";
@@ -262,7 +263,8 @@ bool CScript::IsPushOnly() const
 
 bool IsDirectoryOp(int op) 
 {
-        return op == OP_BDAP_NEW
+        return op == OP_BDAP
+            || op == OP_BDAP_NEW
             || op == OP_BDAP_DELETE
             || op == OP_BDAP_ACTIVATE
             || op == OP_BDAP_MODIFY
@@ -281,7 +283,7 @@ bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<un
     if (opcode < OP_1 || opcode > OP_16)
         return false;
     op = CScript::DecodeOP_N(opcode);
-    if (op != OP_BDAP_NEW)
+    if (op != OP_BDAP)
         return false;
     if (!script.GetOp(pc, opcode))
         return false;
