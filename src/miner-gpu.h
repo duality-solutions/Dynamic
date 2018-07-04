@@ -4,26 +4,27 @@
 #define DYNAMIC_ARGON2_GPU
 
 #ifdef ENABLE_GPU
-#define HAVE_CUDA 1
-#define ARGON2_GPU_CUDA cuda
-#define ARGON2_GPU_OPENCL opencl
-
-#define ARGON2_GPU ARGON2_GPU_CUDA
+#define HAVE_CUDA
 
 #include <cstddef>
+
+#include "argon2-gpu/common.h"
+#ifndef HAVE_CUDA
 #include "argon2-cuda/cuda-exception.h"
 #include "argon2-cuda/processing-unit.h"
-#include "argon2-gpu/common.h"
+#else
+#include "argon2-opencl/opencl.h"
 #include "argon2-opencl/processing-unit.h"
+#endif
 
 using Argon2GPUParams = argon2gpu::Argon2Params;
 
-#if ARGON2_GPU == ARGON2_GPU_CUDA
+#ifndef HAVE_CUDA
 using Argon2GPU = argon2gpu::cuda::ProcessingUnit;
 using Argon2GPUDevice = argon2gpu::cuda::Device;
 using Argon2GPUContext = argon2gpu::cuda::GlobalContext;
 using Argon2GPUProgramContext = argon2gpu::cuda::ProgramContext;
-#elif ARGON2_GPU == ARGON2_GPU_OPENCL
+#else
 using Argon2GPU = argon2gpu::opencl::ProcessingUnit;
 using Argon2GPUDevice = argon2gpu::opencl::Device;
 using Argon2GPUContext = argon2gpu::opencl::GlobalContext;

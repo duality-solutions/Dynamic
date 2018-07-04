@@ -306,8 +306,12 @@ UniValue setgenerate(const JSONRPCRequest& request)
             "2. genproclimit     (numeric, optional) Set the processor limit for when generation is on. Can be -1 for unlimited.\n"
             "3. genproclimit-gpu (numeric, optional) Set the GPU thread limit for when generation is on. Can be -1 for unlimited.\n"
             "\nExamples:\n"
-            "\nSet the generation on with a limit of one processor\n"
+            "\nSet the generation on with a limit of one CPU processor\n"
             + HelpExampleCli("setgenerate", "true 1") +
+#if ENABLE_GPU   
+            "\nSet the generation on with a limit of one GPU\n"
+            + HelpExampleCli("setgenerate", "true 0 1") +
+#endif
             "\nCheck the setting\n"
             + HelpExampleCli("getgenerate", "") +
             "\nTurn off generation\n"
@@ -328,7 +332,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
         nGenProcLimit = request.params[1].get_int();
 
     int nGenProcLimitGPU = GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
-    if (request.params.size() > 1)
+    if (request.params.size() > 2)
         nGenProcLimitGPU = request.params[2].get_int();
 
     if (nGenProcLimit == 0 && nGenProcLimitGPU == 0)
@@ -337,6 +341,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
     GetArg("-gen", "") = (fGenerate ? "1" : "0");
     GetArg("-genproclimit", "") = itostr(nGenProcLimit);
     GetArg("-genproclimit-gpu", "") = itostr(nGenProcLimitGPU);
+    LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimit, nGenProcLimitGPU);
     GenerateDynamics(nGenProcLimit, nGenProcLimitGPU, Params(), *g_connman);
 
     return NullUniValue;
