@@ -4,22 +4,25 @@
 #define DYNAMIC_ARGON2_GPU
 
 #ifdef ENABLE_GPU
-#define HAVE_CUDA
 
 #include <cstddef>
 
-#include "argon2-gpu/common.h"
-#ifndef HAVE_CUDA
-#include "argon2-cuda/cuda-exception.h"
-#include "argon2-cuda/processing-unit.h"
+#include "crypto/argon2gpu/common.h"
+
+// TODO: configure script
+#define HAVE_CUDA 1
+
+#ifdef HAVE_CUDA
+#include "crypto/argon2gpu/cuda/cuda-exception.h"
+#include "crypto/argon2gpu/cuda/processing-unit.h"
 #else
-#include "argon2-opencl/opencl.h"
-#include "argon2-opencl/processing-unit.h"
+#include "crypto/argon2gpu/opencl/opencl.h"
+#include "crypto/argon2gpu/opencl/processing-unit.h"
 #endif
 
 using Argon2GPUParams = argon2gpu::Argon2Params;
 
-#ifndef HAVE_CUDA
+#ifdef HAVE_CUDA
 using Argon2GPU = argon2gpu::cuda::ProcessingUnit;
 using Argon2GPUDevice = argon2gpu::cuda::Device;
 using Argon2GPUContext = argon2gpu::cuda::GlobalContext;
@@ -37,15 +40,21 @@ static std::size_t GetGPUDeviceCount()
     return global.getAllDevices().size();
 }
 
-static Argon2GPU GetGPUProcessingUnit(const std::size_t deviceIndex)
-{
-    Argon2GPUContext global;
-    auto& devices = global.getAllDevices();
-    auto& device = devices[deviceIndex];
-    Argon2GPUProgramContext context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10);
-    Argon2GPUParams params((std::size_t)OUTPUT_BYTES, 2, 500, 8);
-    Argon2GPU processingUnit(&context, &params, &device, 1, false, false);
-    return processingUnit;
+static Argon2GPU GetProcessingUnit(std::size_t nDeviceIndex, bool fGPU) {
+    if (!fGPU) {
+        Argon2GPU processingUnit(nullptr, nullptr, nullptr, 1, false, false);
+        return processingUnit;
+    }
+    else {
+        // Argon2GPU processingUnit = GetGPUProcessingUnit(nDeviceIndex);
+        Argon2GPUContext global;
+        auto& devices = global.getAllDevices();
+        auto& device = devices[nDeviceIndex];
+        Argon2GPUProgramContext context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10);
+        Argon2GPUParams params((std::size_t)OUTPUT_BYTES, 2, 500, 8);
+        Argon2GPU processingUnit(&context, &params, &device, 1, false, false);
+        return processingUnit;
+    }
 }
 
 template <class Pu>

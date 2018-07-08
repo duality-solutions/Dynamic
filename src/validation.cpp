@@ -2957,6 +2957,11 @@ bool InvalidateBlock(CValidationState& state, const Consensus::Params& consensus
     setDirtyBlockIndex.insert(pindex);
     setBlockIndexCandidates.erase(pindex);
 
+    if (pindex == pindexBestHeader) {
+        pindexBestInvalid = pindexBestHeader;
+        pindexBestHeader = pindexBestHeader->pprev;
+    }
+
     while (chainActive.Contains(pindex)) {
         CBlockIndex *pindexWalk = chainActive.Tip();
         pindexWalk->nStatus |= BLOCK_FAILED_CHILD;
@@ -2967,6 +2972,10 @@ bool InvalidateBlock(CValidationState& state, const Consensus::Params& consensus
         if (!DisconnectTip(state, consensusParams)) {      
             mempool.removeForReorg(pcoinsTip, chainActive.Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
             return false;
+        }
+        if (pindexWalk == pindexBestHeader) {
+            pindexBestInvalid = pindexBestHeader;
+            pindexBestHeader = pindexBestHeader->pprev;
         }
     }
 
@@ -3481,13 +3490,17 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 }
 
 // Exposed wrapper for AcceptBlockHeader
-bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex)
+bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, CValidationState& state, const CChainParams& chainparams, const CBlockIndex** ppindex)
 {
     {
         LOCK(cs_main);
         for (const CBlockHeader& header : headers) {
-            if (!AcceptBlockHeader(header, state, chainparams, ppindex)) {
+            CBlockIndex *pindex = NULL; // Use a temp pindex instead of ppindex to avoid a const_cast
+            if (!AcceptBlockHeader(header, state, chainparams, &pindex)) {
                 return false;
+            }
+            if (ppindex) {
+                *ppindex = pindex;
             }
         }
     }

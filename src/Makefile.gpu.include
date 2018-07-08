@@ -1,0 +1,57 @@
+#
+# Argon2 GPU miner
+#
+
+LIBDYNAMIC_GPU = crypto/argon2gpu/libdynamic_gpu.a
+
+DYNAMIC_INCLUDES += $(CUDA_CFLAGS)
+EXTRA_LIBRARIES  += $(LIBDYNAMIC_GPU)
+
+LIBDYNAMIC_GPU_LDADD = $(CUDA_LDFLAGS) $(LIBDYNAMIC_GPU)
+
+if TARGET_DARWIN
+  LIBDYNAMIC_GPU_LDADD += "-framework OpenCL"
+else
+  LIBDYNAMIC_GPU_LDADD += -lOpenCL
+endif
+
+crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
+crypto_argon2gpu_libdynamic_gpu_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_argon2gpu_libdynamic_gpu_a_SOURCES = \
+  crypto/argon2gpu/blake2b.h \
+  crypto/argon2gpu/common.h \
+  crypto/argon2gpu/common.cpp \
+  crypto/argon2gpu/blake2b.cpp
+
+if HAVE_CUDA
+  crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
+    crypto/argon2gpu/cuda/cuda-exception.h \
+    crypto/argon2gpu/cuda/device.h \
+    crypto/argon2gpu/cuda/global-context.h \
+    crypto/argon2gpu/cuda/kernels.h \
+    crypto/argon2gpu/cuda/processing-unit.h \
+    crypto/argon2gpu/cuda/program-context.h \
+    crypto/argon2gpu/cuda/device.cpp \
+    crypto/argon2gpu/cuda/global-context.cpp \
+    crypto/argon2gpu/cuda/kernels.cu \
+    crypto/argon2gpu/cuda/processing-unit.cpp \
+    crypto/argon2gpu/cuda/program-context.cpp
+else
+  crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
+    crypto/argon2gpu/opencl/cl.hpp \
+    crypto/argon2gpu/opencl/device.h \
+    crypto/argon2gpu/opencl/global-context.h \
+    crypto/argon2gpu/opencl/kernel-loader.h \
+    crypto/argon2gpu/opencl/kernel-runner.h \
+    crypto/argon2gpu/opencl/opencl.h \
+    crypto/argon2gpu/opencl/processing-unit.h \
+    crypto/argon2gpu/opencl/program-context.h \
+    crypto/argon2gpu/opencl/device.cpp \
+    crypto/argon2gpu/opencl/global-context.cpp \
+    crypto/argon2gpu/opencl/kernel-loader.cpp \
+    crypto/argon2gpu/opencl/kernel-runner.cpp \
+    crypto/argon2gpu/opencl/processing-unit.cpp \
+    crypto/argon2gpu/opencl/program-context.cpp
+endif
+
+dynamicd_LDADD += $(LIBDYNAMIC_GPU_LDADD)

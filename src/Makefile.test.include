@@ -121,6 +121,9 @@ test_test_dynamic_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -s
 if ENABLE_ZMQ
 test_test_dynamic_LDADD += $(ZMQ_LIBS)
 endif
+if ENABLE_GPU
+test_test_dynamic_LDADD += $(LIBDYNAMIC_GPU_LDADD)
+endif
 
 nodist_test_test_dynamic_SOURCES = $(GENERATED_TEST_FILES)
 
