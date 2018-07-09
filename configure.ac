@@ -217,10 +217,6 @@ AC_ARG_ENABLE([debug],
 AC_LANG_PUSH([C++])
 AX_CHECK_COMPILE_FLAG([-Werror],[CXXFLAG_WERROR="-Werror"],[CXXFLAG_WERROR=""])
 
-if test x$enable_gpu_mining != xno; then
-  AC_SUBST(ENABLE_GPU, 1)
-fi
-
 if test "x$enable_debug" = xyes; then
     CPPFLAGS="$CPPFLAGS -DDEBUG"
     if test "x$GCC" = xyes; then
@@ -938,27 +934,24 @@ else
   AC_MSG_RESULT(no)
 fi
 
-AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable gpu functions])
-AC_DEFINE_UNQUOTED([HAVE_CUDA],[1],[Define to 1 to enable CUDA])
+if test x$enable_gpu != xno; then
+  AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable gpu functions])
 
-dnl Checking for nvcc
-AC_MSG_CHECKING([nvcc in $cuda_prefix/bin])
-if test -x "$cuda_prefix/bin/nvcc"; then
-  AC_MSG_RESULT([found])
-  AC_SUBST(HAVE_CUDA, 1)
-  AC_DEFINE_UNQUOTED([NVCC_PATH], ["$cuda_prefix/bin/nvcc"], [path to nvcc binary])
-  HAVE_CUDA="1"
-  CUDA_CFLAGS="-I$cuda_prefix/include"
-  CUDA_LDFLAGS="-L$cuda_prefix/lib64 -L/usr/lib/x86_64-linux-gnu"
-  CUDA_NVCC_FLAGS="$CUDA_NVCC_FLAGS;-std=c++11;-O3;--ptxas-options=-v;-arch sm_30;-lineinfo"
-else
-  AC_MSG_RESULT([not found!])
-  AC_MSG_WARN([nvcc was not found in $cuda_prefix/bin])
-fi
-
-dnl if cuda has been found check the header and the lib
-if test "$HAVE_CUDA" == "1"; then
-  AC_CHECK_HEADER([cuda_runtime.h],, AC_MSG_ERROR(libcuda headers missing),)
+  dnl Checking for nvcc
+  AC_MSG_CHECKING([nvcc in $cuda_prefix/bin])
+  if test -x "$cuda_prefix/bin/nvcc"; then
+    AC_MSG_RESULT([found])
+    AC_DEFINE_UNQUOTED([NVCC_PATH], ["$cuda_prefix/bin/nvcc"], [path to nvcc binary])
+    AC_CHECK_HEADER([cuda_runtime.h],, AC_MSG_ERROR(libcuda headers missing),)
+    AC_DEFINE_UNQUOTED([HAVE_CUDA],[1],[Define to 1 to enable CUDA])
+    use_cuda=yes
+    CUDA_CFLAGS="-I$cuda_prefix/include"
+    CUDA_LDFLAGS="-L$cuda_prefix/lib64 -L/usr/lib/x86_64-linux-gnu"
+    CUDA_NVCC_FLAGS="$CUDA_NVCC_FLAGS;-std=c++11;-O3;--ptxas-options=-v;-arch sm_30;-lineinfo"
+  else
+    AC_MSG_RESULT([not found!])
+    AC_MSG_WARN([nvcc was not found in $cuda_prefix/bin])
+  fi
 fi
 
 dnl enable upnp support
@@ -1066,7 +1059,7 @@ AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reo
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
 AM_CONDITIONAL([HARDEN],[test x$use_hardening = xyes])
 AM_CONDITIONAL([ENABLE_SSE42],[test x$enable_sse42 = xyes])
-AM_CONDITIONAL([HAVE_CUDA], [test "${HAVE_CUDA}" = "1"])
+AM_CONDITIONAL([HAVE_CUDA],[test x$use_cuda = xyes])
 
 AC_DEFINE(CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MAJOR, [Major version])
 AC_DEFINE(CLIENT_VERSION_MINOR, _CLIENT_VERSION_MINOR, [Minor version])
@@ -1089,6 +1082,7 @@ AC_SUBST(PIC_FLAGS)
 AC_SUBST(PIE_FLAGS)
 AC_SUBST(SSE42_CXXFLAGS)
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
+AC_SUBST(HAVE_CUDA)
 AC_SUBST(USE_UPNP)
 AC_SUBST(USE_QRCODE)
 AC_SUBST(BOOST_LIBS)
