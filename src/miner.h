@@ -26,7 +26,7 @@ namespace Consensus { struct Params; };
 static const bool DEFAULT_GENERATE = false;
 static const int DEFAULT_GENERATE_THREADS_CPU = -1;
 // TODO(crackcom): Set to -1 after autotune tests
-static const int DEFAULT_GENERATE_THREADS_GPU = 1;
+static const int DEFAULT_GENERATE_THREADS_GPU = -1;
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 

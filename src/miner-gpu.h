@@ -4,7 +4,6 @@
 #define DYNAMIC_ARGON2_GPU
 
 #ifdef ENABLE_GPU
-
 #include <cstddef>
 
 #include "crypto/argon2gpu/common.h"
