@@ -19,8 +19,6 @@
 #ifndef ARGON2_CUDA_KERNELS_H
 #define ARGON2_CUDA_KERNELS_H
 
-#if HAVE_CUDA
-
 #include <cuda_runtime.h>
 #include <cstdint>
 
@@ -81,7 +79,5 @@ class KernelRunner
 
 } // namespace cuda
 } // namespace argon2gpu
-
-#endif /* HAVE_CUDA */
 
 #endif // ARGON2_CUDA_KERNELS_H

@@ -19,8 +19,6 @@
 #ifndef ARGON2_CUDA_PROCESSINGUNIT_H
 #define ARGON2_CUDA_PROCESSINGUNIT_H
 
-#if HAVE_CUDA
-
 #include <memory>
 
 #include "crypto/argon2gpu/common.h"
@@ -62,44 +60,5 @@ public:
 
 } // namespace cuda
 } // namespace argon2gpu
-
-#else
-
-#include <cstddef>
-
-#include "crypto/argon2gpu/common.h"
-#include "crypto/argon2gpu/cuda/program-context.h"
-
-namespace argon2gpu
-{
-namespace cuda
-{
-class ProcessingUnit
-{
-public:
-    std::size_t getBatchSize() const { return 0; }
-
-    ProcessingUnit(
-        const ProgramContext* programContext,
-        const Argon2Params* params,
-        const Device* device,
-        std::size_t batchSize,
-        bool bySegment = true,
-        bool precomputeRefs = false)
-    {
-    }
-
-    void setInputAndSalt(std::size_t index, const void* input, std::size_t inputSize) {}
-
-    void getHash(std::size_t index, void* hash) {}
-
-    void beginProcessing() {}
-    void endProcessing() {}
-};
-
-} // namespace cuda
-} // namespace argon2gpu
-
-#endif /* HAVE_CUDA */
 
 #endif // ARGON2_CUDA_PROCESSINGUNIT_H

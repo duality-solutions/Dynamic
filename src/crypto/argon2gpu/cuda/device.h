@@ -26,8 +26,6 @@ namespace argon2gpu
 namespace cuda
 {
 
-#if HAVE_CUDA
-
 class Device
 {
   private:
@@ -55,26 +53,6 @@ class Device
 
     Device &operator=(const Device &) = default;
 };
-
-#else
-
-class Device
-{
-  public:
-    std::string getName() const { return {}; }
-    std::string getInfo() const { return {}; }
-
-    int getDeviceIndex() const { return 0; }
-
-    Device() {}
-
-    Device(const Device &) = default;
-    Device(Device &&) = default;
-
-    Device &operator=(const Device &) = default;
-};
-
-#endif /* HAVE_CUDA */
 
 } // namespace cuda
 } // namespace argon2gpu
