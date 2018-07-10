@@ -7,7 +7,7 @@ LIBDYNAMIC_GPU = crypto/argon2gpu/libdynamic_gpu.a
 DYNAMIC_INCLUDES += $(CUDA_CFLAGS)
 EXTRA_LIBRARIES  += $(LIBDYNAMIC_GPU)
 
-LIBDYNAMIC_GPU_LDADD = $(CUDA_LDFLAGS) $(LIBDYNAMIC_GPU)
+LIBDYNAMIC_GPU_LDADD = $(CUDA_LDLIBS) $(LIBDYNAMIC_GPU)
 
 if TARGET_DARWIN
   LIBDYNAMIC_GPU_LDADD += "-framework OpenCL"
@@ -23,7 +23,7 @@ crypto_argon2gpu_libdynamic_gpu_a_SOURCES = \
   crypto/argon2gpu/common.cpp \
   crypto/argon2gpu/blake2b.cpp
 
-if HAVE_CUDA
+if ENABLE_CUDA
   crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
     crypto/argon2gpu/cuda/cuda-exception.h \
     crypto/argon2gpu/cuda/device.h \

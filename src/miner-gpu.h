@@ -8,10 +8,7 @@
 
 #include "crypto/argon2gpu/common.h"
 
-// TODO: configure script
-#define HAVE_CUDA 1
-
-#ifdef HAVE_CUDA
+#if HAVE_CUDA
 #include "crypto/argon2gpu/cuda/cuda-exception.h"
 #include "crypto/argon2gpu/cuda/processing-unit.h"
 #else
@@ -21,7 +18,7 @@
 
 using Argon2GPUParams = argon2gpu::Argon2Params;
 
-#ifdef HAVE_CUDA
+#if HAVE_CUDA
 using Argon2GPU = argon2gpu::cuda::ProcessingUnit;
 using Argon2GPUDevice = argon2gpu::cuda::Device;
 using Argon2GPUContext = argon2gpu::cuda::GlobalContext;
@@ -70,11 +67,6 @@ inline uint256 GetBlockHashGPU(const CBlockHeader* block, const Pu& pu)
     pu->endProcessing();
     pu->getHash(0, (uint8_t*)&hashResult);
     return hashResult;
-}
-#else
-static std::size_t GetGPUDeviceCount()
-{
-    return 0;
 }
 #endif // ENABLE_GPU
 

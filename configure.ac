@@ -91,17 +91,19 @@ AC_ARG_ENABLE([wallet],
   [enable_wallet=$enableval],
   [enable_wallet=yes])
 
-# TODO: enable by default if CUDA is found
-# Enable GPU mining
+# Enable GPU miner
 AC_ARG_ENABLE([gpu],
-    AS_HELP_STRING([--enable-gpu],[enable GPU mining (disabled by default)]),
-    [enable_gpu=$enableval],
-    [enable_gpu=yes])
+  [AS_HELP_STRING([--disable-gpu],
+  [disable GPU miner (enabled by default)])],
+  [enable_gpu=$enableval],
+  [enable_gpu=yes])
 
-AC_ARG_WITH([cuda],
-    [AS_HELP_STRING([--with-cuda],[prefix of the CUDA installation, e.g. /usr/local/cuda])], 
-    [cuda_prefix=$withval],
-    [cuda_prefix="/usr/local/cuda"])
+# Enable CUDA
+AC_ARG_ENABLE([cuda],
+  [AS_HELP_STRING([--disable-cuda],
+  [disable CUDA miner, use OpenCL instead (only GPU; enabled by default)])],
+  [enable_cuda=$enableval],
+  [enable_cuda=yes])
 
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
@@ -934,23 +936,15 @@ else
   AC_MSG_RESULT(no)
 fi
 
-if test x$enable_gpu != xno; then
-  AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable gpu functions])
+if test x$enable_gpu = xyes; then
+  AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable GPU miner])
 
-  dnl Checking for nvcc
-  AC_MSG_CHECKING([nvcc in $cuda_prefix/bin])
-  if test -x "$cuda_prefix/bin/nvcc"; then
-    AC_MSG_RESULT([found])
-    AC_DEFINE_UNQUOTED([NVCC_PATH], ["$cuda_prefix/bin/nvcc"], [path to nvcc binary])
-    AC_CHECK_HEADER([cuda_runtime.h],, AC_MSG_ERROR(libcuda headers missing),)
-    AC_DEFINE_UNQUOTED([HAVE_CUDA],[1],[Define to 1 to enable CUDA])
-    use_cuda=yes
-    CUDA_CFLAGS="-I$cuda_prefix/include"
-    CUDA_LDFLAGS="-L$cuda_prefix/lib64 -L/usr/lib/x86_64-linux-gnu"
-    CUDA_NVCC_FLAGS="$CUDA_NVCC_FLAGS;-std=c++11;-O3;--ptxas-options=-v;-arch sm_30;-lineinfo"
-  else
-    AC_MSG_RESULT([not found!])
-    AC_MSG_WARN([nvcc was not found in $cuda_prefix/bin])
+  if test "x$enable_cuda" = xyes; then
+    AX_CHECK_CUDA
+    if test "x$NVCC" = xno; then
+      enable_cuda=no
+      AC_MSG_FAILURE([NVIDIA CUDA nvcc compiler not found or CUDA support disabled. Check the $PATH variable to CUDA or specify --with-cuda=/path/to/cuda])
+    fi
   fi
 fi
 
@@ -1047,6 +1041,7 @@ AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
 AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
 AM_CONDITIONAL([ENABLE_GPU],[test x$enable_gpu = xyes])
+AM_CONDITIONAL([ENABLE_CUDA], [test x"$enable_cuda" = xyes])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
 AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
 AM_CONDITIONAL([ENABLE_QT],[test x$dynamic_enable_qt = xyes])
@@ -1059,7 +1054,6 @@ AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reo
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
 AM_CONDITIONAL([HARDEN],[test x$use_hardening = xyes])
 AM_CONDITIONAL([ENABLE_SSE42],[test x$enable_sse42 = xyes])
-AM_CONDITIONAL([HAVE_CUDA],[test x$use_cuda = xyes])
 
 AC_DEFINE(CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MAJOR, [Major version])
 AC_DEFINE(CLIENT_VERSION_MINOR, _CLIENT_VERSION_MINOR, [Minor version])
@@ -1082,10 +1076,6 @@ AC_SUBST(PIC_FLAGS)
 AC_SUBST(PIE_FLAGS)
 AC_SUBST(SSE42_CXXFLAGS)
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
-AC_SUBST(HAVE_CUDA)
-AC_SUBST(CUDA_CFLAGS)
-AC_SUBST(CUDA_LDFLAGS)
-AC_SUBST(CUDA_NVCC_FLAGS)
 AC_SUBST(USE_UPNP)
 AC_SUBST(USE_QRCODE)
 AC_SUBST(BOOST_LIBS)
