@@ -16,7 +16,7 @@ crypto_argon2gpu_libdynamic_gpu_a_SOURCES = \
   crypto/argon2gpu/blake2b.cpp
 
 if ENABLE_CUDA
-crypto_argon2gpu_libdynamic_gpu_a_LDADD = $(CUDA_LDLIBS)
+crypto_argon2gpu_libdynamic_gpu_a_LIBADD = $(CUDA_LDLIBS)
 crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS += $(CUDA_CFLAGS)
 crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
   crypto/argon2gpu/cuda/cuda-exception.h \
@@ -49,7 +49,7 @@ else
   LIBOPENCL = -lOpenCL
 endif
 
-crypto_argon2gpu_libdynamic_gpu_a_LDADD = $(LIBOPENCL)
+crypto_argon2gpu_libdynamic_gpu_a_LIBADD = $(LIBOPENCL)
 crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
   crypto/argon2gpu/opencl/cl.hpp \
   crypto/argon2gpu/opencl/device.h \
