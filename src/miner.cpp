@@ -515,7 +515,6 @@ static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
 
-    // Argon2GPU processingUnit = GetGPUProcessingUnit(nDeviceIndex);
     Argon2GPUContext global;
     auto& devices = global.getAllDevices();
     auto& device = devices[nDeviceIndex];
@@ -894,14 +893,17 @@ void AutoTuneDeviceThreads(const CChainParams& chainparams, CConnman& connman, s
 
 void GenerateAutoTuneDevice(const CChainParams& chainparams, CConnman& connman, bool fGPU)
 {
-    if (!fGPU) {
-        AutoTuneDeviceThreads(chainparams, connman);
-    } else {
+#ifdef ENABLE_GPU
+    if (fGPU) {
         // Start GPU threads
         for (std::size_t device = 0; device < GetGPUDeviceCount(); device++) {
             AutoTuneDeviceThreads(chainparams, connman, device, true);
         }
+        return;
     }
+#endif
+
+    AutoTuneDeviceThreads(chainparams, connman);
 }
 
 void GenerateDynamicsAutoTune(const CChainParams& chainparams, CConnman& connman)

@@ -36,23 +36,6 @@ static std::size_t GetGPUDeviceCount()
     return global.getAllDevices().size();
 }
 
-static Argon2GPU GetProcessingUnit(std::size_t nDeviceIndex, bool fGPU) {
-    if (!fGPU) {
-        Argon2GPU processingUnit(nullptr, nullptr, nullptr, 1, false, false);
-        return processingUnit;
-    }
-    else {
-        // Argon2GPU processingUnit = GetGPUProcessingUnit(nDeviceIndex);
-        Argon2GPUContext global;
-        auto& devices = global.getAllDevices();
-        auto& device = devices[nDeviceIndex];
-        Argon2GPUProgramContext context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10);
-        Argon2GPUParams params((std::size_t)OUTPUT_BYTES, 2, 500, 8);
-        Argon2GPU processingUnit(&context, &params, &device, 1, false, false);
-        return processingUnit;
-    }
-}
-
 template <class Pu>
 inline uint256 GetBlockHashGPU(const CBlockHeader* block, const Pu& pu)
 {
