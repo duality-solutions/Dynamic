@@ -943,7 +943,7 @@ if test x$enable_gpu = xyes; then
     AX_CHECK_CUDA
     if test "x$NVCC" = xno; then
       enable_cuda=no
-      AC_MSG_FAILURE([NVIDIA CUDA nvcc compiler not found or CUDA support disabled. Check the $PATH variable to CUDA or specify --with-cuda=/path/to/cuda])
+      AC_MSG_WARN([NVIDIA CUDA nvcc compiler not found, falling back on OpenCL. Specify --with-cuda=/path/to/cuda])
     fi
   fi
 fi
