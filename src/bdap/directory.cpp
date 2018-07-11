@@ -93,8 +93,11 @@ bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& v
         return false;
     if (!scriptPubKey.GetOp(pc, opcode, vchData))
         return false;
-    if (!scriptPubKey.GetOp(pc, opcode, vchHash))
-        return false;
+
+    uint256 hash;
+    hash = Hash(vchData.begin(), vchData.end());
+    vchHash = vchFromValue(hash.GetHex());
+
     return true;
 }
 
