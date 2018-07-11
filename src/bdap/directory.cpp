@@ -168,6 +168,14 @@ std::vector<unsigned char> CDirectory::vchFullObjectPath() const {
     return vchReturnValue;
 }
 
+void CDirectory::AddCheckpoint(const uint32_t& height, const CharString& vchHash) 
+{
+    std::pair<uint32_t, CharString> pairNewCheckpoint;
+    pairNewCheckpoint.first = height;
+    pairNewCheckpoint.second = vchHash;
+    CheckpointHashes.push_back(pairNewCheckpoint);
+}
+
 void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int& op) {
     UniValue oName(UniValue::VOBJ);
     if (BuildBDAPJson(directory, oName)) {

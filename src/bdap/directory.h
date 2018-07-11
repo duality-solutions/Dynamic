@@ -208,6 +208,7 @@ public:
     CDynamicAddress GetWalletAddress() const;
     std::string GetFullObjectPath() const;
     std::vector<unsigned char> vchFullObjectPath() const;
+    void AddCheckpoint(const uint32_t& height, const CharString& vchHash);
 };
 
 class CDirectoryDB : public CDBWrapper {
