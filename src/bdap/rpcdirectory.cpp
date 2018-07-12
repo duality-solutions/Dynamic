@@ -11,10 +11,6 @@
 
 #include <univalue.h>
 
-#include <boost/xpressive/xpressive_dynamic.hpp>
-
-using namespace boost::xpressive;
-
 extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue);
 
 UniValue addpublicname(const JSONRPCRequest& request) {
@@ -28,11 +24,6 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     // Format object and domain names to lower case.
     std::string strObjectID = request.params[0].get_str();
     ToLowerCase(strObjectID);
-    // Check if the object name is valid.
-    sregex regexValidName = sregex::compile("^((?!-)[a-z0-9-]{2,64}(?<!-)\\.)+[a-z]{2,6}$");
-    smatch sMatch;
-    //if (!regex_search(strObjectID, sMatch, regexValidName))
-    //    throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("Invalid BDAP name.  Regular expression failed."));
 
     CharString vchObjectID = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID);
@@ -44,7 +35,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     CharString vchOID (DEFAULT_OID_PREFIX.begin(), DEFAULT_OID_PREFIX.end());
     // Check if name already exists
     if (CheckIfNameExists(vchObjectID, vchOrganizationalUnit, vchDomainComponent))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3501 - " + _("This public name already exists"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("This public name already exists"));
 
     CDirectory txDirectory;
     txDirectory.OID = vchOID;
@@ -81,7 +72,6 @@ UniValue addpublicname(const JSONRPCRequest& request) {
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
 
     txDirectory.EncryptPublicKey = vchEncryptPubKey;
-    txDirectory.EncryptPrivateKey = vchEncryptPriKey;
 
     CKey privSignKey;
     privSignKey.MakeNewKey(true);
@@ -118,12 +108,18 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     CWalletTx wtx;
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+
+    // check BDAP values
+    std::string strMessage;
+    if (!txDirectory.ValidateValues(strMessage))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3501 - " + strMessage);
+
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
     txDirectory.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDirectory, oName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Failed to read from BDAP JSON object"));
 
     return oName;
 }

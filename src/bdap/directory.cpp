@@ -14,6 +14,11 @@
 
 #include <univalue.h>
 
+#include <boost/algorithm/string/find.hpp>
+#include <boost/xpressive/xpressive_dynamic.hpp>
+
+using namespace boost::xpressive;
+
 CDirectoryDB *pDirectoryDB = NULL;
 
 bool IsDirectoryTransaction(CScript txOut) {
@@ -176,6 +181,120 @@ void CDirectory::AddCheckpoint(const uint32_t& height, const CharString& vchHash
     CheckpointHashes.push_back(pairNewCheckpoint);
 }
 
+bool CDirectory::ValidateValues(std::string& errorMessage)
+{
+    smatch sMatch;
+    std::string regExWithDot = "^((?!-)[a-z0-9-]{2," + std::to_string(MAX_OBJECT_NAME_LENGTH) + "}(?<!-)\\.)+[a-z]{2,6}$";
+    std::string regExWithOutDot = "^((?!-)[a-z0-9-]{2," + std::to_string(MAX_OBJECT_NAME_LENGTH) + "}(?<!-))";
+
+    // check domain name component
+    std::string strDomainComponent = stringFromVch(DomainComponent);
+    if (boost::find_first(strDomainComponent, "."))
+    {
+        sregex regexValidName = sregex::compile(regExWithDot);
+        if (!regex_search(strDomainComponent, sMatch, regexValidName) || std::string(sMatch[0]) != strDomainComponent) {
+            errorMessage = "Invalid BDAP domain name. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }  
+    }
+    else
+    {
+        sregex regexValidName = sregex::compile(regExWithOutDot);
+        if (!regex_search(strDomainComponent, sMatch, regexValidName) || std::string(sMatch[0]) != strDomainComponent) {
+            errorMessage = "Invalid BDAP domain name. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }
+    }
+
+    // check organizational unit component
+    std::string strOrganizationalUnit = stringFromVch(OrganizationalUnit);
+    if (boost::find_first(strOrganizationalUnit, "."))
+    {
+        sregex regexValidName = sregex::compile(regExWithDot);
+        if (!regex_search(strOrganizationalUnit, sMatch, regexValidName) || std::string(sMatch[0]) != strOrganizationalUnit) {
+            errorMessage = "Invalid BDAP organizational unit. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }  
+    }
+    else
+    {
+        sregex regexValidName = sregex::compile(regExWithOutDot);
+        if (!regex_search(strOrganizationalUnit, sMatch, regexValidName) || std::string(sMatch[0]) != strOrganizationalUnit) {
+            errorMessage = "Invalid BDAP organizational unit. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }
+    }
+
+    // check object name component
+    std::string strObjectID = stringFromVch(ObjectID);
+    if (boost::find_first(strObjectID, "."))
+    {
+        sregex regexValidName = sregex::compile(regExWithDot);
+        if (!regex_search(strObjectID, sMatch, regexValidName) || std::string(sMatch[0]) != strObjectID) {
+            errorMessage = "Invalid BDAP object name. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }  
+    }
+    else
+    {
+        sregex regexValidName = sregex::compile(regExWithOutDot);
+        if (!regex_search(strObjectID, sMatch, regexValidName) || std::string(sMatch[0]) != strObjectID) {
+            errorMessage = "Invalid BDAP object name. Must follow the domain name spec of 2 to " + std::to_string(MAX_OBJECT_NAME_LENGTH) + " characters with no preceding or trailing dashes.";
+            return false;
+        }
+    }
+
+    // check object common name component
+    std::string strCommonName = stringFromVch(CommonName);
+    if (strCommonName.length() > MAX_COMMON_NAME_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP common name. Can not have more than " + std::to_string(MAX_COMMON_NAME_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check object organization name component
+    std::string strOrganizationName = stringFromVch(OrganizationName);
+    if (strOrganizationName.length() > MAX_ORG_NAME_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP organization name. Can not have more than " + std::to_string(MAX_ORG_NAME_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check resource pointer component
+    std::string strResourcePointer = stringFromVch(ResourcePointer);
+    if (strResourcePointer.length() > MAX_RESOURCE_POINTER_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP resource pointer. Can not have more than " + std::to_string(MAX_RESOURCE_POINTER_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check certificate component
+    std::string strCertificate = stringFromVch(Certificate);
+    if (strCertificate.length() > MAX_CERTIFICATE_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP Certificate data. Can not have more than " + std::to_string(MAX_CERTIFICATE_LENGTH) + " characters.";
+        return false;
+    }
+
+    // check private data component
+    std::string strPrivateData = stringFromVch(PrivateData);
+    if (strPrivateData.length() > MAX_PRIVATE_DATA_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP private data. Can not have more than " + std::to_string(MAX_PRIVATE_DATA_LENGTH) + " characters.";
+        return false;
+    }
+
+    // make sure the number of checkpoints does not exceed limit
+    if (CheckpointHashes.size() > MAX_NUMBER_CHECKPOINTS) 
+    {
+        errorMessage = "Invalid BDAP checkpoint count. Can not have more than " + std::to_string(MAX_NUMBER_CHECKPOINTS) + " checkpoints for one entry.";
+        return false;
+    }
+    // TODO: (bdap) check if EncryptPublicKey is valid
+    // TODO: (bdap) check WalletAddress and SignWalletAddress
+    return true;
+}
+
 void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int& op) {
     UniValue oName(UniValue::VOBJ);
     if (BuildBDAPJson(directory, oName)) {
@@ -202,7 +321,6 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
     oName.push_back(Pair("public", (int)directory.fPublicObject));
     oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
-    oName.push_back(Pair("encryption_privatekey", stringFromVch(directory.EncryptPrivateKey)));
     oName.push_back(Pair("sigatures_required", (int)directory.nSigaturesRequired));
     oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
     oName.push_back(Pair("txid", directory.txHash.GetHex()));

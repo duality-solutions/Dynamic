@@ -24,13 +24,14 @@ typedef std::vector<CharString> vchCharString;
 typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
 
 static const unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
-static const unsigned int MAX_DOMAIN_NAME_LENGTH      = 128;
-static const unsigned int MAX_OBJECT_NAME_LENGTH      = 128;
-static const unsigned int MAX_RESOURCE_POINTER_LENGTH = 128;
+static const unsigned int MAX_OBJECT_NAME_LENGTH      = 63;
+static const unsigned int MAX_COMMON_NAME_LENGTH      = 95;
+static const unsigned int MAX_ORG_NAME_LENGTH         = 95;
+static const unsigned int MAX_RESOURCE_POINTER_LENGTH = 127;
 static const unsigned int MAX_KEY_LENGTH              = 156;
-static const unsigned int MAX_PUBLIC_VALUE_LENGTH     = 512;
-static const unsigned int MAX_SECRET_VALUE_LENGTH     = 512; // Pay per byte for hosting on chain
-static const unsigned int MAX_NUMBER_CHECKPOINTS      = 1000; // Pay per byte for hosting on chain
+static const unsigned int MAX_CERTIFICATE_LENGTH      = 512;
+static const unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
+static const unsigned int MAX_NUMBER_CHECKPOINTS      = 100; // Pay per byte for hosting on chain
 static const std::string DEFAULT_PUBLIC_DOMAIN        = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU            = "public";
 static const std::string DEFAULT_ADMIN_OU             = "admin";
@@ -87,7 +88,6 @@ public:
     CharString WalletAddress; // used to send collateral funds for this directory record.
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
-    CharString EncryptPrivateKey; // used to decrypt messages and data for this directory record
     CharString SignWalletAddress; // used to verify authorized update transaction
     unsigned int nSigaturesRequired; // number of signatures needed to approve a transaction.  Default = 1
     CharString ResourcePointer; // used to point to a domain shared resource like a stream (video, audio, file sharing), P2P storage (BitTorrent or IPFS network), or private cloud storage
@@ -125,7 +125,6 @@ public:
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
-        EncryptPrivateKey.clear();
         SignWalletAddress.clear();
         nSigaturesRequired = 1;
         ResourcePointer.clear();
@@ -154,7 +153,6 @@ public:
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
-        READWRITE(EncryptPrivateKey);
         READWRITE(SignWalletAddress);
         READWRITE(VARINT(nSigaturesRequired));
         READWRITE(ResourcePointer);
@@ -187,7 +185,6 @@ public:
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
-        EncryptPrivateKey = b.EncryptPrivateKey;
         SignWalletAddress = b.SignWalletAddress;
         nSigaturesRequired = b.nSigaturesRequired;
         ResourcePointer = b.ResourcePointer;
@@ -209,6 +206,7 @@ public:
     std::string GetFullObjectPath() const;
     std::vector<unsigned char> vchFullObjectPath() const;
     void AddCheckpoint(const uint32_t& height, const CharString& vchHash);
+    bool ValidateValues(std::string& errorMessage);
 };
 
 class CDirectoryDB : public CDBWrapper {
