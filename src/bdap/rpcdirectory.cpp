@@ -32,20 +32,16 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     ToLowerCase(vchObjectID);
     CharString vchCommonName = vchFromValue(request.params[1]);
 
-    CharString vchDomainComponent(DEFAULT_PUBLIC_DOMAIN.begin(), DEFAULT_PUBLIC_DOMAIN.end());
-    CharString vchOrganizationalUnit(DEFAULT_PUBLIC_OU.begin(), DEFAULT_PUBLIC_OU.end());
-    CharString vchOrganizationName (DEFAULT_ORGANIZATION_NAME.begin(), DEFAULT_ORGANIZATION_NAME.end());
-    CharString vchOID (DEFAULT_OID_PREFIX.begin(), DEFAULT_OID_PREFIX.end());
     // Check if name already exists
-    if (CheckIfNameExists(vchObjectID, vchOrganizationalUnit, vchDomainComponent))
+    if (CheckIfNameExists(vchObjectID, vchDefaultPublicOU, vchDefaultDomainName))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("This public name already exists"));
 
     CDirectory txDirectory;
-    txDirectory.OID = vchOID;
-    txDirectory.DomainComponent = vchDomainComponent;
-    txDirectory.OrganizationalUnit = vchOrganizationalUnit;
+    txDirectory.OID = vchDefaultOIDPrefix;
+    txDirectory.DomainComponent = vchDefaultDomainName;
+    txDirectory.OrganizationalUnit = vchDefaultPublicOU;
     txDirectory.CommonName = vchCommonName;
-    txDirectory.OrganizationName = vchOrganizationName;
+    txDirectory.OrganizationName = vchDefaultOrganizationName;
     txDirectory.ObjectID = vchObjectID;
     txDirectory.fPublicObject = 1; //make entry public
     txDirectory.transactionFee = 100;
