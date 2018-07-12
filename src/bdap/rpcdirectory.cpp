@@ -4,6 +4,7 @@
 
 #include "bdap/directory.h"
 
+#include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "primitives/transaction.h"
@@ -12,6 +13,8 @@
 #include <univalue.h>
 
 extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue);
+
+static constexpr bool fPrintDebug = true;
 
 UniValue addpublicname(const JSONRPCRequest& request) {
     if (request.params.size() != 2) {
@@ -120,6 +123,18 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDirectory, oName))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Failed to read from BDAP JSON object"));
+    
+    if (fPrintDebug) {
+        // make sure we can deserialize the transaction from the scriptData and get a valid CDirectory class
+        LogPrintf("Directory Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+
+        const CTransaction testTx = (CTransaction)wtx;
+        CDirectory testDirectory(testTx); //loads the class from a transaction
+
+        LogPrintf("CDirectory Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+            testDirectory.nVersion, testDirectory.GetFullObjectPath(), stringFromVch(testDirectory.CommonName), 
+            stringFromVch(testDirectory.OrganizationalUnit), HexStr(testDirectory.EncryptPublicKey), stringFromVch(testDirectory.PrivateData));
+    }
 
     return oName;
 }
