@@ -98,6 +98,7 @@ DYNAMIC_CORE_H = \
   core_io.h \
   core_memusage.h \
   bdap/directory.h \
+  bdap/directorydb.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -221,6 +222,7 @@ libdynamic_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   bdap/directory.cpp \
+  bdap/directorydb.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\

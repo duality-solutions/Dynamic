@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdap/directory.h"
-
+#include "bdap/directorydb.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
 #include "rpcserver.h"

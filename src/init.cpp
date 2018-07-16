@@ -18,7 +18,7 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
-#include "bdap/directory.h"
+#include "bdap/directorydb.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -1489,7 +1489,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pcoinsTip = new CCoinsViewCache(pcoinscatcher);
 
                 // Init BDAP Services DB's
-                pDirectoryDB = new CDirectoryDB(nTotalCache * 35, false, fReindex);
+                bool obfuscate = false;
+                pDirectoryDB = new CDirectoryDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);

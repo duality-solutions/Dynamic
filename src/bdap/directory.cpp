@@ -19,8 +19,6 @@
 
 using namespace boost::xpressive;
 
-CDirectoryDB *pDirectoryDB = NULL;
-
 bool IsDirectoryTransaction(CScript txOut) {
     return (txOut.IsDirectoryScript(BDAP_START)
             || txOut.IsDirectoryScript(BDAP_NEW_TX)
@@ -293,14 +291,6 @@ bool CDirectory::ValidateValues(std::string& errorMessage)
     // TODO: (bdap) check if EncryptPublicKey is valid
     // TODO: (bdap) check WalletAddress and SignWalletAddress
     return true;
-}
-
-void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int& op) {
-    UniValue oName(UniValue::VOBJ);
-    if (BuildBDAPJson(directory, oName)) {
-        GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "add.directory");
-        //WriteDirectoryIndexHistory(directory, op);  //TODO: implement local leveldb storage.
-    }
 }
 
 bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)

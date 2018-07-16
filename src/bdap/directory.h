@@ -7,7 +7,6 @@
 
 #include "amount.h"
 #include "consensus/params.h"
-#include "dbwrapper.h"
 #include "script/script.h"
 #include "serialize.h"
 #include "sync.h"
@@ -220,38 +219,6 @@ public:
     bool ValidateValues(std::string& errorMessage);
 };
 
-class CDirectoryDB : public CDBWrapper {
-public:
-    CDirectoryDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "bdap", nCacheSize, fMemory, fWipe) {
-    }
-
-    // Add, Read, Modify, ModifyRDN, Delete, List, Search, Bind, and Compare
-
-    bool AddDirectory(const CDirectory& directory, const int& op) { 
-        bool writeState = Write(make_pair(std::string("domain_component"), directory.DomainComponent), directory) 
-                             && Write(make_pair(std::string("domain_wallet_address"), directory.WalletAddress), directory.DomainComponent);
-
-        AddDirectoryIndex(directory, op);
-        return writeState;
-    }
-
-    void AddDirectoryIndex(const CDirectory& directory, const int& op);
-
-    bool ReadDirectory();
-
-    bool UpdateDirectory();
-
-    bool ExpireDirectory();
-
-    bool DirectoryExists();
-
-    bool CleanupDirectoryDatabase();
-    
-
-    void WriteDirectoryIndex(const CDirectory& directory, const int& op);
-    void WriteDirectoryIndexHistory(const CDirectory& directory, const int& op);
-};
-
 bool IsDirectoryDataOutput(const CTxOut& out);
 int GetDirectoryDataOutput(const CTransaction& tx);
 bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
@@ -265,7 +232,5 @@ void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
 bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
-
-extern CDirectoryDB *pDirectoryDB;
 
 #endif // DIRECTORY_H
