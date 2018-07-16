@@ -323,7 +323,7 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     oName.push_back(Pair("time", nTime));
     //oName.push_back(Pair("height", directory.nHeight));
     expired_time = directory.nExpireTime;
-    if(expired_time <= chainActive.Tip()->GetMedianTimePast())
+    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
     {
         expired = true;
     }
@@ -332,8 +332,8 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
     
     oName.push_back(Pair("certificate", stringFromVch(directory.Certificate)));
     oName.push_back(Pair("private_data", stringFromVch(directory.PrivateData)));
-    //oName.push_back(Pair("transaction_fee", directory.transactionFee);
-    //oName.push_back(Pair("registration_fee", directory.registrationFeePerDay);
+    oName.push_back(Pair("transaction_fee", directory.transactionFee));
+    oName.push_back(Pair("registration_fee", directory.registrationFeePerDay));
     // loop CheckpointHashes
     return true;
 }
@@ -403,16 +403,3 @@ CAmount GetBDAPFee(const CScript& scriptPubKey)
     recp.nAmount = nFee;
     return recp.nAmount;
 }
-
-/*
-SignWalletAddresses.clear();
-transactionFee = 0;
-registrationFeePerDay = 0;
-CheckpointHashes.clear();
-
-std::vector<std::pair<std::string, std::vector<unsigned char>>> CIdentityParameters::InitialiseAdminOwners()
-{
-
-
-}
-*/

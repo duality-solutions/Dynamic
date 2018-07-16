@@ -8,6 +8,8 @@
 #include "bdap/directory.h"
 #include "dbwrapper.h"
 
+static CCriticalSection cs_bdap_directory;
+
 class CDirectoryDB : public CDBWrapper {
 public:
     CDirectoryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "bdap", nCacheSize, fMemory, fWipe, obfuscate) {
@@ -15,23 +17,23 @@ public:
 
     // Add, Read, Modify, ModifyRDN, Delete, List, Search, Bind, and Compare
     bool AddDirectory(const CDirectory& directory, const int& op);
-
     void AddDirectoryIndex(const CDirectory& directory, const int& op);
-
-    bool ReadDirectory();
-
-    bool UpdateDirectory();
-
-    bool ExpireDirectory();
-
-    bool DirectoryExists();
-
-    bool CleanupDirectoryDatabase();
-    
-
+    bool ReadDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
+    bool ReadDirectoryAddress(const std::vector<unsigned char>& vchAddress, std::vector<unsigned char>& vchObjectPath);
+    bool EraseDirectory(const std::vector<unsigned char>& vchObjectPath);
+    bool EraseDirectoryAddress(const std::vector<unsigned char>& vchAddress);
+    bool DirectoryExists(const std::vector<unsigned char>& vchObjectPath);
+    bool DirectoryExistsAddress(const std::vector<unsigned char>& vchAddress);
+    bool RemoveExpired(int& entriesRemoved);
     void WriteDirectoryIndex(const CDirectory& directory, const int& op);
     void WriteDirectoryIndexHistory(const CDirectory& directory, const int& op);
+    bool UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
+    bool UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory);
 };
+
+bool BuildDirectoryIndexerHistoryJson(const CDirectory& directory, UniValue& oName);
+std::string directoryFromOp(int op);
+bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
 
 extern CDirectoryDB *pDirectoryDB;
 
