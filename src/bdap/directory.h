@@ -2,9 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DIRECTORY_H
-#define DIRECTORY_H
+#ifndef DYNAMIC_DIRECTORY_H
+#define DYNAMIC_DIRECTORY_H
 
+#include "bdap.h"
 #include "amount.h"
 #include "consensus/params.h"
 #include "script/script.h"
@@ -17,36 +18,6 @@ class CDynamicAddress;
 class CRecipient;
 class CTransaction;
 class CTxOut;
-
-typedef std::vector<unsigned char> CharString;
-typedef std::vector<CharString> vchCharString;
-typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
-
-static constexpr unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
-static constexpr unsigned int MAX_OBJECT_NAME_LENGTH      = 63;
-static constexpr unsigned int MAX_COMMON_NAME_LENGTH      = 95;
-static constexpr unsigned int MAX_ORG_NAME_LENGTH         = 95;
-static constexpr unsigned int MAX_RESOURCE_POINTER_LENGTH = 127;
-static constexpr unsigned int MAX_KEY_LENGTH              = 156;
-static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
-static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
-static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 100; // Pay per byte for hosting on chain
-static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
-static const std::string DEFAULT_PUBLIC_OU                = "public";
-static const std::string DEFAULT_ADMIN_OU                 = "admin";
-static const std::string DEFAULT_ORGANIZATION_NAME        = "Duality Blockchain Solutions";
-static const std::string DEFAULT_OID_PREFIX               = "0.0.0";
-
-inline const CharString ConvertConstantToCharString (const std::string strConvert)
-{
-    CharString vchConvert(strConvert.begin(), strConvert.end());
-    return vchConvert;
-};
-static const CharString vchDefaultDomainName = ConvertConstantToCharString(DEFAULT_PUBLIC_DOMAIN);
-static const CharString vchDefaultPublicOU = ConvertConstantToCharString(DEFAULT_PUBLIC_OU);
-static const CharString vchDefaultAdminOU = ConvertConstantToCharString(DEFAULT_ADMIN_OU);
-static const CharString vchDefaultOrganizationName = ConvertConstantToCharString(DEFAULT_ORGANIZATION_NAME);
-static const CharString vchDefaultOIDPrefix = ConvertConstantToCharString(DEFAULT_OID_PREFIX);
 
 /* Blockchain Directory Access Framework
 
@@ -233,4 +204,4 @@ void ToLowerCase(std::string& strValue);
 bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
 
-#endif // DIRECTORY_H
+#endif // DYNAMIC_DIRECTORY_H

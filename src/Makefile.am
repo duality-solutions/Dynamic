@@ -97,6 +97,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  bdap/bdap.h \
   bdap/directory.h \
   bdap/directorydb.h \
   dbwrapper.h \
