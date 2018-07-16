@@ -12,12 +12,7 @@
 
 CDirectoryDB *pDirectoryDB = NULL;
 
-bool BuildDirectoryIndexerHistoryJson(const CDirectory& directory, UniValue& oName)
-{
-    return BuildBDAPJson(directory, oName);
-}
-
-std::string directoryFromOp(int op) 
+std::string directoryFromOp(const int op) 
 {
     switch (op) {
         case OP_BDAP_NEW:
@@ -54,7 +49,7 @@ bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& d
     return true;
 }
 
-bool CDirectoryDB::AddDirectory(const CDirectory& directory, const int& op) 
+bool CDirectoryDB::AddDirectory(const CDirectory& directory, const int op) 
 { 
     bool writeState = false;
     {
@@ -68,7 +63,7 @@ bool CDirectoryDB::AddDirectory(const CDirectory& directory, const int& op)
     return writeState;
 }
 
-void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int& op) 
+void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int op) 
 {
     UniValue oName(UniValue::VOBJ);
     if (BuildBDAPJson(directory, oName)) {
@@ -150,17 +145,17 @@ bool CDirectoryDB::RemoveExpired(int& entriesRemoved)
     return true;
 }
 
-void CDirectoryDB::WriteDirectoryIndexHistory(const CDirectory& directory, const int &op) 
+void CDirectoryDB::WriteDirectoryIndexHistory(const CDirectory& directory, const int op) 
 {
     if (IsArgSet("-zmqpubbdaphistory")) {
         UniValue oName(UniValue::VOBJ);
-        BuildDirectoryIndexerHistoryJson(directory, oName);
+        BuildBDAPJson(directory, oName);
         oName.push_back(Pair("op", directoryFromOp(op)));
         GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "bdap_history");
     }
 }
 
-void CDirectoryDB::WriteDirectoryIndex(const CDirectory& directory, const int &op) 
+void CDirectoryDB::WriteDirectoryIndex(const CDirectory& directory, const int op) 
 {
     if (IsArgSet("-zmqpubbdaprecord")) {
         UniValue oName(UniValue::VOBJ);
