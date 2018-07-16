@@ -1239,8 +1239,20 @@ bool TransactionSignatureChecker::CheckSequence(const CScriptNum& nSequence) con
     return true;
 }
 
-bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
+bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKeyIn, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* serror)
 {
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(scriptPubKeyIn, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = scriptPubKeyIn;
+    }
+
     set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
 
 	if ((flags & SCRIPT_VERIFY_SIGPUSHONLY) != 0 && !scriptSig.IsPushOnly()) {

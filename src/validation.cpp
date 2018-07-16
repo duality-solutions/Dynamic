@@ -1695,7 +1695,19 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                 const CTxOut &out = tx.vout[k];
 
                 if (out.scriptPubKey.IsPayToScriptHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
+
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
 
                     // undo receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, hash, k, false), out.nValue));
@@ -1704,7 +1716,19 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), hash, k), CAddressUnspentValue()));
 
                 } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
+
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
 
                     // undo receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, hash, k, false), out.nValue));
@@ -1758,24 +1782,42 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     const Coin &coin = view.AccessCoin(tx.vin[j].prevout);
                     const CTxOut &prevout = coin.out;
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
-                        std::vector<unsigned char> hashBytes(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22);
+                        // Remove BDAP portion of the script
+                        CScript scriptPubKey;
+                        CScript scriptPubKeyOut;
+                        if (RemoveBDAPScript(prevout.scriptPubKey, scriptPubKeyOut))
+                        {
+                            scriptPubKey = scriptPubKeyOut;
+                        }
+                        else
+                        {
+                            scriptPubKey = prevout.scriptPubKey;
+                        }
 
+                        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
                         // undo spending activity
                         addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, hash, j, true), prevout.nValue * -1));
-
                         // restore unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, prevout.scriptPubKey, undoHeight)));
-
+                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, scriptPubKey, undoHeight)));
 
                     } else if (prevout.scriptPubKey.IsPayToPublicKeyHash()) {
-                        std::vector<unsigned char> hashBytes(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23);
+                        // Remove BDAP portion of the script
+                        CScript scriptPubKey;
+                        CScript scriptPubKeyOut;
+                        if (RemoveBDAPScript(prevout.scriptPubKey, scriptPubKeyOut))
+                        {
+                            scriptPubKey = scriptPubKeyOut;
+                        }
+                        else
+                        {
+                            scriptPubKey = prevout.scriptPubKey;
+                        }
 
+                        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
                         // undo spending activity
                         addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, hash, j, true), prevout.nValue * -1));
-
                         // restore unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, prevout.scriptPubKey, undoHeight)));
-
+                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, scriptPubKey, undoHeight)));
                     } else {
                         continue;
                     }
@@ -2116,23 +2158,41 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 const CTxOut &out = tx.vout[k];
 
                 if (out.scriptPubKey.IsPayToScriptHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
 
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
                     // record receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, txhash, k, false), out.nValue));
-
                     // record unspent output
-                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
-
+                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, scriptPubKey, pindex->nHeight)));
                 } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
 
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
                     // record receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, txhash, k, false), out.nValue));
-
                     // record unspent output
-                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
-
+                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, scriptPubKey, pindex->nHeight)));
                 } else {
                     continue;
                 }

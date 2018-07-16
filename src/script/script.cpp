@@ -171,96 +171,7 @@ const char* GetOpName(opcodetype opcode)
     }
 }
 
-unsigned int CScript::GetSigOpCount(bool fAccurate) const
-{
-    unsigned int n = 0;
-    const_iterator pc = begin();
-    opcodetype lastOpcode = OP_INVALIDOPCODE;
-    while (pc < end())
-    {
-        opcodetype opcode;
-        if (!GetOp(pc, opcode))
-            break;
-        if (opcode == OP_CHECKSIG || opcode == OP_CHECKSIGVERIFY)
-            n++;
-        else if (opcode == OP_CHECKMULTISIG || opcode == OP_CHECKMULTISIGVERIFY)
-        {
-            if (fAccurate && lastOpcode >= OP_1 && lastOpcode <= OP_16)
-                n += DecodeOP_N(lastOpcode);
-            else
-                n += MAX_PUBKEYS_PER_MULTISIG;
-        }
-        lastOpcode = opcode;
-    }
-    return n;
-}
-
-unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
-{
-    if (!IsPayToScriptHash())
-        return GetSigOpCount(true);
-
-    // This is a pay-to-script-hash scriptPubKey;
-    // get the last item that the scriptSig
-    // pushes onto the stack:
-    const_iterator pc = scriptSig.begin();
-    std::vector<unsigned char> data;
-    while (pc < scriptSig.end())
-    {
-        opcodetype opcode;
-        if (!scriptSig.GetOp(pc, opcode, data))
-            return 0;
-        if (opcode > OP_16)
-            return 0;
-    }
-
-    /// ... and return its opcount:
-    CScript subscript(data.begin(), data.end());
-    return subscript.GetSigOpCount(true);
-}
-
-bool CScript::IsPayToPublicKeyHash() const
-{
-    // Extra-fast test for pay-to-pubkey-hash CScripts:
-    return (this->size() == 25 &&
-	    (*this)[0] == OP_DUP &&
-	    (*this)[1] == OP_HASH160 &&
-	    (*this)[2] == 0x14 &&
-	    (*this)[23] == OP_EQUALVERIFY &&
-	    (*this)[24] == OP_CHECKSIG);
-}
-
-bool CScript::IsPayToScriptHash() const
-{
-    // Extra-fast test for pay-to-script-hash CScripts:
-    return (this->size() == 23 &&
-            (*this)[0] == OP_HASH160 &&
-            (*this)[1] == 0x14 &&
-            (*this)[22] == OP_EQUAL);
-}
-
-bool CScript::IsPushOnly(const_iterator pc) const
-{
-    while (pc < end())
-    {
-        opcodetype opcode;
-        if (!GetOp(pc, opcode))
-            return false;
-        // Note that IsPushOnly() *does* consider OP_RESERVED to be a
-        // push-type opcode, however execution of OP_RESERVED fails, so
-        // it's not relevant to P2SH/BIP62 as the scriptSig would fail prior to
-        // the P2SH special validation code being executed.
-        if (opcode > OP_16)
-            return false;
-    }
-    return true;
-}
-
-bool CScript::IsPushOnly() const
-{
-    return this->IsPushOnly(begin());
-}
-
+// TODO (bdap): move functions below to seperate code file
 bool IsDirectoryOp(int op) 
 {
         return op == OP_BDAP
@@ -333,4 +244,144 @@ bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut)
         return false;
     scriptOut = CScript(pc, scriptIn.end());
     return true;
+}
+// TODO (bdap): move the above functions to seperate code file
+
+unsigned int CScript::GetSigOpCount(bool fAccurate) const
+{
+    unsigned int n = 0;
+    const_iterator pc = begin();
+    opcodetype lastOpcode = OP_INVALIDOPCODE;
+    while (pc < end())
+    {
+        opcodetype opcode;
+        if (!GetOp(pc, opcode))
+            break;
+        if (opcode == OP_CHECKSIG || opcode == OP_CHECKSIGVERIFY)
+            n++;
+        else if (opcode == OP_CHECKMULTISIG || opcode == OP_CHECKMULTISIGVERIFY)
+        {
+            if (fAccurate && lastOpcode >= OP_1 && lastOpcode <= OP_16)
+                n += DecodeOP_N(lastOpcode);
+            else
+                n += MAX_PUBKEYS_PER_MULTISIG;
+        }
+        lastOpcode = opcode;
+    }
+    return n;
+}
+
+unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
+{
+    if (!IsPayToScriptHash())
+        return GetSigOpCount(true);
+
+    // This is a pay-to-script-hash scriptPubKey;
+    // get the last item that the scriptSig
+    // pushes onto the stack:
+    const_iterator pc = scriptSig.begin();
+    std::vector<unsigned char> data;
+    while (pc < scriptSig.end())
+    {
+        opcodetype opcode;
+        if (!scriptSig.GetOp(pc, opcode, data))
+            return 0;
+        if (opcode > OP_16)
+            return 0;
+    }
+
+    /// ... and return its opcount:
+    CScript subscript(data.begin(), data.end());
+    return subscript.GetSigOpCount(true);
+}
+
+bool CScript::IsPayToPublicKeyHash() const
+{
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
+
+    // Extra-fast test for pay-to-pubkey-hash CScripts:
+    return (this->size() == 25 &&
+	    (*this)[0] == OP_DUP &&
+	    (*this)[1] == OP_HASH160 &&
+	    (*this)[2] == 0x14 &&
+	    (*this)[23] == OP_EQUALVERIFY &&
+	    (*this)[24] == OP_CHECKSIG);
+}
+
+bool CScript::IsPayToScriptHash() const
+{
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
+    // Extra-fast test for pay-to-script-hash CScripts:
+    return (this->size() == 23 &&
+            (*this)[0] == OP_HASH160 &&
+            (*this)[1] == 0x14 &&
+            (*this)[22] == OP_EQUAL);
+}
+
+bool CScript::IsPayToPublicKey() const
+{
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
+    // Test for pay-to-pubkey CScript with both
+    // compressed or uncompressed pubkey
+    if (scriptPubKey.size() == 35) {
+        return (scriptPubKey[1] == 0x02 || scriptPubKey[1] == 0x03) &&
+            scriptPubKey[34] == OP_CHECKSIG;
+    }
+    if (scriptPubKey.size() == 67) {
+        return scriptPubKey[1] == 0x04 &&
+            scriptPubKey[66] == OP_CHECKSIG;
+    }
+    return false;
+}
+
+bool CScript::IsPushOnly(const_iterator pc) const
+{
+    while (pc < end())
+    {
+        opcodetype opcode;
+        if (!GetOp(pc, opcode))
+            return false;
+        // Note that IsPushOnly() *does* consider OP_RESERVED to be a
+        // push-type opcode, however execution of OP_RESERVED fails, so
+        // it's not relevant to P2SH/BIP62 as the scriptSig would fail prior to
+        // the P2SH special validation code being executed.
+        if (opcode > OP_16)
+            return false;
+    }
+    return true;
+}
+
+bool CScript::IsPushOnly() const
+{
+    return this->IsPushOnly(begin());
 }

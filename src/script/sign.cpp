@@ -126,8 +126,20 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
     return false;
 }
 
-bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKey, CScript& scriptSig)
+bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPubKeyIn, CScript& scriptSig)
 {
+    // Remove BDAP portion of the script
+    CScript fromPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(fromPubKeyIn, scriptPubKeyOut))
+    {
+        fromPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        fromPubKey = fromPubKeyIn;
+    }
+
     txnouttype whichType;
     if (!SignStep(creator, fromPubKey, scriptSig, whichType))
         return false;
