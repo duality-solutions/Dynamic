@@ -858,11 +858,11 @@ void KernelRunner::precomputeRefs()
 
     if (type == ARGON2_I) {
         argon2_precompute_kernel<ARGON2_I>
-            <<<blocks, threads, 0, stream> > >(
+            <<<blocks, threads, 0, stream>>>(
                 refs, passes, lanes, segmentBlocks);
     } else {
         argon2_precompute_kernel<ARGON2_ID>
-            <<<blocks, threads, 0, stream> > >(
+            <<<blocks, threads, 0, stream>>>(
                 refs, passes, lanes, segmentBlocks);
     }
 }
@@ -929,24 +929,24 @@ void KernelRunner::runKernelSegment(uint32_t lanesPerBlock,
             struct ref* refs = (struct ref*)this->refs;
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_segment_precompute<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks,
                         pass, slice);
             } else {
                 argon2_kernel_segment_precompute<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks,
                         pass, slice);
             }
         } else {
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_segment<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks,
                         pass, slice);
             } else {
                 argon2_kernel_segment<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks,
                         pass, slice);
             }
@@ -956,24 +956,24 @@ void KernelRunner::runKernelSegment(uint32_t lanesPerBlock,
             struct ref* refs = (struct ref*)this->refs;
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_segment_precompute<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks,
                         pass, slice);
             } else {
                 argon2_kernel_segment_precompute<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks,
                         pass, slice);
             }
         } else {
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_segment<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks,
                         pass, slice);
             } else {
                 argon2_kernel_segment<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks,
                         pass, slice);
             }
@@ -981,12 +981,12 @@ void KernelRunner::runKernelSegment(uint32_t lanesPerBlock,
     } else {
         if (version == ARGON2_VERSION_10) {
             argon2_kernel_segment<ARGON2_D, ARGON2_VERSION_10>
-                <<<blocks, threads, 0, stream> > >(
+                <<<blocks, threads, 0, stream>>>(
                     memory_blocks, passes, lanes, segmentBlocks,
                     pass, slice);
         } else {
             argon2_kernel_segment<ARGON2_D, ARGON2_VERSION_13>
-                <<<blocks, threads, 0, stream> > >(
+                <<<blocks, threads, 0, stream>>>(
                     memory_blocks, passes, lanes, segmentBlocks,
                     pass, slice);
         }
@@ -1012,21 +1012,21 @@ void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
             struct ref* refs = (struct ref*)this->refs;
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_oneshot_precompute<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks);
             } else {
                 argon2_kernel_oneshot_precompute<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks);
             }
         } else {
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_oneshot<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks);
             } else {
                 argon2_kernel_oneshot<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks);
             }
         }
@@ -1035,32 +1035,32 @@ void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
             struct ref* refs = (struct ref*)this->refs;
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_oneshot_precompute<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks);
             } else {
                 argon2_kernel_oneshot_precompute<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, refs, passes, lanes, segmentBlocks);
             }
         } else {
             if (version == ARGON2_VERSION_10) {
                 argon2_kernel_oneshot<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks);
             } else {
                 argon2_kernel_oneshot<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream> > >(
+                    <<<blocks, threads, 0, stream>>>(
                         memory_blocks, passes, lanes, segmentBlocks);
             }
         }
     } else {
         if (version == ARGON2_VERSION_10) {
             argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_10>
-                <<<blocks, threads, 0, stream> > >(
+                <<<blocks, threads, 0, stream>>>(
                     memory_blocks, passes, lanes, segmentBlocks);
         } else {
             argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_13>
-                <<<blocks, threads, 0, stream> > >(
+                <<<blocks, threads, 0, stream>>>(
                     memory_blocks, passes, lanes, segmentBlocks);
         }
     }

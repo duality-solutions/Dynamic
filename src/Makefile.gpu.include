@@ -10,61 +10,65 @@ EXTRA_LIBRARIES  += $(LIBDYNAMIC_GPU)
 crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
 crypto_argon2gpu_libdynamic_gpu_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_argon2gpu_libdynamic_gpu_a_SOURCES = \
-  crypto/argon2gpu/blake2b.h \
-  crypto/argon2gpu/common.h \
-  crypto/argon2gpu/common.cpp \
-  crypto/argon2gpu/blake2b.cpp
+	crypto/argon2gpu/blake2b.h \
+	crypto/argon2gpu/common.h \
+	crypto/argon2gpu/common.cpp \
+	crypto/argon2gpu/blake2b.cpp
 
 if ENABLE_CUDA
+NVCCFLAGS += --cudart shared --ptxas-options=-v -arch sm_30 -lineinfo -Xcompiler '--std=c++11 $(CFLAGS)'
+
+crypto_argon2gpu_libdynamic_gpu_a_AR = $(NVCC) $(NVCCFLAGS) -lib -o
 crypto_argon2gpu_libdynamic_gpu_a_LIBADD = $(CUDA_LDLIBS)
 crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS += $(CUDA_CFLAGS)
 crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
-  crypto/argon2gpu/cuda/cuda-exception.h \
-  crypto/argon2gpu/cuda/device.h \
-  crypto/argon2gpu/cuda/global-context.h \
-  crypto/argon2gpu/cuda/kernels.h \
-  crypto/argon2gpu/cuda/processing-unit.h \
-  crypto/argon2gpu/cuda/program-context.h \
-  crypto/argon2gpu/cuda/device.cpp \
-  crypto/argon2gpu/cuda/global-context.cpp \
-  crypto/argon2gpu/cuda/kernels.cu \
-  crypto/argon2gpu/cuda/processing-unit.cpp \
-  crypto/argon2gpu/cuda/program-context.cpp
+	crypto/argon2gpu/cuda/cuda-exception.h \
+	crypto/argon2gpu/cuda/device.h \
+	crypto/argon2gpu/cuda/global-context.h \
+	crypto/argon2gpu/cuda/kernels.h \
+	crypto/argon2gpu/cuda/processing-unit.h \
+	crypto/argon2gpu/cuda/program-context.h \
+	crypto/argon2gpu/cuda/device.cpp \
+	crypto/argon2gpu/cuda/global-context.cpp \
+	crypto/argon2gpu/cuda/kernels.cu \
+	crypto/argon2gpu/cuda/processing-unit.cpp \
+	crypto/argon2gpu/cuda/program-context.cpp
 
 DYNAMIC_INCLUDES += $(CUDA_CFLAGS)
 LIBDYNAMIC_GPU_LDADD += $(CUDA_LDLIBS)
 
-NVCCFLAGS += -std=c++11 --ptxas-options=-v -arch sm_30 -lineinfo
+nvcc_ARCH := -gencode=arch=compute_30,code=\"sm_30,compute_30\"
+nvcc_FLAGS = $(nvcc_ARCH) -I. $(CUDA_CFLAGS) $(NVCCFLAGS)
 
 .cu.o:
-    $(NVCC) $(CFLAGS) $(NVCCFLAGS) -o $@ -c $<
+	$(NVCC) $(nvcc_FLAGS) -o $@ -c $<
 
 crypto/argon2gpu/cuda/kernels.o: crypto/argon2gpu/cuda/kernels.cu
-    $(NVCC) $(CFLAGS) $(NVCCFLAGS) -o $@ -c $<
+	$(NVCC) -dlink $(nvcc_FLAGS) -o $@ -c $<
 
 else
 if TARGET_DARWIN
-  LIBOPENCL = "-framework OpenCL"
+	LIBOPENCL = "-framework OpenCL"
 else
-  LIBOPENCL = -lOpenCL
+	LIBOPENCL = -lOpenCL
 endif
 
 crypto_argon2gpu_libdynamic_gpu_a_LIBADD = $(LIBOPENCL)
 crypto_argon2gpu_libdynamic_gpu_a_SOURCES += \
-  crypto/argon2gpu/opencl/cl.hpp \
-  crypto/argon2gpu/opencl/device.h \
-  crypto/argon2gpu/opencl/global-context.h \
-  crypto/argon2gpu/opencl/kernel-loader.h \
-  crypto/argon2gpu/opencl/kernel-runner.h \
-  crypto/argon2gpu/opencl/opencl.h \
-  crypto/argon2gpu/opencl/processing-unit.h \
-  crypto/argon2gpu/opencl/program-context.h \
-  crypto/argon2gpu/opencl/device.cpp \
-  crypto/argon2gpu/opencl/global-context.cpp \
-  crypto/argon2gpu/opencl/kernel-loader.cpp \
-  crypto/argon2gpu/opencl/kernel-runner.cpp \
-  crypto/argon2gpu/opencl/processing-unit.cpp \
-  crypto/argon2gpu/opencl/program-context.cpp
+	crypto/argon2gpu/opencl/cl.hpp \
+	crypto/argon2gpu/opencl/device.h \
+	crypto/argon2gpu/opencl/global-context.h \
+	crypto/argon2gpu/opencl/kernel-loader.h \
+	crypto/argon2gpu/opencl/kernel-runner.h \
+	crypto/argon2gpu/opencl/opencl.h \
+	crypto/argon2gpu/opencl/processing-unit.h \
+	crypto/argon2gpu/opencl/program-context.h \
+	crypto/argon2gpu/opencl/device.cpp \
+	crypto/argon2gpu/opencl/global-context.cpp \
+	crypto/argon2gpu/opencl/kernel-loader.cpp \
+	crypto/argon2gpu/opencl/kernel-runner.cpp \
+	crypto/argon2gpu/opencl/processing-unit.cpp \
+	crypto/argon2gpu/opencl/program-context.cpp
 
 LIBDYNAMIC_GPU_LDADD += $(LIBOPENCL)
 endif

@@ -32,7 +32,7 @@ AC_DEFUN([AX_CHECK_CUDA], [
 AC_ARG_WITH([cuda],
    [AS_HELP_STRING([--with-cuda=PATH],[prefix where CUDA is installed @<:@default=no@:>@])],
    [],
-   [with_cuda=no])
+   [with_cuda=yes])
 
 NVCC=no
 CUDA_CFLAGS=
@@ -123,10 +123,10 @@ EOF
    # -----------------------------------------
    # Check for headers and libraries
    # -----------------------------------------
-   ax_save_CXXFLAGS="${CXXFLAGS}"
+   ax_save_CFLAGS="${CFLAGS}"
    ax_save_LIBS="${LIBS}"
 
-   CXXFLAGS="$CUDA_CFLAGS $CXXFLAGS"
+   CFLAGS="$CUDA_CFLAGS $CFLAGS"
    LIBS="$CUDA_LDLIBS $LIBS"
 
    # And the header and the lib
@@ -138,7 +138,7 @@ EOF
    AC_CHECK_LIB([cublas], [cublasInit], [], AC_MSG_FAILURE([Couldn't find libcublas]))
 
    # Returning to the original flags
-   CXXFLAGS=${ax_save_CXXFLAGS}
+   CFLAGS=${ax_save_CFLAGS}
    LIBS=${ax_save_LIBS}
 
    AC_DEFINE(HAVE_CUDA,1,[Define if we have CUDA])
