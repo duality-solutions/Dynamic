@@ -14,6 +14,7 @@
 
 #include <univalue.h>
 
+class CCoinsViewCache;
 class CDynamicAddress;
 class CRecipient;
 class CTransaction;
@@ -205,5 +206,9 @@ void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
 bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
+bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
+bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
+            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
 #endif // DYNAMIC_DIRECTORY_H

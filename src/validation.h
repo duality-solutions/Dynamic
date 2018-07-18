@@ -197,7 +197,8 @@ extern std::map<uint256, int64_t> mapRejectedBlocks;
 
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex *pindexBestHeader;
-
+/** BDAP, only check when fully loaded **/
+extern bool fLoaded;
 /** Minimum disk space required - used in CheckDiskSpace() */
 static const uint64_t nMinDiskSpace = 52428800;
 
@@ -306,7 +307,8 @@ CBlockIndex * InsertBlockIndex(uint256 hash);
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */
 void PruneAndFlush();
-
+/** Checks inputs for a BDAP transaction. */
+bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity = false);
 /** (try to) add transaction to memory pool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                         bool* pfMissingInputs, bool fOverrideMempoolLimit=false, const CAmount nAbsurdFee=0, bool fDryRun=false);

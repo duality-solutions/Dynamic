@@ -9,6 +9,7 @@
 
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/directorydb.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
@@ -27,6 +28,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "random.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "script/sigcache.h"
 #include "script/standard.h"
@@ -89,6 +91,7 @@ int64_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
+bool fLoaded = false;
 
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
@@ -582,6 +585,51 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+// Check if BDAP entry is valid
+bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
+{
+     // Do not check while wallet is loading
+    if (!fLoaded)
+        return true;
+
+    std::string errorMessage;
+    if (!CheckDirectoryDB())
+    {
+        errorMessage = "ValidateBDAPInputs: CheckDirectoryDB failed!";
+        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+    }
+   
+    std::string statusRpc = "";
+    if (fJustCheck && (IsInitialBlockDownload() || RPCIsInWarmup(&statusRpc)))
+        return true;
+
+    std::vector<std::vector<unsigned char> > vvchArgs;
+    std::vector<std::vector<unsigned char> > vvchBDAPArgs;
+
+    int op = -1;
+    if (nHeight == 0)
+    {
+        nHeight = chainActive.Height() + 1;
+    }
+    
+    bool bValid = false;
+    if (block.vtx.empty() && tx.nVersion == BDAP_TX_VERSION)
+    {
+        if (DecodeDirectoryTx(tx, op, vvchBDAPArgs)) 
+        {
+            bValid = CheckDirectoryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+            if (!bValid)
+            {
+                errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+            if (!bValid || !errorMessage.empty())
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+        }
+    }
+    return true;
+}
+
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
                               bool* pfMissingInputs, int64_t nAcceptTime, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
@@ -1021,6 +1069,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         {
             return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s, %s",
                 __func__, hash.ToString(), FormatStateMessage(state));
+        }
+
+        if (!ValidateBDAPInputs(tx, state, view, CBlock(), true, chainActive.Height())) 
+        {
+            return false;
         }
 
         // Remove conflicting transactions from the mempool
@@ -2303,6 +2356,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     
     if (!control.Wait())
         return state.DoS(100, false);
+
+    CCoinsViewCache viewCoinCache(pcoinsTip);
+    if (!ValidateBDAPInputs(block.vtx[0], state, viewCoinCache, block, fJustCheck, pindex->nHeight))
+    {
+        return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
+    }
+
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
     LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * 0.000001);
 
