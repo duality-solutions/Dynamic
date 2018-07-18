@@ -190,6 +190,8 @@ public:
     bool ValidateValues(std::string& errorMessage);
 };
 
+bool IsDirectoryTransaction(const CScript& txOut);
+std::string directoryFromOp(const int op);
 bool IsDirectoryDataOutput(const CTxOut& out);
 int GetDirectoryDataOutput(const CTransaction& tx);
 bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);

@@ -29,10 +29,13 @@ public:
     void WriteDirectoryIndexHistory(const CDirectory& directory, const int op);
     bool UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
     bool UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory);
+    bool CleanupLevelDB(int& nRemoved);
 };
 
-std::string directoryFromOp(const int op);
 bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
+bool CheckDirectoryDB();
+bool FlushLevelDB();
+void CleanupLevelDB(int& nRemoved);
 
 extern CDirectoryDB *pDirectoryDB;
 

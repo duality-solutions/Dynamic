@@ -12,30 +12,6 @@
 
 CDirectoryDB *pDirectoryDB = NULL;
 
-std::string directoryFromOp(const int op) 
-{
-    switch (op) {
-        case OP_BDAP_NEW:
-            return "bdap_new";
-        case OP_BDAP_DELETE:
-            return "bdap_delete";
-        case OP_BDAP_ACTIVATE:
-            return "bdap_activate";
-        case OP_BDAP_MODIFY:
-            return "bdap_update";
-        case OP_BDAP_MODIFY_RDN:
-            return "bdap_move";
-        case OP_BDAP_EXECUTE_CODE:
-            return "bdap_execute";
-        case OP_BDAP_BIND:
-            return "bdap_bind";
-        case OP_BDAP_REVOKE:
-            return "bdap_revoke";
-        default:
-            return "<unknown directory op>";
-    }
-}
-
 bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory)
 {
     if (!pDirectoryDB || !pDirectoryDB->ReadDirectory(vchObjectPath, directory)) {
@@ -171,10 +147,78 @@ void CDirectoryDB::WriteDirectoryIndex(const CDirectory& directory, const int op
 
 bool CDirectoryDB::UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory)
 {
-    return true; //TODO (bdap): add update impl
+    return false; //TODO (bdap): add update impl
 }
 
 bool CDirectoryDB::UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory)
 {
-    return true; //TODO (bdap): add update impl
+    return false; //TODO (bdap): add update impl
+}
+
+// Removes expired records from databases.
+bool CDirectoryDB::CleanupLevelDB(int& nRemoved)
+{
+    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    CDirectory dirEntry;
+    std::pair<std::string, std::vector<unsigned char> > key;
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        try {
+            if (pcursor->GetKey(key) && key.first == "domain_component") 
+            {
+                pcursor->GetValue(dirEntry);
+                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= dirEntry.nExpireTime)
+                {
+                    nRemoved++;
+                    EraseDirectory(key.second);
+                }
+            }
+            else if (pcursor->GetKey(key) && key.first == "domain_wallet_address") 
+            {
+                std::vector<unsigned char> value;
+                CDirectory directory;
+                pcursor->GetValue(value);
+                if (GetDirectory(value, directory) && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= directory.nExpireTime)
+                {
+                    nRemoved++;
+                    EraseDirectoryAddress(directory.vchFullObjectPath());
+                }
+            }
+            pcursor->Next();
+        } catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
+bool CheckDirectoryDB()
+{
+    if (!pDirectoryDB)
+        return false;
+
+    return true;
+}
+
+bool FlushLevelDB() 
+{
+    {
+        LOCK(cs_bdap_directory);
+        if (pDirectoryDB != NULL)
+        {
+            if (!pDirectoryDB->Flush()) {
+                LogPrintf("Failed to write to BDAP database!");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void CleanupLevelDB(int& nRemoved)
+{
+    if(pDirectoryDB != NULL)
+        pDirectoryDB->CleanupLevelDB(nRemoved);
+    FlushLevelDB();
 }

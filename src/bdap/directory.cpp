@@ -19,7 +19,8 @@
 
 using namespace boost::xpressive;
 
-bool IsDirectoryTransaction(CScript txOut) {
+bool IsDirectoryTransaction(const CScript& txOut)
+{
     return (txOut.IsDirectoryScript(BDAP_START)
             || txOut.IsDirectoryScript(BDAP_NEW_TX)
             || txOut.IsDirectoryScript(BDAP_DELETE_TX)
@@ -30,6 +31,30 @@ bool IsDirectoryTransaction(CScript txOut) {
             || txOut.IsDirectoryScript(BDAP_BIND_TX)
             || txOut.IsDirectoryScript(BDAP_REVOKE_TX)
            );
+}
+
+std::string directoryFromOp(const int op) 
+{
+    switch (op) {
+        case OP_BDAP_NEW:
+            return "bdap_new";
+        case OP_BDAP_DELETE:
+            return "bdap_delete";
+        case OP_BDAP_ACTIVATE:
+            return "bdap_activate";
+        case OP_BDAP_MODIFY:
+            return "bdap_update";
+        case OP_BDAP_MODIFY_RDN:
+            return "bdap_move";
+        case OP_BDAP_EXECUTE_CODE:
+            return "bdap_execute";
+        case OP_BDAP_BIND:
+            return "bdap_bind";
+        case OP_BDAP_REVOKE:
+            return "bdap_revoke";
+        default:
+            return "<unknown directory op>";
+    }
 }
 
 bool IsDirectoryDataOutput(const CTxOut& out) {
