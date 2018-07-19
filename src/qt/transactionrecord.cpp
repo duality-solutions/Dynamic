@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "fluid.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"
@@ -74,7 +75,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::RecvFromOther;
                     sub.address = mapValue["from"];
                 }
-                if (wtx.IsCoinBase())
+                if (IsTransactionFluid(txout.scriptPubKey))
+                {
+                    // Fluid type
+                    sub.type = TransactionRecord::Fluid;
+                }
+                else if (wtx.IsCoinBase())
                 {
                     // Generated
                     sub.type = TransactionRecord::Generated;
@@ -150,7 +156,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-
+                    if(IsTransactionFluid(txout.scriptPubKey)) sub.type = TransactionRecord::Fluid;
                     if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
                     if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
                     if(nDebit - wtx.GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
@@ -199,7 +205,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.address = mapValue["to"];
                 }
 
-                if(mapValue["PS"] == "1")
+                if(IsTransactionFluid(txout.scriptPubKey)) 
+                {
+                    sub.type = TransactionRecord::Fluid;
+                }
+                else if(mapValue["PS"] == "1")
                 {
                     sub.type = TransactionRecord::PrivateSend;
                 }

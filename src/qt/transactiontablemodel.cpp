@@ -371,6 +371,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
 {
     switch(wtx->type)
     {
+    case TransactionRecord::Fluid:
+        return tr("Fluid");
     case TransactionRecord::RecvWithAddress:
         return tr("Received with");
     case TransactionRecord::RecvFromOther:
@@ -406,6 +408,8 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     QString theme = GUIUtil::getThemeName();
     switch(wtx->type)
     {
+    case TransactionRecord::Fluid:
+        return QIcon(":/icons/" + theme + "/fluid");
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
     case TransactionRecord::RecvWithPrivateSend:
@@ -430,6 +434,8 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
 
     switch(wtx->type)
     {
+    case TransactionRecord::Fluid:
+        return tr("Fluid"); // //TODO: Add Fluid Operation Type here
     case TransactionRecord::RecvFromOther:
         return QString::fromStdString(wtx->address) + watchAddress;
     case TransactionRecord::RecvWithAddress:
@@ -451,6 +457,7 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
     // Show addresses without label in a less visible color
     switch(wtx->type)
     {
+    case TransactionRecord::Fluid:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
@@ -614,6 +621,10 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         if(!rec->status.countsForBalance && rec->status.status != TransactionStatus::Immature)
         {
             return COLOR_UNCONFIRMED;
+        }
+        if(index.column() == Amount && (rec->type) == TransactionRecord::Fluid)
+        {
+            return COLOR_FLUID_TX;
         }
         if(index.column() == Amount && (rec->credit+rec->debit) < 0)
         {
