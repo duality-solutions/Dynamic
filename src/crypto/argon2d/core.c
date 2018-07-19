@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * You may use this work under the terms of a Creative Commons CC0 1.0
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -345,14 +345,14 @@ fail:
 #endif /* ARGON2_NO_THREADS */
 
 int fill_memory_blocks(argon2_instance_t *instance) {
-    if (instance == NULL || instance->lanes == 0) {
-        return ARGON2_INCORRECT_PARAMETER;
+	if (instance == NULL || instance->lanes == 0) {
+	    return ARGON2_INCORRECT_PARAMETER;
     }
 #if defined(ARGON2_NO_THREADS)
     return fill_memory_blocks_st(instance);
 #else
     return instance->threads == 1 ?
-            fill_memory_blocks_st(instance) : fill_memory_blocks_mt(instance);
+			fill_memory_blocks_st(instance) : fill_memory_blocks_mt(instance);
 #endif
 }
 
@@ -529,7 +529,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     store32(&value, context->t_cost);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
-    store32(&value, ARGON2_VERSION_NUMBER);        
+    store32(&value, ARGON2_VERSION_NUMBER);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, (uint32_t)type);
