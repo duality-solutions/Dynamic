@@ -170,6 +170,12 @@
 * [Fluid] Fix getfluidhistoryraw RPC command
 * [Fluid] Fix getfluidsovereigns RPC command
 * [Fluid] Allow negative fluid minting amounts
+* fix copy address, issue 157
+* Privatesend->PrivateSend Instantsend->InstantSend
+* Identified and Fixed many issues with Korean Translations.
+* Update dynamic_find_bdb48.m4
+* [Fluid] Fix send fluid tx display in Qt UI
+* Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
@@ -193,7 +199,6 @@
 * Update Proto Version
 * Update secp256k1
 * Fix fixed seeds
-* fix copy address, issue #157
 * Update CHANGELOG
 
 **Dynamic v2.1.0.0**
