@@ -426,8 +426,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     }
 
     if(nProtocolVersion < dnpayments.GetMinDynodePaymentsProto()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- ignoring outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", vin.prevout.ToStringShort(), nProtocolVersion);
-        return false;
+        LogPrintf("CDynodeBroadcast::SimpleCheck -- outdated Dynode: dynode=%s  nProtocolVersion=%d\n", outpoint.ToStringShort(), nProtocolVersion);
+        nActiveState = DYNODE_UPDATE_REQUIRED;
     }
 
     CScript pubkeyScript;
