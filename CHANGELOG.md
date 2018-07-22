@@ -1,6 +1,20 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.0.0**
+
+* Drop delayed headers logic and fix duplicate initial headers sync
+* replace boost iterators with for
+* RPC: Add description for InstantSend-related fields of mempool entry
+* RPC: fix wallet lock check in
+* minor reformatting
+* Remove explicit wallet lock in DynodeList::StartAll()
+* Do not create dnb until dynodeSync is finished
+* Don't drop dnb's for outdated DN's
+* Fix previous commit and fix 2 Spork issues
+* PrepareDenominate fix
+* Sync DN list and DNW list from 3 peers max
+
 **Dynamic v2.3.0.0**
 
 * Skip existing Dynodes connections on mixing
