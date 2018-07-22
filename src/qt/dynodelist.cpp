@@ -170,7 +170,6 @@ void DynodeList::StartAll(std::string strCommand)
             strFailedHtml += "\nFailed to start " + dne.getAlias() + ". Error: " + strError;
         }
     }
-    pwalletMain->Lock();
 
     std::string returnObj;
     returnObj = strprintf("Successfully started %d Dynodes, failed to start %d, total %d", nCountSuccessful, nCountFailed, nCountFailed + nCountSuccessful);
