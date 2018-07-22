@@ -338,8 +338,8 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
         return false;
     };
 
-    //need correct blocks to send ping
-    if (!fOffline && !dynodeSync.IsBlockchainSynced())
+    // Wait for sync to finish because dnb simply won't be relayed otherwise
+    if (!fOffline && !dynodeSync.IsSynced())
         return Log("Sync in progress. Must wait until sync is complete to start Dynode");
 
     if (!CMessageSigner::GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew))
