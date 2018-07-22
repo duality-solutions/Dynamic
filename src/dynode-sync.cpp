@@ -274,6 +274,12 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                     return;
                 }
 
+                // request from three peers max
+                if (nRequestedDynodeAttempt > 2) {
+                    connman.ReleaseNodeVector(vNodesCopy);
+                    return;
+                }
+
                 // only request once from each peer
                 if(netfulfilledman.HasFulfilledRequest(pnode->addr, "dynode-list-sync")) continue;
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "dynode-list-sync");
@@ -313,6 +319,12 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 if(nRequestedDynodeAttempt > 1 && dnpayments.IsEnoughData()) {
                     LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- found enough data\n", nTick, nRequestedDynodeAssets);
                     SwitchToNextAsset(connman);
+                    connman.ReleaseNodeVector(vNodesCopy);
+                    return;
+                }
+
+                // request from three peers max
+                if (nRequestedDynodeAttempt > 2) {
                     connman.ReleaseNodeVector(vNodesCopy);
                     return;
                 }
