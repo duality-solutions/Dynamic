@@ -14,6 +14,9 @@
 * Fix previous commit and fix 2 Spork issues
 * PrepareDenominate fix
 * Sync DN list and DNW list from 3 peers max
+* Use correct protocol when serializing messages in reply to
+* Bump Versioning
+* Update dynamic_qt.m4 (Remove ability to build with Qt4)
 
 **Dynamic v2.3.0.0**
 
