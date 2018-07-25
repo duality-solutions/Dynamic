@@ -237,7 +237,7 @@ RES_ICONS = \
   qt/res/icons/drk/unit_satoshis.png \
   qt/res/icons/drk/unit_udyn.png \
   qt/res/icons/drk/fontbigger.png \
-  qt/res/icons/drk/fontsmaller.png \ 
+  qt/res/icons/drk/fontsmaller.png \
   qt/res/icons/drk/verify.png \
   qt/res/icons/drk/warning.png
 
@@ -369,6 +369,7 @@ qt_dynamic_qt_LDADD = qt/libdynamicqt.a $(LIBDYNAMIC_SERVER)
 if ENABLE_WALLET
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_WALLET)
 endif
+qt_dynamic_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 if ENABLE_GPU
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_GPU_LDADD)
 qt_dynamic_qt_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS)
@@ -379,7 +380,6 @@ endif
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
   $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-qt_dynamic_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 qt_dynamic_qt_LIBTOOLFLAGS = --tag CXX
 
 #locale/foo.ts -> locale/foo.qm
