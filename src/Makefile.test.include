@@ -123,6 +123,7 @@ test_test_dynamic_LDADD += $(ZMQ_LIBS)
 endif
 if ENABLE_GPU
 test_test_dynamic_LDADD += $(LIBDYNAMIC_GPU_LDADD)
+test_test_dynamic_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS)
 endif
 
 nodist_test_test_dynamic_SOURCES = $(GENERATED_TEST_FILES)

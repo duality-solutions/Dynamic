@@ -45,6 +45,7 @@ qt_test_test_dynamic_qt_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif
 if ENABLE_GPU
 qt_test_test_dynamic_qt_LDADD += $(LIBDYNAMIC_GPU_LDADD)
+qt_test_test_dynamic_qt_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS)
 endif
 qt_test_test_dynamic_qt_LDADD += $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(QT_DBUS_LIBS) $(QT_TEST_LIBS) $(QT_LIBS) \

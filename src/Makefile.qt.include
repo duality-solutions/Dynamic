@@ -371,6 +371,7 @@ qt_dynamic_qt_LDADD += $(LIBDYNAMIC_WALLET)
 endif
 if ENABLE_GPU
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_GPU_LDADD)
+qt_dynamic_qt_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS)
 endif
 if ENABLE_ZMQ
 qt_dynamic_qt_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)

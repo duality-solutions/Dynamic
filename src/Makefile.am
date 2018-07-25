@@ -411,7 +411,7 @@ nodist_libdynamic_util_a_SOURCES = $(srcdir)/obj/build.h
 dynamicd_SOURCES = dynamicd.cpp
 dynamicd_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 dynamicd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dynamicd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -Wl,-rpath=/usr/local/cuda-9.2/lib64
+dynamicd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
 dynamicd_SOURCES += dynamicd-res.rc

@@ -4,6 +4,7 @@
 
 LIBDYNAMIC_GPU = crypto/argon2gpu/libdynamic_gpu.a
 LIBDYNAMIC_GPU_LDADD = $(LIBDYNAMIC_GPU)
+LIBDYNAMIC_GPU_LDFLAGS =
 EXTRA_LIBRARIES  += $(LIBDYNAMIC_GPU)
 
 crypto_argon2gpu_libdynamic_gpu_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
@@ -58,13 +59,15 @@ else
 LIBDYNAMIC_GPU_OPENCL = crypto/argon2gpu/opencl/libdynamic_gpu_opencl.a
 EXTRA_LIBRARIES += $(LIBDYNAMIC_GPU_OPENCL)
 
-LIBOPENCL = -lOpenCL
+LIBDYNAMIC_GPU_LDADD += $(LIBDYNAMIC_GPU_OPENCL)
+
 if TARGET_DARWIN
 LIBOPENCL = "-framework OpenCL"
-endif
-
-LIBDYNAMIC_GPU_LDADD += $(LIBDYNAMIC_GPU_OPENCL)
+LIBDYNAMIC_GPU_LDFLAGS += $(LIBOPENCL)
+else
+LIBOPENCL = -lOpenCL
 LIBDYNAMIC_GPU_LDADD += $(LIBOPENCL)
+endif
 
 crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -87,3 +90,4 @@ crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = \
 endif
 
 dynamicd_LDADD += $(LIBDYNAMIC_GPU_LDADD)
+dynamicd_LDFLAGS += $(LIBDYNAMIC_GPU_LDFLAGS)
