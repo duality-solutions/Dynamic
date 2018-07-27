@@ -210,5 +210,7 @@ bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<
 bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
 bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
             const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
+int GetDirectoryOpType(const CScript& script);
+std::string GetDirectoryOpTypeString(const CScript& script);
 
 #endif // DYNAMIC_DIRECTORY_H

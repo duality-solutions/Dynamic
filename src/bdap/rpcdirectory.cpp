@@ -98,6 +98,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(payWallet.Get());
     scriptPubKey += scriptDestination;
+    LogPrintf("BDAP GetDirectoryType = %s \n", GetDirectoryOpTypeString(scriptPubKey));
 
     CScript scriptData;
     scriptData << OP_RETURN << data;

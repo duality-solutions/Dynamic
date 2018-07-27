@@ -500,3 +500,48 @@ bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& t
 
     return true;
 }
+
+int GetDirectoryOpType(const CScript& script)
+{
+    std::string ret;
+    CScript::const_iterator it = script.begin();
+    opcodetype op1 = OP_INVALIDOPCODE;
+    opcodetype op2 = OP_INVALIDOPCODE;
+    while (it != script.end()) {
+        std::vector<unsigned char> vch;
+        if (op1 == OP_INVALIDOPCODE)
+        {
+            if (script.GetOp2(it, op1, &vch)) 
+            {
+                if (op1 - OP_1NEGATE - 1 == OP_BDAP)
+                {
+                    continue;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+        else
+        {
+            if (script.GetOp2(it, op2, &vch)) 
+            {
+                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_REVOKE)
+                {
+                    return (int)op2 - OP_1NEGATE - 1;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+    }
+    return (int)op2;
+}
+
+std::string GetDirectoryOpTypeString(const CScript& script)
+{
+    return directoryFromOp(GetDirectoryOpType(script));
+}
