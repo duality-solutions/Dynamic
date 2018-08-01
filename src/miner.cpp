@@ -855,8 +855,9 @@ static boost::thread_group* GetMinerThreads(bool fGPU = false, bool fInit = true
     return GetCPUMinerThreads(fInit, fRestart);
 }
 
-void AutoTuneDeviceThreads(const CChainParams& chainparams, CConnman& connman, std::size_t nDeviceIndex = -1, bool fGPU = false)
+void AutoTuneDeviceThreads(const CChainParams& chainparams, CConnman& connman, boost::optional<std::size_t> nGPUDeviceIndex = boost::none)
 {
+    bool fGPU = static_cast<bool>(nGPUDeviceIndex);
     // Threads
     boost::thread* lastThread = NULL;
     boost::thread_group* minerThreads = GetMinerThreads(fGPU);
@@ -874,7 +875,7 @@ void AutoTuneDeviceThreads(const CChainParams& chainparams, CConnman& connman, s
     while (true) {
         LogPrintf("Starting %s Miner thread #%u %6.0f khash/s\n", dev, minerThreads->size(), *dHashesPerSec / 1000.0);
         std::size_t nThread = minerThreads->size();
-        std::size_t device = nDeviceIndex == -1 ? nThread : nDeviceIndex;
+        std::size_t device = nGPUDeviceIndex.value_or(nThread);
         lastThread = minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), boost::cref(device), boost::cref(fGPU)));
         MilliSleep(10000);
 
@@ -897,7 +898,7 @@ void GenerateAutoTuneDevice(const CChainParams& chainparams, CConnman& connman, 
     if (fGPU) {
         // Start GPU threads
         for (std::size_t device = 0; device < GetGPUDeviceCount(); device++) {
-            AutoTuneDeviceThreads(chainparams, connman, device, true);
+            AutoTuneDeviceThreads(chainparams, connman, device);
         }
         return;
     }
@@ -943,7 +944,8 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
         nCPUThreads = nNumCores;
 
     // Start CPU threads
-    while (cpuMinerThreads->size() < nCPUThreads) {
+    std::size_t nCPUTarget = static_cast<std::size_t>(nCPUThreads);
+    while (cpuMinerThreads->size() < nCPUTarget) {
         std::size_t nThread = cpuMinerThreads->size();
         LogPrintf("Starting CPU Miner thread #%u\n", nThread);
         cpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), nThread, false));
@@ -953,9 +955,10 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
         nGPUThreads = 4;
 
     // Start GPU threads
+    std::size_t nGPUTarget = static_cast<std::size_t>(nGPUThreads);
     boost::thread_group* gpuMinerThreads = GetGPUMinerThreads();
     for (std::size_t device = 0; device < devices; device++) {
-        for (std::size_t i = 0; i < nGPUThreads; i++) {
+        for (std::size_t i = 0; i < nGPUTarget; i++) {
             LogPrintf("Starting GPU Miner thread %u on device %u, total GPUs found %u\n", i, device, devices);
             gpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), device, true));
         }
