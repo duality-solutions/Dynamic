@@ -16,6 +16,7 @@
  */
 
 #include "crypto/argon2gpu/opencl/kernel-loader.h"
+#include "crypto/argon2gpu/opencl/kernel.cl.h"
 
 #include <fstream>
 #include <iostream>
@@ -27,29 +28,18 @@ namespace opencl
 {
 cl::Program KernelLoader::loadArgon2Program(
     const cl::Context& context,
-    const std::string& sourceDirectory,
     Type type,
     Version version,
     bool debug)
 {
-    std::string sourcePath = sourceDirectory + "/kernel.cl";
-    std::string sourceText;
     std::stringstream buildOpts;
-    {
-        std::ifstream sourceFile{sourcePath};
-        sourceText = {
-            std::istreambuf_iterator<char>(sourceFile),
-            std::istreambuf_iterator<char>()};
-    }
-
     if (debug) {
-        buildOpts << "-g -s \"" << sourcePath << "\""
-                  << " ";
+        buildOpts << "-g ";
     }
     buildOpts << "-DARGON2_TYPE=" << type << " ";
     buildOpts << "-DARGON2_VERSION=" << version << " ";
 
-    cl::Program prog(context, sourceText);
+    cl::Program prog(context, reinterpret_cast<const char*>(code::kernel));
     try {
         std::string opts = buildOpts.str();
         prog.build(opts.c_str());

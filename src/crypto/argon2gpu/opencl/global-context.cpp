@@ -26,11 +26,8 @@ namespace opencl
 GlobalContext::GlobalContext()
     : devices()
 {
-    std::clog << "globalcontextinit <" << std::endl;
     std::vector<cl::Platform> platforms;
-    std::clog << "cl::Platform::get <" << std::endl;
     cl::Platform::get(&platforms);
-    std::clog << "cl::Platform::get >" << std::endl;
 
     std::vector<cl::Device> clDevices;
     for (cl::Platform platform : platforms) {

@@ -31,7 +31,6 @@ namespace KernelLoader
 {
 cl::Program loadArgon2Program(
     const cl::Context& context,
-    const std::string& sourceDirectory,
     Type type,
     Version version,
     bool debug = false);

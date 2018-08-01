@@ -73,6 +73,7 @@ libconftest.dylib*
 
 *.json.h
 *.raw.h
+*.cl.h
 
 #libtool object files
 *.lo

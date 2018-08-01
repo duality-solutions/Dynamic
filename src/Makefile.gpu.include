@@ -67,9 +67,14 @@ else
 LIBDYNAMIC_GPU_LDADD_EXTRA += -lOpenCL
 endif
 
+OPENCL_KERNEL_FILES = crypto/argon2gpu/opencl/kernel.cl
+
+GENERATED_KERNEL_FILES = $(OPENCL_KERNEL_FILES:.cl=.cl.h)
+
 crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES)
 crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = \
+	$(OPENCL_KERNEL_FILES) \
 	crypto/argon2gpu/opencl/cl.hpp \
 	crypto/argon2gpu/opencl/device.h \
 	crypto/argon2gpu/opencl/global-context.h \
@@ -84,6 +89,20 @@ crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = \
 	crypto/argon2gpu/opencl/kernel-runner.cpp \
 	crypto/argon2gpu/opencl/processing-unit.cpp \
 	crypto/argon2gpu/opencl/program-context.cpp
+
+nodist_crypto_argon2gpu_opencl_libdynamic_gpu_opencl_a_SOURCES = $(GENERATED_KERNEL_FILES)
+
+BUILT_SOURCES = $(GENERATED_KERNEL_FILES)
+CLEANFILES += $(GENERATED_KERNEL_FILES)
+
+%.cl.h: %.cl
+	@$(MKDIR_P) $(@D)
+	@echo "namespace argon2gpu { namespace opencl { namespace code {" > $@
+	@echo "static unsigned const char $(*F)[] = {" >> $@
+	@$(HEXDUMP) -v -e '8/1 "0x%02x, "' -e '"\n"' $< | $(SED) -e 's/0x  ,//g' >> $@
+	@echo "};" >> $@
+	@echo "}}}" >> $@
+	@echo "Generated $@"
 
 endif
 

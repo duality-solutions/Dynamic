@@ -34,10 +34,7 @@ ProgramContext::ProgramContext(
         this->devices.push_back(device.getCLDevice());
     }
     context = cl::Context(this->devices);
-
-    program = KernelLoader::loadArgon2Program(
-        // FIXME path:
-        context, "./src/crypto/argon2gpu/opencl", type, version);
+    program = KernelLoader::loadArgon2Program(context, type, version);
 }
 
 } // namespace opencl
