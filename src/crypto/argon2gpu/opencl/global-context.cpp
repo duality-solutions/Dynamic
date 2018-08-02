@@ -32,7 +32,7 @@ GlobalContext::GlobalContext()
     std::vector<cl::Device> clDevices;
     for (cl::Platform platform : platforms) {
         try {
-            platform.getDevices(CL_DEVICE_TYPE_ALL, &clDevices);
+            platform.getDevices(CL_DEVICE_TYPE_GPU, &clDevices);
             devices.insert(devices.end(), clDevices.begin(), clDevices.end());
         } catch (const cl::Error& err) {
             std::cerr << "WARNING: Unable to get devices for platform '"
