@@ -265,18 +265,17 @@ static bool CommonDataCheck(const CDirectory& directory, const vchCharString& vv
         return false;
     }
 
-    if (!pDirectoryDB)
-    {
-        errorMessage = "CommonDataCheck failed! Can not open LevelDB BDAP database.";
-        return false;
-    }
     return true;
 }
 
-bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                               const int op, std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(directory, vvchOpParameters, errorMessage))
         return false;
+
+    if (fJustCheck)
+        return true;
 
     CDirectory getDirectory;
     if (GetDirectory(directory.vchFullObjectPath(), getDirectory))
@@ -284,7 +283,13 @@ bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directo
         errorMessage = "CheckNewDirectoryTxInputs failed! " + getDirectory.GetFullObjectPath() + " already exists.";
         return false;
     }
-    
+
+    if (!pDirectoryDB)
+    {
+        errorMessage = "CheckNewDirectoryTxInputs failed! Can not open LevelDB BDAP entry database.";
+        return false;
+    }
+
     if (!pDirectoryDB->AddDirectory(directory, op))
     {
         errorMessage = "CheckNewDirectoryTxInputs failed! Error adding new directory entry request to LevelDB.";
@@ -294,7 +299,8 @@ bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directo
     return FlushLevelDB();
 }
 
-bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                  const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb
     //check if exists already
@@ -302,14 +308,16 @@ bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& dire
     return false;
 }
 
-bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                    const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb as a new request
     //check if new request exists and is not expired
     return false;
 }
 
-bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                  const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb
     //check if exists already
@@ -317,7 +325,8 @@ bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& dire
     return false;
 }
 
-bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb
     //check if exists already
@@ -325,7 +334,8 @@ bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& direct
     return false;
 }
 
-bool CheckExecuteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckExecuteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                   const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb
     //check if exists already
@@ -333,7 +343,8 @@ bool CheckExecuteDirectoryTxInputs(const CTransaction& tx, const CDirectory& dir
     return false;
 }
 
-bool CheckBindDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckBindDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check names in operation matches directory data in leveldb
     //check if request or accept response
@@ -342,7 +353,8 @@ bool CheckBindDirectoryTxInputs(const CTransaction& tx, const CDirectory& direct
     return false;
 }
 
-bool CheckRevokeDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+bool CheckRevokeDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+                                  const int op, std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches directory data in leveldb
     //check if names exists already
@@ -350,8 +362,8 @@ bool CheckRevokeDirectoryTxInputs(const CTransaction& tx, const CDirectory& dire
     return false;
 }
 
-bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
-            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, 
+                            int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
     if (tx.IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
@@ -359,7 +371,7 @@ bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& t
         return true;
     }
 
-    if (fDebug && !bSanityCheck)
+    //if (fDebug && !bSanityCheck)
         LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, directoryFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
     CScript scriptOp;
@@ -393,21 +405,21 @@ bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& t
     }
 
     if (strOperationType == "bdap_new")
-        return CheckNewDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckNewDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete")
-        return CheckDeleteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckDeleteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_activate")
-        return CheckActivateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckActivateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_update")
-        return CheckUpdateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckUpdateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_move")
-        return CheckMoveDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckMoveDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_execute")
-        return CheckExecuteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckExecuteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_bind")
-        return CheckBindDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckBindDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_revoke")
-        return CheckRevokeDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+        return CheckRevokeDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
 
     return false;
 }

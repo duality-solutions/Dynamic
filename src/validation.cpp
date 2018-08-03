@@ -603,7 +603,6 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     if (fJustCheck && (IsInitialBlockDownload() || RPCIsInWarmup(&statusRpc)))
         return true;
 
-    std::vector<std::vector<unsigned char> > vvchArgs;
     std::vector<std::vector<unsigned char> > vvchBDAPArgs;
 
     int op = -1;
@@ -613,7 +612,7 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     }
     
     bool bValid = false;
-    if (block.vtx.empty() && tx.nVersion == BDAP_TX_VERSION)
+    if (tx.nVersion == BDAP_TX_VERSION)
     {
         if (DecodeDirectoryTx(tx, op, vvchBDAPArgs)) 
         {
@@ -2252,6 +2251,12 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
             }
         }
+        
+        CCoinsViewCache viewCoinCache(pcoinsTip);
+        if (!ValidateBDAPInputs(tx, state, viewCoinCache, block, fJustCheck, pindex->nHeight))
+        {
+            return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
+        }
 
         CTxUndo undoDummy;
         if (i > 0) {
@@ -2356,12 +2361,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     
     if (!control.Wait())
         return state.DoS(100, false);
-
-    CCoinsViewCache viewCoinCache(pcoinsTip);
-    if (!ValidateBDAPInputs(block.vtx[0], state, viewCoinCache, block, fJustCheck, pindex->nHeight))
-    {
-        return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
-    }
 
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
     LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * 0.000001);
