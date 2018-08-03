@@ -32,9 +32,7 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     ToLowerCase(vchObjectID);
     CharString vchCommonName = vchFromValue(request.params[1]);
 
-    // Check if name already exists
-    if (CheckIfNameExists(vchObjectID, vchDefaultPublicOU, vchDefaultDomainName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + _("This public name already exists"));
+    
 
     CDirectory txDirectory;
     txDirectory.OID = vchDefaultOIDPrefix;
@@ -45,6 +43,10 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     txDirectory.ObjectID = vchObjectID;
     txDirectory.fPublicObject = 1; //make entry public
     txDirectory.transactionFee = 100;
+
+    // Check if name already exists
+    if (GetDirectory(txDirectory.vchFullObjectPath(), txDirectory))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + txDirectory.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address and public key
     CKey privWalletKey;
@@ -83,9 +85,6 @@ UniValue addpublicname(const JSONRPCRequest& request) {
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding signature key to wallet for BDAP"));
 
     txDirectory.SignWalletAddress = vchSignWalletAddress;
-
-    if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + _("Failed to read from BDAP database"));
 
     CharString data;
     txDirectory.Serialize(data);

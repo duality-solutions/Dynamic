@@ -414,12 +414,6 @@ void ToLowerCase(std::string& strValue) {
     }
 }
 
-bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent) {
-
-
-    return false;
-}
-
 CAmount GetBDAPFee(const CScript& scriptPubKey)
 {
     CAmount nFee = 0;
@@ -437,7 +431,7 @@ bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<
 
     for (unsigned int i = 0; i < tx.vout.size(); i++) {
         const CTxOut& out = tx.vout[i];
-        std::vector<std::vector<unsigned char> > vvchRead;
+        vchCharString vvchRead;
         if (DecodeBDAPScript(out.scriptPubKey, op, vvchRead)) {
             found = true;
             vvch = vvchRead;
@@ -452,53 +446,18 @@ bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<
 
 bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch)
 {
-    int op;
     for (unsigned int i = 0; i < tx.vin.size(); i++) {
         const Coin& prevCoins = inputs.AccessCoin(tx.vin[i].prevout);
         if (prevCoins.IsSpent()) {
             continue;
         }
         // check unspent input for consensus before adding to a block
+        int op;
         if (DecodeBDAPScript(prevCoins.out.scriptPubKey, op, vvch)) {
             return true;
         }
     }
     return false;
-}
-
-bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
-            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
-{
-    if (tx.IsCoinBase() && !fJustCheck && !bSanityCheck)
-    {
-        LogPrintf("*Trying to add BDAP entry in coinbase transaction, skipping...");
-        return true;
-    }
-    //TODO (bdap): add if back
-    //if (fDebug && !bSanityCheck)
-        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, directoryFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
-    
-    // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
-    CDirectory directory;
-    std::vector<unsigned char> vchData;
-    std::vector<unsigned char> vchHash;
-    int nDataOut;
-    bool bData = GetDirectoryData(tx, vchData, vchHash, nDataOut);
-    if(bData && !directory.UnserializeFromData(vchData, vchHash))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("UnserializeFromData data in tx failed!");
-        return error(errorMessage.c_str());
-    }
-
-    if(!directory.ValidateValues(errorMessage))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + errorMessage;
-        return error(errorMessage.c_str());
-    }
-    //TODO (bdap): continue checking transaction validity
-    
-
-    return true;
 }
 
 int GetDirectoryOpType(const CScript& script)
@@ -544,4 +503,18 @@ int GetDirectoryOpType(const CScript& script)
 std::string GetDirectoryOpTypeString(const CScript& script)
 {
     return directoryFromOp(GetDirectoryOpType(script));
+}
+
+bool GetDirectoryOpScript(const CTransaction& tx, CScript& scriptDirectoryOp, vchCharString& vvchOpParameters, int& op)
+{
+    for (unsigned int i = 0; i < tx.vout.size(); i++) 
+    {
+        const CTxOut& out = tx.vout[i];
+        if (DecodeBDAPScript(out.scriptPubKey, op, vvchOpParameters)) 
+        {
+            scriptDirectoryOp = out.scriptPubKey;
+            return true;
+        }
+    }
+    return false;
 }

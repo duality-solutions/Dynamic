@@ -36,6 +36,16 @@ bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& d
 bool CheckDirectoryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);
+bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckExecuteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckBindDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckRevokeDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage);
+bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
+            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
 extern CDirectoryDB *pDirectoryDB;
 

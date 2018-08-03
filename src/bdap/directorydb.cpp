@@ -18,11 +18,14 @@ bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& d
         return false;
     }
     
+    //TODO: (bdap) calculate directory.nExpireTime
+    /*
     if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= directory.nExpireTime) {
         directory.SetNull();
         return false;
     }
-    return true;
+    */
+    return !directory.IsNull();
 }
 
 bool CDirectoryDB::AddDirectory(const CDirectory& directory, const int op) 
@@ -221,4 +224,190 @@ void CleanupLevelDB(int& nRemoved)
     if(pDirectoryDB != NULL)
         pDirectoryDB->CleanupLevelDB(nRemoved);
     FlushLevelDB();
+}
+
+
+static bool CommonDataCheck(const CDirectory& directory, const vchCharString& vvchOpParameters, std::string& errorMessage)
+{
+    if (directory.IsNull() == true)
+    {
+        errorMessage = "CommonDataCheck failed! Directory is null.";
+        return false;
+    }
+
+    if (vvchOpParameters.size() == 0)
+    {
+        errorMessage = "CommonDataCheck failed! Invalid parameters.";
+        return false;
+    }
+
+    if (directory.GetFullObjectPath() != stringFromVch(vvchOpParameters[0]))
+    {
+        errorMessage = "CommonDataCheck failed! Script operation parameter does not match directory entry object.";
+        return false;
+    }
+    
+    if (directory.DomainComponent != vchDefaultDomainName)
+    {
+        errorMessage = "CommonDataCheck failed! Must use default domain.";
+        return false;
+    }
+
+    if (directory.OrganizationalUnit != vchDefaultPublicOU && directory.OrganizationalUnit != vchDefaultAdminOU)
+    {
+        errorMessage = "CommonDataCheck failed! Must use default public organizational unit.";
+        return false;
+    }
+
+    if (directory.OrganizationalUnit == vchDefaultAdminOU)
+    {
+        errorMessage = "CommonDataCheck failed! Can not use default admin domain.";
+        return false;
+    }
+
+    if (!pDirectoryDB)
+    {
+        errorMessage = "CommonDataCheck failed! Can not open LevelDB BDAP database.";
+        return false;
+    }
+    return true;
+}
+
+bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    if (!CommonDataCheck(directory, vvchOpParameters, errorMessage))
+        return false;
+
+    CDirectory getDirectory;
+    if (GetDirectory(directory.vchFullObjectPath(), getDirectory))
+    {
+        errorMessage = "CheckNewDirectoryTxInputs failed! " + getDirectory.GetFullObjectPath() + " already exists.";
+        return false;
+    }
+    
+    if (!pDirectoryDB->AddDirectory(directory, op))
+    {
+        errorMessage = "CheckNewDirectoryTxInputs failed! Error adding new directory entry request to LevelDB.";
+        return false;
+    }
+
+    return FlushLevelDB();
+}
+
+bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb
+    //check if exists already
+    //if exists, check for owner's signature
+    return false;
+}
+
+bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb as a new request
+    //check if new request exists and is not expired
+    return false;
+}
+
+bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb
+    //check if exists already
+    //if exists, check for owner's signature
+    return false;
+}
+
+bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb
+    //check if exists already
+    //if exists, check for owner's signature
+    return false;
+}
+
+bool CheckExecuteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb
+    //check if exists already
+    //if exists, check for owner's signature
+    return false;
+}
+
+bool CheckBindDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check names in operation matches directory data in leveldb
+    //check if request or accept response
+    //check if names exists already
+    //if exists, check for owner's signature
+    return false;
+}
+
+bool CheckRevokeDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters, const int op, std::string& errorMessage)
+{
+    //check name in operation matches directory data in leveldb
+    //check if names exists already
+    //if exists, check for fluid signature
+    return false;
+}
+
+bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
+            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+{
+    if (tx.IsCoinBase() && !fJustCheck && !bSanityCheck)
+    {
+        LogPrintf("*Trying to add BDAP entry in coinbase transaction, skipping...");
+        return true;
+    }
+
+    if (fDebug && !bSanityCheck)
+        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, directoryFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    
+    CScript scriptOp;
+    vchCharString vvchOpParameters;
+    if (!GetDirectoryOpScript(tx, scriptOp, vvchOpParameters, op))
+    {
+        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("Transaction does not contain BDAP operation script!");
+        return error(errorMessage.c_str());
+    }
+    const std::string strOperationType = GetDirectoryOpTypeString(scriptOp);
+    if (fDebug)
+        LogPrintf("CheckDirectoryTxInputs, strOperationType= %s \n", strOperationType);
+    
+    // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
+    CDirectory directory;
+    std::vector<unsigned char> vchData;
+    std::vector<unsigned char> vchHash;
+    int nDataOut;
+    
+    bool bData = GetDirectoryData(tx, vchData, vchHash, nDataOut);
+    if(bData && !directory.UnserializeFromData(vchData, vchHash))
+    {
+        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
+        return error(errorMessage.c_str());
+    }
+
+    if(!directory.ValidateValues(errorMessage))
+    {
+        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
+        return error(errorMessage.c_str());
+    }
+
+    if (strOperationType == "bdap_new")
+        return CheckNewDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_delete")
+        return CheckDeleteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_activate")
+        return CheckActivateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_update")
+        return CheckUpdateDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_move")
+        return CheckMoveDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_execute")
+        return CheckExecuteDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_bind")
+        return CheckBindDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+    else if (strOperationType == "bdap_revoke")
+        return CheckRevokeDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage);
+
+    return false;
 }

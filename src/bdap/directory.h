@@ -204,13 +204,11 @@ std::vector<unsigned char> vchFromValue(const UniValue& value);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
-bool CheckIfNameExists(const CharString& vchObjectID, const CharString& vchOrganizationalUnit, const CharString& vchDomainComponent);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
 bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
 bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
-bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, int op, 
-            const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 int GetDirectoryOpType(const CScript& script);
 std::string GetDirectoryOpTypeString(const CScript& script);
+bool GetDirectoryOpScript(const CTransaction& tx, CScript& scriptDirectoryOp, vchCharString& vvchOpParameters, int& op);
 
 #endif // DYNAMIC_DIRECTORY_H
