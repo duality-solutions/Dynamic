@@ -196,6 +196,38 @@ bool CDirectoryDB::CleanupLevelDB(int& nRemoved)
     return true;
 }
 
+// Lists active entries by domain name with paging support
+bool CDirectoryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDirectoryList)
+{
+    // TODO: (bdap) implement paging
+    // if vchObjectLocation is empty, list entries from all domains
+    int index = 0;
+    std::pair<std::string, CharString> key;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CDirectory directory;
+        try {
+            if (pcursor->GetKey(key) && key.first == "domain_component") {
+                pcursor->GetValue(directory);
+                if (vchObjectLocation.empty() || directory.vchObjectLocation() == vchObjectLocation)
+                {
+                    UniValue oDirectoryEntry(UniValue::VOBJ);
+                    BuildBDAPJson(directory, oDirectoryEntry, true);
+                    oDirectoryList.push_back(oDirectoryEntry);
+                    index++;
+                }
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
 bool CheckDirectoryDB()
 {
     if (!pDirectoryDB)

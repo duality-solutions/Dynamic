@@ -16,8 +16,10 @@ extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdap
 
 static constexpr bool fPrintDebug = true;
 
-UniValue addpublicname(const JSONRPCRequest& request) {
-    if (request.params.size() != 2) {
+UniValue addpublicname(const JSONRPCRequest& request) 
+{
+    if (request.params.size() != 2) 
+    {
         throw std::runtime_error("addpublicname <userid> <common name>\nAdd public name entry to blockchain directory.\n");
     }
 
@@ -135,21 +137,30 @@ UniValue addpublicname(const JSONRPCRequest& request) {
     return oName;
 }
 
-UniValue directorylist(const JSONRPCRequest& request) {
-    if (request.params.size() != 1) {
-        throw std::runtime_error("directorylist <directoryname>\nAdd directory to blockchain.\n");
+UniValue getdirectories(const JSONRPCRequest& request) 
+{
+    if (request.params.size() > 2) 
+    {
+        throw std::runtime_error("directorylist <records per page> <page returned>\nLists all BDAP entries.\n");
     }
+    
+    unsigned int nRecordsPerPage = 100;
+    unsigned int nPage = 1;
+    if (request.params.size() > 0)
+        nRecordsPerPage = request.params[0].get_int();
 
-    std::vector<unsigned char> vchDirectoryName = vchFromValue(request.params[0]);
-    CDirectory txDirectory;
-    if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
-        throw std::runtime_error("Failed to read from BDAP database");
-	
-    UniValue oName(UniValue::VOBJ);
-    if(!BuildBDAPJson(txDirectory, oName))
-        throw std::runtime_error("Failed to read from BDAP JSON object");
-        
-    return oName;
+    if (request.params.size() == 2)
+        nPage = request.params[1].get_int();
+    
+    // only return entries from the default public domain OU
+    std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
+
+    UniValue oDirectoryList(UniValue::VARR);
+    if (CheckDirectoryDB())
+        pDirectoryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDirectoryList);
+
+    return oDirectoryList;
 }
 
 UniValue directoryupdate(const JSONRPCRequest& request) {
@@ -174,7 +185,7 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
     /* BDAP */
     { "bdap",            "addpublicname",            &addpublicname,                true  },
-    { "bdap",            "directorylist",            &directorylist,                true  },
+    { "bdap",            "getdirectories",           &getdirectories,               true  },
     { "bdap",            "directoryupdate",          &directoryupdate,              true  },
 #endif //ENABLE_WALLET
 };

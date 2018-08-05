@@ -186,7 +186,9 @@ public:
 
     CDynamicAddress GetWalletAddress() const;
     std::string GetFullObjectPath() const;
+    std::string GetObjectLocation() const;
     std::vector<unsigned char> vchFullObjectPath() const;
+    std::vector<unsigned char> vchObjectLocation() const; // OU . Domain Name
     void AddCheckpoint(const uint32_t& height, const CharString& vchHash);
     bool ValidateValues(std::string& errorMessage);
 };
@@ -197,7 +199,7 @@ bool IsDirectoryDataOutput(const CTxOut& out);
 int GetDirectoryDataOutput(const CTransaction& tx);
 bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
 bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
-bool BuildBDAPJson(const CDirectory& directory, UniValue& oName);
+bool BuildBDAPJson(const CDirectory& directory, UniValue& oName, bool fAbridged = false);
 
 std::string stringFromVch(const CharString& vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);

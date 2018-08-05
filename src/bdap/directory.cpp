@@ -192,9 +192,19 @@ std::string CDirectory::GetFullObjectPath() const {
     return stringFromVch(ObjectID) + "@" + stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
 }
 
+std::string CDirectory::GetObjectLocation() const {
+    return stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
+}
+
 std::vector<unsigned char> CDirectory::vchFullObjectPath() const {
     std::string strFullObjectPath = GetFullObjectPath();
     std::vector<unsigned char> vchReturnValue(strFullObjectPath.begin(), strFullObjectPath.end());
+    return vchReturnValue;
+}
+
+std::vector<unsigned char> CDirectory::vchObjectLocation() const {
+    std::string strObjectLocation = GetObjectLocation();
+    std::vector<unsigned char> vchReturnValue(strObjectLocation.begin(), strObjectLocation.end());
     return vchReturnValue;
 }
 
@@ -320,48 +330,53 @@ bool CDirectory::ValidateValues(std::string& errorMessage)
     return true;
 }
 
-bool BuildBDAPJson(const CDirectory& directory, UniValue& oName)
+bool BuildBDAPJson(const CDirectory& directory, UniValue& oName, bool fAbridged)
 {
     bool expired = false;
     int64_t expired_time = 0;
     int64_t nTime = 0;
-    oName.push_back(Pair("_id", stringFromVch(directory.OID)));
-    oName.push_back(Pair("version", directory.nVersion));
-    oName.push_back(Pair("domain_component", stringFromVch(directory.DomainComponent)));
-    oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
-    oName.push_back(Pair("organizational_unit", stringFromVch(directory.OrganizationalUnit)));
-    oName.push_back(Pair("organization_name", stringFromVch(directory.DomainComponent)));
-    oName.push_back(Pair("object_id", stringFromVch(directory.ObjectID)));
-    oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
-    oName.push_back(Pair("object_type", directory.ObjectType));
-    oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
-    oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
-    oName.push_back(Pair("public", (int)directory.fPublicObject));
-    oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
-    oName.push_back(Pair("sigatures_required", (int)directory.nSigaturesRequired));
-    oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
-    oName.push_back(Pair("txid", directory.txHash.GetHex()));
-    if ((unsigned int)chainActive.Height() >= directory.nHeight-1) {
-        CBlockIndex *pindex = chainActive[directory.nHeight-1];
-        if (pindex) {
-            nTime = pindex->GetMedianTimePast();
+    if (!fAbridged) {
+        oName.push_back(Pair("_id", stringFromVch(directory.OID)));
+        oName.push_back(Pair("version", directory.nVersion));
+        oName.push_back(Pair("domain_component", stringFromVch(directory.DomainComponent)));
+        oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
+        oName.push_back(Pair("organizational_unit", stringFromVch(directory.OrganizationalUnit)));
+        oName.push_back(Pair("organization_name", stringFromVch(directory.DomainComponent)));
+        oName.push_back(Pair("object_id", stringFromVch(directory.ObjectID)));
+        oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
+        oName.push_back(Pair("object_type", directory.ObjectType));
+        oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
+        oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
+        oName.push_back(Pair("public", (int)directory.fPublicObject));
+        oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
+        oName.push_back(Pair("sigatures_required", (int)directory.nSigaturesRequired));
+        oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
+        oName.push_back(Pair("txid", directory.txHash.GetHex()));
+        if ((unsigned int)chainActive.Height() >= directory.nHeight-1) {
+            CBlockIndex *pindex = chainActive[directory.nHeight-1];
+            if (pindex) {
+                nTime = pindex->GetMedianTimePast();
+            }
         }
+        oName.push_back(Pair("time", nTime));
+        //oName.push_back(Pair("height", directory.nHeight));
+        expired_time = directory.nExpireTime;
+        if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+        {
+            expired = true;
+        }
+        oName.push_back(Pair("expires_on", expired_time));
+        oName.push_back(Pair("expired", expired));
+        oName.push_back(Pair("certificate", stringFromVch(directory.Certificate)));
+        oName.push_back(Pair("private_data", stringFromVch(directory.PrivateData)));
+        oName.push_back(Pair("transaction_fee", directory.transactionFee));
+        oName.push_back(Pair("registration_fee", directory.registrationFeePerDay));
     }
-    oName.push_back(Pair("time", nTime));
-    //oName.push_back(Pair("height", directory.nHeight));
-    expired_time = directory.nExpireTime;
-    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
-    {
-        expired = true;
+    else {
+        oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
+        oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
+        oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
     }
-    oName.push_back(Pair("expires_on", expired_time));
-    oName.push_back(Pair("expired", expired));
-    
-    oName.push_back(Pair("certificate", stringFromVch(directory.Certificate)));
-    oName.push_back(Pair("private_data", stringFromVch(directory.PrivateData)));
-    oName.push_back(Pair("transaction_fee", directory.transactionFee));
-    oName.push_back(Pair("registration_fee", directory.registrationFeePerDay));
-    // loop CheckpointHashes
     return true;
 }
 
