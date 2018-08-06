@@ -31,6 +31,7 @@ public:
     bool UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory);
     bool CleanupLevelDB(int& nRemoved);
     bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDirectoryList);
+    bool GetDirectoryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDirectoryInfo);
 };
 
 bool GetDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);

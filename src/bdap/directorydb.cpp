@@ -228,6 +228,20 @@ bool CDirectoryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLo
     return true;
 }
 
+bool CDirectoryDB::GetDirectoryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDirectoryInfo)
+{
+    CDirectory directory;
+    if (!ReadDirectory(vchFullObjectPath, directory)) {
+        return false;
+    }
+    
+    if (!BuildBDAPJson(directory, oDirectoryInfo, false)) {
+        return false;  
+    }
+
+    return true;
+}
+
 bool CheckDirectoryDB()
 {
     if (!pDirectoryDB)

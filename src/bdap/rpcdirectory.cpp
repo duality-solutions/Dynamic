@@ -163,6 +163,28 @@ UniValue getdirectories(const JSONRPCRequest& request)
     return oDirectoryList;
 }
 
+UniValue getdirectoryinfo(const JSONRPCRequest& request) 
+{
+    if (request.params.size() != 1) 
+    {
+        throw std::runtime_error("getdirectoryinfo <full entry path>\nList BDAP entry.\n");
+    }
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+
+    CDirectory directory;
+    directory.DomainComponent = vchDefaultDomainName;
+    directory.OrganizationalUnit = vchDefaultPublicOU;
+    directory.ObjectID = vchObjectID;
+    
+    UniValue oDirectoryInfo(UniValue::VOBJ);
+    if (CheckDirectoryDB())
+        pDirectoryDB->GetDirectoryInfo(directory.vchFullObjectPath(), oDirectoryInfo);
+
+    return oDirectoryInfo;
+}
+
 UniValue directoryupdate(const JSONRPCRequest& request) {
     if (request.params.size() != 1) {
         throw std::runtime_error("directoryupdate <directoryname>\nAdd directory to blockchain.\n");
@@ -186,6 +208,7 @@ static const CRPCCommand commands[] =
     /* BDAP */
     { "bdap",            "addpublicname",            &addpublicname,                true  },
     { "bdap",            "getdirectories",           &getdirectories,               true  },
+    { "bdap",            "getdirectoryinfo",         &getdirectoryinfo,             true  },
     { "bdap",            "directoryupdate",          &directoryupdate,              true  },
 #endif //ENABLE_WALLET
 };
