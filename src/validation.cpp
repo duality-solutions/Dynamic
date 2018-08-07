@@ -592,13 +592,9 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     if (!fLoaded)
         return true;
 
-    std::string errorMessage;
     if (!CheckDirectoryDB())
-    {
-        errorMessage = "ValidateBDAPInputs: CheckDirectoryDB failed!";
-        return state.DoS(100, false, REJECT_INVALID, errorMessage);
-    }
-   
+        return true;
+
     std::string statusRpc = "";
     if (fJustCheck && (IsInitialBlockDownload() || RPCIsInWarmup(&statusRpc)))
         return true;
@@ -616,14 +612,15 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     {
         if (DecodeDirectoryTx(tx, op, vvchBDAPArgs)) 
         {
+            std::string errorMessage;
             bValid = CheckDirectoryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
             if (!bValid)
             {
                 errorMessage = "ValidateBDAPInputs: " + errorMessage;
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
-            if (!bValid || !errorMessage.empty())
-                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            if (!errorMessage.empty())
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
         }
     }
     return true;
