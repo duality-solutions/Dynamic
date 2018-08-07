@@ -248,6 +248,32 @@ public:
     }
 
     template <typename K, typename V>
+    bool Update(const K& key, const V& value) const
+    {
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.reserve(DBWRAPPER_PREALLOC_KEY_SIZE);
+        ssKey << key;
+        leveldb::Slice slKey(ssKey.data(), ssKey.size());
+        std::string strValue;
+        try {
+            CDataStream ssValue(strValue.data(), strValue.data() + strValue.size(), SER_DISK, CLIENT_VERSION);
+            ssValue.Xor(obfuscate_key);
+            ssValue << value;
+            leveldb::Slice slValue(ssValue.data(), ssValue.size());
+            leveldb::Status status = pdb->Put(writeoptions, slKey, slValue);
+            if (!status.ok()) {
+                if (status.IsNotFound())
+                    return false;
+                LogPrintf("LevelDB update failure: %s\n", status.ToString());
+                dbwrapper_private::HandleError(status);
+            }
+        } catch (const std::exception&) {
+            return false;
+        }
+        return true;
+    }
+
+    template <typename K, typename V>
     bool Write(const K& key, const V& value, bool fSync = false)
     {
         CDBBatch batch(*this);
