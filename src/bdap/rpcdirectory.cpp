@@ -167,7 +167,7 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getdirectoryinfo <full entry path>\nList BDAP entry.\n");
+        throw std::runtime_error("getdirectoryinfo <public name>\nList BDAP entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
