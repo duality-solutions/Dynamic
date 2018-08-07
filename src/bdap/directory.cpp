@@ -105,6 +105,11 @@ std::vector<unsigned char> vchFromValue(const UniValue& value) {
     return std::vector<unsigned char>(strbeg, strbeg + strName.size());
 }
 
+std::vector<unsigned char> vchFromString(const std::string& str) 
+{
+    return std::vector<unsigned char>(str.begin(), str.end());
+}
+
 int GetDirectoryDataOutput(const CTransaction& tx) {
    for(unsigned int i = 0; i<tx.vout.size();i++) {
        if(IsDirectoryDataOutput(tx.vout[i]))

@@ -203,6 +203,7 @@ bool BuildBDAPJson(const CDirectory& directory, UniValue& oName, bool fAbridged 
 
 std::string stringFromVch(const CharString& vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);
+std::vector<unsigned char> vchFromString(const std::string& str);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);

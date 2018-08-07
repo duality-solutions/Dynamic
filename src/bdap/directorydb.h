@@ -27,8 +27,7 @@ public:
     bool RemoveExpired(int& entriesRemoved);
     void WriteDirectoryIndex(const CDirectory& directory, const int op);
     void WriteDirectoryIndexHistory(const CDirectory& directory, const int op);
-    bool UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory);
-    bool UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory);
+    bool UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, const CDirectory& directory);
     bool CleanupLevelDB(int& nRemoved);
     bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDirectoryList);
     bool GetDirectoryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDirectoryInfo);

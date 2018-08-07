@@ -46,7 +46,8 @@ void CDirectoryDB::AddDirectoryIndex(const CDirectory& directory, const int op)
 {
     UniValue oName(UniValue::VOBJ);
     if (BuildBDAPJson(directory, oName)) {
-        GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "bdap_new");
+        CharString vchOperationType = vchFromString(directoryFromOp(op));
+        GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), reinterpret_cast<char*>(vchOperationType.data()));
         WriteDirectoryIndexHistory(directory, op);
     }
 }
@@ -148,14 +149,20 @@ void CDirectoryDB::WriteDirectoryIndex(const CDirectory& directory, const int op
     WriteDirectoryIndexHistory(directory, op);
 }
 
-bool CDirectoryDB::UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, CDirectory& directory)
+bool CDirectoryDB::UpdateDirectory(const std::vector<unsigned char>& vchObjectPath, const CDirectory& directory)
 {
-    return false; //TODO (bdap): add update impl
-}
+    LOCK(cs_bdap_directory);
 
-bool CDirectoryDB::UpdateDirectoryAddress(const std::vector<unsigned char>& vchAddress, CDirectory& directory)
-{
-    return false; //TODO (bdap): add update impl
+    if (!EraseDirectoryAddress(directory.WalletAddress))
+        return false;
+
+    bool writeState = false;
+    writeState = Update(make_pair(std::string("domain_component"), directory.GetFullObjectPath()), directory) 
+                    && Write(make_pair(std::string("domain_wallet_address"), directory.WalletAddress), directory.GetFullObjectPath());
+    if (writeState)
+        AddDirectoryIndex(directory, OP_BDAP_MODIFY);
+
+    return writeState;
 }
 
 // Removes expired records from databases.
@@ -318,7 +325,7 @@ bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directo
                                const int op, std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(directory, vvchOpParameters, errorMessage))
-        return false;
+        return error(errorMessage.c_str());
 
     if (fJustCheck)
         return true;
@@ -326,20 +333,20 @@ bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directo
     CDirectory getDirectory;
     if (GetDirectory(directory.vchFullObjectPath(), getDirectory))
     {
-        errorMessage = "CheckNewDirectoryTxInputs failed! " + getDirectory.GetFullObjectPath() + " already exists.";
-        return false;
+        errorMessage = "CheckNewDirectoryTxInputs: - The entry " + getDirectory.GetFullObjectPath() + " already exists.  Add new entry failed!";
+        return error(errorMessage.c_str());
     }
 
     if (!pDirectoryDB)
     {
         errorMessage = "CheckNewDirectoryTxInputs failed! Can not open LevelDB BDAP entry database.";
-        return false;
+        return error(errorMessage.c_str());
     }
 
     if (!pDirectoryDB->AddDirectory(directory, op))
     {
         errorMessage = "CheckNewDirectoryTxInputs failed! Error adding new directory entry request to LevelDB.";
-        return false;
+        return error(errorMessage.c_str());
     }
 
     return FlushLevelDB();
@@ -348,10 +355,43 @@ bool CheckNewDirectoryTxInputs(const CTransaction& tx, const CDirectory& directo
 bool CheckDeleteDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   const int op, std::string& errorMessage, bool fJustCheck)
 {
-    //check name in operation matches directory data in leveldb
-    //check if exists already
     //if exists, check for owner's signature
-    return false;
+    if (!CommonDataCheck(directory, vvchOpParameters, errorMessage))
+        return error(errorMessage.c_str());
+
+    if (fJustCheck)
+        return true;
+
+    CDirectory prevDirectory;
+    if (!GetDirectory(directory.vchFullObjectPath(), prevDirectory))
+    {
+        errorMessage = "CheckDeleteDirectoryTxInputs: - Can not find " + prevDirectory.GetFullObjectPath() + " entry; this delete operation failed!";
+        return error(errorMessage.c_str());
+    }
+
+    CTxDestination bdapDest;
+    if (!ExtractDestination(scriptOp, bdapDest))
+    {
+        errorMessage = "CheckDeleteDirectoryTxInputs: - " + _("Cannot extract destination of BDAP input; this delete operation failed!");
+        return error(errorMessage.c_str());
+    }
+    else
+    {
+        CDynamicAddress prevSignAddress(bdapDest);
+        {
+        if (EncodeBase58(directory.SignWalletAddress) != prevSignAddress.ToString())
+            errorMessage = "CheckDeleteDirectoryTxInputs: - " + _("You are not the owner of this BDAP entry; this delete operation failed!");
+            return error(errorMessage.c_str());
+        }
+    }
+
+    if (!pDirectoryDB->EraseDirectory(directory.vchFullObjectPath()))
+    {
+        errorMessage = "CheckDeleteDirectoryTxInputs: - Error deleting directory entry in LevelDB; this delete operation failed!";
+        return error(errorMessage.c_str());
+    }
+
+    return FlushLevelDB();
 }
 
 bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
@@ -365,10 +405,43 @@ bool CheckActivateDirectoryTxInputs(const CTransaction& tx, const CDirectory& di
 bool CheckUpdateDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   const int op, std::string& errorMessage, bool fJustCheck)
 {
-    //check name in operation matches directory data in leveldb
-    //check if exists already
     //if exists, check for owner's signature
-    return false;
+    if (!CommonDataCheck(directory, vvchOpParameters, errorMessage))
+        return error(errorMessage.c_str());
+
+    if (fJustCheck)
+        return true;
+
+    CDirectory prevDirectory;
+    if (!GetDirectory(directory.vchFullObjectPath(), prevDirectory))
+    {
+        errorMessage = "CheckUpdateDirectoryTxInputs: - Can not find " + prevDirectory.GetFullObjectPath() + " entry; this update operation failed!";
+        return error(errorMessage.c_str());
+    }
+
+    CTxDestination bdapDest;
+    if (!ExtractDestination(scriptOp, bdapDest))
+    {
+        errorMessage = "CheckUpdateDirectoryTxInputs: - " + _("Cannot extract destination of BDAP input; this update operation failed!");
+        return error(errorMessage.c_str());
+    }
+    else
+    {
+        CDynamicAddress prevSignAddress(bdapDest);
+        {
+        if (EncodeBase58(directory.SignWalletAddress) != prevSignAddress.ToString())
+            errorMessage = "CheckUpdateDirectoryTxInputs: - " + _("You are not the owner of this BDAP entry; this update operation failed!");
+            return error(errorMessage.c_str());
+        }
+    }
+
+    if (!pDirectoryDB->UpdateDirectory(directory.vchFullObjectPath(), directory))
+    {
+        errorMessage = "CheckUpdateDirectoryTxInputs: - Error updating directory entry in LevelDB; this update operation failed!";
+        return error(errorMessage.c_str());
+    }
+
+    return FlushLevelDB();
 }
 
 bool CheckMoveDirectoryTxInputs(const CTransaction& tx, const CDirectory& directory, const CScript& scriptOp, const vchCharString& vvchOpParameters,
