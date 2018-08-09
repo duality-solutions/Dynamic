@@ -550,6 +550,7 @@ private:
     unsigned int nExtraNonce = 0;
     unsigned int nTransactionsUpdatedLast;
 
+    CBlockIndex* pindexPrev;
     boost::shared_ptr<CReserveScript> coinbaseScript;
 
     arith_uint256 hashTarget;
@@ -592,7 +593,7 @@ private:
         WaitForNetworkInit(chainparams, connman);
         // Create new block
         nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
-        CBlockIndex* pindexPrev = chainActive.Tip();
+        pindexPrev = chainActive.Tip();
         if (!pindexPrev) {
             return nullptr;
         }
