@@ -21,6 +21,7 @@ static constexpr unsigned int MAX_KEY_LENGTH              = 156;
 static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 100; // Pay per byte for hosting on chain
+static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";

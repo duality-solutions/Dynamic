@@ -9,6 +9,7 @@
 #include "rpcserver.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
+#include "validation.h"
 
 #include <univalue.h>
 
@@ -18,9 +19,9 @@ static constexpr bool fPrintDebug = true;
 
 UniValue addpublicname(const JSONRPCRequest& request) 
 {
-    if (request.params.size() != 2) 
+    if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("addpublicname <userid> <common name>\nAdd public name entry to blockchain directory.\n");
+        throw std::runtime_error("addpublicname <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
     }
 
     EnsureWalletIsUnlocked();
@@ -89,6 +90,13 @@ UniValue addpublicname(const JSONRPCRequest& request)
 
     txDirectory.SignWalletAddress = vchSignWalletAddress;
 
+    uint64_t nDays = 1461;  //default to 4 years.
+    if (request.params.size() >= 3) {
+        nDays = request.params[2].get_int();
+    }
+    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    txDirectory.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+
     CharString data;
     txDirectory.Serialize(data);
     
@@ -106,8 +114,8 @@ UniValue addpublicname(const JSONRPCRequest& request)
     scriptData << OP_RETURN << data;
 
     // Send the transaction
-    float fYears = 1.0; //TODO use a variable for registration years.
     CWalletTx wtx;
+    float fYears = ((float)nDays/365.25);
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
@@ -193,9 +201,9 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
 }
 
 UniValue updatedirectory(const JSONRPCRequest& request) {
-    if (request.params.size() != 2) 
+    if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("updatedirectory <userid> <common name>\nUpdate an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("updatedirectory <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
     EnsureWalletIsUnlocked();
@@ -217,6 +225,13 @@ UniValue updatedirectory(const JSONRPCRequest& request) {
     CharString vchCommonName = vchFromValue(request.params[1]);
     txDirectory.CommonName = vchCommonName;
 
+    uint64_t nDays = 1461;  //default to 4 years.
+    if (request.params.size() >= 3) {
+        nDays = request.params[2].get_int();
+    }
+    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    txDirectory.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+
     CharString data;
     txDirectory.Serialize(data);
     
@@ -235,8 +250,8 @@ UniValue updatedirectory(const JSONRPCRequest& request) {
     scriptData << OP_RETURN << data;
 
     // Send the transaction
-    float fYears = 1.0; //TODO use a variable for registration years.
     CWalletTx wtx;
+    float fYears = ((float)nDays/365.25);
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
