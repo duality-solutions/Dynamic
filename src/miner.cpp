@@ -586,7 +586,7 @@ private:
             throw boost::thread_interrupted();
     }
 
-    std::unique_ptr<CBlockTemplate> CreateNewBlock()
+    std::unique_ptr<CBlockTemplate> CreateNewMinerBlock()
     {
         // Wait for blocks if required
         WaitForNetworkInit(chainparams, connman);
@@ -659,7 +659,7 @@ public:
             this->ValidateCoinbase();
 
             while (true) {
-                std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewBlock();
+                std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewMinerBlock();
                 if (pblocktemplate) {
                     LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", deviceName);
                     return;
