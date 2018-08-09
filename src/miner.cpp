@@ -651,7 +651,7 @@ private:
     }
 
 public:
-    static void StartLoop()
+    void StartLoop()
     {
         this->Init();
 
