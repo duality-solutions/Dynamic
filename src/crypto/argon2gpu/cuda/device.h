@@ -34,6 +34,7 @@ class Device
   public:
     std::string getName() const;
     std::string getInfo() const;
+    std::size_t getTotalMemory() const;
 
     int getDeviceIndex() const { return deviceIndex; }
 

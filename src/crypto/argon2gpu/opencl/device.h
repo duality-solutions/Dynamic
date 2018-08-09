@@ -33,6 +33,7 @@ private:
 public:
     std::string getName() const;
     std::string getInfo() const;
+    std::size_t getTotalMemory() const;
 
     const cl::Device& getCLDevice() const { return device; }
 

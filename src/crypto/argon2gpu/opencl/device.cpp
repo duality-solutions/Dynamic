@@ -30,6 +30,11 @@ std::string Device::getName() const
     return "OpenCL Device '" + device.getInfo<CL_DEVICE_NAME>() + "' (" + device.getInfo<CL_DEVICE_VENDOR>() + ")";
 }
 
+std::size_t Device::getTotalMemory() const
+{
+    return device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+}
+
 template <class T>
 static std::ostream& printBitfield(std::ostream& out, T value, const std::vector<std::pair<T, std::string> >& lookup)
 {

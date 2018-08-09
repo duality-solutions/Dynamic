@@ -39,5 +39,12 @@ std::string Device::getInfo() const
     return "CUDA Device '" + std::string(prop.name) + "'";
 }
 
+std::size_t Device::getTotalMemory() const
+{
+    cudaDeviceProp prop;
+    CudaException::check(cudaGetDeviceProperties(&prop, deviceIndex));
+    return prop.totalGlobalMem;
+}
+
 } // namespace cuda
 } // namespace argon2gpu
