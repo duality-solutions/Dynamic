@@ -581,7 +581,7 @@ private:
         std::size_t device = deviceIndex ? *deviceIndex : 0;
         LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
         SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device));
+        RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
         GetMainSignals().ScriptForMining(coinbaseScript);
     }
 
