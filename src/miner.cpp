@@ -673,7 +673,7 @@ public:
 class CPUMiner : public BaseMiner
 {
 private:
-    virtual std::shared_ptr<boost::thread_group>* thread_group()
+    virtual std::shared_ptr<boost::thread_group>* thread_group() override
     {
         static std::shared_ptr<boost::thread_group> minerThreadsCPU = NULL;
         return &minerThreadsCPU;
@@ -719,7 +719,7 @@ private:
 
     std::size_t batchSizeTarget;
 
-    virtual std::shared_ptr<boost::thread_group>* thread_group()
+    virtual std::shared_ptr<boost::thread_group>* thread_group() override
     {
         static std::shared_ptr<boost::thread_group> minerThreadsGPU = NULL;
         return &minerThreadsGPU;
