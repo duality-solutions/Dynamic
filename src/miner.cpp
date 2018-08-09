@@ -509,14 +509,14 @@ public:
     ThreadGroup(bool fInit = true, bool fRestart = true)
     {
         auto minerThreads = this->thread_group();
-        if (fRestart && minerThreads) {
-            minerThreads->interrupt_all();
-            minerThreads.reset(std::nullptr);
+        if (fRestart && *minerThreads) {
+            (*minerThreads)->interrupt_all();
+            minerThreads->reset(std::nullptr);
         }
-        if (fInit && !minerThreads) {
-            minerThreads.reset(new boost::thread_group());
+        if (fInit && !*minerThreads) {
+            minerThreads->reset(new boost::thread_group());
         }
-        return minerThreads.get();
+        return minerThreads->get();
     }
 
     static void Shutdown()
