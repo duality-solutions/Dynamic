@@ -60,8 +60,8 @@ UniValue addpublicname(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
-    CDynamicAddress payWallet = CDynamicAddress(keyWalletID);
-    std::string strWalletAddress = payWallet.ToString();
+    
+    std::string strWalletAddress = CDynamicAddress(keyWalletID).ToString();
     CharString vchWalletAddress(strWalletAddress.begin(), strWalletAddress.end());
     txDirectory.WalletAddress = vchWalletAddress;
 
@@ -80,7 +80,8 @@ UniValue addpublicname(const JSONRPCRequest& request)
     privSignKey.MakeNewKey(true);
     CPubKey pubSignKey = privSignKey.GetPubKey();
     CKeyID keySignID = pubSignKey.GetID();
-    std::string strSignWalletAddress = CDynamicAddress(keySignID).ToString();
+    CDynamicAddress signWallet = CDynamicAddress(keySignID);
+    std::string strSignWalletAddress = signWallet.ToString();
     CharString vchSignWalletAddress(strSignWalletAddress.begin(), strSignWalletAddress.end());
 
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privSignKey, pubSignKey))
@@ -97,7 +98,7 @@ UniValue addpublicname(const JSONRPCRequest& request)
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
-    scriptDestination = GetScriptForDestination(payWallet.Get());
+    scriptDestination = GetScriptForDestination(signWallet.Get());
     scriptPubKey += scriptDestination;
     LogPrintf("BDAP GetDirectoryType = %s \n", GetDirectoryOpTypeString(scriptPubKey));
 
@@ -185,20 +186,78 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
     return oDirectoryInfo;
 }
 
-UniValue directoryupdate(const JSONRPCRequest& request) {
-    if (request.params.size() != 1) {
-        throw std::runtime_error("directoryupdate <directoryname>\nAdd directory to blockchain.\n");
+UniValue updatedirectory(const JSONRPCRequest& request) {
+    if (request.params.size() != 2) 
+    {
+        throw std::runtime_error("updatedirectory <userid> <common name>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
-    std::vector<unsigned char> vchDirectoryName = vchFromValue(request.params[0]);
-    CDirectory txDirectory;
-    if (!pDirectoryDB || !pDirectoryDB->AddDirectory(txDirectory, OP_BDAP_NEW))
-        throw std::runtime_error("Failed to read from BDAP database");
+    EnsureWalletIsUnlocked();
+
+    // Format object and domain names to lower case.
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
     
+    CDirectory txDirectory;
+    txDirectory.DomainComponent = vchDefaultDomainName;
+    txDirectory.OrganizationalUnit = vchDefaultPublicOU;
+    txDirectory.ObjectID = vchObjectID;
+
+    // Check if name already exists
+    if (!GetDirectory(txDirectory.vchFullObjectPath(), txDirectory))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txDirectory.GetFullObjectPath() + _(" does not exists.  Can not update."));
+
+    // TODO: Check if Signature Wallet address is owned.  If not, return an error before submitting to the mem pool.
+    CharString vchCommonName = vchFromValue(request.params[1]);
+    txDirectory.CommonName = vchCommonName;
+
+    CharString data;
+    txDirectory.Serialize(data);
+    
+    // Create BDAP OP_RETURN Signature Scripts
+    CScript scriptPubKey;
+    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_MODIFY) << vchFullObjectPath << OP_2DROP << OP_DROP;
+
+    CDynamicAddress signWallet(stringFromVch(txDirectory.SignWalletAddress));
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(signWallet.Get());
+    scriptPubKey += scriptDestination;
+    LogPrintf("BDAP GetDirectoryType = %s \n", GetDirectoryOpTypeString(scriptPubKey));
+
+    CScript scriptData;
+    scriptData << OP_RETURN << data;
+
+    // Send the transaction
+    float fYears = 1.0; //TODO use a variable for registration years.
+    CWalletTx wtx;
+    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
+    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+
+    // check BDAP values
+    std::string strMessage;
+    if (!txDirectory.ValidateValues(strMessage))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - " + strMessage);
+
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    txDirectory.txHash = wtx.GetHash();
+
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDirectory, oName))
-        throw std::runtime_error("Failed to read from BDAP JSON object");
-        
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3702 - " + _("Failed to read from BDAP JSON object"));
+    
+    if (fPrintDebug) {
+        // make sure we can deserialize the transaction from the scriptData and get a valid CDirectory class
+        LogPrintf("Directory Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+
+        const CTransaction testTx = (CTransaction)wtx;
+        CDirectory testDirectory(testTx); //loads the class from a transaction
+
+        LogPrintf("CDirectory Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+            testDirectory.nVersion, testDirectory.GetFullObjectPath(), stringFromVch(testDirectory.CommonName), 
+            stringFromVch(testDirectory.OrganizationalUnit), HexStr(testDirectory.EncryptPublicKey), stringFromVch(testDirectory.PrivateData));
+    }
+
     return oName;
 }
 
@@ -209,7 +268,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "addpublicname",            &addpublicname,                true  },
     { "bdap",            "getdirectories",           &getdirectories,               true  },
     { "bdap",            "getdirectoryinfo",         &getdirectoryinfo,             true  },
-    { "bdap",            "directoryupdate",          &directoryupdate,              true  },
+    { "bdap",            "updatedirectory",          &updatedirectory,              true  },
 #endif //ENABLE_WALLET
 };
 
