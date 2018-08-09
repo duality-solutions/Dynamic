@@ -804,7 +804,7 @@ static void DynamicMiner(const CChainParams& chainparams, CConnman& connman, boo
 {
 #ifdef ENABLE_GPU
     if (nGPUDeviceIndex) {
-        DynamicMinerGPU(chainparams, connman, nGPUDeviceIndex.value());
+        DynamicMinerGPU(chainparams, connman, *nGPUDeviceIndex);
     } else {
         DynamicMinerCPU(chainparams, connman);
     }
