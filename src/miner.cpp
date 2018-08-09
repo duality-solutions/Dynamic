@@ -530,7 +530,6 @@ static void Shutdown()
 using threads::Shutdown;
 using threads::ThreadGroup;
 
-template <class Children>
 class BaseMiner
 {
 private:
