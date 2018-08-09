@@ -668,8 +668,7 @@ public:
             return;
         }
     }
-
-}
+};
 
 class CPUMiner : public BaseMiner
 {
@@ -706,9 +705,9 @@ private:
         }
         return nHashesDone;
     }
-}
+};
 
-// #ifdef ENABLE_GPU
+#ifdef ENABLE_GPU
 class GPUMiner : public BaseMiner
 {
 private:
@@ -781,8 +780,8 @@ private:
         }
         return nHashesDone;
     }
-}
-// #endif // ENABLE_GPU
+};
+#endif // ENABLE_GPU
 
 } // namespace miner
 
