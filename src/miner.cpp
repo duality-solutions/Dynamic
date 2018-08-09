@@ -543,6 +543,7 @@ public:
 
 private:
     std::string deviceName;
+    boost::optional<std::size_t> deviceIndex;
 
     int64_t nStart;
     double* dHashesPerSec;
@@ -557,7 +558,7 @@ private:
 
     void Init()
     {
-        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, nDeviceIndex);
+        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, deviceIndex.value_or(0));
         SetThreadPriority(THREAD_PRIORITY_LOWEST);
         RenameThread("dynamic-cpu-miner");
         GetMainSignals().ScriptForMining(coinbaseScript);
@@ -735,6 +736,7 @@ private:
 public:
     GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
         : BaseMiner(chainparams, connman),
+          deviceIndex(deviceIndex),
           deviceName("GPU"),
           dHashesPerSec(&dGPUHashesPerSec),
           device(global.getAllDevices()[deviceIndex]),
