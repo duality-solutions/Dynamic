@@ -790,13 +790,13 @@ private:
 
 } // namespace miners
 
-// #ifdef ENABLE_GPU
+#ifdef ENABLE_GPU
 static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, std::size_t nDeviceIndex)
 {
     miners::GPUMiner miner(chainparams, connman, nDeviceIndex);
     miner.StartLoop();
 }
-// #endif // ENABLE_GPU
+#endif // ENABLE_GPU
 
 static void DynamicMinerCPU(const CChainParams& chainparams, CConnman& connman)
 {
