@@ -755,7 +755,7 @@ private:
             const auto pEnd = END(pblock->nNonce);
             const void* input = (pBegin == pEnd ? pblank : static_cast<const void*>(&pBegin[0]));
             // input is copied onto memory buffer
-            pu->setInputAndSalt(i, input, INPUT_BYTES);
+            processingUnit->setInputAndSalt(i, input, INPUT_BYTES);
             // increment block nonce
             pblock->nNonce += 1;
             // increment hashes done
@@ -767,13 +767,13 @@ private:
             }
         }
         // start GPU processing
-        pu->beginProcessing();
+        processingUnit->beginProcessing();
         // wait for results
-        pu->endProcessing();
+        processingUnit->endProcessing();
         // check batch results
         uint256 hash;
         for (std::size_t i = 0; i < batchSize; i++) {
-            pu->getHash(i, (uint8_t*)&hash);
+            processingUnit->getHash(i, (uint8_t*)&hash);
             if (UintToArith256(hash) <= hashTarget) {
                 ProcessFoundSolution(pblock, hash);
                 break;
