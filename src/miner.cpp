@@ -492,37 +492,55 @@ static void WaitForNetworkInit(const CChainParams& chainparams, CConnman& connma
 
 namespace miner
 {
+namespace threads
+{
+// CPU threads
+struct CPU {
+};
+// GPU threads
+struct GPU {
+};
+
+// we are using template to instantiate two
+// distinct threads groups for CPU and GPU
+template <typename T>
+static boost::thread_group*
+ThreadGroup(bool fInit = true, bool fRestart = true)
+{
+    static boost::thread_group* minerThreads = std::nullptr;
+    if (fRestart && *minerThreads) {
+        minerThreads->interrupt_all();
+        delete minerThreads;
+        minerThreads = std::nullptr;
+    }
+    if (fInit && !*minerThreads) {
+        minerThreads = new boost::thread_group();
+    }
+    return minerThreads;
+}
+
+// shutdown all miner threads
+template <typename T>
+static void Shutdown()
+{
+    ThreadGroup<T>(false);
+}
+} // namespace threads
+
+using threads::Shutdown;
+using threads::ThreadGroup;
+
+template <class Children>
 class BaseMiner
 {
 private:
     const CChainParams& chainparams;
     CConnman& connman;
 
-    virtual std::shared_ptr<boost::thread_group>* thread_group() = 0;
-
 public:
     BaseMiner(const CChainParams& chainparams, CConnman& connman)
         : chainparams(chainparams),
           connman(connman) {}
-
-    boost::thread_group*
-    ThreadGroup(bool fInit = true, bool fRestart = true)
-    {
-        auto minerThreads = this->thread_group();
-        if (fRestart && *minerThreads) {
-            (*minerThreads)->interrupt_all();
-            minerThreads->reset(std::nullptr);
-        }
-        if (fInit && !*minerThreads) {
-            minerThreads->reset(new boost::thread_group());
-        }
-        return minerThreads->get();
-    }
-
-    static void Shutdown()
-    {
-        this->ThreadGroup(false);
-    }
 
 private:
     std::string deviceName;
@@ -532,6 +550,8 @@ private:
 
     int64_t nStart;
     arith_uint256 hashTarget;
+
+    virtual unsigned int LoopTick(CBlock* pblock) = 0;
 
     void Init()
     {
@@ -627,10 +647,8 @@ private:
         }
     }
 
-    virtual unsigned int LoopTick(CBlock* pblock) = 0;
-
 public:
-    void StartLoop()
+    static void StartLoop()
     {
         this->Init();
 
@@ -672,13 +690,6 @@ public:
 
 class CPUMiner : public BaseMiner
 {
-private:
-    virtual std::shared_ptr<boost::thread_group>* thread_group() override
-    {
-        static std::shared_ptr<boost::thread_group> minerThreadsCPU = NULL;
-        return &minerThreadsCPU;
-    }
-
 public:
     BaseMiner(const CChainParams& chainparams, CConnman& connman)
         : BaseMiner(chainparams, connman),
@@ -688,8 +699,8 @@ public:
     }
 
 private:
-    unsigned int
-    LoopTick(CBlock* pblock)
+    virtual unsigned int
+    LoopTick(CBlock* pblock) override
     {
         unsigned int nHashesDone = 0;
         while (true) {
@@ -719,12 +730,6 @@ private:
 
     std::size_t batchSizeTarget;
 
-    virtual std::shared_ptr<boost::thread_group>* thread_group() override
-    {
-        static std::shared_ptr<boost::thread_group> minerThreadsGPU = NULL;
-        return &minerThreadsGPU;
-    }
-
 public:
     GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
         : BaseMiner(chainparams, connman),
@@ -739,8 +744,8 @@ public:
     }
 
 private:
-    unsigned int
-    LoopTick(CBlock* pblock)
+    virtual unsigned int
+    LoopTick(CBlock* pblock) override
     {
         unsigned int nHashesDone = 0;
 
@@ -827,7 +832,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
         return;
     }
 
-    boost::thread_group* cpuMinerThreads = miner::CPUMiner::ThreadGroup();
+    boost::thread_group* cpuMinerThreads = miner::ThreadGroup<miner::threads::CPU>();
 
     int nNumCores = GetNumCores();
     LogPrintf("DynamicMiner -- CPU Cores: %u\n", nNumCores);
@@ -848,7 +853,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
 
     // Start GPU threads
     std::size_t nGPUTarget = static_cast<std::size_t>(nGPUThreads);
-    boost::thread_group* gpuMinerThreads = miner::GPUMiner::ThreadGroup();
+    boost::thread_group* gpuMinerThreads = miner::ThreadGroup<miner::threads::GPU>();
     for (std::size_t device = 0; device < devices; device++) {
         for (std::size_t i = 0; i < nGPUTarget; i++) {
             LogPrintf("Starting GPU Miner thread %u on device %u, total GPUs found %u\n", i, device, devices);
@@ -859,12 +864,12 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
 
 void ShutdownCPUMiners()
 {
-    miner::CPUMiner::Shutdown();
+    miner::Shutdown<miner::threads::CPU>();
 }
 
 void ShutdownGPUMiners()
 {
-    miner::GPUMiner::Shutdown();
+    miner::Shutdown<miner::threads::GPU>();
 }
 
 void ShutdownMiners()
