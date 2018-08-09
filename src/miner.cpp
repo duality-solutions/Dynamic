@@ -119,7 +119,7 @@ bool CheckWork(const CChainParams& chainparams, const CBlock* pblock, CWallet& w
 std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
-    auto pblocktemplate = std::make_unique<CBlockTemplate>();
+    std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     CBlock* pblock = &pblocktemplate->block; // pointer for convenience
 
     // Create coinbase tx with fluid issuance
@@ -507,13 +507,13 @@ template <typename T>
 static boost::thread_group*
 ThreadGroup(bool fInit = true, bool fRestart = true)
 {
-    static boost::thread_group* minerThreads = std::nullptr;
-    if (fRestart && minerThreads != std::nullptr) {
+    static boost::thread_group* minerThreads = nullptr;
+    if (fRestart && minerThreads != nullptr) {
         minerThreads->interrupt_all();
         delete minerThreads;
-        minerThreads = std::nullptr;
+        minerThreads = nullptr;
     }
-    if (fInit && minerThreads == std::nullptr) {
+    if (fInit && minerThreads == nullptr) {
         minerThreads = new boost::thread_group();
     }
     return minerThreads;
@@ -594,7 +594,7 @@ private:
         nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
         CBlockIndex* pindexPrev = chainActive.Tip();
         if (!pindexPrev) {
-            return std::nullptr;
+            return nullptr;
         }
         return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
     }
