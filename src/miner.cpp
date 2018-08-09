@@ -542,11 +542,7 @@ public:
           connman(connman) {}
 
 private:
-    std::string deviceName;
-    boost::optional<std::size_t> deviceIndex;
-
     int64_t nStart;
-    double* dHashesPerSec;
     unsigned int nExtraNonce = 0;
     unsigned int nTransactionsUpdatedLast;
 
@@ -557,6 +553,13 @@ private:
 
     virtual unsigned int LoopTick(CBlock* pblock) = 0;
 
+protected:
+    std::string deviceName;
+    boost::optional<std::size_t> deviceIndex;
+
+    double* dHashesPerSec;
+
+private:
     void Init()
     {
         LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, deviceIndex.value_or(0));
