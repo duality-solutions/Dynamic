@@ -601,7 +601,7 @@ private:
         return true;
     }
 
-    void CountHashes()
+    void CountHashes(unsigned int nHashesDone)
     {
         // Meter hashes/seconds
         static int64_t nHashCounter = 0;
