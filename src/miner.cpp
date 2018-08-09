@@ -712,7 +712,7 @@ protected:
         while (true) {
             uint256 hash = pblock->GetHash();
             if (UintToArith256(hash) <= hashTarget) {
-                ProcessFoundSolution(pblock, hash);
+                this->ProcessFoundSolution(pblock, hash);
                 break;
             }
             pblock->nNonce += 1;
@@ -783,7 +783,7 @@ protected:
         for (std::size_t i = 0; i < batchSize; i++) {
             processingUnit.getHash(i, (uint8_t*)&hash);
             if (UintToArith256(hash) <= hashTarget) {
-                ProcessFoundSolution(pblock, hash);
+                this->ProcessFoundSolution(pblock, hash);
                 break;
             }
         }
