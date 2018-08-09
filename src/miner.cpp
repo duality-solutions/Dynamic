@@ -739,8 +739,8 @@ private:
 public:
     GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
         : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
-          device(global.getAllDevices()[deviceIndex]),
           params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
+          device(global.getAllDevices()[deviceIndex]),
           context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
           processingUnit(&context, &params, &device, 1, false, false),
           batchSizeTarget(device.getTotalMemory() / 512e3)
