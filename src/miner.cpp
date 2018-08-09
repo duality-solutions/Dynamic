@@ -498,7 +498,7 @@ private:
     const CChainParams& chainparams;
     CConnman& connman;
 
-    virtual static boost::thread_group* thread_group() = 0;
+    virtual static std::shared_ptr<boost::thread_group>* thread_group() = 0;
 
 public:
     BaseMiner(const CChainParams& chainparams, CConnman& connman)
@@ -508,16 +508,15 @@ public:
     static boost::thread_group*
     ThreadGroup(bool fInit = true, bool fRestart = true)
     {
-        boost::thread_group* minerThreads = this->thread_group();
-        if (fRestart && minerThreads != NULL) {
+        auto minerThreads = this->thread_group();
+        if (fRestart && minerThreads) {
             minerThreads->interrupt_all();
-            delete minerThreads;
-            minerThreads = NULL;
+            minerThreads.reset(std::nullptr);
         }
-        if (fInit && minerThreads == NULL) {
-            minerThreads = new boost::thread_group();
+        if (fInit && !minerThreads) {
+            minerThreads.reset(new boost::thread_group());
         }
-        return minerThreads;
+        return minerThreads.get();
     }
 
     static void Shutdown()
@@ -673,10 +672,10 @@ public:
 class CPUMiner : public BaseMiner
 {
 private:
-    virtual static boost::thread_group* thread_group()
+    virtual static std::shared_ptr<boost::thread_group>* thread_group()
     {
-        static boost::thread_group* minerThreadsCPU = NULL;
-        return minerThreadsCPU;
+        static std::shared_ptr<boost::thread_group> minerThreadsCPU = NULL;
+        return &minerThreadsCPU;
     }
 
 public:
@@ -719,10 +718,10 @@ private:
 
     std::size_t batchSizeTarget;
 
-    virtual static boost::thread_group* thread_group()
+    virtual static std::shared_ptr<boost::thread_group>* thread_group()
     {
-        static boost::thread_group* minerThreadsGPU = NULL;
-        return minerThreadsGPU;
+        static std::shared_ptr<boost::thread_group> minerThreadsGPU = NULL;
+        return &minerThreadsGPU;
     }
 
 public:
