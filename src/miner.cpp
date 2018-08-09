@@ -619,7 +619,6 @@ private:
             return false;
         if (pindexPrev != chainActive.Tip())
             return false;
-
         // Update nTime every few seconds
         if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
             return false; // Recreate the block if the clock has run backwards,
@@ -633,7 +632,6 @@ private:
 
     void CountHashes(unsigned int nHashesDone)
     {
-        // Meter hashes/seconds
         static int64_t nHashCounter = 0;
         static int64_t nLogTime = 0;
 
@@ -752,10 +750,8 @@ protected:
     LoopTick(CBlock* pblock) override
     {
         unsigned int nHashesDone = 0;
-
         // current batch size
         std::size_t batchSize = batchSizeTarget;
-
         // set batch input
         static unsigned char pblank[1];
         for (std::size_t i = 0; i < batchSizeTarget; i++) {
