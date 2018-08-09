@@ -679,7 +679,6 @@ public:
                 nStart = GetTime();
                 hashTarget = arith_uint256().SetCompact(pblock->nBits);
 
-                // search
                 while (true) {
                     auto hashesDone = this->LoopTick(pblock);
                     this->CountHashes(hashesDone);
@@ -742,9 +741,7 @@ public:
           device(global.getAllDevices()[deviceIndex]),
           context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
           processingUnit(&context, &params, &device, 1, false, false),
-          batchSizeTarget(device.getTotalMemory() / 512e3)
-    {
-    }
+          batchSizeTarget(device.getTotalMemory() / 512e3) {}
 
 protected:
     virtual unsigned int
