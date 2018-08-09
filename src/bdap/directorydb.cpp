@@ -523,6 +523,8 @@ bool CheckDirectoryTxInputs(const CCoinsViewCache& inputs, const CTransaction& t
         return error(errorMessage.c_str());
     }
 
+    directory.txHash = tx.GetHash();
+
     if (strOperationType == "bdap_new")
         return CheckNewDirectoryTxInputs(tx, directory, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete")
