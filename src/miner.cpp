@@ -666,7 +666,7 @@ public:
 
             while (true) {
                 std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewMinerBlock();
-                if (pblocktemplate) {
+                if (!pblocktemplate) {
                     LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", deviceName);
                     return;
                 }
