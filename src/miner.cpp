@@ -544,11 +544,14 @@ public:
 
 private:
     std::string deviceName;
-    double* dHashesPerSec;
-    unsigned int nExtraNonce = 0;
-    std::shared_ptr<CReserveScript> coinbaseScript;
 
     int64_t nStart;
+    double* dHashesPerSec;
+    unsigned int nExtraNonce = 0;
+    unsigned int nTransactionsUpdatedLast;
+
+    std::shared_ptr<CReserveScript> coinbaseScript;
+
     arith_uint256 hashTarget;
 
     virtual unsigned int LoopTick(CBlock* pblock) = 0;
@@ -588,7 +591,7 @@ private:
         // Wait for blocks if required
         WaitForNetworkInit(chainparams, connman);
         // Create new block
-        unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+        nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
         CBlockIndex* pindexPrev = chainActive.Tip();
         if (!pindexPrev) {
             return std::nullptr;
