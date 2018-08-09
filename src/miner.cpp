@@ -846,8 +846,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
     // Start CPU threads
     std::size_t nCPUTarget = static_cast<std::size_t>(nCPUThreads);
     while (cpuMinerThreads->size() < nCPUTarget) {
-        std::size_t nThread = cpuMinerThreads->size();
-        LogPrintf("Starting CPU Miner thread #%u\n", nThread);
+        LogPrintf("Starting CPU Miner thread #%u\n", cpuMinerThreads->size());
         cpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman)));
     }
 
