@@ -839,7 +839,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
     boost::thread_group* cpuMinerThreads = miners::ThreadGroup<miners::threads::CPU>();
     while (cpuMinerThreads->size() < nCPUTarget) {
         LogPrintf("Starting CPU Miner thread #%u\n", cpuMinerThreads->size());
-        cpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman)));
+        cpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), boost::none));
     }
 
 #ifdef ENABLE_GPU
