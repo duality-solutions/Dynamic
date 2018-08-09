@@ -180,8 +180,14 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
     directory.ObjectID = vchObjectID;
     
     UniValue oDirectoryInfo(UniValue::VOBJ);
-    if (CheckDirectoryDB())
-        pDirectoryDB->GetDirectoryInfo(directory.vchFullObjectPath(), oDirectoryInfo);
+    if (CheckDirectoryDB()) {
+        if (!pDirectoryDB->GetDirectoryInfo(directory.vchFullObjectPath(), oDirectoryInfo)) {
+            throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
+        }
+    }
+    else {
+        throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
+    }
 
     return oDirectoryInfo;
 }
