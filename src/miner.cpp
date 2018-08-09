@@ -508,12 +508,12 @@ static boost::thread_group*
 ThreadGroup(bool fInit = true, bool fRestart = true)
 {
     static boost::thread_group* minerThreads = std::nullptr;
-    if (fRestart && *minerThreads) {
+    if (fRestart && minerThreads != std::nullptr) {
         minerThreads->interrupt_all();
         delete minerThreads;
         minerThreads = std::nullptr;
     }
-    if (fInit && !*minerThreads) {
+    if (fInit && minerThreads == std::nullptr) {
         minerThreads = new boost::thread_group();
     }
     return minerThreads;
