@@ -576,28 +576,29 @@ private:
         return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
     }
 
-    void SomeChecks()
+    bool LoopChecks()
     {
         // Check for stop or if block needs to be rebuilt
         boost::this_thread::interruption_point();
         // Regtest mode doesn't require peers
         if (connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && chainparams.MiningRequiresPeers())
-            break;
+            return false;
         if (pblock->nNonce >= 0xffff0000)
-            break;
+            return false;
         if (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 60)
-            break;
+            return false;
         if (pindexPrev != chainActive.Tip())
-            break;
+            return false;
 
         // Update nTime every few seconds
         if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
-            break; // Recreate the block if the clock has run backwards,
-                   // so that we can use the correct time.
+            return false; // Recreate the block if the clock has run backwards,
+                          // so that we can use the correct time.
         if (chainparams.GetConsensus().fPowAllowMinDifficultyBlocks) {
             // Changing pblock->nTime can change work required on testnet:
             hashTarget.SetCompact(pblock->nBits);
         }
+        return true;
     }
 
     void CountHashes()
@@ -655,7 +656,8 @@ public:
                 while (true) {
                     auto hashesDone = this->LoopTick(pblock);
                     this->CountHashes(hashesDone);
-                    this->SomeChecks();
+                    if (!this->LoopChecks())
+                        break;
                 }
             }
         } catch (const boost::thread_interrupted&) {
