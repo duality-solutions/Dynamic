@@ -695,7 +695,7 @@ public:
 class CPUMiner : public BaseMiner
 {
 public:
-    BaseMiner(const CChainParams& chainparams, CConnman& connman)
+    CPUMiner(const CChainParams& chainparams, CConnman& connman)
         : BaseMiner(chainparams, connman),
           deviceName("CPU"),
           dHashesPerSec(&dCPUHashesPerSec)
