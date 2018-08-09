@@ -578,7 +578,7 @@ protected:
 private:
     void Init()
     {
-        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, deviceIndex.value_or(0));
+        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, deviceIndex ? *deviceIndex : 0);
         SetThreadPriority(THREAD_PRIORITY_LOWEST);
         RenameThread("dynamic-cpu-miner");
         GetMainSignals().ScriptForMining(coinbaseScript);
