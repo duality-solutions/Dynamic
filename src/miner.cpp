@@ -490,7 +490,7 @@ static void WaitForNetworkInit(const CChainParams& chainparams, CConnman& connma
     }
 }
 
-namespace miner
+namespace miners
 {
 namespace threads
 {
@@ -788,19 +788,19 @@ private:
 };
 #endif // ENABLE_GPU
 
-} // namespace miner
+} // namespace miners
 
 // #ifdef ENABLE_GPU
 static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, std::size_t nDeviceIndex)
 {
-    miner::GPUMiner miner(chainparams, connman, nDeviceIndex);
+    miners::GPUMiner miner(chainparams, connman, nDeviceIndex);
     miner->StartLoop();
 }
 // #endif // ENABLE_GPU
 
 static void DynamicMinerCPU(const CChainParams& chainparams, CConnman& connman)
 {
-    miner::CPUMiner miner(chainparams, connman);
+    miners::CPUMiner miner(chainparams, connman);
     miner->StartLoop();
 }
 
@@ -832,7 +832,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
         return;
     }
 
-    boost::thread_group* cpuMinerThreads = miner::ThreadGroup<miner::threads::CPU>();
+    boost::thread_group* cpuMinerThreads = miners::ThreadGroup<miners::threads::CPU>();
 
     int nNumCores = GetNumCores();
     LogPrintf("DynamicMiner -- CPU Cores: %u\n", nNumCores);
@@ -853,7 +853,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
 
     // Start GPU threads
     std::size_t nGPUTarget = static_cast<std::size_t>(nGPUThreads);
-    boost::thread_group* gpuMinerThreads = miner::ThreadGroup<miner::threads::GPU>();
+    boost::thread_group* gpuMinerThreads = miners::ThreadGroup<miners::threads::GPU>();
     for (std::size_t device = 0; device < devices; device++) {
         for (std::size_t i = 0; i < nGPUTarget; i++) {
             LogPrintf("Starting GPU Miner thread %u on device %u, total GPUs found %u\n", i, device, devices);
@@ -864,12 +864,12 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
 
 void ShutdownCPUMiners()
 {
-    miner::Shutdown<miner::threads::CPU>();
+    miners::Shutdown<miners::threads::CPU>();
 }
 
 void ShutdownGPUMiners()
 {
-    miner::Shutdown<miner::threads::GPU>();
+    miners::Shutdown<miners::threads::GPU>();
 }
 
 void ShutdownMiners()
