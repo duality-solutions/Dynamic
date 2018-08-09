@@ -45,7 +45,7 @@ inline uint256 GetBlockHashGPU(const CBlockHeader* block, const Pu& pu)
     const void* input = (pBegin == pEnd ? pblank : static_cast<const void*>(&pBegin[0]));
 
     uint256 hashResult;
-    pu->setInputAndSalt(0, (const void*)input, INPUT_BYTES);
+    pu->setInputAndSalt(0, input, INPUT_BYTES);
     pu->beginProcessing();
     pu->endProcessing();
     pu->getHash(0, (uint8_t*)&hashResult);
