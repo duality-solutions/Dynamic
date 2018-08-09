@@ -537,9 +537,12 @@ private:
     CConnman& connman;
 
 public:
-    BaseMiner(const CChainParams& chainparams, CConnman& connman)
+    BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex = boost::none)
         : chainparams(chainparams),
-          connman(connman) {}
+          connman(connman),
+          deviceName(deviceName),
+          deviceIndex(deviceIndex),
+          dHashesPerSec(hashesPerSec) {}
 
 private:
     int64_t nStart;
@@ -549,8 +552,6 @@ private:
     CBlockIndex* pindexPrev;
     boost::shared_ptr<CReserveScript> coinbaseScript;
 
-    virtual unsigned int LoopTick(CBlock* pblock) = 0;
-
 protected:
     std::string deviceName;
     boost::optional<std::size_t> deviceIndex;
@@ -558,6 +559,21 @@ protected:
     double* dHashesPerSec;
 
     arith_uint256 hashTarget;
+
+    void ProcessFoundSolution(CBlock* pblock, const uint256& hash)
+    {
+        // Found a solution
+        SetThreadPriority(THREAD_PRIORITY_NORMAL);
+        LogPrintf("DynamicMiner%s:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", deviceName, hash.GetHex(), hashTarget.GetHex());
+        ProcessBlockFound(pblock, chainparams, &connman);
+        SetThreadPriority(THREAD_PRIORITY_LOWEST);
+        coinbaseScript->KeepScript();
+        // In regression test mode, stop mining after a block is found.
+        if (chainparams.MineBlocksOnDemand())
+            throw boost::thread_interrupted();
+    }
+
+    virtual unsigned int LoopTick(CBlock* pblock) = 0;
 
 private:
     void Init()
@@ -575,19 +591,6 @@ private:
         // In the latter case, already the pointer is NULL.
         if (!coinbaseScript || coinbaseScript->reserveScript.empty())
             throw std::runtime_error("No coinbase script available (mining requires a wallet)");
-    }
-
-    void ProcessFoundSolution(CBlock* pblock, const uint256& hash)
-    {
-        // Found a solution
-        SetThreadPriority(THREAD_PRIORITY_NORMAL);
-        LogPrintf("DynamicMiner%s:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", deviceName, hash.GetHex(), hashTarget.GetHex());
-        ProcessBlockFound(pblock, chainparams, &connman);
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        coinbaseScript->KeepScript();
-        // In regression test mode, stop mining after a block is found.
-        if (chainparams.MineBlocksOnDemand())
-            throw boost::thread_interrupted();
     }
 
     std::unique_ptr<CBlockTemplate> CreateNewMinerBlock()
@@ -699,13 +702,9 @@ class CPUMiner : public BaseMiner
 {
 public:
     CPUMiner(const CChainParams& chainparams, CConnman& connman)
-        : BaseMiner(chainparams, connman),
-          deviceName("CPU"),
-          dHashesPerSec(&dCPUHashesPerSec)
-    {
-    }
+        : BaseMiner(chainparams, connman, &dCPUHashesPerSec, "CPU") {}
 
-private:
+protected:
     virtual unsigned int
     LoopTick(CBlock* pblock) override
     {
@@ -739,10 +738,7 @@ private:
 
 public:
     GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
-        : BaseMiner(chainparams, connman),
-          deviceIndex(deviceIndex),
-          deviceName("GPU"),
-          dHashesPerSec(&dGPUHashesPerSec),
+        : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
           device(global.getAllDevices()[deviceIndex]),
           params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
           context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
@@ -751,7 +747,7 @@ public:
     {
     }
 
-private:
+protected:
     virtual unsigned int
     LoopTick(CBlock* pblock) override
     {
