@@ -578,9 +578,10 @@ protected:
 private:
     void Init()
     {
-        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, deviceIndex ? *deviceIndex : 0);
+        std::size_t device = deviceIndex ? *deviceIndex : 0;
+        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
         SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        RenameThread("dynamic-cpu-miner");
+        RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device));
         GetMainSignals().ScriptForMining(coinbaseScript);
     }
 
