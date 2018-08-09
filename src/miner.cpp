@@ -550,7 +550,7 @@ private:
     unsigned int nExtraNonce = 0;
     unsigned int nTransactionsUpdatedLast;
 
-    std::shared_ptr<CReserveScript> coinbaseScript;
+    boost::shared_ptr<CReserveScript> coinbaseScript;
 
     arith_uint256 hashTarget;
 
