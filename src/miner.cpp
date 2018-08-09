@@ -598,7 +598,7 @@ private:
         return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
     }
 
-    bool LoopChecks()
+    bool LoopChecks(CBlock* pblock)
     {
         // Check for stop or if block needs to be rebuilt
         boost::this_thread::interruption_point();
@@ -676,7 +676,7 @@ public:
                 while (true) {
                     auto hashesDone = this->LoopTick(pblock);
                     this->CountHashes(hashesDone);
-                    if (!this->LoopChecks())
+                    if (!this->LoopChecks(pblock))
                         break;
                 }
             }
