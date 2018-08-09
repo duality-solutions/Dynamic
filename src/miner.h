@@ -10,9 +10,9 @@
 
 #include "primitives/block.h"
 
-#include <stdint.h>
-#include <memory>
 #include <cstddef>
+#include <memory>
+#include <stdint.h>
 
 class CBlockIndex;
 class CChainParams;
@@ -21,17 +21,18 @@ class CReserveKey;
 class CScript;
 class CWallet;
 
-namespace Consensus { struct Params; };
+namespace Consensus
+{
+struct Params;
+};
 
 static const bool DEFAULT_GENERATE = false;
 static const int DEFAULT_GENERATE_THREADS_CPU = -1;
-// TODO(crackcom): Set to -1 after autotune tests
 static const int DEFAULT_GENERATE_THREADS_GPU = -1;
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 
-struct CBlockTemplate
-{
+struct CBlockTemplate {
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOps;
@@ -42,7 +43,7 @@ struct CBlockTemplate
 bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman);
 #endif //ENABLE_WALLET
 /** Run the miner threads */
-void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman, bool fAutotune = false);
+void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman);
 /** Shuts down all miner threads */
 void ShutdownMiners();
 /** Shuts down all CPU miner threads */

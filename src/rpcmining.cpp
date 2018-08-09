@@ -344,8 +344,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
     LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimit, nGenProcLimitGPU);
 
     if (fGenerate) {
-        bool fAutotune = nGenProcLimit == -1 && nGenProcLimitGPU == -1;
-        GenerateDynamics(nGenProcLimit, nGenProcLimitGPU, Params(), *g_connman, fAutotune);
+        GenerateDynamics(nGenProcLimit, nGenProcLimitGPU, Params(), *g_connman);
     } else {
         ShutdownMiners();
     }

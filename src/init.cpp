@@ -510,7 +510,6 @@ std::string HelpMessage(HelpMessageMode mode)
     if (showDebug)
     {
         strUsage += HelpMessageOpt("-nodebug", "Turn off debugging messages, same as -debug=0");
-    strUsage += HelpMessageOpt("-autotune", _("Autotune threads per device (default: false)"));
     strUsage += HelpMessageOpt("-gen", strprintf(_("Generate coins (default: %u)"), DEFAULT_GENERATE));
     strUsage += HelpMessageOpt("-genproclimit=<n>", strprintf(_("Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)"), DEFAULT_GENERATE_THREADS_CPU));
 #if ENABLE_GPU
@@ -1833,7 +1832,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Generate coins in the background
     if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
-        GenerateDynamics(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman, GetBoolArg("-autotune", false));
+        GenerateDynamics(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
     }
 
     // ********************************************************* Step 13: finished
