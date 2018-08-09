@@ -521,6 +521,7 @@ static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, 
     Argon2GPUProgramContext context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10);
     Argon2GPUParams params((std::size_t)OUTPUT_BYTES, 2, 500, 8);
     Argon2GPU processingUnit(&context, &params, &device, 1, false, false);
+    std::size_t batchSizeTarget = device.getTotalMemory() / 512e3;
 
     try {
         // Throw an error if no script was provided.  This can happen
@@ -564,12 +565,36 @@ static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, 
             {
                 unsigned int nHashesDone = 0;
 
-                uint256 hash;
-                while (true) {
-                    hash = GetBlockHashGPU(pblock, &processingUnit);
-                    //assert(hash == pblock->GetHash());
-                    if (UintToArith256(hash) <= hashTarget)
-                    {
+                // current batch size
+                std::size_t batchSize = batchSizeTarget;
+
+                // set batch input
+                static unsigned char pblank[1];
+                for (std::size_t i = 0; i < batchSizeTarget; i++) {
+                    const auto pBegin = BEGIN(pblock->nVersion);
+                    const auto pEnd = END(pblock->nNonce);
+                    const void* input = (pBegin == pEnd ? pblank : static_cast<const void*>(&pBegin[0]));
+                    // input is copied onto memory buffer
+                    pu->setInputAndSalt(i, input, INPUT_BYTES);
+                    // increment block nonce
+                    pblock->nNonce += 1;
+                    // increment hashes done
+                    nHashesDone += 1;
+                    // TODO(crackcomm): is this only to count hashes?
+                    if ((pblock->nNonce & 0xFF) == 0) {
+                        batchSize = i + 1;
+                        break;
+                    }
+                }
+
+                // start GPU processing
+                pu->beginProcessing();
+                // wait for results
+                pu->endProcessing();
+                // check batch results
+                for (std::size_t i = 0; i < batchSize; i++) {
+                    pu->getHash(i, (uint8_t*)&hash);
+                    if (UintToArith256(hash) <= hashTarget) {
                         // Found a solution
                         //assert(hash == pblock->GetHash());
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
@@ -584,10 +609,6 @@ static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, 
 
                         break;
                     }
-                    pblock->nNonce += 1;
-                    nHashesDone += 1;
-                    if ((pblock->nNonce & 0xFF) == 0)
-                        break;
                 }
                 
                 // Meter hashes/seconds
@@ -601,6 +622,7 @@ static void DynamicMinerGPU(const CChainParams& chainparams, CConnman& connman, 
                 }
                 else
                     nHashCounter += nHashesDone;
+
                 if (GetTimeMillis() - nHPSTimerStart > 4000)
                 {
                     static CCriticalSection cs;        
