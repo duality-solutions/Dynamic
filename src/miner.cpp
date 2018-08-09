@@ -822,20 +822,10 @@ static void DynamicMiner(const CChainParams& chainparams, CConnman& connman, boo
 
 void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
 {
-    std::size_t devices = 0;
-#ifdef ENABLE_GPU
-    devices = GetGPUDeviceCount();
-    LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
-#else
-    LogPrintf("DynamicMiner -- GPU no support\n");
-#endif
-
-    if (nCPUThreads == 0 && (devices == 0 || nGPUThreads == 0)) {
-        LogPrintf("DynamicMiner -- disabled -- CPU Threads set to zero\n");
+    if (nCPUThreads == 0 && nGPUThreads == 0) {
+        LogPrintf("DynamicMiner -- disabled -- CPU and GPU Threads set to zero\n");
         return;
     }
-
-    boost::thread_group* cpuMinerThreads = miners::ThreadGroup<miners::threads::CPU>();
 
     int nNumCores = GetNumCores();
     LogPrintf("DynamicMiner -- CPU Cores: %u\n", nNumCores);
@@ -845,10 +835,15 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
 
     // Start CPU threads
     std::size_t nCPUTarget = static_cast<std::size_t>(nCPUThreads);
+    boost::thread_group* cpuMinerThreads = miners::ThreadGroup<miners::threads::CPU>();
     while (cpuMinerThreads->size() < nCPUTarget) {
         LogPrintf("Starting CPU Miner thread #%u\n", cpuMinerThreads->size());
         cpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman)));
     }
+
+#ifdef ENABLE_GPU
+    std::size_t devices = GetGPUDeviceCount();
+    LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
 
     if (nGPUThreads < 0)
         nGPUThreads = 4;
@@ -862,6 +857,9 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
             gpuMinerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams), boost::ref(connman), device));
         }
     }
+#else
+    LogPrintf("DynamicMiner -- GPU no support\n");
+#endif
 }
 
 void ShutdownCPUMiners()
