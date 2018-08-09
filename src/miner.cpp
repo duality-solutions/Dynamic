@@ -549,8 +549,6 @@ private:
     CBlockIndex* pindexPrev;
     boost::shared_ptr<CReserveScript> coinbaseScript;
 
-    arith_uint256 hashTarget;
-
     virtual unsigned int LoopTick(CBlock* pblock) = 0;
 
 protected:
@@ -558,6 +556,8 @@ protected:
     boost::optional<std::size_t> deviceIndex;
 
     double* dHashesPerSec;
+
+    arith_uint256 hashTarget;
 
 private:
     void Init()
