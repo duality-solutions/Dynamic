@@ -10,7 +10,8 @@
 
 typedef std::vector<unsigned char> CharString;
 typedef std::vector<CharString> vchCharString;
-typedef std::vector<std::pair<uint32_t, CharString> > vCheckPoints; // << height, block hash >>
+typedef std::pair<uint32_t, CharString> CheckPoint;
+typedef std::vector<CheckPoint> vCheckPoints; // << height, block hash >>
 
 static constexpr unsigned int ACTIVATE_BDAP_HEIGHT        = 10; // TODO: Change for mainnet or spork activate (???)
 static constexpr unsigned int MAX_OBJECT_NAME_LENGTH      = 63;
@@ -23,7 +24,8 @@ static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
 static constexpr unsigned int MAX_SIGNATURE_LENGTH        = 65; // https://bitcoin.stackexchange.com/questions/12554/why-the-signature-is-always-65-13232-bytes-long
 static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
-static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 100; // Pay per byte for hosting on chain
+static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 25; // Pay per byte for hosting on chain
+static constexpr unsigned int MAX_CHECKPOINT_HASH_LENGTH  = 64;
 static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";

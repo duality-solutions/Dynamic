@@ -82,7 +82,6 @@ public:
     CharString PrivateData;
     CAmount transactionFee;
     CAmount registrationFeePerDay;
-    vCheckPoints CheckpointHashes; // used to store main chain hash checkpoints for added security
 
     CDomainEntry() { 
         SetNull();
@@ -115,7 +114,6 @@ public:
         PrivateData.clear();
         transactionFee = 0;
         registrationFeePerDay = 0;
-        CheckpointHashes.clear();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -142,7 +140,6 @@ public:
         READWRITE(PrivateData);
         READWRITE(transactionFee);
         READWRITE(registrationFeePerDay);
-        READWRITE(CheckpointHashes);
     }
 
     inline friend bool operator==(const CDomainEntry &a, const CDomainEntry &b) {
@@ -171,7 +168,6 @@ public:
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
         PrivateData = b.PrivateData;
-        CheckpointHashes = b.CheckpointHashes;
         txHash = b.txHash;
         return *this;
     }
@@ -186,7 +182,6 @@ public:
     std::string GetObjectLocation() const;
     std::vector<unsigned char> vchFullObjectPath() const;
     std::vector<unsigned char> vchObjectLocation() const; // OU . Domain Name
-    void AddCheckpoint(const uint32_t& height, const CharString& vchHash);
     bool ValidateValues(std::string& errorMessage);
 };
 

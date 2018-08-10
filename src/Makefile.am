@@ -101,6 +101,7 @@ DYNAMIC_CORE_H = \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
   bdap/entrycertificate.h \
+  bdap/entrycheckpoints.h \
   bdap/entrylink.h \
   dbwrapper.h \
   dynode.h \
@@ -227,6 +228,7 @@ libdynamic_server_a_SOURCES = \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/entrycertificate.cpp \
+  bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
   dbwrapper.cpp \
   dynode.cpp \

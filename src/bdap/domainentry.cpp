@@ -212,14 +212,6 @@ std::vector<unsigned char> CDomainEntry::vchObjectLocation() const {
     return vchReturnValue;
 }
 
-void CDomainEntry::AddCheckpoint(const uint32_t& height, const CharString& vchHash) 
-{
-    std::pair<uint32_t, CharString> pairNewCheckpoint;
-    pairNewCheckpoint.first = height;
-    pairNewCheckpoint.second = vchHash;
-    CheckpointHashes.push_back(pairNewCheckpoint);
-}
-
 bool CDomainEntry::ValidateValues(std::string& errorMessage)
 {
     smatch sMatch;
@@ -315,12 +307,6 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         return false;
     }
 
-    // make sure the number of checkpoints does not exceed limit
-    if (CheckpointHashes.size() > MAX_NUMBER_CHECKPOINTS) 
-    {
-        errorMessage = "Invalid BDAP checkpoint count. Can not have more than " + std::to_string(MAX_NUMBER_CHECKPOINTS) + " checkpoints for one entry.";
-        return false;
-    }
     // TODO: (bdap) check if EncryptPublicKey is valid
     // TODO: (bdap) check WalletAddress and SignWalletAddress
     return true;
