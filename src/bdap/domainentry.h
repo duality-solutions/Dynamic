@@ -79,7 +79,6 @@ public:
     unsigned int nHeight;
     uint64_t nExpireTime;
 
-    CharString Certificate;
     CharString PrivateData;
     CAmount transactionFee;
     CAmount registrationFeePerDay;
@@ -113,7 +112,6 @@ public:
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
-        Certificate.clear();
         PrivateData.clear();
         transactionFee = 0;
         registrationFeePerDay = 0;
@@ -141,7 +139,6 @@ public:
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
-        READWRITE(Certificate);
         READWRITE(PrivateData);
         READWRITE(transactionFee);
         READWRITE(registrationFeePerDay);
@@ -173,9 +170,9 @@ public:
         txHash = b.txHash;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
-        Certificate = b.Certificate;
         PrivateData = b.PrivateData;
         CheckpointHashes = b.CheckpointHashes;
+        txHash = b.txHash;
         return *this;
     }
  

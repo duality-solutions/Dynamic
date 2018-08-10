@@ -307,14 +307,6 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         return false;
     }
 
-    // check certificate component
-    std::string strCertificate = stringFromVch(Certificate);
-    if (strCertificate.length() > MAX_CERTIFICATE_LENGTH) 
-    {
-        errorMessage = "Invalid BDAP Certificate data. Can not have more than " + std::to_string(MAX_CERTIFICATE_LENGTH) + " characters.";
-        return false;
-    }
-
     // check private data component
     std::string strPrivateData = stringFromVch(PrivateData);
     if (strPrivateData.length() > MAX_PRIVATE_DATA_LENGTH) 
@@ -371,7 +363,6 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         }
         oName.push_back(Pair("expires_on", expired_time));
         oName.push_back(Pair("expired", expired));
-        oName.push_back(Pair("certificate", stringFromVch(entry.Certificate)));
         oName.push_back(Pair("private_data", stringFromVch(entry.PrivateData)));
         oName.push_back(Pair("transaction_fee", entry.transactionFee));
         oName.push_back(Pair("registration_fee", entry.registrationFeePerDay));
