@@ -100,6 +100,7 @@ DYNAMIC_CORE_H = \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
+  bdap/entrylink.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -224,6 +225,7 @@ libdynamic_server_a_SOURCES = \
   checkpoints.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
+  bdap/entrylink.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
