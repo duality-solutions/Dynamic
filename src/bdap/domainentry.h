@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_DIRECTORY_H
-#define DYNAMIC_DIRECTORY_H
+#ifndef DYNAMIC_BDAP_DOMAINENTRY_H
+#define DYNAMIC_BDAP_DOMAINENTRY_H
 
 #include "bdap.h"
 #include "amount.h"
@@ -37,13 +37,13 @@ class CTxOut;
 - Implement file sharing using IPFS
 */
 
-class CDirectoryDefaultParameters {
+class CDomainEntryDefaultParameters {
 public:
     void InitialiseAdminOwners(); //DEFAULT_ADMIN_DOMAIN
     void InitialisePublicDomain(); //DEFAULT_PUBLIC_DOMAIN
 };
 
-enum DirectoryObjectType {
+enum DomainEntryObjectType {
     USER_ACCOUNT = 0,
     DEVICE_ACCOUNT = 1,
     GROUP = 2,
@@ -55,9 +55,9 @@ enum DirectoryObjectType {
 };
 
 // See LDAP Distinguished Name
-class CDirectory {
+class CDomainEntry {
 public:
-    static const int CURRENT_VERSION=3;
+    static const int CURRENT_VERSION=1;
     int nVersion;
     CharString OID; // Canonical Object ID
     //CN=John Smith,OU=Public,DC=BDAP,DC=IO, O=Duality Blockchain Solutions, UID=johnsmith21
@@ -66,7 +66,7 @@ public:
     CharString OrganizationalUnit; // OU. Like OU=sales. blank for top level domain directories
     CharString OrganizationName; // O. Like Duality Blockchain Solutions
     CharString ObjectID; // UID. Like johnsmith21.  blank for top level domain directories
-    DirectoryObjectType ObjectType; // see enum above
+    DomainEntryObjectType ObjectType; // see enum above
     CharString WalletAddress; // used to send collateral funds for this directory record.
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
@@ -85,25 +85,25 @@ public:
     CAmount registrationFeePerDay;
     vCheckPoints CheckpointHashes; // used to store main chain hash checkpoints for added security
 
-    CDirectory() { 
+    CDomainEntry() { 
         SetNull();
     }
 
-    CDirectory(const CTransaction &tx) {
+    CDomainEntry(const CTransaction &tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
 
     inline void SetNull()
     {
-        nVersion = CDirectory::CURRENT_VERSION;
+        nVersion = CDomainEntry::CURRENT_VERSION;
         OID.clear();
         DomainComponent.clear();
         CommonName.clear();
         OrganizationalUnit.clear();
         OrganizationName.clear();
         ObjectID.clear();
-        ObjectType = DirectoryObjectType::DOMAIN_ACCOUNT;
+        ObjectType = DomainEntryObjectType::DOMAIN_ACCOUNT;
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
@@ -148,15 +148,15 @@ public:
         READWRITE(CheckpointHashes);
     }
 
-    inline friend bool operator==(const CDirectory &a, const CDirectory &b) {
+    inline friend bool operator==(const CDomainEntry &a, const CDomainEntry &b) {
         return (a.OID == b.OID && a.DomainComponent == b.DomainComponent && a.OrganizationalUnit == b.OrganizationalUnit && a.ObjectID == b.ObjectID);
     }
 
-    inline friend bool operator!=(const CDirectory &a, const CDirectory &b) {
+    inline friend bool operator!=(const CDomainEntry &a, const CDomainEntry &b) {
         return !(a == b);
     }
 
-    inline CDirectory operator=(const CDirectory &b) {
+    inline CDomainEntry operator=(const CDomainEntry &b) {
         OID = b.OID;
         DomainComponent = b.DomainComponent;
         CommonName = b.CommonName;
@@ -193,13 +193,13 @@ public:
     bool ValidateValues(std::string& errorMessage);
 };
 
-bool IsDirectoryTransaction(const CScript& txOut);
-std::string directoryFromOp(const int op);
-bool IsDirectoryDataOutput(const CTxOut& out);
-int GetDirectoryDataOutput(const CTransaction& tx);
-bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
-bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
-bool BuildBDAPJson(const CDirectory& directory, UniValue& oName, bool fAbridged = false);
+bool IsDomainEntryTransaction(const CScript& txOut);
+std::string DomainEntryFromOp(const int op);
+bool IsDomainEntryDataOutput(const CTxOut& out);
+int GetDomainEntryDataOutput(const CTransaction& tx);
+bool GetDomainEntryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
+bool GetDomainEntryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
+bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged = false);
 
 std::string stringFromVch(const CharString& vch);
 std::vector<unsigned char> vchFromValue(const UniValue& value);
@@ -208,10 +208,10 @@ void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
-bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
-bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
-int GetDirectoryOpType(const CScript& script);
-std::string GetDirectoryOpTypeString(const CScript& script);
-bool GetDirectoryOpScript(const CTransaction& tx, CScript& scriptDirectoryOp, vchCharString& vvchOpParameters, int& op);
+bool DecodeDomainEntryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
+int GetDomainEntryOpType(const CScript& script);
+std::string GetDomainEntryOpTypeString(const CScript& script);
+bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp, vchCharString& vvchOpParameters, int& op);
 
-#endif // DYNAMIC_DIRECTORY_H
+#endif // DYNAMIC_BDAP_DOMAINENTRY_H

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/directory.h"
-#include "bdap/directorydb.h"
+#include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
 #include "rpcserver.h"
@@ -37,19 +37,19 @@ UniValue addpublicname(const JSONRPCRequest& request)
 
     
 
-    CDirectory txDirectory;
-    txDirectory.OID = vchDefaultOIDPrefix;
-    txDirectory.DomainComponent = vchDefaultDomainName;
-    txDirectory.OrganizationalUnit = vchDefaultPublicOU;
-    txDirectory.CommonName = vchCommonName;
-    txDirectory.OrganizationName = vchDefaultOrganizationName;
-    txDirectory.ObjectID = vchObjectID;
-    txDirectory.fPublicObject = 1; //make entry public
-    txDirectory.transactionFee = 100;
+    CDomainEntry txDomainEntry;
+    txDomainEntry.OID = vchDefaultOIDPrefix;
+    txDomainEntry.DomainComponent = vchDefaultDomainName;
+    txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txDomainEntry.CommonName = vchCommonName;
+    txDomainEntry.OrganizationName = vchDefaultOrganizationName;
+    txDomainEntry.ObjectID = vchObjectID;
+    txDomainEntry.fPublicObject = 1; //make entry public
+    txDomainEntry.transactionFee = 100;
 
     // Check if name already exists
-    if (GetDirectory(txDirectory.vchFullObjectPath(), txDirectory))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + txDirectory.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
+    if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address and public key
     CKey privWalletKey;
@@ -64,7 +64,7 @@ UniValue addpublicname(const JSONRPCRequest& request)
     
     std::string strWalletAddress = CDynamicAddress(keyWalletID).ToString();
     CharString vchWalletAddress(strWalletAddress.begin(), strWalletAddress.end());
-    txDirectory.WalletAddress = vchWalletAddress;
+    txDomainEntry.WalletAddress = vchWalletAddress;
 
     CKey privEncryptKey;
     privEncryptKey.MakeNewKey(true);
@@ -75,7 +75,7 @@ UniValue addpublicname(const JSONRPCRequest& request)
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
 
-    txDirectory.EncryptPublicKey = vchEncryptPubKey;
+    txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
 
     CKey privSignKey;
     privSignKey.MakeNewKey(true);
@@ -88,27 +88,27 @@ UniValue addpublicname(const JSONRPCRequest& request)
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privSignKey, pubSignKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding signature key to wallet for BDAP"));
 
-    txDirectory.SignWalletAddress = vchSignWalletAddress;
+    txDomainEntry.SignWalletAddress = vchSignWalletAddress;
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
         nDays = request.params[2].get_int();
     }
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txDirectory.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
-    txDirectory.Serialize(data);
+    txDomainEntry.Serialize(data);
     
     // Create BDAP OP_RETURN Signature Scripts
     CScript scriptPubKey;
-    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
+    std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(signWallet.Get());
     scriptPubKey += scriptDestination;
-    LogPrintf("BDAP GetDirectoryType = %s \n", GetDirectoryOpTypeString(scriptPubKey));
+    LogPrintf("BDAP GetDomainEntryType = %s \n", GetDomainEntryOpTypeString(scriptPubKey));
 
     CScript scriptData;
     scriptData << OP_RETURN << data;
@@ -121,26 +121,26 @@ UniValue addpublicname(const JSONRPCRequest& request)
 
     // check BDAP values
     std::string strMessage;
-    if (!txDirectory.ValidateValues(strMessage))
+    if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3501 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
-    txDirectory.txHash = wtx.GetHash();
+    txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
-    if(!BuildBDAPJson(txDirectory, oName))
+    if(!BuildBDAPJson(txDomainEntry, oName))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
-        // make sure we can deserialize the transaction from the scriptData and get a valid CDirectory class
-        LogPrintf("Directory Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+        // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
+        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
         const CTransaction testTx = (CTransaction)wtx;
-        CDirectory testDirectory(testTx); //loads the class from a transaction
+        CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDirectory Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
-            testDirectory.nVersion, testDirectory.GetFullObjectPath(), stringFromVch(testDirectory.CommonName), 
-            stringFromVch(testDirectory.OrganizationalUnit), HexStr(testDirectory.EncryptPublicKey), stringFromVch(testDirectory.PrivateData));
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+            testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
+            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey), stringFromVch(testDomainEntry.PrivateData));
     }
 
     return oName;
@@ -165,11 +165,11 @@ UniValue getdirectories(const JSONRPCRequest& request)
     std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
 
-    UniValue oDirectoryList(UniValue::VARR);
-    if (CheckDirectoryDB())
-        pDirectoryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDirectoryList);
+    UniValue oDomainEntryList(UniValue::VARR);
+    if (CheckDomainEntryDB())
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
 
-    return oDirectoryList;
+    return oDomainEntryList;
 }
 
 UniValue getdirectoryinfo(const JSONRPCRequest& request) 
@@ -182,14 +182,14 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
     CharString vchObjectID = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID);
 
-    CDirectory directory;
+    CDomainEntry directory;
     directory.DomainComponent = vchDefaultDomainName;
     directory.OrganizationalUnit = vchDefaultPublicOU;
     directory.ObjectID = vchObjectID;
     
-    UniValue oDirectoryInfo(UniValue::VOBJ);
-    if (CheckDirectoryDB()) {
-        if (!pDirectoryDB->GetDirectoryInfo(directory.vchFullObjectPath(), oDirectoryInfo)) {
+    UniValue oDomainEntryInfo(UniValue::VOBJ);
+    if (CheckDomainEntryDB()) {
+        if (!pDomainEntryDB->GetDomainEntryInfo(directory.vchFullObjectPath(), oDomainEntryInfo)) {
             throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
         }
     }
@@ -197,7 +197,7 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
     }
 
-    return oDirectoryInfo;
+    return oDomainEntryInfo;
 }
 
 UniValue updatedirectory(const JSONRPCRequest& request) {
@@ -212,39 +212,39 @@ UniValue updatedirectory(const JSONRPCRequest& request) {
     CharString vchObjectID = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID);
     
-    CDirectory txDirectory;
-    txDirectory.DomainComponent = vchDefaultDomainName;
-    txDirectory.OrganizationalUnit = vchDefaultPublicOU;
-    txDirectory.ObjectID = vchObjectID;
+    CDomainEntry txDomainEntry;
+    txDomainEntry.DomainComponent = vchDefaultDomainName;
+    txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txDomainEntry.ObjectID = vchObjectID;
 
     // Check if name already exists
-    if (!GetDirectory(txDirectory.vchFullObjectPath(), txDirectory))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txDirectory.GetFullObjectPath() + _(" does not exists.  Can not update."));
+    if (!GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txDomainEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
 
     // TODO: Check if Signature Wallet address is owned.  If not, return an error before submitting to the mem pool.
     CharString vchCommonName = vchFromValue(request.params[1]);
-    txDirectory.CommonName = vchCommonName;
+    txDomainEntry.CommonName = vchCommonName;
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
         nDays = request.params[2].get_int();
     }
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txDirectory.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
-    txDirectory.Serialize(data);
+    txDomainEntry.Serialize(data);
     
     // Create BDAP OP_RETURN Signature Scripts
     CScript scriptPubKey;
-    std::vector<unsigned char> vchFullObjectPath = txDirectory.vchFullObjectPath();
+    std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_MODIFY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
-    CDynamicAddress signWallet(stringFromVch(txDirectory.SignWalletAddress));
+    CDynamicAddress signWallet(stringFromVch(txDomainEntry.SignWalletAddress));
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(signWallet.Get());
     scriptPubKey += scriptDestination;
-    LogPrintf("BDAP GetDirectoryType = %s \n", GetDirectoryOpTypeString(scriptPubKey));
+    LogPrintf("BDAP GetDomainEntryType = %s \n", GetDomainEntryOpTypeString(scriptPubKey));
 
     CScript scriptData;
     scriptData << OP_RETURN << data;
@@ -257,26 +257,26 @@ UniValue updatedirectory(const JSONRPCRequest& request) {
 
     // check BDAP values
     std::string strMessage;
-    if (!txDirectory.ValidateValues(strMessage))
+    if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
-    txDirectory.txHash = wtx.GetHash();
+    txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
-    if(!BuildBDAPJson(txDirectory, oName))
+    if(!BuildBDAPJson(txDomainEntry, oName))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3702 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
-        // make sure we can deserialize the transaction from the scriptData and get a valid CDirectory class
-        LogPrintf("Directory Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+        // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
+        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
         const CTransaction testTx = (CTransaction)wtx;
-        CDirectory testDirectory(testTx); //loads the class from a transaction
+        CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDirectory Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
-            testDirectory.nVersion, testDirectory.GetFullObjectPath(), stringFromVch(testDirectory.CommonName), 
-            stringFromVch(testDirectory.OrganizationalUnit), HexStr(testDirectory.EncryptPublicKey), stringFromVch(testDirectory.PrivateData));
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+            testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
+            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey), stringFromVch(testDomainEntry.PrivateData));
     }
 
     return oName;
@@ -293,7 +293,7 @@ static const CRPCCommand commands[] =
 #endif //ENABLE_WALLET
 };
 
-void RegisterDirectoryRPCCommands(CRPCTable &tableRPC)
+void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);

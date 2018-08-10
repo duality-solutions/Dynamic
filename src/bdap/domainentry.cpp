@@ -2,8 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/directory.h"
-
+#include "bdap/domainentry.h"
 
 #include "coins.h"
 #include "fluid.h"
@@ -21,21 +20,21 @@
 
 using namespace boost::xpressive;
 
-bool IsDirectoryTransaction(const CScript& txOut)
+bool IsDomainEntryTransaction(const CScript& txOut)
 {
-    return (txOut.IsDirectoryScript(BDAP_START)
-            || txOut.IsDirectoryScript(BDAP_NEW_TX)
-            || txOut.IsDirectoryScript(BDAP_DELETE_TX)
-            || txOut.IsDirectoryScript(BDAP_ACTIVATE_TX)
-            || txOut.IsDirectoryScript(BDAP_MODIFY_TX)
-            || txOut.IsDirectoryScript(BDAP_MODIFY_RDN_TX)
-            || txOut.IsDirectoryScript(BDAP_EXECUTE_CODE_TX)
-            || txOut.IsDirectoryScript(BDAP_BIND_TX)
-            || txOut.IsDirectoryScript(BDAP_REVOKE_TX)
+    return (txOut.IsBDAPScript(BDAP_START)
+            || txOut.IsBDAPScript(BDAP_NEW_TX)
+            || txOut.IsBDAPScript(BDAP_DELETE_TX)
+            || txOut.IsBDAPScript(BDAP_ACTIVATE_TX)
+            || txOut.IsBDAPScript(BDAP_MODIFY_TX)
+            || txOut.IsBDAPScript(BDAP_MODIFY_RDN_TX)
+            || txOut.IsBDAPScript(BDAP_EXECUTE_CODE_TX)
+            || txOut.IsBDAPScript(BDAP_BIND_TX)
+            || txOut.IsBDAPScript(BDAP_REVOKE_TX)
            );
 }
 
-std::string directoryFromOp(const int op) 
+std::string DomainEntryFromOp(const int op) 
 {
     switch (op) {
         case OP_BDAP_NEW:
@@ -55,11 +54,11 @@ std::string directoryFromOp(const int op)
         case OP_BDAP_REVOKE:
             return "bdap_revoke";
         default:
-            return "<unknown directory op>";
+            return "<unknown bdap op>";
     }
 }
 
-bool IsDirectoryDataOutput(const CTxOut& out) {
+bool IsDomainEntryDataOutput(const CTxOut& out) {
    txnouttype whichType;
     if (!IsStandard(out.scriptPubKey, whichType))
         return false;
@@ -68,7 +67,7 @@ bool IsDirectoryDataOutput(const CTxOut& out) {
    return false;
 }
 
-bool GetDirectoryTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
+bool GetDomainEntryTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
 {
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
@@ -110,15 +109,15 @@ std::vector<unsigned char> vchFromString(const std::string& str)
     return std::vector<unsigned char>(str.begin(), str.end());
 }
 
-int GetDirectoryDataOutput(const CTransaction& tx) {
+int GetDomainEntryDataOutput(const CTransaction& tx) {
    for(unsigned int i = 0; i<tx.vout.size();i++) {
-       if(IsDirectoryDataOutput(tx.vout[i]))
+       if(IsDomainEntryDataOutput(tx.vout[i]))
            return i;
     }
    return -1;
 }
 
-bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash)
+bool GetDomainEntryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash)
 {
     CScript::const_iterator pc = scriptPubKey.begin();
     opcodetype opcode;
@@ -136,21 +135,21 @@ bool GetDirectoryData(const CScript& scriptPubKey, std::vector<unsigned char>& v
     return true;
 }
 
-bool GetDirectoryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
+bool GetDomainEntryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
 {
-    nOut = GetDirectoryDataOutput(tx);
+    nOut = GetDomainEntryDataOutput(tx);
     if(nOut == -1)
        return false;
 
     const CScript &scriptPubKey = tx.vout[nOut].scriptPubKey;
-    return GetDirectoryData(scriptPubKey, vchData, vchHash);
+    return GetDomainEntryData(scriptPubKey, vchData, vchHash);
 }
 
-bool CDirectory::UnserializeFromTx(const CTransaction& tx) {
+bool CDomainEntry::UnserializeFromTx(const CTransaction& tx) {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nOut;
-    if(!GetDirectoryData(tx, vchData, vchHash, nOut))
+    if(!GetDomainEntryData(tx, vchData, vchHash, nOut))
     {
         SetNull();
         return false;
@@ -162,13 +161,13 @@ bool CDirectory::UnserializeFromTx(const CTransaction& tx) {
     return true;
 }
 
-void CDirectory::Serialize(std::vector<unsigned char>& vchData) {
+void CDomainEntry::Serialize(std::vector<unsigned char>& vchData) {
     CDataStream dsBDAP(SER_NETWORK, PROTOCOL_VERSION);
     dsBDAP << *this;
     vchData = std::vector<unsigned char>(dsBDAP.begin(), dsBDAP.end());
 }
 
-bool CDirectory::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) {
+bool CDomainEntry::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) {
     try {
         CDataStream dsBDAP(vchData, SER_NETWORK, PROTOCOL_VERSION);
         dsBDAP >> *this;
@@ -189,31 +188,31 @@ bool CDirectory::UnserializeFromData(const std::vector<unsigned char>& vchData, 
     return true;
 }
 
-CDynamicAddress CDirectory::GetWalletAddress() const {
+CDynamicAddress CDomainEntry::GetWalletAddress() const {
     return CDynamicAddress(stringFromVch(WalletAddress));
 }
 
-std::string CDirectory::GetFullObjectPath() const {
+std::string CDomainEntry::GetFullObjectPath() const {
     return stringFromVch(ObjectID) + "@" + stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
 }
 
-std::string CDirectory::GetObjectLocation() const {
+std::string CDomainEntry::GetObjectLocation() const {
     return stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
 }
 
-std::vector<unsigned char> CDirectory::vchFullObjectPath() const {
+std::vector<unsigned char> CDomainEntry::vchFullObjectPath() const {
     std::string strFullObjectPath = GetFullObjectPath();
     std::vector<unsigned char> vchReturnValue(strFullObjectPath.begin(), strFullObjectPath.end());
     return vchReturnValue;
 }
 
-std::vector<unsigned char> CDirectory::vchObjectLocation() const {
+std::vector<unsigned char> CDomainEntry::vchObjectLocation() const {
     std::string strObjectLocation = GetObjectLocation();
     std::vector<unsigned char> vchReturnValue(strObjectLocation.begin(), strObjectLocation.end());
     return vchReturnValue;
 }
 
-void CDirectory::AddCheckpoint(const uint32_t& height, const CharString& vchHash) 
+void CDomainEntry::AddCheckpoint(const uint32_t& height, const CharString& vchHash) 
 {
     std::pair<uint32_t, CharString> pairNewCheckpoint;
     pairNewCheckpoint.first = height;
@@ -221,7 +220,7 @@ void CDirectory::AddCheckpoint(const uint32_t& height, const CharString& vchHash
     CheckpointHashes.push_back(pairNewCheckpoint);
 }
 
-bool CDirectory::ValidateValues(std::string& errorMessage)
+bool CDomainEntry::ValidateValues(std::string& errorMessage)
 {
     smatch sMatch;
     std::string regExWithDot = "^((?!-)[a-z0-9-]{2," + std::to_string(MAX_OBJECT_NAME_LENGTH) + "}(?<!-)\\.)+[a-z]{2,6}$";
@@ -335,52 +334,52 @@ bool CDirectory::ValidateValues(std::string& errorMessage)
     return true;
 }
 
-bool BuildBDAPJson(const CDirectory& directory, UniValue& oName, bool fAbridged)
+bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
 {
     bool expired = false;
     int64_t expired_time = 0;
     int64_t nTime = 0;
     if (!fAbridged) {
-        oName.push_back(Pair("_id", stringFromVch(directory.OID)));
-        oName.push_back(Pair("version", directory.nVersion));
-        oName.push_back(Pair("domain_component", stringFromVch(directory.DomainComponent)));
-        oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
-        oName.push_back(Pair("organizational_unit", stringFromVch(directory.OrganizationalUnit)));
-        oName.push_back(Pair("organization_name", stringFromVch(directory.DomainComponent)));
-        oName.push_back(Pair("object_id", stringFromVch(directory.ObjectID)));
-        oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
-        oName.push_back(Pair("object_type", directory.ObjectType));
-        oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
-        oName.push_back(Pair("signature_address", stringFromVch(directory.SignWalletAddress)));
-        oName.push_back(Pair("public", (int)directory.fPublicObject));
-        oName.push_back(Pair("encryption_publickey", HexStr(directory.EncryptPublicKey)));
-        oName.push_back(Pair("sigatures_required", (int)directory.nSigaturesRequired));
-        oName.push_back(Pair("resource_pointer", stringFromVch(directory.ResourcePointer)));
-        oName.push_back(Pair("txid", directory.txHash.GetHex()));
-        if ((unsigned int)chainActive.Height() >= directory.nHeight-1) {
-            CBlockIndex *pindex = chainActive[directory.nHeight-1];
+        oName.push_back(Pair("_id", stringFromVch(entry.OID)));
+        oName.push_back(Pair("version", entry.nVersion));
+        oName.push_back(Pair("domain_component", stringFromVch(entry.DomainComponent)));
+        oName.push_back(Pair("common_name", stringFromVch(entry.CommonName)));
+        oName.push_back(Pair("organizational_unit", stringFromVch(entry.OrganizationalUnit)));
+        oName.push_back(Pair("organization_name", stringFromVch(entry.DomainComponent)));
+        oName.push_back(Pair("object_id", stringFromVch(entry.ObjectID)));
+        oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
+        oName.push_back(Pair("object_type", entry.ObjectType));
+        oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
+        oName.push_back(Pair("signature_address", stringFromVch(entry.SignWalletAddress)));
+        oName.push_back(Pair("public", (int)entry.fPublicObject));
+        oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
+        oName.push_back(Pair("sigatures_required", (int)entry.nSigaturesRequired));
+        oName.push_back(Pair("resource_pointer", stringFromVch(entry.ResourcePointer)));
+        oName.push_back(Pair("txid", entry.txHash.GetHex()));
+        if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {
+            CBlockIndex *pindex = chainActive[entry.nHeight-1];
             if (pindex) {
                 nTime = pindex->GetMedianTimePast();
             }
         }
         oName.push_back(Pair("time", nTime));
-        //oName.push_back(Pair("height", directory.nHeight));
-        expired_time = directory.nExpireTime;
+        //oName.push_back(Pair("height", entry.nHeight));
+        expired_time = entry.nExpireTime;
         if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
         {
             expired = true;
         }
         oName.push_back(Pair("expires_on", expired_time));
         oName.push_back(Pair("expired", expired));
-        oName.push_back(Pair("certificate", stringFromVch(directory.Certificate)));
-        oName.push_back(Pair("private_data", stringFromVch(directory.PrivateData)));
-        oName.push_back(Pair("transaction_fee", directory.transactionFee));
-        oName.push_back(Pair("registration_fee", directory.registrationFeePerDay));
+        oName.push_back(Pair("certificate", stringFromVch(entry.Certificate)));
+        oName.push_back(Pair("private_data", stringFromVch(entry.PrivateData)));
+        oName.push_back(Pair("transaction_fee", entry.transactionFee));
+        oName.push_back(Pair("registration_fee", entry.registrationFeePerDay));
     }
     else {
-        oName.push_back(Pair("common_name", stringFromVch(directory.CommonName)));
-        oName.push_back(Pair("object_full_path", stringFromVch(directory.vchFullObjectPath())));
-        oName.push_back(Pair("wallet_address", stringFromVch(directory.WalletAddress)));
+        oName.push_back(Pair("common_name", stringFromVch(entry.CommonName)));
+        oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
+        oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     }
     return true;
 }
@@ -445,7 +444,7 @@ CAmount GetBDAPFee(const CScript& scriptPubKey)
     return recp.nAmount;
 }
 
-bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+bool DecodeDomainEntryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
 {
     bool found = false;
 
@@ -464,7 +463,7 @@ bool DecodeDirectoryTx(const CTransaction& tx, int& op, std::vector<std::vector<
     return found;
 }
 
-bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch)
+bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch)
 {
     for (unsigned int i = 0; i < tx.vin.size(); i++) {
         const Coin& prevCoins = inputs.AccessCoin(tx.vin[i].prevout);
@@ -480,7 +479,7 @@ bool FindDirectoryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, st
     return false;
 }
 
-int GetDirectoryOpType(const CScript& script)
+int GetDomainEntryOpType(const CScript& script)
 {
     std::string ret;
     CScript::const_iterator it = script.begin();
@@ -520,19 +519,19 @@ int GetDirectoryOpType(const CScript& script)
     return (int)op2;
 }
 
-std::string GetDirectoryOpTypeString(const CScript& script)
+std::string GetDomainEntryOpTypeString(const CScript& script)
 {
-    return directoryFromOp(GetDirectoryOpType(script));
+    return DomainEntryFromOp(GetDomainEntryOpType(script));
 }
 
-bool GetDirectoryOpScript(const CTransaction& tx, CScript& scriptDirectoryOp, vchCharString& vvchOpParameters, int& op)
+bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp, vchCharString& vvchOpParameters, int& op)
 {
     for (unsigned int i = 0; i < tx.vout.size(); i++) 
     {
         const CTxOut& out = tx.vout[i];
         if (DecodeBDAPScript(out.scriptPubKey, op, vvchOpParameters)) 
         {
-            scriptDirectoryOp = out.scriptPubKey;
+            scriptDomainEntryOp = out.scriptPubKey;
             return true;
         }
     }

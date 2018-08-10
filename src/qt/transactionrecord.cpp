@@ -9,7 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
-#include "bdap/directory.h"
+#include "bdap/domainentry.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"
@@ -80,7 +80,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
-                if (IsDirectoryDataOutput(txout)) 
+                if (IsDomainEntryDataOutput(txout)) 
                 {
                     // BDAP type
                     sub.type = TransactionRecord::BDAP;
@@ -155,7 +155,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-                    if (IsDirectoryDataOutput(txout)) 
+                    if (IsDomainEntryDataOutput(txout)) 
                     {
                         // BDAP type
                         sub.type = TransactionRecord::BDAP;
@@ -213,7 +213,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::PrivateSend;
                 }
 
-                if(IsDirectoryDataOutput(txout)) 
+                if(IsDomainEntryDataOutput(txout)) 
                 {
                     sub.type = TransactionRecord::BDAP;
                 }
@@ -317,7 +317,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
         {
             status.status = TransactionStatus::Unconfirmed;
             if (wtx.isAbandoned())
-				status.status = TransactionStatus::Abandoned;
+                status.status = TransactionStatus::Abandoned;
         }
         else if (status.depth < RecommendedNumConfirmations)
         {
@@ -346,4 +346,3 @@ int TransactionRecord::getOutputIndex() const
 {
     return idx;
 }
-

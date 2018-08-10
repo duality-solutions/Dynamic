@@ -27,7 +27,7 @@ void RegisterGovernanceRPCCommands(CRPCTable &tableRPC);
 /** Register fluid RPC commands */
 void RegisterFluidRPCCommands(CRPCTable &tableRPC);
 /** Register BDAP RPC commands */
-void RegisterDirectoryRPCCommands(CRPCTable &tableRPC);
+void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC);
 static inline void RegisterAllCoreRPCCommands(CRPCTable &tableRPC)
 {
     RegisterBlockchainRPCCommands(tableRPC);
@@ -38,7 +38,7 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable &tableRPC)
     RegisterDynodeRPCCommands(tableRPC);
     RegisterGovernanceRPCCommands(tableRPC);
     RegisterFluidRPCCommands(tableRPC);
-    RegisterDirectoryRPCCommands(tableRPC);
+    RegisterDomainEntryRPCCommands(tableRPC);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H

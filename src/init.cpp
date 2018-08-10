@@ -18,7 +18,7 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
-#include "bdap/directorydb.h"
+#include "bdap/domainentrydb.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -1480,7 +1480,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinscatcher;
                 delete pblocktree;
                 // BDAP Services DB's
-                delete pDirectoryDB;
+                delete pDomainEntryDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1489,7 +1489,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 // Init BDAP Services DB's
                 bool obfuscate = false;
-                pDirectoryDB = new CDirectoryDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);

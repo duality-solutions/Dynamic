@@ -9,7 +9,7 @@
 
 #include "alert.h"
 #include "arith_uint256.h"
-#include "bdap/directorydb.h"
+#include "bdap/domainentrydb.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
@@ -592,7 +592,7 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     if (!fLoaded)
         return true;
 
-    if (!CheckDirectoryDB())
+    if (!CheckDomainEntryDB())
         return true;
 
     std::string statusRpc = "";
@@ -610,10 +610,10 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     bool bValid = false;
     if (tx.nVersion == BDAP_TX_VERSION)
     {
-        if (DecodeDirectoryTx(tx, op, vvchBDAPArgs)) 
+        if (DecodeDomainEntryTx(tx, op, vvchBDAPArgs)) 
         {
             std::string errorMessage;
-            bValid = CheckDirectoryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+            bValid = CheckDomainEntryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
             if (!bValid)
             {
                 errorMessage = "ValidateBDAPInputs: " + errorMessage;

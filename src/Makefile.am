@@ -98,8 +98,8 @@ DYNAMIC_CORE_H = \
   core_io.h \
   core_memusage.h \
   bdap/bdap.h \
-  bdap/directory.h \
-  bdap/directorydb.h \
+  bdap/domainentry.h \
+  bdap/domainentrydb.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -222,8 +222,8 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
-  bdap/directory.cpp \
-  bdap/directorydb.cpp \
+  bdap/domainentry.cpp \
+  bdap/domainentrydb.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -258,7 +258,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
-  bdap/rpcdirectory.cpp \
+  bdap/rpcdomainentry.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \

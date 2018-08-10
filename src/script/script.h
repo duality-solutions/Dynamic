@@ -701,7 +701,7 @@ public:
         return false;
     }
 
-    bool IsDirectoryScript(ProtocolCodes code) const
+    bool IsBDAPScript(ProtocolCodes code) const
     {
         switch(code) {
             case BDAP_START:

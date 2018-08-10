@@ -139,7 +139,7 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP9                   : return "OP_NOP9";
     case OP_NOP10                  : return "OP_NOP10";
 
-	// fluid
+    // fluid
     case OP_MINT                   : return "OP_MINT";
     case OP_REWARD_DYNODE          : return "OP_REWARD_DYNODE";
     case OP_REWARD_MINING          : return "OP_REWARD_MINING";
@@ -172,7 +172,7 @@ const char* GetOpName(opcodetype opcode)
 }
 
 // TODO (bdap): move functions below to seperate code file
-bool IsDirectoryOp(int op) 
+bool IsBDAPOp(int op) 
 {
         return op == OP_BDAP
             || op == OP_BDAP_NEW
@@ -201,7 +201,7 @@ bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<un
     if (opcode < OP_1 || opcode > OP_16)
         return false;
     op = CScript::DecodeOP_N(opcode);
-    if (!IsDirectoryOp(op))
+    if (!IsBDAPOp(op))
         return false;
     bool found = false;
     for (;;) {
@@ -311,11 +311,11 @@ bool CScript::IsPayToPublicKeyHash() const
 
     // Extra-fast test for pay-to-pubkey-hash CScripts:
     return (this->size() == 25 &&
-	    (*this)[0] == OP_DUP &&
-	    (*this)[1] == OP_HASH160 &&
-	    (*this)[2] == 0x14 &&
-	    (*this)[23] == OP_EQUALVERIFY &&
-	    (*this)[24] == OP_CHECKSIG);
+        (*this)[0] == OP_DUP &&
+        (*this)[1] == OP_HASH160 &&
+        (*this)[2] == 0x14 &&
+        (*this)[23] == OP_EQUALVERIFY &&
+        (*this)[24] == OP_CHECKSIG);
 }
 
 bool CScript::IsPayToScriptHash() const
