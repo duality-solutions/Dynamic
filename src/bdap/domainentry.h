@@ -71,17 +71,11 @@ public:
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
     CharString SignWalletAddress; // used to verify authorized update transaction
-    unsigned int nSigaturesRequired; // number of signatures needed to approve a transaction.  Default = 1
-    CharString ResourcePointer; // used to point to a domain shared resource like a stream (video, audio, file sharing), P2P storage (BitTorrent or IPFS network), or private cloud storage
     
     uint256 txHash;
 
     unsigned int nHeight;
     uint64_t nExpireTime;
-
-    CharString PrivateData;
-    CAmount transactionFee;
-    CAmount registrationFeePerDay;
 
     CDomainEntry() { 
         SetNull();
@@ -106,14 +100,9 @@ public:
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
         SignWalletAddress.clear();
-        nSigaturesRequired = 1;
-        ResourcePointer.clear();
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
-        PrivateData.clear();
-        transactionFee = 0;
-        registrationFeePerDay = 0;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -132,14 +121,9 @@ public:
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
         READWRITE(SignWalletAddress);
-        READWRITE(VARINT(nSigaturesRequired));
-        READWRITE(ResourcePointer);
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
-        READWRITE(PrivateData);
-        READWRITE(transactionFee);
-        READWRITE(registrationFeePerDay);
     }
 
     inline friend bool operator==(const CDomainEntry &a, const CDomainEntry &b) {
@@ -162,12 +146,9 @@ public:
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
         SignWalletAddress = b.SignWalletAddress;
-        nSigaturesRequired = b.nSigaturesRequired;
-        ResourcePointer = b.ResourcePointer;
         txHash = b.txHash;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
-        PrivateData = b.PrivateData;
         txHash = b.txHash;
         return *this;
     }

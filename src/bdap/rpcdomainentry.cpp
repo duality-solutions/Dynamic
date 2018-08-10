@@ -35,8 +35,6 @@ UniValue addpublicname(const JSONRPCRequest& request)
     ToLowerCase(vchObjectID);
     CharString vchCommonName = vchFromValue(request.params[1]);
 
-    
-
     CDomainEntry txDomainEntry;
     txDomainEntry.OID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
@@ -45,7 +43,6 @@ UniValue addpublicname(const JSONRPCRequest& request)
     txDomainEntry.OrganizationName = vchDefaultOrganizationName;
     txDomainEntry.ObjectID = vchObjectID;
     txDomainEntry.fPublicObject = 1; //make entry public
-    txDomainEntry.transactionFee = 100;
 
     // Check if name already exists
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
@@ -138,9 +135,9 @@ UniValue addpublicname(const JSONRPCRequest& request)
         const CTransaction testTx = (CTransaction)wtx;
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey), stringFromVch(testDomainEntry.PrivateData));
+            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
     }
 
     return oName;
@@ -274,9 +271,9 @@ UniValue updatedirectory(const JSONRPCRequest& request) {
         const CTransaction testTx = (CTransaction)wtx;
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\nPrivateData = %s\n", 
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey), stringFromVch(testDomainEntry.PrivateData));
+            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
     }
 
     return oName;

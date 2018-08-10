@@ -20,6 +20,7 @@ static constexpr unsigned int MAX_COMMON_NAME_LENGTH      = 95;
 static constexpr unsigned int MAX_ORG_NAME_LENGTH         = 95;
 static constexpr unsigned int MAX_RESOURCE_POINTER_LENGTH = 127;
 static constexpr unsigned int MAX_KEY_LENGTH              = 156;
+static constexpr unsigned int MAX_DESCRIPTION_LENGTH      = 256;
 static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
 static constexpr unsigned int MAX_SIGNATURE_LENGTH        = 65; // https://bitcoin.stackexchange.com/questions/12554/why-the-signature-is-always-65-13232-bytes-long

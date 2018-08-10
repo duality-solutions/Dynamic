@@ -291,22 +291,6 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         return false;
     }
 
-    // check resource pointer component
-    std::string strResourcePointer = stringFromVch(ResourcePointer);
-    if (strResourcePointer.length() > MAX_RESOURCE_POINTER_LENGTH) 
-    {
-        errorMessage = "Invalid BDAP resource pointer. Can not have more than " + std::to_string(MAX_RESOURCE_POINTER_LENGTH) + " characters.";
-        return false;
-    }
-
-    // check private data component
-    std::string strPrivateData = stringFromVch(PrivateData);
-    if (strPrivateData.length() > MAX_PRIVATE_DATA_LENGTH) 
-    {
-        errorMessage = "Invalid BDAP private data. Can not have more than " + std::to_string(MAX_PRIVATE_DATA_LENGTH) + " characters.";
-        return false;
-    }
-
     // TODO: (bdap) check if EncryptPublicKey is valid
     // TODO: (bdap) check WalletAddress and SignWalletAddress
     return true;
@@ -331,8 +315,6 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("signature_address", stringFromVch(entry.SignWalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
         oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
-        oName.push_back(Pair("sigatures_required", (int)entry.nSigaturesRequired));
-        oName.push_back(Pair("resource_pointer", stringFromVch(entry.ResourcePointer)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
         if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {
             CBlockIndex *pindex = chainActive[entry.nHeight-1];
@@ -349,9 +331,6 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         }
         oName.push_back(Pair("expires_on", expired_time));
         oName.push_back(Pair("expired", expired));
-        oName.push_back(Pair("private_data", stringFromVch(entry.PrivateData)));
-        oName.push_back(Pair("transaction_fee", entry.transactionFee));
-        oName.push_back(Pair("registration_fee", entry.registrationFeePerDay));
     }
     else {
         oName.push_back(Pair("common_name", stringFromVch(entry.CommonName)));
