@@ -9,6 +9,7 @@
 #include "policy/policy.h"
 #include "rpcclient.h"
 #include "rpcserver.h"
+#include "txmempool.h"
 #include "validation.h"
 #include "validationinterface.h"
 #include "wallet/wallet.h"
@@ -19,20 +20,6 @@
 #include <boost/xpressive/xpressive_dynamic.hpp>
 
 using namespace boost::xpressive;
-
-bool IsDomainEntryTransaction(const CScript& txOut)
-{
-    return (txOut.IsBDAPScript(BDAP_START)
-            || txOut.IsBDAPScript(BDAP_NEW_TX)
-            || txOut.IsBDAPScript(BDAP_DELETE_TX)
-            || txOut.IsBDAPScript(BDAP_ACTIVATE_TX)
-            || txOut.IsBDAPScript(BDAP_MODIFY_TX)
-            || txOut.IsBDAPScript(BDAP_MODIFY_RDN_TX)
-            || txOut.IsBDAPScript(BDAP_EXECUTE_CODE_TX)
-            || txOut.IsBDAPScript(BDAP_BIND_TX)
-            || txOut.IsBDAPScript(BDAP_REVOKE_TX)
-           );
-}
 
 std::string DomainEntryFromOp(const int op) 
 {
@@ -294,6 +281,24 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
     // TODO: (bdap) check if EncryptPublicKey is valid
     // TODO: (bdap) check WalletAddress and SignWalletAddress
     return true;
+}
+
+/** Checks if BDAP transaction exists in the memory pool */
+bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage)
+{
+    for (const CTxMemPoolEntry& e : pool.mapTx) {
+        const CTransaction& tx = e.GetTx();
+        for (const CTxOut& txOut : tx.vout) {
+            if (IsDomainEntryDataOutput(txOut)) {
+                CDomainEntry domainEntry(tx);
+                if (this->GetFullObjectPath() == domainEntry.GetFullObjectPath()) {
+                    errorMessage = "CheckIfExistsInMemPool: A BDAP domain entry transaction for " + GetFullObjectPath() + " is already in the memory pool!";
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)

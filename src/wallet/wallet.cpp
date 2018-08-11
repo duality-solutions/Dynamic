@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "primitives/block.h"
+#include "bdap/domainentry.h"
 #include "checkpoints.h"
 #include "chain.h"
 #include "wallet/coincontrol.h"
@@ -3290,7 +3291,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
     // Use special version number when creating a BDAP transaction
     if (fIsBDAP)
         txNew.nVersion = BDAP_TX_VERSION;
-
+    
     // Discourage fee sniping.
     //
     // For a large miner the value of the transactions in the best block and
@@ -3578,6 +3579,14 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 // Embed the constructed transaction data in wtxNew.
                 *static_cast<CTransaction*>(&wtxNew) = CTransaction(txNew);
 
+                if (fIsBDAP) {
+                    // Check the memory pool for a pending tranaction for the same domain entry
+                    CDomainEntry domainEntry(txNew);
+                    if (domainEntry.CheckIfExistsInMemPool(mempool, strFailReason)) {
+                        return false;
+                    }
+                }
+                
                 // Limit size
                 if (nBytes >= MAX_STANDARD_TX_SIZE)
                 {

@@ -700,7 +700,8 @@ public:
         }
         return false;
     }
-
+    
+    //TODO: (bdap) test if this is working
     bool IsBDAPScript(ProtocolCodes code) const
     {
         switch(code) {

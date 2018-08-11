@@ -19,6 +19,7 @@ class CDynamicAddress;
 class CRecipient;
 class CTransaction;
 class CTxOut;
+class CTxMemPool;
 
 /* Blockchain Directory Access Framework
 
@@ -164,9 +165,9 @@ public:
     std::vector<unsigned char> vchFullObjectPath() const;
     std::vector<unsigned char> vchObjectLocation() const; // OU . Domain Name
     bool ValidateValues(std::string& errorMessage);
+    bool CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage);
 };
 
-bool IsDomainEntryTransaction(const CScript& txOut);
 std::string DomainEntryFromOp(const int op);
 bool IsDomainEntryDataOutput(const CTxOut& out);
 int GetDomainEntryDataOutput(const CTransaction& tx);

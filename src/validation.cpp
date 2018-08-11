@@ -661,6 +661,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
 	}
 
+    if (tx.nVersion == BDAP_TX_VERSION) {
+        std::string strErrorMessage;
+        CDomainEntry domainEntry(tx);
+        if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
+            return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
+        }
+    }
+
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
         return state.DoS(100, false, REJECT_INVALID, "coinbase");
@@ -1071,7 +1079,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         {
             return false;
         }
-
+        
         // Remove conflicting transactions from the mempool
         BOOST_FOREACH(const CTxMemPool::txiter it, allConflicting)
         {
