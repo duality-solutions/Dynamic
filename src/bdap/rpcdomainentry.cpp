@@ -17,11 +17,11 @@ extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdap
 
 static constexpr bool fPrintDebug = true;
 
-UniValue addpublicname(const JSONRPCRequest& request) 
+UniValue adddomainentry(const JSONRPCRequest& request) 
 {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("addpublicname <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
+        throw std::runtime_error("adddomainentry <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
     }
 
     EnsureWalletIsUnlocked();
@@ -143,11 +143,11 @@ UniValue addpublicname(const JSONRPCRequest& request)
     return oName;
 }
 
-UniValue getdirectories(const JSONRPCRequest& request) 
+UniValue getdomainentries(const JSONRPCRequest& request) 
 {
     if (request.params.size() > 2) 
     {
-        throw std::runtime_error("directorylist <records per page> <page returned>\nLists all BDAP entries.\n");
+        throw std::runtime_error("getdomainentries <records per page> <page returned>\nLists all BDAP entries.\n");
     }
     
     unsigned int nRecordsPerPage = 100;
@@ -169,11 +169,11 @@ UniValue getdirectories(const JSONRPCRequest& request)
     return oDomainEntryList;
 }
 
-UniValue getdirectoryinfo(const JSONRPCRequest& request) 
+UniValue getdomainentryinfo(const JSONRPCRequest& request) 
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getdirectoryinfo <public name>\nList BDAP entry.\n");
+        throw std::runtime_error("getdomainentryinfo <public name>\nList BDAP entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
@@ -197,10 +197,10 @@ UniValue getdirectoryinfo(const JSONRPCRequest& request)
     return oDomainEntryInfo;
 }
 
-UniValue updatedirectory(const JSONRPCRequest& request) {
+UniValue updatedomainentry(const JSONRPCRequest& request) {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("updatedirectory <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("updatedomainentry <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
     EnsureWalletIsUnlocked();
@@ -283,10 +283,10 @@ static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "addpublicname",            &addpublicname,                true  },
-    { "bdap",            "getdirectories",           &getdirectories,               true  },
-    { "bdap",            "getdirectoryinfo",         &getdirectoryinfo,             true  },
-    { "bdap",            "updatedirectory",          &updatedirectory,              true  },
+    { "bdap",            "adddomainentry",           &adddomainentry,               true  },
+    { "bdap",            "getdomainentries",         &getdomainentries,             true  },
+    { "bdap",            "getdomainentryinfo",       &getdomainentryinfo,           true  },
+    { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
 #endif //ENABLE_WALLET
 };
 
