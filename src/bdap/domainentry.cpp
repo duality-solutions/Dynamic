@@ -263,23 +263,46 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
     }
 
     // check object common name component
-    std::string strCommonName = stringFromVch(CommonName);
-    if (strCommonName.length() > MAX_COMMON_NAME_LENGTH) 
+    if (CommonName.size() > MAX_COMMON_NAME_LENGTH) 
     {
         errorMessage = "Invalid BDAP common name. Can not have more than " + std::to_string(MAX_COMMON_NAME_LENGTH) + " characters.";
         return false;
     }
 
     // check object organization name component
-    std::string strOrganizationName = stringFromVch(OrganizationName);
-    if (strOrganizationName.length() > MAX_ORG_NAME_LENGTH) 
+    if (OrganizationName.size() > MAX_ORG_NAME_LENGTH) 
     {
         errorMessage = "Invalid BDAP organization name. Can not have more than " + std::to_string(MAX_ORG_NAME_LENGTH) + " characters.";
         return false;
     }
 
-    // TODO: (bdap) check if EncryptPublicKey is valid
-    // TODO: (bdap) check WalletAddress and SignWalletAddress
+    if (WalletAddress.size() > MAX_WALLET_ADDRESS_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP wallet address. Can not have more than " + std::to_string(MAX_WALLET_ADDRESS_LENGTH) + " characters.";
+        return false;
+    }
+    else {
+        std::string strWalletAddress = stringFromVch(WalletAddress);
+        CDynamicAddress entryAddress(strWalletAddress);
+        if (!entryAddress.IsValid()) {
+            errorMessage = "Invalid BDAP wallet address. Wallet address failed IsValid check.";
+            return false;
+        }
+    }
+    
+    if (EncryptPublicKey.size() > MAX_KEY_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP encryption public key. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
+        return false;
+    }
+    else {
+        CPubKey entryEncryptPublicKey(EncryptPublicKey);
+        if (!entryEncryptPublicKey.IsFullyValid()) {
+            errorMessage = "Invalid BDAP encryption public key. Encryption public key failed IsFullyValid check.";
+            return false;
+        }
+    }
+
     return true;
 }
 
