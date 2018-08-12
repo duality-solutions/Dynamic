@@ -178,7 +178,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
         // -regtest only: allow overriding block.nVersion with
         // -blockversion=N to test forking scenarios
-        if (chainparams.MineBlocksOnDemand())
+        if (chainparams.TryMineBlocksOnDemand())
             pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
         int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST) ? nMedianTimePast : pblock->GetBlockTime();
@@ -537,14 +537,12 @@ private:
     CConnman& connman;
 
 public:
-    BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex = boost::none)
-        : chainparams(chainparams),
-          connman(connman),
-          deviceName(deviceName),
-          deviceIndex(deviceIndex),
-          dHashesPerSec(hashesPerSec) {}
+    BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex = boost::none);
 
 private:
+    std::string deviceName;
+    boost::optional<std::size_t> deviceIndex;
+
     int64_t nStart;
     unsigned int nExtraNonce = 0;
     unsigned int nTransactionsUpdatedLast;
@@ -552,179 +550,200 @@ private:
     CBlockIndex* pindexPrev;
     boost::shared_ptr<CReserveScript> coinbaseScript;
 
-protected:
-    std::string deviceName;
-    boost::optional<std::size_t> deviceIndex;
-
     double* dHashesPerSec;
 
+private:
+    bool IsBlockSynced(CBlock* pblock);
+    void IncrementHashesDone(unsigned int nHashesDone);
+
+    std::unique_ptr<CBlockTemplate> CreateNewMinerBlock();
+
+protected:
+    // target of the hash
     arith_uint256 hashTarget;
 
-    void ProcessFoundSolution(CBlock* pblock, const uint256& hash)
-    {
-        // Found a solution
-        SetThreadPriority(THREAD_PRIORITY_NORMAL);
-        LogPrintf("DynamicMiner%s:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", deviceName, hash.GetHex(), hashTarget.GetHex());
-        ProcessBlockFound(pblock, chainparams, &connman);
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        coinbaseScript->KeepScript();
-        // In regression test mode, stop mining after a block is found.
-        if (chainparams.MineBlocksOnDemand())
-            throw boost::thread_interrupted();
+    // it should be used by miner to process found solution
+    void ProcessFoundSolution(CBlock* pblock, const uint256& hash);
+
+    // this is single method required to implement miner
+    // returned number is amount of hashes processed
+    virtual unsigned int TryMineBlock(CBlock* pblock) = 0;
+
+public:
+    // starts miner loop
+    void StartLoop();
+};
+
+BaseMiner::BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex)
+    : chainparams(chainparams),
+      connman(connman),
+      deviceName(deviceName),
+      deviceIndex(deviceIndex),
+      dHashesPerSec(hashesPerSec) {}
+
+void BaseMiner::ProcessFoundSolution(CBlock* pblock, const uint256& hash)
+{
+    // Found a solution
+    SetThreadPriority(THREAD_PRIORITY_NORMAL);
+    LogPrintf("DynamicMiner%s:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", deviceName, hash.GetHex(), hashTarget.GetHex());
+    ProcessBlockFound(pblock, chainparams, &connman);
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    coinbaseScript->KeepScript();
+    // In regression test mode, stop mining after a block is found.
+    if (chainparams.TryMineBlocksOnDemand())
+        throw boost::thread_interrupted();
+}
+
+bool BaseMiner::IsBlockSynced(CBlock* pblock)
+{
+    // Check for stop or if block needs to be rebuilt
+    boost::this_thread::interruption_point();
+    // Regtest mode doesn't require peers
+    if (connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && chainparams.MiningRequiresPeers())
+        return false;
+    if (pblock->nNonce >= 0xffff0000)
+        return false;
+    if (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 60)
+        return false;
+    if (pindexPrev != chainActive.Tip())
+        return false;
+    // Update nTime every few seconds
+    if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
+        return false; // Recreate the block if the clock has run backwards,
+                      // so that we can use the correct time.
+    if (chainparams.GetConsensus().fPowAllowMinDifficultyBlocks) {
+        // Changing pblock->nTime can change work required on testnet:
+        hashTarget.SetCompact(pblock->nBits);
+    }
+    return true;
+}
+
+void BaseMiner::IncrementHashesDone(unsigned int nHashesDone)
+{
+    static int64_t nHashCounter = 0;
+    static int64_t nLogTime = 0;
+
+    if (nHPSTimerStart == 0) {
+        nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+    } else {
+        nHashCounter += nHashesDone;
     }
 
-    virtual unsigned int LoopTick(CBlock* pblock) = 0;
-
-private:
-    void Init()
-    {
-        std::size_t device = deviceIndex ? *deviceIndex : 0;
-        LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
-        GetMainSignals().ScriptForMining(coinbaseScript);
+    static CCriticalSection cs;
+    if (GetTimeMillis() - nHPSTimerStart > 4000) {
+        LOCK(cs);
+        *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
+        nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+        if (GetTime() - nLogTime > 30 * 60) {
+            nLogTime = GetTime();
+            LogPrintf("%s hashmeter %6.0f khash/s\n", deviceName, *dHashesPerSec / 1000.0);
+        }
     }
+}
 
-    void ValidateCoinbase()
-    {
+std::unique_ptr<CBlockTemplate> BaseMiner::CreateNewMinerBlock()
+{
+    // Wait for blocks if required
+    WaitForNetworkInit(chainparams, connman);
+    // Create new block
+    nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+    pindexPrev = chainActive.Tip();
+    if (!pindexPrev) {
+        return nullptr;
+    }
+    return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
+}
+
+void BaseMiner::StartLoop()
+{
+    std::size_t device = deviceIndex ? *deviceIndex : 0;
+    LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
+    GetMainSignals().ScriptForMining(coinbaseScript);
+
+    try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
         // In the latter case, already the pointer is NULL.
         if (!coinbaseScript || coinbaseScript->reserveScript.empty())
             throw std::runtime_error("No coinbase script available (mining requires a wallet)");
-    }
 
-    std::unique_ptr<CBlockTemplate> CreateNewMinerBlock()
-    {
-        // Wait for blocks if required
-        WaitForNetworkInit(chainparams, connman);
-        // Create new block
-        nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
-        pindexPrev = chainActive.Tip();
-        if (!pindexPrev) {
-            return nullptr;
-        }
-        return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
-    }
-
-    bool LoopChecks(CBlock* pblock)
-    {
-        // Check for stop or if block needs to be rebuilt
-        boost::this_thread::interruption_point();
-        // Regtest mode doesn't require peers
-        if (connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && chainparams.MiningRequiresPeers())
-            return false;
-        if (pblock->nNonce >= 0xffff0000)
-            return false;
-        if (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 60)
-            return false;
-        if (pindexPrev != chainActive.Tip())
-            return false;
-        // Update nTime every few seconds
-        if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
-            return false; // Recreate the block if the clock has run backwards,
-                          // so that we can use the correct time.
-        if (chainparams.GetConsensus().fPowAllowMinDifficultyBlocks) {
-            // Changing pblock->nTime can change work required on testnet:
-            hashTarget.SetCompact(pblock->nBits);
-        }
-        return true;
-    }
-
-    void CountHashes(unsigned int nHashesDone)
-    {
-        static int64_t nHashCounter = 0;
-        static int64_t nLogTime = 0;
-
-        if (nHPSTimerStart == 0) {
-            nHPSTimerStart = GetTimeMillis();
-            nHashCounter = 0;
-        } else {
-            nHashCounter += nHashesDone;
-        }
-
-        static CCriticalSection cs;
-        if (GetTimeMillis() - nHPSTimerStart > 4000) {
-            LOCK(cs);
-            *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
-            nHPSTimerStart = GetTimeMillis();
-            nHashCounter = 0;
-            if (GetTime() - nLogTime > 30 * 60) {
-                nLogTime = GetTime();
-                LogPrintf("%s hashmeter %6.0f khash/s\n", deviceName, *dHashesPerSec / 1000.0);
+        while (true) {
+            std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewMinerBlock();
+            if (!pblocktemplate) {
+                LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", deviceName);
+                return;
             }
-        }
-    }
+            CBlock* pblock = &pblocktemplate->block;
+            IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-public:
-    void StartLoop()
-    {
-        this->Init();
+            LogPrintf("DynamicMiner%s -- Running miner with %u transactions in block (%u bytes)\n", deviceName, pblock->vtx.size(),
+                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
-        try {
-            this->ValidateCoinbase();
-
+            // set loop start for counter
+            nStart = GetTime();
+            hashTarget = arith_uint256().SetCompact(pblock->nBits);
+            // start mining the block
             while (true) {
-                std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewMinerBlock();
-                if (!pblocktemplate) {
-                    LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", deviceName);
-                    return;
-                }
-                CBlock* pblock = &pblocktemplate->block;
-                IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
-
-                LogPrintf("DynamicMiner%s -- Running miner with %u transactions in block (%u bytes)\n", deviceName, pblock->vtx.size(),
-                    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
-
-                nStart = GetTime();
-                hashTarget = arith_uint256().SetCompact(pblock->nBits);
-
-                while (true) {
-                    auto hashesDone = this->LoopTick(pblock);
-                    this->CountHashes(hashesDone);
-                    if (!this->LoopChecks(pblock))
-                        break;
-                }
+                // try mining the block
+                auto hashesDone = this->TryMineBlock(pblock);
+                // increment hash statistics
+                this->IncrementHashesDone(hashesDone);
+                // check if miner is in sync with blockchain
+                if (!this->IsBlockSynced(pblock))
+                    break;
             }
-        } catch (const boost::thread_interrupted&) {
-            LogPrintf("DynamicMiner%s -- terminated\n", deviceName);
-            throw;
-        } catch (const std::runtime_error& e) {
-            LogPrintf("DynamicMiner%s -- runtime error: %s\n", deviceName, e.what());
-            return;
         }
+    } catch (const boost::thread_interrupted&) {
+        LogPrintf("DynamicMiner%s -- terminated\n", deviceName);
+        throw;
+    } catch (const std::runtime_error& e) {
+        LogPrintf("DynamicMiner%s -- runtime error: %s\n", deviceName, e.what());
+        return;
     }
-};
+}
 
 class CPUMiner : public BaseMiner
 {
 public:
-    CPUMiner(const CChainParams& chainparams, CConnman& connman)
-        : BaseMiner(chainparams, connman, &dCPUHashesPerSec, "CPU") {}
+    CPUMiner(const CChainParams& chainparams, CConnman& connman);
 
 protected:
-    virtual unsigned int
-    LoopTick(CBlock* pblock) override
-    {
-        unsigned int nHashesDone = 0;
-        while (true) {
-            uint256 hash = pblock->GetHash();
-            if (UintToArith256(hash) <= hashTarget) {
-                this->ProcessFoundSolution(pblock, hash);
-                break;
-            }
-            pblock->nNonce += 1;
-            nHashesDone += 1;
-            if ((pblock->nNonce & 0xFF) == 0)
-                break;
-        }
-        return nHashesDone;
-    }
+    virtual unsigned int TryMineBlock(CBlock* pblock) override;
 };
+
+CPUMiner::CPUMiner(const CChainParams& chainparams, CConnman& connman)
+    : BaseMiner(chainparams, connman, &dCPUHashesPerSec, "CPU") {}
+
+unsigned int CPUMiner::TryMineBlock(CBlock* pblock)
+{
+    unsigned int nHashesDone = 0;
+    while (true) {
+        uint256 hash = pblock->GetHash();
+        if (UintToArith256(hash) <= hashTarget) {
+            this->ProcessFoundSolution(pblock, hash);
+            break;
+        }
+        pblock->nNonce += 1;
+        nHashesDone += 1;
+        if ((pblock->nNonce & 0xFF) == 0)
+            break;
+    }
+    return nHashesDone;
+}
 
 #ifdef ENABLE_GPU
 class GPUMiner : public BaseMiner
 {
+public:
+    GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex);
+
+protected:
+    virtual unsigned int TryMineBlock(CBlock* pblock) override;
+
 private:
     Argon2GPUParams params;
     Argon2GPUDevice device;
@@ -733,57 +752,54 @@ private:
     Argon2GPU processingUnit;
 
     std::size_t batchSizeTarget;
-
-public:
-    GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
-        : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
-          params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
-          device(global.getAllDevices()[deviceIndex]),
-          context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
-          processingUnit(&context, &params, &device, 1, false, false),
-          batchSizeTarget(device.getTotalMemory() / 512e3) {}
-
-protected:
-    virtual unsigned int
-    LoopTick(CBlock* pblock) override
-    {
-        unsigned int nHashesDone = 0;
-        // current batch size
-        std::size_t batchSize = batchSizeTarget;
-        // set batch input
-        static unsigned char pblank[1];
-        for (std::size_t i = 0; i < batchSizeTarget; i++) {
-            const auto pBegin = BEGIN(pblock->nVersion);
-            const auto pEnd = END(pblock->nNonce);
-            const void* input = (pBegin == pEnd ? pblank : static_cast<const void*>(&pBegin[0]));
-            // input is copied onto memory buffer
-            processingUnit.setInputAndSalt(i, input, INPUT_BYTES);
-            // increment block nonce
-            pblock->nNonce += 1;
-            // increment hashes done
-            nHashesDone += 1;
-            // TODO(crackcomm): is this only to count hashes?
-            if ((pblock->nNonce & 0xFF) == 0) {
-                batchSize = i + 1;
-                break;
-            }
-        }
-        // start GPU processing
-        processingUnit.beginProcessing();
-        // wait for results
-        processingUnit.endProcessing();
-        // check batch results
-        uint256 hash;
-        for (std::size_t i = 0; i < batchSize; i++) {
-            processingUnit.getHash(i, (uint8_t*)&hash);
-            if (UintToArith256(hash) <= hashTarget) {
-                this->ProcessFoundSolution(pblock, hash);
-                break;
-            }
-        }
-        return nHashesDone;
-    }
 };
+
+GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
+    : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
+      params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
+      device(global.getAllDevices()[deviceIndex]),
+      context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
+      processingUnit(&context, &params, &device, 1, false, false),
+      batchSizeTarget(device.getTotalMemory() / 512e3) {}
+
+unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
+{
+    unsigned int nHashesDone = 0;
+    // current batch size
+    std::size_t batchSize = batchSizeTarget;
+    // set batch input
+    static unsigned char pblank[1];
+    for (std::size_t i = 0; i < batchSizeTarget; i++) {
+        const auto pBegin = BEGIN(pblock->nVersion);
+        const auto pEnd = END(pblock->nNonce);
+        const void* input = (pBegin == pEnd ? pblank : static_cast<const void*>(&pBegin[0]));
+        // input is copied onto memory buffer
+        processingUnit.setInputAndSalt(i, input, INPUT_BYTES);
+        // increment block nonce
+        pblock->nNonce += 1;
+        // increment hashes done
+        nHashesDone += 1;
+        // TODO(crackcomm): is this only to count hashes?
+        if ((pblock->nNonce & 0xFF) == 0) {
+            batchSize = i + 1;
+            break;
+        }
+    }
+    // start GPU processing
+    processingUnit.beginProcessing();
+    // wait for results
+    processingUnit.endProcessing();
+    // check batch results
+    uint256 hash;
+    for (std::size_t i = 0; i < batchSize; i++) {
+        processingUnit.getHash(i, (uint8_t*)&hash);
+        if (UintToArith256(hash) <= hashTarget) {
+            this->ProcessFoundSolution(pblock, hash);
+            break;
+        }
+    }
+    return nHashesDone;
+}
 #endif // ENABLE_GPU
 
 } // namespace miners
