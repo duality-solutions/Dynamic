@@ -377,9 +377,9 @@ bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        CDynamicAddress prevSignAddress(bdapDest);
+        CDynamicAddress prevAddress(bdapDest);
         {
-        if (EncodeBase58(entry.SignWalletAddress) != prevSignAddress.ToString())
+        if (EncodeBase58(entry.WalletAddress) != prevAddress.ToString())
             errorMessage = "CheckDeleteDomainEntryTxInputs: - " + _("You are not the owner of this BDAP entry; this delete operation failed!");
             return error(errorMessage.c_str());
         }
@@ -427,9 +427,9 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        CDynamicAddress prevSignAddress(bdapDest);
+        CDynamicAddress prevAddress(bdapDest);
         {
-        if (EncodeBase58(entry.SignWalletAddress) != prevSignAddress.ToString())
+        if (EncodeBase58(entry.WalletAddress) != prevAddress.ToString())
             errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("You are not the owner of this BDAP entry; this update operation failed!");
             return error(errorMessage.c_str());
         }

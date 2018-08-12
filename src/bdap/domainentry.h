@@ -71,7 +71,6 @@ public:
     CharString WalletAddress; // used to send collateral funds for this directory record.
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
-    CharString SignWalletAddress; // used to verify authorized update transaction
     
     uint256 txHash;
 
@@ -100,7 +99,6 @@ public:
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
-        SignWalletAddress.clear();
         txHash.SetNull();
         nHeight = 0;
         nExpireTime = 0;
@@ -121,7 +119,6 @@ public:
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
-        READWRITE(SignWalletAddress);
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
         READWRITE(VARINT(nExpireTime));
@@ -146,7 +143,6 @@ public:
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
-        SignWalletAddress = b.SignWalletAddress;
         txHash = b.txHash;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;

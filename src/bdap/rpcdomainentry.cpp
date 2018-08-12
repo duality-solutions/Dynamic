@@ -53,14 +53,14 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     privWalletKey.MakeNewKey(true);
     CPubKey pubWalletKey = privWalletKey.GetPubKey();
     CKeyID keyWalletID = pubWalletKey.GetID();
-    
+    CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
+
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
     
-    std::string strWalletAddress = CDynamicAddress(keyWalletID).ToString();
-    CharString vchWalletAddress(strWalletAddress.begin(), strWalletAddress.end());
+    CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
 
     CKey privEncryptKey;
@@ -74,19 +74,6 @@ UniValue adddomainentry(const JSONRPCRequest& request)
 
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
 
-    CKey privSignKey;
-    privSignKey.MakeNewKey(true);
-    CPubKey pubSignKey = privSignKey.GetPubKey();
-    CKeyID keySignID = pubSignKey.GetID();
-    CDynamicAddress signWallet = CDynamicAddress(keySignID);
-    std::string strSignWalletAddress = signWallet.ToString();
-    CharString vchSignWalletAddress(strSignWalletAddress.begin(), strSignWalletAddress.end());
-
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privSignKey, pubSignKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding signature key to wallet for BDAP"));
-
-    txDomainEntry.SignWalletAddress = vchSignWalletAddress;
-
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
         nDays = request.params[2].get_int();
@@ -97,16 +84,17 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CharString data;
     txDomainEntry.Serialize(data);
     
-    // Create BDAP OP_RETURN Signature Scripts
+    // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
-    scriptDestination = GetScriptForDestination(signWallet.Get());
+    scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
     LogPrintf("BDAP GetDomainEntryType = %s \n", GetDomainEntryOpTypeString(scriptPubKey));
 
+    // Create BDAP OP_RETURN script
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
@@ -232,17 +220,17 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     CharString data;
     txDomainEntry.Serialize(data);
     
-    // Create BDAP OP_RETURN Signature Scripts
+    // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_MODIFY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
-    CDynamicAddress signWallet(stringFromVch(txDomainEntry.SignWalletAddress));
+    CDynamicAddress walletAddress(stringFromVch(txDomainEntry.WalletAddress));
     CScript scriptDestination;
-    scriptDestination = GetScriptForDestination(signWallet.Get());
+    scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
-    LogPrintf("BDAP GetDomainEntryType = %s \n", GetDomainEntryOpTypeString(scriptPubKey));
 
+    // Create BDAP OP_RETURN script
     CScript scriptData;
     scriptData << OP_RETURN << data;
 

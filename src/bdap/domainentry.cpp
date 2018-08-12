@@ -340,7 +340,6 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
         oName.push_back(Pair("object_type", entry.ObjectType));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
-        oName.push_back(Pair("signature_address", stringFromVch(entry.SignWalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
         oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
