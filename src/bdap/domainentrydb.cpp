@@ -524,6 +524,7 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction&
     }
 
     entry.txHash = tx.GetHash();
+    entry.nHeight = nHeight;
 
     if (strOperationType == "bdap_new")
         return CheckNewDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, op, errorMessage, fJustCheck);
