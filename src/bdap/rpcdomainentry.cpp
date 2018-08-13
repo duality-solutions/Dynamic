@@ -197,35 +197,39 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     CharString vchObjectID = vchFromValue(request.params[0]);
     ToLowerCase(vchObjectID);
     
-    CDomainEntry txDomainEntry;
-    txDomainEntry.DomainComponent = vchDefaultDomainName;
-    txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
-    txDomainEntry.ObjectID = vchObjectID;
+    CDomainEntry txPreviousEntry;
+    txPreviousEntry.DomainComponent = vchDefaultDomainName;
+    txPreviousEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txPreviousEntry.ObjectID = vchObjectID;
 
     // Check if name already exists
-    if (!GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txDomainEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
+    if (!GetDomainEntry(txPreviousEntry.vchFullObjectPath(), txPreviousEntry))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txPreviousEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
 
-    // TODO: Check if Signature Wallet address is owned.  If not, return an error before submitting to the mem pool.
+    COutPoint outpoint = COutPoint(txPreviousEntry.txHash, 1);
+    if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txPreviousEntry.GetFullObjectPath() + _(" entry.  Can not update."));
+
+    CDomainEntry txUpdatedEntry = txPreviousEntry;
     CharString vchCommonName = vchFromValue(request.params[1]);
-    txDomainEntry.CommonName = vchCommonName;
+    txUpdatedEntry.CommonName = vchCommonName;
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
         nDays = request.params[2].get_int();
     }
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
-    txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    txUpdatedEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
-    txDomainEntry.Serialize(data);
+    txUpdatedEntry.Serialize(data);
     
     // Create BDAP operation script
     CScript scriptPubKey;
-    std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
+    std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_MODIFY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
-    CDynamicAddress walletAddress(stringFromVch(txDomainEntry.WalletAddress));
+    CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
@@ -242,15 +246,15 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
 
     // check BDAP values
     std::string strMessage;
-    if (!txDomainEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - " + strMessage);
+    if (!txUpdatedEntry.ValidateValues(strMessage))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
-    txDomainEntry.txHash = wtx.GetHash();
+    txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
-    if(!BuildBDAPJson(txDomainEntry, oName))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3702 - " + _("Failed to read from BDAP JSON object"));
+    if(!BuildBDAPJson(txUpdatedEntry, oName))
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
