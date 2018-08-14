@@ -162,6 +162,7 @@ public:
     std::vector<unsigned char> vchObjectLocation() const; // OU . Domain Name
     bool ValidateValues(std::string& errorMessage);
     bool CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage);
+    bool TxUsesPreviousUTXO(const CTransaction& tx);
 };
 
 std::string DomainEntryFromOp(const int op);
@@ -183,5 +184,8 @@ bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, 
 int GetDomainEntryOpType(const CScript& script);
 std::string GetDomainEntryOpTypeString(const CScript& script);
 bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp, vchCharString& vvchOpParameters, int& op);
-
+bool IsDomainEntryOperationOutput(const CTxOut& out);
+int GetDomainEntryOperationOutIndex(const CTransaction& tx);
+int GetDomainEntryOperationOutIndex(int nHeight, const uint256& txHash);
+bool GetDomainEntryTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams);
 #endif // DYNAMIC_BDAP_DOMAINENTRY_H

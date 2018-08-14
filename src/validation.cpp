@@ -667,6 +667,31 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
             return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
         }
+        int op;
+        CScript scriptOp;
+        vchCharString vvchOpParameters;
+        if (!GetDomainEntryOpScript(tx, scriptOp, vvchOpParameters, op))
+        {
+            return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
+        }
+        const std::string strOperationType = GetDomainEntryOpTypeString(scriptOp);
+        if (strOperationType == "bdap_update"  || strOperationType == "bdap_delete") {
+            CDomainEntry entry;
+            std::vector<unsigned char> vchData;
+            std::vector<unsigned char> vchHash;
+            int nDataOut;
+            
+            bool bData = GetDomainEntryData(tx, vchData, vchHash, nDataOut);
+            if(bData && !entry.UnserializeFromData(vchData, vchHash))
+            {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
+            }
+            // TODO: (bdap) also allow entries with signatures from the same wallet address as the previous UTXO.
+            if (!entry.TxUsesPreviousUTXO(tx))
+            {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-incorrect-utxo-and-wallet" + strErrorMessage);
+            }
+        }
     }
 
     // Coinbase is only valid in a block, not as a loose transaction

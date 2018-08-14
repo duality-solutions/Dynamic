@@ -206,7 +206,8 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     if (!GetDomainEntry(txPreviousEntry.vchFullObjectPath(), txPreviousEntry))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txPreviousEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
 
-    COutPoint outpoint = COutPoint(txPreviousEntry.txHash, 1);
+    int nIn = GetDomainEntryOperationOutIndex(txPreviousEntry.nHeight, txPreviousEntry.txHash);
+    COutPoint outpoint = COutPoint(txPreviousEntry.txHash, nIn);
     if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txPreviousEntry.GetFullObjectPath() + _(" entry.  Can not update."));
 

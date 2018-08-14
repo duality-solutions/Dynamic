@@ -4,6 +4,7 @@
 
 #include "bdap/domainentry.h"
 
+#include "chainparams.h"
 #include "coins.h"
 #include "fluid.h"
 #include "policy/policy.h"
@@ -324,6 +325,18 @@ bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& e
     return false;
 }
 
+/** Checks if the domain entry transaction uses the entry's UTXO */
+bool CDomainEntry::TxUsesPreviousUTXO(const CTransaction& tx)
+{
+    int nIn = GetDomainEntryOperationOutIndex(tx);
+    COutPoint entryOutpoint = COutPoint(txHash, nIn);
+    for (const CTxIn& txIn : tx.vin) {
+        if (txIn.prevout == entryOutpoint)
+            return true;
+    }
+    return false;
+}
+
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
 {
     bool expired = false;
@@ -519,4 +532,31 @@ bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp
         }
     }
     return false;
+}
+
+bool IsDomainEntryOperationOutput(const CTxOut& out) 
+{
+    if (GetDomainEntryOpType(out.scriptPubKey) > 0)
+        return true;
+    return false;
+}
+
+int GetDomainEntryOperationOutIndex(const CTransaction& tx) 
+{
+    for(unsigned int i = 0; i<tx.vout.size();i++) {
+        if(IsDomainEntryOperationOutput(tx.vout[i]))
+            return i;
+    }
+    return -1;
+}
+
+int GetDomainEntryOperationOutIndex(int nHeight, const uint256& txHash) 
+{
+    CTransaction tx;
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    if (!GetDomainEntryTransaction(nHeight, txHash, tx, consensusParams))
+    {
+        return -1;
+    }
+    return GetDomainEntryOperationOutIndex(tx);
 }

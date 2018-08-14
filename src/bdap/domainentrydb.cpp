@@ -427,10 +427,11 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        CDynamicAddress prevAddress(bdapDest);
+        // TODO: (bdap) also allow entries with signatures from the same wallet address as the previous UTXO.
+        if (!prevDomainEntry.TxUsesPreviousUTXO(tx))
         {
-        if (EncodeBase58(entry.WalletAddress) != prevAddress.ToString())
-            errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("You are not the owner of this BDAP entry; this update operation failed!");
+            //check if PreviousUTXO wallet address is used.
+            errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("Update must use the previous UTXO; this update operation failed!");
             return error(errorMessage.c_str());
         }
     }
