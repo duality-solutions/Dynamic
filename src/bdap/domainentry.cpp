@@ -291,6 +291,20 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         }
     }
     
+    if (LinkAddress.size() > MAX_WALLET_ADDRESS_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP link address. Can not have more than " + std::to_string(MAX_WALLET_ADDRESS_LENGTH) + " characters.";
+        return false;
+    }
+    else {
+        std::string strLinkAddress = stringFromVch(LinkAddress);
+        CDynamicAddress entryLinkAddress(strLinkAddress);
+        if (!entryLinkAddress.IsValid()) {
+            errorMessage = "Invalid BDAP link address. Link wallet address failed IsValid check.";
+            return false;
+        }
+    }
+
     if (EncryptPublicKey.size() > MAX_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP encryption public key. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
@@ -355,6 +369,7 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
         oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
+        oName.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
         if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {
             CBlockIndex *pindex = chainActive[entry.nHeight-1];

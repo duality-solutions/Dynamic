@@ -48,7 +48,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
-    // TODO: Add ability to pass in the wallet address and public key
+    // TODO: Add ability to pass in the wallet address
     CKey privWalletKey;
     privWalletKey.MakeNewKey(true);
     CPubKey pubWalletKey = privWalletKey.GetPubKey();
@@ -63,6 +63,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
 
+    // TODO: Add ability to pass in the encryption public key
     CKey privEncryptKey;
     privEncryptKey.MakeNewKey(true);
     CPubKey pubEncryptKey = privEncryptKey.GetPubKey();
@@ -73,6 +74,20 @@ UniValue adddomainentry(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
 
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
+
+    // TODO: Add ability to pass in the link address
+    CKey privLinkKey;
+    privLinkKey.MakeNewKey(true);
+    CPubKey pubLinkKey = privLinkKey.GetPubKey();
+    CKeyID keyLinkID = pubLinkKey.GetID();
+    CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
+    if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
+
+    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "link");
+    
+    CharString vchLinkAddress = vchFromString(linkAddress.ToString());
+    txDomainEntry.LinkAddress = vchLinkAddress;
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
@@ -92,7 +107,6 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
-    LogPrintf("BDAP GetDomainEntryType = %s \n", GetDomainEntryOpTypeString(scriptPubKey));
 
     // Create BDAP OP_RETURN script
     CScript scriptData;
@@ -107,14 +121,14 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3501 - " + strMessage);
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDomainEntry, oName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
