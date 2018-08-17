@@ -178,7 +178,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
         // -regtest only: allow overriding block.nVersion with
         // -blockversion=N to test forking scenarios
-        if (chainparams.TryMineBlocksOnDemand())
+        if (chainparams.MineBlocksOnDemand())
             pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
         int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST) ? nMedianTimePast : pblock->GetBlockTime();
@@ -590,7 +590,7 @@ void BaseMiner::ProcessFoundSolution(CBlock* pblock, const uint256& hash)
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     coinbaseScript->KeepScript();
     // In regression test mode, stop mining after a block is found.
-    if (chainparams.TryMineBlocksOnDemand())
+    if (chainparams.MineBlocksOnDemand())
         throw boost::thread_interrupted();
 }
 
