@@ -188,8 +188,12 @@ bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, 
 int GetDomainEntryOpType(const CScript& script);
 std::string GetDomainEntryOpTypeString(const CScript& script);
 bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp, vchCharString& vvchOpParameters, int& op);
+bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp);
+bool GetDomainEntryDataScript(const CTransaction& tx, CScript& scriptDomainEntryData);
 bool IsDomainEntryOperationOutput(const CTxOut& out);
 int GetDomainEntryOperationOutIndex(const CTransaction& tx);
 int GetDomainEntryOperationOutIndex(int nHeight, const uint256& txHash);
 bool GetDomainEntryTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams);
+bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType);
+CDynamicAddress GetScriptAddress(const CScript& pubScript);
 #endif // DYNAMIC_BDAP_DOMAINENTRY_H

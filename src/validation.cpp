@@ -677,6 +677,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         const std::string strOperationType = GetDomainEntryOpTypeString(scriptOp);
         if (strOperationType == "bdap_update"  || strOperationType == "bdap_delete") {
             CDomainEntry entry;
+            CDomainEntry prevEntry;
             std::vector<unsigned char> vchData;
             std::vector<unsigned char> vchHash;
             int nDataOut;
@@ -686,10 +687,26 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             {
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
             }
-            // TODO: (bdap) also allow entries with signatures from the same wallet address as the previous UTXO.
-            if (!entry.TxUsesPreviousUTXO(tx))
+            
+            if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-failed" + strErrorMessage);
+            }
+            CTransaction prevTx;
+            uint256 hashBlock;
+            if (!GetTransaction(prevEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-tx-failed" + strErrorMessage);
+            }
+            // Get current wallet address used for BDAP tx
+            CScript scriptPubKey;
+            GetDomainEntryOpScript(tx, scriptPubKey);
+            CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+            // Get previous wallet address used for BDAP tx
+            CScript prevScriptPubKey;
+            GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+            CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+            if (txAddress.ToString() != prevAddress.ToString())
             {
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-incorrect-utxo-and-wallet" + strErrorMessage);
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-incorrect-wallet-address-used" + strErrorMessage);
             }
         }
     }

@@ -549,6 +549,27 @@ bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp
     return false;
 }
 
+bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp)
+{
+    int op;
+    vchCharString vvchOpParameters;
+    return GetDomainEntryOpScript(tx, scriptDomainEntryOp, vvchOpParameters, op);
+}
+
+bool GetDomainEntryDataScript(const CTransaction& tx, CScript& scriptDomainEntryData)
+{
+    for (unsigned int i = 0; i < tx.vout.size(); i++) 
+    {
+        const CTxOut& out = tx.vout[i];
+        if (out.scriptPubKey.IsUnspendable()) 
+        {
+            scriptDomainEntryData = out.scriptPubKey;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool IsDomainEntryOperationOutput(const CTxOut& out) 
 {
     if (GetDomainEntryOpType(out.scriptPubKey) > 0)
@@ -574,4 +595,35 @@ int GetDomainEntryOperationOutIndex(int nHeight, const uint256& txHash)
         return -1;
     }
     return GetDomainEntryOperationOutIndex(tx);
+}
+
+bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType) 
+{
+    for (const CRecipient& rec : vecSend) {
+        CScript bdapScript = rec.scriptPubKey;
+        if (bdapScript.IsUnspendable()) {
+            std::vector<unsigned char> vchData;
+            std::vector<unsigned char> vchHash;
+            if (!GetDomainEntryData(bdapScript, vchData, vchHash)) 
+            {
+                return false;
+            }
+            entry.UnserializeFromData(vchData, vchHash);
+        }
+        else {
+            strOpType = GetDomainEntryOpTypeString(bdapScript);
+        }
+    }
+    if (!entry.IsNull() && strOpType.size() > 0) {
+        return true;
+    }
+    return false;
+}
+
+CDynamicAddress GetScriptAddress(const CScript& pubScript)
+{
+    CTxDestination txDestination;
+    ExtractDestination(pubScript, txDestination);
+    CDynamicAddress entryAddress(txDestination);
+    return entryAddress;
 }

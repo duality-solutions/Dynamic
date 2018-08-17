@@ -249,6 +249,15 @@ bool CDomainEntryDB::GetDomainEntryInfo(const std::vector<unsigned char>& vchFul
     return true;
 }
 
+bool CDomainEntryDB::GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry)
+{
+    if (!ReadDomainEntry(vchFullObjectPath, entry)) {
+        return false;
+    }
+    
+    return true;
+}
+
 bool CheckDomainEntryDB()
 {
     if (!pDomainEntryDB)
@@ -427,11 +436,22 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        // TODO: (bdap) also allow entries with signatures from the same wallet address as the previous UTXO.
-        if (!prevDomainEntry.TxUsesPreviousUTXO(tx))
+        CTransaction prevTx;
+        uint256 hashBlock;
+        if (!GetTransaction(prevDomainEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+            errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("Cannot extract previous transaction from BDAP output; this update operation failed!");
+            return error(errorMessage.c_str());
+        }
+        // Get current wallet address used for BDAP tx
+        CDynamicAddress txAddress = GetScriptAddress(scriptOp);
+        // Get previous wallet address used for BDAP tx
+        CScript prevScriptPubKey;
+        GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+        CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+        if (txAddress.ToString() != prevAddress.ToString())
         {
-            //check if PreviousUTXO wallet address is used.
-            errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("Update must use the previous UTXO; this update operation failed!");
+            //check if previous wallet address is used for update and delete txs
+            errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("Update must use the previous wallet address; this update operation failed!");
             return error(errorMessage.c_str());
         }
     }

@@ -411,10 +411,10 @@ void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScrip
 
     // Check amount
     if (nOPValue <= 0 || nDataValue <= 0)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
 
     if (nOPValue + nDataValue > curBalance)
-        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
 
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
@@ -426,14 +426,14 @@ void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScrip
     LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    CRecipient recDataScript = {bdapDataScript, nDataValue, false};
+    CRecipient recDataScript = {bdapDataScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recDataScript);
-    CRecipient recOPScript = {bdapOPScript, nOPValue, false};
+    CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
                                          strError, NULL, true, ALL_COINS, false, true)) {
-        if (nOPValue + nDataValue + nFeeRequired > pwalletMain->GetBalance())
+        if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }

@@ -31,6 +31,7 @@ public:
     bool CleanupLevelDB(int& nRemoved);
     bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDomainEntryInfo);
+    bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry);
 };
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);

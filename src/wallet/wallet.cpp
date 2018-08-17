@@ -9,7 +9,7 @@
 
 #include "base58.h"
 #include "primitives/block.h"
-#include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
 #include "checkpoints.h"
 #include "chain.h"
 #include "wallet/coincontrol.h"
@@ -2469,6 +2469,48 @@ CAmount CWallet::GetImmatureWatchOnlyBalance() const
     return nTotal;
 }
 
+void CWallet::GetBDAPCoins(std::vector<COutput>& vCoins, const CScript& prevScriptPubKey) const
+{
+    CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+    //LogPrintf("GetBDAPCoins prevAddress =  %s\n", prevAddress.ToString());
+    vCoins.clear();
+    {
+        LOCK2(cs_main, cs_wallet);
+        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+        {
+            const uint256& wtxid = it->first;
+            const CWalletTx* pcoin = &(*it).second;
+            
+            if (!CheckFinalTx(*pcoin))
+                continue;
+
+            if (!pcoin->IsTrusted())
+                continue;
+
+            if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
+                continue;
+
+            int nDepth = pcoin->GetDepthInMainChain(false);
+
+            // We should not consider coins which aren't at least in our mempool
+            // It's possible for these to be conflicted via ancestors which we may never be able to detect
+            if (nDepth == 0 && !pcoin->InMempool())
+                continue;
+
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++) {
+                isminetype mine = IsMine(pcoin->vout[i]);
+                if (!(IsSpent(wtxid, i)) && mine != ISMINE_NO && (!IsLockedCoin((*it).first, i)) && (pcoin->vout[i].nValue > 0)) {
+                    CDynamicAddress address =  GetScriptAddress(pcoin->vout[i].scriptPubKey);
+                    //LogPrintf("GetBDAPCoins address =  %s\n", address.ToString());
+                    if (prevAddress == address) {
+                        vCoins.push_back(COutput(pcoin, i, nDepth, true, (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO));
+                    }
+                }
+            }
+        }
+    }
+}
+
 void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl *coinControl, bool fIncludeZeroValue, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
     vCoins.clear();
@@ -3329,7 +3371,40 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
         LOCK2(cs_main, cs_wallet);
         {
             std::vector<COutput> vAvailableCoins;
-            AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+            if (fIsBDAP) {
+                CDomainEntry entry;
+                CDomainEntry prevEntry;
+                std::string strOpType;
+                if (!GetDomainEntryFromRecipient(vecSend, entry, strOpType)) {
+                    strFailReason = _("GetDomainEntryFromRecipient failed to find BDAP scripts in the recipient array.");
+                    return false;
+                }
+                if (strOpType == "bdap_new") {
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                }
+                else if (strOpType == "bdap_update" || strOpType == "bdap_delete") {
+                    //LogPrintf("CreateTransaction for BDAP entry %s , operation type = %s\n", entry.GetFullObjectPath(), strOpType);
+                    if (CheckDomainEntryDB()) {
+                        
+                        if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                            strFailReason = _("GetDomainEntryInfo failed to find previous domanin entry.");
+                            return false;
+                        }
+                    }
+                    CTransaction prevTx;
+                    uint256 hashBlock;
+                    if (!GetTransaction(prevEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+                        strFailReason = _("GetDomainEntryInfo failed to find previous domanin entry transaction.");
+                        return false;
+                    }
+                    CScript prevScriptPubKey;
+                    GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+            }
+            else {
+                AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+            }
 
             nFeeRet = 0;
             if(nFeePay > 0) nFeeRet = nFeePay;
