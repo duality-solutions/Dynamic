@@ -297,11 +297,13 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         return false;
     }
     else {
-        std::string strLinkAddress = stringFromVch(LinkAddress);
-        CDynamicAddress entryLinkAddress(strLinkAddress);
-        if (!entryLinkAddress.IsValid()) {
-            errorMessage = "Invalid BDAP link address. Link wallet address failed IsValid check.";
-            return false;
+        if (LinkAddress.size() > 0) {
+            std::string strLinkAddress = stringFromVch(LinkAddress);
+            CDynamicAddress entryLinkAddress(strLinkAddress);
+            if (!entryLinkAddress.IsValid()) {
+                errorMessage = "Invalid BDAP link address. Link wallet address failed IsValid check.";
+                return false;
+            }
         }
     }
 
@@ -311,10 +313,12 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         return false;
     }
     else {
-        CPubKey entryEncryptPublicKey(EncryptPublicKey);
-        if (!entryEncryptPublicKey.IsFullyValid()) {
-            errorMessage = "Invalid BDAP encryption public key. Encryption public key failed IsFullyValid check.";
-            return false;
+        if (EncryptPublicKey.size() > 0) {
+            CPubKey entryEncryptPublicKey(EncryptPublicKey);
+            if (!entryEncryptPublicKey.IsFullyValid()) {
+                errorMessage = "Invalid BDAP encryption public key. Encryption public key failed IsFullyValid check.";
+                return false;
+            }
         }
     }
 
