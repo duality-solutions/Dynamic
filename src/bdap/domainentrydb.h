@@ -19,11 +19,11 @@ public:
     bool AddDomainEntry(const CDomainEntry& entry, const int op);
     void AddDomainEntryIndex(const CDomainEntry& entry, const int op);
     bool ReadDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);
-    bool ReadDomainEntryAddress(const std::vector<unsigned char>& vchAddress, std::vector<unsigned char>& vchObjectPath);
+    bool ReadDomainEntryTxId(const uint256& txHash, std::vector<unsigned char>& vchObjectPath);
     bool EraseDomainEntry(const std::vector<unsigned char>& vchObjectPath);
-    bool EraseDomainEntryAddress(const std::vector<unsigned char>& vchAddress);
+    bool EraseDomainEntryTxId(const uint256& txHash);
     bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath);
-    bool DomainEntryExistsAddress(const std::vector<unsigned char>& vchAddress);
+    bool DomainEntryExistsTxId(const uint256& txHash);
     bool RemoveExpired(int& entriesRemoved);
     void WriteDomainEntryIndex(const CDomainEntry& entry, const int op);
     void WriteDomainEntryIndexHistory(const CDomainEntry& entry, const int op);
@@ -32,6 +32,8 @@ public:
     bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDomainEntryInfo);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry);
+    //bool GetDomainEntryInfoTxId(const uint256& txHash, CDomainEntry& entry);
+    //bool GetDomainEntryInfoTxId(const uint256& txHash, std::vector<unsigned char>& vchFullObjectPath);
 };
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);
@@ -39,21 +41,19 @@ bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);
 bool CheckNewDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                               const int op, std::string& errorMessage, bool fJustCheck);
+                               std::string& errorMessage, bool fJustCheck);
 bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                  const int op, std::string& errorMessage, bool fJustCheck);
-bool CheckActivateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const vchCharString& vvchOpParameters,
-                                    const int op, std::string& errorMessage, bool fJustCheck);
+                                  std::string& errorMessage, bool fJustCheck);
 bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                  const int op, std::string& errorMessage, bool fJustCheck);
+                                  std::string& errorMessage, bool fJustCheck);
 bool CheckMoveDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                const int op, std::string& errorMessage, bool fJustCheck);
+                                std::string& errorMessage, bool fJustCheck);
 bool CheckExecuteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                   const int op, std::string& errorMessage, bool fJustCheck);
+                                   std::string& errorMessage, bool fJustCheck);
 bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                const int op, std::string& errorMessage, bool fJustCheck);
+                                std::string& errorMessage, bool fJustCheck);
 bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
-                                  const int op, std::string& errorMessage, bool fJustCheck);
+                                  std::string& errorMessage, bool fJustCheck);
 bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, 
                             int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 

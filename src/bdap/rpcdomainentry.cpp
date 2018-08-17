@@ -286,6 +286,81 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     return oName;
 }
 
+UniValue deletedomainentry(const JSONRPCRequest& request) {
+    if (request.params.size() != 1) 
+    {
+        throw std::runtime_error("deletedomainentry <userid>\nDelete an existing public name blockchain directory entry.\n");
+    }
+
+    EnsureWalletIsUnlocked();
+
+    // Format object and domain names to lower case.
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+    
+    CDomainEntry txSearchEntry;
+    txSearchEntry.DomainComponent = vchDefaultDomainName;
+    txSearchEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txSearchEntry.ObjectID = vchObjectID;
+    CDomainEntry txDeletedEntry = txSearchEntry;
+
+    // Check if name already exists
+    if (!GetDomainEntry(txSearchEntry.vchFullObjectPath(), txSearchEntry))
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txSearchEntry.GetFullObjectPath() + _(" does not exists.  Can not delete."));
+
+    int nIn = GetDomainEntryOperationOutIndex(txSearchEntry.nHeight, txSearchEntry.txHash);
+    COutPoint outpoint = COutPoint(txSearchEntry.txHash, nIn);
+    if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txSearchEntry.GetFullObjectPath() + _(" entry.  Can not delete."));
+    
+    txDeletedEntry.WalletAddress = txSearchEntry.WalletAddress;
+    txDeletedEntry.CommonName = txSearchEntry.CommonName;
+
+    CharString data;
+    txDeletedEntry.Serialize(data);
+    
+    // Create BDAP operation script
+    CScript scriptPubKey;
+    std::vector<unsigned char> vchFullObjectPath = txDeletedEntry.vchFullObjectPath();
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_DELETE) << vchFullObjectPath << OP_2DROP << OP_DROP;
+
+    CDynamicAddress walletAddress(stringFromVch(txDeletedEntry.WalletAddress));
+    CScript scriptDestination;
+    scriptDestination = GetScriptForDestination(walletAddress.Get());
+    scriptPubKey += scriptDestination;
+
+    // Create BDAP OP_RETURN script
+    CScript scriptData;
+    scriptData << OP_RETURN << data;
+
+    // Send the transaction
+    CWalletTx wtx;
+    float fYears = ((float)1/365.25);
+    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
+    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    txDeletedEntry.txHash = wtx.GetHash();
+
+    UniValue oName(UniValue::VOBJ);
+    if(!BuildBDAPJson(txDeletedEntry, oName))
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
+    
+    if (fPrintDebug) {
+        // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
+        LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
+
+        const CTransaction testTx = (CTransaction)wtx;
+        CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
+
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
+            testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
+            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
+    }
+
+    return oName;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
@@ -294,6 +369,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "getdomainentries",         &getdomainentries,             true  },
     { "bdap",            "getdomainentryinfo",       &getdomainentryinfo,           true  },
     { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
+    { "bdap",            "deletedomainentry",        &deletedomainentry,            true  },
 #endif //ENABLE_WALLET
 };
 
