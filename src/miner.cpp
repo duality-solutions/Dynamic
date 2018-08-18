@@ -748,17 +748,17 @@ protected:
     virtual unsigned int TryMineBlock(CBlock* pblock) override;
 
 private:
+    Argon2GPUContext global;
     Argon2GPUParams params;
     Argon2GPUDevice device;
-    Argon2GPUContext global;
     Argon2GPUProgramContext context;
-    Argon2GPU processingUnit;
-
     std::size_t batchSizeTarget;
+    Argon2GPU processingUnit;
 };
 
 GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
     : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
+      global(),
       params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
       device(global.getAllDevices()[deviceIndex]),
       context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
