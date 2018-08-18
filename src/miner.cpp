@@ -545,12 +545,15 @@ private:
 
     int64_t nStart;
     unsigned int nExtraNonce = 0;
-    unsigned int nTransactionsUpdatedLast;
-
-    CBlockIndex* pindexPrev;
-    boost::shared_ptr<CReserveScript> coinbaseScript;
 
     double* dHashesPerSec;
+
+    // set by CreateNewMinerBlock
+    CBlockIndex* pindexPrev;
+    unsigned int nTransactionsUpdatedLast;
+
+    // set in StartLoop
+    boost::shared_ptr<CReserveScript> coinbaseScript;
 
 private:
     bool IsBlockSynced(CBlock* pblock);
@@ -560,7 +563,7 @@ private:
 
 protected:
     // target of the hash
-    arith_uint256 hashTarget;
+    arith_uint256 hashTarget = 0;
 
     // it should be used by miner to process found solution
     void ProcessFoundSolution(CBlock* pblock, const uint256& hash);
@@ -759,8 +762,8 @@ GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size
       params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
       device(global.getAllDevices()[deviceIndex]),
       context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
-      processingUnit(&context, &params, &device, 1, false, false),
-      batchSizeTarget(device.getTotalMemory() / 512e3) {}
+      batchSizeTarget(device.getTotalMemory() / 512e3),
+      processingUnit(&context, &params, &device, batchSizeTarget, false, false) {}
 
 unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
 {
