@@ -264,7 +264,8 @@ namespace GUIUtil
 #endif
 
     // utility functions for mining UI
-    int MaxThreads();
+    int CPUMaxThreads();
+    int GPUMaxThreads();
     QString FormatHashRate(qint64 n);
     int64_t GetNetworkHashPS(int lookup, int height);
     QString FormatTimeInterval(arith_uint256 time);

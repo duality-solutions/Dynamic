@@ -1088,12 +1088,20 @@ void ClickableProgressBar::mouseReleaseEvent(QMouseEvent *event)
     Q_EMIT clicked(event->pos());
 }
 
-int MaxThreads() {
+int CPUMaxThreads() {
     int nThreads = boost::thread::hardware_concurrency();
 
     int nUseThreads = GetArg("-genproclimit", -1);
     if (nUseThreads < 0) {
         nUseThreads = nThreads;
+    }
+    return nUseThreads;
+}
+
+int GPUMaxThreads() {
+    int nUseThreads = 1;
+    if (nUseThreads < 1) {
+        nUseThreads = 1;
     }
     return nUseThreads;
 }

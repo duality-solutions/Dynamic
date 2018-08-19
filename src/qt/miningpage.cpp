@@ -20,7 +20,8 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    int nMaxUseThreads = GUIUtil::MaxThreads();
+    int nCPUMaxUseThreads = GUIUtil::CPUMaxThreads();
+    int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
 
     std::string PrivAddress = GetArg("-miningprivkey", "");
     if (!PrivAddress.empty())
@@ -36,15 +37,15 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
         }
     }
 
-    ui->sliderCPUCores->setMinimum(0);
-    ui->sliderCPUCores->setMaximum(nMaxUseThreads);
-    ui->sliderCPUCores->setValue(nMaxUseThreads);
-    ui->labelNCPUCores->setText(QString("%1").arg(nMaxUseThreads));
+    ui->sliderCPUCores->setMinimum(1);
+    ui->sliderCPUCores->setMaximum(nCPUMaxUseThreads);
+    ui->sliderCPUCores->setValue(nCPUMaxUseThreads);
+    ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
 
-    ui->sliderGPUCores->setMinimum(0);
-    ui->sliderGPUCores->setMaximum(nMaxUseThreads);
-    ui->sliderGPUCores->setValue(nMaxUseThreads);
-    ui->labelNGPUCores->setText(QString("%1").arg(nMaxUseThreads));
+    ui->sliderGPUCores->setMinimum(1);
+    ui->sliderGPUCores->setMaximum(nGPUMaxUseThreads);
+    ui->sliderGPUCores->setValue(nGPUMaxUseThreads);
+    ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
 
     ui->sliderCPUGraphSampleTime->setMaximum(0);
     ui->sliderCPUGraphSampleTime->setMaximum(6);
