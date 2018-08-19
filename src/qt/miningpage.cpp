@@ -37,15 +37,31 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
         }
     }
 
+    if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
+        ui->sliderCPUCores->setVisible(false);
+        ui->labelNCPUCores->setText(QString("Slider will show once Dynamic has finished syncing").arg(nCPUMaxUseThreads));
+    }
+    else {
+        ui->sliderCPUCores->setVisible(true);
+        ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
+    }
+
     ui->sliderCPUCores->setMinimum(1);
     ui->sliderCPUCores->setMaximum(nCPUMaxUseThreads);
     ui->sliderCPUCores->setValue(nCPUMaxUseThreads);
-    ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
+
+    if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
+        ui->sliderGPUCores->setVisible(false);
+        ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing").arg(nGPUMaxUseThreads));
+    }
+    else {
+        ui->sliderGPUCores->setVisible(true);
+        ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
+    }
 
     ui->sliderGPUCores->setMinimum(1);
     ui->sliderGPUCores->setMaximum(nGPUMaxUseThreads);
     ui->sliderGPUCores->setValue(nGPUMaxUseThreads);
-    ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
 
     ui->sliderCPUGraphSampleTime->setMaximum(0);
     ui->sliderCPUGraphSampleTime->setMaximum(6);

@@ -762,7 +762,7 @@ GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size
       params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
       device(global.getAllDevices()[deviceIndex]),
       context(&global, {device}, argon2gpu::ARGON2_D, argon2gpu::ARGON2_VERSION_10),
-      batchSizeTarget(device.getTotalMemory() / 128e3),
+      batchSizeTarget(device.getTotalMemory() / 8192e3),
       processingUnit(&context, &params, &device, batchSizeTarget, false, false) {}
 
 unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
