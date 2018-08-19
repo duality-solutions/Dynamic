@@ -361,6 +361,41 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
     return oName;
 }
 
+UniValue makekeypair(const JSONRPCRequest& request)
+{
+    if (request.params.size() > 1)
+        throw std::runtime_error(
+            "makekeypair [prefix]\n"
+            "Make a public/private key pair.\n"
+            "[prefix] is optional preferred prefix for the public key.\n");
+
+    std::string strPrefix = "";
+    if (request.params.size() > 0)
+        strPrefix = request.params[0].get_str();
+
+    CKey key;
+    int nCount = 0;
+    do
+    {
+        key.MakeNewKey(false);
+        nCount++;
+    } while (nCount < 10000 && strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()));
+
+    if (strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()))
+        return NullUniValue;
+
+    CPrivKey vchPrivKey = key.GetPrivKey();
+    CKeyID keyID = key.GetPubKey().GetID();
+    CKey vchSecret = CKey();
+    vchSecret.SetPrivKey(vchPrivKey, false);
+    UniValue result(UniValue::VOBJ);
+    result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
+    result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
+    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
+    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
@@ -371,6 +406,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
     { "bdap",            "deletedomainentry",        &deletedomainentry,            true  },
 #endif //ENABLE_WALLET
+    { "bdap",            "makekeypair",              &makekeypair,                  true  },
 };
 
 void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC)
