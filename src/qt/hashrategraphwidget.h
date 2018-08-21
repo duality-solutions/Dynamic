@@ -23,10 +23,9 @@ public:
 
     enum GraphType
     {
-        MINER_HASHRATE = 0,
-        NETWORK_HASHRATE,
-        MINER_CPU_HASHRATE,
-        MINER_GPU_HASHRATE
+        MINER_CPU_HASHRATE = 0,
+        MINER_GPU_HASHRATE,
+        NETWORK_HASHRATE
     };
 
     enum SampleTime

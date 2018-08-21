@@ -23,7 +23,7 @@
 
 HashRateGraphWidget::HashRateGraphWidget(QWidget *parent) :
     QWidget(parent),
-    graphType(GraphType::MINER_HASHRATE),
+    graphType(GraphType::MINER_CPU_HASHRATE),
     iDesiredSamples(DEFAULT_DESIRED_SAMPLES),
     iMaxHashRate(0),
     vSampleHashRate(),
@@ -80,7 +80,7 @@ void HashRateGraphWidget::drawHashRate(QPainter& painter)
             path.lineTo(x, y);
         }
         path.lineTo(x, YMARGIN + h);
-        if (graphType == MINER_HASHRATE) {
+        if (graphType == MINER_CPU_HASHRATE || graphType == MINER_GPU_HASHRATE) {
             painter.fillPath(path, QColor(0, 255, 0, 128)); //green
             painter.setPen(Qt::red);
         }
@@ -116,10 +116,10 @@ void HashRateGraphWidget::truncateSampleQueue()
 void HashRateGraphWidget::updateHashRateGraph()
 {
     int64_t iCurrentHashRate = 0;
-    if (graphType == MINER_HASHRATE) {
+    if (graphType == GraphType::MINER_CPU_HASHRATE || graphType == GraphType::MINER_GPU_HASHRATE) {
         iCurrentHashRate = getHashRate();
     }
-    else if (graphType == NETWORK_HASHRATE) {
+    else if (graphType == GraphType::NETWORK_HASHRATE) {
         iCurrentHashRate = GUIUtil::GetNetworkHashPS(120, -1);
     }
     

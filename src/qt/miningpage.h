@@ -34,10 +34,11 @@ private:
     WalletModel *model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     bool hasMiningprivkey;
-
+    bool fGPUMinerOn;
+    bool fCPUMinerOn;
     void timerEvent(QTimerEvent *event);
     void updateUI();
-    void StartMiner();
+    void StartMiner(bool fGPU);
     void StopMiner(bool fGPU);
     void showHashMeterControls(bool show, bool fGPU);
     void updatePushSwitch(bool fGPU);

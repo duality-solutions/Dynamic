@@ -22,7 +22,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 
     int nCPUMaxUseThreads = GUIUtil::CPUMaxThreads();
     int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
-
+ 
     std::string PrivAddress = GetArg("-miningprivkey", "");
     if (!PrivAddress.empty())
     {
@@ -39,7 +39,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderCPUCores->setVisible(false);
-        ui->labelNCPUCores->setText(QString("Slider will show once Dynamic has finished syncing").arg(nCPUMaxUseThreads));
+        ui->labelNCPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
     }
     else {
         ui->sliderCPUCores->setVisible(true);
@@ -52,7 +52,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderGPUCores->setVisible(false);
-        ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing").arg(nGPUMaxUseThreads));
+        ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
     }
     else {
         ui->sliderGPUCores->setVisible(true);
@@ -97,6 +97,8 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
 
     showHashMeterControls(false, false);
     showHashMeterControls(false, true);
+    fCPUMinerOn = false;
+    fGPUMinerOn = false;
     updateUI();
     startTimer(3511);
 }
@@ -113,6 +115,18 @@ void MiningPage::setModel(WalletModel *model)
 
 void MiningPage::updateUI()
 {
+    if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced()) {
+        if (ui->sliderGPUCores->isHidden()) {
+            int nThreads = ui->sliderGPUCores->value();
+            ui->sliderGPUCores->setVisible(true);
+            ui->labelNGPUCores->setText(QString("%1").arg(nThreads));
+        }
+        if (ui->sliderCPUCores->isHidden()) {
+            int nThreads = ui->sliderCPUCores->value();
+            ui->sliderCPUCores->setVisible(true);
+            ui->labelNCPUCores->setText(QString("%1").arg(nThreads));
+        }
+    }
     qint64 networkHashrate = GUIUtil::GetNetworkHashPS(120, -1);
     qint64 hashrate = GetHashRate();
 
@@ -145,21 +159,40 @@ void MiningPage::updatePushSwitch(bool fGPU)
         pushSwitch->setToolTip(tr("Blockchain/Dynodes are not synced, please wait until fully synced before mining!"));
         pushSwitch->setText(tr("Disabled"));
         pushSwitch->setEnabled(false);
-    } else if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced() && GetHashRate() == 0) {
+        return;
+    }
+
+    if (fGPU && fGPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
+        pushSwitch->setText(tr("Stop mining"));
+    }
+    else if (fGPU && !fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
         pushSwitch->setText(tr("Start mining"));
-        pushSwitch->setEnabled(true);
-    } else {
-        pushSwitch->setToolTip(tr("Click 'Stop mining' to finish mining!"));
-        pushSwitch->setText(tr("Stop mining"));
-        pushSwitch->setEnabled(true);
     }
+    else if (!fGPU && fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
+        pushSwitch->setText(tr("Stop mining"));
+    }
+    else if (!fGPU && !fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
+        pushSwitch->setText(tr("Start mining"));
+    }
+    pushSwitch->setEnabled(true);
 }
 
-void MiningPage::StartMiner()
+void MiningPage::StartMiner(bool fGPU)
 {
-    int nCPUThreads = (int)ui->sliderCPUCores->value();
-    int nGPUThreads = (int)ui->sliderGPUCores->value();
+    int nGPUThreads = 0;
+    int nCPUThreads = 0;
+    if (fGPU) {
+        fGPUMinerOn = true;
+        nGPUThreads = (int)ui->sliderGPUCores->value();
+    }
+    else {
+        fCPUMinerOn = true;
+        nCPUThreads = (int)ui->sliderCPUCores->value();
+    }
     GenerateDynamics(nCPUThreads, nGPUThreads, Params(), *g_connman);
     updateUI();
 }
@@ -167,8 +200,10 @@ void MiningPage::StartMiner()
 void MiningPage::StopMiner(bool fGPU)
 {
     if (fGPU) {
+        fGPUMinerOn = false;
         ShutdownGPUMiners();
     } else {
+        fCPUMinerOn = false;
         ShutdownCPUMiners();
     }
     updateUI();
@@ -177,20 +212,20 @@ void MiningPage::StopMiner(bool fGPU)
 void MiningPage::changeNumberOfCPUThreads(int i)
 {
     ui->labelNCPUCores->setText(QString("%1").arg(i));
-    if (i == 0) {
-        StopMiner(false);
-    } else if (i > 0 && GetCPUHashRate() <= 0) {
-        StartMiner();
+    if (fCPUMinerOn) {
+        if (i > 0) {
+            StartMiner(false);
+        }
     }
 }
 
 void MiningPage::changeNumberOfGPUThreads(int i)
 {
     ui->labelNGPUCores->setText(QString("%1").arg(i));
-    if (i == 0) {
-        StopMiner(true);
-    } else if (i > 0 && GetGPUHashRate() <= 0) {
-        StartMiner();
+    if (fGPUMinerOn) {
+        if (i > 0) {
+            StartMiner(true);
+        }
     }
 }
 
@@ -208,19 +243,34 @@ void MiningPage::switchMining(bool fGPU)
 {
     QPushButton* pushSwitch = fGPU ? ui->pushSwitchGPUMining : ui->pushSwitchCPUMining;
     QSlider* coreSlider = fGPU ? ui->sliderGPUCores : ui->sliderCPUCores;
+    QLabel* labelCores = fGPU ? ui->labelNGPUCores : ui->labelNCPUCores;
     int nThreads = (int)(fGPU ? ui->sliderGPUCores->value() : ui->sliderCPUCores->value());
-    int64_t hashRate = fGPU ? GetGPUHashRate() : GetCPUHashRate();
 
-    if (hashRate > 0) {
+    if (fGPU && !fGPUMinerOn) {
+        if (nThreads == 0)
+            coreSlider->setValue(1);
+        coreSlider->setVisible(true);
+        labelCores->setText(QString("%1").arg(nThreads));
+        pushSwitch->setText(tr("Starting"));
+        StartMiner(fGPU);
+    }
+    else if (fGPU && fGPUMinerOn) {
         pushSwitch->setText(tr("Stopping"));
+        coreSlider->setVisible(false);
         StopMiner(fGPU);
-    } else if (nThreads == 0 && hashRate == 0) {
-        coreSlider->setValue(1);
+    }
+    else if (!fGPU && !fCPUMinerOn) {
+        if (nThreads == 0)
+            coreSlider->setValue(1);
+        coreSlider->setVisible(true);
+        labelCores->setText(QString("%1").arg(nThreads));
         pushSwitch->setText(tr("Starting"));
-        StartMiner();
-    } else {
-        pushSwitch->setText(tr("Starting"));
-        StartMiner();
+        StartMiner(fGPU);
+    }
+    else if (!fGPU && fCPUMinerOn) {
+        pushSwitch->setText(tr("Stopping"));
+        coreSlider->setVisible(false);
+        StopMiner(fGPU);
     }
 }
 
@@ -241,12 +291,12 @@ void MiningPage::showGPUHashRate(int i)
 
 void MiningPage::showHashRate(int i, bool fGPU)
 {
-    HashRateGraphWidget* widget = fGPU ? ui->minerGPUHashRateWidget : ui->minerCPUHashRateWidget;
+    HashRateGraphWidget* minerHashRateWidget = fGPU ? ui->minerGPUHashRateWidget : ui->minerCPUHashRateWidget;
     if (i == 0) {
-        widget->StopHashMeter();
+        minerHashRateWidget->StopHashMeter();
         showHashMeterControls(false, fGPU);
     } else {
-        widget->StartHashMeter();
+        minerHashRateWidget->StartHashMeter();
         showHashMeterControls(true, fGPU);
     }
 }
