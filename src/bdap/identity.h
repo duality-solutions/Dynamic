@@ -80,8 +80,9 @@ public:
     int nVersion;
     CharString VerifierFullPath;  // name of the verifier's full domain entry path
     CIdentity Identity;
-    CharString Signature;
+    CharString VerificationData;
     unsigned int nHeight;
+    uint64_t nExpireTime;
 
     uint256 txHash;
 
@@ -101,8 +102,9 @@ public:
         nVersion = CIdentityVerification::CURRENT_VERSION;
         VerifierFullPath.clear();
         Identity.SetNull();
-        Signature.clear();
+        VerificationData.clear();
         nHeight = 0;
+        nExpireTime = 0;
         txHash.SetNull();
         VerifierDomainEntry = nullptr;
     }
@@ -114,13 +116,14 @@ public:
         READWRITE(this->nVersion);
         READWRITE(VerifierFullPath);
         READWRITE(Identity);
-        READWRITE(Signature);
+        READWRITE(VerificationData);
         READWRITE(VARINT(nHeight));
+        READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
     }
 
     inline friend bool operator==(const CIdentityVerification& a, const CIdentityVerification& b) {
-        return (a.VerifierFullPath == b.VerifierFullPath && a.Identity == b.Identity &&  a.Signature == b.Signature);
+        return (a.VerifierFullPath == b.VerifierFullPath && a.Identity == b.Identity &&  a.VerificationData == b.VerificationData && a.nExpireTime == b.nExpireTime);
     }
 
     inline friend bool operator!=(const CIdentityVerification& a, const CIdentityVerification& b) {
@@ -130,8 +133,9 @@ public:
     inline CIdentityVerification operator=(const CIdentityVerification& b) {
         VerifierFullPath = b.VerifierFullPath;
         Identity = b.Identity;
-        Signature = b.Signature;
+        VerificationData = b.VerificationData;
         nHeight = b.nHeight;
+        nExpireTime = b.nExpireTime;
         txHash = b.txHash;
         return *this;
     }
