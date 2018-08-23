@@ -104,6 +104,7 @@ DYNAMIC_CORE_H = \
   bdap/entrychannel.h \
   bdap/entrycheckpoints.h \
   bdap/entrylink.h \
+  bdap/identity.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -232,6 +233,7 @@ libdynamic_server_a_SOURCES = \
   bdap/entrychannel.cpp \
   bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
+  bdap/identity.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
