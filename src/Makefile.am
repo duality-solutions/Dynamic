@@ -97,6 +97,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  bdap/auditdata.h \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
@@ -227,6 +228,7 @@ libdynamic_server_a_SOURCES = \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  bdap/auditdata.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
   bdap/entrycertificate.cpp \

@@ -16,14 +16,14 @@ namespace BDAP {
         DEVICE_ACCOUNT = 3,
         DOMAIN_ACCOUNT = 4,
         ORGANIZATIONAL_UNIT = 5,
-		CERTIFICATE = 6,
-		AUDIT = 7,
-		CHANNEL = 8,
-		CHECKPOINT = 9,
-		BINDING_LINK = 10,
-		IDENTITY = 11,
-		IDENTITY_VERIFICATION = 12,
-		SMART_CONTRACT = 13
+        CERTIFICATE = 6,
+        AUDIT = 7,
+        CHANNEL = 8,
+        CHECKPOINT = 9,
+        BINDING_LINK = 10,
+        IDENTITY = 11,
+        IDENTITY_VERIFICATION = 12,
+        SMART_CONTRACT = 13
     };
 }
 

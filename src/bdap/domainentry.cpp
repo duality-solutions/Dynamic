@@ -26,33 +26,34 @@ namespace BDAP {
     std::string GetObjectTypeString(unsigned int nObjectType)
     {
         switch ((BDAP::ObjectType)nObjectType) {
-            case BDAP::DEFAULT_TYPE:
+
+            case BDAP::ObjectType::DEFAULT_TYPE:
                 return "Default";
-             case BDAP::USER_ACCOUNT:
+             case BDAP::ObjectType::USER_ACCOUNT:
                 return "User Entry";
-            case BDAP::GROUP:
+            case BDAP::ObjectType::GROUP:
                 return "Group Entry";
-            case BDAP::DEVICE_ACCOUNT:
+            case BDAP::ObjectType::DEVICE_ACCOUNT:
                 return "Device Entry";
-            case BDAP::DOMAIN_ACCOUNT:
+            case BDAP::ObjectType::DOMAIN_ACCOUNT:
                 return "Domain Entry";
-            case BDAP::ORGANIZATIONAL_UNIT:
+            case BDAP::ObjectType::ORGANIZATIONAL_UNIT:
                 return "OU Entry";
-            case BDAP::CERTIFICATE:
+            case BDAP::ObjectType::CERTIFICATE:
                 return "Certificate Entry";
-            case BDAP::AUDIT:
+            case BDAP::ObjectType::AUDIT:
                 return "Audit Entry";
-            case BDAP::CHANNEL:
+            case BDAP::ObjectType::CHANNEL:
                 return "Channel Entry";
-            case BDAP::CHECKPOINT:
+            case BDAP::ObjectType::CHECKPOINT:
                 return "Channel Checkpoint Entry";
-            case BDAP::BINDING_LINK:
+            case BDAP::ObjectType::BINDING_LINK:
                 return "Binding Link Entry";
-            case BDAP::IDENTITY:
+            case BDAP::ObjectType::IDENTITY:
                 return "Identity Entry";
-            case BDAP::IDENTITY_VERIFICATION:
+            case BDAP::ObjectType::IDENTITY_VERIFICATION:
                 return "Identity Verification Entry";
-            case BDAP::SMART_CONTRACT:
+            case BDAP::ObjectType::SMART_CONTRACT:
                 return "Smart Contract Entry";
             default:
                 return "Unknown";
