@@ -29,8 +29,8 @@ std::string DomainEntryFromOp(const int op)
             return "bdap_new";
         case OP_BDAP_DELETE:
             return "bdap_delete";
-        case OP_BDAP_ACTIVATE:
-            return "bdap_activate";
+        case OP_BDAP_REVOKE:
+            return "bdap_revoke";
         case OP_BDAP_MODIFY:
             return "bdap_update";
         case OP_BDAP_MODIFY_RDN:
@@ -38,9 +38,19 @@ std::string DomainEntryFromOp(const int op)
         case OP_BDAP_EXECUTE_CODE:
             return "bdap_execute";
         case OP_BDAP_BIND:
-            return "bdap_bind";
-        case OP_BDAP_REVOKE:
-            return "bdap_revoke";
+            return "bdap_link";
+        case OP_BDAP_AUDIT:
+            return "bdap_audit";
+        case OP_BDAP_CERTIFICATE:
+            return "bdap_certificate";
+        case OP_BDAP_IDENTITY:
+            return "bdap_identity";
+        case OP_BDAP_ID_VERIFICATION:
+            return "bdap_identity_verification";
+        case OP_BDAP_CHANNEL:
+            return "bdap_new_channel";
+        case OP_BDAP_CHANNEL_CHECKPOINT:
+            return "bdap_channel_checkpoint";
         default:
             return "<unknown bdap op>";
     }

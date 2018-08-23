@@ -23,21 +23,24 @@
 
 // Identification codes for Fluid and BDAP Transactions
 enum ProtocolCodes {
-    MINT_TX                 =  1,
-    DYNODE_MODFIY_TX        =  2,
-    MINING_MODIFY_TX        =  3,
-    BDAP_START              =  4,
-    BDAP_NEW_TX             =  5,
-    BDAP_DELETE_TX          =  6,
-    BDAP_ACTIVATE_TX        =  7,
-    BDAP_MODIFY_TX          =  8,
-    BDAP_MODIFY_RDN_TX      =  9,
-    BDAP_EXECUTE_CODE_TX    =  10,
-    BDAP_BIND_TX            =  11,
-    BDAP_AUDIT_TX           =  12,
-    BDAP_VERIFICATION_TX    =  13,
-    BDAP_REVOKE_TX          =  14,
-    NO_TX                   =  0
+    MINT_TX                    =  1,
+    DYNODE_MODFIY_TX           =  2,
+    MINING_MODIFY_TX           =  3,
+    BDAP_START                 =  4,
+    BDAP_NEW_TX                =  5,
+    BDAP_DELETE_TX             =  6,
+    BDAP_REVOKE_TX             =  7,
+    BDAP_MODIFY_TX             =  8,
+    BDAP_MODIFY_RDN_TX         =  9,
+    BDAP_EXECUTE_CODE_TX       =  10,
+    BDAP_BIND_TX               =  11,
+    BDAP_AUDIT_TX              =  12,
+    BDAP_CERTIFICATE_TX        =  13,
+    BDAP_IDENTITY_TX           =  14,
+    BDAP_ID_VERIFICATION_TX    =  15,
+    BDAP_CHANNEL_TX            =  16,
+    BDAP_CHANNEL_CHECKPOINT    =  17,
+    NO_TX                      =  0
 };
 
 // Maximum number of bytes pushable to the stack
@@ -214,16 +217,21 @@ enum opcodetype
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-    // directory access, user identity and certificate system
+    // BDAP directory access, user identity and certificate system
     OP_BDAP = 0x01,
-    OP_BDAP_NEW = 0x02,
-    OP_BDAP_DELETE = 0x03,
-    OP_BDAP_ACTIVATE = 0x04,
-    OP_BDAP_MODIFY = 0x05,
-    OP_BDAP_MODIFY_RDN = 0x06,
-    OP_BDAP_EXECUTE_CODE = 0x07,
-    OP_BDAP_BIND = 0x08,
-    OP_BDAP_REVOKE = 0x09,
+    OP_BDAP_NEW = 0x02, // = BDAP create new entry
+    OP_BDAP_DELETE = 0x03, // = BDAP user delete entry
+    OP_BDAP_REVOKE = 0x04, // = BDAP delete using fluid protocol
+    OP_BDAP_MODIFY = 0x05, // = BDAP update entry
+    OP_BDAP_MODIFY_RDN = 0x06, // = move BDAP entry
+    OP_BDAP_EXECUTE_CODE = 0x07, // = BDAP smart contract
+    OP_BDAP_BIND = 0x08, // = BDAP entry link request
+    OP_BDAP_AUDIT = 0x09, // = BDAP entry audit entry
+    OP_BDAP_CERTIFICATE = 0x0a, // = BDAP entry certificate
+    OP_BDAP_IDENTITY = 0x0b, // = BDAP entry identity
+    OP_BDAP_ID_VERIFICATION = 0x0c, // = BDAP identity verification
+    OP_BDAP_CHANNEL = 0x0d, // = BDAP sub chain
+    OP_BDAP_CHANNEL_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -714,8 +722,8 @@ public:
             case BDAP_DELETE_TX:
                 return (size() > 0 && *begin() == OP_BDAP_DELETE);
                 break;
-            case BDAP_ACTIVATE_TX:
-                return (size() > 0 && *begin() == OP_BDAP_ACTIVATE);
+            case BDAP_REVOKE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_REVOKE);
                 break;
             case BDAP_MODIFY_TX:
                 return (size() > 0 && *begin() == OP_BDAP_MODIFY);
@@ -729,8 +737,23 @@ public:
             case BDAP_BIND_TX:
                 return (size() > 0 && *begin() == OP_BDAP_BIND);
                 break;
-            case BDAP_REVOKE_TX:
-                return (size() > 0 && *begin() == OP_BDAP_REVOKE);
+            case BDAP_AUDIT_TX:
+                return (size() > 0 && *begin() == OP_BDAP_AUDIT);
+                break;
+            case BDAP_CERTIFICATE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_CERTIFICATE);
+                break;
+            case BDAP_IDENTITY_TX:
+                return (size() > 0 && *begin() == OP_BDAP_IDENTITY);
+                break;
+            case BDAP_ID_VERIFICATION_TX:
+                return (size() > 0 && *begin() == OP_BDAP_ID_VERIFICATION);
+                break;
+            case BDAP_CHANNEL_TX:
+                return (size() > 0 && *begin() == OP_BDAP_CHANNEL);
+                break;
+            case BDAP_CHANNEL_CHECKPOINT:
+                return (size() > 0 && *begin() == OP_BDAP_CHANNEL_CHECKPOINT);
                 break;
             default:
                 throw std::runtime_error("BDAP code is invalid!");
