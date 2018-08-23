@@ -8,6 +8,25 @@
 #include <vector>
 #include <string>
 
+namespace BDAP {
+    enum ObjectType {
+        DEFAULT_TYPE = 0,
+        USER_ACCOUNT = 1,
+        GROUP = 2,
+        DEVICE_ACCOUNT = 3,
+        DOMAIN_ACCOUNT = 4,
+        ORGANIZATIONAL_UNIT = 5,
+		CERTIFICATE = 6,
+		AUDIT = 7,
+		CHANNEL = 8,
+		CHECKPOINT = 9,
+		BINDING_LINK = 10,
+		IDENTITY = 11,
+		IDENTITY_VERIFICATION = 12,
+		SMART_CONTRACT = 13
+    };
+}
+
 typedef std::vector<unsigned char> CharString;
 typedef std::vector<CharString> vchCharString;
 typedef std::pair<uint32_t, CharString> CheckPoint;

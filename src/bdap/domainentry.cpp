@@ -22,6 +22,44 @@
 
 using namespace boost::xpressive;
 
+namespace BDAP {
+    std::string GetObjectTypeString(unsigned int nObjectType)
+    {
+        switch ((BDAP::ObjectType)nObjectType) {
+            case BDAP::DEFAULT_TYPE:
+                return "Default";
+             case BDAP::USER_ACCOUNT:
+                return "User Entry";
+            case BDAP::GROUP:
+                return "Group Entry";
+            case BDAP::DEVICE_ACCOUNT:
+                return "Device Entry";
+            case BDAP::DOMAIN_ACCOUNT:
+                return "Domain Entry";
+            case BDAP::ORGANIZATIONAL_UNIT:
+                return "OU Entry";
+            case BDAP::CERTIFICATE:
+                return "Certificate Entry";
+            case BDAP::AUDIT:
+                return "Audit Entry";
+            case BDAP::CHANNEL:
+                return "Channel Entry";
+            case BDAP::CHECKPOINT:
+                return "Channel Checkpoint Entry";
+            case BDAP::BINDING_LINK:
+                return "Binding Link Entry";
+            case BDAP::IDENTITY:
+                return "Identity Entry";
+            case BDAP::IDENTITY_VERIFICATION:
+                return "Identity Verification Entry";
+            case BDAP::SMART_CONTRACT:
+                return "Smart Contract Entry";
+            default:
+                return "Unknown";
+        }
+    }
+}
+
 std::string DomainEntryFromOp(const int op) 
 {
     switch (op) {
@@ -378,8 +416,8 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("organizational_unit", stringFromVch(entry.OrganizationalUnit)));
         oName.push_back(Pair("organization_name", stringFromVch(entry.DomainComponent)));
         oName.push_back(Pair("object_id", stringFromVch(entry.ObjectID)));
-        oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
-        oName.push_back(Pair("object_type", entry.ObjectType));
+        oName.push_back(Pair("object_full_path", entry.GetFullObjectPath()));
+        oName.push_back(Pair("object_type", entry.ObjectTypeString()));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
         oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));

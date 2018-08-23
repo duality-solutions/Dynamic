@@ -38,21 +38,16 @@ class CTxMemPool;
 - Implement file sharing using IPFS
 */
 
+using namespace BDAP;
+
+namespace BDAP {
+    std::string GetObjectTypeString(unsigned int nObjectType);
+}
+
 class CDomainEntryDefaultParameters {
 public:
     void InitialiseAdminOwners(); //DEFAULT_ADMIN_DOMAIN
     void InitialisePublicDomain(); //DEFAULT_PUBLIC_DOMAIN
-};
-
-enum DomainEntryObjectType {
-    USER_ACCOUNT = 0,
-    DEVICE_ACCOUNT = 1,
-    GROUP = 2,
-    DOMAIN_ACCOUNT = 3,
-    ORGANIZATIONAL_UNIT = 4,
-    CERTIFICATE = 5,
-    CODE = 6,
-    BINDING = 7
 };
 
 // See LDAP Distinguished Name
@@ -67,7 +62,7 @@ public:
     CharString OrganizationalUnit; // OU. Like OU=sales. blank for top level domain directories
     CharString OrganizationName; // O. Like Duality Blockchain Solutions
     CharString ObjectID; // UID. Like johnsmith21.  blank for top level domain directories
-    DomainEntryObjectType ObjectType; // see enum above
+    unsigned int nObjectType; // see enum above
     CharString WalletAddress; // used to send collateral funds for this directory record.
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
     CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
@@ -96,7 +91,7 @@ public:
         OrganizationalUnit.clear();
         OrganizationName.clear();
         ObjectID.clear();
-        ObjectType = DomainEntryObjectType::DOMAIN_ACCOUNT;
+        nObjectType = 0;
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
         EncryptPublicKey.clear();
@@ -117,7 +112,7 @@ public:
         READWRITE(OrganizationalUnit);
         READWRITE(OrganizationName);
         READWRITE(ObjectID);
-        //READWRITE(static_cast<int>(ObjectType));
+        READWRITE(VARINT(nObjectType));
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
         READWRITE(EncryptPublicKey);
@@ -128,7 +123,7 @@ public:
     }
 
     inline friend bool operator==(const CDomainEntry &a, const CDomainEntry &b) {
-        return (a.OID == b.OID && a.DomainComponent == b.DomainComponent && a.OrganizationalUnit == b.OrganizationalUnit && a.ObjectID == b.ObjectID);
+        return (a.OID == b.OID && a.DomainComponent == b.DomainComponent && a.OrganizationalUnit == b.OrganizationalUnit && a.nObjectType == b.nObjectType);
     }
 
     inline friend bool operator!=(const CDomainEntry &a, const CDomainEntry &b) {
@@ -142,7 +137,7 @@ public:
         OrganizationalUnit = b.OrganizationalUnit;
         OrganizationName = b.OrganizationName;
         ObjectID = b.ObjectID;
-        ObjectType = b.ObjectType;
+        nObjectType = b.nObjectType;
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
         EncryptPublicKey = b.EncryptPublicKey;
@@ -167,6 +162,8 @@ public:
     bool ValidateValues(std::string& errorMessage);
     bool CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage);
     bool TxUsesPreviousUTXO(const CTransaction& tx);
+    BDAP::ObjectType ObjectType() const { return (BDAP::ObjectType)nObjectType; }
+    std::string ObjectTypeString() const { return BDAP::GetObjectTypeString(nObjectType); };
 };
 
 std::string DomainEntryFromOp(const int op);
