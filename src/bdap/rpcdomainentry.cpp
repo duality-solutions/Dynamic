@@ -265,12 +265,8 @@ UniValue getdomaingroupinfo(const JSONRPCRequest& request)
     return oDomainEntryInfo;
 }
 
-UniValue updatedomainentry(const JSONRPCRequest& request) {
-    if (request.params.size() < 2 || request.params.size() > 3) 
-    {
-        throw std::runtime_error("updatedomainentry <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
-    }
-
+static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType) 
+{
     EnsureWalletIsUnlocked();
 
     // Format object and domain names to lower case.
@@ -279,7 +275,12 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     
     CDomainEntry txPreviousEntry;
     txPreviousEntry.DomainComponent = vchDefaultDomainName;
-    txPreviousEntry.OrganizationalUnit = vchDefaultUserOU;
+    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+        txPreviousEntry.OrganizationalUnit = vchDefaultUserOU;
+    }
+    else if (bdapType == BDAP::ObjectType::GROUP) {
+        txPreviousEntry.OrganizationalUnit = vchDefaultGroupOU;
+    }
     txPreviousEntry.ObjectID = vchObjectID;
 
     // Check if name already exists
@@ -294,7 +295,7 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     CDomainEntry txUpdatedEntry = txPreviousEntry;
     CharString vchCommonName = vchFromValue(request.params[1]);
     txUpdatedEntry.CommonName = vchCommonName;
-    txUpdatedEntry.nObjectType = GetObjectTypeInt(BDAP::ObjectType::USER_ACCOUNT);
+    txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
@@ -353,11 +354,28 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     return oName;
 }
 
-UniValue deletedomainentry(const JSONRPCRequest& request) {
-    if (request.params.size() != 1) 
+UniValue updatedomainuser(const JSONRPCRequest& request) {
+    if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("deletedomainentry <userid>\nDelete an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("updatedomainuser <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
+
+    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    return UpdateDomainEntry(request, bdapType);
+}
+
+UniValue updatedomaingroup(const JSONRPCRequest& request) {
+    if (request.params.size() < 2 || request.params.size() > 3) 
+    {
+        throw std::runtime_error("updatedomaingroup <groupid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
+    }
+
+    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    return UpdateDomainEntry(request, bdapType);
+}
+
+static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType) 
+{
 
     EnsureWalletIsUnlocked();
 
@@ -367,22 +385,27 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
     
     CDomainEntry txSearchEntry;
     txSearchEntry.DomainComponent = vchDefaultDomainName;
-    txSearchEntry.OrganizationalUnit = vchDefaultUserOU;
+    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+        txSearchEntry.OrganizationalUnit = vchDefaultUserOU;
+    }
+    else if (bdapType == BDAP::ObjectType::GROUP) {
+        txSearchEntry.OrganizationalUnit = vchDefaultGroupOU;
+    }
     txSearchEntry.ObjectID = vchObjectID;
     CDomainEntry txDeletedEntry = txSearchEntry;
     
     // Check if name already exists
     if (!GetDomainEntry(txSearchEntry.vchFullObjectPath(), txSearchEntry))
-        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txSearchEntry.GetFullObjectPath() + _(" does not exists.  Can not delete."));
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3700 - " + txSearchEntry.GetFullObjectPath() + _(" does not exists.  Can not delete."));
 
     int nIn = GetDomainEntryOperationOutIndex(txSearchEntry.nHeight, txSearchEntry.txHash);
     COutPoint outpoint = COutPoint(txSearchEntry.txHash, nIn);
     if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
-        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txSearchEntry.GetFullObjectPath() + _(" entry.  Can not delete."));
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txSearchEntry.GetFullObjectPath() + _(" entry.  Can not delete."));
     
     txDeletedEntry.WalletAddress = txSearchEntry.WalletAddress;
     txDeletedEntry.CommonName = txSearchEntry.CommonName;
-    txDeletedEntry.nObjectType = GetObjectTypeInt(BDAP::ObjectType::USER_ACCOUNT);
+    txDeletedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
     CharString data;
     txDeletedEntry.Serialize(data);
@@ -412,7 +435,7 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDeletedEntry, oName))
-        throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
@@ -427,6 +450,26 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
     }
 
     return oName;
+}
+
+UniValue deletedomainuser(const JSONRPCRequest& request) {
+    if (request.params.size() != 1) 
+    {
+        throw std::runtime_error("deletedomainuser <userid>\nDelete an existing public name blockchain directory entry.\n");
+    }
+
+    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    return DeleteDomainEntry(request, bdapType);
+}
+
+UniValue deletedomaingroup(const JSONRPCRequest& request) {
+    if (request.params.size() != 1) 
+    {
+        throw std::runtime_error("deletedomaingroup <groupid>\nDelete an existing public name blockchain directory entry.\n");
+    }
+
+    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    return DeleteDomainEntry(request, bdapType);
 }
 
 UniValue makekeypair(const JSONRPCRequest& request)
@@ -483,8 +526,10 @@ static const CRPCCommand commands[] =
     { "bdap",            "getdomainusers",           &getdomainusers,               true  },
     { "bdap",            "getdomaingroups",          &getdomaingroups,              true  },
     { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true  },
-    { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
-    { "bdap",            "deletedomainentry",        &deletedomainentry,            true  },
+    { "bdap",            "updatedomainuser",         &updatedomainuser,             true  },
+    { "bdap",            "updatedomaingroup",        &updatedomaingroup,            true  },
+    { "bdap",            "deletedomainuser",         &deletedomainuser,             true  },
+    { "bdap",            "deletedomaingroup",        &deletedomaingroup,            true  },
     { "bdap",            "adddomaingroup",           &adddomaingroup,               true  },
     { "bdap",            "getdomaingroupinfo",       &getdomaingroupinfo,           true  },
 #endif //ENABLE_WALLET
