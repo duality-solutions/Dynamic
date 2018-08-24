@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "instantsend.h"
 #include "validation.h"
@@ -80,11 +81,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
-                if (IsBDAPDataOutput(txout)) 
-                {
-                    // BDAP type
-                    sub.type = TransactionRecord::BDAP;
-                }
 
                 parts.append(sub);
             }
@@ -155,11 +151,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-                    if (IsBDAPDataOutput(txout)) 
-                    {
-                        // BDAP type
-                        sub.type = TransactionRecord::BDAP;
-                    }
                     if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
                     if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
                     if(nDebit - wtx.GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
@@ -179,14 +170,21 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             // Debit
             //
             CAmount nTxFee = nDebit - wtx.GetValueOut();
-
+            CDomainEntry entry;
+            std::string strOpType;
             for (unsigned int nOut = 0; nOut < wtx.vout.size(); nOut++)
             {
                 const CTxOut& txout = wtx.vout[nOut];
                 TransactionRecord sub(hash, nTime);
                 sub.idx = parts.size();
                 sub.involvesWatchAddress = involvesWatchAddress;
-
+                
+                if (GetBDAPOpType(txout) > 0)
+                {
+                    // BDAP type
+                    strOpType = BDAPFromOp(GetBDAPOpCodeFromOutput(txout));
+                    continue;
+                }
                 if(wallet->IsMine(txout))
                 {
                     // Ignore parts sent to self, as this is usually the change
@@ -208,14 +206,40 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.address = mapValue["to"];
                 }
 
+                if (IsBDAPDataOutput(txout)) {
+                    std::vector<unsigned char> vchData;
+                    std::vector<unsigned char> vchHash;
+                    GetBDAPData(txout, vchData, vchHash);
+                    entry.UnserializeFromData(vchData, vchHash);
+                    if (strOpType == "bdap_new" && entry.ObjectTypeString() == "User Entry"){
+                        sub.type = TransactionRecord::NewDomainUser;
+                    }
+                    else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::UpdateDomainUser;
+                    }
+                    else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::DeleteDomainUser;
+                    }
+                    else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::RevokeDomainUser;
+                    }
+                    else if (strOpType == "bdap_new" && entry.ObjectTypeString() == "Group Entry"){
+                        sub.type = TransactionRecord::NewDomainGroup;
+                    }
+                    else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::UpdateDomainGroup;
+                    }
+                    else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::DeleteDomainGroup;
+                    }
+                    else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::RevokeDomainGroup;
+                    }
+                }
+
                 if(mapValue["PS"] == "1")
                 {
                     sub.type = TransactionRecord::PrivateSend;
-                }
-
-                if(IsBDAPDataOutput(txout)) 
-                {
-                    sub.type = TransactionRecord::BDAP;
                 }
 
                 CAmount nValue = txout.nValue;

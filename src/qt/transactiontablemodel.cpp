@@ -384,8 +384,16 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
         return tr("Payment to yourself");
     case TransactionRecord::Generated:
         return tr("Mined");
-    case TransactionRecord::BDAP:
-        return tr("BDAP");
+    case TransactionRecord::NewDomainUser:
+    case TransactionRecord::UpdateDomainUser:
+    case TransactionRecord::DeleteDomainUser:
+    case TransactionRecord::RevokeDomainUser:
+        return tr("BDAP User Entry");
+    case TransactionRecord::NewDomainGroup:
+    case TransactionRecord::UpdateDomainGroup:
+    case TransactionRecord::DeleteDomainGroup:
+    case TransactionRecord::RevokeDomainGroup:
+        return tr("BDAP Group Entry");
     case TransactionRecord::PrivateSendDenominate:
         return tr("PrivateSend Denominate");
     case TransactionRecord::PrivateSendCollateralPayment:
@@ -416,7 +424,14 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     case TransactionRecord::SendToAddress:
     case TransactionRecord::SendToOther:
         return QIcon(":/icons/" + theme + "/tx_output");
-    case TransactionRecord::BDAP:
+    case TransactionRecord::NewDomainUser:
+    case TransactionRecord::UpdateDomainUser:
+    case TransactionRecord::DeleteDomainUser:
+    case TransactionRecord::RevokeDomainUser:
+    case TransactionRecord::NewDomainGroup:
+    case TransactionRecord::UpdateDomainGroup:
+    case TransactionRecord::DeleteDomainGroup:
+    case TransactionRecord::RevokeDomainGroup:
         return QIcon(":/icons/" + theme + "/tx_bdap");
     default:
         return QIcon(":/icons/" + theme + "/tx_inout");
@@ -443,8 +458,22 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
-    case TransactionRecord::BDAP:
-        return tr("Directory Entry");  //TODO: Add BDAP Name and Operation Type here
+    case TransactionRecord::NewDomainUser:
+        return tr("New Directory User");
+    case TransactionRecord::UpdateDomainUser:
+        return tr("Update Directory User");
+    case TransactionRecord::DeleteDomainUser:
+        return tr("Delete Directory User");
+    case TransactionRecord::RevokeDomainUser:
+        return tr("Revoke Directory User");
+    case TransactionRecord::NewDomainGroup:
+        return tr("New Directory Group");
+    case TransactionRecord::UpdateDomainGroup:
+        return tr("Update Directory Group");
+    case TransactionRecord::DeleteDomainGroup:
+        return tr("Delete Directory Group");
+    case TransactionRecord::RevokeDomainGroup:
+        return tr("Revoke Directory Group");
     case TransactionRecord::SendToSelf:
     default:
         return tr("(n/a)") + watchAddress;
@@ -461,7 +490,14 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
     case TransactionRecord::Generated:
     case TransactionRecord::PrivateSend:
     case TransactionRecord::RecvWithPrivateSend:
-    case TransactionRecord::BDAP:
+    case TransactionRecord::NewDomainUser:
+    case TransactionRecord::UpdateDomainUser:
+    case TransactionRecord::DeleteDomainUser:
+    case TransactionRecord::RevokeDomainUser:
+    case TransactionRecord::NewDomainGroup:
+    case TransactionRecord::UpdateDomainGroup:
+    case TransactionRecord::DeleteDomainGroup:
+    case TransactionRecord::RevokeDomainGroup:
         {
         QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
         if(label.isEmpty())

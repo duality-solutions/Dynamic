@@ -43,6 +43,7 @@ using namespace BDAP;
 namespace BDAP {
     std::string GetObjectTypeString(unsigned int nObjectType);
     unsigned int GetObjectTypeInt(BDAP::ObjectType ObjectType);
+    BDAP::ObjectType GetObjectTypeEnum(unsigned int nObjectType);
 }
 
 class CDomainEntryDefaultParameters {
@@ -172,6 +173,7 @@ bool IsBDAPDataOutput(const CTxOut& out);
 int GetBDAPDataOutput(const CTransaction& tx);
 bool GetBDAPData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut);
 bool GetBDAPData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
+bool GetBDAPData(const CTxOut& out, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash);
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged = false);
 
 std::string stringFromVch(const CharString& vch);
@@ -184,6 +186,7 @@ CAmount GetBDAPFee(const CScript& scriptPubKey);
 bool DecodeBDAPTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
 int GetBDAPOpType(const CScript& script);
+int GetBDAPOpType(const CTxOut& out);
 std::string GetBDAPOpTypeString(const CScript& script);
 bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op);
 bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp);
@@ -194,4 +197,6 @@ int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash);
 bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams);
 bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType);
 CDynamicAddress GetScriptAddress(const CScript& pubScript);
+int GetBDAPOpCodeFromOutput(const CTxOut& out);
+std::string GetBDAPOpStringFromOutput(const CTxOut& out);
 #endif // DYNAMIC_BDAP_DOMAINENTRY_H

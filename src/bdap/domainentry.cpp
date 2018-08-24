@@ -64,6 +64,11 @@ namespace BDAP {
     {
         return (unsigned int)ObjectType;
     }
+
+    BDAP::ObjectType GetObjectTypeEnum(unsigned int nObjectType)
+    {
+        return (BDAP::ObjectType)nObjectType;
+    }
 }
 
 std::string BDAPFromOp(const int op) 
@@ -101,7 +106,7 @@ std::string BDAPFromOp(const int op)
 }
 
 bool IsBDAPDataOutput(const CTxOut& out) {
-   txnouttype whichType;
+    txnouttype whichType;
     if (!IsStandard(out.scriptPubKey, whichType))
         return false;
     if (whichType == TX_NULL_DATA)
@@ -185,6 +190,11 @@ bool GetBDAPData(const CTransaction& tx, std::vector<unsigned char>& vchData, st
 
     const CScript &scriptPubKey = tx.vout[nOut].scriptPubKey;
     return GetBDAPData(scriptPubKey, vchData, vchHash);
+}
+
+bool GetBDAPData(const CTxOut& out, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash)
+{
+    return GetBDAPData(out.scriptPubKey, vchData, vchHash);
 }
 
 bool CDomainEntry::UnserializeFromTx(const CTransaction& tx) {
@@ -587,6 +597,11 @@ int GetBDAPOpType(const CScript& script)
     return (int)op2;
 }
 
+int GetBDAPOpType(const CTxOut& out)
+{
+    return GetBDAPOpType(out.scriptPubKey);
+}
+
 std::string GetBDAPOpTypeString(const CScript& script)
 {
     return BDAPFromOp(GetBDAPOpType(script));
@@ -627,11 +642,25 @@ bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData)
     return false;
 }
 
-bool IsBDAPOperationOutput(const CTxOut& out) 
+bool IsBDAPOperationOutput(const CTxOut& out)
 {
     if (GetBDAPOpType(out.scriptPubKey) > 0)
         return true;
     return false;
+}
+
+int GetBDAPOpCodeFromOutput(const CTxOut& out)
+{
+    if (!IsBDAPOperationOutput(out)) {
+        return 0;
+    }
+
+    return GetBDAPOpType(out.scriptPubKey);
+}
+
+std::string GetBDAPOpStringFromOutput(const CTxOut& out)
+{
+    return GetBDAPOpTypeString(out.scriptPubKey);
 }
 
 int GetBDAPOperationOutIndex(const CTransaction& tx) 
