@@ -80,7 +80,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     // Generated
                     sub.type = TransactionRecord::Generated;
                 }
-                if (IsDomainEntryDataOutput(txout)) 
+                if (IsBDAPDataOutput(txout)) 
                 {
                     // BDAP type
                     sub.type = TransactionRecord::BDAP;
@@ -155,7 +155,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-                    if (IsDomainEntryDataOutput(txout)) 
+                    if (IsBDAPDataOutput(txout)) 
                     {
                         // BDAP type
                         sub.type = TransactionRecord::BDAP;
@@ -213,7 +213,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::PrivateSend;
                 }
 
-                if(IsDomainEntryDataOutput(txout)) 
+                if(IsBDAPDataOutput(txout)) 
                 {
                     sub.type = TransactionRecord::BDAP;
                 }

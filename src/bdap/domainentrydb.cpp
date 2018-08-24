@@ -43,7 +43,7 @@ void CDomainEntryDB::AddDomainEntryIndex(const CDomainEntry& entry, const int op
 {
     UniValue oName(UniValue::VOBJ);
     if (BuildBDAPJson(entry, oName)) {
-        CharString vchOperationType = vchFromString(DomainEntryFromOp(op));
+        CharString vchOperationType = vchFromString(BDAPFromOp(op));
         GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), reinterpret_cast<char*>(vchOperationType.data()));
         WriteDomainEntryIndexHistory(entry, op);
     }
@@ -127,7 +127,7 @@ void CDomainEntryDB::WriteDomainEntryIndexHistory(const CDomainEntry& entry, con
     if (IsArgSet("-zmqpubbdaphistory")) {
         UniValue oName(UniValue::VOBJ);
         BuildBDAPJson(entry, oName);
-        oName.push_back(Pair("op", DomainEntryFromOp(op)));
+        oName.push_back(Pair("op", BDAPFromOp(op)));
         GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "bdap_history");
     }
 }
@@ -415,7 +415,7 @@ bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
         CDynamicAddress txAddress = GetScriptAddress(scriptOp);
         // Get previous wallet address used for BDAP tx
         CScript prevScriptPubKey;
-        GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+        GetBDAPOpScript(prevTx, prevScriptPubKey);
         CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
         if (txAddress.ToString() != prevAddress.ToString())
         {
@@ -469,7 +469,7 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
         CDynamicAddress txAddress = GetScriptAddress(scriptOp);
         // Get previous wallet address used for BDAP tx
         CScript prevScriptPubKey;
-        GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+        GetBDAPOpScript(prevTx, prevScriptPubKey);
         CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
         if (txAddress.ToString() != prevAddress.ToString())
         {
@@ -535,16 +535,16 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction&
     }
 
     //if (fDebug && !bSanityCheck)
-        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, DomainEntryFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
     CScript scriptOp;
     vchCharString vvchOpParameters;
-    if (!GetDomainEntryOpScript(tx, scriptOp, vvchOpParameters, op))
+    if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
     {
         errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("Transaction does not contain BDAP operation script!");
         return error(errorMessage.c_str());
     }
-    const std::string strOperationType = GetDomainEntryOpTypeString(scriptOp);
+    const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
     if (fDebug)
         LogPrintf("CheckDomainEntryTxInputs, strOperationType= %s \n", strOperationType);
     
@@ -554,7 +554,7 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction&
     std::vector<unsigned char> vchHash;
     int nDataOut;
     
-    bool bData = GetDomainEntryData(tx, vchData, vchHash, nDataOut);
+    bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
     if(bData && !entry.UnserializeFromData(vchData, vchHash))
     {
         errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");

@@ -57,7 +57,7 @@ bool CAuditData::UnserializeFromTx(const CTransaction& tx)
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nOut;
-    if(!GetDomainEntryData(tx, vchData, vchHash, nOut))
+    if(!GetBDAPData(tx, vchData, vchHash, nOut))
     {
         SetNull();
         return false;

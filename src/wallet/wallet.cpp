@@ -3398,7 +3398,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                         return false;
                     }
                     CScript prevScriptPubKey;
-                    GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPOpScript(prevTx, prevScriptPubKey);
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
             }

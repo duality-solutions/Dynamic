@@ -287,7 +287,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (!GetDomainEntry(txPreviousEntry.vchFullObjectPath(), txPreviousEntry))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txPreviousEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
 
-    int nIn = GetDomainEntryOperationOutIndex(txPreviousEntry.nHeight, txPreviousEntry.txHash);
+    int nIn = GetBDAPOperationOutIndex(txPreviousEntry.nHeight, txPreviousEntry.txHash);
     COutPoint outpoint = COutPoint(txPreviousEntry.txHash, nIn);
     if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txPreviousEntry.GetFullObjectPath() + _(" entry.  Can not update."));
@@ -398,7 +398,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (!GetDomainEntry(txSearchEntry.vchFullObjectPath(), txSearchEntry))
         throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3700 - " + txSearchEntry.GetFullObjectPath() + _(" does not exists.  Can not delete."));
 
-    int nIn = GetDomainEntryOperationOutIndex(txSearchEntry.nHeight, txSearchEntry.txHash);
+    int nIn = GetBDAPOperationOutIndex(txSearchEntry.nHeight, txSearchEntry.txHash);
     COutPoint outpoint = COutPoint(txSearchEntry.txHash, nIn);
     if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
         throw std::runtime_error("BDAP_DELETE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txSearchEntry.GetFullObjectPath() + _(" entry.  Can not delete."));

@@ -610,7 +610,7 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     bool bValid = false;
     if (tx.nVersion == BDAP_TX_VERSION)
     {
-        if (DecodeDomainEntryTx(tx, op, vvchBDAPArgs)) 
+        if (DecodeBDAPTx(tx, op, vvchBDAPArgs)) 
         {
             std::string errorMessage;
             bValid = CheckDomainEntryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
@@ -670,11 +670,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         int op;
         CScript scriptOp;
         vchCharString vvchOpParameters;
-        if (!GetDomainEntryOpScript(tx, scriptOp, vvchOpParameters, op))
+        if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
         {
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
         }
-        const std::string strOperationType = GetDomainEntryOpTypeString(scriptOp);
+        const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
         if (strOperationType == "bdap_update"  || strOperationType == "bdap_delete") {
             CDomainEntry entry;
             CDomainEntry prevEntry;
@@ -682,7 +682,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             std::vector<unsigned char> vchHash;
             int nDataOut;
             
-            bool bData = GetDomainEntryData(tx, vchData, vchHash, nDataOut);
+            bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
             if(bData && !entry.UnserializeFromData(vchData, vchHash))
             {
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
@@ -698,11 +698,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             }
             // Get current wallet address used for BDAP tx
             CScript scriptPubKey;
-            GetDomainEntryOpScript(tx, scriptPubKey);
+            GetBDAPOpScript(tx, scriptPubKey);
             CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
             // Get previous wallet address used for BDAP tx
             CScript prevScriptPubKey;
-            GetDomainEntryOpScript(prevTx, prevScriptPubKey);
+            GetBDAPOpScript(prevTx, prevScriptPubKey);
             CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
             if (txAddress.ToString() != prevAddress.ToString())
             {

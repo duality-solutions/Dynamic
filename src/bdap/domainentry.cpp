@@ -66,7 +66,7 @@ namespace BDAP {
     }
 }
 
-std::string DomainEntryFromOp(const int op) 
+std::string BDAPFromOp(const int op) 
 {
     switch (op) {
         case OP_BDAP_NEW:
@@ -100,7 +100,7 @@ std::string DomainEntryFromOp(const int op)
     }
 }
 
-bool IsDomainEntryDataOutput(const CTxOut& out) {
+bool IsBDAPDataOutput(const CTxOut& out) {
    txnouttype whichType;
     if (!IsStandard(out.scriptPubKey, whichType))
         return false;
@@ -109,7 +109,7 @@ bool IsDomainEntryDataOutput(const CTxOut& out) {
    return false;
 }
 
-bool GetDomainEntryTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
+bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
 {
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
@@ -151,15 +151,15 @@ std::vector<unsigned char> vchFromString(const std::string& str)
     return std::vector<unsigned char>(str.begin(), str.end());
 }
 
-int GetDomainEntryDataOutput(const CTransaction& tx) {
+int GetBDAPDataOutput(const CTransaction& tx) {
    for(unsigned int i = 0; i<tx.vout.size();i++) {
-       if(IsDomainEntryDataOutput(tx.vout[i]))
+       if(IsBDAPDataOutput(tx.vout[i]))
            return i;
     }
    return -1;
 }
 
-bool GetDomainEntryData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash)
+bool GetBDAPData(const CScript& scriptPubKey, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash)
 {
     CScript::const_iterator pc = scriptPubKey.begin();
     opcodetype opcode;
@@ -177,21 +177,21 @@ bool GetDomainEntryData(const CScript& scriptPubKey, std::vector<unsigned char>&
     return true;
 }
 
-bool GetDomainEntryData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
+bool GetBDAPData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
 {
-    nOut = GetDomainEntryDataOutput(tx);
+    nOut = GetBDAPDataOutput(tx);
     if(nOut == -1)
        return false;
 
     const CScript &scriptPubKey = tx.vout[nOut].scriptPubKey;
-    return GetDomainEntryData(scriptPubKey, vchData, vchHash);
+    return GetBDAPData(scriptPubKey, vchData, vchHash);
 }
 
 bool CDomainEntry::UnserializeFromTx(const CTransaction& tx) {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nOut;
-    if(!GetDomainEntryData(tx, vchData, vchHash, nOut))
+    if(!GetBDAPData(tx, vchData, vchHash, nOut))
     {
         SetNull();
         return false;
@@ -385,7 +385,7 @@ bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& e
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransaction& tx = e.GetTx();
         for (const CTxOut& txOut : tx.vout) {
-            if (IsDomainEntryDataOutput(txOut)) {
+            if (IsBDAPDataOutput(txOut)) {
                 CDomainEntry domainEntry(tx);
                 if (this->GetFullObjectPath() == domainEntry.GetFullObjectPath()) {
                     errorMessage = "CheckIfExistsInMemPool: A BDAP domain entry transaction for " + GetFullObjectPath() + " is already in the memory pool!";
@@ -400,7 +400,7 @@ bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& e
 /** Checks if the domain entry transaction uses the entry's UTXO */
 bool CDomainEntry::TxUsesPreviousUTXO(const CTransaction& tx)
 {
-    int nIn = GetDomainEntryOperationOutIndex(tx);
+    int nIn = GetBDAPOperationOutIndex(tx);
     COutPoint entryOutpoint = COutPoint(txHash, nIn);
     for (const CTxIn& txIn : tx.vin) {
         if (txIn.prevout == entryOutpoint)
@@ -513,7 +513,7 @@ CAmount GetBDAPFee(const CScript& scriptPubKey)
     return recp.nAmount;
 }
 
-bool DecodeDomainEntryTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+bool DecodeBDAPTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
 {
     bool found = false;
 
@@ -532,7 +532,7 @@ bool DecodeDomainEntryTx(const CTransaction& tx, int& op, std::vector<std::vecto
     return found;
 }
 
-bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch)
+bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch)
 {
     for (unsigned int i = 0; i < tx.vin.size(); i++) {
         const Coin& prevCoins = inputs.AccessCoin(tx.vin[i].prevout);
@@ -548,9 +548,8 @@ bool FindDomainEntryInTx(const CCoinsViewCache &inputs, const CTransaction& tx, 
     return false;
 }
 
-int GetDomainEntryOpType(const CScript& script)
+int GetBDAPOpType(const CScript& script)
 {
-    std::string ret;
     CScript::const_iterator it = script.begin();
     opcodetype op1 = OP_INVALIDOPCODE;
     opcodetype op2 = OP_INVALIDOPCODE;
@@ -574,7 +573,7 @@ int GetDomainEntryOpType(const CScript& script)
         {
             if (script.GetOp2(it, op2, &vch)) 
             {
-                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_REVOKE)
+                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
                 {
                     return (int)op2 - OP_1NEGATE - 1;
                 }
@@ -588,71 +587,71 @@ int GetDomainEntryOpType(const CScript& script)
     return (int)op2;
 }
 
-std::string GetDomainEntryOpTypeString(const CScript& script)
+std::string GetBDAPOpTypeString(const CScript& script)
 {
-    return DomainEntryFromOp(GetDomainEntryOpType(script));
+    return BDAPFromOp(GetBDAPOpType(script));
 }
 
-bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp, vchCharString& vvchOpParameters, int& op)
+bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op)
 {
     for (unsigned int i = 0; i < tx.vout.size(); i++) 
     {
         const CTxOut& out = tx.vout[i];
         if (DecodeBDAPScript(out.scriptPubKey, op, vvchOpParameters)) 
         {
-            scriptDomainEntryOp = out.scriptPubKey;
+            scriptBDAPOp = out.scriptPubKey;
             return true;
         }
     }
     return false;
 }
 
-bool GetDomainEntryOpScript(const CTransaction& tx, CScript& scriptDomainEntryOp)
+bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp)
 {
     int op;
     vchCharString vvchOpParameters;
-    return GetDomainEntryOpScript(tx, scriptDomainEntryOp, vvchOpParameters, op);
+    return GetBDAPOpScript(tx, scriptBDAPOp, vvchOpParameters, op);
 }
 
-bool GetDomainEntryDataScript(const CTransaction& tx, CScript& scriptDomainEntryData)
+bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData)
 {
     for (unsigned int i = 0; i < tx.vout.size(); i++) 
     {
         const CTxOut& out = tx.vout[i];
         if (out.scriptPubKey.IsUnspendable()) 
         {
-            scriptDomainEntryData = out.scriptPubKey;
+            scriptBDAPData = out.scriptPubKey;
             return true;
         }
     }
     return false;
 }
 
-bool IsDomainEntryOperationOutput(const CTxOut& out) 
+bool IsBDAPOperationOutput(const CTxOut& out) 
 {
-    if (GetDomainEntryOpType(out.scriptPubKey) > 0)
+    if (GetBDAPOpType(out.scriptPubKey) > 0)
         return true;
     return false;
 }
 
-int GetDomainEntryOperationOutIndex(const CTransaction& tx) 
+int GetBDAPOperationOutIndex(const CTransaction& tx) 
 {
     for(unsigned int i = 0; i<tx.vout.size();i++) {
-        if(IsDomainEntryOperationOutput(tx.vout[i]))
+        if(IsBDAPOperationOutput(tx.vout[i]))
             return i;
     }
     return -1;
 }
 
-int GetDomainEntryOperationOutIndex(int nHeight, const uint256& txHash) 
+int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash) 
 {
     CTransaction tx;
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    if (!GetDomainEntryTransaction(nHeight, txHash, tx, consensusParams))
+    if (!GetBDAPTransaction(nHeight, txHash, tx, consensusParams))
     {
         return -1;
     }
-    return GetDomainEntryOperationOutIndex(tx);
+    return GetBDAPOperationOutIndex(tx);
 }
 
 bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType) 
@@ -662,14 +661,14 @@ bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomain
         if (bdapScript.IsUnspendable()) {
             std::vector<unsigned char> vchData;
             std::vector<unsigned char> vchHash;
-            if (!GetDomainEntryData(bdapScript, vchData, vchHash)) 
+            if (!GetBDAPData(bdapScript, vchData, vchHash)) 
             {
                 return false;
             }
             entry.UnserializeFromData(vchData, vchHash);
         }
         else {
-            strOpType = GetDomainEntryOpTypeString(bdapScript);
+            strOpType = GetBDAPOpTypeString(bdapScript);
         }
     }
     if (!entry.IsNull() && strOpType.size() > 0) {
