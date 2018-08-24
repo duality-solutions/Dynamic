@@ -157,11 +157,11 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     return AddDomainEntry(request, bdapType);
 }
 
-UniValue getdomainentries(const JSONRPCRequest& request) 
+UniValue getdomainusers(const JSONRPCRequest& request) 
 {
     if (request.params.size() > 2) 
     {
-        throw std::runtime_error("getdomainentries <records per page> <page returned>\nLists all BDAP entries.\n");
+        throw std::runtime_error("getdomainusers <records per page> <page returned>\nLists all BDAP public users.\n");
     }
     
     unsigned int nRecordsPerPage = 100;
@@ -174,6 +174,32 @@ UniValue getdomainentries(const JSONRPCRequest& request)
     
     // only return entries from the default public domain OU
     std::string strObjectLocation = DEFAULT_PUBLIC_USER_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
+
+    UniValue oDomainEntryList(UniValue::VARR);
+    if (CheckDomainEntryDB())
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
+
+    return oDomainEntryList;
+}
+
+UniValue getdomaingroups(const JSONRPCRequest& request) 
+{
+    if (request.params.size() > 2) 
+    {
+        throw std::runtime_error("getdomainugroups <records per page> <page returned>\nLists all BDAP public groups.\n");
+    }
+    
+    unsigned int nRecordsPerPage = 100;
+    unsigned int nPage = 1;
+    if (request.params.size() > 0)
+        nRecordsPerPage = request.params[0].get_int();
+
+    if (request.params.size() == 2)
+        nPage = request.params[1].get_int();
+    
+    // only return entries from the default public domain OU
+    std::string strObjectLocation = DEFAULT_PUBLIC_GROUP_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
 
     UniValue oDomainEntryList(UniValue::VARR);
@@ -454,7 +480,8 @@ static const CRPCCommand commands[] =
 #ifdef ENABLE_WALLET
     /* BDAP */
     { "bdap",            "adddomainentry",           &adddomainentry,               true  },
-    { "bdap",            "getdomainentries",         &getdomainentries,             true  },
+    { "bdap",            "getdomainusers",           &getdomainusers,               true  },
+    { "bdap",            "getdomaingroups",          &getdomaingroups,              true  },
     { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true  },
     { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
     { "bdap",            "deletedomainentry",        &deletedomainentry,            true  },
