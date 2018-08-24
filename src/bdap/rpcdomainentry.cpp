@@ -17,13 +17,8 @@ extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdap
 
 static constexpr bool fPrintDebug = true;
 
-UniValue adddomainentry(const JSONRPCRequest& request) 
+static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType bdapType)
 {
-    if (request.params.size() < 2 || request.params.size() > 3) 
-    {
-        throw std::runtime_error("adddomainentry <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
-    }
-
     EnsureWalletIsUnlocked();
 
     // Adds a new name to channel zero.  OID = 0.0.block-height.tx-ordinal.0.0.0.0
@@ -38,15 +33,22 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CDomainEntry txDomainEntry;
     txDomainEntry.OID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
-    txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
+    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+        txDomainEntry.OrganizationalUnit = vchDefaultUserOU;
+    }
+    else if (bdapType == BDAP::ObjectType::GROUP) {
+        txDomainEntry.OrganizationalUnit = vchDefaultGroupOU;
+    }
+    
     txDomainEntry.CommonName = vchCommonName;
     txDomainEntry.OrganizationName = vchDefaultOrganizationName;
     txDomainEntry.ObjectID = vchObjectID;
-    txDomainEntry.fPublicObject = 1; //make entry public
+    txDomainEntry.fPublicObject = 1; // make entry public
+    txDomainEntry.nObjectType = GetObjectTypeInt(bdapType);
 
     // Check if name already exists
     if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3500 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address
     CKey privWalletKey;
@@ -56,7 +58,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
     
@@ -71,7 +73,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CharString vchEncryptPriKey(strPrivateEncryptKey.begin(), strPrivateEncryptKey.end());
     CharString vchEncryptPubKey(pubEncryptKey.begin(), pubEncryptKey.end());
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
 
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
 
@@ -82,7 +84,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "link");
     
@@ -121,14 +123,14 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDomainEntry, oName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
@@ -143,6 +145,16 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     }
 
     return oName;
+}
+
+UniValue adddomainentry(const JSONRPCRequest& request) 
+{
+    if (request.params.size() < 2 || request.params.size() > 3) 
+    {
+        throw std::runtime_error("adddomainentry <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
+    }
+    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    return AddDomainEntry(request, bdapType);
 }
 
 UniValue getdomainentries(const JSONRPCRequest& request) 
@@ -161,7 +173,7 @@ UniValue getdomainentries(const JSONRPCRequest& request)
         nPage = request.params[1].get_int();
     
     // only return entries from the default public domain OU
-    std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    std::string strObjectLocation = DEFAULT_PUBLIC_USER_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
 
     UniValue oDomainEntryList(UniValue::VARR);
@@ -171,11 +183,11 @@ UniValue getdomainentries(const JSONRPCRequest& request)
     return oDomainEntryList;
 }
 
-UniValue getdomainentryinfo(const JSONRPCRequest& request) 
+UniValue getdomainuserinfo(const JSONRPCRequest& request) 
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getdomainentryinfo <public name>\nList BDAP entry.\n");
+        throw std::runtime_error("getdomainuserinfo <public name>\nList BDAP entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
@@ -183,17 +195,45 @@ UniValue getdomainentryinfo(const JSONRPCRequest& request)
 
     CDomainEntry directory;
     directory.DomainComponent = vchDefaultDomainName;
-    directory.OrganizationalUnit = vchDefaultPublicOU;
+    directory.OrganizationalUnit = vchDefaultUserOU;
     directory.ObjectID = vchObjectID;
     
     UniValue oDomainEntryInfo(UniValue::VOBJ);
     if (CheckDomainEntryDB()) {
         if (!pDomainEntryDB->GetDomainEntryInfo(directory.vchFullObjectPath(), oDomainEntryInfo)) {
-            throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
+            throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
         }
     }
     else {
-        throw std::runtime_error("BDAP_SELECT_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
+        throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
+    }
+
+    return oDomainEntryInfo;
+}
+
+UniValue getdomaingroupinfo(const JSONRPCRequest& request) 
+{
+    if (request.params.size() != 1) 
+    {
+        throw std::runtime_error("getdomaingroupinfo <public group>\nList BDAP entry.\n");
+    }
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+
+    CDomainEntry directory;
+    directory.DomainComponent = vchDefaultDomainName;
+    directory.OrganizationalUnit = vchDefaultGroupOU;
+    directory.ObjectID = vchObjectID;
+    
+    UniValue oDomainEntryInfo(UniValue::VOBJ);
+    if (CheckDomainEntryDB()) {
+        if (!pDomainEntryDB->GetDomainEntryInfo(directory.vchFullObjectPath(), oDomainEntryInfo)) {
+            throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
+        }
+    }
+    else {
+        throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
     }
 
     return oDomainEntryInfo;
@@ -213,7 +253,7 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     
     CDomainEntry txPreviousEntry;
     txPreviousEntry.DomainComponent = vchDefaultDomainName;
-    txPreviousEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txPreviousEntry.OrganizationalUnit = vchDefaultUserOU;
     txPreviousEntry.ObjectID = vchObjectID;
 
     // Check if name already exists
@@ -228,6 +268,7 @@ UniValue updatedomainentry(const JSONRPCRequest& request) {
     CDomainEntry txUpdatedEntry = txPreviousEntry;
     CharString vchCommonName = vchFromValue(request.params[1]);
     txUpdatedEntry.CommonName = vchCommonName;
+    txUpdatedEntry.nObjectType = GetObjectTypeInt(BDAP::ObjectType::USER_ACCOUNT);
 
     uint64_t nDays = 1461;  //default to 4 years.
     if (request.params.size() >= 3) {
@@ -300,10 +341,10 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
     
     CDomainEntry txSearchEntry;
     txSearchEntry.DomainComponent = vchDefaultDomainName;
-    txSearchEntry.OrganizationalUnit = vchDefaultPublicOU;
+    txSearchEntry.OrganizationalUnit = vchDefaultUserOU;
     txSearchEntry.ObjectID = vchObjectID;
     CDomainEntry txDeletedEntry = txSearchEntry;
-
+    
     // Check if name already exists
     if (!GetDomainEntry(txSearchEntry.vchFullObjectPath(), txSearchEntry))
         throw std::runtime_error("BDAP_DELETE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txSearchEntry.GetFullObjectPath() + _(" does not exists.  Can not delete."));
@@ -315,6 +356,7 @@ UniValue deletedomainentry(const JSONRPCRequest& request) {
     
     txDeletedEntry.WalletAddress = txSearchEntry.WalletAddress;
     txDeletedEntry.CommonName = txSearchEntry.CommonName;
+    txDeletedEntry.nObjectType = GetObjectTypeInt(BDAP::ObjectType::USER_ACCOUNT);
 
     CharString data;
     txDeletedEntry.Serialize(data);
@@ -396,15 +438,28 @@ UniValue makekeypair(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue adddomaingroup(const JSONRPCRequest& request) 
+{
+    if (request.params.size() < 2 || request.params.size() > 3) 
+    {
+        throw std::runtime_error("adddomaingroup <groupid> <common name> <registration days>\nAdd public group entry to blockchain directory.\n");
+    }
+
+    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    return AddDomainEntry(request, bdapType);
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
     /* BDAP */
     { "bdap",            "adddomainentry",           &adddomainentry,               true  },
     { "bdap",            "getdomainentries",         &getdomainentries,             true  },
-    { "bdap",            "getdomainentryinfo",       &getdomainentryinfo,           true  },
+    { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true  },
     { "bdap",            "updatedomainentry",        &updatedomainentry,            true  },
     { "bdap",            "deletedomainentry",        &deletedomainentry,            true  },
+    { "bdap",            "adddomaingroup",           &adddomaingroup,               true  },
+    { "bdap",            "getdomaingroupinfo",       &getdomaingroupinfo,           true  },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true  },
 };

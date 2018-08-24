@@ -59,6 +59,11 @@ namespace BDAP {
                 return "Unknown";
         }
     }
+    
+    unsigned int GetObjectTypeInt(BDAP::ObjectType ObjectType)
+    {
+        return (unsigned int)ObjectType;
+    }
 }
 
 std::string DomainEntryFromOp(const int op) 

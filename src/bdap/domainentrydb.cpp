@@ -334,9 +334,9 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
         return false;
     }
 
-    if (entry.OrganizationalUnit != vchDefaultPublicOU && entry.OrganizationalUnit != vchDefaultAdminOU)
+    if (entry.OrganizationalUnit != vchDefaultPublicOU && entry.OrganizationalUnit != vchDefaultUserOU && entry.OrganizationalUnit != vchDefaultGroupOU)
     {
-        errorMessage = "CommonDataCheck failed! Must use default public organizational unit.";
+        errorMessage = "CommonDataCheck failed! Must use default organizational units.";
         return false;
     }
 
