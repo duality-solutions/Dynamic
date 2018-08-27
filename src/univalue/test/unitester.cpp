@@ -1,6 +1,6 @@
 // Copyright 2014 BitPay Inc.
 // Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://opensource.org/licenses/mit-license.php.
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +17,7 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
-string srcdir(JSON_TEST_SRC);
+std::string srcdir(JSON_TEST_SRC);
 static bool test_failed = false;
 
 #define d_assert(expr) { if (!(expr)) { test_failed = true; fprintf(stderr, "%s failed\n", filename.c_str()); } }
@@ -29,7 +29,7 @@ static std::string rtrim(std::string s)
     return s;
 }
 
-static void runtest(string filename, const string& jdata)
+static void runtest(std::string filename, const std::string& jdata)
 {
         std::string prefix = filename.substr(0, 4);
 
@@ -67,7 +67,7 @@ static void runtest_file(const char *filename_)
                 int bread = fread(buf, 1, sizeof(buf), f);
                 assert(!ferror(f));
 
-                string s(buf, bread);
+                std::string s(buf, bread);
                 jdata += s;
         }
 
@@ -112,6 +112,8 @@ static const char *filenames[] = {
         "fail39.json",               // invalid unicode: only second half of surrogate pair
         "fail40.json",               // invalid unicode: broken UTF-8
         "fail41.json",               // invalid unicode: unfinished UTF-8
+        "fail42.json",               // valid json with garbage following a nul byte
+        "fail44.json",               // unterminated string
         "fail3.json",
         "fail4.json",                // extra comma
         "fail5.json",
@@ -124,6 +126,11 @@ static const char *filenames[] = {
         "pass3.json",
         "round1.json",              // round-trip test
         "round2.json",              // unicode
+        "round3.json",              // bare string
+        "round4.json",              // bare number
+        "round5.json",              // bare true
+        "round6.json",              // bare false
+        "round7.json",              // bare null
 };
 
 // Test \u handling

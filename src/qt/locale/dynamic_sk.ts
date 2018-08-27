@@ -740,8 +740,8 @@ Adresa: %4</translation>
         <translation>Kopírovať zmenu</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;Privatesend bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť Privatesend, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite Privatesend začiarkavacie políčko.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Vybratý ne-anonymizovaný vstup. &lt;b&gt;PrivateSend bude vypnutý.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ak si stále želáte použiť PrivateSend, najskôr odznačte všetky e-anonymizované vstup a potom znova zaškrtnite PrivateSend začiarkavacie políčko.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -841,10 +841,10 @@ Adresa: %4</translation>
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Konfigurovať Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Konfigurovať PrivateSend</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -891,20 +891,20 @@ Adresa: %4</translation>
         <translation>Toto je najpomalšia a najviac bezpečná možnosť. Použitie maximálnej anonymity bude stáť</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Konfigurácia Privatesend</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>Konfigurácia PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend bol úspešne nastavený na základnú hodnotu (%1 a 2 kolá). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend bol úspešne nastavený na vysokú hodnotu (%1 a 8 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend bol úspešne nastavený na maximálnu hodnotu (%1 a 16 kôl). Toto nastavenie môžete kedykoľvek zmeniť otvorením konfiguračnej obrazovky Dynamic.</translation>
     </message>
 </context>
 <context>
@@ -1145,12 +1145,12 @@ Adresa: %4</translation>
         <translation>(0 = auto, &lt;0 = nechať toľko jadier voľných)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Použiť kôl Privatesend</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>Použiť kôl PrivateSend</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Táto suma slúži ako hranica pre vypnutie Privatesend akonáhle je dosiahnutá</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Táto suma slúži ako hranica pre vypnutie PrivateSend akonáhle je dosiahnutá</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1422,8 +1422,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Dokončenie:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Bilancia Privatesend:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>Bilancia PrivateSend:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1442,8 +1442,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1462,16 +1462,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Posledná správa)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
-        <translation>Skúsiť manuálne odoslať Privatesend požiadavku.</translation>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>Skúsiť manuálne odoslať PrivateSend požiadavku.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Výskúšať mix</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Vynulovať súčasný stav Privatesend (môže prerušiť Privatesend ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Vynulovať súčasný stav PrivateSend (môže prerušiť PrivateSend ak je v procese miešania, čo Vás môže stáť peniaze!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1486,11 +1486,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Vypnuté</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
+        <source>Start PrivateSend Mixing</source>
         <translation>Začať Dasksend miešanie</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
+        <source>Stop PrivateSend Mixing</source>
         <translation>Zastaviť Dasksend miešanie</translation>
     </message>
     <message>
@@ -1534,9 +1534,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Povolené </translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Posledná Privatesend správa:
+        <translation>Posledná PrivateSend správa:
 </translation>
     </message>
     <message>
@@ -1544,20 +1544,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>nie je k dispozícii</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend bol úspešne obnovený</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend bol úspešne obnovený</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Ak nechcete vidieť interné Privatesend poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Ak nechcete vidieť interné PrivateSend poplatky/transakcie, vyberte "Najčastejšie" ako typ na záložke "Transakcie".</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Pre použitie vyžaduje Privatesend aspoň %1.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>Pre použitie vyžaduje PrivateSend aspoň %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Peňaženka je zamknutá a používateľ ju odmietol odomknúť. Vypínam PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -2363,8 +2363,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>&amp;Pridať príjemcu</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -2416,7 +2416,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(Privatesend vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
+        <translation>(PrivateSend vyžaduje aby bola táto suma zaokrúhlená nahor k najbližšej %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
@@ -2566,8 +2566,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Toto je neoverená výzva k platbe.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Platba pre:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Platba &amp;pre:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -3019,8 +3019,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Prijaté od:</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Prijaté cez Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Prijaté cez PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3035,24 +3035,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Vyfárané</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Denominácia Privatesend</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Denominácia PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Zaisťovacia Privatesend platba</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Zaisťovacia PrivateSend platba</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend uskutočnil zaisťovacie vstupy</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Vytvoriť denominácie Privatesend</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>Vytvoriť denominácie PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3130,24 +3130,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Odoslané na</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend uskutočnil zaisťovacie vstupy</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend uskutočnil zaisťovacie vstupy</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Vytvoriť denominácie Privatesend</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>Vytvoriť denominácie PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Denominácia Privatesend</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>Denominácia PrivateSend</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Zaisťovacia Privatesend platba</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>Zaisťovacia PrivateSend platba</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3329,8 +3329,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Nedá sa zamknúť dátový adresár %s. Dynamic už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Pre poslanie zdrojov používa Privatesend presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>Pre poslanie zdrojov používa PrivateSend presné sumy, potrebujete jednoducho anonymizovať viac mincí. </translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3385,12 +3385,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Nedá sa viazať ku %s na tomto počítači. Dynamic už pravdepodobne beží.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Nedá sa nájsť dostatok denominácií Privatesend pre túto transakciu. </translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Nedá sa nájsť dostatok denominácií PrivateSend pre túto transakciu. </translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Nedá sa nájsť dostatok ne-denominovaných Privatesend zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DYN.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Nedá sa nájsť dostatok ne-denominovaných PrivateSend zdrojov pre túto transakciu, ktoré nie sú rovné 1000 DYN.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3489,8 +3489,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Zistený poškodený blok databázy</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Možnosti Privatesend:</translation>
+        <source>PrivateSend options:</source>
+        <translation>Možnosti PrivateSend:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3561,8 +3561,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Chyba: Peňaženka je zamknutá, transakcia sa nedá vytvoriť!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Chyba: Už máte čakajúce položky vo fronte Privatesend</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Chyba: Už máte čakajúce položky vo fronte PrivateSend</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3613,8 +3613,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Vymazať všetky transakcie z peňaženky a pri spustení znova získať z reťazca blokov iba tie získané pomocou -rescan</translation>
     </message>
     <message>
-        <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Vypnúť všetky funkcie špecifické pre Dynamic (Dynode, Privatesend, InstantSend, Rozpočty) (0-1, predvolené: %u)</translation>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Vypnúť všetky funkcie špecifické pre Dynamic (Dynode, PrivateSend, InstantSend, Rozpočty) (0-1, predvolené: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3685,8 +3685,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Výstupné ladiace informácie (predvolené: %u, dodanie &lt;category&gt; je voliteľné)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Poskytnúť likviditu pre Privatesend nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Poskytnúť likviditu pre PrivateSend nepravidelným miešaním mincí na kontinuálnej báze (0-100, predvolené: %u, 1=veľmi často, vysoké poplatky, 100=veľmi zriedkavo, malé poplatky)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3807,16 +3807,16 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Nedá sa analyzovať -rpcbind hodnota %s ako sieťová adresa</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend je nečinný.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend je nečinný.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Privatesend požiadavok dokončený:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>PrivateSend požiadavok dokončený:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Privatesend požiadavok nedokončený:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>PrivateSend požiadavok nedokončený:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3947,7 +3947,7 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Neplatná suma pre -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
+        <source>Last successful PrivateSend action was too recent.</source>
         <translation>Posledná Dasksend akcia bola pred chvíľou.</translation>
     </message>
     <message>
@@ -4223,7 +4223,7 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>V pamäti udržiavať najviac &lt;n&gt; nepotvrdených transakcií (predvolené: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
+        <source>Last PrivateSend was too recent.</source>
         <translation>Posledný Dasksend bol pred chvíľou.</translation>
     </message>
     <message>
@@ -4475,8 +4475,8 @@ napríklad: alertnotify=echo %%s | mail -s "Dynamic Upozornenie" admin@foo.com
         <translation>Užívateľské meno pre JSON-RPC spojenia</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Väčšia hodnota ako dovoľuje fronta Privatesend.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Väčšia hodnota ako dovoľuje fronta PrivateSend.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

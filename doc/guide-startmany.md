@@ -53,7 +53,7 @@ Make note of the hash (which is your collaterla_output) and index.
 ### Enter your Dynode details into your dynode.conf file
 [From the dynamic github repo](https://github.com/duality-solutions/dynamic/blob/master/doc/dynode_conf.md)
 
-The new dynode.conf format consists of a space seperated text file. Each line consisting of an alias, IP address followed by port, Dynode private key, collateral output transaction id and collateral output index. 
+The new dynode.conf format consists of a space separated text file. Each line consisting of an alias, IP address followed by port, Dynode private key, collateral output transaction id and collateral output index. 
 (!!! Currently not implemented: "donation address and donation percentage (the latter two are optional and should be in format "address:percentage")." !!!)
 
 ```

@@ -11,6 +11,7 @@ QT_TS = \
   qt/locale/dynamic_fr.ts \
   qt/locale/dynamic_it.ts \
   qt/locale/dynamic_ja.ts \
+  qt/locale/dynamic_ko.ts \
   qt/locale/dynamic_pl.ts \
   qt/locale/dynamic_pt.ts \
   qt/locale/dynamic_ru.ts \
@@ -28,6 +29,7 @@ QT_FORMS_UI = \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
   qt/forms/intro.ui \
+  qt/forms/miningpage.ui \
   qt/forms/modaloverlay.ui \
   qt/forms/openuridialog.ui \
   qt/forms/optionsdialog.ui \
@@ -58,8 +60,10 @@ QT_MOC_CPP = \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
+  qt/moc_hashrategraphwidget.cpp \
   qt/moc_macdockiconhandler.cpp \
   qt/moc_macnotificationhandler.cpp \
+  qt/moc_miningpage.cpp \
   qt/moc_modaloverlay.cpp \
   qt/moc_notificator.cpp \
   qt/moc_openuridialog.cpp \
@@ -127,9 +131,11 @@ DYNAMIC_QT_H = \
   qt/editaddressdialog.h \
   qt/guiconstants.h \
   qt/guiutil.h \
+  qt/hashrategraphwidget.h \
   qt/intro.h \
   qt/macdockiconhandler.h \
   qt/macnotificationhandler.h \
+  qt/miningpage.h \
   qt/modaloverlay.h \
   qt/networkstyle.h \
   qt/notificator.h \
@@ -206,6 +212,7 @@ RES_ICONS = \
   qt/res/icons/drk/eye_plus.png \
   qt/res/icons/drk/eye.png \
   qt/res/icons/drk/filesave.png \
+  qt/res/icons/drk/fluid.png \
   qt/res/icons/drk/hd_disabled.png \
   qt/res/icons/drk/hd_enabled.png \
   qt/res/icons/drk/history.png \
@@ -273,6 +280,8 @@ DYNAMIC_QT_CPP += \
   qt/coincontroltreewidget.cpp \
   qt/dynodelist.cpp \
   qt/editaddressdialog.cpp \
+  qt/hashrategraphwidget.cpp \
+  qt/miningpage.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
   qt/paymentrequestplus.cpp \

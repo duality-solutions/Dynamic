@@ -85,7 +85,6 @@ DYNAMIC_CORE_H = \
   checkpoints.h \
   checkqueue.h \
   clientversion.h \
-  coincontrol.h \
   coins.h \
   compat.h \
   compat/byteswap.h \
@@ -129,9 +128,10 @@ DYNAMIC_CORE_H = \
   messagesigner.h \
   miner.h \
   net.h \
+  net_processing.h \
+  netaddress.h \
   netbase.h \
   netfulfilledman.h \
-  net_processing.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -189,12 +189,14 @@ DYNAMIC_CORE_H = \
   validationinterface.h \
   version.h \
   versionbits.h \
+  wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
   wallet/walletdb.h \
+  warnings.h \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
@@ -270,6 +272,7 @@ libdynamic_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
+  warnings.cpp \
   $(DYNAMIC_CORE_H)
 
 if ENABLE_ZMQ
@@ -352,6 +355,7 @@ libdynamic_common_a_SOURCES = \
   hdchain.cpp \
   key.cpp \
   keystore.cpp \
+  netaddress.cpp \
   netbase.cpp \
   primitives/block.cpp \
   primitives/transaction.cpp \

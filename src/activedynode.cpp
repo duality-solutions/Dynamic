@@ -10,6 +10,7 @@
 #include "dynode.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "netbase.h"
 #include "protocol.h"
 
 #ifdef ENABLE_WALLET
@@ -22,7 +23,7 @@ CActiveDynode activeDynode;
 void CActiveDynode::ManageState(CConnman& connman)
 {
     LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         LogPrint("Dynode", "CActiveDynode::ManageState -- Not a Dynode, returning\n");
         return;
     }
@@ -105,7 +106,7 @@ bool CActiveDynode::SendDynodePing(CConnman& connman)
     CDynodePing dnp(outpoint);
     dnp.nSentinelVersion = nSentinelVersion;
     dnp.fSentinelIsCurrent =
-            (llabs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_WATCHDOG_MAX_SECONDS);
+            (llabs(GetAdjustedTime() - nSentinelPingTime) < DYNODE_SENTINEL_PING_MAX_SECONDS);
     if(!dnp.Sign(keyDynode, pubKeyDynode)) {
         LogPrintf("CActiveDynode::SendDynodePing -- ERROR: Couldn't sign Dynode Ping\n");
         return false;
@@ -203,9 +204,13 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
         }
     }
 
+    // Check socket connectivity
     LogPrintf("CActiveDynode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
+    SOCKET hSocket;
+    bool fConnected = ConnectSocket(service, hSocket, nConnectTimeout) && IsSelectableSocket(hSocket);
+    CloseSocket(hSocket);
 
-    if(!connman.ConnectNode(CAddress(service, NODE_NETWORK), NULL, false, true)) {
+    if (!fConnected) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = "Could not connect to " + service.ToString();
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);

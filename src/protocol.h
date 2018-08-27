@@ -12,15 +12,13 @@
 #ifndef DYNAMIC_PROTOCOL_H
 #define DYNAMIC_PROTOCOL_H
 
-#include "netbase.h"
+#include "netaddress.h"
 #include "serialize.h"
 #include "uint256.h"
 #include "version.h"
 
 #include <stdint.h>
 #include <string>
-
-#define MESSAGE_START_SIZE 4
 
 /** Message header.
  * (4) message start.
@@ -31,6 +29,16 @@
 class CMessageHeader
 {
 public:
+    enum {
+        MESSAGE_START_SIZE = 4,
+        COMMAND_SIZE = 12,
+        MESSAGE_SIZE_SIZE = 4,
+        CHECKSUM_SIZE = 4,
+
+        MESSAGE_SIZE_OFFSET = MESSAGE_START_SIZE + COMMAND_SIZE,
+        CHECKSUM_OFFSET = MESSAGE_SIZE_OFFSET + MESSAGE_SIZE_SIZE,
+        HEADER_SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE
+    };
     typedef unsigned char MessageStartChars[MESSAGE_START_SIZE];
 
     CMessageHeader(const MessageStartChars& pchMessageStartIn);
@@ -42,7 +50,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
+    inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(FLATDATA(pchMessageStart));
         READWRITE(FLATDATA(pchCommand));
@@ -50,17 +58,6 @@ public:
         READWRITE(FLATDATA(pchChecksum));
     }
 
-    // TODO: make private (improves encapsulation)
-public:
-    enum {
-        COMMAND_SIZE = 12,
-        MESSAGE_SIZE_SIZE = sizeof(int),
-        CHECKSUM_SIZE = sizeof(int),
-
-        MESSAGE_SIZE_OFFSET = MESSAGE_START_SIZE + COMMAND_SIZE,
-        CHECKSUM_OFFSET = MESSAGE_SIZE_OFFSET + MESSAGE_SIZE_SIZE,
-        HEADER_SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE
-    };
     char pchMessageStart[MESSAGE_START_SIZE];
     char pchCommand[COMMAND_SIZE];
     unsigned int nMessageSize;
@@ -290,14 +287,15 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
+    inline void SerializationOp(Stream& s, Operation ser_action)
     {
         if (ser_action.ForRead())
             Init();
-        if (nType & SER_DISK)
+        int nVersion = s.GetVersion();
+        if (s.GetType() & SER_DISK)
             READWRITE(nVersion);
-        if ((nType & SER_DISK) ||
-            (nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
+        if ((s.GetType() & SER_DISK) ||
+            (nVersion >= CADDR_TIME_VERSION && !(s.GetType() & SER_GETHASH)))
             READWRITE(nTime);
         uint64_t nServicesInt = nServices;
         READWRITE(nServicesInt);
@@ -313,6 +311,32 @@ public:
     unsigned int nTime;
 };
 
+/** getdata / inv message types.
+ * These numbers are defined by the protocol. When adding a new value, be sure
+ * to mention it in the respective BIP.
+ */
+enum GetDataMsg {
+    UNDEFINED = 0,
+    MSG_TX = 1,    
+    MSG_BLOCK = 2, 
+    // Nodes may always request a MSG_FILTERED_BLOCK in a getdata, however,    
+    // MSG_FILTERED_BLOCK should not appear in any invs except as a part of getdata.   
+    MSG_FILTERED_BLOCK = 3,    
+    // Dynamic message types   
+    MSG_TXLOCK_REQUEST = 4,    
+    MSG_TXLOCK_VOTE = 5,   
+    MSG_SPORK = 6, 
+    MSG_DYNODE_PAYMENT_VOTE = 7,   
+    MSG_DYNODE_PAYMENT_BLOCK = 8,  
+    MSG_DYNODE_QUORUM = 9, // not implemented  
+    MSG_DYNODE_ANNOUNCE = 10,   
+    MSG_DYNODE_PING = 11,   
+    MSG_PSTX = 12,  
+    MSG_GOVERNANCE_OBJECT = 13, 
+    MSG_GOVERNANCE_OBJECT_VOTE = 14,    
+    MSG_DYNODE_VERIFY = 15,
+};
+
 /** inv message data */
 class CInv
 {
@@ -324,7 +348,7 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
+    inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(type);
         READWRITE(hash);
@@ -340,28 +364,6 @@ public:
 public:
     int type;
     uint256 hash;
-};
-
-enum {
-    MSG_TX = 1,
-    MSG_BLOCK,
-    // Nodes may always request a MSG_FILTERED_BLOCK in a getdata, however,
-    // MSG_FILTERED_BLOCK should not appear in any invs except as a part of getdata.
-    MSG_FILTERED_BLOCK,
-    // Dynamic message types
-    // NOTE: declare non-implmented here, we must keep this enum consistent and backwards compatible
-    MSG_TXLOCK_REQUEST,
-    MSG_TXLOCK_VOTE,
-    MSG_SPORK,
-    MSG_DYNODE_PAYMENT_VOTE,
-    MSG_DYNODE_PAYMENT_BLOCK,
-    MSG_DYNODE_QUORUM, // not implemented
-    MSG_DYNODE_ANNOUNCE,
-    MSG_DYNODE_PING,
-    MSG_PSTX,
-    MSG_GOVERNANCE_OBJECT,
-    MSG_GOVERNANCE_OBJECT_VOTE,
-    MSG_DYNODE_VERIFY,
 };
 
 #endif // DYNAMIC_PROTOCOL_H

@@ -164,7 +164,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     if(fLiteMode) return;
 
     // Disable any PS UI for Dynode or when autobackup is disabled or failed for whatever reason
-    if(fDyNode || nWalletBackups <= 0){
+    if(fDynodeMode || nWalletBackups <= 0){
         DisablePrivateSendCompletely();
         if (nWalletBackups <= 0) {
             ui->labelPrivateSendEnabled->setToolTip(tr("Automatic backups are disabled, no mixing available!"));
@@ -643,7 +643,7 @@ void OverviewPage::togglePrivateSend(){
         /* show privatesend configuration if client has defaults set */
 
         if(privateSendClient.nPrivateSendAmount == 0){
-            PrivatesendConfig dlg(this);
+            PrivateSendConfig dlg(this);
             dlg.setModel(walletModel);
             dlg.exec();
         }

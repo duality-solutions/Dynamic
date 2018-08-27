@@ -1,6 +1,183 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.3.0.0**
+
+* Skip existing Dynodes connections on mixing
+* Protect CKeyHolderStorage via mutex
+* Fix Boost 1.66 Compatibility
+* Net Overhaul and BTC Inlining
+* Bump Versions/Protocol (Updated Dynodes must get a fresh "Start" Signal with the new Binaries)
+* Update Tests
+* util: Add ParseUInt32 and ParseUInt64
+* [RPC] getmempoolancestors/getmempooldescendants
+* [RPC] setnetworkactive
+* httpserver: drop boost
+* Deprecate GetWork()
+* [Fluid] Update sovereign identities addresses for testnet
+* Update guiutil.cpp
+* [RPC] Fix gettxout
+* Update ReadBlockFromDisk
+* Fix Fluid Check
+* First version of Debian build howto
+* Formatting fixes, corrections
+* Removed exec flags where unneeded
+* trivial: remove unnecessary variable fDaemon
+* Fix some locks in net_processing.cpp
+* Tiny cleanup in configure.ac
+* Fix init segfault where InitLoadWallet() calls ATMP before genesis
+* remove new int and make i an unsigned int to supress build warning
+* fix op order to append first alert
+* Remove recommendedMinimum from SetMaxOutboundTarget
+* [init, wallet] ParameterInteraction() if wallet enabled
+* Specify Protobuf version 2 in paymentrequest.proto
+* net: fix maxuploadtarget setting
+* Trivial: UndoReadFromDisk works on undo files (rev), not on block files
+* Move static global randomizer seeds into CConnman
+* [init] Get rid of some ENABLE_WALLET
+* Remove last reference to CWalletDB from accounting_tests.cpp/Remove pwalletdb parameter from CWallet::AddAccountingEntry/Add CWallet::ReorderTransactions and use in accounting_tests.cpp/Add CWallet::ListAccountCreditDebit
+* [Qt] RPC-Console: support nested commands and simple value queries
+* [Wallet] remove unused ThreadFlushWalletDB from removeprunedfunds
+* init: Get rid of fDisableWallet
+* [qt] WalletModel: Expose disablewallet
+* Do not set an addr time penalty when a peer advertises itself.
+* Check for high-entropy ASLR
+* Move AutoBackup initialization into CWallet::InitAutoBackup
+* [mempool] Fix relaypriority calculation error
+* [depends] Fix Qt compilation with Xcode 8
+* [rpc] throw JSONRPCError when utxo set can not be read
+* Remove unused statements in serialization
+* dynamicd: Daemonize using daemon(3)
+* Decouple GetConfigFile and ReadConfigFile from global mapArgs
+* deprecate begin/end ptrs
+* net: fix a few cases where messages were sent rather than dropped upon disconnection
+* Trivial: RPC: getblockchaininfo help: pruneheight is the lowest, not highest, block
+* Sync dynamic-tx with tx version policy
+* RPC: Chainparams: Remove Chainparams::fTestnetToBeDeprecatedFieldRPC
+* Kill insecure_random and associated global state
+* Cleanup enums in protocol.h
+* Add preciousblock RPC
+* Report NodeId in misbehaving debug
+* Remove InsecureRand
+* Fix logging in PushInventory
+* Actually honor fMiningRequiresPeers in getblocktemplate
+* Remove extern
+* Bump LevelDB/UniValue/secp256k1 versions
+* RPC changeover to JSONRPCRequest
+* Qt refactors to better abstract wallet access
+* [RPC] Add ImportMulti
+* [RPC] importmulti: Avoid using boost::variant::operator!=, which is only in newer boost versions
+* Move coincontrol.h to walletfolder
+* Remove unnecessary function prototypes
+* Eliminating Inconsistencies in Textual Output
+* Make connect=0 disable automatic outbound connections.
+* Repair rpc_wallet_tests.cpp and remove unused variable in coins_tests.cpp to remove build warning
+* Repair final instance of mem pool to mempool
+* [RPC] Remove invalid explanation from wallet fee message
+* Return useful error message on ATMP failure/Deprecate Test
+* Fix Build Warnings
+* [Qt] overhaul smart-fee slider, adjust default confirmation target
+* keypoololdest denote Unix epoch, not GMT
+* [qt] Return useful error message on ATMP failure
+* Store mempool and prioritization data to disk
+* Throw exception in gobject prepare when CommitTransaction fails
+* Move CWalletDB::ReorderTransactions to CWallet
+* [rpc] ParseHash: Fail when length is not 64
+* Trivial: Explicitly pass const CChainParams& to LoadBlockIndexDB()
+* [Wallet] Refactor wallet/init interaction (Reaccept wtx, flush thread)
+* Change DEFAULT_TX_CONFIRM_TARGET from 2 to 10
+* Declare wallet.h functions inline
+* net: make a few values immutable, and use deterministic randomness for the localnonce
+* Add common failure cases for rpc server connection failure
+* Remove unused CTxOut::GetHash()
+* new var DIST_CONTRIB adds useful things for packagers from contrib/ to EXTRA_DIST
+* Use RelevantServices instead of node_network in AttemptToEvict and cleanup NodeEvictionCandidate
+* Allow filterclear messages for enabling TX relay only.
+* Use nPowTargetSpacing in SendCoinsDialog::updateGlobalFeeVariables
+* qt: Use correct conversion function for boost::path datadir
+* Hash P2P messages as they are received instead of at process-time
+* Addition of mining tab
+* Initialize variable to prevent compiler warning
+* fix getnettotals RPC description about timemillis
+* Remove redundant duplicate-input check from CheckTransaction
+* Serialization simplification/optimisation
+* fNetworkActive is not protected by a lock, use an atomic
+* Unset fImporting for loading mempool
+* net: don't send feefilter messages before the version handshake is complete
+* Remove block-request logic from INV message processing
+* [Qt] fix coincontrol sort issue
+* getrawtransaction should take a bool for verbose
+* Move -salvagewallet, -zap(wtx) to where they belong
+* Do not fully sort all nodes for addr relay
+* fix CreateTransaction error messages
+* Add check to IsCollateralValid
+* Credit should be CAmount
+* Update bench.cpp
+* remove unnecessary calls to CheckFinalTx
+* Split up AppInit2 into multiple phases
+* Daemonize after datadir lock
+* Get rid of fServer flag
+* Trivial refactor: Remove extern keyword from function declarations, as they are extern by default.
+* SendMoney: use already-calculated balance
+* Disable fee estimates for a confirm target of 1 block
+* Return txid even if ATMP fails for new transaction
+* Do not run functions with necessary side-effects in assert()
+* Use EXIT_FAILURE when calling exit()
+* Stop DynodeBroadcast::Relay() when not synced
+* Add missing locks to dynode.cpp
+* Move over to Sentinel Ping from Watchdog
+* Remove zero-fee transactions as an option
+* Update miningpage for out of sync situation + add tooltips
+* Add Sexy Sliders
+* Remove unused declaration in dynodeman.cpp
+* Add check to ensure that generatetoaddress doesn't function on Main or TestNet
+* [Miner] check for dynode sync before mining
+* Hash Rate Widget for Mining Page
+* [Dynode] Remove lock in ReadBlockFromDisk
+* Initial complete Korean translation added
+* add include to enable wallet to be built disabled
+* Fix Unlocking Error When Mixing
+* Refactor and fix restart
+* Fix segfault crash when shutdown the GUI in disablewallet mode
+* Increase mempool expiry time to 2 weeks
+* [CoinControl] Allow non-wallet owned change addresses
+* Allow shutdown during LoadMempool, dump only when necessary
+* Add IsArgSet, ForceSetArg, ForceSetMultiArgs, ForceRemoveArg & new critical section
+* [bugfix] save feeDelta instead of priorityDelta in DumpMempool
+* Add missing mempool lock for CalculateMemPoolAncestors
+* Qt/Intro: Various fixes
+* [net]Fix close socket loop
+* Bugfix: ancestor modifed fees were incorrect for descendants
+* Fix Dynode List
+* Remove some locking in net.h/net.cpp
+* Fix connectivity check in CActiveDynode::ManageStateInitial
+* Force Dynodes to have listen=1 and maxconnections to be at least DEFAULT_MAX_PEER_CONNECTIONS
+* fix SelectCoinsByDenominations
+* [Init] Avoid segfault when called with -enableinstantsend=0
+* Use correct version for fee estimates db
+* Fix args throughout wallet
+* Remove AddRef call in CNode constructor and do AddRef in AcceptConnection
+* Fix races, clean up args, move wallet backup dir check to wallet.cpp
+* Added check for open() returning a NULL pointer.
+* Limit IS quorums by updated DNs only
+* Fix nStart warning and actually use it
+* Fix LevelDB warning in leveldb/util/logging.cc
+* Update univalue and secp256k1 libraries (June 2018)
+* Bump dynodeman versionCDynodeMan-Version to 2
+* Bump CGovernanceManager version to 23 to signify v2.3
+* Change DyNode to DynodeMode to avoid confusion
+* [BDAP] Increase OP_RETURN relay size for larger DAP entries
+* [Fluid] Fix getfluidhistoryraw RPC command
+* [Fluid] Fix getfluidsovereigns RPC command
+* [Fluid] Allow negative fluid minting amounts
+* fix copy address, issue 157
+* Privatesend->PrivateSend Instantsend->InstantSend
+* Identified and Fixed many issues with Korean Translations.
+* Update dynamic_find_bdb48.m4
+* [Fluid] Fix send fluid tx display in Qt UI
+* Inline Argon2d code with commit fba7b9a
+* Update CHANGELOG
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
@@ -21,11 +198,12 @@
 * Bump Version and Copyright Year
 * Update Proto Version
 * Update secp256k1
-
+* Fix fixed seeds
+* Update CHANGELOG
 
 **Dynamic v2.1.0.0**
 
-* [Trivial] Shift non-Fluid specific operations to seperate file
+* [Trivial] Shift non-Fluid specific operations to separate file
 * [Script] Remove OPCODES from non-existent features
 * Add tags to mempool's mapTx indices
 * remove unused NOBLKS_VERSION_{START,END} constants
@@ -106,7 +284,7 @@
 * increase connection limits for outbound
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
-
+* Update CHANGELOG
 
 **Dynamic v2.0.0.0**
 
@@ -377,7 +555,7 @@
 * Common argument defaults for NODE_BLOOM stuff and -wallet
 * Move privatesend to rpcwallet.cpp
 * Optimize CheckOutpoint
-
+* Update CHANGELOG
 
 **Dynamic v1.4.0.0**
 
@@ -439,7 +617,7 @@
 * Reduce Keypool to 1000
 * Optimise Reindex
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.2**
 
@@ -451,19 +629,19 @@
 * Reduce nDefaultDbCache to 512MiB
 * Bump Proto and ONLY connect to 1.3.0.1 (Proto 70200)
 * Bump Governance/Core Proto/Versions
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
-
+* Update CHANGELOG
 
 **Dynamic v1.3.0.0**
 
 * c++11:Backport from bitcoin-core: don't throw from the reverselock destructor
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
-
+* Update CHANGELOG
 
 **Dynamic v1.2.0.0**
 
@@ -506,7 +684,7 @@
 * Watchdog check removed until Sentinel is updated/compatible fully
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
-
+* Update CHANGELOG
 
 **Dynamic v1.1.0.0**
 
@@ -527,6 +705,6 @@
 * [RPC] remove the option of having multiple timer interfaces		
 * Fix memory leak in httprpc.cpp		
 * Make KEY_SIZE a compile-time constant
+* Update CHANGELOG
 
-** Initial Fork from Dash 
-
+** Initial Fork from Dash

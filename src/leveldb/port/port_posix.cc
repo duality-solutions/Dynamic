@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#if (defined(__x86_64__) || defined(__i386__)) && defined(__GNUC__)
+#include <cpuid.h>
+#endif
+
 namespace leveldb {
 namespace port {
 

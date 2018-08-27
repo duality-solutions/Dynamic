@@ -933,8 +933,8 @@ Address: %4
     </message>
     <message>
         <location line="+329"/>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</translation>
     </message>
     <message>
         <location line="+32"/>
@@ -1062,11 +1062,11 @@ Address: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
         <location filename="../forms/privatesendconfig.ui" line="+14"/>
-        <source>Configure Privatesend</source>
-        <translation>Configure Privatesend</translation>
+        <source>Configure PrivateSend</source>
+        <translation>Configure PrivateSend</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -1127,23 +1127,23 @@ Address: %4
         <location filename="../privatesendconfig.cpp" line="+43"/>
         <location line="+15"/>
         <location line="+15"/>
-        <source>Privatesend Configuration</source>
-        <translation>Privatesend Configuration</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>PrivateSend Configuration</translation>
     </message>
     <message>
         <location line="-29"/>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
-        <translation>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
-        <translation>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
-        <translation>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</translation>
     </message>
 </context>
 <context>
@@ -1310,6 +1310,36 @@ Address: %4
         <source>Show splash screen on startup (default: 1)</source>
         <translation>Show splash screen on startup (default: 1)</translation>
     </message>
+	    <message>
+        <location line="+1"/>
+        <source>PrivateSend-LongText</source>
+        <translation>
+&lt;h3&gt;PrivateSend Basics&lt;/h3&gt;
+PrivateSend gives you true financial privacy by obscuring the origins of your funds.
+All the Dynamic in your wallet is comprised of different &#39;inputs&#39; which you can think of as separate, discrete coins.&lt;br&gt;
+PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet.
+You retain control of your money at all times.&lt;hr&gt;
+&lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations.
+These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
+&lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &#39;Dynodes&#39;.
+These Dynodes are informed then that you are interested in mixing a certain denomination.
+No identifiable information is sent to the Dynodes, so they never know &#39;who&#39; you are.&lt;/li&gt;
+&lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins.
+The Dynode mixes up the inputs and instructs all three users&#39; wallets to pay the now-transformed input back to themselves.
+Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt;
+&lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination.
+Each time the process is completed, it&#39;s called a &#39;round&#39;. Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt;
+&lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction,
+your funds will already be anonymized. No additional waiting is required.&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 2000 of these &#39;change addresses&#39;. Every time a mixing event happens, up to 9 of your addresses are used up.
+This means those 2000 addresses last for about 200 mixing events. When 1900 of them are used, your wallet must create more addresses.
+It can only do this, however, if you have automatic backups enabled.&lt;br&gt;
+Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;
+                </translation>
+    </message>
 </context>
 <context>
     <name>Intro</name>
@@ -1441,13 +1471,13 @@ Address: %4
     </message>
     <message>
         <location line="+40"/>
-        <source>Privatesend rounds to use</source>
-        <translation>Privatesend rounds to use</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>PrivateSend rounds to use</translation>
     </message>
     <message>
         <location line="+24"/>
-        <source>This amount acts as a threshold to turn off Privatesend once it&apos;s reached.</source>
-        <translation>This amount acts as a threshold to turn off Privatesend once it&apos;s reached.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it&apos;s reached.</source>
+        <translation>This amount acts as a threshold to turn off PrivateSend once it&apos;s reached.</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -1790,8 +1820,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Privatesend Balance:</source>
-        <translation>Privatesend Balance:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend Balance:</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -1819,8 +1849,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <location line="+10"/>
         <location line="+10"/>
         <location line="+14"/>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <location line="+74"/>
@@ -1844,8 +1874,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>Try to manually submit a Privatesend request.</source>
-        <translation>Try to manually submit a Privatesend request.</translation>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>Try to manually submit a PrivateSend request.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1854,8 +1884,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it&apos;s in the process of Mixing, which can cost you money!)</source>
-        <translation>Reset the current status of Privatesend (can interrupt Privatesend if it&apos;s in the process of Mixing, which can cost you money!)</translation>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -1881,14 +1911,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <location line="-288"/>
         <location line="+290"/>
         <location line="+91"/>
-        <source>Start Privatesend Mixing</source>
-        <translation>Start Privatesend Mixing</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Start PrivateSend Mixing</translation>
     </message>
     <message>
         <location line="-379"/>
         <location line="+382"/>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Stop Privatesend Mixing</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Stop PrivateSend Mixing</translation>
     </message>
     <message>
         <location line="-211"/>
@@ -1945,9 +1975,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Last Privatesend message:
+        <translation>Last PrivateSend message:
 </translation>
     </message>
     <message>
@@ -1957,23 +1987,23 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend was successfully reset.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend was successfully reset.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>If you don&apos;t want to see internal Privatesend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
-        <translation>If you don&apos;t want to see internal Privatesend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
+        <source>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</translation>
     </message>
     <message>
         <location line="+10"/>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesend requires at least %1 to use.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSend requires at least %1 to use.</translation>
     </message>
     <message>
         <location line="+14"/>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Wallet is locked and user declined to unlock. Disabling Privatesend.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Wallet is locked and user declined to unlock. Disabling PrivateSend.</translation>
     </message>
 </context>
 <context>
@@ -3020,8 +3050,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+38"/>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -3284,8 +3314,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <location line="+18"/>
         <location line="+532"/>
-        <source>Pay To:</source>
-        <translation>Pay To:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Pay &amp;To:</translation>
     </message>
     <message>
         <location line="-498"/>
@@ -3873,8 +3903,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Received via Privatesend</source>
-        <translation>Received via Privatesend</translation>
+        <source>Received via PrivateSend</source>
+        <translation>Received via PrivateSend</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3893,28 +3923,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominate</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominate</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Collateral Payment</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Collateral Payment</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Make Collateral Inputs</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Create Denominations</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Create Denominations</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <location line="+30"/>
@@ -4012,28 +4042,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesended</source>
-        <translation>Privatesended</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSended</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend Make Collateral Inputs</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend Make Collateral Inputs</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend Create Denominations</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend Create Denominations</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend Denominate</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend Denominate</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend Collateral Payment</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend Collateral Payment</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4260,8 +4290,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+12"/>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -4330,13 +4360,13 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Unable to locate enough Privatesend denominated funds for this transaction.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Unable to locate enough PrivateSend denominated funds for this transaction.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -4460,8 +4490,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>Privatesend options:</source>
-        <translation>Privatesend options:</translation>
+        <source>PrivateSend options:</source>
+        <translation>PrivateSend options:</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4550,8 +4580,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Error: You already have pending entries in the Privatesend pool</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Error: You already have pending entries in the PrivateSend pool</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4615,8 +4645,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</translation>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4705,8 +4735,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -4852,18 +4882,18 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend is idle.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend is idle.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Privatesend request complete:</source>
-        <translation>Privatesend request complete:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>PrivateSend request complete:</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Privatesend request incomplete:</source>
-        <translation>Privatesend request incomplete:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>PrivateSend request incomplete:</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -5027,8 +5057,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="+11"/>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>Last successful Privatesend action was too recent.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>Last successful PrivateSend action was too recent.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5372,8 +5402,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="+1"/>
-        <source>Last Privatesend was too recent.</source>
-        <translation>Last Privatesend was too recent.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>Last PrivateSend was too recent.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5687,8 +5717,8 @@ for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.
     </message>
     <message>
         <location line="+1"/>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Value more than Privatesend pool maximum allows.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Value more than PrivateSend pool maximum allows.</translation>
     </message>
     <message>
         <location line="+1"/>

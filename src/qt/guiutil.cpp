@@ -7,6 +7,7 @@
 
 #include "guiutil.h"
 
+#include "arith_uint256.h" 
 #include "dynamicaddressvalidator.h"
 #include "dynamicunits.h"
 #include "qvalidatedlineedit.h"
@@ -435,7 +436,7 @@ void openDebugLogfile()
 
 void openConfigfile()
 {
-    boost::filesystem::path pathConfig = GetConfigFile();
+    boost::filesystem::path pathConfig = GetConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
 
     /* Open dynamic.conf with the associated application */
     if (boost::filesystem::exists(pathConfig))
@@ -804,6 +805,8 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 
 
 #elif defined(Q_OS_MAC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 // based on: https://github.com/Mozketo/LaunchAtLoginController/blob/master/LaunchAtLoginController.m
 
 #include <CoreFoundation/CoreFoundation.h>
@@ -812,60 +815,80 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl);
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl)
 {
+    CFArrayRef listSnapshot = LSSharedFileListCopySnapshot(list, nullptr);
+    if (listSnapshot == nullptr) {
+        return nullptr;
+    }
+    
     // loop through the list of startup items and try to find the Dynamic app
-    CFArrayRef listSnapshot = LSSharedFileListCopySnapshot(list, NULL);
     for(int i = 0; i < CFArrayGetCount(listSnapshot); i++) {
         LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(listSnapshot, i);
         UInt32 resolutionFlags = kLSSharedFileListNoUserInteraction | kLSSharedFileListDoNotMountVolumes;
-        CFURLRef currentItemURL = NULL;
+        CFURLRef currentItemURL = nullptr;
 
 #if defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED >= 10100
-    if(&LSSharedFileListItemCopyResolvedURL)
-        currentItemURL = LSSharedFileListItemCopyResolvedURL(item, resolutionFlags, NULL);
+        if(&LSSharedFileListItemCopyResolvedURL)
+            currentItemURL = LSSharedFileListItemCopyResolvedURL(item, resolutionFlags, nullptr);
 #if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED < 10100
-    else
-        LSSharedFileListItemResolve(item, resolutionFlags, &currentItemURL, NULL);
+        else
+            LSSharedFileListItemResolve(item, resolutionFlags, &currentItemURL, nullptr);
 #endif
 #else
-    LSSharedFileListItemResolve(item, resolutionFlags, &currentItemURL, NULL);
+        LSSharedFileListItemResolve(item, resolutionFlags, &currentItemURL, nullptr);
 #endif
 
-        if(currentItemURL && CFEqual(currentItemURL, findUrl)) {
-            // found
-            CFRelease(currentItemURL);
-            return item;
-        }
         if(currentItemURL) {
+            if (CFEqual(currentItemURL, findUrl)) {
+                // found
+                CFRelease(listSnapshot);
+                CFRelease(currentItemURL);
+                return item;
+            }
             CFRelease(currentItemURL);
         }
     }
-    return NULL;
+    
+    CFRelease(listSnapshot);
+    return nullptr;
 }
 
 bool GetStartOnSystemStartup()
 {
     CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+    if (dynamicAppUrl == nullptr) {
+        return false;
+    }
+    
+    LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
     LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
+
+    CFRelease(dynamicAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
     CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+    if (dynamicAppUrl == nullptr) {
+        return false;
+    }
+    
+    LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
     LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add Dynamic app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, dynamicAppUrl, NULL, NULL);
+        // add dynamic app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, dynamicAppUrl, nullptr, nullptr);
     }
     else if(!fAutoStart && foundItem) {
         // remove item
         LSSharedFileListItemRemove(loginItems, foundItem);
     }
+    
+    CFRelease(dynamicAppUrl);
     return true;
 }
+#pragma GCC diagnostic pop
 #else
 
 bool GetStartOnSystemStartup() { return false; }
@@ -1065,4 +1088,141 @@ void ClickableProgressBar::mouseReleaseEvent(QMouseEvent *event)
     Q_EMIT clicked(event->pos());
 }
 
+int MaxThreads() {
+    int nThreads = boost::thread::hardware_concurrency();
+
+    int nUseThreads = GetArg("-genproclimit", -1);
+    if (nUseThreads < 0) {
+        nUseThreads = nThreads;
+    }
+    return nUseThreads;
+}
+
+int64_t GetHashRate() {
+
+    if (GetTimeMillis() - nHPSTimerStart > 8000)
+        return (int64_t)0;
+    return (int64_t)dHashesPerSec;
+}
+
+
+QString FormatHashRate(qint64 n)
+{
+    if (n == 0)
+        return "0 H/s";
+
+    int i = (int)floor(log(n)/log(1000));
+    float v = n*pow(1000.0f, -i);
+
+    QString prefix = "";
+    if (i >= 1 && i < 9)
+        prefix = " kMGTPEZY"[i];
+
+    return QString("%1 %2H/s").arg(v, 0, 'f', 2).arg(prefix);
+}
+
+int64_t GetNetworkHashPS(int lookup, int height) {
+    CBlockIndex *pb = chainActive.Tip();
+
+    if (height >= 0 && height < chainActive.Height())
+        pb = chainActive[height];
+
+    if (pb == NULL || !pb->nHeight)
+        return 0;
+
+    // If lookup is -1, then use blocks since last difficulty change.
+    if (lookup <= 0)
+        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+
+    // If lookup is larger than chain, then set it to chain length.
+    if (lookup > pb->nHeight)
+        lookup = pb->nHeight;
+
+    CBlockIndex *pb0 = pb;
+    int64_t minTime = pb0->GetBlockTime();
+    int64_t maxTime = minTime;
+    for (int i = 0; i < lookup; i++) {
+        pb0 = pb0->pprev;
+        int64_t time = pb0->GetBlockTime();
+        minTime = std::min(time, minTime);
+        maxTime = std::max(time, maxTime);
+    }
+
+    // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
+    if (minTime == maxTime)
+        return 0;
+
+    arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
+    int64_t timeDiff = maxTime - minTime;
+
+    return workDiff.getdouble() / timeDiff;
+}
+
+QString FormatTimeInterval(arith_uint256 time)
+{
+    enum  EUnit { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, NUM_UNITS };
+
+    const int SecondsPerUnit[NUM_UNITS] =
+    {
+        31556952, // average number of seconds in gregorian year
+        31556952/12, // average number of seconds in gregorian month
+        24*60*60, // number of seconds in a day
+        60*60, // number of seconds in an hour
+        60, // number of seconds in a minute
+        1
+    };
+
+    const char* UnitNames[NUM_UNITS] =
+    {
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second"
+    };
+
+    if (time > 0xFFFFFFFF)
+    {
+        time /= SecondsPerUnit[YEAR];
+        return QString("%1 years").arg(time.ToString().c_str());
+    }
+    else
+    {
+        unsigned int t32 = (unsigned int)time.GetCompact();
+
+        int Values[NUM_UNITS];
+        for (int i = 0; i < NUM_UNITS; i++)
+        {
+            Values[i] = t32/SecondsPerUnit[i];
+            t32 %= SecondsPerUnit[i];
+        }
+
+        int FirstNonZero = 0;
+        while (FirstNonZero < NUM_UNITS && Values[FirstNonZero] == 0)
+            FirstNonZero++;
+
+        QString TimeStr;
+        for (int i = FirstNonZero; i < std::min(FirstNonZero + 3, (int)NUM_UNITS); i++)
+        {
+            int Value = Values[i];
+            TimeStr += QString("%1 %2%3 ").arg(Value).arg(UnitNames[i]).arg((Value == 1)? "" : "s"); // FIXME: this is English specific
+        }
+        return TimeStr;
+    }
+}
+
+QString HashRateUnits(int64_t hashRate)
+{
+    if (hashRate == 0)
+        return "H/s";
+
+    int i = (int)floor(log(hashRate)/log(1000));
+
+    QString prefix = "";
+    if (i >= 1 && i < 9)
+        prefix = " kMGTPEZY"[i];
+
+    return QString("%1H/s").arg(prefix);
+}
 } // namespace GUIUtil

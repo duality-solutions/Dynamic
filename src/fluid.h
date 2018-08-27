@@ -1,6 +1,4 @@
 // Copyright (c) 2017 Duality Blockchain Solutions Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef FLUID_PROTOCOL_H
 #define FLUID_PROTOCOL_H
@@ -35,15 +33,7 @@ public:
     static const CAmount FLUID_MAX_REWARD_FOR_MINING = 1000 * COIN; // Max mining block reward using fluid OP_REWARD_MINING
     static const CAmount FLUID_MAX_FOR_MINT = 1000000000 * COIN; // Max minting amount per fluid transaction
 
-    std::vector<std::pair<std::string, CDynamicAddress>> InitialiseSovereignIdentities() {
-        std::vector<std::pair<std::string, CDynamicAddress>> x;
-        x.push_back(std::make_pair("CEO",   CDynamicAddress("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu")));
-        x.push_back(std::make_pair("CTO",   CDynamicAddress("DRoyjRoxP4qfeAiiZHX1dmSkbUJiBSXBt7")));
-        x.push_back(std::make_pair("CFO",   CDynamicAddress("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t")));
-        x.push_back(std::make_pair("COO",   CDynamicAddress("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH")));
-        x.push_back(std::make_pair("CDOO",  CDynamicAddress("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP")));
-        return x;
-    }
+    std::vector<std::pair<std::string, CDynamicAddress>> InitialiseSovereignIdentities();
 
     std::vector<std::string> InitialiseAddresses();
 };

@@ -1,7 +1,5 @@
+// Copyright (c) 2015 The Bitcoin Core developers
 // Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,15 +10,15 @@
 #include <stdint.h>
 #include <functional>
 
+
 static const int DEFAULT_HTTP_THREADS=4;
 static const int DEFAULT_HTTP_WORKQUEUE=16;
 static const int DEFAULT_HTTP_SERVER_TIMEOUT=30;
 
+struct evhttp_request;
+struct event_base;
 class CService;
 class HTTPRequest;
-
-struct event_base;
-struct evhttp_request;
 
 /** Initialize HTTP server.
  * Call this before RegisterHTTPHandler or EventBase().

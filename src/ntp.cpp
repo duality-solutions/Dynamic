@@ -7,12 +7,13 @@
 #include <unistd.h>
 #endif
 
+#include "init.h"
 #include "netbase.h"
 #include "net.h"
-#include "ui_interface.h"
 #include "timedata.h"
+#include "ui_interface.h"
 #include "utiltime.h"
-#include "init.h"
+#include "warnings.h"
 
 extern int GetRandInt(int nMax);
 
@@ -517,7 +518,7 @@ void ThreadNtpSamples() {
         {
             // If there is not enough node offsets data and NTP time offset is greater than 40 minutes then give a warning.
             std::string strMessage("Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.");
-            strMiscWarning = strMessage;
+            SetMiscWarning(strMessage);
             LogPrintf("*** %s\n", strMessage.c_str());
             uiInterface.ThreadSafeMessageBox(strMessage+" ", std::string("Dynamic"), CClientUIInterface::BTN_OK | CClientUIInterface::ICON_WARNING);
         }

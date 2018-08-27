@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = dynamic
-VERSION = 2.2.0.0
+VERSION = 2.3.0.0
 INCLUDEPATH += src \
                src/crypto \
                src/crypto/heavyhash \
@@ -435,12 +435,15 @@ HEADERS += \
     src/validationinterface.h \
     src/version.h \
     src/versionbits.h \
+    src/warnings.h \
     src/compat/endian.h \
     src/crypto/common.h \
     src/support/lockedpool.h \
     src/messagesigner.h \
     src/qt/modaloverlay.h \
-    src/indirectmap.h
+    src/indirectmap.h \
+    src/qt/miningpage.h \
+    src/qt/hashrategraphwidget.h
 
 SOURCES += \
     src/compat/glibcxx_sanity.cpp \
@@ -603,12 +606,15 @@ SOURCES += \
     src/utiltime.cpp \
     src/validationinterface.cpp \
     src/versionbits.cpp \
+    src/warnings.cpp \
     src/qt/paymentrequest.pb.cc \
     src/support/lockedpool.cpp \
     src/ui_interface.cpp \
     src/messagesigner.cpp \
     src/qt/modaloverlay.cpp \
-    src/sendalert.cpp
+    src/sendalert.cpp \
+    src/qt/miningpage.cpp \
+    src/qt/hashrategraphwidget.cpp
 
 
 OTHER_FILES += \
@@ -639,4 +645,5 @@ FORMS += \
     src/qt/forms/signverifymessagedialog.ui \
     src/qt/forms/dynodelist.ui \
     src/qt/forms/transactiondescdialog.ui \
-    src/qt/forms/modaloverlay.ui
+    src/qt/forms/modaloverlay.ui \
+    src/qt/forms/miningpage.ui

@@ -29,8 +29,6 @@ QT_BEGIN_NAMESPACE
 class QUrl;
 QT_END_NAMESPACE
 
-const int defaultConfirmTarget = 25;
-
 /** Dialog for sending Dynamics */
 class SendCoinsDialog : public QDialog
 {

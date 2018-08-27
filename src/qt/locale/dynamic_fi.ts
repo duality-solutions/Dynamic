@@ -741,8 +741,8 @@ Osoite: %4
         <translation>Kopioi vaihtoraha</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;Privatesend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use Privatesend, please deselect all non-nonymized inputs first and then check Privatesend checkbox again.</source>
-        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;Privatesend poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää Privatesend:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen Privatesend optio.</translation>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Ei anonyymeja syötteitä valittu. &lt;b&gt;PrivateSend poistetaan käytöstä.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Jos silti haluat käyttää PrivateSend:iä, poista ei anonyymit valinnat ensin ja valitse uudelleen PrivateSend optio.</translation>
     </message>
     <message>
         <source>highest</source>
@@ -842,10 +842,10 @@ Osoite: %4
     </message>
 </context>
 <context>
-    <name>PrivatesendConfig</name>
+    <name>PrivateSendConfig</name>
     <message>
-        <source>Configure Privatesend</source>
-        <translation>Privatesend Asetukset</translation>
+        <source>Configure PrivateSend</source>
+        <translation>PrivateSend Asetukset</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
@@ -892,20 +892,20 @@ Osoite: %4
         <translation>Tämä vaihtoehto on hitain ja kaikkein anonyymi. Suurimman yksityisyyden käyttö maksaa</translation>
     </message>
     <message>
-        <source>Privatesend Configuration</source>
-        <translation>Privatesend Asetukset</translation>
+        <source>PrivateSend Configuration</source>
+        <translation>PrivateSend Asetukset</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend on asetettu perusasetuksiin (%1 and 2 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend on asetettu keskitason asetuksiin (%1 and 8 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
     </message>
     <message>
-        <source>Privatesend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>Privatesend on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
+        <translation>PrivateSend on asetettu maksimitason asetuksiin (%1 and 16 kierrosta). Voit muuttaa asetuksia milloin vain Dynamic asetuksista.</translation>
     </message>
 </context>
 <context>
@@ -1147,12 +1147,12 @@ Varoitus: Jos käytät käyttöjärjestelmää (Live os) suoraan usb, dvd tai cd
         <translation>(0 = auto, &lt;0 = jätä näin monta prosessorin ydintä vapaaksi)</translation>
     </message>
     <message>
-        <source>Privatesend rounds to use</source>
-        <translation>Kuinka montaa Privatesend kierrosta käytetään</translation>
+        <source>PrivateSend rounds to use</source>
+        <translation>Kuinka montaa PrivateSend kierrosta käytetään</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off Privatesend once it's reached.</source>
-        <translation>Tämä määrä toimii rajana keskeytykselle kun Privatesend anonymisointi sen saavuttaa.</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <translation>Tämä määrä toimii rajana keskeytykselle kun PrivateSend anonymisointi sen saavuttaa.</translation>
     </message>
     <message>
         <source>Amount of Dynamic to keep anonymized</source>
@@ -1424,8 +1424,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Valmiina:</translation>
     </message>
     <message>
-        <source>Privatesend Balance:</source>
-        <translation>Privatesend Saldo:</translation>
+        <source>PrivateSend Balance:</source>
+        <translation>PrivateSend Saldo:</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
@@ -1444,8 +1444,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1464,16 +1464,16 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>(Viimeisin Viesti)</translation>
     </message>
     <message>
-        <source>Try to manually submit a Privatesend request.</source>
-        <translation>Yritä manuaalisesti esittää Privatesend sekoituspyyntö.</translation>
+        <source>Try to manually submit a PrivateSend request.</source>
+        <translation>Yritä manuaalisesti esittää PrivateSend sekoituspyyntö.</translation>
     </message>
     <message>
         <source>Try Mix</source>
         <translation>Yritä Sekoittaa</translation>
     </message>
     <message>
-        <source>Reset the current status of Privatesend (can interrupt Privatesend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Nollaa nykyinen Privatesend tila (voi keskeyttää Privatesend sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
+        <translation>Nollaa nykyinen PrivateSend tila (voi keskeyttää PrivateSend sekoituksen, joka voi maksaa ylimääräisiä kuluja)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1488,12 +1488,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Ei käytössä</translation>
     </message>
     <message>
-        <source>Start Privatesend Mixing</source>
-        <translation>Käynnistä Privatesend Sekoitus</translation>
+        <source>Start PrivateSend Mixing</source>
+        <translation>Käynnistä PrivateSend Sekoitus</translation>
     </message>
     <message>
-        <source>Stop Privatesend Mixing</source>
-        <translation>Lopeta Privatesend Sekoitus</translation>
+        <source>Stop PrivateSend Mixing</source>
+        <translation>Lopeta PrivateSend Sekoitus</translation>
     </message>
     <message>
         <source>No inputs detected</source>
@@ -1536,9 +1536,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Käytössä</translation>
     </message>
     <message>
-        <source>Last Privatesend message:
+        <source>Last PrivateSend message:
 </source>
-        <translation>Viimeisin Privatesend viesti:
+        <translation>Viimeisin PrivateSend viesti:
 </translation>
     </message>
     <message>
@@ -1546,20 +1546,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>e/s</translation>
     </message>
     <message>
-        <source>Privatesend was successfully reset.</source>
-        <translation>Privatesend nollattu onnistuneesti.</translation>
+        <source>PrivateSend was successfully reset.</source>
+        <translation>PrivateSend nollattu onnistuneesti.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal Privatesend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Jos et halua nähdä sisäisiä Privatesend sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
+        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
+        <translation>Jos et halua nähdä sisäisiä PrivateSend sekoituksen kuluja/tapahtumia, valitse "Yleiset" tyypiksi siirtotapahtumissa.</translation>
     </message>
     <message>
-        <source>Privatesend requires at least %1 to use.</source>
-        <translation>Privatesendin käyttö vaatii vähintään %1.</translation>
+        <source>PrivateSend requires at least %1 to use.</source>
+        <translation>PrivateSendin käyttö vaatii vähintään %1.</translation>
     </message>
     <message>
-        <source>Wallet is locked and user declined to unlock. Disabling Privatesend.</source>
-        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. Privatesend asetetaan pois käytöstä.</translation>
+        <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
+        <translation>Lompakko on lukittu ja käyttäjä ei avannut sitä. PrivateSend asetetaan pois käytöstä.</translation>
     </message>
 </context>
 <context>
@@ -2369,8 +2369,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lisää &amp;Vastaanottaja</translation>
     </message>
     <message>
-        <source>Privatesend</source>
-        <translation>Privatesend</translation>
+        <source>PrivateSend</source>
+        <translation>PrivateSend</translation>
     </message>
     <message>
         <source>InstantSend</source>
@@ -2572,8 +2572,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tämä on vahvistamaton maksupyyntö</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Saaja:</translation>
+        <source>Pay &amp;To:</source>
+        <translation>Maksun &amp;saaja:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -3025,8 +3025,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vastaanotettu osoitteesta</translation>
     </message>
     <message>
-        <source>Received via Privatesend</source>
-        <translation>Privatesend vastaanotettu</translation>
+        <source>Received via PrivateSend</source>
+        <translation>PrivateSend vastaanotettu</translation>
     </message>
     <message>
         <source>Sent to</source>
@@ -3041,24 +3041,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Louhittu</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend denominointi</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend denominointi</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend vakuus maksu</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend vakuus maksu</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend luo vakuus syötteet</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend denominointien luonti</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend denominointien luonti</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesend lähetetty</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSend lähetetty</translation>
     </message>
     <message>
         <source>watch-only</source>
@@ -3136,24 +3136,24 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Lähetetty</translation>
     </message>
     <message>
-        <source>Privatesended</source>
-        <translation>Privatesend lähetetty</translation>
+        <source>PrivateSended</source>
+        <translation>PrivateSend lähetetty</translation>
     </message>
     <message>
-        <source>Privatesend Make Collateral Inputs</source>
-        <translation>Privatesend luo vakuus syötteet</translation>
+        <source>PrivateSend Make Collateral Inputs</source>
+        <translation>PrivateSend luo vakuus syötteet</translation>
     </message>
     <message>
-        <source>Privatesend Create Denominations</source>
-        <translation>Privatesend denominointien luonti</translation>
+        <source>PrivateSend Create Denominations</source>
+        <translation>PrivateSend denominointien luonti</translation>
     </message>
     <message>
-        <source>Privatesend Denominate</source>
-        <translation>Privatesend denominointi</translation>
+        <source>PrivateSend Denominate</source>
+        <translation>PrivateSend denominointi</translation>
     </message>
     <message>
-        <source>Privatesend Collateral Payment</source>
-        <translation>Privatesend vakuus maksu</translation>
+        <source>PrivateSend Collateral Payment</source>
+        <translation>PrivateSend vakuus maksu</translation>
     </message>
     <message>
         <source>To yourself</source>
@@ -3335,8 +3335,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ei voida lukita data hakemistoa %s. Dynamic on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Privatesend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>Privatesend käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
+        <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
+        <translation>PrivateSend käyttää tarkalleen denominoituja syötteitä lähettäessään varoja, saatat tarvita anonymisoida lisää varoja.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
@@ -3391,12 +3391,12 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Ei voida yhdistää %s tässä tietokoneessa. Dynamic on luultavasti jo käynnissä.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend denominated funds for this transaction.</source>
-        <translation>Ei tarpeeksi Privatesend anonymisoituja varoja tälle siirtotapahtumalle.</translation>
+        <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
+        <translation>Ei tarpeeksi PrivateSend anonymisoituja varoja tälle siirtotapahtumalle.</translation>
     </message>
     <message>
-        <source>Unable to locate enough Privatesend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Ei tarpeeksi Privatesend ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DYN.</translation>
+        <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
+        <translation>Ei tarpeeksi PrivateSend ei-anonymisoituja varoja tälle siirtotapahtumalle, joka ei ole 1000 DYN.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
@@ -3495,8 +3495,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Vioittunut lohkotietokanta havaittu</translation>
     </message>
     <message>
-        <source>Privatesend options:</source>
-        <translation>Privatesend valinnat:</translation>
+        <source>PrivateSend options:</source>
+        <translation>PrivateSend valinnat:</translation>
     </message>
     <message>
         <source>Debugging/Testing options:</source>
@@ -3567,8 +3567,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Virhe: Lompakko on lukittu, siirtotapahtumaa ei voida luoda!</translation>
     </message>
     <message>
-        <source>Error: You already have pending entries in the Privatesend pool</source>
-        <translation>Virhe: Sinulla on jo odottavia merkintöjä Privatesend varannossa</translation>
+        <source>Error: You already have pending entries in the PrivateSend pool</source>
+        <translation>Virhe: Sinulla on jo odottavia merkintöjä PrivateSend varannossa</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
@@ -3619,8 +3619,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Poista kaikki lompakon siirtotapahtumat ja palauta vain nuo osat lohkoketjusta -rescan valinnan avulla käynnistyksessä</translation>
     </message>
     <message>
-        <source>Disable all Dynamic specific functionality (Dynodes, Privatesend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Kytke pois käytöstä kaikki Dynamic:in erityistoiminnot (Dynodet, Privatesend, InstantSend, Budjetointi) (0-1, oletus: %u)</translation>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Kytke pois käytöstä kaikki Dynamic:in erityistoiminnot (Dynodet, PrivateSend, InstantSend, Budjetointi) (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
@@ -3632,7 +3632,7 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Ota käyttöön automaattinen Privatesend rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
+        <translation>Ota käyttöön automaattinen PrivateSend rahavaroille tässä lompakossa  (0-1, oletus: %u)</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3691,8 +3691,8 @@ Näillä toiminnoilla voit korjata korruptoituneen lohkoketjun tai puuttuvat/van
         <translation>Tulosta debuggaustieto (oletus: %u, tarjottava &lt;category&gt; on valinnainen)</translation>
     </message>
     <message>
-        <source>Provide liquidity to Privatesend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Tarjoa Privatesend:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
+        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
+        <translation>Tarjoa PrivateSend:ille likviditeettiä jatkuvaa kolikoiden sekoitusta varten (0-100, oletus: %u, 1=usein, isot maksukulut, 100=harvoin, pienet maksukulut)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
@@ -3815,16 +3815,16 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Ei voida jäsentää -rpcbind arvoa %s verkko-osoitteena</translation>
     </message>
     <message>
-        <source>Privatesend is idle.</source>
-        <translation>Privatesend odottaa.</translation>
+        <source>PrivateSend is idle.</source>
+        <translation>PrivateSend odottaa.</translation>
     </message>
     <message>
-        <source>Privatesend request complete:</source>
-        <translation>Privatesend pyyntö valmis:</translation>
+        <source>PrivateSend request complete:</source>
+        <translation>PrivateSend pyyntö valmis:</translation>
     </message>
     <message>
-        <source>Privatesend request incomplete:</source>
-        <translation>Privatesend pyyntö kesken:</translation>
+        <source>PrivateSend request incomplete:</source>
+        <translation>PrivateSend pyyntö kesken:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
@@ -3955,8 +3955,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Virheellinen määrä -paytxfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
-        <source>Last successful Privatesend action was too recent.</source>
-        <translation>Viimeinen onnistunut Privatesend tapahtuma oli liian äskettäin.</translation>
+        <source>Last successful PrivateSend action was too recent.</source>
+        <translation>Viimeinen onnistunut PrivateSend tapahtuma oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
@@ -4231,8 +4231,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Pidä enintään &lt;n&gt; ei yhdistettyä siirtotapahtumaa muistissa (oletus: %u)</translation>
     </message>
     <message>
-        <source>Last Privatesend was too recent.</source>
-        <translation>Viimeisin Privatesend oli liian äskettäin.</translation>
+        <source>Last PrivateSend was too recent.</source>
+        <translation>Viimeisin PrivateSend oli liian äskettäin.</translation>
     </message>
     <message>
         <source>Line: %d</source>
@@ -4483,8 +4483,8 @@ esimerkiksi: alertnotify=echo %%s | mail -s "Dynamic Hälytys" admin@foo.com
         <translation>Käyttäjätunnus JSON-RPC yhteyksille</translation>
     </message>
     <message>
-        <source>Value more than Privatesend pool maximum allows.</source>
-        <translation>Määrä on enemmän kuin Privatesend varannon maksimi sallii.</translation>
+        <source>Value more than PrivateSend pool maximum allows.</source>
+        <translation>Määrä on enemmän kuin PrivateSend varannon maksimi sallii.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>

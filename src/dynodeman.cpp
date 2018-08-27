@@ -21,7 +21,7 @@
 /** Dynode manager */
 CDynodeMan dnodeman;
 
-const std::string CDynodeMan::SERIALIZATION_VERSION_STRING = "CDynodeMan-Version-1";
+const std::string CDynodeMan::SERIALIZATION_VERSION_STRING = "CDynodeMan-Version-2";
 
 struct CompareLastPaidBlock
 {
@@ -64,7 +64,7 @@ CDynodeMan::CDynodeMan()
   fDynodesAdded(false),
   fDynodesRemoved(false),
   vecDirtyGovernanceObjectHashes(),
-  nLastWatchdogVoteTime(0),
+  nLastSentinelPingTime(0),
   mapSeenDynodeBroadcast(),
   mapSeenDynodePing(),
   nPsqCount(0)
@@ -153,7 +153,7 @@ void CDynodeMan::Check()
 {
     LOCK(cs);
 
-    LogPrint("Dynode", "CDynodeMan::Check -- nLastWatchdogVoteTime=%d, IsWatchdogActive()=%d\n", nLastWatchdogVoteTime, IsWatchdogActive());
+    LogPrint("Dynode", "CDynodeMan::Check -- nLastSentinelPingTime=%d, IsSentinelPingActive()=%d\n", nLastSentinelPingTime, IsSentinelPingActive());
 
     for (auto& dnpair : mapDynodes) {
         dnpair.second.Check();
@@ -351,7 +351,7 @@ void CDynodeMan::Clear()
     mapSeenDynodeBroadcast.clear();
     mapSeenDynodePing.clear();
     nPsqCount = 0;
-    nLastWatchdogVoteTime = 0;
+    nLastSentinelPingTime = 0;
 }
 
 int CDynodeMan::CountDynodes(int nProtocolVersion)
@@ -576,10 +576,10 @@ dynode_info_t CDynodeMan::FindRandomNotInVec(const std::vector<COutPoint> &vecTo
         vpDynodesShuffled.push_back(&dnpair.second);
     }
 
-    InsecureRand insecureRand;
+    FastRandomContext insecure_rand;
 
     // shuffle pointers
-    std::random_shuffle(vpDynodesShuffled.begin(), vpDynodesShuffled.end(), insecureRand);
+    std::random_shuffle(vpDynodesShuffled.begin(), vpDynodesShuffled.end(), insecure_rand);
     bool fExclude;
 
     // loop through
@@ -787,11 +787,8 @@ void CDynodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStre
         // see if we have this Dynode
         CDynode* pdn = Find(dnp.vin.prevout);
 
-        // if dynode uses sentinel ping instead of watchdog
-        // we shoud update nTimeLastWatchdogVote here if sentinel
-        // ping flag is actual
         if(pdn && dnp.fSentinelIsCurrent)
-            UpdateWatchdogVoteTime(dnp.vin.prevout, dnp.sigTime);
+            UpdateLastSentinelPingTime();
 
         // too late, new DNANNOUNCE is required
         if(pdn && pdn->IsNewStartRequired()) return;
@@ -1062,23 +1059,20 @@ bool CDynodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<CDyno
 
 void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman& connman)
 {
-    int nDnCount = dnodeman.CountDynodes();
+    AssertLockHeld(cs_main);
 
     // only Dynodes can sign this, why would someone ask regular node?
-    if(!fDyNode) {
+    if(!fDynodeMode) {
         // do not ban, malicious node might be using my IP
         // and trying to confuse the node which tries to verify it
         return;
     }
 
-    if(nDnCount > 200) 
-    {
-        if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
-            // peer should not ask us that often
-            LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
-            Misbehaving(pnode->id, 20);
-            return;
-        }
+    if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
+        // peer should not ask us that often
+        LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
+        Misbehaving(pnode->id, 20);
+        return;
     }
 
     uint256 blockHash;
@@ -1107,6 +1101,8 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
 
 void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 {
+    AssertLockHeld(cs_main);
+
     std::string strError;
 
     int nDnCount = dnodeman.CountDynodes();
@@ -1220,6 +1216,8 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 
 void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification& dnv)
 {
+    AssertLockHeld(cs_main);
+
     std::string strError;
 
     if(mapSeenDynodeVerification.find(dnv.GetHash()) != mapSeenDynodeVerification.end()) {
@@ -1427,7 +1425,7 @@ bool CDynodeMan::CheckDnbAndUpdateDynodeList(CNode* pfrom, CDynodeBroadcast dnb,
         Add(dnb);
         dynodeSync.BumpAssetLastTime("CDynodeMan::CheckDnbAndUpdateDynodeList - new");
         // if it matches our Dynode privkey...
-        if(fDyNode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
+        if(fDynodeMode && dnb.pubKeyDynode == activeDynode.pubKeyDynode) {
             dnb.nPoSeBanScore = -DYNODE_POSE_BAN_MAX_SCORE;
             if(dnb.nProtocolVersion == PROTOCOL_VERSION) {
                 // ... and PROTOCOL_VERSION, then we've been remotely activated ...
@@ -1459,7 +1457,7 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
     static bool IsFirstRun = true;
     // Do full scan on first run or if we are not a Dynode
     // (DNs should update this info on every block, so limited scan should be enough for them)
-    int nMaxBlocksToScanBack = (IsFirstRun || !fDyNode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
+    int nMaxBlocksToScanBack = (IsFirstRun || !fDynodeMode) ? dnpayments.GetStorageLimit() : LAST_PAID_SCAN_BLOCKS;
 
     //                         nCachedBlockHeight, nMaxBlocksToScanBack, IsFirstRun ? "true" : "false");
 
@@ -1470,22 +1468,17 @@ void CDynodeMan::UpdateLastPaid(const CBlockIndex* pindex)
     IsFirstRun = false;
 }
 
-void CDynodeMan::UpdateWatchdogVoteTime(const COutPoint& outpoint, uint64_t nVoteTime)
+void CDynodeMan::UpdateLastSentinelPingTime()
 {
     LOCK(cs);
-    CDynode* pdn = Find(outpoint);
-    if(!pdn) {
-        return;
-    }
-    pdn->UpdateWatchdogVoteTime(nVoteTime);
-    nLastWatchdogVoteTime = GetTime();
+    nLastSentinelPingTime = GetTime();
 }
 
-bool CDynodeMan::IsWatchdogActive()
+bool CDynodeMan::IsSentinelPingActive()
 {
     LOCK(cs);
     // Check if any Dynodes have voted recently, otherwise return false
-    return (GetTime() - nLastWatchdogVoteTime) <= DYNODE_WATCHDOG_MAX_SECONDS;
+    return (GetTime() - nLastSentinelPingTime) <= DYNODE_SENTINEL_PING_MAX_SECONDS;
 }
 
 bool CDynodeMan::AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash)
@@ -1533,13 +1526,9 @@ void CDynodeMan::SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing&
         return;
     }
     pdn->lastPing = dnp;
-    // if dynode uses sentinel ping instead of watchdog
-    // we shoud update nTimeLastWatchdogVote here if sentinel
-    // ping flag is actual
     if(dnp.fSentinelIsCurrent) {
-        UpdateWatchdogVoteTime(dnp.vin.prevout, dnp.sigTime);
+        UpdateLastSentinelPingTime();
     }
-
     mapSeenDynodePing.insert(std::make_pair(dnp.GetHash(), dnp));
 
     CDynodeBroadcast dnb(*pdn);
@@ -1556,7 +1545,7 @@ void CDynodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
 
     CheckSameAddr();
 
-    if(fDyNode) {
+    if(fDynodeMode) {
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
         UpdateLastPaid(pindex);
     }
