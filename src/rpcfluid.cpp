@@ -77,8 +77,8 @@ UniValue getrawpubkey(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"address\"         (string, required) The Dynamic Address from which the pubkey is to recovered.\n"
             "\nExamples:\n"
-            + HelpExampleCli("burndynamic", "123.456")
-            + HelpExampleRpc("burndynamic", "123.456")
+            + HelpExampleCli("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
+            + HelpExampleRpc("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
         );
 
     CDynamicAddress address(request.params[0].get_str());
@@ -110,8 +110,8 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
             "\nArguments:\n"
             "1. \"account\"         (numeric or string, required) The amount of coins to be minted.\n"
             "\nExamples:\n"
-            + HelpExampleCli("burndynamic", "123.456")
-            + HelpExampleRpc("burndynamic", "123.456")
+            + HelpExampleCli("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
+            + HelpExampleRpc("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
         );
 
     EnsureWalletIsUnlocked();
@@ -228,8 +228,8 @@ UniValue verifyquorum(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
             "\nExamples:\n"
-            + HelpExampleCli("consenttoken", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("consenttoken", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
+            + HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
+            + HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
         );
 
     if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
