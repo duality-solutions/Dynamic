@@ -24,6 +24,7 @@
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "flat-database.h"
+#include "fluid/fluiddynode.h"
 #include "governance.h"
 #include "instantsend.h"
 #include "httpserver.h"
@@ -1479,18 +1480,21 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
+                delete pFluidDynodeDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
-
+                
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
                 pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
                 pcoinsTip = new CCoinsViewCache(pcoinscatcher);
 
-                // Init BDAP Services DB's
                 bool obfuscate = false;
+                // Init Fluid DB's
+                pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
+                // Init BDAP Services DB's 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
-
+                
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files

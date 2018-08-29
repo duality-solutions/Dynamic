@@ -10,7 +10,7 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "policy/fees.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 #include "governance-classes.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
@@ -315,8 +315,8 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
 
         // make sure it's not filled yet
         txoutDynodeRet = CTxOut();
-
-        CAmount dynodePayment = getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
+        //TODO fluid
+        CAmount dynodePayment = GetDynodePayment(true);//getDynodeSubsidyWithOverride(pindexPrev->fluidParams.dynodeReward);
         
         txoutDynodeRet = CTxOut(dynodePayment, payee);
         txNew.vout.push_back(txoutDynodeRet);
@@ -585,7 +585,8 @@ bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
     std::string strPayeesPossible = "";
 
     /* Dirtiest trick in the book */
-	CAmount nDynodePayment = getDynodeSubsidyWithOverride(chainActive.Tip()->fluidParams.dynodeReward);
+    //TODO fluid
+    CAmount nDynodePayment = GetDynodePayment(true); //getDynodeSubsidyWithOverride(chainActive.Tip()->fluidParams.dynodeReward);
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 

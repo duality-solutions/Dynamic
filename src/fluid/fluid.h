@@ -9,7 +9,6 @@
 #include "script/script.h"
 #include "consensus/validation.h"
 #include "utilstrencodings.h"
-#include "dbwrapper.h"
 #include "operations.h"
 
 #include <stdint.h>
@@ -22,6 +21,7 @@
 class CBlock;
 class CTxMemPool;
 struct CBlockTemplate;
+class CTransaction;
 
 /** Configuration Framework */
 class CFluidParameters {
@@ -37,6 +37,8 @@ public:
 
     std::vector<std::string> InitialiseAddresses();
 };
+
+std::vector<std::string> InitialiseAddresses();
 
 /** Fluid Asset Management Framework */
 class CFluid : public CFluidParameters, public COperations {
@@ -83,7 +85,12 @@ CAmount getBlockSubsidyWithOverride(const int& nHeight, CAmount lastOverrideComm
 CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode = true);
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount &nExpectedBlockValue, bool fDynodePaid);
-bool IsTransactionFluid(CScript txOut);
+bool IsTransactionFluid(const CScript& txOut);
+bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript);
+int GetFluidOpCode(const CScript& fluidScript);
+
+std::vector<unsigned char> CharVectorFromString(const std::string& str);
+std::string StringFromCharVector(const std::vector<unsigned char>& vch);
 
 extern CFluid fluid;
 

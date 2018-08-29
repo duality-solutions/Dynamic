@@ -23,11 +23,39 @@ CFluid fluid;
 extern CWallet* pwalletMain;
 #endif //ENABLE_WALLET
 
-bool IsTransactionFluid(CScript txOut) {
+bool IsTransactionFluid(const CScript& txOut) {
     return (txOut.IsProtocolInstruction(MINT_TX)
             || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX)
             || txOut.IsProtocolInstruction(MINING_MODIFY_TX)
            );
+}
+
+bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript) 
+{
+    for (const CTxOut& txout : tx.vout) {
+        CScript txOut = txout.scriptPubKey;
+        if (IsTransactionFluid(txOut)) {
+            fluidScript = txOut;
+            return true;
+        }
+    }
+    return false;
+}
+
+int GetFluidOpCode(const CScript& fluidScript)
+{
+    if (fluidScript.IsProtocolInstruction(MINT_TX)) {
+        return OP_MINT;
+    }
+    else if (fluidScript.IsProtocolInstruction(DYNODE_MODFIY_TX))
+    {
+        return OP_REWARD_DYNODE;
+    }
+    else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX))
+    {
+        return OP_REWARD_MINING;
+    }
+    return 0;
 }
 
 /** Initialise sovereign identities that are able to run fluid commands */
@@ -57,6 +85,11 @@ std::vector<std::pair<std::string, CDynamicAddress>> CFluidParameters::Initialis
     return x;
 }
 
+std::vector<std::string> InitialiseAddresses() {
+    CFluidParameters params;
+    return params.InitialiseAddresses();
+}
+
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     if (!inputKey.IsValid()) {
@@ -67,8 +100,11 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
-    if (pindex != NULL)
-        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
+    if (pindex != NULL) {
+        //TODO fluid
+        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
+    }
+        
     else
         fluidSovereigns = InitialiseAddresses();
 
@@ -176,8 +212,10 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
-    if (pindex != NULL)
-        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
+    if (pindex != NULL) {
+        //TODO fluid
+        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
+    }
     else
         fluidSovereigns = InitialiseAddresses();
 
@@ -477,19 +515,24 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 
 /* Check if transaction exists in record */
 bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
-    std::string verificationString;
-    CFluidEntry fluidIndex;
-    if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT)
-        return false;
-    else if (pindex == nullptr) {
-        GetLastBlockIndex(chainActive.Tip());
-        fluidIndex = chainActive.Tip()->fluidParams;
-    } else
-        fluidIndex = pindex->fluidParams;
-
-    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
-
     if (IsTransactionFluid(fluidInstruction)) {
+        std::string verificationString;
+        //TODO fluid
+        /*
+        CFluidEntry fluidIndex;
+        if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT) {
+            return false;
+        }
+        else if (pindex == nullptr) {
+            GetLastBlockIndex(chainActive.Tip());
+            //TODO fluid
+            //fluidIndex = chainActive.Tip()->fluidParams;
+        } else {
+            //TODO fluid
+            //fluidIndex = pindex->fluidParams;
+        }
+        */
+        std::vector<std::string> transactionRecord;//fluidIndex.fluidHistory;
         verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
@@ -646,4 +689,20 @@ bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint
     }
 
     return true;
+}
+
+std::vector<unsigned char> CharVectorFromString(const std::string& str)
+{
+    return std::vector<unsigned char>(str.begin(), str.end());
+}
+
+std::string StringFromCharVector(const std::vector<unsigned char>& vch)
+{
+    std::string strReturn;
+    std::vector<unsigned char>::const_iterator vi = vch.begin();
+    while (vi != vch.end()) {
+        strReturn += (char) (*vi);
+        vi++;
+    }
+    return strReturn;
 }

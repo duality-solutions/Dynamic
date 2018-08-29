@@ -11,6 +11,7 @@
 #include "consensus/consensus.h"
 #include "bdap/bdap.h"
 #include "bdap/domainentry.h"
+#include "fluid/fluid.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"
