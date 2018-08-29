@@ -30,7 +30,7 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "wallet/wallet.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 
 #include <queue>
 #include <utility>
@@ -317,11 +317,17 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
         }
 
+        //TODO fluid
+        CAmount fluidIssuance = 0;
+        CAmount blockReward = getBlockSubsidyWithOverride(nHeight, 0);
         CDynamicAddress address;
+        /*
+        CAmount fluidIssuance;
+        CAmount blockReward = getBlockSubsidyWithOverride(nHeight, prevFluidIndex.blockReward);
         CFluidEntry prevFluidIndex = pindexPrev->fluidParams;
-		CAmount fluidIssuance = 0, blockReward = getBlockSubsidyWithOverride(nHeight, prevFluidIndex.blockReward);
-        bool areWeMinting = fluid.GetMintingInstructions(pindexPrev, address, fluidIssuance);
-
+        */
+        bool areWeMinting = false; //fluid.GetMintingInstructions(pindexPrev, address, fluidIssuance);
+        
         // Compute regular coinbase transaction.
         txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 
@@ -330,12 +336,12 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         } else {
             txNew.vout[0].nValue = blockReward;
         }
-		
+        
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
         CScript script;
-        
-        if (areWeMinting) {		
+        //TODO fluid
+        if (areWeMinting) {        
             // Pick out the amount of issuance
             txNew.vout[0].nValue -= fluidIssuance;
 
@@ -362,7 +368,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
  
         CAmount blockAmount = blockReward + fluidIssuance;
-		LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
+        LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
         // Update block coinbase
         pblock->vtx[0] = txNew;
@@ -374,7 +380,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
         pblock->nNonce = 0;
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(pblock->vtx[0]);
-		CValidationState state;
+        CValidationState state;
         if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
             LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", txNew.ToString());
             throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
@@ -477,7 +483,7 @@ void static DynamicMiner(const CChainParams& chainparams, CConnman& connman)
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
-	
+    
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.

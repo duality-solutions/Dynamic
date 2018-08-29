@@ -104,7 +104,8 @@ DYNAMIC_CORE_H = \
   dynodeman.h \
   dynodeconfig.h \
   flat-database.h \
-  fluid.h \
+  fluid/fluid.h \
+  fluid/fluiddynode.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -225,7 +226,9 @@ libdynamic_server_a_SOURCES = \
   dynode-sync.cpp \
   dynodeconfig.cpp \
   dynodeman.cpp \
-  fluid.cpp \
+  fluid/fluid.cpp \
+  fluid/fluiddynode.cpp \
+  fluid/rpcfluid.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -260,7 +263,6 @@ libdynamic_server_a_SOURCES = \
   rpcnet.cpp \
   rpcrawtransaction.cpp \
   rpcserver.cpp \
-  rpcfluid.cpp \
   script/sigcache.cpp \
   sendalert.cpp \
   spork.cpp \
@@ -510,6 +512,7 @@ CLEANFILES += *.gcda *.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
+CLEANFILES += fluid/*.gcda fluid/*.gcno
 CLEANFILES += policy/*.gcda policy/*.gcno
 CLEANFILES += primitives/*.gcda primitives/*.gcno
 CLEANFILES += script/*.gcda script/*.gcno

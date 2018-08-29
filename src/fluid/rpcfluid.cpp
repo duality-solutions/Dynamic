@@ -4,6 +4,7 @@
 
 #include "chain.h"
 #include "core_io.h"
+#include "fluiddynode.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -293,18 +294,20 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             + HelpExampleRpc("getfluidhistoryraw", "")
         );
 
+    UniValue ret(UniValue::VARR);
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
+    //TODO fluid
+    /*
     CFluidEntry fluidIndex = pindex->fluidParams;
     std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
 
-    UniValue ret(UniValue::VARR);
     for(const std::string& existingRecord : transactionRecord) {
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("fluid command", existingRecord));
         ret.push_back(obj);
     }
-
+    */
     return ret;
 }
 
@@ -332,12 +335,43 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             + HelpExampleRpc("getfluidhistory", "")
         );
 
+    UniValue ret(UniValue::VARR);
+    std::vector<CFluidDynode> dynodeEntries;
+    if (CheckFluidDynodeDB) { 
+        if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid dynode entries"));
+        }
+    }
+    else {
+        throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4001 - " + _("Error opening fluid dynode db"));
+    }
+
+    // load Dynode fluid transaction history
+    for (const CFluidDynode& dynEntry : dynodeEntries)
+    {
+        UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("operation", "Dynode Reward Update"));
+        obj.push_back(Pair("amount", dynEntry.DynodeReward));  //TODO fluid convert to decimal value
+        obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
+        obj.push_back(Pair("address_count", dynEntry.SovereignAddresses.size()));
+        int index = 1;
+        for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses)
+        {
+            std::string addLabel = "sovereign_address_"  + std::to_string(index);
+            obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+            index ++;
+        }
+        obj.push_back(Pair("raw", StringFromCharVector(dynEntry.FluidScript)));
+        ret.push_back(obj);
+    }
+    //TODO fluid
+    /*
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;
     std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
 
-    UniValue ret(UniValue::VARR);
+    
     HexFunctions hexConvert;
     for (const std::string& existingRecord : transactionRecord) {
         UniValue obj(UniValue::VOBJ);
@@ -385,7 +419,7 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         }
         ret.push_back(obj);
     }
-    
+    */
     return ret;
 }
 
@@ -404,19 +438,21 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
             + HelpExampleRpc("getfluidsovereigns", "")
         );
 
+    UniValue ret(UniValue::VARR);
+    /*
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
     CFluidEntry fluidIndex = pindex->fluidParams;
 
     std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
 
-    UniValue ret(UniValue::VARR);
+    
     for (const std::string& sovereign : sovereignLogs) {
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("sovereign address", sovereign));
         ret.push_back(obj);
     }
-
+    */
     return ret;
 }
 
