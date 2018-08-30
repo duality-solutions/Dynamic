@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Duality Blockchain Solutions Developers
 
-#ifndef FLUID_DYNODE_H
-#define FLUID_DYNODE_H
+#ifndef FLUID_MINT_H
+#define FLUID_MINT_H
 
 #include "amount.h"
 #include "dbwrapper.h"
@@ -13,36 +13,38 @@
 class CScript;
 class CTransaction;
 
-class CFluidDynode {
+class CFluidMint {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
-    CAmount DynodeReward;
+    CAmount MintAmount;
+    std::vector<unsigned char> DestinationAddress;
     int64_t nTimeStamp;
     std::vector<std::vector<unsigned char>> SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidDynode() { 
+    CFluidMint() { 
         SetNull();
     }
 
-    CFluidDynode(const CTransaction& tx) {
+    CFluidMint(const CTransaction& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidDynode(const CScript& fluidScript) {
+    CFluidMint(const CScript& fluidScript) {
         SetNull();
         UnserializeFromScript(fluidScript);
     }
 
     inline void SetNull()
     {
-        nVersion = CFluidDynode::CURRENT_VERSION;
+        nVersion = CFluidMint::CURRENT_VERSION;
         FluidScript.clear();
-        DynodeReward = -1;
+        MintAmount = -1;
+        DestinationAddress.clear();
         nTimeStamp = 0;
         SovereignAddresses.clear();
         txHash.SetNull();
@@ -55,24 +57,26 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
-        READWRITE(DynodeReward);
+        READWRITE(MintAmount);
+        READWRITE(DestinationAddress);
         READWRITE(VARINT(nTimeStamp));
         READWRITE(SovereignAddresses);
         READWRITE(txHash);
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidDynode& a, const CFluidDynode& b) {
-        return (a.FluidScript == b.FluidScript && a.DynodeReward == b.DynodeReward && a.nTimeStamp == b.nTimeStamp);
+    inline friend bool operator==(const CFluidMint& a, const CFluidMint& b) {
+        return (a.FluidScript == b.FluidScript && a.MintAmount == b.MintAmount && a.DestinationAddress == b.DestinationAddress && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidDynode& a, const CFluidDynode& b) {
+    inline friend bool operator!=(const CFluidMint& a, const CFluidMint& b) {
         return !(a == b);
     }
 
-    inline CFluidDynode operator=(const CFluidDynode& b) {
+    inline CFluidMint operator=(const CFluidMint& b) {
         FluidScript = b.FluidScript;
-        DynodeReward = b.DynodeReward;
+        MintAmount = b.MintAmount;
+        DestinationAddress = b.DestinationAddress;
         nTimeStamp = b.nTimeStamp;
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses)
         {
@@ -89,20 +93,20 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 };
 
-static CCriticalSection cs_fluid_dynode;
+static CCriticalSection cs_fluid_mint;
 
-class CFluidDynodeDB : public CDBWrapper {
+class CFluidMintDB : public CDBWrapper {
 public:
-    CFluidDynodeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
-    bool AddFluidDynodeEntry(const CFluidDynode& entry, const int op);
-    bool GetLastFluidDynodeRecord(CFluidDynode& entry);
-    bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& entries);
+    CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
+    bool AddFluidMintEntry(const CFluidMint& entry, const int op);
+    bool GetLastFluidMintRecord(CFluidMint& entry);
+    bool GetAllFluidMintRecords(std::vector<CFluidMint>& entries);
 };
 
-bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);
-bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut);
-bool CheckFluidDynodeDB();
+bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
+bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut);
+bool CheckFluidMintDB();
 
-extern CFluidDynodeDB *pFluidDynodeDB;
+extern CFluidMintDB *pFluidMintDB;
 
-#endif // FLUID_DYNODE_H
+#endif // FLUID_MINT_H

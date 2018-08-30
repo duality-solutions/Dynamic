@@ -25,6 +25,8 @@
 #include "dynodeman.h"
 #include "flat-database.h"
 #include "fluid/fluiddynode.h"
+#include "fluid/fluidmining.h"
+#include "fluid/fluidmint.h"
 #include "governance.h"
 #include "instantsend.h"
 #include "httpserver.h"
@@ -1480,7 +1482,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
+                // Fluid transaction DB's
                 delete pFluidDynodeDB;
+                delete pFluidMiningDB;
+                delete pFluidMintDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
                 
@@ -1490,8 +1495,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pcoinsTip = new CCoinsViewCache(pcoinscatcher);
 
                 bool obfuscate = false;
-                // Init Fluid DB's
+                // Init Fluid transaction DB's
                 pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
+
                 // Init BDAP Services DB's 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
                 

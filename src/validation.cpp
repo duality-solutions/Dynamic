@@ -18,6 +18,8 @@
 #include "dynode-sync.h"
 #include "fluid/fluid.h"
 #include "fluid/fluiddynode.h"
+#include "fluid/fluidmining.h"
+#include "fluid/fluidmint.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -2201,6 +2203,16 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     CFluidDynode fluidDynode(scriptFluid);
                     if (CheckFluidDynodeDB)
                         pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
+                }
+                else if (OpCode == OP_REWARD_MINING) {
+                    CFluidMining fluidMining(scriptFluid);
+                    if (CheckFluidMiningDB)
+                        pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
+                }
+                else if (OpCode == OP_MINT) {
+                    CFluidMint fluidMint(scriptFluid);
+                    if (CheckFluidMintDB)
+                        pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }
             }
             if (fAddressIndex || fSpentIndex)

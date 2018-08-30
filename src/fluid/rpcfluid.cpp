@@ -5,6 +5,8 @@
 #include "chain.h"
 #include "core_io.h"
 #include "fluiddynode.h"
+#include "fluidmining.h"
+#include "fluidmint.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -287,7 +289,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             "\nReturns raw data about each fluid command confirmed on the Dynamic blockchain.\n"
             "\nResult:\n"
             "{                   (json array of string)\n"
-            "  \"fluid command\"     (string) The operation code and raw fluid script command\n"
+            "  \"fluid_command\"     (string) The operation code and raw fluid script command\n"
             "}, ...\n"
             "\nExamples\n"
             + HelpExampleCli("getfluidhistoryraw", "")
@@ -295,19 +297,63 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         );
 
     UniValue ret(UniValue::VARR);
-    GetLastBlockIndex(chainActive.Tip());
-    CBlockIndex* pindex = chainActive.Tip();
-    //TODO fluid
-    /*
-    CFluidEntry fluidIndex = pindex->fluidParams;
-    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
+    // load fluid mint transaction history
+    {
+        std::vector<CFluidMint> mintEntries;
+        if (CheckFluidMintDB) { 
+            if (!pFluidMintDB->GetAllFluidMintRecords(mintEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid mint entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4001 - " + _("Error opening fluid mint db"));
+        }
 
-    for(const std::string& existingRecord : transactionRecord) {
-        UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("fluid command", existingRecord));
-        ret.push_back(obj);
+        for (const CFluidMint& mintEntry : mintEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("fluid_mint_command", StringFromCharVector(mintEntry.FluidScript)));
+            ret.push_back(obj);
+        }
     }
-    */
+    // load fluid dynode update reward transaction history
+    {
+        std::vector<CFluidDynode> dynodeEntries;
+        if (CheckFluidDynodeDB) { 
+            if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid dynode entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4001 - " + _("Error opening fluid dynode db"));
+        }
+        
+        for (const CFluidDynode& dynEntry : dynodeEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("fluid_dynode_command", StringFromCharVector(dynEntry.FluidScript)));
+            ret.push_back(obj);
+        }
+    }
+    // load fluid mining update reward transaction history
+    {
+        std::vector<CFluidMining> miningEntries;
+        if (CheckFluidMiningDB) { 
+            if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4004 - " + _("Error getting fluid mining entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error opening fluid mining db"));
+        }
+
+        for (const CFluidMining& miningEntry : miningEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("fluid_mining_command", StringFromCharVector(miningEntry.FluidScript)));
+            ret.push_back(obj);
+        }
+    }
     return ret;
 }
 
@@ -336,90 +382,118 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         );
 
     UniValue ret(UniValue::VARR);
-    std::vector<CFluidDynode> dynodeEntries;
-    if (CheckFluidDynodeDB) { 
-        if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
-            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid dynode entries"));
+    CAmount totalMintedCoins = 0;
+    CAmount totalFluidTxCost = 0;
+    // load fluid mint transaction history
+    {
+        std::vector<CFluidMint> mintEntries;
+        if (CheckFluidMintDB) { 
+            if (!pFluidMintDB->GetAllFluidMintRecords(mintEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid mint entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4001 - " + _("Error opening fluid mint db"));
+        }
+
+        for (const CFluidMint& mintEntry : mintEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("operation", "Mint"));
+            obj.push_back(Pair("amount", mintEntry.MintAmount));  //TODO fluid convert to decimal value
+            obj.push_back(Pair("timestamp", mintEntry.nTimeStamp));
+            obj.push_back(Pair("address_count", mintEntry.SovereignAddresses.size()));
+            obj.push_back(Pair("destination_address)", StringFromCharVector(mintEntry.DestinationAddress)));
+            int index = 1;
+            for (const std::vector<unsigned char>& vchAddress : mintEntry.SovereignAddresses)
+            {
+                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+                obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+                index ++;
+            }
+            ret.push_back(obj);
+            totalMintedCoins = totalMintedCoins + mintEntry.MintAmount;
+            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
         }
     }
-    else {
-        throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4001 - " + _("Error opening fluid dynode db"));
+    // load fluid dynode update reward transaction history
+    {
+        std::vector<CFluidDynode> dynodeEntries;
+        if (CheckFluidDynodeDB) { 
+            if (!pFluidDynodeDB->GetAllFluidDynodeRecords(dynodeEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4002 - " + _("Error getting fluid dynode entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4003 - " + _("Error opening fluid dynode db"));
+        }
+        for (const CFluidDynode& dynEntry : dynodeEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("operation", "Dynode Reward Update"));
+            obj.push_back(Pair("amount", dynEntry.DynodeReward));  //TODO fluid convert to decimal value
+            obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
+            obj.push_back(Pair("address_count", dynEntry.SovereignAddresses.size()));
+            int index = 1;
+            for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses)
+            {
+                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+                obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+                index ++;
+            }
+            ret.push_back(obj);
+            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+        }
     }
+    // load fluid mining update reward transaction history
+    {
+        std::vector<CFluidMining> miningEntries;
+        if (CheckFluidMiningDB) { 
+            if (!pFluidMiningDB->GetAllFluidMiningRecords(miningEntries)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4004 - " + _("Error getting fluid mining entries"));
+            }
+        }
+        else {
+            throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4005 - " + _("Error opening fluid mining db"));
+        }
 
-    // load Dynode fluid transaction history
-    for (const CFluidDynode& dynEntry : dynodeEntries)
+        for (const CFluidMining& miningEntry : miningEntries)
+        {
+            UniValue obj(UniValue::VOBJ);
+            obj.push_back(Pair("operation", "Mining Reward Update"));
+            obj.push_back(Pair("amount", miningEntry.MiningReward));  //TODO fluid convert to decimal value
+            obj.push_back(Pair("timestamp", miningEntry.nTimeStamp));
+            obj.push_back(Pair("address_count", miningEntry.SovereignAddresses.size()));
+            int index = 1;
+            for (const std::vector<unsigned char>& vchAddress : miningEntry.SovereignAddresses)
+            {
+                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+                obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+                index ++;
+            }
+            ret.push_back(obj);
+            totalFluidTxCost = totalFluidTxCost + fluid.FLUID_TRANSACTION_COST;
+        }
+    }
+    // load fluid transaction summary
     {
         UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("operation", "Dynode Reward Update"));
-        obj.push_back(Pair("amount", dynEntry.DynodeReward));  //TODO fluid convert to decimal value
-        obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
-        obj.push_back(Pair("address_count", dynEntry.SovereignAddresses.size()));
-        int index = 1;
-        for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses)
-        {
-            std::string addLabel = "sovereign_address_"  + std::to_string(index);
-            obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
-            index ++;
+        obj.push_back(Pair("total_minted", totalMintedCoins)); //TODO fluid convert to decimal value
+        obj.push_back(Pair("total_fluid_fee_cost", totalFluidTxCost)); //TODO fluid convert to decimal value
+        CFluidDynode lastDynodeRecord;
+        if (!pFluidDynodeDB->GetLastFluidDynodeRecord(lastDynodeRecord)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4006 - " + _("Error getting last fluid dynode entry"));
         }
-        obj.push_back(Pair("raw", StringFromCharVector(dynEntry.FluidScript)));
+        obj.push_back(Pair("current_dynode_reward", lastDynodeRecord.DynodeReward)); //TODO fluid convert to decimal value
+      
+        CFluidMining lastMiningRecord;
+        if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord)) {
+                throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4007 - " + _("Error getting last fluid mining entry"));
+        }
+        obj.push_back(Pair("current_mining_reward", lastMiningRecord.MiningReward)); //TODO fluid convert to decimal value
+            
         ret.push_back(obj);
     }
-    //TODO fluid
-    /*
-    GetLastBlockIndex(chainActive.Tip());
-    CBlockIndex* pindex = chainActive.Tip();
-    CFluidEntry fluidIndex = pindex->fluidParams;
-    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
-
-    
-    HexFunctions hexConvert;
-    for (const std::string& existingRecord : transactionRecord) {
-        UniValue obj(UniValue::VOBJ);
-        std::string strOperationCode = GetRidOfScriptStatement(existingRecord, 0);
-        obj.push_back(Pair("operation", strOperationCode));
-        std::string verificationWithoutOpCode = GetRidOfScriptStatement(existingRecord);
-        std::vector<std::string> splitString;
-        hexConvert.ConvertToString(verificationWithoutOpCode);
-        SeparateString(verificationWithoutOpCode, splitString, false);
-        std::string messageTokenKey = splitString.at(0);
-        std::vector<std::string> vecSplitScript;
-        SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
-        if (vecSplitScript.size() > 1) {
-            if (strOperationCode == "OP_MINT" && vecSplitScript.size() >= 6) {
-                std::string strAmount = vecSplitScript[0];
-                std::string strTimeStamp = vecSplitScript[1];
-                CAmount fluidAmount;
-                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    obj.push_back(Pair("amount", strAmount));
-                }
-                int64_t tokenTimeStamp;
-                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", tokenTimeStamp)); 
-                }
-                obj.push_back(Pair("payment address", vecSplitScript[2]));
-                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
-            }
-            else if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && vecSplitScript.size() == 5) {
-                std::string strAmount = vecSplitScript[0];
-                std::string strTimeStamp = vecSplitScript[1];
-                CAmount fluidAmount;
-                if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
-                    obj.push_back(Pair("amount", strAmount));
-                }
-                int64_t tokenTimeStamp;
-                if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
-                    obj.push_back(Pair("timestamp", tokenTimeStamp)); 
-                }
-                obj.push_back(Pair("sovereign address 1", fluid.GetAddressFromDigestSignature(vecSplitScript[2], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 2", fluid.GetAddressFromDigestSignature(vecSplitScript[3], messageTokenKey).ToString()));
-                obj.push_back(Pair("sovereign address 3", fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
-            }
-        }
-        ret.push_back(obj);
-    }
-    */
     return ret;
 }
 

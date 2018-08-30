@@ -115,6 +115,8 @@ DYNAMIC_CORE_H = \
   flat-database.h \
   fluid/fluid.h \
   fluid/fluiddynode.h \
+  fluid/fluidmining.h \
+  fluid/fluidmint.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -245,6 +247,8 @@ libdynamic_server_a_SOURCES = \
   dynodeman.cpp \
   fluid/fluid.cpp \
   fluid/fluiddynode.cpp \
+  fluid/fluidmining.cpp \
+  fluid/fluidmint.cpp \
   fluid/rpcfluid.cpp \
   governance.cpp \
   governance-classes.cpp \

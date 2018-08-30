@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Duality Blockchain Solutions Developers
 
-#ifndef FLUID_DYNODE_H
-#define FLUID_DYNODE_H
+#ifndef FLUID_MINER
+#define FLUID_MINER
 
 #include "amount.h"
 #include "dbwrapper.h"
@@ -13,36 +13,36 @@
 class CScript;
 class CTransaction;
 
-class CFluidDynode {
+class CFluidMining {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     std::vector<unsigned char> FluidScript;
-    CAmount DynodeReward;
+    CAmount MiningReward;
     int64_t nTimeStamp;
     std::vector<std::vector<unsigned char>> SovereignAddresses;
     uint256 txHash;
     unsigned int nHeight;
 
-    CFluidDynode() { 
+    CFluidMining() { 
         SetNull();
     }
 
-    CFluidDynode(const CTransaction& tx) {
+    CFluidMining(const CTransaction& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
 
-    CFluidDynode(const CScript& fluidScript) {
+    CFluidMining(const CScript& fluidScript) {
         SetNull();
         UnserializeFromScript(fluidScript);
     }
 
     inline void SetNull()
     {
-        nVersion = CFluidDynode::CURRENT_VERSION;
+        nVersion = CFluidMining::CURRENT_VERSION;
         FluidScript.clear();
-        DynodeReward = -1;
+        MiningReward = -1;
         nTimeStamp = 0;
         SovereignAddresses.clear();
         txHash.SetNull();
@@ -55,24 +55,24 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
         READWRITE(FluidScript);
-        READWRITE(DynodeReward);
+        READWRITE(MiningReward);
         READWRITE(VARINT(nTimeStamp));
         READWRITE(SovereignAddresses);
         READWRITE(txHash);
         READWRITE(VARINT(nHeight));
     }
 
-    inline friend bool operator==(const CFluidDynode& a, const CFluidDynode& b) {
-        return (a.FluidScript == b.FluidScript && a.DynodeReward == b.DynodeReward && a.nTimeStamp == b.nTimeStamp);
+    inline friend bool operator==(const CFluidMining& a, const CFluidMining& b) {
+        return (a.FluidScript == b.FluidScript && a.MiningReward == b.MiningReward && a.nTimeStamp == b.nTimeStamp);
     }
 
-    inline friend bool operator!=(const CFluidDynode& a, const CFluidDynode& b) {
+    inline friend bool operator!=(const CFluidMining& a, const CFluidMining& b) {
         return !(a == b);
     }
 
-    inline CFluidDynode operator=(const CFluidDynode& b) {
+    inline CFluidMining operator=(const CFluidMining& b) {
         FluidScript = b.FluidScript;
-        DynodeReward = b.DynodeReward;
+        MiningReward = b.MiningReward;
         nTimeStamp = b.nTimeStamp;
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses)
         {
@@ -89,20 +89,20 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 };
 
-static CCriticalSection cs_fluid_dynode;
+static CCriticalSection cs_fluid_mining;
 
-class CFluidDynodeDB : public CDBWrapper {
+class CFluidMiningDB : public CDBWrapper {
 public:
-    CFluidDynodeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
-    bool AddFluidDynodeEntry(const CFluidDynode& entry, const int op);
-    bool GetLastFluidDynodeRecord(CFluidDynode& entry);
-    bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& entries);
+    CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
+    bool AddFluidMiningEntry(const CFluidMining& entry, const int op);
+    bool GetLastFluidMiningRecord(CFluidMining& entry);
+    bool GetAllFluidMiningRecords(std::vector<CFluidMining>& entries);
 };
 
-bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);
-bool GetFluidDynodeData(const CTransaction& tx, CFluidDynode& entry, int& nOut);
-bool CheckFluidDynodeDB();
+bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
+bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
+bool CheckFluidMiningDB();
 
-extern CFluidDynodeDB *pFluidDynodeDB;
+extern CFluidMiningDB *pFluidMiningDB;
 
-#endif // FLUID_DYNODE_H
+#endif // FLUID_MINER
