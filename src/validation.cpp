@@ -2201,17 +2201,17 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 int OpCode = GetFluidOpCode(scriptFluid);
                 if (OpCode == OP_REWARD_DYNODE) {
                     CFluidDynode fluidDynode(scriptFluid);
-                    if (CheckFluidDynodeDB)
+                    if (CheckFluidDynodeDB())
                         pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
                 }
                 else if (OpCode == OP_REWARD_MINING) {
                     CFluidMining fluidMining(scriptFluid);
-                    if (CheckFluidMiningDB)
+                    if (CheckFluidMiningDB())
                         pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
                 }
                 else if (OpCode == OP_MINT) {
                     CFluidMint fluidMint(scriptFluid);
-                    if (CheckFluidMintDB)
+                    if (CheckFluidMintDB())
                         pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }
             }

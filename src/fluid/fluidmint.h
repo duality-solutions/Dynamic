@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2018 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_MINT_H
 #define FLUID_MINT_H
@@ -10,6 +10,7 @@
 #include "sync.h"
 #include "uint256.h"
 
+class CDynamicAddress;
 class CScript;
 class CTransaction;
 
@@ -91,6 +92,7 @@ public:
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
     void Serialize(std::vector<unsigned char>& vchData);
+    CDynamicAddress GetDestinationAddress() const;
 };
 
 static CCriticalSection cs_fluid_mint;

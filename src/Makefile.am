@@ -114,6 +114,7 @@ DYNAMIC_CORE_H = \
   dynodeconfig.h \
   flat-database.h \
   fluid/fluid.h \
+  fluid/fluiddb.h \
   fluid/fluiddynode.h \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
@@ -246,6 +247,7 @@ libdynamic_server_a_SOURCES = \
   dynodeconfig.cpp \
   dynodeman.cpp \
   fluid/fluid.cpp \
+  fluid/fluiddb.cpp \
   fluid/fluiddynode.cpp \
   fluid/fluidmining.cpp \
   fluid/fluidmint.cpp \

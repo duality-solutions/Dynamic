@@ -100,8 +100,7 @@ bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
                 {
                     entriesRemoved++;
                     EraseDomainEntry(key.second);
-                } 
-                
+                }
             }
             else if (pcursor->GetKey(key) && key.first == "txid") {
                 std::vector<unsigned char> value;

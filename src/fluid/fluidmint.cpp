@@ -3,6 +3,7 @@
 
 #include "fluidmint.h"
 
+#include "base58.h"
 #include "core_io.h"
 #include "fluid.h"
 #include "operations.h"
@@ -96,6 +97,11 @@ void CFluidMint::Serialize(std::vector<unsigned char>& vchData) {
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
 }
 
+CDynamicAddress CFluidMint::GetDestinationAddress() const
+{
+    return CDynamicAddress(StringFromCharVector(DestinationAddress));
+}
+
 CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
 {
 }
@@ -117,7 +123,15 @@ bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& entry)
     LOCK(cs_fluid_mint);
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToLast();
-    pcursor->GetValue(entry);
+    if (pcursor->Valid()) {
+        try {
+            pcursor->GetValue(entry);
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    LogPrintf("GetLastFluidMintRecord 4\n");
     return true;
 }
 
