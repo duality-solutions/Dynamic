@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2018 Duality Blockchain Solutions Developers
 
 
 #include "fluidmining.h"
@@ -114,7 +114,14 @@ bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& entry)
     LOCK(cs_fluid_mining);
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToLast();
-    pcursor->GetValue(entry);
+    if (pcursor->Valid()) {
+        try {
+            pcursor->GetValue(entry);
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
     return true;
 }
 

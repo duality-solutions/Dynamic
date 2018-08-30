@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2018 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_MINER
 #define FLUID_MINER
@@ -102,6 +102,7 @@ public:
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
 bool GetFluidMiningData(const CTransaction& tx, CFluidMining& entry, int& nOut);
 bool CheckFluidMiningDB();
+CAmount GetFluidMiningReward();
 
 extern CFluidMiningDB *pFluidMiningDB;
 

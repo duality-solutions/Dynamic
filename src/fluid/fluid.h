@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_PROTOCOL_H
 #define FLUID_PROTOCOL_H
@@ -77,12 +77,8 @@ public:
 };
 
 /** Standard Reward Payment Determination Functions */
-CAmount GetPoWBlockPayment(const int& nHeight);
-CAmount GetDynodePayment(bool fDynode = true);
-
-/** Override Logic Switch for Reward Payment Determination Functions */
-CAmount getBlockSubsidyWithOverride(const int& nHeight, CAmount lastOverrideCommand);
-CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode = true);
+CAmount GetStandardPoWBlockPayment();
+CAmount GetStandardDynodePayment();
 
 void BuildFluidInformationIndex(CBlockIndex* pindex, CAmount &nExpectedBlockValue, bool fDynodePaid);
 bool IsTransactionFluid(const CScript& txOut);

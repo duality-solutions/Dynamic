@@ -11,7 +11,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
-#include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
 #include "init.h"
 #include "messagesigner.h"
 #include "netbase.h"
@@ -301,8 +301,8 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
             CBlock block;
             if(!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
-            //TODO fluid.
-            CAmount nDynodePayment = GetDynodePayment(true); //getDynodeSubsidyWithOverride(BlockReading->fluidParams.dynodeReward);
+
+            CAmount nDynodePayment = GetFluidDynodeReward();
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
                 if(dnpayee == txout.scriptPubKey && nDynodePayment == txout.nValue) {

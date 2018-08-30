@@ -575,59 +575,37 @@ bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std
     return false;
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight)
+CAmount GetStandardPoWBlockPayment()
 {
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
-        LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
+        LogPrint("superblock creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
     else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
-        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+        LogPrint("zero-reward block creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
     }
     else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
+        LogPrint("creation", "GetStandardPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
         return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
     }
     else
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetDynodePayment(bool fDynode)
+CAmount GetStandardDynodePayment()
 {   
-    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
+    if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
         return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
     }
-    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+    else if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
+        LogPrint("creation", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
-    }
-    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
     }
     else
         return BLOCKCHAIN_INIT_REWARD;
-}
-
-/** Passover code that will act as a switch to check if override did occur for Proof of Work Rewards **/
-CAmount getBlockSubsidyWithOverride(const int& nHeight, CAmount lastOverrideCommand) {
-    if (lastOverrideCommand != 0) {
-        return lastOverrideCommand;
-    } else {
-        return GetPoWBlockPayment(nHeight);
-    }
-}
-
-/** Passover code that will act as a switch to check if override did occur for Dynode Rewards **/
-CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode) {
-    if (lastOverrideCommand != 0) {
-        return lastOverrideCommand;
-    } else {
-        return GetDynodePayment(fDynode);
-    }
 }
 
 bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue) {

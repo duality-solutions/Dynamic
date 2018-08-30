@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2018 Duality Blockchain Solutions Developers
 
 #ifndef FLUID_DYNODE_H
 #define FLUID_DYNODE_H
