@@ -126,6 +126,16 @@ std::vector<std::string> CFluidParameters::InitialiseAddresses() {
     return initialSovereignAddresses;
 }
 
+std::vector<std::vector<unsigned char>> CFluidParameters::InitialiseAddressCharVector()
+{
+    std::vector<std::vector<unsigned char>> initialSovereignAddresses;
+    std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
+    for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
+        initialSovereignAddresses.push_back(CharVectorFromString(sovereignId.second.ToString()));
+    }
+    return initialSovereignAddresses;
+}
+
 /** Checks fluid transactoin operation script amount for invalid values. */
 bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck) {
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);

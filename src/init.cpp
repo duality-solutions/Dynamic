@@ -27,6 +27,7 @@
 #include "fluid/fluiddynode.h"
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
+#include "fluid/fluidsovereign.h"
 #include "governance.h"
 #include "instantsend.h"
 #include "httpserver.h"
@@ -1486,6 +1487,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidDynodeDB;
                 delete pFluidMiningDB;
                 delete pFluidMintDB;
+                delete pFluidSovereignDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
                 
@@ -1499,6 +1501,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 // Init BDAP Services DB's 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);

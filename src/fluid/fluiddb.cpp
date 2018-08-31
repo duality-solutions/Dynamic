@@ -6,6 +6,7 @@
 #include "fluiddynode.h"
 #include "fluidmining.h"
 #include "fluidmint.h"
+#include "fluidsovereign.h"
 
 CAmount GetFluidDynodeReward() 
 {
@@ -14,7 +15,7 @@ CAmount GetFluidDynodeReward()
 
     CFluidDynode lastDynodeRecord;
     if (!pFluidDynodeDB->GetLastFluidDynodeRecord(lastDynodeRecord)) {
-    	return GetStandardDynodePayment();
+        return GetStandardDynodePayment();
     }
     return lastDynodeRecord.DynodeReward;
 }
@@ -26,7 +27,7 @@ CAmount GetFluidMiningReward()
 
     CFluidMining lastMiningRecord;
     if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord)) {
-    	return GetStandardPoWBlockPayment();
+        return GetStandardPoWBlockPayment();
     }
     return lastMiningRecord.MiningReward;
 }
@@ -35,16 +36,16 @@ bool GetMintingInstructions(const int nHeight, CFluidMint& fluidMint)
 {
     if (!CheckFluidMintDB())
         return false;
-	
-	CFluidMint getFluidMint;
+    
+    CFluidMint getFluidMint;
     if (!pFluidMintDB->GetLastFluidMintRecord(getFluidMint)) {
         return false;
     }
-	
-	if ((int)getFluidMint.nHeight == (nHeight -1))
-	{
-		fluidMint = getFluidMint;
-		return true;
-	}
+    
+    if ((int)getFluidMint.nHeight == (nHeight -1))
+    {
+        fluidMint = getFluidMint;
+        return true;
+    }
     return false;
 }
