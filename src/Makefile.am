@@ -109,6 +109,7 @@ DYNAMIC_CORE_H = \
   fluid/fluiddynode.h \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
+  fluid/fluidsovereign.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -235,6 +236,7 @@ libdynamic_server_a_SOURCES = \
   fluid/fluidmining.cpp \
   fluid/fluidmint.cpp \
   fluid/rpcfluid.cpp \
+  fluid/fluidsovereign.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \

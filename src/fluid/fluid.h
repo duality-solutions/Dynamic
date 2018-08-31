@@ -36,6 +36,7 @@ public:
     std::vector<std::pair<std::string, CDynamicAddress>> InitialiseSovereignIdentities();
 
     std::vector<std::string> InitialiseAddresses();
+    std::vector<std::vector<unsigned char>> InitialiseAddressCharVector();
 };
 
 std::vector<std::string> InitialiseAddresses();

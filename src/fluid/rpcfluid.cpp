@@ -7,6 +7,7 @@
 #include "fluiddynode.h"
 #include "fluidmining.h"
 #include "fluidmint.h"
+#include "fluidsovereign.h"
 #include "init.h"
 #include "keepass.h"
 #include "net.h"
@@ -509,21 +510,38 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
         );
 
     UniValue ret(UniValue::VOBJ);
-    //TODO fluid
-    /*
-    GetLastBlockIndex(chainActive.Tip());
-    CBlockIndex* pindex = chainActive.Tip();
-    CFluidEntry fluidIndex = pindex->fluidParams;
-
-    std::vector<std::string> sovereignLogs = fluidIndex.fluidSovereigns;
-
-    
-    for (const std::string& sovereign : sovereignLogs) {
-        UniValue obj(UniValue::VOBJ);
-        obj.push_back(Pair("sovereign address", sovereign));
-        ret.push_back(obj);
+    std::vector<CFluidSovereign> sovereignEntries;
+    if (CheckFluidSovereignDB())
+    {
+        if (pFluidSovereignDB->IsEmpty()) {
+            throw std::runtime_error("GET_FLUID_SOVEREIGN_HISTORY_RPC_ERROR: ERRCODE: 4008 - " + _("Fluid sovereign database is empty."));
+        }
+        if (!pFluidSovereignDB->GetAllFluidSovereignRecords(sovereignEntries)) {
+            throw std::runtime_error("GET_FLUID_SOVEREIGN_HISTORY_RPC_ERROR: ERRCODE: 4008 - " + _("Error getting fluid sovereign entries"));
+        }
     }
-    */
+    else {
+        throw std::runtime_error("GET_FLUID_SOVEREIGN_HISTORY_RPC_ERROR: ERRCODE: 4009 - " + _("Error getting fluid sovereign entries"));
+    }
+
+    int x = 1;
+    UniValue obj(UniValue::VOBJ);
+    for (const CFluidSovereign& sovereignEntry : sovereignEntries)
+    {
+        int index = 1;
+        UniValue oEntry(UniValue::VOBJ);
+        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.SovereignAddresses)
+        {
+            std::string addLabel = "address_"  + std::to_string(index);
+            oEntry.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
+            index ++;
+        }
+        std::string addLabel = "sovereign"  + std::to_string(x);
+        obj.push_back(Pair(addLabel, oEntry));
+        x++;
+    }
+    ret.push_back(Pair("history", obj));
+
     return ret;
 }
 

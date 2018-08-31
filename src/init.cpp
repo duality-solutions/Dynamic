@@ -26,6 +26,7 @@
 #include "fluid/fluiddynode.h"
 #include "fluid/fluidmining.h"
 #include "fluid/fluidmint.h"
+#include "fluid/fluidsovereign.h"
 #include "governance.h"
 #include "instantsend.h"
 #include "httpserver.h"
@@ -1491,6 +1492,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidDynodeDB;
                 delete pFluidMiningDB;
                 delete pFluidMintDB;
+                delete pFluidSovereignDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1502,6 +1504,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
