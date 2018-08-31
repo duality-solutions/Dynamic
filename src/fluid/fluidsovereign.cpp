@@ -85,7 +85,7 @@ void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData) {
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
 }
 
-CFluidSovereignDB::CFluidSovereignDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "fluid-sovereign", nCacheSize, fMemory, fWipe, obfuscate)
+CFluidSovereignDB::CFluidSovereignDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-sovereign", nCacheSize, fMemory, fWipe, obfuscate)
 {
     InitEmpty();
 }
@@ -102,6 +102,7 @@ void CFluidSovereignDB::InitEmpty()
         }
         fluidSovereign.FluidScript = CharVectorFromString("init sovereign");
         fluidSovereign.nTimeStamp = 1;
+        fluidSovereign.nHeight = 1;
         if (!AddFluidSovereignEntry(fluidSovereign))
         {
             LogPrintf("CFluidSovereignDB::InitEmpty add failed.\n");
@@ -120,14 +121,25 @@ bool CFluidSovereignDB::AddFluidSovereignEntry(const CFluidSovereign& entry)
     return writeState;
 }
 
-bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& entry) 
+bool CFluidSovereignDB::GetLastFluidSovereignRecord(CFluidSovereign& returnEntry) 
 {
     LOCK(cs_fluid_sovereign);
+    returnEntry.SetNull();
+    std::pair<std::string, std::vector<unsigned char> > key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToLast();
-    if (pcursor->Valid()) {
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CFluidSovereign entry;
         try {
-            pcursor->GetValue(entry);
+            if (pcursor->GetKey(key) && key.first == "script") {
+                pcursor->GetValue(entry);
+                if (entry.nHeight > returnEntry.nHeight)
+                {
+                    returnEntry = entry;
+                }
+            }
+            pcursor->Next();
         }
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);

@@ -101,8 +101,9 @@ class CFluidMintDB : public CDBWrapper {
 public:
     CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidMintEntry(const CFluidMint& entry, const int op);
-    bool GetLastFluidMintRecord(CFluidMint& entry);
+    bool GetLastFluidMintRecord(CFluidMint& returnEntry);
     bool GetAllFluidMintRecords(std::vector<CFluidMint>& entries);
+    bool IsEmpty();
 };
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
