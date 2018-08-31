@@ -2060,16 +2060,22 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 int OpCode = GetFluidOpCode(scriptFluid);
                 if (OpCode == OP_REWARD_DYNODE) {
                     CFluidDynode fluidDynode(scriptFluid);
+                    fluidDynode.nHeight = pindex->nHeight;
+                    fluidDynode.txHash = tx.GetHash();
                     if (CheckFluidDynodeDB())
                         pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
                 }
                 else if (OpCode == OP_REWARD_MINING) {
                     CFluidMining fluidMining(scriptFluid);
+                    fluidMining.nHeight = pindex->nHeight;
+                    fluidMining.txHash = tx.GetHash();
                     if (CheckFluidMiningDB())
                         pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
                 }
                 else if (OpCode == OP_MINT) {
                     CFluidMint fluidMint(scriptFluid);
+                    fluidMint.nHeight = pindex->nHeight;
+                    fluidMint.txHash = tx.GetHash();
                     if (CheckFluidMintDB())
                         pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
                 }

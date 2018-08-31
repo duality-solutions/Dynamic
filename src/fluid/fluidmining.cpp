@@ -93,7 +93,7 @@ void CFluidMining::Serialize(std::vector<unsigned char>& vchData) {
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
 }
 
-CFluidMiningDB::CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "fluid-mining", nCacheSize, fMemory, fWipe, obfuscate)
+CFluidMiningDB::CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir()  / "blocks" / "fluid-mining", nCacheSize, fMemory, fWipe, obfuscate)
 {
 }
 
@@ -109,14 +109,25 @@ bool CFluidMiningDB::AddFluidMiningEntry(const CFluidMining& entry, const int op
     return writeState;
 }
 
-bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& entry) 
+bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry) 
 {
     LOCK(cs_fluid_mining);
+    returnEntry.SetNull();
+    std::pair<std::string, std::vector<unsigned char> > key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToLast();
-    if (pcursor->Valid()) {
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CFluidMining entry;
         try {
-            pcursor->GetValue(entry);
+            if (pcursor->GetKey(key) && key.first == "script") {
+                pcursor->GetValue(entry);
+                if (entry.nHeight > returnEntry.nHeight)
+                {
+                    returnEntry = entry;
+                }
+            }
+            pcursor->Next();
         }
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
@@ -147,6 +158,28 @@ bool CFluidMiningDB::GetAllFluidMiningRecords(std::vector<CFluidMining>& entries
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
+    }
+    return true;
+}
+
+bool CFluidMiningDB::IsEmpty()
+{
+    LOCK(cs_fluid_mining);
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    if (pcursor->Valid()) {
+        CFluidMining entry;
+        try {
+            std::pair<std::string, std::vector<unsigned char> > key;
+            if (pcursor->GetKey(key) && key.first == "script") {
+                pcursor->GetValue(entry);
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return true;
+        }
+        return false;
     }
     return true;
 }

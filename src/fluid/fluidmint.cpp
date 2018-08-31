@@ -24,7 +24,7 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
     std::vector<std::string> vecSplitScript;
     SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
 
-    if (vecSplitScript.size() == 5 && strOperationCode == "OP_MINT") {
+    if (vecSplitScript.size() == 6 && strOperationCode == "OP_MINT") {
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         std::string strAmount = vecSplitScript[0];
@@ -102,12 +102,12 @@ CDynamicAddress CFluidMint::GetDestinationAddress() const
     return CDynamicAddress(StringFromCharVector(DestinationAddress));
 }
 
-CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
+CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir()  / "blocks" / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
 {
 }
 
 bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op) 
-{ 
+{
     bool writeState = false;
     {
         LOCK(cs_fluid_mint);
@@ -118,20 +118,30 @@ bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op)
     return writeState;
 }
 
-bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& entry) 
+bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry) 
 {
     LOCK(cs_fluid_mint);
+    returnEntry.SetNull();
+    std::pair<std::string, std::vector<unsigned char> > key;
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToLast();
-    if (pcursor->Valid()) {
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CFluidMint entry;
         try {
-            pcursor->GetValue(entry);
+            if (pcursor->GetKey(key) && key.first == "script") {
+                pcursor->GetValue(entry);
+                if (entry.nHeight > returnEntry.nHeight)
+                {
+                    returnEntry = entry;
+                }
+            }
+            pcursor->Next();
         }
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
-    LogPrintf("GetLastFluidMintRecord 4\n");
     return true;
 }
 
@@ -157,6 +167,28 @@ bool CFluidMintDB::GetAllFluidMintRecords(std::vector<CFluidMint>& entries)
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
+    }
+    return true;
+}
+
+bool CFluidMintDB::IsEmpty()
+{
+    LOCK(cs_fluid_mint);
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    if (pcursor->Valid()) {
+        CFluidMint entry;
+        try {
+            std::pair<std::string, std::vector<unsigned char> > key;
+            if (pcursor->GetKey(key) && key.first == "script") {
+                pcursor->GetValue(entry);
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return true;
+        }
+        return false;
     }
     return true;
 }

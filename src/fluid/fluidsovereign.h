@@ -91,7 +91,7 @@ class CFluidSovereignDB : public CDBWrapper {
 public:
     CFluidSovereignDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidSovereignEntry(const CFluidSovereign& entry);
-    bool GetLastFluidSovereignRecord(CFluidSovereign& entry);
+    bool GetLastFluidSovereignRecord(CFluidSovereign& returnEntry);
     bool GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& entries);
     bool IsEmpty();
 private:

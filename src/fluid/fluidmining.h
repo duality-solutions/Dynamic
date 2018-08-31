@@ -95,8 +95,9 @@ class CFluidMiningDB : public CDBWrapper {
 public:
     CFluidMiningDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidMiningEntry(const CFluidMining& entry, const int op);
-    bool GetLastFluidMiningRecord(CFluidMining& entry);
+    bool GetLastFluidMiningRecord(CFluidMining& returnEntry);
     bool GetAllFluidMiningRecords(std::vector<CFluidMining>& entries);
+    bool IsEmpty();
 };
 
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry);
