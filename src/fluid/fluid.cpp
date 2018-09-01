@@ -585,18 +585,18 @@ bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std
     return false;
 }
 
-CAmount GetStandardPoWBlockPayment()
+CAmount GetStandardPoWBlockPayment(const int nHeight)
 {
-    if (chainActive.Height() == 0) {
+    if (nHeight == 1) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
         LogPrint("superblock creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
+    else if (nHeight > 1 && nHeight <= Params().GetConsensus().nRewardsStart) {
         LogPrint("zero-reward block creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
     }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
+    else if (nHeight > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetStandardPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
         return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
     }
@@ -604,18 +604,15 @@ CAmount GetStandardPoWBlockPayment()
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetStandardDynodePayment()
+CAmount GetStandardDynodePayment(const int nHeight)
 {   
-    if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
-        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+    if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrintf("GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
     }
-    else
-        return BLOCKCHAIN_INIT_REWARD;
+    else {
+        return BLOCKCHAIN_INIT_REWARD; // 0 DYN
+    }
 }
 
 bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue) {

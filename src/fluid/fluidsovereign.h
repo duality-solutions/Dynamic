@@ -83,6 +83,7 @@ public:
     bool UnserializeFromTx(const CTransaction& tx);
     bool UnserializeFromScript(const CScript& fluidScript);
     void Serialize(std::vector<unsigned char>& vchData);
+    std::vector<std::string> SovereignAddressesStrings();
 };
 
 static CCriticalSection cs_fluid_sovereign;

@@ -109,7 +109,7 @@ bool CFluidMiningDB::AddFluidMiningEntry(const CFluidMining& entry, const int op
     return writeState;
 }
 
-bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry) 
+bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry, const int nHeight) 
 {
     LOCK(cs_fluid_mining);
     returnEntry.SetNull();
@@ -122,7 +122,10 @@ bool CFluidMiningDB::GetLastFluidMiningRecord(CFluidMining& returnEntry)
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight)
+                if (entry.IsNull()) {
+                    return false;
+                }
+                if (entry.nHeight > returnEntry.nHeight && (int)(entry.nHeight + 1) < nHeight)
                 {
                     returnEntry = entry;
                 }
@@ -182,6 +185,13 @@ bool CFluidMiningDB::IsEmpty()
         return false;
     }
     return true;
+}
+
+bool CFluidMiningDB::RecordExists(const std::vector<unsigned char>& vchFluidScript) 
+{
+    LOCK(cs_fluid_mining);
+    CFluidMining fluidMining;
+    return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMining);
 }
 
 bool CheckFluidMiningDB()

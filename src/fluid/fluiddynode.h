@@ -95,9 +95,10 @@ class CFluidDynodeDB : public CDBWrapper {
 public:
     CFluidDynodeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate);
     bool AddFluidDynodeEntry(const CFluidDynode& entry, const int op);
-    bool GetLastFluidDynodeRecord(CFluidDynode& returnEntry);
+    bool GetLastFluidDynodeRecord(CFluidDynode& returnEntry, const int nHeight);
     bool GetAllFluidDynodeRecords(std::vector<CFluidDynode>& entries);
     bool IsEmpty();
+    bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
 bool GetFluidDynodeData(const CScript& scriptPubKey, CFluidDynode& entry);

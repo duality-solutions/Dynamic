@@ -371,11 +371,11 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
-        CAmount dynodeReward = GetFluidDynodeReward();
+        CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
       
         CFluidMining lastMiningRecord;
-        CAmount miningAmount = GetFluidMiningReward();
+        CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));
@@ -513,10 +513,10 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
         UniValue obj(UniValue::VOBJ);
         obj.push_back(Pair("total_minted", FormatMoney(totalMintedCoins)));
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
-        CAmount dynodeReward = GetFluidDynodeReward();
+        CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
         CFluidMining lastMiningRecord;
-        CAmount miningAmount = GetFluidMiningReward();
+        CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
         obj.push_back(Pair("total_fluid_transactions", nTotal));
         oSummary.push_back(Pair("summary", obj));

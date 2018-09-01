@@ -24,7 +24,7 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
     std::vector<std::string> vecSplitScript;
     SeparateFluidOpString(verificationWithoutOpCode, vecSplitScript);
 
-    if (vecSplitScript.size() == 6 && strOperationCode == "OP_MINT") {
+    if (vecSplitScript.size() >= 6 && strOperationCode == "OP_MINT") {
         std::vector<unsigned char> vchFluidOperation = CharVectorFromString(fluidOperationString);
         entry.FluidScript.insert(entry.FluidScript.end(), vchFluidOperation.begin(), vchFluidOperation.end());
         std::string strAmount = vecSplitScript[0];
@@ -191,6 +191,13 @@ bool CFluidMintDB::IsEmpty()
         return false;
     }
     return true;
+}
+
+bool CFluidMintDB::RecordExists(const std::vector<unsigned char>& vchFluidScript) 
+{
+    LOCK(cs_fluid_mint);
+    CFluidMint fluidMint;
+    return CDBWrapper::Read(make_pair(std::string("script"), vchFluidScript), fluidMint);
 }
 
 bool CheckFluidMintDB()

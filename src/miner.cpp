@@ -320,7 +320,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         }
 
         //TODO fluid
-        CAmount blockReward = GetFluidMiningReward();
+        CAmount blockReward = GetFluidMiningReward(nHeight);
         CDynamicAddress mintAddress;
         CAmount fluidIssuance = 0;
         CFluidMint fluidMint;

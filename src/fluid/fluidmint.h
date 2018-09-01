@@ -104,6 +104,7 @@ public:
     bool GetLastFluidMintRecord(CFluidMint& returnEntry);
     bool GetAllFluidMintRecords(std::vector<CFluidMint>& entries);
     bool IsEmpty();
+    bool RecordExists(const std::vector<unsigned char>& vchFluidScript);
 };
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry);
