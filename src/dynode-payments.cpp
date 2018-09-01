@@ -315,7 +315,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
 
         // make sure it's not filled yet
         txoutDynodeRet = CTxOut();
-        CAmount dynodePayment = GetFluidDynodeReward();
+        CAmount dynodePayment = GetFluidDynodeReward(nBlockHeight);
         
         txoutDynodeRet = CTxOut(dynodePayment, payee);
         txNew.vout.push_back(txoutDynodeRet);
@@ -576,13 +576,13 @@ bool CDynodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq
     return false;
 }
 
-bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
+bool CDynodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int nHeight)
 {
     LOCK(cs_vecPayees);
 
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
-    CAmount nDynodePayment = GetFluidDynodeReward();
+    CAmount nDynodePayment = GetFluidDynodeReward(nHeight);
 
     //require at least DNPAYMENTS_SIGNATURES_REQUIRED signatures
 
@@ -658,7 +658,7 @@ bool CDynodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHe
     LOCK(cs_mapDynodeBlocks);
 
     if(mapDynodeBlocks.count(nBlockHeight)){
-        return mapDynodeBlocks[nBlockHeight].IsTransactionValid(txNew);
+        return mapDynodeBlocks[nBlockHeight].IsTransactionValid(txNew, nBlockHeight);
     }
 
     return true;

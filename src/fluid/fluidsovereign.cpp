@@ -85,6 +85,15 @@ void CFluidSovereign::Serialize(std::vector<unsigned char>& vchData) {
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
 }
 
+std::vector<std::string> CFluidSovereign::SovereignAddressesStrings()
+{
+    std::vector<std::string> vchAddressStrings;
+    for (const std::vector<unsigned char>& vchAddress: SovereignAddresses) {
+        vchAddressStrings.push_back(StringFromCharVector(vchAddress));
+    }
+    return vchAddressStrings;
+}
+
 CFluidSovereignDB::CFluidSovereignDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-sovereign", nCacheSize, fMemory, fWipe, obfuscate)
 {
     InitEmpty();

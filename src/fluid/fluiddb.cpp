@@ -9,33 +9,43 @@
 #include "fluidmint.h"
 #include "fluidsovereign.h"
 
-CAmount GetFluidDynodeReward() 
+CAmount GetFluidDynodeReward(const int nHeight) 
 {
+    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
+        return GetStandardDynodePayment(nHeight);
+
     if (!CheckFluidDynodeDB())
-        return GetStandardDynodePayment();
+        return GetStandardDynodePayment(nHeight);
 
     if (pFluidDynodeDB->IsEmpty())
-        return GetStandardDynodePayment();
+        return GetStandardDynodePayment(nHeight);
 
     CFluidDynode lastDynodeRecord;
-    if (!pFluidDynodeDB->GetLastFluidDynodeRecord(lastDynodeRecord)) {
-        return GetStandardDynodePayment();
+    if (!pFluidDynodeDB->GetLastFluidDynodeRecord(lastDynodeRecord, nHeight)) {
+        return GetStandardDynodePayment(nHeight);
     }
-    LogPrintf("GetFluidDynodeReward: lastDynodeRecord.DynodeReward = %u\n", lastDynodeRecord.DynodeReward);
-    return lastDynodeRecord.DynodeReward;
+    if (lastDynodeRecord.DynodeReward > 0) {
+        return lastDynodeRecord.DynodeReward;
+    }
+    else {
+        return GetStandardDynodePayment(nHeight);
+    }
 }
 
-CAmount GetFluidMiningReward() 
+CAmount GetFluidMiningReward(const int nHeight) 
 {
+    if (fluid.FLUID_ACTIVATE_HEIGHT > nHeight)
+        return GetStandardPoWBlockPayment(nHeight);
+
     if (!CheckFluidMiningDB())
-        return GetStandardPoWBlockPayment();
+        return GetStandardPoWBlockPayment(nHeight);
 
     if (pFluidMiningDB->IsEmpty())
-        return GetStandardPoWBlockPayment();
+        return GetStandardPoWBlockPayment(nHeight);
 
     CFluidMining lastMiningRecord;
-    if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord)) {
-        return GetStandardPoWBlockPayment();
+    if (!pFluidMiningDB->GetLastFluidMiningRecord(lastMiningRecord, nHeight)) {
+        return GetStandardPoWBlockPayment(nHeight);
     }
     return lastMiningRecord.MiningReward;
 }
@@ -140,4 +150,68 @@ bool GetAllFluidSovereignRecords(std::vector<CFluidSovereign>& sovereignEntries)
         return false;
     }
     return true;
+}
+
+bool GetLastFluidSovereignAddressStrings(std::vector<std::string>& sovereignAddresses)
+{
+    if (!CheckFluidSovereignDB()) {
+        return false;
+    }
+
+    CFluidSovereign lastSovereign;
+    if (!pFluidSovereignDB->GetLastFluidSovereignRecord(lastSovereign)) {
+        return false;
+    }
+    sovereignAddresses = lastSovereign.SovereignAddressesStrings();
+    return true;
+}
+
+/** Checks whether 3 of 5 sovereign addresses signed the token in the script to meet the quorum requirements */
+bool CheckSignatureQuorum(const std::vector<unsigned char>& vchFluidScript, std::string& errMessage, bool individual) 
+{
+    std::string consentToken = StringFromCharVector(vchFluidScript);
+    std::vector<std::string> fluidSovereigns;
+    if (!GetLastFluidSovereignAddressStrings(fluidSovereigns)) {
+        return false;
+    }
+    
+    std::pair<CDynamicAddress, bool> keyOne;
+    std::pair<CDynamicAddress, bool> keyTwo;
+    std::pair<CDynamicAddress, bool> keyThree;
+    keyOne.second = false; 
+    keyTwo.second = false; 
+    keyThree.second = false;
+
+    for (const std::string& sovereignAddress : fluidSovereigns) 
+    {
+        CDynamicAddress attemptKey;
+        CDynamicAddress xKey(sovereignAddress);
+
+        if (!xKey.IsValid())
+            return false;
+        CFluid fluid;
+        if (fluid.GenericVerifyInstruction(consentToken, attemptKey, errMessage, 1) && xKey == attemptKey) {
+            keyOne = std::make_pair(attemptKey.ToString(), true);
+        }
+
+        if (fluid.GenericVerifyInstruction(consentToken, attemptKey, errMessage, 2) && xKey == attemptKey) {
+            keyTwo = std::make_pair(attemptKey.ToString(), true);
+        }
+
+        if (fluid.GenericVerifyInstruction(consentToken, attemptKey, errMessage, 3) && xKey == attemptKey) {
+            keyThree = std::make_pair(attemptKey.ToString(), true);
+        }
+    }
+
+    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
+                   && keyOne.first.ToString() != keyThree.first.ToString());
+
+    LogPrint("fluid", "CheckSignatureQuorum(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
+
+    if (individual)
+        return (keyOne.second || keyTwo.second || keyThree.second);
+    else if (fValid)
+        return (keyOne.second && keyTwo.second && keyThree.second);
+
+    return false;
 }
