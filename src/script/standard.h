@@ -29,6 +29,7 @@ public:
 
 static const unsigned int MAX_OP_RETURN_RELAY = 83; //! bytes (+1 for OP_RETURN, +2 for the push data opcodes)
 static const unsigned int MAX_BDAP_RELAY = 2051; //! bytes (+1 for OP_RETURN, +2 for the push data opcodes and +2048)
+
 extern bool fAcceptDatacarrier;
 extern unsigned nMaxDatacarrierBytes;
 

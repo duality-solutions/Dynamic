@@ -3559,6 +3559,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
             if (!fluid.CheckTransactionToBlock(tx, pindexPrev->GetBlockHeader()))
                 return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
         }
+
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
