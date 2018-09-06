@@ -3645,6 +3645,12 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
                 unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
+                if (nBytes > MAX_STANDARD_TX_SIZE) {
+                    // Do not create oversized transactions (bad-txns-oversize).
+                    strFailReason = _("Transaction too large");
+                    return false;
+                }
+
                 // Remove scriptSigs if we used dummy signatures for fee calculation
                 if (!sign) {
                     BOOST_FOREACH (CTxIn& txin, txNew.vin)

@@ -212,6 +212,7 @@ RES_ICONS = \
   qt/res/icons/drk/eye_plus.png \
   qt/res/icons/drk/eye.png \
   qt/res/icons/drk/filesave.png \
+  qt/res/icons/drk/fluid.png \
   qt/res/icons/drk/hd_disabled.png \
   qt/res/icons/drk/hd_enabled.png \
   qt/res/icons/drk/history.png \

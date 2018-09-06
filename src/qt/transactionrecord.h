@@ -78,6 +78,7 @@ public:
     enum Type
     {
         Other,
+        Fluid,
         Generated,
         SendToAddress,
         SendToOther,

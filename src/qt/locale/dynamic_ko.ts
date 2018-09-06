@@ -1,9 +1,11 @@
-<TS language="ko" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ko">
 <context>
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>주소 및 라벨을 수정하려면 마우스 오른쪽 버튼을 클릭해주세요.</translation>
+        <translation>주소 및 라벨을 수정하려면 마우스 오른쪽 버튼을 클릭해주세요</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -15,7 +17,7 @@
     </message>
     <message>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>현재 선택된 주소를 복사합니다.</translation>
+        <translation>현재 선택된 주소를 복사합니다</translation>
     </message>
     <message>
         <source>&amp;Copy</source>
@@ -23,7 +25,7 @@
     </message>
     <message>
         <source>Delete the currently selected address from the list</source>
-        <translation>현재 선택된 주소를 목록에서 삭제합니다.</translation>
+        <translation>현재 선택된 주소를 목록에서 삭제합니다</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
@@ -43,11 +45,11 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>전송할 주소를 선택해주세요.</translation>
+        <translation>전송할 주소를 선택해주세요</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>전송 받을 주소를 선택해주세요.</translation>
+        <translation>전송 받을 주소를 선택해주세요</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -130,10 +132,6 @@
     <message>
         <source>Repeat new passphrase</source>
         <translation>새로운 암호 확인</translation>
-    </message>
-    <message>
-        <source>Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.</source>
-        <translation>운영체제 계정이 손상되었을 때 일반적인 송금을 비활성화 합니다. 실질적인 보안을 제공하지 않습니다.</translation>
     </message>
     <message>
         <source>For anonymization only</source>
@@ -340,7 +338,7 @@
     </message>
     <message>
         <source>&amp;Backup Wallet...</source>
-        <translation>&amp;지갑 백업</translation>
+        <translation>&amp;지갑 백업 ...</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -372,7 +370,7 @@
     </message>
     <message>
         <source>Sign messages with your Dynamic addresses to prove you own them</source>
-        <translation>Dynamic 주소로 메시지에 서명하여 소유하고 있음을 증명하십시오.</translation>
+        <translation>Dynamic 주소로 메시지에 서명하여 소유하고 있음을 증명하십시오</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
@@ -380,7 +378,7 @@
     </message>
     <message>
         <source>Verify messages to ensure they were signed with specified Dynamic addresses</source>
-        <translation>메시지가 지정된 Dynamic 주소로 서명되었는지 확인합니다.</translation>
+        <translation>메시지가 지정된 Dynamic 주소로 서명되었는지 확인합니다</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -443,10 +441,6 @@
         <translation>&amp;구성 파일 열기</translation>
     </message>
     <message>
-        <source>Open configuration file</source>
-        <translation>구성 파일 열기</translation>
-    </message>
-    <message>
         <source>Show Automatic &amp;Backups</source>
         <translation>자동 &amp;백업 폴더 열기</translation>
     </message>
@@ -496,7 +490,9 @@
     </message>
     <message numerus="yes">
         <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>%n 블록의 거래내역 확인됨.</numerusform></translation>
+        <translation>
+            <numerusform>%n 블록의 거래내역 확인됨.</numerusform>
+        </translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
@@ -528,7 +524,9 @@
     </message>
     <message numerus="yes">
         <source>%n active connection(s) to Dynamic network</source>
-        <translation><numerusform>%n 개의 Dynamic 네트웍에 연결됨</numerusform></translation>
+        <translation>
+            <numerusform>%n 개의 Dynamic 네트웍에 연결됨</numerusform>
+        </translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
@@ -552,15 +550,21 @@
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
-        <translation><numerusform>%n 시간</numerusform></translation>
+        <translation>
+            <numerusform>%n 시간</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation><numerusform>%n 일</numerusform></translation>
+        <translation>
+            <numerusform>%n 일</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation><numerusform>%n 주</numerusform></translation>
+        <translation>
+            <numerusform>%n 주</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 and %2</source>
@@ -568,7 +572,9 @@
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
-        <translation><numerusform>%n 년</numerusform></translation>
+        <translation>
+            <numerusform>%n 년</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -618,10 +624,6 @@ Address: %4
 주소: %4
 </translation>
     </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>%n 블록의 거래내역 확인됨.</numerusform></translation>
-    </message>
     <message>
         <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
         <translation>HD 키 생성이 &lt;b&gt;사용됨&lt;/b&gt;</translation>
@@ -632,15 +634,15 @@ Address: %4
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>현재 지갑은 &lt;b&gt;암호화되어 &lt;b&gt;잠금해제되었습니다.</translation>
+        <translation>현재 지갑은 &lt;b&gt;암호화되어 &lt;b&gt;잠금해제되었습니다</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt; for anonimization only</source>
-        <translation>현재 지갑은 &lt;b&gt;암호화&lt;/b&gt; 되어 &lt;b&gt;잠긴&lt;/b&gt; 상태로 익명의 전용모드로 안전하게 구동중입니다.</translation>
+        <translation>현재 지갑은 &lt;b&gt;암호화&lt;/b&gt; 되어 &lt;b&gt;잠긴&lt;/b&gt; 상태로 익명의 전용모드로 안전하게 구동중입니다</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>지갑은 &lt;b&gt;암호화&lt;/ b&gt;되어 있으며 현재 &lt;b&gt;잠겨 있습니다&lt;/ b&gt;.</translation>
+        <translation>지갑은 &lt;b&gt;암호화&lt;/b&gt;되어 있으며 현재 &lt;b&gt;잠겨 있습니다&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -798,8 +800,8 @@ Address: %4
         <translation>변경 복사</translation>
     </message>
     <message>
-        <source>Please switch to 'List mode' to use this function.</source>
-        <translation>이 기능을 사용하려면 '목록 모드' 로 전환하십시오.</translation>
+        <source>Please switch to &apos;List mode&apos; to use this function.</source>
+        <translation>이 기능을 사용하려면 &apos;목록 모드&apos; 로 전환하십시오.</translation>
     </message>
     <message>
         <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-anonymized inputs first and then check PrivateSend checkbox again.</source>
@@ -823,7 +825,7 @@ Address: %4
     </message>
     <message>
         <source>Can vary +/- %1 satoshi(s) per input.</source>
-        <translation>입력당 +/- 1 satoshi 조절 가능.</translation>
+        <translation>입력당 +/- %1 satoshi 조절 가능.</translation>
     </message>
     <message>
         <source>N/A</source>
@@ -866,6 +868,10 @@ Address: %4
         <translation>아니오</translation>
     </message>
     <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>수신자가 현재 먼지 임계 값보다 작은 양을 수신하면이 레이블이 빨간색으로 바뀝니다.</translation>
+    </message>
+    <message>
         <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
         <translation>트랜잭션 크기가 1000 byte 보다 클 경우 라벨이 빨간색으로 변경됩니다.</translation>
     </message>
@@ -882,8 +888,8 @@ Address: %4
         <translation>우선 순위가 높은 트랜잭션이 블록에 포함 될 확률이 높아집니다.</translation>
     </message>
     <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>우선 순위가 "중간" 보다 낮으면 라벨이 빨간색으로 변경됩니다.</translation>
+        <source>This label turns red, if the priority is smaller than &quot;medium&quot;.</source>
+        <translation>우선 순위가 &quot;중간&quot; 보다 낮으면 라벨이 빨간색으로 변경됩니다.</translation>
     </message>
     <message>
         <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
@@ -926,23 +932,23 @@ Address: %4
     </message>
     <message>
         <source>Use 2 separate Dynodes to mix funds up to 1000 DYN</source>
-        <translation>2 개의 별도 다이 노드 Dynodes 를 사용하여 최대 1000 DYN까지 자금을 섞으십시오.</translation>
+        <translation>2 개의 별도 다이 노드 Dynodes 를 사용하여 최대 1000 DYN까지 자금을 섞으십시오</translation>
     </message>
     <message>
         <source>Use 8 separate Dynodes to mix funds up to 1000 DYN</source>
-        <translation>8 개의 별도 다이 노드 Dynodes를 사용하여 최대 1000 DYN까지 자금을 섞으십시오.</translation>
+        <translation>8 개의 별도 다이 노드 Dynodes를 사용하여 최대 1000 DYN까지 자금을 섞으십시오</translation>
     </message>
     <message>
         <source>Use 16 separate Dynodes to mix funds up to 1000 DYN</source>
-        <translation>16 개의 별도 다이 노드 Dynodes를 사용하여 최대 1000 DYN까지 자금을 섞으십시오.</translation>
+        <translation>16 개의 별도 다이 노드 Dynodes를 사용하여 최대 1000 DYN까지 자금을 섞으십시오</translation>
     </message>
     <message>
         <source>This option is the quickest and will cost about ~0.025 DYN to anonymize 1000 DYN</source>
-        <translation>이 옵션은 가장 빠르며 1000 DYN을 익명화하려면 ~ 0.025 DYN 정도 소요됩니다.</translation>
+        <translation>이 옵션은 가장 빠르며 1000 DYN을 익명화하려면 ~ 0.025 DYN 정도 소요됩니다</translation>
     </message>
     <message>
         <source>This option is moderately fast and will cost about 0.05 DYN to anonymize 1000 DYN</source>
-        <translation>이 옵션은 적당히 빠르며 1000 DYN을 익명화하기 위해 약 0.05 DYN의 비용이 소요됩니다.</translation>
+        <translation>이 옵션은 적당히 빠르며 1000 DYN을 익명화하기 위해 약 0.05 DYN의 비용이 소요됩니다</translation>
     </message>
     <message>
         <source>0.1 DYN per 1000 DYN you anonymize.</source>
@@ -950,23 +956,23 @@ Address: %4
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
-        <translation>이것은 가장 느리고 가장 안전한 옵션입니다. 최대 익명 성을 사용하면 비용이 발생합니다.</translation>
+        <translation>이것은 가장 느리고 가장 안전한 옵션입니다. 최대 익명 성을 사용하면 비용이 발생합니다</translation>
     </message>
     <message>
         <source>PrivateSend Configuration</source>
         <translation>PrivateSend 구성</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>PrivateSend가 기본 (% 1 및 2 라운드)으로 설정되었습니다. Dynamic의 설정 화면을 열어 언제든지 변경할 수 있습니다.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend가 기본 (%1 및 2 라운드)으로 설정되었습니다. Dynamic의 설정 화면을 열어 언제든지 변경할 수 있습니다.</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>PrivateSend가 성공적으로 높게 설정되었습니다 (% 1 및 8 라운드). Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend가 성공적으로 높게 설정되었습니다 (%1 및 8 라운드). Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic's configuration screen.</source>
-        <translation>PrivateSend가 최대 (% 1 및 16 라운드)로 설정되었습니다. Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend가 최대 (%1 및 16 라운드)로 설정되었습니다. Dynamic의 구성 화면을 열어 언제든지이를 변경할 수 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -1008,12 +1014,12 @@ Address: %4
         <translation>보내는 주소 수정</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Dynamic address.</source>
-        <translation>입력된 주소 "%1"는 올바른 Dynamic 주소가 아닙니다.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid Dynamic address.</source>
+        <translation>입력된 주소 &quot;%1&quot;는 올바른 Dynamic 주소가 아닙니다.</translation>
     </message>
     <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>입력한 주소 "%1"는 이미 주소록에 등록 되있습니다.</translation>
+        <source>The entered address &quot;%1&quot; is already in the address book.</source>
+        <translation>입력한 주소 &quot;%1&quot;는 이미 주소록에 등록 되있습니다.</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
@@ -1079,15 +1085,15 @@ Address: %4
     </message>
     <message>
         <source>UI options</source>
-        <translation>UI 옵션:</translation>
+        <translation>UI 옵션</translation>
     </message>
     <message>
         <source>Choose data directory on startup (default: 0)</source>
         <translation>데이터 디렉토리 선택 (기본: %u)</translation>
     </message>
     <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
-        <translation>언어 설정 예시 "de_DE" (기본값: 시스템 언어)</translation>
+        <source>Set language, for example &quot;de_DE&quot; (default: system locale)</source>
+        <translation>언어 설정 예시 &quot;de_DE&quot; (기본값: 시스템 언어)</translation>
     </message>
     <message>
         <source>Start minimized</source>
@@ -1100,6 +1106,51 @@ Address: %4
     <message>
         <source>Show splash screen on startup (default: 1)</source>
         <translation>실행시 초기화면 표시 (기본: %u)</translation>
+    </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>정보를 PrivateSend</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+        <translation>
+    &lt;h3&gt;기초 PrivateSend&lt;/h3&gt;
+    PrivateSend는 자금의 기원을 불명료하게하여 진정한 금융 정보를 제공합니다.
+    귀하의 지갑에있는 모든 Dynamic은 별도의 이산 동전로 생각할 수있는 다양한 \&quot;입력으로\&quot; 구성되어 있습니다.&lt;br&gt;
+    PrivateSend는 혁신적인 프로세스를 사용하여 동전을 지갑에서 지우지 않고 입력 물과 다른 두 사람의 의견을 섞습니다.
+    항상 돈 관리권을 유지합니다.&lt;hr&gt;
+    &lt;b&gt;PrivateSend 프로세스는 다음과 같이 작동합니다:&lt;/b&gt;
+    &lt;ol type=\&quot;1\&quot;&gt;
+    &lt;li&gt;PrivateSend는 거래 입력을 표준 단위로 나누는 것으로 시작됩니다.
+    이 금액은 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN입니다. 매일 사용하는 지폐와 비슷합니다.&lt;/li&gt;
+    &lt;li&gt;그런 다음 지갑은 네트워크의 특수하게 구성된 소프트웨어 노드에 요청을 전송합니다 \&quot;Dynodes.\&quot;
+    이러한 Dynodes는 특정 종파를 혼합하는 데 관심이 있다는 사실을 알립니다.
+    식별 가능한 정보는 다이 노드로 전송되지 \&quot;않으므로\&quot; 사용자가.&lt;/li&gt;
+    &lt;li&gt;다른 두 사람이 비슷한 메시지를 보내면 동일한 명칭을 혼합하려고한다는 것을 나타내며 믹싱 세션이 시작됩니다.
+    Dynode는 입력을 혼합하여 3 명의 모든 사용자에게&apos; 이제는 변환 된 입력 값을 지불하기 위해 지갑을 사용하십시오.
+    귀하의 지갑은 해당 액면가를 직접 지불하지만 다른 주소 (변경 주소라고 함)에 있습니다.&lt;/li&gt;
+    &lt;li&gt;자금을 완전히 모호하게하기 위해 지갑은 각 종파마다이 과정을 여러 번 반복해야합니다.
+    프로세스가 완료 될 때마다, \&quot;라운드라고합니다.\&quot; PrivateSend의 각 라운드는 자금 출처를 기하 급수적으로 판별하기가 더 어려워집니다.&lt;/li&gt;
+    &lt;li&gt;이 믹싱 프로세스는 사용자의 개입없이 백그라운드에서 발생합니다. 거래를 할 때
+    자금은 이미 익명 처리됩니다. 추가 대기는 필요하지 않습니다.&lt;/li&gt;
+    &lt;/ol&gt; &lt;hr&gt;
+    &lt;b&gt;중대한:&lt;/b&gt; 지갑에는 2000 개의 변경 주소 \&quot;만 있습니다.\&quot; 믹싱 이벤트가 발생할 때마다 최대 9 개의 주소가 사용됩니다.
+    이것은 2000 개의 주소가 약 200 개의 믹싱 이벤트에 대해 지속된다는 것을 의미합니다. 1900 개가 사용되면 지갑에서 더 많은 주소를 만들어야합니다.
+    그러나 자동 백업을 사용하도록 설정 한 경우에만이 작업을 수행 할 수 있습니다.&lt;br&gt;
+    따라서 백업이 비활성화 된 사용자는 PrivateSend도 비활성화됩니다. &lt;hr&gt;
+            </translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>시작시 데이터 디렉토리 선택 (기본값: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>시작시 스플래시 화면 표시 (기본값: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
     </message>
 </context>
 <context>
@@ -1133,8 +1184,8 @@ Address: %4
         <translation>Dynamic</translation>
     </message>
     <message>
-        <source>Error: Specified data directory "%1" cannot be created.</source>
-        <translation>오류: 지정된 데이터 디렉토리 "%1"을 생성할 수 없습니다.</translation>
+        <source>Error: Specified data directory &quot;%1&quot; cannot be created.</source>
+        <translation>오류: 지정된 데이터 디렉토리 &quot;%1&quot;을 생성할 수 없습니다.</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1215,7 +1266,7 @@ Address: %4
         <translation>익명화를 유지할 Dynamic 양</translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
+        <source>This amount acts as a threshold to turn off PrivateSend once it&apos;s reached.</source>
         <translation>이 금액은 일단 도달하면 PrivateSend를 끄는 임계 값 역할을합니다.</translation>
     </message>
     <message>
@@ -1313,17 +1364,9 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>실험적인 PrivateSend 모드를 블록 당 여러 개의 혼합 세션과 함께 사용할지 여부.&lt;br/&gt;참고:이 기능을 신중하게 사용해야합니다.&lt;br/&gt;항상 안전한 장소에 최근 지갑 (자동) 백업을했는지 확인하십시오!</translation>
     </message>
     <message>
-        <source>PrivateSend rounds to use</source>
-        <translation>PrivateSend 라운드 사용</translation>
-    </message>
-    <message>
         <source>&amp;Spend unconfirmed change</source>
         <translation>&amp;확인되지 않은 변경사항 전송</translation>
     </message>
-    <message>
-        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
-        <translation>이 양은 일단 도달하면 PrivateSend를 끄는 임계 값 역할을합니다.</translation>
-    </message>    
     <message>
         <source>&amp;Network</source>
         <translation>&amp;네트워크</translation>
@@ -1548,7 +1591,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>keys left: %1</source>
         <translation>왼쪽 키: %1</translation>
-    </message>    
+    </message>
     <message>
         <source>Completion:</source>
         <translation>완성:</translation>
@@ -1618,8 +1661,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>PrivateSend 및 믹싱에 대한 정보</translation>
     </message>
     <message>
-        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Privendsend의 현재 상태를 리셋합니다 (믹싱 중일 경우 PrivateSend를 방해 할 수 있습니다. 비용이들 수도 있습니다).</translation>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>Privendsend의 현재 상태를 리셋합니다 (믹싱 중일 경우 PrivateSend를 방해 할 수 있습니다. 비용이들 수도 있습니다)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1643,16 +1686,18 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>No inputs detected</source>
-        <translation>입력이 없습니다.</translation>
+        <translation>입력이 없습니다</translation>
     </message>
     <message numerus="yes">
         <source>%n Rounds</source>
-        <translation><numerusform>%n 한바퀴</numerusform><numerusform>%n 한바퀴</numerusform></translation>
+        <translation>
+            <numerusform>%n 한바퀴</numerusform>
+        </translation>
     </message>
     <message>
-        <source>Not enough compatible inputs to anonymize &lt;span style='color:red;'&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style='color:red;'&gt;%2&lt;/span&gt; instead</source>
-        <translation>익명화 할 수있는 호환 입력이 충분하지 않습니다 &lt;span style='color:red;'&gt;%1&lt;/span&gt;,&lt;br/&gt;
-대신 &lt;span style='color:red;'&gt;%2&lt;/span&gt; 익명화됩니다</translation>
+        <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
+        <translation>익명화 할 수있는 호환 입력이 충분하지 않습니다 &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br/&gt;
+대신 &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; 익명화됩니다</translation>
     </message>
     <message>
         <source>Overall progress</source>
@@ -1668,7 +1713,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message numerus="yes">
         <source>Denominated inputs have %5 of %n rounds on average</source>
-        <translation><numerusform>지정 입력에는 평균 %5 라운드 중 %n 라운드가 있습니다</numerusform><numerusform>지정 입력에는 평균 %5 라운드 중 %n 라운드가 있습니다</numerusform></translation>
+        <translation>
+            <numerusform>지정 입력에는 평균 %5 라운드 중 %n 라운드가 있습니다</numerusform>
+        </translation>
     </message>
     <message>
         <source>Found enough compatible inputs to anonymize %1</source>
@@ -1695,12 +1742,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>PrivateSend 가 성공적으로 재설정되었습니다.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>내부 Privendsend 수수료 / 거래를보고 싶지 않으면 "거래"탭에서 유형으로 "가장 일반적"을 선택하십시오.</translation>
+        <source>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Most Common&quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>내부 Privendsend 수수료 / 거래를보고 싶지 않으면 &quot;거래&quot;탭에서 유형으로 &quot;가장 일반적&quot;을 선택하십시오.</translation>
     </message>
     <message>
         <source>PrivateSend requires at least %1 to use.</source>
-        <translation>PrivateSend는 적어도 % 1을 (를) 사용하도록 요구합니다.</translation>
+        <translation>PrivateSend는 적어도 %1을 (를) 사용하도록 요구합니다.</translation>
     </message>
     <message>
         <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
@@ -1715,8 +1762,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Cannot start dynamic: click-to-pay handler</source>
-        <translation>dynamic을 시작할 수 없습니다: 지불하려면 클릭하십시오 처리기
-</translation>
+        <translation>dynamic 를 시작할 수 없습니다.: 클릭 투 결제 핸들러</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1747,7 +1793,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>결제 요청이 거부되었습니다</translation>
     </message>
     <message>
-        <source>Payment request network doesn't match client network.</source>
+        <source>Payment request network doesn&apos;t match client network.</source>
         <translation>지불 요청 네트워크가 클라이언트 네트워크와 일치하지 않습니다.</translation>
     </message>
     <message>
@@ -1772,7 +1818,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Payment request %1 is too large (%2 bytes, allowed %3 bytes).</source>
-        <translation>지불 요청 %1 이 (%2 바이트, 바이트 허용) 너무 큽니다.</translation>
+        <translation>지불 요청 %1이 (%2 바이트, %3 바이트 허용) 너무 큽니다.</translation>
     </message>
     <message>
         <source>Payment request DoS protection</source>
@@ -1953,7 +1999,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Memory usage</source>
         <translation>메모리 사용량</translation>
-    </message>  
+    </message>
     <message>
         <source>Debug log file</source>
         <translation>디버그 로그 파일</translation>
@@ -1981,7 +2027,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Datadir</source>
         <translation>데이터 디렉토리</translation>
-    </message>    
+    </message>
     <message>
         <source>Block chain</source>
         <translation>블록 체인</translation>
@@ -2008,7 +2054,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Totals</source>
-        <translation>합계:</translation>
+        <translation>합계</translation>
     </message>
     <message>
         <source>Received</source>
@@ -2243,7 +2289,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>&amp;Amount:</source>
-        <translation>&amp;양</translation>
+        <translation>&amp;양:</translation>
     </message>
     <message>
         <source>Request InstantSend</source>
@@ -2275,7 +2321,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Remove the selected entries from the list</source>
-        <translation>선택한 항목을 목록에서 제거하십시오.</translation>
+        <translation>선택한 항목을 목록에서 제거하십시오</translation>
     </message>
     <message>
         <source>Remove</source>
@@ -2481,7 +2527,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <message>
         <source>Hide</source>
         <translation>숨는 장소</translation>
-    </message>    
+    </message>
     <message>
         <source>collapse fee-settings</source>
         <translation>축소비 설정</translation>
@@ -2491,12 +2537,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>최소화</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 "킬로바이트 당"은 수수료 250 원만 지불합니다,,&lt;br /&gt; "적어도"1000 표는 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 &quot;킬로바이트 당&quot;은 수수료 250 원만 지불합니다,,&lt;br /&gt; &quot;적어도&quot;1000 표는 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 "킬로바이트 당"은 수수료 250 원만 지불합니다,&lt;br /&gt; "적어도 총"은 1000 개를 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>관례 요금이 1000 satoshis로 설정되고 거래가 단지 250 바이트 인 경우 &quot;킬로바이트 당&quot;은 수수료 250 원만 지불합니다,&lt;br /&gt; &quot;적어도 총&quot;은 1000 개를 지불합니다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for Dynamic transactions than the network can process.</source>
@@ -2540,7 +2586,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Send as zero-fee transaction if possible</source>
-        <translation>가능한 경우 제로 수수료 거래로 전송하십시오.</translation>
+        <translation>가능한 경우 제로 수수료 거래로 전송하십시오</translation>
     </message>
     <message>
         <source>(confirmation may take longer)</source>
@@ -2660,7 +2706,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message numerus="yes">
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>%n 개의 블록 내에서 확인을 시작할 것으로 추정됩니다.</numerusform></translation>
+        <translation>
+            <numerusform>%n 개의 블록 내에서 확인을 시작할 것으로 추정됩니다.</numerusform>
+        </translation>
     </message>
     <message>
         <source>The recipient address is not valid, please recheck.</source>
@@ -2779,15 +2827,11 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>관례 요금이 1000의 satoshis에 세트되고 거래가 단지 250 바이트 인 경우에, "적어도"는 1000의 satoshis를 지불하는 그러나, "킬로바이트 당"는 요금에서 250의 satoshis 만 지불한다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
+        <translation>관례 요금이 1000의 satoshis에 세트되고 거래가 단지 250 바이트 인 경우에, &quot;적어도&quot;는 1000의 satoshis를 지불하는 그러나, &quot;킬로바이트 당&quot;는 요금에서 250의 satoshis 만 지불한다. 1 킬로바이트보다 큰 거래의 경우 모두 킬로바이트 단위로 지불합니다.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
         <translation>확인되지 않은 지불 요청입니다.</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>에 &amp;지불하다:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2914,8 +2958,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>모든 확인 메시지 필드 재설정</translation>
     </message>
     <message>
-        <source>Click "Sign Message" to generate signature</source>
-        <translation>"메시지 서명"를 클릭하여 서명 생성</translation>
+        <source>Click &quot;Sign Message&quot; to generate signature</source>
+        <translation>&quot;메시지 서명&quot;를 클릭하여 서명 생성</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
@@ -3000,7 +3044,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n 개의 추가 블록 열기</numerusform><numerusform>%n 개의 추가 블록 열기</numerusform></translation>
+        <translation>
+            <numerusform>%n 개의 추가 블록 열기</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -3064,7 +3110,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message numerus="yes">
         <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>, %n 노드를 통해 브로드 캐스트</numerusform><numerusform>, %n 노드를 통해 브로드 캐스트</numerusform></translation>
+        <translation>
+            <numerusform>, %n 노드를 통해 브로드 캐스트</numerusform>
+        </translation>
     </message>
     <message>
         <source>Date</source>
@@ -3108,7 +3156,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message numerus="yes">
         <source>matures in %n more block(s)</source>
-        <translation><numerusform>%n 개의 블록이 더 이상 만기됩니다</numerusform><numerusform>%n 개의 블록이 더 이상 만기됩니다</numerusform></translation>
+        <translation>
+            <numerusform>%n 개의 블록이 더 이상 만기됩니다</numerusform>
+        </translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -3159,8 +3209,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>상인</translation>
     </message>
     <message>
-        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to "not accepted" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>생성 된 동전은 사용하기 전에 %1 블록을 성숙해야합니다. 이 블록을 생성하면 네트워크에 브로드 캐스팅되어 블록 체인에 추가됩니다. 사슬에 빠지면 상태가 "받아 들여지지 않음"으로 바뀌며 쓸모가 없습니다. 다른 노드가 몇 초 내에 블록을 생성하는 경우 가끔 이런 일이 발생할 수 있습니다.</translation>
+        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <translation>생성 된 동전은 사용하기 전에 %1 블록을 성숙해야합니다. 이 블록을 생성하면 네트워크에 브로드 캐스팅되어 블록 체인에 추가됩니다. 사슬에 빠지면 상태가 &quot;받아 들여지지 않음&quot;으로 바뀌며 쓸모가 없습니다. 다른 노드가 몇 초 내에 블록을 생성하는 경우 가끔 이런 일이 발생할 수 있습니다.</translation>
     </message>
     <message>
         <source>Debug information</source>
@@ -3222,7 +3272,9 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n 개의 추가 블록 열기</numerusform><numerusform>%n 개의 추가 블록 열기</numerusform></translation>
+        <translation>
+            <numerusform>%n 개의 추가 블록 열기</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -3531,8 +3583,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>모든 Dynodes</translation>
     </message>
     <message>
-        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see "ENABLED" in "Status" field.</source>
-        <translation>참고: 로컬 지갑의 Dynode 상태가 약간 잘못 될 수 있습니다.&lt;br /&gt; 추가 데이터를 동기화하려면 항상 Wallet을 기다린 다음 Dynode가&lt;br /&gt;실행되어야하지만 "ENABLED" 필드에 "터" 가 표시되지 않으면&lt;br /&gt;다른 노드에서 다시 확인하십시오.</translation>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>참고: 로컬 지갑의 Dynode 상태가 약간 잘못 될 수 있습니다.&lt;br /&gt; 추가 데이터를 동기화하려면 항상 Wallet을 기다린 다음 Dynode가&lt;br /&gt;실행되어야하지만 &quot;ENABLED&quot; 필드에 &quot;터&quot; 가 표시되지 않으면&lt;br /&gt;다른 노드에서 다시 확인하십시오.</translation>
     </message>
     <message>
         <source>Start &amp;all</source>
@@ -3607,8 +3659,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>현재 명령을 사용할 수 없습니다</translation>
     </message>
     <message>
-        <source>You can't use this command until Dynode list is synced</source>
-        <translation>Dynode 목록이 동기화 될 때까지이 명령을 사용할 수 없습니다.</translation>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Dynode 목록이 동기화 될 때까지이 명령을 사용할 수 없습니다</translation>
     </message>
     <message>
         <source>Confirm Dynode start</source>
@@ -3628,7 +3680,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Successfully started Dynode.</source>
-        <translation>Dynode를 성공적으로 시작했습니다...</translation>
+        <translation>Dynode를 성공적으로 시작했습니다.</translation>
     </message>
     <message>
         <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
@@ -3678,10 +3730,6 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>제거하다</translation>
     </message>
     <message>
-        <source>Clear</source>
-        <translation>제거하다</translation>
-    </message>
-    <message>
         <source>Use the slider to select the amount of CPU threads to use</source>
         <translation>슬라이더를 사용하여 사용할 CPU 스레드 수를 선택하십시오</translation>
     </message>
@@ -3702,12 +3750,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>Blockchain/Dynodes가 동기화되지 않았습니다. 광산 전에 완전히 동기화 될 때까지 기다려주세요!</translation>
     </message>
     <message>
-        <source>Click 'Start mining' to begin mining!</source>
-        <translation>마이닝을 시작하려면 '채광 시작' 을 클릭하십시오!</translation>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>마이닝을 시작하려면 &apos;채광 시작&apos; 을 클릭하십시오!</translation>
     </message>
     <message>
-        <source>Click 'Stop mining' to finish mining!</source>
-        <translation>마이닝을 시작하려면 '마이닝 중지' 을 클릭하십시오!</translation>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>마이닝을 시작하려면 &apos;마이닝 중지&apos; 을 클릭하십시오!</translation>
     </message>
     <message>
         <source>Stopping</source>
@@ -3723,7 +3771,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
 </context>
 <context>
-    <name>HashRateGraphWidget</name> 
+    <name>HashRateGraphWidget</name>
     <message>
         <source>5 minutes</source>
         <translation>5 분</translation>
@@ -3774,7 +3822,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>동전 보내기</translation>
     </message>
     <message>
-        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
+        <source>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
         <translation>InstantSend는 아직 높은 값을 보내는 것을 지원하지 않습니다. 트랜잭션은 현재 %1 DYN으로 제한됩니다.</translation>
     </message>
 </context>
@@ -3806,7 +3854,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>There was an error trying to save the wallet data to %1.</source>
-        <translation>1% 에 지갑 데이터를 저장하는 동안 오류가 발생했습니다.</translation>
+        <translation>%1 에 지갑 데이터를 저장하는 동안 오류가 발생했습니다.</translation>
     </message>
     <message>
         <source>Backup Successful</source>
@@ -3814,7 +3862,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>The wallet data was successfully saved to %1.</source>
-        <translation>지갑 데이터가 1% 에 성공적으로 저장되었습니다.</translation>
+        <translation>지갑 데이터가 %1 에 성공적으로 저장되었습니다.</translation>
     </message>
 </context>
 <context>
@@ -3849,7 +3897,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>
-        <translation>지갑 트랜잭션이 변경되면 명령을 실행합니다 (cmd의 %s 는 TxID로 바뀜).</translation>
+        <translation>지갑 트랜잭션이 변경되면 명령을 실행합니다 (cmd의 %s 는 TxID로 바뀜)</translation>
     </message>
     <message>
         <source>Execute command when the best block changes (%s in cmd is replaced by block hash)</source>
@@ -3865,7 +3913,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
-        <translation>지갑 패스 프레이즈를 저장하는 KeePass 항목의 URL을 구성하는 이름입니다.</translation>
+        <translation>지갑 패스 프레이즈를 저장하는 KeePass 항목의 URL을 구성하는 이름입니다</translation>
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect)</source>
@@ -3881,7 +3929,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>This is a pre-release test build - use at your own risk - do not use for mining or merchant applications</source>
-        <translation>시험판입니다. - 위험에 따라 사용하십시오. - 광산 또는 상인 응용 프로그램에는 사용하지 마십시오.</translation>
+        <translation>시험판입니다. - 위험에 따라 사용하십시오. - 광산 또는 상인 응용 프로그램에는 사용하지 마십시오</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer. Dynamic is probably already running.</source>
@@ -3945,14 +3993,14 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Attempt to recover private keys from a corrupt wallet.dat</source>
-        <translation>손상된 wallet.dat에서 개인 키를 복구하려고 시도합니다.</translation>
+        <translation>손상된 wallet.dat에서 개인 키를 복구하려고 시도합니다</translation>
     </message>
     <message>
         <source>Block creation options:</source>
         <translation>차단 생성 옵션:</translation>
     </message>
     <message>
-        <source>Can't denominate: no compatible inputs left.</source>
+        <source>Can&apos;t denominate: no compatible inputs left.</source>
         <translation>연결할 수 없습니다: 호환 가능한 입력이 없습니다.</translation>
     </message>
     <message>
@@ -3960,12 +4008,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>지갑을 다운 그레이드 할 수 없습니다</translation>
     </message>
     <message>
-        <source>Cannot resolve -bind address: '%s'</source>
-        <translation>-bind 주소를 확인할 수 없습니다: '%s'</translation>
+        <source>Cannot resolve -bind address: &apos;%s&apos;</source>
+        <translation>-bind 주소를 확인할 수 없습니다: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Cannot resolve -externalip address: '%s'</source>
-        <translation>-externalip 주소를 확인할 수 없습니다: '%s'</translation>
+        <source>Cannot resolve -externalip address: &apos;%s&apos;</source>
+        <translation>-externalip 주소를 확인할 수 없습니다: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Cannot write default address</source>
@@ -4005,7 +4053,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Do not load the wallet and disable wallet RPC calls</source>
-        <translation>지갑을로드하지 말고 지갑 RPC 호출을 비활성화하십시오.</translation>
+        <translation>지갑을로드하지 말고 지갑 RPC 호출을 비활성화하십시오</translation>
     </message>
     <message>
         <source>Do you want to rebuild the block database now?</source>
@@ -4065,12 +4113,12 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Error: You already have pending entries in the PrivateSend pool</source>
-        <translation>오류: 이미 Privendsend 풀에 보류중인 항목이 있습니다.</translation>
+        <translation>오류: 이미 Privendsend 풀에 보류중인 항목이 있습니다</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
         <translation>모든 포트에서 수신 대기하지 못했습니다. 이것을 원한다면 -listen=0 을 사용하십시오.</translation>
-    </message> 
+    </message>
     <message>
         <source>Failed to read block</source>
         <translation>블록을 읽지 못했습니다</translation>
@@ -4085,7 +4133,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
-        <translation>지정된 소스에서 JSON-RPC 연결을 허용합니다. 유효한 &lt;IP&gt; 단일 IP (예: 1.2.3.4), 네트워크 / 넷 마스크 (예: 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예: 1.2.3.4/24)입니다. 이 옵션은 여러 번 지정할 수 있습니다.</translation>
+        <translation>지정된 소스에서 JSON-RPC 연결을 허용합니다. 유효한 &lt;IP&gt; 단일 IP (예: 1.2.3.4), 네트워크 / 넷 마스크 (예: 1.2.3.4/255.255.255.0) 또는 네트워크 / CIDR (예: 1.2.3.4/24)입니다. 이 옵션은 여러 번 지정할 수 있습니다</translation>
     </message>
     <message>
         <source>An error occurred while setting up the RPC address %s port %u for listening: %s</source>
@@ -4097,7 +4145,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>주어진 주소에 바인드하여 JSON-RPC 연결을 기다립니다. IPv6의 경우 [host]:port 표기법을 사용하십시오. 이 옵션은 여러 번 지정할 수 있습니다 (기본값: 모든 인터페이스에 바인드).</translation>
+        <translation>주어진 주소에 바인드하여 JSON-RPC 연결을 기다립니다. IPv6의 경우 [host]:port 표기법을 사용하십시오. 이 옵션은 여러 번 지정할 수 있습니다 (기본값: 모든 인터페이스에 바인드)</translation>
     </message>
     <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
@@ -4113,7 +4161,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
-        <translation>모든 지갑 트랜잭션을 삭제하고 시작시 -rescan을 통해 블록 체인의 해당 부분 만 복구하십시오.</translation>
+        <translation>모든 지갑 트랜잭션을 삭제하고 시작시 -rescan을 통해 블록 체인의 해당 부분 만 복구하십시오</translation>
     </message>
     <message>
         <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
@@ -4132,7 +4180,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>이 지갑에 저장된 자금에 대한 자동화 된 PrivateSend 사용 (0-1, 기본값: %u)</translation>
     </message>
     <message>
-        <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
+        <source>Error: Unsupported argument -socks found. Setting SOCKS version isn&apos;t possible anymore, only SOCKS5 proxies are supported.</source>
         <translation>오류: 지원되지 않는 인수 -socks가 발견되었습니다. SOCKS 버전 설정은 더 이상 가능하지 않으며 SOCKS5 프록시 만 지원됩니다.</translation>
     </message>
     <message>
@@ -4156,8 +4204,8 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>paytxfee가 설정되지 않은 경우 거래가 n 블록 (평균: %u) 내에서 평균 확인을 시작하기에 충분한 수수료를 포함하십시오.</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
-        <translation>-maxtxfee=&lt;금액&gt;: '%s' 의 금액이 잘못되었습니다 (적어도 거래가 발생하지 않도록 %s 의 minrelay 수수료가되어야합니다)</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
+        <translation>-maxtxfee=&lt;금액&gt;: &apos;%s&apos; 의 금액이 잘못되었습니다 (적어도 거래가 발생하지 않도록 %s 의 minrelay 수수료가되어야합니다)</translation>
     </message>
     <message>
         <source>Log transaction priority and fee per kB when mining blocks (default: %u)</source>
@@ -4165,7 +4213,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Maintain a full transaction index, used by the getrawtransaction rpc call (default: %u)</source>
-        <translation>getrawtransaction rpc 호출에서 사용되는 전체 트랜잭션 색인을 유지 관리합니다 (기본값: %u).</translation>
+        <translation>getrawtransaction rpc 호출에서 사용되는 전체 트랜잭션 색인을 유지 관리합니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Maximum size of data in data carrier transactions we relay and mine (default: %u)</source>
@@ -4173,7 +4221,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Maximum total fees to use in a single wallet transaction, setting too low may abort large transactions (default: %s)</source>
-        <translation>단일 월렛 거래에 사용할 최대 총 수수료입니다. 너무 낮게 설정하면 큰 거래가 중단 될 수 있습니다 (기본값: %s).</translation>
+        <translation>단일 월렛 거래에 사용할 최대 총 수수료입니다. 너무 낮게 설정하면 큰 거래가 중단 될 수 있습니다 (기본값: %s)</translation>
     </message>
     <message>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: %u)</source>
@@ -4189,7 +4237,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
-        <translation>무료 또는 저렴한 요금의 거래를 중계하기 위해 높은 우선 순위를 요구합니다 (기본값: %u).</translation>
+        <translation>무료 또는 저렴한 요금의 거래를 중계하기 위해 높은 우선 순위를 요구합니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file (default: %u)</source>
@@ -4217,7 +4265,7 @@ rpcpassword=%s
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "Dynamic Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.com
 </source>
         <translation>dynamicd 또는 dynamic-qt에 -server 옵션을 사용하려면 구성 파일에 rpcpassword를 설정해야합니다.
 %에스
@@ -4228,7 +4276,7 @@ rpcpassword=%s
 사용자 이름과 비밀번호는 동일하지 않아야합니다.
 파일이 없으면 소유자가 읽을 수있는 파일 권한으로 파일을 만듭니다.
 또한 문제 알림을받을 수 있도록 alertnotify를 설정하는 것이 좋습니다.
-예: alertnotify=echo %%s | mail -s "동적 경고" admin@foo.com
+예: alertnotify=echo %%s | mail -s &quot;동적 경고&quot; admin@foo.com
 </translation>
     </message>
     <message>
@@ -4244,7 +4292,7 @@ rpcpassword=%s
         <translation>경고: -maxtxfee가 매우 높게 설정되었습니다! 이 금액은 단일 거래로 지불 할 수 있습니다.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
         <translation>경고: 컴퓨터의 날짜와 시간이 올바른지 확인하십시오! 시계가 틀리면 Dynamic이 제대로 작동하지 않습니다.</translation>
     </message>
     <message>
@@ -4271,7 +4319,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Accept public REST requests (default: %u)</source>
-        <translation>공개 REST 요청을 수락합니다 (기본값: %u).</translation>
+        <translation>공개 REST 요청을 수락합니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Acceptable ciphers (default: %s)</source>
@@ -4279,11 +4327,11 @@ rpcpassword=%s
     </message>
     <message>
         <source>Always query for peer addresses via DNS lookup (default: %u)</source>
-        <translation>DNS 검색을 통해 피어 주소를 항상 쿼리합니다 (기본값: %u).</translation>
+        <translation>DNS 검색을 통해 피어 주소를 항상 쿼리합니다 (기본값: %u)</translation>
     </message>
     <message>
-        <source>Cannot resolve -whitebind address: '%s'</source>
-        <translation>-whitebind 주소를 확인할 수 없습니다: '%s'</translation>
+        <source>Cannot resolve -whitebind address: &apos;%s&apos;</source>
+        <translation>-whitebind 주소를 확인할 수 없습니다: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Connect through SOCKS5 proxy</source>
@@ -4335,11 +4383,11 @@ rpcpassword=%s
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
-        <translation>오류: 치명적인 내부 오류가 발생했습니다. 자세한 내용은 debug.log를 참조하십시오.</translation>
+        <translation>오류: 치명적인 내부 오류가 발생했습니다. 자세한 내용은 debug.log를 참조하십시오</translation>
     </message>
     <message>
-        <source>Error: Can't select current denominated inputs</source>
-        <translation>오류: 현재 표시된 입력을 선택할 수 없습니다.</translation>
+        <source>Error: Can&apos;t select current denominated inputs</source>
+        <translation>오류: 현재 표시된 입력을 선택할 수 없습니다</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
@@ -4418,32 +4466,32 @@ rpcpassword=%s
         <translation>불충분 한 자금.</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>잘못된 -onion 주소: '%s'</translation>
+        <source>Invalid -onion address: &apos;%s&apos;</source>
+        <translation>잘못된 -onion 주소: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>잘못된 -proxy 주소: '%s'</translation>
+        <source>Invalid -proxy address: &apos;%s&apos;</source>
+        <translation>잘못된 -proxy 주소: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s'</source>
-        <translation>-maxtxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>-maxtxfee=&lt;금액&gt;: &apos;%s&apos;의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
-        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>-minrelaytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
+        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>-minrelaytxfee=&lt;금액&gt;: &apos;%s&apos;의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
-        <source>Invalid amount for -mintxfee=&lt;amount&gt;: '%s'</source>
-        <translation>-mintxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
+        <source>Invalid amount for -mintxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>-mintxfee=&lt;금액&gt;: &apos;%s&apos;의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
-        <translation>-paytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다 (%s 이상이어야합니다).</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least %s)</source>
+        <translation>-paytxfee=&lt;금액&gt;: &apos;%s&apos;의 금액이 잘못되었습니다 (%s 이상이어야합니다).</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>-paytxfee=&lt;금액&gt;: '%s'의 금액이 잘못되었습니다.</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>-paytxfee=&lt;금액&gt;: &apos;%s&apos;의 금액이 잘못되었습니다.</translation>
     </message>
     <message>
         <source>Last successful PrivateSend action was too recent.</source>
@@ -4471,7 +4519,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Loading Dynode payment cache...</source>
-        <translation>Dynode 지불 캐시로드 중</translation>
+        <translation>Dynode 결제 캐시로드 중 ...</translation>
     </message>
     <message>
         <source>Loading governance cache...</source>
@@ -4506,8 +4554,8 @@ rpcpassword=%s
         <translation>믹싱 진행 중...</translation>
     </message>
     <message>
-        <source>Need to specify a port with -whitebind: '%s'</source>
-        <translation>-whitebind: '%s'을 (를) 사용하여 포트를 지정해야합니다.</translation>
+        <source>Need to specify a port with -whitebind: &apos;%s&apos;</source>
+        <translation>-whitebind: &apos;%s&apos;을 (를) 사용하여 포트를 지정해야합니다.</translation>
     </message>
     <message>
         <source>No Dynodes detected.</source>
@@ -4535,19 +4583,19 @@ rpcpassword=%s
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
-        <translation>타임 스탬프로 디버그 출력을 앞에 추가합니다 (기본값: %u).</translation>
+        <translation>타임 스탬프로 디버그 출력을 앞에 추가합니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Run a thread to flush wallet periodically (default: %u)</source>
-        <translation>정기적으로 지갑을 플러시하도록 스레드를 실행하십시오 (기본값: %u).</translation>
+        <translation>정기적으로 지갑을 플러시하도록 스레드를 실행하십시오 (기본값: %u)</translation>
     </message>
     <message>
         <source>Send trace/debug info to debug.log file (default: %u)</source>
-        <translation>debug.log 파일에 추적 / 디버그 정보를 보냅니다 (기본값: %u).</translation>
+        <translation>debug.log 파일에 추적 / 디버그 정보를 보냅니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>가능한 경우 거래를 제로 수수료 거래로 보냅니다 (기본값: %u).</translation>
+        <translation>가능한 경우 거래를 제로 수수료 거래로 보냅니다 (기본값: %u)</translation>
     </message>
     <message>
         <source>Server certificate file (default: %s)</source>
@@ -4623,7 +4671,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Synchronization finished</source>
-        <translation>동기화가 완료되었습니다.</translation>
+        <translation>동기화가 완료되었습니다</translation>
     </message>
     <message>
         <source>Synchronizing budgets...</source>
@@ -4694,11 +4742,11 @@ rpcpassword=%s
         <translation>(메인 네트의 경우 33300이어야 함)</translation>
     </message>
     <message>
-        <source>Can't find random Dynode.</source>
+        <source>Can&apos;t find random Dynode.</source>
         <translation>랜덤 다이 노스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <source>Can't mix while sync in progress.</source>
+        <source>Can&apos;t mix while sync in progress.</source>
         <translation>진행중인 동기화 중에는 혼합 할 수 없습니다.</translation>
     </message>
     <message>
@@ -4706,8 +4754,8 @@ rpcpassword=%s
         <translation>dynode.conf를 분석 할 수 없습니다</translation>
     </message>
     <message>
-        <source>Invalid netmask specified in -whitelist: '%s'</source>
-        <translation>잘못된 넷 마스크가에서 지정되었습니다 -whitelist: '%s'</translation>
+        <source>Invalid netmask specified in -whitelist: &apos;%s&apos;</source>
+        <translation>잘못된 넷 마스크가에서 지정되었습니다 -whitelist: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Invalid port detected in dynode.conf</source>
@@ -4870,8 +4918,8 @@ rpcpassword=%s
         <translation>&lt;n&gt; 시간 (기본값: %u)보다 긴 트랜잭션을 메모리 풀에 유지하지 마십시오</translation>
     </message>
     <message>
-        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, >%u = target size in MiB to use for block files)</source>
-        <translation>오래된 블록을 정리 (삭제)하여 스토리지 요구 사항을 줄입니다. 이 모드는 -txindex 및 -rescan과 호환되지 않습니다. 경고 :이 설정을 되돌리려면 전체 블록 체인을 다시 다운로드해야합니다. (기본값 : 0 = 잘라내 기 블록 사용 안 함,> %u = 블록 파일에 사용할 MiB의 대상 크기)</translation>
+        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, &gt;%u = target size in MiB to use for block files)</source>
+        <translation>오래된 블록을 정리 (삭제)하여 스토리지 요구 사항을 줄입니다. 이 모드는 -txindex 및 -rescan과 호환되지 않습니다. 경고 :이 설정을 되돌리려면 전체 블록 체인을 다시 다운로드해야합니다. (기본값 : 0 = 잘라내 기 블록 사용 안 함,&gt; %u = 블록 파일에 사용할 MiB의 대상 크기)</translation>
     </message>
     <message>
         <source>Rebuild chain state from the currently indexed blocks</source>
@@ -4879,7 +4927,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Rebuild chain state and block index from the blk*.dat files on disk</source>
-        <translation>디스크의 blk*.dat 파일에서 체인 상태를 재구성하고 인덱스를 차단합니다.</translation>
+        <translation>디스크의 blk*.dat 파일에서 체인 상태를 재구성하고 인덱스를 차단합니다</translation>
     </message>
     <message>
         <source>Maintain a full address index, used to query for the balance, txids and unspent outputs for addresses (default: %u)</source>
@@ -4895,11 +4943,11 @@ rpcpassword=%s
     </message>
     <message>
         <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
-        <translation>지정된 노드에만 연결하십시오. 자동 연결을 사용하지 않으려면 -noconnect 또는 -connect = 0을 단독으로 사용하십시오.</translation>
+        <translation>지정된 노드에만 연결하십시오. 자동 연결을 사용하지 않으려면 -noconnect 또는 -connect = 0을 단독으로 사용하십시오</translation>
     </message>
     <message>
         <source>Discover own IP addresses (default: 1 when listening and no -externalip or -proxy)</source>
-        <translation>자신의 IP 주소를 찾습니다 (기본값: 수신시 1, -externalip 또는 -proxy 없음).</translation>
+        <translation>자신의 IP 주소를 찾습니다 (기본값: 수신시 1, -externalip 또는 -proxy 없음)</translation>
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
@@ -4907,11 +4955,11 @@ rpcpassword=%s
     </message>
     <message>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>외부에서 연결을 허용합니다 (기본값: -proxy 또는 -connect/-noconnect가없는 경우 1).</translation>
+        <translation>외부에서 연결을 허용합니다 (기본값: -proxy 또는 -connect/-noconnect가없는 경우 1)</translation>
     </message>
     <message>
         <source>Automatically create Tor hidden service (default: %d)</source>
-        <translation>자동으로 Tor 숨김 서비스를 생성합니다 (기본값: %d).</translation>
+        <translation>자동으로 Tor 숨김 서비스를 생성합니다 (기본값: %d)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (temporary service connections excluded) (default: %u)</source>
@@ -4956,7 +5004,7 @@ rpcpassword=%s
     <message>
         <source>Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)</source>
         <translation>이보다 작은 수수료 (%s/Kb)는 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
-    </message>    
+    </message>
     <message>
         <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
         <translation>이것보다 작은 수수료 (%s/kB 단위)는 중계, 광업 및 거래 생성을위한 제로 수수료로 간주됩니다 (기본값: %s)</translation>
@@ -5036,10 +5084,6 @@ rpcpassword=%s
     <message>
         <source>Use N separate Dynodes for each denominated input to mix funds (2-16, default: %u)</source>
         <translation>자금을 혼합하기 위해 각 입력에 대해 N 개의 개별 Dynode를 사용하십시오 (기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>빈번하게 동전을 혼합하여 (0-100, 기본값: %u, 1 =매우 자주, 높은 수수료, 100= 매우 드물게, 낮은 수수료) PrivateSend에 유동성을 제공하십시오.</translation>
     </message>
     <message>
         <source>Enable InstantSend, show confirmations for locked transactions (0-1, default: %u)</source>
@@ -5194,8 +5238,8 @@ rpcpassword=%s
         <translation>spork 메시지에 서명 할 수 없습니다. 잘못된 키입니까?</translation>
     </message>
     <message>
-        <source>Unknown network specified in -onlynet: '%s'</source>
-        <translation>에 지정된 알 수없는 네트워크 -onlynet: '%s'</translation>
+        <source>Unknown network specified in -onlynet: &apos;%s&apos;</source>
+        <translation>에 지정된 알 수없는 네트워크 -onlynet: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Unknown state: id = %u</source>
@@ -5235,7 +5279,7 @@ rpcpassword=%s
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
-        <translation>월렛 %s 이 (가) 데이터 디렉토리 %s 외부에 있습니다.</translation>
+        <translation>월렛 %s 이 (가) 데이터 디렉토리 %s 외부에 있습니다</translation>
     </message>
     <message>
         <source>Wallet is locked.</source>
@@ -5283,7 +5327,7 @@ rpcpassword=%s
     </message>
 </context>
 <context>
-<name>ModalOverlay</name>
+    <name>ModalOverlay</name>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
         <translation>표시된 정보가 오래되었을 수 있습니다. 연결이 설정되면 지갑이 자동으로 Dynamic 네트워크와 동기화되지만이 프로세스는 아직 완료되지 않았습니다. 즉, 최근 거래가 표시되지 않고이 프로세스가 완료 될 때까지 잔액이 최신 상태가 아님을 의미합니다.</translation>
@@ -5335,54 +5379,6 @@ rpcpassword=%s
     <message>
         <source>Hide</source>
         <translation>숨는 장소</translation>
-    </message>
-</context>
-<context>
-    <name>HelpMessageDialog</name>
-    <message>
-        <source>PrivateSend information</source>
-        <translation>정보를 PrivateSend</translation>
-    </message>
-    <message>
-        <source>PrivateSend-LongText</source>
-        <translation>
-    &lt;h3&gt;기초 PrivateSend&lt;/h3&gt;
-    PrivateSend는 자금의 기원을 불명료하게하여 진정한 금융 정보를 제공합니다.
-    귀하의 지갑에있는 모든 Dynamic은 별도의 이산 동전로 생각할 수있는 다양한 \&quot;입력으로\&quot; 구성되어 있습니다.&lt;br&gt;
-    PrivateSend는 혁신적인 프로세스를 사용하여 동전을 지갑에서 지우지 않고 입력 물과 다른 두 사람의 의견을 섞습니다.
-    항상 돈 관리권을 유지합니다.&lt;hr&gt;
-    &lt;b&gt;PrivateSend 프로세스는 다음과 같이 작동합니다:&lt;/b&gt;
-    &lt;ol type=\&quot;1\&quot;&gt;
-    &lt;li&gt;PrivateSend는 거래 입력을 표준 단위로 나누는 것으로 시작됩니다.
-    이 금액은 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN입니다. 매일 사용하는 지폐와 비슷합니다.&lt;/li&gt;
-    &lt;li&gt;그런 다음 지갑은 네트워크의 특수하게 구성된 소프트웨어 노드에 요청을 전송합니다 \&quot;Dynodes.\&quot;
-    이러한 Dynodes는 특정 종파를 혼합하는 데 관심이 있다는 사실을 알립니다.
-    식별 가능한 정보는 다이 노드로 전송되지 \&quot;않으므로\&quot; 사용자가.&lt;/li&gt;
-    &lt;li&gt;다른 두 사람이 비슷한 메시지를 보내면 동일한 명칭을 혼합하려고한다는 것을 나타내며 믹싱 세션이 시작됩니다.
-    Dynode는 입력을 혼합하여 3 명의 모든 사용자에게&#39; 이제는 변환 된 입력 값을 지불하기 위해 지갑을 사용하십시오.
-    귀하의 지갑은 해당 액면가를 직접 지불하지만 다른 주소 (변경 주소라고 함)에 있습니다.&lt;/li&gt;
-    &lt;li&gt;자금을 완전히 모호하게하기 위해 지갑은 각 종파마다이 과정을 여러 번 반복해야합니다.
-    프로세스가 완료 될 때마다, \&quot;라운드라고합니다.\&quot; PrivateSend의 각 라운드는 자금 출처를 기하 급수적으로 판별하기가 더 어려워집니다.&lt;/li&gt;
-    &lt;li&gt;이 믹싱 프로세스는 사용자의 개입없이 백그라운드에서 발생합니다. 거래를 할 때
-    자금은 이미 익명 처리됩니다. 추가 대기는 필요하지 않습니다.&lt;/li&gt;
-    &lt;/ol&gt; &lt;hr&gt;
-    &lt;b&gt;중대한:&lt;/b&gt; 지갑에는 2000 개의 변경 주소 \&quot;만 있습니다.\&quot; 믹싱 이벤트가 발생할 때마다 최대 9 개의 주소가 사용됩니다.
-    이것은 2000 개의 주소가 약 200 개의 믹싱 이벤트에 대해 지속된다는 것을 의미합니다. 1900 개가 사용되면 지갑에서 더 많은 주소를 만들어야합니다.
-    그러나 자동 백업을 사용하도록 설정 한 경우에만이 작업을 수행 할 수 있습니다.&lt;br&gt;
-    따라서 백업이 비활성화 된 사용자는 PrivateSend도 비활성화됩니다. &lt;hr&gt;
-            </translation>
-    </message>
-    <message>
-        <source>Choose data directory on startup (default: %n)</source>
-        <translation>시작시 데이터 디렉토리 선택 (기본값: %n)</translation>
-    </message>
-    <message>
-        <source>Show splash screen on startup (default: %u)</source>
-        <translation>시작시 스플래시 화면 표시 (기본값: %u)</translation>
-    </message>
-    <message>
-        <source>Reset all settings changes made over the GUI</source>
-        <translation>GUI를 통해 이루어진 모든 설정 변경 재설정</translation>
     </message>
 </context>
 </TS>

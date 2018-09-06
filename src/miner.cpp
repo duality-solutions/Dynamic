@@ -83,7 +83,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 }
 
 #ifdef ENABLE_WALLET
-bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman)
+bool CheckWork(const CChainParams& chainparams, const CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman)
 {
     uint256 hash = pblock->GetHash();
     arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);

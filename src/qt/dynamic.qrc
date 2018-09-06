@@ -57,6 +57,7 @@
         <file alias="tx_input">res/icons/drk/tx_input.png</file>
         <file alias="tx_output">res/icons/drk/tx_output.png</file>
         <file alias="tx_inout">res/icons/drk/tx_inout.png</file>
+        <file alias="fluid">res/icons/drk/fluid.png</file>
         <file alias="unit_dyn">res/icons/drk/unit_dyn.png</file>
         <file alias="unit_mdyn">res/icons/drk/unit_mdyn.png</file>
         <file alias="unit_udyn">res/icons/drk/unit_udyn.png</file>

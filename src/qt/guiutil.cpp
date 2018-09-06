@@ -1092,10 +1092,10 @@ int MaxThreads() {
     int nThreads = boost::thread::hardware_concurrency();
 
     int nUseThreads = GetArg("-genproclimit", -1);
-    if (nUseThreads < 0)
+    if (nUseThreads < 0) {
         nUseThreads = nThreads;
-
-        return nUseThreads;
+    }
+    return nUseThreads;
 }
 
 int64_t GetHashRate() {

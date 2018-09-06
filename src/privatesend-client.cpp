@@ -1091,8 +1091,8 @@ bool CPrivateSendClient::PrepareDenominate(int nMinRounds, int nMaxRounds, std::
                 ++it2;
             }
         }
-        if(nValueLeft == 0) break;
         nStep++;
+        if(nValueLeft == 0) break;
     }
 
     {
