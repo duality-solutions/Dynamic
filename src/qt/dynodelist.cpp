@@ -112,7 +112,7 @@ void DynodeList::StartAlias(std::string strAlias)
     std::string strStatusHtml;
     strStatusHtml += "<center>Alias: " + strAlias;
 
-    BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+    for (const auto& dne : dynodeConfig.getEntries()) {
         if(dne.getAlias() == strAlias) {
             std::string strError;
             CDynodeBroadcast dnb;
@@ -145,7 +145,7 @@ void DynodeList::StartAll(std::string strCommand)
     int nCountFailed = 0;
     std::string strFailedHtml;
 
-    BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+    for (const auto& dne : dynodeConfig.getEntries()) {
         std::string strError;
         CDynodeBroadcast dnb;
 
@@ -170,7 +170,6 @@ void DynodeList::StartAll(std::string strCommand)
             strFailedHtml += "\nFailed to start " + dne.getAlias() + ". Error: " + strError;
         }
     }
-    pwalletMain->Lock();
 
     std::string returnObj;
     returnObj = strprintf("Successfully started %d Dynodes, failed to start %d, total %d", nCountSuccessful, nCountFailed, nCountFailed + nCountSuccessful);
@@ -242,7 +241,7 @@ void DynodeList::updateMyNodeList(bool fForce)
     nTimeMyListUpdated = GetTime();
 
     ui->tableWidgetDynodes->setSortingEnabled(false);
-    BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+    for (const auto& dne : dynodeConfig.getEntries()) {
         int32_t nOutputIndex = 0;
         if(!ParseInt32(dne.getOutputIndex(), &nOutputIndex)) {
             continue;

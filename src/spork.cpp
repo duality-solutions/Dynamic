@@ -220,6 +220,12 @@ bool CSporkManager::SetPrivKey(std::string strPrivKey)
 bool CSporkMessage::Sign(std::string strSignKey)
 {
     CKey key;
+    
+    if (!key.IsValid()) {
+        LogPrintf("CSporkMessage::Sign -- signing key is not valid\n");
+        return false;
+    }
+
     CPubKey pubkey;
     std::string strError = "";
     std::string strMessage = boost::lexical_cast<std::string>(nSporkID) + boost::lexical_cast<std::string>(nValue) + boost::lexical_cast<std::string>(nTimeSigned);
@@ -250,7 +256,6 @@ bool CSporkMessage::CheckSignature()
     CPubKey pubkey(ParseHex(Params().SporkPubKey()));
 
     if(!CMessageSigner::VerifyMessage(pubkey, vchSig, strMessage, strError)) {
-        LogPrintf("CSporkMessage::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
 

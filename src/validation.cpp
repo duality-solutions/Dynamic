@@ -9,13 +9,18 @@
 
 #include "alert.h"
 #include "arith_uint256.h"
+#include "bdap/domainentrydb.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
 #include "consensus/consensus.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
+#include "fluid/fluiddynode.h"
+#include "fluid/fluidmining.h"
+#include "fluid/fluidmint.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -27,6 +32,7 @@
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "random.h"
+#include "rpcserver.h"
 #include "script/script.h"
 #include "script/sigcache.h"
 #include "script/standard.h"
@@ -89,6 +95,7 @@ size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
+bool fLoaded = false;
 
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
@@ -226,19 +233,19 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
         return true;
     
     if (nBlockHeight >= fluid.FLUID_ACTIVATE_HEIGHT) {
-		if (!fluid.ProvisionalCheckTransaction(tx))
-			return false;
-		
-		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey)) {
-                std::string strErrorMessage;
-                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, nBlockTime, strErrorMessage)) {
-                    return false;
-                }
+        if (!fluid.ProvisionalCheckTransaction(tx))
+            return false;
+
+        CScript scriptFluid;
+        if (IsTransactionFluid(tx, scriptFluid))
+        {
+            std::string strErrorMessage;
+            if (!fluid.CheckFluidOperationScript(scriptFluid, nBlockTime, strErrorMessage)) {
+                return false;
             }
-		}
-	}
-	
+        }
+    }
+    
     BOOST_FOREACH(const CTxIn& txin, tx.vin) {
         if (!(txin.nSequence == CTxIn::SEQUENCE_FINAL))
             return false;
@@ -582,6 +589,47 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+// Check if BDAP entry is valid
+bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
+{
+     // Do not check while wallet is loading
+    if (!fLoaded)
+        return true;
+
+    if (!CheckDomainEntryDB())
+        return true;
+
+    std::string statusRpc = "";
+    if (fJustCheck && (IsInitialBlockDownload() || RPCIsInWarmup(&statusRpc)))
+        return true;
+
+    std::vector<std::vector<unsigned char> > vvchBDAPArgs;
+
+    int op = -1;
+    if (nHeight == 0)
+    {
+        nHeight = chainActive.Height() + 1;
+    }
+    
+    bool bValid = false;
+    if (tx.nVersion == BDAP_TX_VERSION)
+    {
+        if (DecodeBDAPTx(tx, op, vvchBDAPArgs)) 
+        {
+            std::string errorMessage;
+            bValid = CheckDomainEntryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+            if (!bValid)
+            {
+                errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+            if (!errorMessage.empty())
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+        }
+    }
+    return true;
+}
+
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
                               bool* pfMissingInputs, int64_t nAcceptTime, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
@@ -596,10 +644,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         return false; // state filled in by CheckTransaction
 
     if (!fluid.ProvisionalCheckTransaction(tx))
-		return false;
+        return false;
 
-    for (const CTxOut& txout : tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey))
+    for (const CTxOut& txout : tx.vout)    {    
+        if (IsTransactionFluid(txout.scriptPubKey))
         {
             fluidTransaction = true;
             std::string strErrorMessage;
@@ -615,7 +663,57 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
-	}
+    }
+
+    if (tx.nVersion == BDAP_TX_VERSION) {
+        std::string strErrorMessage;
+        CDomainEntry domainEntry(tx);
+        if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
+            return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
+        }
+        int op;
+        CScript scriptOp;
+        vchCharString vvchOpParameters;
+        if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
+        {
+            return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
+        }
+        const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
+        if (strOperationType == "bdap_update"  || strOperationType == "bdap_delete") {
+            CDomainEntry entry;
+            CDomainEntry prevEntry;
+            std::vector<unsigned char> vchData;
+            std::vector<unsigned char> vchHash;
+            int nDataOut;
+            
+            bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
+            if(bData && !entry.UnserializeFromData(vchData, vchHash))
+            {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
+            }
+            
+            if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-failed" + strErrorMessage);
+            }
+            CTransaction prevTx;
+            uint256 hashBlock;
+            if (!GetTransaction(prevEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-tx-failed" + strErrorMessage);
+            }
+            // Get current wallet address used for BDAP tx
+            CScript scriptPubKey;
+            GetBDAPOpScript(tx, scriptPubKey);
+            CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+            // Get previous wallet address used for BDAP tx
+            CScript prevScriptPubKey;
+            GetBDAPOpScript(prevTx, prevScriptPubKey);
+            CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+            if (txAddress.ToString() != prevAddress.ToString())
+            {
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-incorrect-wallet-address-used" + strErrorMessage);
+            }
+        }
+    }
 
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
@@ -625,7 +723,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     // sure that such transactions will be mined (unless we're on
     // -testnet/-regtest).
     const CChainParams& chainparams = Params();
-    if (fRequireStandard && tx.nVersion >= 2 && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
+    if (fRequireStandard && tx.nVersion >= 2 && tx.nVersion != BDAP_TX_VERSION && VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV) != THRESHOLD_ACTIVE) {
         return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
     }
 
@@ -1023,6 +1121,11 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 __func__, hash.ToString(), FormatStateMessage(state));
         }
 
+        if (!ValidateBDAPInputs(tx, state, view, CBlock(), true, chainActive.Height())) 
+        {
+            return false;
+        }
+        
         // Remove conflicting transactions from the mempool
         BOOST_FOREACH(const CTxMemPool::txiter it, allConflicting)
         {
@@ -1695,7 +1798,19 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                 const CTxOut &out = tx.vout[k];
 
                 if (out.scriptPubKey.IsPayToScriptHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
+
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
 
                     // undo receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, hash, k, false), out.nValue));
@@ -1704,7 +1819,19 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), hash, k), CAddressUnspentValue()));
 
                 } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
+
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
 
                     // undo receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, hash, k, false), out.nValue));
@@ -1758,24 +1885,42 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
                     const Coin &coin = view.AccessCoin(tx.vin[j].prevout);
                     const CTxOut &prevout = coin.out;
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
-                        std::vector<unsigned char> hashBytes(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22);
+                        // Remove BDAP portion of the script
+                        CScript scriptPubKey;
+                        CScript scriptPubKeyOut;
+                        if (RemoveBDAPScript(prevout.scriptPubKey, scriptPubKeyOut))
+                        {
+                            scriptPubKey = scriptPubKeyOut;
+                        }
+                        else
+                        {
+                            scriptPubKey = prevout.scriptPubKey;
+                        }
 
+                        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
                         // undo spending activity
                         addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, hash, j, true), prevout.nValue * -1));
-
                         // restore unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, prevout.scriptPubKey, undoHeight)));
-
+                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, scriptPubKey, undoHeight)));
 
                     } else if (prevout.scriptPubKey.IsPayToPublicKeyHash()) {
-                        std::vector<unsigned char> hashBytes(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23);
+                        // Remove BDAP portion of the script
+                        CScript scriptPubKey;
+                        CScript scriptPubKeyOut;
+                        if (RemoveBDAPScript(prevout.scriptPubKey, scriptPubKeyOut))
+                        {
+                            scriptPubKey = scriptPubKeyOut;
+                        }
+                        else
+                        {
+                            scriptPubKey = prevout.scriptPubKey;
+                        }
 
+                        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
                         // undo spending activity
                         addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, hash, j, true), prevout.nValue * -1));
-
                         // restore unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, prevout.scriptPubKey, undoHeight)));
-
+                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), input.prevout.hash, input.prevout.n), CAddressUnspentValue(prevout.nValue, scriptPubKey, undoHeight)));
                     } else {
                         continue;
                     }
@@ -2052,7 +2197,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 return state.DoS(100, error("%s: contains a non-BIP68-final transaction", __func__),
                                  REJECT_INVALID, "bad-txns-nonfinal");
             }
-
             if (fAddressIndex || fSpentIndex)
             {
                 for (size_t j = 0; j < tx.vin.size(); j++) {
@@ -2116,28 +2260,52 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 const CTxOut &out = tx.vout[k];
 
                 if (out.scriptPubKey.IsPayToScriptHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
 
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
                     // record receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(2, uint160(hashBytes), pindex->nHeight, i, txhash, k, false), out.nValue));
-
                     // record unspent output
-                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
-
+                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, scriptPubKey, pindex->nHeight)));
                 } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
-                    std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
+                    // Remove BDAP portion of the script
+                    CScript scriptPubKey;
+                    CScript scriptPubKeyOut;
+                    if (RemoveBDAPScript(out.scriptPubKey, scriptPubKeyOut))
+                    {
+                        scriptPubKey = scriptPubKeyOut;
+                    }
+                    else
+                    {
+                        scriptPubKey = out.scriptPubKey;
+                    }
 
+                    std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
                     // record receiving activity
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), pindex->nHeight, i, txhash, k, false), out.nValue));
-
                     // record unspent output
-                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
-
+                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, scriptPubKey, pindex->nHeight)));
                 } else {
                     continue;
                 }
 
             }
+        }
+        
+        CCoinsViewCache viewCoinCache(pcoinsTip);
+        if (!ValidateBDAPInputs(tx, state, viewCoinCache, block, fJustCheck, pindex->nHeight))
+        {
+            return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
         }
 
         CTxUndo undoDummy;
@@ -2169,80 +2337,84 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         fDynodePaid = false;
     }
 
-	CAmount nExpectedBlockValue;
-	std::string strError = "";
-	{
-		CBlockIndex* prevIndex = pindex->pprev;
-		CFluidEntry prevFluidIndex = pindex->pprev->fluidParams;
-		
-		CFluidEntry FluidIndex;
-		
-		CAmount fluidIssuance, newReward = 0, newDynodeReward = 0;
-		CDynamicAddress mintAddress;
-		
-		if (!fluid.GetProofOverrideRequest(pindex->pprev, newReward) 
-		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-				FluidIndex.blockReward = (prevIndex? prevFluidIndex.blockReward : 0);
-		} else {
-				FluidIndex.blockReward = newReward;
-		}
+    // BEGIN FLUID
+    CAmount nExpectedBlockValue;
+    std::string strError = "";
+    {
+        CBlockIndex* prevIndex = pindex->pprev;
+        CAmount newMiningReward = GetFluidMiningReward(pindex->nHeight);
+        CAmount newDynodeReward = 0;
+        if (fDynodePaid)
+            newDynodeReward = GetFluidDynodeReward(pindex->nHeight);
 
-		if (!fluid.GetDynodeOverrideRequest(pindex->pprev, newDynodeReward) 
-		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-				FluidIndex.dynodeReward = (prevIndex? prevFluidIndex.dynodeReward : 0);
-		} else {
-				FluidIndex.dynodeReward = newDynodeReward;
-		}
-		
-		if (fluid.GetMintingInstructions(pindex->pprev, mintAddress, fluidIssuance) 
-		&& pindex->nHeight  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
-									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward) + 
-									fluidIssuance;
-		} else {
-			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
-									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward);
-		}
-		
-		std::vector<std::string> fluidHistory, fluidSovereigns;
-		
-		if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
-			return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
-		}
-		
-		if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
-			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-			return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
-									REJECT_INVALID, "bad-cb-payee");
-		}
-		
-		if (prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {	
-			fluidHistory.insert(fluidHistory.end(), prevFluidIndex.fluidHistory.begin(), prevFluidIndex.fluidHistory.end());
-			fluid.AddFluidTransactionsToRecord(prevIndex, fluidHistory);
-			std::set<std::string> setX(fluidHistory.begin(), fluidHistory.end());
-			fluidHistory.assign(setX.begin(), setX.end());
-			
-			FluidIndex.fluidHistory = fluidHistory;
-			
-			for (uint32_t x = 0; x != fluid.InitialiseSovereignIdentities().size(); x++) {
-				/* std::string error;
-				CDynamicAddress inputKey; // Reinitialise at each iteration to reset value
-				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
-				
-				if (!GetNameCurrentAddress(val, inputKey, error))
-					fluidSovereigns.push_back(inputKey.ToString());
-				else */
-					fluidSovereigns.push_back(prevFluidIndex.fluidSovereigns.at(x));
-			}
-		}
-		
-		pindex->fluidParams = FluidIndex;
-	}
+        CAmount newMintIssuance = 0;
+        CDynamicAddress mintAddress;
+        if (prevIndex->nHeight + 1 >= fluid.FLUID_ACTIVATE_HEIGHT) 
+        {
+            CFluidMint fluidMint;
+            if (GetMintingInstructions(pindex->nHeight, fluidMint)) {
+                newMintIssuance = fluidMint.MintAmount;
+                mintAddress = fluidMint.GetDestinationAddress();
+                LogPrintf("ConnectBlock, GetMintingInstructions MintAmount = %u\n", fluidMint.MintAmount);
+            }
+        }
+        nExpectedBlockValue = newMintIssuance + newMiningReward + newDynodeReward;
 
-    // END DYNAMIC
+        if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
+            return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        }
+        if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
+            mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+            return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
+                                    REJECT_INVALID, "bad-cb-payee");
+        }
+    }
+    for (unsigned int i = 0; i < block.vtx.size(); i++)
+    {
+        const CTransaction &tx = block.vtx[i];
+        CScript scriptFluid;
+        if (IsTransactionFluid(tx, scriptFluid)) {
+            int OpCode = GetFluidOpCode(scriptFluid);
+            if (OpCode == OP_REWARD_DYNODE) {
+                CFluidDynode fluidDynode(scriptFluid);
+                fluidDynode.nHeight = pindex->nHeight;
+                fluidDynode.txHash = tx.GetHash();
+                if (CheckFluidDynodeDB()) {
+                    if (!CheckSignatureQuorum(fluidDynode.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-dynode-address-signature");
+                    }
+                    pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
+                }
+            }
+            else if (OpCode == OP_REWARD_MINING) {
+                CFluidMining fluidMining(scriptFluid);
+                fluidMining.nHeight = pindex->nHeight;
+                fluidMining.txHash = tx.GetHash();
+                if (CheckFluidMiningDB()) {
+                    if (!CheckSignatureQuorum(fluidMining.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
+                    }
+                    pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
+                }
+            }
+            else if (OpCode == OP_MINT) {
+                CFluidMint fluidMint(scriptFluid);
+                fluidMint.nHeight = pindex->nHeight;
+                fluidMint.txHash = tx.GetHash();
+                if (CheckFluidMintDB()) {
+                    if (!CheckSignatureQuorum(fluidMint.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mint-address-signature");
+                    }
+                    pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
+                }
+            }
+        }
+    }
+    // END FLUID
     
     if (!control.Wait())
         return state.DoS(100, false);
+
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
     LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * 0.000001);
 
@@ -3296,8 +3468,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                 tx.GetHash().ToString(),
                 FormatStateMessage(state));
 
-		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey)) {
+        BOOST_FOREACH(const CTxOut& txout, tx.vout)    {    
+            if (IsTransactionFluid(txout.scriptPubKey)) {
                 std::string strErrorMessage;
                 if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime, strErrorMessage)) {
                     return error("CheckBlock(): %s, Block %s failed with %s",
@@ -3305,12 +3477,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                         tx.GetHash().ToString(),
                         FormatStateMessage(state));
                 }
-			}	
-		}
-		
-	    if (!fluid.CheckTransactionToBlock(tx, block))
-			return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
-	}
+            }    
+        }
+        
+        if (!fluid.CheckTransactionToBlock(tx, block))
+            return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
+    }
 
     unsigned int nSigOps = 0;
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
@@ -3387,7 +3559,6 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
             if (!fluid.CheckTransactionToBlock(tx, pindexPrev->GetBlockHeader()))
                 return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
         }
-        
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
