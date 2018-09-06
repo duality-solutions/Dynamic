@@ -11,7 +11,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
-#include "fluid.h"
+#include "fluid/fluiddb.h"
 #include "init.h"
 #include "messagesigner.h"
 #include "netbase.h"
@@ -302,7 +302,7 @@ void CDynode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack
             if(!ReadBlockFromDisk(block, BlockReading, Params().GetConsensus())) // shouldn't really happen
                 continue;
 
-            CAmount nDynodePayment = getDynodeSubsidyWithOverride(BlockReading->fluidParams.dynodeReward);
+            CAmount nDynodePayment = GetFluidDynodeReward(BlockReading->nHeight);
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
                 if(dnpayee == txout.scriptPubKey && nDynodePayment == txout.nValue) {
@@ -338,8 +338,8 @@ bool CDynodeBroadcast::Create(std::string strService, std::string strKeyDynode, 
         return false;
     };
 
-    //need correct blocks to send ping
-    if (!fOffline && !dynodeSync.IsBlockchainSynced())
+    // Wait for sync to finish because dnb simply won't be relayed otherwise
+    if (!fOffline && !dynodeSync.IsSynced())
         return Log("Sync in progress. Must wait until sync is complete to start Dynode");
 
     if (!CMessageSigner::GetKeysFromSecret(strKeyDynode, keyDynodeNew, pubKeyDynodeNew))
@@ -426,8 +426,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     }
 
     if(nProtocolVersion < dnpayments.GetMinDynodePaymentsProto()) {
-        LogPrintf("CDynodeBroadcast::SimpleCheck -- ignoring outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", vin.prevout.ToStringShort(), nProtocolVersion);
-        return false;
+        LogPrintf("CDynodeBroadcast::SimpleCheck -- outdated Dynode: Dynode=%s  nProtocolVersion=%d\n", vin.prevout.ToStringShort(), nProtocolVersion);
+        nActiveState = DYNODE_UPDATE_REQUIRED;
     }
 
     CScript pubkeyScript;

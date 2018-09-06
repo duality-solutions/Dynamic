@@ -8,7 +8,7 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
-# **Dynamic (DYN) v2.3.0.0**
+# **Dynamic (DYN) v2.4.0.0**
 
 ![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
@@ -46,19 +46,19 @@ As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic
 P2P Port = 33300
 RPC Port = 33350
 Dynodes = 33300
-Magic Bytes: 0x6e 0x71 0x84 0x90
+Magic Bytes: 0x5e 0x61 0x74 0x80
 
 **TestNet Parameters**
 P2P Port = 33400
 RPC Port = 33450
 Dynodes = 33400
-Magic Bytes: 0x3f 0x42 0x25 0x50
+Magic Bytes: 0x2f 0x32 0x15 0x40
 
 **RegTest Parameters**
 P2P Port = 33500
 RPC Port = 33550
 Dynodes = 33500
-Magic Bytes = 0x3f 0x42 0x25 0x4f
+Magic Bytes = 0x2f 0x32 0x15 0x3f
 
 
 UNIX BUILD NOTES

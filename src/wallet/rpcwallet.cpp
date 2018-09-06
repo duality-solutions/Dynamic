@@ -405,6 +405,45 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
     }
 }
 
+void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue)
+{
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nOPValue <= 0 || nDataValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
+
+    if (nOPValue + nDataValue > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendBDAPTransaction insufficient funds");
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosInOut = 0;
+
+    LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+
+    CRecipient recDataScript = {bdapDataScript, DEFAULT_MIN_RELAY_TX_FEE, false};
+    vecSend.push_back(recDataScript);
+    CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
+    vecSend.push_back(recOPScript);
+
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
+                                         strError, NULL, true, ALL_COINS, false, true)) {
+        if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+}
+
 void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
@@ -2697,42 +2736,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     result.push_back(Pair("changepos", nChangePos));
     result.push_back(Pair("fee", ValueFromAmount(nFee)));
 
-    return result;
-}
-
-
-UniValue makekeypair(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw std::runtime_error(
-            "makekeypair [prefix]\n"
-            "Make a public/private key pair.\n"
-            "[prefix] is optional preferred prefix for the public key.\n");
-
-    std::string strPrefix = "";
-    if (params.size() > 0)
-        strPrefix = params[0].get_str();
-
-    CKey key;
-    int nCount = 0;
-    do
-    {
-        key.MakeNewKey(false);
-        nCount++;
-    } while (nCount < 10000 && strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()));
-
-    if (strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()))
-        return NullUniValue;
-
-    CPrivKey vchPrivKey = key.GetPrivKey();
-    CKeyID keyID = key.GetPubKey().GetID();
-    CKey vchSecret = CKey();
-    vchSecret.SetPrivKey(vchPrivKey, false);
-    UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
-    result.push_back(Pair("PublicKey", HexStr(key.GetPubKey())));
-    result.push_back(Pair("WalletAddress", CDynamicAddress(keyID).ToString()));
-    result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
     return result;
 }
 

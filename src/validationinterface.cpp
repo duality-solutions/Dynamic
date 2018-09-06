@@ -25,6 +25,7 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.BlockChecked.connect(boost::bind(&CValidationInterface::BlockChecked, pwalletIn, _1, _2));
     g_signals.ScriptForMining.connect(boost::bind(&CValidationInterface::GetScriptForMining, pwalletIn, _1));
     g_signals.BlockFound.connect(boost::bind(&CValidationInterface::ResetRequestCount, pwalletIn, _1));
+    g_signals.NotifyBDAPUpdate.connect(boost::bind(&CValidationInterface::NotifyBDAPUpdate, pwalletIn, _1, _2));
 }
 
 void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
@@ -40,6 +41,7 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.UpdatedBlockTip.disconnect(boost::bind(&CValidationInterface::UpdatedBlockTip, pwalletIn, _1, _2, _3));
     g_signals.NotifyHeaderTip.disconnect(boost::bind(&CValidationInterface::NotifyHeaderTip, pwalletIn, _1, _2));
     g_signals.AcceptedBlockHeader.disconnect(boost::bind(&CValidationInterface::AcceptedBlockHeader, pwalletIn, _1));
+    g_signals.NotifyBDAPUpdate.disconnect(boost::bind(&CValidationInterface::NotifyBDAPUpdate, pwalletIn, _1, _2));
 }
 
 void UnregisterAllValidationInterfaces() {
@@ -55,4 +57,5 @@ void UnregisterAllValidationInterfaces() {
     g_signals.UpdatedBlockTip.disconnect_all_slots();
     g_signals.NotifyHeaderTip.disconnect_all_slots();
     g_signals.AcceptedBlockHeader.disconnect_all_slots();
+    g_signals.NotifyBDAPUpdate.disconnect_all_slots();
 }

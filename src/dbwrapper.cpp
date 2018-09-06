@@ -125,12 +125,6 @@ CDBWrapper::CDBWrapper(const boost::filesystem::path& path, size_t nCacheSize, b
         LogPrintf("Finished database compaction of %s\n", path.string());
     }
 
-    if (GetBoolArg("-forcecompactdb", false)) {
-        LogPrintf("Starting database compaction of %s\n", path.string());
-        pdb->CompactRange(nullptr, nullptr);
-        LogPrintf("Finished database compaction of %s\n", path.string());
-    }
-
     // The base-case obfuscation key, which is a noop.
     obfuscate_key = std::vector<unsigned char>(OBFUSCATE_KEY_NUM_BYTES, '\000');
 
@@ -202,6 +196,7 @@ bool CDBWrapper::IsEmpty()
 CDBIterator::~CDBIterator() { delete piter; }
 bool CDBIterator::Valid() { return piter->Valid(); }
 void CDBIterator::SeekToFirst() { piter->SeekToFirst(); }
+void CDBIterator::SeekToLast() { piter->SeekToLast(); }
 void CDBIterator::Next() { piter->Next(); }
 
 namespace dbwrapper_private {

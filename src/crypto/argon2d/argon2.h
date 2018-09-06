@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * You may use this work under the terms of a Creative Commons CC0 1.0
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -18,8 +18,8 @@
 #ifndef ARGON2_H
 #define ARGON2_H
 
-#if defined(HAVE_CONFIG_H)
-#include "config/dynamic-config.h"
+#if defined(HAVE_CONFIG_H) 
+#include "config/dynamic-config.h" 
 #endif
 
 #include <stdint.h>
@@ -33,10 +33,13 @@ extern "C" {
 /* Symbols visibility control */
 #ifdef A2_VISCTL
 #define ARGON2_PUBLIC __attribute__((visibility("default")))
+#define ARGON2_LOCAL __attribute__ ((visibility ("hidden")))
 #elif _MSC_VER
 #define ARGON2_PUBLIC __declspec(dllexport)
+#define ARGON2_LOCAL
 #else
 #define ARGON2_PUBLIC
+#define ARGON2_LOCAL
 #endif
 
 /*
@@ -236,27 +239,6 @@ ARGON2_PUBLIC const char *argon2_type2string(argon2_type type, int uppercase);
  */
 ARGON2_PUBLIC int argon2_ctx(argon2_context *context, argon2_type type);
 
-/**
- * Hashes a password with Argon2i, producing a raw hash by allocating memory at
- * @hash
- * @param t_cost Number of iterations
- * @param m_cost Sets memory usage to m_cost kibibytes
- * @param parallelism Number of threads and compute lanes
- * @param pwd Pointer to password
- * @param pwdlen Password size in bytes
- * @param salt Pointer to salt
- * @param saltlen Salt size in bytes
- * @param hash Buffer where to write the raw hash - updated by the function
- * @param hashlen Desired length of the hash in bytes
- * @pre   Different parallelism levels will give different results
- * @pre   Returns ARGON2_OK if successful
- */
-ARGON2_PUBLIC int argon2d_hash_raw(const uint32_t t_cost, const uint32_t m_cost,
-                                   const uint32_t parallelism, const void *pwd,
-                                   const size_t pwdlen, const void *salt,
-                                   const size_t saltlen, void *hash,
-                                   const size_t hashlen);
-
 ARGON2_PUBLIC int argon2d_hash_encoded(const uint32_t t_cost,
                                        const uint32_t m_cost,
                                        const uint32_t parallelism,
@@ -264,6 +246,12 @@ ARGON2_PUBLIC int argon2d_hash_encoded(const uint32_t t_cost,
                                        const void *salt, const size_t saltlen,
                                        const size_t hashlen, char *encoded,
                                        const size_t encodedlen);
+
+ARGON2_PUBLIC int argon2d_hash_raw(const uint32_t t_cost, const uint32_t m_cost,
+                                   const uint32_t parallelism, const void *pwd,
+                                   const size_t pwdlen, const void *salt,
+                                   const size_t saltlen, void *hash,
+                                   const size_t hashlen);
 
 /* generic function underlying the above ones */
 ARGON2_PUBLIC int argon2_hash(const uint32_t t_cost, const uint32_t m_cost,

@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * You may use this work under the terms of a Creative Commons CC0 1.0
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -42,7 +42,7 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
         return result;
     }
 
-    if (Argon2_d != type) {
+    if (Argon2_d != type) {    
         return ARGON2_INCORRECT_TYPE;
     }
 
@@ -96,7 +96,7 @@ int argon2_hash(const uint32_t t_cost, const uint32_t m_cost,
                 const uint32_t parallelism, const void *pwd,
                 const size_t pwdlen, const void *salt, const size_t saltlen,
                 void *hash, const size_t hashlen, char *encoded,
-                const size_t encodedlen, argon2_type type){
+                const size_t encodedlen, argon2_type type){    
 
     argon2_context context;
     int result;
@@ -263,6 +263,7 @@ fail:
 
     return ret;
 }
+
 
 int argon2d_verify(const char *encoded, const void *pwd, const size_t pwdlen) {
 

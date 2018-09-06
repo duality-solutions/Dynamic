@@ -1,6 +1,23 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.0.0**
+
+* Drop delayed headers logic and fix duplicate initial headers sync
+* replace boost iterators with for
+* RPC: Add description for InstantSend-related fields of mempool entry
+* RPC: fix wallet lock check in
+* minor reformatting
+* Remove explicit wallet lock in DynodeList::StartAll()
+* Do not create dnb until dynodeSync is finished
+* Don't drop dnb's for outdated DN's
+* Fix previous commit and fix 2 Spork issues
+* PrepareDenominate fix
+* Sync DN list and DNW list from 3 peers max
+* Use correct protocol when serializing messages in reply to
+* Bump Versioning
+* Update dynamic_qt.m4 (Remove ability to build with Qt4)
+
 **Dynamic v2.3.0.0**
 
 * Skip existing Dynodes connections on mixing
@@ -170,6 +187,12 @@
 * [Fluid] Fix getfluidhistoryraw RPC command
 * [Fluid] Fix getfluidsovereigns RPC command
 * [Fluid] Allow negative fluid minting amounts
+* fix copy address, issue 157
+* Privatesend->PrivateSend Instantsend->InstantSend
+* Identified and Fixed many issues with Korean Translations.
+* Update dynamic_find_bdb48.m4
+* [Fluid] Fix send fluid tx display in Qt UI
+* Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
 **Dynamic v2.2.0.0**
@@ -193,7 +216,6 @@
 * Update Proto Version
 * Update secp256k1
 * Fix fixed seeds
-* fix copy address, issue #157
 * Update CHANGELOG
 
 **Dynamic v2.1.0.0**

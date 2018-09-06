@@ -9,6 +9,9 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
+#include "bdap/bdap.h"
+#include "bdap/domainentry.h"
+#include "fluid/fluid.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"
@@ -74,7 +77,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::RecvFromOther;
                     sub.address = mapValue["from"];
                 }
-                if (wtx.IsCoinBase())
+                if (IsTransactionFluid(txout.scriptPubKey))
+                {
+                    // Fluid type
+                    sub.type = TransactionRecord::Fluid;
+                }
+                else if (wtx.IsCoinBase())
                 {
                     // Generated
                     sub.type = TransactionRecord::Generated;
@@ -128,7 +136,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             // Payment to self by default
             sub.type = TransactionRecord::SendToSelf;
             sub.address = "";
-
             if(mapValue["PS"] == "1")
             {
                 sub.type = TransactionRecord::PrivateSend;
@@ -150,7 +157,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     const CTxOut& txout = wtx.vout[nOut];
                     sub.idx = parts.size();
-
+                    if(IsTransactionFluid(txout.scriptPubKey)) sub.type = TransactionRecord::Fluid;
                     if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
                     if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
                     if(nDebit - wtx.GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
@@ -170,14 +177,21 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             // Debit
             //
             CAmount nTxFee = nDebit - wtx.GetValueOut();
-
+            CDomainEntry entry;
+            std::string strOpType;
             for (unsigned int nOut = 0; nOut < wtx.vout.size(); nOut++)
             {
                 const CTxOut& txout = wtx.vout[nOut];
                 TransactionRecord sub(hash, nTime);
                 sub.idx = parts.size();
                 sub.involvesWatchAddress = involvesWatchAddress;
-
+                
+                if (GetBDAPOpType(txout) > 0)
+                {
+                    // BDAP type
+                    strOpType = BDAPFromOp(GetBDAPOpCodeFromOutput(txout));
+                    continue;
+                }
                 if(wallet->IsMine(txout))
                 {
                     // Ignore parts sent to self, as this is usually the change
@@ -198,8 +212,41 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                     sub.type = TransactionRecord::SendToOther;
                     sub.address = mapValue["to"];
                 }
-
-                if(mapValue["PS"] == "1")
+                if (IsBDAPDataOutput(txout)) {
+                    std::vector<unsigned char> vchData;
+                    std::vector<unsigned char> vchHash;
+                    GetBDAPData(txout, vchData, vchHash);
+                    entry.UnserializeFromData(vchData, vchHash);
+                    if (strOpType == "bdap_new" && entry.ObjectTypeString() == "User Entry"){
+                        sub.type = TransactionRecord::NewDomainUser;
+                    }
+                    else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::UpdateDomainUser;
+                    }
+                    else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::DeleteDomainUser;
+                    }
+                    else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "User Entry") {
+                        sub.type = TransactionRecord::RevokeDomainUser;
+                    }
+                    else if (strOpType == "bdap_new" && entry.ObjectTypeString() == "Group Entry"){
+                        sub.type = TransactionRecord::NewDomainGroup;
+                    }
+                    else if (strOpType == "bdap_update" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::UpdateDomainGroup;
+                    }
+                    else if (strOpType == "bdap_delete" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::DeleteDomainGroup;
+                    }
+                    else if (strOpType == "bdap_revoke" && entry.ObjectTypeString() == "Group Entry") {
+                        sub.type = TransactionRecord::RevokeDomainGroup;
+                    }
+                }
+                if(IsTransactionFluid(txout.scriptPubKey)) 
+                {
+                    sub.type = TransactionRecord::Fluid;
+                }
+                else if(mapValue["PS"] == "1")
                 {
                     sub.type = TransactionRecord::PrivateSend;
                 }
@@ -303,7 +350,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
         {
             status.status = TransactionStatus::Unconfirmed;
             if (wtx.isAbandoned())
-				status.status = TransactionStatus::Abandoned;
+                status.status = TransactionStatus::Abandoned;
         }
         else if (status.depth < RecommendedNumConfirmations)
         {
@@ -332,4 +379,3 @@ int TransactionRecord::getOutputIndex() const
 {
     return idx;
 }
-

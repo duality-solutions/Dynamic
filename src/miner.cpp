@@ -16,7 +16,9 @@
 #include "consensus/validation.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
+#include "fluid/fluidmint.h"
 #include "governance-classes.h"
 #include "hash.h"
 #include "net.h"
@@ -307,36 +309,38 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
         }
 
-        CDynamicAddress address;
-        CFluidEntry prevFluidIndex = pindexPrev->fluidParams;
-        CAmount fluidIssuance = 0, blockReward = getBlockSubsidyWithOverride(nHeight, prevFluidIndex.blockReward);
-        bool areWeMinting = fluid.GetMintingInstructions(pindexPrev, address, fluidIssuance);
-
+        CAmount blockReward = GetFluidMiningReward(nHeight);
+        CDynamicAddress mintAddress;
+        CAmount fluidIssuance = 0;
+        CFluidMint fluidMint;
+        bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
+        
         // Compute regular coinbase transaction.
         txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 
-        if (areWeMinting) {
+        if (areWeMinting) 
+        {
+            mintAddress = fluidMint.GetDestinationAddress();
+            fluidIssuance = fluidMint.MintAmount;
             txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
             txNew.vout[0].nValue = blockReward;
         }
-
+        
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
         CScript script;
-
-        if (areWeMinting) {
+        if (areWeMinting) {        
             // Pick out the amount of issuance
             txNew.vout[0].nValue -= fluidIssuance;
 
-            assert(address.IsValid());
-            if (!address.IsScript()) {
-                script = GetScriptForDestination(address.Get());
+            assert(mintAddress.IsValid());
+            if (!mintAddress.IsScript()) {
+                script = GetScriptForDestination(mintAddress.Get());
             } else {
-                CScriptID fluidScriptID = boost::get<CScriptID>(address.Get());
+                CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
                 script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
             }
-
             txNew.vout.push_back(CTxOut(fluidIssuance, script));
             LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
         }
@@ -666,7 +670,7 @@ void BaseMiner::StartLoop()
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
     GetMainSignals().ScriptForMining(coinbaseScript);
-
+  
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
