@@ -18,11 +18,16 @@
 #include "chain.h"
 #include "chainparams.h"
 #include "checkpoints.h"
+#include "bdap/domainentrydb.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
 #include "dynodeman.h"
 #include "flat-database.h"
+#include "fluid/fluiddynode.h"
+#include "fluid/fluidmining.h"
+#include "fluid/fluidmint.h"
+#include "fluid/fluidsovereign.h"
 #include "governance.h"
 #include "instantsend.h"
 #include "httpserver.h"
@@ -1468,7 +1473,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("* Using %.1fMiB for chain state database\n", nCoinDBCache * (1.0 / 1024 / 1024));
     LogPrintf("* Using %.1fMiB for in-memory UTXO set (plus up to %.1fMiB of unused mempool space)\n", nCoinCacheUsage * (1.0 / 1024 / 1024), nMempoolSizeMax * (1.0 / 1024 / 1024));
 
-    bool fLoaded = false;
     int64_t nStart = GetTimeMillis();
     while (!fLoaded && !fRequestShutdown) {
         bool fReset = fReindex;
@@ -1484,12 +1488,29 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
-
+                // Fluid transaction DB's
+                delete pFluidDynodeDB;
+                delete pFluidMiningDB;
+                delete pFluidMintDB;
+                delete pFluidSovereignDB;
+                // BDAP Services DB's
+                delete pDomainEntryDB;
+                
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
                 pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
                 pcoinsTip = new CCoinsViewCache(pcoinscatcher);
 
+                bool obfuscate = false;
+                // Init Fluid transaction DB's
+                pFluidDynodeDB = new CFluidDynodeDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidMiningDB = new CFluidMiningDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
+
+                // Init BDAP Services DB's 
+                pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
+                
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files

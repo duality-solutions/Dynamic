@@ -104,6 +104,14 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     typeWidget->addItem(tr("Fluid"), TransactionFilterProxy::TYPE(TransactionRecord::Fluid));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
+    typeWidget->addItem(tr("BDAP"), TransactionFilterProxy::TYPE(TransactionRecord::NewDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::UpdateDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::DeleteDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::RevokeDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::NewDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::UpdateDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::DeleteDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::RevokeDomainGroup));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
     typeWidget->setCurrentIndex(settings.value("transactionType").toInt());
 

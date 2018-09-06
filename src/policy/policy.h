@@ -49,6 +49,8 @@ static const unsigned int STANDARD_NOT_MANDATORY_VERIFY_FLAGS = STANDARD_SCRIPT_
 /** Used as the flags parameter to sequence and nLocktime checks in non-consensus code. */
 static const unsigned int STANDARD_LOCKTIME_VERIFY_FLAGS = LOCKTIME_VERIFY_SEQUENCE |
                                                            LOCKTIME_MEDIAN_TIME_PAST;
+/** Used for BDAP transactions. */
+static const int BDAP_TX_VERSION = 0x3500;
 
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
     /**
