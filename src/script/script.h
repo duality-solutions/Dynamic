@@ -21,13 +21,26 @@
 #include <string>
 #include <vector>
 
-// Identification codes for Fluid Protocol Transactions
+// Identification codes for Fluid and BDAP Transactions
 enum ProtocolCodes {
-	MINT_TX 			= 1,
-	DYNODE_MODFIY_TX 	= 2,
-	MINING_MODIFY_TX 	= 3,
-	
-	NO_TX = 0
+    MINT_TX                    =  1,
+    DYNODE_MODFIY_TX           =  2,
+    MINING_MODIFY_TX           =  3,
+    BDAP_START                 =  4,
+    BDAP_NEW_TX                =  5,
+    BDAP_DELETE_TX             =  6,
+    BDAP_REVOKE_TX             =  7,
+    BDAP_MODIFY_TX             =  8,
+    BDAP_MODIFY_RDN_TX         =  9,
+    BDAP_EXECUTE_CODE_TX       =  10,
+    BDAP_BIND_TX               =  11,
+    BDAP_AUDIT_TX              =  12,
+    BDAP_CERTIFICATE_TX        =  13,
+    BDAP_IDENTITY_TX           =  14,
+    BDAP_ID_VERIFICATION_TX    =  15,
+    BDAP_CHANNEL_TX            =  16,
+    BDAP_CHANNEL_CHECKPOINT    =  17,
+    NO_TX                      =  0
 };
 
 // Maximum number of bytes pushable to the stack
@@ -195,24 +208,31 @@ enum opcodetype
     OP_PUBKEYHASH = 0xfd,
     OP_PUBKEY = 0xfe,
 
-	// Fluid Autonomus Monetary Management System (FAM2S)
+    // Fluid Autonomus Monetary Management System (FAM2S)
     OP_MINT = 0xc0,
-	OP_REWARD_DYNODE = 0xc3,
-	OP_REWARD_MINING = 0xc4,
+    OP_REWARD_DYNODE = 0xc3,
+    OP_REWARD_MINING = 0xc4,
     OP_SWAP_SOVEREIGN_ADDRESS = 0xc5,
     OP_UPDATE_FEES = 0xc6,
     OP_FREEZE_ADDRESS = 0xc7,
     OP_RELEASE_ADDRESS = 0xc8,
 
-    // identity alias system
-    OP_IDENTITY_NEW = 0xd1,
-    OP_IDENTITY_DELETE = 0xd2,
-    OP_IDENTITY_PAYMENT = 0xd3,
-    OP_IDENTITY_ACTIVATE = 0xd4,
-    OP_IDENTITY_UPDATE = 0xd5,
-    OP_IDENTITY_MULTISIG = 0xd6,
-
-    // dynamic extended reserved 
+    // BDAP directory access, user identity and certificate system
+    OP_BDAP = 0x01,
+    OP_BDAP_NEW = 0x02, // = BDAP create new entry
+    OP_BDAP_DELETE = 0x03, // = BDAP user delete entry
+    OP_BDAP_REVOKE = 0x04, // = BDAP delete using fluid protocol
+    OP_BDAP_MODIFY = 0x05, // = BDAP update entry
+    OP_BDAP_MODIFY_RDN = 0x06, // = move BDAP entry
+    OP_BDAP_EXECUTE_CODE = 0x07, // = BDAP smart contract
+    OP_BDAP_BIND = 0x08, // = BDAP entry link request
+    OP_BDAP_AUDIT = 0x09, // = BDAP entry audit entry
+    OP_BDAP_CERTIFICATE = 0x0a, // = BDAP entry certificate
+    OP_BDAP_IDENTITY = 0x0b, // = BDAP entry identity
+    OP_BDAP_ID_VERIFICATION = 0x0c, // = BDAP identity verification
+    OP_BDAP_CHANNEL = 0x0d, // = BDAP sub chain
+    OP_BDAP_CHANNEL_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
+    // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
     // invalid operation code
@@ -655,6 +675,7 @@ public:
     bool IsPayToPublicKeyHash() const;
 
     bool IsPayToScriptHash() const;
+    bool IsPayToPublicKey() const;
 
     /** Called by IsStandardTx and P2SH/BIP62 VerifyScript (which makes it consensus-critical). */
     bool IsPushOnly(const_iterator pc) const;
@@ -670,22 +691,74 @@ public:
         return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
     }
 
-	bool IsProtocolInstruction(ProtocolCodes code) const
+    bool IsProtocolInstruction(ProtocolCodes code) const
     {
-		switch(code) {
-			case MINT_TX:
-				return (size() > 0 && *begin() == OP_MINT);
-				break;
-			case DYNODE_MODFIY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_DYNODE);
-				break;
-			case MINING_MODIFY_TX:
-				return (size() > 0 && *begin() == OP_REWARD_MINING);
-				break;
-			default:
-				throw std::runtime_error("Protocol code is invalid!");
-		}
-		return false;
+        switch(code) {
+            case MINT_TX:
+                return (size() > 0 && *begin() == OP_MINT);
+                break;
+            case DYNODE_MODFIY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_DYNODE);
+                break;
+            case MINING_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_REWARD_MINING);
+                break;
+            default:
+                throw std::runtime_error("Protocol code is invalid!");
+        }
+        return false;
+    }
+    
+    //TODO: (bdap) test if this is working
+    bool IsBDAPScript(ProtocolCodes code) const
+    {
+        switch(code) {
+            case BDAP_START:
+                return (size() > 0 && *begin() == OP_BDAP);
+                break;
+            case BDAP_NEW_TX:
+                return (size() > 0 && *begin() == OP_BDAP_NEW);
+                break;
+            case BDAP_DELETE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_DELETE);
+                break;
+            case BDAP_REVOKE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_REVOKE);
+                break;
+            case BDAP_MODIFY_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY);
+                break;
+            case BDAP_MODIFY_RDN_TX:
+                return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
+                break;
+            case BDAP_EXECUTE_CODE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_EXECUTE_CODE);
+                break;
+            case BDAP_BIND_TX:
+                return (size() > 0 && *begin() == OP_BDAP_BIND);
+                break;
+            case BDAP_AUDIT_TX:
+                return (size() > 0 && *begin() == OP_BDAP_AUDIT);
+                break;
+            case BDAP_CERTIFICATE_TX:
+                return (size() > 0 && *begin() == OP_BDAP_CERTIFICATE);
+                break;
+            case BDAP_IDENTITY_TX:
+                return (size() > 0 && *begin() == OP_BDAP_IDENTITY);
+                break;
+            case BDAP_ID_VERIFICATION_TX:
+                return (size() > 0 && *begin() == OP_BDAP_ID_VERIFICATION);
+                break;
+            case BDAP_CHANNEL_TX:
+                return (size() > 0 && *begin() == OP_BDAP_CHANNEL);
+                break;
+            case BDAP_CHANNEL_CHECKPOINT:
+                return (size() > 0 && *begin() == OP_BDAP_CHANNEL_CHECKPOINT);
+                break;
+            default:
+                throw std::runtime_error("BDAP code is invalid!");
+        }
+        return false;
     }
 
     void clear()
@@ -703,5 +776,11 @@ public:
     CReserveScript() {}
     virtual ~CReserveScript() {}
 };
+
+// TODO: Use a seperate code file for these BDAP functions
+bool IsDirectoryOp(int op);
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);
 
 #endif // DYNAMIC_SCRIPT_SCRIPT_H
