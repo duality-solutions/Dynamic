@@ -3,6 +3,81 @@
 
 **Dynamic v2.4.0.0**
 
+* Remove unused serialization method
+* Fix consts in txmempool
+* [depends] upgrade boost to 1.67.0
+* [depends] upgrade dbus to 1.13.4
+* [depends] update expad download path
+* [depends] upgrade freetype to 2.9.1
+* [depends] update libevent download path
+* [depends] upgrade libxcb to 1.13
+* [depends] upgrade miniupnpc to 2.1
+* [depends] upgrade native_biplist to 1.0.3
+* [depends] upgrade native_ccache to 3.4.2
+* [depends] update native_ds_store download path
+* [depends] upgrade native_mac_alias to 2.0.7
+* [depends] upgrade native_protobuf to 3.6.0
+* [depends] update openssl to 1.0.1k - Add RISC-V support
+* [depends] upgrade qt to 5.9.6
+* [depends] upgrade qrencode
+* [depends] upgrade xcb_proto to 1.13
+* [depends] upgrade xtrans to 1.3.5
+* [depends] upgrade zeromq to 4.2.5
+* [depends] add fix_configure_mac.patch file
+* [depends] add fix_no_printer.patch file
+* [depends] update mac-qmake.conf patch file
+* [BDAP] Add directory type function
+* [BDAP] Implement add new entry validation checking
+* [BDAP] Fix validation when syncing blocks from peers
+* [BDAP] Implement directory entry list RPC command
+* [BDAP] Add getdirectoryinfo RPC command
+* [BDAP] Add leveldb update method to db wrapper class
+* [BDAP] Fix validate input function; leveldb check not DOS
+* [BDAP] Update getdirectoryinfo help parameter
+* [BDAP] Implement update & delete entry tx validation checking
+* [BDAP] Fix saving tx hash in leveldb bdap database
+* [BDAP] Replace updatedirectory RPC command
+* [BDAP] Fix getdirectoryinfo return when entry not found
+* [BDAP] Fix expire time in RPC commands
+* [BDAP] Refactor directory to domainentry
+* [BDAP] Add domain entry link class for binding operations
+* [BDAP] Refactor domain entry certificate and move to its own class
+* [BDAP] Refactor domain entry checkpoints and move to its own class
+* [BDAP] Refactor domain entry channel data and move to its own class
+* [BDAP] Check if tx exists in memory pool for new domain entries
+* [BDAP] Update RPC command names
+* [BDAP] Check domain entry wallet address and encrypt pub key
+* [BDAP] Remove SignWalletAddress in domain entry. Only use WalletAddress
+* [BDAP] Check ownership in updatedomainentry RPC command
+* [BDAP] Fix domain entry so it populates block height
+* [BDAP] Add code to check domain entry's previous UTXO
+* Remove duplicate mem pool check in wallet available coins
+* [BDAP] Add link address to domain entry class
+* [BDAP] Check previous wallet address for update and delete txs
+* [BDAP] Add delete domain entry RPC command
+* [BDAP] Allow blank link address and encrypt pub key for delete operations
+* [Fluid] Fix segfault when running reindex
+* Move makekeypair to BDAP and change testnet spork pub key
+* [BDAP] Add identity and identity verification classes
+* [BDAP] Add missing operation codes
+* [BDAP] Adjust identity verification class
+* [BDAP] Fix domain entry object type enum
+* [BDAP] Add entry audit data class
+* [BDAP] Add new public group entry RPC command
+* [BDAP] Add list domain group entries RPC command
+* [BDAP] Add update and delete public group RPC commands
+* Corrected the documentation for Fluid RPC Calls
+* [BDAP] Refactor general functions and fix get op type
+* [BDAP] Improve transaction display in Qt UI
+* Added more seednodes
+* Remove double forcecompactdb arg
+* [Fluid] Refactor fluid code and remove index database
+* [BDAP] Remove fluid reference from domain entry
+* [Fluid] Add mining update and mint leveldb databases
+* [Fluid] Implement new fluid databases
+* [Fluid] Fix get fluid sovereigns RPC
+* [Fluid] Fixes to get last functions and RPC commands
+* [Fluid] Fix consensus issues with new db code
 * Drop delayed headers logic and fix duplicate initial headers sync
 * replace boost iterators with for
 * RPC: Add description for InstantSend-related fields of mempool entry
