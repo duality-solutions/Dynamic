@@ -101,8 +101,8 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL) {
-        //TODO fluid
-        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
+        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
+        fluidSovereigns = InitialiseAddresses();
     }
         
     else
@@ -223,8 +223,8 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL) {
-        //TODO fluid
-        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
+        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
+        fluidSovereigns = InitialiseAddresses();
     }
     else
         fluidSovereigns = InitialiseAddresses();
@@ -527,21 +527,6 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
     if (IsTransactionFluid(fluidInstruction)) {
         std::string verificationString;
-        //TODO fluid
-        /*
-        CFluidEntry fluidIndex;
-        if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT) {
-            return false;
-        }
-        else if (pindex == nullptr) {
-            GetLastBlockIndex(chainActive.Tip());
-            //TODO fluid
-            //fluidIndex = chainActive.Tip()->fluidParams;
-        } else {
-            //TODO fluid
-            //fluidIndex = pindex->fluidParams;
-        }
-        */
         std::vector<std::string> transactionRecord;//fluidIndex.fluidHistory;
         verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
