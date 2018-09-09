@@ -1,0 +1,3 @@
+[submodule "src/libtorrent"]
+	path = src/libtorrent
+	url = https://github.com/BlockChainTech/libtorrent.git
