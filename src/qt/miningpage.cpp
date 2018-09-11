@@ -188,12 +188,13 @@ void MiningPage::StartMiner(bool fGPU)
     if (fGPU) {
         fGPUMinerOn = true;
         nGPUThreads = (int)ui->sliderGPUCores->value();
+        GenerateDynamicsGPU(nGPUThreads, Params(), *g_connman);
     }
     else {
         fCPUMinerOn = true;
         nCPUThreads = (int)ui->sliderCPUCores->value();
+        GenerateDynamicsCPU(nCPUThreads, Params(), *g_connman);
     }
-    GenerateDynamics(nCPUThreads, nGPUThreads, Params(), *g_connman);
     updateUI();
 }
 

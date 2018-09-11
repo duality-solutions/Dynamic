@@ -42,8 +42,10 @@ struct CBlockTemplate {
 /** Check mined block */
 bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman);
 #endif //ENABLE_WALLET
-/** Run the miner threads */
-void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman);
+/** Run the CPU miner thread(s) */
+void GenerateDynamicsCPU(int nCPUThreads, const CChainParams& chainparams, CConnman& connman);
+/** Run the GPU miner thread(s) */
+void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConnman& connman);
 /** Shuts down all miner threads */
 void ShutdownMiners();
 /** Shuts down all CPU miner threads */

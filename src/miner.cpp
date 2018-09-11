@@ -403,7 +403,8 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 //
 double dCPUHashesPerSec = 0.0;
 double dGPUHashesPerSec = 0.0;
-int64_t nHPSTimerStart = 0;
+int64_t nCPUHPSTimerStart = 0;
+int64_t nGPUHPSTimerStart = 0;
 
 int64_t GetHashRate()
 {
@@ -412,14 +413,14 @@ int64_t GetHashRate()
 
 int64_t GetCPUHashRate()
 {
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
+    if (GetTimeMillis() - nCPUHPSTimerStart > 8000)
         return (int64_t)0;
     return (int64_t)(dCPUHashesPerSec);
 }
 
 int64_t GetGPUHashRate()
 {
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
+    if (GetTimeMillis() - nGPUHPSTimerStart > 8000)
         return (int64_t)0;
     return (int64_t)(dGPUHashesPerSec);
 }
@@ -541,9 +542,8 @@ private:
     CConnman& connman;
 
 public:
-    BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex = boost::none);
+    BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, int64_t* nHPSTimerStart, std::string deviceName, boost::optional<std::size_t> deviceIndex = boost::none);
 
-private:
     std::string deviceName;
     boost::optional<std::size_t> deviceIndex;
 
@@ -551,6 +551,7 @@ private:
     unsigned int nExtraNonce = 0;
 
     double* dHashesPerSec;
+    int64_t* nHPSTimerStart;
 
     // set by CreateNewMinerBlock
     CBlockIndex* pindexPrev;
@@ -559,9 +560,7 @@ private:
     // set in StartLoop
     boost::shared_ptr<CReserveScript> coinbaseScript;
 
-private:
     bool IsBlockSynced(CBlock* pblock);
-    void IncrementHashesDone(unsigned int nHashesDone);
 
     std::unique_ptr<CBlockTemplate> CreateNewMinerBlock();
 
@@ -575,18 +574,16 @@ protected:
     // this is single method required to implement miner
     // returned number is amount of hashes processed
     virtual unsigned int TryMineBlock(CBlock* pblock) = 0;
-
-public:
-    // starts miner loop
-    void StartLoop();
 };
 
-BaseMiner::BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, std::string deviceName, boost::optional<std::size_t> deviceIndex)
+BaseMiner::BaseMiner(const CChainParams& chainparams, CConnman& connman, double* hashesPerSec, int64_t* nHPSTimerStart, std::string deviceName, boost::optional<std::size_t> deviceIndex)
     : chainparams(chainparams),
       connman(connman),
       deviceName(deviceName),
       deviceIndex(deviceIndex),
-      dHashesPerSec(hashesPerSec) {}
+      dHashesPerSec(hashesPerSec), 
+      nHPSTimerStart(nHPSTimerStart)
+      {}
 
 void BaseMiner::ProcessFoundSolution(CBlock* pblock, const uint256& hash)
 {
@@ -625,31 +622,6 @@ bool BaseMiner::IsBlockSynced(CBlock* pblock)
     return true;
 }
 
-void BaseMiner::IncrementHashesDone(unsigned int nHashesDone)
-{
-    static int64_t nHashCounter = 0;
-    static int64_t nLogTime = 0;
-
-    if (nHPSTimerStart == 0) {
-        nHPSTimerStart = GetTimeMillis();
-        nHashCounter = 0;
-    } else {
-        nHashCounter += nHashesDone;
-    }
-
-    static CCriticalSection cs;
-    if (GetTimeMillis() - nHPSTimerStart > 4000) {
-        LOCK(cs);
-        *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
-        nHPSTimerStart = GetTimeMillis();
-        nHashCounter = 0;
-        if (GetTime() - nLogTime > 30 * 60) {
-            nLogTime = GetTime();
-            LogPrintf("%s hashmeter %6.0f khash/s\n", deviceName, *dHashesPerSec / 1000.0);
-        }
-    }
-}
-
 std::unique_ptr<CBlockTemplate> BaseMiner::CreateNewMinerBlock()
 {
     // Wait for blocks if required
@@ -663,7 +635,70 @@ std::unique_ptr<CBlockTemplate> BaseMiner::CreateNewMinerBlock()
     return CreateNewBlock(chainparams, coinbaseScript->reserveScript);
 }
 
-void BaseMiner::StartLoop()
+class CPUMiner : public BaseMiner
+{
+public:
+    CPUMiner(const CChainParams& chainparams, CConnman& connman);
+    // starts miner loop
+    void StartLoop();
+
+private:
+    void IncrementHashesDone(unsigned int nHashesDone);
+
+protected:
+    virtual unsigned int TryMineBlock(CBlock* pblock) override;
+
+};
+
+CPUMiner::CPUMiner(const CChainParams& chainparams, CConnman& connman)
+    : BaseMiner(chainparams, connman, &dCPUHashesPerSec, &nCPUHPSTimerStart, "CPU") {}
+
+unsigned int CPUMiner::TryMineBlock(CBlock* pblock)
+{
+    unsigned int nHashesDone = 0;
+    while (true) {
+        uint256 hash = pblock->GetHash();
+        if (UintToArith256(hash) <= hashTarget) {
+            this->ProcessFoundSolution(pblock, hash);
+            break;
+        }
+        pblock->nNonce += 1;
+        nHashesDone += 1;
+        if ((pblock->nNonce & 0xFF) == 0)
+            break;
+    }
+    return nHashesDone;
+}
+
+void CPUMiner::IncrementHashesDone(unsigned int nHashesDone)
+{
+    static int64_t nHashCounter = 0;
+    static int64_t nLogTime = 0;
+    static CCriticalSection cs;
+
+    int64_t nTimerStart = *nHPSTimerStart;
+    if (nTimerStart == 0) {
+        LOCK(cs);
+        *nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+        return;
+    } else {
+        nHashCounter += nHashesDone;
+    }
+    
+    if (GetTimeMillis() - nTimerStart > 4000) {
+        LOCK(cs);
+        *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nTimerStart);
+        *nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+        if (GetTime() - nLogTime > 30 * 60) {
+            nLogTime = GetTime();
+            LogPrintf("%s hashmeter %6.0f khash/s\n", deviceName, *dHashesPerSec / 1000.0);
+        }
+    }
+}
+
+void CPUMiner::StartLoop()
 {
     std::size_t device = deviceIndex ? *deviceIndex : 0;
     LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
@@ -713,55 +748,31 @@ void BaseMiner::StartLoop()
     }
 }
 
-class CPUMiner : public BaseMiner
-{
-public:
-    CPUMiner(const CChainParams& chainparams, CConnman& connman);
-
-protected:
-    virtual unsigned int TryMineBlock(CBlock* pblock) override;
-};
-
-CPUMiner::CPUMiner(const CChainParams& chainparams, CConnman& connman)
-    : BaseMiner(chainparams, connman, &dCPUHashesPerSec, "CPU") {}
-
-unsigned int CPUMiner::TryMineBlock(CBlock* pblock)
-{
-    unsigned int nHashesDone = 0;
-    while (true) {
-        uint256 hash = pblock->GetHash();
-        if (UintToArith256(hash) <= hashTarget) {
-            this->ProcessFoundSolution(pblock, hash);
-            break;
-        }
-        pblock->nNonce += 1;
-        nHashesDone += 1;
-        if ((pblock->nNonce & 0xFF) == 0)
-            break;
-    }
-    return nHashesDone;
-}
-
 #ifdef ENABLE_GPU
 class GPUMiner : public BaseMiner
 {
 public:
     GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex);
+    // starts miner loop
+    void StartLoop();
 
 protected:
     virtual unsigned int TryMineBlock(CBlock* pblock) override;
 
 private:
+    void IncrementHashesDone(unsigned int nHashesDone);
+
     Argon2GPUContext global;
     Argon2GPUParams params;
     Argon2GPUDevice device;
     Argon2GPUProgramContext context;
     std::size_t batchSizeTarget;
     Argon2GPU processingUnit;
+
 };
 
 GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
-    : BaseMiner(chainparams, connman, &dGPUHashesPerSec, "GPU", deviceIndex),
+    : BaseMiner(chainparams, connman, &dGPUHashesPerSec, &nGPUHPSTimerStart, "GPU", deviceIndex),
       global(),
       params((std::size_t)OUTPUT_BYTES, 2, 500, 8),
       device(global.getAllDevices()[deviceIndex]),
@@ -807,6 +818,84 @@ unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
     }
     return nHashesDone;
 }
+
+void GPUMiner::IncrementHashesDone(unsigned int nHashesDone)
+{
+    static int64_t nHashCounter = 0;
+    static int64_t nLogTime = 0;
+    static CCriticalSection cs;
+
+    int64_t nTimerStart = *nHPSTimerStart;
+    if (nTimerStart == 0) {
+        LOCK(cs);
+        *nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+        return;
+    } else {
+        nHashCounter += nHashesDone;
+    }
+
+    if (GetTimeMillis() - nTimerStart > 4000) {
+        LOCK(cs);
+        *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nTimerStart);
+        *nHPSTimerStart = GetTimeMillis();
+        nHashCounter = 0;
+        if (GetTime() - nLogTime > 30 * 60) {
+            nLogTime = GetTime();
+            LogPrintf("%s hashmeter %6.0f khash/s\n", deviceName, *dHashesPerSec / 1000.0);
+        }
+    }
+}
+
+void GPUMiner::StartLoop()
+{
+    std::size_t device = deviceIndex ? *deviceIndex : 0;
+    LogPrintf("DynamicMiner%s -- started #%u\n", deviceName, device);
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
+    GetMainSignals().ScriptForMining(coinbaseScript);
+  
+    try {
+        // Throw an error if no script was provided.  This can happen
+        // due to some internal error but also if the keypool is empty.
+        // In the latter case, already the pointer is NULL.
+        if (!coinbaseScript || coinbaseScript->reserveScript.empty())
+            throw std::runtime_error("No coinbase script available (mining requires a wallet)");
+
+        while (true) {
+            std::unique_ptr<CBlockTemplate> pblocktemplate = this->CreateNewMinerBlock();
+            if (!pblocktemplate) {
+                LogPrintf("DynamicMiner%s -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n", deviceName);
+                return;
+            }
+            CBlock* pblock = &pblocktemplate->block;
+            IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+
+            LogPrintf("DynamicMiner%s -- Running miner with %u transactions in block (%u bytes)\n", deviceName, pblock->vtx.size(),
+                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+
+            // set loop start for counter
+            nStart = GetTime();
+            hashTarget = arith_uint256().SetCompact(pblock->nBits);
+            // start mining the block
+            while (true) {
+                // try mining the block
+                auto hashesDone = this->TryMineBlock(pblock);
+                // increment hash statistics
+                this->IncrementHashesDone(hashesDone);
+                // check if miner is in sync with blockchain
+                if (!this->IsBlockSynced(pblock))
+                    break;
+            }
+        }
+    } catch (const boost::thread_interrupted&) {
+        LogPrintf("DynamicMiner%s -- terminated\n", deviceName);
+        throw;
+    } catch (const std::runtime_error& e) {
+        LogPrintf("DynamicMiner%s -- runtime error: %s\n", deviceName, e.what());
+        return;
+    }
+}
 #endif // ENABLE_GPU
 
 } // namespace miners
@@ -825,15 +914,15 @@ static void DynamicMinerCPU(const CChainParams& chainparams, CConnman& connman)
     miner.StartLoop();
 }
 
-void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
+void GenerateDynamicsCPU(int nCPUThreads, const CChainParams& chainparams, CConnman& connman)
 {
-    if (nCPUThreads == 0 && nGPUThreads == 0) {
+    if (nCPUThreads == 0) {
         LogPrintf("DynamicMiner -- disabled -- CPU and GPU Threads set to zero\n");
         return;
     }
 
     int nNumCores = GetNumCores();
-    LogPrintf("DynamicMiner -- CPU Cores: %u\n", nNumCores);
+    //LogPrintf("DynamicMiner -- CPU Cores: %u\n", nNumCores);
 
     if (nCPUThreads < 0 || nCPUThreads > nNumCores)
         nCPUThreads = nNumCores;
@@ -842,13 +931,21 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
     std::size_t nCPUTarget = static_cast<std::size_t>(nCPUThreads);
     boost::thread_group* cpuMinerThreads = miners::ThreadGroup<miners::threads::CPU>();
     while (cpuMinerThreads->size() < nCPUTarget) {
-        LogPrintf("Starting CPU Miner thread #%u\n", cpuMinerThreads->size());
+        //LogPrintf("Starting CPU Miner thread #%u\n", cpuMinerThreads->size());
         cpuMinerThreads->create_thread(boost::bind(&DynamicMinerCPU, boost::cref(chainparams), boost::ref(connman)));
     }
+}
 
+void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
+{
 #ifdef ENABLE_GPU
+    if (nGPUThreads == 0) {
+        LogPrintf("DynamicMiner -- disabled -- CPU and GPU Threads set to zero\n");
+        return;
+    }
+
     std::size_t devices = GetGPUDeviceCount();
-    LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
+    //LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
 
     if (nGPUThreads < 0)
         nGPUThreads = 4;
@@ -858,7 +955,7 @@ void GenerateDynamics(int nCPUThreads, int nGPUThreads, const CChainParams& chai
     boost::thread_group* gpuMinerThreads = miners::ThreadGroup<miners::threads::GPU>();
     for (std::size_t device = 0; device < devices; device++) {
         for (std::size_t i = 0; i < nGPUTarget; i++) {
-            LogPrintf("Starting GPU Miner thread %u on device %u, total GPUs found %u\n", i, device, devices);
+            //LogPrintf("Starting GPU Miner thread %u on device %u, total GPUs found %u\n", i, device, devices);
             gpuMinerThreads->create_thread(boost::bind(&DynamicMinerGPU, boost::cref(chainparams), boost::ref(connman), device));
         }
     }

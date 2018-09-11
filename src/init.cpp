@@ -239,7 +239,7 @@ void PrepareShutdown()
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
-    GenerateDynamics(false, 0, Params(), *g_connman);
+    ShutdownMiners();
     MapPort(false);
     UnregisterValidationInterface(peerLogic.get());
     peerLogic.reset();
@@ -1853,7 +1853,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Generate coins in the background
     if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
-        GenerateDynamics(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
+        GenerateDynamicsCPU(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), chainparams, connman);
+        GenerateDynamicsGPU(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
     }
 
     // ********************************************************* Step 13: finished
