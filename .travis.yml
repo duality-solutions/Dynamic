@@ -3,11 +3,28 @@ compiler: gcc
 os: linux
 sudo: required
 dist: trusty
+sudo: required
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - [libc++-dev, gcc-5, g++-5]
+    - [libboost1.55-all-dev, libboost1.55-tools-dev]
+    - [libqt5gui5, libqt5core5a, libqt5dbus5, qttools5-dev, qttools5-dev-tools]
+    - [libprotobuf-dev, protobuf-compiler]
+    - [libcrypto++-dev, libssl-dev, libevent-dev]
+
+before_install:
+  - git submodule update --init --recursive
+
 install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y build-essential libtool autotools-dev autoconf pkg-config libssl-dev libboost-all-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libcrypto++-dev libevent-dev
   - sudo add-apt-repository -y ppa:silknetwork/silknetwork
   - sudo apt-get update -y && sudo apt-get install -y libdb4.8-dev libdb4.8++-dev
+  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+
 script:
   - ./autogen.sh && ./configure --with-gui=qt5 && make
 

@@ -238,7 +238,7 @@ RES_ICONS = \
   qt/res/icons/drk/unit_satoshis.png \
   qt/res/icons/drk/unit_udyn.png \
   qt/res/icons/drk/fontbigger.png \
-  qt/res/icons/drk/fontsmaller.png \ 
+  qt/res/icons/drk/fontsmaller.png \
   qt/res/icons/drk/verify.png \
   qt/res/icons/drk/warning.png
 

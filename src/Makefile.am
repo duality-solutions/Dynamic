@@ -454,7 +454,8 @@ dynamicd_LDADD = \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBTORRENT)
 
 if ENABLE_ZMQ
 dynamicd_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
@@ -586,6 +587,10 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
+endif
+
+if EMBEDDED_LIBTORRENT
+include Makefile.libtorrent.include
 endif
 
 if ENABLE_TESTS
