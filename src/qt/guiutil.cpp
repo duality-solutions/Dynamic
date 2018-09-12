@@ -1088,7 +1088,7 @@ void ClickableProgressBar::mouseReleaseEvent(QMouseEvent *event)
     Q_EMIT clicked(event->pos());
 }
 
-int MaxThreads() {
+int CPUMaxThreads() {
     int nThreads = boost::thread::hardware_concurrency();
 
     int nUseThreads = GetArg("-genproclimit", -1);
@@ -1098,13 +1098,13 @@ int MaxThreads() {
     return nUseThreads;
 }
 
-int64_t GetHashRate() {
-
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
-        return (int64_t)0;
-    return (int64_t)dHashesPerSec;
+int GPUMaxThreads() {
+    int nUseThreads = 1;
+    if (nUseThreads < 1) {
+        nUseThreads = 1;
+    }
+    return nUseThreads;
 }
-
 
 QString FormatHashRate(qint64 n)
 {

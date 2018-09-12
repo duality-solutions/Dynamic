@@ -140,6 +140,7 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
+  miner-gpu.h \
   miner.h \
   net.h \
   net_processing.h \
@@ -313,7 +314,6 @@ libdynamic_zmq_a_SOURCES = \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp
 endif
-
 
 # wallet: shared between dynamicd and dynamic-qt, but only linked
 # when wallet enabled
@@ -586,6 +586,10 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
+endif
+
+if ENABLE_GPU
+include Makefile.gpu.include
 endif
 
 if ENABLE_TESTS

@@ -23,7 +23,8 @@ public:
 
     enum GraphType
     {
-        MINER_HASHRATE = 0,
+        MINER_CPU_HASHRATE = 0,
+        MINER_GPU_HASHRATE,
         NETWORK_HASHRATE
     };
 
@@ -52,6 +53,7 @@ private:
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
     void truncateSampleQueue();
+    int64_t getHashRate();
 
     unsigned int iDesiredSamples;
     int64_t iMaxHashRate;

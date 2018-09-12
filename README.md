@@ -342,6 +342,19 @@ CPU's with AVX512 support:
         Skylake-X processor, 2017
         Cannonlake processor, expected in 2018
         Ice Lake processor, expected in 2018
+       
+GPU Mining
+----------
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. 
+(Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer)
+
+At configure time for non-Nvidia GPU's:
+
+    --enable-gpu --disable-cuda 
+
+At configure time for Nvidia GPU's:
+
+    --enable-gpu --enable-cuda
 
 Example Build Command
 --------------------

@@ -239,7 +239,7 @@ void PrepareShutdown()
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
-    GenerateDynamics(false, 0, Params(), *g_connman);
+    ShutdownMiners();
     MapPort(false);
     UnregisterValidationInterface(peerLogic.get());
     peerLogic.reset();
@@ -516,7 +516,10 @@ std::string HelpMessage(HelpMessageMode mode)
     {
         strUsage += HelpMessageOpt("-nodebug", "Turn off debugging messages, same as -debug=0");
     strUsage += HelpMessageOpt("-gen", strprintf(_("Generate coins (default: %u)"), DEFAULT_GENERATE));
-    strUsage += HelpMessageOpt("-genproclimit=<n>", strprintf(_("Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)"), DEFAULT_GENERATE_THREADS));
+    strUsage += HelpMessageOpt("-genproclimit=<n>", strprintf(_("Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)"), DEFAULT_GENERATE_THREADS_CPU));
+#if ENABLE_GPU
+    strUsage += HelpMessageOpt("-genproclimit-gpu=<n>", strprintf(_("Set the number of threads per GPU for coin generation if enabled (default: %d)"), DEFAULT_GENERATE_THREADS_GPU));
+#endif
     strUsage += HelpMessageOpt("-help-debug", _("Show all debugging options (usage: --help -help-debug)"));
     strUsage += HelpMessageOpt("-logips", strprintf(_("Include IP addresses in debug output (default: %u)"), DEFAULT_LOGIPS));
     strUsage += HelpMessageOpt("-logtimestamps", strprintf(_("Prepend debug output with timestamp (default: %u)"), DEFAULT_LOGTIMESTAMPS));
@@ -1849,7 +1852,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError(strNodeError);
 
     // Generate coins in the background
-    GenerateDynamics(GetBoolArg("-gen", DEFAULT_GENERATE), GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams, connman);
+    if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
+        GenerateDynamicsCPU(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), chainparams, connman);
+        GenerateDynamicsGPU(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
+    }
 
     // ********************************************************* Step 13: finished
 
