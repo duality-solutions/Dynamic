@@ -782,6 +782,7 @@ GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size
 
 unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
 {
+    uint32_t startNonce = pblock->nNonce;
     unsigned int nHashesDone = 0;
     // current batch size
     std::size_t batchSize = batchSizeTarget;
@@ -812,6 +813,7 @@ unsigned int GPUMiner::TryMineBlock(CBlock* pblock)
     for (std::size_t i = 0; i < batchSize; i++) {
         processingUnit.getHash(i, (uint8_t*)&hash);
         if (UintToArith256(hash) <= hashTarget) {
+            pblock->nNonce = startNonce + i;
             this->ProcessFoundSolution(pblock, hash);
             break;
         }
