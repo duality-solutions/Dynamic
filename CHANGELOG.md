@@ -3,6 +3,70 @@
 
 **Dynamic v2.4.0.0**
 
+* [GPU] Fix GPU found block nonce before ProcessFoundSolution
+* [GPU] Update README for GPU Mining
+* [GPU] Seperate CPU and GPU miners to fix hashmeters
+* [GPU] Fix Qt mining page layout so it expands
+* [GPU] Fixes to miner UI controls
+* [GPU] Hide slider until sync completes/change batch size
+* [GPU] Split CPU/GPU UI thread allocation
+* [GPU] fix global and order members as they appear in initializer
+* [GPU] fix processingUnit batch size and minor code tweaks
+* [GPU] fix autoreplace
+* [GPU] move implementations out of definitions
+* [GPU] fix const char* instead of std::string
+* [GPU] fix unique_ptr null check
+* [GPU] remove redundant comments and whitespace
+* [GPU] fix thread names
+* [GPU] remove redundant comments and whitespace
+* [GPU] follow pattern and add this->
+* [GPU] remove redundant DynamicMiner function
+* [GPU] explicit boost::none for boost::bind
+* [GPU] fix boost::optional no value_or method error
+* [GPU] reorder constructor initialization
+* [GPU] move constructor code to base
+* [GPU] move hashTarget to protected variables
+* [GPU] fix non-pointer operand
+* [GPU] move protected variables
+* [GPU] fix CPUMiner constructor
+* [GPU] track chain tip
+* [GPU] remove name collison
+* [GPU] add device index to base class
+* [GPU] provide pblock to LoopChecks
+* [GPU] remove unused template from BaseMiner
+* [GPU] remove static from StartLoop
+* [GPU] c++11 compatibility
+* [GPU] cleanup thread constructor
+* [GPU] remove unused assignment
+* [GPU] nullptr comparisons
+* [GPU] use boost::shared_ptr as expected
+* [GPU] move transactionsUdatedLast to base class
+* [GPU] enable_gpu ifdef
+* [GPU] fix miner start loop call
+* [GPU] rename namespace to miners
+* [GPU] move threads to namespace
+* [GPU] fix ptr ptr semantics
+* [GPU] fix count hashes function params
+* [GPU] mark function as override
+* [GPU] bring back enable_gpu ifdef
+* [GPU] rename processing unit
+* [GPU] remove static from thread_group
+* [GPU] fix optional dereference
+* [GPU] rename check function and fix breaks
+* [GPU] use shared_ptr to manage thread_group ptr
+* [GPU] Refactor miners code
+* [GPU] Process hashes in batches
+* [GPU] Remove obvious type hint
+* [GPU] Device get total memory method
+* [GPU] OpenCL kernel static build rule
+* [GPU] Remove unsigned and signed int comparison
+* [GPU] Mac build fix attempt
+* [GPU] Disable CUDA in Travis
+* [GPU] Fix autoconf warnings
+* [GPU] Apple OpenCL linker flags
+* [GPU] Implement GPU Mining for both Daemon/Qt
+* [GPU] Split CUDA and OpenCL libraries
+* [GPU] Add CUDA/OpenCL Libraries for GPU Mining
 * Remove unused serialization method
 * Fix consts in txmempool
 * [depends] upgrade boost to 1.67.0
