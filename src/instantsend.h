@@ -30,7 +30,7 @@ extern CInstantSend instantsend;
 static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 11;
 static const int DEFAULT_INSTANTSEND_DEPTH          = 10;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION      = 70600;
+static const int MIN_INSTANTSEND_PROTO_VERSION      = 70900;
 
 // For how long we are going to accept votes/locks
 // after we saw the first one for a specific transaction

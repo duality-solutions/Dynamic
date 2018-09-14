@@ -3,6 +3,7 @@
 
 **Dynamic v2.4.0.0**
 
+* Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
 * [GPU] Fix GPU found block nonce before ProcessFoundSolution
 * [GPU] Update README for GPU Mining
 * [GPU] Seperate CPU and GPU miners to fix hashmeters
@@ -156,6 +157,7 @@
 * Use correct protocol when serializing messages in reply to
 * Bump Versioning
 * Update dynamic_qt.m4 (Remove ability to build with Qt4)
+
 
 **Dynamic v2.3.0.0**
 
@@ -334,6 +336,7 @@
 * Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
@@ -356,6 +359,7 @@
 * Update secp256k1
 * Fix fixed seeds
 * Update CHANGELOG
+
 
 **Dynamic v2.1.0.0**
 
@@ -441,6 +445,7 @@
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
 * Update CHANGELOG
+
 
 **Dynamic v2.0.0.0**
 
@@ -713,6 +718,7 @@
 * Optimize CheckOutpoint
 * Update CHANGELOG
 
+
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values
@@ -775,6 +781,7 @@
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.2**
 
 * [Sync] Fix issue with headers first sync
@@ -787,10 +794,12 @@
 * Bump Governance/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 * Update CHANGELOG
+
 
 **Dynamic v1.3.0.0**
 
@@ -798,6 +807,7 @@
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 * Update CHANGELOG
+
 
 **Dynamic v1.2.0.0**
 
@@ -841,6 +851,7 @@
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
 * Update CHANGELOG
+
 
 **Dynamic v1.1.0.0**
 
