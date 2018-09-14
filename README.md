@@ -362,10 +362,10 @@ At configure time for Nvidia GPU's:
 
 Example Build Command
 --------------------
-Qt Wallet and Deamon, CLI version build:
+Qt Wallet and Deamon, CLI version build without GPU support:
 
-    ./autogen.sh && ./configure --with-gui && make
+    ./autogen.sh && ./configure --with-gui --disable-gpu && make
 
-CLI and Deamon Only Buld:
+CLI and Deamon Only build without GPU support:
 
-    ./autogen.sh && ./configure --without-gui && make
+    ./autogen.sh && ./configure --without-gui --disable-gpu && make
