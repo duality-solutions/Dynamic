@@ -7,6 +7,7 @@
 
 #include "bdap/domainentry.h"
 #include "dbwrapper.h"
+#include "sync.h"
 
 static CCriticalSection cs_bdap_entry;
 
