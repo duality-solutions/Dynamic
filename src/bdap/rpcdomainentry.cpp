@@ -147,21 +147,21 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     return oName;
 }
 
-UniValue adddomainentry(const JSONRPCRequest& request) 
+UniValue adduser(const JSONRPCRequest& request) 
 {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("adddomainentry <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
+        throw std::runtime_error("adduser <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
     }
     BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
     return AddDomainEntry(request, bdapType);
 }
 
-UniValue getdomainusers(const JSONRPCRequest& request) 
+UniValue getusers(const JSONRPCRequest& request) 
 {
     if (request.params.size() > 2) 
     {
-        throw std::runtime_error("getdomainusers <records per page> <page returned>\nLists all BDAP public users.\n");
+        throw std::runtime_error("getusers <records per page> <page returned>\nLists all BDAP public users.\n");
     }
     
     unsigned int nRecordsPerPage = 100;
@@ -183,11 +183,11 @@ UniValue getdomainusers(const JSONRPCRequest& request)
     return oDomainEntryList;
 }
 
-UniValue getdomaingroups(const JSONRPCRequest& request) 
+UniValue getgroups(const JSONRPCRequest& request) 
 {
     if (request.params.size() > 2) 
     {
-        throw std::runtime_error("getdomainugroups <records per page> <page returned>\nLists all BDAP public groups.\n");
+        throw std::runtime_error("getgroups <records per page> <page returned>\nLists all BDAP public groups.\n");
     }
     
     unsigned int nRecordsPerPage = 100;
@@ -209,11 +209,11 @@ UniValue getdomaingroups(const JSONRPCRequest& request)
     return oDomainEntryList;
 }
 
-UniValue getdomainuserinfo(const JSONRPCRequest& request) 
+UniValue getuserinfo(const JSONRPCRequest& request) 
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getdomainuserinfo <public name>\nList BDAP entry.\n");
+        throw std::runtime_error("getuserinfo <public name>\nList BDAP entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
@@ -237,11 +237,11 @@ UniValue getdomainuserinfo(const JSONRPCRequest& request)
     return oDomainEntryInfo;
 }
 
-UniValue getdomaingroupinfo(const JSONRPCRequest& request) 
+UniValue getgroupinfo(const JSONRPCRequest& request) 
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getdomaingroupinfo <public group>\nList BDAP entry.\n");
+        throw std::runtime_error("getgroupinfo <public group>\nList BDAP entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
@@ -255,11 +255,11 @@ UniValue getdomaingroupinfo(const JSONRPCRequest& request)
     UniValue oDomainEntryInfo(UniValue::VOBJ);
     if (CheckDomainEntryDB()) {
         if (!pDomainEntryDB->GetDomainEntryInfo(directory.vchFullObjectPath(), oDomainEntryInfo)) {
-            throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
+            throw std::runtime_error("BDAP_SELECT_PUBLIC_GROUP_RPC_ERROR: ERRCODE: 3600 - " + directory.GetFullObjectPath() + _(" can not be found.  Get info failed!"));
         }
     }
     else {
-        throw std::runtime_error("BDAP_SELECT_PUBLIC_USER_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
+        throw std::runtime_error("BDAP_SELECT_PUBLIC_GROUP_RPC_ERROR: ERRCODE: 3601 - " + _("Can not access BDAP LevelDB database.  Get info failed!"));
     }
 
     return oDomainEntryInfo;
@@ -285,12 +285,12 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     // Check if name already exists
     if (!GetDomainEntry(txPreviousEntry.vchFullObjectPath(), txPreviousEntry))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3700 - " + txPreviousEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3700 - " + txPreviousEntry.GetFullObjectPath() + _(" does not exists.  Can not update."));
 
     int nIn = GetBDAPOperationOutIndex(txPreviousEntry.nHeight, txPreviousEntry.txHash);
     COutPoint outpoint = COutPoint(txPreviousEntry.txHash, nIn);
     if(pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE)
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txPreviousEntry.GetFullObjectPath() + _(" entry.  Can not update."));
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3701 - You do not own the " + txPreviousEntry.GetFullObjectPath() + _(" entry.  Can not update."));
 
     CDomainEntry txUpdatedEntry = txPreviousEntry;
     CharString vchCommonName = vchFromValue(request.params[1]);
@@ -330,14 +330,14 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
 
     SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txUpdatedEntry, oName))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_NAME_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
@@ -354,20 +354,20 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     return oName;
 }
 
-UniValue updatedomainuser(const JSONRPCRequest& request) {
+UniValue updateuser(const JSONRPCRequest& request) {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("updatedomainuser <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("updateuser <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
     return UpdateDomainEntry(request, bdapType);
 }
 
-UniValue updatedomaingroup(const JSONRPCRequest& request) {
+UniValue updategroup(const JSONRPCRequest& request) {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("updatedomaingroup <groupid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("updategroup <groupid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
@@ -452,20 +452,20 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     return oName;
 }
 
-UniValue deletedomainuser(const JSONRPCRequest& request) {
+UniValue deleteuser(const JSONRPCRequest& request) {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("deletedomainuser <userid>\nDelete an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("deleteuser <userid>\nDelete an existing public name blockchain directory entry.\n");
     }
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
     return DeleteDomainEntry(request, bdapType);
 }
 
-UniValue deletedomaingroup(const JSONRPCRequest& request) {
+UniValue deletegroup(const JSONRPCRequest& request) {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("deletedomaingroup <groupid>\nDelete an existing public name blockchain directory entry.\n");
+        throw std::runtime_error("deletegroup <groupid>\nDelete an existing public name blockchain directory entry.\n");
     }
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
@@ -507,11 +507,11 @@ UniValue makekeypair(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue adddomaingroup(const JSONRPCRequest& request) 
+UniValue addgroup(const JSONRPCRequest& request) 
 {
     if (request.params.size() < 2 || request.params.size() > 3) 
     {
-        throw std::runtime_error("adddomaingroup <groupid> <common name> <registration days>\nAdd public group entry to blockchain directory.\n");
+        throw std::runtime_error("addgroup <groupid> <common name> <registration days>\nAdd public group entry to blockchain directory.\n");
     }
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
@@ -522,16 +522,16 @@ static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "adddomainentry",           &adddomainentry,               true  },
-    { "bdap",            "getdomainusers",           &getdomainusers,               true  },
-    { "bdap",            "getdomaingroups",          &getdomaingroups,              true  },
-    { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true  },
-    { "bdap",            "updatedomainuser",         &updatedomainuser,             true  },
-    { "bdap",            "updatedomaingroup",        &updatedomaingroup,            true  },
-    { "bdap",            "deletedomainuser",         &deletedomainuser,             true  },
-    { "bdap",            "deletedomaingroup",        &deletedomaingroup,            true  },
-    { "bdap",            "adddomaingroup",           &adddomaingroup,               true  },
-    { "bdap",            "getdomaingroupinfo",       &getdomaingroupinfo,           true  },
+    { "bdap",            "adduser",                  &adduser,                      true  },
+    { "bdap",            "getusers",                 &getusers,                     true  },
+    { "bdap",            "getgroups",                &getgroups,                    true  },
+    { "bdap",            "getuserinfo",              &getuserinfo,                  true  },
+    { "bdap",            "updateuser",               &updateuser,                   true  },
+    { "bdap",            "updategroup",              &updategroup,                  true  },
+    { "bdap",            "deleteuser",               &deleteuser,                   true  },
+    { "bdap",            "deletegroup",              &deletegroup,                  true  },
+    { "bdap",            "addgroup",                 &addgroup,                     true  },
+    { "bdap",            "getgroupinfo",             &getgroupinfo,                 true  },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true  },
 };
