@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue bdap
+DIST_SUBDIRS = secp256k1 univalue libtorrent
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -10,6 +10,11 @@ DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPP
 
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/ed25519/src
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/aux_
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/extensions
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/kademlia
 
 LIBDYNAMIC_SERVER=libdynamic_server.a
 LIBDYNAMIC_WALLET=libdynamic_wallet.a
@@ -20,6 +25,7 @@ LIBDYNAMIC_CRYPTO=crypto/libdynamic_crypto.a
 LIBDYNAMICQT=qt/libdynamicqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
+#LIBTORRENT=libtorrent/librasterbar.a
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
@@ -106,6 +112,7 @@ DYNAMIC_CORE_H = \
   bdap/entrycheckpoints.h \
   bdap/entrylink.h \
   bdap/identity.h \
+  bdap/keyed25519.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -241,6 +248,7 @@ libdynamic_server_a_SOURCES = \
   bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
   bdap/identity.cpp \
+  bdap/keyed25519.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\

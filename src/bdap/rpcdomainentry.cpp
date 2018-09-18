@@ -10,6 +10,7 @@
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
 #include "validation.h"
+#include "bdap/keyed25519.h"
 
 #include <univalue.h>
 

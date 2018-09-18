@@ -2,10 +2,8 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-LIBTORRENT_INT = libtorrent/rasterbar.a
-
+LIBTORRENT_INT = libtorrent/librasterbar.a
 EXTRA_LIBRARIES += $(LIBTORRENT_INT)
-
 LIBTORRENT += $(LIBTORRENT_INT)
 
 LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include
@@ -21,11 +19,11 @@ if TARGET_WINDOWS
 LIBTORRENT_CPPFLAGS_INT += -DWIN32_LEAN_AND_MEAN -D__USE_W32_SOCKETS -DWIN32 -D_WIN32 -D__USE_MINGW_ANSI_STDIO=1
 endif
 
-libtorrent_rasterbar_a_CPPFLAGS = $(CPPFLAGS) $(LIBTORRENT_CPPFLAGS_INT) $(LIBTORRENT_CPPFLAGS)
-libtorrent_rasterbar_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
+libtorrent_librasterbar_a_CPPFLAGS = $(CPPFLAGS) $(LIBTORRENT_CPPFLAGS_INT) $(LIBTORRENT_CPPFLAGS)
+libtorrent_librasterbar_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
 
 
-libtorrent_rasterbar_a_SOURCES=                     \
+libtorrent_librasterbar_a_SOURCES= \
   libtorrent/include/libtorrent/*.hpp               \
   libtorrent/include/libtorrent/aux_/*.hpp          \
   libtorrent/include/libtorrent/extensions/*.hpp    \
@@ -120,7 +118,9 @@ libtorrent_rasterbar_a_SOURCES=                     \
   libtorrent/src/session_udp_sockets.cpp            \
   libtorrent/src/proxy_settings.cpp                 \
   libtorrent/src/settings_pack.cpp                  \
+  libtorrent/src/sha1.cpp                           \
   libtorrent/src/sha1_hash.cpp                      \
+  libtorrent/src/sha512.cpp                         \
   libtorrent/src/smart_ban.cpp                      \
   libtorrent/src/socket_io.cpp                      \
   libtorrent/src/socket_type.cpp                    \
