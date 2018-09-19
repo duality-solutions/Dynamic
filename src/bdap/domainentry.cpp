@@ -375,6 +375,8 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid BDAP encryption public key. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
         return false;
     }
+    //TODO (BDAP): validate Ed25519 public key if possible.
+    /*
     else {
         if (EncryptPublicKey.size() > 0) {
             CPubKey entryEncryptPublicKey(EncryptPublicKey);
@@ -384,7 +386,7 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
             }
         }
     }
-
+    */
     return true;
 }
 
@@ -435,7 +437,7 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("object_type", entry.ObjectTypeString()));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
-        oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
+        oName.push_back(Pair("encryption_publickey", stringFromVch(entry.EncryptPublicKey)));
         oName.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
         if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {

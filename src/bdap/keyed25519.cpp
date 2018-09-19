@@ -4,16 +4,20 @@
 
 #include "keyed25519.h"
 
+#include "random.h"
+#include "bdap/domainentry.h"
+#include "util.h"
+
+#include <libtorrent/ed25519.hpp>
+#include <libtorrent/hex.hpp>
+#include <libtorrent/kademlia/ed25519.hpp>
+#include <libtorrent/kademlia/types.hpp>
+
 #include <array>
-
-#include "libtorrent/hasher512.hpp"
-#include "libtorrent/kademlia/ed25519.hpp"
-#include "libtorrent/kademlia/types.hpp"
-
 #include <assert.h>
 #include <tuple>
 
-using namespace libtorrent::dht;
+using namespace libtorrent;
 
 struct ed25519_context
 {
@@ -41,29 +45,32 @@ bool CKeyEd25519::Check(const unsigned char *vch)
 // TODO (BDAP): Support compressed Ed25519 keys
 void CKeyEd25519::MakeNewKeyPair()
 {
-    std::tuple<libtorrent::dht::public_key, libtorrent::dht::secret_key> newKeyPair;
-    newKeyPair = ed25519_create_keypair(ed25519_context_sign->seed);
-	// Load the new ed25519 private key
+    // Load seed
+    std::array<char, 32> seed;
+    if (ed25519_context_sign == NULL || sizeof(ed25519_context_sign->seed) == 0) {
+        LogPrintf("CKeyEd25519::MakeNewKeyPair -- created new seed.\n");
+        seed = dht::ed25519_create_seed();
+    }
+    else {
+        seed = ed25519_context_sign->seed;
+    }
+    // Load the new ed25519 private key
+    std::tuple<dht::public_key, dht::secret_key> newKeyPair = dht::ed25519_create_keypair(seed); 
     {
-        secret_key privateKey = std::get<1>(newKeyPair);
+        dht::secret_key privateKey = std::get<1>(newKeyPair);
         std::vector<unsigned char> vchPrivateKey;
-        for (std::size_t i{0}; i < sizeof(privateKey); ++i) {
-            unsigned char charValue = static_cast<unsigned char>(privateKey.bytes[i]);
-            vchPrivateKey.push_back(charValue);
-        }
-        Set(vchPrivateKey.begin(), vchPrivateKey.end(), false);
+        std::string strPrivateKey = aux::to_hex(privateKey.bytes);
+        vchPrivateKey = vchFromString(strPrivateKey);
+        memcpy(keyData.data(), &vchPrivateKey[0], vchPrivateKey.size());
+        //LogPrintf("CKeyEd25519::MakeNewKeyPair -- vchPrivateKey = %s, size = %u\n", stringFromVch(vchPrivateKey), vchPrivateKey.size());
     }
-	// Load the new ed25519 public key
+    // Load the new ed25519 public key
     {
-        public_key publicKey = std::get<0>(newKeyPair);
-        std::vector<unsigned char> vchPublicKey;
-        for (std::size_t i{0}; i < sizeof(publicKey); ++i) {
-            unsigned char charValue = static_cast<unsigned char>(publicKey.bytes[i]);
-            vchPublicKey.push_back(charValue);
-        }
-        SetPubKey(vchPublicKey.begin(), vchPublicKey.end());
+        dht::public_key publicKey = std::get<0>(newKeyPair);
+        std::string strPublicKey = aux::to_hex(publicKey.bytes);
+        publicKeyData = vchFromString(strPublicKey);
+        //LogPrintf("CKeyEd25519::MakeNewKeyPair -- vchPublicKey = %s, size = %u\n", stringFromVch(publicKeyData), publicKeyData.size());
     }
-    fValid = true;
 }
 
 void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen) 
@@ -78,11 +85,10 @@ void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen)
 void ECC_Ed25519_Start() 
 {
     assert(ed25519_context_sign == NULL);
-
     ed25519_context* ctx = new ed25519_context();
     assert(ctx != NULL);
     {
-        ctx->seed = ed25519_create_seed();
+        ctx->seed = dht::ed25519_create_seed();
     }
     ed25519_context_sign = ctx;
 }
@@ -100,6 +106,7 @@ bool ECC_Ed25519_InitSanityCheck()
 void ECC_Ed25519_Stop() 
 {
     ed25519_context *ctx = ed25519_context_sign;
+    //ctx->seed = NULL;
     ed25519_context_sign = NULL;
     assert(ctx == NULL);
 }

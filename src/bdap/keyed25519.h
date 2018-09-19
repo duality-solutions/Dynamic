@@ -66,10 +66,7 @@ private:
     {
         if (size_t(pend - pbegin) != publicKeyData.size())
             return;
-
-        if (Check(&pbegin[0])) {
-            memcpy(publicKeyData.data(), (unsigned char*)&pbegin[0], publicKeyData.size());
-        }
+        memcpy(publicKeyData.data(), (unsigned char*)&pbegin[0], publicKeyData.size());
     }
 
 public:
@@ -111,7 +108,10 @@ public:
     unsigned int size() const { return (fValid ? keyData.size() : 0); }
     const unsigned char* begin() const { return keyData.data(); }
     const unsigned char* end() const { return keyData.data() + size(); }
-
+    
+    unsigned int PubKeySize() const { return publicKeyData.size(); }
+    const unsigned char* PubKeyBegin() const { return publicKeyData.data(); }
+    const unsigned char* PubKeyEnd() const { return publicKeyData.data() + PubKeySize(); }
 
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }
@@ -130,17 +130,15 @@ public:
      * This is expensive. 
      */
     CPrivKeyEd25519 GetPrivKey() const;
-    /**
-     * Convert the private key to a CPrivKeyEd25519 (serialized OpenSSL private key data).
-     * This is expensive.
-     */
-    //secret_key GetDHTPrivKey() const;
 
+    //std::vector<unsigned char> GetDHTPrivKey() const { return keyData; }
+
+    std::vector<unsigned char> GetPubKey() const { return publicKeyData; }
     /**
      * Compute the public key from a private key.
      * This is expensive.
      */
-    //public_key GetPubKey() const;
+    // CPubKeyEd25519 GetPubKey() const;
 
     void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
     /**

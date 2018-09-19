@@ -4,13 +4,13 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/keyed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
 #include "validation.h"
-#include "bdap/keyed25519.h"
 
 #include <univalue.h>
 
@@ -67,15 +67,16 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     txDomainEntry.WalletAddress = vchWalletAddress;
 
     // TODO: Add ability to pass in the encryption public key
-    CKey privEncryptKey;
-    privEncryptKey.MakeNewKey(true);
-    CPubKey pubEncryptKey = privEncryptKey.GetPubKey();
-    std::string strPrivateEncryptKey = CDynamicSecret(privEncryptKey).ToString();
-    CharString vchEncryptPriKey(strPrivateEncryptKey.begin(), strPrivateEncryptKey.end());
-    CharString vchEncryptPubKey(pubEncryptKey.begin(), pubEncryptKey.end());
-    if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
-
+    // TODO: Consider renaming to DHTPublicKey since it is used to add/modify entries in the DHT and encrypt/decrypt data stored in the DHT & blockchain.
+    // TODO: Add Ed25519 private key to wallet.  Make sure it uses the same seed as secpk256k1
+    CKeyEd25519 privEncryptKey;
+    privEncryptKey.MakeNewKeyPair();
+    //CharString vchEncryptPriKey = privEncryptKey.GetDHTPrivKey();
+    CharString vchEncryptPubKey = privEncryptKey.GetPubKey();
+    //if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
+    //    throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
+    //std::string strPrivateEncryptKey = stringFromVch(vchEncryptPriKey);
+    LogPrintf("AddDomainEntry -- vchEncryptPubKey = %s\n", stringFromVch(vchEncryptPubKey));
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
 
     // TODO: Add ability to pass in the link address
@@ -142,7 +143,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
     }
 
     return oName;
@@ -349,7 +350,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
     }
 
     return oName;
@@ -447,7 +448,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), HexStr(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
     }
 
     return oName;
