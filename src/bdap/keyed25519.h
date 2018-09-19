@@ -8,8 +8,38 @@
 
 #include <cstring>
 
-//struct secret_key;
-//struct public_key;
+struct ed25519_context
+{
+    ed25519_context() = default;
+
+    explicit ed25519_context(char const* b)
+    { std::copy(b, b + len, seed.begin()); }
+
+    bool operator==(ed25519_context const& rhs) const
+    { return seed == rhs.seed; }
+
+    bool operator!=(ed25519_context const& rhs) const
+    { return seed != rhs.seed; }
+
+    constexpr static int len = 32;
+
+    std::array<char, len> seed;
+    
+    void SetNull() 
+    {
+        std::fill(seed.begin(),seed.end(),0);
+    }
+
+    bool IsNull()
+    {
+        for(int i=0;i<len;i++) {
+            if (seed[i] != 0) {
+                return false;
+            }
+        }
+        return true; 
+    }
+};
 
 /** 
  * ed25519:

@@ -19,19 +19,6 @@
 
 using namespace libtorrent;
 
-struct ed25519_context
-{
-    ed25519_context() = default;
-    explicit ed25519_context(char const* b)
-    { std::copy(b, b + len, seed.begin()); }
-    bool operator==(ed25519_context const& rhs) const
-    { return seed == rhs.seed; }
-    bool operator!=(ed25519_context const& rhs) const
-    { return seed != rhs.seed; }
-    constexpr static int len = 32;
-    std::array<char, len> seed;
-};
-
 static ed25519_context* ed25519_context_sign = NULL;
 
 // TODO (BDAP): Implement check Ed25519 keys
@@ -47,12 +34,14 @@ void CKeyEd25519::MakeNewKeyPair()
 {
     // Load seed
     std::array<char, 32> seed;
-    if (ed25519_context_sign == NULL || sizeof(ed25519_context_sign->seed) == 0) {
-        LogPrintf("CKeyEd25519::MakeNewKeyPair -- created new seed.\n");
+    if (ed25519_context_sign == NULL || sizeof(ed25519_context_sign->seed) == 0 || ed25519_context_sign->IsNull()) {
+        //LogPrintf("CKeyEd25519::MakeNewKeyPair -- created new seed.\n");
         seed = dht::ed25519_create_seed();
     }
     else {
         seed = ed25519_context_sign->seed;
+        std::string strSeed = aux::to_hex(seed);
+        //LogPrintf("CKeyEd25519::MakeNewKeyPair -- used existing seed = %s.\n", strSeed);
     }
     // Load the new ed25519 private key
     std::tuple<dht::public_key, dht::secret_key> newKeyPair = dht::ed25519_create_keypair(seed); 
@@ -89,6 +78,8 @@ void ECC_Ed25519_Start()
     assert(ctx != NULL);
     {
         ctx->seed = dht::ed25519_create_seed();
+        std::string strSeed = aux::to_hex(ctx->seed);
+        //LogPrintf("ECC_Ed25519_Start -- new seed created = %s.\n", strSeed);
     }
     ed25519_context_sign = ctx;
 }
@@ -106,7 +97,11 @@ bool ECC_Ed25519_InitSanityCheck()
 void ECC_Ed25519_Stop() 
 {
     ed25519_context *ctx = ed25519_context_sign;
-    //ctx->seed = NULL;
+    std::string strSeed = aux::to_hex(ctx->seed);
+    //LogPrintf("ECC_Ed25519_Stop -- before null seed = %s.\n", strSeed);
+    ctx->SetNull();
     ed25519_context_sign = NULL;
-    assert(ctx == NULL);
+    strSeed = aux::to_hex(ctx->seed);
+    //LogPrintf("ECC_Ed25519_Stop -- after null seed = %s.\n", strSeed);
+    assert(ed25519_context_sign == NULL);
 }
