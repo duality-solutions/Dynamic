@@ -161,7 +161,7 @@ public:
      */
     CPrivKeyEd25519 GetPrivKey() const;
 
-    //std::vector<unsigned char> GetDHTPrivKey() const { return keyData; }
+    std::vector<unsigned char> GetDHTPrivKey() const;
 
     std::vector<unsigned char> GetPubKey() const { return publicKeyData; }
     /**

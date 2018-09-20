@@ -7,9 +7,6 @@ EXTRA_LIBRARIES += $(LIBTORRENT_INT)
 LIBTORRENT += $(LIBTORRENT_INT)
 
 LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include
-LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include/aux_
-LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include/extensions
-LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/include/kademlia
 LIBTORRENT_CPPFLAGS += -I$(srcdir)/libtorrent/ed25519/src
 
 LIBTORRENT_CPPFLAGS_INT =
@@ -22,13 +19,7 @@ endif
 libtorrent_librasterbar_a_CPPFLAGS = $(CPPFLAGS) $(LIBTORRENT_CPPFLAGS_INT) $(LIBTORRENT_CPPFLAGS)
 libtorrent_librasterbar_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
 
-
 libtorrent_librasterbar_a_SOURCES= \
-  libtorrent/include/libtorrent/*.hpp               \
-  libtorrent/include/libtorrent/aux_/*.hpp          \
-  libtorrent/include/libtorrent/extensions/*.hpp    \
-  libtorrent/include/libtorrent/kademlia/*.hpp      \
-  libtorrent/ed25519/src/*.h                        \
   libtorrent/src/web_connection_base.cpp            \
   libtorrent/src/alert.cpp                          \
   libtorrent/src/alert_manager.cpp                  \
@@ -284,15 +275,6 @@ LIBTORRENT_DOCS_PAGES = \
   libtorrent/docs/reference.html                    \
   libtorrent/docs/single-page-ref.html
 
-LIBTORRENT_ED25519_SOURCE = \
-  libtorrent/ed25519/readme.md                      \
-  libtorrent/ed25519/test.c                         \
-  libtorrent/ed25519/src/fe.h                       \
-  libtorrent/ed25519/src/fixedint.h                 \
-  libtorrent/ed25519/src/ge.h                       \
-  libtorrent/ed25519/src/precomp_data.h             \
-  libtorrent/ed25519/src/sc.h
-
 LIBTORRENT_EXTRA_DIST = \
   libtorrent/Jamfile                                \
   libtorrent/Jamroot.jam                            \
@@ -301,5 +283,4 @@ LIBTORRENT_EXTRA_DIST = \
   libtorrent/LICENSE                                \
   libtorrent/README.rst                             \
   $(LIBTORRENT_DOCS_PAGES)                          \
-  $(LIBTORRENT_DOCS_IMAGES)                         \
-  $(LIBTORRENT_ED25519_SOURCE)
+  $(LIBTORRENT_DOCS_IMAGES)

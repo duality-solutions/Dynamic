@@ -19,6 +19,7 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "bdap/domainentrydb.h"
+#include "dht/keyed25519.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -336,6 +337,7 @@ void Shutdown()
 #endif
     globalVerifyHandle.reset();
     ECC_Stop();
+    ECC_Ed25519_Stop();
     LogPrintf("%s: done\n", __func__);
 }
 
@@ -1189,6 +1191,7 @@ bool AppInitSanityChecks()
 
     // Initialize elliptic curve code
     ECC_Start();
+    ECC_Ed25519_Start();
     globalVerifyHandle.reset(new ECCVerifyHandle());
 
     // Sanity check

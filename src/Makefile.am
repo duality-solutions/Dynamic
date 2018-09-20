@@ -6,15 +6,10 @@ AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
 DYNAMIC_CONFIG_INCLUDES=-I$(builddir)/config
-DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(LIBTORRENT_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
-DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/ed25519/src
-DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include
-DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/aux_
-DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/extensions
-DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include/kademlia
 
 LIBDYNAMIC_SERVER=libdynamic_server.a
 LIBDYNAMIC_WALLET=libdynamic_wallet.a
@@ -25,13 +20,16 @@ LIBDYNAMIC_CRYPTO=crypto/libdynamic_crypto.a
 LIBDYNAMICQT=qt/libdynamicqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 LIBUNIVALUE=univalue/libunivalue.la
-#LIBTORRENT=libtorrent/librasterbar.a
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 $(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+if EMBEDDED_LIBTORRENT
+include Makefile.libtorrent.include
+endif
 
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
@@ -112,8 +110,8 @@ DYNAMIC_CORE_H = \
   bdap/entrycheckpoints.h \
   bdap/entrylink.h \
   bdap/identity.h \
-  bdap/keyed25519.h \
   dbwrapper.h \
+  dht/keyed25519.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
@@ -248,8 +246,8 @@ libdynamic_server_a_SOURCES = \
   bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
   bdap/identity.cpp \
-  bdap/keyed25519.cpp \
   dbwrapper.cpp \
+  dht/keyed25519.cpp \
   dynode.cpp \
   dynode-payments.cpp\
   dynode-sync.cpp \
@@ -507,7 +505,8 @@ dynamic_tx_LDADD = \
   $(LIBDYNAMIC_COMMON) \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1)  \
+  $(LIBTORRENT)
 
 dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
@@ -595,10 +594,6 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
-endif
-
-if EMBEDDED_LIBTORRENT
-include Makefile.libtorrent.include
 endif
 
 if ENABLE_TESTS

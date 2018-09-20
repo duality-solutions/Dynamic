@@ -71,6 +71,13 @@ void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen)
     return;
 }
 
+std::vector<unsigned char> CKeyEd25519::GetDHTPrivKey() const
+{
+    std::vector<unsigned char> vchPrivateKey;
+    memcpy(vchPrivateKey.data(), &keyData[0], keyData.size());
+    return vchPrivateKey;
+}
+
 void ECC_Ed25519_Start() 
 {
     assert(ed25519_context_sign == NULL);
