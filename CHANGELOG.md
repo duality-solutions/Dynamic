@@ -3,6 +3,7 @@
 
 **Dynamic v2.3.5.0**
 
+* Fix crash bug with duplicate inputs within a transaction
 * Reduces memory usage and blockchain size on disk
 * Bump client version to v2.3.5 and minimum protocol version to 70800 (v2.2)
 * [Fluid] Refactor fluid code and remove index database
