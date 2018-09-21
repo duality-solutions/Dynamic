@@ -1,8 +1,8 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#ifndef DYNAMIC_BDAP_KEYED25519_H
-#define DYNAMIC_BDAP_KEYED25519_H
+#ifndef DYNAMIC_DHT_KEYED25519_H
+#define DYNAMIC_DHT_KEYED25519_H
 
 #include "support/allocators/secure.h"
 
@@ -203,4 +203,4 @@ bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();
 void ECC_Ed25519_Stop();
 
-#endif // DYNAMIC_BDAP_KEYED25519_H
+#endif // DYNAMIC_DHT_KEYED25519_H
