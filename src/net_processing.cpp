@@ -1878,7 +1878,10 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 return error("invalid header received");
             }
         }
-
+        if (!pindexLast) {
+            LogPrintf("*** ProcessMessage Error -- ProcessNewBlockHeaders returned an invalid pindexLast.  Avoid assert(pindexLast);\n");
+            return error("ProcessNewBlockHeaders returned an invalid pindexLast.");
+        }
         {
         LOCK(cs_main);
         CNodeState *nodestate = State(pfrom->GetId());
