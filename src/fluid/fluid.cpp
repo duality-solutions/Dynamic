@@ -23,11 +23,39 @@ CFluid fluid;
 extern CWallet* pwalletMain;
 #endif //ENABLE_WALLET
 
-bool IsTransactionFluid(CScript txOut) {
+bool IsTransactionFluid(const CScript& txOut) {
     return (txOut.IsProtocolInstruction(MINT_TX)
             || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX)
             || txOut.IsProtocolInstruction(MINING_MODIFY_TX)
            );
+}
+
+bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript) 
+{
+    for (const CTxOut& txout : tx.vout) {
+        CScript txOut = txout.scriptPubKey;
+        if (IsTransactionFluid(txOut)) {
+            fluidScript = txOut;
+            return true;
+        }
+    }
+    return false;
+}
+
+int GetFluidOpCode(const CScript& fluidScript)
+{
+    if (fluidScript.IsProtocolInstruction(MINT_TX)) {
+        return OP_MINT;
+    }
+    else if (fluidScript.IsProtocolInstruction(DYNODE_MODFIY_TX))
+    {
+        return OP_REWARD_DYNODE;
+    }
+    else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX))
+    {
+        return OP_REWARD_MINING;
+    }
+    return 0;
 }
 
 /** Initialise sovereign identities that are able to run fluid commands */
@@ -57,6 +85,11 @@ std::vector<std::pair<std::string, CDynamicAddress>> CFluidParameters::Initialis
     return x;
 }
 
+std::vector<std::string> InitialiseAddresses() {
+    CFluidParameters params;
+    return params.InitialiseAddresses();
+}
+
 /** Checks if any given address is a current master key (invoked by RPC) */
 bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     if (!inputKey.IsValid()) {
@@ -67,8 +100,11 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
-    if (pindex != NULL)
-        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
+    if (pindex != NULL) {
+        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
+        fluidSovereigns = InitialiseAddresses();
+    }
+        
     else
         fluidSovereigns = InitialiseAddresses();
 
@@ -86,6 +122,16 @@ std::vector<std::string> CFluidParameters::InitialiseAddresses() {
     std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
     for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
         initialSovereignAddresses.push_back(sovereignId.second.ToString());
+    }
+    return initialSovereignAddresses;
+}
+
+std::vector<std::vector<unsigned char>> CFluidParameters::InitialiseAddressCharVector()
+{
+    std::vector<std::vector<unsigned char>> initialSovereignAddresses;
+    std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
+    for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
+        initialSovereignAddresses.push_back(CharVectorFromString(sovereignId.second.ToString()));
     }
     return initialSovereignAddresses;
 }
@@ -176,8 +222,10 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
     GetLastBlockIndex(chainActive.Tip());
     CBlockIndex* pindex = chainActive.Tip();
 
-    if (pindex != NULL)
-        fluidSovereigns = pindex->fluidParams.fluidSovereigns;
+    if (pindex != NULL) {
+        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
+        fluidSovereigns = InitialiseAddresses();
+    }
     else
         fluidSovereigns = InitialiseAddresses();
 
@@ -477,19 +525,9 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 
 /* Check if transaction exists in record */
 bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
-    std::string verificationString;
-    CFluidEntry fluidIndex;
-    if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT)
-        return false;
-    else if (pindex == nullptr) {
-        GetLastBlockIndex(chainActive.Tip());
-        fluidIndex = chainActive.Tip()->fluidParams;
-    } else
-        fluidIndex = pindex->fluidParams;
-
-    std::vector<std::string> transactionRecord = fluidIndex.fluidHistory;
-
     if (IsTransactionFluid(fluidInstruction)) {
+        std::string verificationString;
+        std::vector<std::string> transactionRecord;//fluidIndex.fluidHistory;
         verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
@@ -532,58 +570,33 @@ bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std
     return false;
 }
 
-CAmount GetPoWBlockPayment(const int& nHeight)
+CAmount GetStandardPoWBlockPayment(const int nHeight)
 {
-    if (chainActive.Height() == 0) {
+    if (nHeight == 1) {
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
-        LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
+        LogPrint("superblock creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
-        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
+    else if (nHeight > 1 && nHeight <= Params().GetConsensus().nRewardsStart) {
+        LogPrint("zero-reward block creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
     }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
+    else if (nHeight > Params().GetConsensus().nRewardsStart) {
+        LogPrint("creation", "GetStandardPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
         return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
     }
     else
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
-CAmount GetDynodePayment(bool fDynode)
+CAmount GetStandardDynodePayment(const int nHeight)
 {   
-    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
-        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
-    }
-    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+    if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
+        LogPrintf("GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
     }
-    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
-    }
-    else
-        return BLOCKCHAIN_INIT_REWARD;
-}
-
-/** Passover code that will act as a switch to check if override did occur for Proof of Work Rewards **/
-CAmount getBlockSubsidyWithOverride(const int& nHeight, CAmount lastOverrideCommand) {
-    if (lastOverrideCommand != 0) {
-        return lastOverrideCommand;
-    } else {
-        return GetPoWBlockPayment(nHeight);
-    }
-}
-
-/** Passover code that will act as a switch to check if override did occur for Dynode Rewards **/
-CAmount getDynodeSubsidyWithOverride(CAmount lastOverrideCommand, bool fDynode) {
-    if (lastOverrideCommand != 0) {
-        return lastOverrideCommand;
-    } else {
-        return GetDynodePayment(fDynode);
+    else {
+        return BLOCKCHAIN_INIT_REWARD; // 0 DYN
     }
 }
 
@@ -646,4 +659,20 @@ bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint
     }
 
     return true;
+}
+
+std::vector<unsigned char> CharVectorFromString(const std::string& str)
+{
+    return std::vector<unsigned char>(str.begin(), str.end());
+}
+
+std::string StringFromCharVector(const std::vector<unsigned char>& vch)
+{
+    std::string strReturn;
+    std::vector<unsigned char>::const_iterator vi = vch.begin();
+    while (vi != vch.end()) {
+        strReturn += (char) (*vi);
+        vi++;
+    }
+    return strReturn;
 }

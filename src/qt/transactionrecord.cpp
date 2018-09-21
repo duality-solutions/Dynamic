@@ -9,7 +9,7 @@
 
 #include "base58.h"
 #include "consensus/consensus.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 #include "instantsend.h"
 #include "validation.h"
 #include "privatesend.h"

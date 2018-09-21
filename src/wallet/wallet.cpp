@@ -13,7 +13,7 @@
 #include "chain.h"
 #include "wallet/coincontrol.h"
 #include "consensus/consensus.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
 #include "governance.h"
 #include "init.h"
 #include "instantsend.h"

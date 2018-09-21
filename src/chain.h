@@ -16,8 +16,6 @@
 
 #include <vector>
 
-std::vector<std::string> InitialiseAddresses();
-
 class CBlockFileInfo
 {
 public:
@@ -150,71 +148,6 @@ enum BlockStatus: uint32_t {
     BLOCK_FAILED_MASK        =   BLOCK_FAILED_VALID | BLOCK_FAILED_CHILD,
 };
 
-/** Fluid Protocol Entry Corresponding to Each Block */
-class CFluidEntry
-{
-public:
-	CAmount blockReward;
-	CAmount dynodeReward;
-    unsigned int dynodeRecipientCount;
-	std::vector<std::string> fluidHistory;
-	std::vector<std::string> fluidSovereigns;
-	std::vector<std::string> fluidFrozenAccounts;
-
-	CFluidEntry() {
-        SetNull();
-    }
-
-	ADD_SERIALIZE_METHODS;
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
-		READWRITE(VARINT(blockReward));
-		READWRITE(VARINT(dynodeReward));
-        READWRITE(VARINT(dynodeRecipientCount));
-		READWRITE(fluidHistory);
-		READWRITE(fluidSovereigns);
-		READWRITE(fluidFrozenAccounts);
-	}
-
-    inline friend bool operator==(const CFluidEntry &a, const CFluidEntry &b) {
-        return (
-			a.fluidHistory == b.fluidHistory
-			&& a.fluidSovereigns == b.fluidSovereigns
-			&& a.blockReward == b.blockReward
-			&& a.dynodeReward == b.dynodeReward
-			&& a.dynodeRecipientCount == b.dynodeRecipientCount
-			&& a.fluidFrozenAccounts == b.fluidFrozenAccounts
-			);
-    }
-
-    inline CFluidEntry operator=(const CFluidEntry &b) {
-		fluidHistory = b.fluidHistory;
-		fluidSovereigns = b.fluidSovereigns;
-		blockReward = b.blockReward;
-		dynodeReward = b.dynodeReward;
-		dynodeRecipientCount = b.dynodeRecipientCount;
-		fluidFrozenAccounts = b.fluidFrozenAccounts;
-		return *this;
-    }
-
-    inline friend bool operator!=(const CFluidEntry &a, const CFluidEntry &b) {
-        return !(a == b);
-    }
-    
-    inline void SetNull() { 
-		fluidHistory.clear();
-		fluidSovereigns = InitialiseAddresses();
-		fluidFrozenAccounts.clear();
-		blockReward = 0;
-		dynodeReward = 0;
-		dynodeRecipientCount = 1;
-	}
-
-    inline bool IsNull() const { 
-		return (fluidHistory.empty() && fluidSovereigns == InitialiseAddresses() && fluidFrozenAccounts.empty() && blockReward == 0 && dynodeReward == 0 && dynodeRecipientCount == 1); 
-	}
-};
-
 /** The block chain is a tree shaped structure starting with the
  * genesis block at the root, with each block potentially having multiple
  * candidates to be the next block. A blockindex may have multiple pprev pointing
@@ -269,9 +202,6 @@ public:
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     int32_t nSequenceId;
 
-	//! Fluid Entry
-	CFluidEntry fluidParams;
-
     void SetNull()
     {
         phashBlock = NULL;
@@ -286,7 +216,6 @@ public:
         nChainTx = 0;
         nStatus = 0;
         nSequenceId = 0;
-		fluidParams.SetNull();
 
         nVersion       = 0;
         hashMerkleRoot = uint256();
@@ -447,8 +376,6 @@ public:
             READWRITE(VARINT(nDataPos));
         if (nStatus & BLOCK_HAVE_UNDO)
             READWRITE(VARINT(nUndoPos));
-        
-        READWRITE(fluidParams);
 		
         // block hash
         READWRITE(hash);

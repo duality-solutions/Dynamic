@@ -15,7 +15,11 @@
 #include "consensus/consensus.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
-#include "fluid.h"
+#include "fluid/fluid.h"
+#include "fluid/fluiddb.h"
+#include "fluid/fluiddynode.h"
+#include "fluid/fluidmining.h"
+#include "fluid/fluidmint.h"
 #include "hash.h"
 #include "init.h"
 #include "instantsend.h"
@@ -226,19 +230,19 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
         return true;
     
     if (nBlockHeight >= fluid.FLUID_ACTIVATE_HEIGHT) {
-		if (!fluid.ProvisionalCheckTransaction(tx))
-			return false;
-		
-		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey)) {
-                std::string strErrorMessage;
-                if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, nBlockTime, strErrorMessage)) {
-                    return false;
-                }
+        if (!fluid.ProvisionalCheckTransaction(tx))
+            return false;
+
+        CScript scriptFluid;
+        if (IsTransactionFluid(tx, scriptFluid))
+        {
+            std::string strErrorMessage;
+            if (!fluid.CheckFluidOperationScript(scriptFluid, nBlockTime, strErrorMessage)) {
+                return false;
             }
-		}
-	}
-	
+        }
+    }
+    
     BOOST_FOREACH(const CTxIn& txin, tx.vin) {
         if (!(txin.nSequence == CTxIn::SEQUENCE_FINAL))
             return false;
@@ -596,10 +600,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         return false; // state filled in by CheckTransaction
 
     if (!fluid.ProvisionalCheckTransaction(tx))
-		return false;
+        return false;
 
-    for (const CTxOut& txout : tx.vout)	{	
-		if (IsTransactionFluid(txout.scriptPubKey))
+    for (const CTxOut& txout : tx.vout)    {    
+        if (IsTransactionFluid(txout.scriptPubKey))
         {
             fluidTransaction = true;
             std::string strErrorMessage;
@@ -615,7 +619,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.DoS(100, false, REJECT_INVALID, strErrorMessage);
             }
         }
-	}
+    }
 
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
@@ -2052,7 +2056,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 return state.DoS(100, error("%s: contains a non-BIP68-final transaction", __func__),
                                  REJECT_INVALID, "bad-txns-nonfinal");
             }
-
             if (fAddressIndex || fSpentIndex)
             {
                 for (size_t j = 0; j < tx.vin.size(); j++) {
@@ -2169,77 +2172,80 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         fDynodePaid = false;
     }
 
-	CAmount nExpectedBlockValue;
-	std::string strError = "";
-	{
-		CBlockIndex* prevIndex = pindex->pprev;
-		CFluidEntry prevFluidIndex = pindex->pprev->fluidParams;
-		
-		CFluidEntry FluidIndex;
-		
-		CAmount fluidIssuance, newReward = 0, newDynodeReward = 0;
-		CDynamicAddress mintAddress;
-		
-		if (!fluid.GetProofOverrideRequest(pindex->pprev, newReward) 
-		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-				FluidIndex.blockReward = (prevIndex? prevFluidIndex.blockReward : 0);
-		} else {
-				FluidIndex.blockReward = newReward;
-		}
+    // BEGIN FLUID
+    CAmount nExpectedBlockValue;
+    std::string strError = "";
+    {
+        CBlockIndex* prevIndex = pindex->pprev;
+        CAmount newMiningReward = GetFluidMiningReward(pindex->nHeight);
+        CAmount newDynodeReward = 0;
+        if (fDynodePaid)
+            newDynodeReward = GetFluidDynodeReward(pindex->nHeight);
 
-		if (!fluid.GetDynodeOverrideRequest(pindex->pprev, newDynodeReward) 
-		&& prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-				FluidIndex.dynodeReward = (prevIndex? prevFluidIndex.dynodeReward : 0);
-		} else {
-				FluidIndex.dynodeReward = newDynodeReward;
-		}
-		
-		if (fluid.GetMintingInstructions(pindex->pprev, mintAddress, fluidIssuance) 
-		&& pindex->nHeight  >= fluid.FLUID_ACTIVATE_HEIGHT) {
-			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
-									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward) + 
-									fluidIssuance;
-		} else {
-			nExpectedBlockValue = 	getDynodeSubsidyWithOverride(prevFluidIndex.dynodeReward, fDynodePaid) + 
-									getBlockSubsidyWithOverride(prevIndex->nHeight, prevFluidIndex.blockReward);
-		}
-		
-		std::vector<std::string> fluidHistory, fluidSovereigns;
-		
-		if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
-			return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
-		}
-		
-		if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
-			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-			return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
-									REJECT_INVALID, "bad-cb-payee");
-		}
-		
-		if (prevIndex->nHeight + 1  >= fluid.FLUID_ACTIVATE_HEIGHT) {	
-			fluidHistory.insert(fluidHistory.end(), prevFluidIndex.fluidHistory.begin(), prevFluidIndex.fluidHistory.end());
-			fluid.AddFluidTransactionsToRecord(prevIndex, fluidHistory);
-			std::set<std::string> setX(fluidHistory.begin(), fluidHistory.end());
-			fluidHistory.assign(setX.begin(), setX.end());
-			
-			FluidIndex.fluidHistory = fluidHistory;
-			
-			for (uint32_t x = 0; x != fluid.InitialiseSovereignIdentities().size(); x++) {
-				/* std::string error;
-				CDynamicAddress inputKey; // Reinitialise at each iteration to reset value
-				CNameVal val = nameValFromString(fluid.InitialiseIdentities().at(x));
-				
-				if (!GetNameCurrentAddress(val, inputKey, error))
-					fluidSovereigns.push_back(inputKey.ToString());
-				else */
-					fluidSovereigns.push_back(prevFluidIndex.fluidSovereigns.at(x));
-			}
-		}
-		
-		pindex->fluidParams = FluidIndex;
-	}
+        CAmount newMintIssuance = 0;
+        CDynamicAddress mintAddress;
+        if (prevIndex->nHeight + 1 >= fluid.FLUID_ACTIVATE_HEIGHT) 
+        {
+            CFluidMint fluidMint;
+            if (GetMintingInstructions(pindex->nHeight, fluidMint)) {
+                newMintIssuance = fluidMint.MintAmount;
+                mintAddress = fluidMint.GetDestinationAddress();
+                LogPrintf("ConnectBlock, GetMintingInstructions MintAmount = %u\n", fluidMint.MintAmount);
+            }
+        }
+        nExpectedBlockValue = newMintIssuance + newMiningReward + newDynodeReward;
 
-    // END DYNAMIC
+        if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)) {
+            return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        }
+        if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
+            mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+            return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
+                                    REJECT_INVALID, "bad-cb-payee");
+        }
+    }
+    for (unsigned int i = 0; i < block.vtx.size(); i++)
+    {
+        const CTransaction &tx = block.vtx[i];
+        CScript scriptFluid;
+        if (IsTransactionFluid(tx, scriptFluid)) {
+            int OpCode = GetFluidOpCode(scriptFluid);
+            if (OpCode == OP_REWARD_DYNODE) {
+                CFluidDynode fluidDynode(scriptFluid);
+                fluidDynode.nHeight = pindex->nHeight;
+                fluidDynode.txHash = tx.GetHash();
+                if (CheckFluidDynodeDB()) {
+                    if (!CheckSignatureQuorum(fluidDynode.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-dynode-address-signature");
+                    }
+                    pFluidDynodeDB->AddFluidDynodeEntry(fluidDynode, OP_REWARD_DYNODE);
+                }
+            }
+            else if (OpCode == OP_REWARD_MINING) {
+                CFluidMining fluidMining(scriptFluid);
+                fluidMining.nHeight = pindex->nHeight;
+                fluidMining.txHash = tx.GetHash();
+                if (CheckFluidMiningDB()) {
+                    if (!CheckSignatureQuorum(fluidMining.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mining-address-signature");
+                    }
+                    pFluidMiningDB->AddFluidMiningEntry(fluidMining, OP_REWARD_MINING);
+                }
+            }
+            else if (OpCode == OP_MINT) {
+                CFluidMint fluidMint(scriptFluid);
+                fluidMint.nHeight = pindex->nHeight;
+                fluidMint.txHash = tx.GetHash();
+                if (CheckFluidMintDB()) {
+                    if (!CheckSignatureQuorum(fluidMint.FluidScript, strError)) {
+                        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "invalid-fluid-mint-address-signature");
+                    }
+                    pFluidMintDB->AddFluidMintEntry(fluidMint, OP_MINT);
+                }
+            }
+        }
+    }
+    // END FLUID
     
     if (!control.Wait())
         return state.DoS(100, false);
@@ -3291,13 +3297,13 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 
     // Check transactions
     BOOST_FOREACH(const CTransaction& tx, block.vtx) {
-        if (!CheckTransaction(tx, state, false))
+        if (!CheckTransaction(tx, state, true))
             return error("CheckBlock(): CheckTransaction of %s failed with %s",
                 tx.GetHash().ToString(),
                 FormatStateMessage(state));
 
-		BOOST_FOREACH(const CTxOut& txout, tx.vout)	{	
-			if (IsTransactionFluid(txout.scriptPubKey)) {
+        BOOST_FOREACH(const CTxOut& txout, tx.vout)    {    
+            if (IsTransactionFluid(txout.scriptPubKey)) {
                 std::string strErrorMessage;
                 if (!fluid.CheckFluidOperationScript(txout.scriptPubKey, block.nTime, strErrorMessage)) {
                     return error("CheckBlock(): %s, Block %s failed with %s",
@@ -3305,12 +3311,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                         tx.GetHash().ToString(),
                         FormatStateMessage(state));
                 }
-			}	
-		}
-		
-	    if (!fluid.CheckTransactionToBlock(tx, block))
-			return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
-	}
+            }    
+        }
+        
+        if (!fluid.CheckTransactionToBlock(tx, block))
+            return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
+    }
 
     unsigned int nSigOps = 0;
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
@@ -3387,7 +3393,6 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
             if (!fluid.CheckTransactionToBlock(tx, pindexPrev->GetBlockHeader()))
                 return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
         }
-        
         if (!IsFinalTx(tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, error("%s: contains a non-final transaction", __func__), REJECT_INVALID, "bad-txns-nonfinal");
         }
