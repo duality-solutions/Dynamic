@@ -3,6 +3,7 @@
 
 **Dynamic v2.4.0.0**
 
+* [Qt] Fix styling of PrivateSend option on sendcoinsdialog.ui
 * Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
 * [GPU] Fix GPU found block nonce before ProcessFoundSolution
 * [GPU] Update README for GPU Mining
