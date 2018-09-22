@@ -7,10 +7,14 @@
 
 #include <libtorrent/session.hpp>
 
+static const int MIN_DHT_PROTO_VERSION = 71000;
+
 class CDHTSettings {
 private:
-    
     libtorrent::settings_pack settings;
+    std::string listen_interfaces;
+    std::string dht_bootstrap_nodes;
+    std::string user_agent;
 
 public:
 
@@ -20,7 +24,8 @@ public:
 
 private:
 
-	void LoadSettings();
+    void LoadSettings();
+    void LoadPeerList();
 };
 
 
