@@ -110,6 +110,7 @@ DYNAMIC_CORE_H = \
   bdap/entrycheckpoints.h \
   bdap/entrylink.h \
   bdap/identity.h \
+  bdap/linking.h \
   dbwrapper.h \
   dht/bootstrap.h \
   dht/dhtsettings.h \
@@ -248,6 +249,7 @@ libdynamic_server_a_SOURCES = \
   bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
   bdap/identity.cpp \
+  bdap/linking.cpp \
   dbwrapper.cpp \
   dht/bootstrap.cpp \
   dht/dhtsettings.cpp \
