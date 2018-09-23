@@ -22,6 +22,10 @@
 
 #include "crypto/argon2gpu/opencl/kernel-runner.h"
 
+#if defined(MAC_OSX)
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
 namespace argon2gpu
 {
 namespace opencl
