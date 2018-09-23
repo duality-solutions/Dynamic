@@ -3,6 +3,10 @@
 
 **Dynamic v2.4.0.0**
 
+* Fix copy elision warning in opencl device.cpp
+* Supress OSX private field warnings
+* Fix comparator and supress warning
+* Supress MacOS build warnings for deprecated code
 * [Qt] Fix styling of PrivateSend option on sendcoinsdialog.ui
 * Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
 * [GPU] Fix GPU found block nonce before ProcessFoundSolution
