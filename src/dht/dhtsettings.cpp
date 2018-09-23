@@ -8,6 +8,7 @@
 #include "dynodeman.h"
 #include "net.h"
 #include "primitives/transaction.h"
+#include "util.h"
 
 using namespace libtorrent;
 
@@ -17,8 +18,6 @@ CDHTSettings::CDHTSettings()
     // Use ports 33307, 33317, 33327, 33337 and 33347
     listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33317,[::]:33317,0.0.0.0:33327," 
                         "[::]:33327,0.0.0.0:33337,[::]:33337,0.0.0.0:33347,[::]:33347";
-    LoadPeerList();
-    LoadSettings();
 }
 
 void CDHTSettings::LoadPeerList()
@@ -42,11 +41,17 @@ void CDHTSettings::LoadPeerList()
             }
         }
     }
-    dht_bootstrap_nodes = strPeerList.substr(0, strPeerList.size()-1);
+    if (strPeerList.size() > 1) {
+        dht_bootstrap_nodes = strPeerList.substr(0, strPeerList.size()-1);
+    }
+    // TODO: (DHT) Remove port number and do not add duplicates
+    LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s.\n", dht_bootstrap_nodes);
 }
 
 void CDHTSettings::LoadSettings()
 {
+    LoadPeerList();
+
     settings.set_bool(settings_pack::enable_dht, false);
     settings.set_int(settings_pack::alert_mask, 0xffffffff);
     session newSession(settings);

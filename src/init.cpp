@@ -20,6 +20,7 @@
 #include "checkpoints.h"
 #include "bdap/domainentrydb.h"
 #include "dht/keyed25519.h"
+#include "dht/bootstrap.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -236,6 +237,7 @@ void PrepareShutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
+    StopTorrentDHTNetwork();
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->Flush(false);
@@ -1498,7 +1500,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidSovereignDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
-                
+
+                // LibTorrent DHT Netowrk Services
+                delete pTorrentDHTSession;
+
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
                 pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
@@ -1513,7 +1518,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 // Init BDAP Services DB's 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
-                
+
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files
@@ -1854,6 +1859,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // Generate coins in the background
     GenerateDynamics(GetBoolArg("-gen", DEFAULT_GENERATE), GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams, connman);
 
+    // Start the DHT Torrent network in the background
+    StartTorrentDHTNetwork(chainparams, connman);
     // ********************************************************* Step 13: finished
 
     SetRPCWarmupFinished();

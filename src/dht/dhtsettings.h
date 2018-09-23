@@ -1,4 +1,3 @@
-
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
@@ -7,7 +6,7 @@
 
 #include <libtorrent/session.hpp>
 
-static const int MIN_DHT_PROTO_VERSION = 71000;
+static constexpr int MIN_DHT_PROTO_VERSION = 71000;
 
 class CDHTSettings {
 private:
@@ -19,14 +18,12 @@ private:
 public:
 
     CDHTSettings();
-    
-    libtorrent::settings_pack GetSettingsPack() const;
+    void LoadSettings();
+    libtorrent::settings_pack GetSettingsPack() const { return settings; }
 
 private:
-
-    void LoadSettings();
     void LoadPeerList();
-};
 
+};
 
 #endif // DYNAMIC_DHT_DHTSETTINGS_H
