@@ -1343,7 +1343,7 @@ border-radius: 4px;
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_7">
+        <spacer name="horizontalSpacer_8">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -1377,7 +1377,7 @@ border-radius: 4px;
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_8">
+        <spacer name="horizontalSpacer_9">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -1465,7 +1465,7 @@ border-radius: 4px;
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="groupCustomFee"/>
   <buttongroup name="groupFee"/>
+  <buttongroup name="groupCustomFee"/>
  </buttongroups>
 </ui>
