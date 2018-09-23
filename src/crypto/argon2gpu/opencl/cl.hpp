@@ -4162,6 +4162,9 @@ class Image2D : public Image
 #if !defined(CL_VERSION_1_2) || defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS)
         if (!useCreateImage)
         {
+#if defined(MAC_OSX)
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
             object_ = ::clCreateImage2D(
                 context(), flags, &format, width, height, row_pitch, host_ptr, &error);
 
