@@ -1099,8 +1099,8 @@ int CPUMaxThreads() {
 }
 
 int GPUMaxThreads() {
-    int nUseThreads = 1;
-    if (nUseThreads < 1) {
+    int nUseThreads = 8;
+    if (nUseThreads < 0) {
         nUseThreads = 1;
     }
     return nUseThreads;
