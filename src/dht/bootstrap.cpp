@@ -28,6 +28,7 @@
 
 using namespace libtorrent;
 
+static boost::thread *dhtTorrentThread;
 session *pTorrentDHTSession = NULL;
 
 static alert* wait_for_alert(session* dhtSession, int alert_type)
@@ -141,7 +142,12 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
-        while (true) {}
+        while (true) {
+            MilliSleep(60000);
+            load_dht_state(pTorrentDHTSession);
+            bootstrap(pTorrentDHTSession);
+            save_dht_state(pTorrentDHTSession);
+        }
     }
     catch (const boost::thread_interrupted&)
     {
@@ -157,12 +163,11 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
-    static boost::thread_group* dhtTorrentThreads;
-    if (dhtTorrentThreads != NULL)
+    if (dhtTorrentThread != NULL)
     {
-        dhtTorrentThreads->interrupt_all();
-        delete dhtTorrentThreads;
-        dhtTorrentThreads = NULL;
+        dhtTorrentThread->interrupt();
+        delete dhtTorrentThread;
+        dhtTorrentThread = NULL;
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork stopped.\n");
     }
     else {
@@ -173,12 +178,10 @@ void StopTorrentDHTNetwork()
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
     LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", get_log_path());
-    static boost::thread_group* dhtTorrentThreads;
+    if (dhtTorrentThread != NULL)
+         StopTorrentDHTNetwork();
 
-    StopTorrentDHTNetwork();
-
-    dhtTorrentThreads = new boost::thread_group();
-    dhtTorrentThreads->create_thread(boost::bind(&DHTTorrentNetwork, boost::cref(chainparams), boost::ref(connman)));
+    dhtTorrentThread = new  boost::thread(DHTTorrentNetwork, boost::cref(chainparams), boost::ref(connman));
 }
 
 bool GetDHTMutableData(std::array<char, 32> public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence)
