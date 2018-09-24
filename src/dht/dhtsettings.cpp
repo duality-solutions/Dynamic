@@ -22,13 +22,22 @@ CDHTSettings::CDHTSettings()
 
 void CDHTSettings::LoadPeerList()
 {
-    std::string strPeerList;
+    std::string strPeerList = "";
     // get all Dynodes above the minimum protocol version
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
     for (auto& dnpair : mapDynodes) {
         CDynode dn = dnpair.second;
         if (dn.nProtocolVersion >= MIN_DHT_PROTO_VERSION) {
-            strPeerList += dn.addr.ToString() + ","; 
+            std::string strDynodeIP = dn.addr.ToString();
+            size_t pos = strDynodeIP.find(":");
+            if (pos != std::string::npos && strDynodeIP.size() > 5) {
+                // remove port from IP address string
+                strDynodeIP = strDynodeIP.substr(0, pos);
+            }
+            pos = strPeerList.find(strDynodeIP);
+            if (pos == std::string::npos) {
+                strPeerList += strDynodeIP + ","; 
+            }
         }
     }
     // get all peers above the minimum protocol version
@@ -37,15 +46,23 @@ void CDHTSettings::LoadPeerList()
         g_connman->GetNodeStats(vstats);
         for (const CNodeStats& stats : vstats) {
             if (stats.nVersion >= MIN_DHT_PROTO_VERSION) {
-                strPeerList += stats.addrName + ",";
+                std::string strPeerIP = stats.addrName;
+                size_t pos = strPeerIP.find(":");
+                if (pos != std::string::npos && strPeerIP.size() > 5) {
+                    // remove port from IP address string
+                    strPeerIP = strPeerIP.substr(0, pos);
+                }
+                pos = strPeerList.find(strPeerIP);
+                if (pos == std::string::npos) {
+                    strPeerList += strPeerIP + ",";
+                }
             }
         }
     }
     if (strPeerList.size() > 1) {
         dht_bootstrap_nodes = strPeerList.substr(0, strPeerList.size()-1);
     }
-    // TODO: (DHT) Remove port number and do not add duplicates
-    LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s.\n", dht_bootstrap_nodes);
+    LogPrintf("CDHTSettings::LoadPeerList -- dht_bootstrap_nodes = %s\n", dht_bootstrap_nodes);
 }
 
 void CDHTSettings::LoadSettings()
