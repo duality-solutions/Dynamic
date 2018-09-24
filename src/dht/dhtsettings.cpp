@@ -36,7 +36,7 @@ void CDHTSettings::LoadPeerList()
             }
             pos = strPeerList.find(strDynodeIP);
             if (pos == std::string::npos) {
-                strPeerList += strDynodeIP + ","; 
+                strPeerList += strDynodeIP + ":33307,"; 
             }
         }
     }
@@ -54,7 +54,7 @@ void CDHTSettings::LoadPeerList()
                 }
                 pos = strPeerList.find(strPeerIP);
                 if (pos == std::string::npos) {
-                    strPeerList += strPeerIP + ",";
+                    strPeerList += strPeerIP + ":33307,";
                 }
             }
         }
@@ -129,6 +129,20 @@ void CDHTSettings::LoadSettings()
     // connections on port 7777 on adapter with this GUID.
     // TODO: Add peers and dynodes to the dht_bootstrap_nodes list.
     settings.set_str(settings_pack::listen_interfaces, listen_interfaces);
+    
+    // ``dht_announce_interval`` is the number of seconds between
+    // announcing torrents to the distributed hash table (DHT).
+    //settings.set_int(settings_pack::dht_announce_interval, 30);
+
+    // ``enable_outgoing_utp`` ``enable_incoming_utp`` 
+    // ``enable_outgoing_tcp`` ``enable_incoming_tcp``
+    // when set to true, libtorrent will try to make outgoing utp
+    // connections controls whether libtorrent will accept incoming
+    // connections or make outgoing connections of specific type.
+    //settings.set_bool(settings_pack::enable_outgoing_utp, true);
+    //settings.set_bool(settings_pack::enable_incoming_utp, true);
+    //settings.set_bool(settings_pack::enable_outgoing_tcp, true);
+    //settings.set_bool(settings_pack::enable_incoming_tcp, true);
 
     // Apply settings.
     newSession.apply_settings(settings);
@@ -140,7 +154,8 @@ void CDHTSettings::LoadSettings()
     // omitted.
     //settings.set_bool(settings_pack::announce_ip, false);
 
-    // ``allow_multiple_connections_per_ip`` determines if connections from the same IP address as existing
+    // ``allow_multiple_connections_per_ip``
+    // determines if connections from the same IP address as existing
     // connections should be rejected or not. Multiple connections from
     // the same IP address is not allowed by default, to prevent abusive
     // behavior by peers. It may be useful to allow such connections in
@@ -305,16 +320,6 @@ void CDHTSettings::LoadSettings()
     // expensive and disruptive on networks, only every 8th announce uses
     // broadcast.
     //settings.set_bool(settings_pack::broadcast_lsd, true);
-
-    // ``enable_outgoing_utp`` ``enable_incoming_utp`` 
-    // ``enable_outgoing_tcp`` ``enable_incoming_tcp``
-    // when set to true, libtorrent will try to make outgoing utp
-    // connections controls whether libtorrent will accept incoming
-    // connections or make outgoing connections of specific type.
-    //settings.set_bool(settings_pack::enable_outgoing_utp, true);
-    //settings.set_bool(settings_pack::enable_incoming_utp, true);
-    //settings.set_bool(settings_pack::enable_outgoing_tcp, true);
-    //settings.set_bool(settings_pack::enable_incoming_tcp, true);
 
     // ``seeding_outgoing_connections`` determines if seeding (and
     // finished) torrents should attempt to make outgoing connections or
@@ -915,10 +920,6 @@ void CDHTSettings::LoadSettings()
     // discovery is enabled a torrent announces itself every 5 minutes.
     // This interval is specified in seconds.
     //local_service_announce_interval,
-
-    // ``dht_announce_interval`` is the number of seconds between
-    // announcing torrents to the distributed hash table (DHT).
-    //dht_announce_interval,
 
     // ``udp_tracker_token_expiry`` is the number of seconds libtorrent
     // will keep UDP tracker connection tokens around for. This is
