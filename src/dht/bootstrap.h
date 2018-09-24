@@ -15,7 +15,7 @@ void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
 /** Get a mutable entry in the libtorrent DHT */
-bool GetDHTMutableData(std::array<char, 32> public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence);
+bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence);
 /** Set a mutable entry in the libtorrent DHT */
 bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
                         ,char const* dhtValue, std::string& message);

@@ -29,6 +29,7 @@
 using namespace libtorrent;
 
 static boost::thread *dhtTorrentThread;
+static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
 static alert* wait_for_alert(session* dhtSession, int alert_type)
@@ -45,15 +46,18 @@ static alert* wait_for_alert(session* dhtSession, int alert_type)
         for (std::vector<alert*>::iterator i = alerts.begin()
             , end(alerts.end()); i != end; ++i)
         {
+            LogPrintf("DHTTorrentNetwork -- message = %s, type =%d, alert_type =%d\n", (*i)->message(), (*i)->type(), alert_type);
             if ((*i)->type() != alert_type)
             {
                 //print some alerts?
-                // LogPrintf("DHTTorrentNetwork -- alert = .\n");
+                
                 continue;
             }
             ret = *i;
             found = true;
         }
+        if (fShutdown)
+            return ret;
     }
     LogPrintf("DHTTorrentNetwork -- wait_for_alert complete.\n");
     return ret;
@@ -83,12 +87,12 @@ static int save_dht_state(session* dhtSession)
     return 0;
 }
 
-static void load_dht_state(session* dhtSession)
+static bool load_dht_state(session* dhtSession)
 {
     std::fstream f(get_log_path().c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
 
     auto const size = f.tellg();
-    if (static_cast<int>(size) <= 0) return;
+    if (static_cast<int>(size) <= 0) return false;
     f.seekg(0, std::ios_base::beg);
 
     std::vector<char> state;
@@ -98,7 +102,7 @@ static void load_dht_state(session* dhtSession)
     if (f.fail())
     {
         LogPrintf("DHTTorrentNetwork -- failed to read dht-state.log\n");
-        return;
+        return false;
     }
 
     bdecode_node e;
@@ -106,12 +110,14 @@ static void load_dht_state(session* dhtSession)
     bdecode(state.data(), state.data() + state.size(), e, ec);
     if (ec) {
         LogPrintf("DHTTorrentNetwork -- failed to parse dht-state.log file: (%d) %s\n", ec.value(), ec.message());
+        return false;
     }
     else
     {
         LogPrintf("DHTTorrentNetwork -- load dht state from dht-state.log\n");
         dhtSession->load_state(e);
     }
+    return true;
 }
 
 void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman)
@@ -130,6 +136,9 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
             if (!fvNodesEmpty && !IsInitialBlockDownload() && dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced())
                 break;
             MilliSleep(1000);
+            if (fShutdown)
+                break;
+
         } while (true);
 
         // boot strap the DHT LibTorrent network
@@ -142,11 +151,11 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
-        while (true) {
+        while (!fShutdown) {
             MilliSleep(60000);
-            load_dht_state(pTorrentDHTSession);
-            bootstrap(pTorrentDHTSession);
-            save_dht_state(pTorrentDHTSession);
+            //load_dht_state(pTorrentDHTSession);
+            //bootstrap(pTorrentDHTSession);
+            //save_dht_state(pTorrentDHTSession);
         }
     }
     catch (const boost::thread_interrupted&)
@@ -163,6 +172,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
+    fShutdown = true;
     if (dhtTorrentThread != NULL)
     {
         dhtTorrentThread->interrupt();
@@ -178,21 +188,23 @@ void StopTorrentDHTNetwork()
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
     LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", get_log_path());
+    fShutdown = false;
     if (dhtTorrentThread != NULL)
          StopTorrentDHTNetwork();
 
     dhtTorrentThread = new  boost::thread(DHTTorrentNetwork, boost::cref(chainparams), boost::ref(connman));
 }
 
-bool GetDHTMutableData(std::array<char, 32> public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence)
+bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence)
 {
     //TODO: DHT add locks
-    LogPrintf("DHTTorrentNetwork -- PutMutableData started.\n");
+    LogPrintf("DHTTorrentNetwork -- GetDHTMutableData started.\n");
 
     if (!pTorrentDHTSession) 
         return false;
 
-    bootstrap(pTorrentDHTSession);
+    if (!load_dht_state(pTorrentDHTSession))
+        bootstrap(pTorrentDHTSession);
 
     pTorrentDHTSession->dht_get_item(public_key, entrySalt);
     LogPrintf("DHTTorrentNetwork -- MGET: %s, salt = %s\n", aux::to_hex(public_key), entrySalt);
@@ -207,10 +219,10 @@ bool GetDHTMutableData(std::array<char, 32> public_key, const std::string& entry
         authoritative = dhtGetAlert->authoritative;
         entryValue = dhtGetAlert->item.to_string();
         lastSequence = dhtGetAlert->seq;
-        LogPrintf("%s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
+        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
     }
     save_dht_state(pTorrentDHTSession);
-
+    LogPrintf("DHTTorrentNetwork -- GetDHTMutableData end.\n");
     return true;
 }
 
@@ -224,16 +236,17 @@ static void put_string(
     ,char const* str)
 {
     using dht::sign_mutable_item;
-
-    e = std::string(str);
-    std::vector<char> buf;
-    bencode(std::back_inserter(buf), e);
-    dht::signature sign;
-    ++seq;
-    sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
-        , dht::public_key(pk.data())
-        , dht::secret_key(sk.data()));
-    sig = sign.bytes;
+    if (str != NULL) {
+        e = std::string(str);
+        std::vector<char> buf;
+        bencode(std::back_inserter(buf), e);
+        dht::signature sign;
+        ++seq;
+        sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
+            , dht::public_key(pk.data())
+            , dht::secret_key(sk.data()));
+        sig = sign.bytes;
+    }
 }
 
 bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
@@ -245,7 +258,8 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
     if (!pTorrentDHTSession) 
         return false;
 
-    bootstrap(pTorrentDHTSession);
+    if (!load_dht_state(pTorrentDHTSession))
+        bootstrap(pTorrentDHTSession);
 
     entry e;
     std::array<char, 64> sig;
@@ -257,6 +271,7 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
     message = dhtPutAlert->message();
     LogPrintf("%s\n", message);
     save_dht_state(pTorrentDHTSession);
+    LogPrintf("DHTTorrentNetwork -- PutMutableData end.\n");
 
     return true;
 }
