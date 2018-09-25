@@ -125,8 +125,6 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
     LogPrintf("DHTTorrentNetwork -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dht-torrent-network");
-
-    boost::shared_ptr<CReserveScript> coinbaseScript;
     
     try {
         CDHTSettings settings;
@@ -229,7 +227,7 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
 static void put_string(
     entry& e
     ,std::array<char, 64>& sig
-    ,std::int64_t& seq
+    ,std::int64_t const& seq
     ,std::string const& salt
     ,std::array<char, 32> const& pk
     ,std::array<char, 64> const& sk
@@ -241,7 +239,6 @@ static void put_string(
         std::vector<char> buf;
         bencode(std::back_inserter(buf), e);
         dht::signature sign;
-        ++seq;
         sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
             , dht::public_key(pk.data())
             , dht::secret_key(sk.data()));
@@ -263,13 +260,13 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
 
     entry e;
     std::array<char, 64> sig;
-    pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_string, e, sig, lastSequence + 1, entrySalt, public_key, private_key, dhtValue));
+    pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_string, e, sig, lastSequence, entrySalt, public_key, private_key, dhtValue));
 
-    LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s\n", aux::to_hex(public_key), entrySalt);
+    LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, sig=%s, seq=%d\n", aux::to_hex(public_key), entrySalt, aux::to_hex(sig), lastSequence);
     alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_put_alert::alert_type);
     dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
     message = dhtPutAlert->message();
-    LogPrintf("%s\n", message);
+    LogPrintf("DHTTorrentNetwork -- PutMutableData %s\n", message);
     save_dht_state(pTorrentDHTSession);
     LogPrintf("DHTTorrentNetwork -- PutMutableData end.\n");
 
