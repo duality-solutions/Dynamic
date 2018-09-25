@@ -39,7 +39,7 @@ bool CEntryLink::UnserializeFromData(const std::vector<unsigned char>& vchData, 
     return true;
 }
 
-bool CEntryLink::UnserializeFromTx(const CTransaction& tx) 
+bool CEntryLink::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

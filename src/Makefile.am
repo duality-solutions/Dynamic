@@ -75,6 +75,7 @@ DYNAMIC_CORE_H = \
   base58.h \
   bip39_english.h \
   bip39.h \
+  blockencodings.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -147,6 +148,7 @@ DYNAMIC_CORE_H = \
   netaddress.h \
   netbase.h \
   netfulfilledman.h \
+  netmessagemaker.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -231,6 +233,7 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \

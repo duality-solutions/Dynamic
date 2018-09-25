@@ -218,11 +218,31 @@ extern const char *REJECT;
  */
 extern const char *SENDHEADERS;
 /**
- * The feefilter message tells the receiving peer not to inv us any txs
- * which do not meet the specified min fee rate.
- * @since protocol version 70600 as described by BIP133
+ * Contains a 1-byte bool and 8-byte LE version number.
+ * Indicates that a node is willing to provide blocks via "cmpctblock" messages.
+ * May indicate that a node prefers to receive new block announcements via a
+ * "cmpctblock" message rather than an "inv", depending on message contents.
+ * @since protocol version 71000 as described by BIP 152
  */
-extern const char *FEEFILTER;
+extern const char *SENDCMPCT;
+/**
+ * Contains a CBlockHeaderAndShortTxIDs object - providing a header and
+ * list of "short txids".
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *CMPCTBLOCK;
+/**
+ * Contains a BlockTransactionsRequest
+ * Peer should respond with "blocktxn" message.
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *GETBLOCKTXN;
+/**
+ * Contains a BlockTransactions.
+ * Sent in response to a "getblocktxn" message.
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *BLOCKTXN;
 // Dynamic message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description
@@ -335,6 +355,9 @@ enum GetDataMsg {
     MSG_GOVERNANCE_OBJECT = 13, 
     MSG_GOVERNANCE_OBJECT_VOTE = 14,    
     MSG_DYNODE_VERIFY = 15,
+    // Nodes may always request a MSG_CMPCT_BLOCK in a getdata, however,
+    // MSG_CMPCT_BLOCK should not appear in any invs except as a part of getdata.
+    MSG_CMPCT_BLOCK = 20, //!< Defined in BIP152
 };
 
 /** inv message data */

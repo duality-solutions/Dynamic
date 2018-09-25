@@ -136,7 +136,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
@@ -343,7 +343,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
@@ -441,7 +441,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 

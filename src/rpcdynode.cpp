@@ -91,7 +91,7 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
 
     dynode_info_t dnInfo;
     if (privateSendClient.GetMixingDynodeInfo(dnInfo)) {
-        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
         obj.push_back(Pair("addr",          dnInfo.addr.ToString()));
     }
 
@@ -177,8 +177,8 @@ UniValue dynode(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Incorrect dynode address %s", strAddress));
 
         // TODO: Pass CConnman instance somehow and don't use global variable.
-        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
-        if(!pnode)
+        g_connman->OpenDynodeConnection(CAddress(addr, NODE_NETWORK));
+        if (!g_connman->IsConnected(CAddress(addr, NODE_NETWORK), CConnman::AllNodes))
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to dynode %s", strAddress));
 
         return "successfully connected";
@@ -234,7 +234,7 @@ UniValue dynode(const JSONRPCRequest& request)
         obj.push_back(Pair("height",        nHeight));
         obj.push_back(Pair("IP:port",       dnInfo.addr.ToString()));
         obj.push_back(Pair("protocol",      (int64_t)dnInfo.nProtocolVersion));
-        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
         obj.push_back(Pair("payee",         CDynamicAddress(dnInfo.pubKeyCollateralAddress.GetID()).ToString()));
         obj.push_back(Pair("lastseen",      dnInfo.nTimeLastPing));
         obj.push_back(Pair("activeseconds", dnInfo.nTimeLastPing - dnInfo.sigTime));
@@ -515,10 +515,10 @@ UniValue dynodelist(const JSONRPCRequest& request)
     if (strMode == "rank") {
         CDynodeMan::rank_pair_vec_t vDynodeRanks;
         dnodeman.GetDynodeRanks(vDynodeRanks);
-        BOOST_FOREACH(PAIRTYPE(int, CDynode)& s, vDynodeRanks) {
-            std::string strOutpoint = s.second.vin.prevout.ToStringShort();
+        for (const auto& rankpair : vDynodeRanks) {
+            std::string strOutpoint = rankpair.second.outpoint.ToStringShort();
             if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
-            obj.push_back(Pair(strOutpoint, s.first));
+            obj.push_back(Pair(strOutpoint, rankpair.first));
         }
     } else {
         std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
@@ -764,7 +764,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 
             if(dnb.CheckSignature(nDos)) {
                 nSuccessful++;
-                resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
+                resultObj.push_back(Pair("outpoint", dnb.outpoint.ToStringShort()));
                 resultObj.push_back(Pair("addr", dnb.addr.ToString()));
                 resultObj.push_back(Pair("pubKeyCollateralAddress", CDynamicAddress(dnb.pubKeyCollateralAddress.GetID()).ToString()));
                 resultObj.push_back(Pair("pubKeyDynode", CDynamicAddress(dnb.pubKeyDynode.GetID()).ToString()));
@@ -774,7 +774,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
                 resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
-                lastPingObj.push_back(Pair("outpoint", dnb.lastPing.vin.prevout.ToStringShort()));
+                lastPingObj.push_back(Pair("outpoint", dnb.lastPing.dynodeOutpoint.ToStringShort()));
                 lastPingObj.push_back(Pair("blockHash", dnb.lastPing.blockHash.ToString()));
                 lastPingObj.push_back(Pair("sigTime", dnb.lastPing.sigTime));
                 lastPingObj.push_back(Pair("vchSig", EncodeBase64(&dnb.lastPing.vchSig[0], dnb.lastPing.vchSig.size())));
@@ -815,7 +815,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
         BOOST_FOREACH(CDynodeBroadcast& dnb, vecDnb) {
             UniValue resultObj(UniValue::VOBJ);
 
-            resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
+            resultObj.push_back(Pair("outpoint", dnb.outpoint.ToStringShort()));
             resultObj.push_back(Pair("addr", dnb.addr.ToString()));
 
             int nDos = 0;

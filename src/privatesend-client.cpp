@@ -9,8 +9,10 @@
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
+#include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "netmessagemaker.h"
 #include "script/sign.h"
 #include "txmempool.h"
 #include "util.h"
@@ -39,7 +41,7 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         vRecv >> psq;
 
         // process every psq only once
-        BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
+        for (const auto& q : vecPrivateSendQueue) {
             if(q == psq) {
                 // LogPrint("privatesend", "PSQUEUE -- %s seen\n", psq.ToString());
                 return;
@@ -51,11 +53,11 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
         if(psq.IsExpired()) return;
 
         dynode_info_t infoDn;
-        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) return;
+        if(!dnodeman.GetDynodeInfo(psq.dynodeOutpoint, infoDn)) return;
 
         if(!psq.CheckSignature(infoDn.pubKeyDynode)) {
             // we probably have outdated info
-            dnodeman.AskForDN(pfrom, psq.vin.prevout, connman);
+            dnodeman.AskForDN(pfrom, psq.dynodeOutpoint, connman);
             return;
         }
 
@@ -72,8 +74,8 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                 SubmitDenominate(connman);
             }
         } else {
-            BOOST_FOREACH(CPrivateSendQueue q, vecPrivateSendQueue) {
-                if(q.vin == psq.vin) {
+            for (const auto& q : vecPrivateSendQueue) {
+                if(q.dynodeOutpoint == psq.dynodeOutpoint) {
                     // no way same dn can send another "not yet ready" psq this soon
                     LogPrint("privatesend", "PSQUEUE -- Dynode %s is sending WAY too many psq messages\n", infoDn.addr.ToString());
                     return;
@@ -88,10 +90,10 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
                 return;
             }
 
-            if(!dnodeman.AllowMixing(psq.vin.prevout)) return;
+            if(!dnodeman.AllowMixing(psq.dynodeOutpoint)) return;
 
             LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
-            if(infoMixingDynode.fInfoValid && infoMixingDynode.vin.prevout == psq.vin.prevout) {
+            if(infoMixingDynode.fInfoValid && infoMixingDynode.outpoint == psq.dynodeOutpoint) {
                 psq.fTried = true;
             }
             vecPrivateSendQueue.push_back(psq);
@@ -145,7 +147,9 @@ void CPrivateSendClient::ProcessMessage(CNode* pfrom, std::string& strCommand, C
     } else if(strCommand == NetMsgType::PSFINALTX) {
 
         if(pfrom->nVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
-            LogPrintf("PSFINALTX -- incompatible version! nVersion: %d\n", pfrom->nVersion);
+            LogPrint("privatesend", "PSFINALTX -- peer=%d using obsolete version %i\n", pfrom->id, pfrom->nVersion);
+            connman.PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                               strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
 
@@ -218,6 +222,7 @@ void CPrivateSendClient::SetNull()
     nEntriesCount = 0;
     fLastEntryAccepted = false;
     infoMixingDynode = dynode_info_t();
+    pendingPsaRequest = CPendingPsaRequest();
 
     CPrivateSendBase::SetNull();
 }
@@ -321,9 +326,11 @@ void CPrivateSendClient::CheckPool()
 //
 void CPrivateSendClient::CheckTimeout()
 {
+    if(fDynodeMode) return;
+
     CheckQueue();
 
-    if(!fEnablePrivateSend && !fDynodeMode) return;
+    if(!fEnablePrivateSend) return;
 
     // catching hanging sessions
     if(!fDynodeMode) {
@@ -341,9 +348,9 @@ void CPrivateSendClient::CheckTimeout()
         }
     }
 
-    int nLagTime = fDynodeMode ? 0 : 10000; // if we're the client, give the server a few extra seconds before resetting.
+    int nLagTime = 10; // give the server a few extra seconds before resetting.
     int nTimeout = (nState == POOL_STATE_SIGNING) ? PRIVATESEND_SIGNING_TIMEOUT : PRIVATESEND_QUEUE_TIMEOUT;
-    bool fTimeout = GetTimeMillis() - nTimeLastSuccessfulStep >= nTimeout*1000 + nLagTime;
+    bool fTimeout = GetTime() - nTimeLastSuccessfulStep >= nTimeout + nLagTime;
 
     if(nState != POOL_STATE_IDLE && fTimeout) {
         LogPrint("privatesend", "CPrivateSendClient::CheckTimeout -- %s timed out (%ds) -- restting\n",
@@ -565,7 +572,8 @@ bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransacti
 
     // push all of our signatures to the Dynode
     LogPrintf("CPrivateSendClient::SignFinalTransaction -- pushing sigs to the dynode, finalMutableTransaction=%s", finalMutableTransaction.ToString());
-    connman.PushMessage(pnode, NetMsgType::PSSIGNFINALTX, sigs);
+    CNetMsgMaker msgMaker(pnode->GetSendVersion());
+    connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSSIGNFINALTX, sigs));
     SetState(POOL_STATE_SIGNING);
     nTimeLastSuccessfulStep = GetTimeMillis();
 
@@ -823,7 +831,7 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 {
     std::vector<CAmount> vecStandardDenoms = CPrivateSend::GetStandardDenominations();
     // Look through the queues and see if anything matches
-    BOOST_FOREACH(CPrivateSendQueue& psq, vecPrivateSendQueue) {
+    for (auto& psq : vecPrivateSendQueue) {
         // only try each queue once
         if(psq.fTried) continue;
         psq.fTried = true;
@@ -832,12 +840,18 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         dynode_info_t infoDn;
 
-        if(!dnodeman.GetDynodeInfo(psq.vin.prevout, infoDn)) {
-            LogPrintf("CPrivateSendClient::JoinExistingQueue -- psq dynode is not in dynode list, dynode=%s\n", psq.vin.prevout.ToStringShort());
+        if(!dnodeman.GetDynodeInfo(psq.dynodeOutpoint, infoDn)) {
+            LogPrintf("CPrivateSendClient::JoinExistingQueue -- psq dynode is not in dynode list, dynode=%s\n", psq.dynodeOutpoint.ToStringShort());
             continue;
         }
 
         if(infoDn.nProtocolVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) continue;
+
+        // skip next dn payments winners
+        if (dnpayments.IsScheduled(infoDn, 0)) {
+            LogPrintf("CPrivateSendClient::JoinExistingQueue -- skipping winner, dynode=%s\n", infoDn.outpoint.ToStringShort());
+            continue;
+        }
 
         std::vector<int> vecBits;
         if(!CPrivateSend::GetDenominationsBits(psq.nDenom, vecBits)) {
@@ -854,45 +868,42 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
         CAmount nValueInTmp = 0;
         std::vector<CTxPSIn> vecTxPSInTmp;
         std::vector<COutput> vCoinsTmp;
+        CAmount nMinAmount = vecStandardDenoms[vecBits.front()];
+        CAmount nMaxAmount = nBalanceNeedsAnonymized;
+        // nInputCount is not covered by legacy signature, require SPORK_6_NEW_SIGS to activate to use new algo
+        // (to make sure nInputCount wasn't modified by some intermediary node)
+        bool fNewAlgo = infoDn.nProtocolVersion > 70900 && sporkManager.IsSporkActive(SPORK_6_NEW_SIGS);
 
+        if (fNewAlgo && psq.nInputCount != 0) {
+            nMinAmount = nMaxAmount = psq.nInputCount * vecStandardDenoms[vecBits.front()];
+        }
         // Try to match their denominations if possible, select at least 1 denominations
         if(!pwalletMain->SelectCoinsByDenominations(psq.nDenom, vecStandardDenoms[vecBits.front()], nBalanceNeedsAnonymized, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, nPrivateSendRounds + (bool)nLiquidityProvider)) {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- Couldn't match denominations %d %d (%s)\n", vecBits.front(), psq.nDenom, CPrivateSend::GetDenominationsToString(psq.nDenom));
             continue;
         }
 
-        vecDynodesUsed.push_back(psq.vin.prevout);
+        vecDynodesUsed.push_back(psq.dynodeOutpoint);
 
-        bool fSkip = false;
-        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&fSkip](CNode* pnode) {
-            fSkip = pnode->fDisconnect || pnode->fDynode;
-            return true;
-        });
-        if (fSkip) {
+        if (connman.IsDynodeOrDisconnectRequested(infoDn.addr)) {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
             continue;
         }
 
-        LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to dynode from queue, addr=%s\n", infoDn.addr.ToString());
-        // connect to Dynode and submit the queue request
-        CNode* pnode = connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
-        if(pnode) {
-            infoMixingDynode = infoDn;
-            nSessionDenom = psq.nDenom;
-
-            connman.PushMessage(pnode, NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
-            LogPrintf("CPrivateSendClient::JoinExistingQueue -- connected (from queue), sending PSACCEPT: nSessionDenom: %d (%s), addr=%s\n",
-                    nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), pnode->addr.ToString());
-            strAutoDenomResult = _("Mixing in progress...");
-            SetState(POOL_STATE_QUEUE);
-            nTimeLastSuccessfulStep = GetTimeMillis();
-            return true;
-        } else {
-            LogPrintf("CPrivateSendClient::JoinExistingQueue -- can't connect, addr=%s\n", infoDn.addr.ToString());
-            strAutoDenomResult = _("Error connecting to Dynode.");
-            continue;
-        }
+        nSessionDenom = psq.nDenom;
+        nSessionInputCount = fNewAlgo ? psq.nInputCount : 0;
+        infoMixingDynode = infoDn;
+        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, nSessionInputCount, txMyCollateral));
+        connman.AddPendingDynode(infoDn.addr);
+        // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
+        SetState(POOL_STATE_QUEUE);
+        nTimeLastSuccessfulStep = GetTime();
+        LogPrintf("CPrivateSendClient::JoinExistingQueue -- pending connection (from queue): nSessionDenom: %d (%s), nSessionInputCount: %d, addr=%s\n",
+                  nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), nSessionInputCount, infoDn.addr.ToString());
+        strAutoDenomResult = _("Trying to connect...");
+        return true;
     }
+    strAutoDenomResult = _("Failed to find mixing queue to join");
     return false;
 }
 
@@ -914,60 +925,105 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
     // otherwise, try one randomly
     while(nTries < 10) {
         dynode_info_t infoDn = dnodeman.FindRandomNotInVec(vecDynodesUsed, MIN_PRIVATESEND_PEER_PROTO_VERSION);
+
         if(!infoDn.fInfoValid) {
-            LogPrintf("CPrivateSendClient::StartNewQueue -- Can't find random dynode!\n");
+            LogPrintf("CPrivateSendClient::StartNewQueue -- Can't find random Dynode!\n");
             strAutoDenomResult = _("Can't find random Dynode.");
             return false;
         }
-        vecDynodesUsed.push_back(infoDn.vin.prevout);
+
+        // skip next dn payments winners
+        if (dnpayments.IsScheduled(infoDn, 0)) {
+            LogPrintf("CPrivateSendClient::StartNewQueue -- skipping winner, Dynode=%s\n", infoDn.outpoint.ToStringShort());
+            nTries++;
+            continue;
+        }
+
+        vecDynodesUsed.push_back(infoDn.outpoint);
 
         if(infoDn.nLastPsq != 0 && infoDn.nLastPsq + nDnCountEnabled/5 > dnodeman.nPsqCount) {
-            LogPrintf("CPrivateSendClient::StartNewQueue -- Too early to mix on this dynode!"
-                        " dynode=%s  addr=%s  nLastPsq=%d  CountEnabled/5=%d  nPsqCount=%d\n",
-                        infoDn.vin.prevout.ToStringShort(), infoDn.addr.ToString(), infoDn.nLastPsq,
+            LogPrintf("CPrivateSendClient::StartNewQueue -- Too early to mix on this Dynode!"
+                        " Dynode=%s  addr=%s  nLastPsq=%d  CountEnabled/5=%d  nPsqCount=%d\n",
+                        infoDn.outpoint.ToStringShort(), infoDn.addr.ToString(), infoDn.nLastPsq,
                         nDnCountEnabled/5, dnodeman.nPsqCount);
             nTries++;
             continue;
         }
 
-        bool fSkip = false;
-        connman.ForNode(infoDn.addr, CConnman::AllNodes, [&fSkip](CNode* pnode) {
-            fSkip = pnode->fDisconnect || pnode->fDynode;
-            return true;
-        });
-        if (fSkip) {
-            LogPrintf("CPrivateSendClient::StartNewQueue -- skipping dynode connection, addr=%s\n", infoDn.addr.ToString());
+        if (connman.IsDynodeOrDisconnectRequested(infoDn.addr)) {
+            LogPrintf("CPrivateSendClient::StartNewQueue -- skipping Dynode connection, addr=%s\n", infoDn.addr.ToString());
             nTries++;
             continue;
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Dynode %s\n", nTries, infoDn.addr.ToString());
-        CNode* pnode = connman.ConnectNode(CAddress(infoDn.addr, NODE_NETWORK), NULL, false, true);
-        if(pnode) {
-            LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoDn.addr.ToString());
-            infoMixingDynode = infoDn;
 
-            std::vector<CAmount> vecAmounts;
-            pwalletMain->ConvertList(vecTxIn, vecAmounts);
-            // try to get a single random denom out of vecAmounts
-            while(nSessionDenom == 0) {
-                nSessionDenom = CPrivateSend::GetDenominationsByAmounts(vecAmounts);
-            }
-
-            connman.PushMessage(pnode, NetMsgType::PSACCEPT, nSessionDenom, txMyCollateral);
-            LogPrintf("CPrivateSendClient::StartNewQueue -- connected, sending PSACCEPT, nSessionDenom: %d (%s)\n",
-                    nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom));
-            strAutoDenomResult = _("Mixing in progress...");
-            SetState(POOL_STATE_QUEUE);
-            nTimeLastSuccessfulStep = GetTimeMillis();
-            return true;
-        } else {
-            LogPrintf("CPrivateSendClient::StartNewQueue -- can't connect, addr=%s\n", infoDn.addr.ToString());
-            nTries++;
-            continue;
+        std::vector<CAmount> vecAmounts;
+        pwalletMain->ConvertList(vecTxIn, vecAmounts);
+        // try to get a single random denom out of vecAmounts
+        while(nSessionDenom == 0) {
+            nSessionDenom = CPrivateSend::GetDenominationsByAmounts(vecAmounts);
         }
+
+        // Count available denominations.
+        // Should never really fail after this point, since we just selected compatible inputs ourselves.
+        std::vector<int> vecBits;
+        if (!CPrivateSend::GetDenominationsBits(nSessionDenom, vecBits)) {
+            return false;
+        }
+
+        CAmount nValueInTmp = 0;
+        std::vector<CTxPSIn> vecTxPSInTmp;
+        std::vector<COutput> vCoinsTmp;
+        std::vector<CAmount> vecStandardDenoms = CPrivateSend::GetStandardDenominations();
+
+        bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecStandardDenoms[vecBits.front()], vecStandardDenoms[vecBits.front()] * PRIVATESEND_ENTRY_MAX_SIZE, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, nPrivateSendRounds);
+        if (!fSelected) {
+            return false;
+        }
+
+        // nInputCount is not covered by legacy signature, require SPORK_6_NEW_SIGS to activate to use new algo
+        // (to make sure nInputCount wasn't modified by some intermediary node)
+        bool fNewAlgo = infoDn.nProtocolVersion > 70900 && sporkManager.IsSporkActive(SPORK_6_NEW_SIGS);
+        nSessionInputCount = fNewAlgo
+                ? std::min(vecTxPSInTmp.size(), size_t(5 + GetRand(PRIVATESEND_ENTRY_MAX_SIZE - 5 + 1)))
+                : 0;
+        infoMixingDynode = infoDn;
+        connman.AddPendingDynode(infoDn.addr);
+        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, nSessionInputCount, txMyCollateral));
+        // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
+        SetState(POOL_STATE_QUEUE);
+        nTimeLastSuccessfulStep = GetTime();
+        LogPrintf("CPrivateSendClient::StartNewQueue -- pending connection, nSessionDenom: %d (%s), nSessionInputCount: %d, addr=%s\n",
+                nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), nSessionInputCount, infoDn.addr.ToString());
+        strAutoDenomResult = _("Trying to connect...");
+        return true;
     }
+    strAutoDenomResult = _("Failed to start a new mixing queue");
     return false;
+}
+
+void CPrivateSendClient::ProcessPendingPsaRequest(CConnman& connman)
+{
+    if (!pendingPsaRequest) return;
+
+    bool fDone = connman.ForNode(pendingPsaRequest.GetAddr(), [&](CNode* pnode) {
+        LogPrint("privatesend", "-- processing psa queue for addr=%s\n", pnode->addr.ToString());
+        nTimeLastSuccessfulStep = GetTime();
+        // TODO: this vvvv should be here after new state POOL_STATE_CONNECTING is added and MIN_PRIVATESEND_PEER_PROTO_VERSION is bumped
+        // SetState(POOL_STATE_QUEUE);
+        strAutoDenomResult = _("Mixing in progress...");
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSACCEPT, pendingPsaRequest.GetPSA()));
+        return true;
+    });
+
+    if (fDone) {
+        pendingPsaRequest = CPendingPsaRequest();
+    } else if (pendingPsaRequest.IsExpired()) {
+        LogPrint("privatesend", "CPrivateSendClient::%s -- failed to connect to %s\n", __func__, pendingPsaRequest.GetAddr().ToString());
+        SetNull();
+    }
 }
 
 bool CPrivateSendClient::SubmitDenominate(CConnman& connman)
@@ -1355,7 +1411,8 @@ void CPrivateSendClient::RelayIn(const CPrivateSendEntry& entry, CConnman& connm
 
     connman.ForNode(infoMixingDynode.addr, [&entry, &connman](CNode* pnode) {
         LogPrintf("CPrivateSendClient::RelayIn -- found master, relaying message to %s\n", pnode->addr.ToString());
-        connman.PushMessage(pnode, NetMsgType::PSVIN, entry);
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
+        connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSVIN, entry));
         return true;
     });
 }
@@ -1372,33 +1429,22 @@ void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindex)
     LogPrint("privatesend", "CPrivateSendClient::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 }
 
-//TODO: Rename/move to core
-void ThreadCheckPrivateSendClient(CConnman& connman)
+void CPrivateSendClient::DoMaintenance(CConnman& connman)
 {
-    if(fLiteMode) return; // disable all Dynamic specific functionality
-    if(fDynodeMode) return; // no client-side mixing on dynodes
+    if(fLiteMode) return; // disable all Dash specific functionality
+    if(fDynodeMode) return; // no client-side mixing on masternodes
 
-    static bool fOneThread;
-    if(fOneThread) return;
-    fOneThread = true;
+    if(!dynodeSync.IsBlockchainSynced() || ShutdownRequested())
+        return;
 
-    // Make this thread recognisable as the PrivateSend thread
-    RenameThread("dynamic-ps-client");
+    static unsigned int nTick = 0;
+    static unsigned int nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN;
 
-    unsigned int nTick = 0;
-    unsigned int nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN;
-
-    while (true)
-    {
-        MilliSleep(1000);
-
-        if(dynodeSync.IsBlockchainSynced() && !ShutdownRequested()) {
-            nTick++;
-            privateSendClient.CheckTimeout();
-            if(nDoAutoNextRun == nTick) {
-                privateSendClient.DoAutomaticDenominating(connman);
-                nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
-            }
-        }
+    nTick++;
+    privateSendClient.CheckTimeout();
+    privateSendClient.ProcessPendingPsaRequest(connman);
+    if(nDoAutoNextRun == nTick) {
+        privateSendClient.DoAutomaticDenominating(connman);
+        nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
     }
 }

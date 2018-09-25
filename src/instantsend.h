@@ -116,12 +116,14 @@ public:
     void Relay(const uint256& txHash, CConnman& connman);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
-    void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
+    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, int posInBlock);
 
     std::string ToString();
+
+    void DoMaintenance() { CheckAndRemove(); }
 };
 
-class CTxLockRequest : public CTransaction
+class CTxLockRequest
 {
 private:
     static const CAmount MIN_FEE            = 0.001 * COIN;
@@ -129,12 +131,39 @@ private:
 public:
     static const int WARN_MANY_INPUTS       = 100;
 
-    CTxLockRequest() = default;
-    CTxLockRequest(const CTransaction& tx) : CTransaction(tx) {};
+    CTransactionRef tx;
 
+    CTxLockRequest() = default;
+    CTxLockRequest(const CTransaction& _tx) : tx(MakeTransactionRef(_tx)) {};
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(tx);
+    }
+    
     bool IsValid() const;
     CAmount GetMinFee() const;
     int GetMaxSignatures() const;
+
+    const uint256 &GetHash() const {
+        return tx->GetHash();
+    }
+
+    std::string ToString() const {
+        return tx->ToString();
+    }
+
+    friend bool operator==(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx == *b.tx;
+    }
+
+    friend bool operator!=(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx != *b.tx;
+    }
 
     explicit operator bool() const
     {
@@ -142,6 +171,13 @@ public:
     }
 };
 
+/**
+ * An InstantSend transaction lock vote. Sent by a masternode in response to a
+ * transaction lock request (ix message) to indicate the transaction input can
+ * be locked. Contains the proposed transaction's hash and the outpoint being
+ * locked along with the masternodes outpoint and signature.
+ * @see CTxLockRequest
+ */
 class CTxLockVote
 {
 private:
@@ -244,6 +280,16 @@ public:
 
     CTxLockRequest txLockRequest;
     std::map<COutPoint, COutPointLock> mapOutPointLocks;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(txLockRequest);
+        READWRITE(mapOutPointLocks);
+        READWRITE(nTimeCreated);
+        READWRITE(nConfirmedHeight);
+    }
 
     uint256 GetHash() const { return txLockRequest.GetHash(); }
 

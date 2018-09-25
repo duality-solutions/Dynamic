@@ -39,9 +39,15 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
 
     dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 
+    // Update global DIP0001 activation status
+    fDIP0001ActiveAtTip = pindexNew->nHeight >= Params().GetConsensus().DIP0001Height;
+
     if (fInitialDownload)
         return;
 
+    if (fLiteMode)
+        return;
+    
     dnodeman.UpdatedBlockTip(pindexNew);
     CPrivateSend::UpdatedBlockTip(pindexNew);
 #ifdef ENABLE_WALLET
@@ -52,8 +58,8 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
     governance.UpdatedBlockTip(pindexNew, connman);
 }
 
-void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, const CBlock *pblock)
+void CPSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, int posInBlock)
 {
-    instantsend.SyncTransaction(tx, pblock);
-    CPrivateSend::SyncTransaction(tx, pblock);
+    instantsend.SyncTransaction(tx, pindex, posInBlock);
+    CPrivateSend::SyncTransaction(tx, pindex, posInBlock);
 }

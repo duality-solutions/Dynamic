@@ -7,9 +7,17 @@
 #define DYNAMIC_CONSENSUS_CONSENSUS_H
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
-static const unsigned int MAX_BLOCK_SIZE = 4194304; //4MB
+static const unsigned int MAX_LEGACY_BLOCK_SIZE = 4194304; //4MB
+static const unsigned int MAX_NEW_BLOCK_SIZE = 4194304; //4MB
+inline unsigned int MaxBlockSize(bool fDIP0001Active /*= false */)
+{
+    return fDIP0001Active ? MAX_NEW_BLOCK_SIZE : MAX_LEGACY_BLOCK_SIZE;
+}
 /** The maximum allowed number of signature check operations in a block (network rule) */
-static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
+inline unsigned int MaxBlockSigOps(bool fDIP0001Active /*= false */)
+{
+    return MaxBlockSize(fDIP0001Active) / 50;
+}
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 10;
 

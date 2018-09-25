@@ -348,7 +348,7 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
     return true;
 }
 
-bool CheckNewDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                std::string& errorMessage, bool fJustCheck)
 {
     if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
@@ -379,7 +379,7 @@ bool CheckNewDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& ent
     return FlushLevelDB();
 }
 
-bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //if exists, check for owner's signature
@@ -404,7 +404,7 @@ bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        CTransaction prevTx;
+        CTransactionRef prevTx = MakeTransactionRef();
         uint256 hashBlock;
         if (!GetTransaction(prevDomainEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
             errorMessage = "CheckDeleteDomainEntryTxInputs: - " + _("Cannot extract previous transaction from BDAP output; this delete operation failed!");
@@ -433,7 +433,7 @@ bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     return FlushLevelDB();
 }
 
-bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //if exists, check for owner's signature
@@ -458,7 +458,7 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     }
     else
     {
-        CTransaction prevTx;
+        CTransactionRef prevTx = MakeTransactionRef();
         uint256 hashBlock;
         if (!GetTransaction(prevDomainEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
             errorMessage = "CheckUpdateDomainEntryTxInputs: - " + _("Cannot extract previous transaction from BDAP output; this update operation failed!");
@@ -487,7 +487,7 @@ bool CheckUpdateDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     return FlushLevelDB();
 }
 
-bool CheckMoveDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckMoveDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                 std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches entry data in leveldb
@@ -496,7 +496,7 @@ bool CheckMoveDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& en
     return false;
 }
 
-bool CheckExecuteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckExecuteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                    std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches entry data in leveldb
@@ -505,7 +505,7 @@ bool CheckExecuteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry&
     return false;
 }
 
-bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckBindDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                 std::string& errorMessage, bool fJustCheck)
 {
     //check names in operation matches entry data in leveldb
@@ -515,7 +515,7 @@ bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& en
     return false;
 }
 
-bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckRevokeDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
     //check name in operation matches entry data in leveldb
@@ -524,17 +524,17 @@ bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& 
     return false;
 }
 
-bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, 
+bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
                             int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
-    if (tx.IsCoinBase() && !fJustCheck && !bSanityCheck)
+    if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
         LogPrintf("*Trying to add BDAP entry in coinbase transaction, skipping...");
         return true;
     }
 
     //if (fDebug && !bSanityCheck)
-        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op).c_str(), tx.GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
     CScript scriptOp;
     vchCharString vvchOpParameters;
@@ -566,23 +566,23 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction&
         return error(errorMessage.c_str());
     }
 
-    entry.txHash = tx.GetHash();
+    entry.txHash = tx->GetHash();
     entry.nHeight = nHeight;
 
     if (strOperationType == "bdap_new")
-        return CheckNewDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete")
-        return CheckDeleteDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_update")
-        return CheckUpdateDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_move")
-        return CheckMoveDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_execute")
-        return CheckExecuteDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckExecuteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_bind")
-        return CheckBindDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckBindDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_revoke")
-        return CheckRevokeDomainEntryTxInputs(tx, entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
 
     return false;
 }

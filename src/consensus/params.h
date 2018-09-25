@@ -37,6 +37,7 @@ struct BIP9Deployment {
  */
 struct Params {
     uint256 hashGenesisBlock;
+    int DIP0001Height;
     int nRewardsStart;
     int nDynodePaymentsStartBlock;
     int nMinCountDynodesPaymentStart;
@@ -72,6 +73,8 @@ struct Params {
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
+    uint256 nMinimumChainWork;
+    uint256 defaultAssumeValid;
     
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
     int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp  )) / 100; }

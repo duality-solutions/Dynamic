@@ -11,6 +11,11 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
+uint256 CBlockHeader::GetHash() const
+{
+    return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
+}
+
 std::string CBlock::ToString() const
 {
     std::stringstream s;
@@ -23,7 +28,7 @@ std::string CBlock::ToString() const
         vtx.size());
     for (unsigned int i = 0; i < vtx.size(); i++)
     {
-        s << "  " << vtx[i].ToString() << "\n";
+        s << "  " << vtx[i]->ToString() << "\n";
     }
     return s.str();
 }

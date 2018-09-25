@@ -25,9 +25,9 @@ protected:
     void Shutdown();
 
     // CValidationInterface
-    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, const CBlock* pblock);
-    void UpdatedBlockTip(const CBlockIndex *pindex);
-    void NotifyTransactionLock(const CTransaction &tx);
+    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, int posInBlock) override;
+    void UpdatedBlockTip(const CBlockIndex *pindex) override;
+    void NotifyTransactionLock(const CTransaction &tx) override;
 
 private:
     CZMQNotificationInterface();

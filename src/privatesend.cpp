@@ -14,12 +14,13 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "messagesigner.h"
+#include "netmessagemaker.h"
 #include "script/sign.h"
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
 
-#include <boost/lexical_cast.hpp>
+#include <string>
 
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
@@ -37,28 +38,71 @@ bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
     return false;
 }
 
+uint256 CPrivateSendQueue::GetSignatureHash() const
+{
+    return SerializeHash(*this);
+}
+
 bool CPrivateSendQueue::Sign()
 {
     if(!fDynodeMode) return false;
 
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
-
-    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-        LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
-        return false;
-    }
-
-    return CheckSignature(activeDynode.pubKeyDynode);
-}
-
-bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode)
-{
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
     std::string strError = "";
 
-    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-        LogPrintf("CPrivateSendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
-        return false;
+    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+        uint256 hash = GetSignatureHash();
+
+        if (!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchSig)) {
+            LogPrintf("CPrivateSendQueue::Sign -- SignHash() failed\n");
+            return false;
+        }
+
+        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchSig, strError)) {
+            LogPrintf("CPrivateSendQueue::Sign -- VerifyHash() failed, error: %s\n", strError);
+            return false;
+        }
+    } else {
+        std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
+                        std::to_string(nDenom) +
+                        std::to_string(nTime) +
+                        std::to_string(fReady);
+
+        if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+            LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
+            return false;
+        }
+
+        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
+            LogPrintf("CPrivateSendQueue::Sign -- VerifyMessage() failed, error: %s\n", strError);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode) const
+{
+    std::string strError = "";
+
+    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+        uint256 hash = GetSignatureHash();
+
+        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
+            // we don't care about queues with old signature format
+            LogPrintf("CPrivateSendQueue::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
+            return false;
+        }
+    } else {
+        std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
+                        std::to_string(nDenom) +
+                        std::to_string(nTime) +
+                        std::to_string(fReady);
+
+        if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+            LogPrintf("CPrivateSendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
+            return false;
+        }
     }
 
     return true;
@@ -66,12 +110,11 @@ bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 
 bool CPrivateSendQueue::Relay(CConnman& connman)
 {
-    std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
-    BOOST_FOREACH(CNode* pnode, vNodesCopy)
-        if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            connman.PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
-
-    connman.ReleaseNodeVector(vNodesCopy);
+    connman.ForEachNode([&connman, this](CNode* pnode) {
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
+        if (pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
+            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSQUEUE, (*this)));
+    });
     return true;
 }
 
@@ -79,24 +122,56 @@ bool CPrivateSendBroadcastTx::Sign()
 {
     if(!fDynodeMode) return false;
 
-    std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
-
-    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-        LogPrintf("CPrivateSendBroadcastTx::Sign -- SignMessage() failed\n");
-        return false;
-    }
-
-    return CheckSignature(activeDynode.pubKeyDynode);
-}
-
-bool CPrivateSendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode)
-{
-    std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
     std::string strError = "";
 
-    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-        LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
-        return false;
+    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+        uint256 hash = GetSignatureHash();
+
+        if (!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchSig)) {
+            LogPrintf("CPrivateSendBroadcastTx::Sign -- SignHash() failed\n");
+            return false;
+        }
+
+        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchSig, strError)) {
+            LogPrintf("CPrivateSendBroadcastTx::Sign -- VerifyHash() failed, error: %s\n", strError);
+            return false;
+        }
+    } else {
+        std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
+
+        if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+            LogPrintf("CPrivateSendBroadcastTx::Sign -- SignMessage() failed\n");
+            return false;
+        }
+
+        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
+            LogPrintf("CPrivateSendBroadcastTx::Sign -- VerifyMessage() failed, error: %s\n", strError);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CPrivateSendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode) const
+{
+    std::string strError = "";
+
+    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+        uint256 hash = GetSignatureHash();
+
+        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
+            // we don't care about pstxes with old signature format
+            LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
+            return false;
+        }
+    } else {
+        std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
+
+        if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+            LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
+            return false;
+        }
     }
 
     return true;
@@ -215,7 +290,7 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     {
         LOCK(cs_main);
         CValidationState validationState;
-        if(!AcceptToMemoryPool(mempool, validationState, txCollateral, false, NULL, false, maxTxFee, true)) {
+        if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), false, NULL, NULL, false, maxTxFee, true)) {
             LogPrint("privatesend", "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool()\n");
             return false;
         }
@@ -374,6 +449,7 @@ std::string CPrivateSend::GetMessageByID(PoolMessage nMessageID)
         case MSG_NOERR:                 return _("No errors detected.");
         case MSG_SUCCESS:               return _("Transaction created successfully.");
         case MSG_ENTRIES_ADDED:         return _("Your entries added successfully.");
+        case ERR_INVALID_INPUT_COUNT:   return _("Invalid input count.");
         default:                        return _("Unknown response.");
     }
 }
@@ -381,7 +457,7 @@ std::string CPrivateSend::GetMessageByID(PoolMessage nMessageID)
 void CPrivateSend::AddPSTX(const CPrivateSendBroadcastTx& pstx)
 {
     LOCK(cs_mappstx);
-    mapPSTX.insert(std::make_pair(pstx.tx.GetHash(), pstx));
+    mapPSTX.insert(std::make_pair(pstx.tx->GetHash(), pstx));
 }
 
 CPrivateSendBroadcastTx CPrivateSend::GetPSTX(const uint256& hash)
@@ -412,7 +488,7 @@ void CPrivateSend::UpdatedBlockTip(const CBlockIndex *pindex)
     }
 }
 
-void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
+void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, int posInBlock)
 {
     if (tx.IsCoinBase()) return;
 
@@ -421,68 +497,7 @@ void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
     uint256 txHash = tx.GetHash();
     if (!mapPSTX.count(txHash)) return;
 
-    // When tx is 0-confirmed or conflicted, pblock is NULL and nConfirmedHeight should be set to -1
-    CBlockIndex* pblockindex = NULL;
-    if(pblock) {
-        uint256 blockHash = pblock->GetHash();
-        BlockMap::iterator mi = mapBlockIndex.find(blockHash);
-        if(mi == mapBlockIndex.end() || !mi->second) {
-            // shouldn't happen
-            LogPrint("privatesend", "CPrivateSendClient::SyncTransaction -- Failed to find block %s\n", blockHash.ToString());
-            return;
-        }
-        pblockindex = mi->second;
-    }
-    mapPSTX[txHash].SetConfirmedHeight(pblockindex ? pblockindex->nHeight : -1);
+    // When tx is 0-confirmed or conflicted, posInBlock is SYNC_TRANSACTION_NOT_IN_BLOCK and nConfirmedHeight should be set to -1
+    mapPSTX[txHash].SetConfirmedHeight(posInBlock == CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK ? -1 : pindex->nHeight);
     LogPrint("privatesend", "CPrivateSendClient::SyncTransaction -- txid=%s\n", txHash.ToString());
-}
-
-//TODO: Rename/move to core
-void ThreadCheckPrivateSend(CConnman& connman)
-{
-    if(fLiteMode) return; // disable all Dynamic specific functionality
-
-    static bool fOneThread;
-    if(fOneThread) return;
-    fOneThread = true;
-
-    // Make this thread recognisable as the PrivateSend thread
-    RenameThread("dynamic-ps");
-
-    unsigned int nTick = 0;
-
-    while (true)
-    {
-        MilliSleep(1000);
-
-        // try to sync from all available nodes, one step at a time
-        dynodeSync.ProcessTick(connman);
-
-        if(dynodeSync.IsBlockchainSynced() && !ShutdownRequested()) {
-
-            nTick++;
-
-            // make sure to check all dynodes first
-            dnodeman.Check();
-
-            // check if we should activate or ping every few minutes,
-            // slightly postpone first run to give net thread a chance to connect to some peers
-            if(nTick % DYNODE_MIN_DNP_SECONDS == 15)
-                activeDynode.ManageState(connman);
-
-            if(nTick % 60 == 0) {
-                dnodeman.ProcessDynodeConnections(connman);
-                dnodeman.CheckAndRemove(connman);
-                dnpayments.CheckAndRemove();
-                instantsend.CheckAndRemove();
-            }
-            if(fDynodeMode && (nTick % (60 * 5) == 0)) {
-                dnodeman.DoFullVerificationStep(connman);
-            }
-
-            if(nTick % (60 * 5) == 0) {
-                governance.DoMaintenance(connman);
-            }
-        }
-    }
 }

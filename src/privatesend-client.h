@@ -37,6 +37,45 @@ static const int PRIVATESEND_KEYS_THRESHOLD_STOP    = 50;
 // The main object for accessing mixing
 extern CPrivateSendClient privateSendClient;
 
+class CPendingPsaRequest
+{
+private:
+    static const int TIMEOUT = 15;
+
+    CService addr;
+    CPrivateSendAccept psa;
+    int64_t nTimeCreated;
+
+public:
+    CPendingPsaRequest():
+        addr(CService()),
+        psa(CPrivateSendAccept()),
+        nTimeCreated(0)
+    {};
+
+    CPendingPsaRequest(const CService& addr_, const CPrivateSendAccept& psa_):
+        addr(addr_),
+        psa(psa_)
+    { nTimeCreated = GetTime(); }
+
+    CService GetAddr() { return addr; }
+    CPrivateSendAccept GetPSA() { return psa; }
+    bool IsExpired() { return GetTime() - nTimeCreated > TIMEOUT; }
+
+    friend bool operator==(const CPendingPsaRequest& a, const CPendingPsaRequest& b)
+    {
+        return a.addr == b.addr && a.psa == b.psa;
+    }
+    friend bool operator!=(const CPendingPsaRequest& a, const CPendingPsaRequest& b)
+    {
+        return !(a == b);
+    }
+    explicit operator bool() const
+    {
+        return *this != CPendingPsaRequest();
+    }
+};
+
 /** Used to keep track of current status of mixing pool
  */
 class CPrivateSendClient : public CPrivateSendBase
@@ -62,6 +101,7 @@ private:
 
     dynode_info_t infoMixingDynode;
     CMutableTransaction txMyCollateral; // client side collateral
+    CPendingPsaRequest pendingPsaRequest;
 
     CKeyHolderStorage keyHolderStorage; // storage for keys used in PrepareDenominate
 
@@ -147,11 +187,13 @@ public:
     /// Passively run mixing in the background according to the configuration in settings
     bool DoAutomaticDenominating(CConnman& connman, bool fDryRun=false);
 
+    void ProcessPendingPsaRequest(CConnman& connman);
+
     void CheckTimeout();
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
-};
 
-void ThreadCheckPrivateSendClient(CConnman& connman);
+    void DoMaintenance(CConnman& connman);
+};
 
 #endif

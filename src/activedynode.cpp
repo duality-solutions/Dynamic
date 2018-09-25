@@ -251,7 +251,7 @@ void CActiveDynode::ManageStateRemote()
         }
         if(nState != ACTIVE_DYNODE_STARTED) {
             LogPrintf("CActiveDynode::ManageStateRemote -- STARTED!\n");
-            outpoint = infoDn.vin.prevout;
+            outpoint = infoDn.outpoint;
             service = infoDn.addr;
             fPingerEnabled = true;
             nState = ACTIVE_DYNODE_STARTED;
