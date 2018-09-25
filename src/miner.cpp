@@ -938,19 +938,31 @@ void GenerateDynamicsCPU(int nCPUThreads, const CChainParams& chainparams, CConn
     }
 }
 
-void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
-{
 #ifdef ENABLE_GPU
+static int lastGPUChangeTime;
+static boost::thread *gpuStartThread;
+
+void static GenerateDynamicsGPULocal(int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
+{
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    RenameThread("gpu-miner-controller");
     if (nGPUThreads == 0) {
-        LogPrintf("DynamicMiner -- disabled -- CPU and GPU Threads set to zero\n");
+        LogPrintf("GenerateDynamicsGPU -- disabled -- CPU and GPU Threads set to zero\n");
         return;
+    }
+
+    if (GetTime() - lastGPUChangeTime < 2000) {
+        lastGPUChangeTime = GetTime();
+        //LogPrintf("GenerateDynamicsGPULocal -- waiting to make changes.\n");
+        ShutdownGPUMiners();
+        MilliSleep(2000);
     }
 
     std::size_t devices = GetGPUDeviceCount();
     //LogPrintf("DynamicMiner -- GPU Devices: %u\n", devices);
 
     if (nGPUThreads < 0)
-        nGPUThreads = 4;
+        nGPUThreads = 8;
 
     // Start GPU threads
     std::size_t nGPUTarget = static_cast<std::size_t>(nGPUThreads);
@@ -961,6 +973,21 @@ void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConn
             gpuMinerThreads->create_thread(boost::bind(&DynamicMinerGPU, boost::cref(chainparams), boost::ref(connman), device));
         }
     }
+    lastGPUChangeTime = GetTime();
+}
+#endif // ENABLE_GPU
+
+void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
+{
+#ifdef ENABLE_GPU
+    if (gpuStartThread != NULL) {
+        //ShutdownGPUMiners();
+        MilliSleep(30);
+        gpuStartThread->interrupt();
+        delete gpuStartThread;
+        gpuStartThread = NULL;
+    }
+    gpuStartThread = new  boost::thread(GenerateDynamicsGPULocal, nGPUThreads, boost::cref(chainparams), boost::ref(connman));
 #else
     LogPrintf("DynamicMiner -- GPU no support\n");
 #endif
