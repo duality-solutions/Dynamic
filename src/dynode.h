@@ -28,17 +28,20 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 
 // sentinel version before sentinel ping implementation
 #define DEFAULT_SENTINEL_VERSION 0x010001
+// daemon version before implementation of nDaemonVersion in CDynodePing
+#define DEFAULT_DAEMON_VERSION 203050
 
 class CDynodePing
 {
 public:
-    CTxIn vin{};
+    COutPoint dynodeOutpoint{};
     uint256 blockHash{};
     int64_t sigTime{}; //dnb message times
     std::vector<unsigned char> vchSig{};
     bool fSentinelIsCurrent = false; // true if last sentinel ping was actual
     // DSB is always 0, other 3 bits corresponds to x.x.x version scheme
     uint32_t nSentinelVersion{DEFAULT_SENTINEL_VERSION};
+    uint32_t nDaemonVersion{DEFAULT_DAEMON_VERSION};
 
     CDynodePing() = default;
 
@@ -48,45 +51,70 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(blockHash);
         READWRITE(sigTime);
-        READWRITE(vchSig);
-        if(ser_action.ForRead() && (s.size() == 0))
-        {
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
+        if(ser_action.ForRead() && s.size() == 0) {
+            // TODO: drop this after migration to 70100
             fSentinelIsCurrent = false;
             nSentinelVersion = DEFAULT_SENTINEL_VERSION;
-           return;
+            nDaemonVersion = DEFAULT_DAEMON_VERSION;
+            return;
         }
         READWRITE(fSentinelIsCurrent);
         READWRITE(nSentinelVersion);
+        if(ser_action.ForRead() && s.size() == 0) {
+            // TODO: drop this after migration to 70100
+            nDaemonVersion = DEFAULT_DAEMON_VERSION;
+            return;
+        }
+        if (!(nVersion == 70900 && (s.GetType() & SER_NETWORK))) {
+            READWRITE(nDaemonVersion);
+        }
     }
 
-    uint256 GetHash() const
-    {
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vin;
-        ss << sigTime;
-        return ss.GetHash();
-    }
+    uint256 GetHash() const;
+    uint256 GetSignatureHash() const;
 
     bool IsExpired() const { return GetAdjustedTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
 
     bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
-    bool CheckSignature(CPubKey& pubKeyDynode, int &nDos);
+    bool CheckSignature(const CPubKey& pubKeyDynode, int &nDos) const;
     bool SimpleCheck(int& nDos);
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
 
+    explicit operator bool() const;
 };
 
 inline bool operator==(const CDynodePing& a, const CDynodePing& b)
 {
-    return a.vin == b.vin && a.blockHash == b.blockHash;
+    return a.dynodeOutpoint == b.dynodeOutpoint && a.blockHash == b.blockHash;
 }
 inline bool operator!=(const CDynodePing& a, const CDynodePing& b)
 {
     return !(a == b);
+}
+inline CDynodePing::operator bool() const
+{
+    return *this != CDynodePing();
 }
 
 struct dynode_info_t 
@@ -100,17 +128,17 @@ struct dynode_info_t
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
 
     dynode_info_t(int activeState, int protoVer, int64_t sTime,
-                      COutPoint const& outpoint, CService const& addr,
+                      COutPoint const& outpnt, CService const& addr,
                       CPubKey const& pkCollAddr, CPubKey const& pkDN) :
         nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
-        vin{outpoint}, addr{addr},
+        outpoint{outpnt}, addr{addr},
         pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN} {}
 
     int nActiveState = 0;
     int nProtocolVersion = 0;
     int64_t sigTime = 0; //dnb message time
 
-    CTxIn vin{};
+    COutPoint outpoint{};
     CService addr{};
     CPubKey pubKeyCollateralAddress{};
     CPubKey pubKeyDynode{};
@@ -175,7 +203,21 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         LOCK(cs);
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                outpoint = txin.prevout;
+            } else {
+                txin = CTxIn(outpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(outpoint);
+        }
         READWRITE(addr);
         READWRITE(pubKeyCollateralAddress);
         READWRITE(pubKeyDynode);
@@ -197,7 +239,7 @@ public:
     }
 
     // CALCULATE A RANK AGAINST OF GIVEN BLOCK
-    arith_uint256 CalculateScore(const uint256& blockHash);
+    arith_uint256 CalculateScore(const uint256& blockHash) const;
 
     bool UpdateFromNewBroadcast(CDynodeBroadcast& dnb, CConnman& connman);
 
@@ -209,7 +251,7 @@ public:
 
     bool IsPingedWithin(int nSeconds, int64_t nTimeToCheckAt = -1)
     {
-        if(lastPing == CDynodePing()) return false;
+        if(!lastPing) return false;
 
         if(nTimeToCheckAt == -1) {
             nTimeToCheckAt = GetAdjustedTime();
@@ -217,16 +259,16 @@ public:
         return nTimeToCheckAt - lastPing.sigTime < nSeconds;
     }
 
-    bool IsEnabled() { return nActiveState == DYNODE_ENABLED; }
-    bool IsPreEnabled() { return nActiveState == DYNODE_PRE_ENABLED; }
-    bool IsPoSeBanned() { return nActiveState == DYNODE_POSE_BAN; }
+    bool IsEnabled() const { return nActiveState == DYNODE_ENABLED; }
+    bool IsPreEnabled() const { return nActiveState == DYNODE_PRE_ENABLED; }
+    bool IsPoSeBanned() const { return nActiveState == DYNODE_POSE_BAN; }
     // NOTE: this one relies on nPoSeBanScore, not on nActiveState as everything else here
-    bool IsPoSeVerified() { return nPoSeBanScore <= -DYNODE_POSE_BAN_MAX_SCORE; }
-    bool IsExpired() { return nActiveState == DYNODE_EXPIRED; }
-    bool IsOutpointSpent() { return nActiveState == DYNODE_OUTPOINT_SPENT; }
-    bool IsUpdateRequired() { return nActiveState == DYNODE_UPDATE_REQUIRED; }
-    bool IsSentinelPingExpired() { return nActiveState == DYNODE_SENTINEL_PING_EXPIRED; }
-    bool IsNewStartRequired() { return nActiveState == DYNODE_NEW_START_REQUIRED; }
+    bool IsPoSeVerified() const { return nPoSeBanScore <= -DYNODE_POSE_BAN_MAX_SCORE; }
+    bool IsExpired() const { return nActiveState == DYNODE_EXPIRED; }
+    bool IsOutpointSpent() const { return nActiveState == DYNODE_OUTPOINT_SPENT; }
+    bool IsUpdateRequired() const { return nActiveState == DYNODE_UPDATE_REQUIRED; }
+    bool IsSentinelPingExpired() const { return nActiveState == DYNODE_SENTINEL_PING_EXPIRED; }
+    bool IsNewStartRequired() const { return nActiveState == DYNODE_NEW_START_REQUIRED; }
 
     static bool IsValidStateForAutoStart(int nActiveStateIn)
     {
@@ -236,7 +278,7 @@ public:
                 nActiveStateIn == DYNODE_SENTINEL_PING_EXPIRED;
     }
 
-   bool IsValidForPayment()
+   bool IsValidForPayment() const
     {
         if(nActiveState == DYNODE_ENABLED) {
             return true;
@@ -256,7 +298,7 @@ public:
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
     void PoSeBan() { nPoSeBanScore = DYNODE_POSE_BAN_MAX_SCORE; }
 
-    dynode_info_t GetInfo();
+    dynode_info_t GetInfo() const;
 
     static std::string StateToString(int nStateIn);
     std::string GetStateString() const;
@@ -264,8 +306,8 @@ public:
 
     int GetCollateralAge();
 
-    int GetLastPaidTime() { return nTimeLastPaid; }
-    int GetLastPaidBlock() { return nBlockLastPaid; }
+    int GetLastPaidTime() const { return nTimeLastPaid; }
+    int GetLastPaidBlock() const { return nBlockLastPaid; }
     void UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack);
 
     // KEEP TRACK OF EACH GOVERNANCE ITEM INCASE THIS NODE GOES OFFLINE, SO WE CAN RECALC THEIR STATUS
@@ -293,11 +335,11 @@ public:
 
 inline bool operator==(const CDynode& a, const CDynode& b)
 {
-    return a.vin == b.vin;
+    return a.outpoint == b.outpoint;
 }
 inline bool operator!=(const CDynode& a, const CDynode& b)
 {
-    return !(a.vin == b.vin);
+    return !(a.outpoint == b.outpoint);
 }
 
 //
@@ -318,45 +360,55 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                outpoint = txin.prevout;
+            } else {
+                txin = CTxIn(outpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(outpoint);
+        }
         READWRITE(addr);
         READWRITE(pubKeyCollateralAddress);
         READWRITE(pubKeyDynode);
-        READWRITE(vchSig);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
         READWRITE(sigTime);
         READWRITE(nProtocolVersion);
-        READWRITE(lastPing);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(lastPing);
+        }
     }
 
-    uint256 GetHash() const
-    {
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-            ss << vin;
-            ss << pubKeyCollateralAddress;
-            ss << sigTime;
-        return ss.GetHash();
-    }
+    uint256 GetHash() const;
+    uint256 GetSignatureHash() const;
 
     /// Create Dynode broadcast, needs to be relayed manually after that
     static bool Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet);
-    static bool Create(std::string strService, std::string strKey, std::string strTxHash, std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline = false);
+    static bool Create(const std::string strService, const std::string strKey, const std::string strTxHash, const std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
     bool Update(CDynode* pdn, int& nDos, CConnman& connman);
     bool CheckOutpoint(int& nDos);
-    /// Is the input associated with this public key? (and there is 1000 DYN - checking if valid Dynode)
-    bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
 
     bool Sign(const CKey& keyCollateralAddress);
-    bool CheckSignature(int& nDos);
-    void Relay(CConnman& connman);
+    bool CheckSignature(int& nDos) const;
+    void Relay(CConnman& connman) const;
 };
 
 class CDynodeVerification
 {
 public:
-    CTxIn vin1{};
-    CTxIn vin2{};
+    COutPoint dynodeOutpoint1{};
+    COutPoint dynodeOutpoint2{};
     CService addr{};
     int nonce{};
     int nBlockHeight{};
@@ -375,8 +427,27 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        READWRITE(vin1);
-        READWRITE(vin2);
+        int nVersion = s.GetVersion();
+        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin1{};
+            CTxIn txin2{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin1);
+                READWRITE(txin2);
+                dynodeOutpoint1 = txin1.prevout;
+                dynodeOutpoint2 = txin2.prevout;
+            } else {
+                txin1 = CTxIn(dynodeOutpoint1);
+                txin2 = CTxIn(dynodeOutpoint2);
+                READWRITE(txin1);
+                READWRITE(txin2);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint1);
+            READWRITE(dynodeOutpoint2);
+        }
         READWRITE(addr);
         READWRITE(nonce);
         READWRITE(nBlockHeight);
@@ -386,12 +457,39 @@ public:
 
     uint256 GetHash() const
     {
+        // Note: doesn't match serialization
+
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << vin1;
-        ss << vin2;
+        // adding dummy values here to match old hashing format
+        ss << dynodeOutpoint1 << uint8_t{} << 0xffffffff;
+        ss << dynodeOutpoint2 << uint8_t{} << 0xffffffff;
         ss << addr;
         ss << nonce;
         ss << nBlockHeight;
+        return ss.GetHash();
+    }
+
+    uint256 GetSignatureHash1(const uint256& blockHash) const
+    {
+        // Note: doesn't match serialization
+
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << addr;
+        ss << nonce;
+        ss << blockHash;
+        return ss.GetHash();
+    }
+
+    uint256 GetSignatureHash2(const uint256& blockHash) const
+    {
+        // Note: doesn't match serialization
+
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << dynodeOutpoint1;
+        ss << dynodeOutpoint2;
+        ss << addr;
+        ss << nonce;
+        ss << blockHash;
         return ss.GetHash();
     }
 

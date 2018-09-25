@@ -40,21 +40,6 @@ static bool Sign1(const CKeyID& address, const BaseSignatureCreator& creator, co
     return true;
 }
 
-static bool Sign1(const CKeyID& address, const CKeyStore& keystore, uint256 hash, int nHashType, CScript& scriptSigRet)
-{
-    CKey key;
-    if (!keystore.GetKey(address, key))
-        return false;
-
-    std::vector<unsigned char> vchSig;
-    if (!key.Sign(hash, vchSig))
-        return false;
-    vchSig.push_back((unsigned char)nHashType);
-    scriptSigRet << vchSig;
-
-    return true;
-}
-
 static bool SignN(const std::vector<valtype>& multisigdata, const BaseSignatureCreator& creator, const CScript& scriptCode, CScript& scriptSigRet)
 {
     int nSigned = 0;
@@ -64,20 +49,6 @@ static bool SignN(const std::vector<valtype>& multisigdata, const BaseSignatureC
         const valtype& pubkey = multisigdata[i];
         CKeyID keyID = CPubKey(pubkey).GetID();
         if (Sign1(keyID, creator, scriptCode, scriptSigRet))
-            ++nSigned;
-    }
-    return nSigned==nRequired;
-}
-
-static bool SignN(const std::vector<valtype>& multisigdata, const CKeyStore& keystore, uint256 hash, int nHashType, CScript& scriptSigRet)
-{
-    int nSigned = 0;
-    int nRequired = multisigdata.front()[0];
-    for (unsigned int i = 1; i < multisigdata.size()-1 && nSigned < nRequired; i++)
-    {
-        const valtype& pubkey = multisigdata[i];
-        CKeyID keyID = CPubKey(pubkey).GetID();
-        if (Sign1(keyID, keystore, hash, nHashType, scriptSigRet))
             ++nSigned;
     }
     return nSigned==nRequired;
@@ -344,48 +315,4 @@ bool DummySignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, const 
     vchSig[6 + 33] = 0x01;
     vchSig[6 + 33 + 32] = SIGHASH_ALL;
     return true;
-}
-
-/**
- * Sign scriptPubKey with private keys stored in keystore, given transaction hash and hash type.
- * Signatures are returned in scriptSigRet (or returns false if scriptPubKey can't be signed),
- * unless whichTypeRet is TX_SCRIPTHASH, in which case scriptSigRet is the redemption script.
- * Returns false if scriptPubKey could not be completely satisfied.
- */
-bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash, int nHashType,
-                  CScript& scriptSigRet, txnouttype& whichTypeRet)
-{
-    scriptSigRet.clear();
-
-    std::vector<valtype> vSolutions;
-    if (!Solver(scriptPubKey, whichTypeRet, vSolutions))
-        return false;
-
-    CKeyID keyID;
-    switch (whichTypeRet)
-    {
-    case TX_NONSTANDARD:
-    case TX_NULL_DATA:
-    case TX_PUBKEY:
-        keyID = CPubKey(vSolutions[0]).GetID();
-        return Sign1(keyID, keystore, hash, nHashType, scriptSigRet);
-    case TX_PUBKEYHASH:
-        keyID = CKeyID(uint160(vSolutions[0]));
-        if (!Sign1(keyID, keystore, hash, nHashType, scriptSigRet))
-            return false;
-        else
-        {
-            CPubKey vch;
-            keystore.GetPubKey(keyID, vch);
-            scriptSigRet << ToByteVector(vch);
-        }
-        return true;
-    case TX_SCRIPTHASH:
-        return keystore.GetCScript(uint160(vSolutions[0]), scriptSigRet);
-
-    case TX_MULTISIG:
-        scriptSigRet << OP_0; // workaround CHECKMULTISIG bug
-        return (SignN(vSolutions, keystore, hash, nHashType, scriptSigRet));
-    }
-    return false;
 }

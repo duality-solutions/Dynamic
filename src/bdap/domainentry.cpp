@@ -113,18 +113,22 @@ bool IsBDAPDataOutput(const CTxOut& out) {
    return false;
 }
 
-bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
+bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut, const Consensus::Params& consensusParams)
 {
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
-    CBlockIndex *pindexSlow = NULL; 
+
+    CBlockIndex *pindexSlow = NULL;
+
     LOCK(cs_main);
+    
     pindexSlow = chainActive[nHeight];
+    
     if (pindexSlow) {
         CBlock block;
         if (ReadBlockFromDisk(block, pindexSlow, consensusParams)) {
-            BOOST_FOREACH(const CTransaction &tx, block.vtx) {
-                if (tx.GetHash() == hash) {
+                for (const auto& tx : block.vtx) {
+                if (tx->GetHash() == hash) {
                     txOut = tx;
                     return true;
                 }
@@ -155,9 +159,9 @@ std::vector<unsigned char> vchFromString(const std::string& str)
     return std::vector<unsigned char>(str.begin(), str.end());
 }
 
-int GetBDAPDataOutput(const CTransaction& tx) {
-   for(unsigned int i = 0; i<tx.vout.size();i++) {
-       if(IsBDAPDataOutput(tx.vout[i]))
+int GetBDAPDataOutput(const CTransactionRef& tx) {
+   for(unsigned int i = 0; i < tx->vout.size();i++) {
+       if(IsBDAPDataOutput(tx->vout[i]))
            return i;
     }
    return -1;
@@ -181,13 +185,13 @@ bool GetBDAPData(const CScript& scriptPubKey, std::vector<unsigned char>& vchDat
     return true;
 }
 
-bool GetBDAPData(const CTransaction& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
+bool GetBDAPData(const CTransactionRef& tx, std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchHash, int& nOut)
 {
     nOut = GetBDAPDataOutput(tx);
     if(nOut == -1)
        return false;
 
-    const CScript &scriptPubKey = tx.vout[nOut].scriptPubKey;
+    const CScript &scriptPubKey = tx->vout[nOut].scriptPubKey;
     return GetBDAPData(scriptPubKey, vchData, vchHash);
 }
 
@@ -196,7 +200,7 @@ bool GetBDAPData(const CTxOut& out, std::vector<unsigned char>& vchData, std::ve
     return GetBDAPData(out.scriptPubKey, vchData, vchHash);
 }
 
-bool CDomainEntry::UnserializeFromTx(const CTransaction& tx) {
+bool CDomainEntry::UnserializeFromTx(const CTransactionRef& tx) {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nOut;
@@ -392,8 +396,8 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
 bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& errorMessage)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
-        const CTransaction& tx = e.GetTx();
-        for (const CTxOut& txOut : tx.vout) {
+        const CTransactionRef& tx = e.GetSharedTx();
+        for (const CTxOut& txOut : tx->vout) {
             if (IsBDAPDataOutput(txOut)) {
                 CDomainEntry domainEntry(tx);
                 if (this->GetFullObjectPath() == domainEntry.GetFullObjectPath()) {
@@ -407,11 +411,11 @@ bool CDomainEntry::CheckIfExistsInMemPool(const CTxMemPool& pool, std::string& e
 }
 
 /** Checks if the domain entry transaction uses the entry's UTXO */
-bool CDomainEntry::TxUsesPreviousUTXO(const CTransaction& tx)
+bool CDomainEntry::TxUsesPreviousUTXO(const CTransactionRef& tx)
 {
     int nIn = GetBDAPOperationOutIndex(tx);
     COutPoint entryOutpoint = COutPoint(txHash, nIn);
-    for (const CTxIn& txIn : tx.vin) {
+    for (const CTxIn& txIn : tx->vin) {
         if (txIn.prevout == entryOutpoint)
             return true;
     }
@@ -522,12 +526,12 @@ CAmount GetBDAPFee(const CScript& scriptPubKey)
     return recp.nAmount;
 }
 
-bool DecodeBDAPTx(const CTransaction& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+bool DecodeBDAPTx(const CTransactionRef& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
 {
     bool found = false;
 
-    for (unsigned int i = 0; i < tx.vout.size(); i++) {
-        const CTxOut& out = tx.vout[i];
+    for (unsigned int i = 0; i < tx->vout.size(); i++) {
+        const CTxOut& out = tx->vout[i];
         vchCharString vvchRead;
         if (DecodeBDAPScript(out.scriptPubKey, op, vvchRead)) {
             found = true;
@@ -606,11 +610,11 @@ std::string GetBDAPOpTypeString(const CScript& script)
     return BDAPFromOp(GetBDAPOpType(script));
 }
 
-bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op)
+bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op)
 {
-    for (unsigned int i = 0; i < tx.vout.size(); i++) 
+    for (unsigned int i = 0; i < tx->vout.size(); i++) 
     {
-        const CTxOut& out = tx.vout[i];
+        const CTxOut& out = tx->vout[i];
         if (DecodeBDAPScript(out.scriptPubKey, op, vvchOpParameters)) 
         {
             scriptBDAPOp = out.scriptPubKey;
@@ -620,7 +624,7 @@ bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp, vchCharStrin
     return false;
 }
 
-bool GetBDAPOpScript(const CTransaction& tx, CScript& scriptBDAPOp)
+bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp)
 {
     int op;
     vchCharString vvchOpParameters;
@@ -662,10 +666,10 @@ std::string GetBDAPOpStringFromOutput(const CTxOut& out)
     return GetBDAPOpTypeString(out.scriptPubKey);
 }
 
-int GetBDAPOperationOutIndex(const CTransaction& tx) 
+int GetBDAPOperationOutIndex(const CTransactionRef& tx) 
 {
-    for(unsigned int i = 0; i<tx.vout.size();i++) {
-        if(IsBDAPOperationOutput(tx.vout[i]))
+    for(unsigned int i = 0; i < tx->vout.size();i++) {
+        if(IsBDAPOperationOutput(tx->vout[i]))
             return i;
     }
     return -1;
@@ -673,7 +677,7 @@ int GetBDAPOperationOutIndex(const CTransaction& tx)
 
 int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash) 
 {
-    CTransaction tx;
+    CTransactionRef tx;
     const Consensus::Params& consensusParams = Params().GetConsensus();
     if (!GetBDAPTransaction(nHeight, txHash, tx, consensusParams))
     {

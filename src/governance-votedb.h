@@ -11,6 +11,7 @@
 
 #include "governance-vote.h"
 #include "serialize.h"
+#include "streams.h"
 #include "uint256.h"
 
 /**
@@ -63,15 +64,13 @@ public:
     /**
      * Retrieve a vote cached in memory
      */
-    bool GetVote(const uint256& nHash, CGovernanceVote& vote) const;
+    bool SerializeVoteToStream(const uint256& nHash, CDataStream& ss) const;
 
     int GetVoteCount() {
         return nMemoryVotes;
     }
 
     std::vector<CGovernanceVote> GetVotes() const;
-
-    CGovernanceObjectVoteFile& operator=(const CGovernanceObjectVoteFile& other);
 
     void RemoveVotesFromDynode(const COutPoint& outpointDynode);
 

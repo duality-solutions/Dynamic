@@ -5,26 +5,31 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
+
 #include "chainparamsbase.h"
 #include "clientversion.h"
 #include "rpcclient.h"
 #include "rpcprotocol.h"
+#include "support/events.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
 #include <univalue.h>
 
-#include <stdio.h>
-
-#include <event2/event.h>
-#include <event2/http.h>
 #include <event2/buffer.h>
+#include <event2/event.h>
 #include <event2/keyvalq_struct.h>
 
 #include <boost/filesystem/operations.hpp>
 
+#include <stdio.h>
+
 static const char DEFAULT_RPCCONNECT[] = "127.0.0.1";
 static const int DEFAULT_HTTP_CLIENT_TIMEOUT=900;
+static const bool DEFAULT_NAMED=false;
 static const int CONTINUE_EXECUTION=-1;
 
 std::string HelpMessageCli()
@@ -35,6 +40,7 @@ std::string HelpMessageCli()
     strUsage += HelpMessageOpt("-conf=<file>", strprintf(_("Specify configuration file (default: %s)"), DYNAMIC_CONF_FILENAME));
     strUsage += HelpMessageOpt("-datadir=<dir>", _("Specify data directory"));
     AppendParamsHelpMessages(strUsage);
+    strUsage += HelpMessageOpt("-named", strprintf(_("Pass named instead of positional arguments (default: %s)"), DEFAULT_NAMED));
     strUsage += HelpMessageOpt("-rpcconnect=<ip>", strprintf(_("Send commands to node running on <ip> (default: %s)"), DEFAULT_RPCCONNECT));
     strUsage += HelpMessageOpt("-rpcport=<port>", strprintf(_("Connect to JSON-RPC on <port> (default: %u or testnet: %u)"), BaseParams(CBaseChainParams::MAIN).RPCPort(), BaseParams(CBaseChainParams::TESTNET).RPCPort()));
     strUsage += HelpMessageOpt("-rpcwait", _("Wait for RPC server to start"));
@@ -194,24 +200,19 @@ UniValue CallRPC(const std::string& strMethod, const UniValue& params)
     std::string host = GetArg("-rpcconnect", DEFAULT_RPCCONNECT);
     int port = GetArg("-rpcport", BaseParams().RPCPort());
 
-    // Create event base
-    struct event_base *base = event_base_new(); // TODO RAII
-    if (!base)
-        throw std::runtime_error("cannot create event_base");
+    // Obtain event base
+    raii_event_base base = obtain_event_base();
 
     // Synchronously look up hostname
-    struct evhttp_connection *evcon = evhttp_connection_base_new(base, NULL, host.c_str(), port); // TODO RAII
-    if (evcon == NULL)
-        throw std::runtime_error("create connection failed");
-    evhttp_connection_set_timeout(evcon, GetArg("-rpcclienttimeout", DEFAULT_HTTP_CLIENT_TIMEOUT));
+    raii_evhttp_connection evcon = obtain_evhttp_connection_base(base.get(), host, port);
+    evhttp_connection_set_timeout(evcon.get(), GetArg("-rpcclienttimeout", DEFAULT_HTTP_CLIENT_TIMEOUT));
 
     HTTPReply response;
-    struct evhttp_request *req = evhttp_request_new(http_request_done, (void*)&response); // TODO RAII
+    raii_evhttp_request req = obtain_evhttp_request(http_request_done, (void*)&response);
     if (req == NULL)
         throw std::runtime_error("create http request failed");
-
 #if LIBEVENT_VERSION_NUMBER >= 0x02010300
-    evhttp_request_set_error_cb(req, http_error_cb);
+    evhttp_request_set_error_cb(req.get(), http_error_cb);
 #endif
 
     // Get credentials
@@ -228,7 +229,7 @@ UniValue CallRPC(const std::string& strMethod, const UniValue& params)
         strRPCUserColonPass = GetArg("-rpcuser", "") + ":" + GetArg("-rpcpassword", "");
     }
 
-    struct evkeyvalq *output_headers = evhttp_request_get_output_headers(req);
+    struct evkeyvalq* output_headers = evhttp_request_get_output_headers(req.get());
     assert(output_headers);
     evhttp_add_header(output_headers, "Host", host.c_str());
     evhttp_add_header(output_headers, "Connection", "close");
@@ -236,23 +237,20 @@ UniValue CallRPC(const std::string& strMethod, const UniValue& params)
 
     // Attach request data
     std::string strRequest = JSONRPCRequestObj(strMethod, params, 1).write() + "\n";
-    struct evbuffer * output_buffer = evhttp_request_get_output_buffer(req);
+    struct evbuffer* output_buffer = evhttp_request_get_output_buffer(req.get());
     assert(output_buffer);
     evbuffer_add(output_buffer, strRequest.data(), strRequest.size());
 
-    int r = evhttp_make_request(evcon, req, EVHTTP_REQ_POST, "/");
+    int r = evhttp_make_request(evcon.get(), req.get(), EVHTTP_REQ_POST, "/");
+    req.release(); // ownership moved to evcon in above call
     if (r != 0) {
-        evhttp_connection_free(evcon);
-        event_base_free(base);
         throw CConnectionFailed("send http request failed");
     }
 
-    event_base_dispatch(base);
-    evhttp_connection_free(evcon);
-    event_base_free(base);
+    event_base_dispatch(base.get());
 
     if (response.status == 0)
-        throw CConnectionFailed(strprintf("couldn't connect to server\n(make sure server is running and you are connecting to the correct RPC port: %d %s)", response.error, http_errorstring(response.error)));
+        throw CConnectionFailed(strprintf("couldn't connect to server: %s (code %d)\n(make sure server is running and you are connecting to the correct RPC port)", http_errorstring(response.error), response.error));
     else if (response.status == HTTP_UNAUTHORIZED)
         throw std::runtime_error("incorrect rpcuser or rpcpassword (authorization failed)");
     else if (response.status >= 400 && response.status != HTTP_BAD_REQUEST && response.status != HTTP_NOT_FOUND && response.status != HTTP_INTERNAL_SERVER_ERROR)
@@ -262,7 +260,7 @@ UniValue CallRPC(const std::string& strMethod, const UniValue& params)
 
     // Parse reply
     UniValue valReply(UniValue::VSTR);
-    if (!valReply.read(response.body))     
+    if (!valReply.read(response.body))
         throw std::runtime_error("couldn't parse reply from server");
     const UniValue& reply = valReply.get_obj();
     if (reply.empty())
@@ -291,7 +289,14 @@ int CommandLineRPC(int argc, char *argv[])
         if (args.size() < 1)
             throw std::runtime_error("too few parameters (need at least command)");
         std::string strMethod = args[0];
-        UniValue params = RPCConvertValues(strMethod, std::vector<std::string>(args.begin()+1, args.end()));
+        args.erase(args.begin()); // Remove trailing method name from arguments vector
+
+        UniValue params;
+        if(GetBoolArg("-named", DEFAULT_NAMED)) {
+            params = RPCConvertNamedValues(strMethod, args);
+        } else {
+            params = RPCConvertValues(strMethod, args);
+        }
 
         // Execute and handle connection failures with -rpcwait
         const bool fWait = GetBoolArg("-rpcwait", false);

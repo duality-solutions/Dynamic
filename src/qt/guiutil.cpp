@@ -123,6 +123,23 @@ QFont fixedPitchFont()
 #endif
 }
 
+// Just some dummy data to generate an convincing random-looking (but consistent) address
+static const uint8_t dummydata[] = {0xeb,0x15,0x23,0x1d,0xfc,0xeb,0x60,0x92,0x58,0x86,0xb6,0x7d,0x06,0x52,0x99,0x92,0x59,0x15,0xae,0xb1,0x72,0xc0,0x66,0x47};
+
+// Generate a dummy address with invalid CRC, starting with the network prefix.
+static std::string DummyAddress(const CChainParams &params)
+{
+    std::vector<unsigned char> sourcedata = params.Base58Prefix(CChainParams::PUBKEY_ADDRESS);
+    sourcedata.insert(sourcedata.end(), dummydata, dummydata + sizeof(dummydata));
+    for(int i=0; i<256; ++i) { // Try every trailing byte
+        std::string s = EncodeBase58(sourcedata.data(), sourcedata.data() + sourcedata.size());
+        if (!CDynamicAddress(s).IsValid())
+            return s;
+        sourcedata[sourcedata.size()-1] += 1;
+    }
+    return "";
+}
+
 void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 {
     parent->setFocusProxy(widget);
@@ -131,7 +148,8 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a Dynamic address (e.g. %1)").arg("D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
+    widget->setPlaceholderText(QObject::tr("Enter a Dynamic address (e.g. %1)").arg(
+        QString::fromStdString(DummyAddress(Params()))));
 #endif
     widget->setValidator(new DynamicAddressEntryValidator(parent));
     widget->setCheckValidator(new DynamicAddressCheckValidator(parent));
@@ -443,7 +461,7 @@ void openConfigfile()
         QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathConfig)));
 }
 
-void openSNConfigfile()
+void openDNConfigfile()
 {
     boost::filesystem::path pathConfig = GetDynodeConfigFile();
 
@@ -847,45 +865,31 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
             CFRelease(currentItemURL);
         }
     }
-    
-    CFRelease(listSnapshot);
-    return nullptr;
+    return NULL;
 }
 
 bool GetStartOnSystemStartup()
 {
     CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (dynamicAppUrl == nullptr) {
-        return false;
-    }
-    
-    LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
+    LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
     LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
-
-    CFRelease(dynamicAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
     CFURLRef dynamicAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (dynamicAppUrl == nullptr) {
-        return false;
-    }
-    
-    LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
+    LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
     LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, dynamicAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add dynamic app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, dynamicAppUrl, nullptr, nullptr);
+        // add Dynamic Core app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, dynamicAppUrl, NULL, NULL);
     }
     else if(!fAutoStart && foundItem) {
         // remove item
         LSSharedFileListItemRemove(loginItems, foundItem);
     }
-    
-    CFRelease(dynamicAppUrl);
     return true;
 }
 #pragma GCC diagnostic pop
@@ -895,6 +899,17 @@ bool GetStartOnSystemStartup() { return false; }
 bool SetStartOnSystemStartup(bool fAutoStart) { return false; }
 
 #endif
+
+void migrateQtSettings()
+{
+    QSettings settings;
+    if(!settings.value("fMigrationDone121", false).toBool()) {
+        settings.remove("theme");
+        settings.remove("nWindowPos");
+        settings.remove("nWindowSize");
+        settings.setValue("fMigrationDone121", true);
+    }
+}
 
 void saveWindowGeometry(const QString& strSetting, QWidget *parent)
 {
@@ -909,14 +924,17 @@ void restoreWindowGeometry(const QString& strSetting, const QSize& defaultSize, 
     QPoint pos = settings.value(strSetting + "Pos").toPoint();
     QSize size = settings.value(strSetting + "Size", defaultSize).toSize();
 
-    if (!pos.x() && !pos.y()) {
-        QRect screen = QApplication::desktop()->screenGeometry();
-        pos.setX((screen.width() - size.width()) / 2);
-        pos.setY((screen.height() - size.height()) / 2);
-    }
-
     parent->resize(size);
     parent->move(pos);
+
+    if ((!pos.x() && !pos.y()) || (QApplication::desktop()->screenNumber(parent) == -1))
+    {
+        QRect screen = QApplication::desktop()->screenGeometry();
+        QPoint defaultPos = screen.center() -
+            QPoint(defaultSize.width() / 2, defaultSize.height() / 2);
+        parent->resize(defaultSize);
+        parent->move(defaultPos);
+    }
 }
 
 // Return name of current UI-theme or default theme if no theme was found
@@ -1018,6 +1036,9 @@ QString formatServicesStr(quint64 mask)
                 break;
             case NODE_BLOOM:
                 strList.append("BLOOM");
+                break;
+            case NODE_XTHIN:
+                strList.append("XTHIN");
                 break;
             default:
                 strList.append(QString("%1[%2]").arg("UNKNOWN").arg(check));

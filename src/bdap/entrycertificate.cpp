@@ -38,7 +38,7 @@ bool CEntryCertificate::UnserializeFromData(const std::vector<unsigned char>& vc
     return true;
 }
 
-bool CEntryCertificate::UnserializeFromTx(const CTransaction& tx) 
+bool CEntryCertificate::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

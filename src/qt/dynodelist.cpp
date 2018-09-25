@@ -119,10 +119,14 @@ void DynodeList::StartAlias(std::string strAlias)
 
             bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+            int nDoS;
+            if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+                strError = "Failed to verify DNB";
+                fSuccess = false;
+            }
+
             if(fSuccess) {
                 strStatusHtml += "<br>Successfully started Dynode.";
-                dnodeman.UpdateDynodeList(dnb, *g_connman);
-                dnb.Relay(*g_connman);
                 dnodeman.NotifyDynodeUpdates(*g_connman);
             } else {
                 strStatusHtml += "<br>Failed to start Dynode.<br>Error: " + strError;
@@ -160,10 +164,14 @@ void DynodeList::StartAll(std::string strCommand)
 
         bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+        int nDoS;
+        if (fSuccess && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+            strError = "Failed to verify DNB";
+            fSuccess = false;
+        }
+
         if(fSuccess) {
             nCountSuccessful++;
-            dnodeman.UpdateDynodeList(dnb, *g_connman);
-            dnb.Relay(*g_connman);
             dnodeman.NotifyDynodeUpdates(*g_connman);
         } else {
             nCountFailed++;
@@ -229,7 +237,6 @@ void DynodeList::updateMyNodeList(bool fForce)
     if(!fLockAcquired) {
         return;
     }
-
     static int64_t nTimeMyListUpdated = 0;
 
     // automatically update my Dynode list only once in MY_DYNODELIST_UPDATE_SECONDS seconds,
@@ -240,6 +247,11 @@ void DynodeList::updateMyNodeList(bool fForce)
     if(nSecondsTillUpdate > 0 && !fForce) return;
     nTimeMyListUpdated = GetTime();
 
+    // Find selected row
+    QItemSelectionModel* selectionModel = ui->tableWidgetMyDynodes->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : 0;
+
     ui->tableWidgetDynodes->setSortingEnabled(false);
     for (const auto& dne : dynodeConfig.getEntries()) {
         int32_t nOutputIndex = 0;
@@ -249,6 +261,7 @@ void DynodeList::updateMyNodeList(bool fForce)
 
         updateMyDynodeInfo(QString::fromStdString(dne.getAlias()), QString::fromStdString(dne.getIp()), COutPoint(uint256S(dne.getTxHash()), nOutputIndex));
     }
+    ui->tableWidgetMyDynodes->selectRow(nSelectedRow);
     ui->tableWidgetDynodes->setSortingEnabled(true);
 
     // reset "timer"
@@ -284,7 +297,7 @@ void DynodeList::updateNodeList()
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
     int offsetFromUtc = GetOffsetFromUtc();
 
-    for(auto& dnpair : mapDynodes)
+    for(const auto& dnpair : mapDynodes)
     {
         CDynode dn = dnpair.second;
         // populate list

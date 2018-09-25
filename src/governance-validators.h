@@ -10,27 +10,17 @@
 
 #include <univalue.h>
 
-class CProposalValidator  {
+class CProposalValidator
+{
+private:
+    UniValue               objJSON;
+    bool                   fJSONValid;
+    std::string            strErrorMessages;
+
 public:
     CProposalValidator(const std::string& strDataHexIn = std::string());
 
-    void Clear();
-
-    void SetHexData(const std::string& strDataHexIn);
-
-    bool Validate();
-
-    bool ValidateJSON();
-
-    bool ValidateName();
-
-    bool ValidateStartEndEpoch();
-
-    bool ValidatePaymentAmount();
-
-    bool ValidatePaymentAddress();
-
-    bool ValidateURL();
+    bool Validate(bool fCheckExpiration = true);
 
     const std::string& GetErrorMessages()
     {
@@ -38,27 +28,20 @@ public:
     }
 
 private:
-    void ParseJSONData();
+    void ParseStrHexData(const std::string& strHexData);
+    void ParseJSONData(const std::string& strJSONData);
 
-    bool GetDataValue(const std::string& strKey, std::string& strValue);
+    bool GetDataValue(const std::string& strKey, std::string& strValueRet);
+    bool GetDataValue(const std::string& strKey, int64_t& nValueRet);
+    bool GetDataValue(const std::string& strKey, double& dValueRet);
 
-    bool GetDataValue(const std::string& strKey, int64_t& nValue);
+    bool ValidateName();
+    bool ValidateStartEndEpoch(bool fCheckExpiration = true);
+    bool ValidatePaymentAmount();
+    bool ValidatePaymentAddress();
+    bool ValidateURL();
 
-    bool GetDataValue(const std::string& strKey, double& dValue);
-
-    static std::string StripWhitespace(const std::string& strIn);
-
-    static bool CheckURL(const std::string& strURLIn);
-
-private:
-    std::string            strData;
-
-    UniValue               objJSON;
-
-    bool                   fJSONValid;
-
-    std::string            strErrorMessages;
-
+    bool CheckURL(const std::string& strURLIn);
 };
 
 #endif

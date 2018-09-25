@@ -7,7 +7,6 @@
 #define DYNAMIC_SCRIPT_SIGN_H
 
 #include "script/interpreter.h"
-#include "script/standard.h"
 
 class CKeyID;
 class CKeyStore;
@@ -40,16 +39,16 @@ class TransactionSignatureCreator : public BaseSignatureCreator {
 
 public:
     TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, int nHashTypeIn=SIGHASH_ALL);
-    const BaseSignatureChecker& Checker() const { return checker; }
-    bool CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& keyid, const CScript& scriptCode) const;
+    const BaseSignatureChecker& Checker() const override{ return checker; }
+    bool CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& keyid, const CScript& scriptCode) const override;
 };
 
 /** A signature creator that just produces 72-byte empty signatyres. */
 class DummySignatureCreator : public BaseSignatureCreator {
 public:
     DummySignatureCreator(const CKeyStore* keystoreIn) : BaseSignatureCreator(keystoreIn) {}
-    const BaseSignatureChecker& Checker() const;
-    bool CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& keyid, const CScript& scriptCode) const;
+    const BaseSignatureChecker& Checker() const override;
+    bool CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& keyid, const CScript& scriptCode) const override;
 };
 
 /** Produce a script signature using a generic signature creator. */
@@ -64,8 +63,5 @@ CScript CombineSignatures(const CScript& scriptPubKey, const BaseSignatureChecke
 
 /** Combine two script signatures on transactions. */
 CScript CombineSignatures(const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn, const CScript& scriptSig1, const CScript& scriptSig2);
-
-bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash, int nHashType,
-                  CScript& scriptSigRet, txnouttype& whichTypeRet);
 
 #endif // DYNAMIC_SCRIPT_SIGN_H

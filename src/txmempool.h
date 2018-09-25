@@ -8,9 +8,12 @@
 #ifndef DYNAMIC_TXMEMPOOL_H
 #define DYNAMIC_TXMEMPOOL_H
 
-#include <list>
 #include <memory>
 #include <set>
+#include <map>
+#include <vector>
+#include <utility>
+#include <string>
 
 #include "addressindex.h"
 #include "spentindex.h"
@@ -25,6 +28,8 @@
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 #include "boost/multi_index/hashed_index.hpp"
+
+#include <boost/signals2/signal.hpp>
 
 class CAutoFile;
 class CBlockIndex;
@@ -64,7 +69,7 @@ class CTxMemPool;
 
 /** \class CTxMemPoolEntry
  *
- * CTxMemPoolEntry stores data about the correponding transaction, as well
+ * CTxMemPoolEntry stores data about the corresponding transaction, as well
  * as data about all in-mempool transactions that depend on the transaction
  * ("descendant" transactions).
  *
@@ -82,7 +87,7 @@ class CTxMemPool;
 class CTxMemPoolEntry
 {
 private:
-    std::shared_ptr<const CTransaction> tx;
+    CTransactionRef tx;
     CAmount nFee;              //!< Cached to avoid expensive parent-transaction lookups
     size_t nTxSize;            //!< ... and avoid recomputing tx size
     size_t nModSize;           //!< ... and modified size for priority
@@ -90,7 +95,6 @@ private:
     int64_t nTime;             //!< Local time when entering the mempool
     double entryPriority;      //!< Priority when entering the mempool
     unsigned int entryHeight;  //!< Chain height when entering the mempool
-    bool hadNoDependencies;    //!< Not dependent on any other txs when it entered the mempool
     CAmount inChainInputValue; //!< Sum of all txin values that are already in blockchain
     bool spendsCoinbase;       //!< keep track of transactions that spend a coinbase
     unsigned int sigOpCount;   //!< Legacy sig ops plus P2SH sig op count
@@ -113,14 +117,15 @@ private:
     unsigned int nSigOpCountWithAncestors;
 
 public:
-    CTxMemPoolEntry(const CTransaction& _tx, const CAmount& _nFee,
+    CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee,
                     int64_t _nTime, double _entryPriority, unsigned int _entryHeight,
-                    bool poolHasNoInputsOf, CAmount _inChainInputValue, bool spendsCoinbase,
+                    CAmount _inChainInputValue, bool spendsCoinbase,
                     unsigned int nSigOps, LockPoints lp);
+
     CTxMemPoolEntry(const CTxMemPoolEntry& other);
 
     const CTransaction& GetTx() const { return *this->tx; }
-    std::shared_ptr<const CTransaction> GetSharedTx() const { return this->tx; }
+    CTransactionRef GetSharedTx() const { return this->tx; }
     /**
      * Fast calculation of lower bound of current priority as update
      * from entry priority. Only inputs that were originally in-chain will age.
@@ -130,7 +135,6 @@ public:
     size_t GetTxSize() const { return nTxSize; }
     int64_t GetTime() const { return nTime; }
     unsigned int GetHeight() const { return entryHeight; }
-    bool WasClearAtEntry() const { return hadNoDependencies; }
     unsigned int GetSigOpCount() const { return sigOpCount; }
     int64_t GetModifiedFee() const { return nFee + feeDelta; }
     size_t DynamicMemoryUsage() const { return nUsageSize; }
@@ -156,6 +160,8 @@ public:
     uint64_t GetSizeWithAncestors() const { return nSizeWithAncestors; }
     CAmount GetModFeesWithAncestors() const { return nModFeesWithAncestors; }
     unsigned int GetSigOpCountWithAncestors() const { return nSigOpCountWithAncestors; }
+
+    mutable size_t vTxHashesIdx; //!< Index in mempool's vTxHashes
 };
 
 // Helpers for modifying CTxMemPool::mapTx, which is a boost multi_index.
@@ -321,7 +327,7 @@ class CBlockPolicyEstimator;
 struct TxMempoolInfo
 {
     /** The transaction itself */
-    std::shared_ptr<const CTransaction> tx;
+    CTransactionRef tx;
 
     /** Time the transaction entered the mempool. */
     int64_t nTime;
@@ -331,6 +337,19 @@ struct TxMempoolInfo
 
     /** The fee delta. */
     int64_t nFeeDelta;
+};
+
+/** Reason why a transaction was removed from the mempool,
+ * this is passed to the notification signal.
+ */
+enum class MemPoolRemovalReason {
+    UNKNOWN = 0, //! Manually removed or unknown reason
+    EXPIRY,      //! Expired from mempool
+    SIZELIMIT,   //! Removed in size limiting
+    REORG,       //! Removed for reorganization
+    BLOCK,       //! Removed for block
+    CONFLICT,    //! Removed for conflict with in-block transaction
+    REPLACED     //! Removed for replacement
 };
 
 class SaltedTxidHasher
@@ -348,14 +367,17 @@ public:
 };
 
 /**
- * CTxMemPool stores valid-according-to-the-current-best-chain
- * transactions that may be included in the next block.
+ * CTxMemPool stores valid-according-to-the-current-best-chain transactions
+ * that may be included in the next block.
  *
- * Transactions are added when they are seen on the network
- * (or created by the local node), but not all transactions seen
- * are added to the pool: if a new transaction double-spends
- * an input of a transaction in the pool, it is dropped,
- * as are non-standard transactions.
+ * Transactions are added when they are seen on the network (or created by the
+ * local node), but not all transactions seen are added to the pool. For
+ * example, the following new transactions will not be added to the mempool:
+ * - a transaction which doesn't meet the minimum fee requirements.
+ * - a new transaction that double-spends an input of a transaction already in
+ * the pool where the new transaction does not meet the Replace-By-Fee
+ * requirements as defined in BIP 125.
+ * - a non-standard transaction.
  *
  * CTxMemPool::mapTx, and CTxMemPoolEntry bookkeeping:
  *
@@ -428,13 +450,11 @@ class CTxMemPool
 {
 private:
     uint32_t nCheckFrequency; //!< Value n means that n times in 2^32 we check.
-    unsigned int nTransactionsUpdated;
+    unsigned int nTransactionsUpdated; //!< Used by getblocktemplate to trigger CreateNewBlock() invocation
     CBlockPolicyEstimator* minerPolicyEstimator;
 
     uint64_t totalTxSize;      //!< sum of all mempool tx' byte sizes
     uint64_t cachedInnerUsage; //!< sum of dynamic memory usage of all the map elements (NOT the maps themselves)
-
-    CFeeRate minReasonableRelayFee;
 
     mutable int64_t lastRollingFeeUpdate;
     mutable bool blockSinceLastRollingFeeBump;
@@ -480,7 +500,10 @@ public:
 
     mutable CCriticalSection cs;
     indexed_transaction_set mapTx;
+
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
+    std::vector<std::pair<uint256, txiter> > vTxHashes; //!< All tx hashes/entries in mapTx, in random order
+
     struct CompareIteratorByHash {
         bool operator()(const txiter &a, const txiter &b) const {
             return a->GetTx().GetHash() < b->GetTx().GetHash();
@@ -523,9 +546,6 @@ public:
     std::map<uint256, std::pair<double, CAmount> > mapDeltas;
 
     /** Create a new CTxMemPool.
-     *  minReasonableRelayFee should be a feerate which is, roughly, somewhere
-     *  around what it "costs" to relay a transaction around the network and
-     *  below which we would reasonably say a transaction has 0-effective-fee.
      */
     CTxMemPool(const CFeeRate& _minReasonableRelayFee);
     ~CTxMemPool();
@@ -543,8 +563,8 @@ public:
     // to track size/count of descendant transactions.  First version of
     // addUnchecked can be used to have it call CalculateMemPoolAncestors(), and
     // then invoke the second version.
-    bool addUnchecked(const uint256& hash, const CTxMemPoolEntry &entry, bool fCurrentEstimate = true);
-    bool addUnchecked(const uint256& hash, const CTxMemPoolEntry &entry, setEntries &setAncestors, bool fCurrentEstimate = true);
+    bool addUnchecked(const uint256& hash, const CTxMemPoolEntry &entry, bool validFeeEstimate = true);
+    bool addUnchecked(const uint256& hash, const CTxMemPoolEntry &entry, setEntries &setAncestors, bool validFeeEstimate = true);
 
     void addAddressIndex(const CTxMemPoolEntry &entry, const CCoinsViewCache &view);
     bool getAddressIndex(std::vector<std::pair<uint160, int> > &addresses,
@@ -555,11 +575,11 @@ public:
     bool getSpentIndex(CSpentIndexKey &key, CSpentIndexValue &value);
     bool removeSpentIndex(const uint256 txhash);
 
-    void removeRecursive(const CTransaction &tx, std::list<CTransaction>& removed);
+    void removeRecursive(const CTransaction &tx, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
     void removeForReorg(const CCoinsViewCache *pcoins, unsigned int nMemPoolHeight, int flags);
-    void removeConflicts(const CTransaction &tx, std::list<CTransaction>& removed);
-    void removeForBlock(const std::vector<CTransaction>& vtx, unsigned int nBlockHeight,
-                        std::list<CTransaction>& conflicts, bool fCurrentEstimate = true);
+    void removeConflicts(const CTransaction &tx);
+    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight);
+
     void clear();
     void _clear(); //lock free
     bool CompareDepthAndScore(const uint256& hasha, const uint256& hashb);
@@ -586,7 +606,7 @@ public:
      *  Set updateDescendants to true when removing a tx that was in a block, so
      *  that any in-mempool descendants have their ancestor state updated.
      */
-    void RemoveStaged(setEntries &stage, bool updateDescendants);
+    void RemoveStaged(setEntries &stage, bool updateDescendants, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
 
     /** When adding transactions from a disconnected block back to the mempool,
      *  new mempool entries may have children in the mempool (which is generally
@@ -618,7 +638,7 @@ public:
 
     /** The minimum fee to get into the mempool, which may itself not be enough
       *  for larger-sized transactions.
-      *  The minReasonableRelayFee constructor arg is used to bound the time it
+      *  The incrementalRelayFee policy variable is used to bound the time it
       *  takes the fee rate to go back down all the way to 0. When the feerate
       *  would otherwise be half of this, it is set to 0 instead.
       */
@@ -633,6 +653,9 @@ public:
 
     /** Expire all transaction (and their dependencies) in the mempool older than time. Return the number of removed transactions. */
     int Expire(int64_t time);
+
+    /** Returns false if the transaction is in the mempool and not within the chain limit specified. */
+    bool TransactionWithinChainLimit(const uint256& txid, size_t chainLimit) const;
 
     unsigned long size()
     {
@@ -659,7 +682,7 @@ public:
         return (it != mapTx.end() && outpoint.n < it->GetTx().vout.size());
     }
 
-    std::shared_ptr<const CTransaction> get(const uint256& hash) const;
+    CTransactionRef get(const uint256& hash) const;
     TxMempoolInfo info(const uint256& hash) const;
     std::vector<TxMempoolInfo> infoAll() const;
 
@@ -686,6 +709,9 @@ public:
     bool ReadFeeEstimates(CAutoFile& filein);
 
     size_t DynamicMemoryUsage() const;
+
+    boost::signals2::signal<void (CTransactionRef)> NotifyEntryAdded;
+    boost::signals2::signal<void (CTransactionRef, MemPoolRemovalReason)> NotifyEntryRemoved;
 
 private:
     /** UpdateForDescendants is used by UpdateTransactionsFromBlock to update
@@ -723,7 +749,7 @@ private:
      *  transactions in a chain before we've updated all the state for the
      *  removal.
      */
-    void removeUnchecked(txiter entry);
+    void removeUnchecked(txiter entry, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
 };
 
 /** 

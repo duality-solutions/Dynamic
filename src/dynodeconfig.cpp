@@ -10,7 +10,7 @@
 
 CDynodeConfig dynodeConfig;
 
-void CDynodeConfig::add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex) {
+void CDynodeConfig::add(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex) {
     CDynodeEntry cme(alias, ip, privKey, txHash, outputIndex);
     entries.push_back(cme);
 }

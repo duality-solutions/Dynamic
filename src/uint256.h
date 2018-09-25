@@ -45,19 +45,11 @@ public:
         memset(data, 0, sizeof(data));
     }
 
-    int CompareTo(const base_blob& b) const;
-    bool EqualTo(uint64_t b) const;
-
     inline int Compare(const base_blob& other) const { return memcmp(data, other.data, sizeof(data)); }
 
     friend inline bool operator==(const base_blob& a, const base_blob& b) { return a.Compare(b) == 0; }
     friend inline bool operator!=(const base_blob& a, const base_blob& b) { return a.Compare(b) != 0; }
     friend inline bool operator<(const base_blob& a, const base_blob& b) { return a.Compare(b) < 0; }
-    friend inline bool operator>(const base_blob& a, const base_blob& b) { return a.CompareTo(b) > 0; }
-    friend inline bool operator>=(const base_blob& a, const base_blob& b) { return a.CompareTo(b) >= 0; }
-    friend inline bool operator<=(const base_blob& a, const base_blob& b) { return a.CompareTo(b) <= 0; }
-    friend inline bool operator==(const base_blob& a, uint64_t b) { return a.EqualTo(b); }
-    friend inline bool operator!=(const base_blob& a, uint64_t b) { return !a.EqualTo(b); }
 
     std::string GetHex() const;
     void SetHex(const char* psz);
@@ -183,6 +175,5 @@ public:
         return result;
     }
 };
-
 
 #endif // DYNAMIC_UINT256_H

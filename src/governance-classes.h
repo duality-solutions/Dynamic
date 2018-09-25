@@ -17,22 +17,19 @@
 
 #include <boost/shared_ptr.hpp>
 
+class CSuperblock;
 class CGovernanceTrigger;
 class CGovernanceTriggerManager;
-class CSuperblock;
 class CSuperblockManager;
 
 static const int TRIGGER_UNKNOWN            = -1;
 static const int TRIGGER_SUPERBLOCK         = 1000;
 static const CAmount STATIC_SUPERBLOCK_AMOUNT = 0; //Budget amount fixed at 0DYN
 
-typedef boost::shared_ptr<CSuperblock> CSuperblock_sptr;
+typedef std::shared_ptr<CSuperblock> CSuperblock_sptr;
 
 // DECLARE GLOBAL VARIABLES FOR GOVERNANCE CLASSES
 extern CGovernanceTriggerManager triggerman;
-
-// SPLIT A STRING UP - USED FOR SUPERBLOCK PAYMENTS
-std::vector<std::string> SplitBy(std::string strCommand, std::string strDelimit);
 
 /**
 *   Trigger Mananger
@@ -77,6 +74,7 @@ public:
     static bool IsSuperblockTriggered(int nBlockHeight);
 
     static void CreateSuperblock(CMutableTransaction& txNewRet, int nBlockHeight, std::vector<CTxOut>& voutSuperblockRet);
+    static void ExecuteBestSuperblock(int nBlockHeight);
 
     static std::string GetRequiredPaymentsString(int nBlockHeight);
     static bool IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
@@ -114,7 +112,7 @@ public:
             nAmount = nAmountIn;
             fValid = true;
         }
-        catch(const std::exception& e)
+        catch(std::exception& e)
         {
             LogPrintf("CGovernancePayment Payment not valid: addrIn = %s, nAmountIn = %d, what = %s\n",
                      addrIn.ToString(), nAmountIn, e.what());
@@ -152,11 +150,11 @@ class CSuperblock : public CGovernanceObject
 private:
     uint256 nGovObjHash;
 
-    int nEpochStart;
+    int nBlockHeight;
     int nStatus;
     std::vector<CGovernancePayment> vecPayments;
 
-    void ParsePaymentSchedule(std::string& strPaymentAddresses, std::string& strPaymentAmounts);
+    void ParsePaymentSchedule(const std::string& strPaymentAddresses, const std::string& strPaymentAmounts);
 
 public:
 
@@ -164,6 +162,7 @@ public:
     CSuperblock(uint256& nHash);
 
     static bool IsValidBlockHeight(int nBlockHeight);
+    static void GetNearestSuperblocksHeights(int nBlockHeight, int& nLastSuperblockRet, int& nNextSuperblockRet);
     static CAmount GetPaymentsLimit(int nBlockHeight);
 
     int GetStatus() { return nStatus; }
@@ -181,11 +180,17 @@ public:
         return pObj;
     }
 
+    int GetBlockHeight()
+    {
+        return nBlockHeight;
+    }
+
     int CountPayments() { return (int)vecPayments.size(); }
     bool GetPayment(int nPaymentIndex, CGovernancePayment& paymentRet);
     CAmount GetPaymentsTotalAmount();
 
     bool IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
+    bool IsExpired();
 };
 
-#endif // DYNAMIC_GOVERNANCE_CLASSES_H
+#endif

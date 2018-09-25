@@ -9,7 +9,6 @@
 #define DYNAMIC_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
-
 #include "prevector.h"
 
 #include <assert.h>
@@ -20,28 +19,6 @@
 #include <string.h>
 #include <string>
 #include <vector>
-
-// Identification codes for Fluid and BDAP Transactions
-enum ProtocolCodes {
-    MINT_TX                    =  1,
-    DYNODE_MODFIY_TX           =  2,
-    MINING_MODIFY_TX           =  3,
-    BDAP_START                 =  4,
-    BDAP_NEW_TX                =  5,
-    BDAP_DELETE_TX             =  6,
-    BDAP_REVOKE_TX             =  7,
-    BDAP_MODIFY_TX             =  8,
-    BDAP_MODIFY_RDN_TX         =  9,
-    BDAP_EXECUTE_CODE_TX       =  10,
-    BDAP_BIND_TX               =  11,
-    BDAP_AUDIT_TX              =  12,
-    BDAP_CERTIFICATE_TX        =  13,
-    BDAP_IDENTITY_TX           =  14,
-    BDAP_ID_VERIFICATION_TX    =  15,
-    BDAP_CHANNEL_TX            =  16,
-    BDAP_CHANNEL_CHECKPOINT    =  17,
-    NO_TX                      =  0
-};
 
 // Maximum number of bytes pushable to the stack
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520;
@@ -240,6 +217,28 @@ enum opcodetype
 };
 
 const char* GetOpName(opcodetype opcode);
+
+// Identification codes for Fluid and BDAP Transactions
+enum ProtocolCodes {
+    MINT_TX                    =  1,
+    DYNODE_MODFIY_TX           =  2,
+    MINING_MODIFY_TX           =  3,
+    BDAP_START                 =  4,
+    BDAP_NEW_TX                =  5,
+    BDAP_DELETE_TX             =  6,
+    BDAP_REVOKE_TX             =  7,
+    BDAP_MODIFY_TX             =  8,
+    BDAP_MODIFY_RDN_TX         =  9,
+    BDAP_EXECUTE_CODE_TX       =  10,
+    BDAP_BIND_TX               =  11,
+    BDAP_AUDIT_TX              =  12,
+    BDAP_CERTIFICATE_TX        =  13,
+    BDAP_IDENTITY_TX           =  14,
+    BDAP_ID_VERIFICATION_TX    =  15,
+    BDAP_CHANNEL_TX            =  16,
+    BDAP_CHANNEL_CHECKPOINT    =  17,
+    NO_TX                      =  0
+};
 
 class scriptnum_error : public std::runtime_error
 {
@@ -446,7 +445,6 @@ protected:
     }
 public:
     CScript() { }
-    CScript(const CScript& b) : CScriptBase(b.begin(), b.end()) { }
     CScript(const_iterator pbegin, const_iterator pend) : CScriptBase(pbegin, pend) { }
     CScript(std::vector<unsigned char>::const_iterator pbegin, std::vector<unsigned char>::const_iterator pend) : CScriptBase(pbegin, pend) { }
     CScript(const unsigned char* pbegin, const unsigned char* pend) : CScriptBase(pbegin, pend) { }
@@ -675,8 +673,10 @@ public:
     bool IsPayToPublicKeyHash() const;
 
     bool IsPayToScriptHash() const;
-    bool IsPayToPublicKey() const;
 
+    /** Used for obsolete pay-to-pubkey addresses indexing. */
+    bool IsPayToPublicKey() const;
+    
     /** Called by IsStandardTx and P2SH/BIP62 VerifyScript (which makes it consensus-critical). */
     bool IsPushOnly(const_iterator pc) const;
     bool IsPushOnly() const;

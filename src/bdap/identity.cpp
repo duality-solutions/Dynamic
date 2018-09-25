@@ -36,7 +36,7 @@ bool CIdentity::UnserializeFromData(const std::vector<unsigned char>& vchData, c
     return true;
 }
 
-bool CIdentity::UnserializeFromTx(const CTransaction& tx) 
+bool CIdentity::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -82,7 +82,7 @@ bool CIdentityVerification::UnserializeFromData(const std::vector<unsigned char>
     return true;
 }
 
-bool CIdentityVerification::UnserializeFromTx(const CTransaction& tx) 
+bool CIdentityVerification::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

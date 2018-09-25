@@ -205,7 +205,8 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
             // target -- 1 in 2^(2^32). That ain't gonna happen.
             ++pblock->nNonce;
         }
-        if (!ProcessNewBlock(Params(), pblock, true, NULL, NULL))
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
         ++nHeight;
         blockHashes.push_back(pblock->GetHash().GetHex());
@@ -778,8 +779,8 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     UniValue transactions(UniValue::VARR);
     std::map<uint256, int64_t> setTxIndex;
     int i = 0;
-    BOOST_FOREACH (const CTransaction& tx, pblock->vtx) 
-    {
+    for (const auto& it : pblock->vtx) {
+        const CTransaction& tx = *it;
         uint256 txHash = tx.GetHash();
         setTxIndex[txHash] = i++;
 
@@ -878,7 +879,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
-    result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0].GetValueOut()));
+    result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->GetValueOut()));
     result.push_back(Pair("longpollid", chainActive.Tip()->GetBlockHash().GetHex() + i64tostr(nTransactionsUpdatedLast)));
     result.push_back(Pair("target", hashTarget.GetHex()));
     result.push_back(Pair("mintime", (int64_t)pindexPrev->GetMedianTimePast()+1));
@@ -962,10 +963,15 @@ UniValue submitblock(const JSONRPCRequest& request)
             + HelpExampleRpc("submitblock", "\"mydata\"")
         );
 
-    CBlock block;
+    std::shared_ptr<CBlock> blockptr = std::make_shared<CBlock>();
+    CBlock& block = *blockptr;
     if (!DecodeHexBlk(block, request.params[0].get_str()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block decode failed");
 
+    if (block.vtx.empty() || !block.vtx[0]->IsCoinBase()) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
+    }
+    
     uint256 hash = block.GetHash();
     bool fBlockPresent = false;
     {
@@ -985,7 +991,7 @@ UniValue submitblock(const JSONRPCRequest& request)
     CValidationState state;
     submitblock_StateCatcher sc(block.GetHash());
     RegisterValidationInterface(&sc);
-    bool fAccepted = ProcessNewBlock(Params(), &block, true, NULL, NULL);
+    bool fAccepted = ProcessNewBlock(Params(), blockptr, true, NULL);
     UnregisterValidationInterface(&sc);
     if (fBlockPresent)
     {
@@ -1131,30 +1137,30 @@ UniValue estimatesmartpriority(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafeMode
-  //  --------------------- ------------------------  -----------------------  ----------
-    { "mining",             "getnetworkhashps",       &getnetworkhashps,       true  },
-    { "mining",             "getmininginfo",          &getmininginfo,          true  },
-    { "mining",             "prioritisetransaction",  &prioritisetransaction,  true  },
-    { "mining",             "getblocktemplate",       &getblocktemplate,       true  },
-    { "mining",             "submitblock",            &submitblock,            true  },
+{ //  category              name                      actor (function)         okSafe argNames
+  //  --------------------- ------------------------  -----------------------  ------ ---
+    { "mining",             "getnetworkhashps",       &getnetworkhashps,       true,  {"nblocks","height"} },
+    { "mining",             "getmininginfo",          &getmininginfo,          true,  {} },
+    { "mining",             "prioritisetransaction",  &prioritisetransaction,  true,  {"txid","priority_delta","fee_delta"} },
+    { "mining",             "getblocktemplate",       &getblocktemplate,       true,  {"template_request"} },
+    { "mining",             "submitblock",            &submitblock,            true,  {"hexdata","parameters"} },
 
-    { "generating",         "getgenerate",            &getgenerate,            true  },
-    { "generating",         "setgenerate",            &setgenerate,            true  },
-    { "generating",         "generate",               &generate,               true  },
-    { "generating",         "generatetoaddress",      &generatetoaddress,      true  },
-    { "generating",         "gethashespersec",        &gethashespersec,        true  },
-    { "generating",         "getcpuhashespersec",     &getcpuhashespersec,     true  },
-    { "generating",         "getgpuhashespersec",     &getgpuhashespersec,     true  },
+    { "generating",         "getgenerate",            &getgenerate,            true,  {} },
+    { "generating",         "setgenerate",            &setgenerate,            true,  {"generate","genproclimit","genproclimit-gpu"} },
+    { "generating",         "generate",               &generate,               true,  {"nblocks","maxtries"} },
+    { "generating",         "generatetoaddress",      &generatetoaddress,      true,  {"nblocks","address","maxtries"} },
+    { "generating",         "gethashespersec",        &gethashespersec,        true,  {} },
+    { "generating",         "getcpuhashespersec",     &getcpuhashespersec,     true,  {} },
+    { "generating",         "getgpuhashespersec",     &getgpuhashespersec,     true,  {} },
 
-    { "util",               "estimatefee",            &estimatefee,            true  },
-    { "util",               "estimatepriority",       &estimatepriority,       true  },
-    { "util",               "estimatesmartfee",       &estimatesmartfee,       true  },
-    { "util",               "estimatesmartpriority",  &estimatesmartpriority,  true  },
+    { "util",               "estimatefee",            &estimatefee,            true,  {"nblocks"} },
+    { "util",               "estimatepriority",       &estimatepriority,       true,  {"nblocks"} },
+    { "util",               "estimatesmartfee",       &estimatesmartfee,       true,  {"nblocks"} },
+    { "util",               "estimatesmartpriority",  &estimatesmartpriority,  true,  {"nblocks"} },
 };
 
-void RegisterMiningRPCCommands(CRPCTable &tableRPC)
+void RegisterMiningRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }

@@ -27,11 +27,16 @@
 
 UniValue dynodelist(const JSONRPCRequest& request);
 
+bool EnsureWalletIsAvailable(bool avoidException);
+
 #ifdef ENABLE_WALLET
 void EnsureWalletIsUnlocked();
 
 UniValue privatesend(const JSONRPCRequest& request)
 {
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "privatesend \"command\"\n"
@@ -43,15 +48,15 @@ UniValue privatesend(const JSONRPCRequest& request)
             "  reset       - Reset mixing\n"
             );
 
+    if(fDynodeMode)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Client-side mixing is not supported on dynodes");
+
     if(request.params[0].get_str() == "start") {
         {
             LOCK(pwalletMain->cs_wallet);
             if (pwalletMain->IsLocked(true))
                 throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
         }
-
-        if(fDynodeMode)
-            return "Mixing is not supported from Dynodes";
 
         privateSendClient.fEnablePrivateSend = true;
         bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
@@ -91,7 +96,7 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
 
     dynode_info_t dnInfo;
     if (privateSendClient.GetMixingDynodeInfo(dnInfo)) {
-        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
         obj.push_back(Pair("addr",          dnInfo.addr.ToString()));
     }
 
@@ -177,8 +182,8 @@ UniValue dynode(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Incorrect dynode address %s", strAddress));
 
         // TODO: Pass CConnman instance somehow and don't use global variable.
-        CNode *pnode = g_connman->ConnectNode(CAddress(addr, NODE_NETWORK), NULL);
-        if(!pnode)
+        g_connman->OpenDynodeConnection(CAddress(addr, NODE_NETWORK));
+        if (!g_connman->IsConnected(CAddress(addr, NODE_NETWORK), CConnman::AllNodes))
             throw JSONRPCError(RPC_INTERNAL_ERROR, strprintf("Couldn't connect to dynode %s", strAddress));
 
         return "successfully connected";
@@ -234,7 +239,7 @@ UniValue dynode(const JSONRPCRequest& request)
         obj.push_back(Pair("height",        nHeight));
         obj.push_back(Pair("IP:port",       dnInfo.addr.ToString()));
         obj.push_back(Pair("protocol",      (int64_t)dnInfo.nProtocolVersion));
-        obj.push_back(Pair("outpoint",      dnInfo.vin.prevout.ToStringShort()));
+        obj.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
         obj.push_back(Pair("payee",         CDynamicAddress(dnInfo.pubKeyCollateralAddress.GetID()).ToString()));
         obj.push_back(Pair("lastseen",      dnInfo.nTimeLastPing));
         obj.push_back(Pair("activeseconds", dnInfo.nTimeLastPing - dnInfo.sigTime));
@@ -257,6 +262,9 @@ UniValue dynode(const JSONRPCRequest& request)
 
     if (strCommand == "start-alias")
     {
+        if (!EnsureWalletIsAvailable(request.fHelp))
+            return NullUniValue;
+
         if (request.params.size() < 2)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Please specify an alias");
 
@@ -272,7 +280,7 @@ UniValue dynode(const JSONRPCRequest& request)
         UniValue statusObj(UniValue::VOBJ);
         statusObj.push_back(Pair("alias", strAlias));
 
-        BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+        for (const auto& dne : dynodeConfig.getEntries()) {
             if(dne.getAlias() == strAlias) {
                 fFound = true;
                 std::string strError;
@@ -280,13 +288,16 @@ UniValue dynode(const JSONRPCRequest& request)
 
                 bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+                int nDoS;
+                if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+                    strError = "Failed to verify DNB";
+                    fResult = false;
+                }
+
                 statusObj.push_back(Pair("result", fResult ? "successful" : "failed"));
                 if(fResult) {
-                    dnodeman.UpdateDynodeList(dnb, *g_connman);
-                    dnb.Relay(*g_connman);
-                } else {
                     statusObj.push_back(Pair("errorMessage", strError));
-                }
+                } 
                 dnodeman.NotifyDynodeUpdates(*g_connman);
                 break;
             }
@@ -303,6 +314,9 @@ UniValue dynode(const JSONRPCRequest& request)
 
     if (strCommand == "start-all" || strCommand == "start-missing" || strCommand == "start-disabled")
     {
+        if (!EnsureWalletIsAvailable(request.fHelp))
+            return NullUniValue;
+
         {
             LOCK(pwalletMain->cs_wallet);
             EnsureWalletIsUnlocked();
@@ -317,7 +331,7 @@ UniValue dynode(const JSONRPCRequest& request)
 
         UniValue resultsObj(UniValue::VOBJ);
 
-        BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+        for (const auto& dne : dynodeConfig.getEntries()) {
             std::string strError;
 
             COutPoint outpoint = COutPoint(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
@@ -330,14 +344,18 @@ UniValue dynode(const JSONRPCRequest& request)
 
             bool fResult = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
+            int nDoS;
+            if (fResult && !dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDoS, *g_connman)) {
+                strError = "Failed to verify DNB";
+                fResult = false;
+            }
+
             UniValue statusObj(UniValue::VOBJ);
             statusObj.push_back(Pair("alias", dne.getAlias()));
             statusObj.push_back(Pair("result", fResult ? "successful" : "failed"));
 
             if (fResult) {
                 nSuccessful++;
-                dnodeman.UpdateDynodeList(dnb, *g_connman);
-                dnb.Relay(*g_connman);
             } else {
                 nFailed++;
                 statusObj.push_back(Pair("errorMessage", strError));
@@ -367,7 +385,7 @@ UniValue dynode(const JSONRPCRequest& request)
     {
         UniValue resultObj(UniValue::VOBJ);
 
-        BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+        for (const auto& dne : dynodeConfig.getEntries()) {
             COutPoint outpoint = COutPoint(uint256S(dne.getTxHash()), uint32_t(atoi(dne.getOutputIndex().c_str())));
             CDynode dn;
             bool fFound = dnodeman.Get(outpoint, dn);
@@ -389,12 +407,15 @@ UniValue dynode(const JSONRPCRequest& request)
 
 #ifdef ENABLE_WALLET
     if (strCommand == "outputs") {
+        if (!EnsureWalletIsAvailable(request.fHelp))
+            return NullUniValue;
+
         // Find possible candidates
         std::vector<COutput> vPossibleCoins;
         pwalletMain->AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
 
         UniValue obj(UniValue::VOBJ);
-        BOOST_FOREACH(COutput& out, vPossibleCoins) {
+        for (const auto& out : vPossibleCoins) {
             obj.push_back(Pair(out.tx->GetHash().ToString(), strprintf("%d", out.i)));
         }
 
@@ -515,10 +536,10 @@ UniValue dynodelist(const JSONRPCRequest& request)
     if (strMode == "rank") {
         CDynodeMan::rank_pair_vec_t vDynodeRanks;
         dnodeman.GetDynodeRanks(vDynodeRanks);
-        BOOST_FOREACH(PAIRTYPE(int, CDynode)& s, vDynodeRanks) {
-            std::string strOutpoint = s.second.vin.prevout.ToStringShort();
+        for (const auto& rankpair : vDynodeRanks) {
+            std::string strOutpoint = rankpair.second.outpoint.ToStringShort();
             if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
-            obj.push_back(Pair(strOutpoint, s.first));
+            obj.push_back(Pair(strOutpoint, rankpair.first));
         }
     } else {
         std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
@@ -642,6 +663,9 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
     if (strCommand == "create-alias")
     {
+        if (!EnsureWalletIsAvailable(request.fHelp))
+            return NullUniValue;
+
         // wait for reindex and/or import to finish
         if (fImporting || fReindex)
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Wait for reindex and/or import to finish");
@@ -662,7 +686,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 
         statusObj.push_back(Pair("alias", strAlias));
 
-        BOOST_FOREACH(CDynodeConfig::CDynodeEntry dne, dynodeConfig.getEntries()) {
+        for (const auto& dne : dynodeConfig.getEntries()) {
             if(dne.getAlias() == strAlias) {
                 fFound = true;
                 std::string strError;
@@ -694,6 +718,9 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 
     if (strCommand == "create-all")
     {
+        if (!EnsureWalletIsAvailable(request.fHelp))
+            return NullUniValue;
+
         // wait for reindex and/or import to finish
         if (fImporting || fReindex)
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Wait for reindex and/or import to finish");
@@ -759,12 +786,12 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
         int nDos = 0;
         UniValue returnObj(UniValue::VOBJ);
 
-        BOOST_FOREACH(CDynodeBroadcast& dnb, vecDnb) {
+        for (const auto& dnb : vecDnb) {
             UniValue resultObj(UniValue::VOBJ);
 
             if(dnb.CheckSignature(nDos)) {
                 nSuccessful++;
-                resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
+                resultObj.push_back(Pair("outpoint", dnb.outpoint.ToStringShort()));
                 resultObj.push_back(Pair("addr", dnb.addr.ToString()));
                 resultObj.push_back(Pair("pubKeyCollateralAddress", CDynamicAddress(dnb.pubKeyCollateralAddress.GetID()).ToString()));
                 resultObj.push_back(Pair("pubKeyDynode", CDynamicAddress(dnb.pubKeyDynode.GetID()).ToString()));
@@ -774,7 +801,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
                 resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
-                lastPingObj.push_back(Pair("outpoint", dnb.lastPing.vin.prevout.ToStringShort()));
+                lastPingObj.push_back(Pair("outpoint", dnb.lastPing.dynodeOutpoint.ToStringShort()));
                 lastPingObj.push_back(Pair("blockHash", dnb.lastPing.blockHash.ToString()));
                 lastPingObj.push_back(Pair("sigTime", dnb.lastPing.sigTime));
                 lastPingObj.push_back(Pair("vchSig", EncodeBase64(&dnb.lastPing.vchSig[0], dnb.lastPing.vchSig.size())));
@@ -798,8 +825,7 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
         if (request.params.size() < 2 || request.params.size() > 3)
             throw JSONRPCError(RPC_INVALID_PARAMETER,   "dynodebroadcast relay \"hexstring\" ( fast )\n"
                                                         "\nArguments:\n"
-                                                        "1. \"hex\"      (string, required) Broadcast messages hex string\n"
-                                                        "2. fast       (string, optional) If none, using safe method\n");
+                                                        "1. \"hex\"      (string, required) Broadcast messages hex string\n");
 
         std::vector<CDynodeBroadcast> vecDnb;
 
@@ -808,26 +834,19 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
 
         int nSuccessful = 0;
         int nFailed = 0;
-        bool fSafe = request.params.size() == 2;
         UniValue returnObj(UniValue::VOBJ);
 
         // verify all signatures first, bailout if any of them broken
-        BOOST_FOREACH(CDynodeBroadcast& dnb, vecDnb) {
+        for (const auto& dnb : vecDnb) {
             UniValue resultObj(UniValue::VOBJ);
 
-            resultObj.push_back(Pair("outpoint", dnb.vin.prevout.ToStringShort()));
+            resultObj.push_back(Pair("outpoint", dnb.outpoint.ToStringShort()));
             resultObj.push_back(Pair("addr", dnb.addr.ToString()));
 
             int nDos = 0;
             bool fResult;
             if (dnb.CheckSignature(nDos)) {
-                if (fSafe) {
-                    fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
-                } else {
-                    dnodeman.UpdateDynodeList(dnb, *g_connman);
-                    dnb.Relay(*g_connman);
-                    fResult = true;
-                }
+                fResult = dnodeman.CheckDnbAndUpdateDynodeList(NULL, dnb, nDos, *g_connman);
                 dnodeman.NotifyDynodeUpdates(*g_connman);
             } else fResult = false;
 
@@ -871,20 +890,22 @@ UniValue sentinelping(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{ //  category                  name                    actor (function)     okSafeMode
+{ //  category                 name                     actor (function)     okSafe argNames
+  //  ---------------------    ----------------------   -------------------  ------ ----
     /* Dynamic features */
-    { "dynamic",               "dynode",                &dynode,             true  },
-    { "dynamic",               "dynodelist",            &dynodelist,         true  },
-    { "dynamic",               "dynodebroadcast",       &dynodebroadcast,    true  },
-    { "dynamic",               "getpoolinfo",           &getpoolinfo,        true  },
-    { "dynamic",               "sentinelping",          &sentinelping,       true  },
+    { "dynamic",               "dynode",                &dynode,             true,  {} },
+    { "dynamic",               "dynodelist",            &dynodelist,         true,  {} },
+    { "dynamic",               "dynodebroadcast",       &dynodebroadcast,    true,  {} },
+    { "dynamic",               "getpoolinfo",           &getpoolinfo,        true,  {} },
+    { "dynamic",               "sentinelping",          &sentinelping,       true,  {} },
 #ifdef ENABLE_WALLET
-    { "dynamic",               "privatesend",           &privatesend,        false },
+    { "dynamic",               "privatesend",           &privatesend,        false,  {} },
 #endif // ENABLE_WALLET
 };
 
-void RegisterDynodeRPCCommands(CRPCTable &tableRPC)
+void RegisterDynodeRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
+

@@ -842,9 +842,9 @@ void DynamicGUI::showConfEditor()
     GUIUtil::openConfigfile();
 }
 
-void DynamicGUI::showSNConfEditor()
+void DynamicGUI::showDNConfEditor()
 {
-    GUIUtil::openSNConfigfile();
+    GUIUtil::openDNConfigfile();
 }
 
 void DynamicGUI::showBackups()
