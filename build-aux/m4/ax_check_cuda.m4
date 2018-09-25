@@ -81,7 +81,7 @@ then
       NVCCFLAGS+=" -O3"
    fi
    AC_ARG_ENABLE([emu],
-      AC_HELP_STRING([--enable-emu],[turn on device emulation for CUDA]),
+      AS_HELP_STRING([--enable-emu],[turn on device emulation for CUDA]),
       [case "${enableval}" in
          yes) EMULATION=true;;
          no)  EMULATION=false;;
