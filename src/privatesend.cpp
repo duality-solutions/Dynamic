@@ -14,6 +14,7 @@
 #include "dynode-sync.h"
 #include "dynodeman.h"
 #include "messagesigner.h"
+#include "netmessagemaker.h"
 #include "script/sign.h"
 #include "txmempool.h"
 #include "util.h"
@@ -41,7 +42,7 @@ bool CPrivateSendQueue::Sign()
 {
     if(!fDynodeMode) return false;
 
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
 
     if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
         LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
@@ -53,7 +54,7 @@ bool CPrivateSendQueue::Sign()
 
 bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 {
-    std::string strMessage = vin.ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + boost::lexical_cast<std::string>(nDenom) + boost::lexical_cast<std::string>(nTime) + boost::lexical_cast<std::string>(fReady);
     std::string strError = "";
 
     if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
@@ -66,12 +67,11 @@ bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode)
 
 bool CPrivateSendQueue::Relay(CConnman& connman)
 {
-    std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
-    BOOST_FOREACH(CNode* pnode, vNodesCopy)
+    connman.ForEachNode([&connman, this](CNode* pnode) {
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
         if(pnode->nVersion >= MIN_PRIVATESEND_PEER_PROTO_VERSION)
-            connman.PushMessage(pnode, NetMsgType::PSQUEUE, (*this));
-
-    connman.ReleaseNodeVector(vNodesCopy);
+            connman.PushMessage(pnode, msgMaker.Make(NetMsgType::PSQUEUE, (*this)));
+    });
     return true;
 }
 
@@ -435,54 +435,4 @@ void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlock* pblock)
     }
     mapPSTX[txHash].SetConfirmedHeight(pblockindex ? pblockindex->nHeight : -1);
     LogPrint("privatesend", "CPrivateSendClient::SyncTransaction -- txid=%s\n", txHash.ToString());
-}
-
-//TODO: Rename/move to core
-void ThreadCheckPrivateSend(CConnman& connman)
-{
-    if(fLiteMode) return; // disable all Dynamic specific functionality
-
-    static bool fOneThread;
-    if(fOneThread) return;
-    fOneThread = true;
-
-    // Make this thread recognisable as the PrivateSend thread
-    RenameThread("dynamic-ps");
-
-    unsigned int nTick = 0;
-
-    while (true)
-    {
-        MilliSleep(1000);
-
-        // try to sync from all available nodes, one step at a time
-        dynodeSync.ProcessTick(connman);
-
-        if(dynodeSync.IsBlockchainSynced() && !ShutdownRequested()) {
-
-            nTick++;
-
-            // make sure to check all dynodes first
-            dnodeman.Check();
-
-            // check if we should activate or ping every few minutes,
-            // slightly postpone first run to give net thread a chance to connect to some peers
-            if(nTick % DYNODE_MIN_DNP_SECONDS == 15)
-                activeDynode.ManageState(connman);
-
-            if(nTick % 60 == 0) {
-                dnodeman.ProcessDynodeConnections(connman);
-                dnodeman.CheckAndRemove(connman);
-                dnpayments.CheckAndRemove();
-                instantsend.CheckAndRemove();
-            }
-            if(fDynodeMode && (nTick % (60 * 5) == 0)) {
-                dnodeman.DoFullVerificationStep(connman);
-            }
-
-            if(nTick % (60 * 5) == 0) {
-                governance.DoMaintenance(connman);
-            }
-        }
-    }
 }

@@ -312,7 +312,7 @@ bool CSuperblockManager::IsSuperblockTriggered(int nBlockHeight)
             continue;
         }
 
-        LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- data = %s\n", pObj->GetDataAsString());
+        LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- data = %s\n", pObj->GetDataAsPlainString());
 
         if(nBlockHeight != Params().GetConsensus().nSuperblockCycle) {
             LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- block height doesn't match nBlockHeight = %d, blockStart = %d, continuing\n",
@@ -659,8 +659,8 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount b
     int nPayments = CountPayments();
     int nMinerPayments = nOutputs - nPayments;
 
-    LogPrint("gobject", "CSuperblock::IsValid nOutputs = %d, nPayments = %d, strData = %s\n",
-             nOutputs, nPayments, GetGovernanceObject()->GetDataAsHex());
+    LogPrint("gobject", "CSuperblock::IsValid nOutputs = %d, nPayments = %d, GetDataAsHexString = %s\n",
+             nOutputs, nPayments, GetGovernanceObject()->GetDataAsHexString());
 
     // We require an exact match (including order) between the expected
     // superblock payments and the payments actually in the block.

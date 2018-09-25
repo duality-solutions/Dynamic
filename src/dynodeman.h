@@ -53,13 +53,17 @@ private:
     std::map<CNetAddr, int64_t> mWeAskedForDynodeList;
     // which Dynodes we've asked for
     std::map<COutPoint, std::map<CNetAddr, int64_t> > mWeAskedForDynodeListEntry;
-    // who we asked for the Dynode verification
-    std::map<CNetAddr, CDynodeVerification> mWeAskedForVerification;
+
+    // who we asked for the dynode verification
+    std::map<CService, CDynodeVerification> mWeAskedForVerification;
 
     // these maps are used for Dynode recovery from DYNODE_NEW_START_REQUIRED state
     std::map<uint256, std::pair< int64_t, std::set<CNetAddr> > > mDnbRecoveryRequests;
     std::map<uint256, std::vector<CDynodeBroadcast> > mDnbRecoveryGoodReplies;
     std::list< std::pair<CService, uint256> > listScheduledDnbRequestConnections;
+    std::map<CService, std::pair<int64_t, std::set<uint256> > > mapPendingDNB;
+    std::map<CService, std::pair<int64_t, CDynodeVerification> > mapPendingDNV;
+    CCriticalSection cs_mapPendingDNV;
 
     /// Set when Dynodes are added, cleared when CGovernanceManager is notified
     bool fDynodesAdded;
@@ -76,6 +80,11 @@ private:
     CDynode* Find(const COutPoint& outpoint);
 
     bool GetDynodeScores(const uint256& nBlockHash, score_pair_vec_t& vecDynodeScoresRet, int nMinProtocol = 0);
+
+    void SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman& connman);
+    void SyncAll(CNode* pnode, CConnman& connman);
+
+    void PushPsegInvs(CNode* pnode, const CDynode& dn);
 
 public:
     // Keep track of all broadcasts I've seen
@@ -177,12 +186,14 @@ public:
 
     void ProcessDynodeConnections(CConnman& connman);
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();
+    void ProcessPendingDnbRequests(CConnman& connman);
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
     void DoFullVerificationStep(CConnman& connman);
     void CheckSameAddr();
-    bool SendVerifyRequest(const CAddress& addr, const std::vector<CDynode*>& vSortedByAddr, CConnman& connman);
+    bool SendVerifyRequest(const CAddress& addr, const std::vector<const CDynode*>& vSortedByAddr, CConnman& connman);
+    void ProcessPendingDnvRequests(CConnman& connman);
     void SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnman& connman);
     void ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv);
     void ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification& dnv);
@@ -233,6 +244,7 @@ public:
      */
     void NotifyDynodeUpdates(CConnman& connman);
 
+    void DoMaintenance(CConnman &connman);
 };
 
 #endif // DYNAMIC_DYNODEMAN_H

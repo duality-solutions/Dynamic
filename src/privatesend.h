@@ -99,27 +99,66 @@ public:
         {}
 };
 
+class CPrivateSendAccept
+{
+public:
+    int nDenom;
+    int nInputCount;
+    CMutableTransaction txCollateral;
+
+    CPrivateSendAccept() :
+        nDenom(0),
+        nInputCount(0),
+        txCollateral(CMutableTransaction())
+        {};
+
+    CPrivateSendAccept(int nDenom, int nInputCount, const CMutableTransaction& txCollateral) :
+        nDenom(nDenom),
+        nInputCount(nInputCount),
+        txCollateral(txCollateral)
+        {};
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(nDenom);
+        int nVersion = s.GetVersion();
+        if (nVersion > 70900) {
+            READWRITE(nInputCount);
+        } else if (ser_action.ForRead()) {
+            nInputCount = 0;
+        }
+        READWRITE(txCollateral);
+    }
+
+    friend bool operator==(const CPrivateSendAccept& a, const CPrivateSendAccept& b)
+    {
+        return a.nDenom == b.nDenom && a.txCollateral == b.txCollateral;
+    }
+};
+
 // A clients transaction in the mixing pool
 class CPrivateSendEntry
 {
 public:
     std::vector<CTxPSIn> vecTxPSIn;
     std::vector<CTxOut> vecTxOut;
-    CTransaction txCollateral;
+    CTransactionRef txCollateral;
     // memory only
     CService addr;
 
     CPrivateSendEntry() :
         vecTxPSIn(std::vector<CTxPSIn>()),
         vecTxOut(std::vector<CTxOut>()),
-        txCollateral(CTransaction()),
+        txCollateral(MakeTransactionRef()),
         addr(CService())
         {}
 
     CPrivateSendEntry(const std::vector<CTxPSIn>& vecTxPSIn, const std::vector<CTxOut>& vecTxOut, const CTransaction& txCollateral) :
         vecTxPSIn(vecTxPSIn),
         vecTxOut(vecTxOut),
-        txCollateral(txCollateral),
+        txCollateral(MakeTransactionRef(txCollateral)),
         addr(CService())
         {}
 
@@ -143,7 +182,8 @@ class CPrivateSendQueue
 {
 public:
     int nDenom;
-    CTxIn vin;
+    int nInputCount;
+    COutPoint dynodeOutpoint;
     int64_t nTime;
     bool fReady; //ready for submit
     std::vector<unsigned char> vchSig;
@@ -152,16 +192,18 @@ public:
 
     CPrivateSendQueue() :
         nDenom(0),
-        vin(CTxIn()),
+        nInputCount(0),
+        dynodeOutpoint(COutPoint()),
         nTime(0),
         fReady(false),
         vchSig(std::vector<unsigned char>()),
         fTried(false)
         {}
 
-    CPrivateSendQueue(int nDenom, COutPoint outpoint, int64_t nTime, bool fReady) :
+    CPrivateSendQueue(int nDenom, int nInputCount, COutPoint outpoint, int64_t nTime, bool fReady) :
         nDenom(nDenom),
-        vin(CTxIn(outpoint)),
+        nInputCount(nInputCount),
+        dynodeOutpoint(outpoint),
         nTime(nTime),
         fReady(fReady),
         vchSig(std::vector<unsigned char>()),
@@ -173,10 +215,31 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(nDenom);
-        READWRITE(vin);
+        int nVersion = s.GetVersion();
+        if (nVersion > 70900) {
+            READWRITE(nInputCount);
+        } else if (ser_action.ForRead()) {
+            nInputCount = 0;
+        }
+        if (nVersion <= 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
         READWRITE(nTime);
         READWRITE(fReady);
-        READWRITE(vchSig);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
     }
 
     /** Sign this mixing transaction
@@ -197,13 +260,13 @@ public:
 
     std::string ToString()
     {
-        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, dynode=%s",
-                        nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", vin.prevout.ToStringShort());
+        return strprintf("nDenom=%d, nInputCount=%d, nTime=%lld, fReady=%s, fTried=%s, dynode=%s",
+                        nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", dynodeOutpoint.ToStringShort());
     }
 
     friend bool operator==(const CPrivateSendQueue& a, const CPrivateSendQueue& b)
     {
-        return a.nDenom == b.nDenom && a.vin.prevout == b.vin.prevout && a.nTime == b.nTime && a.fReady == b.fReady;
+        return a.nDenom == b.nDenom && a.nInputCount == b.nInputCount && a.dynodeOutpoint == b.dynodeOutpoint && a.nTime == b.nTime && a.fReady == b.fReady;
     }
 };
 
@@ -217,25 +280,25 @@ private:
     int nConfirmedHeight;
 
 public:
-    CTransaction tx;
-    CTxIn vin;
+    CTransactionRef tx;
+    COutPoint dynodeOutpoint;
     std::vector<unsigned char> vchSig;
     int64_t sigTime;
 
     CPrivateSendBroadcastTx() :
         nConfirmedHeight(-1),
-        tx(),
-        vin(),
+        tx(MakeTransactionRef()),
+        dynodeOutpoint(),
         vchSig(),
         sigTime(0)
         {}
 
-    CPrivateSendBroadcastTx(CTransaction tx, COutPoint outpoint, int64_t sigTime) :
+    CPrivateSendBroadcastTx(const CTransactionRef& _tx, COutPoint _outpoint, int64_t _sigTime) :
         nConfirmedHeight(-1),
-        tx(tx),
-        vin(CTxIn(outpoint)),
+        tx(_tx),
+        dynodeOutpoint(_outpoint),
         vchSig(),
-        sigTime(sigTime)
+        sigTime(_sigTime)
         {}
 
     ADD_SERIALIZE_METHODS;
@@ -243,8 +306,24 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(tx);
-        READWRITE(vin);
-        READWRITE(vchSig);
+        int nVersion = s.GetVersion();
+        if (nVersion <= 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin{};
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
         READWRITE(sigTime);
     }
 
@@ -291,6 +370,7 @@ protected:
 
 public:
     int nSessionDenom; //Users must submit an denom matching this
+    int nSessionInputCount; //Users must submit a count matching this
 
     CPrivateSendBase() { SetNull(); }
 
@@ -357,7 +437,5 @@ public:
 
     static void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
 };
-
-void ThreadCheckPrivateSend(CConnman& connman);
 
 #endif

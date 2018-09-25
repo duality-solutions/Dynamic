@@ -119,6 +119,8 @@ public:
     void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
 
     std::string ToString();
+
+    void DoMaintenance() { CheckAndRemove(); }
 };
 
 class CTxLockRequest : public CTransaction
@@ -129,12 +131,39 @@ private:
 public:
     static const int WARN_MANY_INPUTS       = 100;
 
-    CTxLockRequest() = default;
-    CTxLockRequest(const CTransaction& tx) : CTransaction(tx) {};
+    CTransactionRef tx;
 
+    CTxLockRequest() = default;
+    CTxLockRequest(const CTransaction& _tx) : tx(MakeTransactionRef(_tx)) {};
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(tx);
+    }
+    
     bool IsValid() const;
     CAmount GetMinFee() const;
     int GetMaxSignatures() const;
+
+    const uint256 &GetHash() const {
+        return tx->GetHash();
+    }
+
+    std::string ToString() const {
+        return tx->ToString();
+    }
+
+    friend bool operator==(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx == *b.tx;
+    }
+
+    friend bool operator!=(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx != *b.tx;
+    }
 
     explicit operator bool() const
     {
@@ -142,6 +171,13 @@ public:
     }
 };
 
+/**
+ * An InstantSend transaction lock vote. Sent by a masternode in response to a
+ * transaction lock request (ix message) to indicate the transaction input can
+ * be locked. Contains the proposed transaction's hash and the outpoint being
+ * locked along with the masternodes outpoint and signature.
+ * @see CTxLockRequest
+ */
 class CTxLockVote
 {
 private:

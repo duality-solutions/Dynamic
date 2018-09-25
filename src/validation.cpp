@@ -9,6 +9,7 @@
 
 #include "alert.h"
 #include "arith_uint256.h"
+#include "blockencodings.h"
 #include "bdap/domainentrydb.h"
 #include "chainparams.h"
 #include "checkpoints.h"
@@ -192,8 +193,40 @@ namespace {
 
     /** Dirty block file entries. */
     std::set<int> setDirtyFileInfo;
-
 } // anon namespace
+
+/* Use this class to start tracking transactions that are removed from the
+ * mempool and pass all those transactions through SyncTransaction when the
+ * object goes out of scope. This is currently only used to call SyncTransaction
+ * on conflicts removed from the mempool during block connection.  Applied in
+ * ActivateBestChain around ActivateBestStep which in turn calls:
+ * ConnectTip->removeForBlock->removeConflicts
+ */
+class MemPoolConflictRemovalTracker
+{
+private:
+    std::vector<CTransactionRef> conflictedTxs;
+    CTxMemPool &pool;
+
+public:
+    MemPoolConflictRemovalTracker(CTxMemPool &_pool) : pool(_pool) {
+        pool.NotifyEntryRemoved.connect(boost::bind(&MemPoolConflictRemovalTracker::NotifyEntryRemoved, this, _1, _2));
+    }
+
+    void NotifyEntryRemoved(CTransactionRef txRemoved, MemPoolRemovalReason reason) {
+        if (reason == MemPoolRemovalReason::CONFLICT) {
+            conflictedTxs.push_back(txRemoved);
+        }
+    }
+
+    ~MemPoolConflictRemovalTracker() {
+        pool.NotifyEntryRemoved.disconnect(boost::bind(&MemPoolConflictRemovalTracker::NotifyEntryRemoved, this, _1, _2));
+        for (const auto& tx : conflictedTxs) {
+            GetMainSignals().SyncTransaction(*tx, NULL, CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK);
+        }
+        conflictedTxs.clear();
+    }
+};
 
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator)
 {
@@ -630,13 +663,15 @@ bool ValidateBDAPInputs(const CTransaction& tx, CValidationState& state, const C
     return true;
 }
 
-bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree,
-                              bool* pfMissingInputs, int64_t nAcceptTime, bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
+bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx, bool fLimitFree,
+                              bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
+                              bool fOverrideMempoolLimit, const CAmount& nAbsurdFee,
                               std::vector<COutPoint>& coins_to_uncache, bool fDryRun)
 {
-    AssertLockHeld(cs_main);
-
+    const CTransaction& tx = *ptx;
+    const uint256 hash = tx.GetHash();
     bool fluidTransaction = false;
+    AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
@@ -1164,8 +1199,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
     return true;
 }
 
-bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, int64_t nAcceptTime, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx, bool fLimitFree,
+                        bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
+                        bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
     std::vector<COutPoint> coins_to_uncache;
     bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, nAcceptTime, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
@@ -1194,8 +1230,9 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState &state, const
     return res;
 }
 
-bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
+bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx, bool fLimitFree,
+                        bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced,
+                        bool fOverrideMempoolLimit, const CAmount nAbsurdFee, bool fDryRun)
 {
     return AcceptToMemoryPoolWithTime(pool, state, tx, fLimitFree, pfMissingInputs, GetTime(), fOverrideMempoolLimit, nAbsurdFee, fDryRun);
 }
@@ -1250,16 +1287,16 @@ bool GetAddressUnspent(uint160 addressHash, int type,
 }
 
 /** Return transaction in tx, and if it was found inside a block, its hash is placed in hashBlock */
-bool GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::Params& consensusParams, uint256 &hashBlock, bool fAllowSlow)
+bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus::Params& consensusParams, uint256 &hashBlock, bool fAllowSlow)
 {
     CBlockIndex *pindexSlow = NULL;
 
     LOCK(cs_main);
 
-    std::shared_ptr<const CTransaction> ptx = mempool.get(hash);
+    CTransactionRef ptx = mempool.get(hash);
     if (ptx)
     {
-        txOut = *ptx;
+        txOut = ptx;
         return true;
     }
 
@@ -3370,22 +3407,16 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
     return true;
 }
 
-bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW)
+bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
 {
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, Params().GetConsensus()))
-        return state.DoS(50, error("CheckBlockHeader(): proof of work failed"),
-                         REJECT_INVALID, "high-hash");
-
-    // Check timestamp
-    if (block.GetBlockTime() > GetAdjustedTime() + 2 * 60 * 60)
-        return state.Invalid(error("CheckBlockHeader(): block timestamp too far in the future"),
-                             REJECT_INVALID, "time-too-new");
+    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+        return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
 {
     // These are checks that are independent of context.
 
@@ -3394,7 +3425,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, fCheckPOW))
+    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
         return false;
 
     // Check the merkle root.
@@ -3423,13 +3454,11 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                          REJECT_INVALID, "bad-blk-length");
 
     // First transaction must be coinbase, the rest must not be
-    if (block.vtx.empty() || !block.vtx[0].IsCoinBase())
-        return state.DoS(100, error("CheckBlock(): first tx is not coinbase"),
-                         REJECT_INVALID, "bad-cb-missing");
+    if (block.vtx.empty() || !block.vtx[0]->IsCoinBase())
+        return state.DoS(100, false, REJECT_INVALID, "bad-cb-missing", false, "first tx is not coinbase");
     for (unsigned int i = 1; i < block.vtx.size(); i++)
-        if (block.vtx[i].IsCoinBase())
-            return state.DoS(100, error("CheckBlock(): more than one coinbase"),
-                             REJECT_INVALID, "bad-cb-multiple");
+        if (block.vtx[i]->IsCoinBase())
+            return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
 
     // DYNAMIC : CHECK TRANSACTIONS FOR INSTANTSEND
@@ -3438,11 +3467,11 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
         // We should never accept block which conflicts with completed transaction lock,
         // that's why this is in CheckBlock unlike coinbase payee/amount.
         // Require other nodes to comply, send them some data in case they are missing it.
-         BOOST_FOREACH(const CTransaction& tx, block.vtx) {
+        for(const auto& tx : block.vtx) {
             // skip coinbase, it has no inputs
             if (tx.IsCoinBase()) continue;
             // LOOK FOR TRANSACTION LOCK IN OUR MAP OF OUTPOINTS
-            BOOST_FOREACH(const CTxIn& txin, tx.vin) {
+            for (const auto& txin : tx->vin) {
                 uint256 hashLocked;
                 if(instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx.GetHash()) {
                     // The node which relayed this will have to swtich later,
@@ -3463,7 +3492,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 
     // Check transactions
     BOOST_FOREACH(const CTransaction& tx, block.vtx) {
-        if (!CheckTransaction(tx, state, false))
+        if (!CheckTransaction(*tx, state, false))
             return error("CheckBlock(): CheckTransaction of %s failed with %s",
                 tx.GetHash().ToString(),
                 FormatStateMessage(state));
@@ -3480,18 +3509,18 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
             }    
         }
         
-        if (!fluid.CheckTransactionToBlock(tx, block))
+        if (!fluid.CheckTransactionToBlock(*tx, block))
             return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx.GetHash().ToString());
     }
 
     unsigned int nSigOps = 0;
-    BOOST_FOREACH(const CTransaction& tx, block.vtx)
+    for (const auto& tx : block.vtx)
     {
-        nSigOps += GetLegacySigOpCount(tx);
+        nSigOps += GetLegacySigOpCount(*tx);
     }
-    if (nSigOps > MAX_BLOCK_SIGOPS)
-        return state.DoS(100, error("CheckBlock(): out-of-bounds SigOpCount"),
-                         REJECT_INVALID, "bad-blk-sigops");
+    // sigops limits (relaxed)
+    if (nSigOps > MaxBlockSigOps(true))
+        return state.DoS(100, false, REJECT_INVALID, "bad-blk-sigops", false, "out-of-bounds SigOpCount");
 
     if (fCheckPOW && fCheckMerkleRoot)
         block.fChecked = true;
@@ -3590,7 +3619,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const CB
             script = CScript() << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
         }
         
-        for (const CTxOut& output : block.vtx[0].vout) {
+        for (const CTxOut& output : block.vtx[0]->vout) {
             if (output.scriptPubKey == script) {
                 if (output.nValue == fluidIssuance) {
                     found = true;
@@ -4631,10 +4660,9 @@ bool LoadMempool(void)
         file >> num;
         double prioritydummy = 0;
         while (num--) {
-            CTransaction tx;
             int64_t nTime;
             int64_t nFeeDelta;
-            file >> tx;
+            CTransaction tx(deserialize, file);
             file >> nTime;
             file >> nFeeDelta;
 

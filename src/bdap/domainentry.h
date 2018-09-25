@@ -8,6 +8,7 @@
 #include "bdap.h"
 #include "amount.h"
 #include "consensus/params.h"
+#include "primitives/transaction.h"
 #include "script/script.h"
 #include "serialize.h"
 #include "sync.h"
@@ -17,7 +18,6 @@
 class CCoinsViewCache;
 class CDynamicAddress;
 struct CRecipient;
-class CTransaction;
 class CTxOut;
 class CTxMemPool;
 
@@ -194,7 +194,7 @@ bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData);
 bool IsBDAPOperationOutput(const CTxOut& out);
 int GetBDAPOperationOutIndex(const CTransaction& tx);
 int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash);
-bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams);
+bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut, const Consensus::Params& consensusParams);
 bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType);
 CDynamicAddress GetScriptAddress(const CScript& pubScript);
 int GetBDAPOpCodeFromOutput(const CTxOut& out);

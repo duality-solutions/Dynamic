@@ -113,18 +113,22 @@ bool IsBDAPDataOutput(const CTxOut& out) {
    return false;
 }
 
-bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransaction& txOut, const Consensus::Params& consensusParams)
+bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut, const Consensus::Params& consensusParams)
 {
     if(nHeight < 0 || nHeight > chainActive.Height())
         return false;
-    CBlockIndex *pindexSlow = NULL; 
+
+    CBlockIndex *pindexSlow = NULL;
+
     LOCK(cs_main);
+    
     pindexSlow = chainActive[nHeight];
+    
     if (pindexSlow) {
         CBlock block;
         if (ReadBlockFromDisk(block, pindexSlow, consensusParams)) {
-            BOOST_FOREACH(const CTransaction &tx, block.vtx) {
-                if (tx.GetHash() == hash) {
+                for (const auto& tx : block.vtx) {
+                if (tx->GetHash() == hash) {
                     txOut = tx;
                     return true;
                 }

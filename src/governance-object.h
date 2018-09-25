@@ -16,6 +16,7 @@
 #include "net.h"
 #include "sync.h"
 #include "util.h"
+#include "utilstrencodings.h"
 
 #include <univalue.h>
 
@@ -148,10 +149,10 @@ private:
     uint256 nCollateralHash;
 
     /// Data field - can be used for anything
-    std::string strData;
+    std::vector<unsigned char> vchData;
 
     /// Dynode info for signed objects
-    CTxIn vinDynode;
+    COutPoint dynodeOutpoint;
     std::vector<unsigned char> vchSig;
 
     /// is valid by blockchain
@@ -193,7 +194,7 @@ private:
 public:
     CGovernanceObject();
 
-    CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int64_t nTime, uint256 nCollateralHashIn, std::string strDataIn);
+    CGovernanceObject(const uint256& nHashParentIn, int nRevisionIn, int64_t nTime, const uint256& nCollateralHashIn, const std::string& strDataHexIn);
 
     CGovernanceObject(const CGovernanceObject& other);
 
@@ -217,8 +218,8 @@ public:
         return nCollateralHash;
     }
 
-    const CTxIn& GetDynodeVin() const {
-        return vinDynode;
+    const COutPoint& GetDynodeOutpoint() const {
+        return dynodeOutpoint;
     }
 
     bool IsSetCachedFunding() const {
@@ -255,11 +256,12 @@ public:
 
     // Signature related functions
 
-    void SetDynodeVin(const COutPoint& outpoint);
-    bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
-    bool CheckSignature(CPubKey& pubKeyDynode);
+    void SetDynodeOutpoint(const COutPoint& outpoint);
+    bool Sign(const CKey& keyMasternode, const CPubKey& pubKeyMasternode);
+    bool CheckSignature(const CPubKey& pubKeyDynode) const;
 
     std::string GetSignatureMessage() const;
+    uint256 GetSignatureHash() const;
 
     // CORE OBJECT FUNCTIONS
 
@@ -298,8 +300,8 @@ public:
 
     // FUNCTIONS FOR DEALING WITH DATA STRING
 
-    std::string GetDataAsHex();
-    std::string GetDataAsString();
+    std::string GetDataAsHexString() const;
+    std::string GetDataAsPlainString() const;
 
     // SERIALIZER
 
@@ -309,15 +311,43 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         // SERIALIZE DATA FOR SAVING/LOADING OR NETWORK FUNCTIONS
-
+        int nVersion = s.GetVersion();
         READWRITE(nHashParent);
         READWRITE(nRevision);
         READWRITE(nTime);
         READWRITE(nCollateralHash);
-        READWRITE(LIMITED_STRING(strData, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
+        if (nVersion <= 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            std::string strDataHex;
+            if (ser_action.ForRead()) {
+                READWRITE(LIMITED_STRING(strDataHex, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
+                vchData = ParseHex(strDataHex);
+            } else {
+                strDataHex = HexStr(vchData);
+                READWRITE(LIMITED_STRING(strDataHex, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
+            }
+        } else {
+            // using new format directly
+            READWRITE(vchData);
+        }
         READWRITE(nObjectType);
-        READWRITE(vinDynode);
-        READWRITE(vchSig);
+        if (nVersion <= 70900 && (s.GetType() & SER_NETWORK)) {
+            // converting from/to old format
+            CTxIn txin;
+            if (ser_action.ForRead()) {
+                READWRITE(txin);
+                dynodeOutpoint = txin.prevout;
+            } else {
+                txin = CTxIn(dynodeOutpoint);
+                READWRITE(txin);
+            }
+        } else {
+            // using new format directly
+            READWRITE(dynodeOutpoint);
+        }
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchSig);
+        }
         if(s.GetType() & SER_DISK) {
             // Only include these for the disk file format
             LogPrint("gobject", "CGovernanceObject::SerializationOp Reading/writing votes from/to disk\n");

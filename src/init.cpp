@@ -1805,13 +1805,24 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 11d: start dynamic-ps-<smth> threads
 
-    threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSend, boost::ref(*g_connman)));
-    if (fDynodeMode)
-        threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendServer, boost::ref(*g_connman)));
+    if (!fLiteMode) {
+        scheduler.scheduleEvery(boost::bind(&CNetFulfilledRequestManager::DoMaintenance, boost::ref(netfulfilledman)), 60);
+        scheduler.scheduleEvery(boost::bind(&CDynodeSync::DoMaintenance, boost::ref(dynodeSync), boost::ref(*g_connman)), DYNODE_SYNC_TICK_SECONDS);
+        scheduler.scheduleEvery(boost::bind(&CDynodeMan::DoMaintenance, boost::ref(dnodeman), boost::ref(*g_connman)), 1);
+        scheduler.scheduleEvery(boost::bind(&CActiveDynode::DoMaintenance, boost::ref(activeDynode), boost::ref(*g_connman)), 1);
+
+        scheduler.scheduleEvery(boost::bind(&CDynodePayments::DoMaintenance, boost::ref(dnpayments)), 60);
+        scheduler.scheduleEvery(boost::bind(&CGovernanceManager::DoMaintenance, boost::ref(governance), boost::ref(*g_connman)), 60 * 5);
+
+        scheduler.scheduleEvery(boost::bind(&CInstantSend::DoMaintenance, boost::ref(instantsend)), 60);
+
+        if (fDynodeMode)
+            scheduler.scheduleEvery(boost::bind(&CPrivateSendServer::DoMaintenance, boost::ref(privateSendServer), boost::ref(*g_connman)), 1);
 #ifdef ENABLE_WALLET
-     else
-        threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendClient, boost::ref(*g_connman)));
+        else
+            scheduler.scheduleEvery(boost::bind(&CPrivateSendClient::DoMaintenance, boost::ref(privateSendClient), boost::ref(*g_connman)), 1);
 #endif // ENABLE_WALLET
+    }
 
     // ********************************************************* Step 12: start node
 

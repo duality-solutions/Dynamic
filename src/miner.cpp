@@ -126,7 +126,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
 
     // Create coinbase tx with fluid issuance
     // TODO: Can this be made any more elegant?
-    CMutableTransaction txNew;
+    CMutableTransaction coinbaseTx;
     txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull();
     txNew.vout.resize(1);

@@ -174,10 +174,7 @@ public:
             assert(genesis.hashMerkleRoot == uint256S("0xfa0e753db5a853ebbc52594eb62fa8219155547b426fba8789fa96dbf07e6ed5"));
         }
 
-        vSeeds.push_back(CDNSSeedData("dnsseeder.io", "dyn2.dnsseeder.io"));
-        vSeeds.push_back(CDNSSeedData("dnsseeder.com", "dyn2.dnsseeder.com"));
-        vSeeds.push_back(CDNSSeedData("dnsseeder.host", "dyn2.dnsseeder.host"));
-        vSeeds.push_back(CDNSSeedData("dnsseeder.net", "dyn2.dnsseeder.net"));
+        vSeeds.push_back(CDNSSeedData("quasar.servies", "dnsseeder-dyn.quasar.services"));
 
         // Dynamic addresses start with 'D'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,30);
@@ -197,8 +194,10 @@ public:
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
+        fRequireRoutableExternalIP = true;
         fMineBlocksOnDemand = false;
         fAllowMultipleAddressesFromGroup = false;
+        fAllowMultiplePorts = false;
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60 * 60; // fulfilled requests expire in 1 hour
@@ -313,8 +312,10 @@ public:
         fMiningRequiresPeers = false;
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
+        fRequireRoutableExternalIP = true;
         fMineBlocksOnDemand = false;
         fAllowMultipleAddressesFromGroup = false;
+        fAllowMultiplePorts = false;
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
@@ -404,8 +405,10 @@ public:
         fMiningRequiresPeers = false;
         fDefaultConsistencyChecks = true;
         fRequireStandard = false;
+        fRequireRoutableExternalIP = true;
         fMineBlocksOnDemand = true;
         fAllowMultipleAddressesFromGroup = false;
+        fAllowMultiplePorts = false;
 
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
         strSporkPubKey = "04e8118b469667861157f3b2b28056ae92581ce61ce2db80d04a701f5ec5391b751e6136bafdcca7b8d0b564a5afce213e8069bdd1d17131f61d116b73dbf7e2d6";

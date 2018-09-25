@@ -19,7 +19,7 @@ public:
     explicit CoinControlTreeWidget(QWidget *parent = 0);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // DYNAMIC_QT_COINCONTROLTREEDIALOG_H

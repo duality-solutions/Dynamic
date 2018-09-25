@@ -67,12 +67,16 @@ public:
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** Policy: Filter transactions that do not match well-defined patterns */
     bool RequireStandard() const { return fRequireStandard; }
+    /** Require addresses specified with "-externalip" parameter to be routable */
+    bool RequireRoutableExternalIP() const { return fRequireRoutableExternalIP; }
     int64_t MaxTipAge() const { return nMaxTipAge; }
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
     /** Make miner stop after a block is found. In RPC, don't return until nGenProcLimit blocks are generated */
     bool MineBlocksOnDemand() const { return fMineBlocksOnDemand; }
     /** Allow multiple addresses to be selected from the same network group (e.g. 192.168.x.x) */
     bool AllowMultipleAddressesFromGroup() const { return fAllowMultipleAddressesFromGroup; }
+    /** Allow nodes with the same address and multiple ports */
+    bool AllowMultiplePorts() const { return fAllowMultiplePorts; }
     /** Return the BIP70 network string (main, test or regtest) */
     std::string NetworkIDString() const { return strNetworkID; }
     const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
@@ -102,8 +106,10 @@ protected:
     bool fMiningRequiresPeers;
     bool fDefaultConsistencyChecks;
     bool fRequireStandard;
+    bool fRequireRoutableExternalIP;
     bool fMineBlocksOnDemand;
     bool fAllowMultipleAddressesFromGroup;
+    bool fAllowMultiplePorts;
     bool startNewChain;
     CCheckpointData checkpointData;
     int nPoolMaxTransactions;

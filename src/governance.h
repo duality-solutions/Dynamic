@@ -294,13 +294,14 @@ public:
     virtual ~CGovernanceManager() {}
 
     /**
-     * This is called by AlreadyHave in main.cpp as part of the inventory
+     * This is called by AlreadyHave in net_processing.cpp as part of the inventory
      * retrieval process.  Returns true if we want to retrieve the object, otherwise
      * false. (Note logic is inverted in AlreadyHave).
      */
     bool ConfirmInventoryRequest(const CInv& inv);
 
-    void Sync(CNode* node, const uint256& nProp, const CBloomFilter& filter, CConnman& connman);
+    void SyncSingleObjAndItsVotes(CNode* pnode, const uint256& nProp, const CBloomFilter& filter, CConnman& connman);
+    void SyncAll(CNode* pnode, CConnman& connman) const;
 
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
@@ -314,8 +315,6 @@ public:
 
     bool IsBudgetPaymentBlock(int nBlockHeight);
     void AddGovernanceObject(CGovernanceObject& govobj, CConnman& connman, CNode* pfrom = NULL);
-
-    std::string GetRequiredPaymentsString(int nBlockHeight);
 
     void UpdateCachesAndClean();
 
