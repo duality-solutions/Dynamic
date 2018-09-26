@@ -294,6 +294,7 @@ libdynamic_server_a_SOURCES = \
   rest.cpp \
   rpcblockchain.cpp \
   bdap/rpcdomainentry.cpp \
+  dht/rpcdht.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
