@@ -224,14 +224,17 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
     return true;
 }
 
-static void put_string(
+static void put_mutable
+(
     entry& e
     ,std::array<char, 64>& sig
-    ,std::int64_t const& seq
+    ,std::int64_t& seq
     ,std::string const& salt
     ,std::array<char, 32> const& pk
     ,std::array<char, 64> const& sk
-    ,char const* str)
+    ,char const* str
+    ,std::int64_t const& iSeq
+)
 {
     using dht::sign_mutable_item;
     if (str != NULL) {
@@ -239,6 +242,7 @@ static void put_string(
         std::vector<char> buf;
         bencode(std::back_inserter(buf), e);
         dht::signature sign;
+        seq = iSeq + 1;
         sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
             , dht::public_key(pk.data())
             , dht::secret_key(sk.data()));
@@ -258,11 +262,10 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
     if (!load_dht_state(pTorrentDHTSession))
         bootstrap(pTorrentDHTSession);
 
-    entry e;
-    std::array<char, 64> sig;
-    pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_string, e, sig, lastSequence, entrySalt, public_key, private_key, dhtValue));
+    pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_mutable, std::placeholders::_1, std::placeholders::_2, 
+                                        std::placeholders::_3, std::placeholders::_4, public_key, private_key, dhtValue, lastSequence), entrySalt);
 
-    LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, sig=%s, seq=%d\n", aux::to_hex(public_key), entrySalt, aux::to_hex(sig), lastSequence);
+    LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, seq=%d\n", aux::to_hex(public_key), entrySalt, lastSequence);
     alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_put_alert::alert_type);
     dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
     message = dhtPutAlert->message();
