@@ -40,26 +40,34 @@ static alert* wait_for_alert(session* dhtSession, int alert_type)
     while (!found)
     {
         dhtSession->wait_for_alert(seconds(5));
-
         std::vector<alert*> alerts;
         dhtSession->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator i = alerts.begin()
             , end(alerts.end()); i != end; ++i)
         {
-            LogPrintf("DHTTorrentNetwork -- message = %s, type =%d, alert_type =%d\n", (*i)->message(), (*i)->type(), alert_type);
+            if ((*i)->category() == 0x1) {
+                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            }
+            else if ((*i)->category() == 0x80) {
+                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            }
+            else if ((*i)->category() == 0x200) {
+                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            }
+            else if ((*i)->category() == 0x400) {
+                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            }
             if ((*i)->type() != alert_type)
             {
-                //print some alerts?
-                
                 continue;
             }
+            LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
             ret = *i;
             found = true;
         }
         if (fShutdown)
             return ret;
     }
-    LogPrintf("DHTTorrentNetwork -- wait_for_alert complete.\n");
     return ret;
 }
 
@@ -84,6 +92,7 @@ static int save_dht_state(session* dhtSession)
     bencode(std::back_inserter(state), torrentEntry);
     std::fstream f(get_log_path().c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     f.write(state.data(), state.size());
+    LogPrintf("DHTTorrentNetwork -- save_dht_state complete.\n");
     return 0;
 }
 
@@ -150,10 +159,13 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
         while (!fShutdown) {
-            MilliSleep(60000);
-            //load_dht_state(pTorrentDHTSession);
-            //bootstrap(pTorrentDHTSession);
-            //save_dht_state(pTorrentDHTSession);
+            MilliSleep(5000);
+            if (!pTorrentDHTSession->is_dht_running()) {
+                LogPrintf("DHTTorrentNetwork -- not running.  Loading from file and restarting bootstrap.\n");
+                load_dht_state(pTorrentDHTSession);
+                bootstrap(pTorrentDHTSession);
+                save_dht_state(pTorrentDHTSession);
+            }
         }
     }
     catch (const boost::thread_interrupted&)
@@ -170,6 +182,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
+    save_dht_state(pTorrentDHTSession);
     fShutdown = true;
     if (dhtTorrentThread != NULL)
     {
@@ -179,7 +192,7 @@ void StopTorrentDHTNetwork()
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork stopped.\n");
     }
     else {
-        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork dhtTorrentThreads is null.  Stop not needed.\n");
+        LogPrintf("DHTTorrentNetwork --StopTorrentDHTNetwork dhtTorrentThreads is null.  Stop not needed.\n");
     }
 }
 
@@ -193,34 +206,58 @@ void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
     dhtTorrentThread = new  boost::thread(DHTTorrentNetwork, boost::cref(chainparams), boost::ref(connman));
 }
 
-bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence)
+bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool fWaitForAuthoritative)
 {
     //TODO: DHT add locks
     LogPrintf("DHTTorrentNetwork -- GetDHTMutableData started.\n");
 
-    if (!pTorrentDHTSession) 
+    if (!pTorrentDHTSession) {
+        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pTorrentDHTSession is null.";
         return false;
+    }
 
-    if (!load_dht_state(pTorrentDHTSession))
-        bootstrap(pTorrentDHTSession);
+    if (!pTorrentDHTSession->is_dht_running()) {
+        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Restarting DHT.\n");
+        if (!load_dht_state(pTorrentDHTSession)) {
+            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to bootstrap again.\n");
+            bootstrap(pTorrentDHTSession);
+        }
+        else {
+            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData  setting loaded from file.\n");
+        }
+    }
+    else {
+        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData DHT already running.  Bootstrap not needed.\n");
+    }
 
     pTorrentDHTSession->dht_get_item(public_key, entrySalt);
     LogPrintf("DHTTorrentNetwork -- MGET: %s, salt = %s\n", aux::to_hex(public_key), entrySalt);
 
     bool authoritative = false;
-    while (!authoritative)
-    {
+    if (fWaitForAuthoritative) {
+        while (!authoritative)
+        {
+            alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type);
+
+            dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
+            authoritative = dhtGetAlert->authoritative;
+            entryValue = dhtGetAlert->item.to_string();
+            lastSequence = dhtGetAlert->seq;
+            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
+        }
+    }
+    else {
         alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type);
-
         dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
-
         authoritative = dhtGetAlert->authoritative;
         entryValue = dhtGetAlert->item.to_string();
         lastSequence = dhtGetAlert->seq;
         LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
     }
-    save_dht_state(pTorrentDHTSession);
-    LogPrintf("DHTTorrentNetwork -- GetDHTMutableData end.\n");
+
+    if (entryValue == "<uninitialized>")
+        return false;
+
     return true;
 }
 
@@ -256,12 +293,25 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
     //TODO: (DHT) add locks
     LogPrintf("DHTTorrentNetwork -- PutMutableData started.\n");
 
-    if (!pTorrentDHTSession) 
+    if (!pTorrentDHTSession) {
+        message = "DHTTorrentNetwork -- PutDHTMutableData Error. pTorrentDHTSession is null.";
         return false;
+    }
 
-    if (!load_dht_state(pTorrentDHTSession))
-        bootstrap(pTorrentDHTSession);
-
+    if (!pTorrentDHTSession->is_dht_running()) {
+        LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Restarting DHT.\n");
+        if (!load_dht_state(pTorrentDHTSession)) {
+            LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Couldn't load previous settings.  Trying to bootstrap again.\n");
+            bootstrap(pTorrentDHTSession);
+        }
+        else {
+            LogPrintf("DHTTorrentNetwork -- PutDHTMutableData  setting loaded from file.\n");
+        }
+    }
+    else {
+        LogPrintf("DHTTorrentNetwork -- PutDHTMutableData DHT already running.  Bootstrap not needed.\n");
+    }
+    
     pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_mutable, std::placeholders::_1, std::placeholders::_2, 
                                         std::placeholders::_3, std::placeholders::_4, public_key, private_key, dhtValue, lastSequence), entrySalt);
 
@@ -270,8 +320,9 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
     dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
     message = dhtPutAlert->message();
     LogPrintf("DHTTorrentNetwork -- PutMutableData %s\n", message);
-    save_dht_state(pTorrentDHTSession);
-    LogPrintf("DHTTorrentNetwork -- PutMutableData end.\n");
+
+    if (dhtPutAlert->num_success == 0)
+        return false;
 
     return true;
 }

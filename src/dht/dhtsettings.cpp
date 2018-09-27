@@ -15,9 +15,8 @@ using namespace libtorrent;
 CDHTSettings::CDHTSettings()
 {
     user_agent = "Dynamic v" + FormatFullVersion();
-    // Use ports 33307, 33317, 33327, 33337 and 33347
-    listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33317,[::]:33317,0.0.0.0:33327," 
-                        "[::]:33327,0.0.0.0:33337,[::]:33337,0.0.0.0:33347,[::]:33347";
+    // Use ports 33307 and 33337
+    listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33337,[::]:33337";
 }
 
 void CDHTSettings::LoadPeerList()
@@ -69,85 +68,64 @@ void CDHTSettings::LoadSettings()
 {
     LoadPeerList();
 
-    settings.set_bool(settings_pack::enable_dht, false);
-    settings.set_int(settings_pack::alert_mask, 0xffffffff);
-    session newSession(settings);
+    params.settings.set_bool(settings_pack::enable_dht, false);
+    params.settings.set_int(settings_pack::alert_mask, 0xffffffff);
+    session newSession(params.settings);
 
     // Dynamic LibTorrent Settings
+    // see https://www.libtorrent.org/reference-Settings.html#dht_settings
+    // DHT Settings
+    params.dht_settings.max_peers_reply = 100; // default = 100
+    params.dht_settings.search_branching = 10; // default = 5
+    params.dht_settings.max_fail_count = 100; // default = 20
+    params.dht_settings.max_torrents = 2000;
+    params.dht_settings.max_dht_items = 5000; // default = 700
+    params.dht_settings.max_peers = 1000; // default = 5000
+    params.dht_settings.max_torrent_search_reply = 20; // default = 20
 
-    // ``enable_dht`` 
-    // starts the dht node and makes the trackerless service
-    // available to torrents.
-    settings.set_bool(settings_pack::enable_dht, true);
-    
-    // ``user_agent`` 
-    // this is the client identification to the tracker. The recommended
-    // format of this string is: "ClientName/ClientVersion
-    // libtorrent/libtorrentVersion". This name will not only be used when
-    // making HTTP requests, but also when sending extended headers to
-    // peers that support that extension. It may not contain \r or \n
-    settings.set_str(settings_pack::user_agent, user_agent);
+    params.dht_settings.restrict_routing_ips = true; // default = true
+    params.dht_settings.restrict_search_ips = true; // default = true
 
-    // ``dht_bootstrap_nodes`` 
-    // This is a comma-separated list of IP port-pairs. They will be added
-    // to the DHT node (if it's enabled) as back-up nodes in case we don't
-    // know of any. This setting will contain one or more bootstrap nodes
-    // by default.
-    // Changing these after the DHT has been started may not have any
-    // effect until the DHT is restarted.
-    settings.set_str(settings_pack::dht_bootstrap_nodes, dht_bootstrap_nodes); 
+    params.dht_settings.extended_routing_table = true; // default = true
+    params.dht_settings.aggressive_lookups = true; // default = true
+    params.dht_settings.privacy_lookups = false; // default = false
+    params.dht_settings.enforce_node_id = true; // default = false
 
-    // ``listen_interfaces``
-    // a comma-separated list of (IP or device name, port) pairs. These are
-    // the listen ports that will be opened for accepting incoming uTP and
-    // TCP connections. It is possible to listen on multiple interfaces and
-    // multiple ports. Binding to port 0 will make the operating system
-    // pick the port. The default is "0.0.0.0:6881,[::]:6881", which binds
-    // to all interfaces on port 6881.
-    //
-    // a port that has an "s" suffix will accept SSL connections. (note
-    // that SSL sockets are not enabled by default).
-    //
-    // if binding fails, the listen_failed_alert is posted. If or once a
-    // socket binding succeeds, the listen_succeeded_alert is posted. There
-    // may be multiple failures before a success.
-    //
-    // For example:
-    // ``[::1]:8888`` - will only accept connections on the IPv6 loopback
-    // address on port 8888.
-    //
-    // ``eth0:4444,eth1:4444`` - will accept connections on port 4444 on
-    // any IP address bound to device ``eth0`` or ``eth1``.
-    //
-    // ``[::]:0s`` - will accept SSL connections on a port chosen by the
-    // OS. And not accept non-SSL connections at all.
-    //
-    // Windows OS network adapter device name can be specified with GUID.
-    // It can be obtained from "netsh lan show interfaces" command output.
-    // GUID must be uppercased string embraced in curly brackets.
-    // ``{E4F0B674-0DFC-48BB-98A5-2AA730BDB6D6}::7777`` - will accept
-    // connections on port 7777 on adapter with this GUID.
-    // TODO: Add peers and dynodes to the dht_bootstrap_nodes list.
-    settings.set_str(settings_pack::listen_interfaces, listen_interfaces);
-    
-    // ``dht_announce_interval`` is the number of seconds between
-    // announcing torrents to the distributed hash table (DHT).
-    //settings.set_int(settings_pack::dht_announce_interval, 30);
+    params.dht_settings.ignore_dark_internet = true; // default = true
+    params.dht_settings.block_timeout = (5 * 60); // default = (5 * 60)
+    params.dht_settings.block_ratelimit = 10; // default = 5
+    params.dht_settings.read_only = false; // default = false
+    params.dht_settings.item_lifetime = 0; // default = 0
 
-    // ``enable_outgoing_utp`` ``enable_incoming_utp`` 
-    // ``enable_outgoing_tcp`` ``enable_incoming_tcp``
-    // when set to true, libtorrent will try to make outgoing utp
-    // connections controls whether libtorrent will accept incoming
-    // connections or make outgoing connections of specific type.
-    //settings.set_bool(settings_pack::enable_outgoing_utp, true);
-    //settings.set_bool(settings_pack::enable_incoming_utp, true);
-    //settings.set_bool(settings_pack::enable_outgoing_tcp, true);
-    //settings.set_bool(settings_pack::enable_incoming_tcp, true);
+    // General LibTorrent Settings
+    params.settings.set_int(settings_pack::alert_mask, 0xffffffff); // receive all alerts
+    params.settings.set_bool(settings_pack::enable_dht, true);
+    params.settings.set_str(settings_pack::user_agent, user_agent);
+    params.settings.set_str(settings_pack::dht_bootstrap_nodes, dht_bootstrap_nodes); 
+    params.settings.set_str(settings_pack::listen_interfaces, listen_interfaces);
+    params.settings.set_bool(settings_pack::enable_natpmp, true);
+    params.settings.set_int(settings_pack::dht_announce_interval, (60));
+    params.settings.set_bool(settings_pack::enable_outgoing_utp, true);
+    params.settings.set_bool(settings_pack::enable_incoming_utp, true);
+    params.settings.set_bool(settings_pack::enable_outgoing_tcp, false);
+    params.settings.set_bool(settings_pack::enable_incoming_tcp, false);
 
     // Apply settings.
-    newSession.apply_settings(settings);
+    newSession.set_dht_settings(params.dht_settings);
+    newSession.apply_settings(params.settings);
 
     // TODO: (DHT) Evaluate and test the rest of these settings.
+    // ``enable_lsd``
+    // Starts and stops Local Service Discovery. This service will
+    // broadcast the info-hashes of all the non-private torrents on the
+    // local network to look for peers on the same swarm within multicast
+    // reach.
+    //params.settings.set_bool(settings_pack::enable_lsd, false);
+
+    // ``prefer_rc4``
+    // if the allowed encryption level is both, setting this to true will
+    // prefer rc4 if both methods are offered, plaintext otherwise
+    //params.settings.set_bool(settings_pack::prefer_rc4, true); 
 
     // ``announce_ip`` is the ip address passed along to trackers as the
     // ``&ip=`` parameter. If left as the default, that parameter is
@@ -396,29 +374,6 @@ void CDHTSettings::LoadSettings()
     // the portmap_alert and the portmap_error_alert. The object will be
     // valid until ``stop_upnp()`` is called. See upnp-and-nat-pmp_.
     //settings.set_bool(settings_pack::enable_upnp, false);
-
-    // ``enable_natpmp``
-    // Starts and stops the NAT-PMP service. When started, the listen port
-    // and the DHT port are attempted to be forwarded on the router
-    // through NAT-PMP.
-    // The natpmp object returned by ``start_natpmp()`` can be used to add
-    // and remove arbitrary port mappings. Mapping status is returned
-    // through the portmap_alert and the portmap_error_alert. The object
-    // will be valid until ``stop_natpmp()`` is called. See
-    // upnp-and-nat-pmp_.
-    //settings.set_bool(settings_pack::enable_natpmp, true); //TODO: should this be true?
-
-    // ``enable_lsd``
-    // Starts and stops Local Service Discovery. This service will
-    // broadcast the info-hashes of all the non-private torrents on the
-    // local network to look for peers on the same swarm within multicast
-    // reach.
-    //settings.set_bool(settings_pack::enable_lsd, true);
-
-    // ``prefer_rc4``
-    // if the allowed encryption level is both, setting this to true will
-    // prefer rc4 if both methods are offered, plaintext otherwise
-    //settings.set_bool(settings_pack::prefer_rc4, true); //TODO: should this be true?
 
     // ``proxy_hostnames``
     // if true, hostname lookups are done via the configured proxy (if
