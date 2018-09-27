@@ -32,12 +32,15 @@ UniValue getdhtmutable(const JSONRPCRequest& request)
     std::string strValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence);
+    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence, false);
     if (fRet) {
         result.push_back(Pair("Get_PubKey", strPubKey));
         result.push_back(Pair("Get_Salt", strSalt));
         result.push_back(Pair("Get_Seq", iSequence));
         result.push_back(Pair("Get_Value", strValue));
+    }
+    else {
+        throw std::runtime_error("getdhtdata failed.  Check the debug.log for details.\n");
     }
 
     return result;
@@ -54,6 +57,7 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
     if (!pTorrentDHTSession)
         return result;
 
+    bool fNewEntry = false;
     char const* putValue = request.params[0].get_str().c_str();
     const std::string strSalt = request.params[1].get_str();
     std::string strPrivKey;
@@ -67,6 +71,7 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
         key.MakeNewKeyPair();
         strPubKey = stringFromVch(key.GetPubKey());
         strPrivKey = stringFromVch(key.GetPrivKey());
+        fNewEntry = true;
     }
 
     bool fRet = false;
@@ -77,19 +82,31 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
 
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
-
-    fRet = GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence);
-    std::string dhtMessage = "";
-    fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
-    if (fRet) {
-        result.push_back(Pair("Put_PubKey", strPubKey));
-        result.push_back(Pair("Put_PrivKey", strPrivKey));
-        result.push_back(Pair("Put_Salt", strSalt));
-        result.push_back(Pair("Put_Seq", iSequence));
-        result.push_back(Pair("Put_Value", request.params[0].get_str()));
-        result.push_back(Pair("Put_Message", dhtMessage));
+    if (!fNewEntry) {
+        // we need the last sequence number to update an existing DHT entry.
+        fRet = GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, true);
     }
-
+    else {
+        fRet = true;
+    }
+    if (fRet) {
+        std::string dhtMessage = "";
+        fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
+        if (fRet) {
+            result.push_back(Pair("Put_PubKey", strPubKey));
+            result.push_back(Pair("Put_PrivKey", strPrivKey));
+            result.push_back(Pair("Put_Salt", strSalt));
+            result.push_back(Pair("Put_Seq", iSequence));
+            result.push_back(Pair("Put_Value", request.params[0].get_str()));
+            result.push_back(Pair("Put_Message", dhtMessage));
+        }
+        else {
+            throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
+        }
+    }
+    else {
+        throw std::runtime_error("putdhtmutable failed. Get failed. Check the debug.log for details.\n");
+    }
     return result;
 }
 
