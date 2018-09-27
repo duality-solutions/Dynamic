@@ -113,6 +113,7 @@ DYNAMIC_CORE_H = \
   bdap/linking.h \
   dbwrapper.h \
   dht/bootstrap.h \
+  dht/curve25519.h \
   dht/dhtsettings.h \
   dht/keyed25519.h \
   dynode.h \
@@ -252,6 +253,7 @@ libdynamic_server_a_SOURCES = \
   bdap/linking.cpp \
   dbwrapper.cpp \
   dht/bootstrap.cpp \
+  dht/curve25519.cpp \
   dht/dhtsettings.cpp \
   dht/keyed25519.cpp \
   dynode.cpp \
