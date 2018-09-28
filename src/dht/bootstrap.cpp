@@ -32,43 +32,67 @@ static boost::thread *dhtTorrentThread;
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
-static alert* wait_for_alert(session* dhtSession, int alert_type)
+static void empty_public_key(std::array<char, 32>& public_key)
+{
+    for( unsigned int i = 0; i < sizeof(public_key); i++) {
+        public_key[i] = 0;
+    }
+}
+
+static alert* wait_for_alert(session* dhtSession, int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
 {
     LogPrintf("DHTTorrentNetwork -- wait_for_alert start.\n");
     alert* ret = nullptr;
     bool found = false;
+    std::array<char, 32> emptyKey;
+    empty_public_key(emptyKey);
+    std::string strEmpty = aux::to_hex(emptyKey);
+    std::string strPublicKey = aux::to_hex(public_key);
     while (!found)
     {
         dhtSession->wait_for_alert(seconds(5));
         std::vector<alert*> alerts;
         dhtSession->pop_alerts(&alerts);
-        for (std::vector<alert*>::iterator i = alerts.begin()
-            , end(alerts.end()); i != end; ++i)
+        for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert)
         {
-            if ((*i)->category() == 0x1) {
-                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            std::string strAlertMessage = (*iAlert)->message();
+            int iAlertType = (*iAlert)->type();
+            if ((*iAlert)->category() == 0x1) {
+                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
-            else if ((*i)->category() == 0x80) {
-                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            else if ((*iAlert)->category() == 0x80) {
+                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
-            else if ((*i)->category() == 0x200) {
-                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            else if ((*iAlert)->category() == 0x200) {
+                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
-            else if ((*i)->category() == 0x400) {
-                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
+            else if ((*iAlert)->category() == 0x400) {
+                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
-            if ((*i)->type() != alert_type)
+            if (iAlertType != alert_type)
             {
                 continue;
             }
-            LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", (*i)->message(), (*i)->type());
-            ret = *i;
-            found = true;
+            
+            size_t posKey = strAlertMessage.find("key=" + strPublicKey);
+            size_t posSalt = strAlertMessage.find("salt=" + strSalt);
+            if (strPublicKey == strEmpty || (posKey != std::string::npos && posSalt != std::string::npos)) {
+                LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                ret = *iAlert;
+                found = true;
+            }
         }
         if (fShutdown)
             return ret;
     }
     return ret;
+}
+
+static alert* wait_for_alert(session* dhtSession, int alert_type)
+{
+    std::array<char, 32> emptyKey;
+    empty_public_key(emptyKey);
+    return wait_for_alert(dhtSession, alert_type, emptyKey, "");
 }
 
 static void bootstrap(lt::session* dhtSession)
@@ -237,7 +261,7 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
     if (fWaitForAuthoritative) {
         while (!authoritative)
         {
-            alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type);
+            alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
 
             dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
             authoritative = dhtGetAlert->authoritative;
@@ -247,7 +271,7 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
         }
     }
     else {
-        alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type);
+        alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
         dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
         authoritative = dhtGetAlert->authoritative;
         entryValue = dhtGetAlert->item.to_string();
@@ -316,7 +340,7 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
                                         std::placeholders::_3, std::placeholders::_4, public_key, private_key, dhtValue, lastSequence), entrySalt);
 
     LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, seq=%d\n", aux::to_hex(public_key), entrySalt, lastSequence);
-    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_put_alert::alert_type);
+    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_put_alert::alert_type, public_key, entrySalt);
     dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
     message = dhtPutAlert->message();
     LogPrintf("DHTTorrentNetwork -- PutMutableData %s\n", message);
@@ -325,4 +349,22 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
         return false;
 
     return true;
+}
+
+void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
+{
+    LogPrintf("DHTTorrentNetwork -- GetDHTStats started.\n");
+
+    if (!pTorrentDHTSession) 
+        return;
+
+    if (!load_dht_state(pTorrentDHTSession))
+        bootstrap(pTorrentDHTSession);
+
+    pTorrentDHTSession->post_dht_stats();
+    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_stats_alert::alert_type);
+    dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
+    vchDHTLookup = dhtStatsAlert->active_requests;
+    vchDHTBuckets = dhtStatsAlert->routing_table;
+    stats = pTorrentDHTSession->status();
 }
