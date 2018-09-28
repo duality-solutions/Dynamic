@@ -14,9 +14,11 @@
 #include <algorithm>
 #include <assert.h>
 #include <ios>
+#include <iostream>
 #include <limits>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <stdint.h>
 #include <string>

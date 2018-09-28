@@ -123,7 +123,7 @@ public:
     void DoMaintenance() { CheckAndRemove(); }
 };
 
-class CTxLockRequest : public CTransaction
+class CTxLockRequest
 {
 private:
     static const CAmount MIN_FEE            = 0.001 * COIN;
@@ -280,6 +280,16 @@ public:
 
     CTxLockRequest txLockRequest;
     std::map<COutPoint, COutPointLock> mapOutPointLocks;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(txLockRequest);
+        READWRITE(mapOutPointLocks);
+        READWRITE(nTimeCreated);
+        READWRITE(nConfirmedHeight);
+    }
 
     uint256 GetHash() const { return txLockRequest.GetHash(); }
 

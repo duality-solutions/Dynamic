@@ -38,7 +38,7 @@ bool CEntryChannel::UnserializeFromData(const std::vector<unsigned char>& vchDat
     return true;
 }
 
-bool CEntryChannel::UnserializeFromTx(const CTransaction& tx) 
+bool CEntryChannel::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

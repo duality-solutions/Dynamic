@@ -40,7 +40,7 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
 bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);
-bool CheckNewDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                std::string& errorMessage, bool fJustCheck);
 bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);

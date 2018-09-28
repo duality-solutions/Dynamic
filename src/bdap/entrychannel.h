@@ -44,7 +44,7 @@ public:
         SetNull();
     }
 
-    CEntryChannel(const CTransaction& tx) {
+    CEntryChannel(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
@@ -110,7 +110,7 @@ public:
     inline bool IsNull() const { return (OwnerFullPath.empty()); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
-    bool UnserializeFromTx(const CTransaction& tx);
+    bool UnserializeFromTx(const CTransactionRef& tx);
 
     bool ValidateValues(std::string& errorMessage);
 };

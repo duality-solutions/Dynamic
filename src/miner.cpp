@@ -127,14 +127,14 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     // Create coinbase tx with fluid issuance
     // TODO: Can this be made any more elegant?
     CMutableTransaction coinbaseTx;
-    txNew.vin.resize(1);
-    txNew.vin[0].prevout.SetNull();
-    txNew.vout.resize(1);
+    coinbaseTx.vin.resize(1);
+    coinbaseTx.vin[0].prevout.SetNull();
+    coinbaseTx.vout.resize(1);
 
     // Largest block you're willing to create:
     unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
     // Limit to between 1K and MAX_BLOCK_SIZE-1K for sanity:
-    nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MAX_BLOCK_SIZE - 1000), nBlockMaxSize));
+    nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MaxBlockSize(false) - 1000), nBlockMaxSize));
 
     // How much of the block should be dedicated to high-priority transactions,
     // included regardless of the fees they pay
@@ -174,7 +174,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
         // Add our coinbase tx as first transaction
-        pblock->vtx.push_back(txNew);
+        pblock->vtx.push_back(coinbaseTx);
         pblocktemplate->vTxFees.push_back(-1);   // updated at end
         pblocktemplate->vTxSigOps.push_back(-1); // updated at end
         pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
@@ -316,23 +316,23 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
         
         // Compute regular coinbase transaction.
-        txNew.vout[0].scriptPubKey = scriptPubKeyIn;
+        coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
 
         if (areWeMinting) 
         {
             mintAddress = fluidMint.GetDestinationAddress();
             fluidIssuance = fluidMint.MintAmount;
-            txNew.vout[0].nValue = blockReward + fluidIssuance;
+            coinbaseTx.vout[0].nValue = blockReward + fluidIssuance;
         } else {
-            txNew.vout[0].nValue = blockReward;
+            coinbaseTx.vout[0].nValue = blockReward;
         }
         
-        txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
+        coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
         CScript script;
         if (areWeMinting) {        
             // Pick out the amount of issuance
-            txNew.vout[0].nValue -= fluidIssuance;
+            coinbaseTx.vout[0].nValue -= fluidIssuance;
 
             assert(mintAddress.IsValid());
             if (!mintAddress.IsScript()) {
@@ -341,15 +341,15 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
                 script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
             }
-            txNew.vout.push_back(CTxOut(fluidIssuance, script));
-            LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
+            coinbaseTx.vout.push_back(CTxOut(fluidIssuance, script));
+            LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", coinbaseTx.ToString());
         }
 
         // Update coinbase transaction with additional info about dynode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, pblock->txoutDynode, pblock->voutSuperblock);
-        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
-        //             nHeight, blockReward, pblock->txoutDynode.ToString(), txNew.ToString());
+        FillBlockPayments(coinbaseTx, nHeight, pblock->txoutDynode, pblock->voutSuperblock);
+        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s coinbaseTx %s",
+        //             nHeight, blockReward, pblock->txoutDynode.ToString(), coinbaseTx.ToString());
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -359,7 +359,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
         // Update block coinbase
-        pblock->vtx[0] = txNew;
+        pblock->vtx[0] = coinbaseTx;
         pblocktemplate->vTxFees[0] = -nFees;
 
         // Fill in header
@@ -370,7 +370,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(pblock->vtx[0]);
         CValidationState state;
         if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
-            LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", txNew.ToString());
+            LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", coinbaseTx.ToString());
             throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
         }
     }

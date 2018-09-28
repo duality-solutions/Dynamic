@@ -6,6 +6,7 @@
 #define DYNAMIC_BDAP_ENTRYLINK_H
 
 #include "bdap.h"
+#include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
 
@@ -15,7 +16,6 @@ manage domain entry link requests. When linking entries, we want
 to use stealth addresses so the linkage requests are not public.
 */
 
-class CTransaction;
 
 class CEntryLink {
 public:
@@ -33,7 +33,7 @@ public:
         SetNull();
     }
 
-    CEntryLink(const CTransaction& tx) {
+    CEntryLink(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
@@ -87,9 +87,9 @@ public:
     inline bool IsNull() const { return (SenderFullPath.empty()); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
-    bool UnserializeFromTx(const CTransaction &tx);
+    bool UnserializeFromTx(const CTransactionRef& tx);
 
-    bool IsMyRequest(const CTransaction& tx);
+    bool IsMyRequest(const CTransactionRef& tx);
     CharString SenderFileName(unsigned int nTime);
     CharString RecipientFileName(unsigned int nTime);
 };
