@@ -32,7 +32,6 @@ static boost::thread *dhtTorrentThread;
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
-
 static void empty_public_key(std::array<char, 32>& public_key)
 {
     for( unsigned int i = 0; i < sizeof(public_key); i++) {
@@ -350,4 +349,22 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
         return false;
 
     return true;
+}
+
+void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
+{
+    LogPrintf("DHTTorrentNetwork -- GetDHTStats started.\n");
+
+    if (!pTorrentDHTSession) 
+        return;
+
+    if (!load_dht_state(pTorrentDHTSession))
+        bootstrap(pTorrentDHTSession);
+
+    pTorrentDHTSession->post_dht_stats();
+    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_stats_alert::alert_type);
+    dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
+    vchDHTLookup = dhtStatsAlert->active_requests;
+    vchDHTBuckets = dhtStatsAlert->routing_table;
+    stats = pTorrentDHTSession->status();
 }

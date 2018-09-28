@@ -4,11 +4,13 @@
 #include "bdap/domainentry.h"
 #include "dht/bootstrap.h"
 #include "dht/keyed25519.h"
-#include "libtorrent/hex.hpp" // for to_hex and from_hex
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "util.h"
 #include "utilstrencodings.h"
+
+#include <libtorrent/alert_types.hpp>
+#include <libtorrent/hex.hpp> // for to_hex and from_hex
 
 #include <univalue.h>
 
@@ -22,7 +24,7 @@ UniValue getdhtmutable(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
-        throw std::runtime_error("getdhtmutable failed. Session is null.\n");
+        throw std::runtime_error("getdhtmutable failed. DHT session not started.\n");
 
     const std::string strPubKey = request.params[0].get_str();
     const std::string strSalt = request.params[1].get_str();
@@ -55,8 +57,9 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
-        throw std::runtime_error("putdhtmutable failed. Session is null.\n");
+        throw std::runtime_error("putdhtmutable failed. DHT session not started.\n");
 
+    //TODO: Check putValue is not > 1000 bytes.
     bool fNewEntry = false;
     char const* putValue = request.params[0].get_str().c_str();
     const std::string strSalt = request.params[1].get_str();
@@ -102,11 +105,97 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue dhtinfo(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "dhtinfo\n"
+            "\n");
+
+    if (!pTorrentDHTSession)
+        throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
+
+    libtorrent::session_status stats;
+    std::vector<libtorrent::dht_lookup> vchDHTLookup; 
+    std::vector<libtorrent::dht_routing_bucket> vchDHTBuckets;
+    GetDHTStats(stats, vchDHTLookup, vchDHTBuckets);
+
+    UniValue result(UniValue::VOBJ);
+    result.push_back(Pair("num_peers", stats.num_peers));
+    result.push_back(Pair("peerlist_size", stats.peerlist_size));
+    result.push_back(Pair("active_request_size", (int)stats.active_requests.size()));
+    result.push_back(Pair("dht_node_cache", stats.dht_node_cache));
+    result.push_back(Pair("dht_global_nodes", stats.dht_global_nodes));
+    result.push_back(Pair("dht_download_rate", stats.dht_download_rate));
+    result.push_back(Pair("dht_upload_rate", stats.dht_upload_rate));
+    result.push_back(Pair("dht_total_allocations", stats.dht_total_allocations));
+    result.push_back(Pair("download_rate", stats.download_rate));
+    result.push_back(Pair("upload_rate", stats.upload_rate));
+    result.push_back(Pair("total_download", stats.total_download));
+    result.push_back(Pair("total_upload", stats.total_upload));
+    result.push_back(Pair("total_dht_download", stats.total_dht_download));
+    result.push_back(Pair("total_dht_upload", stats.total_dht_upload));
+    result.push_back(Pair("total_ip_overhead_download", stats.total_ip_overhead_download));
+    result.push_back(Pair("total_ip_overhead_upload", stats.total_ip_overhead_upload));
+    result.push_back(Pair("total_payload_download", stats.total_payload_download));
+    result.push_back(Pair("total_payload_upload", stats.total_payload_upload));
+    result.push_back(Pair("dht_nodes", stats.dht_nodes));
+    result.push_back(Pair("dht_torrents", stats.dht_torrents));
+
+    for (const libtorrent::dht_routing_bucket& bucket : vchDHTBuckets){
+        UniValue oBucket(UniValue::VOBJ);
+        oBucket.push_back(Pair("num_nodes", bucket.num_nodes));
+        oBucket.push_back(Pair("num_replacements", bucket.num_replacements));
+        oBucket.push_back(Pair("last_active", bucket.last_active));
+        result.push_back(Pair("bucket", oBucket)); 
+    }
+
+    for (const libtorrent::dht_lookup& lookup : vchDHTLookup) {
+        UniValue oLookup(UniValue::VOBJ);
+        oLookup.push_back(Pair("outstanding_requests", lookup.outstanding_requests));
+        oLookup.push_back(Pair("timeouts", lookup.timeouts));
+        oLookup.push_back(Pair("responses", lookup.responses));
+        oLookup.push_back(Pair("branch_factor", lookup.branch_factor));
+        oLookup.push_back(Pair("nodes_left", lookup.nodes_left));
+        oLookup.push_back(Pair("last_sent", lookup.last_sent));
+        oLookup.push_back(Pair("first_timeout", lookup.first_timeout));
+        // string literal indicating which kind of lookup this is
+        // char const* type;
+        // the node-id or info-hash target for this lookup
+        //sha1_hash target;
+        result.push_back(oLookup);
+        result.push_back(Pair("lookup", oLookup)); 
+    }
+/*
+    result.push_back(Pair("ip_overhead_download_rate", stats.ip_overhead_download_rate));
+    result.push_back(Pair("ip_overhead_upload_rate", stats.ip_overhead_upload_rate));
+    result.push_back(Pair("payload_download_rate", stats.payload_download_rate));
+    result.push_back(Pair("payload_upload_rate", stats.payload_upload_rate));
+    result.push_back(Pair("tracker_upload_rate", stats.tracker_upload_rate));
+    result.push_back(Pair("tracker_download_rate", stats.tracker_download_rate));
+    result.push_back(Pair("total_tracker_download", stats.total_tracker_download));
+    result.push_back(Pair("total_tracker_upload", stats.total_tracker_upload));
+    result.push_back(Pair("total_redundant_bytes", stats.total_redundant_bytes));
+    result.push_back(Pair("total_failed_bytes", stats.total_failed_bytes));
+    result.push_back(Pair("num_unchoked", stats.num_unchoked));
+    result.push_back(Pair("allowed_upload_slots", stats.allowed_upload_slots));
+    result.push_back(Pair("up_bandwidth_queue", stats.up_bandwidth_queue));
+    result.push_back(Pair("down_bandwidth_queue", stats.down_bandwidth_queue));
+    result.push_back(Pair("up_bandwidth_bytes_queue", stats.up_bandwidth_bytes_queue));
+    result.push_back(Pair("down_bandwidth_bytes_queue", stats.down_bandwidth_bytes_queue));
+    result.push_back(Pair("optimistic_unchoke_counter", stats.optimistic_unchoke_counter));
+    result.push_back(Pair("unchoke_counter", stats.unchoke_counter));
+    result.push_back(Pair("has_incoming_connections", stats.has_incoming_connections));
+*/
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
     { "dht",             "getdhtmutable",            &getdhtmutable,                true  },
     { "dht",             "putdhtmutable",            &putdhtmutable,                true  },
+    { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
