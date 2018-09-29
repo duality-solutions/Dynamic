@@ -233,11 +233,11 @@ void PrepareShutdown()
     /// module was initialized.
     RenameThread("dynamic-shutoff");
     mempool.AddTransactionsUpdated(1);
+    StopTorrentDHTNetwork();
     StopHTTPRPC();
     StopREST();
     StopRPC();
     StopHTTPServer();
-    StopTorrentDHTNetwork();
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->Flush(false);
