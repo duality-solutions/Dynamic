@@ -721,14 +721,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
 
     if (tx.nVersion == BDAP_TX_VERSION) {
         std::string strErrorMessage;
-        CDomainEntry domainEntry(tx);
+        CDomainEntry domainEntry(ptx);
         if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
             return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
         }
         int op;
         CScript scriptOp;
         vchCharString vvchOpParameters;
-        if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
+        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op))
         {
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
         }
@@ -740,7 +740,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             std::vector<unsigned char> vchHash;
             int nDataOut;
             
-            bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
+            bool bData = GetBDAPData(ptx, vchData, vchHash, nDataOut);
             if(bData && !entry.UnserializeFromData(vchData, vchHash))
             {
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-data-failed" + strErrorMessage);
@@ -749,18 +749,18 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-failed" + strErrorMessage);
             }
-            CTransaction prevTx;
+            CTransactionRef pPrevTx;
             uint256 hashBlock;
-            if (!GetTransaction(prevEntry.txHash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+            if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-previous-tx-failed" + strErrorMessage);
             }
             // Get current wallet address used for BDAP tx
             CScript scriptPubKey;
-            GetBDAPOpScript(tx, scriptPubKey);
+            GetBDAPOpScript(ptx, scriptPubKey);
             CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
             // Get previous wallet address used for BDAP tx
             CScript prevScriptPubKey;
-            GetBDAPOpScript(prevTx, prevScriptPubKey);
+            GetBDAPOpScript(pPrevTx, prevScriptPubKey);
             CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
             if (txAddress.ToString() != prevAddress.ToString())
             {
@@ -1225,8 +1225,8 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState &state, const
     std::vector<COutPoint> coins_to_uncache;
     bool res = AcceptToMemoryPoolWorker(pool, state, tx, fLimitFree, pfMissingInputs, nAcceptTime, plTxnReplaced, fOverrideMempoolLimit, nAbsurdFee, coins_to_uncache, fDryRun);
     bool fluidTimestampCheck = true;
-    
-    if (!fluid.ProvisionalCheckTransaction(tx))
+
+    if (!fluid.ProvisionalCheckTransaction(*tx))
         return false;
 
     BOOST_FOREACH(const CTxOut& txout, tx->vout) {   
