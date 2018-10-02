@@ -176,8 +176,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         // with current peers and Dynodes
         unsigned int iCounter = 0;
         settings.LoadSettings();
-        pTorrentDHTSession = new session(settings.GetSettingsPack());
-        load_dht_state(pTorrentDHTSession);
+        pTorrentDHTSession = settings.GetSession();
         bootstrap(pTorrentDHTSession);
         save_dht_state(pTorrentDHTSession);
         if (!pTorrentDHTSession) {

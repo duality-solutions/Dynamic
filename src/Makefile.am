@@ -116,6 +116,7 @@ DYNAMIC_CORE_H = \
   dht/curve25519.h \
   dht/dhtsettings.h \
   dht/keyed25519.h \
+  dht/persistence.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
@@ -256,6 +257,7 @@ libdynamic_server_a_SOURCES = \
   dht/curve25519.cpp \
   dht/dhtsettings.cpp \
   dht/keyed25519.cpp \
+  dht/persistence.cpp \
   dynode.cpp \
   dynode-payments.cpp\
   dynode-sync.cpp \
