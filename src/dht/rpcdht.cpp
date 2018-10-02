@@ -107,9 +107,6 @@ UniValue putdhtmutable(const JSONRPCRequest& request)
         }
     }
     else {
-        throw std::runtime_error("putdhtmutable failed. Get failed. Check the debug.log for details.\n");
-    }
-    else {
         throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
     }
     return result;
