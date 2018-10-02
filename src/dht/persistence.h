@@ -19,6 +19,8 @@
 #include <libtorrent/kademlia/dht_storage.hpp>
 #include <libtorrent/bloom_filter.hpp>
 
+static constexpr unsigned int ANNOUNCE_INTERVAL_MINUTES = 30;
+
 namespace libtorrent { 
 namespace dht {
 

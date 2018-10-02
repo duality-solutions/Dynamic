@@ -3,6 +3,8 @@
 
 #include "persistence.h"
 
+#include "bdap/domainentry.h"
+#include "dht/mutabledata.h"
 #include "util.h"
 
 #include <libtorrent/aux_/numeric_cast.hpp>
@@ -22,8 +24,7 @@ bool operator<(peer_entry const& lhs, peer_entry const& rhs)
         : lhs.addr.address() < rhs.addr.address();
 }
 
-// TODO: 2 make this configurable in dht_settings
-constexpr time_duration announce_interval = minutes(30);
+constexpr time_duration announce_interval = minutes(ANNOUNCE_INTERVAL_MINUTES);
 
 void set_value(dht_immutable_item& item, span<char const> buf)
 {
@@ -218,27 +219,30 @@ void dht_bdap_storage::put_immutable_item(sha1_hash const& target, span<char con
 bool dht_bdap_storage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
 {
     LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq ********** \n");
-    auto const i = m_mutable_table.find(target);
-    if (i == m_mutable_table.end()) return false;
-
-    seq = i->second.seq;
+    CMutableData mutableData;
+    std::string strInfoHash = target.to_string();
+    CharString vchInfoHash = vchFromString(strInfoHash);
+    if (!GetMutableData(vchInfoHash, mutableData)) {
+        return false;
+    }
+    seq = dht::sequence_number(mutableData.SequenceNumber);
     return true;
 }
 
 bool dht_bdap_storage::get_mutable_item(sha1_hash const& target, sequence_number const seq, bool const force_fill, entry& item) const
 {
     LogPrintf("********** dht_bdap_storage -- get_mutable_item ********** \n");
-    auto const i = m_mutable_table.find(target);
-    if (i == m_mutable_table.end()) return false;
 
-    dht_mutable_item const& f = i->second;
-    item["seq"] = f.seq.value;
-    if (force_fill || (sequence_number(0) <= seq && seq < f.seq))
-    {
-        item["v"] = bdecode(f.value.get(), f.value.get() + f.size);
-        item["sig"] = f.sig.bytes;
-        item["k"] = f.key.bytes;
+    CMutableData mutableData;
+    std::string strInfoHash = target.to_string();
+    CharString vchInfoHash = vchFromString(strInfoHash);
+    if (!GetMutableData(vchInfoHash, mutableData)) {
+        return false;
     }
+    if (!(seq == dht::sequence_number(mutableData.SequenceNumber))) {
+       return false;
+    }
+    item = stringFromVch(mutableData.Value);
     return true;
 }
 
@@ -251,48 +255,33 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
     , address const& addr)
 {
     LogPrintf("********** dht_bdap_storage -- put_mutable_item ********** \n");
-    TORRENT_ASSERT(!m_node_ids.empty());
-    auto i = m_mutable_table.find(target);
-    if (i == m_mutable_table.end())
-    {
-        // this is the case where we don't have an item in this slot
-        // make sure we don't add too many items
-        if (int(m_mutable_table.size()) >= m_settings.max_dht_items)
-        {
-            auto const j = pick_least_important_item(m_node_ids
-                , m_mutable_table);
-
-            TORRENT_ASSERT(j != m_mutable_table.end());
-            m_mutable_table.erase(j);
-            m_counters.mutable_data -= 1;
-        }
-        dht_mutable_item to_add;
-        set_value(to_add, buf);
-        to_add.seq = seq;
-        to_add.salt = {salt.begin(), salt.end()};
-        to_add.sig = sig;
-        to_add.key = pk;
-
-        std::tie(i, std::ignore) = m_mutable_table.insert(
-            std::make_pair(target, std::move(to_add)));
-        m_counters.mutable_data += 1;
-    }
-    else
-    {
-        // this is the case where we already
-        dht_mutable_item& item = i->second;
-
-        if (item.seq < seq)
-        {
-            set_value(item, buf);
-            item.seq = seq;
-            item.sig = sig;
+    CMutableData mutableData;
+    //TODO: convert these variables
+    //mutableData.Value = buf;
+    //mutableData.Signature = sig.bytes();
+    //mutableData.SequenceNumber = seq;
+    //mutableData.PublicKey = pk.bytes();
+    //mutableData.Salt = salt;
+    CMutableData getData;
+    std::string strInfoHash = target.to_string();
+    CharString vchInfoHash = vchFromString(strInfoHash);
+    if (!GetMutableData(vchInfoHash, getData)) {
+        if (!PutMutableData(vchInfoHash, mutableData)) {
+            return;
         }
     }
-
-    touch_item(i->second, addr);
+    else {
+        if ((seq < dht::sequence_number(mutableData.SequenceNumber))) {
+            return;
+        }
+        else {
+            if (!PutMutableData(vchInfoHash, mutableData)) {
+                return;
+            }
+        }
+    }
+	return;
 }
-
 
 int dht_bdap_storage::get_infohashes_sample(entry& item)
 {
