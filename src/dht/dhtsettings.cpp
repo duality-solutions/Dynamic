@@ -19,7 +19,9 @@ CDHTSettings::CDHTSettings()
 {
     user_agent = "Dynamic v" + FormatFullVersion();
     // Use ports 33307 and 33337
-    listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33337,[::]:33337";
+    listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33317,[::]:33317";
+                        //"0.0.0.0:33327,[::]:33327,0.0.0.0:33337,[::]:33337"
+                        //"0.0.0.0:33347,[::]:33347";
 }
 
 void CDHTSettings::LoadPeerList()
@@ -38,7 +40,11 @@ void CDHTSettings::LoadPeerList()
             }
             pos = strPeerList.find(strDynodeIP);
             if (pos == std::string::npos) {
-                strPeerList += strDynodeIP + ":33307,"; 
+                strPeerList += strDynodeIP + ":33307,";
+                //strPeerList += strDynodeIP + ":33317,";
+                //strPeerList += strDynodeIP + ":33327,";
+                //strPeerList += strDynodeIP + ":33337,";
+                //strPeerList += strDynodeIP + ":33347,";
             }
         }
     }
@@ -57,6 +63,10 @@ void CDHTSettings::LoadPeerList()
                 pos = strPeerList.find(strPeerIP);
                 if (pos == std::string::npos) {
                     strPeerList += strPeerIP + ":33307,";
+                    //strPeerList += strPeerIP + ":33317,";
+                    //strPeerList += strPeerIP + ":33327,";
+                    //strPeerList += strPeerIP + ":33337,";
+                    //strPeerList += strPeerIP + ":33347,";
                 }
             }
         }

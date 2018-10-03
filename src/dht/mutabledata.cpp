@@ -8,11 +8,7 @@
 
 #include <univalue.h>
 
-#include <thread>
-
-static CMutableDataDB *pMutableDataDB = NULL;
-
-static std::shared_ptr<std::thread> pMutableDataDBThread;
+CMutableDataDB *pMutableDataDB = NULL;
 
 bool AddMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
 {

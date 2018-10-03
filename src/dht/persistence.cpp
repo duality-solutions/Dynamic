@@ -10,6 +10,7 @@
 #include <libtorrent/aux_/numeric_cast.hpp>
 #include <libtorrent/broadcast_socket.hpp> // for ip_v4
 #include <libtorrent/config.hpp>
+#include <libtorrent/hex.hpp>
 #include <libtorrent/random.hpp>
 #include <libtorrent/socket_io.hpp>
 
@@ -52,13 +53,13 @@ void touch_item(dht_immutable_item& f, address const& addr)
 
 size_t dht_bdap_storage::num_torrents() const 
 { 
-    LogPrintf("********** dht_bdap_storage -- num_torrents ********** \n");
+    LogPrintf("********** dht_bdap_storage -- num_torrents **********\n");
     return m_map.size(); 
 }
 
 size_t dht_bdap_storage::num_peers() const
 {
-    LogPrintf("********** dht_bdap_storage -- num_peers ********** \n");
+    LogPrintf("********** dht_bdap_storage -- num_peers **********\n");
     size_t ret = 0;
     for (auto const& t : m_map)
         ret += t.second.peers4.size() + t.second.peers6.size();
@@ -67,13 +68,13 @@ size_t dht_bdap_storage::num_peers() const
 
 void dht_bdap_storage::update_node_ids(std::vector<node_id> const& ids)
 {
-    LogPrintf("********** dht_bdap_storage -- update_node_ids ********** \n");
+    LogPrintf("********** dht_bdap_storage -- update_node_ids **********\n");
     m_node_ids = ids;
 }
 
 bool dht_bdap_storage::get_peers(sha1_hash const& info_hash, bool const noseed, bool const scrape, address const& requester, entry& peers) const
 {
-    LogPrintf("********** dht_bdap_storage -- get_peers ********** \n");
+    LogPrintf("********** dht_bdap_storage -- get_peers **********\n");
     auto const i = m_map.find(info_hash);
     if (i == m_map.end()) return int(m_map.size()) >= m_settings.max_torrents;
 
@@ -155,7 +156,7 @@ bool dht_bdap_storage::get_peers(sha1_hash const& info_hash, bool const noseed, 
 
 void dht_bdap_storage::announce_peer(sha1_hash const& info_hash, tcp::endpoint const& endp, string_view name, bool const seed)
 {
-    LogPrintf("********** dht_bdap_storage -- announce_peer ********** \n");
+    LogPrintf("********** dht_bdap_storage -- announce_peer **********\n");
     auto const ti = m_map.find(info_hash);
     torrent_entry* v;
     if (ti == m_map.end())
@@ -207,43 +208,67 @@ void dht_bdap_storage::announce_peer(sha1_hash const& info_hash, tcp::endpoint c
 // Do not support get immutable item
 bool dht_bdap_storage::get_immutable_item(sha1_hash const& target, entry& item) const
 {
-    LogPrintf("********** dht_bdap_storage -- get_immutable_item ********** \n");
+    //TODO: this is not the best place to reject an immutable_item, we should ban the sender as well
+    LogPrintf("********** dht_bdap_storage -- get_immutable_item **********\n");
     return false;
 }
 
 void dht_bdap_storage::put_immutable_item(sha1_hash const& target, span<char const> buf, address const& addr)
 {
-    LogPrintf("********** dht_bdap_storage -- put_immutable_item ********** \n");
+    //TODO: this is not the best place to reject an immutable_item, we should ban the sender as well
+    LogPrintf("********** dht_bdap_storage -- put_immutable_item **********\n");
 }
 
 bool dht_bdap_storage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
 {
-    LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq ********** \n");
     CMutableData mutableData;
-    std::string strInfoHash = target.to_string();
+    std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     if (!GetMutableData(vchInfoHash, mutableData)) {
         return false;
     }
     seq = dht::sequence_number(mutableData.SequenceNumber);
+    LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq seq = %u\n", mutableData.SequenceNumber);
     return true;
 }
 
 bool dht_bdap_storage::get_mutable_item(sha1_hash const& target, sequence_number const seq, bool const force_fill, entry& item) const
 {
-    LogPrintf("********** dht_bdap_storage -- get_mutable_item ********** \n");
-
     CMutableData mutableData;
-    std::string strInfoHash = target.to_string();
+    std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     if (!GetMutableData(vchInfoHash, mutableData)) {
+        LogPrintf("********** dht_bdap_storage -- get_mutable_item failed to get mutable data from leveldb.\n");
         return false;
     }
-    if (!(seq == dht::sequence_number(mutableData.SequenceNumber))) {
-       return false;
-    }
     item = stringFromVch(mutableData.Value);
+    LogPrintf("********** dht_bdap_storage -- get_mutable_item, Value = %s, seq_found = %d, seq_query = %d\n", 
+                                stringFromVch(mutableData.Value), mutableData.SequenceNumber, seq.value);
     return true;
+}
+
+static std::string CleanPutValue(std::string value)
+{
+    std::string strReturn = "";
+    size_t posStart = 3;  // always start at the third char
+    size_t posEnd = 0;
+    if (!(posStart == std::string::npos)) {
+        posEnd = value.find("e1:q3:put1:t");
+        if (!(posEnd == std::string::npos) && value.size() > posEnd) {
+            strReturn = value.substr(posStart, posEnd - posStart);
+        }
+    }
+    return strReturn;
+}
+
+static std::string CleanSalt(std::string salt)
+{
+    std::string strReturn = "";
+    size_t posEnd = salt.find("3:seqi1e3:");
+    if (!(posEnd == std::string::npos) && salt.size() > posEnd) {
+        strReturn = salt.substr(0, posEnd);
+    }
+    return strReturn;
 }
 
 void dht_bdap_storage::put_mutable_item(sha1_hash const& target
@@ -254,38 +279,42 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
     , span<char const> salt
     , address const& addr)
 {
-    LogPrintf("********** dht_bdap_storage -- put_mutable_item ********** \n");
-    CMutableData mutableData;
-    //TODO: convert these variables
-    //mutableData.Value = buf;
-    //mutableData.Signature = sig.bytes();
-    //mutableData.SequenceNumber = seq;
-    //mutableData.PublicKey = pk.bytes();
-    //mutableData.Salt = salt;
-    CMutableData getData;
-    std::string strInfoHash = target.to_string();
+    std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    if (!GetMutableData(vchInfoHash, getData)) {
-        if (!PutMutableData(vchInfoHash, mutableData)) {
+    std::string strValue = CleanPutValue(std::string(buf.data()));
+    CharString vchValue = vchFromString(strValue);
+    std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
+    CharString vchSignature = vchFromString(strSignature);
+    std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
+    CharString vchPublicKey = vchFromString(strPublicKey);
+    std::string strSalt = CleanSalt(std::string(salt.data()));
+    CharString vchSalt = vchFromString(strSalt);
+    CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchValue);
+    LogPrintf("********** dht_bdap_storage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
+                    strInfoHash, strValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+    CMutableData previousData;
+    if (!GetMutableData(vchInfoHash, previousData)) {
+        if (!PutMutableData(vchInfoHash, putMutableData)) {
             return;
         }
     }
     else {
-        if ((seq < dht::sequence_number(mutableData.SequenceNumber))) {
+        if ((seq < dht::sequence_number(putMutableData.SequenceNumber))) {
             return;
         }
         else {
-            if (!PutMutableData(vchInfoHash, mutableData)) {
+            if (!UpdateMutableData(vchInfoHash, putMutableData)) {
                 return;
             }
         }
     }
-	return;
+    LogPrintf("********** dht_bdap_storage -- put_mutable_item completed successfully**********\n");
+    return;
 }
 
 int dht_bdap_storage::get_infohashes_sample(entry& item)
 {
-    LogPrintf("********** dht_bdap_storage -- get_infohashes_sample ********** \n");
+    LogPrintf("********** dht_bdap_storage -- get_infohashes_sample **********\n");
     item["interval"] = aux::clamp(m_settings.sample_infohashes_interval
         , 0, sample_infohashes_interval_max);
     item["num"] = int(m_map.size());
@@ -301,7 +330,7 @@ int dht_bdap_storage::get_infohashes_sample(entry& item)
 
 void dht_bdap_storage::tick()
 {
-    LogPrintf("********** dht_bdap_storage -- tick ********** \n");
+    LogPrintf("********** dht_bdap_storage -- tick **********\n");
     // look through all peers and see if any have timed out
     for (auto i = m_map.begin(), end(m_map.end()); i != end;)
     {
@@ -352,13 +381,13 @@ void dht_bdap_storage::tick()
 
 dht_storage_counters dht_bdap_storage::counters() const
 {
-    LogPrintf("********** dht_bdap_storage -- counters ********** \n");
+    LogPrintf("********** dht_bdap_storage -- counters **********\n");
     return m_counters;
 }
 
 void dht_bdap_storage::purge_peers(std::vector<peer_entry>& peers)
 {
-    LogPrintf("********** dht_bdap_storage -- purge_peers ********** \n");
+    LogPrintf("********** dht_bdap_storage -- purge_peers **********\n");
     auto now = aux::time_now();
     auto new_end = std::remove_if(peers.begin(), peers.end()
         , [=](peer_entry const& e)
@@ -375,7 +404,7 @@ void dht_bdap_storage::purge_peers(std::vector<peer_entry>& peers)
 
 void dht_bdap_storage::refresh_infohashes_sample()
 {
-    LogPrintf("********** dht_bdap_storage -- refresh_infohashes_sample ********** \n");
+    LogPrintf("********** dht_bdap_storage -- refresh_infohashes_sample **********\n");
     time_point const now = aux::time_now();
     int const interval = aux::clamp(m_settings.sample_infohashes_interval
         , 0, sample_infohashes_interval_max);

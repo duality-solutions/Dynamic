@@ -27,6 +27,10 @@ public:
         SetNull();
     }
 
+    CMutableData(const CharString& infoHash, const CharString& publicKey, const CharString& signature, 
+                    const std::int64_t& sequenceNumber, const CharString& salt, const CharString& value) :
+                    InfoHash(infoHash), PublicKey(publicKey), Signature(signature), SequenceNumber(sequenceNumber), Salt(salt), Value(value){}
+
     inline void SetNull()
     {
         nVersion = CMutableData::CURRENT_VERSION;
@@ -90,5 +94,7 @@ bool AddMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutabl
 bool UpdateMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
 bool GetMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
 bool PutMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
+
+extern CMutableDataDB* pMutableDataDB;
 
 #endif // DYNAMIC_DHT_MUTABLE_DATA_H
