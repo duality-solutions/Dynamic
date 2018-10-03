@@ -5,6 +5,7 @@
 #include "dht/bootstrap.h"
 #include "dht/keyed25519.h"
 #include "dht/mutabledata.h"
+#include "dht/persistence.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -211,8 +212,8 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("public_key", data.PublicKey()));
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
-            oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", data.Value()));
+            oMutableData.push_back(Pair("salt", libtorrent::dht::ExtractSalt(data.Salt())));
+            oMutableData.push_back(Pair("value", libtorrent::dht::ExtractPutValue(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }
