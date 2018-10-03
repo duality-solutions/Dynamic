@@ -74,7 +74,7 @@ void dht_bdap_storage::update_node_ids(std::vector<node_id> const& ids)
 
 bool dht_bdap_storage::get_peers(sha1_hash const& info_hash, bool const noseed, bool const scrape, address const& requester, entry& peers) const
 {
-    LogPrintf("********** dht_bdap_storage -- get_peers **********\n");
+    //LogPrintf("********** dht_bdap_storage -- get_peers **********\n");
     auto const i = m_map.find(info_hash);
     if (i == m_map.end()) return int(m_map.size()) >= m_settings.max_torrents;
 
@@ -224,7 +224,9 @@ bool dht_bdap_storage::get_mutable_item_seq(sha1_hash const& target, sequence_nu
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
+    LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq infohash = %s\n", strInfoHash);
     if (!GetMutableData(vchInfoHash, mutableData)) {
+        LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq failed to get sequence_number for infohash = %s.\n", strInfoHash);
         return false;
     }
     seq = dht::sequence_number(mutableData.SequenceNumber);
@@ -243,11 +245,11 @@ bool dht_bdap_storage::get_mutable_item(sha1_hash const& target, sequence_number
     }
     item = stringFromVch(mutableData.Value);
     LogPrintf("********** dht_bdap_storage -- get_mutable_item found, Value = %s, seq_found = %d, seq_query = %d\n", 
-                                stringFromVch(mutableData.Value), mutableData.SequenceNumber, seq.value);
+                                ExtractPutValue(stringFromVch(mutableData.Value)), mutableData.SequenceNumber, seq.value);
     return true;
 }
 
-static std::string ExtractPutValue(std::string value)
+std::string ExtractPutValue(std::string value)
 {
     std::string strReturn = "";
     size_t posStart = value.find(":") + 1;
@@ -261,7 +263,7 @@ static std::string ExtractPutValue(std::string value)
     return strReturn;
 }
 
-static std::string ExtractSalt(std::string salt)
+std::string ExtractSalt(std::string salt)
 {
     std::string strReturn = "";
     size_t posEnd = salt.find("3:seqi1e3:");
@@ -281,17 +283,17 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
 {
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    std::string strValue = ExtractPutValue(std::string(buf.data()));
-    CharString vchValue = vchFromString(strValue);
+    std::string strPutValue = std::string(buf.data());
+    CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
     CharString vchPublicKey = vchFromString(strPublicKey);
-    std::string strSalt = ExtractSalt(std::string(salt.data()));
+    std::string strSalt = std::string(salt.data());
     CharString vchSalt = vchFromString(strSalt);
-    CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchValue);
+    CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** dht_bdap_storage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, strValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, ExtractSalt(strSalt), putMutableData.SequenceNumber);
     CMutableData previousData;
     if (!GetMutableData(vchInfoHash, previousData)) {
         if (PutMutableData(vchInfoHash, putMutableData)) {
