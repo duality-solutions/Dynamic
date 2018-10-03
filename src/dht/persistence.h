@@ -106,9 +106,6 @@ private:
     std::vector<node_id> const& m_node_ids;
 };
 
-void set_value(dht_immutable_item& item, span<char const> buf);
-void touch_item(dht_immutable_item& f, address const& addr);
-
 using node_id = libtorrent::sha1_hash;
 
 // picks the least important one (i.e. the one

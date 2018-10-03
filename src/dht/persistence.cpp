@@ -27,30 +27,6 @@ bool operator<(peer_entry const& lhs, peer_entry const& rhs)
 
 constexpr time_duration announce_interval = minutes(ANNOUNCE_INTERVAL_MINUTES);
 
-void set_value(dht_immutable_item& item, span<char const> buf)
-{
-    int const size = int(buf.size());
-    if (item.size != size)
-    {
-        item.value.reset(new char[std::size_t(size)]);
-        item.size = size;
-    }
-    std::memcpy(item.value.get(), buf.data(), buf.size());
-}
-
-void touch_item(dht_immutable_item& f, address const& addr)
-{
-    f.last_seen = aux::time_now();
-
-    // maybe increase num_announcers if we haven't seen this IP before
-    sha1_hash const iphash = hash_address(addr);
-    if (!f.ips.find(iphash))
-    {
-        f.ips.set(iphash);
-        ++f.num_announcers;
-    }
-}
-
 size_t dht_bdap_storage::num_torrents() const 
 { 
     LogPrintf("********** dht_bdap_storage -- num_torrents **********\n");
@@ -243,9 +219,19 @@ bool dht_bdap_storage::get_mutable_item(sha1_hash const& target, sequence_number
         LogPrintf("********** dht_bdap_storage -- get_mutable_item failed to get mutable data from leveldb.\n");
         return false;
     }
-    item = stringFromVch(mutableData.Value);
+    item["seq"] = mutableData.SequenceNumber;
+    if (force_fill || (sequence_number(0) <= seq && seq < sequence_number(mutableData.SequenceNumber)))
+    {
+        item["v"] = bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
+        std::array<char, 64> sig;
+        aux::from_hex(mutableData.Signature(), sig.data());
+        item["sig"] = sig;
+        std::array<char, 32> pubKey;
+        aux::from_hex(mutableData.PublicKey(), pubKey.data());
+        item["k"] = pubKey;
+    }
     LogPrintf("********** dht_bdap_storage -- get_mutable_item found, Value = %s, seq_found = %d, seq_query = %d\n", 
-                                ExtractPutValue(stringFromVch(mutableData.Value)), mutableData.SequenceNumber, seq.value);
+                                ExtractPutValue(mutableData.Value()), mutableData.SequenceNumber, seq.value);
     return true;
 }
 
@@ -281,6 +267,7 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
     , span<char const> salt
     , address const& addr)
 {
+
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     std::string strPutValue = std::string(buf.data());
@@ -294,6 +281,7 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** dht_bdap_storage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
                     strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, ExtractSalt(strSalt), putMutableData.SequenceNumber);
+
     CMutableData previousData;
     if (!GetMutableData(vchInfoHash, previousData)) {
         if (PutMutableData(vchInfoHash, putMutableData)) {
@@ -301,7 +289,7 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
         }
     }
     else {
-        if (putMutableData.Value != previousData.Value || putMutableData.SequenceNumber != previousData.SequenceNumber) {
+        if (putMutableData.Value() != previousData.Value() || putMutableData.SequenceNumber != previousData.SequenceNumber) {
             if (UpdateMutableData(vchInfoHash, putMutableData)) {
                 LogPrintf("********** dht_bdap_storage -- put_mutable_item updated successfully**********\n");
             }
@@ -310,6 +298,7 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
             LogPrintf("********** dht_bdap_storage -- put_mutable_item value unchanged. No database operation needed. **********\n");
         }
     }
+    // TODO: Log from address (addr). See touch_item in the default storage implementation.
     return;
 }
 
