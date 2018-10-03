@@ -8,6 +8,8 @@
 
 #include <univalue.h>
 
+#include <boost/thread.hpp>
+
 CMutableDataDB *pMutableDataDB = NULL;
 
 bool AddMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
@@ -66,6 +68,17 @@ bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash)
     return true;
 }
 
+bool GetAllMutableData(std::vector<CMutableData>& vchMutableData)
+{
+    if (!pMutableDataDB) {
+        return false;
+    }
+    if (!pMutableDataDB->ListMutableData(vchMutableData)) {
+        return false;
+    }
+    return true;
+}
+
 void CMutableData::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsMutableData(SER_NETWORK, PROTOCOL_VERSION);
@@ -95,12 +108,37 @@ bool CMutableData::UnserializeFromData(const std::vector<unsigned char>& vchData
     return true;
 }
 
+std::string CMutableData::InfoHash() const
+{
+    return stringFromVch(vchInfoHash);
+}
+
+std::string CMutableData::PublicKey() const
+{
+    return stringFromVch(vchPublicKey);
+}
+
+std::string CMutableData::Signature() const
+{
+    return stringFromVch(vchSignature);
+}
+
+std::string CMutableData::Salt() const
+{
+    return stringFromVch(vchSalt);
+}
+
+std::string CMutableData::Value() const
+{
+    return stringFromVch(vchValue);
+}
+
 bool CMutableDataDB::AddMutableData(const CMutableData& data)
 {
     bool writeState = false;
     {
         LOCK(cs_dht_entry);
-        writeState = CDBWrapper::Write(make_pair(std::string("ih"), data.InfoHash), data);  // use info hash as key
+        writeState = CDBWrapper::Write(make_pair(std::string("ih"), data.vchInfoHash), data);  // use info hash as key
     }
     return writeState;
 }
@@ -121,10 +159,32 @@ bool CMutableDataDB::UpdateMutableData(const CMutableData& data)
 {
     LOCK(cs_dht_entry);
 
-    if (!EraseMutableData(data.InfoHash))
+    if (!EraseMutableData(data.vchInfoHash))
         return false;
 
     bool writeState = false;
-    writeState = CDBWrapper::Update(make_pair(std::string("ih"), data.InfoHash), data);
+    writeState = CDBWrapper::Update(make_pair(std::string("ih"), data.vchInfoHash), data);
     return writeState;
+}
+
+bool CMutableDataDB::ListMutableData(std::vector<CMutableData>& vchMutableData)
+{
+    std::pair<std::string, CharString> infoHash;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        CMutableData data;
+        try {
+            if (pcursor->GetKey(infoHash) && infoHash.first == "ih") {
+                pcursor->GetValue(data);
+                vchMutableData.push_back(data);
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
 }

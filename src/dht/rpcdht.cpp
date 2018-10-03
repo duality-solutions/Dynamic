@@ -4,6 +4,7 @@
 #include "bdap/domainentry.h"
 #include "dht/bootstrap.h"
 #include "dht/keyed25519.h"
+#include "dht/mutabledata.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -197,12 +198,48 @@ UniValue dhtinfo(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue dhtdb(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "dhtdb\n"
+            "\n");
+
+    UniValue result(UniValue::VOBJ);
+
+    std::vector<CMutableData> vchMutableData;
+    
+    bool fRet = GetAllMutableData(vchMutableData);
+    int nCounter = 0;
+    if (fRet) {
+        for(const CMutableData& data : vchMutableData) {
+            UniValue oMutableData(UniValue::VOBJ);
+            oMutableData.push_back(Pair("info_hash", data.InfoHash()));
+            oMutableData.push_back(Pair("public_key", data.PublicKey()));
+            oMutableData.push_back(Pair("signature", data.Signature()));
+            oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
+            oMutableData.push_back(Pair("salt", data.Salt()));
+            oMutableData.push_back(Pair("value", data.Value()));
+            result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
+            nCounter++;
+        }
+    }
+    else {
+        throw std::runtime_error("dhtdb failed.  Check the debug.log for details.\n");
+    }
+    UniValue oCounter(UniValue::VOBJ);
+    oCounter.push_back(Pair("record_count", nCounter));
+    result.push_back(Pair("summary", oCounter));
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
     { "dht",             "getdht",                   &getdht,                       true  },
     { "dht",             "putdht",                   &putdht,                       true  },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
+    { "dht",             "dhtdb",                    &dhtdb,                        true  },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)

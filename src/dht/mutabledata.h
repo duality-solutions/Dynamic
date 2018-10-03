@@ -16,12 +16,12 @@ class CMutableData {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
-    CharString InfoHash;  // key
-    CharString PublicKey;
-    CharString Signature;
+    CharString vchInfoHash;  // key
+    CharString vchPublicKey;
+    CharString vchSignature;
     std::int64_t SequenceNumber;
-    CharString Salt;
-    CharString Value;
+    CharString vchSalt;
+    CharString vchValue;
 
     CMutableData() {
         SetNull();
@@ -29,17 +29,17 @@ public:
 
     CMutableData(const CharString& infoHash, const CharString& publicKey, const CharString& signature, 
                     const std::int64_t& sequenceNumber, const CharString& salt, const CharString& value) :
-                    InfoHash(infoHash), PublicKey(publicKey), Signature(signature), SequenceNumber(sequenceNumber), Salt(salt), Value(value){}
+                    vchInfoHash(infoHash), vchPublicKey(publicKey), vchSignature(signature), SequenceNumber(sequenceNumber), vchSalt(salt), vchValue(value){}
 
     inline void SetNull()
     {
         nVersion = CMutableData::CURRENT_VERSION;
-        InfoHash.clear();
-        PublicKey.clear();
-        Signature.clear();
+        vchInfoHash.clear();
+        vchPublicKey.clear();
+        vchSignature.clear();
         SequenceNumber = 0;
-        Salt.clear();
-        Value.clear();
+        vchSalt.clear();
+        vchValue.clear();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -47,16 +47,16 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
-        READWRITE(InfoHash);
-        READWRITE(PublicKey);
-        READWRITE(Signature);
+        READWRITE(vchInfoHash);
+        READWRITE(vchPublicKey);
+        READWRITE(vchSignature);
         READWRITE(VARINT(SequenceNumber));
-        READWRITE(Salt);
-        READWRITE(Value);
+        READWRITE(vchSalt);
+        READWRITE(vchValue);
     }
 
     inline friend bool operator==(const CMutableData &a, const CMutableData &b) {
-        return (a.InfoHash == b.InfoHash && a.PublicKey == b.PublicKey && a.Signature == b.Signature);
+        return (a.vchInfoHash == b.vchInfoHash && a.vchPublicKey == b.vchPublicKey && a.vchSalt == b.vchSalt);
     }
 
     inline friend bool operator!=(const CMutableData &a, const CMutableData &b) {
@@ -65,18 +65,24 @@ public:
 
     inline CMutableData operator=(const CMutableData &b) {
         nVersion = b.nVersion;
-        InfoHash = b.InfoHash;
-        PublicKey = b.PublicKey;
-        Signature = b.Signature;
+        vchInfoHash = b.vchInfoHash;
+        vchPublicKey = b.vchPublicKey;
+        vchSignature = b.vchSignature;
         SequenceNumber = b.SequenceNumber;
-        Salt = b.Salt;
-        Value = b.Value;
+        vchSalt = b.vchSalt;
+        vchValue = b.vchValue;
         return *this;
     }
  
-    inline bool IsNull() const { return (Signature.empty()); }
+    inline bool IsNull() const { return (vchInfoHash.empty()); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+
+    std::string InfoHash() const;
+    std::string PublicKey() const;
+    std::string Signature() const;
+    std::string Salt() const;
+    std::string Value() const;
 };
 
 class CMutableDataDB : public CDBWrapper {
@@ -88,12 +94,14 @@ public:
     bool UpdateMutableData(const CMutableData& data);
     bool ReadMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
     bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash);
+    bool ListMutableData(std::vector<CMutableData>& vchMutableData);
 };
 
 bool AddMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
 bool UpdateMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
 bool GetMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
 bool PutMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
+bool GetAllMutableData(std::vector<CMutableData>& vchMutableData);
 
 extern CMutableDataDB* pMutableDataDB;
 
