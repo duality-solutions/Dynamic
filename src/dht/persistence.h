@@ -183,6 +183,9 @@ private:
 
 std::unique_ptr<dht_storage_interface> dht_bdap_storage_constructor(dht_settings const& settings);
 
+std::string ExtractPutValue(std::string value);
+std::string ExtractSalt(std::string salt);
+
 } // namespace dht
 } // namespace libtorrent
 

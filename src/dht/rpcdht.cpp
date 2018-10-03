@@ -15,11 +15,11 @@
 #include <univalue.h>
 
 
-UniValue getdhtmutable(const JSONRPCRequest& request)
+UniValue getdht(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getdhtdata\n"
+            "getdht\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -48,11 +48,11 @@ UniValue getdhtmutable(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue putdhtmutable(const JSONRPCRequest& request)
+UniValue putdht(const JSONRPCRequest& request)
 {
     if (request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putdhtdata\n"
+            "putdht\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -193,8 +193,8 @@ UniValue dhtinfo(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
-    { "dht",             "getdhtmutable",            &getdhtmutable,                true  },
-    { "dht",             "putdhtmutable",            &putdhtmutable,                true  },
+    { "dht",             "getdht",                   &getdht,                       true  },
+    { "dht",             "putdht",                   &putdht,                       true  },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
 };
 
