@@ -16,7 +16,7 @@
 
 class CCoinsViewCache;
 class CDynamicAddress;
-class CRecipient;
+struct CRecipient;
 class CTransaction;
 class CTxOut;
 class CTxMemPool;

@@ -92,12 +92,19 @@ UniValue putdht(const JSONRPCRequest& request)
     std::string dhtMessage = "";
     fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
     if (fRet) {
-        result.push_back(Pair("Put_PubKey", strPubKey));
-        result.push_back(Pair("Put_PrivKey", strPrivKey));
-        result.push_back(Pair("Put_Salt", strSalt));
-        result.push_back(Pair("Put_Seq", iSequence));
-        result.push_back(Pair("Put_Value", request.params[0].get_str()));
-        result.push_back(Pair("Put_Message", dhtMessage));
+        std::string dhtMessage = "";
+        fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
+        if (fRet) {
+            result.push_back(Pair("Put_PubKey", strPubKey));
+            result.push_back(Pair("Put_PrivKey", strPrivKey));
+            result.push_back(Pair("Put_Salt", strSalt));
+            result.push_back(Pair("Put_Seq", iSequence));
+            result.push_back(Pair("Put_Value", request.params[0].get_str()));
+            result.push_back(Pair("Put_Message", dhtMessage));
+        }
+        else {
+            throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
+        }
     }
     else {
         throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
