@@ -21,6 +21,7 @@
 #include "bdap/domainentrydb.h"
 #include "dht/keyed25519.h"
 #include "dht/bootstrap.h"
+#include "dht/mutabledata.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeconfig.h"
@@ -233,11 +234,11 @@ void PrepareShutdown()
     /// module was initialized.
     RenameThread("dynamic-shutoff");
     mempool.AddTransactionsUpdated(1);
+    StopTorrentDHTNetwork();
     StopHTTPRPC();
     StopREST();
     StopRPC();
     StopHTTPServer();
-    StopTorrentDHTNetwork();
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->Flush(false);
@@ -1503,6 +1504,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 // LibTorrent DHT Netowrk Services
                 delete pTorrentDHTSession;
+                delete pMutableDataDB;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex || fReindexChainState);
@@ -1516,8 +1518,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pFluidMintDB = new CFluidMintDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pFluidSovereignDB = new CFluidSovereignDB(nTotalCache * 35, false, fReindex, obfuscate);
 
-                // Init BDAP Services DB's 
+                // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
+
+                // Init DHT Services DB
+                pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);

@@ -17,7 +17,6 @@
 #include "libtorrent/kademlia/ed25519.hpp"
 #include "libtorrent/span.hpp"
 
-#include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 
 #include <functional>
@@ -28,7 +27,8 @@
 
 using namespace libtorrent;
 
-static boost::thread *dhtTorrentThread;
+static std::shared_ptr<std::thread> pDHTTorrentThread;
+
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
@@ -50,7 +50,7 @@ static alert* wait_for_alert(session* dhtSession, int alert_type, const std::arr
     std::string strPublicKey = aux::to_hex(public_key);
     while (!found)
     {
-        dhtSession->wait_for_alert(seconds(5));
+        dhtSession->wait_for_alert(seconds(1));
         std::vector<alert*> alerts;
         dhtSession->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert)
@@ -95,7 +95,7 @@ static alert* wait_for_alert(session* dhtSession, int alert_type)
     return wait_for_alert(dhtSession, alert_type, emptyKey, "");
 }
 
-static void bootstrap(lt::session* dhtSession)
+static void bootstrap(libtorrent::session* dhtSession)
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
     wait_for_alert(dhtSession, dht_bootstrap_alert::alert_type);
@@ -174,31 +174,35 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
         // boot strap the DHT LibTorrent network
         // with current peers and Dynodes
+        unsigned int iCounter = 0;
         settings.LoadSettings();
-        pTorrentDHTSession = new session(settings.GetSettingsPack());
-        load_dht_state(pTorrentDHTSession);
+        pTorrentDHTSession = settings.GetSession();
         bootstrap(pTorrentDHTSession);
         save_dht_state(pTorrentDHTSession);
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
         while (!fShutdown) {
-            MilliSleep(5000);
+            MilliSleep(1000);
+            iCounter ++;
             if (!pTorrentDHTSession->is_dht_running()) {
                 LogPrintf("DHTTorrentNetwork -- not running.  Loading from file and restarting bootstrap.\n");
                 load_dht_state(pTorrentDHTSession);
                 bootstrap(pTorrentDHTSession);
                 save_dht_state(pTorrentDHTSession);
             }
+            else {
+                if (iCounter >= 300) {
+                    // save DHT state every 5 minutes
+                    save_dht_state(pTorrentDHTSession);
+                    iCounter = 0;
+                }
+            }
         }
-    }
-    catch (const boost::thread_interrupted&)
-    {
-        LogPrintf("DHTTorrentNetwork -- terminated\n");
-        throw;
     }
     catch (const std::runtime_error& e)
     {
+        fShutdown = true;
         LogPrintf("DHTTorrentNetwork -- runtime error: %s\n", e.what());
         return;
     }
@@ -206,28 +210,34 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
-    save_dht_state(pTorrentDHTSession);
+    LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
     fShutdown = true;
-    if (dhtTorrentThread != NULL)
+    MilliSleep(1100);
+    if (pDHTTorrentThread != NULL)
     {
-        dhtTorrentThread->interrupt();
-        delete dhtTorrentThread;
-        dhtTorrentThread = NULL;
-        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork stopped.\n");
+        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
+        libtorrent::session_params params;
+        params.settings.set_bool(settings_pack::enable_dht, false);
+        params.settings.set_int(settings_pack::alert_mask, 0x0);
+        pTorrentDHTSession->apply_settings(params.settings);
+        pTorrentDHTSession->abort();
+        pDHTTorrentThread->join();
+        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
     }
     else {
-        LogPrintf("DHTTorrentNetwork --StopTorrentDHTNetwork dhtTorrentThreads is null.  Stop not needed.\n");
+        LogPrintf("DHTTorrentNetwork --StopTorrentDHTNetwork pDHTTorrentThreads is null.  Stop not needed.\n");
     }
+    pDHTTorrentThread = NULL;
 }
 
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
     LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", get_log_path());
     fShutdown = false;
-    if (dhtTorrentThread != NULL)
+    if (pDHTTorrentThread != NULL)
          StopTorrentDHTNetwork();
 
-    dhtTorrentThread = new  boost::thread(DHTTorrentNetwork, boost::cref(chainparams), boost::ref(connman));
+    pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&DHTTorrentNetwork, std::cref(chainparams), std::ref(connman)));
 }
 
 bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool fWaitForAuthoritative)
@@ -355,11 +365,23 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
 {
     LogPrintf("DHTTorrentNetwork -- GetDHTStats started.\n");
 
-    if (!pTorrentDHTSession) 
+    if (!pTorrentDHTSession) {
         return;
+    }
 
-    if (!load_dht_state(pTorrentDHTSession))
-        bootstrap(pTorrentDHTSession);
+    if (!pTorrentDHTSession->is_dht_running()) {
+        LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
+        if (!load_dht_state(pTorrentDHTSession)) {
+            LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
+            bootstrap(pTorrentDHTSession);
+        }
+        else {
+            LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
+        }
+    }
+    else {
+        LogPrintf("DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
+    }
 
     pTorrentDHTSession->post_dht_stats();
     alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_stats_alert::alert_type);
