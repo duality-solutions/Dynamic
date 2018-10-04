@@ -277,11 +277,11 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
     CharString vchSignature = vchFromString(strSignature);
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
     CharString vchPublicKey = vchFromString(strPublicKey);
-    std::string strSalt = std::string(salt.data());
+    std::string strSalt = ExtractSalt(std::string(salt.data()));
     CharString vchSalt = vchFromString(strSalt);
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** dht_bdap_storage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, ExtractSalt(strSalt), putMutableData.SequenceNumber);
+                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {

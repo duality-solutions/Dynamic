@@ -18,11 +18,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include <functional>
 #include <cstdio> // for snprintf
 #include <cinttypes> // for PRId64 et.al.
 #include <cstdlib>
 #include <fstream>
+#include <thread>
 
 using namespace libtorrent;
 
