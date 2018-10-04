@@ -1,10 +1,11 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#include "persistence.h"
+#include "storage.h"
 
 #include "bdap/domainentry.h"
-#include "dht/mutabledata.h"
+#include "dht/mutable.h"
+#include "dht/mutabledb.h"
 #include "util.h"
 
 #include <libtorrent/aux_/numeric_cast.hpp>
@@ -201,7 +202,7 @@ bool dht_bdap_storage::get_mutable_item_seq(sha1_hash const& target, sequence_nu
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq infohash = %s\n", strInfoHash);
-    if (!GetMutableData(vchInfoHash, mutableData)) {
+    if (!GetLocalMutableData(vchInfoHash, mutableData)) {
         LogPrintf("********** dht_bdap_storage -- get_mutable_item_seq failed to get sequence_number for infohash = %s.\n", strInfoHash);
         return false;
     }
@@ -215,7 +216,7 @@ bool dht_bdap_storage::get_mutable_item(sha1_hash const& target, sequence_number
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    if (!GetMutableData(vchInfoHash, mutableData)) {
+    if (!GetLocalMutableData(vchInfoHash, mutableData)) {
         LogPrintf("********** dht_bdap_storage -- get_mutable_item failed to get mutable data from leveldb.\n");
         return false;
     }
@@ -283,14 +284,14 @@ void dht_bdap_storage::put_mutable_item(sha1_hash const& target
                     strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, ExtractSalt(strSalt), putMutableData.SequenceNumber);
 
     CMutableData previousData;
-    if (!GetMutableData(vchInfoHash, previousData)) {
-        if (PutMutableData(vchInfoHash, putMutableData)) {
+    if (!GetLocalMutableData(vchInfoHash, previousData)) {
+        if (PutLocalMutableData(vchInfoHash, putMutableData)) {
             LogPrintf("********** dht_bdap_storage -- put_mutable_item added successfully**********\n");
         }
     }
     else {
         if (putMutableData.Value() != previousData.Value() || putMutableData.SequenceNumber != previousData.SequenceNumber) {
-            if (UpdateMutableData(vchInfoHash, putMutableData)) {
+            if (UpdateLocalMutableData(vchInfoHash, putMutableData)) {
                 LogPrintf("********** dht_bdap_storage -- put_mutable_item updated successfully**********\n");
             }
         }

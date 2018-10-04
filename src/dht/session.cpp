@@ -1,10 +1,10 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#include "dht/bootstrap.h"
+#include "dht/session.h"
 
 #include "chainparams.h"
-#include "dht/dhtsettings.h"
+#include "dht/settings.h"
 #include "dynode-sync.h"
 #include "net.h"
 #include "util.h"
@@ -13,7 +13,6 @@
 #include "libtorrent/hex.hpp" // for to_hex
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/bencode.hpp" // for bencode()
-#include "libtorrent/kademlia/item.hpp" // for sign_mutable_item
 #include "libtorrent/kademlia/ed25519.hpp"
 #include "libtorrent/span.hpp"
 
@@ -39,9 +38,9 @@ static void empty_public_key(std::array<char, 32>& public_key)
     }
 }
 
-static alert* wait_for_alert(session* dhtSession, int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
+alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
 {
-    LogPrintf("DHTTorrentNetwork -- wait_for_alert start.\n");
+    LogPrintf("DHTTorrentNetwork -- WaitForResponse start.\n");
     alert* ret = nullptr;
     bool found = false;
     std::array<char, 32> emptyKey;
@@ -88,41 +87,41 @@ static alert* wait_for_alert(session* dhtSession, int alert_type, const std::arr
     return ret;
 }
 
-static alert* wait_for_alert(session* dhtSession, int alert_type)
+static alert* WaitForResponse(session* dhtSession, const int alert_type)
 {
     std::array<char, 32> emptyKey;
     empty_public_key(emptyKey);
-    return wait_for_alert(dhtSession, alert_type, emptyKey, "");
+    return WaitForResponse(dhtSession, alert_type, emptyKey, "");
 }
 
-static void bootstrap(libtorrent::session* dhtSession)
+void Bootstrap(libtorrent::session* dhtSession)
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
-    wait_for_alert(dhtSession, dht_bootstrap_alert::alert_type);
+    WaitForResponse(dhtSession, dht_bootstrap_alert::alert_type);
     LogPrintf("DHTTorrentNetwork -- bootstrap done.\n");
 }
 
-static std::string get_log_path()
+std::string GetSessionStatePath()
 {
-    boost::filesystem::path path = GetDataDir() / "dht-state.dat";
+    boost::filesystem::path path = GetDataDir() / "dht_state.dat";
     return path.string();
 }
 
-static int save_dht_state(session* dhtSession)
+int SaveSessionState(session* dhtSession)
 {
     entry torrentEntry;
     dhtSession->save_state(torrentEntry, session::save_dht_state);
     std::vector<char> state;
     bencode(std::back_inserter(state), torrentEntry);
-    std::fstream f(get_log_path().c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
+    std::fstream f(GetSessionStatePath().c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     f.write(state.data(), state.size());
-    LogPrintf("DHTTorrentNetwork -- save_dht_state complete.\n");
+    LogPrintf("DHTTorrentNetwork -- SaveSessionState complete.\n");
     return 0;
 }
 
-static bool load_dht_state(session* dhtSession)
+bool LoadSessionState(session* dhtSession)
 {
-    std::fstream f(get_log_path().c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
+    std::fstream f(GetSessionStatePath().c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
 
     auto const size = f.tellg();
     if (static_cast<int>(size) <= 0) return false;
@@ -134,7 +133,7 @@ static bool load_dht_state(session* dhtSession)
     f.read(state.data(), state.size());
     if (f.fail())
     {
-        LogPrintf("DHTTorrentNetwork -- failed to read dht-state.log\n");
+        LogPrintf("DHTTorrentNetwork -- LoadSessionState failed to read dht-state.log\n");
         return false;
     }
 
@@ -142,12 +141,12 @@ static bool load_dht_state(session* dhtSession)
     error_code ec;
     bdecode(state.data(), state.data() + state.size(), e, ec);
     if (ec) {
-        LogPrintf("DHTTorrentNetwork -- failed to parse dht-state.log file: (%d) %s\n", ec.value(), ec.message());
+        LogPrintf("DHTTorrentNetwork -- LoadSessionState failed to parse dht-state.log file: (%d) %s\n", ec.value(), ec.message());
         return false;
     }
     else
     {
-        LogPrintf("DHTTorrentNetwork -- load dht state from dht-state.log\n");
+        LogPrintf("DHTTorrentNetwork -- LoadSessionState load dht state from dht-state.log\n");
         dhtSession->load_state(e);
     }
     return true;
@@ -177,8 +176,8 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         unsigned int iCounter = 0;
         settings.LoadSettings();
         pTorrentDHTSession = settings.GetSession();
-        bootstrap(pTorrentDHTSession);
-        save_dht_state(pTorrentDHTSession);
+        Bootstrap(pTorrentDHTSession);
+        SaveSessionState(pTorrentDHTSession);
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
@@ -187,14 +186,14 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
             iCounter ++;
             if (!pTorrentDHTSession->is_dht_running()) {
                 LogPrintf("DHTTorrentNetwork -- not running.  Loading from file and restarting bootstrap.\n");
-                load_dht_state(pTorrentDHTSession);
-                bootstrap(pTorrentDHTSession);
-                save_dht_state(pTorrentDHTSession);
+                LoadSessionState(pTorrentDHTSession);
+                Bootstrap(pTorrentDHTSession);
+                SaveSessionState(pTorrentDHTSession);
             }
             else {
                 if (iCounter >= 300) {
                     // save DHT state every 5 minutes
-                    save_dht_state(pTorrentDHTSession);
+                    SaveSessionState(pTorrentDHTSession);
                     iCounter = 0;
                 }
             }
@@ -232,133 +231,12 @@ void StopTorrentDHTNetwork()
 
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", get_log_path());
+    LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", GetSessionStatePath());
     fShutdown = false;
     if (pDHTTorrentThread != NULL)
          StopTorrentDHTNetwork();
 
     pDHTTorrentThread = std::make_shared<std::thread>(std::bind(&DHTTorrentNetwork, std::cref(chainparams), std::ref(connman)));
-}
-
-bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool fWaitForAuthoritative)
-{
-    //TODO: DHT add locks
-    LogPrintf("DHTTorrentNetwork -- GetDHTMutableData started.\n");
-
-    if (!pTorrentDHTSession) {
-        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pTorrentDHTSession is null.";
-        return false;
-    }
-
-    if (!pTorrentDHTSession->is_dht_running()) {
-        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Restarting DHT.\n");
-        if (!load_dht_state(pTorrentDHTSession)) {
-            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to bootstrap again.\n");
-            bootstrap(pTorrentDHTSession);
-        }
-        else {
-            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData  setting loaded from file.\n");
-        }
-    }
-    else {
-        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData DHT already running.  Bootstrap not needed.\n");
-    }
-
-    pTorrentDHTSession->dht_get_item(public_key, entrySalt);
-    LogPrintf("DHTTorrentNetwork -- MGET: %s, salt = %s\n", aux::to_hex(public_key), entrySalt);
-
-    bool authoritative = false;
-    if (fWaitForAuthoritative) {
-        while (!authoritative)
-        {
-            alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
-
-            dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
-            authoritative = dhtGetAlert->authoritative;
-            entryValue = dhtGetAlert->item.to_string();
-            lastSequence = dhtGetAlert->seq;
-            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
-        }
-    }
-    else {
-        alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
-        dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
-        authoritative = dhtGetAlert->authoritative;
-        entryValue = dhtGetAlert->item.to_string();
-        lastSequence = dhtGetAlert->seq;
-        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
-    }
-
-    if (entryValue == "<uninitialized>")
-        return false;
-
-    return true;
-}
-
-static void put_mutable
-(
-    entry& e
-    ,std::array<char, 64>& sig
-    ,std::int64_t& seq
-    ,std::string const& salt
-    ,std::array<char, 32> const& pk
-    ,std::array<char, 64> const& sk
-    ,char const* str
-    ,std::int64_t const& iSeq
-)
-{
-    using dht::sign_mutable_item;
-    if (str != NULL) {
-        e = std::string(str);
-        std::vector<char> buf;
-        bencode(std::back_inserter(buf), e);
-        dht::signature sign;
-        seq = iSeq + 1;
-        sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
-            , dht::public_key(pk.data())
-            , dht::secret_key(sk.data()));
-        sig = sign.bytes;
-    }
-}
-
-bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
-                        ,char const* dhtValue, std::string& message)
-{
-    //TODO: (DHT) add locks
-    LogPrintf("DHTTorrentNetwork -- PutMutableData started.\n");
-
-    if (!pTorrentDHTSession) {
-        message = "DHTTorrentNetwork -- PutDHTMutableData Error. pTorrentDHTSession is null.";
-        return false;
-    }
-
-    if (!pTorrentDHTSession->is_dht_running()) {
-        LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Restarting DHT.\n");
-        if (!load_dht_state(pTorrentDHTSession)) {
-            LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Couldn't load previous settings.  Trying to bootstrap again.\n");
-            bootstrap(pTorrentDHTSession);
-        }
-        else {
-            LogPrintf("DHTTorrentNetwork -- PutDHTMutableData  setting loaded from file.\n");
-        }
-    }
-    else {
-        LogPrintf("DHTTorrentNetwork -- PutDHTMutableData DHT already running.  Bootstrap not needed.\n");
-    }
-    
-    pTorrentDHTSession->dht_put_item(public_key, std::bind(&put_mutable, std::placeholders::_1, std::placeholders::_2, 
-                                        std::placeholders::_3, std::placeholders::_4, public_key, private_key, dhtValue, lastSequence), entrySalt);
-
-    LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, seq=%d\n", aux::to_hex(public_key), entrySalt, lastSequence);
-    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_put_alert::alert_type, public_key, entrySalt);
-    dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
-    message = dhtPutAlert->message();
-    LogPrintf("DHTTorrentNetwork -- PutMutableData %s\n", message);
-
-    if (dhtPutAlert->num_success == 0)
-        return false;
-
-    return true;
 }
 
 void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
@@ -371,9 +249,9 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
 
     if (!pTorrentDHTSession->is_dht_running()) {
         LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        if (!load_dht_state(pTorrentDHTSession)) {
+        if (!LoadSessionState(pTorrentDHTSession)) {
             LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
-            bootstrap(pTorrentDHTSession);
+            Bootstrap(pTorrentDHTSession);
         }
         else {
             LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
@@ -384,7 +262,7 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
     }
 
     pTorrentDHTSession->post_dht_stats();
-    alert* dhtAlert = wait_for_alert(pTorrentDHTSession, dht_stats_alert::alert_type);
+    alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
     dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
     vchDHTLookup = dhtStatsAlert->active_requests;
     vchDHTBuckets = dhtStatsAlert->routing_table;

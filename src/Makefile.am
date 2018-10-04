@@ -112,12 +112,14 @@ DYNAMIC_CORE_H = \
   bdap/identity.h \
   bdap/linking.h \
   dbwrapper.h \
-  dht/bootstrap.h \
   dht/curve25519.h \
-  dht/dhtsettings.h \
-  dht/keyed25519.h \
-  dht/mutabledata.h \
-  dht/persistence.h \
+  dht/ed25519.h \
+  dht/mutable.h \
+  dht/mutabledb.h \
+  dht/operations.h \
+  dht/session.h \
+  dht/settings.h \
+  dht/storage.h \
   dynode.h \
   dynode-payments.h \
   dynode-sync.h \
@@ -254,12 +256,14 @@ libdynamic_server_a_SOURCES = \
   bdap/identity.cpp \
   bdap/linking.cpp \
   dbwrapper.cpp \
-  dht/bootstrap.cpp \
   dht/curve25519.cpp \
-  dht/dhtsettings.cpp \
-  dht/keyed25519.cpp \
-  dht/mutabledata.cpp \
-  dht/persistence.cpp \
+  dht/ed25519.cpp \
+  dht/mutable.cpp \
+  dht/mutabledb.cpp \
+  dht/operations.cpp \
+  dht/session.cpp \
+  dht/settings.cpp \
+  dht/storage.cpp \
   dynode.cpp \
   dynode-payments.cpp\
   dynode-sync.cpp \
