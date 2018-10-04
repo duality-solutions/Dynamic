@@ -2,9 +2,11 @@
 // TODO: Add License
 
 #include "bdap/domainentry.h"
-#include "dht/bootstrap.h"
-#include "dht/keyed25519.h"
-#include "dht/mutabledata.h"
+#include "dht/ed25519.h"
+#include "dht/mutable.h"
+#include "dht/mutabledb.h"
+#include "dht/storage.h"
+#include "dht/operations.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -15,12 +17,11 @@
 
 #include <univalue.h>
 
-
-UniValue getdht(const JSONRPCRequest& request)
+UniValue getmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getdht\n"
+            "getmutable\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -43,22 +44,22 @@ UniValue getdht(const JSONRPCRequest& request)
         result.push_back(Pair("Get_Value", strValue));
     }
     else {
-        throw std::runtime_error("getdhtdata failed.  Check the debug.log for details.\n");
+        throw std::runtime_error("getmutable failed.  Check the debug.log for details.\n");
     }
 
     return result;
 }
 
-UniValue putdht(const JSONRPCRequest& request)
+UniValue putmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putdht\n"
+            "putmutable\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
-        throw std::runtime_error("putdhtmutable failed. DHT session not started.\n");
+        throw std::runtime_error("putmutable failed. DHT session not started.\n");
 
     //TODO: Check putValue is not > 1000 bytes.
     bool fNewEntry = false;
@@ -108,7 +109,7 @@ UniValue putdht(const JSONRPCRequest& request)
         }
     }
     else {
-        throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
+        throw std::runtime_error("putmutable failed. Put failed. Check the debug.log for details.\n");
     }
     return result;
 }
@@ -209,7 +210,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
 
     std::vector<CMutableData> vchMutableData;
     
-    bool fRet = GetAllMutableData(vchMutableData);
+    bool fRet = GetAllLocalMutableData(vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutableData& data : vchMutableData) {
@@ -218,8 +219,8 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("public_key", data.PublicKey()));
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
-            oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", data.Value()));
+            oMutableData.push_back(Pair("salt", libtorrent::dht::ExtractSalt(data.Salt())));
+            oMutableData.push_back(Pair("value", libtorrent::dht::ExtractPutValue(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }
@@ -236,8 +237,8 @@ UniValue dhtdb(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
-    { "dht",             "getdht",                   &getdht,                       true  },
-    { "dht",             "putdht",                   &putdht,                       true  },
+    { "dht",             "getmutable",               &getmutable,                   true  },
+    { "dht",             "putmutable",               &putmutable,                   true  },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
     { "dht",             "dhtdb",                    &dhtdb,                        true  },
 };

@@ -2,7 +2,7 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#include "keyed25519.h"
+#include "ed25519.h"
 
 #include "random.h"
 #include "bdap/domainentry.h"

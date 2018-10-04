@@ -1,8 +1,8 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#ifndef DYNAMIC_DHT_DHTSETTINGS_H
-#define DYNAMIC_DHT_DHTSETTINGS_H
+#ifndef DYNAMIC_DHT_SETTINGS_H
+#define DYNAMIC_DHT_SETTINGS_H
 
 #include <libtorrent/session.hpp>
 
@@ -30,4 +30,4 @@ private:
 
 };
 
-#endif // DYNAMIC_DHT_DHTSETTINGS_H
+#endif // DYNAMIC_DHT_SETTINGS_H

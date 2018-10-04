@@ -1,8 +1,8 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#ifndef DYNAMIC_DHT_PERSISTENCE_H
-#define DYNAMIC_DHT_PERSISTENCE_H
+#ifndef DYNAMIC_DHT_STORAGE_H
+#define DYNAMIC_DHT_STORAGE_H
 
 #include <tuple>
 #include <algorithm>
@@ -187,4 +187,4 @@ std::string ExtractSalt(std::string salt);
 } // namespace libtorrent
 
 
-#endif // DYNAMIC_DHT_PERSISTENCE_H
+#endif // DYNAMIC_DHT_STORAGE_H

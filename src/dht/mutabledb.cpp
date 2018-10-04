@@ -1,10 +1,9 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#include "dht/mutabledata.h"
+#include "dht/mutabledb.h"
 
-#include "bdap/domainentry.h"
-#include "hash.h"
+#include "dht/mutable.h"
 
 #include <univalue.h>
 
@@ -12,7 +11,7 @@
 
 CMutableDataDB *pMutableDataDB = NULL;
 
-bool AddMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
+bool AddLocalMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
 {
     if (!pMutableDataDB) {
         return false;
@@ -23,7 +22,7 @@ bool AddMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutabl
     return true;
 }
 
-bool UpdateMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
+bool UpdateLocalMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMutableData& data)
 {
     if (!pMutableDataDB) {
         return false;
@@ -34,7 +33,7 @@ bool UpdateMutableData(const std::vector<unsigned char>& vchInfoHash,const  CMut
     return true;
 }
 
-bool GetMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data)
+bool GetLocalMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data)
 {
     if (!pMutableDataDB || !pMutableDataDB->ReadMutableData(vchInfoHash, data)) {
         return false;
@@ -42,22 +41,22 @@ bool GetMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData&
     return !data.IsNull();
 }
 
-bool PutMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data)
+bool PutLocalMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data)
 {
     if (!pMutableDataDB) {
         return false;
     }
     CMutableData readMutableData;
     if (pMutableDataDB->ReadMutableData(vchInfoHash, readMutableData)) {
-        UpdateMutableData(vchInfoHash, data);
+        UpdateLocalMutableData(vchInfoHash, data);
     }
     else {
-        AddMutableData(vchInfoHash, data);
+        AddLocalMutableData(vchInfoHash, data);
     }
     return !data.IsNull();
 }
 
-bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash)
+bool EraseLocalMutableData(const std::vector<unsigned char>& vchInfoHash)
 {
     if (!pMutableDataDB) {
         return false;
@@ -68,7 +67,7 @@ bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash)
     return true;
 }
 
-bool GetAllMutableData(std::vector<CMutableData>& vchMutableData)
+bool GetAllLocalMutableData(std::vector<CMutableData>& vchMutableData)
 {
     if (!pMutableDataDB) {
         return false;
@@ -77,60 +76,6 @@ bool GetAllMutableData(std::vector<CMutableData>& vchMutableData)
         return false;
     }
     return true;
-}
-
-void CMutableData::Serialize(std::vector<unsigned char>& vchData) 
-{
-    CDataStream dsMutableData(SER_NETWORK, PROTOCOL_VERSION);
-    dsMutableData << *this;
-    vchData = std::vector<unsigned char>(dsMutableData.begin(), dsMutableData.end());
-}
-
-bool CMutableData::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
-{
-    try {
-        CDataStream dsMutableData(vchData, SER_NETWORK, PROTOCOL_VERSION);
-        dsMutableData >> *this;
-
-        std::vector<unsigned char> vchMutableData;
-        Serialize(vchMutableData);
-        const uint256 &calculatedHash = Hash(vchMutableData.begin(), vchMutableData.end());
-        const std::vector<unsigned char> &vchRandMutableData = vchFromValue(calculatedHash.GetHex());
-        if(vchRandMutableData != vchHash)
-        {
-            SetNull();
-            return false;
-        }
-    } catch (std::exception &e) {
-        SetNull();
-        return false;
-    }
-    return true;
-}
-
-std::string CMutableData::InfoHash() const
-{
-    return stringFromVch(vchInfoHash);
-}
-
-std::string CMutableData::PublicKey() const
-{
-    return stringFromVch(vchPublicKey);
-}
-
-std::string CMutableData::Signature() const
-{
-    return stringFromVch(vchSignature);
-}
-
-std::string CMutableData::Salt() const
-{
-    return stringFromVch(vchSalt);
-}
-
-std::string CMutableData::Value() const
-{
-    return stringFromVch(vchValue);
 }
 
 bool CMutableDataDB::AddMutableData(const CMutableData& data)

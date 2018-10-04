@@ -4,7 +4,7 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
-#include "dht/keyed25519.h"
+#include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
 #include "rpcserver.h"

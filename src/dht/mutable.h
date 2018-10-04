@@ -1,16 +1,13 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#ifndef DYNAMIC_DHT_MUTABLE_DATA_H
-#define DYNAMIC_DHT_MUTABLE_DATA_H
+#ifndef DYNAMIC_DHT_MUTABLE_H
+#define DYNAMIC_DHT_MUTABLE_H
 
 #include "bdap/bdap.h"
-#include "dbwrapper.h"
 #include "serialize.h"
-#include "sync.h"
-#include "uint256.h"
 
-static CCriticalSection cs_dht_entry;
+#include "uint256.h"
 
 class CMutableData {
 public:
@@ -84,25 +81,5 @@ public:
     std::string Salt() const;
     std::string Value() const;
 };
-
-class CMutableDataDB : public CDBWrapper {
-public:
-    CMutableDataDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "dht", nCacheSize, fMemory, fWipe, obfuscate) {
-    }
-
-    bool AddMutableData(const CMutableData& data);
-    bool UpdateMutableData(const CMutableData& data);
-    bool ReadMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
-    bool EraseMutableData(const std::vector<unsigned char>& vchInfoHash);
-    bool ListMutableData(std::vector<CMutableData>& vchMutableData);
-};
-
-bool AddMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
-bool UpdateMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
-bool GetMutableData(const std::vector<unsigned char>& vchInfoHash, CMutableData& data);
-bool PutMutableData(const std::vector<unsigned char>& vchInfoHash, const CMutableData& data);
-bool GetAllMutableData(std::vector<CMutableData>& vchMutableData);
-
-extern CMutableDataDB* pMutableDataDB;
 
 #endif // DYNAMIC_DHT_MUTABLE_DATA_H

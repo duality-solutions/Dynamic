@@ -1,9 +1,9 @@
 // Copyright (c) 2018 Duality Blockchain Solutions Developers
 // TODO: Add License
 
-#include "dht/dhtsettings.h"
+#include "dht/settings.h"
 
-#include "dht/persistence.h"
+#include "dht/storage.h"
 #include "clientversion.h"
 #include "dynode.h"
 #include "dynodeman.h"
