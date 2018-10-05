@@ -203,10 +203,10 @@ public:
 
     /** Process all the transactions that have been included in a block */
     void processBlock(unsigned int nBlockHeight,
-                      std::vector<CTxMemPoolEntry>& entries, bool fCurrentEstimate);
+                      std::vector<const CTxMemPoolEntry*>& entries);
 
     /** Process a transaction confirmed in a block*/
-    void processBlockTx(unsigned int nBlockHeight, const CTxMemPoolEntry& entry);
+    bool processBlockTx(unsigned int nBlockHeight, const CTxMemPoolEntry* entry);
 
     /** Process a transaction accepted to the mempool*/
     void processTransaction(const CTxMemPoolEntry& entry, bool fCurrentEstimate);
@@ -253,26 +253,13 @@ private:
         TxStatsInfo() : blockHeight(0), bucketIndex(0) {}
     };
 
-    FastRandomContext insecure_rand;
-
     // map of txids to information about that transaction
     std::map<uint256, TxStatsInfo> mapMemPoolTxs;
 
     /** Classes to track historical data on transaction confirmations */
     TxConfirmStats feeStats;
-};
 
-class FeeFilterRounder
-{
-public:
-    /** Create new FeeFilterRounder */
-    FeeFilterRounder(const CFeeRate& minIncrementalFee);
-
-    /** Quantize a minimum fee for privacy purpose before broadcast **/
-    CAmount round(CAmount currentMinFee);
-
-private:
-    std::set<double> feeset;
-    FastRandomContext insecure_rand;
+    unsigned int trackedTxs;
+    unsigned int untrackedTxs;
 };
 #endif /*DYNAMIC_POLICYESTIMATOR_H */

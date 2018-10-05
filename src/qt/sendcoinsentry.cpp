@@ -270,8 +270,3 @@ bool SendCoinsEntry::updateLabel(const QString &address)
 
     return false;
 }
-
-void SendCoinsEntry::setRemoveEnabled(bool enabled)
-{
-    ui->deleteButton->setEnabled(enabled);
-}

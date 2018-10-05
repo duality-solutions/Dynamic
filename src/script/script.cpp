@@ -363,13 +363,13 @@ bool CScript::IsPayToPublicKey() const
     }
     // Test for pay-to-pubkey CScript with both
     // compressed or uncompressed pubkey
-    if (scriptPubKey.size() == 35) {
-        return (scriptPubKey[1] == 0x02 || scriptPubKey[1] == 0x03) &&
-            scriptPubKey[34] == OP_CHECKSIG;
+    if (this->size() == 35) {
+        return ((*this)[1] == 0x02 || (*this)[1] == 0x03) &&
+                (*this)[34] == OP_CHECKSIG;
     }
-    if (scriptPubKey.size() == 67) {
-        return scriptPubKey[1] == 0x04 &&
-            scriptPubKey[66] == OP_CHECKSIG;
+    if (this->size() == 67) {
+        return (*this)[1] == 0x04 &&
+                (*this)[66] == OP_CHECKSIG;
     }
     return false;
 }

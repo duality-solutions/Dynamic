@@ -20,14 +20,20 @@ extern CInstantSend instantsend;
 
 /*
     At 15 signatures, 1/2 of the dynode network can be owned by
-    one party without comprimising the security of InstantSend
+    one party without compromising the security of InstantSend
     (1000/2150.0)**10 = 0.00047382219560689856
     (1000/2900.0)**10 = 2.3769498616783657e-05
 
     ### getting 5 of 10 signatures w/ 1000 nodes of 2900
     (1000/2900.0)**5 = 0.004875397277841433
 */
-static const int INSTANTSEND_CONFIRMATIONS_REQUIRED = 11;
+
+// The INSTANTSEND_DEPTH is the "pseudo block depth" level assigned to locked
+// txs to indicate the degree of confidence in their eventual confirmation and
+// inability to be double-spent (adjustable via command line argument)
+static const int MIN_INSTANTSEND_DEPTH              = 0;
+static const int MAX_INSTANTSEND_DEPTH              = 60;
+/// Default number of "pseudo-confirmations" for an InstantSend tx
 static const int DEFAULT_INSTANTSEND_DEPTH          = 10;
 
 static const int MIN_INSTANTSEND_PROTO_VERSION      = 70900;
@@ -46,6 +52,8 @@ extern int nCompleteTXLocks;
 class CInstantSend
 {
 private:
+    static const std::string SERIALIZATION_VERSION_STRING;
+
     // Keep track of current block height
     int nCachedBlockHeight;
 
@@ -67,25 +75,56 @@ private:
     void CreateEmptyTxLockCandidate(const uint256& txHash);
     void Vote(CTxLockCandidate& txLockCandidate, CConnman& connman);
 
-    //process consensus vote message
-    bool ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote, CConnman& connman);
-    void ProcessOrphanTxLockVotes(CConnman& connman);
-    bool IsEnoughOrphanVotesForTx(const CTxLockRequest& txLockRequest);
-    bool IsEnoughOrphanVotesForTxAndOutPoint(const uint256& txHash, const COutPoint& outpoint);
+    /// Process consensus vote message
+    bool ProcessNewTxLockVote(CNode* pfrom, const CTxLockVote& vote, CConnman& connman);
+
+    void UpdateVotedOutpoints(const CTxLockVote& vote, CTxLockCandidate& txLockCandidate);
+    bool ProcessOrphanTxLockVote(const CTxLockVote& vote);
+    void ProcessOrphanTxLockVotes();
     int64_t GetAverageDynodeOrphanVoteTime();
 
     void TryToFinalizeLockCandidate(const CTxLockCandidate& txLockCandidate);
     void LockTransactionInputs(const CTxLockCandidate& txLockCandidate);
-    //update UI and notify external script if any
+    /// Update UI and notify external script if any
     void UpdateLockedTransaction(const CTxLockCandidate& txLockCandidate);
     bool ResolveConflicts(const CTxLockCandidate& txLockCandidate);
 
     bool IsInstantSendReadyToLock(const uint256 &txHash);
 
 public:
-    CCriticalSection cs_instantsend;
+    mutable CCriticalSection cs_instantsend;
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        std::string strVersion;
+        if(ser_action.ForRead()) {
+            READWRITE(strVersion);
+        }
+        else {
+            strVersion = SERIALIZATION_VERSION_STRING;
+            READWRITE(strVersion);
+        }
+
+        READWRITE(mapLockRequestAccepted);
+        READWRITE(mapLockRequestRejected);
+        READWRITE(mapTxLockVotes);
+        READWRITE(mapTxLockVotesOrphan);
+        READWRITE(mapTxLockCandidates);
+        READWRITE(mapVotedOutpoints);
+        READWRITE(mapLockedOutpoints);
+        READWRITE(mapDynodeOrphanVotes);
+        READWRITE(nCachedBlockHeight);
+
+        if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
+            Clear();
+        }
+    }
+
+    void Clear();
+
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
     bool ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CConnman& connman);
     void Vote(const uint256& txHash, CConnman& connman);
@@ -101,40 +140,74 @@ public:
 
     bool GetLockedOutPointTxHash(const COutPoint& outpoint, uint256& hashRet);
 
-    // verify if transaction is currently locked
+    /// Verify if transaction is currently locked
     bool IsLockedInstantSendTransaction(const uint256& txHash);
-    // get the actual number of accepted lock signatures
+    /// Get the actual number of accepted lock signatures
     int GetTransactionLockSignatures(const uint256& txHash);
-    // get instantsend confirmations (only)
+    /// Get instantsend confirmations (only)
     int GetConfirmations(const uint256 &nTXHash);
 
-    // remove expired entries from maps
+    /// Remove expired entries from maps
     void CheckAndRemove();
-    // verify if transaction lock timed out
+    /// Verify if transaction lock timed out
     bool IsTxLockCandidateTimedOut(const uint256& txHash);
 
     void Relay(const uint256& txHash, CConnman& connman);
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
-    void SyncTransaction(const CTransaction& tx, const CBlock* pblock);
+    void SyncTransaction(const CTransaction& tx, const CBlockIndex *pindex, int posInBlock);
 
-    std::string ToString();
+    std::string ToString() const;
+
+    void DoMaintenance() { CheckAndRemove(); }
 };
 
-class CTxLockRequest : public CTransaction
+/**
+ * An InstantSend transaction lock request.
+ */
+class CTxLockRequest
 {
 private:
-    static const CAmount MIN_FEE            = 0.001 * COIN;
+    static const CAmount MIN_FEE            = 0.0001 * COIN;
 
 public:
+    /// Warn for a large number of inputs to an IS tx - fees could be substantial
+    /// and the number txlvote responses requested large (10 * # of inputs)
     static const int WARN_MANY_INPUTS       = 100;
 
-    CTxLockRequest() = default;
-    CTxLockRequest(const CTransaction& tx) : CTransaction(tx) {};
+    CTransactionRef tx;
+
+    CTxLockRequest() : tx(MakeTransactionRef()) {}
+    CTxLockRequest(const CTransaction& _tx) : tx(MakeTransactionRef(_tx)) {};
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(tx);
+    }
 
     bool IsValid() const;
     CAmount GetMinFee() const;
     int GetMaxSignatures() const;
+
+    const uint256 &GetHash() const {
+        return tx->GetHash();
+    }
+
+    std::string ToString() const {
+        return tx->ToString();
+    }
+
+    friend bool operator==(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx == *b.tx;
+    }
+
+    friend bool operator!=(const CTxLockRequest& a, const CTxLockRequest& b)
+    {
+        return *a.tx != *b.tx;
+    }
 
     explicit operator bool() const
     {
@@ -142,6 +215,13 @@ public:
     }
 };
 
+/**
+ * An InstantSend transaction lock vote. Sent by a dynode in response to a
+ * transaction lock request (ix message) to indicate the transaction input can
+ * be locked. Contains the proposed transaction's hash and the outpoint being
+ * locked along with the dynodes outpoint and signature.
+ * @see CTxLockRequest
+ */
 class CTxLockVote
 {
 private:
@@ -150,7 +230,7 @@ private:
     COutPoint outpointDynode;
     std::vector<unsigned char> vchDynodeSignature;
     // local memory only
-    int nConfirmedHeight; // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
+    int nConfirmedHeight; ///< When corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
     int64_t nTimeCreated;
 
 public:
@@ -179,10 +259,13 @@ public:
         READWRITE(txHash);
         READWRITE(outpoint);
         READWRITE(outpointDynode);
-        READWRITE(vchDynodeSignature);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(vchDynodeSignature);
+        }
     }
 
     uint256 GetHash() const;
+    uint256 GetSignatureHash() const;
 
     uint256 GetTxHash() const { return txHash; }
     COutPoint GetOutpoint() const { return outpoint; }
@@ -200,16 +283,21 @@ public:
     void Relay(CConnman& connman) const;
 };
 
+/**
+ * An InstantSend OutpointLock.
+ */
 class COutPointLock
 {
 private:
-    COutPoint outpoint; // utxo
-    std::map<COutPoint, CTxLockVote> mapDynodeVotes; // dynode outpoint - vote
+    COutPoint outpoint; ///< UTXO
+    std::map<COutPoint, CTxLockVote> mapDynodeVotes; ///< Dynode outpoint - vote
     bool fAttacked = false;
 
 public:
-    static const int SIGNATURES_REQUIRED        = 11;
-    static const int SIGNATURES_TOTAL           = 20;
+    static const int SIGNATURES_REQUIRED        = 6;
+    static const int SIGNATURES_TOTAL           = 10;
+
+    COutPointLock() {}
 
     COutPointLock(const COutPoint& outpointIn) :
         outpoint(outpointIn),
@@ -217,6 +305,15 @@ public:
         {}
 
     COutPoint GetOutpoint() const { return outpoint; }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(outpoint);
+        READWRITE(mapDynodeVotes);
+        READWRITE(fAttacked);
+    }
 
     bool AddVote(const CTxLockVote& vote);
     std::vector<CTxLockVote> GetVotes() const;
@@ -228,13 +325,21 @@ public:
     void Relay(CConnman& connman) const;
 };
 
+/**
+ * An InstantSend transaction lock candidate.
+ */
 class CTxLockCandidate
 {
 private:
-    int nConfirmedHeight; // when corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
+    int nConfirmedHeight; ///<When corresponding tx is 0-confirmed or conflicted, nConfirmedHeight is -1
     int64_t nTimeCreated;
 
 public:
+    CTxLockCandidate() :
+        nConfirmedHeight(-1),
+        nTimeCreated(GetTime())
+    {}
+
     CTxLockCandidate(const CTxLockRequest& txLockRequestIn) :
         nConfirmedHeight(-1),
         nTimeCreated(GetTime()),
@@ -244,6 +349,16 @@ public:
 
     CTxLockRequest txLockRequest;
     std::map<COutPoint, COutPointLock> mapOutPointLocks;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(txLockRequest);
+        READWRITE(mapOutPointLocks);
+        READWRITE(nTimeCreated);
+        READWRITE(nConfirmedHeight);
+    }
 
     uint256 GetHash() const { return txLockRequest.GetHash(); }
 

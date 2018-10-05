@@ -568,19 +568,20 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{   //  category         name                        actor (function)           okSafeMode
+{ //  category              name                     actor (function)           okSafe argNames
+  //  --------------------- ------------------------ -----------------------    ------ --------------------
 #ifdef ENABLE_WALLET
     /* Fluid Protocol */
-    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
-    { "fluid",           "signtoken",                &signtoken,                true  },
-    { "fluid",           "consenttoken",             &consenttoken,             true  },
-    { "fluid",           "getrawpubkey",             &getrawpubkey,             true  },
-    { "fluid",           "verifyquorum",             &verifyquorum,             true  },
-    { "fluid",           "maketoken",                &maketoken,                true  },
-    { "fluid",           "getfluidhistory",          &getfluidhistory,          true  },
-    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
-    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
-    { "fluid",           "gettime",                  &gettime,                  true  },
+    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true,  {"opcode","hexstring"} },
+    { "fluid",           "signtoken",                &signtoken,                true,  {"address","tokenkey"} },
+    { "fluid",           "consenttoken",             &consenttoken,             true,  {"address","tokenkey"} },
+    { "fluid",           "getrawpubkey",             &getrawpubkey,             true,  {"address"} },
+    { "fluid",           "verifyquorum",             &verifyquorum,             true,  {"tokenkey"} },
+    { "fluid",           "maketoken",                &maketoken,                true,  {"string"} },
+    { "fluid",           "getfluidhistory",          &getfluidhistory,          true,  {} },
+    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true,  {} },
+    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true,  {} },
+    { "fluid",           "gettime",                  &gettime,                  true,  {} },
 #endif //ENABLE_WALLET
 };
 

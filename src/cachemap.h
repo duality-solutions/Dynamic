@@ -68,8 +68,6 @@ public:
 private:
     size_type nMaxSize;
 
-    size_type nCurrentSize;
-
     list_t listItems;
 
     map_t mapIndex;
@@ -77,14 +75,12 @@ private:
 public:
     CacheMap(size_type nMaxSizeIn = 0)
         : nMaxSize(nMaxSizeIn),
-          nCurrentSize(0),
           listItems(),
           mapIndex()
     {}
 
     CacheMap(const CacheMap<K,V>& other)
         : nMaxSize(other.nMaxSize),
-          nCurrentSize(other.nCurrentSize),
           listItems(other.listItems),
           mapIndex()
     {
@@ -95,7 +91,6 @@ public:
     {
         mapIndex.clear();
         listItems.clear();
-        nCurrentSize = 0;
     }
 
     void SetMaxSize(size_type nMaxSizeIn)
@@ -108,29 +103,25 @@ public:
     }
 
     size_type GetSize() const {
-        return nCurrentSize;
+        return listItems.size();
     }
 
-    void Insert(const K& key, const V& value)
+    bool Insert(const K& key, const V& value)
     {
-        map_it it = mapIndex.find(key);
-        if(it != mapIndex.end()) {
-            item_t& item = *(it->second);
-            item.value = value;
-            return;
+        if(mapIndex.find(key) != mapIndex.end()) {
+            return false;
         }
-        if(nCurrentSize == nMaxSize) {
+        if(listItems.size() == nMaxSize) {
             PruneLast();
         }
         listItems.push_front(item_t(key, value));
-        mapIndex[key] = listItems.begin();
-        ++nCurrentSize;
+        mapIndex.emplace(key, listItems.begin());
+        return true;
     }
 
     bool HasKey(const K& key) const
     {
-        map_cit it = mapIndex.find(key);
-        return (it != mapIndex.end());
+        return (mapIndex.find(key) != mapIndex.end());
     }
 
     bool Get(const K& key, V& value) const
@@ -152,7 +143,6 @@ public:
         }
         listItems.erase(it->second);
         mapIndex.erase(it);
-        --nCurrentSize;
     }
 
     const list_t& GetItemList() const {
@@ -162,7 +152,6 @@ public:
     CacheMap<K,V>& operator=(const CacheMap<K,V>& other)
     {
         nMaxSize = other.nMaxSize;
-        nCurrentSize = other.nCurrentSize;
         listItems = other.listItems;
         RebuildIndex();
         return *this;
@@ -174,7 +163,6 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(nMaxSize);
-        READWRITE(nCurrentSize);
         READWRITE(listItems);
         if(ser_action.ForRead()) {
             RebuildIndex();
@@ -184,20 +172,19 @@ public:
 private:
     void PruneLast()
     {
-        if(nCurrentSize < 1) {
+        if(listItems.empty()) {
             return;
         }
         item_t& item = listItems.back();
         mapIndex.erase(item.key);
         listItems.pop_back();
-        --nCurrentSize;
     }
 
     void RebuildIndex()
     {
         mapIndex.clear();
         for(list_it it = listItems.begin(); it != listItems.end(); ++it) {
-            mapIndex[it->key] = it;
+            mapIndex.emplace(it->key, it);
         }
     }
 };

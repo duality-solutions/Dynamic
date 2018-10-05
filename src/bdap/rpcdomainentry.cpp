@@ -136,7 +136,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
@@ -343,7 +343,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
@@ -441,7 +441,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
         LogPrintf("DomainEntry Scripts:\nscriptData = %s\n", ScriptToAsmStr(scriptData, true));
 
-        const CTransaction testTx = (CTransaction)wtx;
+        const CTransactionRef testTx = MakeTransactionRef((CTransaction)wtx);
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
         LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
@@ -519,25 +519,26 @@ UniValue adddomaingroup(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{   //  category         name                        actor (function)           okSafeMode
+{ //  category              name                     actor (function)               okSafe argNames
+  //  --------------------- ------------------------ -----------------------        ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "adddomainentry",           &adddomainentry,               true  },
-    { "bdap",            "getdomainusers",           &getdomainusers,               true  },
-    { "bdap",            "getdomaingroups",          &getdomaingroups,              true  },
-    { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true  },
-    { "bdap",            "updatedomainuser",         &updatedomainuser,             true  },
-    { "bdap",            "updatedomaingroup",        &updatedomaingroup,            true  },
-    { "bdap",            "deletedomainuser",         &deletedomainuser,             true  },
-    { "bdap",            "deletedomaingroup",        &deletedomaingroup,            true  },
-    { "bdap",            "adddomaingroup",           &adddomaingroup,               true  },
-    { "bdap",            "getdomaingroupinfo",       &getdomaingroupinfo,           true  },
+    { "bdap",            "adddomainentry",           &adddomainentry,               true, {"userid","common name", "registration days"} },
+    { "bdap",            "getdomainusers",           &getdomainusers,               true, {"records per page","page returned"} },
+    { "bdap",            "getdomaingroups",          &getdomaingroups,              true, {"records per page","page returned"} },
+    { "bdap",            "getdomainuserinfo",        &getdomainuserinfo,            true, {"public name"} },
+    { "bdap",            "updatedomainuser",         &updatedomainuser,             true, {"userid","common name", "registration days"} },
+    { "bdap",            "updatedomaingroup",        &updatedomaingroup,            true, {"groupid","common name", "registration days"} },
+    { "bdap",            "deletedomainuser",         &deletedomainuser,             true, {"userid"} },
+    { "bdap",            "deletedomaingroup",        &deletedomaingroup,            true, {"groupid"} },
+    { "bdap",            "adddomaingroup",           &adddomaingroup,               true, {"groupid","common name"} },
+    { "bdap",            "getdomaingroupinfo",       &getdomaingroupinfo,           true, {} },
 #endif //ENABLE_WALLET
-    { "bdap",            "makekeypair",              &makekeypair,                  true  },
+    { "bdap",            "makekeypair",              &makekeypair,                  true, {} },
 };
 
-void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC)
+void RegisterDomainEntryRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }

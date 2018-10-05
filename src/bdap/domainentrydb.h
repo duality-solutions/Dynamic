@@ -40,7 +40,7 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
 bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);
-bool CheckNewDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
+bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                std::string& errorMessage, bool fJustCheck);
 bool CheckDeleteDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);
@@ -54,7 +54,7 @@ bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& en
                                 std::string& errorMessage, bool fJustCheck);
 bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);
-bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransaction& tx, 
+bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
                             int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
 extern CDomainEntryDB *pDomainEntryDB;

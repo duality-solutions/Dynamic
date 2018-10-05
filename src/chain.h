@@ -202,6 +202,9 @@ public:
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     int32_t nSequenceId;
 
+    //! (memory only) Maximum nTime in the chain upto and including this block.
+    unsigned int nTimeMax;
+    
     void SetNull()
     {
         phashBlock = NULL;
@@ -216,6 +219,7 @@ public:
         nChainTx = 0;
         nStatus = 0;
         nSequenceId = 0;
+        nTimeMax = 0;
 
         nVersion       = 0;
         hashMerkleRoot = uint256();
@@ -281,7 +285,12 @@ public:
         return (int64_t)nTime;
     }
 
-    enum { nMedianTimeSpan=11 };
+    int64_t GetBlockTimeMax() const
+    {
+        return (int64_t)nTimeMax;
+    }
+
+    static constexpr int nMedianTimeSpan = 11;
 
     int64_t GetMedianTimePast() const
     {
@@ -471,7 +480,7 @@ public:
     const CBlockIndex *FindFork(const CBlockIndex *pindex) const;
 
     /** Find the most recent block with timestamp lower than the given. */
-    CBlockIndex* FindLatestBefore(int64_t nTime) const;
+    CBlockIndex* FindEarliestAtLeast(int64_t nTime) const;
 };
 
 #endif // DYNAMIC_CHAIN_H

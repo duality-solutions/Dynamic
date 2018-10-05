@@ -73,8 +73,18 @@ DYNAMIC_CORE_H = \
   amount.h \
   arith_uint256.h \
   base58.h \
+  bdap/auditdata.h \
+  bdap/bdap.h \
+  bdap/domainentry.h \
+  bdap/domainentrydb.h \
+  bdap/entrycertificate.h \
+  bdap/entrychannel.h \
+  bdap/entrycheckpoints.h \
+  bdap/entrylink.h \
+  bdap/identity.h \
   bip39_english.h \
   bip39.h \
+  blockencodings.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -97,15 +107,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  bdap/auditdata.h \
-  bdap/bdap.h \
-  bdap/domainentry.h \
-  bdap/domainentrydb.h \
-  bdap/entrycertificate.h \
-  bdap/entrychannel.h \
-  bdap/entrycheckpoints.h \
-  bdap/entrylink.h \
-  bdap/identity.h \
+  cuckoocache.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -147,6 +149,7 @@ DYNAMIC_CORE_H = \
   netaddress.h \
   netbase.h \
   netfulfilledman.h \
+  netmessagemaker.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -231,6 +234,7 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \

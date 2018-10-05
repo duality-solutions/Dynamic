@@ -20,9 +20,9 @@ static const int MIN_PRIVATESEND_ROUNDS             = 2;
 static const int MIN_PRIVATESEND_AMOUNT             = 2;
 static const int MIN_PRIVATESEND_LIQUIDITY          = 0;
 static const int MAX_PRIVATESEND_ROUNDS             = 16;
-static const int MAX_PRIVATESEND_AMOUNT             = 100000;
+static const int MAX_PRIVATESEND_AMOUNT             = MAX_MONEY / COIN;
 static const int MAX_PRIVATESEND_LIQUIDITY          = 100;
-static const int DEFAULT_PRIVATESEND_ROUNDS         = 2;
+static const int DEFAULT_PRIVATESEND_ROUNDS         = 4;
 static const int DEFAULT_PRIVATESEND_AMOUNT         = 1000;
 static const int DEFAULT_PRIVATESEND_LIQUIDITY      = 0;
 
@@ -36,6 +36,45 @@ static const int PRIVATESEND_KEYS_THRESHOLD_STOP    = 50;
 
 // The main object for accessing mixing
 extern CPrivateSendClient privateSendClient;
+
+class CPendingPsaRequest
+{
+private:
+    static const int TIMEOUT = 15;
+
+    CService addr;
+    CPrivateSendAccept psa;
+    int64_t nTimeCreated;
+
+public:
+    CPendingPsaRequest():
+        addr(CService()),
+        psa(CPrivateSendAccept()),
+        nTimeCreated(0)
+    {};
+
+    CPendingPsaRequest(const CService& addr_, const CPrivateSendAccept& psa_):
+        addr(addr_),
+        psa(psa_)
+    { nTimeCreated = GetTime(); }
+
+    CService GetAddr() { return addr; }
+    CPrivateSendAccept GetPSA() { return psa; }
+    bool IsExpired() { return GetTime() - nTimeCreated > TIMEOUT; }
+
+    friend bool operator==(const CPendingPsaRequest& a, const CPendingPsaRequest& b)
+    {
+        return a.addr == b.addr && a.psa == b.psa;
+    }
+    friend bool operator!=(const CPendingPsaRequest& a, const CPendingPsaRequest& b)
+    {
+        return !(a == b);
+    }
+    explicit operator bool() const
+    {
+        return *this != CPendingPsaRequest();
+    }
+};
 
 /** Used to keep track of current status of mixing pool
  */
@@ -62,6 +101,7 @@ private:
 
     dynode_info_t infoMixingDynode;
     CMutableTransaction txMyCollateral; // client side collateral
+    CPendingPsaRequest pendingPsaRequest;
 
     CKeyHolderStorage keyHolderStorage; // storage for keys used in PrepareDenominate
 
@@ -69,9 +109,7 @@ private:
     void CheckPool();
     void CompletedTransaction(PoolMessage nMessageID);
 
-    bool IsDenomSkipped(CAmount nDenomValue) {
-        return std::find(vecDenominationsSkipped.begin(), vecDenominationsSkipped.end(), nDenomValue) != vecDenominationsSkipped.end();
-    }
+    bool IsDenomSkipped(CAmount nDenomValue);
 
     bool WaitForAnotherBlock();
 
@@ -129,7 +167,7 @@ public:
         nCachedNumBlocks(std::numeric_limits<int>::max()),
         fCreateAutoBackups(true) { SetNull(); }
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
     void ClearSkippedDenominations() { vecDenominationsSkipped.clear(); }
 
@@ -147,11 +185,13 @@ public:
     /// Passively run mixing in the background according to the configuration in settings
     bool DoAutomaticDenominating(CConnman& connman, bool fDryRun=false);
 
+    void ProcessPendingPsaRequest(CConnman& connman);
+
     void CheckTimeout();
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
-};
 
-void ThreadCheckPrivateSendClient(CConnman& connman);
+    void DoMaintenance(CConnman& connman);
+};
 
 #endif

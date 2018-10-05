@@ -157,6 +157,7 @@ UniValue dnsync(const JSONRPCRequest& request)
         UniValue objStatus(UniValue::VOBJ);
         objStatus.push_back(Pair("AssetID", dynodeSync.GetAssetID()));
         objStatus.push_back(Pair("AssetName", dynodeSync.GetAssetName()));
+        objStatus.push_back(Pair("AssetStartTime", dynodeSync.GetAssetStartTime()));
         objStatus.push_back(Pair("Attempt", dynodeSync.GetAttempt()));
         objStatus.push_back(Pair("IsBlockchainSynced", dynodeSync.IsBlockchainSynced()));
         objStatus.push_back(Pair("IsDynodeListSynced", dynodeSync.IsDynodeListSynced()));
@@ -1086,36 +1087,51 @@ UniValue getspentinfo(const JSONRPCRequest& request)
     return obj;
 }
 
-static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafeMode
-  //  --------------------- ------------------------  -----------------------  ----------
-    { "control",            "debug",                  &debug,                  true  },
-    { "control",            "getinfo",                &getinfo,                true  }, /* uses wallet if enabled */
-    { "control",            "getmemoryinfo",          &getmemoryinfo,          true  },
+UniValue echo(const JSONRPCRequest& request)
+{
+    if (request.fHelp)
+        throw std::runtime_error(
+            "echo|echojson \"message\" ...\n"
+            "\nSimply echo back the input arguments. This command is for testing.\n"
+            "\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in"
+            "bitcoin-cli and the GUI. There is no server-side difference."
+        );
 
-    { "util",               "validateaddress",        &validateaddress,        true  }, /* uses wallet if enabled */
-    { "util",               "createmultisig",         &createmultisig,         true  },
-    { "util",               "verifymessage",          &verifymessage,          true  },
-    { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true  },
-    { "blockchain",         "getspentinfo",           &getspentinfo,           false },
+    return request.params;
+}
+
+static const CRPCCommand commands[] =
+{ //  category              name                      actor (function)         okSafe argNames
+  //  --------------------- ------------------------  -----------------------  ------ ---
+    { "control",            "debug",                  &debug,                  true,  {} },
+    { "control",            "getinfo",                &getinfo,                true,  {} }, /* uses wallet if enabled */
+    { "control",            "getmemoryinfo",          &getmemoryinfo,          true,  {} },
+
+    { "util",               "validateaddress",        &validateaddress,        true,  {"address"} }, /* uses wallet if enabled */
+    { "util",               "createmultisig",         &createmultisig,         true,  {"nrequired","keys"} },
+    { "util",               "verifymessage",          &verifymessage,          true,  {"address","signature","message"} },
+    { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true,  {"privkey","message"} },
+    { "blockchain",         "getspentinfo",           &getspentinfo,           false, {"json"} },
 
     /* Address index */
-    { "addressindex",       "getaddressmempool",      &getaddressmempool,      true  },
-    { "addressindex",       "getaddressutxos",        &getaddressutxos,        false },
-    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       false },
-    { "addressindex",       "getaddresstxids",        &getaddresstxids,        false },
-    { "addressindex",       "getaddressbalance",      &getaddressbalance,      false },
+    { "addressindex",       "getaddressmempool",      &getaddressmempool,      true,  {"addresses"} },
+    { "addressindex",       "getaddressutxos",        &getaddressutxos,        false, {"addresses"} },
+    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       false, {"addresses"} },
+    { "addressindex",       "getaddresstxids",        &getaddresstxids,        false, {"addresses"} },
+    { "addressindex",       "getaddressbalance",      &getaddressbalance,      false, {"addresses"} },
 
     /* Dynamic features */
-    { "dynamic",            "dnsync",                 &dnsync,                 true  },
-    { "dynamic",            "spork",                  &spork,                  true  },
+    { "dynamic",            "dnsync",                 &dnsync,                 true,  {} },
+    { "dynamic",            "spork",                  &spork,                  true,  {"value"} },
 
     /* Not shown in help */
-    { "hidden",             "setmocktime",            &setmocktime,            true  },
+    { "hidden",             "setmocktime",            &setmocktime,            true,  {"timestamp"}},
+    { "hidden",             "echo",                   &echo,                   true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
+    { "hidden",             "echojson",               &echo,                  true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
 };
 
-void RegisterMiscRPCCommands(CRPCTable &tableRPC)
+void RegisterMiscRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }

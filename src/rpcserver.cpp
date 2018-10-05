@@ -18,6 +18,7 @@
 #include <univalue.h>
 
 #include <memory> // for unique_ptr
+#include <unordered_map>
 
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/case_conv.hpp> // for to_upper()
@@ -63,6 +64,11 @@ void RPCServer::OnPreCommand(boost::function<void (const CRPCCommand&)> slot)
     g_rpcSignals.PreCommand.connect(boost::bind(slot, _1));
 }
 
+void RPCServer::OnPostCommand(boost::function<void (const CRPCCommand&)> slot)
+{
+    g_rpcSignals.PostCommand.connect(boost::bind(slot, _1));
+}
+
 void RPCTypeCheck(const UniValue& params,
                   const std::list<UniValue::VType>& typesExpected,
                   bool fAllowNull)
@@ -74,31 +80,46 @@ void RPCTypeCheck(const UniValue& params,
             break;
 
         const UniValue& v = params[i];
-        if (!((v.type() == t) || (fAllowNull && (v.isNull()))))
-        {
-            std::string err = strprintf("Expected type %s, got %s",
-                                   uvTypeName(t), uvTypeName(v.type()));
-            throw JSONRPCError(RPC_TYPE_ERROR, err);
+        if (!(fAllowNull && v.isNull())) {
+            RPCTypeCheckArgument(v, t);
         }
         i++;
     }
 }
 
-void RPCTypeCheckObj(const UniValue& o,
-                  const std::map<std::string, UniValue::VType>& typesExpected,
-                  bool fAllowNull)
+void RPCTypeCheckArgument(const UniValue& value, UniValue::VType typeExpected)
 {
-    BOOST_FOREACH(const PAIRTYPE(std::string, UniValue::VType)& t, typesExpected)
-    {
+    if (value.type() != typeExpected) {
+        throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Expected type %s, got %s", uvTypeName(typeExpected), uvTypeName(value.type())));
+    }
+}
+
+void RPCTypeCheckObj(const UniValue& o,
+    const std::map<std::string, UniValueType>& typesExpected,
+    bool fAllowNull,
+    bool fStrict)
+{
+    for (const auto& t : typesExpected) {
         const UniValue& v = find_value(o, t.first);
         if (!fAllowNull && v.isNull())
             throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Missing %s", t.first));
 
-        if (!((v.type() == t.second) || (fAllowNull && (v.isNull()))))
-        {
+        if (!(t.second.typeAny || v.type() == t.second.type || (fAllowNull && v.isNull()))) {
             std::string err = strprintf("Expected type %s for %s, got %s",
-                                   uvTypeName(t.second), t.first, uvTypeName(v.type()));
+                uvTypeName(t.second.type), t.first, uvTypeName(v.type()));
             throw JSONRPCError(RPC_TYPE_ERROR, err);
+        }
+    }
+
+    if (fStrict)
+    {
+        for (const std::string& k : o.getKeys())
+        {
+            if (typesExpected.count(k) == 0)
+            {
+                std::string err = strprintf("Unexpected key %s", k);
+                throw JSONRPCError(RPC_TYPE_ERROR, err);
+            }
         }
     }
 }
@@ -254,11 +275,11 @@ UniValue stop(const JSONRPCRequest& jsonRequest)
  * Call Table
  */
 static const CRPCCommand vRPCCommands[] =
-{ //  category              name                      actor (function)         okSafeMode
-  //  --------------------- ------------------------  -----------------------  ----------
+{ //  category              name                      actor (function)         okSafe argNames
+  //  --------------------- ------------------------  -----------------------  ------ ----------
     /* Overall control/query calls */
-    { "Control",            "help",                   &help,                   true  },
-    { "Control",            "stop",                   &stop,                   true  },
+    { "control",            "help",                   &help,                   true,  {"command"}  },
+    { "control",            "stop",                   &stop,                   true,  {}  },
 };
 
 CRPCTable::CRPCTable()
@@ -314,6 +335,7 @@ void StopRPC()
 {
     LogPrint("rpc", "Stopping RPC\n");
     deadlineTimers.clear();
+    DeleteAuthCookie();
     g_rpcSignals.Stopped();
 }
 
@@ -365,12 +387,12 @@ void JSONRPCRequest::parse(const UniValue& valRequest)
 
     // Parse params
     UniValue valParams = find_value(request, "params");
-    if (valParams.isArray())
-        params = valParams.get_array();
+    if (valParams.isArray() || valParams.isObject())
+        params = valParams;
     else if (valParams.isNull())
         params = UniValue(UniValue::VARR);
     else
-        throw JSONRPCError(RPC_INVALID_REQUEST, "Params must be an array");
+        throw JSONRPCError(RPC_INVALID_REQUEST, "Params must be an array or object");
 }
 
 static UniValue JSONRPCExecOne(const UniValue& req)
@@ -406,6 +428,48 @@ std::string JSONRPCExecBatch(const UniValue& vReq)
     return ret.write() + "\n";     
 }
 
+/**
+ * Process named arguments into a vector of positional arguments, based on the
+ * passed-in specification for the RPC call's arguments.
+ */
+static inline JSONRPCRequest transformNamedArguments(const JSONRPCRequest& in, const std::vector<std::string>& argNames)
+{
+    JSONRPCRequest out = in;
+    out.params = UniValue(UniValue::VARR);
+    // Build a map of parameters, and remove ones that have been processed, so that we can throw a focused error if
+    // there is an unknown one.
+    const std::vector<std::string>& keys = in.params.getKeys();
+    const std::vector<UniValue>& values = in.params.getValues();
+    std::unordered_map<std::string, const UniValue*> argsIn;
+    for (size_t i=0; i<keys.size(); ++i) {
+        argsIn[keys[i]] = &values[i];
+    }
+    // Process expected parameters.
+    int hole = 0;
+    for (const std::string &argName: argNames) {
+        auto fr = argsIn.find(argName);
+        if (fr != argsIn.end()) {
+            for (int i = 0; i < hole; ++i) {
+                // Fill hole between specified parameters with JSON nulls,
+                // but not at the end (for backwards compatibility with calls
+                // that act based on number of specified parameters).
+                out.params.push_back(UniValue());
+            }
+            hole = 0;
+            out.params.push_back(*fr->second);
+            argsIn.erase(fr);
+        } else {
+            hole += 1;
+        }
+    }
+    // If there are still arguments in the argsIn map, this is an error.
+    if (!argsIn.empty()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown named parameter " + argsIn.begin()->first);
+    }
+    // Return request with named arguments transformed to positional arguments
+    return out;
+}
+
 UniValue CRPCTable::execute(const JSONRPCRequest &request) const
 {
     // Return immediately if in warmup
@@ -424,8 +488,12 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
 
     try
     {
-        // Execute
-        return pcmd->actor(request);
+        // Execute, convert arguments to array if necessary
+        if (request.params.isObject()) {
+            return pcmd->actor(transformNamedArguments(request, pcmd->argNames));
+        } else {
+            return pcmd->actor(request);
+        }
     }
     catch (const std::exception& e)
     {
@@ -454,7 +522,8 @@ std::string HelpExampleCli(const std::string& methodname, const std::string& arg
 std::string HelpExampleRpc(const std::string& methodname, const std::string& args)
 {
     return "> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", "
-        "\"method\": \"" + methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;' http://127.0.0.1:31350/\n";
+        "\"method\": \"" + methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;'"
+        " http://127.0.0.1:" + strprintf("%d", GetArg("-rpcport", BaseParams().RPCPort())) + "/\n";
 }
 
 void RPCSetTimerInterfaceIfUnset(RPCTimerInterface *iface)

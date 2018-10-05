@@ -87,8 +87,7 @@ int dynamicconsensus_verify_script(const unsigned char *scriptPubKey, unsigned i
     }
     try {
         TxInputStream stream(SER_NETWORK, PROTOCOL_VERSION, txTo, txToLen);
-        CTransaction tx;
-        stream >> tx;
+        CTransaction tx(deserialize, stream);
         if (nIn >= tx.vin.size())
             return set_error(err, dynamicconsensus_ERR_TX_INDEX);
         if (GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) != txToLen)

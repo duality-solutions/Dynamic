@@ -460,8 +460,8 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -477,8 +477,8 @@ bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& co
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -494,8 +494,8 @@ bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& c
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -511,8 +511,8 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
     
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
                         LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));

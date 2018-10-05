@@ -62,10 +62,7 @@ public:
         return (nBits == 0);
     }
 
-    uint256 GetHash() const
-    {
-        return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
-    }
+    uint256 GetHash() const;
     
     int64_t GetBlockTime() const
     {
@@ -78,11 +75,9 @@ class CBlock : public CBlockHeader
 {
 public:
     // network and disk
-    std::vector<CTransaction> vtx;
+    std::vector<CTransactionRef> vtx;
 
     // memory only
-    mutable CTxOut txoutDynode; // Dynode payment
-    mutable std::vector<CTxOut> voutSuperblock; // superblock payment
     mutable bool fChecked;
 
     CBlock()
@@ -108,8 +103,6 @@ public:
     {
         CBlockHeader::SetNull();
         vtx.clear();
-        txoutDynode = CTxOut();
-        voutSuperblock.clear();
         fChecked = false;
     }
 

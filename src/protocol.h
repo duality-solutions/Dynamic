@@ -218,11 +218,31 @@ extern const char *REJECT;
  */
 extern const char *SENDHEADERS;
 /**
- * The feefilter message tells the receiving peer not to inv us any txs
- * which do not meet the specified min fee rate.
- * @since protocol version 70600 as described by BIP133
+ * Contains a 1-byte bool and 8-byte LE version number.
+ * Indicates that a node is willing to provide blocks via "cmpctblock" messages.
+ * May indicate that a node prefers to receive new block announcements via a
+ * "cmpctblock" message rather than an "inv", depending on message contents.
+ * @since protocol version 71000 as described by BIP 152
  */
-extern const char *FEEFILTER;
+extern const char *SENDCMPCT;
+/**
+ * Contains a CBlockHeaderAndShortTxIDs object - providing a header and
+ * list of "short txids".
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *CMPCTBLOCK;
+/**
+ * Contains a BlockTransactionsRequest
+ * Peer should respond with "blocktxn" message.
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *GETBLOCKTXN;
+/**
+ * Contains a BlockTransactions.
+ * Sent in response to a "getblocktxn" message.
+ * @since protocol version 71000 as described by BIP 152
+ */
+extern const char *BLOCKTXN;
 // Dynamic message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description
@@ -267,12 +287,17 @@ enum ServiceFlags : uint64_t {
     // NODE_BLOOM means the node is capable and willing to handle bloom-filtered connections.
     // Dynamic nodes used to support this by default, without advertising this bit.
     NODE_BLOOM = (1 << 2),
+    // NODE_XTHIN means the node supports Xtreme Thinblocks
+    // If this is turned off then the node will not service nor make xthin requests
+    NODE_XTHIN = (1 << 4),
 
-    // Remember that service bits are just unauthenticated
-    // advertisements, so your code must be robust against
-    // collisions and other cases where nodes may be advertising 
-    // a service they do not actually support. Other service 
-    // bits should be allocated via the BIP process.
+    // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
+    // isn't getting used, or one not being used much, and notify the
+    // bitcoin-development mailing list. Remember that service bits are just
+    // unauthenticated advertisements, so your code must be robust against
+    // collisions and other cases where nodes may be advertising a service they
+    // do not actually support. Other service bits should be allocated via the
+    // BIP process.
 };
 
 /** A CService with information about it as peer */
@@ -335,6 +360,9 @@ enum GetDataMsg {
     MSG_GOVERNANCE_OBJECT = 13, 
     MSG_GOVERNANCE_OBJECT_VOTE = 14,    
     MSG_DYNODE_VERIFY = 15,
+    // Nodes may always request a MSG_CMPCT_BLOCK in a getdata, however,
+    // MSG_CMPCT_BLOCK should not appear in any invs except as a part of getdata.
+    MSG_CMPCT_BLOCK = 20, //!< Defined in BIP152
 };
 
 /** inv message data */

@@ -21,7 +21,7 @@ class CPrivateSendServer : public CPrivateSendBase
 private:
     // Mixing uses collateral transactions to trust parties entering the pool
     // to behave honestly. If they don't it takes their money.
-    std::vector<CTransaction> vecSessionCollaterals;
+    std::vector<CTransactionRef> vecSessionCollaterals;
 
     bool fUnitTest;
 
@@ -42,9 +42,9 @@ private:
     void CommitFinalTransaction(CConnman& connman);
 
     /// Is this nDenom and txCollateral acceptable?
-    bool IsAcceptableDenomAndCollateral(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet);
-    bool CreateNewSession(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet, CConnman& connman);
-    bool AddUserToExistingSession(int nDenom, CTransaction txCollateral, PoolMessage &nMessageIDRet);
+    bool IsAcceptablePSA(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet);
+    bool CreateNewSession(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet, CConnman& connman);
+    bool AddUserToExistingSession(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet);
     /// Do we have enough users to take entries?
     bool IsSessionReady() { return (int)vecSessionCollaterals.size() >= CPrivateSend::GetMaxPoolTransactions(); }
 
@@ -70,12 +70,12 @@ public:
     CPrivateSendServer() :
         fUnitTest(false) { SetNull(); }
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 
     void CheckTimeout(CConnman& connman);
     void CheckForCompleteQueue(CConnman& connman);
-};
 
-void ThreadCheckPrivateSendServer(CConnman& connman);
+    void DoMaintenance(CConnman& connman);
+};
 
 #endif
