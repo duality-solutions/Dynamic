@@ -609,6 +609,18 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+static bool IsCurrentForFeeEstimation()
+{
+    AssertLockHeld(cs_main);
+    if (IsInitialBlockDownload())
+        return false;
+    if (chainActive.Tip()->GetBlockTime() < (GetTime() - MAX_FEE_ESTIMATION_TIP_AGE))
+        return false;
+    if (chainActive.Height() < pindexBestHeader->nHeight - 1)
+        return false;
+    return true;
+}
+
 // Check if BDAP entry is valid
 bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, const CCoinsViewCache& inputs, const CBlock& block, bool fJustCheck, int nHeight, bool bSanity)
 {
@@ -1005,7 +1017,8 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // subsequent RemoveStaged() and addUnchecked() calls don't guarantee
         // mempool consistency for us.
         LOCK(pool.cs);
-        if (setConflicts.size())
+        const bool fReplacementTransaction = setConflicts.size();
+        if (fReplacementTransaction)
         {
             CFeeRate newFeeRate(nModifiedFees, nSize);
             std::set<uint256> setConflictsParents;
@@ -1151,16 +1164,25 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         // Remove conflicting transactions from the mempool
         BOOST_FOREACH(const CTxMemPool::txiter it, allConflicting)
         {
-            LogPrint("mempool", "replacing tx %s with %s for %s BTC additional fees, %d delta bytes\n",
+            LogPrint("mempool", "replacing tx %s with %s for %s %s additional fees, %d delta bytes\n",
                     it->GetTx().GetHash().ToString(),
                     hash.ToString(),
                     FormatMoney(nModifiedFees - nConflictingFees),
+                    CURRENCY_UNIT,
                     (int)nSize - (int)nConflictingSize);
+            if (plTxnReplaced)
+                plTxnReplaced->push_back(it->GetSharedTx());
         }
         pool.RemoveStaged(allConflicting, false);
 
+        // This transaction should only count for fee estimation if it isn't a
+        // BIP 125 replacement transaction (may not be widely supported), the
+        // node is not behind, and the transaction is not dependent on any other
+        // transactions in the mempool.
+        bool validForFeeEstimation = !fReplacementTransaction && IsCurrentForFeeEstimation() && pool.HasNoInputsOf(tx);
+        
         // Store transaction in memory
-        pool.addUnchecked(hash, entry, setAncestors, !IsInitialBlockDownload());
+        pool.addUnchecked(hash, entry, setAncestors, validForFeeEstimation);
 
         // Add memory address index
         if (fAddressIndex) {
@@ -1207,7 +1229,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState &state, const
     }
     
     if (!res || fDryRun || !fluidTimestampCheck) {
-        if(!res) LogPrint("mempool", "%s: %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason());
+        if(!res) LogPrint("mempool", "%s: %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason(), state.GetDebugMessage());
         BOOST_FOREACH(const COutPoint& hashTx, coins_to_uncache)
             pcoinsTip->Uncache(hashTx);
     }

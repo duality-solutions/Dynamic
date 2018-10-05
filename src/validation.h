@@ -134,6 +134,8 @@ static const int64_t BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 125000;
 static const unsigned int DEFAULT_LIMITFREERELAY = 0;
 static const bool DEFAULT_RELAYPRIORITY = true;
 static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 64;
+/** Maximum age of our tip in seconds for us to be considered current for fee estimation */
+static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 
 /** Default for -permitbaremultisig */
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
@@ -156,7 +158,6 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 12;
 static const int MAX_UNCONNECTING_HEADERS = 10;
 
 //Dynamic Constants
-static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 static const CAmount BLOCKCHAIN_INIT_REWARD = COIN * 0;
 static const CAmount PHASE_1_POW_REWARD = COIN * 1;
 static const CAmount PHASE_1_DYNODE_PAYMENT = COIN * 0.382;
