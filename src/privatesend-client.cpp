@@ -490,8 +490,8 @@ bool CPrivateSendClient::CheckPoolStateUpdate(PoolState nStateNew, int nEntriesC
 //
 bool CPrivateSendClient::SignFinalTransaction(const CTransaction& finalTransactionNew, CNode* pnode, CConnman& connman)
 {
-    if (!pwalletMain) return; 
-
+     if (!pwalletMain) return false; 
+     
     if(fDynodeMode || pnode == nullptr) return false;
 
     finalMutableTransaction = finalTransactionNew;
@@ -1343,7 +1343,7 @@ bool CPrivateSendClient::CreateDenominated(CConnman& connman)
 bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals, CConnman& connman)
 {
     if (!pwalletMain) return false;
-    
+
     std::vector<CRecipient> vecSend;
     CKeyHolderStorage keyHolderStorageDenom;
 

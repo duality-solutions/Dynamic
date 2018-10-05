@@ -892,21 +892,21 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
     UniValue dynodeObj(UniValue::VOBJ);
-    if(pblock->txoutDynode != CTxOut()) {
+    if(pblocktemplate->txoutDynode != CTxOut()) {
         CTxDestination address1;
-        ExtractDestination(pblock->txoutDynode.scriptPubKey, address1);
+        ExtractDestination(pblocktemplate->txoutDynode.scriptPubKey, address1);
         CDynamicAddress address2(address1);
         dynodeObj.push_back(Pair("payee", address2.ToString().c_str()));
-        dynodeObj.push_back(Pair("script", HexStr(pblock->txoutDynode.scriptPubKey.begin(), pblock->txoutDynode.scriptPubKey.end())));
-        dynodeObj.push_back(Pair("amount", pblock->txoutDynode.nValue));
+        dynodeObj.push_back(Pair("script", HexStr(pblocktemplate->txoutDynode.scriptPubKey.begin(), pblocktemplate->txoutDynode.scriptPubKey.end())));
+        dynodeObj.push_back(Pair("amount", pblocktemplate->txoutDynode.nValue));
     }
     result.push_back(Pair("dynode", dynodeObj));
     result.push_back(Pair("dynode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nDynodePaymentsStartBlock));
     result.push_back(Pair("dynode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_DYNODE_PAYMENT_ENFORCEMENT)));
 
     UniValue superblockObjArray(UniValue::VARR);
-    if(pblock->voutSuperblock.size()) {
-        BOOST_FOREACH (const CTxOut& txout, pblock->voutSuperblock) {
+    if(pblocktemplate->voutSuperblock.size()) {
+        BOOST_FOREACH (const CTxOut& txout, pblocktemplate->voutSuperblock) {
             UniValue entry(UniValue::VOBJ);
             CTxDestination address1;
             ExtractDestination(txout.scriptPubKey, address1);
