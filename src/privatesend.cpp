@@ -311,7 +311,7 @@ bool CPrivateSend::IsCollateralAmount(CAmount nInputAmount)
     if (dnpayments.GetMinDynodePaymentsProto() > 70900) {
         // collateral input can be anything between 1x and "max" (including both)
         return (nInputAmount >= GetCollateralAmount() && nInputAmount <= GetMaxCollateralAmount());
-    } else { // <= 70208
+    } else { // <= 70900
         // collateral input can be anything between 2x and "max" (including both)
         return (nInputAmount >= GetCollateralAmount() * 2 && nInputAmount <= GetMaxCollateralAmount());
     }
