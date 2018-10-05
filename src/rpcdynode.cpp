@@ -146,7 +146,7 @@ UniValue dynode(const JSONRPCRequest& request)
                 "\nAvailable commands:\n"
                 "  count        - Get information about number of dynodes (DEPRECATED options: 'total', 'ps', 'enabled', 'qualify', 'all')\n"
                 "  current      - Print info on current dynode winner to be paid the next block (calculated locally)\n"
-                "  genkey       - Generate new dynodeprivkey\n"
+                "  genkey       - Generate new dynodepairingkey\n"
 #ifdef ENABLE_WALLET
                 "  outputs      - Print dynode compatible outputs\n"
                 "  start-alias  - Start single remote dynode by assigned alias configured in dynode.conf\n"

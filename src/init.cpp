@@ -1809,14 +1809,14 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if(fDynodeMode) {
         LogPrintf("DYNODE:\n");
 
-        std::string strDyNodePrivKey = GetArg("-dynodeprivkey", "");
-        if(!strDyNodePrivKey.empty()) {
-            if(!CMessageSigner::GetKeysFromSecret(strDyNodePrivKey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
-                return InitError(_("Invalid dynodeprivkey. Please see documenation."));
+        std::string strdynodepairingkey = GetArg("-dynodepairingkey", "");
+        if(!strdynodepairingkey.empty()) {
+            if(!CMessageSigner::GetKeysFromSecret(strdynodepairingkey, activeDynode.keyDynode, activeDynode.pubKeyDynode))
+                return InitError(_("Invalid dynodepairingkey. Please see documenation."));
 
             LogPrintf("  pubKeyDynode: %s\n", CDynamicAddress(activeDynode.pubKeyDynode.GetID()).ToString());
         } else {
-            return InitError(_("You must specify a dynodeprivkey in the configuration. Please see documentation for help."));
+            return InitError(_("You must specify a dynodepairingkey in the configuration. Please see documentation for help."));
         }
     }
 

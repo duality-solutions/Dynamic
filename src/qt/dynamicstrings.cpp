@@ -312,7 +312,7 @@ QT_TRANSLATE_NOOP("dynamic", ""
 "Whitelisted peers cannot be DoS banned and their transactions are always "
 "relayed, even if they are already in the mempool, useful e.g. for a gateway"),
 QT_TRANSLATE_NOOP("dynamic", ""
-"You must specify a dynodeprivkey in the configuration. Please see "
+"You must specify a dynodepairingkey in the configuration. Please see "
 "documentation for help."),
 QT_TRANSLATE_NOOP("dynamic", ""
 "You need to rebuild the database using -reindex to go back to unpruned "
@@ -419,7 +419,7 @@ QT_TRANSLATE_NOOP("dynamic", "Invalid -proxy address: '%s'"),
 QT_TRANSLATE_NOOP("dynamic", "Invalid amount for -%s=<amount>: '%s'"),
 QT_TRANSLATE_NOOP("dynamic", "Invalid amount for -fallbackfee=<amount>: '%s'"),
 QT_TRANSLATE_NOOP("dynamic", "Invalid amount for -paytxfee=<amount>: '%s' (must be at least %s)"),
-QT_TRANSLATE_NOOP("dynamic", "Invalid dynodeprivkey. Please see documenation."),
+QT_TRANSLATE_NOOP("dynamic", "Invalid dynodepairingkey. Please see documenation."),
 QT_TRANSLATE_NOOP("dynamic", "Invalid netmask specified in -whitelist: '%s'"),
 QT_TRANSLATE_NOOP("dynamic", "Invalid port detected in dynode.conf"),
 QT_TRANSLATE_NOOP("dynamic", "Invalid script detected."),
