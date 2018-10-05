@@ -139,8 +139,7 @@ void CDynodeSync::ProcessMessage(CNode* pfrom, const std::string& strCommand, CD
 void CDynodeSync::ProcessTick(CConnman& connman)
 {
     static int nTick = 0;
-
-    if(nTick++ % DYNODE_SYNC_TICK_SECONDS != 0) return;
+    nTick++;
     
     // reset the sync process if the last call to this function was more than 60 minutes ago (client was in sleep mode)
     static int64_t nTimeLastProcess = GetTime();
@@ -383,7 +382,6 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                             connman.ReleaseNodeVector(vNodesCopy);
                             return;
                         }
-
                         nLastTick = nTick;
                         nLastVotes = governance.GetVoteCount();
                     }
