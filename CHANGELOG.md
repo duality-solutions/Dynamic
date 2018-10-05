@@ -164,6 +164,19 @@
 * Update dynamic_qt.m4 (Remove ability to build with Qt4)
 
 
+**Dynamic v2.3.5.0**
+
+* Fix crash bug with duplicate inputs within a transaction
+* Reduces memory usage and blockchain size on disk
+* Bump client version to v2.3.5 and minimum protocol version to 70800 (v2.2)
+* [Fluid] Refactor fluid code and remove index database
+* [Fluid] Add mining update and mint leveldb databases
+* [Fluid] Implement new fluid databases
+* [Fluid] Fix get fluid sovereigns RPC
+* [Fluid] Fixes to get last functions and RPC commands
+* [Fluid] Fix consensus issues with new db code
+* Update changelog and cleanup fluid to do lists/comments
+
 **Dynamic v2.3.0.0**
 
 * Skip existing Dynodes connections on mixing
