@@ -1119,11 +1119,11 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
         uint256 nHashGovobj;
 
         // ask for triggers first
-        if(vTriggerObjHashes.size()) { 
-            nHashGovobj = vTriggerObjHashes.back(); 
+        if(vTriggerObjHashes.size()) {
+            nHashGovobj = vTriggerObjHashes.back();
         } else {
-            if(vOtherObjHashes.empty()) break; 
-            nHashGovobj = vOtherObjHashes.back(); 
+            if(vOtherObjHashes.empty()) break;
+            nHashGovobj = vOtherObjHashes.back();
         }
         bool fAsked = false;
         for (const auto& pnode : vNodesCopy) {
@@ -1147,10 +1147,10 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
             if(mapAskedRecently[nHashGovobj].size() >= nPeersPerHashMax) break;
         }
         // NOTE: this should match `if` above (the one before `while`)
-        if(vpGovObjsTriggersTmp.size()) {
-            vpGovObjsTriggersTmp.pop_back();
+        if(vTriggerObjHashes.size()) {
+            vTriggerObjHashes.pop_back();
         } else {
-            vpGovObjsTmp.pop_back();
+            vOtherObjHashes.pop_back();
         }
         if(!fAsked) i--;
     }

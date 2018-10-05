@@ -914,6 +914,15 @@ void CDynodePing::Relay(CConnman& connman)
     connman.RelayInv(inv);
 }
 
+std::string CDynodePing::GetSentinelString() const
+{
+    return nSentinelVersion > DEFAULT_SENTINEL_VERSION ? SafeIntVersionToString(nSentinelVersion) : "Unknown";
+}
+std::string CDynodePing::GetDaemonString() const
+{
+    return nDaemonVersion > DEFAULT_DAEMON_VERSION ? FormatVersion(nDaemonVersion) : "Unknown";
+}
+
 void CDynode::AddGovernanceVote(uint256 nGovernanceObjectHash)
 {
     if(mapGovernanceObjectsVotedOn.count(nGovernanceObjectHash)) {
