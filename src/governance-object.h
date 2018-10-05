@@ -195,8 +195,6 @@ public:
 
     CGovernanceObject(const CGovernanceObject& other);
 
-    void swap(CGovernanceObject& first, CGovernanceObject& second); // nothrow
-
     // Public Getter methods
 
     int64_t GetCreationTime() const {
@@ -354,12 +352,6 @@ public:
         }
 
         // AFTER DESERIALIZATION OCCURS, CACHED VARIABLES MUST BE CALCULATED MANUALLY
-    }
-
-    CGovernanceObject& operator=(CGovernanceObject from)
-    {
-        swap(*this, from);
-        return *this;
     }
 
 private:

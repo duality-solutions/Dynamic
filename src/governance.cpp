@@ -1067,8 +1067,8 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
     int nTimeout = 60 * 60;
     size_t nPeersPerHashMax = 3;
 
-    std::vector<CGovernanceObject*> vpGovObjsTmp;
-    std::vector<CGovernanceObject*> vpGovObjsTriggersTmp;
+    std::vector<uint256> vTriggerObjHashes; 
+    std::vector<uint256> vOtherObjHashes; 
 
     // This should help us to get some idea about an impact this can bring once deployed on mainnet.
     // Testnet is ~40 times smaller in dynode count, but only ~1000 dynodes usually vote,
@@ -1100,32 +1100,30 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
                 if(mapAskedRecently[nHash].size() >= nPeersPerHashMax) continue;
             }
 
-            auto govObj = objPair.second;
-            if(govObj.nObjectType == GOVERNANCE_OBJECT_TRIGGER) {
-                vpGovObjsTriggersTmp.push_back(&govObj);
+            if(objPair.second.nObjectType == GOVERNANCE_OBJECT_TRIGGER) { 
+                vTriggerObjHashes.push_back(nHash); 
             } else {
-                vpGovObjsTmp.push_back(&govObj);
+                vOtherObjHashes.push_back(nHash); 
             }
         }
     }
 
-    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- start: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
-                vpGovObjsTriggersTmp.size(), vpGovObjsTmp.size(), mapAskedRecently.size());
+    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- start: vTriggerObjHashes %d vOtherObjHashes %d mapAskedRecently %d\n", 
+                vTriggerObjHashes.size(), vOtherObjHashes.size(), mapAskedRecently.size()); 
 
     FastRandomContext insecure_rand;
-    // shuffle pointers
-    std::random_shuffle(vpGovObjsTriggersTmp.begin(), vpGovObjsTriggersTmp.end(), insecure_rand);
-    std::random_shuffle(vpGovObjsTmp.begin(), vpGovObjsTmp.end(), insecure_rand);
+    std::random_shuffle(vTriggerObjHashes.begin(), vTriggerObjHashes.end(), insecure_rand); 
+    std::random_shuffle(vOtherObjHashes.begin(), vOtherObjHashes.end(), insecure_rand); 
 
     for (int i = 0; i < nMaxObjRequestsPerNode; ++i) {
         uint256 nHashGovobj;
 
         // ask for triggers first
-        if(vpGovObjsTriggersTmp.size()) {
-            nHashGovobj = vpGovObjsTriggersTmp.back()->GetHash();
+        if(vTriggerObjHashes.size()) { 
+            nHashGovobj = vTriggerObjHashes.back(); 
         } else {
-            if(vpGovObjsTmp.empty()) break;
-            nHashGovobj = vpGovObjsTmp.back()->GetHash();
+            if(vOtherObjHashes.empty()) break; 
+            nHashGovobj = vOtherObjHashes.back(); 
         }
         bool fAsked = false;
         for (const auto& pnode : vNodesCopy) {
@@ -1156,10 +1154,10 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
         }
         if(!fAsked) i--;
     }
-    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- end: vpGovObjsTriggersTmp %d vpGovObjsTmp %d mapAskedRecently %d\n",
-                vpGovObjsTriggersTmp.size(), vpGovObjsTmp.size(), mapAskedRecently.size());
+    LogPrint("gobject", "CGovernanceManager::RequestGovernanceObjectVotes -- end: vTriggerObjHashes %d vOtherObjHashes %d mapAskedRecently %d\n", 
+                vTriggerObjHashes.size(), vOtherObjHashes.size(), mapAskedRecently.size()); 
 
-    return int(vpGovObjsTriggersTmp.size() + vpGovObjsTmp.size());
+    return int(vTriggerObjHashes.size() + vOtherObjHashes.size()); 
 }
 
 bool CGovernanceManager::AcceptObjectMessage(const uint256& nHash)
