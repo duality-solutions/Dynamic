@@ -245,6 +245,13 @@ bool CWallet::GetKey(const CKeyID &address, CKey& keyOut) const
     }
 }
 
+bool CWallet::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
+{
+    LOCK(cs_wallet);
+    //TODO: (DHT) Support mapHdPubKeys for keys derived by a common seed
+    return CBasicKeyStore::GetDHTKey(address, keyOut);
+}
+
 bool CWallet::HaveKey(const CKeyID &address) const
 {
     LOCK(cs_wallet);
@@ -310,6 +317,22 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
         return CWalletDB(strWalletFile).WriteKey(pubkey,
                                                  secret.GetPrivKey(),
                                                  mapKeyMetadata[pubkey.GetID()]);
+    }
+    return true;
+}
+
+bool CWallet::AddDHTKey(const CKeyEd25519& key)
+{
+    AssertLockHeld(cs_wallet); // mapKeyMetadata
+
+    if (!CCryptoKeyStore::AddDHTKey(key))
+        return false;
+
+    if (!fFileBacked)
+        return true;
+
+    if (!IsCrypted()) {
+        return CWalletDB(strWalletFile).WriteDHTKey(key);
     }
     return true;
 }

@@ -68,16 +68,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     // TODO: Add ability to pass in the encryption public key
     // TODO: Consider renaming to DHTPublicKey since it is used to add/modify entries in the DHT and encrypt/decrypt data stored in the DHT & blockchain.
-    // TODO: Add Ed25519 private key to wallet.  Make sure it uses the same seed as secpk256k1
     CKeyEd25519 privEncryptKey;
     privEncryptKey.MakeNewKeyPair();
-    //CharString vchEncryptPriKey = privEncryptKey.GetDHTPrivKey();
     CharString vchEncryptPubKey = privEncryptKey.GetPubKey();
-    //if (pwalletMain && !pwalletMain->AddKeyPubKey(privEncryptKey, pubEncryptKey))
-    //    throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding encrypt key to wallet for BDAP"));
-    //std::string strPrivateEncryptKey = stringFromVch(vchEncryptPriKey);
-    LogPrintf("AddDomainEntry -- vchEncryptPubKey = %s\n", stringFromVch(vchEncryptPubKey));
+    if (pwalletMain && !pwalletMain->AddDHTKey(privEncryptKey))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
+
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
+
 
     // TODO: Add ability to pass in the link address
     CKey privLinkKey;

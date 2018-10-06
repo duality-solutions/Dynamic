@@ -11,6 +11,7 @@
 #include "hash.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "util.h"
 
 #include <stdexcept>
 #include <vector>
@@ -49,12 +50,16 @@ private:
     unsigned char vch[65];
 
     //! Compute the length of a pubkey with a given first byte.
-    unsigned int static GetLen(unsigned char chHeader)
+    unsigned int static GetLen(unsigned char chHeader, bool fIsSecp = true)
     {
+        if (!fIsSecp)
+            return 32; // ed25519 public keys are always = 32
+
         if (chHeader == 2 || chHeader == 3)
             return 33;
         if (chHeader == 4 || chHeader == 6 || chHeader == 7)
             return 65;
+
         return 0;
     }
 
@@ -65,17 +70,22 @@ private:
     }
 
 public:
+    //! Set to false if using ed25519 public key
+    bool fSecp256k1;
+
     //! Construct an invalid public key.
-    CPubKey()
+    CPubKey(bool fIsSecp = true)
     {
+        fSecp256k1 = fIsSecp;
         Invalidate();
     }
 
     //! Initialize a public key using begin/end iterators to byte data.
     template <typename T>
-    void Set(const T pbegin, const T pend)
+    void Set(const T pbegin, const T pend, bool fIsSecp = true)
     {
-        int len = pend == pbegin ? 0 : GetLen(pbegin[0]);
+        fSecp256k1 = fIsSecp;
+        int len = pend == pbegin ? 0 : GetLen(pbegin[0], fIsSecp);
         if (len && len == (pend - pbegin))
             memcpy(vch, (unsigned char*)&pbegin[0], len);
         else
@@ -84,14 +94,17 @@ public:
 
     //! Construct a public key using begin/end iterators to byte data.
     template <typename T>
-    CPubKey(const T pbegin, const T pend)
+    CPubKey(const T pbegin, const T pend, bool fIsSecp = true)
     {
+        fSecp256k1 = fIsSecp;
         Set(pbegin, pend);
     }
 
     //! Construct a public key from a byte vector.
-    CPubKey(const std::vector<unsigned char>& _vch)
+    CPubKey(const std::vector<unsigned char>& _vch, bool fIsSecp = true)
     {
+        fSecp256k1 = fIsSecp;
+        
         Set(_vch.begin(), _vch.end());
     }
 

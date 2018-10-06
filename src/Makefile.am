@@ -257,7 +257,6 @@ libdynamic_server_a_SOURCES = \
   bdap/linking.cpp \
   dbwrapper.cpp \
   dht/curve25519.cpp \
-  dht/ed25519.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/operations.cpp \
@@ -402,6 +401,7 @@ libdynamic_common_a_SOURCES = \
   consensus/merkle.cpp \
   core_read.cpp \
   core_write.cpp \
+  dht/ed25519.cpp \
   hash.cpp \
   hdchain.cpp \
   key.cpp \

@@ -116,6 +116,8 @@ class CCryptoKeyStore : public CBasicKeyStore
 {
 private:
     CryptedKeyMap mapCryptedKeys;
+    CryptedDHTKeyMap mapCryptedDHTKeys;
+
     CHDChain cryptedHDChain;
 
     CKeyingMaterial vMasterKey;
@@ -186,6 +188,7 @@ public:
 
     virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
+    bool AddDHTKey(const CKeyEd25519& key);
     bool HaveKey(const CKeyID &address) const
     {
         {
@@ -213,6 +216,8 @@ public:
             mi++;
         }
     }
+
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
 
     bool GetHDChain(CHDChain& hdChainRet) const;
 

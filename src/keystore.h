@@ -8,6 +8,7 @@
 #ifndef DYNAMIC_KEYSTORE_H
 #define DYNAMIC_KEYSTORE_H
 
+#include "dht/ed25519.h"
 #include "hdchain.h"
 #include "key.h"
 #include "pubkey.h"
@@ -53,6 +54,7 @@ typedef std::map<CKeyID, CKey> KeyMap;
 typedef std::map<CKeyID, CPubKey> WatchKeyMap;
 typedef std::map<CScriptID, CScript > ScriptMap;
 typedef std::set<CScript> WatchOnlySet;
+typedef std::map<CKeyID, CKeyEd25519> DHTKeyMap;
 
 /** Basic key store, that keeps keys in an address->secret map */
 class CBasicKeyStore : public CKeyStore
@@ -62,6 +64,7 @@ protected:
     WatchKeyMap mapWatchKeys;
     ScriptMap mapScripts;
     WatchOnlySet setWatchOnly;
+    DHTKeyMap mapDHTKeys;
     /* the HD chain data model*/
     CHDChain hdChain;
 
@@ -112,10 +115,14 @@ public:
     virtual bool HaveWatchOnly(const CScript &dest) const;
     virtual bool HaveWatchOnly() const;
 
+    bool AddDHTKey(const CKeyEd25519& key);
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
+
     bool GetHDChain(CHDChain& hdChainRet) const;
 };
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
 typedef std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char> > > CryptedKeyMap;
+typedef std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char> > > CryptedDHTKeyMap;
 
 #endif // DYNAMIC_KEYSTORE_H

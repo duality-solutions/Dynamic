@@ -4,8 +4,8 @@
 
 #include "ed25519.h"
 
+#include "hash.h"
 #include "random.h"
-#include "bdap/domainentry.h"
 #include "util.h"
 
 #include <libtorrent/ed25519.hpp>
@@ -22,6 +22,22 @@ using namespace libtorrent;
 static ed25519_context* ed25519_context_sign = NULL;
 
 // TODO (BDAP): Implement check Ed25519 keys
+
+
+CKeyEd25519::CKeyEd25519(const std::array<char, 32>& _seed)
+{
+    seed = _seed;
+    std::tuple<dht::public_key, dht::secret_key> keyPair = dht::ed25519_create_keypair(seed);
+    {
+        dht::secret_key sk = std::get<1>(keyPair);
+        privateKey = sk.bytes;
+    }
+    {
+        dht::public_key pk = std::get<0>(keyPair);
+        publicKey = pk.bytes;
+    }
+}
+
 
 //! Generate a new private key using LibTorrent's Ed25519
 // TODO (BDAP): Support compressed Ed25519 keys
@@ -67,13 +83,24 @@ void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen)
 std::vector<unsigned char> CKeyEd25519::GetPrivKey() const
 {
     std::string strPrivateKey = aux::to_hex(privateKey);
-    return vchFromString(strPrivateKey);
+    return std::vector<unsigned char>(strPrivateKey.begin(), strPrivateKey.end());
 }
 
 std::vector<unsigned char> CKeyEd25519::GetPubKey() const
 {
     std::string strPublicKey = aux::to_hex(publicKey);
-    return vchFromString(strPublicKey);
+    return std::vector<unsigned char>(strPublicKey.begin(), strPublicKey.end());
+}
+
+std::vector<unsigned char> CKeyEd25519::GetPrivSeed() const
+{
+    return std::vector<unsigned char>(seed.begin(), seed.end());
+}
+
+CPubKey CKeyEd25519::PubKey() const
+{
+    CPubKey pubkey(GetPubKey(), false);
+    return pubkey;
 }
 
 void ECC_Ed25519_Start() 

@@ -737,12 +737,16 @@ public:
     bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
     //! GetKey implementation that can derive a HD private key on the fly
     bool GetKey(const CKeyID &address, CKey& keyOut) const;
+    //! Gets Ed25519 private key from the wallet(database)
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
     //! Adds a HDPubKey into the wallet(database)
     bool AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal);
     //! loads a HDPubKey into the wallets memory
     bool LoadHDPubKey(const CHDPubKey &hdPubKey);
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
+    //! Adds an ed25519 keypair and saves it to disk.
+    bool AddDHTKey(const CKeyEd25519& key);
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key, const CPubKey &pubkey) { return CCryptoKeyStore::AddKeyPubKey(key, pubkey); }
     //! Load metadata (used by LoadWallet)
