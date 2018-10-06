@@ -75,9 +75,10 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
     txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
-
+    pwalletMain->SetAddressBook(privEncryptKey.PubKey().GetID(), strObjectID, "pubkey");
 
     // TODO: Add ability to pass in the link address
+    // TODO: Use stealth address for the link address so linking will be private
     CKey privLinkKey;
     privLinkKey.MakeNewKey(true);
     CPubKey pubLinkKey = privLinkKey.GetPubKey();

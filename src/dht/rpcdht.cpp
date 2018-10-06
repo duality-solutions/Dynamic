@@ -2,6 +2,7 @@
 // TODO: Add License
 
 #include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
 #include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
@@ -11,6 +12,7 @@
 #include "rpcserver.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "wallet/wallet.h"
 
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/hex.hpp> // for to_hex and from_hex
@@ -235,6 +237,74 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue savebdapdata(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 3)
+        throw std::runtime_error(
+            "savebdapdata <id> <dht value> <operation>\nSaves mutable data in the DHT for a BDAP entry.\n"
+            "\n");
+    UniValue result(UniValue::VOBJ);
+   
+    EnsureWalletIsUnlocked();
+
+    if (!pTorrentDHTSession)
+        throw std::runtime_error("savebdapdata failed. DHT session not started.\n");
+
+    if (!CheckDomainEntryDB())
+        throw std::runtime_error("savebdapdata failed. Can not access BDAP domain entry database.\n");
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.ObjectID = vchObjectID;
+    std::string strFullObjectPath = entry.GetFullObjectPath();
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
+        throw std::runtime_error("savebdapdata: ERRCODE: 5500 - " + strFullObjectPath + _(" can not be found.  Get info failed!\n"));
+
+
+
+    CPubKey pubKey(entry.EncryptPublicKey, false);
+    CKeyEd25519 getKey;
+
+    if (pwalletMain && !pwalletMain->GetDHTKey(pubKey.GetID(), getKey))
+        throw std::runtime_error("savebdapdata: ERRCODE: 5501 - " + _("Error getting ed25519 key from BDAP entry.\n"));
+
+    result.push_back(Pair("entry_path", strFullObjectPath));
+    result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
+    result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
+    result.push_back(Pair("pub_pubkey", stringFromVch(entry.EncryptPublicKey)));
+    result.push_back(Pair("pub_key_id", getKey.PubKey().GetID().ToString()));
+
+    char const* putValue = request.params[1].get_str().c_str();
+    const std::string strOperationType = request.params[2].get_str();
+    
+    bool fRet = false;
+    int64_t iSequence = 0;
+    std::string strPubKey = stringFromVch(getKey.GetPubKey());
+    std::array<char, 32> arrPubKey;
+    libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
+
+    std::string strPrivKey = stringFromVch(getKey.GetPrivKey());
+    std::array<char, 64> arrPrivKey;
+    libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
+    std::string dhtMessage = "";
+    fRet = PutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue, dhtMessage);
+    if (fRet) {
+        //result.push_back(Pair("put_privkey", strPrivKey));
+        result.push_back(Pair("put_operation", strOperationType));
+        result.push_back(Pair("put_seq", iSequence));
+        result.push_back(Pair("put_value", request.params[1].get_str()));
+        result.push_back(Pair("put_message", dhtMessage));
+    }
+    else {
+        throw std::runtime_error("savebdapdata failed. Error putting data in DHT. Check the debug.log for details.\n");
+    }
+
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
@@ -242,6 +312,7 @@ static const CRPCCommand commands[] =
     { "dht",             "putmutable",               &putmutable,                   true  },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
     { "dht",             "dhtdb",                    &dhtdb,                        true  },
+    { "dht",             "savebdapdata",             &savebdapdata,                 true  },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
