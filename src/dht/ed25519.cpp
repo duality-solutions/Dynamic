@@ -23,10 +23,28 @@ static ed25519_context* ed25519_context_sign = NULL;
 
 // TODO (BDAP): Implement check Ed25519 keys
 
-
 CKeyEd25519::CKeyEd25519(const std::array<char, 32>& _seed)
 {
     seed = _seed;
+    std::tuple<dht::public_key, dht::secret_key> keyPair = dht::ed25519_create_keypair(seed);
+    {
+        dht::secret_key sk = std::get<1>(keyPair);
+        privateKey = sk.bytes;
+    }
+    {
+        dht::public_key pk = std::get<0>(keyPair);
+        publicKey = pk.bytes;
+    }
+}
+
+CKeyEd25519::CKeyEd25519(const std::vector<unsigned char>& _seed)
+{
+    if (sizeof(_seed) == 32) {
+        for(unsigned int i = 0; i < sizeof(_seed); i++) {
+            seed[i] = _seed[i];
+        }
+    }
+    
     std::tuple<dht::public_key, dht::secret_key> keyPair = dht::ed25519_create_keypair(seed);
     {
         dht::secret_key sk = std::get<1>(keyPair);

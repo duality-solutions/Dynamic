@@ -79,12 +79,13 @@ public:
     {
     }
 
+    CKeyEd25519(const std::array<char, 32>& _seed);
+    CKeyEd25519(const std::vector<unsigned char>& _seed);
+
     //! Destructor (necessary because of memlocking). ??
     ~CKeyEd25519()
     {
     }
-
-    CKeyEd25519(const std::array<char, 32>& _seed);
 
     //! Simple read-only vector-like interface.
     unsigned int size() const { return seed.size(); }

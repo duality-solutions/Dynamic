@@ -749,6 +749,8 @@ public:
     bool AddDHTKey(const CKeyEd25519& key);
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key, const CPubKey &pubkey) { return CCryptoKeyStore::AddKeyPubKey(key, pubkey); }
+    //! Adds a key to the store, without saving it to disk (used by LoadWallet)
+    bool LoadDHTKey(const CKeyEd25519& key) { return CCryptoKeyStore::AddDHTKey(key); }
     //! Load metadata (used by LoadWallet)
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 

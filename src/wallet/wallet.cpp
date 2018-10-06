@@ -325,14 +325,15 @@ bool CWallet::AddDHTKey(const CKeyEd25519& key)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    if (!CCryptoKeyStore::AddDHTKey(key))
+    if (!CCryptoKeyStore::AddDHTKey(key)) {
         return false;
+    }
 
     if (!fFileBacked)
         return true;
 
     if (!IsCrypted()) {
-        return CWalletDB(strWalletFile).WriteDHTKey(key);
+        return CWalletDB(strWalletFile).WriteDHTKey(key, mapKeyMetadata[key.PubKey().GetID()]);
     }
     return true;
 }

@@ -256,15 +256,13 @@ UniValue savebdapdata(const JSONRPCRequest& request)
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
         throw std::runtime_error("savebdapdata: ERRCODE: 5500 - " + strFullObjectPath + _(" can not be found.  Get info failed!\n"));
 
-    //LogPrintf("savebdapdata entry.EncryptPublicKey = %s\n", stringFromVch(entry.EncryptPublicKey));
+
 
     CPubKey pubKey(entry.EncryptPublicKey, false);
     CKeyEd25519 getKey;
-    LogPrintf("savebdapdata pubKey id = %s\n", pubKey.GetID().ToString());
+
     if (pwalletMain && !pwalletMain->GetDHTKey(pubKey.GetID(), getKey))
         throw std::runtime_error("savebdapdata: ERRCODE: 5501 - " + _("Error getting ed25519 key from BDAP entry.\n"));
-
-    //LogPrintf("savebdapdata get new pubkey hash = %s\n", getKey.PubKey().GetHash().ToString());
 
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
@@ -290,7 +288,7 @@ UniValue savebdapdata(const JSONRPCRequest& request)
         //result.push_back(Pair("put_privkey", strPrivKey));
         result.push_back(Pair("put_operation", strOperationType));
         result.push_back(Pair("put_seq", iSequence));
-        result.push_back(Pair("put_value", request.params[0].get_str()));
+        result.push_back(Pair("put_value", request.params[1].get_str()));
         result.push_back(Pair("put_message", dhtMessage));
     }
     else {
