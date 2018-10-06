@@ -8,6 +8,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
+#include "dht/ed25519.h"
 #include "validation.h" // For CheckTransaction
 #include "protocol.h"
 #include "serialize.h"
@@ -65,6 +66,20 @@ bool CWalletDB::EraseTx(uint256 hash)
 {
     nWalletDBUpdated++;
     return Erase(std::make_pair(std::string("tx"), hash));
+}
+
+bool CWalletDB::WriteDHTKey(const CKeyEd25519& key)
+{
+    nWalletDBUpdated++;
+    std::vector<unsigned char> vchPrivKey = key.GetPrivKey();
+    std::vector<unsigned char> vchPubKey = key.GetPubKey();
+    // hash pubkey/privkey to accelerate wallet load
+    std::vector<unsigned char> vchKey;
+    vchKey.reserve(vchPubKey.size() + vchPrivKey.size());
+    vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
+    vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
+
+    return Write(std::make_pair(std::string("dhtkey"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)

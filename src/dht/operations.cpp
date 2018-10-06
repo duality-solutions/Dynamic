@@ -11,6 +11,8 @@
 #include <libtorrent/bencode.hpp>
 #include "libtorrent/kademlia/item.hpp" // for sign_mutable_item
 
+#include <functional>
+
 using namespace libtorrent;
 
 bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool fWaitForAuthoritative)
@@ -86,7 +88,7 @@ static void put_mutable
         std::vector<char> buf;
         bencode(std::back_inserter(buf), e);
         dht::signature sign;
-        seq = iSeq + 1;
+        seq = iSeq;
         sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
             , dht::public_key(pk.data())
             , dht::secret_key(sk.data()));

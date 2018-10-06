@@ -4,7 +4,9 @@
 #ifndef DYNAMIC_DHT_ED25519_H
 #define DYNAMIC_DHT_ED25519_H
 
+#include "pubkey.h"
 #include "support/allocators/secure.h"
+
 
 #include <array>
 #include <cstring>
@@ -82,11 +84,22 @@ public:
     {
     }
 
+    CKeyEd25519(const std::array<char, 32>& _seed);
+
+    //! Simple read-only vector-like interface.
+    unsigned int size() const { return seed.size(); }
+    const unsigned char* begin() const { return GetPrivSeed().data(); }
+    const unsigned char* end() const { return GetPrivSeed().data() + size(); }
+
     //! Generate a new private key using LibTorrent's Ed25519 implementation
     void MakeNewKeyPair();
 
     std::vector<unsigned char> GetPrivKey() const;
     std::vector<unsigned char> GetPubKey() const;
+    std::vector<unsigned char> GetPrivSeed() const;
+
+    CPubKey PubKey() const;
+
     /**
      * Used for the Torrent DHT.
      */

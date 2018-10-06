@@ -40,6 +40,27 @@ bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
     return true;
 }
 
+bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key)
+{
+    LOCK(cs_KeyStore);
+    mapDHTKeys[key.PubKey().GetID()] = key;
+    return true;
+}
+
+bool CBasicKeyStore::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        DHTKeyMap::const_iterator mi = mapDHTKeys.find(address);
+        if (mi != mapDHTKeys.end())
+        {
+            keyOut = mi->second;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool CBasicKeyStore::AddCScript(const CScript& redeemScript)
 {
     if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)

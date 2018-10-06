@@ -90,6 +90,7 @@ UniValue putmutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.
         GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, true);
+        iSequence++;
     }
     std::string dhtMessage = "";
     fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
@@ -219,7 +220,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("public_key", data.PublicKey()));
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
-            oMutableData.push_back(Pair("salt", libtorrent::dht::ExtractSalt(data.Salt())));
+            oMutableData.push_back(Pair("salt", data.Salt()));
             oMutableData.push_back(Pair("value", libtorrent::dht::ExtractPutValue(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;

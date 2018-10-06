@@ -210,7 +210,6 @@ bool DecryptAES256(const SecureString& sKey, const std::string& sCiphertext, con
     return true;
 }
 
-
 static bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsigned char>& vchCryptedSecret, const CPubKey& vchPubKey, CKey& key)
 {
     CKeyingMaterial vchSecret;
@@ -222,6 +221,21 @@ static bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsi
 
     key.Set(vchSecret.begin(), vchSecret.end(), vchPubKey.IsCompressed());
     return key.VerifyPubKey(vchPubKey);
+}
+
+static bool DecryptKey(const CKeyingMaterial& vMasterKey, const std::vector<unsigned char>& vchCryptedSecret, const CPubKey& vchPubKey, CKeyEd25519& key)
+{
+    CKeyingMaterial vchSecret;
+    if(!DecryptSecret(vMasterKey, vchCryptedSecret, vchPubKey.GetHash(), vchSecret))
+        return false;
+
+    if (vchSecret.size() != 32)
+        return false;
+
+    //TODO: (DHT) Complete decrypting Ed25519 key
+    //CKeyEd25519 decryptkey(vchSecret);
+    //key = decryptkey;
+    return false;
 }
 
 bool CCryptoKeyStore::SetCrypted()
@@ -325,6 +339,26 @@ bool CCryptoKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
     return true;
 }
 
+bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::AddDHTKey(key);
+
+        if (IsLocked(true))
+            return false;
+
+        std::vector<unsigned char> vchCryptedSecret;
+        CKeyingMaterial vchSecret(key.begin(), key.end());
+        if (!EncryptSecret(vMasterKey, vchSecret, key.PubKey().GetHash(), vchCryptedSecret))
+            return false;
+
+        if (!AddCryptedKey(key.PubKey(), vchCryptedSecret))
+            return false;
+    }
+    return true;
+}
 
 bool CCryptoKeyStore::AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
@@ -346,6 +380,24 @@ bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey& keyOut) const
             return CBasicKeyStore::GetKey(address, keyOut);
 
         CryptedKeyMap::const_iterator mi = mapCryptedKeys.find(address);
+        if (mi != mapCryptedKeys.end())
+        {
+            const CPubKey &vchPubKey = (*mi).second.first;
+            const std::vector<unsigned char> &vchCryptedSecret = (*mi).second.second;
+            return DecryptKey(vMasterKey, vchCryptedSecret, vchPubKey, keyOut);
+        }
+    }
+    return false;
+}
+
+bool CCryptoKeyStore::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::GetDHTKey(address, keyOut);
+        //TODO: (DHT) implement encrypted wallet keys
+        CryptedDHTKeyMap::const_iterator mi = mapCryptedDHTKeys.find(address);
         if (mi != mapCryptedKeys.end())
         {
             const CPubKey &vchPubKey = (*mi).second.first;
