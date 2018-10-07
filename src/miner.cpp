@@ -135,12 +135,17 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     // Largest block you're willing to create:
     unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
     // Limit to between 1K and MAX_BLOCK_SIZE-1K for sanity:
-    nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MAX_BLOCK_SIZE-1000), nBlockMaxSize));
-    
+    nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MAX_BLOCK_SIZE - 1000), nBlockMaxSize));
+
     // How much of the block should be dedicated to high-priority transactions,
     // included regardless of the fees they pay
     unsigned int nBlockPrioritySize = GetArg("-blockprioritysize", DEFAULT_BLOCK_PRIORITY_SIZE);
     nBlockPrioritySize = std::min(nBlockMaxSize, nBlockPrioritySize);
+
+    // Minimum block size you want to create; block will be filled with free transactions
+    // until there are no more or the block reaches this size:
+    unsigned int nBlockMinSize = GetArg("-blockminsize", DEFAULT_BLOCK_MIN_SIZE);
+    nBlockMinSize = std::min(nBlockMaxSize, nBlockMinSize);
 
     // Collect memory pool transactions into the block
     CTxMemPool::setEntries inBlock;
@@ -235,13 +240,15 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
             }
 
             unsigned int nTxSize = iter->GetTxSize();
-
-            // If now that this txs is added we've surpassed our desired priority size
-            // or have dropped below the AllowFreeThreshold, then we're done adding priority txs
-            if (nBlockSize >= nBlockPrioritySize || !AllowFree(actualPriority)) {
+            if (fPriorityBlock &&
+                (nBlockSize + nTxSize >= nBlockPrioritySize || !AllowFree(actualPriority))) {
+                fPriorityBlock = false;
+                waitPriMap.clear();
+            }
+            if (!priorityTx &&
+                (iter->GetModifiedFee() < ::minRelayTxFee.GetFee(nTxSize) && nBlockSize >= nBlockMinSize)) {
                 break;
             }
-
             if (nBlockSize + nTxSize >= nBlockMaxSize) {
                 if (nBlockSize > nBlockMaxSize - 100 || lastFewTxs > 50) {
                     break;
@@ -265,16 +272,14 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 continue;
             }
 
-            // Add dummy coinbase tx as first transaction
-            pblock->vtx.emplace_back();
-            pblocktemplate->vTxFees.push_back(-1); // updated at end
-            pblocktemplate->vTxSigOps.push_back(-1); // updated at end
-            
+            pblock->vtx.emplace_back(iter->GetSharedTx());
+
+            pblocktemplate->vTxFees.push_back(iter->GetFee());
+            pblocktemplate->vTxSigOps.push_back(iter->GetSigOpCount());
             nBlockSize += iter->GetTxSize();
             ++nBlockTx;
             nBlockSigOps += iter->GetSigOpCount();
             nFees += iter->GetFee();
-            inBlock.insert(iter);
 
             if (fPrintPriority) {
                 double dPriority = iter->GetPriority(nHeight);
@@ -310,28 +315,23 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         CFluidMint fluidMint;
         bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
         
-        // Create coinbase transaction.
-        CMutableTransaction coinbaseTx;
-        coinbaseTx.vin.resize(1);
-        coinbaseTx.vin[0].prevout.SetNull();
-        coinbaseTx.vout.resize(1);
-        coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
+        // Compute regular coinbase transaction.
+        txNew.vout[0].scriptPubKey = scriptPubKeyIn;
+        txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
         if (areWeMinting) 
         {
             mintAddress = fluidMint.GetDestinationAddress();
             fluidIssuance = fluidMint.MintAmount;
-            coinbaseTx.vout[0].nValue = blockReward + fluidIssuance;
+            txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
-            coinbaseTx.vout[0].nValue = blockReward;
+            txNew.vout[0].nValue = blockReward;
         }
         
-        coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
-
         CScript script;
         if (areWeMinting) {        
             // Pick out the amount of issuance
-            coinbaseTx.vout[0].nValue -= fluidIssuance;
+            txNew.vout[0].nValue -= fluidIssuance;
 
             assert(mintAddress.IsValid());
             if (!mintAddress.IsScript()) {
@@ -340,15 +340,15 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
                 CScriptID fluidScriptID = boost::get<CScriptID>(mintAddress.Get());
                 script = CScript() << OP_HASH160 << ToByteVector(fluidScriptID) << OP_EQUAL;
             }
-            coinbaseTx.vout.push_back(CTxOut(fluidIssuance, script));
+            txNew.vout.push_back(CTxOut(fluidIssuance, script));
             LogPrintf("CreateNewBlock(): Generated Fluid Issuance Transaction:\n%s\n", txNew.ToString());
         }
 
         // Update coinbase transaction with additional info about dynode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(coinbaseTx, nHeight, blockReward, pblocktemplate->txoutDynode, pblocktemplate->voutSuperblock);
+        FillBlockPayments(txNew, nHeight, blockReward, pblocktemplate->txoutDynode, pblocktemplate->voutSuperblock);
         // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
-        //             nHeight, blockReward, pblocktemplate->txoutDynode.ToString(), txNew.ToString());
+        //             nHeight, blockReward, pblock->txoutDynode.ToString(), txNew.ToString());
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -358,7 +358,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         LogPrintf("CreateNewBlock(): Computed Miner Block Reward is %ld DYN\n", FormatMoney(blockAmount));
 
         // Update block coinbase
-        pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
+        pblock->vtx[0] = MakeTransactionRef(std::move(txNew));
         pblocktemplate->vTxFees[0] = -nFees;
 
         // Fill in header
