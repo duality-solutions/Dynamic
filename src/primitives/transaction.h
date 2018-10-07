@@ -204,7 +204,6 @@ public:
 };
 
 struct CMutableTransaction;
-
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
@@ -275,14 +274,14 @@ public:
 
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-
+    
     /**
      * Get the total transaction size in bytes, including witness data.
      * "Total Size" defined in BIP141 and BIP144.
      * @return Total transaction size in bytes
      */
     unsigned int GetTotalSize() const;
-
+   
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
@@ -326,7 +325,7 @@ struct CMutableTransaction
     CMutableTransaction(deserialize_type, Stream& s) {
         Unserialize(s);
     }
-    
+
     /** Compute the hash of this CMutableTransaction. This is computed on the
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */

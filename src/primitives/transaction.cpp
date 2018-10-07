@@ -97,7 +97,6 @@ CTransaction::CTransaction() : nVersion(CTransaction::CURRENT_VERSION), vin(), v
 CTransaction::CTransaction(const CMutableTransaction &tx) : nVersion(tx.nVersion), vin(tx.vin), vout(tx.vout), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 CTransaction::CTransaction(CMutableTransaction &&tx) : nVersion(tx.nVersion), vin(std::move(tx.vin)), vout(std::move(tx.vout)), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 
-
 CAmount CTransaction::GetValueOut() const
 {
     CAmount nValueOut = 0;

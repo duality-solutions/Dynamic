@@ -203,7 +203,7 @@ void Argon2Params::finalize(void* out, const void* memory) const
     for (std::size_t l = 0; l < getLanes(); l++) {
         for (std::size_t k = 0; k < ARGON2_BLOCK_SIZE / 8; k++) {
             std::fprintf(stderr, "Block %04u [%3u]: %016llx\n",
-                (unsigned)i, (unsigned)k,
+                (unsigned)l, (unsigned)k,
                 (unsigned long long)cursor[l].v[k]);
         }
     }

@@ -63,7 +63,7 @@ public:
     }
 
     uint256 GetHash() const;
-    
+
     int64_t GetBlockTime() const
     {
         return (int64_t)nTime;
@@ -78,6 +78,8 @@ public:
     std::vector<CTransactionRef> vtx;
 
     // memory only
+    mutable CTxOut txoutDynode; // dynode payment
+    mutable std::vector<CTxOut> voutSuperblock; // superblock payment
     mutable bool fChecked;
 
     CBlock()
@@ -103,9 +105,11 @@ public:
     {
         CBlockHeader::SetNull();
         vtx.clear();
+        txoutDynode = CTxOut();
+        voutSuperblock.clear();
         fChecked = false;
     }
-
+    
     CBlockHeader GetBlockHeader() const
     {
         CBlockHeader block;

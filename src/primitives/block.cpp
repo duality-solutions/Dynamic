@@ -11,7 +11,7 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
-uint256 CBlockHeader::GetHash() const
+uint256 CBlockHeader::GetHash() const 
 {
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }
