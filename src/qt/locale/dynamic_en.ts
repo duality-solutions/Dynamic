@@ -4091,6 +4091,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Min amount</translation>
     </message>
     <message>
+        <location line="+37"/>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <location line="+36"/>
         <source>Copy address</source>
         <translation>Copy address</translation>
