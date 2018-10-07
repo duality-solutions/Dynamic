@@ -3160,6 +3160,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>最小金额</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>复制地址</translation>
     </message>

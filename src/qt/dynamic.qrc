@@ -46,6 +46,7 @@
         <file alias="synced">res/icons/drk/synced.png</file>
         <file alias="transaction_0">res/icons/drk/transaction0.png</file>
         <file alias="transaction_confirmed">res/icons/drk/transaction2.png</file>
+        <file alias="transaction_abandoned">res/icons/drk/transaction_abandoned.png</file>
         <file alias="transaction_conflicted">res/icons/drk/transaction_conflicted.png</file>
         <file alias="transaction_1">res/icons/drk/clock1.png</file>
         <file alias="transaction_2">res/icons/drk/clock2.png</file>
