@@ -14,6 +14,9 @@
 
 #include <string>
 
+
+const std::string CSporkManager::SERIALIZATION_VERSION_STRING = "CSporkManager-Version-2";
+
 CSporkManager sporkManager;
 
 std::map<int, int64_t> mapSporkDefaults = {
@@ -33,8 +36,37 @@ void CSporkManager::Clear()
     LOCK(cs);
     mapSporksActive.clear();
     mapSporksByHash.clear();
-    sporkPubKeyID.SetNull();
-    sporkPrivKey = CKey();
+    // sporkPubKeyID and sporkPrivKey should be set in init.cpp, 
+    // we should not alter them here. 
+}
+
+void CSporkManager::CheckAndRemove()
+{
+    LOCK(cs);
+    bool fSporkAddressIsSet = !sporkPubKeyID.IsNull();
+    assert(fSporkAddressIsSet);
+    auto itActive = mapSporksActive.begin();
+    while (itActive != mapSporksActive.end()) {
+        if (!itActive->second.CheckSignature(sporkPubKeyID, false)) {
+            if (!itActive->second.CheckSignature(sporkPubKeyID, true)) {
+                mapSporksByHash.erase(itActive->second.GetHash());
+                mapSporksActive.erase(itActive++);
+                continue;
+            }
+        }
+        ++itActive;
+    }
+    auto itByHash = mapSporksByHash.begin();
+    while (itByHash != mapSporksByHash.end()) {
+        if (!itByHash->second.CheckSignature(sporkPubKeyID, false)) {
+            if (!itByHash->second.CheckSignature(sporkPubKeyID, true)) {
+                mapSporksActive.erase(itByHash->second.nSporkID);
+                mapSporksByHash.erase(itByHash++);
+                continue;
+            }
+        }
+        ++itByHash;
+    }
 }
 
 void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
