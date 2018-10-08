@@ -719,11 +719,22 @@ void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
+    std::vector<dynode_info_t> vecDnInfo; // will be empty when no wallet 
 #ifdef ENABLE_WALLET
-        if(pnode->fDynode && !privateSendClient.IsMixingDynode(pnode)) {
-#else
-        if(pnode->fDynode) {
+     privateSendClient.GetMixingDynodesInfo(vecDnInfo); 
+#endif // ENABLE_WALLET 
+
+    connman.ForEachNode(CConnman::AllNodes, [&vecDnInfo](CNode* pnode) {
+        if (pnode->fDynode) {
+#ifdef ENABLE_WALLET
+            bool fFound = false;
+            for (const auto& dnInfo : vecDnInfo) {
+                if (pnode->addr == dnInfo.addr) {
+                    fFound = true;
+                    break;
+                }
+            }
+            if (fFound) return; // do NOT disconnect mixing dynodes
 #endif // ENABLE_WALLET
             LogPrintf("Closing Dynode connection: peer=%d, addr=%s\n", pnode->id, pnode->addr.ToString());
             pnode->fDisconnect = true;

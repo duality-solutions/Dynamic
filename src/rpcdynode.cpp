@@ -61,7 +61,7 @@ UniValue privatesend(const JSONRPCRequest& request)
 
         privateSendClient.fEnablePrivateSend = true;
         bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatus() + ", will retry"));
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatuses() + ", will retry")); 
     }
 
     if(request.params[0].get_str() == "stop") {
@@ -86,19 +86,25 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
             "Returns an object containing mixing pool related information.\n");
 
 #ifdef ENABLE_WALLET
-    CPrivateSendBase* pprivateSendBase = fDynodeMode ? (CPrivateSendBase*)&privateSendServer : (CPrivateSendBase*)&privateSendClient;
+    CPrivateSendBaseManager* pprivateSendBaseManager = fDynodeMode ? (CPrivateSendBaseManager*)&privateSendServer : (CPrivateSendBaseManager*)&privateSendClient; 
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state",             pprivateSendBase->GetStateString()));
-    obj.push_back(Pair("mixing_mode",       (!fDynodeMode && privateSendClient.fPrivateSendMultiSession) ? "multi-session" : "normal"));
-    obj.push_back(Pair("queue",             pprivateSendBase->GetQueueSize()));
-    obj.push_back(Pair("entries",           pprivateSendBase->GetEntriesCount()));
-    obj.push_back(Pair("status",            privateSendClient.GetStatus()));
+    // TODO:
+    // obj.push_back(Pair("state",              pprivateSendBase->GetStateString()));
+    obj.push_back(Pair("queue",                 pprivateSendBaseManager->GetQueueSize()));
+    // obj.push_back(Pair("entries",            pprivateSendBase->GetEntriesCount()));
+    obj.push_back(Pair("status",                privateSendClient.GetStatuses()));
 
-    dynode_info_t dnInfo;
-    if (privateSendClient.GetMixingDynodeInfo(dnInfo)) {
-        obj.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
-        obj.push_back(Pair("addr",          dnInfo.addr.ToString()));
+    std::vector<dynode_info_t> vecDnInfo;
+    if (privateSendClient.GetMixingDynodesInfo(vecDnInfo)) {
+        UniValue pools(UniValue::VARR);
+        for (const auto& dnInfo : vecDnInfo) {
+            UniValue pool(UniValue::VOBJ);
+            pool.push_back(Pair("outpoint",      dnInfo.outpoint.ToStringShort()));
+            pool.push_back(Pair("addr",          dnInfo.addr.ToString()));
+            pools.push_back(pool);
+        }
+        obj.push_back(Pair("pools", pools));
     }
 
     if (pwalletMain) {

@@ -188,9 +188,10 @@ bool CPrivateSendBroadcastTx::IsExpired(int nHeight)
     return (nConfirmedHeight != -1) && (nHeight - nConfirmedHeight > 24);
 }
 
-void CPrivateSendBase::SetNull()
-{
+ void CPrivateSendBaseSession::SetNull() 
+ {
     // Both sides
+    LOCK(cs_privatesend); 
     nState = POOL_STATE_IDLE;
     nSessionID = 0;
     nSessionDenom = 0;
@@ -201,22 +202,42 @@ void CPrivateSendBase::SetNull()
     nTimeLastSuccessfulStep = GetTime();
 }
 
-void CPrivateSendBase::CheckQueue()
+void CPrivateSendBaseManager::SetNull() 
 {
-    TRY_LOCK(cs_privatesend, lockPS);
+    LOCK(cs_vecqueue);
+    vecPrivateSendQueue.clear();
+}
+
+void CPrivateSendBaseManager::CheckQueue()
+{
+    TRY_LOCK(cs_vecqueue, lockPS);
     if(!lockPS) return; // it's ok to fail here, we run this quite frequently
 
     // check mixing queue objects for timeouts
     std::vector<CPrivateSendQueue>::iterator it = vecPrivateSendQueue.begin();
     while(it != vecPrivateSendQueue.end()) {
         if((*it).IsExpired()) {
-            LogPrint("privatesend", "CPrivateSendBase::%s -- Removing expired queue (%s)\n", __func__, (*it).ToString());
+            LogPrint("privatesend", "CPrivateSendBaseManager::%s -- Removing expired queue (%s)\n", __func__, (*it).ToString());
             it = vecPrivateSendQueue.erase(it);
         } else ++it;
     }
 }
 
-std::string CPrivateSendBase::GetStateString() const
+bool CPrivateSendBaseManager::GetQueueItemAndTry(CPrivateSendQueue& psqRet)
+{
+    TRY_LOCK(cs_vecqueue, lockPS);
+    if(!lockPS) return false; // it's ok to fail here, we run this quite frequently
+    for (auto& psq : vecPrivateSendQueue) {
+        // only try each queue once
+        if(psq.fTried || psq.IsExpired()) continue;
+        psq.fTried = true;
+        psqRet = psq;
+        return true;
+    }
+    return false;
+}
+
+std::string CPrivateSendBaseSession::GetStateString() const
 {
     switch(nState) {
         case POOL_STATE_IDLE:                   return "IDLE";
@@ -509,5 +530,5 @@ void CPrivateSend::SyncTransaction(const CTransaction& tx, const CBlockIndex *pi
 
     // When tx is 0-confirmed or conflicted, posInBlock is SYNC_TRANSACTION_NOT_IN_BLOCK and nConfirmedHeight should be set to -1
     mapPSTX[txHash].SetConfirmedHeight(posInBlock == CMainSignals::SYNC_TRANSACTION_NOT_IN_BLOCK ? -1 : pindex->nHeight);
-    LogPrint("privatesend", "CPrivateSendClient::SyncTransaction -- txid=%s\n", txHash.ToString());
+    LogPrint("privatesend", "CPrivateSend::SyncTransaction -- txid=%s\n", txHash.ToString());
 }

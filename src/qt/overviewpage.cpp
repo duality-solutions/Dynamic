@@ -557,7 +557,7 @@ void OverviewPage::privateSendStatus()
         updatePrivateSendProgress();
     }
 
-    QString strStatus = QString(privateSendClient.GetStatus().c_str());
+    QString strStatus = QString(privateSendClient.GetStatuses().c_str()); 
 
     QString s = tr("Last PrivateSend message:\n") + strStatus;
 
@@ -566,13 +566,7 @@ void OverviewPage::privateSendStatus()
 
     ui->labelPrivateSendLastMessage->setText(s);
 
-    if(privateSendClient.nSessionDenom == 0){
-        ui->labelSubmittedDenom->setText(tr("N/A"));
-    } else {
-        QString strDenom(CPrivateSend::GetDenominationsToString(privateSendClient.nSessionDenom).c_str());
-        ui->labelSubmittedDenom->setText(strDenom);
-    }
-
+     ui->labelSubmittedDenom->setText(QString(privateSendClient.GetSessionDenoms().c_str())); 
 }
 
 void OverviewPage::privateSendAuto(){
@@ -636,7 +630,7 @@ void OverviewPage::togglePrivateSend(){
 
     if(!privateSendClient.fEnablePrivateSend){
         ui->togglePrivateSend->setText(tr("Start Mixing"));
-        privateSendClient.UnlockCoins();
+        privateSendClient.ResetPool();
     } else {
         ui->togglePrivateSend->setText(tr("Stop Mixing"));
 
