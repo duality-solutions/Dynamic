@@ -24,7 +24,7 @@ static const int DYNODE_SYNC_GOVOBJ_VOTE     = 11;
 static const int DYNODE_SYNC_FINISHED        = 999;
 
 static const int DYNODE_SYNC_TICK_SECONDS    = 6;
-static const int DYNODE_SYNC_TIMEOUT_SECONDS = 10; // our blocks are 64 seconds, this needs to be fast
+static const int DYNODE_SYNC_TIMEOUT_SECONDS = 25;
 
 static const int DYNODE_SYNC_ENOUGH_PEERS    = 10;
 
@@ -52,7 +52,6 @@ private:
     int64_t nTimeLastFailure;
 
     void Fail();
-    void ClearFulfilledRequests(CConnman& connman);
 
 public:
     CDynodeSync() { Reset(); }
@@ -67,20 +66,22 @@ public:
 
     int GetAssetID() { return nRequestedDynodeAssets; }
     int GetAttempt() { return nRequestedDynodeAttempt; }
-
-    void BumpAssetLastTime(std::string strFuncName);
+    void BumpAssetLastTime(const std::string strFuncName);
+    int64_t GetAssetStartTime() { return nTimeAssetSyncStarted; }
     std::string GetAssetName();
     std::string GetSyncStatus();
 
     void Reset();
     void SwitchToNextAsset(CConnman& connman);
 
-    void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv);
     void ProcessTick(CConnman& connman);
 
     void AcceptedBlockHeader(const CBlockIndex *pindexNew);
     void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman& connman);
     void UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman& connman);
+
+    void DoMaintenance(CConnman &connman) { ProcessTick(connman); }
 };
 
 #endif // DYNAMIC_DYNODE_SYNC_H

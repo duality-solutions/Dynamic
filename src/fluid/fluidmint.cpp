@@ -9,8 +9,6 @@
 #include "operations.h"
 #include "script/script.h"
 
-#include <boost/thread.hpp>
-
 CFluidMintDB *pFluidMintDB = NULL;
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)

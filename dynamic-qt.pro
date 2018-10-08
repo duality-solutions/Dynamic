@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = dynamic
-VERSION = 2.3.5.0
+VERSION = 2.4.0.0
 INCLUDEPATH += src \
                src/crypto \
                src/crypto/heavyhash \
@@ -376,7 +376,6 @@ HEADERS += \
     src/flat-database.h \
     src/governance-classes.h \
     src/governance-exceptions.h \
-    src/governance-misc.h \
     src/governance-object.h \
     src/governance-vote.h \
     src/governance-votedb.h \

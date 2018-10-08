@@ -124,7 +124,7 @@ namespace GUIUtil
     void openConfigfile();	
 
     // Open dynode.conf
-    void openSNConfigfile();	
+    void openDNConfigfile();	
 
     // Browse backup folder
     void showBackups();
@@ -192,6 +192,9 @@ namespace GUIUtil
     bool GetStartOnSystemStartup();
     bool SetStartOnSystemStartup(bool fAutoStart);
 
+    /** Modify Qt network specific settings on migration */
+    void migrateQtSettings();
+    
     /** Save window size and position */
     void saveWindowGeometry(const QString& strSetting, QWidget *parent);
     /** Restore window size and position */
@@ -264,8 +267,8 @@ namespace GUIUtil
 #endif
 
     // utility functions for mining UI
-    int MaxThreads();
-    int64_t GetHashRate();
+    int CPUMaxThreads();
+    int GPUMaxThreads();
     QString FormatHashRate(qint64 n);
     int64_t GetNetworkHashPS(int lookup, int height);
     QString FormatTimeInterval(arith_uint256 time);

@@ -56,14 +56,7 @@ bool CAddrInfo::IsTerrible(int64_t nNow) const
 double CAddrInfo::GetChance(int64_t nNow) const
 {
     double fChance = 1.0;
-
-    int64_t nSinceLastSeen = nNow - nTime;
-    int64_t nSinceLastTry = nNow - nLastTry;
-
-    if (nSinceLastSeen < 0)
-        nSinceLastSeen = 0;
-    if (nSinceLastTry < 0)
-        nSinceLastTry = 0;
+    int64_t nSinceLastTry = std::max<int64_t>(nNow - nLastTry, 0);
 
     // deprioritize very recent attempts away
     if (nSinceLastTry < 60 * 10)
@@ -75,9 +68,14 @@ double CAddrInfo::GetChance(int64_t nNow) const
     return fChance;
 }
 
-CAddrInfo* CAddrMan::Find(const CNetAddr& addr, int* pnId)
+CAddrInfo* CAddrMan::Find(const CService& addr, int* pnId)
 {
-    std::map<CNetAddr, int>::iterator it = mapAddr.find(addr);
+    CService addr2 = addr;
+    if (!discriminatePorts) {
+        addr2.SetPort(0);
+    }
+
+    std::map<CService, int>::iterator it = mapAddr.find(addr2);
     if (it == mapAddr.end())
         return NULL;
     if (pnId)
@@ -90,9 +88,14 @@ CAddrInfo* CAddrMan::Find(const CNetAddr& addr, int* pnId)
 
 CAddrInfo* CAddrMan::Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId)
 {
+    CService addr2 = addr;
+    if (!discriminatePorts) {
+        addr2.SetPort(0);
+    }
+
     int nId = nIdCount++;
     mapInfo[nId] = CAddrInfo(addr, addrSource);
-    mapAddr[addr] = nId;
+    mapAddr[addr2] = nId;
     mapInfo[nId].nRandomPos = vRandom.size();
     vRandom.push_back(nId);
     if (pnId)
@@ -127,9 +130,14 @@ void CAddrMan::Delete(int nId)
     assert(!info.fInTried);
     assert(info.nRefCount == 0);
 
+    CService addr = info;
+    if (!discriminatePorts) {
+        addr.SetPort(0);
+    }
+
     SwapRandom(info.nRandomPos, vRandom.size() - 1);
     vRandom.pop_back();
-    mapAddr.erase(info);
+    mapAddr.erase(addr);
     mapInfo.erase(nId);
     nNew--;
 }

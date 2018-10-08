@@ -3175,6 +3175,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Montant min.</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Copier l’adresse</translation>
     </message>

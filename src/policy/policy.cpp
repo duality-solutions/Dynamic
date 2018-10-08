@@ -47,7 +47,7 @@ bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType)
         if (m < 1 || m > n)
             return false;
     } else if (whichType == TX_NULL_DATA &&
-               (!fAcceptDatacarrier || scriptPubKey.size() > nMaxDatacarrierBytes))
+               (!fAcceptDatacarrier || scriptPubKey.size() > MAX_BDAP_RELAY))
           return false;
 
     return whichType != TX_NONSTANDARD;
@@ -55,7 +55,7 @@ bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType)
 
 bool IsStandardTx(const CTransaction& tx, std::string& reason)
 {
-    if (tx.nVersion > CTransaction::MAX_STANDARD_VERSION || tx.nVersion < 1) {
+    if ((tx.nVersion > CTransaction::MAX_STANDARD_VERSION || tx.nVersion < 1) && tx.nVersion != BDAP_TX_VERSION) {
         reason = "version";
         return false;
     }
@@ -97,12 +97,18 @@ bool IsStandardTx(const CTransaction& tx, std::string& reason)
             return false;
         }
 
-        if (whichType == TX_NULL_DATA)
+        if (whichType == TX_NULL_DATA) {
+            // if this null data tx is not a BDAP and is larger than the max datacarrier, then return a non-standard transaction
+            if (tx.nVersion != BDAP_TX_VERSION && txout.scriptPubKey.size() > nMaxDatacarrierBytes) {
+                reason = "scriptpubkey";
+                return false;
+            }
             nDataOut++;
+        }
         else if ((whichType == TX_MULTISIG) && (!fIsBareMultisigStd)) {
             reason = "bare-multisig";
             return false;
-        } else if (txout.IsDust(::minRelayTxFee)) {
+        } else if (txout.IsDust(dustRelayFee)) {
             reason = "dust";
             return false;
         }
@@ -150,3 +156,6 @@ bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs)
 
     return true;
 }
+
+CFeeRate incrementalRelayFee = CFeeRate(DEFAULT_INCREMENTAL_RELAY_FEE);
+CFeeRate dustRelayFee = CFeeRate(DUST_RELAY_TX_FEE);

@@ -679,6 +679,14 @@ void DynamicGUI::setClientModel(ClientModel *_clientModel)
         }
 #endif // ENABLE_WALLET
         unitDisplayControl->setOptionsModel(nullptr);
+
+#ifdef Q_OS_MAC
+        if(dockIconMenu)
+        {
+            // Disable context menu on dock icon
+            dockIconMenu->clear();
+        }
+#endif
     }
 }
 
@@ -842,9 +850,9 @@ void DynamicGUI::showConfEditor()
     GUIUtil::openConfigfile();
 }
 
-void DynamicGUI::showSNConfEditor()
+void DynamicGUI::showDNConfEditor()
 {
-    GUIUtil::openSNConfigfile();
+    GUIUtil::openDNConfigfile();
 }
 
 void DynamicGUI::showBackups()
@@ -976,8 +984,11 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             updateHeadersSyncProgressLabel();
             break;
         case BLOCK_SOURCE_DISK:
-            if (header)
-                progressBarLabel->setText(tr("Importing blocks on disk..."));
+            if (header) {
+                progressBarLabel->setText(tr("Indexing blocks on disk..."));
+            } else {
+                progressBarLabel->setText(tr("Processing blocks on disk..."));
+            }
             break;
         case BLOCK_SOURCE_REINDEX:
             progressBarLabel->setText(tr("Reindexing blocks on disk..."));
@@ -990,6 +1001,7 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             break;
     }
 
+
     QString tooltip;
 
     QDateTime currentDate = QDateTime::currentDateTime();
@@ -1000,30 +1012,25 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     // Set icon state: spinning if catching up, tick otherwise
     QString theme = GUIUtil::getThemeName();
 
-    if(!dynodeSync.IsBlockchainSynced())
+#ifdef ENABLE_WALLET
+    if (walletFrame)
     {
-        // Represent time from last generated block in human readable text
-        QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
-        const int HOUR_IN_SECONDS = 60*60;
-        const int DAY_IN_SECONDS = 24*60*60;
-        const int WEEK_IN_SECONDS = 7*24*60*60;
-        const int YEAR_IN_SECONDS = 31556952; // Average length of year in Gregorian calendar
-        if(secs < 2*DAY_IN_SECONDS)
+        if(secs < 25*60) // 90*60 in bitcoin
         {
-            timeBehindText = tr("%n hour(s)","",secs/HOUR_IN_SECONDS);
-        }
-        else if(secs < 2*WEEK_IN_SECONDS)
-        {
-            timeBehindText = tr("%n day(s)","",secs/DAY_IN_SECONDS);
-        }
-        else if(secs < YEAR_IN_SECONDS)
-        {
-            timeBehindText = tr("%n week(s)","",secs/WEEK_IN_SECONDS);
+            modalOverlay->showHide(true, true);
+            // TODO instead of hiding it forever, we should add meaningful information about MN sync to the overlay
+            modalOverlay->hideForever();
         }
         else
         {
-            QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
+            modalOverlay->showHide();
         }
+    }
+#endif // ENABLE_WALLET
+
+    if(!dynodeSync.IsBlockchainSynced())
+    {
+        QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
 
         progressBarLabel->setVisible(true);
         progressBar->setFormat(tr("%1 behind").arg(timeBehindText));
@@ -1045,7 +1052,6 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         if(walletFrame)
         {
             walletFrame->showOutOfSyncWarning(true);
-            modalOverlay->showHide();
         }
 #endif // ENABLE_WALLET
 
@@ -1053,6 +1059,8 @@ void DynamicGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
         tooltip += QString("<br>");
         tooltip += tr("Transactions after this will not yet be visible.");
+    } else if (fLiteMode) {
+        setAdditionalDataSyncProgress(1);
     }
 
     // Don't word-wrap this (fixed-width) tooltip
@@ -1083,6 +1091,11 @@ void DynamicGUI::setAdditionalDataSyncProgress(double nSyncProgress)
     QString strSyncStatus;
     tooltip = tr("Up to date") + QString(".<br>") + tooltip;
 
+#ifdef ENABLE_WALLET
+    if(walletFrame)
+        walletFrame->showOutOfSyncWarning(false);
+#endif // ENABLE_WALLET
+    
     if(dynodeSync.IsSynced()) {
         progressBarLabel->setVisible(false);
         progressBar->setVisible(false);
@@ -1093,14 +1106,6 @@ void DynamicGUI::setAdditionalDataSyncProgress(double nSyncProgress)
             ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
             .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
         spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
-
-#ifdef ENABLE_WALLET
-        if(walletFrame)
-        {
-            walletFrame->showOutOfSyncWarning(false);
-            modalOverlay->showHide(true, true);
-        }
-#endif // ENABLE_WALLET
 
         progressBar->setFormat(tr("Synchronizing additional data: %p%"));
         progressBar->setMaximum(1000000000);
@@ -1209,11 +1214,16 @@ void DynamicGUI::closeEvent(QCloseEvent *event)
 
             QApplication::quit();
         }
+        else
+        {
+            QMainWindow::showMinimized();
+            event->ignore();
+        }
     }
-#endif
+#else
     QMainWindow::closeEvent(event);
+#endif
 }
-
 void DynamicGUI::showEvent(QShowEvent *event)
 {
     // enable the debug window when the main window shows up
@@ -1418,9 +1428,10 @@ void DynamicGUI::setTrayIconVisible(bool fHideTrayIcon)
 
 void DynamicGUI::showModalOverlay()
 {
-    if (modalOverlay)
-        modalOverlay->showHide(false, true);
+    if (modalOverlay && (progressBar->isVisible() || modalOverlay->isLayerVisible()))
+        modalOverlay->toggleVisibility();
 }
+
 
 static bool ThreadSafeMessageBox(DynamicGUI *gui, const std::string& message, const std::string& caption, unsigned int style)
 {

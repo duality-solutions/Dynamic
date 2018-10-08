@@ -104,6 +104,14 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     typeWidget->addItem(tr("Fluid"), TransactionFilterProxy::TYPE(TransactionRecord::Fluid));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
+    typeWidget->addItem(tr("BDAP"), TransactionFilterProxy::TYPE(TransactionRecord::NewDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::UpdateDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::DeleteDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::RevokeDomainUser) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::NewDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::UpdateDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::DeleteDomainGroup) |
+                                    TransactionFilterProxy::TYPE(TransactionRecord::RevokeDomainGroup));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
     typeWidget->setCurrentIndex(settings.value("transactionType").toInt());
 
@@ -192,7 +200,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     connect(view, SIGNAL(clicked(QModelIndex)), this, SLOT(computeSum()));
     connect(view, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextualMenu(QPoint)));
 
-	connect(abandonAction, SIGNAL(triggered()), this, SLOT(abandonTx()));
+    connect(abandonAction, SIGNAL(triggered()), this, SLOT(abandonTx()));
     connect(copyAddressAction, SIGNAL(triggered()), this, SLOT(copyAddress()));
     connect(copyLabelAction, SIGNAL(triggered()), this, SLOT(copyLabel()));
     connect(copyAmountAction, SIGNAL(triggered()), this, SLOT(copyAmount()));
@@ -422,6 +430,24 @@ void TransactionView::contextualMenu(const QPoint &point)
     }
 }
 
+void TransactionView::abandonTx()
+{
+    if(!transactionView || !transactionView->selectionModel())
+        return;
+    QModelIndexList selection = transactionView->selectionModel()->selectedRows(0);
+
+    // get the hash from the TxHashRole (QVariant / QString)
+    uint256 hash;
+    QString hashQStr = selection.at(0).data(TransactionTableModel::TxHashRole).toString();
+    hash.SetHex(hashQStr.toStdString());
+
+    // Abandon the wallet transaction over the walletModel
+    model->abandonTransaction(hash);
+
+    // Update the table
+    model->getTransactionTableModel()->updateTransaction(hashQStr, CT_UPDATED, false);
+}
+
 void TransactionView::copyAddress()
 {
     GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::AddressRole);
@@ -450,24 +476,6 @@ void TransactionView::copyTxHex()
 void TransactionView::copyTxPlainText()
 {
     GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::TxPlainTextRole);
-}
-
-void TransactionView::abandonTx()
-{
-    if(!transactionView || !transactionView->selectionModel())
-        return;
-    QModelIndexList selection = transactionView->selectionModel()->selectedRows(0);
-
-    // get the hash from the TxHashRole (QVariant / QString)
-    uint256 hash;
-    QString hashQStr = selection.at(0).data(TransactionTableModel::TxHashRole).toString();
-    hash.SetHex(hashQStr.toStdString());
-
-    // Abandon the wallet transaction over the walletModel
-    model->abandonTransaction(hash);
-
-    // Update the table
-    model->getTransactionTableModel()->updateTransaction(hashQStr, CT_UPDATED, false);
 }
 
 void TransactionView::editLabel()

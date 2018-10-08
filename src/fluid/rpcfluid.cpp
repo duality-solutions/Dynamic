@@ -88,8 +88,8 @@ UniValue getrawpubkey(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"address\"         (string, required) The Dynamic Address from which the pubkey is to recovered.\n"
             "\nExamples:\n"
-            + HelpExampleCli("burndynamic", "123.456")
-            + HelpExampleRpc("burndynamic", "123.456")
+            + HelpExampleCli("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
+            + HelpExampleRpc("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
         );
     UniValue ret(UniValue::VOBJ);
 
@@ -120,8 +120,8 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
             "\nArguments:\n"
             "1. \"account\"         (numeric or string, required) The amount of coins to be minted.\n"
             "\nExamples:\n"
-            + HelpExampleCli("burndynamic", "123.456")
-            + HelpExampleRpc("burndynamic", "123.456")
+            + HelpExampleCli("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
+            + HelpExampleRpc("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
         );
     CWalletTx wtx;
 
@@ -137,7 +137,7 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
 
-    SendCustomTransaction(destroyScript, wtx, nAmount);
+    SendCustomTransaction(destroyScript, wtx, nAmount, false);
 
     return wtx.GetHash().GetHex();
 }
@@ -180,7 +180,7 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
-        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST);
+        SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
     }
     else {
@@ -235,8 +235,8 @@ UniValue verifyquorum(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
             "\nExamples:\n"
-            + HelpExampleCli("consenttoken", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("consenttoken", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
+            + HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
+            + HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
         );
     std::string message;
 
@@ -568,19 +568,20 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{   //  category         name                        actor (function)           okSafeMode
+{ //  category              name                     actor (function)           okSafe argNames
+  //  --------------------- ------------------------ -----------------------    ------ --------------------
 #ifdef ENABLE_WALLET
     /* Fluid Protocol */
-    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
-    { "fluid",           "signtoken",                &signtoken,                true  },
-    { "fluid",           "consenttoken",             &consenttoken,             true  },
-    { "fluid",           "getrawpubkey",             &getrawpubkey,             true  },
-    { "fluid",           "verifyquorum",             &verifyquorum,             true  },
-    { "fluid",           "maketoken",                &maketoken,                true  },
-    { "fluid",           "getfluidhistory",          &getfluidhistory,          true  },
-    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
-    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
-    { "fluid",           "gettime",                  &gettime,                  true  },
+    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true,  {"opcode","hexstring"} },
+    { "fluid",           "signtoken",                &signtoken,                true,  {"address","tokenkey"} },
+    { "fluid",           "consenttoken",             &consenttoken,             true,  {"address","tokenkey"} },
+    { "fluid",           "getrawpubkey",             &getrawpubkey,             true,  {"address"} },
+    { "fluid",           "verifyquorum",             &verifyquorum,             true,  {"tokenkey"} },
+    { "fluid",           "maketoken",                &maketoken,                true,  {"string"} },
+    { "fluid",           "getfluidhistory",          &getfluidhistory,          true,  {} },
+    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true,  {} },
+    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true,  {} },
+    { "fluid",           "gettime",                  &gettime,                  true,  {} },
 #endif //ENABLE_WALLET
 };
 

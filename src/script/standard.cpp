@@ -29,7 +29,6 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_SCRIPTHASH: return "scripthash";
     case TX_MULTISIG: return "multisig";
     case TX_NULL_DATA: return "nulldata";
-    case TX_NAME: return "name";
     }
     return NULL;
 }
@@ -37,7 +36,7 @@ const char* GetTxnOutputType(txnouttype t)
 /**
  * Return public keys or hashes from scriptPubKey, for 'standard' transaction types.
  */
-bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
+bool Solver(const CScript& scriptPubKeyIn, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
 {
     // Templates
     static std::multimap<txnouttype, CScript> mTemplates;
@@ -51,13 +50,19 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
 
         // Sender provides N pubkeys, receivers provides M signatures
         mTemplates.insert(std::make_pair(TX_MULTISIG, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_CHECKMULTISIG));
-
-        // Sender provides N pubkeys, receivers provides M signatures
-        // TODO (amir): Is this correct???
-        mTemplates.insert(std::make_pair(TX_NAME, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_IDENTITY_NEW));
     }
 
     vSolutionsRet.clear();
+
+    // Check to see if this is a BDAP service transaction, if so get the scriptPubKey by extracting service specific script information
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(scriptPubKeyIn, scriptPubKeyOut)) {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else {
+        scriptPubKey = scriptPubKeyIn;
+    }
 
     // Shortcut for pay-to-script-hash, which are more constrained than the other types:
     // it is always OP_HASH160 20 [20 byte hash] OP_EQUAL
@@ -284,9 +289,4 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys)
         script << ToByteVector(key);
     script << CScript::EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
     return script;
-}
-
-CScriptID GetScriptID(const CScript& script)
-{
-    return CScriptID(Hash160(script));
 }

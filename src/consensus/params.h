@@ -30,6 +30,10 @@ struct BIP9Deployment {
     int64_t nStartTime;
     /** Timeout/expiry MedianTime for the deployment attempt. */
     int64_t nTimeout;
+    /** The number of past blocks (including the block under consideration) to be taken into account for locking in a fork. */
+    int64_t nWindowSize;
+    /** A number of blocks, in the range of 1..nWindowSize, which must signal for a fork in order to lock it in. */
+    int64_t nThreshold;
 };
 
 /**
@@ -40,12 +44,14 @@ struct Params {
     int nRewardsStart;
     int nDynodePaymentsStartBlock;
     int nMinCountDynodesPaymentStart;
+    int nInstantSendConfirmationsRequired; // in blocks
     int nInstantSendKeepLock; // in blocks
     int nBudgetPaymentsStartBlock;
     int nBudgetPaymentsCycleBlocks;
     int nBudgetPaymentsWindowBlocks;
     int nBudgetProposalEstablishingTime; // in seconds
     int nSuperblockStartBlock;
+    uint256 nSuperblockStartHash;
     int nSuperblockCycle; // in blocks
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
     int nGovernanceFilterElements;
@@ -54,6 +60,7 @@ struct Params {
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
+
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.
@@ -72,6 +79,8 @@ struct Params {
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
+    uint256 nMinimumChainWork;
+    uint256 defaultAssumeValid;
     
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
     int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp  )) / 100; }

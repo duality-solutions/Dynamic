@@ -1,6 +1,169 @@
 **Dynamic CHANGELOG**
 -------------------------
 
+**Dynamic v2.4.0.0**
+
+* Fix copy elision warning in opencl device.cpp
+* Supress OSX private field warnings
+* Fix comparator and supress warning
+* Supress MacOS build warnings for deprecated code
+* [Qt] Fix styling of PrivateSend option on sendcoinsdialog.ui
+* Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
+* [GPU] Fix GPU found block nonce before ProcessFoundSolution
+* [GPU] Update README for GPU Mining
+* [GPU] Seperate CPU and GPU miners to fix hashmeters
+* [GPU] Fix Qt mining page layout so it expands
+* [GPU] Fixes to miner UI controls
+* [GPU] Hide slider until sync completes/change batch size
+* [GPU] Split CPU/GPU UI thread allocation
+* [GPU] fix global and order members as they appear in initializer
+* [GPU] fix processingUnit batch size and minor code tweaks
+* [GPU] fix autoreplace
+* [GPU] move implementations out of definitions
+* [GPU] fix const char* instead of std::string
+* [GPU] fix unique_ptr null check
+* [GPU] remove redundant comments and whitespace
+* [GPU] fix thread names
+* [GPU] remove redundant comments and whitespace
+* [GPU] follow pattern and add this->
+* [GPU] remove redundant DynamicMiner function
+* [GPU] explicit boost::none for boost::bind
+* [GPU] fix boost::optional no value_or method error
+* [GPU] reorder constructor initialization
+* [GPU] move constructor code to base
+* [GPU] move hashTarget to protected variables
+* [GPU] fix non-pointer operand
+* [GPU] move protected variables
+* [GPU] fix CPUMiner constructor
+* [GPU] track chain tip
+* [GPU] remove name collison
+* [GPU] add device index to base class
+* [GPU] provide pblock to LoopChecks
+* [GPU] remove unused template from BaseMiner
+* [GPU] remove static from StartLoop
+* [GPU] c++11 compatibility
+* [GPU] cleanup thread constructor
+* [GPU] remove unused assignment
+* [GPU] nullptr comparisons
+* [GPU] use boost::shared_ptr as expected
+* [GPU] move transactionsUdatedLast to base class
+* [GPU] enable_gpu ifdef
+* [GPU] fix miner start loop call
+* [GPU] rename namespace to miners
+* [GPU] move threads to namespace
+* [GPU] fix ptr ptr semantics
+* [GPU] fix count hashes function params
+* [GPU] mark function as override
+* [GPU] bring back enable_gpu ifdef
+* [GPU] rename processing unit
+* [GPU] remove static from thread_group
+* [GPU] fix optional dereference
+* [GPU] rename check function and fix breaks
+* [GPU] use shared_ptr to manage thread_group ptr
+* [GPU] Refactor miners code
+* [GPU] Process hashes in batches
+* [GPU] Remove obvious type hint
+* [GPU] Device get total memory method
+* [GPU] OpenCL kernel static build rule
+* [GPU] Remove unsigned and signed int comparison
+* [GPU] Mac build fix attempt
+* [GPU] Disable CUDA in Travis
+* [GPU] Fix autoconf warnings
+* [GPU] Apple OpenCL linker flags
+* [GPU] Implement GPU Mining for both Daemon/Qt
+* [GPU] Split CUDA and OpenCL libraries
+* [GPU] Add CUDA/OpenCL Libraries for GPU Mining
+* Remove unused serialization method
+* Fix consts in txmempool
+* [depends] upgrade boost to 1.67.0
+* [depends] upgrade dbus to 1.13.4
+* [depends] update expad download path
+* [depends] upgrade freetype to 2.9.1
+* [depends] update libevent download path
+* [depends] upgrade libxcb to 1.13
+* [depends] upgrade miniupnpc to 2.1
+* [depends] upgrade native_biplist to 1.0.3
+* [depends] upgrade native_ccache to 3.4.2
+* [depends] update native_ds_store download path
+* [depends] upgrade native_mac_alias to 2.0.7
+* [depends] upgrade native_protobuf to 3.6.0
+* [depends] update openssl to 1.0.1k - Add RISC-V support
+* [depends] upgrade qt to 5.9.6
+* [depends] upgrade qrencode
+* [depends] upgrade xcb_proto to 1.13
+* [depends] upgrade xtrans to 1.3.5
+* [depends] upgrade zeromq to 4.2.5
+* [depends] add fix_configure_mac.patch file
+* [depends] add fix_no_printer.patch file
+* [depends] update mac-qmake.conf patch file
+* [BDAP] Add directory type function
+* [BDAP] Implement add new entry validation checking
+* [BDAP] Fix validation when syncing blocks from peers
+* [BDAP] Implement directory entry list RPC command
+* [BDAP] Add getdirectoryinfo RPC command
+* [BDAP] Add leveldb update method to db wrapper class
+* [BDAP] Fix validate input function; leveldb check not DOS
+* [BDAP] Update getdirectoryinfo help parameter
+* [BDAP] Implement update & delete entry tx validation checking
+* [BDAP] Fix saving tx hash in leveldb bdap database
+* [BDAP] Replace updatedirectory RPC command
+* [BDAP] Fix getdirectoryinfo return when entry not found
+* [BDAP] Fix expire time in RPC commands
+* [BDAP] Refactor directory to domainentry
+* [BDAP] Add domain entry link class for binding operations
+* [BDAP] Refactor domain entry certificate and move to its own class
+* [BDAP] Refactor domain entry checkpoints and move to its own class
+* [BDAP] Refactor domain entry channel data and move to its own class
+* [BDAP] Check if tx exists in memory pool for new domain entries
+* [BDAP] Update RPC command names
+* [BDAP] Check domain entry wallet address and encrypt pub key
+* [BDAP] Remove SignWalletAddress in domain entry. Only use WalletAddress
+* [BDAP] Check ownership in updatedomainentry RPC command
+* [BDAP] Fix domain entry so it populates block height
+* [BDAP] Add code to check domain entry's previous UTXO
+* Remove duplicate mem pool check in wallet available coins
+* [BDAP] Add link address to domain entry class
+* [BDAP] Check previous wallet address for update and delete txs
+* [BDAP] Add delete domain entry RPC command
+* [BDAP] Allow blank link address and encrypt pub key for delete operations
+* [Fluid] Fix segfault when running reindex
+* Move makekeypair to BDAP and change testnet spork pub key
+* [BDAP] Add identity and identity verification classes
+* [BDAP] Add missing operation codes
+* [BDAP] Adjust identity verification class
+* [BDAP] Fix domain entry object type enum
+* [BDAP] Add entry audit data class
+* [BDAP] Add new public group entry RPC command
+* [BDAP] Add list domain group entries RPC command
+* [BDAP] Add update and delete public group RPC commands
+* Corrected the documentation for Fluid RPC Calls
+* [BDAP] Refactor general functions and fix get op type
+* [BDAP] Improve transaction display in Qt UI
+* Added more seednodes
+* Remove double forcecompactdb arg
+* [Fluid] Refactor fluid code and remove index database
+* [BDAP] Remove fluid reference from domain entry
+* [Fluid] Add mining update and mint leveldb databases
+* [Fluid] Implement new fluid databases
+* [Fluid] Fix get fluid sovereigns RPC
+* [Fluid] Fixes to get last functions and RPC commands
+* [Fluid] Fix consensus issues with new db code
+* Drop delayed headers logic and fix duplicate initial headers sync
+* replace boost iterators with for
+* RPC: Add description for InstantSend-related fields of mempool entry
+* RPC: fix wallet lock check in
+* minor reformatting
+* Remove explicit wallet lock in DynodeList::StartAll()
+* Do not create dnb until dynodeSync is finished
+* Don't drop dnb's for outdated DN's
+* Fix previous commit and fix 2 Spork issues
+* PrepareDenominate fix
+* Sync DN list and DNW list from 3 peers max
+* Use correct protocol when serializing messages in reply to
+* Bump Versioning
+* Update dynamic_qt.m4 (Remove ability to build with Qt4)
+
+
 **Dynamic v2.3.5.0**
 
 * Fix crash bug with duplicate inputs within a transaction
@@ -191,6 +354,7 @@
 * Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
@@ -213,6 +377,7 @@
 * Update secp256k1
 * Fix fixed seeds
 * Update CHANGELOG
+
 
 **Dynamic v2.1.0.0**
 
@@ -298,6 +463,7 @@
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
 * Update CHANGELOG
+
 
 **Dynamic v2.0.0.0**
 
@@ -570,6 +736,7 @@
 * Optimize CheckOutpoint
 * Update CHANGELOG
 
+
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values
@@ -632,6 +799,7 @@
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.2**
 
 * [Sync] Fix issue with headers first sync
@@ -644,10 +812,12 @@
 * Bump Governance/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 * Update CHANGELOG
+
 
 **Dynamic v1.3.0.0**
 
@@ -655,6 +825,7 @@
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 * Update CHANGELOG
+
 
 **Dynamic v1.2.0.0**
 
@@ -698,6 +869,7 @@
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
 * Update CHANGELOG
+
 
 **Dynamic v1.1.0.0**
 

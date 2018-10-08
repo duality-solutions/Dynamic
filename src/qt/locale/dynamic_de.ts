@@ -3175,6 +3175,10 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Minimaler Betrag</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Adresse kopieren</translation>
     </message>

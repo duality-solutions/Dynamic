@@ -64,6 +64,9 @@ Notificator::Notificator(const QString &_programName, QSystemTrayIcon *_trayIcon
         mode = UserNotificationCenter;
     }
     else {
+#if defined(MAC_OSX)
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
         // Check if Growl is installed (based on Qt's tray icon implementation)
         CFURLRef cfurl;
         OSStatus status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, CFSTR("growlTicket"), kLSRolesAll, 0, &cfurl);

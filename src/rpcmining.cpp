@@ -205,7 +205,8 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
             // target -- 1 in 2^(2^32). That ain't gonna happen.
             ++pblock->nNonce;
         }
-        if (!ProcessNewBlock(Params(), pblock, true, NULL, NULL))
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, NULL))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
         ++nHeight;
         blockHashes.push_back(pblock->GetHash().GetHex());
@@ -295,18 +296,23 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
 
 UniValue setgenerate(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3)
         throw std::runtime_error(
-            "setgenerate generate ( genproclimit )\n"
+            "setgenerate generate genproclimit (genproclimit-gpu)\n"
             "\nSet 'generate' true or false to turn generation on or off.\n"
             "Generation is limited to 'genproclimit' processors, -1 is unlimited.\n"
             "See the getgenerate call for the current setting.\n"
             "\nArguments:\n"
             "1. generate         (boolean, required) Set to true to turn on generation, false to turn off.\n"
             "2. genproclimit     (numeric, optional) Set the processor limit for when generation is on. Can be -1 for unlimited.\n"
+            "3. genproclimit-gpu (numeric, optional) Set the GPU thread limit for when generation is on. Can be -1 for unlimited.\n"
             "\nExamples:\n"
-            "\nSet the generation on with a limit of one processor\n"
+            "\nSet the generation on with a limit of one CPU processor\n"
             + HelpExampleCli("setgenerate", "true 1") +
+#if ENABLE_GPU   
+            "\nSet the generation on with a limit of one GPU\n"
+            + HelpExampleCli("setgenerate", "true 0 1") +
+#endif
             "\nCheck the setting\n"
             + HelpExampleCli("getgenerate", "") +
             "\nTurn off generation\n"
@@ -322,17 +328,28 @@ UniValue setgenerate(const JSONRPCRequest& request)
     if (request.params.size() > 0)
         fGenerate = request.params[0].get_bool();
 
-    int nGenProcLimit = GetArg("-genproclimit", DEFAULT_GENERATE_THREADS);
+    int nGenProcLimit = GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU);
     if (request.params.size() > 1)
-    {
         nGenProcLimit = request.params[1].get_int();
-        if (nGenProcLimit == 0)
-            fGenerate = false;
-    }
 
-    GetArg("-gen", "") = (fGenerate ? "1" : "0");
-    GetArg("-genproclimit", "") = itostr(nGenProcLimit);
-    GenerateDynamics(fGenerate, nGenProcLimit, Params(), *g_connman);
+    int nGenProcLimitGPU = GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
+    if (request.params.size() > 2)
+        nGenProcLimitGPU = request.params[2].get_int();
+
+    if (nGenProcLimit == 0 && nGenProcLimitGPU == 0)
+        fGenerate = false;
+
+    ForceSetArg("-gen", fGenerate ? "1" : "0");
+    ForceSetArg("-genproclimit", nGenProcLimit);
+    ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
+    LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimit, nGenProcLimitGPU);
+
+    if (fGenerate) {
+        GenerateDynamicsCPU(nGenProcLimit, Params(), *g_connman);
+        GenerateDynamicsGPU(nGenProcLimitGPU, Params(), *g_connman);
+    } else {
+        ShutdownMiners();
+    }
 
     return NullUniValue;
 }
@@ -351,9 +368,43 @@ UniValue gethashespersec(const JSONRPCRequest& request)
             + HelpExampleRpc("gethashespersec", "")
         );
 
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
-        return (int64_t)0;
-    return (int64_t)dHashesPerSec;
+    return GetHashRate();
+}
+
+
+UniValue getcpuhashespersec(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getcpuhashespersec\n"
+            "\nReturns a recent CPU hashes per second performance measurement while generating.\n"
+            "See the getgenerate and setgenerate calls to turn generation on and off.\n"
+            "\nResult:\n"
+            "n            (numeric) The recent CPU hashes per second when generation is on (will return 0 if generation is off)\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getcpuhashespersec", "")
+            + HelpExampleRpc("getcpuhashespersec", "")
+        );
+
+    return GetCPUHashRate();
+}
+
+
+UniValue getgpuhashespersec(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getgpuhashespersec\n"
+            "\nReturns a recent GPU hashes per second performance measurement while generating.\n"
+            "See the getgenerate and setgenerate calls to turn generation on and off.\n"
+            "\nResult:\n"
+            "n            (numeric) The recent GPU hashes per second when generation is on (will return 0 if generation is off)\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getgpuhashespersec", "")
+            + HelpExampleRpc("getgpuhashespersec", "")
+        );
+
+    return GetGPUHashRate();
 }
 
 UniValue getmininginfo(const JSONRPCRequest& request)
@@ -373,6 +424,9 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"genproclimit\": n          (numeric) The processor limit for generation. -1 if no generation. (see getgenerate or setgenerate calls)\n"
             "  \"pooledtx\": n              (numeric) The size of the mempool\n"
             "  \"chain\": \"xxxx\",         (string) current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"hashespersec\": n          (numeric) The recent hashes per second when generation is on (will return 0 if generation is off)\n"
+            "  \"cpuhashespersec\": n       (numeric) The recent CPU hashes per second when generation is on (will return 0 if generation is off)\n"
+            "  \"gpuhashespersec\": n       (numeric) The recent GPU hashes per second when generation is on (will return 0 if generation is off)\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getmininginfo", "")
@@ -388,12 +442,15 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.push_back(Pair("currentblocktx",   (uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty",       (double)GetDifficulty()));
     obj.push_back(Pair("errors",           GetWarnings("statusbar")));
-    obj.push_back(Pair("genproclimit",     (int)GetArg("-genproclimit", DEFAULT_GENERATE_THREADS)));
+    obj.push_back(Pair("genproclimit",     (int)GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU)));
+    obj.push_back(Pair("genproclimit-gpu", (int)GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU)));
     obj.push_back(Pair("networkhashps",    getnetworkhashps(request)));
     obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
     obj.push_back(Pair("chain",            Params().NetworkIDString()));
     obj.push_back(Pair("generate",         getgenerate(request)));
     obj.push_back(Pair("hashespersec",     gethashespersec(request)));
+    obj.push_back(Pair("cpuhashespersec",  getcpuhashespersec(request)));
+    obj.push_back(Pair("gpuhashespersec",  getgpuhashespersec(request)));
     return obj;
 }
 
@@ -662,10 +719,6 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         }
 
         // Release the wallet and main lock while waiting
-#ifdef ENABLE_WALLET
-        if(pwalletMain)
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet);
-#endif
         LEAVE_CRITICAL_SECTION(cs_main);
         {
             checktxtime = boost::get_system_time() + boost::posix_time::minutes(1);
@@ -683,10 +736,6 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             }
         }
         ENTER_CRITICAL_SECTION(cs_main);
-#ifdef ENABLE_WALLET
-        if(pwalletMain)
-            ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet);
-#endif
 
         if (!IsRPCRunning())
             throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Shutting down");
@@ -730,8 +779,8 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     UniValue transactions(UniValue::VARR);
     std::map<uint256, int64_t> setTxIndex;
     int i = 0;
-    BOOST_FOREACH (const CTransaction& tx, pblock->vtx) 
-    {
+    for (const auto& it : pblock->vtx) {
+        const CTransaction& tx = *it;
         uint256 txHash = tx.GetHash();
         setTxIndex[txHash] = i++;
 
@@ -830,7 +879,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
-    result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0].GetValueOut()));
+    result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->GetValueOut()));
     result.push_back(Pair("longpollid", chainActive.Tip()->GetBlockHash().GetHex() + i64tostr(nTransactionsUpdatedLast)));
     result.push_back(Pair("target", hashTarget.GetHex()));
     result.push_back(Pair("mintime", (int64_t)pindexPrev->GetMedianTimePast()+1));
@@ -843,21 +892,21 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
     UniValue dynodeObj(UniValue::VOBJ);
-    if(pblock->txoutDynode != CTxOut()) {
+    if(pblocktemplate->txoutDynode != CTxOut()) {
         CTxDestination address1;
-        ExtractDestination(pblock->txoutDynode.scriptPubKey, address1);
+        ExtractDestination(pblocktemplate->txoutDynode.scriptPubKey, address1);
         CDynamicAddress address2(address1);
         dynodeObj.push_back(Pair("payee", address2.ToString().c_str()));
-        dynodeObj.push_back(Pair("script", HexStr(pblock->txoutDynode.scriptPubKey.begin(), pblock->txoutDynode.scriptPubKey.end())));
-        dynodeObj.push_back(Pair("amount", pblock->txoutDynode.nValue));
+        dynodeObj.push_back(Pair("script", HexStr(pblocktemplate->txoutDynode.scriptPubKey.begin(), pblocktemplate->txoutDynode.scriptPubKey.end())));
+        dynodeObj.push_back(Pair("amount", pblocktemplate->txoutDynode.nValue));
     }
     result.push_back(Pair("dynode", dynodeObj));
     result.push_back(Pair("dynode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nDynodePaymentsStartBlock));
     result.push_back(Pair("dynode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_DYNODE_PAYMENT_ENFORCEMENT)));
 
     UniValue superblockObjArray(UniValue::VARR);
-    if(pblock->voutSuperblock.size()) {
-        BOOST_FOREACH (const CTxOut& txout, pblock->voutSuperblock) {
+    if(pblocktemplate->voutSuperblock.size()) {
+        BOOST_FOREACH (const CTxOut& txout, pblocktemplate->voutSuperblock) {
             UniValue entry(UniValue::VOBJ);
             CTxDestination address1;
             ExtractDestination(txout.scriptPubKey, address1);
@@ -914,10 +963,15 @@ UniValue submitblock(const JSONRPCRequest& request)
             + HelpExampleRpc("submitblock", "\"mydata\"")
         );
 
-    CBlock block;
+    std::shared_ptr<CBlock> blockptr = std::make_shared<CBlock>();
+    CBlock& block = *blockptr;
     if (!DecodeHexBlk(block, request.params[0].get_str()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block decode failed");
 
+    if (block.vtx.empty() || !block.vtx[0]->IsCoinBase()) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
+    }
+    
     uint256 hash = block.GetHash();
     bool fBlockPresent = false;
     {
@@ -937,7 +991,7 @@ UniValue submitblock(const JSONRPCRequest& request)
     CValidationState state;
     submitblock_StateCatcher sc(block.GetHash());
     RegisterValidationInterface(&sc);
-    bool fAccepted = ProcessNewBlock(Params(), &block, true, NULL, NULL);
+    bool fAccepted = ProcessNewBlock(Params(), blockptr, true, NULL);
     UnregisterValidationInterface(&sc);
     if (fBlockPresent)
     {
@@ -1083,29 +1137,30 @@ UniValue estimatesmartpriority(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafeMode
-  //  --------------------- ------------------------  -----------------------  ----------
-    { "mining",             "getnetworkhashps",       &getnetworkhashps,       true  },
-    { "mining",             "getmininginfo",          &getmininginfo,          true  },
-    { "mining",             "prioritisetransaction",  &prioritisetransaction,  true  },
-    { "mining",             "getblocktemplate",       &getblocktemplate,       true  },
-    { "mining",             "submitblock",            &submitblock,            true  },
+{ //  category              name                      actor (function)         okSafe argNames
+  //  --------------------- ------------------------  -----------------------  ------ ---
+    { "mining",             "getnetworkhashps",       &getnetworkhashps,       true,  {"nblocks","height"} },
+    { "mining",             "getmininginfo",          &getmininginfo,          true,  {} },
+    { "mining",             "prioritisetransaction",  &prioritisetransaction,  true,  {"txid","priority_delta","fee_delta"} },
+    { "mining",             "getblocktemplate",       &getblocktemplate,       true,  {"template_request"} },
+    { "mining",             "submitblock",            &submitblock,            true,  {"hexdata","parameters"} },
 
-    { "generating",         "getgenerate",            &getgenerate,            true  },
-    { "generating",         "setgenerate",            &setgenerate,            true  },
-    { "generating",         "generate",               &generate,               true  },
-    { "generating",         "generatetoaddress",      &generatetoaddress,      true  },
-    { "generating",         "gethashespersec",        &gethashespersec,        true  },
+    { "generating",         "getgenerate",            &getgenerate,            true,  {} },
+    { "generating",         "setgenerate",            &setgenerate,            true,  {"generate","genproclimit","genproclimit-gpu"} },
+    { "generating",         "generate",               &generate,               true,  {"nblocks","maxtries"} },
+    { "generating",         "generatetoaddress",      &generatetoaddress,      true,  {"nblocks","address","maxtries"} },
+    { "generating",         "gethashespersec",        &gethashespersec,        true,  {} },
+    { "generating",         "getcpuhashespersec",     &getcpuhashespersec,     true,  {} },
+    { "generating",         "getgpuhashespersec",     &getgpuhashespersec,     true,  {} },
 
-    { "util",               "estimatefee",            &estimatefee,            true  },
-    { "util",               "estimatepriority",       &estimatepriority,       true  },
-    { "util",               "estimatesmartfee",       &estimatesmartfee,       true  },
-    { "util",               "estimatesmartpriority",  &estimatesmartpriority,  true  },
+    { "util",               "estimatefee",            &estimatefee,            true,  {"nblocks"} },
+    { "util",               "estimatepriority",       &estimatepriority,       true,  {"nblocks"} },
+    { "util",               "estimatesmartfee",       &estimatesmartfee,       true,  {"nblocks"} },
+    { "util",               "estimatesmartpriority",  &estimatesmartpriority,  true,  {"nblocks"} },
 };
 
-void RegisterMiningRPCCommands(CRPCTable &tableRPC)
+void RegisterMiningRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
-

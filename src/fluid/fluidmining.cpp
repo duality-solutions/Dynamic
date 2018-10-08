@@ -8,8 +8,6 @@
 #include "operations.h"
 #include "script/script.h"
 
-#include <boost/thread.hpp>
-
 CFluidMiningDB *pFluidMiningDB = NULL;
 
 bool GetFluidMiningData(const CScript& scriptPubKey, CFluidMining& entry)

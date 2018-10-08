@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue
+DIST_SUBDIRS = secp256k1 univalue bdap
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -73,8 +73,18 @@ DYNAMIC_CORE_H = \
   amount.h \
   arith_uint256.h \
   base58.h \
+  bdap/auditdata.h \
+  bdap/bdap.h \
+  bdap/domainentry.h \
+  bdap/domainentrydb.h \
+  bdap/entrycertificate.h \
+  bdap/entrychannel.h \
+  bdap/entrycheckpoints.h \
+  bdap/entrylink.h \
+  bdap/identity.h \
   bip39_english.h \
   bip39.h \
+  blockencodings.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -97,6 +107,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
+  cuckoocache.h \
   dbwrapper.h \
   dynode.h \
   dynode-payments.h \
@@ -131,12 +142,14 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
+  miner-gpu.h \
   miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
   netbase.h \
   netfulfilledman.h \
+  netmessagemaker.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -221,9 +234,18 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
+  bdap/auditdata.cpp \
+  bdap/domainentry.cpp \
+  bdap/domainentrydb.cpp \
+  bdap/entrycertificate.cpp \
+  bdap/entrychannel.cpp \
+  bdap/entrycheckpoints.cpp \
+  bdap/entrylink.cpp \
+  bdap/identity.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -264,6 +286,7 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
+  bdap/rpcdomainentry.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
@@ -295,7 +318,6 @@ libdynamic_zmq_a_SOURCES = \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp
 endif
-
 
 # wallet: shared between dynamicd and dynamic-qt, but only linked
 # when wallet enabled
@@ -517,6 +539,7 @@ endif
 
 CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a
 CLEANFILES += *.gcda *.gcno
+CLEANFILES += bdap/*.gcda bdap/*.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
@@ -567,6 +590,10 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
+endif
+
+if ENABLE_GPU
+include Makefile.gpu.include
 endif
 
 if ENABLE_TESTS

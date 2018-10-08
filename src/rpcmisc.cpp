@@ -157,6 +157,7 @@ UniValue dnsync(const JSONRPCRequest& request)
         UniValue objStatus(UniValue::VOBJ);
         objStatus.push_back(Pair("AssetID", dynodeSync.GetAssetID()));
         objStatus.push_back(Pair("AssetName", dynodeSync.GetAssetName()));
+        objStatus.push_back(Pair("AssetStartTime", dynodeSync.GetAssetStartTime()));
         objStatus.push_back(Pair("Attempt", dynodeSync.GetAttempt()));
         objStatus.push_back(Pair("IsBlockchainSynced", dynodeSync.IsBlockchainSynced()));
         objStatus.push_back(Pair("IsDynodeListSynced", dynodeSync.IsDynodeListSynced()));
@@ -226,27 +227,52 @@ public:
 */
 UniValue spork(const JSONRPCRequest& request)
 {
-    if(request.params.size() == 1 && request.params[0].get_str() == "show"){
-        UniValue ret(UniValue::VOBJ);
-        for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
-            if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
-                ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.GetSporkValue(nSporkID)));
+    if (request.params.size() == 1) {
+        // basic mode, show info
+        std:: string strCommand = request.params[0].get_str();
+        if (strCommand == "show") {
+            UniValue ret(UniValue::VOBJ);
+            for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
+                if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
+                    ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.GetSporkValue(nSporkID)));
+            }
+            return ret;
+        } else if(strCommand == "active"){
+            UniValue ret(UniValue::VOBJ);
+            for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
+                if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
+                    ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.IsSporkActive(nSporkID)));
+            }
+            return ret;
         }
-        return ret;
-    } else if(request.params.size() == 1 && request.params[0].get_str() == "active"){
-        UniValue ret(UniValue::VOBJ);
-        for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
-            if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
-                ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.IsSporkActive(nSporkID)));
-        }
-        return ret;
     }
-#ifdef ENABLE_WALLET
-    else if (request.params.size() == 2){
+
+    if (request.fHelp || request.params.size() != 2) {
+        // default help, for basic mode
+        throw std::runtime_error(
+            "spork \"command\"\n"
+            "\nShows information about current state of sporks\n"
+            "\nArguments:\n"
+            "1. \"command\"                     (string, required) 'show' to show all current spork values, 'active' to show which sporks are active\n"
+            "\nResult:\n"
+            "For 'show':\n"
+            "{\n"
+            "  \"SPORK_NAME\" : spork_value,    (number) The value of the specific spork with the name SPORK_NAME\n"
+            "  ...\n"
+            "}\n"
+            "For 'active':\n"
+            "{\n"
+            "  \"SPORK_NAME\" : true|false,     (boolean) 'true' for time-based sporks if spork is active and 'false' otherwise\n"
+            "  ...\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("spork", "show")
+            + HelpExampleRpc("spork", "\"show\""));
+    } else {
+        // advanced mode, update spork values
         int nSporkID = sporkManager.GetSporkIDByName(request.params[0].get_str());
-        if(nSporkID == -1){
-            return "Invalid spork name";
-        }
+        if(nSporkID == -1)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid spork name");
 
         if (!g_connman)
             throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
@@ -259,21 +285,19 @@ UniValue spork(const JSONRPCRequest& request)
             sporkManager.ExecuteSpork(nSporkID, nValue);
             return "success";
         } else {
-            return "failure";
+            throw std::runtime_error(
+                "spork \"name\" value\n"
+                "\nUpdate the value of the specific spork. Requires \"-sporkkey\" to be set to sign the message.\n"
+                "\nArguments:\n"
+                "1. \"name\"              (string, required) The name of the spork to update\n"
+                "2. value               (number, required) The new desired value of the spork\n"
+                "\nResult:\n"
+                "  result               (string) \"success\" if spork value was updated or this help otherwise\n"
+                "\nExamples:\n"
+                + HelpExampleCli("spork", "SPORK_2_INSTANTSEND_ENABLED 4070908800")
+                + HelpExampleRpc("spork", "\"SPORK_2_INSTANTSEND_ENABLED\", 4070908800"));
         }
-
     }
-
-    throw std::runtime_error(
-        "spork <name> [<value>]\n"
-        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active\n"
-        "<value> is a epoch datetime to enable or disable spork\n"
-        + HelpRequiringPassphrase());
-#else // ENABLE_WALLET
-    throw std::runtime_error(
-        "spork <name>\n"
-        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active\n");
-#endif // ENABLE_WALLET
 
 }
 
@@ -296,6 +320,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
             "  \"pubkey\" : \"publickeyhex\",    (string) The hex value of the raw public key\n"
             "  \"iscompressed\" : true|false,  (boolean) If the address is compressed\n"
             "  \"account\" : \"account\"         (string) DEPRECATED. The account associated with the address, \"\" is the default account\n"
+            "  \"timestamp\" : timestamp,        (number, optional) The creation time of the key if available in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"hdkeypath\" : \"keypath\"       (string, optional) The HD keypath if the key is HD and available\n"
             "  \"hdchainid\" : \"<hash>\"        (string, optional) The ID of the HD chain\n"
             "}\n"
@@ -333,11 +358,21 @@ UniValue validateaddress(const JSONRPCRequest& request)
         if (pwalletMain && pwalletMain->mapAddressBook.count(dest))
             ret.push_back(Pair("account", pwalletMain->mapAddressBook[dest].name));
         CKeyID keyID;
-        CHDChain hdChainCurrent;
-        if (pwalletMain && address.GetKeyID(keyID) && pwalletMain->mapHdPubKeys.count(keyID) && pwalletMain->GetHDChain(hdChainCurrent))
-        {
-            ret.push_back(Pair("hdkeypath", pwalletMain->mapHdPubKeys[keyID].GetKeyPath()));
-            ret.push_back(Pair("hdchainid", hdChainCurrent.GetID().GetHex()));
+        if (pwalletMain) {
+            const auto& meta = pwalletMain->mapKeyMetadata;
+            auto it = address.GetKeyID(keyID) ? meta.find(keyID) : meta.end();
+            if (it == meta.end()) {
+                it = meta.find(CScriptID(scriptPubKey));
+            }
+            if (it != meta.end()) {
+                ret.push_back(Pair("timestamp", it->second.nCreateTime));
+            }
+
+            CHDChain hdChainCurrent;
+            if (!keyID.IsNull() && pwalletMain->mapHdPubKeys.count(keyID) && pwalletMain->GetHDChain(hdChainCurrent)) {
+                ret.push_back(Pair("hdkeypath", pwalletMain->mapHdPubKeys[keyID].GetKeyPath()));
+                ret.push_back(Pair("hdchainid", hdChainCurrent.GetID().GetHex()));
+            }
         }
 #endif
     }
@@ -572,48 +607,6 @@ UniValue setmocktime(const JSONRPCRequest& request)
     SetMockTime(request.params[0].get_int64());
 
     return NullUniValue;
-}
-
-static UniValue RPCLockedMemoryInfo()
-{
-    LockedPool::Stats stats = LockedPoolManager::Instance().stats();
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("used", uint64_t(stats.used)));
-    obj.push_back(Pair("free", uint64_t(stats.free)));
-    obj.push_back(Pair("total", uint64_t(stats.total)));
-    obj.push_back(Pair("locked", uint64_t(stats.locked)));
-    obj.push_back(Pair("chunks_used", uint64_t(stats.chunks_used)));
-    obj.push_back(Pair("chunks_free", uint64_t(stats.chunks_free)));
-    return obj;
-}
-
-UniValue getmemoryinfo(const JSONRPCRequest& request)
-{
-    /* Please, avoid using the word "pool" here in the RPC interface or help,
-     * as users will undoubtedly confuse it with the other "memory pool"
-     */
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getmemoryinfo\n"
-            "Returns an object containing information about memory usage.\n"
-            "\nResult:\n"
-            "{\n"
-            "  \"locked\": {               (object) Information about locked memory manager\n"
-            "    \"used\": xxxxx,          (numeric) Number of bytes used\n"
-            "    \"free\": xxxxx,          (numeric) Number of bytes available in current arenas\n"
-            "    \"total\": xxxxxxx,       (numeric) Total number of bytes managed\n"
-            "    \"locked\": xxxxxx,       (numeric) Amount of bytes that succeeded locking. If this number is smaller than total, locking pages failed at some point and key data could be swapped to disk.\n"
-            "    \"chunks_used\": xxxxx,   (numeric) Number allocated chunks\n"
-            "    \"chunks_free\": xxxxx,   (numeric) Number unused chunks\n"
-            "  }\n"
-            "}\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getmemoryinfo", "")
-            + HelpExampleRpc("getmemoryinfo", "")
-        );
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("locked", RPCLockedMemoryInfo()));
-    return obj;
 }
 
 bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &address)
@@ -1086,36 +1079,94 @@ UniValue getspentinfo(const JSONRPCRequest& request)
     return obj;
 }
 
-static const CRPCCommand commands[] =
-{ //  category              name                      actor (function)         okSafeMode
-  //  --------------------- ------------------------  -----------------------  ----------
-    { "control",            "debug",                  &debug,                  true  },
-    { "control",            "getinfo",                &getinfo,                true  }, /* uses wallet if enabled */
-    { "control",            "getmemoryinfo",          &getmemoryinfo,          true  },
+static UniValue RPCLockedMemoryInfo()
+{
+    LockedPool::Stats stats = LockedPoolManager::Instance().stats();
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("used", uint64_t(stats.used)));
+    obj.push_back(Pair("free", uint64_t(stats.free)));
+    obj.push_back(Pair("total", uint64_t(stats.total)));
+    obj.push_back(Pair("locked", uint64_t(stats.locked)));
+    obj.push_back(Pair("chunks_used", uint64_t(stats.chunks_used)));
+    obj.push_back(Pair("chunks_free", uint64_t(stats.chunks_free)));
+    return obj;
+}
 
-    { "util",               "validateaddress",        &validateaddress,        true  }, /* uses wallet if enabled */
-    { "util",               "createmultisig",         &createmultisig,         true  },
-    { "util",               "verifymessage",          &verifymessage,          true  },
-    { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true  },
-    { "blockchain",         "getspentinfo",           &getspentinfo,           false },
+UniValue getmemoryinfo(const JSONRPCRequest& request)
+{
+    /* Please, avoid using the word "pool" here in the RPC interface or help,
+     * as users will undoubtedly confuse it with the other "memory pool"
+     */
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getmemoryinfo\n"
+            "Returns an object containing information about memory usage.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"locked\": {               (object) Information about locked memory manager\n"
+            "    \"used\": xxxxx,          (numeric) Number of bytes used\n"
+            "    \"free\": xxxxx,          (numeric) Number of bytes available in current arenas\n"
+            "    \"total\": xxxxxxx,       (numeric) Total number of bytes managed\n"
+            "    \"locked\": xxxxxx,       (numeric) Amount of bytes that succeeded locking. If this number is smaller than total, locking pages failed at some point and key data could be swapped to disk.\n"
+            "    \"chunks_used\": xxxxx,   (numeric) Number allocated chunks\n"
+            "    \"chunks_free\": xxxxx,   (numeric) Number unused chunks\n"
+            "  }\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getmemoryinfo", "")
+            + HelpExampleRpc("getmemoryinfo", "")
+        );
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("locked", RPCLockedMemoryInfo()));
+    return obj;
+}
+
+UniValue echo(const JSONRPCRequest& request)
+{
+    if (request.fHelp)
+        throw std::runtime_error(
+            "echo|echojson \"message\" ...\n"
+            "\nSimply echo back the input arguments. This command is for testing.\n"
+            "\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in"
+            "bitcoin-cli and the GUI. There is no server-side difference."
+        );
+
+    return request.params;
+}
+
+static const CRPCCommand commands[] =
+{ //  category              name                      actor (function)         okSafe argNames
+  //  --------------------- ------------------------  -----------------------  ------ ---
+    { "control",            "debug",                  &debug,                  true,  {} },
+    { "control",            "getinfo",                &getinfo,                true,  {} }, /* uses wallet if enabled */
+    { "control",            "getmemoryinfo",          &getmemoryinfo,          true,  {} },
+
+    { "util",               "validateaddress",        &validateaddress,        true,  {"address"} }, /* uses wallet if enabled */
+    { "util",               "createmultisig",         &createmultisig,         true,  {"nrequired","keys"} },
+    { "util",               "verifymessage",          &verifymessage,          true,  {"address","signature","message"} },
+    { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true,  {"privkey","message"} },
+
+    { "blockchain",         "getspentinfo",           &getspentinfo,           false, {"json"} },
 
     /* Address index */
-    { "addressindex",       "getaddressmempool",      &getaddressmempool,      true  },
-    { "addressindex",       "getaddressutxos",        &getaddressutxos,        false },
-    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       false },
-    { "addressindex",       "getaddresstxids",        &getaddresstxids,        false },
-    { "addressindex",       "getaddressbalance",      &getaddressbalance,      false },
+    { "addressindex",       "getaddressmempool",      &getaddressmempool,      true,  {"addresses"} },
+    { "addressindex",       "getaddressutxos",        &getaddressutxos,        false, {"addresses"} },
+    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       false, {"addresses"} },
+    { "addressindex",       "getaddresstxids",        &getaddresstxids,        false, {"addresses"} },
+    { "addressindex",       "getaddressbalance",      &getaddressbalance,      false, {"addresses"} },
 
     /* Dynamic features */
-    { "dynamic",            "dnsync",                 &dnsync,                 true  },
-    { "dynamic",            "spork",                  &spork,                  true  },
+    { "dynamic",            "dnsync",                 &dnsync,                 true,  {} },
+    { "dynamic",            "spork",                  &spork,                  true,  {"value"} },
 
     /* Not shown in help */
-    { "hidden",             "setmocktime",            &setmocktime,            true  },
+    { "hidden",             "setmocktime",            &setmocktime,            true,  {"timestamp"}},
+    { "hidden",             "echo",                   &echo,                   true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
+    { "hidden",             "echojson",               &echo,                  true,  {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
 };
 
-void RegisterMiscRPCCommands(CRPCTable &tableRPC)
+void RegisterMiscRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);
+        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }

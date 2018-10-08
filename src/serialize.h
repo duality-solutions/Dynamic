@@ -14,9 +14,11 @@
 #include <algorithm>
 #include <assert.h>
 #include <ios>
+#include <iostream>
 #include <limits>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <stdint.h>
 #include <string>
@@ -25,6 +27,20 @@
 #include <vector>
 
 static const unsigned int MAX_SIZE = 0x02000000;
+
+/**
+ * Dummy data type to identify deserializing constructors.
+ *
+ * By convention, a constructor of a type T with signature
+ *
+ *   template <typename Stream> T::T(deserialize_type, Stream& s)
+ *
+ * is a deserializing constructor, which builds the type by
+ * deserializing it from s. If T contains const fields, this
+ * is likely the only way to do so.
+ */
+struct deserialize_type {};
+constexpr deserialize_type deserialize {};
 
 /**
  * Used to bypass the rule against non-const reference to temporary
@@ -44,37 +60,6 @@ template<typename T>
 inline T* NCONST_PTR(const T* val)
 {
     return const_cast<T*>(val);
-}
-
-/** 
- * Important: Do not use the following functions in new code, but use v.data()
- * and v.data() + v.size() respectively directly. They were once introduced to
- * have a compatible, safe way to get the begin and end pointer of a vector.
- * However with C++11 the language has built-in functionality for this and it's
- * more readable to just use that.
- */
-template <typename V>
-inline typename V::value_type* begin_ptr(V& v)
-{
-    return v.data();
-}
-/** Get begin pointer of vector (const version) */
-template <typename V>
-inline const typename V::value_type* begin_ptr(const V& v)
-{
-    return v.data();
-}
-/** Get end pointer of vector (non-const version) */
-template <typename V>
-inline typename V::value_type* end_ptr(V& v)
-{
-    return v.data() + v.size();
-}
-/** Get end pointer of vector (const version) */
-template <typename V>
-inline const typename V::value_type* end_ptr(const V& v)
-{
-    return v.data() + v.size();
 }
 
 /*
@@ -537,6 +522,18 @@ template<typename Stream, typename K, typename Pred, typename A> void Serialize(
 template<typename Stream, typename K, typename Pred, typename A> void Unserialize(Stream& is, std::set<K, Pred, A>& m);
 
 /**
+ * shared_ptr
+ */
+template<typename Stream, typename T> void Serialize(Stream& os, const std::shared_ptr<const T>& p);
+template<typename Stream, typename T> void Unserialize(Stream& os, std::shared_ptr<const T>& p);
+
+/**
+ * unique_ptr
+ */
+template<typename Stream, typename T> void Serialize(Stream& os, const std::unique_ptr<const T>& p);
+template<typename Stream, typename T> void Unserialize(Stream& os, std::unique_ptr<const T>& p);
+
+/**
  * If none of the specialized versions above matched, default to calling member function.
  */
 template<typename Stream, typename T>
@@ -792,6 +789,38 @@ void Unserialize(Stream& is, std::list<T, A>& l)
         Unserialize(is, val);
         l.push_back(val);
     }
+}
+
+/**
+ * unique_ptr
+ */
+template<typename Stream, typename T> void
+Serialize(Stream& os, const std::unique_ptr<const T>& p)
+{
+    Serialize(os, *p);
+}
+
+template<typename Stream, typename T>
+void Unserialize(Stream& is, std::unique_ptr<const T>& p)
+{
+    p.reset(new T(deserialize, is));
+}
+
+
+
+/**
+ * shared_ptr
+ */
+template<typename Stream, typename T> void
+Serialize(Stream& os, const std::shared_ptr<const T>& p)
+{
+    Serialize(os, *p);
+}
+
+template<typename Stream, typename T>
+void Unserialize(Stream& is, std::shared_ptr<const T>& p)
+{
+    p = std::make_shared<const T>(deserialize, is);
 }
 
 /**

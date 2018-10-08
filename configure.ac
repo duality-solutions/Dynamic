@@ -1,8 +1,8 @@
 dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 2)
-define(_CLIENT_VERSION_MINOR, 3)
-define(_CLIENT_VERSION_REVISION, 5)
+define(_CLIENT_VERSION_MINOR, 4)
+define(_CLIENT_VERSION_REVISION, 0)
 define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2018)
@@ -90,6 +90,20 @@ AC_ARG_ENABLE([wallet],
   [disable wallet (enabled by default)])],
   [enable_wallet=$enableval],
   [enable_wallet=yes])
+
+# Enable GPU miner
+AC_ARG_ENABLE([gpu],
+  [AS_HELP_STRING([--disable-gpu],
+  [disable GPU miner (enabled by default)])],
+  [enable_gpu=$enableval],
+  [enable_gpu=yes])
+
+# Enable CUDA
+AC_ARG_ENABLE([cuda],
+  [AS_HELP_STRING([--disable-cuda],
+  [disable CUDA miner, use OpenCL instead (only GPU; enabled by default)])],
+  [enable_cuda=$enableval],
+  [enable_cuda=yes])
 
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
@@ -528,7 +542,7 @@ fi
 AC_CHECK_HEADERS([endian.h sys/endian.h byteswap.h stdio.h stdlib.h unistd.h strings.h sys/types.h sys/stat.h sys/select.h sys/prctl.h])
 
 AC_CHECK_DECLS([strnlen])
-   
+
 # Check for daemon(3), unrelated to --with-daemon (although used by it)
 AC_CHECK_DECLS([daemon])
 
@@ -922,6 +936,18 @@ else
   AC_MSG_RESULT(no)
 fi
 
+if test x$enable_gpu = xyes; then
+  AC_DEFINE_UNQUOTED([ENABLE_GPU],[1],[Define to 1 to enable GPU miner])
+
+  if test "x$enable_cuda" = xyes; then
+    AX_CHECK_CUDA
+    if test "x$NVCC" = xno; then
+      enable_cuda=no
+      AC_MSG_WARN([NVIDIA CUDA nvcc compiler not found, falling back on OpenCL. Specify --with-cuda=/path/to/cuda or --disable-gpu])
+    fi
+  fi
+fi
+
 dnl enable upnp support
 AC_MSG_CHECKING([whether to build with support for UPnP])
 if test x$have_miniupnpc = xno; then
@@ -1014,6 +1040,8 @@ fi
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
 AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
+AM_CONDITIONAL([ENABLE_GPU],[test x$enable_gpu = xyes])
+AM_CONDITIONAL([ENABLE_CUDA], [test x"$enable_cuda" = xyes])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
 AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
 AM_CONDITIONAL([ENABLE_QT],[test x$dynamic_enable_qt = xyes])

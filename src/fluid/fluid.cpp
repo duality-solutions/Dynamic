@@ -101,8 +101,8 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL) {
-        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
-        fluidSovereigns = InitialiseAddresses();
+        //TODO fluid
+        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
     }
         
     else
@@ -223,8 +223,8 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
     CBlockIndex* pindex = chainActive.Tip();
 
     if (pindex != NULL) {
-        //TODO fluid (use sovereign leveldb database for fluidSovereigns)
-        fluidSovereigns = InitialiseAddresses();
+        //TODO fluid
+        fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
     }
     else
         fluidSovereigns = InitialiseAddresses();
@@ -460,8 +460,8 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -477,8 +477,8 @@ bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& co
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -494,8 +494,8 @@ bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& c
 
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -511,8 +511,8 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
     
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
                         LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
@@ -527,6 +527,21 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
     if (IsTransactionFluid(fluidInstruction)) {
         std::string verificationString;
+        //TODO fluid
+        /*
+        CFluidEntry fluidIndex;
+        if (chainActive.Height() <= fluid.FLUID_ACTIVATE_HEIGHT) {
+            return false;
+        }
+        else if (pindex == nullptr) {
+            GetLastBlockIndex(chainActive.Tip());
+            //TODO fluid
+            //fluidIndex = chainActive.Tip()->fluidParams;
+        } else {
+            //TODO fluid
+            //fluidIndex = pindex->fluidParams;
+        }
+        */
         std::vector<std::string> transactionRecord;//fluidIndex.fluidHistory;
         verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);

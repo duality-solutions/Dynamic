@@ -139,7 +139,7 @@ const char* GetOpName(opcodetype opcode)
     case OP_NOP9                   : return "OP_NOP9";
     case OP_NOP10                  : return "OP_NOP10";
 
-	// fluid
+    // fluid
     case OP_MINT                   : return "OP_MINT";
     case OP_REWARD_DYNODE          : return "OP_REWARD_DYNODE";
     case OP_REWARD_MINING          : return "OP_REWARD_MINING";
@@ -148,7 +148,23 @@ const char* GetOpName(opcodetype opcode)
     case OP_FREEZE_ADDRESS         : return "OP_FREEZE_ADDRESS";
     case OP_RELEASE_ADDRESS        : return "OP_RELEASE_ADDRESS";
 
-    case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
+    // BDAP, directory access, user identity and certificate system
+    case OP_BDAP                     : return "OP_BDAP";
+    case OP_BDAP_NEW                 : return "OP_BDAP_NEW";
+    case OP_BDAP_DELETE              : return "OP_BDAP_DELETE";
+    case OP_BDAP_REVOKE              : return "OP_BDAP_REVOKE";
+    case OP_BDAP_MODIFY              : return "OP_BDAP_MODIFY";
+    case OP_BDAP_MODIFY_RDN          : return "OP_BDAP_MODIFY_RDN";
+    case OP_BDAP_EXECUTE_CODE        : return "OP_BDAP_EXECUTE_CODE";
+    case OP_BDAP_BIND                : return "OP_BDAP_BIND";
+    case OP_BDAP_AUDIT               : return "OP_BDAP_AUDIT";
+    case OP_BDAP_CERTIFICATE         : return "OP_BDAP_CERTIFICATE";
+    case OP_BDAP_IDENTITY            : return "OP_BDAP_IDENTITY";
+    case OP_BDAP_ID_VERIFICATION     : return "OP_BDAP_ID_VERIFICATION";
+    case OP_BDAP_CHANNEL             : return "OP_BDAP_CHANNEL";
+    case OP_BDAP_CHANNEL_CHECKPOINT  : return "OP_BDAP_CHANNEL_CHECKPOINT";
+
+    case OP_INVALIDOPCODE            : return "OP_INVALIDOPCODE";
 
     // Note:
     //  The template matching params OP_SMALLINTEGER/etc are defined in opcodetype enum
@@ -159,6 +175,87 @@ const char* GetOpName(opcodetype opcode)
         return "OP_UNKNOWN";
     }
 }
+
+// TODO (bdap): move functions below to seperate code file
+bool IsBDAPOp(int op) 
+{
+        return op == OP_BDAP
+            || op == OP_BDAP_NEW
+            || op == OP_BDAP_DELETE
+            || op == OP_BDAP_REVOKE
+            || op == OP_BDAP_MODIFY
+            || op == OP_BDAP_MODIFY_RDN
+            || op == OP_BDAP_EXECUTE_CODE
+            || op == OP_BDAP_BIND
+            || op == OP_BDAP_AUDIT
+            || op == OP_BDAP_CERTIFICATE
+            || op == OP_BDAP_IDENTITY
+            || op == OP_BDAP_ID_VERIFICATION
+            || op == OP_BDAP_CHANNEL
+            || op == OP_BDAP_CHANNEL_CHECKPOINT;
+}
+
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc) 
+{
+    opcodetype opcode;
+    vvch.clear();
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+    op = CScript::DecodeOP_N(opcode);
+    if (op != OP_BDAP)
+        return false;
+    if (!script.GetOp(pc, opcode))
+        return false;
+    if (opcode < OP_1 || opcode > OP_16)
+        return false;
+    op = CScript::DecodeOP_N(opcode);
+    if (!IsBDAPOp(op))
+        return false;
+    bool found = false;
+    for (;;) {
+        std::vector<unsigned char> vch;
+        if (!script.GetOp(pc, opcode, vch))
+            return false;
+        if (opcode == OP_DROP || opcode == OP_2DROP)
+        {
+            found = true;
+            break;
+        }
+        if (!(opcode >= 0 && opcode <= OP_PUSHDATA4))
+            return false;
+        vvch.push_back(vch);
+    }
+
+    // move the pc to after any DROP or NOP
+    while (opcode == OP_DROP || opcode == OP_2DROP) {
+        if (!script.GetOp(pc, opcode))
+            break;
+    }
+
+    pc--;
+    return found;
+}
+
+bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+{
+    CScript::const_iterator pc = script.begin();
+    return DecodeBDAPScript(script, op, vvch, pc);
+}
+
+bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut) 
+{
+    int op;
+    std::vector<std::vector<unsigned char> > vvch;
+    CScript::const_iterator pc = scriptIn.begin();
+
+    if (!DecodeBDAPScript(scriptIn, op, vvch, pc))
+        return false;
+    scriptOut = CScript(pc, scriptIn.end());
+    return true;
+}
+// TODO (bdap): move the above functions to seperate code file
 
 unsigned int CScript::GetSigOpCount(bool fAccurate) const
 {
@@ -210,22 +307,71 @@ unsigned int CScript::GetSigOpCount(const CScript& scriptSig) const
 
 bool CScript::IsPayToPublicKeyHash() const
 {
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
+
     // Extra-fast test for pay-to-pubkey-hash CScripts:
     return (this->size() == 25 &&
-	    (*this)[0] == OP_DUP &&
-	    (*this)[1] == OP_HASH160 &&
-	    (*this)[2] == 0x14 &&
-	    (*this)[23] == OP_EQUALVERIFY &&
-	    (*this)[24] == OP_CHECKSIG);
+        (*this)[0] == OP_DUP &&
+        (*this)[1] == OP_HASH160 &&
+        (*this)[2] == 0x14 &&
+        (*this)[23] == OP_EQUALVERIFY &&
+        (*this)[24] == OP_CHECKSIG);
 }
 
 bool CScript::IsPayToScriptHash() const
 {
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
     // Extra-fast test for pay-to-script-hash CScripts:
     return (this->size() == 23 &&
             (*this)[0] == OP_HASH160 &&
             (*this)[1] == 0x14 &&
             (*this)[22] == OP_EQUAL);
+}
+
+bool CScript::IsPayToPublicKey() const
+{
+    // Remove BDAP portion of the script
+    CScript scriptPubKey;
+    CScript scriptPubKeyOut;
+    if (RemoveBDAPScript(*this, scriptPubKeyOut))
+    {
+        scriptPubKey = scriptPubKeyOut;
+    }
+    else
+    {
+        scriptPubKey = *this;
+    }
+    // Test for pay-to-pubkey CScript with both
+    // compressed or uncompressed pubkey
+    if (this->size() == 35) {
+        return ((*this)[1] == 0x02 || (*this)[1] == 0x03) &&
+                (*this)[34] == OP_CHECKSIG;
+    }
+    if (this->size() == 67) {
+        return (*this)[1] == 0x04 &&
+                (*this)[66] == OP_CHECKSIG;
+    }
+    return false;
 }
 
 bool CScript::IsPushOnly(const_iterator pc) const

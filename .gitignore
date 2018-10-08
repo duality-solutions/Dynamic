@@ -73,6 +73,7 @@ libconftest.dylib*
 
 *.json.h
 *.raw.h
+*.cl.h
 
 #libtool object files
 *.lo
@@ -134,3 +135,37 @@ dynamic-cli
 dynamicd
 dynamic-qt
 make
+
+# Compiled Object files
+*.slo
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.lib
+
+# Executables
+*.out
+*.app
+
+# CMake
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+install_manifest.txt
+
+# Qt Creator
+*.user
