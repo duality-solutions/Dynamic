@@ -61,7 +61,6 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
         LogPrint("privatesend", "PSQUEUE -- %s new\n", psq.ToString());
 
         if(psq.IsExpired()) return;
-        if(psq.nInputCount < 0 || psq.nInputCount > PRIVATESEND_ENTRY_MAX_SIZE) return;
 
         dynode_info_t infoDn;
         if(!dnodeman.GetDynodeInfo(psq.dynodeOutpoint, infoDn)) return;
@@ -1022,17 +1021,10 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
         std::vector<COutput> vCoinsTmp;
         CAmount nMinAmount = vecStandardDenoms[vecBits.front()];
         CAmount nMaxAmount = nBalanceNeedsAnonymized;
-        // nInputCount is not covered by legacy signature, require SPORK_6_NEW_SIGS to activate to use new algo
-        // (to make sure nInputCount wasn't modified by some intermediary node)
-        bool fNewAlgo = infoDn.nProtocolVersion > 70900 && sporkManager.IsSporkActive(SPORK_6_NEW_SIGS);
 
-        if (fNewAlgo && psq.nInputCount != 0) {
-            nMinAmount = nMaxAmount = psq.nInputCount * vecStandardDenoms[vecBits.front()];
-        }
         // Try to match their denominations if possible, select exact number of denominations
         if(!pwalletMain->SelectCoinsByDenominations(psq.nDenom, nMinAmount, nMaxAmount, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, privateSendClient.nPrivateSendRounds)) { 
-            LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- Couldn't match %d denominations %d %d (%s)\n", psq.nInputCount, vecBits.front(), psq.nDenom, CPrivateSend::GetDenominationsToString(psq.nDenom));
-            continue;
+             LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- Couldn't match %d denominations %d (%s)\n", vecBits.front(), psq.nDenom, CPrivateSend::GetDenominationsToString(psq.nDenom));             continue;
         }
 
         privateSendClient.AddUsedDynode(psq.dynodeOutpoint); 
@@ -1043,15 +1035,14 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
         }
 
         nSessionDenom = psq.nDenom;
-        nSessionInputCount = fNewAlgo ? psq.nInputCount : 0;
         infoMixingDynode = infoDn;
-        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, nSessionInputCount, txMyCollateral));
+        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, txMyCollateral));
         connman.AddPendingDynode(infoDn.addr);
         // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
         SetState(POOL_STATE_QUEUE);
         nTimeLastSuccessfulStep = GetTime();
-        LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- pending connection (from queue): nSessionDenom: %d (%s), nSessionInputCount: %d, addr=%s\n",
-                  nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), nSessionInputCount, infoDn.addr.ToString());
+        LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- pending connection (from queue): nSessionDenom: %d (%s), addr=%s\n",
+                  nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), infoDn.addr.ToString());
         strAutoDenomResult = _("Trying to connect...");
         return true;
     }
@@ -1119,37 +1110,14 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
             nSessionDenom = CPrivateSend::GetDenominationsByAmounts(vecAmounts);
         }
 
-        // Count available denominations.
-        // Should never really fail after this point, since we just selected compatible inputs ourselves.
-        std::vector<int> vecBits;
-        if (!CPrivateSend::GetDenominationsBits(nSessionDenom, vecBits)) {
-            return false;
-        }
-
-        CAmount nValueInTmp = 0;
-        std::vector<CTxPSIn> vecTxPSInTmp;
-        std::vector<COutput> vCoinsTmp;
-        std::vector<CAmount> vecStandardDenoms = CPrivateSend::GetStandardDenominations();
-
-        bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecStandardDenoms[vecBits.front()], vecStandardDenoms[vecBits.front()] * PRIVATESEND_ENTRY_MAX_SIZE, vecTxPSInTmp, vCoinsTmp, nValueInTmp, 0, privateSendClient.nPrivateSendRounds); 
-        if (!fSelected) {
-            return false;
-        }
-
-        // nInputCount is not covered by legacy signature, require SPORK_6_NEW_SIGS to activate to use new algo
-        // (to make sure nInputCount wasn't modified by some intermediary node)
-        bool fNewAlgo = infoDn.nProtocolVersion > 70900 && sporkManager.IsSporkActive(SPORK_6_NEW_SIGS);
-        nSessionInputCount = fNewAlgo
-                ? std::min(vecTxPSInTmp.size(), size_t(5 + GetRand(PRIVATESEND_ENTRY_MAX_SIZE - 5 + 1)))
-                : 0;
         infoMixingDynode = infoDn;
         connman.AddPendingDynode(infoDn.addr);
-        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, nSessionInputCount, txMyCollateral));
+        pendingPsaRequest = CPendingPsaRequest(infoDn.addr, CPrivateSendAccept(nSessionDenom, txMyCollateral));
         // TODO: add new state POOL_STATE_CONNECTING and bump MIN_PRIVATESEND_PEER_PROTO_VERSION
         SetState(POOL_STATE_QUEUE);
         nTimeLastSuccessfulStep = GetTime();
-        LogPrintf("CPrivateSendClientSession::StartNewQueue -- pending connection, nSessionDenom: %d (%s), nSessionInputCount: %d, addr=%s\n",
-                nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), nSessionInputCount, infoDn.addr.ToString());
+        LogPrintf("CPrivateSendClientSession::StartNewQueue -- pending connection, nSessionDenom: %d (%s),  addr=%s\n",
+                nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), infoDn.addr.ToString());
         strAutoDenomResult = _("Trying to connect...");
         return true;
     }
@@ -1268,8 +1236,7 @@ bool CPrivateSendClientSession::PrepareDenominate(int nMinRounds, int nMaxRounds
         return false;
     }
     std::vector<CAmount> vecStandardDenoms = CPrivateSend::GetStandardDenominations();
-    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecStandardDenoms[vecBits.front()], vecStandardDenoms[vecBits.front()] * PRIVATESEND_ENTRY_MAX_SIZE, vecTxPSIn, vCoins, nValueIn, nMinRounds, nMaxRounds);
-    if (nMinRounds >= 0 && !fSelected) {
+    bool fSelected = pwalletMain->SelectCoinsByDenominations(nSessionDenom, vecStandardDenoms[vecBits.front()], CPrivateSend::GetMaxPoolAmount(), vecTxPSIn, vCoins, nValueIn, nMinRounds, nMaxRounds);     if (nMinRounds >= 0 && !fSelected) {
         strErrorRet = "Can't select current denominated inputs";
         return false;
     }
@@ -1289,7 +1256,7 @@ bool CPrivateSendClientSession::PrepareDenominate(int nMinRounds, int nMaxRounds
     // NOTE: No need to randomize order of inputs because they were
     // initially shuffled in CWallet::SelectCoinsByDenominations already.
     int nStep = 0;
-    int nStepsMax = nSessionInputCount != 0 ? nSessionInputCount : (5 + GetRandInt(PRIVATESEND_ENTRY_MAX_SIZE - 5 + 1));
+    int nStepsMax = 5 + GetRandInt(PRIVATESEND_ENTRY_MAX_SIZE - 5 + 1);
 
     while (nStep < nStepsMax) {
         for (const auto& nBit : vecBits) {
@@ -1336,7 +1303,7 @@ bool CPrivateSendClientSession::PrepareDenominate(int nMinRounds, int nMaxRounds
         }
     }
 
-    if (CPrivateSend::GetDenominations(vecTxOutRet) != nSessionDenom || (nSessionInputCount != 0 && vecTxOutRet.size() != (size_t)nSessionInputCount)) { 
+    if (CPrivateSend::GetDenominations(vecTxOutRet) != nSessionDenom) { 
         {
             // unlock used coins on failure
             LOCK(pwalletMain->cs_wallet);
