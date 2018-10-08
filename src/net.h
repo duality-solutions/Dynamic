@@ -69,7 +69,7 @@ static const int MAX_OUTBOUND_CONNECTIONS = 16;
 /** Maximum number of addnode outgoing nodes */
 static const int MAX_ADDNODE_CONNECTIONS = 16;
 /** Maximum number if outgoing dynodes */
-static const int MAX_OUTBOUND_DYNODE_CONNECTIONS = 21;
+static const int MAX_OUTBOUND_DYNODE_CONNECTIONS = 32;
 /** -listen default */
 static const bool DEFAULT_LISTEN = true;
 /** -upnp default */

@@ -349,13 +349,10 @@ public:
 };
 
 // base class
-class CPrivateSendBase
+class CPrivateSendBaseSession 
 {
 protected:
     mutable CCriticalSection cs_privatesend;
-
-    // The current mixing sessions in progress on the network
-    std::vector<CPrivateSendQueue> vecPrivateSendQueue;
 
     std::vector<CPrivateSendEntry> vecEntries; // Dynode/clients entries
 
@@ -367,19 +364,41 @@ protected:
     CMutableTransaction finalMutableTransaction; // the finalized transaction ready for signing
 
     void SetNull();
-    void CheckQueue();
 
 public:
-    int nSessionDenom; //Users must submit an denom matching this
+    int nSessionDenom; //Users must submit a denom matching this
     int nSessionInputCount; //Users must submit a count matching this
 
-    CPrivateSendBase() { SetNull(); }
+   CPrivateSendBaseSession() :
+        vecEntries(),
+        nState(POOL_STATE_IDLE),
+        nTimeLastSuccessfulStep(0),
+        nSessionID(0),
+        finalMutableTransaction(),
+        nSessionDenom(0),
+        nSessionInputCount(0)
+        {}
+    CPrivateSendBaseSession(const CPrivateSendBaseSession& other) { /* dummy copy constructor*/ SetNull(); }
 
-    int GetQueueSize() const { return vecPrivateSendQueue.size(); }
     int GetState() const { return nState; }
     std::string GetStateString() const;
 
     int GetEntriesCount() const { return vecEntries.size(); }
+};
+
+// base class
+class CPrivateSendBaseManager
+{
+protected:
+    mutable CCriticalSection cs_vecqueue;
+    // The current mixing sessions in progress on the network
+    std::vector<CPrivateSendQueue> vecPrivateSendQueue;
+    void SetNull();
+    void CheckQueue();
+public:
+    CPrivateSendBaseManager() : vecPrivateSendQueue() {}
+    int GetQueueSize() const { return vecPrivateSendQueue.size(); }
+    bool GetQueueItemAndTry(CPrivateSendQueue& psqRet);
 };
 
 // helper class
