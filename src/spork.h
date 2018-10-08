@@ -33,7 +33,6 @@ static const int SPORK_START                                            = SPORK_
 static const int SPORK_END                                              = SPORK_14_REQUIRE_SENTINEL_FLAG;
 
 extern std::map<int, int64_t> mapSporkDefaults;
-extern std::map<uint256, CSporkMessage> mapSporks;
 extern CSporkManager sporkManager;
 
 //
@@ -79,8 +78,8 @@ public:
     uint256 GetHash() const;
     uint256 GetSignatureHash() const;
 
-    bool Sign(const CKey& key);
-    bool CheckSignature(const CKeyID& pubKeyId) const;
+    bool Sign(const CKey& key, bool fSporkSixActive); 
+    bool CheckSignature(const CKeyID& pubKeyId, bool fSporkSixActive) const; 
     void Relay(CConnman& connman);
 };
 
@@ -88,8 +87,10 @@ public:
 class CSporkManager
 {
 private:
-    CCriticalSection cs; 
-    std::vector<unsigned char> vchSig;
+    static const std::string SERIALIZATION_VERSION_STRING; 
+
+    mutable CCriticalSection cs; 
+    std::map<uint256, CSporkMessage> mapSporksByHash; 
     std::map<int, CSporkMessage> mapSporksActive;
 
     CKeyID sporkPubKeyID;
@@ -98,6 +99,27 @@ private:
 public:
 
     CSporkManager() {}
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        std::string strVersion;
+        if(ser_action.ForRead()) {
+            READWRITE(strVersion);
+            if (strVersion != SERIALIZATION_VERSION_STRING) {
+                return;
+            }
+        } else {
+            strVersion = SERIALIZATION_VERSION_STRING;
+            READWRITE(strVersion);
+        }
+        READWRITE(sporkPubKeyID);
+        READWRITE(mapSporksByHash);
+        READWRITE(mapSporksActive);
+        // we don't serialize private key to prevent its leakage
+    }
+    void Clear();
+     void CheckAndRemove(); 
 
     void ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     void ExecuteSpork(int nSporkID, int nValue);
@@ -108,8 +130,12 @@ public:
     int GetSporkIDByName(std::string strName);
     std::string GetSporkNameByID(int nSporkID);
 
+    bool GetSporkByHash(const uint256& hash, CSporkMessage &sporkRet); 
+
     bool SetSporkAddress(const std::string& strAddress);
     bool SetPrivKey(const std::string& strPrivKey);
+
+    std::string ToString() const; 
 };
 
 #endif // DYNAMIC_SPORK_H
