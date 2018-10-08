@@ -132,6 +132,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "prioritisetransaction", 2, "fee_delta" },
     { "setban", 2, "bantime" },
     { "setban", 3, "absolute" },
+    { "setprivatesendrounds", 0, "rounds" },
+    { "setprivatesendamount", 0, "amount" },
     { "getmempoolancestors", 1, "verbose" },
     { "getmempooldescendants", 1, "verbose" },
     { "setnetworkactive", 0, "state" },
