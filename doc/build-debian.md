@@ -95,18 +95,18 @@ in the getinfo-output. If the numbers match, the installation is completed.
 ```
 dynamic-cli getinfo
 {
-  "version": 2030000,
-  "protocolversion": 70900,
-  "walletversion": 120200,
+  "version": 2040000,
+  "protocolversion": 71000,
+  "walletversion": 204000,
   "balance": 0.00000000,
   "privatesend_balance": 0.00000000,
-  "blocks": 73731, <- we're looking for this line right here
+  "blocks": 193619,
   "timeoffset": 0,
   "connections": 16,
   "proxy": "127.0.0.1:9050",
-  "difficulty": 0.5382088449061717,
+  "difficulty": 1.129563238994795,
   "testnet": false,
-  "keypoololdest": 1522174973,
+  "keypoololdest": 1538953839,
   "keypoolsize": 1999,
   "paytxfee": 0.00000000,
   "relayfee": 0.00001000,
