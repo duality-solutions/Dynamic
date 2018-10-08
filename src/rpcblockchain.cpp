@@ -88,6 +88,7 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.push_back(Pair("confirmations", confirmations));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", blockindex->nVersion));
+    result.push_back(Pair("versionHex", strprintf("%08x", blockindex->nVersion)));
     result.push_back(Pair("merkleroot", blockindex->hashMerkleRoot.GetHex()));
     result.push_back(Pair("time", (int64_t)blockindex->nTime));
     result.push_back(Pair("mediantime", (int64_t)blockindex->GetMedianTimePast()));
@@ -116,6 +117,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", block.nVersion));
+    result.push_back(Pair("versionHex", strprintf("%08x", block.nVersion)));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
     UniValue txs(UniValue::VARR);
     for(const auto& tx : block.vtx)
@@ -682,15 +684,16 @@ UniValue getblockheader(const JSONRPCRequest& request)
             "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
             "  \"height\" : n,          (numeric) The block height or index\n"
             "  \"version\" : n,         (numeric) The block version\n"
+            "  \"versionHex\" : \"00000000\", (string) The block version formatted in hexadecimal\n"
             "  \"merkleroot\" : \"xxxx\", (string) The merkle root\n"
             "  \"time\" : ttt,          (numeric) The block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"nonce\" : n,           (numeric) The nonce\n"
             "  \"bits\" : \"1d00ffff\", (string) The bits\n"
             "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
+            "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\",      (string) The hash of the next block\n"
-            "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "}\n"
             "\nResult (for verbose=false):\n"
             "\"data\"             (string) A string that is serialized, hex-encoded data for block 'hash'.\n"
@@ -830,6 +833,7 @@ UniValue getblock(const JSONRPCRequest& request)
             "  \"size\" : n,            (numeric) The block size\n"
             "  \"height\" : n,          (numeric) The block height or index\n"
             "  \"version\" : n,         (numeric) The block version\n"
+            "  \"versionHex\" : \"00000000\", (string) The block version formatted in hexadecimal\n"
             "  \"merkleroot\" : \"xxxx\", (string) The merkle root\n"
             "  \"tx\" : [               (array of string) The transaction ids\n"
             "     \"transactionid\"     (string) The transaction id\n"
@@ -1302,6 +1306,7 @@ UniValue getchaintips(const JSONRPCRequest& request)
             "    \"difficulty\" : x.xxx,       (numeric) The difficulty\n"
             "    \"chainwork\" : \"0000...1f3\"  (string) Expected number of hashes required to produce the current chain (in hex)\n"
             "    \"branchlen\": 0              (numeric) zero for main chain\n"
+            "    \"forkpoint\": \"xxxx\",        (string) same as \"hash\" for the main chain\n"
             "    \"status\": \"active\"          (string) \"active\" for the main chain\n"
             "  },\n"
             "  {\n"
@@ -1310,6 +1315,7 @@ UniValue getchaintips(const JSONRPCRequest& request)
             "    \"difficulty\" : x.xxx,\n"
             "    \"chainwork\" : \"0000...1f3\"\n"
             "    \"branchlen\": 1              (numeric) length of branch connecting the tip to the main chain\n"
+            "    \"forkpoint\": \"xxxx\",        (string) block hash of the last common block between this tip and the main chain\n"
             "    \"status\": \"xxxx\"            (string) status of the chain (active, valid-fork, valid-headers, headers-only, invalid)\n"
             "  }\n"
             "]\n"
@@ -1368,6 +1374,7 @@ UniValue getchaintips(const JSONRPCRequest& request)
     UniValue res(UniValue::VARR);
     BOOST_FOREACH(const CBlockIndex* block, setTips)
     {
+        const CBlockIndex* pindexFork = chainActive.FindFork(block);
         const int branchLen = block->nHeight - chainActive.FindFork(block)->nHeight;
         if(branchLen < nBranchMin) continue;
 
@@ -1377,8 +1384,9 @@ UniValue getchaintips(const JSONRPCRequest& request)
         obj.push_back(Pair("height", block->nHeight));
         obj.push_back(Pair("hash", block->phashBlock->GetHex()));
         obj.push_back(Pair("difficulty", GetDifficulty(block)));
-        obj.push_back(Pair("branchlen", branchLen));
         obj.push_back(Pair("chainwork", block->nChainWork.GetHex()));
+        obj.push_back(Pair("branchlen", branchLen));
+        obj.push_back(Pair("forkpoint", pindexFork->phashBlock->GetHex()));
 
         std::string status;
         if (chainActive.Contains(block)) {

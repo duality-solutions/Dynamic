@@ -495,14 +495,11 @@ UniValue importwallet(const JSONRPCRequest& request)
     }
     file.close();
     pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
-
     pwalletMain->UpdateTimeFirstKey(nTimeBegin);
 
     CBlockIndex *pindex = chainActive.FindEarliestAtLeast(nTimeBegin - 7200);
 
-    pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
-
-    pwalletMain->UpdateTimeFirstKey(nTimeBegin);
+    LogPrintf("Rescanning last %i blocks\n", pindex ? chainActive.Height() - pindex->nHeight + 1 : 0);
     pwalletMain->ScanForWalletTransactions(pindex);
     pwalletMain->MarkDirty();
 
