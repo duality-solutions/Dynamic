@@ -146,6 +146,17 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "getaddressdeltas", 0, "addresses" },
     { "getaddressutxos", 0, "addresses" },
     { "getaddressmempool", 0, "addresses" },
+    // Echo with conversion (For testing only)
+    { "echojson", 0, "arg0" },
+    { "echojson", 1, "arg1" },
+    { "echojson", 2, "arg2" },
+    { "echojson", 3, "arg3" },
+    { "echojson", 4, "arg4" },
+    { "echojson", 5, "arg5" },
+    { "echojson", 6, "arg6" },
+    { "echojson", 7, "arg7" },
+    { "echojson", 8, "arg8" },
+    { "echojson", 9, "arg9" },
 };
 
 class CRPCConvertTable

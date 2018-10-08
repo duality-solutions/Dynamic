@@ -1375,16 +1375,16 @@ UniValue listreceivedbyaddress(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
-    
+
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
-            "listreceivedbyaddress ( minconf addlockconf includeempty includeWatchonly)\n"
-            "\nList balances by receiving address.\n"
+            "listreceivedbyaddress ( minconf addlockconf include_empty include_watchonly)\n"
+            "\nList incoming payments grouped by receiving address.\n"
             "\nArguments:\n"
-            "1. minconf          (numeric, optional, default=1) The minimum number of confirmations before payments are included.\n"
-            "2. addlockconf      (bool, optional, default=false) Whether to add " + std::to_string(nInstantSendDepth) + " confirmations to transactions locked via InstantSend.\n"
-            "3. includeempty     (bool, optional, default=false) Whether to include addresses that haven't received any payments.\n"
-            "4. includeWatchonly (bool, optional, default=false) Whether to include watchonly addresses (see 'importaddress').\n"
+            "1. minconf           (numeric, optional, default=1) The minimum number of confirmations before payments are included.\n"
+            "2. addlockconf       (bool, optional, default=false) Whether to add " + std::to_string(nInstantSendDepth) + " confirmations to transactions locked via InstantSend.\n"
+            "3. include_empty     (bool, optional, default=false) Whether to include addresses that haven't received any payments.\n"
+            "4. include_watchonly (bool, optional, default=false) Whether to include watch-only addresses (see 'importaddress').\n"
 
             "\nResult:\n"
             "[\n"
@@ -1396,15 +1396,19 @@ UniValue listreceivedbyaddress(const JSONRPCRequest& request)
             "    \"confirmations\" : n                (numeric) The number of confirmations of the most recent transaction included.\n"
             "                                                 If 'addlockconf' is true, the minimum number of confirmations is calculated\n"
             "                                                 including additional " + std::to_string(nInstantSendDepth) + " confirmations for transactions locked via InstantSend\n"
-            "    \"label\" : \"label\"                  (string) A comment for the address/transaction, if any\n"
+            "    \"label\" : \"label\",               (string) A comment for the address/transaction, if any\n"
+            "    \"txids\": [\n"
+            "       n,                                (numeric) The ids of transactions received with the address \n"
+            "       ...\n"
+            "    ]\n"
             "  }\n"
             "  ,...\n"
             "]\n"
 
             "\nExamples:\n"
             + HelpExampleCli("listreceivedbyaddress", "")
-            + HelpExampleCli("listreceivedbyaddress", "10 false true")
-            + HelpExampleRpc("listreceivedbyaddress", "10, false, true, true")
+            + HelpExampleCli("listreceivedbyaddress", "6 false true")
+            + HelpExampleRpc("listreceivedbyaddress", "6, false, true, true")
         );
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
@@ -2439,7 +2443,7 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
-    
+
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getwalletinfo\n"
@@ -2448,6 +2452,8 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
             "{\n"
             "  \"walletversion\": xxxxx,     (numeric) the wallet version\n"
             "  \"balance\": xxxxxxx,         (numeric) the total confirmed balance of the wallet in " + CURRENCY_UNIT + "\n"
+            + (!fLiteMode ?
+            "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized dash balance of the wallet in " + CURRENCY_UNIT + "\n" : "") +
             "  \"unconfirmed_balance\": xxx, (numeric) the total unconfirmed balance of the wallet in " + CURRENCY_UNIT + "\n"
             "  \"immature_balance\": xxxxxx, (numeric) the total immature balance of the wallet in " + CURRENCY_UNIT + "\n"
             "  \"txcount\": xxxxxxx,         (numeric) the total number of transactions in the wallet\n"
@@ -2480,6 +2486,8 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
     obj.push_back(Pair("balance",       ValueFromAmount(pwalletMain->GetBalance())));
+    if(!fLiteMode)
+        obj.push_back(Pair("privatesend_balance",       ValueFromAmount(pwalletMain->GetAnonymizedBalance())));
     obj.push_back(Pair("unconfirmed_balance", ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("immature_balance",    ValueFromAmount(pwalletMain->GetImmatureBalance())));
     obj.push_back(Pair("txcount",       (int)pwalletMain->mapWallet.size()));
@@ -2496,8 +2504,7 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("hdchainid", hdChainCurrent.GetID().GetHex()));
         obj.push_back(Pair("hdaccountcount", (int64_t)hdChainCurrent.CountAccounts()));
         UniValue accounts(UniValue::VARR);
-        size_t i;
-        for (i = 0; i < hdChainCurrent.CountAccounts(); ++i)
+        for (size_t i = 0; i < hdChainCurrent.CountAccounts(); ++i)
         {
             CHDAccount acc;
             UniValue account(UniValue::VOBJ);
@@ -2515,8 +2522,12 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     return obj;
 }
 
+
 UniValue keepass(const JSONRPCRequest& request)
 {
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
     std::string strCommand;
 
     if (request.params.size() >= 1)
@@ -2872,36 +2883,6 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
     result.push_back(Pair("changepos", changePosition));
     result.push_back(Pair("fee", ValueFromAmount(nFeeOut)));
 
-    return result;
-}
-
-UniValue convertrawprivkey(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() != 1)
-        throw std::runtime_error(
-            "convertrawprivkey [private key]\n"
-            "Converts private key to base58 encoded wallet private key.\n");
-
-    std::string strPrivKey = params[0].get_str();
-    CPrivKey vecPrivateKey;
-    for (unsigned i = 0, uchr ; i < strPrivKey.length() ; i += 2) {
-        sscanf( strPrivKey.c_str()+ i, "%2x", &uchr ); // conversion
-        vecPrivateKey.push_back(uchr);
-      }
-
-    CKey vchSecret = CKey();
-    vchSecret.SetPrivKey(vecPrivateKey, false);
-
-    UniValue result(UniValue::VOBJ);
-    if (vchSecret.IsValid())
-    {
-        result.push_back(Pair("WalletPrivateKey", CDynamicSecret(vchSecret).ToString()));
-    }
-    else
-    {
-        result.push_back(Pair("WalletPrivateKey", "Could not convert private key.  Invalid."));
-    }
-    
     return result;
 }
 
