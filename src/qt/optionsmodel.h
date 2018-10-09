@@ -52,6 +52,7 @@ public:
         SpendZeroConfChange,    // bool
         ShowDynodesTab,     // bool
         ShowAdvancedPSUI,       // bool
+        ShowPrivateSendPopups,  // bool 
         LowKeysWarning,         // bool
         PrivateSendRounds,      // int
         PrivateSendAmount,      // int
