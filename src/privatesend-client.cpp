@@ -73,8 +73,8 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
 
         // if the queue is ready, submit if we can
         if(psq.fReady) {
-            LOCK(cs_vecsessions);
-            for (auto& session : vecSessions) {
+            LOCK(cs_peqsessions);
+            for (auto& session : peqSessions) {
                 dynode_info_t dnMixing;
                 if (session.GetMixingDynodeInfo(dnMixing) && dnMixing.addr == infoDn.addr && session.GetState() == POOL_STATE_QUEUE) {
                     LogPrint("privatesend", "PSQUEUE -- PrivateSend queue (%s) is ready on dynode %s\n", psq.ToString(), infoDn.addr.ToString());
@@ -83,7 +83,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
                 }
             }
         } else {
-            LOCK(cs_vecsessions); // have to lock this first to avoid deadlocks with cs_vecqueue
+            LOCK(cs_peqsessions); // have to lock this first to avoid deadlocks with cs_vecqueue
             TRY_LOCK(cs_vecqueue, lockRecv);
             if(!lockRecv) return;
 
@@ -106,7 +106,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
             if(!dnodeman.AllowMixing(psq.dynodeOutpoint)) return;
 
             LogPrint("privatesend", "PSQUEUE -- new PrivateSend queue (%s) from dynode %s\n", psq.ToString(), infoDn.addr.ToString());
-            for (auto& session : vecSessions) {
+            for (auto& session : peqSessions) {
                 dynode_info_t dnMixing;
                 if (session.GetMixingDynodeInfo(dnMixing) && dnMixing.outpoint == psq.dynodeOutpoint) {
                     psq.fTried = true;
@@ -121,8 +121,8 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
         strCommand == NetMsgType::PSFINALTX ||
         strCommand == NetMsgType::PSCOMPLETE
     ) {
-        LOCK(cs_vecsessions);
-        for (auto& session : vecSessions) {
+        LOCK(cs_peqsessions);
+        for (auto& session : peqSessions) {
             session.ProcessMessage(pfrom, strCommand, vRecv, connman);
         }
     }
@@ -251,13 +251,13 @@ void CPrivateSendClientSession::ResetPool()
 
 void CPrivateSendClientManager::ResetPool()
 {
-    LOCK(cs_vecsessions);
+    LOCK(cs_peqsessions);
     nCachedLastSuccessBlock = 0;
     vecDynodesUsed.clear();
-    for (auto& session : vecSessions) {
+    for (auto& session : peqSessions) {
         session.ResetPool();
     }
-    vecSessions.clear();
+    peqSessions.clear();
 }
 
 void CPrivateSendClientSession::SetNull()
@@ -340,10 +340,10 @@ std::string CPrivateSendClientSession::GetStatus(bool fWaitForBlock)
 
 std::string CPrivateSendClientManager::GetStatuses()
 {
-    LOCK(cs_vecsessions);
+    LOCK(cs_peqsessions);
     std::string strStatus;
     bool fWaitForBlock = WaitForAnotherBlock();
-    for (auto& session : vecSessions) {
+    for (auto& session : peqSessions) {
         strStatus += session.GetStatus(fWaitForBlock) + "; ";
     }
     return strStatus;
@@ -351,9 +351,9 @@ std::string CPrivateSendClientManager::GetStatuses()
 
 std::string CPrivateSendClientManager::GetSessionDenoms()
 {
-    LOCK(cs_vecsessions);
+    LOCK(cs_peqsessions);
     std::string strSessionDenoms;
-    for (auto& session : vecSessions) {
+    for (auto& session : peqSessions) {
         strSessionDenoms += (session.nSessionDenom ? CPrivateSend::GetDenominationsToString(session.nSessionDenom) : "N/A") + "; ";
     }
     return strSessionDenoms.empty() ? "N/A" : strSessionDenoms;
@@ -367,8 +367,8 @@ bool CPrivateSendClientSession::GetMixingDynodeInfo(dynode_info_t& dnInfoRet) co
 
 bool CPrivateSendClientManager::GetMixingDynodesInfo(std::vector<dynode_info_t>& vecDnInfoRet) const 
 {
-    LOCK(cs_vecsessions);
-    for (const auto& session : vecSessions) {
+    LOCK(cs_peqsessions);
+    for (const auto& session : peqSessions) {
         dynode_info_t dnInfo;
         if (session.GetMixingDynodeInfo(dnInfo)) {
             vecDnInfoRet.push_back(dnInfo);
@@ -442,8 +442,8 @@ void CPrivateSendClientManager::CheckTimeout()
     if(fDynodeMode) return;
     if(!fEnablePrivateSend) return;
     CheckQueue();
-    LOCK(cs_vecsessions);
-    for (auto& session : vecSessions) {
+    LOCK(cs_peqsessions);
+    for (auto& session : peqSessions) {
         if (session.CheckTimeout()) {
             strAutoDenomResult = _("Session timed out.");
         }
@@ -951,12 +951,12 @@ bool CPrivateSendClientManager::DoAutomaticDenominating(CConnman& connman, bool 
         LogPrint("privatesend", "  vecDynodesUsed: new size: %d, threshold: %d\n", (int)vecDynodesUsed.size(), nThreshold_high);
     }
 
-     LOCK(cs_vecsessions); 
+     LOCK(cs_peqsessions); 
     bool fResult = true; 
-    if ((int)vecSessions.size() < nPrivateSendSessions) { 
-        vecSessions.emplace_back();
+    if ((int)peqSessions.size() < nPrivateSendSessions) { 
+        peqSessions.emplace_back();
     }
-    for (auto& session : vecSessions) {
+    for (auto& session : peqSessions) {
         if (!CheckAutomaticBackup())
             return false;
 
@@ -1150,8 +1150,8 @@ bool CPrivateSendClientSession::ProcessPendingPsaRequest(CConnman& connman)
 
 void CPrivateSendClientManager::ProcessPendingPsaRequest(CConnman& connman)
 {
-    LOCK(cs_vecsessions);
-    for (auto& session : vecSessions) {
+    LOCK(cs_peqsessions);
+    for (auto& session : peqSessions) {
         if (session.ProcessPendingPsaRequest(connman)) {
             strAutoDenomResult = _("Mixing in progress...");
         }

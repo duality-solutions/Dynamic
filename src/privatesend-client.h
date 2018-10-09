@@ -174,8 +174,8 @@ private:
     std::vector<CAmount> vecDenominationsSkipped;
 
     // TODO: or map<denom, CPrivateSendClientSession> ??
-    std::vector<CPrivateSendClientSession> vecSessions;
-    mutable CCriticalSection cs_vecsessions;
+    std::deque<CPrivateSendClientSession> peqSessions;
+    mutable CCriticalSection cs_peqsessions;
 
     int nCachedLastSuccessBlock;
     int nMinBlocksToWait; // how many blocks to wait after one successful mixing tx in non-multisession mode
@@ -203,7 +203,7 @@ public:
     CPrivateSendClientManager() :
         vecDynodesUsed(),
         vecDenominationsSkipped(),
-        vecSessions(),
+        peqSessions(),
         nCachedLastSuccessBlock(0),
         nMinBlocksToWait(1),
         strAutoDenomResult(),
