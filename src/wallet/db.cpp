@@ -364,7 +364,7 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
                 std::string strFileRes = strFile + ".rewrite";
                 { // surround usage of db with extra {}
                     CDB db(strFile.c_str(), "r");
-                    Db* pdbCopy = new Db(bitdb.dbenv.get(), 0);
+                    std::unique_ptr<Db> pdbCopy{new Db(bitdb.dbenv.get(), 0)};
 
                     int ret = pdbCopy->open(NULL, // Txn pointer
                         strFileRes.c_str(),       // Filename
@@ -410,7 +410,6 @@ bool CDB::Rewrite(const std::string& strFile, const char* pszSkip)
                         bitdb.CloseDb(strFile);
                         if (pdbCopy->close(0))
                             fSuccess = false;
-                        delete pdbCopy;
                     }
                 }
                 if (fSuccess) {
