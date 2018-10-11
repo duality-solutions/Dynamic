@@ -39,6 +39,7 @@ class CMutableDataEvent : public CEvent {
        std::string PublicKey() const { return pubkey; }
        std::string Salt() const { return salt; }
        std::int64_t SequenceNumber() const { return seq; }
+       std::string InfoHash() const;
 };
 
 void StopEventListener();

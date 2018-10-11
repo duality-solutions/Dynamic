@@ -5,11 +5,14 @@
 
 #include "util.h" // for LogPrintf
 
-#include "libtorrent/alert.hpp"
-#include "libtorrent/alert_types.hpp"
-#include "libtorrent/session.hpp"
-#include "libtorrent/session_status.hpp"
-#include "libtorrent/time.hpp"
+#include <libtorrent/alert.hpp>
+#include <libtorrent/alert_types.hpp>
+#include <libtorrent/kademlia/types.hpp>
+#include <libtorrent/kademlia/item.hpp>
+#include <libtorrent/hex.hpp> // for to_hex and from_hex
+#include <libtorrent/session.hpp>
+#include <libtorrent/session_status.hpp>
+#include <libtorrent/time.hpp>
 
 #include <map>
 #include <mutex>
@@ -70,43 +73,72 @@ std::int64_t CEvent::Timestamp() const
 std::string CEvent::ToString() const 
 {
     if (pAlert == nullptr)
-        return 0;
+        return "";
     return strprintf("CEvent(Message = %s\n, Type = %d\n, Category = %d\n, What = %s\n, Timestamp = %u)\n",
         Message(), Type(), Category(), What(), Timestamp());
 }
 
-CMutableDataEvent::CMutableDataEvent(alert* alert) : CEvent(alert)
+static bool ParseDHTMessageKey(const std::string& strAlertMessage, MutableKey& key)
 {
     // parse key and salt
-    std::string strAlertMessage = Message();
     size_t posKeyStart = strAlertMessage.find("key=");
     size_t posSaltBegin = strAlertMessage.find("salt=");
     if (posKeyStart == std::string::npos || posSaltBegin == std::string::npos) {
-        LogPrintf("CMutableDataEvent::CMutableDataEvent -- Error parsing DHT alert message start. %s\n", strAlertMessage);
-        return;
+        LogPrintf("DHTEventListener -- ParseDHTMessage Error parsing DHT alert message start.\n");
+        return false;
     }
     size_t posKeyEnd = strAlertMessage.find(" ", posKeyStart);
     size_t posSaltEnd = strAlertMessage.find(" ", posSaltBegin);
     if (posKeyEnd == std::string::npos || posSaltEnd == std::string::npos) {
-        LogPrintf("CMutableDataEvent::CMutableDataEvent -- Error parsing DHT alert message end. %s\n", strAlertMessage);
-        return;
+        LogPrintf("DHTEventListener -- ParseDHTMessage Error parsing DHT alert message end.\n");
+        return false;
     }
-    pubkey = strAlertMessage.substr(posKeyStart + 4, posKeyEnd);
-    salt = strAlertMessage.substr(posSaltBegin + 5, posSaltEnd);
-    LogPrintf("CMutableDataEvent::CMutableDataEvent -- pubkey = %s, salt = %s.\n", pubkey, salt);
+    const std::string pubkey = strAlertMessage.substr(posKeyStart + 4, posKeyEnd);
+    const std::string salt = strAlertMessage.substr(posSaltBegin + 5, posSaltEnd);
+    key = std::make_pair(pubkey, salt);
+    
+    return true;
+}
+
+static bool ParseDHTMessage(const std::string& strAlertMessage, MutableKey& key, std::int64_t& sequence)
+{
+    if (!ParseDHTMessageKey(strAlertMessage, key)) {
+        return false;
+    }
     // parse sequence number
     size_t posSeqBegin = strAlertMessage.find("seq=");
     if (posSeqBegin == std::string::npos) {
-        LogPrintf("CMutableDataEvent:CMutableDataEvent -- Error parsing DHT alert seq start.s %\n", strAlertMessage);
-        return;
+        LogPrintf("DHTEventListener -- ParseDHTMessage Error parsing DHT alert seq start.s %\n", strAlertMessage);
+        sequence = -1;
+        return true;
     }
     size_t posSeqEnd = strAlertMessage.find(" ", posSeqBegin);
     if (posSeqEnd == std::string::npos) {
-        LogPrintf("CMutableDataEvent -- Error parsing DHT alert seq end. %s\n", strAlertMessage);
-        return;
+        LogPrintf("DHTEventListener -- ParseDHTMessage Error parsing DHT alert seq end. %s\n", strAlertMessage);
+        sequence = -1;
+        return true;
     }
-    seq = std::stoi(strAlertMessage.substr(posSeqBegin + 4, posSeqEnd));
-    LogPrintf("CMutableDataEvent::CMutableDataEvent -- seq = %u.\n", seq);
+    sequence = std::stoi(strAlertMessage.substr(posSeqBegin + 4, posSeqEnd));
+    return true;
+}
+
+CMutableDataEvent::CMutableDataEvent(alert* alert) : CEvent(alert)
+{
+    MutableKey key;
+    ParseDHTMessage(Message(), key, seq); // parse key, salt and seq
+    pubkey = key.first;
+    salt = key.second;
+    LogPrintf("CMutableDataEvent::CMutableDataEvent -- pubkey = %s, salt = %s, seq = %u.\n", pubkey, salt, seq);
+}
+
+std::string CMutableDataEvent::InfoHash() const
+{
+    std::array<char, 32> arrPubKey;
+    aux::from_hex(pubkey, arrPubKey.data());
+    dht::public_key pk;
+    pk.bytes = arrPubKey;
+    const sha1_hash infoHash = dht::item_target_id(salt, pk);
+    return infoHash.to_string();
 }
 
 static void  DHTEventListener(session* dhtSession)
@@ -122,22 +154,12 @@ static void  DHTEventListener(session* dhtSession)
             int iAlertType = (*iAlert)->type();
             if ((*iAlert)->category() == 0x400) {
                 LogPrintf("DHTEventListener -- DHT Alert Message = %s, Alert Type =%d\n", strAlertMessage, iAlertType);
-                // parse key and salt
-                size_t posKeyStart = strAlertMessage.find("key=");
-                size_t posSaltBegin = strAlertMessage.find("salt=");
-                if (posKeyStart == std::string::npos || posSaltBegin == std::string::npos) {
+                MutableKey mKey; // parse key and salt
+                if (!ParseDHTMessageKey(strAlertMessage, mKey)) {
                     LogPrintf("DHTEventListener -- Error parsing DHT alert message start.\n");
                     continue;
                 }
-                size_t posKeyEnd = strAlertMessage.find(" ", posKeyStart);
-                size_t posSaltEnd = strAlertMessage.find(" ", posSaltBegin);
-                if (posKeyEnd == std::string::npos || posSaltEnd == std::string::npos) {
-                    LogPrintf("DHTEventListener -- Error parsing DHT alert message end.\n");
-                    continue;
-                }
-                const std::string pubkey = strAlertMessage.substr(posKeyStart + 4, posKeyEnd);
-                const std::string salt = strAlertMessage.substr(posSaltBegin + 5, posSaltEnd);
-                MutableKey mKey(pubkey, salt);
+                
                 //CMutableDataEvent findEvent = m_DHTEventMap.find(mKey);
                 // TODO: (DHT) Add map entry
                 // find existing map for this entry
