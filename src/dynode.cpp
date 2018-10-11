@@ -209,10 +209,6 @@ void CDynode::Check(bool fForce)
             return;
         }
 
-        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetAdjustedTime()=%d, fWatchdogExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime());
-
-
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {
             nActiveState = DYNODE_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
