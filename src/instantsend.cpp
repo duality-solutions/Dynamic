@@ -1056,32 +1056,18 @@ uint256 CTxLockVote::GetSignatureHash() const
 bool CTxLockVote::CheckSignature() const
 {
     std::string strError;
+    std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
     dynode_info_t infoDn;
 
     if(!dnodeman.GetDynodeInfo(outpointDynode, infoDn)) {
-        LogPrintf("CTxLockVote::CheckSignature -- Unknown Dynode: dynode=%s\n", outpointDynode.ToString());
-        return false;
+    LogPrintf("CTxLockVote::CheckSignature -- Unknown Dynode: dynode=%s\n", outpointDynode.ToString());
+    return false;
     }
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, infoDn.pubKeyDynode, vchDynodeSignature, strError)) {
-            // could be a signature in old format
-            std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
-            if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
-                // nope, not in old format either
-                LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
-                return false;
-            }
-        }
-    } else {
-        std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
-        if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
-            LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    
+    if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+        LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;
@@ -1090,31 +1076,16 @@ bool CTxLockVote::CheckSignature() const
 bool CTxLockVote::Sign()
 {
     std::string strError;
+    std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
+    if(!CMessageSigner::SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
+        LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
+        return false;
+    }
 
-        if(!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchDynodeSignature)) {
-            LogPrintf("CTxLockVote::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchDynodeSignature, strError)) {
-            LogPrintf("CTxLockVote::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
-
-        if(!CMessageSigner::SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
-            LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
-            return false;
-        }
-
-        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
-            LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+        LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;

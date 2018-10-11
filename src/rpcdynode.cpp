@@ -490,52 +490,49 @@ UniValue dynode(const JSONRPCRequest& request)
 
 UniValue dynodelist(const JSONRPCRequest& request)
 {
-    std::string strMode = "json";
+    std::string strMode = "status";
     std::string strFilter = "";
 
     if (request.params.size() >= 1) strMode = request.params[0].get_str();
     if (request.params.size() == 2) strFilter = request.params[1].get_str();
 
     if (request.fHelp || (
-                strMode != "activeseconds" && strMode != "addr" && strMode != "daemon" && strMode != "full" && strMode != "info" && strMode != "json" &&
+                strMode != "activeseconds" && strMode != "addr" && strMode != "full" && strMode != "info" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
                 strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
-                strMode != "rank" && strMode != "sentinel" && strMode != "status"))
+                strMode != "rank" && strMode != "status"))
     {
         throw std::runtime_error(
                 "dynodelist ( \"mode\" \"filter\" )\n"
-                "Get a list of dynodes in different modes\n"
+                "Get a list of Dynodes in different modes\n"
                 "\nArguments:\n"
-                "1. \"mode\"      (string, optional/required to use filter, defaults = json) The mode to run list in\n"
+                "1. \"mode\"      (string, optional/required to use filter, defaults = status) The mode to run list in\n"
                 "2. \"filter\"    (string, optional) Filter results. Partial match by outpoint by default in all modes,\n"
                 "                                    additional matches in some modes are also available\n"
                 "\nAvailable modes:\n"
-                "  activeseconds  - Print number of seconds dynode recognized by the network as enabled\n"
+                "  activeseconds  - Print number of seconds Dynode recognized by the network as enabled\n"
                 "                   (since latest issued \"dynode start/start-many/start-alias\")\n"
-                "  addr           - Print ip address associated with a dynode (can be additionally filtered, partial match)\n"
-                "  daemon         - Print daemon version of a dynode (can be additionally filtered, exact match)\n"
+                "  addr           - Print ip address associated with a Dynode (can be additionally filtered, partial match)\n"
                 "  full           - Print info in format 'status protocol payee lastseen activeseconds lastpaidtime lastpaidblock IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
                 "  info           - Print info in format 'status protocol payee lastseen activeseconds sentinelversion sentinelstate IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
-                "  json           - Print info in JSON format (can be additionally filtered, partial match)\n"
                 "  lastpaidblock  - Print the last block height a node was paid on the network\n"
                 "  lastpaidtime   - Print the last time a node was paid on the network\n"
-                "  lastseen       - Print timestamp of when a dynode was last seen on the network\n"
-                "  payee          - Print Dynamic address associated with a dynode (can be additionally filtered,\n"
+                "  lastseen       - Print timestamp of when a Dynode was last seen on the network\n"
+                "  payee          - Print Dynamic address associated with a Dynode (can be additionally filtered,\n"
                 "                   partial match)\n"
-                "  protocol       - Print protocol of a dynode (can be additionally filtered, exact match)\n"
-                "  pubkey         - Print the dynode (not collateral) public key\n"
-                "  rank           - Print rank of a dynode based on current block\n"
-                "  sentinel       - Print sentinel version of a dynode (can be additionally filtered, exact match)\n"
-                "  status         - Print dynode status: PRE_ENABLED / ENABLED / EXPIRED / SENTINEL_PING_EXPIRED / NEW_START_REQUIRED /\n"
+                "  protocol       - Print protocol of a Dynode (can be additionally filtered, exact match))\n"
+                "  pubkey         - Print the Dynode (not collateral) public key\n"
+                "  rank           - Print rank of a Dynode based on current block\n"
+                "  status         - Print Dynode status: PRE_ENABLED / ENABLED / EXPIRED / SENTINEL_PING_EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
                 );
     }
 
-    if (strMode == "full" || strMode == "json" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
+    if (strMode == "full" || strMode == "lastpaidtime" || strMode == "lastpaidblock") {
         CBlockIndex* pindex = NULL;
-        {
+         {
             LOCK(cs_main);
             pindex = chainActive.Tip();
         }
@@ -553,7 +550,7 @@ UniValue dynodelist(const JSONRPCRequest& request)
         }
     } else {
         std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
-        for (const auto& dnpair : mapDynodes) {
+        for (auto& dnpair : mapDynodes) {
             CDynode dn = dnpair.second;
             std::string strOutpoint = dnpair.first.ToStringShort();
             if (strMode == "activeseconds") {
@@ -564,16 +561,6 @@ UniValue dynodelist(const JSONRPCRequest& request)
                 if (strFilter !="" && strAddress.find(strFilter) == std::string::npos &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, strAddress));
-            } else if (strMode == "daemon") {
-                std::string strDaemon = dn.lastPing.GetDaemonString(); 
-                if (strFilter !="" && strDaemon.find(strFilter) == std::string::npos &&
-                    strOutpoint.find(strFilter) == std::string::npos) continue;
-                obj.push_back(Pair(strOutpoint, strDaemon));
-            } else if (strMode == "sentinel") {
-                std::string strSentinel = dn.lastPing.GetSentinelString(); 
-                if (strFilter !="" && strSentinel.find(strFilter) == std::string::npos &&
-                    strOutpoint.find(strFilter) == std::string::npos) continue;
-                obj.push_back(Pair(strOutpoint, strSentinel));
             } else if (strMode == "full") {
                 std::ostringstream streamFull;
                 streamFull << std::setw(18) <<
@@ -597,42 +584,13 @@ UniValue dynodelist(const JSONRPCRequest& request)
                                CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString() << " " <<
                                (int64_t)dn.lastPing.sigTime << " " << std::setw(8) <<
                                (int64_t)(dn.lastPing.sigTime - dn.sigTime) << " " <<
-                               dn.lastPing.GetSentinelString() << " "  << 
+                               SafeIntVersionToString(dn.lastPing.nSentinelVersion) << " "  <<
                                (dn.lastPing.fSentinelIsCurrent ? "current" : "expired") << " " <<
                                dn.addr.ToString();
                 std::string strInfo = streamInfo.str();
                 if (strFilter !="" && strInfo.find(strFilter) == std::string::npos &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, strInfo));
-            } else if (strMode == "json") {
-                std::ostringstream streamInfo;
-                streamInfo <<  dn.addr.ToString() << " " <<
-                               CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString() << " " <<
-                               dn.GetStatus() << " " <<
-                               dn.nProtocolVersion << " " <<
-                               dn.lastPing.nDaemonVersion << " " <<
-                               dn.lastPing.GetSentinelString() << " " << 
-                               (dn.lastPing.fSentinelIsCurrent ? "current" : "expired") << " " <<
-                               (int64_t)dn.lastPing.sigTime << " " <<
-                               (int64_t)(dn.lastPing.sigTime - dn.sigTime) << " " <<
-                               dn.GetLastPaidTime() << " " <<
-                               dn.GetLastPaidBlock();
-                std::string strInfo = streamInfo.str();
-                if (strFilter !="" && strInfo.find(strFilter) == std::string::npos &&
-                    strOutpoint.find(strFilter) == std::string::npos) continue;
-                UniValue objDN(UniValue::VOBJ);
-                objDN.push_back(Pair("address", dn.addr.ToString()));
-                objDN.push_back(Pair("payee", CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
-                objDN.push_back(Pair("status", dn.GetStatus()));
-                objDN.push_back(Pair("protocol", dn.nProtocolVersion));
-                objDN.push_back(Pair("daemonversion", dn.lastPing.GetDaemonString())); 
-                objDN.push_back(Pair("sentinelversion", dn.lastPing.GetSentinelString())); 
-                objDN.push_back(Pair("sentinelstate", (dn.lastPing.fSentinelIsCurrent ? "current" : "expired")));
-                objDN.push_back(Pair("lastseen", (int64_t)dn.lastPing.sigTime));
-                objDN.push_back(Pair("activeseconds", (int64_t)(dn.lastPing.sigTime - dn.sigTime)));
-                objDN.push_back(Pair("lastpaidtime", dn.GetLastPaidTime()));
-                objDN.push_back(Pair("lastpaidblock", dn.GetLastPaidBlock()));
-                obj.push_back(Pair(strOutpoint, objDN));
             } else if (strMode == "lastpaidblock") {
                 if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, dn.GetLastPaidBlock()));
@@ -651,7 +609,7 @@ UniValue dynodelist(const JSONRPCRequest& request)
             } else if (strMode == "protocol") {
                 if (strFilter !="" && strFilter != strprintf("%d", dn.nProtocolVersion) &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
-                obj.push_back(Pair(strOutpoint, dn.nProtocolVersion));
+                obj.push_back(Pair(strOutpoint, (int64_t)dn.nProtocolVersion));
             } else if (strMode == "pubkey") {
                 if (strFilter !="" && strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, HexStr(dn.pubKeyDynode)));

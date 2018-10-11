@@ -192,7 +192,7 @@ void CDynode::Check(bool fForce)
 
     if(fWaitForPing && !fOurDynode) {
         // ...but if it was already expired before the initial check - return right away
-        if(IsExpired() || IsSentinelPingExpired() || IsNewStartRequired()) {
+        if(IsExpired() || IsWatchdogExpired() || IsNewStartRequired()) {
             LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state, waiting for ping\n", outpoint.ToStringShort(), GetStateString());
             return;
         }
@@ -202,43 +202,20 @@ void CDynode::Check(bool fForce)
     if(!fWaitForPing || fOurDynode) {
 
         if(!IsPingedWithin(DYNODE_NEW_START_REQUIRED_SECONDS)) {
-            nActiveState = DYNODE_NEW_START_REQUIRED_SECONDS;
+            nActiveState = DYNODE_NEW_START_REQUIRED;
             if(nActiveStatePrev != nActiveState) {
                 LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
             }
             return;
         }
+
+        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, nTimeLastWatchdogVote=%d, GetAdjustedTime()=%d, fWatchdogExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime());
+
 
         if(!IsPingedWithin(DYNODE_EXPIRATION_SECONDS)) {
             nActiveState = DYNODE_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
-                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
-            }
-            return;
-        }
-
-        // part 1: expire based on dashd ping
-        bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(DYNODE_SENTINEL_PING_MAX_SECONDS);
-        
-        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-
-        if(fSentinelPingExpired) {
-            nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
-                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
-            }
-            return;
-        }
-    }
-
-    // We require DNs to be in PRE_ENABLED until they either start to expire or receive a ping and go into ENABLED state
-    // Works on mainnet/testnet only and not the case on regtest/devnet.
-    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
-        if (lastPing.sigTime - sigTime < DYNODE_MIN_DNP_SECONDS) {
-            nActiveState = DYNODE_PRE_ENABLED;
-            if (nActiveStatePrev != nActiveState) {
                 LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
             }
             return;
@@ -280,7 +257,7 @@ std::string CDynode::StateToString(int nStateIn)
         case DYNODE_EXPIRED:                return "EXPIRED";
         case DYNODE_OUTPOINT_SPENT:         return "OUTPOINT_SPENT";
         case DYNODE_UPDATE_REQUIRED:        return "UPDATE_REQUIRED";
-        case DYNODE_SENTINEL_PING_EXPIRED:  return "SENTINEL_PING_EXPIRED";
+        case DYNODE_WATCHDOG_EXPIRED:       return "WATCHDOG_EXPIRED";
         case DYNODE_NEW_START_REQUIRED:     return "NEW_START_REQUIRED";
         case DYNODE_POSE_BAN:               return "POSE_BAN";
         default:                            return "UNKNOWN";
@@ -430,7 +407,7 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
     }
 
     // empty ping or incorrect sigTime/unknown blockhash
-    if(!lastPing || !lastPing.SimpleCheck(nDos)) {
+    if(lastPing == CDynodePing() || !lastPing.SimpleCheck(nDos)) {
         // one of us is probably forked or smth, just mark it as expired and check the rest of the rules
         nActiveState = DYNODE_EXPIRED;
     }
@@ -579,62 +556,23 @@ bool CDynodeBroadcast::CheckOutpoint(int& nDos)
     return true;
 }
 
-uint256 CDynodeBroadcast::GetHash() const
-{
-    // Note: doesn't match serialization
-
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << outpoint << uint8_t{} << 0xffffffff; // adding dummy values here to match old hashing format
-    ss << pubKeyCollateralAddress;
-    ss << sigTime;
-    return ss.GetHash();
-}
-
-uint256 CDynodeBroadcast::GetSignatureHash() const
-{
-    // TODO: replace with "return SerializeHash(*this);" after migration to 70100
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << outpoint;
-    ss << addr;
-    ss << pubKeyCollateralAddress;
-    ss << pubKeyDynode;
-    ss << sigTime;
-    ss << nProtocolVersion;
-    return ss.GetHash();
-}
-
 bool CDynodeBroadcast::Sign(const CKey& keyCollateralAddress)
 {
     std::string strError;
 
     sigTime = GetAdjustedTime();
+    std::string strMessage = addr.ToString(false) + std::to_string(sigTime) +
+                    pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
+                    std::to_string(nProtocolVersion);
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
+    if (!CMessageSigner::SignMessage(strMessage, vchSig, keyCollateralAddress)) {
+        LogPrintf("CDynodeBroadcast::Sign -- SignMessage() failed\n");
+        return false;
+    }
 
-        if (!CHashSigner::SignHash(hash, keyCollateralAddress, vchSig)) {
-            LogPrintf("CDynodeBroadcast::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyCollateralAddress, vchSig, strError)) {
-            LogPrintf("CDynodeBroadcast::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = addr.ToString(false) + std::to_string(sigTime) +
-                        pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
-                        std::to_string(nProtocolVersion);
-
-        if (!CMessageSigner::SignMessage(strMessage, vchSig, keyCollateralAddress)) {
-            LogPrintf("CDynodeBroadcast::Sign -- SignMessage() failed\n");
-            return false;
-        }
-
-        if (!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
-            LogPrintf("CDynodeBroadcast::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    if (!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)) {
+        LogPrintf("CDynodeBroadcast::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;
@@ -642,35 +580,20 @@ bool CDynodeBroadcast::Sign(const CKey& keyCollateralAddress)
 
 bool CDynodeBroadcast::CheckSignature(int& nDos) const
 {
+    std::string strMessage;
     std::string strError = "";
     nDos = 0;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
+    strMessage = addr.ToString(false) + boost::lexical_cast<std::string>(sigTime) +
+                    pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
+                    boost::lexical_cast<std::string>(nProtocolVersion);
 
-        if (!CHashSigner::VerifyHash(hash, pubKeyCollateralAddress, vchSig, strError)) {
-            // maybe it's in old format
-            std::string strMessage = addr.ToString(false) + std::to_string(sigTime) +
-                            pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
-                            std::to_string(nProtocolVersion);
+    LogPrint("Dynode", "CDynodeBroadcast::CheckSignature -- strMessage: %s  pubKeyCollateralAddress address: %s  sig: %s\n", strMessage, CDynamicAddress(pubKeyCollateralAddress.GetID()).ToString(), EncodeBase64(&vchSig[0], vchSig.size()));
 
-            if (!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
-                // nope, not in old format either
-                LogPrintf("CDynodeBroadcast::CheckSignature -- Got bad Dynode announce signature, error: %s\n", strError);
-                nDos = 100;
-                return false;
-            }
-        }
-    } else {
-        std::string strMessage = addr.ToString(false) + std::to_string(sigTime) +
-                        pubKeyCollateralAddress.GetID().ToString() + pubKeyDynode.GetID().ToString() +
-                        std::to_string(nProtocolVersion);
-
-        if (!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
-            LogPrintf("CDynodeBroadcast::CheckSignature -- Got bad Dynode announce signature, error: %s\n", strError);
-            nDos = 100;
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(pubKeyCollateralAddress, vchSig, strMessage, strError)){
+        LogPrintf("CDynodeBroadcast::CheckSignature -- Got bad Dynode announce signature, error: %s\n", strError);
+        nDos = 100;
+        return false;
     }
 
     return true;
@@ -688,31 +611,6 @@ void CDynodeBroadcast::Relay(CConnman& connman) const
     connman.RelayInv(inv);
 }
 
-uint256 CDynodePing::GetHash() const
-{
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        // TODO: replace with "return SerializeHash(*this);" after migration to 70100
-        ss << dynodeOutpoint;
-        ss << blockHash;
-        ss << sigTime;
-        ss << fSentinelIsCurrent;
-        ss << nSentinelVersion;
-        ss << nDaemonVersion;
-    } else {
-        // Note: doesn't match serialization
-
-        ss << dynodeOutpoint << uint8_t{} << 0xffffffff; // adding dummy values here to match old hashing format
-        ss << sigTime;
-    }
-    return ss.GetHash();
-}
-
-uint256 CDynodePing::GetSignatureHash() const
-{
-    return GetHash();
-}
-
 CDynodePing::CDynodePing(const COutPoint& outpoint)
 {
     LOCK(cs_main);
@@ -721,72 +619,39 @@ CDynodePing::CDynodePing(const COutPoint& outpoint)
     dynodeOutpoint = outpoint;
     blockHash = chainActive[chainActive.Height() - 12]->GetBlockHash();
     sigTime = GetAdjustedTime();
-    nDaemonVersion = CLIENT_VERSION;
 }
 
 bool CDynodePing::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 {
     std::string strError;
+    std::string strDyNodeSignMessage;
 
+    // TODO: add sentinel data
     sigTime = GetAdjustedTime();
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
+        LogPrintf("CDynodePing::Sign -- SignMessage() failed\n");
+        return false;
+    }
 
-        if (!CHashSigner::SignHash(hash, keyDynode, vchSig)) {
-            LogPrintf("CDynodePing::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CDynodePing::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = CTxIn(dynodeOutpoint).ToString() + blockHash.ToString() +
-                    std::to_string(sigTime);
-
-        if (!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
-            LogPrintf("CDynodePing::Sign -- SignMessage() failed\n");
-            return false;
-        }
-
-        if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CDynodePing::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CDynodePing::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;
 }
-
 bool CDynodePing::CheckSignature(const CPubKey& pubKeyDynode, int &nDos) const
 {
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() + blockHash.ToString() + std::to_string(sigTime);
     std::string strError = "";
     nDos = 0;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            std::string strMessage = CTxIn(dynodeOutpoint).ToString() + blockHash.ToString() +
-                        std::to_string(sigTime);
-
-            if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-                LogPrintf("CDynodePing::CheckSignature -- Got bad Dynode ping signature, dynode=%s, error: %s\n", dynodeOutpoint.ToStringShort(), strError);
-                nDos = 33;
-                return false;
-            }
-        }
-    } else {
-        std::string strMessage = CTxIn(dynodeOutpoint).ToString() + blockHash.ToString() +
-                    std::to_string(sigTime);
-
-        if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CDynodePing::CheckSignature -- Got bad Dynode ping signature, dynode=%s, error: %s\n", dynodeOutpoint.ToStringShort(), strError);
-            nDos = 33;
-            return false;
-        }
+    if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CDynodePing::CheckSignature -- Got bad Dynode ping signature, dynode=%s, error: %s\n", dynodeOutpoint.ToStringShort(), strError);
+        nDos = 33;
+        return false;
     }
 
     return true;
@@ -889,7 +754,7 @@ bool CDynodePing::SimpleCheck(int& nDos)
     // force update, ignoring cache
     pdn->Check(true);
     // relay ping for nodes in ENABLED/EXPIRED/SENTINEL_PING_EXPIRED state only, skip everyone else
-    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsSentinelPingExpired()) return false;
+    if (!pdn->IsEnabled() && !pdn->IsExpired() && !pdn->IsWatchdogExpired()) return false;
 
     LogPrint("Dynode", "CDynodePing::CheckAndUpdate -- Dynode ping acceepted and relayed, Dynode=%s\n", dynodeOutpoint.ToStringShort());
     Relay(connman);
@@ -909,15 +774,6 @@ void CDynodePing::Relay(CConnman& connman)
     connman.RelayInv(inv);
 }
 
-std::string CDynodePing::GetSentinelString() const
-{
-    return nSentinelVersion > DEFAULT_SENTINEL_VERSION ? SafeIntVersionToString(nSentinelVersion) : "Unknown";
-}
-std::string CDynodePing::GetDaemonString() const
-{
-    return nDaemonVersion > DEFAULT_DAEMON_VERSION ? FormatVersion(nDaemonVersion) : "Unknown";
-}
-
 void CDynode::AddGovernanceVote(uint256 nGovernanceObjectHash)
 {
     if(mapGovernanceObjectsVotedOn.count(nGovernanceObjectHash)) {
@@ -934,6 +790,12 @@ void CDynode::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
         return;
     }
     mapGovernanceObjectsVotedOn.erase(it);
+}
+
+void CDynode::UpdateWatchdogVoteTime(uint64_t nVoteTime)
+{
+    LOCK(cs);
+    nTimeLastWatchdogVote = (nVoteTime == 0) ? GetAdjustedTime() : nVoteTime;
 }
 
 /**

@@ -48,34 +48,19 @@ bool CPrivateSendQueue::Sign()
     if(!fDynodeMode) return false;
 
     std::string strError = "";
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchSig)) {
-            LogPrintf("CPrivateSendQueue::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CPrivateSendQueue::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
                         std::to_string(nDenom) +
                         std::to_string(nTime) +
                         std::to_string(fReady);
 
-        if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-            LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
-            return false;
-        }
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+        LogPrintf("CPrivateSendQueue::Sign -- SignMessage() failed, %s\n", ToString());
+        return false;
+    }
 
-        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CPrivateSendQueue::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CPrivateSendQueue::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;
@@ -84,25 +69,14 @@ bool CPrivateSendQueue::Sign()
 bool CPrivateSendQueue::CheckSignature(const CPubKey& pubKeyDynode) const
 {
     std::string strError = "";
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            // we don't care about queues with old signature format
-            LogPrintf("CPrivateSendQueue::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
+    std::string strMessage = CTxIn(dynodeOutpoint).ToString() +
                         std::to_string(nDenom) +
                         std::to_string(nTime) +
                         std::to_string(fReady);
 
-        if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CPrivateSendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CPrivateSendQueue::CheckSignature -- Got bad Dynode queue signature: %s; error: %s\n", ToString(), strError);
+        return false;
     }
 
     return true;
@@ -128,21 +102,7 @@ bool CPrivateSendBroadcastTx::Sign()
     if(!fDynodeMode) return false;
 
     std::string strError = "";
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchSig)) {
-            LogPrintf("CPrivateSendBroadcastTx::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CPrivateSendBroadcastTx::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
+    std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
 
         if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
             LogPrintf("CPrivateSendBroadcastTx::Sign -- SignMessage() failed\n");
@@ -153,7 +113,6 @@ bool CPrivateSendBroadcastTx::Sign()
             LogPrintf("CPrivateSendBroadcastTx::Sign -- VerifyMessage() failed, error: %s\n", strError);
             return false;
         }
-    }
 
     return true;
 }
@@ -161,23 +120,12 @@ bool CPrivateSendBroadcastTx::Sign()
 bool CPrivateSendBroadcastTx::CheckSignature(const CPubKey& pubKeyDynode) const
 {
     std::string strError = "";
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            // we don't care about pstxes with old signature format
-            LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
+    std::string strMessage = tx->GetHash().ToString() + std::to_string(sigTime);
 
         if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
             LogPrintf("CPrivateSendBroadcastTx::CheckSignature -- Got bad pstx signature, error: %s\n", strError);
             return false;
         }
-    }
 
     return true;
 }

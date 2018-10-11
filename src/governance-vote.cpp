@@ -10,6 +10,8 @@
 #include "messagesigner.h"
 #include "util.h"
 
+#include <boost/lexical_cast.hpp>
+
 std::string CGovernanceVoting::ConvertOutcomeToString(vote_outcome_enum_t nOutcome)
 {
     switch(nOutcome)
@@ -156,22 +158,7 @@ uint256 CGovernanceVote::GetSignatureHash() const
 bool CGovernanceVote::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 {
     std::string strError;
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if(!CHashSigner::SignHash(hash, keyDynode, vchSig)) {
-            LogPrintf("CGovernanceVote::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CGovernanceVote::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-
-        std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
             std::to_string(nVoteSignal) + "|" + std::to_string(nVoteOutcome) + "|" + std::to_string(nTime);
 
         if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
@@ -183,7 +170,6 @@ bool CGovernanceVote::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
             LogPrintf("CGovernanceVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
             return false;
         }
-    }
 
     return true;
 }
@@ -191,25 +177,7 @@ bool CGovernanceVote::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 bool CGovernanceVote::CheckSignature(const CPubKey& pubKeyDynode) const
 {
     std::string strError;
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            // could be a signature in old format
-            std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
-                std::to_string(nVoteSignal) + "|" +
-                std::to_string(nVoteOutcome) + "|" +
-                std::to_string(nTime);
-
-            if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-                // nope, not in old format either
-                LogPrint("gobject", "CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
-                return false;
-            }
-        }
-    } else {
-        std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+    std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
             std::to_string(nVoteSignal) + "|" +
             std::to_string(nVoteOutcome) + "|" +
             std::to_string(nTime);
@@ -218,7 +186,6 @@ bool CGovernanceVote::CheckSignature(const CPubKey& pubKeyDynode) const
             LogPrint("gobject", "CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
             return false;
         }
-    }
 
     return true;
 }
@@ -252,7 +219,18 @@ bool CGovernanceVote::IsValid(bool fSignatureCheck) const
 
     if(!fSignatureCheck) return true;
 
-    return CheckSignature(infoDn.pubKeyDynode);
+    std::string strError;
+    std::string strMessage = dynodeOutpoint.ToStringShort() + "|" + nParentHash.ToString() + "|" +
+            std::to_string(nVoteSignal) + "|" +
+            std::to_string(nVoteOutcome) + "|" +
+            std::to_string(nTime);
+
+    if(!CMessageSigner::VerifyMessage(infoDn.pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CGovernanceVote::IsValid -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
+    }
+
+    return true;
 }
 
 bool operator==(const CGovernanceVote& vote1, const CGovernanceVote& vote2)

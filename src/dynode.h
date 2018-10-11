@@ -28,8 +28,7 @@ static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
 
 // sentinel version before sentinel ping implementation
 #define DEFAULT_SENTINEL_VERSION 0x010001
-// daemon version before implementation of nDaemonVersion in CDynodePing
-#define DEFAULT_DAEMON_VERSION 203050
+
 
 class CDynodePing
 {
@@ -41,7 +40,6 @@ public:
     bool fSentinelIsCurrent = false; // true if last sentinel ping was actual
     // DSB is always 0, other 3 bits corresponds to x.x.x version scheme
     uint32_t nSentinelVersion{DEFAULT_SENTINEL_VERSION};
-    uint32_t nDaemonVersion{DEFAULT_DAEMON_VERSION};
 
     CDynodePing() = default;
 
@@ -75,23 +73,19 @@ public:
             // TODO: drop this after migration to 70100
             fSentinelIsCurrent = false;
             nSentinelVersion = DEFAULT_SENTINEL_VERSION;
-            nDaemonVersion = DEFAULT_DAEMON_VERSION;
             return;
         }
         READWRITE(fSentinelIsCurrent);
         READWRITE(nSentinelVersion);
-        if(ser_action.ForRead() && s.size() == 0) {
-            // TODO: drop this after migration to 70100
-            nDaemonVersion = DEFAULT_DAEMON_VERSION;
-            return;
-        }
-        if (!(nVersion == 70900 && (s.GetType() & SER_NETWORK))) {
-            READWRITE(nDaemonVersion);
-        }
     }
 
-    uint256 GetHash() const;
-    uint256 GetSignatureHash() const;
+    uint256 GetHash() const
+    {
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss <<dynodeOutpoint << uint8_t{} << 0xffffffff;
+        ss << sigTime;
+        return ss.GetHash();
+    }
 
     bool IsExpired() const { return GetAdjustedTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
 
@@ -100,10 +94,7 @@ public:
     bool SimpleCheck(int& nDos);
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
-
-    std::string GetSentinelString() const;
-    std::string GetDaemonString() const;
-    
+   
     explicit operator bool() const;
 };
 
@@ -145,6 +136,7 @@ struct dynode_info_t
     CService addr{};
     CPubKey pubKeyCollateralAddress{};
     CPubKey pubKeyDynode{};
+    int64_t nTimeLastWatchdogVote = 0;
 
     int64_t nLastPsq = 0; //the psq count from the last psq broadcast of this node
     int64_t nTimeLastChecked = 0;
@@ -170,7 +162,7 @@ public:
         DYNODE_EXPIRED,
         DYNODE_OUTPOINT_SPENT,
         DYNODE_UPDATE_REQUIRED,
-        DYNODE_SENTINEL_PING_EXPIRED,
+        DYNODE_WATCHDOG_EXPIRED,
         DYNODE_NEW_START_REQUIRED,
         DYNODE_POSE_BAN
     };
@@ -270,7 +262,7 @@ public:
     bool IsExpired() const { return nActiveState == DYNODE_EXPIRED; }
     bool IsOutpointSpent() const { return nActiveState == DYNODE_OUTPOINT_SPENT; }
     bool IsUpdateRequired() const { return nActiveState == DYNODE_UPDATE_REQUIRED; }
-    bool IsSentinelPingExpired() const { return nActiveState == DYNODE_SENTINEL_PING_EXPIRED; }
+    bool IsWatchdogExpired() const { return nActiveState == DYNODE_WATCHDOG_EXPIRED; }
     bool IsNewStartRequired() const { return nActiveState == DYNODE_NEW_START_REQUIRED; }
 
     static bool IsValidStateForAutoStart(int nActiveStateIn)
@@ -278,7 +270,7 @@ public:
         return  nActiveStateIn == DYNODE_ENABLED ||
                 nActiveStateIn == DYNODE_PRE_ENABLED ||
                 nActiveStateIn == DYNODE_EXPIRED ||
-                nActiveStateIn == DYNODE_SENTINEL_PING_EXPIRED;
+                nActiveStateIn == DYNODE_WATCHDOG_EXPIRED;
     }
 
    bool IsValidForPayment() const
@@ -287,7 +279,7 @@ public:
             return true;
         }
         if(!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
-           (nActiveState == DYNODE_SENTINEL_PING_EXPIRED)) {
+           (nActiveState == DYNODE_WATCHDOG_EXPIRED)) {
             return true;
         }
 
@@ -319,6 +311,8 @@ public:
     void FlagGovernanceItemsAsDirty();
 
     void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
+
+    void UpdateWatchdogVoteTime(uint64_t nVoteTime = 0);
 
     CDynode& operator=(CDynode const& from)
     {
@@ -364,7 +358,7 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         int nVersion = s.GetVersion();
-        if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
+        if (nVersion == 70900) {
             // converting from/to old format
             CTxIn txin{};
             if (ser_action.ForRead()) {
@@ -381,18 +375,20 @@ public:
         READWRITE(addr);
         READWRITE(pubKeyCollateralAddress);
         READWRITE(pubKeyDynode);
-        if (!(s.GetType() & SER_GETHASH)) {
-            READWRITE(vchSig);
-        }
+        READWRITE(vchSig);
         READWRITE(sigTime);
         READWRITE(nProtocolVersion);
-        if (!(s.GetType() & SER_GETHASH)) {
-            READWRITE(lastPing);
-        }
+        READWRITE(lastPing);
     }
 
-    uint256 GetHash() const;
-    uint256 GetSignatureHash() const;
+    uint256 GetHash() const
+    {
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << outpoint << uint8_t{} << 0xffffffff;
+        ss << pubKeyCollateralAddress;
+        ss << sigTime;
+        return ss.GetHash();
+    }
 
     /// Create Dynode broadcast, needs to be relayed manually after that
     static bool Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet);
@@ -458,41 +454,15 @@ public:
         READWRITE(vchSig2);
     }
 
+
     uint256 GetHash() const
     {
-        // Note: doesn't match serialization
-
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        // adding dummy values here to match old hashing format
         ss << dynodeOutpoint1 << uint8_t{} << 0xffffffff;
         ss << dynodeOutpoint2 << uint8_t{} << 0xffffffff;
         ss << addr;
         ss << nonce;
         ss << nBlockHeight;
-        return ss.GetHash();
-    }
-
-    uint256 GetSignatureHash1(const uint256& blockHash) const
-    {
-        // Note: doesn't match serialization
-
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << addr;
-        ss << nonce;
-        ss << blockHash;
-        return ss.GetHash();
-    }
-
-    uint256 GetSignatureHash2(const uint256& blockHash) const
-    {
-        // Note: doesn't match serialization
-
-        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-        ss << dynodeOutpoint1;
-        ss << dynodeOutpoint2;
-        ss << addr;
-        ss << nonce;
-        ss << blockHash;
         return ss.GetHash();
     }
 
