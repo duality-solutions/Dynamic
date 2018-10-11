@@ -76,23 +76,33 @@
 #include <sys/prctl.h>
 #endif
 
+#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
+#include <boost/program_options/detail/config_file.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/thread.hpp>
+
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 
-#include <thread>
+// Work around clang compilation problem in Boost 1.46:
+// /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
+// See also: http://stackoverflow.com/questions/10020179/compilation-fail-in-boost-librairies-program-options
+//           http://clang.debian.net/status.php?version=3.0&key=CANNOT_FIND_FUNCTION
+namespace boost {
 
-#include <boost/algorithm/string/case_conv.hpp> // for to_lower()
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/program_options/detail/config_file.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
-#include <boost/thread.hpp>
+    namespace program_options {
+        std::string to_internal(const std::string&);
+    }
+
+} // namespace boost
 
 //Dynamic only features
 bool fDynodeMode = false;
@@ -116,6 +126,7 @@ const std::map<std::string, std::vector<std::string> >& mapMultiArgs = _mapMulti
 bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
+
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogThreadNames = DEFAULT_LOGTHREADNAMES;
@@ -866,13 +877,17 @@ void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length) {
 
 void ShrinkDebugFile()
 {
+    // Amount of debug.log to save at end when shrinking (must fit in memory)
+    constexpr size_t RECENT_DEBUG_HISTORY_SIZE = 10 * 1000000;
     // Scroll debug.log if it's getting too big
     boost::filesystem::path pathLog = GetDataDir() / "debug.log";
     FILE* file = fopen(pathLog.string().c_str(), "r");
-    if (file && boost::filesystem::file_size(pathLog) > 10 * 1000000)
+    // If debug.log file is more than 10% bigger the RECENT_DEBUG_HISTORY_SIZE
+    // trim it down by saving only the last RECENT_DEBUG_HISTORY_SIZE bytes
+    if (file && boost::filesystem::file_size(pathLog) > 11 * (RECENT_DEBUG_HISTORY_SIZE / 10))
     {
         // Restart the file with some of the end
-        std::vector <char> vch(200000,0);
+        std::vector<char> vch(RECENT_DEBUG_HISTORY_SIZE, 0);
         fseek(file, -((long)vch.size()), SEEK_END);
         int nBytes = fread(vch.data(), 1, vch.size(), file);
         fclose(file);
@@ -989,7 +1004,11 @@ void SetThreadPriority(int nPriority)
 
 int GetNumCores()
 {
+#if BOOST_VERSION >= 105600
+    return boost::thread::physical_concurrency();
+#else // Must fall back to hardware_concurrency, which unfortunately counts virtual cores
     return boost::thread::hardware_concurrency();
+#endif
 }
 
 uint32_t StringVersionToInt(const std::string& strVersion)

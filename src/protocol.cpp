@@ -88,6 +88,7 @@ static const char* ppszTypeName[] =
     NetMsgType::DNGOVERNANCEOBJECT,
     NetMsgType::DNGOVERNANCEOBJECTVOTE,
     NetMsgType::DNVERIFY,
+    "compact block", // Should never occur
 };
 
 /** All known message types. Keep this in the same order as the list of
