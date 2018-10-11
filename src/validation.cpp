@@ -3578,7 +3578,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Co
     // Check that all transactions are finalized and not over-sized
     // Also count sigops
     for (const auto& tx : block.vtx) {
-        if (pindexPrev != nullptr) {
+        if (pindexPrev != NULL) {
             if (!fluid.CheckTransactionToBlock(*tx, pindexPrev->GetBlockHeader()))
                 return state.DoS(10, error("%s: contains an invalid fluid transaction", __func__), REJECT_INVALID, "invalid-fluid-txns");
         }
