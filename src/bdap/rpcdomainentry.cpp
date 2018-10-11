@@ -66,16 +66,15 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
 
-    // TODO: Add ability to pass in the encryption public key
-    // TODO: Consider renaming to DHTPublicKey since it is used to add/modify entries in the DHT and encrypt/decrypt data stored in the DHT & blockchain.
-    CKeyEd25519 privEncryptKey;
-    privEncryptKey.MakeNewKeyPair();
-    CharString vchEncryptPubKey = privEncryptKey.GetPubKey();
-    if (pwalletMain && !pwalletMain->AddDHTKey(privEncryptKey))
+    // TODO: Add ability to pass in the DHT public key
+    CKeyEd25519 privDHTKey;
+    CharString vchDHTPubKey = privDHTKey.GetPubKey();
+    
+    if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
-    txDomainEntry.EncryptPublicKey = vchEncryptPubKey;
-    pwalletMain->SetAddressBook(privEncryptKey.PubKey().GetID(), strObjectID, "pubkey");
+    txDomainEntry.DHTPublicKey = vchDHTPubKey;
+    pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "pubkey");
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
@@ -140,11 +139,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         const CTransaction testTx = (CTransaction)wtx;
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
-
+    std::string strPubKeyHash = privDHTKey.GetHash().ToString();
+    std::string strPubKeyID = privDHTKey.GetID().ToString();
+    oName.push_back(Pair("dht_pubkey_hash", strPubKeyHash));
+    oName.push_back(Pair("dht_pubkey_id", strPubKeyID));
     return oName;
 }
 
@@ -347,9 +349,9 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         const CTransaction testTx = (CTransaction)wtx;
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
 
     return oName;
@@ -445,9 +447,9 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         const CTransaction testTx = (CTransaction)wtx;
         CDomainEntry testDomainEntry(testTx); //loads the class from a transaction
 
-        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nEncryptPublicKey = %s\n", 
+        LogPrintf("CDomainEntry Values:\nnVersion = %u\nFullObjectPath = %s\nCommonName = %s\nOrganizationalUnit = %s\nDHTPublicKey = %s\n", 
             testDomainEntry.nVersion, testDomainEntry.GetFullObjectPath(), stringFromVch(testDomainEntry.CommonName), 
-            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.EncryptPublicKey));
+            stringFromVch(testDomainEntry.OrganizationalUnit), stringFromVch(testDomainEntry.DHTPublicKey));
     }
 
     return oName;

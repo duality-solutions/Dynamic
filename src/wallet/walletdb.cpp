@@ -8,6 +8,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
+#include "bdap/domainentry.h"
 #include "dht/ed25519.h"
 #include "validation.h" // For CheckTransaction
 #include "protocol.h"
@@ -70,7 +71,7 @@ bool CWalletDB::EraseTx(uint256 hash)
 
 bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const CKeyMetadata& keyMeta)
 {
-    if (!Write(std::make_pair(std::string("keymeta"), key.GetPubKey()),
+    if (!Write(std::make_pair(std::string("keymeta"), key.GetID()),
                keyMeta, false))
         return false;
 
@@ -82,6 +83,7 @@ bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const CKeyMetadata& keyMeta)
     vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
+
     return Write(std::make_pair(std::string("dhtkey"), key.GetPubKey()), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
@@ -440,12 +442,13 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
         }
         else if (strType == "dhtkey")
         {
-            CPubKey vchPubKey;
+            std::vector<unsigned char> vchPubKey;
             ssKey >> vchPubKey;
             std::vector<unsigned char> vchPrivKeySeed;
             ssValue >> vchPrivKeySeed;
             CKeyEd25519 key(vchPrivKeySeed);
             uint256 hash;
+            std::string strPubKey = stringFromVch(vchPubKey);
             try
             {
                 ssValue >> hash;
@@ -463,7 +466,7 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
                     return false;
                 }
             }
-            if (!pwallet->LoadDHTKey(key))
+            if (!pwallet->LoadDHTKey(key, vchPubKey))
             {
                 strErr = "Error reading wallet database: LoadDHTKey failed";
                 return false;

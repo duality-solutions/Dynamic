@@ -6,10 +6,11 @@
 
 #include "pubkey.h"
 #include "support/allocators/secure.h"
-
+#include "uint256.h"
 
 #include <array>
 #include <cstring>
+#include <memory>
 
 struct ed25519_context
 {
@@ -74,9 +75,10 @@ public:
     std::array<char, 32> publicKey;
 
 public:
-    //! Construct an invalid private key.
+    //! Construct a new private key.
     CKeyEd25519()
     {
+        MakeNewKeyPair();
     }
 
     CKeyEd25519(const std::array<char, 32>& _seed);
@@ -88,18 +90,20 @@ public:
     }
 
     //! Simple read-only vector-like interface.
-    unsigned int size() const { return seed.size(); }
+    int size() const { return (int)seed.size(); }
     const unsigned char* begin() const { return GetPrivSeed().data(); }
     const unsigned char* end() const { return GetPrivSeed().data() + size(); }
-
-    //! Generate a new private key using LibTorrent's Ed25519 implementation
-    void MakeNewKeyPair();
 
     std::vector<unsigned char> GetPrivKey() const;
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
+    int PubKeySize() const { return sizeof(GetPubKey()); }
 
-    CPubKey PubKey() const;
+    void GetPubKey(CPubKey& key) const;
+    CPubKey PubKey() const
+    {
+        return CPubKey(GetPubKey(), false);
+    }
 
     /**
      * Used for the Torrent DHT.
@@ -111,6 +115,25 @@ public:
     std::array<char, 32> GetDHTPubKey() const { return publicKey; }
 
     void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
+
+    //! Get the 256-bit hash of this public key.
+    uint256 GetHash() const
+    {
+        std::vector<unsigned char> vch = GetPubKey();
+        return Hash(vch.begin(), vch.end());
+    }
+
+    //! Get the 256-bit hash of this public key.
+    CKeyID GetID() const
+    {
+        std::vector<unsigned char> vch = GetPubKey();
+        return CKeyID(Hash160(vch.begin(), vch.end()));
+    }
+
+private:
+    //! Generate a new private key using LibTorrent's Ed25519 implementation
+    void MakeNewKeyPair();
+
 };
 
 bool ECC_Ed25519_InitSanityCheck();

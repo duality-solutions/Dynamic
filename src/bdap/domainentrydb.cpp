@@ -142,7 +142,7 @@ void CDomainEntryDB::WriteDomainEntryIndex(const CDomainEntry& entry, const int 
         CDynamicAddress address(EncodeBase58(entry.WalletAddress));
         oName.push_back(Pair("address", address.ToString()));
         oName.push_back(Pair("expires_on", entry.nExpireTime));
-        oName.push_back(Pair("encryption_publickey", HexStr(entry.EncryptPublicKey)));
+        oName.push_back(Pair("dht_publickey", HexStr(entry.DHTPublicKey)));
         GetMainSignals().NotifyBDAPUpdate(oName.write().c_str(), "bdap_record");
     }
     WriteDomainEntryIndexHistory(entry, op);

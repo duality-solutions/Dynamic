@@ -8,6 +8,8 @@
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
 #include "dht/operations.h"
+#include "hash.h"
+#include "pubkey.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "util.h"
@@ -75,7 +77,6 @@ UniValue putmutable(const JSONRPCRequest& request)
     }
     else if (request.params.size() == 2) {
         CKeyEd25519 key;
-        key.MakeNewKeyPair();
         strPubKey = stringFromVch(key.GetPubKey());
         strPrivKey = stringFromVch(key.GetPrivKey());
         fNewEntry = true;
@@ -101,7 +102,7 @@ UniValue putmutable(const JSONRPCRequest& request)
         fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
         if (fRet) {
             result.push_back(Pair("Put_PubKey", strPubKey));
-            result.push_back(Pair("Put_PrivKey", strPrivKey));
+            //result.push_back(Pair("Put_PrivKey", strPrivKey));
             result.push_back(Pair("Put_Salt", strSalt));
             result.push_back(Pair("Put_Seq", iSequence));
             result.push_back(Pair("Put_Value", request.params[0].get_str()));
@@ -237,23 +238,26 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue savebdapdata(const JSONRPCRequest& request)
+UniValue putbdapdata(const JSONRPCRequest& request)
 {
     if (request.params.size() != 3)
         throw std::runtime_error(
-            "savebdapdata <id> <dht value> <operation>\nSaves mutable data in the DHT for a BDAP entry.\n"
+            "putbdapdata <id> <dht value> <operation>\nSaves mutable data in the DHT for a BDAP entry.\n"
             "\n");
     UniValue result(UniValue::VOBJ);
    
     EnsureWalletIsUnlocked();
 
     if (!pTorrentDHTSession)
-        throw std::runtime_error("savebdapdata failed. DHT session not started.\n");
+        throw std::runtime_error("putbdapdata: ERRCODE: 5500 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
-        throw std::runtime_error("savebdapdata failed. Can not access BDAP domain entry database.\n");
+        throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
 
     CharString vchObjectID = vchFromValue(request.params[0]);
+    const char* putValue = request.params[1].get_str().c_str();
+    const std::string strOperationType = request.params[2].get_str();
+
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
@@ -261,25 +265,31 @@ UniValue savebdapdata(const JSONRPCRequest& request)
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
-        throw std::runtime_error("savebdapdata: ERRCODE: 5500 - " + strFullObjectPath + _(" can not be found.  Get info failed!\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5502 - " + strFullObjectPath + _(" can not be found.  Get BDAP info failed!\n"));
 
-
-
-    CPubKey pubKey(entry.EncryptPublicKey, false);
+    CPubKey pubKey(entry.DHTPublicKey, false);
     CKeyEd25519 getKey;
-
-    if (pwalletMain && !pwalletMain->GetDHTKey(pubKey.GetID(), getKey))
-        throw std::runtime_error("savebdapdata: ERRCODE: 5501 - " + _("Error getting ed25519 key from BDAP entry.\n"));
+    std::vector<unsigned char> vch = entry.DHTPublicKey;
+    CKeyID keyID(Hash160(vch.begin(), vch.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey)) {
+        //throw std::runtime_error("putbdapdata: ERRCODE: 5503 - Error getting ed25519 private key for the " + strFullObjectPath + _(" BDAP entry.\n"));
+        result.push_back(Pair("entry_key_id", keyID.ToString()));
+        result.push_back(Pair("error", "Failed to get private key."));
+        return result;
+    }
 
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
-    result.push_back(Pair("pub_pubkey", stringFromVch(entry.EncryptPublicKey)));
-    result.push_back(Pair("pub_key_id", getKey.PubKey().GetID().ToString()));
+    result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
+    result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
+    //result.push_back(Pair("put_privkey", stringFromVch(getKey.GetPrivKey())));
+    result.push_back(Pair("entry_key_id", pubKey.GetID().ToString()));
+    result.push_back(Pair("put_key_id", getKey.GetID().ToString()));
+    result.push_back(Pair("entry_key_hash", pubKey.GetHash().ToString()));
+    result.push_back(Pair("put_key_hash", getKey.GetHash().ToString()));
+    result.push_back(Pair("put_operation", strOperationType));
 
-    char const* putValue = request.params[1].get_str().c_str();
-    const std::string strOperationType = request.params[2].get_str();
-    
     bool fRet = false;
     int64_t iSequence = 0;
     std::string strPubKey = stringFromVch(getKey.GetPubKey());
@@ -290,16 +300,66 @@ UniValue savebdapdata(const JSONRPCRequest& request)
     std::array<char, 64> arrPrivKey;
     libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
     std::string dhtMessage = "";
+    
     fRet = PutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue, dhtMessage);
     if (fRet) {
-        //result.push_back(Pair("put_privkey", strPrivKey));
-        result.push_back(Pair("put_operation", strOperationType));
         result.push_back(Pair("put_seq", iSequence));
         result.push_back(Pair("put_value", request.params[1].get_str()));
         result.push_back(Pair("put_message", dhtMessage));
     }
     else {
-        throw std::runtime_error("savebdapdata failed. Error putting data in DHT. Check the debug.log for details.\n");
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error putting data in DHT. Check the debug.log for details.\n");
+    }
+
+    return result;
+}
+
+UniValue getbdapdata(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 2)
+        throw std::runtime_error(
+            "getbdapdata <bdap id> <operation>\nGets the mutable data in the DHT for a BDAP entry.\n"
+            "\n");
+    UniValue result(UniValue::VOBJ);
+   
+    if (!pTorrentDHTSession)
+        throw std::runtime_error("getbdapdata: ERRCODE: 5600 - DHT session not started.\n");
+
+    if (!CheckDomainEntryDB())
+        throw std::runtime_error("getbdapdata: ERRCODE: 5601 - Can not access BDAP domain entry database.\n");
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.ObjectID = vchObjectID;
+    std::string strFullObjectPath = entry.GetFullObjectPath();
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
+        throw std::runtime_error("getbdapdata: ERRCODE: 5602 - " + strFullObjectPath + _(" can not be found.  Get BDAP entry failed!\n"));
+
+    const std::string strOperationType = request.params[1].get_str();
+    result.push_back(Pair("entry_path", strFullObjectPath));
+    result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
+    result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
+    result.push_back(Pair("get_pubkey", stringFromVch(entry.DHTPublicKey)));
+    result.push_back(Pair("get_operation", strOperationType));
+    
+    
+    bool fRet = false;
+    int64_t iSequence = 0;
+    std::string strPubKey = stringFromVch(entry.DHTPublicKey);
+    std::array<char, 32> arrPubKey;
+    libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
+
+    std::string strValue = "";
+    fRet = GetDHTMutableData(arrPubKey, strOperationType, strValue, iSequence, false);
+    if (fRet) {
+        result.push_back(Pair("get_seq", iSequence));
+        result.push_back(Pair("get_value", strValue));
+    }
+    else {
+        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data in DHT. Check the debug.log for details.\n");
     }
 
     return result;
@@ -312,7 +372,8 @@ static const CRPCCommand commands[] =
     { "dht",             "putmutable",               &putmutable,                   true  },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
     { "dht",             "dhtdb",                    &dhtdb,                        true  },
-    { "dht",             "savebdapdata",             &savebdapdata,                 true  },
+    { "dht",             "putbdapdata",              &putbdapdata,                  true  },
+    { "dht",             "getbdapdata",              &getbdapdata,                  true  },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
