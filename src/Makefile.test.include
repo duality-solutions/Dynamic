@@ -27,6 +27,8 @@ JSON_TEST_FILES = \
   test/data/base58_encode_decode.json \
   test/data/base58_keys_invalid.json \
   test/data/bip39_vectors.json \
+  test/data/proposals_valid.json \
+  test/data/proposals_invalid.json \
   test/data/tx_invalid.json \
   test/data/tx_valid.json \
   test/data/sighash.json
@@ -52,7 +54,6 @@ DYNAMIC_TESTS =\
   test/cachemap_tests.cpp \
   test/cachemultimap_tests.cpp \
   test/checkblock_tests.cpp \
-  test/Checkpoints_tests.cpp \
   test/coins_tests.cpp \
   test/compress_tests.cpp \
   test/crypto_tests.cpp \
@@ -103,7 +104,6 @@ DYNAMIC_TESTS =\
 
 if ENABLE_WALLET
 DYNAMIC_TESTS += \
-  test/accounting_tests.cpp \
   wallet/test/wallet_tests.cpp
 endif
 
