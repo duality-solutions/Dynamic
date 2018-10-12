@@ -100,10 +100,10 @@ AC_ARG_ENABLE([gpu],
 
 # Enable CUDA
 AC_ARG_ENABLE([cuda],
-  [AS_HELP_STRING([--disable-cuda],
-  [disable CUDA miner, use OpenCL instead (only GPU; enabled by default)])],
+  [AS_HELP_STRING([--enable-cuda],
+  [enable CUDA miner (defaults is no)])],
   [enable_cuda=$enableval],
-  [enable_cuda=yes])
+  [enable_cuda=no])
 
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
