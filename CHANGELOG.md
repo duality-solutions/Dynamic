@@ -3,6 +3,58 @@
 
 **Dynamic v2.4.0.0**
 
+* Repair Send in ThreadSocketHandler
+* Repair nActiveStatePrev
+* Repair 'GUI: QColor::setRgb: RGB parameters out of range' warning
+* Fix segfault with nRefCount in net
+* Amend Check in dynode.cpp
+* minor things i missed
+* update sync.cpp/h
+* amend some versioning
+* Use unique_ptr for db copy
+* Use unique_ptr for wallet db env
+* Remove dummy constructor
+* Allow users to mix up to 16 rounds
+* Only allow 2.4 nodes to mix with 2.4 nodes or newer
+* remove unused variable from serialization
+* A couple of small fixes for mixing collaterals
+* Add an option to disable popups for PS mixing txes
+* Identify PS collateral payments in transaction list a bit more accurate
+* Add more variance to coin selection in PS mixing
+* Revert Require all participants to submit equal number of inputs
+* Split PS into Manager and Session and allow running multiple mixing sessions in parallel
+* Document Sporks
+* M-of-N-like sporks
+* Update ImportPrivKey command
+* adds rpc calls for and 'setprivatesendamount'
+* Add versioning to spork cache
+* extract sporkmanager from sporkmessage 
+* Save/load spork cache
+* Update HD Feature Base and update build-debian.md
+* Sweep and Update RPC files
+* Tidy chainparams and update block.cpp/h
+* [GPU] Fix debug block info
+* Update rpcwallet.cpp calls and add missing AbandonTransaction bits
+* Update miner code back with new pointers etc.
+* [GPU] Disable GPU info on configure failure 
+* Fix Spork Address for TestNet
+* Improve fee warning colour
+* Update Qt and fix usage of dustRelayFee
+* Fix segfault when sending a Qt transaction
+* Increase fileout version in WriteFeeEstimates
+* Amend Fee Structure
+* Protect CSporkManager with critical section
+* Fix wallet lock check in DoAutomaticDenominating
+* Move block template specific stuff from CBlock to CBlockTemplate
+* Fix activeDynode task scheduler
+* Show some info about the wallet dumped via dumpwallet and show warning
+* Make sure pwalletMain is not null whenever it's used in PS client
+* Update rpcdynode and add helpers
+* Switch RequestGovernanceObjectVotes from pointers to hashes
+* remove/update dns seeders
+* [GPU] Update obsolete macro AC_HELP_STRING
+* [GPU] Prevent crash when changing the slidebar too fast
+* [GPU] Optimise GPU Miner
 * Fix copy elision warning in opencl device.cpp
 * Supress OSX private field warnings
 * Fix comparator and supress warning
