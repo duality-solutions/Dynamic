@@ -118,6 +118,7 @@ DYNAMIC_CORE_H = \
   dht/mutabledb.h \
   dht/operations.h \
   dht/session.h \
+  dht/sessionevents.h \
   dht/settings.h \
   dht/storage.h \
   dynode.h \
@@ -261,6 +262,7 @@ libdynamic_server_a_SOURCES = \
   dht/mutabledb.cpp \
   dht/operations.cpp \
   dht/session.cpp \
+  dht/sessionevents.cpp \
   dht/settings.cpp \
   dht/storage.cpp \
   dynode.cpp \

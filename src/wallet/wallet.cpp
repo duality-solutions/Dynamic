@@ -321,11 +321,11 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
     return true;
 }
 
-bool CWallet::AddDHTKey(const CKeyEd25519& key)
+bool CWallet::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    if (!CCryptoKeyStore::AddDHTKey(key)) {
+    if (!CCryptoKeyStore::AddDHTKey(key, pubkey)) {
         return false;
     }
 
@@ -333,7 +333,8 @@ bool CWallet::AddDHTKey(const CKeyEd25519& key)
         return true;
 
     if (!IsCrypted()) {
-        return CWalletDB(strWalletFile).WriteDHTKey(key, mapKeyMetadata[key.PubKey().GetID()]);
+        CKeyID keyID(Hash160(pubkey.begin(), pubkey.end()));
+        return CWalletDB(strWalletFile).WriteDHTKey(key, mapKeyMetadata[keyID]);
     }
     return true;
 }

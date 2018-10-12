@@ -67,7 +67,7 @@ public:
     unsigned int nObjectType; // see enum above
     CharString WalletAddress; // used to send collateral funds for this directory record.
     int8_t fPublicObject; // public and private visibility is relative to other objects in its domain directory
-    CharString EncryptPublicKey; // used to encrypt data to send to this directory record.
+    CharString DHTPublicKey; // used to save data in the DHT and encrypt data for this entry.
     CharString LinkAddress; // used to send link requests.  should use a stealth address.
 
     uint256 txHash;
@@ -96,7 +96,7 @@ public:
         nObjectType = 0;
         WalletAddress.clear();
         fPublicObject = 0; // by default set to private visibility.
-        EncryptPublicKey.clear();
+        DHTPublicKey.clear();
         LinkAddress.clear();
         txHash.SetNull();
         nHeight = 0;
@@ -117,7 +117,7 @@ public:
         READWRITE(VARINT(nObjectType));
         READWRITE(WalletAddress);
         READWRITE(VARINT(fPublicObject));
-        READWRITE(EncryptPublicKey);
+        READWRITE(DHTPublicKey);
         READWRITE(LinkAddress);
         READWRITE(VARINT(nHeight));
         READWRITE(txHash);
@@ -142,7 +142,7 @@ public:
         nObjectType = b.nObjectType;
         WalletAddress = b.WalletAddress;
         fPublicObject = b.fPublicObject;
-        EncryptPublicKey = b.EncryptPublicKey;
+        DHTPublicKey = b.DHTPublicKey;
         LinkAddress = b.LinkAddress;
         txHash = b.txHash;
         nHeight = b.nHeight;

@@ -33,17 +33,18 @@ bool CBasicKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) con
     return true;
 }
 
-bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
+bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
 {
     LOCK(cs_KeyStore);
     mapKeys[pubkey.GetID()] = key;
     return true;
 }
 
-bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key)
+bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
 {
     LOCK(cs_KeyStore);
-    mapDHTKeys[key.PubKey().GetID()] = key;
+    CKeyID keyID(Hash160(pubkey.begin(), pubkey.end()));
+    mapDHTKeys[keyID] = key;
     return true;
 }
 

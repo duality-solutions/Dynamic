@@ -746,11 +746,11 @@ public:
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
     //! Adds an ed25519 keypair and saves it to disk.
-    bool AddDHTKey(const CKeyEd25519& key);
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key, const CPubKey &pubkey) { return CCryptoKeyStore::AddKeyPubKey(key, pubkey); }
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
-    bool LoadDHTKey(const CKeyEd25519& key) { return CCryptoKeyStore::AddDHTKey(key); }
+    bool LoadDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) { return CCryptoKeyStore::AddDHTKey(key, pubkey); }
     //! Load metadata (used by LoadWallet)
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 

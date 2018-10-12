@@ -370,7 +370,7 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
         }
     }
 
-    if (EncryptPublicKey.size() > MAX_KEY_LENGTH) 
+    if (DHTPublicKey.size() > MAX_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP encryption public key. Can not have more than " + std::to_string(MAX_KEY_LENGTH) + " characters.";
         return false;
@@ -378,9 +378,9 @@ bool CDomainEntry::ValidateValues(std::string& errorMessage)
     //TODO (BDAP): validate Ed25519 public key if possible.
     /*
     else {
-        if (EncryptPublicKey.size() > 0) {
-            CPubKey entryEncryptPublicKey(EncryptPublicKey);
-            if (!entryEncryptPublicKey.IsFullyValid()) {
+        if (DHTPublicKey.size() > 0) {
+            CPubKey entryDHTPublicKey(DHTPublicKey);
+            if (!entryDHTPublicKey.IsFullyValid()) {
                 errorMessage = "Invalid BDAP encryption public key. Encryption public key failed IsFullyValid check.";
                 return false;
             }
@@ -437,7 +437,7 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("object_type", entry.ObjectTypeString()));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
         oName.push_back(Pair("public", (int)entry.fPublicObject));
-        oName.push_back(Pair("encryption_publickey", stringFromVch(entry.EncryptPublicKey)));
+        oName.push_back(Pair("dht_publickey", stringFromVch(entry.DHTPublicKey)));
         oName.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
         oName.push_back(Pair("txid", entry.txHash.GetHex()));
         if ((unsigned int)chainActive.Height() >= entry.nHeight-1) {
@@ -460,6 +460,7 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("common_name", stringFromVch(entry.CommonName)));
         oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
+        oName.push_back(Pair("dht_publickey", stringFromVch(entry.DHTPublicKey)));
     }
     return true;
 }

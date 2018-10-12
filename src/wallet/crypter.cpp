@@ -339,19 +339,22 @@ bool CCryptoKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
     return true;
 }
 
-bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key)
+bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
 {
     {
         LOCK(cs_KeyStore);
-        if (!IsCrypted())
-            return CBasicKeyStore::AddDHTKey(key);
+        if (!IsCrypted()) {
+            return CBasicKeyStore::AddDHTKey(key, pubkey);
+        }
 
         if (IsLocked(true))
             return false;
 
         std::vector<unsigned char> vchCryptedSecret;
         CKeyingMaterial vchSecret(key.begin(), key.end());
-        if (!EncryptSecret(vMasterKey, vchSecret, key.PubKey().GetHash(), vchCryptedSecret))
+        uint256 getHash = Hash(pubkey.begin(), pubkey.end());
+
+        if (!EncryptSecret(vMasterKey, vchSecret, getHash, vchCryptedSecret))
             return false;
 
         if (!AddCryptedKey(key.PubKey(), vchCryptedSecret))

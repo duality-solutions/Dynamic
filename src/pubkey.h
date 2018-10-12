@@ -52,8 +52,9 @@ private:
     //! Compute the length of a pubkey with a given first byte.
     unsigned int static GetLen(unsigned char chHeader, bool fIsSecp = true)
     {
-        if (!fIsSecp)
-            return 32; // ed25519 public keys are always = 32
+        if (!fIsSecp) {
+            return 24; // ed25519 public keys are always = 24
+        }
 
         if (chHeader == 2 || chHeader == 3)
             return 33;
@@ -97,19 +98,18 @@ public:
     CPubKey(const T pbegin, const T pend, bool fIsSecp = true)
     {
         fSecp256k1 = fIsSecp;
-        Set(pbegin, pend);
+        Set(pbegin, pend, fSecp256k1);
     }
 
     //! Construct a public key from a byte vector.
     CPubKey(const std::vector<unsigned char>& _vch, bool fIsSecp = true)
     {
         fSecp256k1 = fIsSecp;
-        
-        Set(_vch.begin(), _vch.end());
+        Set(_vch.begin(), _vch.end(), fSecp256k1);
     }
 
     //! Simple read-only vector-like interface to the pubkey data.
-    unsigned int size() const { return GetLen(vch[0]); }
+    unsigned int size() const { return GetLen(vch[0], fSecp256k1); }
     const unsigned char* begin() const { return vch; }
     const unsigned char* end() const { return vch + size(); }
     const unsigned char& operator[](unsigned int pos) const { return vch[pos]; }

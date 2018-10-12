@@ -186,14 +186,14 @@ void dht_bdap_storage::announce_peer(sha1_hash const& info_hash, tcp::endpoint c
 bool dht_bdap_storage::get_immutable_item(sha1_hash const& target, entry& item) const
 {
     //TODO: this is not the best place to reject an immutable_item, we should ban the sender as well
-    LogPrintf("********** dht_bdap_storage -- get_immutable_item **********\n");
+    LogPrintf("********** dht_bdap_storage -- get_immutable_item target = %s **********\n", target.to_string());
     return false;
 }
 
 void dht_bdap_storage::put_immutable_item(sha1_hash const& target, span<char const> buf, address const& addr)
 {
     //TODO: this is not the best place to reject an immutable_item, we should ban the sender as well
-    LogPrintf("********** dht_bdap_storage -- put_immutable_item **********\n");
+    LogPrintf("********** dht_bdap_storage -- put_immutable_item target = %s, buf = %s, addr = %s\n", target.to_string(), std::string(buf.data()), addr.to_string());
 }
 
 bool dht_bdap_storage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
