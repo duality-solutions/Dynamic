@@ -1369,7 +1369,7 @@ void CConnman::ThreadSocketHandler()
                 if (nBytes) {
                     RecordBytesSent(nBytes);
                 }
-            Repa}
+            }
 
             //
             // Inactivity checking
