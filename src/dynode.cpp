@@ -202,7 +202,7 @@ void CDynode::Check(bool fForce)
     if(!fWaitForPing || fOurDynode) {
 
         if(!IsPingedWithin(DYNODE_NEW_START_REQUIRED_SECONDS)) {
-            nActiveState = DYNODE_NEW_START_REQUIRED_SECONDS;
+            nActiveState = DYNODE_NEW_START_REQUIRED;
             if(nActiveStatePrev != nActiveState) {
                 LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
             }
