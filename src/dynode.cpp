@@ -233,6 +233,18 @@ void CDynode::Check(bool fForce)
         }
     }
 
+    // We require DNs to be in PRE_ENABLED until they either start to expire or receive a ping and go into ENABLED state
+    // Works on mainnet/testnet only and not the case on regtest/devnet.
+    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
+        if (lastPing.sigTime - sigTime < DYNODE_MIN_DNP_SECONDS) {
+            nActiveState = DYNODE_PRE_ENABLED;
+            if (nActiveStatePrev != nActiveState) {
+                LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
+            }
+            return;
+        }
+    }
+
     if(!fWaitForPing || fOurDynode) {
         // part 2: expire based on sentinel info
         bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();

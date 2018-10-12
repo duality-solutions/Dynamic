@@ -173,35 +173,19 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
         return;
     }
     
-    int mainnetDefaultPort = DEFAULT_P2P_PORT;
-    int testnetDefaultPort = DEFAULT_P2P_PORT + 100;
-    int regTestnetDefaultPort = DEFAULT_P2P_PORT + 200;
-
+    int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if(service.GetPort() != mainnetDefaultPort) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u - only %u is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
-            LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
+            strNotCapableReason = strprintf("Invalid port: %u - only %d is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
+            LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
-    }
-
-    if(Params().NetworkIDString() != CBaseChainParams::TESTNET) {
-        if(service.GetPort() == testnetDefaultPort) {
-            nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u -  only %u is supported on testnnet.", service.GetPort(), testnetDefaultPort);
-            LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
-            return;
-        }
-    }
-
-    if(Params().NetworkIDString() != CBaseChainParams::REGTEST) {
-        if(service.GetPort() == regTestnetDefaultPort) {
-            nState = ACTIVE_DYNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u -  only %u is supported on regtestnnet.", service.GetPort(), regTestnetDefaultPort);
-            LogPrintf("CActiveDynode::ManageStatus() - not capable: %s\n", strNotCapableReason);
-            return;
-        }
+    } else if(service.GetPort() == mainnetDefaultPort) {
+        nState = ACTIVE_DYNODE_NOT_CAPABLE;
+        strNotCapableReason = strprintf("Invalid port: %u - %d is only supported on mainnet.", service.GetPort(), mainnetDefaultPort);
+        LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+        return;
     }
 
     // Check socket connectivity
