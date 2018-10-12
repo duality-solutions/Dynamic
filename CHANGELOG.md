@@ -3,6 +3,10 @@
 
 **Dynamic v2.4.0.0**
 
+* Update info for testnet spork key
+* add missing file to makefile
+* Remove bdap from DIST_SUBDIRS in make file
+* Do not check for CUDA as default at configure time
 * Repair Send in ThreadSocketHandler
 * Repair nActiveStatePrev
 * Repair 'GUI: QColor::setRgb: RGB parameters out of range' warning
