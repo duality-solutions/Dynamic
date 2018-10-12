@@ -246,6 +246,7 @@ libdynamic_server_a_SOURCES = \
   bdap/entrycheckpoints.cpp \
   bdap/entrylink.cpp \
   bdap/identity.cpp \
+  bdap/rpcdomainentry.cpp \
   dbwrapper.cpp \
   dynode.cpp \
   dynode-payments.cpp\
@@ -286,7 +287,6 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
-  bdap/rpcdomainentry.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
