@@ -133,6 +133,7 @@ CDynode::CollateralStatus CDynode::CheckCollateral(const COutPoint& outpoint, co
 
 void CDynode::Check(bool fForce)
 {
+    AssertLockHeld(cs_main);
     LOCK(cs);
 
     if(ShutdownRequested()) return;
@@ -220,7 +221,6 @@ void CDynode::Check(bool fForce)
         // part 1: expire based on dashd ping
         bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
         bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(DYNODE_SENTINEL_PING_MAX_SECONDS);
-        
         LogPrint("Dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
                 outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
@@ -233,12 +233,17 @@ void CDynode::Check(bool fForce)
         }
     }
 
-    // We require DNs to be in PRE_ENABLED until they either start to expire or receive a ping and go into ENABLED state
-    // Works on mainnet/testnet only and not the case on regtest/devnet.
-    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
-        if (lastPing.sigTime - sigTime < DYNODE_MIN_DNP_SECONDS) {
-            nActiveState = DYNODE_PRE_ENABLED;
-            if (nActiveStatePrev != nActiveState) {
+    if(!fWaitForPing || fOurDynode) {
+        // part 2: expire based on sentinel info
+        bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
+        bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
+
+        LogPrint("Dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
+
+        if(fSentinelPingExpired) {
+            nActiveState = DYNODE_SENTINEL_PING_EXPIRED;
+            if(nActiveStatePrev != nActiveState) {
                 LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
             }
             return;
@@ -250,6 +255,7 @@ void CDynode::Check(bool fForce)
         LogPrint("Dynode", "CDynode::Check -- Dynode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
     }
 }
+
 
 bool CDynode::IsValidNetAddr()
 {
@@ -415,6 +421,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 {
     nDos = 0;
 
+    AssertLockHeld(cs_main);
+
     // make sure addr is valid
     if(!IsValidNetAddr()) {
         LogPrintf("CDynodeBroadcast::SimpleCheck -- Invalid addr, rejected: Dynode=%s  addr=%s\n",
@@ -469,6 +477,8 @@ bool CDynodeBroadcast::SimpleCheck(int& nDos)
 bool CDynodeBroadcast::Update(CDynode* pdn, int& nDos, CConnman& connman)
 {
     nDos = 0;
+
+    AssertLockHeld(cs_main);
 
     if(pdn->sigTime == sigTime && !fRecovery) {
         // mapSeenDynodeBroadcast in CDynodeMan::CheckDnbAndUpdateDynodeList should filter legit duplicates
@@ -819,6 +829,9 @@ bool CDynodePing::SimpleCheck(int& nDos)
  
  bool CDynodePing::CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman)
  {
+
+    AssertLockHeld(cs_main);
+
     // don't ban by default
     nDos = 0;
  

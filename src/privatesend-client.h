@@ -231,6 +231,7 @@ public:
     std::string GetSessionDenoms();
 
     bool GetMixingDynodesInfo(std::vector<dynode_info_t>& vecDnInfoRet) const; 
+    bool IsMixingDynode(const CNode* pnode);
 
     /// Passively run mixing in the background according to the configuration in settings
     bool DoAutomaticDenominating(CConnman& connman, bool fDryRun=false);

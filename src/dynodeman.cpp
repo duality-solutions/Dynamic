@@ -166,6 +166,8 @@ void CDynodeMan::Check()
 {
     LOCK2(cs_main, cs);
 
+    LogPrint("Dynode", "CDynodeMan::Check -- nLastSentinelPingTime=%d, IsSentinelPingActive()=%d\n", nLastSentinelPingTime, IsSentinelPingActive());
+
     for (auto& dnpair : mapDynodes) {
         // NOTE: internally it checks only every DYNODE_CHECK_SECONDS seconds
         // since the last time, so expect some DNs to skip this
@@ -719,10 +721,10 @@ void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    std::vector<dynode_info_t> vecDnInfo; // will be empty when no wallet 
+    std::vector<dynode_info_t> vecDnInfo; // will be empty when no wallet
 #ifdef ENABLE_WALLET
-     privateSendClient.GetMixingDynodesInfo(vecDnInfo); 
-#endif // ENABLE_WALLET 
+    privateSendClient.GetMixingDynodesInfo(vecDnInfo);
+#endif // ENABLE_WALLET
 
     connman.ForEachNode(CConnman::AllNodes, [&vecDnInfo](CNode* pnode) {
         if (pnode->fDynode) {
@@ -741,6 +743,7 @@ void CDynodeMan::ProcessDynodeConnections(CConnman& connman)
         }
     });
 }
+
 
 std::pair<CService, std::set<uint256> > CDynodeMan::PopScheduledDnbRequestConnection()
 {
