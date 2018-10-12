@@ -236,8 +236,6 @@ public:
 
     void UpdatedBlockTip(const CBlockIndex *pindex);
 
-    void WarnDynodeDaemonUpdates();
-
     /**
      * Called to notify CGovernanceManager that the Dynode index has been updated.
      * Must be called while not holding the CDynodeMan::cs mutex

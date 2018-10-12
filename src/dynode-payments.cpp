@@ -285,9 +285,7 @@ void CDynodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeigh
 }
 
 int CDynodePayments::GetMinDynodePaymentsProto() const {
-    return sporkManager.IsSporkActive(SPORK_10_DYNODE_PAY_UPDATED_NODES)
-            ? MIN_DYNODE_PAYMENT_PROTO_VERSION_2
-            : MIN_DYNODE_PAYMENT_PROTO_VERSION_1;
+ return sporkManager.IsSporkActive(SPORK_10_DYNODE_PAY_UPDATED_NODES);
 }
 
 void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
@@ -423,52 +421,21 @@ void CDynodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand
     }
 }
 
-uint256 CDynodePaymentVote::GetHash() const
-{
-    // Note: doesn't match serialization
-
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << *(CScriptBase*)(&payee);
-    ss << nBlockHeight;
-    ss << dynodeOutpoint;
-    return ss.GetHash();
-}
-
-uint256 CDynodePaymentVote::GetSignatureHash() const
-{
-    return SerializeHash(*this);
-}
-
 bool CDynodePaymentVote::Sign()
 {
     std::string strError;
+    std::string strMessage = dynodeOutpoint.ToStringShort() +
+                std::to_string(nBlockHeight) +
+                ScriptToAsmStr(payee);
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
+        LogPrintf("CDynodePaymentVote::Sign -- SignMessage() failed\n");
+        return false;
+    }
 
-        if(!CHashSigner::SignHash(hash, activeDynode.keyDynode, vchSig)) {
-            LogPrintf("CDynodePaymentVote::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CDynodePaymentVote::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = dynodeOutpoint.ToStringShort() +
-                    std::to_string(nBlockHeight) +
-                    ScriptToAsmStr(payee);
-
-        if(!CMessageSigner::SignMessage(strMessage, vchSig, activeDynode.keyDynode)) {
-            LogPrintf("CDynodePaymentVote::Sign -- SignMessage() failed\n");
-            return false;
-        }
-
-        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CDynodePaymentVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CDynodePaymentVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
     }
 
     return true;
@@ -709,7 +676,7 @@ bool CDynodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::strin
         nMinRequiredProtocol = dnpayments.GetMinDynodePaymentsProto();
     } else {
         // allow non-updated dynodes for old blocks
-        nMinRequiredProtocol = MIN_DYNODE_PAYMENT_PROTO_VERSION_1;
+        nMinRequiredProtocol = MIN_DYNODE_PAYMENT_PROTO_VERSION;
     }
 
     if(dnInfo.nProtocolVersion < nMinRequiredProtocol) {
@@ -898,42 +865,19 @@ bool CDynodePaymentVote::CheckSignature(const CPubKey& pubKeyDynode, int nValida
     // do not ban by default
     nDos = 0;
     std::string strError = "";
+    std::string strMessage = dynodeOutpoint.ToStringShort() +
+                boost::lexical_cast<std::string>(nBlockHeight) +
+                ScriptToAsmStr(payee);
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            // could be a signature in old format
-            std::string strMessage = dynodeOutpoint.ToStringShort() +
-                        boost::lexical_cast<std::string>(nBlockHeight) +
-                        ScriptToAsmStr(payee);
-            if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-                // nope, not in old format either
-                // Only ban for future block vote when we are already synced.
-                // Otherwise it could be the case when DN which signed this vote is using another key now
-                // and we have no idea about the old one.
-                if(dynodeSync.IsDynodeListSynced() && nBlockHeight > nValidationHeight) {
-                    nDos = 20;
-                }
-                return error("CDynodePaymentVote::CheckSignature -- Got bad Dynode payment signature, dynode=%s, error: %s",
-                            dynodeOutpoint.ToStringShort(), strError);
-            }
+    if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+        // Only ban for future block vote when we are already synced.
+        // Otherwise it could be the case when DN which signed this vote is using another key now
+        // and we have no idea about the old one.
+        if(dynodeSync.IsDynodeListSynced() && nBlockHeight > nValidationHeight) {
+            nDos = 20;
         }
-    } else {
-        std::string strMessage = dynodeOutpoint.ToStringShort() +
-                    boost::lexical_cast<std::string>(nBlockHeight) +
-                    ScriptToAsmStr(payee);
-
-        if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-            // Only ban for future block vote when we are already synced.
-            // Otherwise it could be the case when DN which signed this vote is using another key now
-            // and we have no idea about the old one.
-            if(dynodeSync.IsDynodeListSynced() && nBlockHeight > nValidationHeight) {
-                nDos = 20;
-            }
-            return error("CDynodePaymentVote::CheckSignature -- Got bad Dynode payment signature, dynode=%s, error: %s",
-                        dynodeOutpoint.ToStringShort(), strError);
-        }
+        return error("CDynodePaymentVote::CheckSignature -- Got bad Dynode payment signature, dynode=%s, error: %s",
+                    dynodeOutpoint.ToStringShort(), strError);
     }
 
     return true;

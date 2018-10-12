@@ -20,12 +20,7 @@ class CDynodePaymentVote;
 static const int DNPAYMENTS_SIGNATURES_REQUIRED         = 10;
 static const int DNPAYMENTS_SIGNATURES_TOTAL            = 20;
 
-//! minimum peer version that can receive and send dynode payment messages,
-//  vote for dynode and be elected as a payment winner
-// V1 - Last protocol version before update
-// V2 - Newest protocol version
-static const int MIN_DYNODE_PAYMENT_PROTO_VERSION_1 = 70900;
-static const int MIN_DYNODE_PAYMENT_PROTO_VERSION_2 = 71000;
+static const int MIN_DYNODE_PAYMENT_PROTO_VERSION = 70900;
 
 extern CCriticalSection cs_vecPayees;
 extern CCriticalSection cs_mapDynodeBlocks;
@@ -155,9 +150,16 @@ public:
             READWRITE(vchSig);
         }
     }
+    uint256 GetHash() const
+    {
+        // Note: doesn't match serialization
 
-    uint256 GetHash() const;
-    uint256 GetSignatureHash() const;
+        CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+        ss << *(CScriptBase*)(&payee);
+        ss << nBlockHeight;
+        ss << dynodeOutpoint;
+        return ss.GetHash();
+    }
 
     bool Sign();
     bool CheckSignature(const CPubKey& pubKeyDynode, int nValidationHeight, int &nDos) const;

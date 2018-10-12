@@ -166,6 +166,8 @@ void CDynodeMan::Check()
 {
     LOCK2(cs_main, cs);
 
+    LogPrint("Dynode", "CDynodeMan::Check -- nLastSentinelPingTime=%d, IsSentinelPingActive()=%d\n", nLastSentinelPingTime, IsSentinelPingActive());
+
     for (auto& dnpair : mapDynodes) {
         // NOTE: internally it checks only every DYNODE_CHECK_SECONDS seconds
         // since the last time, so expect some DNs to skip this
@@ -1195,43 +1197,29 @@ void CDynodeMan::SendVerifyReply(CNode* pnode, CDynodeVerification& dnv, CConnma
 
     if(netfulfilledman.HasFulfilledRequest(pnode->addr, strprintf("%s", NetMsgType::DNVERIFY)+"-reply")) {
         // peer should not ask us that often
-        LogPrintf("CDynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
+        LogPrintf("DynodeMan::SendVerifyReply -- ERROR: peer already asked me recently, peer=%d\n", pnode->id);
         Misbehaving(pnode->id, 20);
         return;
     }
 
     uint256 blockHash;
     if(!GetBlockHash(blockHash, dnv.nBlockHeight)) {
-        LogPrintf("CDynodeMan::SendVerifyReply -- can't get block hash for unknown block height %d, peer=%d\n", dnv.nBlockHeight, pnode->id);
+        LogPrintf("DynodeMan::SendVerifyReply -- can't get block hash for unknown block height %d, peer=%d\n", dnv.nBlockHeight, pnode->id);
+        return;
+    }
+
+    std::string strMessage = strprintf("%s%d%s", activeDynode.service.ToString(false), dnv.nonce, blockHash.ToString());
+
+    if(!CMessageSigner::SignMessage(strMessage, dnv.vchSig1, activeDynode.keyDynode)) {
+        LogPrintf("DynodeMan::SendVerifyReply -- SignMessage() failed\n");
         return;
     }
 
     std::string strError;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = dnv.GetSignatureHash1(blockHash);
-
-        if(!CHashSigner::SignHash(hash, activeDynode.keyDynode, dnv.vchSig1)) {
-            LogPrintf("CDynodeMan::SendVerifyReply -- SignHash() failed\n");
-            return;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, activeDynode.pubKeyDynode, dnv.vchSig1, strError)) {
-            LogPrintf("CDynodeMan::SendVerifyReply -- VerifyHash() failed, error: %s\n", strError);
-            return;
-        }
-    } else {
-        std::string strMessage = strprintf("%s%d%s", activeDynode.service.ToString(false), dnv.nonce, blockHash.ToString());
-
-        if(!CMessageSigner::SignMessage(strMessage, dnv.vchSig1, activeDynode.keyDynode)) {
-            LogPrintf("CDynodeMan::SendVerifyReply -- SignMessage() failed\n");
-            return;
-        }
-
-        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig1, strMessage, strError)) {
-            LogPrintf("CDynodeMan::SendVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
-            return;
-        }
+    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig1, strMessage, strError)) {
+        LogPrintf("DynodeMan::SendVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
+        return;
     }
 
     CNetMsgMaker msgMaker(pnode->GetSendVersion());
@@ -1287,20 +1275,10 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
 
         CDynode* prealDynode = nullptr;
         std::vector<CDynode*> vpDynodesToBan;
-
-        uint256 hash1 = dnv.GetSignatureHash1(blockHash);
         std::string strMessage1 = strprintf("%s%d%s", pnode->addr.ToString(false), dnv.nonce, blockHash.ToString());
-
         for (auto& dnpair : mapDynodes) {
             if(CAddress(dnpair.second.addr, NODE_NETWORK) == pnode->addr) {
-                bool fFound = false;
-                if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-                    fFound = CHashSigner::VerifyHash(hash1, dnpair.second.pubKeyDynode, dnv.vchSig1, strError);
-                    // we don't care about dnv with signature in old format
-                } else {
-                    fFound = CMessageSigner::VerifyMessage(dnpair.second.pubKeyDynode, dnv.vchSig1, strMessage1, strError);
-                }
-                if (fFound) {
+                if(CMessageSigner::VerifyMessage(dnpair.second.pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
                     // found it!
                     prealDynode = &dnpair.second;
                     if(!dnpair.second.IsPoSeVerified()) {
@@ -1314,34 +1292,20 @@ void CDynodeMan::ProcessVerifyReply(CNode* pnode, CDynodeVerification& dnv)
                     dnv.addr = dnpair.second.addr;
                     dnv.dynodeOutpoint1 = dnpair.second.outpoint;
                     dnv.dynodeOutpoint2 = activeDynode.outpoint;
-                    // ... and sign it
+                    std::string strMessage2 = strprintf("%s%d%s%s%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString(),
+                                            dnv.dynodeOutpoint1.ToStringShort(), dnv.dynodeOutpoint2.ToStringShort());
+
+                    // ... and sign it                    
+                    if(!CMessageSigner::SignMessage(strMessage2, dnv.vchSig2, activeDynode.keyDynode)) {
+                        LogPrintf("DynodeMan::ProcessVerifyReply -- SignMessage() failed\n");
+                        return;
+                    }
+                        
                     std::string strError;
-
-                    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-                        uint256 hash2 = dnv.GetSignatureHash2(blockHash);
-
-                        if(!CHashSigner::SignHash(hash2, activeDynode.keyDynode, dnv.vchSig2)) {
-                            LogPrintf("DynodeMan::ProcessVerifyReply -- SignHash() failed\n");
-                            return;
-                        }
-
-                        if(!CHashSigner::VerifyHash(hash2, activeDynode.pubKeyDynode, dnv.vchSig2, strError)) {
-                            LogPrintf("DynodeMan::ProcessVerifyReply -- VerifyHash() failed, error: %s\n", strError);
-                            return;
-                        }
-                    } else {
-                        std::string strMessage2 = strprintf("%s%d%s%s%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString(),
-                                                dnv.dynodeOutpoint1.ToStringShort(), dnv.dynodeOutpoint2.ToStringShort());
-
-                        if(!CMessageSigner::SignMessage(strMessage2, dnv.vchSig2, activeDynode.keyDynode)) {
-                            LogPrintf("DynodeMan::ProcessVerifyReply -- SignMessage() failed\n");
-                            return;
-                        }
-
-                        if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
-                            LogPrintf("DynodeMan::ProcessVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
-                            return;
-                        }
+                        
+                    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
+                        LogPrintf("DynodeMan::ProcessVerifyReply -- VerifyMessage() failed, error: %s\n", strError);
+                        return;
                     }
 
                     mWeAskedForVerification[pnode->addr] = dnv;
@@ -1427,6 +1391,10 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
     {
         LOCK(cs);
 
+        std::string strMessage1 = strprintf("%s%d%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString());
+        std::string strMessage2 = strprintf("%s%d%s%s%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString(),
+                                dnv.dynodeOutpoint1.ToStringShort(), dnv.dynodeOutpoint2.ToStringShort());
+
         CDynode* pdn1 = Find(dnv.dynodeOutpoint1);
         if(!pdn1) {
             LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- can't find Dynode1 %s\n", dnv.dynodeOutpoint1.ToStringShort());
@@ -1444,34 +1412,17 @@ void CDynodeMan::ProcessVerifyBroadcast(CNode* pnode, const CDynodeVerification&
             return;
         }
 
-        if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-            uint256 hash1 = dnv.GetSignatureHash1(blockHash);
-            uint256 hash2 = dnv.GetSignatureHash2(blockHash);
 
-            if(!CHashSigner::VerifyHash(hash1, pdn1->pubKeyDynode, dnv.vchSig1, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
-                return;
-            }
-
-            if(!CHashSigner::VerifyHash(hash2, pdn2->pubKeyDynode, dnv.vchSig2, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyHash() failed, error: %s\n", strError);
-                return;
-            }
-        } else {
-        std::string strMessage1 = strprintf("%s%d%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString());
-        std::string strMessage2 = strprintf("%s%d%s%s%s", dnv.addr.ToString(false), dnv.nonce, blockHash.ToString(),
-                                dnv.dynodeOutpoint1.ToStringShort(), dnv.dynodeOutpoint2.ToStringShort());
-
-            if(!CMessageSigner::VerifyMessage(pdn1->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode1 failed, error: %s\n", strError);
-                return;
-            }
-
-            if(!CMessageSigner::VerifyMessage(pdn2->pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
-                LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode2 failed, error: %s\n", strError);
-                return;
-            }
+        if(!CMessageSigner::VerifyMessage(pdn1->pubKeyDynode, dnv.vchSig1, strMessage1, strError)) {
+            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode1 failed, error: %s\n", strError);
+            return;
         }
+
+        if(!CMessageSigner::VerifyMessage(pdn2->pubKeyDynode, dnv.vchSig2, strMessage2, strError)) {
+            LogPrintf("CDynodeMan::ProcessVerifyBroadcast -- VerifyMessage() for dynode2 failed, error: %s\n", strError);
+            return;
+        }
+
 
         if(!pdn1->IsPoSeVerified()) {
             pdn1->DecreasePoSeBanScore();
@@ -1676,14 +1627,17 @@ bool CDynodeMan::IsDynodePingedWithin(const COutPoint& outpoint, int nSeconds, i
 void CDynodeMan::SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& dnp)
 {
     LOCK(cs);
+
     CDynode* pdn = Find(outpoint);
     if(!pdn) {
         return;
     }
+
     pdn->lastPing = dnp;
     if(dnp.fSentinelIsCurrent) {
         UpdateLastSentinelPingTime();
     }
+
     mapSeenDynodePing.insert(std::make_pair(dnp.GetHash(), dnp));
 
     CDynodeBroadcast dnb(*pdn);
@@ -1706,47 +1660,6 @@ void CDynodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
     }
 }
 
-void CDynodeMan::WarnDynodeDaemonUpdates()
-{
-    LOCK(cs);
-
-    static bool fWarned = false;
-
-    if (fWarned || !size() || !dynodeSync.IsDynodeListSynced())
-        return;
-
-    int nUpdatedDynodes{0};
-
-    for (const auto& dnpair : mapDynodes) {
-        if (dnpair.second.lastPing.nDaemonVersion > CLIENT_VERSION) {
-            ++nUpdatedDynodes;
-        }
-    }
-
-    // Warn only when at least half of known dynodes already updated
-    if (nUpdatedDynodes < size() / 2)
-        return;
-
-    std::string strWarning;
-    if (nUpdatedDynodes != size()) {
-        strWarning = strprintf(_("Warning: At least %d of %d dynodes are running on a newer software version. Please check latest releases, you might need to update too."),
-                    nUpdatedDynodes, size());
-    } else {
-        // someone was postponing this update for way too long probably
-        strWarning = strprintf(_("Warning: Every dynode (out of %d known ones) is running on a newer software version. Please check latest releases, it's very likely that you missed a major/critical update."),
-                    size());
-    }
-
-    // notify GetWarnings(), called by Qt and the JSON-RPC code to warn the user
-    SetMiscWarning(strWarning);
-    // trigger GUI update
-    uiInterface.NotifyAlertChanged(SerializeHash(strWarning), CT_NEW);
-    // trigger cmd-line notification
-    CAlert::Notify(strWarning);
-
-    fWarned = true;
-}
-
 void CDynodeMan::NotifyDynodeUpdates(CConnman& connman)
 {
     // Avoid double locking
@@ -1762,6 +1675,7 @@ void CDynodeMan::NotifyDynodeUpdates(CConnman& connman)
         governance.CheckDynodeOrphanObjects(connman);
         governance.CheckDynodeOrphanVotes(connman);
     }
+
     if(fDynodesRemovedLocal) {
         governance.UpdateCachesAndClean();
     }
@@ -1790,8 +1704,8 @@ void CDynodeMan::DoMaintenance(CConnman& connman)
 
     if(nTick % 60 == 0) {
         dnodeman.ProcessDynodeConnections(connman);
+
         dnodeman.CheckAndRemove(connman);
-        dnodeman.WarnDynodeDaemonUpdates();
     }
 
     if(fDynodeMode && (nTick % (60 * 5) == 0)) {

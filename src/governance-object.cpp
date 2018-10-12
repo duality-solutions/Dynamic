@@ -270,31 +270,17 @@ void CGovernanceObject::SetDynodeOutpoint(const COutPoint& outpoint)
 bool CGovernanceObject::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 {
     std::string strError;
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::SignHash(hash, keyDynode, vchSig)) {
-            LogPrintf("CGovernanceObject::Sign -- SignHash() failed\n");
-            return false;
-        }
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            LogPrintf("CGovernanceObject::Sign -- VerifyHash() failed, error: %s\n", strError);
-            return false;
-        }
-    } else {
-        std::string strMessage = GetSignatureMessage();
-        if (!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
-            LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
-            return false;
-        }
-
-        if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-            LogPrintf("CGovernanceObject::Sign -- VerifyMessage() failed, error: %s\n", strError);
-            return false;
-        }
+    std::string strMessage = GetSignatureMessage();
+    if (!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
+        LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
+        return false;
     }
+
+    if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+        LogPrintf("CGovernanceObject::Sign -- VerifyMessage() failed, error: %s\n", strError);
+        return false;
+    }
+
 
     LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, dynode = %s\n",
              pubKeyDynode.GetID().ToString(), dynodeOutpoint.ToStringShort());
@@ -305,28 +291,12 @@ bool CGovernanceObject::Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode)
 bool CGovernanceObject::CheckSignature(const CPubKey& pubKeyDynode) const
 {
     std::string strError;
-
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
-        uint256 hash = GetSignatureHash();
-
-        if (!CHashSigner::VerifyHash(hash, pubKeyDynode, vchSig, strError)) {
-            // could be an old object
-            std::string strMessage = GetSignatureMessage();
-
-            if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
-                // nope, not in old format either
-                LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
-                return false;
-            }
-        }
-    } else {
-        std::string strMessage = GetSignatureMessage();
+    std::string strMessage = GetSignatureMessage();
 
         if (!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
             LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
             return false;
         }
-    }
 
     return true;
 }

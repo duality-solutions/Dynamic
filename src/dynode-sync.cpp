@@ -117,7 +117,7 @@ std::string CDynodeSync::GetSyncStatus()
         case DYNODE_SYNC_GOVERNANCE:    return _("Synchronizing governance objects...");
         case DYNODE_SYNC_FAILED:        return _("Synchronization failed");
         case DYNODE_SYNC_FINISHED:      return _("Synchronization finished");
-        default:                           return "";
+        default:                        return "";
     }
 }
 
