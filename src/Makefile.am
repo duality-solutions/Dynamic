@@ -188,6 +188,7 @@ DYNAMIC_CORE_H = \
   support/allocators/zeroafterfree.h \
   support/cleanse.h \
   support/lockedpool.h \
+  support/events.h \
   sync.h \
   threadinterrupt.h \
   threadsafety.h \
