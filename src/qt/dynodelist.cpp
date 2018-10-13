@@ -34,11 +34,10 @@ int GetOffsetFromUtc()
 #endif
 }
 
-DynodeList::DynodeList(const PlatformStyle *platformStyle, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::DynodeList),
-    clientModel(0),
-    walletModel(0)
+DynodeList::DynodeList(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
+                                                                              ui(new Ui::DynodeList),
+                                                                              clientModel(0),
+                                                                              walletModel(0)
 {
     ui->setupUi(this);
 
@@ -66,7 +65,7 @@ DynodeList::DynodeList(const PlatformStyle *platformStyle, QWidget *parent) :
 
     ui->tableWidgetMyDynodes->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    QAction *startAliasAction = new QAction(tr("Start alias"), this);
+    QAction* startAliasAction = new QAction(tr("Start alias"), this);
     contextMenu = new QMenu();
     contextMenu->addAction(startAliasAction);
     connect(ui->tableWidgetMyDynodes, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
@@ -87,24 +86,25 @@ DynodeList::~DynodeList()
     delete ui;
 }
 
-void DynodeList::setClientModel(ClientModel *model)
+void DynodeList::setClientModel(ClientModel* model)
 {
     this->clientModel = model;
-    if(model) {
+    if (model) {
         // try to update list when Dynode count changes
         connect(clientModel, SIGNAL(strDynodesChanged(QString)), this, SLOT(updateNodeList()));
     }
 }
 
-void DynodeList::setWalletModel(WalletModel *model)
+void DynodeList::setWalletModel(WalletModel* model)
 {
     this->walletModel = model;
 }
 
-void DynodeList::showContextMenu(const QPoint &point)
+void DynodeList::showContextMenu(const QPoint& point)
 {
-    QTableWidgetItem *item = ui->tableWidgetMyDynodes->itemAt(point);
-    if(item) contextMenu->exec(QCursor::pos());
+    QTableWidgetItem* item = ui->tableWidgetMyDynodes->itemAt(point);
+    if (item)
+        contextMenu->exec(QCursor::pos());
 }
 
 void DynodeList::StartAlias(std::string strAlias)
@@ -113,7 +113,7 @@ void DynodeList::StartAlias(std::string strAlias)
     strStatusHtml += "<center>Alias: " + strAlias;
 
     for (const auto& dne : dynodeConfig.getEntries()) {
-        if(dne.getAlias() == strAlias) {
+        if (dne.getAlias() == strAlias) {
             std::string strError;
             CDynodeBroadcast dnb;
 
@@ -125,7 +125,7 @@ void DynodeList::StartAlias(std::string strAlias)
                 fSuccess = false;
             }
 
-            if(fSuccess) {
+            if (fSuccess) {
                 strStatusHtml += "<br>Successfully started Dynode.";
                 dnodeman.NotifyDynodeUpdates(*g_connman);
             } else {
@@ -154,13 +154,14 @@ void DynodeList::StartAll(std::string strCommand)
         CDynodeBroadcast dnb;
 
         int32_t nOutputIndex = 0;
-        if(!ParseInt32(dne.getOutputIndex(), &nOutputIndex)) {
+        if (!ParseInt32(dne.getOutputIndex(), &nOutputIndex)) {
             continue;
         }
 
         COutPoint outpoint = COutPoint(uint256S(dne.getTxHash()), nOutputIndex);
 
-        if(strCommand == "start-missing" && dnodeman.Has(outpoint)) continue;
+        if (strCommand == "start-missing" && dnodeman.Has(outpoint))
+            continue;
 
         bool fSuccess = CDynodeBroadcast::Create(dne.getIp(), dne.getPrivKey(), dne.getTxHash(), dne.getOutputIndex(), strError, dnb);
 
@@ -170,7 +171,7 @@ void DynodeList::StartAll(std::string strCommand)
             fSuccess = false;
         }
 
-        if(fSuccess) {
+        if (fSuccess) {
             nCountSuccessful++;
             dnodeman.NotifyDynodeUpdates(*g_connman);
         } else {
@@ -197,15 +198,15 @@ void DynodeList::updateMyDynodeInfo(QString strAlias, QString strAddr, const COu
     bool fOldRowFound = false;
     int nNewRow = 0;
 
-    for(int i = 0; i < ui->tableWidgetMyDynodes->rowCount(); i++) {
-        if(ui->tableWidgetMyDynodes->item(i, 0)->text() == strAlias) {
+    for (int i = 0; i < ui->tableWidgetMyDynodes->rowCount(); i++) {
+        if (ui->tableWidgetMyDynodes->item(i, 0)->text() == strAlias) {
             fOldRowFound = true;
             nNewRow = i;
             break;
         }
     }
 
-    if(nNewRow == 0 && !fOldRowFound) {
+    if (nNewRow == 0 && !fOldRowFound) {
         nNewRow = ui->tableWidgetMyDynodes->rowCount();
         ui->tableWidgetMyDynodes->insertRow(nNewRow);
     }
@@ -213,14 +214,14 @@ void DynodeList::updateMyDynodeInfo(QString strAlias, QString strAddr, const COu
     dynode_info_t infoDn;
     bool fFound = dnodeman.GetDynodeInfo(outpoint, infoDn);
 
-    QTableWidgetItem *aliasItem = new QTableWidgetItem(strAlias);
-    QTableWidgetItem *addrItem = new QTableWidgetItem(fFound ? QString::fromStdString(infoDn.addr.ToString()) : strAddr);
-    QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(fFound ? infoDn.nProtocolVersion : -1));
-    QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynode::StateToString(infoDn.nActiveState) : "MISSING"));
-    QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(fFound ? (infoDn.nTimeLastPing - infoDn.sigTime) : 0)));
-    QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M",
-                                                                                                   fFound ? infoDn.nTimeLastPing + GetOffsetFromUtc() : 0)));
-    QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynamicAddress(infoDn.pubKeyCollateralAddress.GetID()).ToString() : ""));
+    QTableWidgetItem* aliasItem = new QTableWidgetItem(strAlias);
+    QTableWidgetItem* addrItem = new QTableWidgetItem(fFound ? QString::fromStdString(infoDn.addr.ToString()) : strAddr);
+    QTableWidgetItem* protocolItem = new QTableWidgetItem(QString::number(fFound ? infoDn.nProtocolVersion : -1));
+    QTableWidgetItem* statusItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynode::StateToString(infoDn.nActiveState) : "MISSING"));
+    QTableWidgetItem* activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(fFound ? (infoDn.nTimeLastPing - infoDn.sigTime) : 0)));
+    QTableWidgetItem* lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M",
+        fFound ? infoDn.nTimeLastPing + GetOffsetFromUtc() : 0)));
+    QTableWidgetItem* pubkeyItem = new QTableWidgetItem(QString::fromStdString(fFound ? CDynamicAddress(infoDn.pubKeyCollateralAddress.GetID()).ToString() : ""));
 
     ui->tableWidgetMyDynodes->setItem(nNewRow, 0, aliasItem);
     ui->tableWidgetMyDynodes->setItem(nNewRow, 1, addrItem);
@@ -234,7 +235,7 @@ void DynodeList::updateMyDynodeInfo(QString strAlias, QString strAddr, const COu
 void DynodeList::updateMyNodeList(bool fForce)
 {
     TRY_LOCK(cs_mydnlist, fLockAcquired);
-    if(!fLockAcquired) {
+    if (!fLockAcquired) {
         return;
     }
     static int64_t nTimeMyListUpdated = 0;
@@ -244,7 +245,8 @@ void DynodeList::updateMyNodeList(bool fForce)
     int64_t nSecondsTillUpdate = nTimeMyListUpdated + MY_DYNODELIST_UPDATE_SECONDS - GetTime();
     ui->secondsLabel->setText(QString::number(nSecondsTillUpdate));
 
-    if(nSecondsTillUpdate > 0 && !fForce) return;
+    if (nSecondsTillUpdate > 0 && !fForce)
+        return;
     nTimeMyListUpdated = GetTime();
 
     // Find selected row
@@ -255,7 +257,7 @@ void DynodeList::updateMyNodeList(bool fForce)
     ui->tableWidgetDynodes->setSortingEnabled(false);
     for (const auto& dne : dynodeConfig.getEntries()) {
         int32_t nOutputIndex = 0;
-        if(!ParseInt32(dne.getOutputIndex(), &nOutputIndex)) {
+        if (!ParseInt32(dne.getOutputIndex(), &nOutputIndex)) {
             continue;
         }
 
@@ -271,7 +273,7 @@ void DynodeList::updateMyNodeList(bool fForce)
 void DynodeList::updateNodeList()
 {
     TRY_LOCK(cs_dnlist, fLockAcquired);
-    if(!fLockAcquired) {
+    if (!fLockAcquired) {
         return;
     }
 
@@ -279,12 +281,12 @@ void DynodeList::updateNodeList()
 
     // to prevent high cpu usage update only once in DYNODELIST_UPDATE_SECONDS seconds
     // or DYNODELIST_FILTER_COOLDOWN_SECONDS seconds after filter was last changed
-    int64_t nSecondsToWait = fFilterUpdated
-                            ? nTimeFilterUpdated - GetTime() + DYNODELIST_FILTER_COOLDOWN_SECONDS
-                            : nTimeListUpdated - GetTime() + DYNODELIST_UPDATE_SECONDS;
+    int64_t nSecondsToWait = fFilterUpdated ? nTimeFilterUpdated - GetTime() + DYNODELIST_FILTER_COOLDOWN_SECONDS : nTimeListUpdated - GetTime() + DYNODELIST_UPDATE_SECONDS;
 
-    if(fFilterUpdated) ui->countLabel->setText(QString::fromStdString(strprintf("Please wait... %d", nSecondsToWait)));
-    if(nSecondsToWait > 0) return;
+    if (fFilterUpdated)
+        ui->countLabel->setText(QString::fromStdString(strprintf("Please wait... %d", nSecondsToWait)));
+    if (nSecondsToWait > 0)
+        return;
 
     nTimeListUpdated = GetTime();
     fFilterUpdated = false;
@@ -297,27 +299,26 @@ void DynodeList::updateNodeList()
     std::map<COutPoint, CDynode> mapDynodes = dnodeman.GetFullDynodeMap();
     int offsetFromUtc = GetOffsetFromUtc();
 
-    for(const auto& dnpair : mapDynodes)
-    {
+    for (const auto& dnpair : mapDynodes) {
         CDynode dn = dnpair.second;
         // populate list
         // Address, Protocol, Status, Active Seconds, Last Seen, Pub Key
-        QTableWidgetItem *addressItem = new QTableWidgetItem(QString::fromStdString(dn.addr.ToString()));
-        QTableWidgetItem *protocolItem = new QTableWidgetItem(QString::number(dn.nProtocolVersion));
-        QTableWidgetItem *statusItem = new QTableWidgetItem(QString::fromStdString(dn.GetStatus()));
-        QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(dn.lastPing.sigTime - dn.sigTime)));
-        QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", dn.lastPing.sigTime + offsetFromUtc)));
-        QTableWidgetItem *pubkeyItem = new QTableWidgetItem(QString::fromStdString(CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
+        QTableWidgetItem* addressItem = new QTableWidgetItem(QString::fromStdString(dn.addr.ToString()));
+        QTableWidgetItem* protocolItem = new QTableWidgetItem(QString::number(dn.nProtocolVersion));
+        QTableWidgetItem* statusItem = new QTableWidgetItem(QString::fromStdString(dn.GetStatus()));
+        QTableWidgetItem* activeSecondsItem = new QTableWidgetItem(QString::fromStdString(DurationToDHMS(dn.lastPing.sigTime - dn.sigTime)));
+        QTableWidgetItem* lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat("%Y-%m-%d %H:%M", dn.lastPing.sigTime + offsetFromUtc)));
+        QTableWidgetItem* pubkeyItem = new QTableWidgetItem(QString::fromStdString(CDynamicAddress(dn.pubKeyCollateralAddress.GetID()).ToString()));
 
-        if (strCurrentFilter != "")
-        {
-            strToFilter =   addressItem->text() + " " +
-                            protocolItem->text() + " " +
-                            statusItem->text() + " " +
-                            activeSecondsItem->text() + " " +
-                            lastSeenItem->text() + " " +
-                            pubkeyItem->text();
-            if (!strToFilter.contains(strCurrentFilter)) continue;
+        if (strCurrentFilter != "") {
+            strToFilter = addressItem->text() + " " +
+                          protocolItem->text() + " " +
+                          statusItem->text() + " " +
+                          activeSecondsItem->text() + " " +
+                          lastSeenItem->text() + " " +
+                          pubkeyItem->text();
+            if (!strToFilter.contains(strCurrentFilter))
+                continue;
         }
 
         ui->tableWidgetDynodes->insertRow(0);
@@ -333,7 +334,7 @@ void DynodeList::updateNodeList()
     ui->tableWidgetDynodes->setSortingEnabled(true);
 }
 
-void DynodeList::on_filterLineEdit_textChanged(const QString &strFilterIn)
+void DynodeList::on_filterLineEdit_textChanged(const QString& strFilterIn)
 {
     strCurrentFilter = strFilterIn;
     nTimeFilterUpdated = GetTime();
@@ -350,7 +351,8 @@ void DynodeList::on_startButton_clicked()
         QItemSelectionModel* selectionModel = ui->tableWidgetMyDynodes->selectionModel();
         QModelIndexList selected = selectionModel->selectedRows();
 
-        if(selected.count() == 0) return;
+        if (selected.count() == 0)
+            return;
 
         QModelIndex index = selected.at(0);
         int nSelectedRow = index.row();
@@ -363,14 +365,16 @@ void DynodeList::on_startButton_clicked()
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 
-    if(retval != QMessageBox::Yes) return;
+    if (retval != QMessageBox::Yes)
+        return;
 
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
-    if(encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
+    if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
         WalletModel::UnlockContext ctx(walletModel->requestUnlock());
 
-        if(!ctx.isValid()) return; // Unlock wallet was cancelled
+        if (!ctx.isValid())
+            return; // Unlock wallet was cancelled
 
         StartAlias(strAlias);
         return;
@@ -387,14 +391,16 @@ void DynodeList::on_startAllButton_clicked()
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 
-    if(retval != QMessageBox::Yes) return;
+    if (retval != QMessageBox::Yes)
+        return;
 
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
-    if(encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
+    if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
         WalletModel::UnlockContext ctx(walletModel->requestUnlock());
 
-        if(!ctx.isValid()) return; // Unlock wallet was cancelled
+        if (!ctx.isValid())
+            return; // Unlock wallet was cancelled
 
         StartAll();
         return;
@@ -405,8 +411,7 @@ void DynodeList::on_startAllButton_clicked()
 
 void DynodeList::on_startMissingButton_clicked()
 {
-
-    if(!dynodeSync.IsDynodeListSynced()) {
+    if (!dynodeSync.IsDynodeListSynced()) {
         QMessageBox::critical(this, tr("Command is not available right now"),
             tr("You can't use this command until Dynode list is synced"));
         return;
@@ -419,14 +424,16 @@ void DynodeList::on_startMissingButton_clicked()
         QMessageBox::Yes | QMessageBox::Cancel,
         QMessageBox::Cancel);
 
-    if(retval != QMessageBox::Yes) return;
+    if (retval != QMessageBox::Yes)
+        return;
 
     WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
 
-    if(encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
+    if (encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
         WalletModel::UnlockContext ctx(walletModel->requestUnlock());
 
-        if(!ctx.isValid()) return; // Unlock wallet was cancelled
+        if (!ctx.isValid())
+            return; // Unlock wallet was cancelled
 
         StartAll("start-missing");
         return;
@@ -437,7 +444,7 @@ void DynodeList::on_startMissingButton_clicked()
 
 void DynodeList::on_tableWidgetMyDynodes_itemSelectionChanged()
 {
-    if(ui->tableWidgetMyDynodes->selectedItems().count() > 0) {
+    if (ui->tableWidgetMyDynodes->selectedItems().count() > 0) {
         ui->startButton->setEnabled(true);
     }
 }

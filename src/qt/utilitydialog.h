@@ -14,8 +14,9 @@
 class ClientModel;
 class DynamicGUI;
 
-namespace Ui {
-    class HelpMessageDialog;
+namespace Ui
+{
+class HelpMessageDialog;
 }
 
 /** "Help message" dialog box */
@@ -30,14 +31,14 @@ public:
         pshelp
     };
 
-    explicit HelpMessageDialog(QWidget *parent, HelpMode helpMode);
+    explicit HelpMessageDialog(QWidget* parent, HelpMode helpMode);
     ~HelpMessageDialog();
 
     void printToConsole();
     void showOrPrint();
 
 private:
-    Ui::HelpMessageDialog *ui;
+    Ui::HelpMessageDialog* ui;
     QString text;
 
 private Q_SLOTS:
@@ -51,11 +52,11 @@ class ShutdownWindow : public QWidget
     Q_OBJECT
 
 public:
-    ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
-    static QWidget *showShutdownWindow(DynamicGUI *window);
+    ShutdownWindow(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    static QWidget* showShutdownWindow(DynamicGUI* window);
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 };
 
 #endif // DYNAMIC_QT_UTILITYDIALOG_H

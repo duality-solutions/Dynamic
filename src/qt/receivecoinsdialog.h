@@ -22,8 +22,9 @@ class OptionsModel;
 class PlatformStyle;
 class WalletModel;
 
-namespace Ui {
-    class ReceiveCoinsDialog;
+namespace Ui
+{
+class ReceiveCoinsDialog;
 }
 
 QT_BEGIN_NAMESPACE
@@ -44,10 +45,10 @@ public:
         MINIMUM_COLUMN_WIDTH = 120
     };
 
-    explicit ReceiveCoinsDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    explicit ReceiveCoinsDialog(const PlatformStyle* platformStyle, QWidget* parent = 0);
     ~ReceiveCoinsDialog();
 
-    void setModel(WalletModel *model);
+    void setModel(WalletModel* model);
 
 public Q_SLOTS:
     void clear();
@@ -55,27 +56,27 @@ public Q_SLOTS:
     void accept() override;
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    Ui::ReceiveCoinsDialog *ui;
-    GUIUtil::TableViewLastColumnResizingFixer *columnResizingFixer;
-    WalletModel *model;
-    QMenu *contextMenu;
-    const PlatformStyle *platformStyle;
-	
-	QModelIndex selectedRow();
+    Ui::ReceiveCoinsDialog* ui;
+    GUIUtil::TableViewLastColumnResizingFixer* columnResizingFixer;
+    WalletModel* model;
+    QMenu* contextMenu;
+    const PlatformStyle* platformStyle;
+
+    QModelIndex selectedRow();
     void copyColumnToClipboard(int column);
-    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 private Q_SLOTS:
     void on_receiveButton_clicked();
     void on_showRequestButton_clicked();
     void on_removeRequestButton_clicked();
-    void on_recentRequestsView_doubleClicked(const QModelIndex &index);
-    void recentRequestsView_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void on_recentRequestsView_doubleClicked(const QModelIndex& index);
+    void recentRequestsView_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void updateDisplayUnit();
-    void showMenu(const QPoint &point);
+    void showMenu(const QPoint& point);
     void copyAddress();
     void copyLabel();
     void copyMessage();

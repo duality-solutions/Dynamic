@@ -11,84 +11,85 @@
 #include "utilstrencodings.h"
 
 #ifndef WIN32
-# include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 
-namespace NetMsgType {
-const char *VERSION="version";
-const char *VERACK="verack";
-const char *ADDR="addr";
-const char *INV="inv";
-const char *GETDATA="getdata";
-const char *MERKLEBLOCK="merkleblock";
-const char *GETBLOCKS="getblocks";
-const char *GETHEADERS="getheaders";
-const char *TX="tx";
-const char *HEADERS="headers";
-const char *BLOCK="block";
-const char *GETADDR="getaddr";
-const char *MEMPOOL="mempool";
-const char *PING="ping";
-const char *PONG="pong";
-const char *ALERT="alert";
-const char *NOTFOUND="notfound";
-const char *FILTERLOAD="filterload";
-const char *FILTERADD="filteradd";
-const char *FILTERCLEAR="filterclear";
-const char *REJECT="reject";
-const char *SENDHEADERS="sendheaders";
-const char *SENDCMPCT="sendcmpct";
-const char *CMPCTBLOCK="cmpctblock";
-const char *GETBLOCKTXN="getblocktxn";
-const char *BLOCKTXN="blocktxn";
+namespace NetMsgType
+{
+const char* VERSION = "version";
+const char* VERACK = "verack";
+const char* ADDR = "addr";
+const char* INV = "inv";
+const char* GETDATA = "getdata";
+const char* MERKLEBLOCK = "merkleblock";
+const char* GETBLOCKS = "getblocks";
+const char* GETHEADERS = "getheaders";
+const char* TX = "tx";
+const char* HEADERS = "headers";
+const char* BLOCK = "block";
+const char* GETADDR = "getaddr";
+const char* MEMPOOL = "mempool";
+const char* PING = "ping";
+const char* PONG = "pong";
+const char* ALERT = "alert";
+const char* NOTFOUND = "notfound";
+const char* FILTERLOAD = "filterload";
+const char* FILTERADD = "filteradd";
+const char* FILTERCLEAR = "filterclear";
+const char* REJECT = "reject";
+const char* SENDHEADERS = "sendheaders";
+const char* SENDCMPCT = "sendcmpct";
+const char* CMPCTBLOCK = "cmpctblock";
+const char* GETBLOCKTXN = "getblocktxn";
+const char* BLOCKTXN = "blocktxn";
 // Dynamic message types
-const char *TXLOCKREQUEST="is";
-const char *TXLOCKVOTE="txlvote";
-const char *SPORK="spork";
-const char *GETSPORKS="getsporks";
-const char *DYNODEPAYMENTVOTE="dnw";
-const char *DYNODEPAYMENTBLOCK="dnwb";
-const char *DYNODEPAYMENTSYNC="dnget";
-const char *DNQUORUM="dn quorum"; // not implemented
-const char *DNANNOUNCE="dnb";
-const char *DNPING="dnp";
-const char *PSACCEPT="psa";
-const char *PSVIN="psi";
-const char *PSFINALTX="psf";
-const char *PSSIGNFINALTX="pss";
-const char *PSCOMPLETE="psc";
-const char *PSSTATUSUPDATE="pssu";
-const char *PSTX="pstx";
-const char *PSQUEUE="psq";
-const char *PSEG="pseg";
-const char *SYNCSTATUSCOUNT="ssc";
-const char *DNGOVERNANCESYNC="govsync";
-const char *DNGOVERNANCEOBJECT="govobj";
-const char *DNGOVERNANCEOBJECTVOTE="govobjvote";
-const char *DNVERIFY="dnv";
-};
+const char* TXLOCKREQUEST = "is";
+const char* TXLOCKVOTE = "txlvote";
+const char* SPORK = "spork";
+const char* GETSPORKS = "getsporks";
+const char* DYNODEPAYMENTVOTE = "dnw";
+const char* DYNODEPAYMENTBLOCK = "dnwb";
+const char* DYNODEPAYMENTSYNC = "dnget";
+const char* DNQUORUM = "dn quorum"; // not implemented
+const char* DNANNOUNCE = "dnb";
+const char* DNPING = "dnp";
+const char* PSACCEPT = "psa";
+const char* PSVIN = "psi";
+const char* PSFINALTX = "psf";
+const char* PSSIGNFINALTX = "pss";
+const char* PSCOMPLETE = "psc";
+const char* PSSTATUSUPDATE = "pssu";
+const char* PSTX = "pstx";
+const char* PSQUEUE = "psq";
+const char* PSEG = "pseg";
+const char* SYNCSTATUSCOUNT = "ssc";
+const char* DNGOVERNANCESYNC = "govsync";
+const char* DNGOVERNANCEOBJECT = "govobj";
+const char* DNGOVERNANCEOBJECTVOTE = "govobjvote";
+const char* DNVERIFY = "dnv";
+}; // namespace NetMsgType
 
 static const char* ppszTypeName[] =
-{
-    "ERROR", // Should never occur
-    NetMsgType::TX,
-    NetMsgType::BLOCK,
-    "filtered block", // Should never occur
-    // Dynamic message types
-    // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
-    NetMsgType::TXLOCKREQUEST,
-    NetMsgType::TXLOCKVOTE,
-    NetMsgType::SPORK,
-    NetMsgType::DYNODEPAYMENTVOTE,
-    NetMsgType::DYNODEPAYMENTBLOCK,
-    NetMsgType::DNQUORUM, // not implemented
-    NetMsgType::DNANNOUNCE,
-    NetMsgType::DNPING,
-    NetMsgType::PSTX,
-    NetMsgType::DNGOVERNANCEOBJECT,
-    NetMsgType::DNGOVERNANCEOBJECTVOTE,
-    NetMsgType::DNVERIFY,
-    "compact block", // Should never occur
+    {
+        "ERROR", // Should never occur
+        NetMsgType::TX,
+        NetMsgType::BLOCK,
+        "filtered block", // Should never occur
+        // Dynamic message types
+        // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
+        NetMsgType::TXLOCKREQUEST,
+        NetMsgType::TXLOCKVOTE,
+        NetMsgType::SPORK,
+        NetMsgType::DYNODEPAYMENTVOTE,
+        NetMsgType::DYNODEPAYMENTBLOCK,
+        NetMsgType::DNQUORUM, // not implemented
+        NetMsgType::DNANNOUNCE,
+        NetMsgType::DNPING,
+        NetMsgType::PSTX,
+        NetMsgType::DNGOVERNANCEOBJECT,
+        NetMsgType::DNGOVERNANCEOBJECTVOTE,
+        NetMsgType::DNVERIFY,
+        "compact block", // Should never occur
 };
 
 /** All known message types. Keep this in the same order as the list of
@@ -147,7 +148,7 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::DNGOVERNANCEOBJECTVOTE,
     NetMsgType::DNVERIFY,
 };
-const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
+const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes + ARRAYLEN(allNetMessageTypes));
 
 CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn)
 {
@@ -178,29 +179,24 @@ bool CMessageHeader::IsValid(const MessageStartChars& pchMessageStartIn) const
         return false;
 
     // Check the command string for errors
-    for (const char* p1 = pchCommand; p1 < pchCommand + COMMAND_SIZE; p1++)
-    {
-        if (*p1 == 0)
-        {
+    for (const char* p1 = pchCommand; p1 < pchCommand + COMMAND_SIZE; p1++) {
+        if (*p1 == 0) {
             // Must be all zeros after the first zero
             for (; p1 < pchCommand + COMMAND_SIZE; p1++)
                 if (*p1 != 0)
                     return false;
-        }
-        else if (*p1 < ' ' || *p1 > 0x7E)
+        } else if (*p1 < ' ' || *p1 > 0x7E)
             return false;
     }
 
     // Message size
-    if (nMessageSize > MAX_SIZE)
-    {
+    if (nMessageSize > MAX_SIZE) {
         LogPrintf("CMessageHeader::IsValid(): (%s, %u bytes) nMessageSize > MAX_SIZE\n", GetCommand(), nMessageSize);
         return false;
     }
 
     return true;
 }
-
 
 
 CAddress::CAddress() : CService()
@@ -235,10 +231,8 @@ CInv::CInv(int typeIn, const uint256& hashIn)
 CInv::CInv(const std::string& strType, const uint256& hashIn)
 {
     unsigned int i;
-    for (i = 1; i < ARRAYLEN(ppszTypeName); i++)
-    {
-        if (strType == ppszTypeName[i])
-        {
+    for (i = 1; i < ARRAYLEN(ppszTypeName); i++) {
+        if (strType == ppszTypeName[i]) {
             type = i;
             break;
         }
@@ -269,12 +263,12 @@ std::string CInv::ToString() const
 {
     try {
         return strprintf("%s %s", GetCommand(), hash.ToString());
-    } catch(const std::out_of_range &) {
+    } catch (const std::out_of_range&) {
         return strprintf("0x%08x %s", type, hash.ToString());
     }
 }
 
-const std::vector<std::string> &getAllNetMessageTypes()
+const std::vector<std::string>& getAllNetMessageTypes()
 {
     return allNetMessageTypesVec;
 }

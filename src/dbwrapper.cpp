@@ -20,60 +20,60 @@
 
 #include <boost/filesystem.hpp>
 
-class CDynamicLevelDBLogger : public leveldb::Logger {
+class CDynamicLevelDBLogger : public leveldb::Logger
+{
 public:
     // This code is adapted from posix_logger.h, which is why it is using vsprintf.
     // Please do not do this in normal code
-    virtual void Logv(const char * format, va_list ap) override {
-            if (!LogAcceptCategory("leveldb"))
-                return;
-            char buffer[500];
-            for (int iter = 0; iter < 2; iter++) {
-                char* base;
-                int bufsize;
-                if (iter == 0) {
-                    bufsize = sizeof(buffer);
-                    base = buffer;
-                }
-                else {
-                    bufsize = 30000;
-                    base = new char[bufsize];
-                }
-                char* p = base;
-                char* limit = base + bufsize;
-
-                // Print the message
-                if (p < limit) {
-                    va_list backup_ap;
-                    va_copy(backup_ap, ap);
-                    // Do not use vsnprintf elsewhere in bitcoin source code, see above.
-                    p += vsnprintf(p, limit - p, format, backup_ap);
-                    va_end(backup_ap);
-                }
-
-                // Truncate to available space if necessary
-                if (p >= limit) {
-                    if (iter == 0) {
-                        continue;       // Try again with larger buffer
-                    }
-                    else {
-                        p = limit - 1;
-                    }
-                }
-
-                // Add newline if necessary
-                if (p == base || p[-1] != '\n') {
-                    *p++ = '\n';
-                }
-
-                assert(p <= limit);
-                base[std::min(bufsize - 1, (int)(p - base))] = '\0';
-                LogPrintStr(base);
-                if (base != buffer) {
-                    delete[] base;
-                }
-                break;
+    virtual void Logv(const char* format, va_list ap) override
+    {
+        if (!LogAcceptCategory("leveldb"))
+            return;
+        char buffer[500];
+        for (int iter = 0; iter < 2; iter++) {
+            char* base;
+            int bufsize;
+            if (iter == 0) {
+                bufsize = sizeof(buffer);
+                base = buffer;
+            } else {
+                bufsize = 30000;
+                base = new char[bufsize];
             }
+            char* p = base;
+            char* limit = base + bufsize;
+
+            // Print the message
+            if (p < limit) {
+                va_list backup_ap;
+                va_copy(backup_ap, ap);
+                // Do not use vsnprintf elsewhere in bitcoin source code, see above.
+                p += vsnprintf(p, limit - p, format, backup_ap);
+                va_end(backup_ap);
+            }
+
+            // Truncate to available space if necessary
+            if (p >= limit) {
+                if (iter == 0) {
+                    continue; // Try again with larger buffer
+                } else {
+                    p = limit - 1;
+                }
+            }
+
+            // Add newline if necessary
+            if (p == base || p[-1] != '\n') {
+                *p++ = '\n';
+            }
+
+            assert(p <= limit);
+            base[std::min(bufsize - 1, (int)(p - base))] = '\0';
+            LogPrintStr(base);
+            if (base != buffer) {
+                delete[] base;
+            }
+            break;
+        }
     }
 };
 
@@ -183,7 +183,6 @@ std::vector<unsigned char> CDBWrapper::CreateObfuscateKey() const
     unsigned char buff[OBFUSCATE_KEY_NUM_BYTES];
     GetRandBytes(buff, OBFUSCATE_KEY_NUM_BYTES);
     return std::vector<unsigned char>(&buff[0], &buff[OBFUSCATE_KEY_NUM_BYTES]);
-
 }
 
 bool CDBWrapper::IsEmpty()
@@ -199,8 +198,8 @@ void CDBIterator::SeekToFirst() { piter->SeekToFirst(); }
 void CDBIterator::SeekToLast() { piter->SeekToLast(); }
 void CDBIterator::Next() { piter->Next(); }
 
-namespace dbwrapper_private {
-
+namespace dbwrapper_private
+{
 void HandleError(const leveldb::Status& status)
 {
     if (status.ok())
@@ -215,10 +214,9 @@ void HandleError(const leveldb::Status& status)
     throw dbwrapper_error("Unknown database error");
 }
 
-const std::vector<unsigned char>& GetObfuscateKey(const CDBWrapper &w)
+const std::vector<unsigned char>& GetObfuscateKey(const CDBWrapper& w)
 {
     return w.obfuscate_key;
 }
 
-};
-
+}; // namespace dbwrapper_private

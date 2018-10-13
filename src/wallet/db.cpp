@@ -95,15 +95,15 @@ bool CDBEnv::Open(const boost::filesystem::path& pathIn)
     dbenv->set_flags(DB_TXN_WRITE_NOSYNC, 1);
     dbenv->log_set_config(DB_LOG_AUTO_REMOVE, 1);
     int ret = dbenv->open(strPath.c_str(),
-                         DB_CREATE |
-                             DB_INIT_LOCK |
-                             DB_INIT_LOG |
-                             DB_INIT_MPOOL |
-                             DB_INIT_TXN |
-                             DB_THREAD |
-                             DB_RECOVER |
-                             nEnvFlags,
-                         S_IRUSR | S_IWUSR);
+        DB_CREATE |
+            DB_INIT_LOCK |
+            DB_INIT_LOG |
+            DB_INIT_MPOOL |
+            DB_INIT_TXN |
+            DB_THREAD |
+            DB_RECOVER |
+            nEnvFlags,
+        S_IRUSR | S_IWUSR);
     if (ret != 0)
         return error("CDBEnv::Open: Error %d opening database environment: %s\n", ret, DbEnv::strerror(ret));
 
@@ -129,14 +129,14 @@ void CDBEnv::MakeMock()
     dbenv->set_flags(DB_AUTO_COMMIT, 1);
     dbenv->log_set_config(DB_LOG_IN_MEMORY, 1);
     int ret = dbenv->open(NULL,
-                         DB_CREATE |
-                             DB_INIT_LOCK |
-                             DB_INIT_LOG |
-                             DB_INIT_MPOOL |
-                             DB_INIT_TXN |
-                             DB_THREAD |
-                             DB_PRIVATE,
-                         S_IRUSR | S_IWUSR);
+        DB_CREATE |
+            DB_INIT_LOCK |
+            DB_INIT_LOG |
+            DB_INIT_MPOOL |
+            DB_INIT_TXN |
+            DB_THREAD |
+            DB_PRIVATE,
+        S_IRUSR | S_IWUSR);
     if (ret > 0)
         throw std::runtime_error(strprintf("CDBEnv::MakeMock: Error %d opening database environment.", ret));
 
@@ -162,9 +162,9 @@ CDBEnv::VerifyResult CDBEnv::Verify(const std::string& strFile, bool (*recoverFu
 }
 
 /* End of headers, beginning of key/value data */
-static const char *HEADER_END = "HEADER=END";
+static const char* HEADER_END = "HEADER=END";
 /* End of key/value data */
-static const char *DATA_END = "DATA=END";
+static const char* DATA_END = "DATA=END";
 
 bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<CDBEnv::KeyValPair>& vResult)
 {
@@ -267,12 +267,12 @@ CDB::CDB(const std::string& strFilename, const char* pszMode, bool fFlushOnClose
                     throw std::runtime_error(strprintf("CDB: Failed to configure for no temp file backing for database %s", strFile));
             }
 
-            ret = pdb->open(NULL,                               // Txn pointer
-                            fMockDb ? NULL : strFile.c_str(),   // Filename
-                            fMockDb ? strFile.c_str() : "main", // Logical db name
-                            DB_BTREE,                           // Database type
-                            nFlags,                             // Flags
-                            0);
+            ret = pdb->open(NULL,                   // Txn pointer
+                fMockDb ? NULL : strFile.c_str(),   // Filename
+                fMockDb ? strFile.c_str() : "main", // Logical db name
+                DB_BTREE,                           // Database type
+                nFlags,                             // Flags
+                0);
 
             if (ret != 0) {
                 delete pdb;

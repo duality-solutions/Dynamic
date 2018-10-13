@@ -15,7 +15,8 @@
 #include <QWidget>
 #include <memory>
 
-namespace Ui {
+namespace Ui
+{
 class MiningPage;
 }
 
@@ -24,19 +25,19 @@ class MiningPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit MiningPage(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    explicit MiningPage(const PlatformStyle* platformStyle, QWidget* parent = 0);
     ~MiningPage();
 
-    void setModel(WalletModel *model);
+    void setModel(WalletModel* model);
 
 private:
-    Ui::MiningPage *ui;
-    WalletModel *model;
+    Ui::MiningPage* ui;
+    WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     bool hasMiningprivkey;
     bool fGPUMinerOn;
     bool fCPUMinerOn;
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent* event);
     void updateUI();
     void StartMiner(bool fGPU);
     void StopMiner(bool fGPU);

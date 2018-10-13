@@ -16,7 +16,7 @@ extern CPrivateSendServer privateSendServer;
 
 /** Used to keep track of current status of mixing pool
  */
-class CPrivateSendServer : public CPrivateSendBaseSession, public CPrivateSendBaseManager 
+class CPrivateSendServer : public CPrivateSendBaseSession, public CPrivateSendBaseManager
 {
 private:
     // Mixing uses collateral transactions to trust parties entering the pool
@@ -42,9 +42,9 @@ private:
     void CommitFinalTransaction(CConnman& connman);
 
     /// Is this nDenom and txCollateral acceptable?
-    bool IsAcceptablePSA(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet);
-    bool CreateNewSession(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet, CConnman& connman);
-    bool AddUserToExistingSession(const CPrivateSendAccept& psa, PoolMessage &nMessageIDRet);
+    bool IsAcceptablePSA(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet);
+    bool CreateNewSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet, CConnman& connman);
+    bool AddUserToExistingSession(const CPrivateSendAccept& psa, PoolMessage& nMessageIDRet);
     /// Do we have enough users to take entries?
     bool IsSessionReady() { return (int)vecSessionCollaterals.size() >= CPrivateSend::GetMaxPoolTransactions(); }
 
@@ -67,7 +67,7 @@ private:
     void SetNull();
 
 public:
-    CPrivateSendServer() : vecSessionCollaterals(), fUnitTest(false) {} 
+    CPrivateSendServer() : vecSessionCollaterals(), fUnitTest(false) {}
 
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
 

@@ -14,8 +14,8 @@
 #include "util.h"             // for LogPrint()
 #include "utilstrencodings.h" // for GetTime()
 
-#include <stdlib.h>
 #include <limits>
+#include <stdlib.h>
 
 #ifndef WIN32
 #include <sys/time.h>
@@ -32,11 +32,13 @@ static inline int64_t GetPerformanceCounter()
     return __rdtsc();
 #elif defined(__i386__)
     uint64_t r;
-    __asm__ volatile ("rdtsc" : "=A"(r)); // Constrain the r variable to the eax:edx pair.
+    __asm__ volatile("rdtsc"
+                     : "=A"(r)); // Constrain the r variable to the eax:edx pair.
     return r;
 #elif defined(__x86_64__) || defined(__amd64__)
     uint64_t r1, r2;
-    __asm__ volatile ("rdtsc" : "=a"(r1), "=d"(r2)); // Constrain r1 to rax and r2 to rdx.
+    __asm__ volatile("rdtsc"
+                     : "=a"(r1), "=d"(r2)); // Constrain r1 to rax and r2 to rdx.
     return (r2 << 32) | r1;
 #else
     // Fall back to using gettimeofday (with microsecond precision)

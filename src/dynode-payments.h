@@ -17,8 +17,8 @@ class CDynodeBlockPayees;
 class CDynodePayments;
 class CDynodePaymentVote;
 
-static const int DNPAYMENTS_SIGNATURES_REQUIRED         = 10;
-static const int DNPAYMENTS_SIGNATURES_TOTAL            = 20;
+static const int DNPAYMENTS_SIGNATURES_REQUIRED = 10;
+static const int DNPAYMENTS_SIGNATURES_TOTAL = 20;
 
 //! minimum peer version that can receive and send dynode payment messages,
 //  vote for dynode and be elected as a payment winner
@@ -34,7 +34,7 @@ extern CCriticalSection cs_mapDynodePayeeVotes;
 extern CDynodePayments dnpayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward, std::string &strErrorRet);
+bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockReward, std::string& strErrorRet);
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
 void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutDynodeRet, std::vector<CTxOut>& voutSuperblockRet);
 std::string GetRequiredPaymentsString(int nBlockHeight);
@@ -46,14 +46,13 @@ private:
     std::vector<uint256> vecVoteHashes;
 
 public:
-    CDynodePayee() :
-        scriptPubKey(),
-        vecVoteHashes()
-        {}
+    CDynodePayee() : scriptPubKey(),
+                     vecVoteHashes()
+    {
+    }
 
-    CDynodePayee(CScript payee, uint256 hashIn) :
-        scriptPubKey(payee),
-        vecVoteHashes()
+    CDynodePayee(CScript payee, uint256 hashIn) : scriptPubKey(payee),
+                                                  vecVoteHashes()
     {
         vecVoteHashes.push_back(hashIn);
     }
@@ -61,7 +60,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(*(CScriptBase*)(&scriptPubKey));
         READWRITE(vecVoteHashes);
     }
@@ -80,19 +80,20 @@ public:
     int nBlockHeight;
     std::vector<CDynodePayee> vecPayees;
 
-    CDynodeBlockPayees() :
-        nBlockHeight(0),
-        vecPayees()
-        {}
-    CDynodeBlockPayees(int nBlockHeightIn) :
-        nBlockHeight(nBlockHeightIn),
-        vecPayees()
-        {}
+    CDynodeBlockPayees() : nBlockHeight(0),
+                           vecPayees()
+    {
+    }
+    CDynodeBlockPayees(int nBlockHeightIn) : nBlockHeight(nBlockHeightIn),
+                                             vecPayees()
+    {
+    }
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(nBlockHeight);
         READWRITE(vecPayees);
     }
@@ -116,24 +117,25 @@ public:
     CScript payee;
     std::vector<unsigned char> vchSig;
 
-    CDynodePaymentVote() :
-        dynodeOutpoint(),
-        nBlockHeight(0),
-        payee(),
-        vchSig()
-        {}
+    CDynodePaymentVote() : dynodeOutpoint(),
+                           nBlockHeight(0),
+                           payee(),
+                           vchSig()
+    {
+    }
 
-    CDynodePaymentVote(COutPoint outpoint, int nBlockHeight, CScript payee) :
-        dynodeOutpoint(outpoint),
-        nBlockHeight(nBlockHeight),
-        payee(payee),
-        vchSig()
-        {}
+    CDynodePaymentVote(COutPoint outpoint, int nBlockHeight, CScript payee) : dynodeOutpoint(outpoint),
+                                                                              nBlockHeight(nBlockHeight),
+                                                                              payee(payee),
+                                                                              vchSig()
+    {
+    }
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         int nVersion = s.GetVersion();
         if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
             // converting from/to old format
@@ -160,7 +162,7 @@ public:
     uint256 GetSignatureHash() const;
 
     bool Sign();
-    bool CheckSignature(const CPubKey& pubKeyDynode, int nValidationHeight, int &nDos) const;
+    bool CheckSignature(const CPubKey& pubKeyDynode, int nValidationHeight, int& nDos) const;
 
     bool IsValid(CNode* pnode, int nValidationHeight, std::string& strError, CConnman& connman) const;
     void Relay(CConnman& connman) const;
@@ -198,7 +200,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(mapDynodePaymentVotes);
         READWRITE(mapDynodeBlocks);
     }
@@ -232,7 +235,7 @@ public:
     bool IsEnoughData() const;
     int GetStorageLimit() const;
 
-    void UpdatedBlockTip(const CBlockIndex *pindex, CConnman& connman);
+    void UpdatedBlockTip(const CBlockIndex* pindex, CConnman& connman);
 
     void DoMaintenance() { CheckAndRemove(); }
 };

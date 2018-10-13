@@ -25,20 +25,20 @@ public:
 private:
     static const std::string SERIALIZATION_VERSION_STRING;
 
-    static const int PSEG_UPDATE_SECONDS        = 3 * 60 * 60;
+    static const int PSEG_UPDATE_SECONDS = 3 * 60 * 60;
 
     static const int LAST_PAID_SCAN_BLOCKS;
 
-    static const int MIN_POSE_PROTO_VERSION     = 70600;
-    static const int MAX_POSE_CONNECTIONS       = 10;
-    static const int MAX_POSE_RANK              = 10;
-    static const int MAX_POSE_BLOCKS            = 10;
+    static const int MIN_POSE_PROTO_VERSION = 70600;
+    static const int MAX_POSE_CONNECTIONS = 10;
+    static const int MAX_POSE_RANK = 10;
+    static const int MAX_POSE_BLOCKS = 10;
 
-    static const int DNB_RECOVERY_QUORUM_TOTAL      = 10;
-    static const int DNB_RECOVERY_QUORUM_REQUIRED   = 10;
-    static const int DNB_RECOVERY_MAX_ASK_ENTRIES   = 10;
-    static const int DNB_RECOVERY_WAIT_SECONDS      = 60;
-    static const int DNB_RECOVERY_RETRY_SECONDS     = 3 * 60 * 60;
+    static const int DNB_RECOVERY_QUORUM_TOTAL = 10;
+    static const int DNB_RECOVERY_QUORUM_REQUIRED = 10;
+    static const int DNB_RECOVERY_MAX_ASK_ENTRIES = 10;
+    static const int DNB_RECOVERY_WAIT_SECONDS = 60;
+    static const int DNB_RECOVERY_RETRY_SECONDS = 3 * 60 * 60;
 
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
@@ -59,9 +59,9 @@ private:
     std::map<CService, CDynodeVerification> mWeAskedForVerification;
 
     // these maps are used for Dynode recovery from DYNODE_NEW_START_REQUIRED state
-    std::map<uint256, std::pair< int64_t, std::set<CService> > > mDnbRecoveryRequests;
+    std::map<uint256, std::pair<int64_t, std::set<CService> > > mDnbRecoveryRequests;
     std::map<uint256, std::vector<CDynodeBroadcast> > mDnbRecoveryGoodReplies;
-    std::list< std::pair<CService, uint256> > listScheduledDnbRequestConnections;
+    std::list<std::pair<CService, uint256> > listScheduledDnbRequestConnections;
     std::map<CService, std::pair<int64_t, std::set<uint256> > > mapPendingDNB;
     std::map<CService, std::pair<int64_t, CDynodeVerification> > mapPendingDNV;
     CCriticalSection cs_mapPendingDNV;
@@ -101,14 +101,14 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         LOCK(cs);
         std::string strVersion;
-        if(ser_action.ForRead()) {
+        if (ser_action.ForRead()) {
             READWRITE(strVersion);
-        }
-        else {
-            strVersion = SERIALIZATION_VERSION_STRING; 
+        } else {
+            strVersion = SERIALIZATION_VERSION_STRING;
             READWRITE(strVersion);
         }
 
@@ -123,7 +123,7 @@ public:
 
         READWRITE(mapSeenDynodeBroadcast);
         READWRITE(mapSeenDynodePing);
-        if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
+        if (ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
         }
     }
@@ -131,15 +131,15 @@ public:
     CDynodeMan();
 
     /// Add an entry
-    bool Add(CDynode &dn);
+    bool Add(CDynode& dn);
 
     /// Ask (source) node for dnb
-    void AskForDN(CNode *pnode, const COutPoint& outpoint, CConnman& connman);
-    void AskForDnb(CNode *pnode, const uint256 &hash);
+    void AskForDN(CNode* pnode, const COutPoint& outpoint, CConnman& connman);
+    void AskForDnb(CNode* pnode, const uint256& hash);
 
-    bool PoSeBan(const COutPoint &outpoint);
-    bool AllowMixing(const COutPoint &outpoint);
-    bool DisallowMixing(const COutPoint &outpoint);
+    bool PoSeBan(const COutPoint& outpoint);
+    bool AllowMixing(const COutPoint& outpoint);
+    bool DisallowMixing(const COutPoint& outpoint);
 
     /// Check all Dynodes
     void Check();
@@ -178,12 +178,12 @@ public:
     bool GetNextDynodeInQueueForPayment(bool fFilterSigTime, int& nCountRet, dynode_info_t& dnInfoRet);
 
     /// Find a random entry
-    dynode_info_t FindRandomNotInVec(const std::vector<COutPoint> &vecToExclude, int nProtocolVersion = -1);
+    dynode_info_t FindRandomNotInVec(const std::vector<COutPoint>& vecToExclude, int nProtocolVersion = -1);
 
     std::map<COutPoint, CDynode> GetFullDynodeMap() { return mapDynodes; }
 
     bool GetDynodeRanks(rank_pair_vec_t& vecDynodeRanksRet, int nBlockHeight = -1, int nMinProtocol = 0);
-    bool GetDynodeRank(const COutPoint &outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
+    bool GetDynodeRank(const COutPoint& outpoint, int& nRankRet, int nBlockHeight = -1, int nMinProtocol = 0);
 
     void ProcessDynodeConnections(CConnman& connman);
     std::pair<CService, std::set<uint256> > PopScheduledDnbRequestConnection();
@@ -234,7 +234,7 @@ public:
     bool IsDynodePingedWithin(const COutPoint& outpoint, int nSeconds, int64_t nTimeToCheckAt = -1);
     void SetDynodeLastPing(const COutPoint& outpoint, const CDynodePing& dnp);
 
-    void UpdatedBlockTip(const CBlockIndex *pindex);
+    void UpdatedBlockTip(const CBlockIndex* pindex);
 
     void WarnDynodeDaemonUpdates();
 
@@ -244,7 +244,7 @@ public:
      */
     void NotifyDynodeUpdates(CConnman& connman);
 
-    void DoMaintenance(CConnman &connman);
+    void DoMaintenance(CConnman& connman);
 };
 
 #endif // DYNAMIC_DYNODEMAN_H

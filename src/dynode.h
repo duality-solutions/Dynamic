@@ -7,20 +7,20 @@
 #define DYNAMIC_DYNODE_H
 
 #include "key.h"
-#include "validation.h"
 #include "spork.h"
+#include "validation.h"
 
 class CDynode;
 class CDynodeBroadcast;
 
-static const int DYNODE_CHECK_SECONDS                = 5;
-static const int DYNODE_MIN_DNB_SECONDS              = 5 * 60;
-static const int DYNODE_MIN_DNP_SECONDS              = 10 * 60;
-static const int DYNODE_EXPIRATION_SECONDS           = 65 * 60;
-static const int DYNODE_SENTINEL_PING_MAX_SECONDS    = 120 * 60;
-static const int DYNODE_NEW_START_REQUIRED_SECONDS   = 180 * 60;
+static const int DYNODE_CHECK_SECONDS = 5;
+static const int DYNODE_MIN_DNB_SECONDS = 5 * 60;
+static const int DYNODE_MIN_DNP_SECONDS = 10 * 60;
+static const int DYNODE_EXPIRATION_SECONDS = 65 * 60;
+static const int DYNODE_SENTINEL_PING_MAX_SECONDS = 120 * 60;
+static const int DYNODE_NEW_START_REQUIRED_SECONDS = 180 * 60;
 
-static const int DYNODE_POSE_BAN_MAX_SCORE           = 5;
+static const int DYNODE_POSE_BAN_MAX_SCORE = 5;
 
 //
 // The Dynode Ping Class : Contains a different serialize method for sending pings from Dynodes throughout the network
@@ -50,7 +50,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         int nVersion = s.GetVersion();
         if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
             // converting from/to old format
@@ -71,7 +72,7 @@ public:
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(vchSig);
         }
-        if(ser_action.ForRead() && s.size() == 0) {
+        if (ser_action.ForRead() && s.size() == 0) {
             // TODO: drop this after migration to 70100
             fSentinelIsCurrent = false;
             nSentinelVersion = DEFAULT_SENTINEL_VERSION;
@@ -80,7 +81,7 @@ public:
         }
         READWRITE(fSentinelIsCurrent);
         READWRITE(nSentinelVersion);
-        if(ser_action.ForRead() && s.size() == 0) {
+        if (ser_action.ForRead() && s.size() == 0) {
             // TODO: drop this after migration to 70100
             nDaemonVersion = DEFAULT_DAEMON_VERSION;
             return;
@@ -96,14 +97,14 @@ public:
     bool IsExpired() const { return GetAdjustedTime() - sigTime > DYNODE_NEW_START_REQUIRED_SECONDS; }
 
     bool Sign(const CKey& keyDynode, const CPubKey& pubKeyDynode);
-    bool CheckSignature(const CPubKey& pubKeyDynode, int &nDos) const;
+    bool CheckSignature(const CPubKey& pubKeyDynode, int& nDos) const;
     bool SimpleCheck(int& nDos);
     bool CheckAndUpdate(CDynode* pdn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
 
     std::string GetSentinelString() const;
     std::string GetDaemonString() const;
-    
+
     explicit operator bool() const;
 };
 
@@ -120,22 +121,17 @@ inline CDynodePing::operator bool() const
     return *this != CDynodePing();
 }
 
-struct dynode_info_t 
-{
+struct dynode_info_t {
     // Note: all these constructors can be removed once C++14 is enabled.
     // (in C++11 the member initializers wrongly disqualify this as an aggregate)
     dynode_info_t() = default;
     dynode_info_t(dynode_info_t const&) = default;
 
-    dynode_info_t(int activeState, int protoVer, int64_t sTime) :
-        nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
+    dynode_info_t(int activeState, int protoVer, int64_t sTime) : nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime} {}
 
-    dynode_info_t(int activeState, int protoVer, int64_t sTime,
-                      COutPoint const& outpnt, CService const& addr,
-                      CPubKey const& pkCollAddr, CPubKey const& pkDN) :
-        nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
-        outpoint{outpnt}, addr{addr},
-        pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN} {}
+    dynode_info_t(int activeState, int protoVer, int64_t sTime, COutPoint const& outpnt, CService const& addr, CPubKey const& pkCollAddr, CPubKey const& pkDN) : nActiveState{activeState}, nProtocolVersion{protoVer}, sigTime{sTime},
+                                                                                                                                                                 outpoint{outpnt}, addr{addr},
+                                                                                                                                                                 pubKeyCollateralAddress{pkCollAddr}, pubKeyDynode{pkDN} {}
 
     int nActiveState = 0;
     int nProtocolVersion = 0;
@@ -150,7 +146,7 @@ struct dynode_info_t
     int64_t nTimeLastChecked = 0;
     int64_t nTimeLastPaid = 0;
     int64_t nTimeLastPing = 0; //* not in CDN
-    bool fInfoValid = false; //* not in CDN
+    bool fInfoValid = false;   //* not in CDN
 };
 
 //
@@ -204,7 +200,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         LOCK(cs);
         int nVersion = s.GetVersion();
         if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
@@ -254,9 +251,10 @@ public:
 
     bool IsPingedWithin(int nSeconds, int64_t nTimeToCheckAt = -1)
     {
-        if(!lastPing) return false;
+        if (!lastPing)
+            return false;
 
-        if(nTimeToCheckAt == -1) {
+        if (nTimeToCheckAt == -1) {
             nTimeToCheckAt = GetAdjustedTime();
         }
         return nTimeToCheckAt - lastPing.sigTime < nSeconds;
@@ -275,19 +273,19 @@ public:
 
     static bool IsValidStateForAutoStart(int nActiveStateIn)
     {
-        return  nActiveStateIn == DYNODE_ENABLED ||
-                nActiveStateIn == DYNODE_PRE_ENABLED ||
-                nActiveStateIn == DYNODE_EXPIRED ||
-                nActiveStateIn == DYNODE_SENTINEL_PING_EXPIRED;
+        return nActiveStateIn == DYNODE_ENABLED ||
+               nActiveStateIn == DYNODE_PRE_ENABLED ||
+               nActiveStateIn == DYNODE_EXPIRED ||
+               nActiveStateIn == DYNODE_SENTINEL_PING_EXPIRED;
     }
 
-   bool IsValidForPayment() const
+    bool IsValidForPayment() const
     {
-        if(nActiveState == DYNODE_ENABLED) {
+        if (nActiveState == DYNODE_ENABLED) {
             return true;
         }
-        if(!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
-           (nActiveState == DYNODE_SENTINEL_PING_EXPIRED)) {
+        if (!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
+            (nActiveState == DYNODE_SENTINEL_PING_EXPIRED)) {
             return true;
         }
 
@@ -297,8 +295,16 @@ public:
     bool IsValidNetAddr();
     static bool IsValidNetAddr(CService addrIn);
 
-    void IncreasePoSeBanScore() { if(nPoSeBanScore < DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
-    void DecreasePoSeBanScore() { if(nPoSeBanScore > -DYNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
+    void IncreasePoSeBanScore()
+    {
+        if (nPoSeBanScore < DYNODE_POSE_BAN_MAX_SCORE)
+            nPoSeBanScore++;
+    }
+    void DecreasePoSeBanScore()
+    {
+        if (nPoSeBanScore > -DYNODE_POSE_BAN_MAX_SCORE)
+            nPoSeBanScore--;
+    }
     void PoSeBan() { nPoSeBanScore = DYNODE_POSE_BAN_MAX_SCORE; }
 
     dynode_info_t GetInfo() const;
@@ -311,7 +317,7 @@ public:
 
     int GetLastPaidTime() const { return nTimeLastPaid; }
     int GetLastPaidBlock() const { return nBlockLastPaid; }
-    void UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack);
+    void UpdateLastPaid(const CBlockIndex* pindex, int nMaxBlocksToScanBack);
 
     // KEEP TRACK OF EACH GOVERNANCE ITEM INCASE THIS NODE GOES OFFLINE, SO WE CAN RECALC THEIR STATUS
     void AddGovernanceVote(uint256 nGovernanceObjectHash);
@@ -322,7 +328,7 @@ public:
 
     CDynode& operator=(CDynode const& from)
     {
-        static_cast<dynode_info_t&>(*this)=from;
+        static_cast<dynode_info_t&>(*this) = from;
         lastPing = from.lastPing;
         vchSig = from.vchSig;
         nCollateralMinConfBlockHash = from.nCollateralMinConfBlockHash;
@@ -352,17 +358,16 @@ inline bool operator!=(const CDynode& a, const CDynode& b)
 class CDynodeBroadcast : public CDynode
 {
 public:
-
     bool fRecovery;
     CDynodeBroadcast() : CDynode(), fRecovery(false) {}
     CDynodeBroadcast(const CDynode& dn) : CDynode(dn), fRecovery(false) {}
-    CDynodeBroadcast(CService addrNew, COutPoint outpointNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn) :
-        CDynode(addrNew, outpointNew, pubKeyCollateralAddressNew, pubKeyDynodeNew, nProtocolVersionIn), fRecovery(false) {}
+    CDynodeBroadcast(CService addrNew, COutPoint outpointNew, CPubKey pubKeyCollateralAddressNew, CPubKey pubKeyDynodeNew, int nProtocolVersionIn) : CDynode(addrNew, outpointNew, pubKeyCollateralAddressNew, pubKeyDynodeNew, nProtocolVersionIn), fRecovery(false) {}
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         int nVersion = s.GetVersion();
         if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
             // converting from/to old format
@@ -395,8 +400,8 @@ public:
     uint256 GetSignatureHash() const;
 
     /// Create Dynode broadcast, needs to be relayed manually after that
-    static bool Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string &strErrorRet, CDynodeBroadcast &dnbRet);
-    static bool Create(const std::string strService, const std::string strKey, const std::string strTxHash, const std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast &dnbRet, bool fOffline = false);
+    static bool Create(const COutPoint& outpoint, const CService& service, const CKey& keyCollateralAddressNew, const CPubKey& pubKeyCollateralAddressNew, const CKey& keyDynodeNew, const CPubKey& pubKeyDynodeNew, std::string& strErrorRet, CDynodeBroadcast& dnbRet);
+    static bool Create(const std::string strService, const std::string strKey, const std::string strTxHash, const std::string strOutputIndex, std::string& strErrorRet, CDynodeBroadcast& dnbRet, bool fOffline = false);
 
     bool SimpleCheck(int& nDos);
     bool Update(CDynode* pdn, int& nDos, CConnman& connman);
@@ -420,16 +425,17 @@ public:
 
     CDynodeVerification() = default;
 
-    CDynodeVerification(CService addr, int nonce, int nBlockHeight) :
-        addr(addr),
-        nonce(nonce),
-        nBlockHeight(nBlockHeight)
-    {}
+    CDynodeVerification(CService addr, int nonce, int nBlockHeight) : addr(addr),
+                                                                      nonce(nonce),
+                                                                      nBlockHeight(nBlockHeight)
+    {
+    }
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         int nVersion = s.GetVersion();
         if (nVersion == 70900 && (s.GetType() & SER_NETWORK)) {
             // converting from/to old format

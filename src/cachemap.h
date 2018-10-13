@@ -10,23 +10,24 @@
 
 #include "serialize.h"
 
-#include <map>
-#include <list>
 #include <cstddef>
+#include <list>
+#include <map>
 
 /**
  * Serializable structure for key/value items
  */
-template<typename K, typename V>
-struct CacheItem
-{
+template <typename K, typename V>
+struct CacheItem {
     CacheItem()
-    {}
+    {
+    }
 
     CacheItem(const K& keyIn, const V& valueIn)
-    : key(keyIn),
-      value(valueIn)
-    {}
+        : key(keyIn),
+          value(valueIn)
+    {
+    }
 
     K key;
     V value;
@@ -45,13 +46,13 @@ struct CacheItem
 /**
  * Map like container that keeps the N most recently added items
  */
-template<typename K, typename V, typename Size = uint32_t>
+template <typename K, typename V, typename Size = uint32_t>
 class CacheMap
 {
 public:
     typedef Size size_type;
 
-    typedef CacheItem<K,V> item_t;
+    typedef CacheItem<K, V> item_t;
 
     typedef std::list<item_t> list_t;
 
@@ -77,9 +78,10 @@ public:
         : nMaxSize(nMaxSizeIn),
           listItems(),
           mapIndex()
-    {}
+    {
+    }
 
-    CacheMap(const CacheMap<K,V>& other)
+    CacheMap(const CacheMap<K, V>& other)
         : nMaxSize(other.nMaxSize),
           listItems(other.listItems),
           mapIndex()
@@ -98,20 +100,22 @@ public:
         nMaxSize = nMaxSizeIn;
     }
 
-    size_type GetMaxSize() const {
+    size_type GetMaxSize() const
+    {
         return nMaxSize;
     }
 
-    size_type GetSize() const {
+    size_type GetSize() const
+    {
         return listItems.size();
     }
 
     bool Insert(const K& key, const V& value)
     {
-        if(mapIndex.find(key) != mapIndex.end()) {
+        if (mapIndex.find(key) != mapIndex.end()) {
             return false;
         }
-        if(listItems.size() == nMaxSize) {
+        if (listItems.size() == nMaxSize) {
             PruneLast();
         }
         listItems.push_front(item_t(key, value));
@@ -127,7 +131,7 @@ public:
     bool Get(const K& key, V& value) const
     {
         map_cit it = mapIndex.find(key);
-        if(it == mapIndex.end()) {
+        if (it == mapIndex.end()) {
             return false;
         }
         item_t& item = *(it->second);
@@ -138,18 +142,19 @@ public:
     void Erase(const K& key)
     {
         map_it it = mapIndex.find(key);
-        if(it == mapIndex.end()) {
+        if (it == mapIndex.end()) {
             return;
         }
         listItems.erase(it->second);
         mapIndex.erase(it);
     }
 
-    const list_t& GetItemList() const {
+    const list_t& GetItemList() const
+    {
         return listItems;
     }
 
-    CacheMap<K,V>& operator=(const CacheMap<K,V>& other)
+    CacheMap<K, V>& operator=(const CacheMap<K, V>& other)
     {
         nMaxSize = other.nMaxSize;
         listItems = other.listItems;
@@ -164,7 +169,7 @@ public:
     {
         READWRITE(nMaxSize);
         READWRITE(listItems);
-        if(ser_action.ForRead()) {
+        if (ser_action.ForRead()) {
             RebuildIndex();
         }
     }
@@ -172,7 +177,7 @@ public:
 private:
     void PruneLast()
     {
-        if(listItems.empty()) {
+        if (listItems.empty()) {
             return;
         }
         item_t& item = listItems.back();
@@ -183,7 +188,7 @@ private:
     void RebuildIndex()
     {
         mapIndex.clear();
-        for(list_it it = listItems.begin(); it != listItems.end(); ++it) {
+        for (list_it it = listItems.begin(); it != listItems.end(); ++it) {
             mapIndex.emplace(it->key, it);
         }
     }

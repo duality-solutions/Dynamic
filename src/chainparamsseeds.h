@@ -16,10 +16,8 @@
  */
 
 //	Dynamic Seeds
-static SeedSpec6 pnSeed6_main[] = {
-};
+static SeedSpec6 pnSeed6_main[] = {};
 
-static SeedSpec6 pnSeed6_test[] = {
-};
+static SeedSpec6 pnSeed6_test[] = {};
 
 #endif // DYNAMIC_CHAINPARAMSSEEDS_H

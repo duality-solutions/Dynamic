@@ -6,8 +6,8 @@
 #ifndef DYNAMIC_QT_HASHRATEGRAPHWIDGET_H
 #define DYNAMIC_QT_HASHRATEGRAPHWIDGET_H
 
-#include <QWidget>
 #include <QQueue>
+#include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -19,17 +19,15 @@ class HashRateGraphWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit HashRateGraphWidget(QWidget *parent = 0);
+    explicit HashRateGraphWidget(QWidget* parent = 0);
 
-    enum GraphType
-    {
+    enum GraphType {
         MINER_CPU_HASHRATE = 0,
         MINER_GPU_HASHRATE,
         NETWORK_HASHRATE
     };
 
-    enum SampleTime
-    {
+    enum SampleTime {
         FIVE_MINUTES = 0,
         TEN_MINUTES,
         THIRTY_MINUTES,
@@ -40,7 +38,7 @@ public:
     };
 
     GraphType graphType;
-    
+
 public Q_SLOTS:
     void StopHashMeter();
     void StartHashMeter();
@@ -48,7 +46,7 @@ public Q_SLOTS:
     void clear();
 
 private:
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent* event);
     void updateHashRateGraph();
     void initGraph(QPainter& painter);
     void drawHashRate(QPainter& painter);
@@ -60,8 +58,8 @@ private:
     QQueue<int64_t> vSampleHashRate;
     bool fPlotHashRate;
 
-protected :
-    void paintEvent(QPaintEvent *);
+protected:
+    void paintEvent(QPaintEvent*);
 };
 
 #endif // DYNAMIC_QT_HASHRATEGRAPHWIDGET_H

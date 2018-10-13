@@ -10,7 +10,7 @@
 int64_t NtpGetTime(CNetAddr& ip);
 
 // Get time from provided server.
-int64_t NtpGetTime(const std::string &strHostName);
+int64_t NtpGetTime(const std::string& strHostName);
 
 // Get time from random server.
 int64_t NtpGetTime();

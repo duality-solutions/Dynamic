@@ -25,11 +25,11 @@ class CRPCCommand;
 
 namespace RPCServer
 {
-    void OnStarted(boost::function<void ()> slot);
-    void OnStopped(boost::function<void ()> slot);
-    void OnPreCommand(boost::function<void (const CRPCCommand&)> slot);
-    void OnPostCommand(boost::function<void (const CRPCCommand&)> slot);
-}
+void OnStarted(boost::function<void()> slot);
+void OnStopped(boost::function<void()> slot);
+void OnPreCommand(boost::function<void(const CRPCCommand&)> slot);
+void OnPostCommand(boost::function<void(const CRPCCommand&)> slot);
+} // namespace RPCServer
 
 class CBlockIndex;
 class CNetAddr;
@@ -53,7 +53,12 @@ public:
     std::string URI;
     std::string authUser;
 
-    JSONRPCRequest() { id = NullUniValue; params = NullUniValue; fHelp = false; }
+    JSONRPCRequest()
+    {
+        id = NullUniValue;
+        params = NullUniValue;
+        fHelp = false;
+    }
     void parse(const UniValue& valRequest);
 };
 
@@ -69,14 +74,15 @@ void SetRPCWarmupStatus(const std::string& newStatus);
 void SetRPCWarmupFinished();
 
 /* returns the current warmup state.  */
-bool RPCIsInWarmup(std::string *outStatus);
+bool RPCIsInWarmup(std::string* outStatus);
 
 /**
  * Type-check arguments; throws JSONRPCError if wrong type given. Does not check that
  * the right number of arguments are passed, just that any passed are the correct type.
  */
 void RPCTypeCheck(const UniValue& params,
-                  const std::list<UniValue::VType>& typesExpected, bool fAllowNull=false);
+    const std::list<UniValue::VType>& typesExpected,
+    bool fAllowNull = false);
 
 /**
  * Type-check one argument; throws JSONRPCError if wrong type given.
@@ -109,7 +115,7 @@ class RPCTimerInterface
 public:
     virtual ~RPCTimerInterface() {}
     /** Implementation name */
-    virtual const char *Name() = 0;
+    virtual const char* Name() = 0;
     /** Factory function for timers.
      * RPC will call the function to create a timer that will call func in *millis* milliseconds.
      * @note As the RPC mechanism is backend-neutral, it can use different implementations of timers.
@@ -120,11 +126,11 @@ public:
 };
 
 /** Set the factory function for timers */
-void RPCSetTimerInterface(RPCTimerInterface *iface);
+void RPCSetTimerInterface(RPCTimerInterface* iface);
 /** Set the factory function for timer, but only, if unset */
-void RPCSetTimerInterfaceIfUnset(RPCTimerInterface *iface);
+void RPCSetTimerInterfaceIfUnset(RPCTimerInterface* iface);
 /** Unset factory function for timers */
-void RPCUnsetTimerInterface(RPCTimerInterface *iface);
+void RPCUnsetTimerInterface(RPCTimerInterface* iface);
 
 /**
  * Run func nSeconds from now.
@@ -132,7 +138,7 @@ void RPCUnsetTimerInterface(RPCTimerInterface *iface);
  */
 void RPCRunLater(const std::string& name, boost::function<void(void)> func, int64_t nSeconds);
 
-typedef UniValue(*rpcfn_type)(const JSONRPCRequest& jsonRequest);
+typedef UniValue (*rpcfn_type)(const JSONRPCRequest& jsonRequest);
 
 class CRPCCommand
 {
@@ -151,6 +157,7 @@ class CRPCTable
 {
 private:
     std::map<std::string, const CRPCCommand*> mapCommands;
+
 public:
     CRPCTable();
     const CRPCCommand* operator[](const std::string& name) const;
@@ -162,7 +169,7 @@ public:
      * @returns Result of the call.
      * @throws an exception (UniValue) when an error happens.
      */
-    UniValue execute(const JSONRPCRequest &request) const;
+    UniValue execute(const JSONRPCRequest& request) const;
 
     /**
     * Returns a list of registered commands
@@ -203,6 +210,6 @@ bool StartRPC();
 void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
-void RPCNotifyBlockChange(bool ibd, const CBlockIndex *);
+void RPCNotifyBlockChange(bool ibd, const CBlockIndex*);
 
 #endif // DYNAMIC_RPCSERVER_H

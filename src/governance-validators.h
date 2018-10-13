@@ -13,9 +13,9 @@
 class CProposalValidator
 {
 private:
-    UniValue               objJSON;
-    bool                   fJSONValid;
-    std::string            strErrorMessages;
+    UniValue objJSON;
+    bool fJSONValid;
+    std::string strErrorMessages;
 
 public:
     CProposalValidator(const std::string& strDataHexIn = std::string());
