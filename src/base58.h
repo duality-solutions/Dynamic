@@ -81,8 +81,8 @@ protected:
     vector_uchar vchData;
 
     CBase58Data();
-    void SetData(const std::vector<unsigned char> &vchVersionIn, const void* pdata, size_t nSize);
-    void SetData(const std::vector<unsigned char> &vchVersionIn, const unsigned char *pbegin, const unsigned char *pend);
+    void SetData(const std::vector<unsigned char>& vchVersionIn, const void* pdata, size_t nSize);
+    void SetData(const std::vector<unsigned char>& vchVersionIn, const unsigned char* pbegin, const unsigned char* pend);
 
 public:
     bool SetString(const char* psz, unsigned int nVersionBytes = 1);
@@ -93,8 +93,8 @@ public:
     bool operator==(const CBase58Data& b58) const { return CompareTo(b58) == 0; }
     bool operator<=(const CBase58Data& b58) const { return CompareTo(b58) <= 0; }
     bool operator>=(const CBase58Data& b58) const { return CompareTo(b58) >= 0; }
-    bool operator< (const CBase58Data& b58) const { return CompareTo(b58) <  0; }
-    bool operator> (const CBase58Data& b58) const { return CompareTo(b58) >  0; }
+    bool operator<(const CBase58Data& b58) const { return CompareTo(b58) < 0; }
+    bool operator>(const CBase58Data& b58) const { return CompareTo(b58) > 0; }
 };
 
 /** base58-encoded Dynamic addresses.
@@ -103,21 +103,22 @@ public:
  * Script-hash-addresses have version 16 (or 19 testnet).
  * The data vector contains RIPEMD160(SHA256(cscript)), where cscript is the serialized redemption script.
  */
-class CDynamicAddress : public CBase58Data {
+class CDynamicAddress : public CBase58Data
+{
 public:
-    bool Set(const CKeyID &id);
-    bool Set(const CScriptID &id);
-    bool Set(const CTxDestination &dest);
+    bool Set(const CKeyID& id);
+    bool Set(const CScriptID& id);
+    bool Set(const CTxDestination& dest);
     bool IsValid() const;
-    bool IsValid(const CChainParams &params) const;
+    bool IsValid(const CChainParams& params) const;
 
     CDynamicAddress() {}
-    CDynamicAddress(const CTxDestination &dest) { Set(dest); }
+    CDynamicAddress(const CTxDestination& dest) { Set(dest); }
     CDynamicAddress(const std::string& strAddress) { SetString(strAddress); }
     CDynamicAddress(const char* pszAddress) { SetString(pszAddress); }
 
     CTxDestination Get() const;
-    bool GetKeyID(CKeyID &keyID) const;
+    bool GetKeyID(CKeyID& keyID) const;
     bool GetIndexKey(uint160& hashBytes, int& type) const;
     bool IsScript() const;
 };
@@ -138,16 +139,19 @@ public:
     CDynamicSecret() {}
 };
 
-template<typename K, int Size, CChainParams::Base58Type Type> class CDynamicExtKeyBase : public CBase58Data
+template <typename K, int Size, CChainParams::Base58Type Type>
+class CDynamicExtKeyBase : public CBase58Data
 {
 public:
-    void SetKey(const K &key) {
+    void SetKey(const K& key)
+    {
         unsigned char vch[Size];
         key.Encode(vch);
-        SetData(Params().Base58Prefix(Type), vch, vch+Size);
+        SetData(Params().Base58Prefix(Type), vch, vch + Size);
     }
 
-    K GetKey() {
+    K GetKey()
+    {
         K ret;
         if (vchData.size() == Size) {
             //if base58 encouded data not holds a ext key, return a !IsValid() key
@@ -156,11 +160,13 @@ public:
         return ret;
     }
 
-    CDynamicExtKeyBase(const K &key) {
+    CDynamicExtKeyBase(const K& key)
+    {
         SetKey(key);
     }
 
-    CDynamicExtKeyBase(const std::string& strBase58c) {
+    CDynamicExtKeyBase(const std::string& strBase58c)
+    {
         SetString(strBase58c.c_str(), Params().Base58Prefix(Type).size());
     }
 

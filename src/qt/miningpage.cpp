@@ -13,23 +13,20 @@
 #include <boost/thread.hpp>
 #include <stdio.h>
 
-MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MiningPage),
-    hasMiningprivkey(false)
+MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
+                                                                              ui(new Ui::MiningPage),
+                                                                              hasMiningprivkey(false)
 {
     ui->setupUi(this);
 
     int nCPUMaxUseThreads = GUIUtil::CPUMaxThreads();
     int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
- 
+
     std::string PrivAddress = GetArg("-miningprivkey", "");
-    if (!PrivAddress.empty())
-    {
+    if (!PrivAddress.empty()) {
         CDynamicSecret Secret;
         Secret.SetString(PrivAddress);
-        if (Secret.IsValid())
-        {
+        if (Secret.IsValid()) {
             CDynamicAddress Address;
             Address.Set(Secret.GetKey().GetPubKey().GetID());
             ui->labelAddress->setText(QString("All mined coins will go to %1").arg(Address.ToString().c_str()));
@@ -40,8 +37,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderCPUCores->setVisible(false);
         ui->labelNCPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
-    }
-    else {
+    } else {
         ui->sliderCPUCores->setVisible(true);
         ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
     }
@@ -53,8 +49,7 @@ MiningPage::MiningPage(const PlatformStyle *platformStyle, QWidget *parent) :
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderGPUCores->setVisible(false);
         ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
-    }
-    else {
+    } else {
         ui->sliderGPUCores->setVisible(true);
         ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
     }
@@ -108,7 +103,7 @@ MiningPage::~MiningPage()
     delete ui;
 }
 
-void MiningPage::setModel(WalletModel *model)
+void MiningPage::setModel(WalletModel* model)
 {
     this->model = model;
 }
@@ -165,16 +160,13 @@ void MiningPage::updatePushSwitch(bool fGPU)
     if (fGPU && fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
         pushSwitch->setText(tr("Stop mining"));
-    }
-    else if (fGPU && !fGPUMinerOn) {
+    } else if (fGPU && !fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
         pushSwitch->setText(tr("Start mining"));
-    }
-    else if (!fGPU && fCPUMinerOn) {
+    } else if (!fGPU && fCPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
         pushSwitch->setText(tr("Stop mining"));
-    }
-    else if (!fGPU && !fCPUMinerOn) {
+    } else if (!fGPU && !fCPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
         pushSwitch->setText(tr("Start mining"));
     }
@@ -189,8 +181,7 @@ void MiningPage::StartMiner(bool fGPU)
         fGPUMinerOn = true;
         nGPUThreads = (int)ui->sliderGPUCores->value();
         GenerateDynamicsGPU(nGPUThreads, Params(), *g_connman);
-    }
-    else {
+    } else {
         fCPUMinerOn = true;
         nCPUThreads = (int)ui->sliderCPUCores->value();
         GenerateDynamicsCPU(nCPUThreads, Params(), *g_connman);
@@ -254,28 +245,25 @@ void MiningPage::switchMining(bool fGPU)
         labelCores->setText(QString("%1").arg(nThreads));
         pushSwitch->setText(tr("Starting"));
         StartMiner(fGPU);
-    }
-    else if (fGPU && fGPUMinerOn) {
+    } else if (fGPU && fGPUMinerOn) {
         pushSwitch->setText(tr("Stopping"));
         coreSlider->setVisible(false);
         StopMiner(fGPU);
-    }
-    else if (!fGPU && !fCPUMinerOn) {
+    } else if (!fGPU && !fCPUMinerOn) {
         if (nThreads == 0)
             coreSlider->setValue(1);
         coreSlider->setVisible(true);
         labelCores->setText(QString("%1").arg(nThreads));
         pushSwitch->setText(tr("Starting"));
         StartMiner(fGPU);
-    }
-    else if (!fGPU && fCPUMinerOn) {
+    } else if (!fGPU && fCPUMinerOn) {
         pushSwitch->setText(tr("Stopping"));
         coreSlider->setVisible(false);
         StopMiner(fGPU);
     }
 }
 
-void MiningPage::timerEvent(QTimerEvent *)
+void MiningPage::timerEvent(QTimerEvent*)
 {
     updateUI();
 }

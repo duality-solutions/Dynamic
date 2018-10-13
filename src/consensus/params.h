@@ -11,12 +11,11 @@
 #include <map>
 #include <string>
 
-namespace Consensus {
-
-enum DeploymentPos
+namespace Consensus
 {
+enum DeploymentPos {
     DEPLOYMENT_TESTDUMMY,
-    DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
+    DEPLOYMENT_CSV,              // Deployment of BIP68, BIP112, and BIP113.
     MAX_VERSION_BITS_DEPLOYMENTS // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
 };
 
@@ -45,14 +44,14 @@ struct Params {
     int nDynodePaymentsStartBlock;
     int nMinCountDynodesPaymentStart;
     int nInstantSendConfirmationsRequired; // in blocks
-    int nInstantSendKeepLock; // in blocks
+    int nInstantSendKeepLock;              // in blocks
     int nBudgetPaymentsStartBlock;
     int nBudgetPaymentsCycleBlocks;
     int nBudgetPaymentsWindowBlocks;
     int nBudgetProposalEstablishingTime; // in seconds
     int nSuperblockStartBlock;
     uint256 nSuperblockStartHash;
-    int nSuperblockCycle; // in blocks
+    int nSuperblockCycle;     // in blocks
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
     int nGovernanceFilterElements;
     int nDynodeMinimumConfirmations;
@@ -81,9 +80,9 @@ struct Params {
     int64_t nUpdateDiffAlgoHeight;
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
-    
+
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
-    int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp  )) / 100; }
+    int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp)) / 100; }
     int64_t MaxActualTimespan() const { return (AveragingWindowTimespan() * (100 + nPowMaxAdjustDown)) / 100; }
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
 };

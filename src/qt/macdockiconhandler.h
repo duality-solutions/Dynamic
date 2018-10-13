@@ -26,10 +26,10 @@ class MacDockIconHandler : public QObject
 public:
     ~MacDockIconHandler();
 
-    QMenu *dockMenu();
-    void setIcon(const QIcon &icon);
-    void setMainWindow(QMainWindow *window);
-    static MacDockIconHandler *instance();
+    QMenu* dockMenu();
+    void setIcon(const QIcon& icon);
+    void setMainWindow(QMainWindow* window);
+    static MacDockIconHandler* instance();
     static void cleanup();
     void handleDockIconClickEvent();
 
@@ -39,9 +39,9 @@ Q_SIGNALS:
 private:
     MacDockIconHandler();
 
-    QWidget *m_dummyWidget;
-    QMenu *m_dockMenu;
-    QMainWindow *mainWindow;
+    QWidget* m_dummyWidget;
+    QMenu* m_dockMenu;
+    QMainWindow* mainWindow;
 };
 
 #endif // DYNAMIC_QT_MACDOCKICONHANDLER_H

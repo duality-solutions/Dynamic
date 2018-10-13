@@ -22,8 +22,8 @@ class CGovernanceTrigger;
 class CGovernanceTriggerManager;
 class CSuperblockManager;
 
-static const int TRIGGER_UNKNOWN            = -1;
-static const int TRIGGER_SUPERBLOCK         = 1000;
+static const int TRIGGER_UNKNOWN = -1;
+static const int TRIGGER_SUPERBLOCK = 1000;
 static const CAmount STATIC_SUPERBLOCK_AMOUNT = 0; //Budget amount fixed at 0DYN
 
 typedef std::shared_ptr<CSuperblock> CSuperblock_sptr;
@@ -70,7 +70,6 @@ private:
     static bool GetBestSuperblock(CSuperblock_sptr& pSuperblockRet, int nBlockHeight);
 
 public:
-
     static bool IsSuperblockTriggered(int nBlockHeight);
 
     static void CreateSuperblock(CMutableTransaction& txNewRet, int nBlockHeight, std::vector<CTxOut>& voutSuperblockRet);
@@ -95,32 +94,28 @@ public:
     CAmount nAmount;
 
     CGovernancePayment()
-        :fValid(false),
-         script(),
-         nAmount(0)
-    {}
+        : fValid(false),
+          script(),
+          nAmount(0)
+    {
+    }
 
     CGovernancePayment(CDynamicAddress addrIn, CAmount nAmountIn)
-        :fValid(false),
-         script(),
-         nAmount(0)
+        : fValid(false),
+          script(),
+          nAmount(0)
     {
-        try
-        {
+        try {
             CTxDestination dest = addrIn.Get();
             script = GetScriptForDestination(dest);
             nAmount = nAmountIn;
             fValid = true;
-        }
-        catch(std::exception& e)
-        {
+        } catch (std::exception& e) {
             LogPrintf("CGovernancePayment Payment not valid: addrIn = %s, nAmountIn = %d, what = %s\n",
-                     addrIn.ToString(), nAmountIn, e.what());
-        }
-        catch(...)
-        {
+                addrIn.ToString(), nAmountIn, e.what());
+        } catch (...) {
             LogPrintf("CGovernancePayment Payment not valid: addrIn = %s, nAmountIn = %d\n",
-                      addrIn.ToString(), nAmountIn);
+                addrIn.ToString(), nAmountIn);
         }
     }
 
@@ -157,7 +152,6 @@ private:
     void ParsePaymentSchedule(const std::string& strPaymentAddresses, const std::string& strPaymentAmounts);
 
 public:
-
     CSuperblock();
     CSuperblock(uint256& nHash);
 

@@ -314,22 +314,21 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         CAmount fluidIssuance = 0;
         CFluidMint fluidMint;
         bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
-        
+
         // Compute regular coinbase transaction.
         txNew.vout[0].scriptPubKey = scriptPubKeyIn;
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
-        if (areWeMinting) 
-        {
+        if (areWeMinting) {
             mintAddress = fluidMint.GetDestinationAddress();
             fluidIssuance = fluidMint.MintAmount;
             txNew.vout[0].nValue = blockReward + fluidIssuance;
         } else {
             txNew.vout[0].nValue = blockReward;
         }
-        
+
         CScript script;
-        if (areWeMinting) {        
+        if (areWeMinting) {
             // Pick out the amount of issuance
             txNew.vout[0].nValue -= fluidIssuance;
 
@@ -367,7 +366,7 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
         pblock->nNonce = 0;
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(*pblock->vtx[0]);
-        
+
         CValidationState state;
         if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
             LogPrintf("CreateNewBlock(): Generated Transaction:\n%s\n", txNew.ToString());
@@ -582,9 +581,10 @@ BaseMiner::BaseMiner(const CChainParams& chainparams, CConnman& connman, double*
       connman(connman),
       deviceName(deviceName),
       deviceIndex(deviceIndex),
-      dHashesPerSec(hashesPerSec), 
+      dHashesPerSec(hashesPerSec),
       nHPSTimerStart(nHPSTimerStart)
-      {}
+{
+}
 
 void BaseMiner::ProcessFoundSolution(CBlock* pblock, const uint256& hash)
 {
@@ -648,7 +648,6 @@ private:
 
 protected:
     virtual unsigned int TryMineBlock(CBlock* pblock) override;
-
 };
 
 CPUMiner::CPUMiner(const CChainParams& chainparams, CConnman& connman)
@@ -686,7 +685,7 @@ void CPUMiner::IncrementHashesDone(unsigned int nHashesDone)
     } else {
         nHashCounter += nHashesDone;
     }
-    
+
     if (GetTimeMillis() - nTimerStart > 4000) {
         LOCK(cs);
         *dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nTimerStart);
@@ -706,7 +705,7 @@ void CPUMiner::StartLoop()
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
     GetMainSignals().ScriptForMining(coinbaseScript);
-  
+
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -769,7 +768,6 @@ private:
     Argon2GPUProgramContext context;
     std::size_t batchSizeTarget;
     Argon2GPU processingUnit;
-
 };
 
 GPUMiner::GPUMiner(const CChainParams& chainparams, CConnman& connman, std::size_t deviceIndex)
@@ -857,7 +855,7 @@ void GPUMiner::StartLoop()
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread(tfm::format("dynamic-%s-miner-%u", deviceName, device).data());
     GetMainSignals().ScriptForMining(coinbaseScript);
-  
+
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -941,7 +939,7 @@ void GenerateDynamicsCPU(int nCPUThreads, const CChainParams& chainparams, CConn
 
 #ifdef ENABLE_GPU
 static int lastGPUChangeTime;
-static boost::thread *gpuStartThread;
+static boost::thread* gpuStartThread;
 
 void static GenerateDynamicsGPULocal(int nGPUThreads, const CChainParams& chainparams, CConnman& connman)
 {
@@ -988,7 +986,7 @@ void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConn
         delete gpuStartThread;
         gpuStartThread = NULL;
     }
-    gpuStartThread = new  boost::thread(GenerateDynamicsGPULocal, nGPUThreads, boost::cref(chainparams), boost::ref(connman));
+    gpuStartThread = new boost::thread(GenerateDynamicsGPULocal, nGPUThreads, boost::cref(chainparams), boost::ref(connman));
 #else
     LogPrintf("DynamicMiner -- GPU no support\n");
 #endif

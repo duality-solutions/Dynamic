@@ -9,7 +9,7 @@
 #include "operations.h"
 #include "script/script.h"
 
-CFluidMintDB *pFluidMintDB = NULL;
+CFluidMintDB* pFluidMintDB = NULL;
 
 bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
 {
@@ -31,8 +31,8 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
         CAmount fluidAmount;
         if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
             entry.MintAmount = fluidAmount;
-        } 
-        std::string strTimeStamp = vecSplitScript[1]; 
+        }
+        std::string strTimeStamp = vecSplitScript[1];
         int64_t tokenTimeStamp;
         if (ParseInt64(strTimeStamp, &tokenTimeStamp)) {
             entry.nTimeStamp = tokenTimeStamp;
@@ -44,9 +44,9 @@ bool GetFluidMintData(const CScript& scriptPubKey, CFluidMint& entry)
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[4], messageTokenKey).ToString()));
         entry.SovereignAddresses.push_back(CharVectorFromString(fluid.GetAddressFromDigestSignature(vecSplitScript[5], messageTokenKey).ToString()));
 
-        LogPrintf("GetFluidMintData: strAmount = %s, strTimeStamp = %d, DestinationAddress = %s, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n", 
-            strAmount, entry.nTimeStamp, 
-            StringFromCharVector(entry.DestinationAddress), StringFromCharVector(entry.SovereignAddresses[0]), 
+        LogPrintf("GetFluidMintData: strAmount = %s, strTimeStamp = %d, DestinationAddress = %s, Addresses1 = %s, Addresses2 = %s, Addresses3 = %s \n",
+            strAmount, entry.nTimeStamp,
+            StringFromCharVector(entry.DestinationAddress), StringFromCharVector(entry.SovereignAddresses[0]),
             StringFromCharVector(entry.SovereignAddresses[1]), StringFromCharVector(entry.SovereignAddresses[2]));
 
         return true;
@@ -68,30 +68,31 @@ bool GetFluidMintData(const CTransaction& tx, CFluidMint& entry, int& nOut)
     return false;
 }
 
-bool CFluidMint::UnserializeFromTx(const CTransaction& tx) {
+bool CFluidMint::UnserializeFromTx(const CTransaction& tx)
+{
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nOut;
-    if(!GetFluidMintData(tx, *this, nOut))
-    {
+    if (!GetFluidMintData(tx, *this, nOut)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-bool CFluidMint::UnserializeFromScript(const CScript& fluidScript) {
+bool CFluidMint::UnserializeFromScript(const CScript& fluidScript)
+{
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
-    if(!GetFluidMintData(fluidScript, *this))
-    {
+    if (!GetFluidMintData(fluidScript, *this)) {
         SetNull();
         return false;
     }
     return true;
 }
 
-void CFluidMint::Serialize(std::vector<unsigned char>& vchData) {
+void CFluidMint::Serialize(std::vector<unsigned char>& vchData)
+{
     CDataStream dsFluidOp(SER_NETWORK, PROTOCOL_VERSION);
     dsFluidOp << *this;
     vchData = std::vector<unsigned char>(dsFluidOp.begin(), dsFluidOp.end());
@@ -102,23 +103,22 @@ CDynamicAddress CFluidMint::GetDestinationAddress() const
     return CDynamicAddress(StringFromCharVector(DestinationAddress));
 }
 
-CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir()  / "blocks" / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
+CFluidMintDB::CFluidMintDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "fluid-mint", nCacheSize, fMemory, fWipe, obfuscate)
 {
 }
 
-bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op) 
+bool CFluidMintDB::AddFluidMintEntry(const CFluidMint& entry, const int op)
 {
     bool writeState = false;
     {
         LOCK(cs_fluid_mint);
-        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) 
-                     && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
+        writeState = Write(make_pair(std::string("script"), entry.FluidScript), entry) && Write(make_pair(std::string("txid"), entry.txHash), entry.FluidScript);
     }
 
     return writeState;
 }
 
-bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry) 
+bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry)
 {
     LOCK(cs_fluid_mint);
     returnEntry.SetNull();
@@ -131,21 +131,19 @@ bool CFluidMintDB::GetLastFluidMintRecord(CFluidMint& returnEntry)
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (entry.nHeight > returnEntry.nHeight)
-                {
+                if (entry.nHeight > returnEntry.nHeight) {
                     returnEntry = entry;
                 }
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
     return true;
 }
 
-bool CFluidMintDB::GetAllFluidMintRecords(std::vector<CFluidMint>& entries) 
+bool CFluidMintDB::GetAllFluidMintRecords(std::vector<CFluidMint>& entries)
 {
     LOCK(cs_fluid_mint);
     std::pair<std::string, std::vector<unsigned char> > key;
@@ -157,14 +155,12 @@ bool CFluidMintDB::GetAllFluidMintRecords(std::vector<CFluidMint>& entries)
         try {
             if (pcursor->GetKey(key) && key.first == "script") {
                 pcursor->GetValue(entry);
-                if (!entry.IsNull())
-                {
+                if (!entry.IsNull()) {
                     entries.push_back(entry);
                 }
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
         }
     }
@@ -184,8 +180,7 @@ bool CFluidMintDB::IsEmpty()
                 pcursor->GetValue(entry);
             }
             pcursor->Next();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             return true;
         }
         return false;
@@ -193,7 +188,7 @@ bool CFluidMintDB::IsEmpty()
     return true;
 }
 
-bool CFluidMintDB::RecordExists(const std::vector<unsigned char>& vchFluidScript) 
+bool CFluidMintDB::RecordExists(const std::vector<unsigned char>& vchFluidScript)
 {
     LOCK(cs_fluid_mint);
     CFluidMint fluidMint;

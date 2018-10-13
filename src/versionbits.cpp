@@ -11,16 +11,15 @@
 
 const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_BITS_DEPLOYMENTS] = {
     {
-        /*.name =*/ "testdummy",
-        /*.gbt_force =*/ true,
-        /*.check_dn_protocol =*/ false,
+        /*.name =*/"testdummy",
+        /*.gbt_force =*/true,
+        /*.check_dn_protocol =*/false,
     },
     {
-        /*.name =*/ "csv",
-        /*.gbt_force =*/ true,
-        /*.check_dn_protocol =*/ false,
-    }
-};
+        /*.name =*/"csv",
+        /*.gbt_force =*/true,
+        /*.check_dn_protocol =*/false,
+    }};
 
 ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const
 {
@@ -62,43 +61,43 @@ ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex*
         vToCompute.pop_back();
 
         switch (state) {
-            case THRESHOLD_DEFINED: {
-                if (pindexPrev->GetMedianTimePast() >= nTimeTimeout) {
-                    stateNext = THRESHOLD_FAILED;
-                } else if (pindexPrev->GetMedianTimePast() >= nTimeStart) {
-                    stateNext = THRESHOLD_STARTED;
-                }
+        case THRESHOLD_DEFINED: {
+            if (pindexPrev->GetMedianTimePast() >= nTimeTimeout) {
+                stateNext = THRESHOLD_FAILED;
+            } else if (pindexPrev->GetMedianTimePast() >= nTimeStart) {
+                stateNext = THRESHOLD_STARTED;
+            }
+            break;
+        }
+        case THRESHOLD_STARTED: {
+            if (pindexPrev->GetMedianTimePast() >= nTimeTimeout) {
+                stateNext = THRESHOLD_FAILED;
                 break;
             }
-            case THRESHOLD_STARTED: {
-                if (pindexPrev->GetMedianTimePast() >= nTimeTimeout) {
-                    stateNext = THRESHOLD_FAILED;
-                    break;
+            // We need to count
+            const CBlockIndex* pindexCount = pindexPrev;
+            int count = 0;
+            for (int i = 0; i < nPeriod; i++) {
+                if (Condition(pindexCount, params)) {
+                    count++;
                 }
-                // We need to count
-                const CBlockIndex* pindexCount = pindexPrev;
-                int count = 0;
-                for (int i = 0; i < nPeriod; i++) {
-                    if (Condition(pindexCount, params)) {
-                        count++;
-                    }
-                    pindexCount = pindexCount->pprev;
-                }
-                if (count >= nThreshold) {
-                    stateNext = THRESHOLD_LOCKED_IN;
-                }
-                break;
+                pindexCount = pindexCount->pprev;
             }
-            case THRESHOLD_LOCKED_IN: {
-                // Always progresses into ACTIVE.
-                stateNext = THRESHOLD_ACTIVE;
-                break;
+            if (count >= nThreshold) {
+                stateNext = THRESHOLD_LOCKED_IN;
             }
-            case THRESHOLD_FAILED:
-            case THRESHOLD_ACTIVE: {
-                // Nothing happens, these are terminal states.
-                break;
-            }
+            break;
+        }
+        case THRESHOLD_LOCKED_IN: {
+            // Always progresses into ACTIVE.
+            stateNext = THRESHOLD_ACTIVE;
+            break;
+        }
+        case THRESHOLD_FAILED:
+        case THRESHOLD_ACTIVE: {
+            // Nothing happens, these are terminal states.
+            break;
+        }
         }
         cache[pindexPrev] = state = stateNext;
     }
@@ -141,7 +140,8 @@ namespace
 /**
  * Class to implement versionbits logic.
  */
-class VersionBitsConditionChecker : public AbstractThresholdConditionChecker {
+class VersionBitsConditionChecker : public AbstractThresholdConditionChecker
+{
 private:
     const Consensus::DeploymentPos id;
 
@@ -161,7 +161,7 @@ public:
     uint32_t Mask(const Consensus::Params& params) const { return ((uint32_t)1) << params.vDeployments[id].bit; }
 };
 
-}
+} // namespace
 
 ThresholdState VersionBitsState(const CBlockIndex* pindexPrev, const Consensus::Params& params, Consensus::DeploymentPos pos, VersionBitsCache& cache)
 {

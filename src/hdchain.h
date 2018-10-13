@@ -47,17 +47,16 @@ private:
     mutable CCriticalSection cs_accounts;
 
 public:
-
     CHDChain() : nVersion(CHDChain::CURRENT_VERSION) { SetNull(); }
-    CHDChain(const CHDChain& other) :
-        nVersion(other.nVersion),
-        id(other.id),
-        fCrypted(other.fCrypted),
-        vchSeed(other.vchSeed),
-        vchMnemonic(other.vchMnemonic),
-        vchMnemonicPassphrase(other.vchMnemonicPassphrase),
-        mapAccounts(other.mapAccounts)
-        {}
+    CHDChain(const CHDChain& other) : nVersion(other.nVersion),
+                                      id(other.id),
+                                      fCrypted(other.fCrypted),
+                                      vchSeed(other.vchSeed),
+                                      vchMnemonic(other.vchMnemonic),
+                                      vchMnemonicPassphrase(other.vchMnemonicPassphrase),
+                                      mapAccounts(other.mapAccounts)
+    {
+    }
 
     ADD_SERIALIZE_METHODS;
     template <typename Stream, typename Operation>

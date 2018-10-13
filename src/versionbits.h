@@ -36,7 +36,7 @@ typedef std::map<const CBlockIndex*, ThresholdState> ThresholdConditionCache;
 
 struct BIP9DeploymentInfo {
     /** Deployment name */
-    const char *name;
+    const char* name;
     /** Whether GBT clients can safely ignore this rule in simplified usage */
     bool gbt_force;
     /** Whether to check current MN protocol or not */
@@ -48,13 +48,14 @@ extern const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[];
 /**
  * Abstract class that implements BIP9-style threshold logic, and caches results.
  */
-class AbstractThresholdConditionChecker {
+class AbstractThresholdConditionChecker
+{
 protected:
-    virtual bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const =0;
-    virtual int64_t BeginTime(const Consensus::Params& params) const =0;
-    virtual int64_t EndTime(const Consensus::Params& params) const =0;
-    virtual int Period(const Consensus::Params& params) const =0;
-    virtual int Threshold(const Consensus::Params& params) const =0;
+    virtual bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const = 0;
+    virtual int64_t BeginTime(const Consensus::Params& params) const = 0;
+    virtual int64_t EndTime(const Consensus::Params& params) const = 0;
+    virtual int Period(const Consensus::Params& params) const = 0;
+    virtual int Threshold(const Consensus::Params& params) const = 0;
 
 public:
     // Note that the function below takes a pindexPrev as input: they compute information for block B based on its parent.
@@ -62,8 +63,7 @@ public:
     int GetStateSinceHeightFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const;
 };
 
-struct VersionBitsCache
-{
+struct VersionBitsCache {
     ThresholdConditionCache caches[Consensus::MAX_VERSION_BITS_DEPLOYMENTS];
 
     void Clear();

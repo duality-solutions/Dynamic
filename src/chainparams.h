@@ -8,9 +8,9 @@
 #ifndef DYNAMIC_CHAINPARAMS_H
 #define DYNAMIC_CHAINPARAMS_H
 
-#include "primitives/block.h"
 #include "chainparamsbase.h"
 #include "consensus/params.h"
+#include "primitives/block.h"
 #include "protocol.h"
 
 #include <vector>
@@ -18,7 +18,7 @@
 struct CDNSSeedData {
     std::string name, host;
     bool supportsServiceBitsFiltering;
-    CDNSSeedData(const std::string &strName, const std::string &strHost, bool supportsServiceBitsFilteringIn = false) : name(strName), host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
+    CDNSSeedData(const std::string& strName, const std::string& strHost, bool supportsServiceBitsFilteringIn = false) : name(strName), host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
 };
 
 struct SeedSpec6 {
@@ -91,6 +91,7 @@ public:
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     const std::vector<std::string>& SporkAddresses() const { return vSporkAddresses; }
     int MinSporkKeys() const { return nMinSporkKeys; }
+
 protected:
     CChainParams() {}
 
@@ -127,7 +128,7 @@ protected:
  * Return the currently selected parameters. This won't change after app
  * startup, except for unit tests.
  */
-const CChainParams &Params();
+const CChainParams& Params();
 
 /**
  * @returns CChainParams for the given BIP70 chain name.

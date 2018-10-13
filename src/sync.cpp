@@ -51,6 +51,7 @@ struct CLockLocation {
     std::string MutexName() const { return mutexName; }
 
     bool fTry;
+
 private:
     std::string mutexName;
     std::string sourceFile;

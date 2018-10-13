@@ -58,8 +58,8 @@ public:
      * Returns true if strFile is OK.
      */
     enum VerifyResult { VERIFY_OK,
-                        RECOVER_OK,
-                        RECOVER_FAIL };
+        RECOVER_OK,
+        RECOVER_FAIL };
     VerifyResult Verify(const std::string& strFile, bool (*recoverFunc)(CDBEnv& dbenv, const std::string& strFile));
     /**
      * Salvage data from a file that Verify says is bad.
@@ -102,7 +102,7 @@ protected:
     bool fReadOnly;
     bool fFlushOnClose;
 
-    explicit CDB(const std::string& strFilename, const char* pszMode = "r+", bool fFlushOnCloseIn=true);
+    explicit CDB(const std::string& strFilename, const char* pszMode = "r+", bool fFlushOnCloseIn = true);
     ~CDB() { Close(); }
 
 public:

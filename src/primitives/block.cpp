@@ -11,7 +11,7 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 
-uint256 CBlockHeader::GetHash() const 
+uint256 CBlockHeader::GetHash() const
 {
     return hash_Argon2d(BEGIN(nVersion), END(nNonce), 1);
 }
@@ -26,8 +26,7 @@ std::string CBlock::ToString() const
         hashMerkleRoot.ToString(),
         nTime, nBits, nNonce,
         vtx.size());
-    for (unsigned int i = 0; i < vtx.size(); i++)
-    {
+    for (unsigned int i = 0; i < vtx.size(); i++) {
         s << "  " << vtx[i]->ToString() << "\n";
     }
     return s.str();

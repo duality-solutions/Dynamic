@@ -22,18 +22,27 @@ public:
     uint32_t n;
 
     COutPoint() { SetNull(); }
-    COutPoint(uint256 hashIn, uint32_t nIn) { hash = hashIn; n = nIn; }
+    COutPoint(uint256 hashIn, uint32_t nIn)
+    {
+        hash = hashIn;
+        n = nIn;
+    }
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(hash);
         READWRITE(n);
     }
 
-    void SetNull() { hash.SetNull(); n = (uint32_t) -1; }
-    bool IsNull() const { return (hash.IsNull() && n == (uint32_t) -1); }
+    void SetNull()
+    {
+        hash.SetNull();
+        n = (uint32_t)-1;
+    }
+    bool IsNull() const { return (hash.IsNull() && n == (uint32_t)-1); }
 
     friend bool operator<(const COutPoint& a, const COutPoint& b)
     {
@@ -98,13 +107,14 @@ public:
         nSequence = SEQUENCE_FINAL;
     }
 
-    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=SEQUENCE_FINAL);
-    CTxIn(uint256 hashPrevTx, uint32_t nOut, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=SEQUENCE_FINAL);
+    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn = CScript(), uint32_t nSequenceIn = SEQUENCE_FINAL);
+    CTxIn(uint256 hashPrevTx, uint32_t nOut, CScript scriptSigIn = CScript(), uint32_t nSequenceIn = SEQUENCE_FINAL);
 
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(prevout);
         READWRITE(*(CScriptBase*)(&scriptSig));
         READWRITE(nSequence);
@@ -112,7 +122,7 @@ public:
 
     friend bool operator==(const CTxIn& a, const CTxIn& b)
     {
-        return (a.prevout   == b.prevout &&
+        return (a.prevout == b.prevout &&
                 a.scriptSig == b.scriptSig &&
                 a.nSequence == b.nSequence);
     }
@@ -124,7 +134,7 @@ public:
 
     friend bool operator<(const CTxIn& a, const CTxIn& b)
     {
-        return a.prevout<b.prevout;
+        return a.prevout < b.prevout;
     }
 
     std::string ToString() const;
@@ -150,7 +160,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(nValue);
         READWRITE(*(CScriptBase*)(&scriptPubKey));
     }
@@ -167,7 +178,7 @@ public:
         return (nValue == -1);
     }
 
-    CAmount GetDustThreshold(const CFeeRate &minRelayTxFee) const
+    CAmount GetDustThreshold(const CFeeRate& minRelayTxFee) const
     {
         // "Dust" is defined in terms of CTransaction::minRelayTxFee, which has units satoshis-per-kilobyte.
         // If you'd pay more than 1/3 in fees to spend something, then we consider it dust.
@@ -179,20 +190,20 @@ public:
         if (scriptPubKey.IsUnspendable())
             return 0;
 
-        size_t nSize = GetSerializeSize(*this, SER_DISK, 0)+148u;
-        return 3*minRelayTxFee.GetFee(nSize);
+        size_t nSize = GetSerializeSize(*this, SER_DISK, 0) + 148u;
+        return 3 * minRelayTxFee.GetFee(nSize);
     }
 
-    bool IsDust(const CFeeRate &minRelayTxFee) const
+    bool IsDust(const CFeeRate& minRelayTxFee) const
     {
         return (nValue < GetDustThreshold(minRelayTxFee));
     }
 
     friend bool operator==(const CTxOut& a, const CTxOut& b)
     {
-        return (a.nValue       == b.nValue &&
+        return (a.nValue == b.nValue &&
                 a.scriptPubKey == b.scriptPubKey &&
-                a.nRounds      == b.nRounds);
+                a.nRounds == b.nRounds);
     }
 
     friend bool operator!=(const CTxOut& a, const CTxOut& b)
@@ -211,13 +222,13 @@ class CTransaction
 {
 public:
     // Default transaction version.
-    static const int32_t CURRENT_VERSION=1;
+    static const int32_t CURRENT_VERSION = 1;
 
     // Changing the default transaction version requires a two step process: first
     // adapting relay policy by bumping MAX_STANDARD_VERSION, and then later date
     // bumping the default CURRENT_VERSION at which point both CURRENT_VERSION and
     // MAX_STANDARD_VERSION will be equal.
-    static const int32_t MAX_STANDARD_VERSION=2;
+    static const int32_t MAX_STANDARD_VERSION = 2;
 
     // The local variables are made const to prevent unintended modification
     // without updating the cached hash value. However, CTransaction is not
@@ -240,11 +251,12 @@ public:
     CTransaction();
 
     /** Convert a CMutableTransaction into a CTransaction. */
-    CTransaction(const CMutableTransaction &tx);
-    CTransaction(CMutableTransaction &&tx);
+    CTransaction(const CMutableTransaction& tx);
+    CTransaction(CMutableTransaction&& tx);
 
     template <typename Stream>
-    inline void Serialize(Stream& s) const {
+    inline void Serialize(Stream& s) const
+    {
         s << this->nVersion;
         s << vin;
         s << vout;
@@ -254,13 +266,17 @@ public:
     /** This deserializing constructor is provided instead of an Unserialize method.
      *  Unserialize is not possible, since it would require overwriting const fields. */
     template <typename Stream>
-    CTransaction(deserialize_type, Stream& s) : CTransaction(CMutableTransaction(deserialize, s)) {}
+    CTransaction(deserialize_type, Stream& s) : CTransaction(CMutableTransaction(deserialize, s))
+    {
+    }
 
-    bool IsNull() const {
+    bool IsNull() const
+    {
         return vin.empty() && vout.empty();
     }
 
-    const uint256& GetHash() const {
+    const uint256& GetHash() const
+    {
         return hash;
     }
 
@@ -270,18 +286,18 @@ public:
     // inputs must be known to compute value in.
 
     // Compute priority, given priority of inputs and (optionally) tx size
-    double ComputePriority(double dPriorityInputs, unsigned int nTxSize=0) const;
+    double ComputePriority(double dPriorityInputs, unsigned int nTxSize = 0) const;
 
     // Compute modified tx size for priority calculation (optionally given tx size)
-    unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-    
+    unsigned int CalculateModifiedSize(unsigned int nTxSize = 0) const;
+
     /**
      * Get the total transaction size in bytes, including witness data.
      * "Total Size" defined in BIP141 and BIP144.
      * @return Total transaction size in bytes
      */
     unsigned int GetTotalSize() const;
-   
+
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
@@ -301,8 +317,7 @@ public:
 };
 
 /** A mutable version of CTransaction. */
-struct CMutableTransaction
-{
+struct CMutableTransaction {
     int32_t nVersion;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
@@ -314,7 +329,8 @@ struct CMutableTransaction
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(vin);
         READWRITE(vout);
@@ -322,7 +338,8 @@ struct CMutableTransaction
     }
 
     template <typename Stream>
-    CMutableTransaction(deserialize_type, Stream& s) {
+    CMutableTransaction(deserialize_type, Stream& s)
+    {
         Unserialize(s);
     }
 
@@ -342,21 +359,24 @@ struct CMutableTransaction
     {
         return !(a == b);
     }
-
 };
 
 typedef std::shared_ptr<const CTransaction> CTransactionRef;
 static inline CTransactionRef MakeTransactionRef() { return std::make_shared<const CTransaction>(); }
-template <typename Tx> static inline CTransactionRef MakeTransactionRef(Tx&& txIn) { return std::make_shared<const CTransaction>(std::forward<Tx>(txIn)); }
+template <typename Tx>
+static inline CTransactionRef MakeTransactionRef(Tx&& txIn)
+{
+    return std::make_shared<const CTransaction>(std::forward<Tx>(txIn));
+}
 
 /** Implementation of BIP69
  * https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki
  */
-struct CompareInputBIP69
-{
+struct CompareInputBIP69 {
     inline bool operator()(const CTxIn& a, const CTxIn& b) const
     {
-        if (a.prevout.hash == b.prevout.hash) return a.prevout.n < b.prevout.n;
+        if (a.prevout.hash == b.prevout.hash)
+            return a.prevout.n < b.prevout.n;
 
         uint256 hasha = a.prevout.hash;
         uint256 hashb = b.prevout.hash;
@@ -369,8 +389,7 @@ struct CompareInputBIP69
     }
 };
 
-struct CompareOutputBIP69
-{
+struct CompareOutputBIP69 {
     inline bool operator()(const CTxOut& a, const CTxOut& b) const
     {
         return a.nValue < b.nValue || (a.nValue == b.nValue && a.scriptPubKey < b.scriptPubKey);

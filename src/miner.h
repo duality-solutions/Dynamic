@@ -36,7 +36,7 @@ struct CBlockTemplate {
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOps;
-    CTxOut txoutDynode; // dynode payment
+    CTxOut txoutDynode;                 // dynode payment
     std::vector<CTxOut> voutSuperblock; // dynode payment
 };
 

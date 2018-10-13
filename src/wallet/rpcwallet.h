@@ -9,6 +9,6 @@
 
 class CRPCTable;
 
-void RegisterWalletRPCCommands(CRPCTable &t);
+void RegisterWalletRPCCommands(CRPCTable& t);
 
 #endif //DYNAMIC_WALLET_RPCWALLET_H

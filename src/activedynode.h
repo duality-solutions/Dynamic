@@ -14,16 +14,16 @@
 #include "primitives/transaction.h"
 
 #ifdef ENABLE_WALLET
-#include "wallet/wallet.h"     
+#include "wallet/wallet.h"
 #endif //ENABLE_WALLET
 
 class CActiveDynode;
 
-static const int ACTIVE_DYNODE_INITIAL          = 0; // initial state
-static const int ACTIVE_DYNODE_SYNC_IN_PROCESS  = 1;
-static const int ACTIVE_DYNODE_INPUT_TOO_NEW    = 2;
-static const int ACTIVE_DYNODE_NOT_CAPABLE      = 3;
-static const int ACTIVE_DYNODE_STARTED          = 4;
+static const int ACTIVE_DYNODE_INITIAL = 0; // initial state
+static const int ACTIVE_DYNODE_SYNC_IN_PROCESS = 1;
+static const int ACTIVE_DYNODE_INPUT_TOO_NEW = 2;
+static const int ACTIVE_DYNODE_NOT_CAPABLE = 3;
+static const int ACTIVE_DYNODE_STARTED = 4;
 
 extern CActiveDynode activeDynode;
 
@@ -33,7 +33,7 @@ class CActiveDynode
 public:
     enum dynode_type_enum_t {
         DYNODE_UNKNOWN = 0,
-        DYNODE_REMOTE  = 1
+        DYNODE_REMOTE = 1
     };
 
 private:
@@ -71,7 +71,8 @@ public:
           outpoint(),
           service(),
           nState(ACTIVE_DYNODE_INITIAL)
-    {}
+    {
+    }
 
     /// Manage state of active Dynode
     void ManageState(CConnman& connman);
@@ -82,7 +83,7 @@ public:
 
     bool UpdateSentinelPing(int version);
 
-    void DoMaintenance(CConnman &connman) { ManageState(connman); }
+    void DoMaintenance(CConnman& connman) { ManageState(connman); }
 
 private:
     void ManageStateInitial(CConnman& connman);
