@@ -224,7 +224,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
             oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", libtorrent::dht::ExtractPutValue(data.Value())));
+            oMutableData.push_back(Pair("value", ExtractPutValue(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }

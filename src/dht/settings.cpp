@@ -85,7 +85,7 @@ void CDHTSettings::LoadSettings()
     session* newSession = new session(params.settings);
     ses = newSession;
     if (!ses->is_dht_running()) {
-        ses->set_dht_storage(dht::dht_bdap_storage_constructor);
+        ses->set_dht_storage(CDHTStorageConstructor);
         // General LibTorrent Settings
         params.settings.set_int(settings_pack::alert_mask, 0xffffffff); // receive all alerts
         params.settings.set_bool(settings_pack::enable_dht, true);
@@ -122,7 +122,7 @@ void CDHTSettings::LoadSettings()
         params.settings.set_bool(settings_pack::enable_incoming_tcp, false);
 
         ses->apply_settings(params.settings);
-        ses->set_dht_storage(dht::dht_bdap_storage_constructor);
+        ses->set_dht_storage(CDHTStorageConstructor);
     }
     // Dynamic LibTorrent Settings
     // see https://www.libtorrent.org/reference-Settings.html#dht_settings
