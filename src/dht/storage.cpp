@@ -55,17 +55,24 @@ void CDHTStorage::announce_peer(sha1_hash const& info_hash, tcp::endpoint const&
 
 bool CDHTStorage::get_immutable_item(sha1_hash const& target, entry& item) const
 {
-    //TODO: Only get mutable items for peer discovery.
-    // Do we need immutable item support ???
-    LogPrintf("********** CDHTStorage -- get_immutable_item target = %s **********\n", target.to_string());
-    return pDefaultStorage->get_immutable_item(target, item);
+    CMutableData mutableData;
+    std::string strInfoHash = aux::to_hex(target.to_string());
+    CharString vchInfoHash = vchFromString(strInfoHash);
+    LogPrintf("********** CDHTStorage -- get_immutable_item infohash = %s\n", strInfoHash);
+    if (!GetLocalMutableData(vchInfoHash, mutableData)) {
+        LogPrintf("********** CDHTStorage -- get_immutable_item failed to get sequence_number for infohash = %s.\n", strInfoHash);
+        return false;
+    }
+    std::string strValue = mutableData.Value();
+    item["v"] = bdecode(strValue.begin(), strValue.end());
+    return true;
 }
 
 void CDHTStorage::put_immutable_item(sha1_hash const& target, span<char const> buf, address const& addr)
 {
     //TODO: Only store mutable items for peer discovery.
     // Do we need immutable item support ???
-    LogPrintf("********** CDHTStorage -- put_immutable_item target = %s, buf = %s, addr = %s\n", target.to_string(), std::string(buf.data()), addr.to_string());
+    LogPrintf("********** CDHTStorage -- put_immutable_item target = %s, buf = %s, addr = %s\n", aux::to_hex(target.to_string()), std::string(buf.data()), addr.to_string());
     pDefaultStorage->put_immutable_item(target, buf, addr);
 }
 
