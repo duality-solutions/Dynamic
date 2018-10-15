@@ -25,7 +25,7 @@ UniValue getmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getmutable\n"
+            "getmutable <pubkey> <operation>\nGets mutable data from the DHT.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -58,7 +58,7 @@ UniValue putmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putmutable\n"
+            "putmutable <dht value> <operation> <pubkey> <privkey>\nSaves mutable data in the DHT.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -122,7 +122,7 @@ UniValue dhtinfo(const JSONRPCRequest& request)
 {
     if (request.params.size() != 0)
         throw std::runtime_error(
-            "dhtinfo\n"
+            "dhtinfo\nGets DHT network stats and info.\n"
             "\n");
 
     if (!pTorrentDHTSession)
@@ -207,7 +207,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
 {
     if (request.params.size() != 0)
         throw std::runtime_error(
-            "dhtdb\n"
+            "dhtdb\nGets the local DHT cache database contents.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -325,7 +325,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getbdapdata <bdap id> <operation>\nGets the mutable data in the DHT for a BDAP entry.\n"
+            "getbdapdata <bdap id> <operation>\nGets the mutable data from the DHT for a BDAP entry.\n"
             "\n");
     UniValue result(UniValue::VOBJ);
    
