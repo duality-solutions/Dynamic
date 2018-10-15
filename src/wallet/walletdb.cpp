@@ -69,22 +69,26 @@ bool CWalletDB::EraseTx(uint256 hash)
     return Erase(std::make_pair(std::string("tx"), hash));
 }
 
-bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const CKeyMetadata& keyMeta)
+bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta)
 {
-    if (!Write(std::make_pair(std::string("keymeta"), key.GetID()),
-               keyMeta, false))
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+
+    if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta, false))
         return false;
 
     nWalletDBUpdated++;
     std::vector<unsigned char> vchPrivKeySeed = key.GetPrivSeed();
-    std::vector<unsigned char> vchPubKey = key.GetPubKey();
     // hash pubkey/privkey to accelerate wallet load
     std::vector<unsigned char> vchKey;
     vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
 
-    return Write(std::make_pair(std::string("dhtkey"), key.GetPubKey()), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
+    //LogPrintf("CWalletDB::WriteDHTKey \nvchKey = %s, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+    //                    StringFromVch(vchKey), keyID.ToString(), 
+    //                    StringFromVch(vchPubKey), StringFromVch(key.GetPrivKey()), StringFromVch(key.GetPrivSeed()));
+
+    return Write(std::make_pair(std::string("dhtkey"), vchPubKey), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
 bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
@@ -449,23 +453,31 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             CKeyEd25519 key(vchPrivKeySeed);
             uint256 hash;
             std::string strPubKey = stringFromVch(vchPubKey);
+            
             try
             {
                 ssValue >> hash;
             }
             catch (...) {}
+
             if (!hash.IsNull()) {
                 std::vector<unsigned char> vchKey;
                 vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
                 vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
                 vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
-                uint256 hash = Hash(vchKey.begin(), vchKey.end());
-                if (Hash(vchKey.begin(), vchKey.end()) != hash)
+                uint256 hash2 = Hash(vchKey.begin(), vchKey.end());
+                
+                if (hash2 != hash)
                 {
-                    strErr = "Error reading wallet database: CPubKey/CPrivKey corrupt";
+                    //LogPrintf("CReadKeyValue hash mismatch error: \nvchKey = %s, \nhash = %s\n, \nhash2 = %s\n", 
+                    //                          stringFromVch(vchKey), hash2.ToString(), hash.ToString());
+                    strErr = "Error reading wallet database: DHT Ed25519 CPubKey/CPrivKey corrupt";
                     return false;
                 }
             }
+            //LogPrintf("CReadKeyValue, \nvchPubKey = %s, \nprivkey = %s, \nprivseed = %s,\nhash = %s\n", 
+            //                          strPubKey, key.GetPrivKeyString(), key.GetPrivSeedString(), hash.ToString());
+
             if (!pwallet->LoadDHTKey(key, vchPubKey))
             {
                 strErr = "Error reading wallet database: LoadDHTKey failed";

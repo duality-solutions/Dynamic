@@ -25,7 +25,7 @@ UniValue getmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getmutable\n"
+            "getmutable <pubkey> <operation>\nGets mutable data from the DHT.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -58,7 +58,7 @@ UniValue putmutable(const JSONRPCRequest& request)
 {
     if (request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putmutable\n"
+            "putmutable <dht value> <operation> <pubkey> <privkey>\nSaves mutable data in the DHT.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -122,7 +122,7 @@ UniValue dhtinfo(const JSONRPCRequest& request)
 {
     if (request.params.size() != 0)
         throw std::runtime_error(
-            "dhtinfo\n"
+            "dhtinfo\nGets DHT network stats and info.\n"
             "\n");
 
     if (!pTorrentDHTSession)
@@ -207,7 +207,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
 {
     if (request.params.size() != 0)
         throw std::runtime_error(
-            "dhtdb\n"
+            "dhtdb\nGets the local DHT cache database contents.\n"
             "\n");
 
     UniValue result(UniValue::VOBJ);
@@ -277,13 +277,20 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("error", "Failed to get private key."));
         return result;
     }
-
+    if (getKey.GetPubKey() != entry.DHTPublicKey) {
+        //throw std::runtime_error("putbdapdata: ERRCODE: 5504 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
+        result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
+        result.push_back(Pair("wallet_pubkey", stringFromVch(getKey.GetPubKey())));
+        result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
+        result.push_back(Pair("error", "Wallet public key doesn't match BDAP entry."));
+        return result;
+    }
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
     result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
-    //result.push_back(Pair("put_privkey", stringFromVch(getKey.GetPrivKey())));
+    //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
     result.push_back(Pair("entry_key_id", pubKey.GetID().ToString()));
     result.push_back(Pair("put_key_id", getKey.GetID().ToString()));
     result.push_back(Pair("entry_key_hash", pubKey.GetHash().ToString()));
@@ -318,7 +325,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 {
     if (request.params.size() != 2)
         throw std::runtime_error(
-            "getbdapdata <bdap id> <operation>\nGets the mutable data in the DHT for a BDAP entry.\n"
+            "getbdapdata <bdap id> <operation>\nGets the mutable data from the DHT for a BDAP entry.\n"
             "\n");
     UniValue result(UniValue::VOBJ);
    
@@ -339,16 +346,15 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("getbdapdata: ERRCODE: 5602 - " + strFullObjectPath + _(" can not be found.  Get BDAP entry failed!\n"));
 
     const std::string strOperationType = request.params[1].get_str();
+    std::string strPubKey = stringFromVch(entry.DHTPublicKey);
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
-    result.push_back(Pair("get_pubkey", stringFromVch(entry.DHTPublicKey)));
+    result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
-    
     
     bool fRet = false;
     int64_t iSequence = 0;
-    std::string strPubKey = stringFromVch(entry.DHTPublicKey);
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
 
@@ -359,7 +365,8 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("get_value", strValue));
     }
     else {
-        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data in DHT. Check the debug.log for details.\n");
+        result.push_back(Pair("error", "getbdapdata timeout error"));
+        //throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
     }
 
     return result;

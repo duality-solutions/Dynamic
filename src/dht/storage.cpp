@@ -43,8 +43,9 @@ void CDHTStorage::update_node_ids(std::vector<libtorrent::sha1_hash> const& ids)
 
 bool CDHTStorage::get_peers(sha1_hash const& info_hash, bool const noseed, bool const scrape, address const& requester, entry& peers) const
 {
-    //LogPrintf("********** CDHTStorage -- get_peers **********\n");
-    return pDefaultStorage->get_peers(info_hash, noseed, scrape, requester, peers);
+    bool ret = pDefaultStorage->get_peers(info_hash, noseed, scrape, requester, peers);
+    //LogPrintf("********** CDHTStorage -- get_peers peers = %s **********\n", peers.to_string());
+    return ret;
 }
 
 void CDHTStorage::announce_peer(sha1_hash const& info_hash, tcp::endpoint const& endp, string_view name, bool const seed)
@@ -55,18 +56,15 @@ void CDHTStorage::announce_peer(sha1_hash const& info_hash, tcp::endpoint const&
 
 bool CDHTStorage::get_immutable_item(sha1_hash const& target, entry& item) const
 {
-    //TODO: Only get mutable items for peer discovery.
-    // Do we need immutable item support ???
-    LogPrintf("********** CDHTStorage -- get_immutable_item target = %s **********\n", target.to_string());
-    return pDefaultStorage->get_immutable_item(target, item);
+    return false;
 }
 
 void CDHTStorage::put_immutable_item(sha1_hash const& target, span<char const> buf, address const& addr)
 {
-    //TODO: Only store mutable items for peer discovery.
+    //TODO: ban nodes that try to put immutable entries.
+    //pDefaultStorage->put_immutable_item(target, buf, addr);
     // Do we need immutable item support ???
-    LogPrintf("********** CDHTStorage -- put_immutable_item target = %s, buf = %s, addr = %s\n", target.to_string(), std::string(buf.data()), addr.to_string());
-    pDefaultStorage->put_immutable_item(target, buf, addr);
+    LogPrintf("********** CDHTStorage -- put_immutable_item target = %s, buf = %s, addr = %s\n", aux::to_hex(target.to_string()), std::string(buf.data()), addr.to_string());
 }
 
 bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
@@ -76,7 +74,7 @@ bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number&
     CharString vchInfoHash = vchFromString(strInfoHash);
     LogPrintf("********** CDHTStorage -- get_mutable_item_seq infohash = %s\n", strInfoHash);
     if (!GetLocalMutableData(vchInfoHash, mutableData)) {
-        LogPrintf("********** CDHTStorage -- get_mutable_item_seq failed to get sequence_number for infohash = %s.\n", strInfoHash);
+        LogPrintf("********** CDHTStorage -- get_mutable_item_seq failed to get mutable entry sequence_number for infohash = %s.\n", strInfoHash);
         return false;
     }
     seq = dht::sequence_number(mutableData.SequenceNumber);
@@ -90,12 +88,13 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     if (!GetLocalMutableData(vchInfoHash, mutableData)) {
-        LogPrintf("********** CDHTStorage -- get_mutable_item failed to get mutable data from leveldb.\n");
+        LogPrintf("********** CDHTStorage -- get_mutable_item failed to get mutable entry for infohash = %s.\n", strInfoHash);
         return false;
     }
     item["seq"] = mutableData.SequenceNumber;
     if (force_fill || (sequence_number(0) <= seq && seq < sequence_number(mutableData.SequenceNumber)))
     {
+        LogPrintf("********** CDHTStorage -- get_mutable_item data found.\n");
         item["v"] = bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
         std::array<char, 64> sig;
         aux::from_hex(mutableData.Signature(), sig.data());
@@ -104,8 +103,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
         aux::from_hex(mutableData.PublicKey(), pubKey.data());
         item["k"] = pubKey;
     }
-    LogPrintf("********** CDHTStorage -- get_mutable_item found, Value = %s, seq_found = %d, seq_query = %d\n", 
-                                ExtractPutValue(mutableData.Value()), mutableData.SequenceNumber, seq.value);
+    LogPrintf("********** CDHTStorage -- get_mutable_item target = %s, item = %s\n", aux::to_hex(target.to_string()), item.to_string());
     return true;
 }
 
@@ -117,7 +115,6 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     , span<char const> salt
     , address const& addr)
 {
-
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     std::string strPutValue = std::string(buf.data());
@@ -150,6 +147,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     }
     // TODO: Log from address (addr). See touch_item in the default storage implementation.
     return;
+    
 }
 
 int CDHTStorage::get_infohashes_sample(entry& item)
@@ -192,9 +190,10 @@ std::string ExtractPutValue(std::string value)
 std::string ExtractSalt(std::string salt)
 {
     std::string strReturn = "";
-    size_t posEnd = salt.find("3:seqi1e3:");
+    size_t posEnd = salt.find("3:seqi");
     if (!(posEnd == std::string::npos) && salt.size() > posEnd) {
         strReturn = salt.substr(0, posEnd);
     }
+    //LogPrintf("********** CDHTStorage -- ExtractSalt salt in = %, salt out = %s\n", salt, strReturn);
     return strReturn;
 }
