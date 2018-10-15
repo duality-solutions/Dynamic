@@ -94,6 +94,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     item["seq"] = mutableData.SequenceNumber;
     if (force_fill || (sequence_number(0) <= seq && seq < sequence_number(mutableData.SequenceNumber)))
     {
+        LogPrintf("********** CDHTStorage -- get_mutable_item data found.\n");
         item["v"] = bdecode(mutableData.vchValue.begin(), mutableData.vchValue.end());
         std::array<char, 64> sig;
         aux::from_hex(mutableData.Signature(), sig.data());
@@ -116,7 +117,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
 {
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    std::string strPutValue = std::string(buf.data());
+    std::string strPutValue = ExtractPutValue(std::string(buf.data()));
     CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
@@ -126,7 +127,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchSalt = vchFromString(strSalt);
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+                    strInfoHash, strPutValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {

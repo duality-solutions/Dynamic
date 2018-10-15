@@ -224,7 +224,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
             oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", ExtractPutValue(data.Value())));
+            oMutableData.push_back(Pair("value", data.Value()));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }
@@ -339,16 +339,15 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("getbdapdata: ERRCODE: 5602 - " + strFullObjectPath + _(" can not be found.  Get BDAP entry failed!\n"));
 
     const std::string strOperationType = request.params[1].get_str();
+    std::string strPubKey = stringFromVch(entry.DHTPublicKey);
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
-    result.push_back(Pair("get_pubkey", stringFromVch(entry.DHTPublicKey)));
+    result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
-    
     
     bool fRet = false;
     int64_t iSequence = 0;
-    std::string strPubKey = stringFromVch(entry.DHTPublicKey);
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
 
@@ -359,7 +358,8 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("get_value", strValue));
     }
     else {
-        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data in DHT. Check the debug.log for details.\n");
+        result.push_back(Pair("error", "getbdapdata error"));
+        //throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
     }
 
     return result;
