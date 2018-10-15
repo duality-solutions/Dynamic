@@ -10,20 +10,20 @@
 
 namespace BDAP {
     enum ObjectType {
-        DEFAULT_TYPE = 0,
-        USER_ACCOUNT = 1,
-        GROUP = 2,
-        DEVICE_ACCOUNT = 3,
-        DOMAIN_ACCOUNT = 4,
-        ORGANIZATIONAL_UNIT = 5,
-        CERTIFICATE = 6,
-        AUDIT = 7,
-        CHANNEL = 8,
-        CHECKPOINT = 9,
-        BINDING_LINK = 10,
-        IDENTITY = 11,
-        IDENTITY_VERIFICATION = 12,
-        SMART_CONTRACT = 13
+        BDAP_DEFAULT_TYPE = 0,
+        BDAP_USER = 1,
+        BDAP_GROUP = 2,
+        BDAP_DEVICE = 3,
+        BDAP_DOMAIN = 4,
+        BDAP_ORGANIZATIONAL_UNIT = 5,
+        BDAP_CERTIFICATE = 6,
+        BDAP_AUDIT = 7,
+        BDAP_CHANNEL = 8,
+        BDAP_CHECKPOINT = 9,
+        BDAP_BINDING_LINK = 10,
+        BDAP_IDENTITY = 11,
+        BDAP_IDENTITY_VERIFICATION = 12,
+        BDAP_SMART_CONTRACT = 13
     };
 }
 

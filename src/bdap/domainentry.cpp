@@ -26,33 +26,33 @@ namespace BDAP {
     {
         switch ((BDAP::ObjectType)nObjectType) {
 
-            case BDAP::ObjectType::DEFAULT_TYPE:
+            case BDAP::ObjectType::BDAP_DEFAULT_TYPE:
                 return "Default";
-             case BDAP::ObjectType::USER_ACCOUNT:
+             case BDAP::ObjectType::BDAP_USER:
                 return "User Entry";
-            case BDAP::ObjectType::GROUP:
+            case BDAP::ObjectType::BDAP_GROUP:
                 return "Group Entry";
-            case BDAP::ObjectType::DEVICE_ACCOUNT:
+            case BDAP::ObjectType::BDAP_DEVICE:
                 return "Device Entry";
-            case BDAP::ObjectType::DOMAIN_ACCOUNT:
+            case BDAP::ObjectType::BDAP_DOMAIN:
                 return "Domain Entry";
-            case BDAP::ObjectType::ORGANIZATIONAL_UNIT:
+            case BDAP::ObjectType::BDAP_ORGANIZATIONAL_UNIT:
                 return "OU Entry";
-            case BDAP::ObjectType::CERTIFICATE:
+            case BDAP::ObjectType::BDAP_CERTIFICATE:
                 return "Certificate Entry";
-            case BDAP::ObjectType::AUDIT:
+            case BDAP::ObjectType::BDAP_AUDIT:
                 return "Audit Entry";
-            case BDAP::ObjectType::CHANNEL:
+            case BDAP::ObjectType::BDAP_CHANNEL:
                 return "Channel Entry";
-            case BDAP::ObjectType::CHECKPOINT:
+            case BDAP::ObjectType::BDAP_CHECKPOINT:
                 return "Channel Checkpoint Entry";
-            case BDAP::ObjectType::BINDING_LINK:
+            case BDAP::ObjectType::BDAP_BINDING_LINK:
                 return "Binding Link Entry";
-            case BDAP::ObjectType::IDENTITY:
+            case BDAP::ObjectType::BDAP_IDENTITY:
                 return "Identity Entry";
-            case BDAP::ObjectType::IDENTITY_VERIFICATION:
+            case BDAP::ObjectType::BDAP_IDENTITY_VERIFICATION:
                 return "Identity Verification Entry";
-            case BDAP::ObjectType::SMART_CONTRACT:
+            case BDAP::ObjectType::BDAP_SMART_CONTRACT:
                 return "Smart Contract Entry";
             default:
                 return "Unknown";
