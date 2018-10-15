@@ -72,6 +72,7 @@ bool CWalletDB::EraseTx(uint256 hash)
 bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta)
 {
     CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+
     if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta, false))
         return false;
 
@@ -82,7 +83,11 @@ bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned c
     vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
-    
+
+    //LogPrintf("CWalletDB::WriteDHTKey \nvchKey = %s, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+    //                    StringFromVch(vchKey), keyID.ToString(), 
+    //                    StringFromVch(vchPubKey), StringFromVch(key.GetPrivKey()), StringFromVch(key.GetPrivSeed()));
+
     return Write(std::make_pair(std::string("dhtkey"), vchPubKey), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
 }
 
@@ -448,23 +453,31 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             CKeyEd25519 key(vchPrivKeySeed);
             uint256 hash;
             std::string strPubKey = stringFromVch(vchPubKey);
+            
             try
             {
                 ssValue >> hash;
             }
             catch (...) {}
+
             if (!hash.IsNull()) {
                 std::vector<unsigned char> vchKey;
                 vchKey.reserve(vchPubKey.size() + vchPrivKeySeed.size());
                 vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
                 vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
-                uint256 hash = Hash(vchKey.begin(), vchKey.end());
-                if (Hash(vchKey.begin(), vchKey.end()) != hash)
+                uint256 hash2 = Hash(vchKey.begin(), vchKey.end());
+                
+                if (hash2 != hash)
                 {
-                    strErr = "Error reading wallet database: CPubKey/CPrivKey corrupt";
+                    //LogPrintf("CReadKeyValue hash mismatch error: \nvchKey = %s, \nhash = %s\n, \nhash2 = %s\n", 
+                    //                          stringFromVch(vchKey), hash2.ToString(), hash.ToString());
+                    strErr = "Error reading wallet database: DHT Ed25519 CPubKey/CPrivKey corrupt";
                     return false;
                 }
             }
+            //LogPrintf("CReadKeyValue, \nvchPubKey = %s, \nprivkey = %s, \nprivseed = %s,\nhash = %s\n", 
+            //                          strPubKey, key.GetPrivKeyString(), key.GetPrivSeedString(), hash.ToString());
+
             if (!pwallet->LoadDHTKey(key, vchPubKey))
             {
                 strErr = "Error reading wallet database: LoadDHTKey failed";

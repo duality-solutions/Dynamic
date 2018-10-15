@@ -37,8 +37,20 @@ CKeyEd25519::CKeyEd25519(const std::array<char, 32>& _seed)
     }
 }
 
+static std::string StringFromVch(const std::vector<unsigned char>& vch) {
+    std::string res;
+    std::vector<unsigned char>::const_iterator vi = vch.begin();
+    while (vi != vch.end()) {
+        res += (char) (*vi);
+        vi++;
+    }
+    return res;
+}
+
 CKeyEd25519::CKeyEd25519(const std::vector<unsigned char>& _seed)
 {
+    std::string strSeed = StringFromVch(_seed);
+    aux::from_hex(strSeed, seed.data());
     if (sizeof(_seed) == 32) {
         for(unsigned int i = 0; i < sizeof(_seed); i++) {
             seed[i] = _seed[i];
@@ -84,22 +96,37 @@ void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen)
     return;
 }
 */
+std::string CKeyEd25519::GetPrivKeyString() const
+{
+    return aux::to_hex(privateKey);
+}
+
+std::string CKeyEd25519::GetPubKeyString() const
+{
+    return aux::to_hex(publicKey);
+}
+
+std::string CKeyEd25519::GetPrivSeedString() const
+{
+    return aux::to_hex(seed);
+}
 
 std::vector<unsigned char> CKeyEd25519::GetPrivKey() const
 {
-    std::string strPrivateKey = aux::to_hex(privateKey);
+    std::string strPrivateKey = GetPrivKeyString();
     return std::vector<unsigned char>(strPrivateKey.begin(), strPrivateKey.end());
 }
 
 std::vector<unsigned char> CKeyEd25519::GetPubKey() const
 {
-    std::string strPublicKey = aux::to_hex(publicKey);
+    std::string strPublicKey = GetPubKeyString();
     return std::vector<unsigned char>(strPublicKey.begin(), strPublicKey.end());
 }
 
 std::vector<unsigned char> CKeyEd25519::GetPrivSeed() const
 {
-    return std::vector<unsigned char>(seed.begin(), seed.end());
+    std::string strPrivateSeedKey = GetPrivSeedString();
+    return std::vector<unsigned char>(strPrivateSeedKey.begin(), strPrivateSeedKey.end());
 }
 
 void CKeyEd25519::GetPubKey(CPubKey& key) const

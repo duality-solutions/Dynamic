@@ -365,7 +365,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("get_value", strValue));
     }
     else {
-        result.push_back(Pair("error", "getbdapdata error"));
+        result.push_back(Pair("error", "getbdapdata timeout error"));
         //throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
     }
 

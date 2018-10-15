@@ -97,6 +97,10 @@ public:
     std::vector<unsigned char> GetPrivKey() const;
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
+    std::string GetPrivKeyString() const;
+    std::string GetPubKeyString() const;
+    std::string GetPrivSeedString() const;
+
     int PubKeySize() const { return sizeof(GetPubKey()); }
 
     void GetPubKey(CPubKey& key) const;
@@ -105,6 +109,7 @@ public:
         return CPubKey(GetPubKey(), false);
     }
 
+    std::array<char, 32> GetDHTPrivSeed() const { return seed; }
     /**
      * Used for the Torrent DHT.
      */
@@ -114,7 +119,7 @@ public:
      */
     std::array<char, 32> GetDHTPubKey() const { return publicKey; }
 
-    void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
+    //void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
 
     //! Get the 256-bit hash of this public key.
     uint256 GetHash() const
