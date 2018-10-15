@@ -40,10 +40,10 @@ bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
     return true;
 }
 
-bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
+bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey)
 {
     LOCK(cs_KeyStore);
-    CKeyID keyID(Hash160(pubkey.begin(), pubkey.end()));
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
     mapDHTKeys[keyID] = key;
     return true;
 }

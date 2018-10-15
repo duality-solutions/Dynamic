@@ -334,7 +334,7 @@ bool CWallet::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>
 
     if (!IsCrypted()) {
         CKeyID keyID(Hash160(pubkey.begin(), pubkey.end()));
-        return CWalletDB(strWalletFile).WriteDHTKey(key, mapKeyMetadata[keyID]);
+        return CWalletDB(strWalletFile).WriteDHTKey(key, pubkey, mapKeyMetadata[keyID]);
     }
     return true;
 }

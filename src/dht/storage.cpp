@@ -117,7 +117,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
 {
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    std::string strPutValue = ExtractPutValue(std::string(buf.data()));
+    std::string strPutValue = std::string(buf.data());
     CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
@@ -127,7 +127,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchSalt = vchFromString(strSalt);
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, strPutValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {

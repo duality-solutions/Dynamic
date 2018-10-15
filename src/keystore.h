@@ -115,7 +115,7 @@ public:
     virtual bool HaveWatchOnly(const CScript &dest) const;
     virtual bool HaveWatchOnly() const;
 
-    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey);
     bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
 
     bool GetHDChain(CHDChain& hdChainRet) const;

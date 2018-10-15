@@ -224,7 +224,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
             oMutableData.push_back(Pair("signature", data.Signature()));
             oMutableData.push_back(Pair("seq_num", data.SequenceNumber));
             oMutableData.push_back(Pair("salt", data.Salt()));
-            oMutableData.push_back(Pair("value", data.Value()));
+            oMutableData.push_back(Pair("value", ExtractPutValue(data.Value())));
             result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
             nCounter++;
         }
@@ -277,13 +277,20 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("error", "Failed to get private key."));
         return result;
     }
-
+    if (getKey.GetPubKey() != entry.DHTPublicKey) {
+        //throw std::runtime_error("putbdapdata: ERRCODE: 5504 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
+        result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
+        result.push_back(Pair("wallet_pubkey", stringFromVch(getKey.GetPubKey())));
+        result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
+        result.push_back(Pair("error", "Wallet public key doesn't match BDAP entry."));
+        return result;
+    }
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
     result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
-    //result.push_back(Pair("put_privkey", stringFromVch(getKey.GetPrivKey())));
+    //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
     result.push_back(Pair("entry_key_id", pubKey.GetID().ToString()));
     result.push_back(Pair("put_key_id", getKey.GetID().ToString()));
     result.push_back(Pair("entry_key_hash", pubKey.GetHash().ToString()));
