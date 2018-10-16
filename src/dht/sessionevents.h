@@ -8,8 +8,8 @@
 #include <vector>
 
 namespace libtorrent {
-    struct session;
-    struct alert;
+    class session;
+    class alert;
 }
 
 typedef std::pair<std::string, std::string> MutableKey; // <pubkey, salt>

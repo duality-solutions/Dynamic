@@ -15,7 +15,6 @@ class CDHTStorage final : public dht_storage_interface
 public:
 
     explicit CDHTStorage(dht_settings const& settings)
-        : m_settings(settings)
     {
         pDefaultStorage = dht_default_storage_constructor(settings);
     }
@@ -50,7 +49,6 @@ public:
 
 private:
     std::unique_ptr<dht_storage_interface> pDefaultStorage;
-    dht_settings const& m_settings;
 
 };
 
