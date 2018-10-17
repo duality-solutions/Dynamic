@@ -1840,7 +1840,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         LOCK(pwalletMain->cs_wallet);
         LogPrintf("Locking Dynodes:\n");
         uint256 dnTxHash;
-        int outputIndex;
+        uint32_t outputIndex;
         for (const auto& dne : dynodeConfig.getEntries()) {
             dnTxHash.SetHex(dne.getTxHash());
             outputIndex = (uint32_t)atoi(dne.getOutputIndex());
