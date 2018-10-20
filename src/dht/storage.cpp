@@ -107,6 +107,13 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     return true;
 }
 
+static void GetValue(std::unique_ptr<char[]>& value, const span<char const>& buf)
+{
+    int const size = int(buf.size());
+    value.reset(new char[std::size_t(size)]);
+    std::memcpy(value.get(), buf.data(), buf.size());
+}
+
 void CDHTStorage::put_mutable_item(sha1_hash const& target
     , span<char const> buf
     , signature const& sig
@@ -117,7 +124,9 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
 {
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    std::string strPutValue = std::string(buf.data());
+    std::unique_ptr<char[]> value;
+    GetValue(value, buf);
+    std::string strPutValue = std::string(value.get());
     CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
@@ -127,7 +136,7 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchSalt = vchFromString(strSalt);
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+                    strInfoHash, strPutValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {
@@ -171,20 +180,6 @@ dht_storage_counters CDHTStorage::counters() const
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings)
 {
     return std::unique_ptr<CDHTStorage>(new CDHTStorage(settings));
-}
-
-std::string ExtractPutValue(std::string value)
-{
-    std::string strReturn = "";
-    size_t posStart = value.find(":") + 1;
-    size_t posEnd = 0;
-    if (!(posStart == std::string::npos)) {
-        posEnd = value.find("e1:q3:put1:t");
-        if (!(posEnd == std::string::npos) && value.size() > posEnd) {
-            strReturn = value.substr(posStart, posEnd - posStart);
-        }
-    }
-    return strReturn;
 }
 
 std::string ExtractSalt(std::string salt)

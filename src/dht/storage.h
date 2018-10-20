@@ -56,7 +56,6 @@ private:
 
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings);
 
-std::string ExtractPutValue(std::string value);
 std::string ExtractSalt(std::string salt);
 
 
