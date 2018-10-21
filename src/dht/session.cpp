@@ -54,6 +54,9 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
         dhtSession->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert)
         {
+            if ((*iAlert) == nullptr)
+                continue;
+
             std::string strAlertMessage = (*iAlert)->message();
             int iAlertType = (*iAlert)->type();
             if ((*iAlert)->category() == 0x1) {
@@ -68,6 +71,9 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
             else if ((*iAlert)->category() == 0x400) {
                 LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
+            //else {
+            //    LogPrintf("DHTTorrentNetwork -- other dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            //}
             if (iAlertType != alert_type)
             {
                 continue;

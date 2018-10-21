@@ -14,7 +14,8 @@
 #include <libtorrent/config.hpp>
 #include <libtorrent/hex.hpp>
 #include <libtorrent/random.hpp>
-#include <libtorrent/packet_buffer.hpp> 
+#include <libtorrent/packet_buffer.hpp>
+#include <libtorrent/span.hpp>
 #include <libtorrent/socket_io.hpp>
 
 #include <array>
@@ -107,7 +108,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     return true;
 }
 
-static void GetValue(std::unique_ptr<char[]>& value, const span<char const>& buf)
+void ExtractValue(std::unique_ptr<char[]>& value, const span<char const>& buf)
 {
     int const size = int(buf.size());
     value.reset(new char[std::size_t(size)]);
@@ -125,14 +126,16 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     std::unique_ptr<char[]> value;
-    GetValue(value, buf);
+    ExtractValue(value, buf);
     std::string strPutValue = std::string(value.get());
     CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
     CharString vchPublicKey = vchFromString(strPublicKey);
-    std::string strSalt = ExtractSalt(std::string(salt.data()));
+    std::unique_ptr<char[]> saltValue;
+    ExtractValue(saltValue, salt);
+    std::string strSalt = std::string(saltValue.get());
     CharString vchSalt = vchFromString(strSalt);
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
     LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
@@ -180,15 +183,4 @@ dht_storage_counters CDHTStorage::counters() const
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings)
 {
     return std::unique_ptr<CDHTStorage>(new CDHTStorage(settings));
-}
-
-std::string ExtractSalt(std::string salt)
-{
-    std::string strReturn = "";
-    size_t posEnd = salt.find("3:seqi");
-    if (!(posEnd == std::string::npos) && salt.size() > posEnd) {
-        strReturn = salt.substr(0, posEnd);
-    }
-    //LogPrintf("********** CDHTStorage -- ExtractSalt salt in = %, salt out = %s\n", salt, strReturn);
-    return strReturn;
 }

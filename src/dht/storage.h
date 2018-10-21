@@ -55,8 +55,6 @@ private:
 };
 
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings);
-
-std::string ExtractSalt(std::string salt);
-
+void ExtractValue(std::unique_ptr<char[]>& value, const span<char const>& buf);
 
 #endif // DYNAMIC_DHT_STORAGE_H
