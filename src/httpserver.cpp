@@ -46,7 +46,7 @@ public:
     HTTPWorkItem(std::unique_ptr<HTTPRequest> req, const std::string& path, const HTTPRequestHandler& func) : req(std::move(req)), path(path), func(func)
     {
     }
-    void operator()()
+    void operator()() override
     {
         func(req.get(), path);
     }
