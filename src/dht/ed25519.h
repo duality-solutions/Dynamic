@@ -12,6 +12,11 @@
 #include <cstring>
 #include <memory>
 
+static constexpr unsigned int ED25519_PUBLIC_KEY_BYTE_LENGTH        = 32;
+static constexpr unsigned int ED25519_PRIVATE_SEED_BYTE_LENGTH      = 32;
+static constexpr unsigned int ED25519_SIGTATURE_BYTE_LENGTH         = 64;
+static constexpr unsigned int ED25519_PRIVATE_KEY_BYTE_LENGTH       = 64;
+
 struct ed25519_context
 {
     ed25519_context() = default;
@@ -25,7 +30,7 @@ struct ed25519_context
     bool operator!=(ed25519_context const& rhs) const
     { return seed != rhs.seed; }
 
-    constexpr static int len = 32;
+    constexpr static int len = ED25519_PRIVATE_SEED_BYTE_LENGTH;
 
     std::array<char, len> seed;
     
@@ -68,11 +73,11 @@ public:
     /**
      * ed25519:
      */
-    std::array<char, 32> seed;
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> seed;
     //TODO (DHT): store privateKey in a secure allocator:
-    std::array<char, 64> privateKey;
+    std::array<char, ED25519_PRIVATE_KEY_BYTE_LENGTH> privateKey;
     //std::vector<unsigned char, secure_allocator<unsigned char> > keyData;
-    std::array<char, 32> publicKey;
+    std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> publicKey;
 
 public:
     //! Construct a new private key.
@@ -81,7 +86,7 @@ public:
         MakeNewKeyPair();
     }
 
-    CKeyEd25519(const std::array<char, 32>& _seed);
+    CKeyEd25519(const std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH>& _seed);
     CKeyEd25519(const std::vector<unsigned char>& _seed);
 
     //! Destructor (necessary because of memlocking). ??
@@ -109,15 +114,15 @@ public:
         return CPubKey(GetPubKey(), false);
     }
 
-    std::array<char, 32> GetDHTPrivSeed() const { return seed; }
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> GetDHTPrivSeed() const { return seed; }
     /**
      * Used for the Torrent DHT.
      */
-    std::array<char, 64> GetDHTPrivKey() const { return privateKey; }
+    std::array<char, ED25519_PRIVATE_KEY_BYTE_LENGTH> GetDHTPrivKey() const { return privateKey; }
     /**
      * Used for the Torrent DHT.
      */
-    std::array<char, 32> GetDHTPubKey() const { return publicKey; }
+    std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> GetDHTPubKey() const { return publicKey; }
 
     //void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
 

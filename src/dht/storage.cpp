@@ -4,6 +4,7 @@
 #include "storage.h"
 
 #include "bdap/domainentry.h"
+#include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "util.h"
@@ -24,7 +25,7 @@
 using namespace libtorrent;
 using namespace libtorrent::dht;
 
-size_t CDHTStorage::num_torrents() const 
+size_t CDHTStorage::num_torrents() const
 { 
     LogPrintf("********** CDHTStorage -- num_torrents **********\n");
     return pDefaultStorage->num_torrents(); 
@@ -114,7 +115,7 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     return true;
 }
 
-void ExtractValue(std::unique_ptr<char[]>& value, const span<char const>& buf)
+void ExtractValueFromSpan(std::unique_ptr<char[]>& value, const span<char const>& buf)
 {
     int const size = int(buf.size());
     value.reset(new char[std::size_t(size)]);
@@ -133,29 +134,27 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     //pDefaultStorage->put_mutable_item(target, buf, sig, seq, pk, salt, addr);
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
+
     std::unique_ptr<char[]> value;
-    ExtractValue(value, buf);
-    std::string strPutValue = std::string(value.get());
+    ExtractValueFromSpan(value, buf);
+    std::string strPutValue = std::string(value.get(), buf.size());
     CharString vchPutValue = vchFromString(strPutValue);
-    std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
+
+    std::string strSignature = aux::to_hex(std::string(sig.bytes.data(), ED25519_SIGTATURE_BYTE_LENGTH));
     CharString vchSignature = vchFromString(strSignature);
-    if (vchSignature.size() != 128) {
-        LogPrintf("********** CDHTStorage -- put_mutable_item Error: %d is an invalid signature length: %s\n", vchSignature.size(), strSignature);
-        return;
-    }
-    std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
+
+    std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data(), ED25519_PUBLIC_KEY_BYTE_LENGTH));
     CharString vchPublicKey = vchFromString(strPublicKey);
-    if (vchPublicKey.size() != 64) {
-        LogPrintf("********** CDHTStorage -- put_mutable_item Error: %d is an invalid pubkey length: %s\n", vchPublicKey.size(), strPublicKey);
-        return;
-    }
+
     std::unique_ptr<char[]> saltValue;
-    ExtractValue(saltValue, salt);
-    std::string strSalt = std::string(saltValue.get());
+    ExtractValueFromSpan(saltValue, salt);
+    std::string strSalt = std::string(saltValue.get(), salt.size());
     CharString vchSalt = vchFromString(strSalt);
+
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
-    LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, strPutValue, strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+    LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
+                    strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
+                    vchPutValue.size(), vchSignature.size(), vchPublicKey.size(), vchSalt.size());
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {
