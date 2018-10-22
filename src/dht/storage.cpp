@@ -70,6 +70,9 @@ void CDHTStorage::put_immutable_item(sha1_hash const& target, span<char const> b
 
 bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
 {
+    //bool ret = pDefaultStorage->get_mutable_item_seq(target, seq);
+    //return ret;
+    // TODO (DHT): Try to find entry in memory before searching leveldb
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
@@ -85,6 +88,9 @@ bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number&
 
 bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number const seq, bool const force_fill, entry& item) const
 {
+    //bool ret = pDefaultStorage->get_mutable_item(target, seq, force_fill, item);
+    //return ret;
+    // TODO (DHT): Try to find entry in memory before searching leveldb
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
@@ -123,6 +129,8 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     , span<char const> salt
     , address const& addr)
 {
+    // TODO (DHT): Store entries in memory as well
+    //pDefaultStorage->put_mutable_item(target, buf, sig, seq, pk, salt, addr);
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
     std::unique_ptr<char[]> value;
@@ -131,8 +139,16 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     CharString vchPutValue = vchFromString(strPutValue);
     std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
     CharString vchSignature = vchFromString(strSignature);
+    if (vchSignature.size() != 128) {
+        LogPrintf("********** CDHTStorage -- put_mutable_item Error: %d is an invalid signature length: %s\n", vchSignature.size(), strSignature);
+        return;
+    }
     std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
     CharString vchPublicKey = vchFromString(strPublicKey);
+    if (vchPublicKey.size() != 64) {
+        LogPrintf("********** CDHTStorage -- put_mutable_item Error: %d is an invalid pubkey length: %s\n", vchPublicKey.size(), strPublicKey);
+        return;
+    }
     std::unique_ptr<char[]> saltValue;
     ExtractValue(saltValue, salt);
     std::string strSalt = std::string(saltValue.get());
