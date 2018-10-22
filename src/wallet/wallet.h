@@ -827,7 +827,7 @@ public:
     int CountInputsWithAmount(CAmount nInputAmount);
 
     // get the PrivateSend chain depth for a given input
-    int GetRealOutpointPrivateSendRounds(const COutPoint& outpoint, int nRounds) const;
+    int GetRealOutpointPrivateSendRounds(const COutPoint& outpoint, int nRounds = 0) const;
     // respect current settings
     int GetOutpointPrivateSendRounds(const COutPoint& outpoint) const;
 
