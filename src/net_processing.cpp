@@ -740,7 +740,8 @@ void Misbehaving(NodeId pnode, int howmuch)
 // blockchain -> download logic notification
 //
 
-PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn) : connman(connmanIn)
+PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn) : 
+    connman(connmanIn)
 {
     // Initialize global variables that cannot be constructed at startup.
     recentRejects.reset(new CRollingBloomFilter(120000, 0.000001));
