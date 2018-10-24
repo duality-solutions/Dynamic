@@ -54,10 +54,8 @@ private:
 
 };
 
+void ExtractValueFromSpan(std::unique_ptr<char[]>& value, const span<char const>& buf);
+
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings);
-
-std::string ExtractPutValue(std::string value);
-std::string ExtractSalt(std::string salt);
-
 
 #endif // DYNAMIC_DHT_STORAGE_H

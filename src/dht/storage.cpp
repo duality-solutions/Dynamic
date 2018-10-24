@@ -4,6 +4,7 @@
 #include "storage.h"
 
 #include "bdap/domainentry.h"
+#include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "util.h"
@@ -14,7 +15,8 @@
 #include <libtorrent/config.hpp>
 #include <libtorrent/hex.hpp>
 #include <libtorrent/random.hpp>
-#include <libtorrent/packet_buffer.hpp> 
+#include <libtorrent/packet_buffer.hpp>
+#include <libtorrent/span.hpp>
 #include <libtorrent/socket_io.hpp>
 
 #include <array>
@@ -23,7 +25,7 @@
 using namespace libtorrent;
 using namespace libtorrent::dht;
 
-size_t CDHTStorage::num_torrents() const 
+size_t CDHTStorage::num_torrents() const
 { 
     LogPrintf("********** CDHTStorage -- num_torrents **********\n");
     return pDefaultStorage->num_torrents(); 
@@ -69,6 +71,9 @@ void CDHTStorage::put_immutable_item(sha1_hash const& target, span<char const> b
 
 bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number& seq) const
 {
+    //bool ret = pDefaultStorage->get_mutable_item_seq(target, seq);
+    //return ret;
+    // TODO (DHT): Try to find entry in memory before searching leveldb
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
@@ -84,6 +89,9 @@ bool CDHTStorage::get_mutable_item_seq(sha1_hash const& target, sequence_number&
 
 bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number const seq, bool const force_fill, entry& item) const
 {
+    //bool ret = pDefaultStorage->get_mutable_item(target, seq, force_fill, item);
+    //return ret;
+    // TODO (DHT): Try to find entry in memory before searching leveldb
     CMutableData mutableData;
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
@@ -107,6 +115,13 @@ bool CDHTStorage::get_mutable_item(sha1_hash const& target, sequence_number cons
     return true;
 }
 
+void ExtractValueFromSpan(std::unique_ptr<char[]>& value, const span<char const>& buf)
+{
+    int const size = int(buf.size());
+    value.reset(new char[std::size_t(size)]);
+    std::memcpy(value.get(), buf.data(), buf.size());
+}
+
 void CDHTStorage::put_mutable_item(sha1_hash const& target
     , span<char const> buf
     , signature const& sig
@@ -115,19 +130,31 @@ void CDHTStorage::put_mutable_item(sha1_hash const& target
     , span<char const> salt
     , address const& addr)
 {
+    // TODO (DHT): Store entries in memory as well
+    //pDefaultStorage->put_mutable_item(target, buf, sig, seq, pk, salt, addr);
     std::string strInfoHash = aux::to_hex(target.to_string());
     CharString vchInfoHash = vchFromString(strInfoHash);
-    std::string strPutValue = std::string(buf.data());
+
+    std::unique_ptr<char[]> value;
+    ExtractValueFromSpan(value, buf);
+    std::string strPutValue = std::string(value.get(), buf.size());
     CharString vchPutValue = vchFromString(strPutValue);
-    std::string strSignature = aux::to_hex(std::string(sig.bytes.data()));
+
+    std::string strSignature = aux::to_hex(std::string(sig.bytes.data(), ED25519_SIGTATURE_BYTE_LENGTH));
     CharString vchSignature = vchFromString(strSignature);
-    std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data()));
+
+    std::string strPublicKey = aux::to_hex(std::string(pk.bytes.data(), ED25519_PUBLIC_KEY_BYTE_LENGTH));
     CharString vchPublicKey = vchFromString(strPublicKey);
-    std::string strSalt = ExtractSalt(std::string(salt.data()));
+
+    std::unique_ptr<char[]> saltValue;
+    ExtractValueFromSpan(saltValue, salt);
+    std::string strSalt = std::string(saltValue.get(), salt.size());
     CharString vchSalt = vchFromString(strSalt);
+
     CMutableData putMutableData(vchInfoHash, vchPublicKey, vchSignature, seq.value, vchSalt, vchPutValue);
-    LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, sig = %s, pubkey = %s, salt = %s, seq = %d \n", 
-                    strInfoHash, ExtractPutValue(strPutValue), strSignature, strPublicKey, strSalt, putMutableData.SequenceNumber);
+    LogPrintf("********** CDHTStorage -- put_mutable_item info_hash = %s, buf_value = %s, salt = %s, seq = %d, put_size = %d, sig_size = %d, pubkey_size = %d, salt_size = %d\n", 
+                    strInfoHash, strPutValue, strSalt, putMutableData.SequenceNumber, 
+                    vchPutValue.size(), vchSignature.size(), vchPublicKey.size(), vchSalt.size());
 
     CMutableData previousData;
     if (!GetLocalMutableData(vchInfoHash, previousData)) {
@@ -171,29 +198,4 @@ dht_storage_counters CDHTStorage::counters() const
 std::unique_ptr<dht_storage_interface> CDHTStorageConstructor(dht_settings const& settings)
 {
     return std::unique_ptr<CDHTStorage>(new CDHTStorage(settings));
-}
-
-std::string ExtractPutValue(std::string value)
-{
-    std::string strReturn = "";
-    size_t posStart = value.find(":") + 1;
-    size_t posEnd = 0;
-    if (!(posStart == std::string::npos)) {
-        posEnd = value.find("e1:q3:put1:t");
-        if (!(posEnd == std::string::npos) && value.size() > posEnd) {
-            strReturn = value.substr(posStart, posEnd - posStart);
-        }
-    }
-    return strReturn;
-}
-
-std::string ExtractSalt(std::string salt)
-{
-    std::string strReturn = "";
-    size_t posEnd = salt.find("3:seqi");
-    if (!(posEnd == std::string::npos) && salt.size() > posEnd) {
-        strReturn = salt.substr(0, posEnd);
-    }
-    //LogPrintf("********** CDHTStorage -- ExtractSalt salt in = %, salt out = %s\n", salt, strReturn);
-    return strReturn;
 }
