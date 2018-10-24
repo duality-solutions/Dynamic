@@ -20,7 +20,6 @@
 
 using namespace libtorrent;
 
-typedef std::pair<std::string, std::string> MutableKey;
 typedef std::map<uint64_t, CEvent> EventMap;
 typedef std::map<MutableKey, CMutableDataEvent> DHTEventMap;
 
@@ -33,8 +32,15 @@ static EventMap m_EventMap;
 static DHTEventMap m_DHTEventMap;
 
 CEvent::CEvent(libtorrent::alert* alert) {
-    pAlert = alert;
-    timestamp = total_milliseconds(clock_type::now() - pAlert->timestamp());
+    SetAlert(alert);
+}
+
+void CEvent::SetAlert(libtorrent::alert* alert)
+{
+    if (alert != nullptr) {
+        pAlert = alert;
+        timestamp = total_milliseconds(clock_type::now() - pAlert->timestamp());
+    }
 }
 
 std::string CEvent::Message() const
@@ -44,7 +50,7 @@ std::string CEvent::Message() const
     return pAlert->message();
 }
 
-int CEvent::Type() const 
+int CEvent::Type() const
 {
     if (pAlert == nullptr)
         return 0;
@@ -124,11 +130,32 @@ static bool ParseDHTMessage(const std::string& strAlertMessage, MutableKey& key,
 
 CMutableDataEvent::CMutableDataEvent(alert* alert) : CEvent(alert)
 {
-    MutableKey key;
-    ParseDHTMessage(Message(), key, seq); // parse key, salt and seq
-    pubkey = key.first;
-    salt = key.second;
-    LogPrintf("CMutableDataEvent::CMutableDataEvent -- pubkey = %s, salt = %s, seq = %u.\n", pubkey, salt, seq);
+    Init();
+}
+
+CMutableDataEvent::CMutableDataEvent() : CEvent()
+{
+}
+
+bool CMutableDataEvent::Init()
+{
+    if (pAlert != nullptr) {
+        MutableKey key;
+        ParseDHTMessage(Message(), key, seq); // parse key, salt and seq
+        pubkey = key.first;
+        salt = key.second;
+        LogPrintf("CMutableDataEvent::Init -- pubkey = %s, salt = %s, seq = %u.\n", pubkey, salt, seq);
+        return true;
+    }
+    return false;
+}
+
+void CMutableDataEvent::SetAlert(libtorrent::alert* alert)
+{
+    if (alert != nullptr) {
+        CEvent::SetAlert(alert);
+        Init();
+    }
 }
 
 std::string CMutableDataEvent::InfoHash() const
@@ -159,11 +186,16 @@ static void  DHTEventListener(session* dhtSession)
                     LogPrintf("DHTEventListener -- Error parsing DHT alert message start.\n");
                     continue;
                 }
-                
-                //CMutableDataEvent findEvent = m_DHTEventMap.find(mKey);
-                // TODO: (DHT) Add map entry
-                // find existing map for this entry
-                //m_DHTEventMap.insert(std::make_pair(event,value));
+                CMutableDataEvent event((*iAlert));
+                std::map<MutableKey, CMutableDataEvent>::iterator iMutableEvent = m_DHTEventMap.find(mKey);
+                if (iMutableEvent == m_DHTEventMap.end()) {
+                    // event not found. Add a new entry to DHT event map
+                    m_DHTEventMap.insert(std::make_pair(mKey, event));
+                }
+                else {
+                    // event found. Update entry in DHT event map
+                    iMutableEvent->second = event;
+                }
             }
             else {
                 CEvent event((*iAlert));
@@ -198,14 +230,25 @@ void StartEventListener(session* dhtSession)
     pEventListenerThread = std::make_shared<std::thread>(std::bind(&DHTEventListener, std::ref(dhtSession)));
 }
 
-bool FindLastEvent(CEvent& event)
+bool GetLastEvents(const uint64_t startTime, std::vector<CEvent>& events)
 {
-    // TODO: (DHT) lookup in m_EventMap
-    return false;
+    std::map<uint64_t, CEvent>::reverse_iterator iEvent;
+    for (iEvent = m_EventMap.rbegin(); iEvent != m_EventMap.rend(); ++iEvent) {
+        if (iEvent->second.Timestamp() < startTime) {
+            break;
+        }
+        events.push_back(iEvent->second);
+    }
+    return events.size() > 0;
 }
 
-bool FindLastDHTEvent(CMutableDataEvent& event)
+bool FindLastDHTEvent(const MutableKey& mKey, CMutableDataEvent& event)
 {
-    // TODO: (DHT) lookup in m_DHTEventMap
+    std::map<MutableKey, CMutableDataEvent>::iterator iMutableEvent = m_DHTEventMap.find(mKey);
+    if (iMutableEvent != m_DHTEventMap.end()) {
+        // event found.
+        event = iMutableEvent->second;
+        return true;
+    }
     return false;
 }
