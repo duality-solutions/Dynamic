@@ -12,7 +12,7 @@ namespace libtorrent {
     struct alert;
 }
 
-typedef std::pair<std::string, std::string> MutableKey;
+typedef std::pair<std::string, std::string> MutableKey; // <pubkey, salt>
 
 class CEvent { 
 public:
@@ -26,7 +26,7 @@ public:
     void SetAlert(libtorrent::alert* alert);
     std::string Message() const;
     int Type() const;
-    unsigned int Category() const;
+    uint32_t Category() const;
     std::string What() const;
     std::int64_t Timestamp() const; // microseconds since session started
     std::string ToString() const;
@@ -74,7 +74,7 @@ public:
 void StopEventListener();
 void StartEventListener(libtorrent::session* dhtSession);
 
-bool GetLastEvents(const uint64_t startTime, std::vector<CEvent>& events);
+bool GetLastCategoryEvents(const uint32_t category, const int64_t& startTime, std::vector<CEvent>& events);
 bool FindLastDHTEvent(const MutableKey& mKey, CMutableDataEvent& event);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

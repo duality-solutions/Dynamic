@@ -3,6 +3,7 @@
 
 #include "dht/sessionevents.h"
 
+#include "sync.h" // for LOCK and CCriticalSection
 #include "util.h" // for LogPrintf
 
 #include <libtorrent/alert.hpp>
@@ -20,15 +21,16 @@
 
 using namespace libtorrent;
 
-typedef std::map<uint64_t, CEvent> EventMap;
+typedef std::pair<int64_t, CEvent> EventPair;
+typedef std::multimap<uint32_t, EventPair> EventCategoryMap;
 typedef std::map<MutableKey, CMutableDataEvent> DHTEventMap;
 
-static std::mutex mut_EventMap;
-static std::mutex mut_DHTEventMap;
+static CCriticalSection cs_EventMap;
+static CCriticalSection cs_DHTEventMap;
 
 static bool fShutdown;
 static std::shared_ptr<std::thread> pEventListenerThread;
-static EventMap m_EventMap;
+static EventCategoryMap m_EventCategoryMap;
 static DHTEventMap m_DHTEventMap;
 
 CEvent::CEvent(libtorrent::alert* alert) {
@@ -57,7 +59,7 @@ int CEvent::Type() const
     return pAlert->type();
 }
 
-unsigned int CEvent::Category() const 
+uint32_t CEvent::Category() const 
 {
     if (pAlert == nullptr)
         return 0;
@@ -168,6 +170,26 @@ std::string CMutableDataEvent::InfoHash() const
     return infoHash.to_string();
 }
 
+static void AddToDHTEventMap(const MutableKey& mKey, const CMutableDataEvent& event) 
+{
+    LOCK(cs_DHTEventMap);
+    std::map<MutableKey, CMutableDataEvent>::iterator iMutableEvent = m_DHTEventMap.find(mKey);
+    if (iMutableEvent == m_DHTEventMap.end()) {
+        // event not found. Add a new entry to DHT event map
+        m_DHTEventMap.insert(std::make_pair(mKey, event));
+    }
+    else {
+        // event found. Update entry in DHT event map
+        iMutableEvent->second = event;
+    }
+}
+
+static void AddToEventMap(const uint32_t category, const CEvent& event) 
+{
+    LOCK(cs_EventMap);
+    m_EventCategoryMap.insert(std::make_pair(category, std::make_pair(event.Timestamp(), event)));
+}
+
 static void  DHTEventListener(session* dhtSession)
 {
     unsigned int counter = 0;
@@ -177,29 +199,25 @@ static void  DHTEventListener(session* dhtSession)
         std::vector<alert*> alerts;
         dhtSession->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
-            std::string strAlertMessage = (*iAlert)->message();
-            int iAlertType = (*iAlert)->type();
-            if ((*iAlert)->category() == 0x400) {
+            if ((*iAlert) == nullptr)
+                continue;
+
+            const uint32_t category = (*iAlert)->category();
+            const std::string strAlertMessage = (*iAlert)->message();
+            const int iAlertType = (*iAlert)->type();
+            if (category == 0x400) {
                 LogPrintf("DHTEventListener -- DHT Alert Message = %s, Alert Type =%d\n", strAlertMessage, iAlertType);
                 MutableKey mKey; // parse key and salt
                 if (!ParseDHTMessageKey(strAlertMessage, mKey)) {
                     LogPrintf("DHTEventListener -- Error parsing DHT alert message start.\n");
                     continue;
                 }
-                CMutableDataEvent event((*iAlert));
-                std::map<MutableKey, CMutableDataEvent>::iterator iMutableEvent = m_DHTEventMap.find(mKey);
-                if (iMutableEvent == m_DHTEventMap.end()) {
-                    // event not found. Add a new entry to DHT event map
-                    m_DHTEventMap.insert(std::make_pair(mKey, event));
-                }
-                else {
-                    // event found. Update entry in DHT event map
-                    iMutableEvent->second = event;
-                }
+                const CMutableDataEvent event((*iAlert));
+                AddToDHTEventMap(mKey, event);
             }
             else {
-                CEvent event((*iAlert));
-                m_EventMap.insert(std::make_pair(event.Timestamp(), event));
+                const CEvent event((*iAlert));
+                AddToEventMap(category, event);
             }
         }
         if (fShutdown)
@@ -230,20 +248,22 @@ void StartEventListener(session* dhtSession)
     pEventListenerThread = std::make_shared<std::thread>(std::bind(&DHTEventListener, std::ref(dhtSession)));
 }
 
-bool GetLastEvents(const uint64_t startTime, std::vector<CEvent>& events)
+bool GetLastCategoryEvents(const uint32_t category, const int64_t& startTime, std::vector<CEvent>& events)
 {
-    std::map<uint64_t, CEvent>::reverse_iterator iEvent;
-    for (iEvent = m_EventMap.rbegin(); iEvent != m_EventMap.rend(); ++iEvent) {
-        if (iEvent->second.Timestamp() < startTime) {
-            break;
+    LOCK(cs_EventMap);
+    std::multimap<uint32_t, EventPair>::iterator iEvents = m_EventCategoryMap.find(category);
+    while (iEvents != m_EventCategoryMap.end()) {
+        if (iEvents->second.first >= startTime) {
+            events.push_back(iEvents->second.second);
         }
-        events.push_back(iEvent->second);
+        iEvents++;
     }
     return events.size() > 0;
 }
 
 bool FindLastDHTEvent(const MutableKey& mKey, CMutableDataEvent& event)
 {
+    LOCK(cs_DHTEventMap);
     std::map<MutableKey, CMutableDataEvent>::iterator iMutableEvent = m_DHTEventMap.find(mKey);
     if (iMutableEvent != m_DHTEventMap.end()) {
         // event found.
