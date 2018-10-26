@@ -10,8 +10,8 @@
 
 #include "compressor.h"
 #include "consensus/consensus.h"
-#include "serialize.h"
 #include "primitives/transaction.h"
+#include "serialize.h"
 
 /** Undo information for a CTxIn
  *
@@ -25,8 +25,9 @@ class TxInUndoSerializer
     const Coin* txout;
 
 public:
-    template<typename Stream>
-    void Serialize(Stream &s) const {
+    template <typename Stream>
+    void Serialize(Stream& s) const
+    {
         ::Serialize(s, VARINT(txout->nHeight * 2 + (txout->fCoinBase ? 1 : 0)));
         if (txout->nHeight > 0) {
             // Required to maintain compatibility with older undo format.
@@ -43,8 +44,9 @@ class TxInUndoDeserializer
     Coin* txout;
 
 public:
-    template<typename Stream>
-    void Unserialize(Stream &s) {
+    template <typename Stream>
+    void Unserialize(Stream& s)
+    {
         unsigned int nCode = 0;
         ::Unserialize(s, VARINT(nCode));
         txout->nHeight = nCode / 2;
@@ -72,7 +74,8 @@ public:
     std::vector<Coin> vprevout;
 
     template <typename Stream>
-    void Serialize(Stream& s) const {
+    void Serialize(Stream& s) const
+    {
         // TODO: avoid reimplementing vector serializer
         uint64_t count = vprevout.size();
         ::Serialize(s, COMPACTSIZE(REF(count)));
@@ -82,7 +85,8 @@ public:
     }
 
     template <typename Stream>
-    void Unserialize(Stream& s) {
+    void Unserialize(Stream& s)
+    {
         // TODO: avoid reimplementing vector deserializer
         uint64_t count = 0;
         ::Unserialize(s, COMPACTSIZE(count));
@@ -105,7 +109,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(vtxundo);
     }
 };

@@ -8,12 +8,12 @@
 #ifndef DYNAMIC_POW_H
 #define DYNAMIC_POW_H
 
-#include <consensus/params.h>
 #include <arith_uint256.h>
 #include <chain.h>
+#include <consensus/params.h>
+#include <stdint.h>
 #include <sync.h>
 #include <util.h>
-#include <stdint.h>
 
 class arith_uint256;
 class CBlockHeader;
@@ -22,9 +22,9 @@ class uint256;
 
 #define PERCENT_FACTOR 100
 
-#define BLOCK_TYPE CBlockHeader *
+#define BLOCK_TYPE CBlockHeader*
 #define BLOCK_TIME(block) block->nTime
-#define INDEX_TYPE CBlockIndex *
+#define INDEX_TYPE CBlockIndex*
 #define INDEX_HEIGHT(block) block->nHeight
 #define INDEX_TIME(block) block->GetBlockTime()
 #define INDEX_PREV(block) block->pprev
@@ -39,9 +39,9 @@ class uint256;
 
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex);
 
-bool CheckForkIsTrue(const CBlockIndex* pindexLast, bool fTableFlip=false);
+bool CheckForkIsTrue(const CBlockIndex* pindexLast, bool fTableFlip = false);
 
-unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
+unsigned int LegacyRetargetBlock(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params&);
 unsigned int GetNextWorkRequired(const INDEX_TYPE pindexLast, const BLOCK_TYPE block, const Consensus::Params&);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */

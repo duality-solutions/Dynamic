@@ -13,6 +13,7 @@ class CKeyHolder
 private:
     CReserveKey reserveKey;
     CPubKey pubKey;
+
 public:
     CKeyHolder(CWallet* pwalletIn);
     CKeyHolder(CKeyHolder&&) = default;
@@ -21,7 +22,6 @@ public:
     void ReturnKey();
 
     CScript GetScriptForDestination() const;
-
 };
 
 class CKeyHolderStorage
@@ -31,9 +31,8 @@ private:
     mutable CCriticalSection cs_storage;
 
 public:
-    const CKeyHolder& AddKey(CWallet* pwalletIn);
+    CScript AddKey(CWallet* pwalletIn);
     void KeepAll();
     void ReturnAll();
-
 };
 #endif //PRIVATESENDUTIL_H

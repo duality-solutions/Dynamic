@@ -23,14 +23,12 @@ CFluid fluid;
 extern CWallet* pwalletMain;
 #endif //ENABLE_WALLET
 
-bool IsTransactionFluid(const CScript& txOut) {
-    return (txOut.IsProtocolInstruction(MINT_TX)
-            || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX)
-            || txOut.IsProtocolInstruction(MINING_MODIFY_TX)
-           );
+bool IsTransactionFluid(const CScript& txOut)
+{
+    return (txOut.IsProtocolInstruction(MINT_TX) || txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) || txOut.IsProtocolInstruction(MINING_MODIFY_TX));
 }
 
-bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript) 
+bool IsTransactionFluid(const CTransaction& tx, CScript& fluidScript)
 {
     for (const CTxOut& txout : tx.vout) {
         CScript txOut = txout.scriptPubKey;
@@ -46,52 +44,49 @@ int GetFluidOpCode(const CScript& fluidScript)
 {
     if (fluidScript.IsProtocolInstruction(MINT_TX)) {
         return OP_MINT;
-    }
-    else if (fluidScript.IsProtocolInstruction(DYNODE_MODFIY_TX))
-    {
+    } else if (fluidScript.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
         return OP_REWARD_DYNODE;
-    }
-    else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX))
-    {
+    } else if (fluidScript.IsProtocolInstruction(MINING_MODIFY_TX)) {
         return OP_REWARD_MINING;
     }
     return 0;
 }
 
 /** Initialise sovereign identities that are able to run fluid commands */
-std::vector<std::pair<std::string, CDynamicAddress>> CFluidParameters::InitialiseSovereignIdentities() {
-    std::vector<std::pair<std::string, CDynamicAddress>> x;
+std::vector<std::pair<std::string, CDynamicAddress> > CFluidParameters::InitialiseSovereignIdentities()
+{
+    std::vector<std::pair<std::string, CDynamicAddress> > x;
     if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        x.push_back(std::make_pair("CEO",       CDynamicAddress("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu")));
-        x.push_back(std::make_pair("CTO",       CDynamicAddress("DRoyjRoxP4qfeAiiZHX1dmSkbUJiBSXBt7")));
-        x.push_back(std::make_pair("CFO",       CDynamicAddress("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t")));
-        x.push_back(std::make_pair("COO",       CDynamicAddress("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH")));
-        x.push_back(std::make_pair("CDOO",      CDynamicAddress("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP")));
-    }
-    else if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
-        x.push_back(std::make_pair("Test01",    CDynamicAddress("DSCex4e189aULrig3nLd42gVf7AbjTwnP5"))); //importprivatekey QVKXuZ2hSo2cT9BhkN3CApLuZYVsuzNvidJRt1ucyniHheZ2Pfq5
-        x.push_back(std::make_pair("Test02",    CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1 
-        x.push_back(std::make_pair("Test03",    CDynamicAddress("DN4KvqtXyygooPV3oha72TyBB5nqBbkxwj"))); //importprivatekey QWjTe6sCFVtKBsXfrYDyrHzn7eBeJktsQnWzfiANkMd9PhVM4Qnp
-        x.push_back(std::make_pair("Test04",    CDynamicAddress("DHVmS621KBBZJTJSxGDdLxoU7LCmpexWDa"))); //importprivatekey QScWuazWgWDTj8cXXz1YFKJW7mNJHJgMFY2FB6hkNyh3SJDUhPZt
-        x.push_back(std::make_pair("Test05",    CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU
-    }
-    else if (Params().NetworkIDString() == CBaseChainParams::REGTEST) {
+        x.push_back(std::make_pair("CEO", CDynamicAddress("D9avNWVBmaUNevMNnkcLMrQpze8M2mKURu")));
+        x.push_back(std::make_pair("CTO", CDynamicAddress("DRoyjRoxP4qfeAiiZHX1dmSkbUJiBSXBt7")));
+        x.push_back(std::make_pair("CFO", CDynamicAddress("DHkD6oBQ5PtCiKo4wX8CRWrG61Vy5hEu4t")));
+        x.push_back(std::make_pair("COO", CDynamicAddress("DKyqamefa7YdbqrP5pdTfNVVuq1gerNhMH")));
+        x.push_back(std::make_pair("CDOO", CDynamicAddress("DUDE1zFKK4fezCgcxdGbFh4yHJMcg8qpoP")));
+    } else if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+        x.push_back(std::make_pair("Test01", CDynamicAddress("DSCex4e189aULrig3nLd42gVf7AbjTwnP5"))); //importprivatekey QVKXuZ2hSo2cT9BhkN3CApLuZYVsuzNvidJRt1ucyniHheZ2Pfq5
+        x.push_back(std::make_pair("Test02", CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1
+        x.push_back(std::make_pair("Test03", CDynamicAddress("DN4KvqtXyygooPV3oha72TyBB5nqBbkxwj"))); //importprivatekey QWjTe6sCFVtKBsXfrYDyrHzn7eBeJktsQnWzfiANkMd9PhVM4Qnp
+        x.push_back(std::make_pair("Test04", CDynamicAddress("DHVmS621KBBZJTJSxGDdLxoU7LCmpexWDa"))); //importprivatekey QScWuazWgWDTj8cXXz1YFKJW7mNJHJgMFY2FB6hkNyh3SJDUhPZt
+        x.push_back(std::make_pair("Test05", CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU
+    } else if (Params().NetworkIDString() == CBaseChainParams::REGTEST) {
         x.push_back(std::make_pair("RegTest01", CDynamicAddress("DSCex4e189aULrig3nLd42gVf7AbjTwnP5"))); //importprivatekey QVKXuZ2hSo2cT9BhkN3CApLuZYVsuzNvidJRt1ucyniHheZ2Pfq5
-        x.push_back(std::make_pair("RegTest02", CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1 
+        x.push_back(std::make_pair("RegTest02", CDynamicAddress("DMAh37n3RUdDxox3uiWAnc1zEPp5yFbHiL"))); //importprivatekey QU4VGDcVoej7nDZiyaSgoL7foG8xKiaVyk5odHnJdtyv4tYkmBw1
         x.push_back(std::make_pair("RegTest03", CDynamicAddress("DN4KvqtXyygooPV3oha72TyBB5nqBbkxwj"))); //importprivatekey QWjTe6sCFVtKBsXfrYDyrHzn7eBeJktsQnWzfiANkMd9PhVM4Qnp
         x.push_back(std::make_pair("RegTest04", CDynamicAddress("DHVmS621KBBZJTJSxGDdLxoU7LCmpexWDa"))); //importprivatekey QScWuazWgWDTj8cXXz1YFKJW7mNJHJgMFY2FB6hkNyh3SJDUhPZt
-        x.push_back(std::make_pair("RegTest05", CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU 
+        x.push_back(std::make_pair("RegTest05", CDynamicAddress("DCZXDSRB3cJdCCUSerE4pvSfGQoXUivUxo"))); //importprivatekey QUt4pEDanRPzos3meoiNGUG9g7RctCtiwLoPjhDKfNPK99oLuzcU
     }
     return x;
 }
 
-std::vector<std::string> InitialiseAddresses() {
+std::vector<std::string> InitialiseAddresses()
+{
     CFluidParameters params;
     return params.InitialiseAddresses();
 }
 
 /** Checks if any given address is a current master key (invoked by RPC) */
-bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
+bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey)
+{
     if (!inputKey.IsValid()) {
         return false;
     }
@@ -104,7 +99,7 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
         //TODO fluid
         fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
     }
-        
+
     else
         fluidSovereigns = InitialiseAddresses();
 
@@ -117,19 +112,20 @@ bool CFluid::IsGivenKeyMaster(CDynamicAddress inputKey) {
     return false;
 }
 
-std::vector<std::string> CFluidParameters::InitialiseAddresses() {
+std::vector<std::string> CFluidParameters::InitialiseAddresses()
+{
     std::vector<std::string> initialSovereignAddresses;
-    std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
+    std::vector<std::pair<std::string, CDynamicAddress> > fluidIdentities = InitialiseSovereignIdentities();
     for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
         initialSovereignAddresses.push_back(sovereignId.second.ToString());
     }
     return initialSovereignAddresses;
 }
 
-std::vector<std::vector<unsigned char>> CFluidParameters::InitialiseAddressCharVector()
+std::vector<std::vector<unsigned char> > CFluidParameters::InitialiseAddressCharVector()
 {
-    std::vector<std::vector<unsigned char>> initialSovereignAddresses;
-    std::vector<std::pair<std::string, CDynamicAddress>> fluidIdentities = InitialiseSovereignIdentities();
+    std::vector<std::vector<unsigned char> > initialSovereignAddresses;
+    std::vector<std::pair<std::string, CDynamicAddress> > fluidIdentities = InitialiseSovereignIdentities();
     for (const std::pair<std::string, CDynamicAddress>& sovereignId : fluidIdentities) {
         initialSovereignAddresses.push_back(CharVectorFromString(sovereignId.second.ToString()));
     }
@@ -137,7 +133,8 @@ std::vector<std::vector<unsigned char>> CFluidParameters::InitialiseAddressCharV
 }
 
 /** Checks fluid transactoin operation script amount for invalid values. */
-bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck) {
+bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const int64_t timeStamp, std::string& errorMessage, bool fSkipTimeStampCheck)
+{
     std::string strFluidOpScript = ScriptToAsmStr(fluidScriptPubKey);
     std::string verificationWithoutOpCode = GetRidOfScriptStatement(strFluidOpScript);
     std::string strOperationCode = GetRidOfScriptStatement(strFluidOpScript, 0);
@@ -159,27 +156,22 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
                 if ((strOperationCode == "OP_REWARD_MINING" || strOperationCode == "OP_REWARD_DYNODE") && fluidAmount < 0) {
                     errorMessage = "CheckFluidOperationScript fluid reward amount is less than zero: " + strAmount;
                     return false;
-                }
-                else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
+                } else if (strOperationCode == "OP_MINT" && (fluidAmount > FLUID_MAX_FOR_MINT)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_MINT amount exceeds maximum: " + strAmount;
                     return false;
-                }
-                else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
+                } else if (strOperationCode == "OP_REWARD_MINING" && (fluidAmount > FLUID_MAX_REWARD_FOR_MINING)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_REWARD_MINING amount exceeds maximum: " + strAmount;
                     return false;
-                }
-                else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
+                } else if (strOperationCode == "OP_REWARD_DYNODE" && (fluidAmount > FLUID_MAX_REWARD_FOR_DYNODE)) {
                     errorMessage = "CheckFluidOperationScript fluid OP_REWARD_DYNODE amount exceeds maximum: " + strAmount;
                     return false;
                 }
             }
-        }
-        else {
+        } else {
             errorMessage = "CheckFluidOperationScript fluid token invalid. " + strUnHexedFluidOpScript;
             return false;
         }
-    }
-    else {
+    } else {
         errorMessage = "CheckFluidOperationScript fluid token is not hex. " + verificationWithoutOpCode;
         return false;
     }
@@ -188,8 +180,8 @@ bool CFluid::CheckFluidOperationScript(const CScript& fluidScriptPubKey, const i
 }
 
 /** Checks whether fluid transaction is in the memory pool already */
-bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage) {
-
+bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluidScriptPubKey, std::string& errorMessage)
+{
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransaction& tx = e.GetTx();
         for (const CTxOut& txOut : tx.vout) {
@@ -211,7 +203,8 @@ bool CFluid::CheckIfExistsInMemPool(const CTxMemPool& pool, const CScript& fluid
 }
 
 /** Checks whether as to parties have actually signed it - please use this with ones with the OP_CODE */
-bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &message, bool individual) {
+bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string& message, bool individual)
+{
     std::vector<std::string> fluidSovereigns;
     std::pair<CDynamicAddress, bool> keyOne;
     std::pair<CDynamicAddress, bool> keyTwo;
@@ -225,8 +218,7 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
     if (pindex != NULL) {
         //TODO fluid
         fluidSovereigns = InitialiseAddresses(); //pindex->fluidParams.fluidSovereigns;
-    }
-    else
+    } else
         fluidSovereigns = InitialiseAddresses();
 
     for (const std::string& address : fluidSovereigns) {
@@ -248,8 +240,7 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
         }
     }
 
-    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString()
-                   && keyOne.first.ToString() != keyThree.first.ToString());
+    bool fValid = (keyOne.first.ToString() != keyTwo.first.ToString() && keyTwo.first.ToString() != keyThree.first.ToString() && keyOne.first.ToString() != keyThree.first.ToString());
 
     LogPrint("fluid", "CheckIfQuorumExists(): Addresses validating this consent token are: %s, %s and %s\n", keyOne.first.ToString(), keyTwo.first.ToString(), keyThree.first.ToString());
 
@@ -263,27 +254,29 @@ bool CFluid::CheckIfQuorumExists(const std::string consentToken, std::string &me
 
 
 /** Checks whether as to parties have actually signed it - please use this with ones **without** the OP_CODE */
-bool CFluid::CheckNonScriptQuorum(const std::string consentToken, std::string &message, bool individual) {
+bool CFluid::CheckNonScriptQuorum(const std::string consentToken, std::string& message, bool individual)
+{
     std::string result = "12345 " + consentToken;
     return CheckIfQuorumExists(result, message, individual);
 }
 
 /** It will append a signature of the new information */
-bool CFluid::GenericConsentMessage(std::string message, std::string &signedString, CDynamicAddress signer) {
+bool CFluid::GenericConsentMessage(std::string message, std::string& signedString, CDynamicAddress signer)
+{
     std::string token, digest;
 
     if (!IsHex(message))
         return false;
 
-    if(!CheckNonScriptQuorum(message, token, true))
+    if (!CheckNonScriptQuorum(message, token, true))
         return false;
 
-    if(token == "")
+    if (token == "")
         return false;
 
     ConvertToString(message);
 
-    if(!SignTokenMessage(signer, token, digest, false))
+    if (!SignTokenMessage(signer, token, digest, false))
         return false;
 
     signedString = StitchString(message, digest, false);
@@ -294,18 +287,19 @@ bool CFluid::GenericConsentMessage(std::string message, std::string &signedStrin
 }
 
 /** Extract timestamp from a Fluid Transaction */
-bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp) {
+bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t timeStamp)
+{
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
     std::string dehexString = HexToString(consentTokenNoScript);
     std::vector<std::string> strs, ptrs;
     SeparateString(dehexString, strs, false);
     SeparateString(strs.at(0), ptrs, true);
 
-    if(1 >= (int)strs.size())
+    if (1 >= (int)strs.size())
         return false;
 
     std::string ls = ptrs.at(1);
-    
+
     ScrubString(ls, true);
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
@@ -316,7 +310,8 @@ bool CFluid::ExtractCheckTimestamp(const std::string consentToken, const int64_t
     return true;
 }
 
-bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo) {
+bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::string>& ptrs, int strVecNo)
+{
     std::string consentTokenNoScript = GetRidOfScriptStatement(consentToken);
 
     std::string message;
@@ -329,14 +324,15 @@ bool CFluid::ProcessFluidToken(const std::string consentToken, std::vector<std::
     SeparateString(dehexString, strs, false);
     SeparateString(strs.at(0), ptrs, true);
 
-    if(strVecNo >= (int)strs.size())
+    if (strVecNo >= (int)strs.size())
         return false;
 
     return true;
 }
 
 /** It gets a number from the ASM of an OP_CODE without signature verification */
-bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& coinAmount, bool txCheckPurpose) {
+bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t timeStamp, CAmount& coinAmount, bool txCheckPurpose)
+{
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(consentToken, ptrs, 1))
@@ -357,10 +353,11 @@ bool CFluid::GenericParseNumber(const std::string consentToken, const int64_t ti
     return true;
 }
 
-CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey) {
+CDynamicAddress CFluid::GetAddressFromDigestSignature(const std::string digestSignature, const std::string messageTokenKey)
+{
     bool fInvalid = false;
     std::vector<unsigned char> vchSig = DecodeBase64(digestSignature.c_str(), &fInvalid);
-    
+
     if (fInvalid) {
         LogPrintf("GenericVerifyInstruction(): Digest Signature Found Invalid, Signature: %s \n", digestSignature);
         return nullptr;
@@ -394,7 +391,7 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
     messageTokenKey = strs.at(0);
 
     /* Don't even bother looking there there aren't enough digest keys or we are checking in the wrong place */
-    if(whereToLook >= (int)strs.size() || whereToLook == 0)
+    if (whereToLook >= (int)strs.size() || whereToLook == 0)
         return false;
 
     std::string digestSignature = strs.at(whereToLook);
@@ -404,13 +401,14 @@ bool CFluid::GenericVerifyInstruction(const std::string consentToken, CDynamicAd
     return true;
 }
 
-bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose) {
+bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAmount& coinAmount, std::string uniqueIdentifier, bool txCheckPurpose)
+{
     std::vector<std::string> ptrs;
 
     if (!ProcessFluidToken(uniqueIdentifier, ptrs, 1))
         return false;
 
-    if(2 >= (int)ptrs.size())
+    if (2 >= (int)ptrs.size())
         return false;
 
     std::string lr = ptrs.at(0);
@@ -419,7 +417,7 @@ bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAm
     ScrubString(ls, true);
     int64_t tokenTimeStamp;
     ParseInt64(ls, &tokenTimeStamp);
-    
+
     if (nTime > tokenTimeStamp + fluid.MAX_FLUID_TIME_DISTORT && !txCheckPurpose)
         return false;
 
@@ -428,7 +426,7 @@ bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAm
     std::string recipientAddress = ptrs.at(2);
     destination.SetString(recipientAddress);
 
-    if(!destination.IsValid())
+    if (!destination.IsValid())
         return false;
 
     LogPrintf("ParseMintKey(): Token Data -- Address %s | Coins to be minted: %s | Time: %s\n", ptrs.at(2), coinAmount / COIN, ls);
@@ -439,15 +437,14 @@ bool CFluid::ParseMintKey(const int64_t nTime, CDynamicAddress& destination, CAm
 static bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
 {
     if (pblockindex != nullptr) {
-        // Check for invalid block position and file. 
+        // Check for invalid block position and file.
         const CDiskBlockPos pos = pblockindex->GetBlockPos();
         if (pos.nFile > -1 && pos.nPos > 0) {
-            if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
+            if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus())) {
                 LogPrintf("Unable to read from disk! Highly unlikely but has occured, may be bug or damaged blockchain copy!\n");
                 return false;
             }
-        }
-        else {
+        } else {
             return false;
         }
     } else {
@@ -456,12 +453,12 @@ static bool GetFluidBlock(const CBlockIndex* pblockindex, CBlock& block)
     return true;
 }
 
-bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount) {
-
+bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddress& toMintAddress, CAmount& mintAmount)
+{
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINT_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -473,12 +470,12 @@ bool CFluid::GetMintingInstructions(const CBlockIndex* pblockindex, CDynamicAddr
     return false;
 }
 
-bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount) {
-
+bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount)
+{
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(MINING_MODIFY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -490,12 +487,12 @@ bool CFluid::GetProofOverrideRequest(const CBlockIndex* pblockindex, CAmount& co
     return false;
 }
 
-bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount) {
-
+bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& coinAmount)
+{
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (txout.scriptPubKey.IsProtocolInstruction(DYNODE_MODFIY_TX)) {
                     std::string message;
                     if (CheckIfQuorumExists(ScriptToAsmStr(txout.scriptPubKey), message))
@@ -507,12 +504,12 @@ bool CFluid::GetDynodeOverrideRequest(const CBlockIndex* pblockindex, CAmount& c
     return false;
 }
 
-void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord) {
-    
+void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::vector<std::string>& transactionRecord)
+{
     CBlock block;
     if (GetFluidBlock(pblockindex, block)) {
-        for (const CTransaction& tx : block.vtx) {
-            for (const CTxOut& txout : tx.vout) {
+        for (const CTransactionRef& tx : block.vtx) {
+            for (const CTxOut& txout : tx->vout) {
                 if (IsTransactionFluid(txout.scriptPubKey)) {
                     if (!InsertTransactionToRecord(txout.scriptPubKey, transactionRecord)) {
                         LogPrintf("AddFluidTransactionsToRecord(): Script Database Entry: %s , FAILED!\n", ScriptToAsmStr(txout.scriptPubKey));
@@ -524,7 +521,8 @@ void CFluid::AddFluidTransactionsToRecord(const CBlockIndex* pblockindex, std::v
 }
 
 /* Check if transaction exists in record */
-bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex) {
+bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pindex)
+{
     if (IsTransactionFluid(fluidInstruction)) {
         std::string verificationString;
         //TODO fluid
@@ -542,13 +540,12 @@ bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pin
             //fluidIndex = pindex->fluidParams;
         }
         */
-        std::vector<std::string> transactionRecord;//fluidIndex.fluidHistory;
+        std::vector<std::string> transactionRecord; //fluidIndex.fluidHistory;
         verificationString = ScriptToAsmStr(fluidInstruction);
         std::string verificationWithoutOpCode = GetRidOfScriptStatement(verificationString);
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
-            for (const std::string& existingRecord : transactionRecord)
-            {
+            for (const std::string& existingRecord : transactionRecord) {
                 std::string existingWithoutOpCode = GetRidOfScriptStatement(existingRecord);
                 LogPrint("fluid", "CheckTransactionInRecord(): operation code removed. existingRecord  = %s verificationString = %s\n", existingWithoutOpCode, verificationWithoutOpCode);
                 if (existingWithoutOpCode == verificationWithoutOpCode) {
@@ -563,7 +560,8 @@ bool CFluid::CheckTransactionInRecord(CScript fluidInstruction, CBlockIndex* pin
 }
 
 /* Insertion of transaction script to record */
-bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord) {
+bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std::string>& transactionRecord)
+{
     std::string verificationString;
 
     if (IsTransactionFluid(fluidInstruction)) {
@@ -571,8 +569,7 @@ bool CFluid::InsertTransactionToRecord(CScript fluidInstruction, std::vector<std
 
         std::string message;
         if (CheckIfQuorumExists(verificationString, message)) {
-            for (const std::string& existingRecord : transactionRecord)
-            {
+            for (const std::string& existingRecord : transactionRecord) {
                 if (existingRecord == verificationString) {
                     return false;
                 }
@@ -591,31 +588,28 @@ CAmount GetStandardPoWBlockPayment(const int nHeight)
         CAmount nSubsidy = INITIAL_SUPERBLOCK_PAYMENT;
         LogPrint("superblock creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
-    }
-    else if (nHeight > 1 && nHeight <= Params().GetConsensus().nRewardsStart) {
+    } else if (nHeight > 1 && nHeight <= Params().GetConsensus().nRewardsStart) {
         LogPrint("zero-reward block creation", "GetStandardPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
-    }
-    else if (nHeight > Params().GetConsensus().nRewardsStart) {
+    } else if (nHeight > Params().GetConsensus().nRewardsStart) {
         LogPrint("creation", "GetStandardPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
         return PHASE_1_POW_REWARD; // 1 DYN  and burn transaction fees
-    }
-    else
+    } else
         return BLOCKCHAIN_INIT_REWARD; // Burn transaction fees
 }
 
 CAmount GetStandardDynodePayment(const int nHeight)
-{   
+{
     if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
         LogPrintf("GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
-    }
-    else {
+    } else {
         return BLOCKCHAIN_INIT_REWARD; // 0 DYN
     }
 }
 
-bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue) {
+bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount txValue)
+{
     std::string message;
     CAmount mintAmount;
     CDynamicAddress toMintAddress;
@@ -626,13 +620,13 @@ bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount
         }
 
         if (txOut.IsProtocolInstruction(MINT_TX) &&
-                !ParseMintKey(0, toMintAddress, mintAmount, ScriptToAsmStr(txOut), true)) {
+            !ParseMintKey(0, toMintAddress, mintAmount, ScriptToAsmStr(txOut), true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-mint-auth-failure");
         }
 
         if ((txOut.IsProtocolInstruction(DYNODE_MODFIY_TX) ||
                 txOut.IsProtocolInstruction(MINING_MODIFY_TX)) &&
-                !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
+            !GenericParseNumber(ScriptToAsmStr(txOut), 0, mintAmount, true)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-fluid-modify-parse-failure");
         }
     }
@@ -640,7 +634,8 @@ bool CFluid::ValidationProcesses(CValidationState& state, CScript txOut, CAmount
     return true;
 }
 
-bool CFluid::ProvisionalCheckTransaction(const CTransaction& transaction) {
+bool CFluid::ProvisionalCheckTransaction(const CTransaction& transaction)
+{
     for (const CTxOut& txout : transaction.vout) {
         CScript txOut = txout.scriptPubKey;
 
@@ -653,12 +648,14 @@ bool CFluid::ProvisionalCheckTransaction(const CTransaction& transaction) {
     return true;
 }
 
-bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader) {
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const CBlockHeader& blockHeader)
+{
     uint256 hash = blockHeader.GetHash();
     return CheckTransactionToBlock(transaction, hash);
 }
 
-bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash) {
+bool CFluid::CheckTransactionToBlock(const CTransaction& transaction, const uint256 hash)
+{
     if (mapBlockIndex.count(hash) == 0)
         return true;
 
@@ -686,7 +683,7 @@ std::string StringFromCharVector(const std::vector<unsigned char>& vch)
     std::string strReturn;
     std::vector<unsigned char>::const_iterator vi = vch.begin();
     while (vi != vch.end()) {
-        strReturn += (char) (*vi);
+        strReturn += (char)(*vi);
         vi++;
     }
     return strReturn;

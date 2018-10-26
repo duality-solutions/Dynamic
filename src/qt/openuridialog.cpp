@@ -13,9 +13,8 @@
 
 #include <QUrl>
 
-OpenURIDialog::OpenURIDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::OpenURIDialog)
+OpenURIDialog::OpenURIDialog(QWidget* parent) : QDialog(parent),
+                                                ui(new Ui::OpenURIDialog)
 {
     ui->setupUi(this);
 #if QT_VERSION >= 0x040700
@@ -36,8 +35,7 @@ QString OpenURIDialog::getURI()
 void OpenURIDialog::accept()
 {
     SendCoinsRecipient rcp;
-    if(GUIUtil::parseDynamicURI(getURI(), &rcp))
-    {
+    if (GUIUtil::parseDynamicURI(getURI(), &rcp)) {
         /* Only accept value URIs */
         QDialog::accept();
     } else {
@@ -48,7 +46,7 @@ void OpenURIDialog::accept()
 void OpenURIDialog::on_selectFileButton_clicked()
 {
     QString filename = GUIUtil::getOpenFileName(this, tr("Select payment request file to open"), "", "", NULL);
-    if(filename.isEmpty())
+    if (filename.isEmpty())
         return;
     QUrl fileUri = QUrl::fromLocalFile(filename);
     ui->uriEdit->setText("dynamic:?r=" + QUrl::toPercentEncoding(fileUri.toString()));

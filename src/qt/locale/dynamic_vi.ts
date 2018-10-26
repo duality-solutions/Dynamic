@@ -3171,6 +3171,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Số tiền tối thiểu</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Sao chép địa chỉ</translation>
     </message>

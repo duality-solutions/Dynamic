@@ -2253,6 +2253,16 @@ QTabBar { alignment: left; }</string>
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="showPrivateSendPopups">
+            <property name="toolTip">
+             <string>Show system popups for PrivateSend mixing transactions&lt;br/&gt;just like for all other transaction types.</string>
+            </property>
+            <property name="text">
+             <string>Show popups for Privatesend transactions</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="lowKeysWarning">
             <property name="palette">
              <palette>
@@ -3548,7 +3558,7 @@ QTabBar { alignment: left; }</string>
             <number>2</number>
            </property>
            <property name="maximum">
-            <number>8</number>
+            <number>16</number>
            </property>
            <property name="value">
             <number>4</number>

@@ -28,7 +28,7 @@ public:
 };
 
 static const unsigned int MAX_OP_RETURN_RELAY = 83; //! bytes (+1 for OP_RETURN, +2 for the push data opcodes)
-static const unsigned int MAX_BDAP_RELAY = 2051; //! bytes (+1 for OP_RETURN, +2 for the push data opcodes and +2048)
+static const unsigned int MAX_BDAP_RELAY = 2051;    //! bytes (+1 for OP_RETURN, +2 for the push data opcodes and +2048)
 extern bool fAcceptDatacarrier;
 extern unsigned nMaxDatacarrierBytes;
 
@@ -43,8 +43,7 @@ extern unsigned nMaxDatacarrierBytes;
  */
 static const unsigned int MANDATORY_SCRIPT_VERIFY_FLAGS = SCRIPT_VERIFY_P2SH;
 
-enum txnouttype
-{
+enum txnouttype {
     TX_NONSTANDARD,
     // 'standard' transaction types:
     TX_PUBKEY,
@@ -54,10 +53,11 @@ enum txnouttype
     TX_NULL_DATA
 };
 
-class CNoDestination {
+class CNoDestination
+{
 public:
-    friend bool operator==(const CNoDestination &a, const CNoDestination &b) { return true; }
-    friend bool operator<(const CNoDestination &a, const CNoDestination &b) { return true; }
+    friend bool operator==(const CNoDestination& a, const CNoDestination& b) { return true; }
+    friend bool operator<(const CNoDestination& a, const CNoDestination& b) { return true; }
 };
 
 /** 
@@ -78,6 +78,5 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, std::
 CScript GetScriptForDestination(const CTxDestination& dest);
 CScript GetScriptForRawPubKey(const CPubKey& pubkey);
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
-CScriptID GetScriptID(const CScript& script);
 
 #endif // DYNAMIC_SCRIPT_STANDARD_H

@@ -760,6 +760,25 @@
            </layout>
           </item>
           <item>
+           <widget class="QLabel" name="fallbackFeeWarningLabel">
+            <property name="toolTip">
+             <string>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until your have validated the complete chain.</string>
+            </property>
+            <property name="font">
+            <font>
+                <weight>75</weight>
+                <bold>true</bold>
+            </font>
+            </property>
+            <property name="text">
+             <string>Warning: Fee estimation is currently not possible.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -1343,7 +1362,7 @@ border-radius: 4px;
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_7">
+        <spacer name="horizontalSpacer_8">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -1377,7 +1396,7 @@ border-radius: 4px;
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_8">
+        <spacer name="horizontalSpacer_9">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -1465,7 +1484,7 @@ border-radius: 4px;
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="groupCustomFee"/>
   <buttongroup name="groupFee"/>
+  <buttongroup name="groupCustomFee"/>
  </buttongroups>
 </ui>

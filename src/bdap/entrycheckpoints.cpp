@@ -38,7 +38,7 @@ bool CEntryCheckpoints::UnserializeFromData(const std::vector<unsigned char>& vc
     return true;
 }
 
-bool CEntryCheckpoints::UnserializeFromTx(const CTransaction& tx) 
+bool CEntryCheckpoints::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

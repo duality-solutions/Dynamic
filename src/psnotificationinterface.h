@@ -11,7 +11,7 @@
 class CPSNotificationInterface : public CValidationInterface
 {
 public:
-    CPSNotificationInterface(CConnman& connmanIn): connman(connmanIn) {}
+    CPSNotificationInterface(CConnman& connmanIn) : connman(connmanIn) {}
     virtual ~CPSNotificationInterface() = default;
 
     // a small helper to initialize current block height in sub-modules on startup
@@ -19,10 +19,10 @@ public:
 
 protected:
     // CValidationInterface
-    void AcceptedBlockHeader(const CBlockIndex *pindexNew) override;
-    void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload) override;
-    void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) override;
-    void SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, const CBlock *pblock) override;
+    void AcceptedBlockHeader(const CBlockIndex* pindexNew) override;
+    void NotifyHeaderTip(const CBlockIndex* pindexNew, bool fInitialDownload) override;
+    void UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload) override;
+    void SyncTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock) override;
 
 private:
     CConnman& connman;

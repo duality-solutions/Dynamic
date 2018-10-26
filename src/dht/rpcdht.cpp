@@ -373,14 +373,15 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{   //  category         name                        actor (function)           okSafeMode
+{ //  category              name                     actor (function)               okSafe   argNames
+  //  --------------------- ------------------------ -----------------------        ------   --------------------
     /* DHT */
-    { "dht",             "getmutable",               &getmutable,                   true  },
-    { "dht",             "putmutable",               &putmutable,                   true  },
-    { "dht",             "dhtinfo",                  &dhtinfo,                      true  },
-    { "dht",             "dhtdb",                    &dhtdb,                        true  },
-    { "dht",             "putbdapdata",              &putbdapdata,                  true  },
-    { "dht",             "getbdapdata",              &getbdapdata,                  true  },
+    { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey","operation"}  },
+    { "dht",             "putmutable",               &putmutable,                   true,    {"dht value","operation", "pubkey", "privkey"} },
+    { "dht",             "dhtinfo",                  &dhtinfo,                      true,    {} },
+    { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
+    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"bdap id","dht value", "operation"} },
+    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"bdap id","operation"} },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
