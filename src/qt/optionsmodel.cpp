@@ -20,6 +20,7 @@
 #endif
 #include "init.h"
 #include "net.h"
+#include "netbase.h"
 #include "validation.h" // For DEFAULT_SCRIPTCHECK_THREADS
 #ifdef ENABLE_WALLET
 #include "privatesend-client.h"

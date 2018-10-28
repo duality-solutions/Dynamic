@@ -46,6 +46,7 @@
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 #endif
 #include <boost/scoped_array.hpp>
+#include <boost/thread.hpp>
 
 #include <QAbstractItemView>
 #include <QApplication>
