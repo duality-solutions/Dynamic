@@ -3,6 +3,7 @@
 
 #include "dht/session.h"
 
+#include "dht/sessionevents.h"
 #include "chainparams.h"
 #include "dht/settings.h"
 #include "dynode-sync.h"
@@ -31,6 +32,7 @@ static std::shared_ptr<std::thread> pDHTTorrentThread;
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
+/*
 static void empty_public_key(std::array<char, 32>& public_key)
 {
     for( unsigned int i = 0; i < sizeof(public_key); i++) {
@@ -99,11 +101,11 @@ static alert* WaitForResponse(session* dhtSession, const int alert_type)
     empty_public_key(emptyKey);
     return WaitForResponse(dhtSession, alert_type, emptyKey, "");
 }
-
-void Bootstrap(libtorrent::session* dhtSession)
+*/
+void Bootstrap()
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
-    WaitForResponse(dhtSession, dht_bootstrap_alert::alert_type);
+    //WaitForResponse(dhtSession, dht_bootstrap_alert::alert_type);
     LogPrintf("DHTTorrentNetwork -- bootstrap done.\n");
 }
 
@@ -162,7 +164,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 {
     LogPrintf("DHTTorrentNetwork -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("dht-torrent-network");
+    RenameThread("dht-session");
     
     try {
         CDHTSettings settings;
@@ -177,33 +179,18 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
         } while (true);
 
-        // boot strap the DHT LibTorrent network
         // with current peers and Dynodes
-        unsigned int iCounter = 0;
         settings.LoadSettings();
         pTorrentDHTSession = settings.GetSession();
-        Bootstrap(pTorrentDHTSession);
-        SaveSessionState(pTorrentDHTSession);
+        
+        
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
-        while (!fShutdown) {
-            MilliSleep(1000);
-            iCounter ++;
-            if (!pTorrentDHTSession->is_dht_running()) {
-                LogPrintf("DHTTorrentNetwork -- not running.  Loading from file and restarting bootstrap.\n");
-                LoadSessionState(pTorrentDHTSession);
-                Bootstrap(pTorrentDHTSession);
-                SaveSessionState(pTorrentDHTSession);
-            }
-            else {
-                if (iCounter >= 300) {
-                    // save DHT state every 5 minutes
-                    SaveSessionState(pTorrentDHTSession);
-                    iCounter = 0;
-                }
-            }
-        }
+        StartEventListener(pTorrentDHTSession);
+        // boot strap the DHT LibTorrent network
+        Bootstrap();
+        //SaveSessionState(pTorrentDHTSession);
     }
     catch (const std::runtime_error& e)
     {
@@ -216,8 +203,9 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 void StopTorrentDHTNetwork()
 {
     LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
+    StopEventListener();
     fShutdown = true;
-    MilliSleep(1100);
+    MilliSleep(30);
     if (pDHTTorrentThread != NULL)
     {
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
@@ -254,23 +242,25 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
     }
 
     if (!pTorrentDHTSession->is_dht_running()) {
-        LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        if (!LoadSessionState(pTorrentDHTSession)) {
-            LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
-            Bootstrap(pTorrentDHTSession);
-        }
-        else {
-            LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
-        }
+        return;
+        //LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
+        //if (!LoadSessionState(pTorrentDHTSession)) {
+        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
+        //    Bootstrap();
+        //}
+        //else {
+        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
+        //}
     }
     else {
         LogPrintf("DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
     }
 
     pTorrentDHTSession->post_dht_stats();
-    alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
-    dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
-    vchDHTLookup = dhtStatsAlert->active_requests;
-    vchDHTBuckets = dhtStatsAlert->routing_table;
+    //get alert from map
+    //alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
+    //dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
+    //vchDHTLookup = dhtStatsAlert->active_requests;
+    //vchDHTBuckets = dhtStatsAlert->routing_table;
     stats = pTorrentDHTSession->status();
 }

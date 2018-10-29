@@ -40,11 +40,13 @@ UniValue getmutable(const JSONRPCRequest& request)
     std::string strValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence, false);
+    bool fAuthoritative;
+    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Get_PubKey", strPubKey));
         result.push_back(Pair("Get_Salt", strSalt));
         result.push_back(Pair("Get_Seq", iSequence));
+        result.push_back(Pair("Get_Authoritative", fAuthoritative ? "True" : "False"));
         result.push_back(Pair("Get_Value", strValue));
     }
     else {
@@ -92,28 +94,22 @@ UniValue putmutable(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.
-        GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, true);
+        bool fAuthoritative;
+        GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, fAuthoritative);
         iSequence++;
     }
     std::string dhtMessage = "";
-    fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
+    fRet = SubmitPutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue);
     if (fRet) {
-        std::string dhtMessage = "";
-        fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
-        if (fRet) {
-            result.push_back(Pair("Put_PubKey", strPubKey));
-            //result.push_back(Pair("Put_PrivKey", strPrivKey));
-            result.push_back(Pair("Put_Salt", strSalt));
-            result.push_back(Pair("Put_Seq", iSequence));
-            result.push_back(Pair("Put_Value", request.params[0].get_str()));
-            result.push_back(Pair("Put_Message", dhtMessage));
-        }
-        else {
-            throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
-        }
+        result.push_back(Pair("Put_PubKey", strPubKey));
+        //result.push_back(Pair("Put_PrivKey", strPrivKey));
+        result.push_back(Pair("Put_Salt", strSalt));
+        result.push_back(Pair("Put_Seq", iSequence));
+        result.push_back(Pair("Put_Value", request.params[0].get_str()));
+        //result.push_back(Pair("Put_Message", dhtMessage));
     }
     else {
-        throw std::runtime_error("putmutable failed. Put failed. Check the debug.log for details.\n");
+        throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
     }
     return result;
 }
@@ -308,11 +304,11 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
     std::string dhtMessage = "";
     
-    fRet = PutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue, dhtMessage);
+    fRet = SubmitPutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue);
     if (fRet) {
         result.push_back(Pair("put_seq", iSequence));
         result.push_back(Pair("put_value", request.params[1].get_str()));
-        result.push_back(Pair("put_message", dhtMessage));
+        //result.push_back(Pair("put_message", dhtMessage));
     }
     else {
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error putting data in DHT. Check the debug.log for details.\n");
@@ -359,7 +355,8 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
 
     std::string strValue = "";
-    fRet = GetDHTMutableData(arrPubKey, strOperationType, strValue, iSequence, false);
+    bool fAuthoritative;
+    fRet = GetDHTMutableData(arrPubKey, strOperationType, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("get_seq", iSequence));
         result.push_back(Pair("get_value", strValue));
