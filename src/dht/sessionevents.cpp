@@ -3,6 +3,7 @@
 
 #include "dht/sessionevents.h"
 
+#include "dht/session.h"
 #include "sync.h" // for LOCK and CCriticalSection
 #include "util.h" // for LogPrintf
 #include "utiltime.h" // for GetTimeMillis
@@ -24,8 +25,8 @@ using namespace libtorrent;
 
 typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<uint32_t, EventPair> EventCategoryMap;
-typedef std::map<MutableKey, CMutableGetEvent> DHTGetEventMap;
-typedef std::map<MutableKey, CMutablePutEvent> DHTPutEventMap;
+typedef std::multimap<std::string, CMutableGetEvent> DHTGetEventMap;
+typedef std::multimap<std::string, CMutablePutEvent> DHTPutEventMap;
 
 static CCriticalSection cs_EventMap;
 static CCriticalSection cs_DHTGetEventMap;
@@ -37,79 +38,19 @@ static EventCategoryMap m_EventCategoryMap;
 static DHTGetEventMap m_DHTGetEventMap;
 static DHTPutEventMap m_DHTPutEventMap;
 
-CEvent::CEvent(libtorrent::alert* alert) {
-    SetAlert(alert);
-}
-
-void CEvent::SetAlert(libtorrent::alert* alert)
+CEvent::CEvent(std::string _message, int _type, uint32_t _category, std::string _what)
 {
-    if (alert != nullptr) {
-        pAlert = alert;
-        timestamp = GetTimeMillis();
-    }
-}
-
-std::string CEvent::Message() const
-{
-    if (pAlert == nullptr)
-        return "";
-    return pAlert->message();
-}
-
-int CEvent::Type() const
-{
-    if (pAlert == nullptr)
-        return 0;
-    return pAlert->type();
-}
-
-uint32_t CEvent::Category() const 
-{
-    if (pAlert == nullptr)
-        return 0;
-    return pAlert->category();
-}
-
-std::string CEvent::What() const 
-{
-    if (pAlert == nullptr)
-        return "";
-    return (std::string)pAlert->what();
-}
-
-std::int64_t CEvent::Timestamp() const 
-{
-    return timestamp;
+    message = _message;
+    type = _type;
+    category = _category;
+    what = _what;
+    timestamp = GetTimeMillis();
 }
 
 std::string CEvent::ToString() const 
 {
-    if (pAlert == nullptr)
-        return "";
     return strprintf("CEvent(Message = %s\n, Type = %d\n, Category = %d\n, What = %s\n, Timestamp = %u)\n",
         Message(), Type(), Category(), What(), Timestamp());
-}
-
-static bool ParseDHTMessageKey(const std::string& strAlertMessage, MutableKey& key)
-{
-    // parse key and salt
-    size_t posKeyStart = strAlertMessage.find("key=");
-    size_t posSaltBegin = strAlertMessage.find("salt=");
-    if (posKeyStart == std::string::npos || posSaltBegin == std::string::npos) {
-        LogPrintf("DHTEventListener -- ParseDHTMessageKey Error parsing DHT alert message start.\n");
-        return false;
-    }
-    size_t posKeyEnd = strAlertMessage.find(" ", posKeyStart);
-    size_t posSaltEnd = strAlertMessage.find(" ", posSaltBegin);
-    if (posKeyEnd == std::string::npos || posSaltEnd == std::string::npos) {
-        LogPrintf("DHTEventListener -- ParseDHTMessageKey Error parsing DHT alert message end.\n");
-        return false;
-    }
-    const std::string pubkey = strAlertMessage.substr(posKeyStart + 4, posKeyEnd);
-    const std::string salt = strAlertMessage.substr(posSaltBegin + 5, posSaltEnd);
-    key = std::make_pair(pubkey, salt);
-    
-    return true;
 }
 
 static std::string GetInfoHash(const std::string pubkey, const std::string salt)
@@ -119,81 +60,50 @@ static std::string GetInfoHash(const std::string pubkey, const std::string salt)
     dht::public_key pk;
     pk.bytes = arrPubKey;
     const sha1_hash infoHash = dht::item_target_id(salt, pk);
-    return infoHash.to_string();
-}
-
-CMutableGetEvent::CMutableGetEvent(alert* alert) : CEvent(alert)
-{
-    Init();
-}
-
-CMutablePutEvent::CMutablePutEvent(alert* alert) : CEvent(alert)
-{
-    Init();
+    
+    return aux::to_hex(infoHash.to_string());
 }
 
 CMutableGetEvent::CMutableGetEvent() : CEvent()
 {
 }
-
-bool CMutableGetEvent::Init()
+CMutableGetEvent::CMutableGetEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
+                                   std::string _pubkey, std::string _salt, int64_t _seq, std::string _value, std::string _signature, bool _authoritative)
+                : CEvent(_message, _type, _category, _what)
 {
-    if (pAlert != nullptr) {
-        dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(pAlert);
-        pubkey = aux::to_hex(dhtGetAlert->key);
-        salt = dhtGetAlert->salt;
-        authoritative = dhtGetAlert->authoritative;
-        value = dhtGetAlert->item.to_string();
-        signature = aux::to_hex(dhtGetAlert->signature);
-        seq = dhtGetAlert->seq;
-        infohash = GetInfoHash(pubkey, salt);
-        LogPrintf("CMutableGetEvent::Init -- pubkey = %s, salt = %s, seq = %u.\n", pubkey, salt, seq);
-        return true;
-    }
-    return false;
+    pubkey = _pubkey;
+    salt = _salt;
+    seq = _seq;
+    value = _value;
+    signature = _signature;
+    authoritative = _authoritative;
+    infohash = GetInfoHash(pubkey, salt);
 }
 
-bool CMutablePutEvent::Init()
+CMutablePutEvent::CMutablePutEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
+                                   std::string _pubkey, std::string _salt, int64_t _seq, std::string _signature, uint32_t _success_count)
+                : CEvent(_message, _type, _category, _what)
 {
-    if (pAlert != nullptr) {
-        dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(pAlert);
-        pubkey = aux::to_hex(dhtPutAlert->public_key);
-        salt = dhtPutAlert->salt;
-        num_success = dhtPutAlert->num_success;
-        seq = dhtPutAlert->seq;
-        signature = aux::to_hex(dhtPutAlert->signature);
-        infohash = GetInfoHash(pubkey, salt);
-        LogPrintf("CMutablePutEvent::Init -- pubkey = %s, salt = %s, seq = %u.\n", pubkey, salt, seq);
-        return true;
-    }
-    return false;
-}
-
-void CMutableGetEvent::SetAlert(libtorrent::alert* alert)
-{
-    if (alert != nullptr) {
-        CEvent::SetAlert(alert);
-        Init();
-    }
-}
-
-void CMutablePutEvent::SetAlert(libtorrent::alert* alert)
-{
-    if (alert != nullptr) {
-        CEvent::SetAlert(alert);
-        Init();
-    }
+    pubkey = _pubkey;
+    salt = _salt;
+    seq = _seq;
+    signature = _signature;
+    success_count = _success_count;
+    infohash = GetInfoHash(pubkey, salt);
 }
 
 static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& event) 
 {
     LOCK(cs_DHTGetEventMap);
-    std::map<MutableKey, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(mKey);
+    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
+    std::multimap<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent == m_DHTGetEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        m_DHTGetEventMap.insert(std::make_pair(mKey, event));
+        //LogPrintf("AddToDHTGetEventMap Not found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+        m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
+        //LogPrintf("AddToDHTGetEventMap Found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
         // event found. Update entry in DHT event map
         iMutableEvent->second = event;
     }
@@ -202,12 +112,15 @@ static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& 
 static void AddToDHTPutEventMap(const MutableKey& mKey, const CMutablePutEvent& event) 
 {
     LOCK(cs_DHTPutEventMap);
-    std::map<MutableKey, CMutablePutEvent>::iterator iMutableEvent = m_DHTPutEventMap.find(mKey);
+    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
+    std::multimap<std::string, CMutablePutEvent>::iterator iMutableEvent = m_DHTPutEventMap.find(infoHash);
     if (iMutableEvent == m_DHTPutEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        m_DHTPutEventMap.insert(std::make_pair(mKey, event));
+        //LogPrintf("AddToDHTPutEventMap Not found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+        m_DHTPutEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
+        //LogPrintf("AddToDHTPutEventMap Found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
         // event found. Update entry in DHT event map
         iMutableEvent->second = event;
     }
@@ -236,30 +149,42 @@ static void  DHTEventListener(session* dhtSession)
             const uint32_t category = (*iAlert)->category();
             const std::string strAlertMessage = (*iAlert)->message();
             const int iAlertType = (*iAlert)->type();
-            if (iAlertType == 75 || iAlertType == 76) {
+            if (iAlertType == DHT_GET_ALERT_TYPE_CODE || iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
                 LogPrintf("DHTEventListener -- DHT Alert Message = %s, Alert Type =%d\n", strAlertMessage, iAlertType);
-                MutableKey mKey; // parse key and salt
-                if (!ParseDHTMessageKey(strAlertMessage, mKey)) {
-                    LogPrintf("DHTEventListener -- Error parsing DHT alert message start.\n");
-                    continue;
-                }
-                if (iAlertType == 75) {
-                    const CMutableGetEvent event((*iAlert));
+                MutableKey mKey;
+                if (iAlertType == DHT_GET_ALERT_TYPE_CODE) {
+                    // DHT Get Mutable Event
+                    dht_mutable_item_alert* pGet = alert_cast<dht_mutable_item_alert>((*iAlert));
+                    if (pGet == nullptr)
+                        continue;
+
+                    const CMutableGetEvent event(pGet->message(), pGet->type(), pGet->category(), std::string(pGet->what()), 
+                          aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
+
+                    mKey = std::make_pair(event.PublicKey(), event.Salt());
                     AddToDHTGetEventMap(mKey, event);
                 }
-                else if (iAlertType == 76) {
-                    const CMutablePutEvent event((*iAlert));
+                else if (iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
+                    // DHT Put Mutable Event
+                    dht_put_alert* pPut = alert_cast<dht_put_alert>((*iAlert));
+                    if (pPut == nullptr)
+                        continue;
+
+                    const CMutablePutEvent event(pPut->message(), pPut->type(), pPut->category(), std::string(pPut->what()), 
+                          aux::to_hex(pPut->public_key), pPut->salt, pPut->seq, aux::to_hex(pPut->signature), pPut->num_success);
+
+                    mKey = std::make_pair(event.PublicKey(), event.Salt());
                     AddToDHTPutEventMap(mKey, event);
                 }
             }
             else {
-                const CEvent event((*iAlert));
+                const CEvent event((*iAlert)->message(), (*iAlert)->type(), (*iAlert)->category(), std::string((*iAlert)->what()));
                 AddToEventMap(category, event);
             }
         }
         if (fShutdown)
             return;
-        //TODO: (DHT) remove old entries.
+        //TODO: (DHT) remove old entries from maps.
         counter++;
     }
 }
@@ -301,19 +226,23 @@ bool GetLastCategoryEvents(const uint32_t category, const int64_t& startTime, st
 bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event)
 {
     LOCK(cs_DHTGetEventMap);
-    std::map<MutableKey, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(mKey);
+    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
+    std::multimap<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent != m_DHTGetEventMap.end()) {
         // event found.
+        //LogPrintf("FindDHTGetEvent -- Found, infoHash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
         event = iMutableEvent->second;
         return true;
     }
+    //LogPrintf("FindDHTGetEvent -- Not found, infoHash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
     return false;
 }
 
 bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event)
 {
     LOCK(cs_DHTPutEventMap);
-    std::map<MutableKey, CMutablePutEvent>::iterator iMutableEvent = m_DHTPutEventMap.find(mKey);
+    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
+    std::multimap<std::string, CMutablePutEvent>::iterator iMutableEvent = m_DHTPutEventMap.find(infoHash);
     if (iMutableEvent != m_DHTPutEventMap.end()) {
         // event found.
         event = iMutableEvent->second;

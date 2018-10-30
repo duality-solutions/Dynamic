@@ -14,25 +14,31 @@ namespace libtorrent {
 
 typedef std::pair<std::string, std::string> MutableKey; // <pubkey, salt>
 
-class CEvent { 
-public:
-    libtorrent::alert* pAlert;
+class CEvent {
+private:
+    std::string message;
+    int type;
+    uint32_t category;
+    std::string what;
     std::int64_t timestamp;
 
+public:
     CEvent() {};
-    CEvent(libtorrent::alert* alert);
+    CEvent(std::string _message, int _type, uint32_t _category, std::string _what);
 
-    bool IsNull() { return pAlert == nullptr; }
-    void SetAlert(libtorrent::alert* alert);
-    std::string Message() const;
-    int Type() const;
-    uint32_t Category() const;
-    std::string What() const;
-    std::int64_t Timestamp() const;
+    std::string Message() const { return message; }
+    int Type() const { return type; }
+    uint32_t Category() const { return category; }
+    std::string What() const { return what; }
+    std::int64_t Timestamp() const { return timestamp; }
     std::string ToString() const;
 
     inline CEvent operator=(const CEvent& b) {
-        SetAlert(b.pAlert);
+        message = b.Message();
+        type = b.Type();
+        category = b.Category();
+        what = b.What();
+        timestamp = b.Timestamp();
         return *this;
     }
 };
@@ -43,22 +49,22 @@ private:
     std::string salt;
     std::int64_t seq;
     std::string value;
-    bool authoritative;
     std::string signature;
+    bool authoritative;
     std::string infohash;
 
 public:
     CMutableGetEvent();
-    CMutableGetEvent(libtorrent::alert* alert);
+    CMutableGetEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
+                     std::string _pubkey, std::string _salt, int64_t _seq, std::string _value, std::string _signature, bool _authoritative);
 
-    bool Init();
-    void SetAlert(libtorrent::alert* alert);
     std::string PublicKey() const { return pubkey; }
     std::string Salt() const { return salt; }
     std::int64_t SequenceNumber() const { return seq; }
-    std::string InfoHash() const { return infohash; }
     std::string Value() const { return value; }
+    std::string Signature() const { return signature; }
     bool Authoritative() const { return authoritative; }
+    std::string InfoHash() const { return infohash; }
 
     inline friend bool operator==(const CMutableGetEvent& a, const CMutableGetEvent& b) {
         return (a.ToString() == b.ToString() && a.PublicKey() == b.PublicKey() && a.Salt() == b.Salt() && a.SequenceNumber() == b.SequenceNumber());
@@ -69,10 +75,13 @@ public:
     }
 
     inline CMutableGetEvent operator=(const CMutableGetEvent& b) {
-        SetAlert(b.pAlert);
         pubkey = b.PublicKey();
         salt = b.Salt();
         seq = b.SequenceNumber();
+        value = b.Value();
+        authoritative = b.Authoritative();
+        signature = b.Signature();
+        infohash = b.InfoHash();
         return *this;
     }
 };
@@ -82,21 +91,21 @@ private:
     std::string pubkey;
     std::string salt;
     std::int64_t seq;
-    std::uint32_t num_success;
     std::string signature;
+    std::uint32_t success_count;
     std::string infohash;
 
 public:
     CMutablePutEvent();
-    CMutablePutEvent(libtorrent::alert* alert);
+    CMutablePutEvent(std::string _message, int _type, uint32_t _category, std::string _what, 
+                     std::string _pubkey, std::string _salt, int64_t _seq, std::string _signature, uint32_t _success_count);
 
-    bool Init();
-    void SetAlert(libtorrent::alert* alert);
     std::string PublicKey() const { return pubkey; }
     std::string Salt() const { return salt; }
     std::int64_t SequenceNumber() const { return seq; }
+    std::string Signature() const { return signature; }
+    std::uint32_t SuccessCount() const { return success_count; }
     std::string InfoHash() const  { return infohash; }
-    std::uint32_t SuccessCount() const { return num_success; }
 
     inline friend bool operator==(const CMutablePutEvent& a, const CMutablePutEvent& b) {
         return (a.ToString() == b.ToString() && a.PublicKey() == b.PublicKey() && a.Salt() == b.Salt() && a.SequenceNumber() == b.SequenceNumber());
@@ -107,10 +116,12 @@ public:
     }
 
     inline CMutablePutEvent operator=(const CMutablePutEvent& b) {
-        SetAlert(b.pAlert);
         pubkey = b.PublicKey();
         salt = b.Salt();
         seq = b.SequenceNumber();
+        signature = b.Signature();
+        success_count = b.SuccessCount();
+        infohash = b.InfoHash();
         return *this;
     }
 };

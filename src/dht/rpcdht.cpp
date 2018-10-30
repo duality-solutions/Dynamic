@@ -41,7 +41,7 @@ UniValue getmutable(const JSONRPCRequest& request)
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     bool fAuthoritative;
-    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence, fAuthoritative);
+    fRet = GetDHTMutableData(pubKey, strSalt, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Get_PubKey", strPubKey));
         result.push_back(Pair("Get_Salt", strSalt));
@@ -95,7 +95,7 @@ UniValue putmutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.
         bool fAuthoritative;
-        GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, fAuthoritative);
+        GetDHTMutableData(pubKey, strSalt, 5000, strPutValue, iSequence, fAuthoritative);
         iSequence++;
     }
     std::string dhtMessage = "";
@@ -356,7 +356,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 
     std::string strValue = "";
     bool fAuthoritative;
-    fRet = GetDHTMutableData(arrPubKey, strOperationType, strValue, iSequence, fAuthoritative);
+    fRet = GetDHTMutableData(arrPubKey, strOperationType, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("get_seq", iSequence));
         result.push_back(Pair("get_value", strValue));

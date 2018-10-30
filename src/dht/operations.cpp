@@ -46,26 +46,28 @@ bool SubmitGetDHTMutableData(const std::array<char, 32>& public_key, const std::
     return true;
 }
 
-bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative)
+bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
+                            std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative)
 {
     if (!SubmitGetDHTMutableData(public_key, entrySalt))
         return false;
 
+    MilliSleep(27);
     MutableKey mKey = std::make_pair(aux::to_hex(public_key), entrySalt);
     CMutableGetEvent data;
-    unsigned int timeout = 5000; // timeout in 5 seconds
-    unsigned int starttime = GetTimeMillis();
-    while (GetTimeMillis() - starttime < timeout)
+    int64_t startTime = GetTimeMillis();
+    while (timeout > GetTimeMillis() - startTime)
     {
         if (FindDHTGetEvent(mKey, data)) {
             entryValue = data.Value();
             lastSequence = data.SequenceNumber();
             fAuthoritative = data.Authoritative();
-            break;
+            //LogPrintf("DHTTorrentNetwork -- GetDHTMutableData: value = %s, seq = %d, auth = %u\n", entryValue, lastSequence, fAuthoritative);
+            return true;
         }
         MilliSleep(351);
     }
-    return true;
+    return false;
 }
 
 static void put_mutable

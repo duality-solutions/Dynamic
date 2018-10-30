@@ -13,6 +13,10 @@ class CChainParams;
 class CConnman;
 class CKeyEd25519;
 
+static constexpr int DHT_GET_ALERT_TYPE_CODE = 75;
+static constexpr int DHT_PUT_ALERT_TYPE_CODE = 76;
+static constexpr int BOOTSTRAP_ALERT_TYPE_CODE = 62;
+
 void Bootstrap();
 bool LoadSessionState(libtorrent::session* dhtSession);
 int SaveSessionState(libtorrent::session* dhtSession);
