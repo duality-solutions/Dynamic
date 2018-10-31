@@ -132,7 +132,7 @@ static void AddToEventMap(const uint32_t category, const CEvent& event)
     m_EventCategoryMap.insert(std::make_pair(category, std::make_pair(event.Timestamp(), event)));
 }
 
-static void  DHTEventListener(session* dhtSession)
+static void DHTEventListener(session* dhtSession)
 {
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dht-events");
@@ -184,9 +184,33 @@ static void  DHTEventListener(session* dhtSession)
         }
         if (fShutdown)
             return;
-        //TODO: (DHT) remove old entries from maps.
+        
+        counter++;
+        if (counter % 60 == 0) {
+            LogPrintf("DHTEventListener -- Before CleanUpEventMap. counter = %u\n", counter);
+            CleanUpEventMap(300000);
+        }
+    }
+}
+
+void CleanUpEventMap(uint32_t timeout)
+{
+    unsigned int deleted = 0;
+    unsigned int counter = 0;
+    int64_t iTime = GetTimeMillis();
+    LOCK(cs_EventMap);
+    for (auto it = m_EventCategoryMap.begin(); it != m_EventCategoryMap.end(); ) {
+        CEvent event = it->second.second;
+        if ((iTime - event.Timestamp()) > timeout) {
+            it = m_EventCategoryMap.erase(it);
+            deleted++;
+        }
+        else {
+            ++it;
+        }
         counter++;
     }
+    //LogPrintf("DHTEventListener -- CleanUpEventMap. deleted = %u, count = %u\n", deleted, counter);
 }
 
 void StopEventListener()

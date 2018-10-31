@@ -126,6 +126,8 @@ public:
     }
 };
 
+void CleanUpEventMap(uint32_t timeout = 300000);  //default to 5 minutes.
+
 void StopEventListener();
 void StartEventListener(libtorrent::session* dhtSession);
 
