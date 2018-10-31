@@ -8,6 +8,7 @@
 #include "activedynode.h"
 #include "base58.h"
 #include "chain.h"
+#include "clientversion.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"

@@ -3187,11 +3187,14 @@ bool SendMessages(CNode* pto, CConnman& connman, const std::atomic<bool>& interr
             pto->vInventoryBlockToSend.clear();
 
             // Check whether periodic sends should happen
-            bool fSendTrickle = pto->fWhitelisted;
+            // Note: If this node is running in a Dynode mode, it makes no sense to delay outgoing txes
+            // because we never produce any txes ourselves i.e. no privacy is lost in this case.
+            bool fSendTrickle = pto->fWhitelisted || fDynodeMode;
             if (pto->nNextInvSend < nNow) {
                 fSendTrickle = true;
-                // Use half the delay for outbound peers, as there is less privacy concern for them.
-                pto->nNextInvSend = PoissonNextSend(nNow, INVENTORY_BROADCAST_INTERVAL >> !pto->fInbound);
+                // Use half the delay for regular outbound peers, as there is less privacy concern for them,
+                // and quarter the delay for Dynode outbound peers, as there is even less privacy concern in this case.
+                pto->nNextInvSend = PoissonNextSend(nNow, INVENTORY_BROADCAST_INTERVAL >> !pto->fInbound >> pto->fDynode);
             }
 
             // Time to send but the peer has requested we not relay transactions.

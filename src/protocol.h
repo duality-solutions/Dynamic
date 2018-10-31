@@ -289,7 +289,7 @@ enum ServiceFlags : uint64_t {
     NODE_BLOOM = (1 << 2),
     // NODE_XTHIN means the node supports Xtreme Thinblocks
     // If this is turned off then the node will not service nor make xthin requests
-    NODE_XTHIN = (1 << 4),
+    NODE_XTHIN = (1 << 3),
 
     // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
     // isn't getting used, or one not being used much, and notify the
@@ -362,7 +362,7 @@ enum GetDataMsg {
     MSG_DYNODE_VERIFY = 15,
     // Nodes may always request a MSG_CMPCT_BLOCK in a getdata, however,
     // MSG_CMPCT_BLOCK should not appear in any invs except as a part of getdata.
-    MSG_CMPCT_BLOCK = 20, //!< Defined in BIP152
+    MSG_CMPCT_BLOCK = 16, //!< Defined in BIP152
 };
 
 /** inv message data */
