@@ -99,9 +99,7 @@ static void put_mutable
 bool SubmitPutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
                         ,char const* dhtValue)
 {
-    //TODO: (DHT) add locks
-    LogPrintf("DHTTorrentNetwork -- PutMutableData started.\n");
-
+    LogPrintf("DHTTorrentNetwork -- PutMutableData started, Value = %s, lastSequence = %u\n", std::string(dhtValue), lastSequence);
     if (!pTorrentDHTSession) {
         return false;
     }

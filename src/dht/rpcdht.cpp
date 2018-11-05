@@ -8,6 +8,7 @@
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
 #include "dht/operations.h"
+#include "dht/sessionevents.h"
 #include "hash.h"
 #include "pubkey.h"
 #include "rpcprotocol.h"
@@ -251,7 +252,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
 
     CharString vchObjectID = vchFromValue(request.params[0]);
-    const char* putValue = request.params[1].get_str().c_str();
+    char const* putValue = request.params[1].get_str().c_str();
     const std::string strOperationType = request.params[2].get_str();
 
     ToLowerCase(vchObjectID);
@@ -303,12 +304,15 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     std::array<char, 64> arrPrivKey;
     libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
     std::string dhtMessage = "";
-    
+    // we need the last sequence number to update an existing DHT entry.
+    bool fAuthoritative = false;
+    std::string strGetLastValue;
+    GetDHTMutableData(arrPubKey, strOperationType, 5000, strGetLastValue, iSequence, fAuthoritative);
+    iSequence++;
     fRet = SubmitPutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue);
     if (fRet) {
         result.push_back(Pair("put_seq", iSequence));
         result.push_back(Pair("put_value", request.params[1].get_str()));
-        //result.push_back(Pair("put_message", dhtMessage));
     }
     else {
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error putting data in DHT. Check the debug.log for details.\n");
@@ -353,7 +357,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-
+    
     std::string strValue = "";
     bool fAuthoritative;
     fRet = GetDHTMutableData(arrPubKey, strOperationType, 5000, strValue, iSequence, fAuthoritative);
@@ -362,8 +366,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         result.push_back(Pair("get_value", strValue));
     }
     else {
-        result.push_back(Pair("error", "getbdapdata timeout error"));
-        //throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
+        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
     }
 
     return result;
