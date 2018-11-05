@@ -274,3 +274,12 @@ bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event)
     }
     return false;
 }
+
+bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents)
+{
+    LOCK(cs_DHTPutEventMap);
+    for (std::multimap<std::string, CMutablePutEvent>::iterator it=m_DHTPutEventMap.begin(); it!=m_DHTPutEventMap.end(); ++it) {
+        vchPutEvents.push_back(it->second);
+    }
+    return true;
+}

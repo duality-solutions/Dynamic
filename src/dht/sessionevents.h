@@ -134,5 +134,6 @@ void StartEventListener(libtorrent::session* dhtSession);
 bool GetLastCategoryEvents(const uint32_t category, const int64_t& startTime, std::vector<CEvent>& events);
 bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event);
 bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event);
+bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

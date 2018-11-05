@@ -372,6 +372,42 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue dhtputmessages(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "dhtputmessages\nGets all DHT put messages in memory.\n"
+            "\n");
+
+    UniValue result(UniValue::VOBJ);
+
+    std::vector<CMutablePutEvent> vchMutableData;
+    bool fRet = GetAllDHTPutEvents(vchMutableData);
+    int nCounter = 0;
+    if (fRet) {
+        for(const CMutablePutEvent& data : vchMutableData) {
+            UniValue oMutableData(UniValue::VOBJ);
+            oMutableData.push_back(Pair("info_hash", data.InfoHash()));
+            oMutableData.push_back(Pair("public_key", data.PublicKey()));
+            oMutableData.push_back(Pair("salt", data.Salt()));
+            oMutableData.push_back(Pair("seq_num", data.SequenceNumber()));
+            oMutableData.push_back(Pair("success_count", (int64_t)data.SuccessCount()));
+            oMutableData.push_back(Pair("message", data.Message()));
+            oMutableData.push_back(Pair("what", data.What()));
+            oMutableData.push_back(Pair("timestamp", data.Timestamp()));
+            result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
+            nCounter++;
+        }
+    }
+    else {
+        throw std::runtime_error("dhtputmessages failed.  Check the debug.log for details.\n");
+    }
+    UniValue oCounter(UniValue::VOBJ);
+    oCounter.push_back(Pair("record_count", nCounter));
+    result.push_back(Pair("summary", oCounter));
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
     /* DHT */
@@ -381,6 +417,7 @@ static const CRPCCommand commands[] =
     { "dht",             "dhtdb",                    &dhtdb,                        true  },
     { "dht",             "putbdapdata",              &putbdapdata,                  true  },
     { "dht",             "getbdapdata",              &getbdapdata,                  true  },
+    { "dht",             "dhtputmessages",           &dhtputmessages,               true  },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)
