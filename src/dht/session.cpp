@@ -33,6 +33,75 @@ static std::shared_ptr<std::thread> pDHTTorrentThread;
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
+static void empty_public_key(std::array<char, 32>& public_key)
+{
+    for( unsigned int i = 0; i < sizeof(public_key); i++) {
+        public_key[i] = 0;
+    }
+}
+
+alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
+{
+    LogPrintf("DHTTorrentNetwork -- WaitForResponse start.\n");
+    alert* ret = nullptr;
+    bool found = false;
+    std::array<char, 32> emptyKey;
+    empty_public_key(emptyKey);
+    std::string strEmpty = aux::to_hex(emptyKey);
+    std::string strPublicKey = aux::to_hex(public_key);
+    while (!found)
+    {
+        dhtSession->wait_for_alert(seconds(1));
+        std::vector<alert*> alerts;
+        dhtSession->pop_alerts(&alerts);
+        for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert)
+        {
+            if (!(*iAlert))
+               continue;
+ 
+            std::string strAlertMessage = (*iAlert)->message();
+            int iAlertType = (*iAlert)->type();
+            if ((*iAlert)->category() == 0x1) {
+                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            }
+            else if ((*iAlert)->category() == 0x80) {
+                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            }
+            else if ((*iAlert)->category() == 0x200) {
+                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            }
+            else if ((*iAlert)->category() == 0x400) {
+                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            }
+            else {
+                LogPrintf("DHTTorrentNetwork -- dht other alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+            }
+            if (iAlertType != alert_type)
+            {
+                continue;
+            }
+            
+            size_t posKey = strAlertMessage.find("key=" + strPublicKey);
+            size_t posSalt = strAlertMessage.find("salt=" + strSalt);
+            if (strPublicKey == strEmpty || (posKey != std::string::npos && posSalt != std::string::npos)) {
+                LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                ret = *iAlert;
+                found = true;
+            }
+        }
+        if (fShutdown)
+            return ret;
+    }
+    return ret;
+}
+
+static alert* WaitForResponse(session* dhtSession, const int alert_type)
+{
+    std::array<char, 32> emptyKey;
+    empty_public_key(emptyKey);
+    return WaitForResponse(dhtSession, alert_type, emptyKey, "");
+}
+
 void Bootstrap()
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");

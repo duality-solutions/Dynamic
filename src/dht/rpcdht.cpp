@@ -70,48 +70,45 @@ UniValue putmutable(const JSONRPCRequest& request)
 
     //TODO: Check putValue is not > 1000 bytes.
     bool fNewEntry = false;
-    char const* putValue = request.params[0].get_str().c_str();
-    const std::string strSalt = request.params[1].get_str();
+    const std::string strValue = request.params[1].get_str();
+    const std::string strOperationType = request.params[1].get_str();
     std::string strPrivKey;
     std::string strPubKey;
+    
     if (request.params.size() == 4) {
         strPubKey = request.params[2].get_str();
         strPrivKey = request.params[3].get_str();
     }
     else if (request.params.size() == 2) {
-        CKeyEd25519 key;
-        strPubKey = stringFromVch(key.GetPubKey());
-        strPrivKey = stringFromVch(key.GetPrivKey());
+        CKeyEd25519 newkey;
+        strPubKey = stringFromVch(newkey.GetPubKey());
+        strPrivKey = stringFromVch(newkey.GetPrivKey());
         fNewEntry = true;
     }
 
-    bool fRet = false;
     int64_t iSequence = 0;
     std::string strPutValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
+    CKeyEd25519 key(pubKey, privKey);
+
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.
         bool fAuthoritative;
-        GetDHTMutableData(pubKey, strSalt, 5000, strPutValue, iSequence, fAuthoritative);
+        GetDHTMutableData(pubKey, strOperationType, 2000, strPutValue, iSequence, fAuthoritative);
         iSequence++;
     }
-    std::string dhtMessage = "";
-    fRet = SubmitPutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue);
-    if (fRet) {
-        result.push_back(Pair("Put_PubKey", strPubKey));
-        //result.push_back(Pair("Put_PrivKey", strPrivKey));
-        result.push_back(Pair("Put_Salt", strSalt));
-        result.push_back(Pair("Put_Seq", iSequence));
-        result.push_back(Pair("Put_Value", request.params[0].get_str()));
-        //result.push_back(Pair("Put_Message", dhtMessage));
-    }
-    else {
-        throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
-    }
+    CPutRequest put(key, strOperationType, iSequence, strValue);
+    AddPutRequest(put);
+
+    result.push_back(Pair("Put_PubKey", strPubKey));
+    //result.push_back(Pair("Put_PrivKey", strPrivKey));
+    result.push_back(Pair("Put_Salt", strOperationType));
+    result.push_back(Pair("Put_Seq", iSequence));
+    result.push_back(Pair("Put_Value", request.params[0].get_str()));
+    
     return result;
 }
 
