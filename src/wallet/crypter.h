@@ -9,8 +9,8 @@
 #define DYNAMIC_WALLET_CRYPTER_H
 
 #include "keystore.h"
-#include "support/allocators/secure.h"
 #include "serialize.h"
+#include "support/allocators/secure.h"
 
 class uint256;
 
@@ -50,7 +50,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(vchCryptedKey);
         READWRITE(vchSalt);
         READWRITE(nDerivationMethod);
@@ -74,14 +75,14 @@ typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMate
 class CCrypter
 {
 private:
-    std::vector<unsigned char, secure_allocator<unsigned char>> vchKey;
-    std::vector<unsigned char, secure_allocator<unsigned char>> vchIV;
+    std::vector<unsigned char, secure_allocator<unsigned char> > vchKey;
+    std::vector<unsigned char, secure_allocator<unsigned char> > vchIV;
     bool fKeySet;
 
 
 public:
-    bool SetKeyFromPassphrase(const SecureString &strKeyData, const std::vector<unsigned char>& chSalt, const unsigned int nRounds, const unsigned int nDerivationMethod);
-    bool Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned char> &vchCiphertext) const;
+    bool SetKeyFromPassphrase(const SecureString& strKeyData, const std::vector<unsigned char>& chSalt, const unsigned int nRounds, const unsigned int nDerivationMethod);
+    bool Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned char>& vchCiphertext) const;
     bool Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingMaterial& vchPlaintext) const;
     bool SetKey(const CKeyingMaterial& chNewKey, const std::vector<unsigned char>& chNewIV);
 
@@ -179,17 +180,19 @@ public:
         // false        true                true
         // false        false               result
 
-        if(!fForMixing && fOnlyMixingAllowed) return true;
+        if (!fForMixing && fOnlyMixingAllowed)
+            return true;
 
         return result;
     }
 
     bool Lock(bool fAllowMixing = false);
 
-    virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
-    bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
+    virtual bool AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+    bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
     bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
-    bool HaveKey(const CKeyID &address) const
+
+    bool HaveKey(const CKeyID& address) const override
     {
         {
             LOCK(cs_KeyStore);
@@ -199,19 +202,17 @@ public:
         }
         return false;
     }
-    bool GetKey(const CKeyID &address, CKey& keyOut) const;
-    bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
-    void GetKeys(std::set<CKeyID> &setAddress) const
+    bool GetKey(const CKeyID& address, CKey& keyOut) const override;
+    bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const override;
+    void GetKeys(std::set<CKeyID>& setAddress) const override
     {
-        if (!IsCrypted())
-        {
+        if (!IsCrypted()) {
             CBasicKeyStore::GetKeys(setAddress);
             return;
         }
         setAddress.clear();
         CryptedKeyMap::const_iterator mi = mapCryptedKeys.begin();
-        while (mi != mapCryptedKeys.end())
-        {
+        while (mi != mapCryptedKeys.end()) {
             setAddress.insert((*mi).first);
             mi++;
         }
@@ -219,13 +220,13 @@ public:
 
     bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
 
-    bool GetHDChain(CHDChain& hdChainRet) const;
+    virtual bool GetHDChain(CHDChain& hdChainRet) const override;
 
     /**
      * Wallet status (encrypted, locked) changed.
      * Note: Called without locks held.
      */
-    boost::signals2::signal<void (CCryptoKeyStore* wallet)> NotifyStatusChanged;
+    boost::signals2::signal<void(CCryptoKeyStore* wallet)> NotifyStatusChanged;
 };
 
 #endif // DYNAMIC_WALLET_CRYPTER_H

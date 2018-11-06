@@ -101,7 +101,7 @@ private:
     // Mempool counts of outstanding transactions
     // For each bucket X, track the number of transactions in the mempool
     // that are unconfirmed for each possible confirmation value Y
-    std::vector<std::vector<int> > unconfTxs;  //unconfTxs[Y][X]
+    std::vector<std::vector<int> > unconfTxs; //unconfTxs[Y][X]
     // transactions still unconfirmed after MAX_CONFIRMS for each bucket
     std::vector<int> oldUnconfTxs;
 
@@ -130,8 +130,7 @@ public:
     unsigned int NewTx(unsigned int nBlockHeight, double val);
 
     /** Remove a transaction from mempool tracking stats*/
-    void removeTx(unsigned int entryHeight, unsigned int nBestSeenHeight,
-                  unsigned int bucketIndex);
+    void removeTx(unsigned int entryHeight, unsigned int nBestSeenHeight, unsigned int bucketIndex);
 
     /** Update our estimates by decaying our historical moving average and updating
         with the data gathered from the current block */
@@ -148,8 +147,7 @@ public:
      *        return the highest feerate such that all lower values fail minSuccess
      * @param nBlockHeight the current block height
      */
-    double EstimateMedianVal(int confTarget, double sufficientTxVal,
-                             double minSuccess, bool requireGreater, unsigned int nBlockHeight);
+    double EstimateMedianVal(int confTarget, double sufficientTxVal, double minSuccess, bool requireGreater, unsigned int nBlockHeight);
 
     /** Return the max number of confirms we're tracking */
     unsigned int GetMaxConfirms() { return confAvg.size(); }
@@ -163,7 +161,6 @@ public:
      */
     void Read(CAutoFile& filein);
 };
-
 
 
 /** Track confirm delays up to 25 blocks, can't estimate beyond that */
@@ -203,10 +200,10 @@ public:
 
     /** Process all the transactions that have been included in a block */
     void processBlock(unsigned int nBlockHeight,
-                      std::vector<CTxMemPoolEntry>& entries, bool fCurrentEstimate);
+        std::vector<const CTxMemPoolEntry*>& entries);
 
     /** Process a transaction confirmed in a block*/
-    void processBlockTx(unsigned int nBlockHeight, const CTxMemPoolEntry& entry);
+    bool processBlockTx(unsigned int nBlockHeight, const CTxMemPoolEntry* entry);
 
     /** Process a transaction accepted to the mempool*/
     void processTransaction(const CTxMemPoolEntry& entry, bool fCurrentEstimate);
@@ -221,7 +218,7 @@ public:
      *  confTarget blocks. If no answer can be given at confTarget, return an
      *  estimate at the lowest target where one can be given.
      */
-    CFeeRate estimateSmartFee(int confTarget, int *answerFoundAtTarget, const CTxMemPool& pool);
+    CFeeRate estimateSmartFee(int confTarget, int* answerFoundAtTarget, const CTxMemPool& pool);
 
     /** Return a priority estimate.
      *  DEPRECATED
@@ -235,7 +232,7 @@ public:
      *  Returns -1 unless mempool is currently limited then returns INF_PRIORITY
      *  answerFoundAtTarget is set to confTarget
      */
-    double estimateSmartPriority(int confTarget, int *answerFoundAtTarget, const CTxMemPool& pool);
+    double estimateSmartPriority(int confTarget, int* answerFoundAtTarget, const CTxMemPool& pool);
 
     /** Write estimation data to a file */
     void Write(CAutoFile& fileout);
@@ -246,33 +243,19 @@ public:
 private:
     CFeeRate minTrackedFee; //! Passed to constructor to avoid dependency on main
     unsigned int nBestSeenHeight;
-    struct TxStatsInfo
-    {
+    struct TxStatsInfo {
         unsigned int blockHeight;
         unsigned int bucketIndex;
         TxStatsInfo() : blockHeight(0), bucketIndex(0) {}
     };
-
-    FastRandomContext insecure_rand;
 
     // map of txids to information about that transaction
     std::map<uint256, TxStatsInfo> mapMemPoolTxs;
 
     /** Classes to track historical data on transaction confirmations */
     TxConfirmStats feeStats;
-};
 
-class FeeFilterRounder
-{
-public:
-    /** Create new FeeFilterRounder */
-    FeeFilterRounder(const CFeeRate& minIncrementalFee);
-
-    /** Quantize a minimum fee for privacy purpose before broadcast **/
-    CAmount round(CAmount currentMinFee);
-
-private:
-    std::set<double> feeset;
-    FastRandomContext insecure_rand;
+    unsigned int trackedTxs;
+    unsigned int untrackedTxs;
 };
 #endif /*DYNAMIC_POLICYESTIMATOR_H */

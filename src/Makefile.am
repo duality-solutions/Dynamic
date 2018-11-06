@@ -77,8 +77,18 @@ DYNAMIC_CORE_H = \
   amount.h \
   arith_uint256.h \
   base58.h \
+  bdap/auditdata.h \
+  bdap/bdap.h \
+  bdap/domainentry.h \
+  bdap/domainentrydb.h \
+  bdap/entrycertificate.h \
+  bdap/entrychannel.h \
+  bdap/entrycheckpoints.h \
+  bdap/entrylink.h \
+  bdap/identity.h \
   bip39_english.h \
   bip39.h \
+  blockencodings.h \
   bloom.h \
   cachemap.h \
   cachemultimap.h \
@@ -101,16 +111,7 @@ DYNAMIC_CORE_H = \
   consensus/validation.h \
   core_io.h \
   core_memusage.h \
-  bdap/auditdata.h \
-  bdap/bdap.h \
-  bdap/domainentry.h \
-  bdap/domainentrydb.h \
-  bdap/entrycertificate.h \
-  bdap/entrychannel.h \
-  bdap/entrycheckpoints.h \
-  bdap/entrylink.h \
-  bdap/identity.h \
-  bdap/linking.h \
+  cuckoocache.h \
   dbwrapper.h \
   dht/curve25519.h \
   dht/ed25519.h \
@@ -154,12 +155,14 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
+  miner-gpu.h \
   miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
   netbase.h \
   netfulfilledman.h \
+  netmessagemaker.h \
   noui.h \
   ntp.h \
   operations.h \
@@ -198,6 +201,7 @@ DYNAMIC_CORE_H = \
   support/allocators/zeroafterfree.h \
   support/cleanse.h \
   support/lockedpool.h \
+  support/events.h \
   sync.h \
   threadinterrupt.h \
   threadsafety.h \
@@ -244,6 +248,7 @@ libdynamic_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
+  blockencodings.cpp \
   bloom.cpp \
   chain.cpp \
   checkpoints.cpp \
@@ -256,11 +261,13 @@ libdynamic_server_a_SOURCES = \
   bdap/entrylink.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
+  bdap/rpcdomainentry.cpp \
   dbwrapper.cpp \
   dht/curve25519.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/operations.cpp \
+  dht/rpcdht.cpp \
   dht/session.cpp \
   dht/sessionevents.cpp \
   dht/settings.cpp \
@@ -304,8 +311,6 @@ libdynamic_server_a_SOURCES = \
   psnotificationinterface.cpp \
   rest.cpp \
   rpcblockchain.cpp \
-  bdap/rpcdomainentry.cpp \
-  dht/rpcdht.cpp \
   rpcdynode.cpp \
   rpcgovernance.cpp \
   rpcmining.cpp \
@@ -337,7 +342,6 @@ libdynamic_zmq_a_SOURCES = \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp
 endif
-
 
 # wallet: shared between dynamicd and dynamic-qt, but only linked
 # when wallet enabled
@@ -613,6 +617,10 @@ endif
 
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
+endif
+
+if ENABLE_GPU
+include Makefile.gpu.include
 endif
 
 if ENABLE_TESTS

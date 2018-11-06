@@ -11,38 +11,38 @@
 class CRPCTable;
 
 /** Register block chain RPC commands */
-void RegisterBlockchainRPCCommands(CRPCTable &tableRPC);
+void RegisterBlockchainRPCCommands(CRPCTable& tableRPC);
 /** Register P2P networking RPC commands */
-void RegisterNetRPCCommands(CRPCTable &tableRPC);
+void RegisterNetRPCCommands(CRPCTable& tableRPC);
 /** Register miscellaneous RPC commands */
-void RegisterMiscRPCCommands(CRPCTable &tableRPC);
+void RegisterMiscRPCCommands(CRPCTable& tableRPC);
 /** Register mining RPC commands */
-void RegisterMiningRPCCommands(CRPCTable &tableRPC);
+void RegisterMiningRPCCommands(CRPCTable& tableRPC);
 /** Register raw transaction RPC commands */
-void RegisterRawTransactionRPCCommands(CRPCTable &tableRPC);
+void RegisterRawTransactionRPCCommands(CRPCTable& tableRPC);
 /** Register dynode RPC commands */
-void RegisterDynodeRPCCommands(CRPCTable &tableRPC);
+void RegisterDynodeRPCCommands(CRPCTable& tableRPC);
 /** Register governance RPC commands */
-void RegisterGovernanceRPCCommands(CRPCTable &tableRPC);
+void RegisterGovernanceRPCCommands(CRPCTable& tableRPC);
 /** Register fluid RPC commands */
-void RegisterFluidRPCCommands(CRPCTable &tableRPC);
+void RegisterFluidRPCCommands(CRPCTable& tableRPC);
 /** Register BDAP RPC commands */
 void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC);
 /** Register DHT RPC commands */
 void RegisterDHTRPCCommands(CRPCTable &tableRPC);
 
-static inline void RegisterAllCoreRPCCommands(CRPCTable &tableRPC)
+static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
 {
-    RegisterBlockchainRPCCommands(tableRPC);
-    RegisterNetRPCCommands(tableRPC);
-    RegisterMiscRPCCommands(tableRPC);
-    RegisterMiningRPCCommands(tableRPC);
-    RegisterRawTransactionRPCCommands(tableRPC);
-    RegisterDynodeRPCCommands(tableRPC);
-    RegisterGovernanceRPCCommands(tableRPC);
-    RegisterFluidRPCCommands(tableRPC);
-    RegisterDomainEntryRPCCommands(tableRPC);
-    RegisterDHTRPCCommands(tableRPC);
+    RegisterBlockchainRPCCommands(t);
+    RegisterNetRPCCommands(t);
+    RegisterMiscRPCCommands(t);
+    RegisterMiningRPCCommands(t);
+    RegisterRawTransactionRPCCommands(t);
+    RegisterDynodeRPCCommands(t);
+    RegisterGovernanceRPCCommands(t);
+    RegisterFluidRPCCommands(t);
+    RegisterDomainEntryRPCCommands(t);
+    RegisterDHTRPCCommands(t);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H

@@ -27,14 +27,14 @@ class WalletFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit WalletFrame(const PlatformStyle *platformStyle, DynamicGUI *_gui = 0);
+    explicit WalletFrame(const PlatformStyle* platformStyle, DynamicGUI* _gui = 0);
     ~WalletFrame();
 
-    void setClientModel(ClientModel *clientModel);
+    void setClientModel(ClientModel* clientModel);
 
-    bool addWallet(const QString& name, WalletModel *walletModel);
+    bool addWallet(const QString& name, WalletModel* walletModel);
     bool setCurrentWallet(const QString& name);
-    bool removeWallet(const QString &name);
+    bool removeWallet(const QString& name);
     void removeAllWallets();
 
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
@@ -46,16 +46,16 @@ Q_SIGNALS:
     void requestedSyncWarningInfo();
 
 private:
-    QStackedWidget *walletStack;
-    DynamicGUI *gui;
-    ClientModel *clientModel;
+    QStackedWidget* walletStack;
+    DynamicGUI* gui;
+    ClientModel* clientModel;
     QMap<QString, WalletView*> mapWalletViews;
 
     bool bOutOfSync;
 
-    const PlatformStyle *platformStyle;
+    const PlatformStyle* platformStyle;
 
-    WalletView *currentWalletView();
+    WalletView* currentWalletView();
 
 public Q_SLOTS:
     /** Switch to overview (home) page */
@@ -65,8 +65,8 @@ public Q_SLOTS:
     /** Switch to Dynode page */
     void gotoDynodePage();
     /** Switch to mining page */
-    void gotoMiningPage();   
-    
+    void gotoMiningPage();
+
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

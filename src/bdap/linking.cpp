@@ -8,7 +8,7 @@
 #include "script/script.h"
 #include "streams.h"
 
-bool CRequestLink::UnserializeFromTx(const CTransaction& tx) 
+bool CRequestLink::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -66,7 +66,7 @@ bool CRequestLink::ValidateValues(std::string& errorMessage)
 }
 
 
-bool CRequestLink::IsMyLinkRequest(const CTransaction& tx)
+bool CRequestLink::IsMyLinkRequest(const CTransactionRef& tx)
 {
     return false;
 }

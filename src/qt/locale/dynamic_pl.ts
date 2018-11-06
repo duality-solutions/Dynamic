@@ -3171,6 +3171,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Min suma</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Kopiuj adres</translation>
     </message>

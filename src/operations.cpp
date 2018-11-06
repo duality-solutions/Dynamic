@@ -24,58 +24,64 @@ std::string SignatureDelimiter = " ";
 std::string PrimaryDelimiter = "@";
 std::string SubDelimiter = "$";
 
-void ScrubString(std::string &input, bool forInteger) {
-	input.erase(std::remove(input.begin(), input.end(), '@'), input.end());
-	input.erase(std::remove(input.begin(), input.end(), '$'), input.end());
-	if (forInteger)
-		input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
+void ScrubString(std::string& input, bool forInteger)
+{
+    input.erase(std::remove(input.begin(), input.end(), '@'), input.end());
+    input.erase(std::remove(input.begin(), input.end(), '$'), input.end());
+    if (forInteger)
+        input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
 }
 
-void SeparateString(std::string input, std::vector<std::string> &output, bool subDelimiter) {
-	if(subDelimiter)
-		boost::split(output, input, boost::is_any_of(SubDelimiter));
-	else
-		boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
+void SeparateString(std::string input, std::vector<std::string>& output, bool subDelimiter)
+{
+    if (subDelimiter)
+        boost::split(output, input, boost::is_any_of(SubDelimiter));
+    else
+        boost::split(output, input, boost::is_any_of(PrimaryDelimiter));
 }
 
-void SeparateFluidOpString(std::string input, std::vector<std::string> &output) {
-  std::vector<std::string> firstSplit;
-  SeparateString(input, firstSplit);
-  if (firstSplit.size() > 1) {
-    std::vector<std::string> secondSplit;
-    SeparateString(firstSplit[0], secondSplit, true);
-    for (const std::string& item : secondSplit) {
-      output.push_back(item);
+void SeparateFluidOpString(std::string input, std::vector<std::string>& output)
+{
+    std::vector<std::string> firstSplit;
+    SeparateString(input, firstSplit);
+    if (firstSplit.size() > 1) {
+        std::vector<std::string> secondSplit;
+        SeparateString(firstSplit[0], secondSplit, true);
+        for (const std::string& item : secondSplit) {
+            output.push_back(item);
+        }
+        unsigned int n = 0;
+        for (const std::string& item : firstSplit) {
+            if (n != 0) {
+                output.push_back(item);
+            }
+            n = +1;
+        }
     }
-    unsigned int n = 0;
-    for (const std::string& item : firstSplit) {
-      if (n != 0) {
-        output.push_back(item);
-      }
-      n =+1;
-    }
-  }
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter) {
-	if(subDelimiter)
-		return stringOne + SubDelimiter + stringTwo;
-	else 
-		return stringOne + PrimaryDelimiter + stringTwo;
+std::string StitchString(std::string stringOne, std::string stringTwo, bool subDelimiter)
+{
+    if (subDelimiter)
+        return stringOne + SubDelimiter + stringTwo;
+    else
+        return stringOne + PrimaryDelimiter + stringTwo;
 }
 
-std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter) {
-	if(subDelimiter)
-		return stringOne + SubDelimiter + stringTwo + SubDelimiter + stringThree;
-	else 
-		return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
+std::string StitchString(std::string stringOne, std::string stringTwo, std::string stringThree, bool subDelimiter)
+{
+    if (subDelimiter)
+        return stringOne + SubDelimiter + stringTwo + SubDelimiter + stringThree;
+    else
+        return stringOne + PrimaryDelimiter + stringTwo + PrimaryDelimiter + stringThree;
 }
 
-std::string GetRidOfScriptStatement(std::string input, int position) {
-	std::vector<std::string> output;
-	boost::split(output, input, boost::is_any_of(" "));
-	
-	return output.at(position);
+std::string GetRidOfScriptStatement(std::string input, int position)
+{
+    std::vector<std::string> output;
+    boost::split(output, input, boost::is_any_of(" "));
+
+    return output.at(position);
 }
 
 /////////////////////////////////////////////////////////////
@@ -84,7 +90,8 @@ std::string GetRidOfScriptStatement(std::string input, int position) {
 //
 /////////////////////////////////////////////////////////////
 
-bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress) {
+bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress)
+{
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
     CDynamicAddress address(dynamicAddress);
@@ -105,7 +112,8 @@ bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress) {
 }
 
 
-bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsignedMessage, std::string &stitchedMessage, bool stitch) {
+bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
+{
 #ifdef ENABLE_WALLET
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
@@ -124,7 +132,7 @@ bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsigned
     std::vector<unsigned char> vchSig;
     if (!key.SignCompact(ss.GetHash(), vchSig))
         return false;
-    else if(stitch)
+    else if (stitch)
         stitchedMessage = StitchString(unsignedMessage, EncodeBase64(&vchSig[0], vchSig.size()), false);
     else
         stitchedMessage = EncodeBase64(&vchSig[0], vchSig.size());
@@ -135,8 +143,9 @@ bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsigned
 #endif //ENABLE_WALLET
 }
 
-bool COperations::GenericSignMessage(const std::string message, std::string &signedString, CDynamicAddress signer) {
-    if(!SignTokenMessage(signer, message, signedString, true))
+bool COperations::GenericSignMessage(const std::string message, std::string& signedString, CDynamicAddress signer)
+{
+    if (!SignTokenMessage(signer, message, signedString, true))
         return false;
     else
         ConvertToHex(signedString);
