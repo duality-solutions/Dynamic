@@ -283,3 +283,12 @@ bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents)
     }
     return true;
 }
+
+bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
+{
+    LOCK(cs_DHTGetEventMap);
+    for (std::multimap<std::string, CMutableGetEvent>::iterator it=m_DHTGetEventMap.begin(); it!=m_DHTGetEventMap.end(); ++it) {
+        vchGetEvents.push_back(it->second);
+    }
+    return true;
+}
