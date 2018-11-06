@@ -8,6 +8,7 @@
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
 #include "dht/operations.h"
+#include "dht/sessionevents.h"
 #include "hash.h"
 #include "pubkey.h"
 #include "rpcprotocol.h"
@@ -40,11 +41,13 @@ UniValue getmutable(const JSONRPCRequest& request)
     std::string strValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
-    fRet = GetDHTMutableData(pubKey, strSalt, strValue, iSequence, false);
+    bool fAuthoritative;
+    fRet = GetDHTMutableData(pubKey, strSalt, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Get_PubKey", strPubKey));
         result.push_back(Pair("Get_Salt", strSalt));
         result.push_back(Pair("Get_Seq", iSequence));
+        result.push_back(Pair("Get_Authoritative", fAuthoritative ? "True" : "False"));
         result.push_back(Pair("Get_Value", strValue));
     }
     else {
@@ -92,28 +95,22 @@ UniValue putmutable(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.
-        GetDHTMutableData(pubKey, strSalt, strPutValue, iSequence, true);
+        bool fAuthoritative;
+        GetDHTMutableData(pubKey, strSalt, 5000, strPutValue, iSequence, fAuthoritative);
         iSequence++;
     }
     std::string dhtMessage = "";
-    fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
+    fRet = SubmitPutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue);
     if (fRet) {
-        std::string dhtMessage = "";
-        fRet = PutDHTMutableData(pubKey, privKey, strSalt, iSequence, putValue, dhtMessage);
-        if (fRet) {
-            result.push_back(Pair("Put_PubKey", strPubKey));
-            //result.push_back(Pair("Put_PrivKey", strPrivKey));
-            result.push_back(Pair("Put_Salt", strSalt));
-            result.push_back(Pair("Put_Seq", iSequence));
-            result.push_back(Pair("Put_Value", request.params[0].get_str()));
-            result.push_back(Pair("Put_Message", dhtMessage));
-        }
-        else {
-            throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
-        }
+        result.push_back(Pair("Put_PubKey", strPubKey));
+        //result.push_back(Pair("Put_PrivKey", strPrivKey));
+        result.push_back(Pair("Put_Salt", strSalt));
+        result.push_back(Pair("Put_Seq", iSequence));
+        result.push_back(Pair("Put_Value", request.params[0].get_str()));
+        //result.push_back(Pair("Put_Message", dhtMessage));
     }
     else {
-        throw std::runtime_error("putmutable failed. Put failed. Check the debug.log for details.\n");
+        throw std::runtime_error("putdhtmutable failed. Put failed. Check the debug.log for details.\n");
     }
     return result;
 }
@@ -255,7 +252,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
 
     CharString vchObjectID = vchFromValue(request.params[0]);
-    const char* putValue = request.params[1].get_str().c_str();
+    const std::string strValue = request.params[1].get_str();
     const std::string strOperationType = request.params[2].get_str();
 
     ToLowerCase(vchObjectID);
@@ -291,32 +288,19 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
     //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
-    result.push_back(Pair("entry_key_id", pubKey.GetID().ToString()));
-    result.push_back(Pair("put_key_id", getKey.GetID().ToString()));
-    result.push_back(Pair("entry_key_hash", pubKey.GetHash().ToString()));
-    result.push_back(Pair("put_key_hash", getKey.GetHash().ToString()));
     result.push_back(Pair("put_operation", strOperationType));
 
-    bool fRet = false;
     int64_t iSequence = 0;
-    std::string strPubKey = stringFromVch(getKey.GetPubKey());
-    std::array<char, 32> arrPubKey;
-    libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-
-    std::string strPrivKey = stringFromVch(getKey.GetPrivKey());
-    std::array<char, 64> arrPrivKey;
-    libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
-    std::string dhtMessage = "";
+    bool fAuthoritative = false;
+    std::string strGetLastValue;
+    // we need the last sequence number to update an existing DHT entry. 
+    GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
+    iSequence++;
+    CPutRequest put(getKey, strOperationType, iSequence, strValue);
+    AddPutRequest(put);
     
-    fRet = PutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue, dhtMessage);
-    if (fRet) {
-        result.push_back(Pair("put_seq", iSequence));
-        result.push_back(Pair("put_value", request.params[1].get_str()));
-        result.push_back(Pair("put_message", dhtMessage));
-    }
-    else {
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error putting data in DHT. Check the debug.log for details.\n");
-    }
+    result.push_back(Pair("put_seq", iSequence));
+    result.push_back(Pair("put_value", strValue));
 
     return result;
 }
@@ -357,18 +341,91 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-
+    
     std::string strValue = "";
-    fRet = GetDHTMutableData(arrPubKey, strOperationType, strValue, iSequence, false);
+    bool fAuthoritative;
+    fRet = GetDHTMutableData(arrPubKey, strOperationType, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("get_seq", iSequence));
         result.push_back(Pair("get_value", strValue));
     }
     else {
-        result.push_back(Pair("error", "getbdapdata timeout error"));
-        //throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
+        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
     }
 
+    return result;
+}
+
+UniValue dhtputmessages(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "dhtputmessages\nGets all DHT put messages in memory.\n"
+            "\n");
+
+    UniValue result(UniValue::VOBJ);
+
+    std::vector<CMutablePutEvent> vchMutableData;
+    bool fRet = GetAllDHTPutEvents(vchMutableData);
+    int nCounter = 0;
+    if (fRet) {
+        for(const CMutablePutEvent& data : vchMutableData) {
+            UniValue oMutableData(UniValue::VOBJ);
+            oMutableData.push_back(Pair("info_hash", data.InfoHash()));
+            oMutableData.push_back(Pair("public_key", data.PublicKey()));
+            oMutableData.push_back(Pair("salt", data.Salt()));
+            oMutableData.push_back(Pair("seq_num", data.SequenceNumber()));
+            oMutableData.push_back(Pair("success_count", (int64_t)data.SuccessCount()));
+            oMutableData.push_back(Pair("message", data.Message()));
+            oMutableData.push_back(Pair("what", data.What()));
+            oMutableData.push_back(Pair("timestamp", data.Timestamp()));
+            result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
+            nCounter++;
+        }
+    }
+    else {
+        throw std::runtime_error("dhtputmessages failed.  Check the debug.log for details.\n");
+    }
+    UniValue oCounter(UniValue::VOBJ);
+    oCounter.push_back(Pair("record_count", nCounter));
+    result.push_back(Pair("summary", oCounter));
+    return result;
+}
+
+UniValue dhtgetmessages(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "dhtgetmessages\nGets all DHT get messages in memory.\n"
+            "\n");
+
+    UniValue result(UniValue::VOBJ);
+
+    std::vector<CMutableGetEvent> vchMutableData;
+    bool fRet = GetAllDHTGetEvents(vchMutableData);
+    int nCounter = 0;
+    if (fRet) {
+        for(const CMutableGetEvent& data : vchMutableData) {
+            UniValue oMutableData(UniValue::VOBJ);
+            oMutableData.push_back(Pair("info_hash", data.InfoHash()));
+            oMutableData.push_back(Pair("public_key", data.PublicKey()));
+            oMutableData.push_back(Pair("salt", data.Salt()));
+            oMutableData.push_back(Pair("seq_num", data.SequenceNumber()));
+            oMutableData.push_back(Pair("authoritative", data.Authoritative() ? "Yes" : "No"));
+            oMutableData.push_back(Pair("message", data.Message()));
+            oMutableData.push_back(Pair("what", data.What()));
+            oMutableData.push_back(Pair("timestamp", data.Timestamp()));
+            oMutableData.push_back(Pair("value", data.Value()));
+            result.push_back(Pair("dht_entry_" + std::to_string(nCounter + 1), oMutableData));
+            nCounter++;
+        }
+    }
+    else {
+        throw std::runtime_error("dhtgetmessages failed.  Check the debug.log for details.\n");
+    }
+    UniValue oCounter(UniValue::VOBJ);
+    oCounter.push_back(Pair("record_count", nCounter));
+    result.push_back(Pair("summary", oCounter));
     return result;
 }
 
@@ -382,6 +439,8 @@ static const CRPCCommand commands[] =
     { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
     { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"bdap id","dht value", "operation"} },
     { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"bdap id","operation"} },
+    { "dht",             "dhtputmessages",           &dhtputmessages,               true,    {} },
+    { "dht",             "dhtgetmessages",           &dhtgetmessages,               true,    {} },
 };
 
 void RegisterDHTRPCCommands(CRPCTable &tableRPC)

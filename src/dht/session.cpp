@@ -3,11 +3,13 @@
 
 #include "dht/session.h"
 
+#include "dht/sessionevents.h"
 #include "chainparams.h"
 #include "dht/settings.h"
 #include "dynode-sync.h"
 #include "net.h"
 #include "util.h"
+#include "utiltime.h" // for GetTimeMillis
 #include "validation.h"
 
 #include "libtorrent/hex.hpp" // for to_hex
@@ -31,80 +33,23 @@ static std::shared_ptr<std::thread> pDHTTorrentThread;
 static bool fShutdown;
 session *pTorrentDHTSession = NULL;
 
-static void empty_public_key(std::array<char, 32>& public_key)
-{
-    for( unsigned int i = 0; i < sizeof(public_key); i++) {
-        public_key[i] = 0;
-    }
-}
-
-alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
-{
-    LogPrintf("DHTTorrentNetwork -- WaitForResponse start.\n");
-    alert* ret = nullptr;
-    bool found = false;
-    std::array<char, 32> emptyKey;
-    empty_public_key(emptyKey);
-    std::string strEmpty = aux::to_hex(emptyKey);
-    std::string strPublicKey = aux::to_hex(public_key);
-    while (!found)
-    {
-        dhtSession->wait_for_alert(seconds(1));
-        std::vector<alert*> alerts;
-        dhtSession->pop_alerts(&alerts);
-        for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert)
-        {
-            if ((*iAlert) == nullptr)
-                continue;
-
-            std::string strAlertMessage = (*iAlert)->message();
-            int iAlertType = (*iAlert)->type();
-            if ((*iAlert)->category() == 0x1) {
-                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-            }
-            else if ((*iAlert)->category() == 0x80) {
-                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-            }
-            else if ((*iAlert)->category() == 0x200) {
-                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-            }
-            else if ((*iAlert)->category() == 0x400) {
-                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-            }
-            //else {
-            //    LogPrintf("DHTTorrentNetwork -- other dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-            //}
-            if (iAlertType != alert_type)
-            {
-                continue;
-            }
-            
-            size_t posKey = strAlertMessage.find("key=" + strPublicKey);
-            size_t posSalt = strAlertMessage.find("salt=" + strSalt);
-            if (strPublicKey == strEmpty || (posKey != std::string::npos && posSalt != std::string::npos)) {
-                LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
-                ret = *iAlert;
-                found = true;
-            }
-        }
-        if (fShutdown)
-            return ret;
-    }
-    return ret;
-}
-
-static alert* WaitForResponse(session* dhtSession, const int alert_type)
-{
-    std::array<char, 32> emptyKey;
-    empty_public_key(emptyKey);
-    return WaitForResponse(dhtSession, alert_type, emptyKey, "");
-}
-
-void Bootstrap(libtorrent::session* dhtSession)
+void Bootstrap()
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
-    WaitForResponse(dhtSession, dht_bootstrap_alert::alert_type);
-    LogPrintf("DHTTorrentNetwork -- bootstrap done.\n");
+    const int64_t timeout = 30000; // 30 seconds
+    const int64_t startTime = GetTimeMillis();
+    while (timeout > GetTimeMillis() - startTime)
+    {
+        std::vector<CEvent> events;
+        if (GetLastCategoryEvents(BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
+        {
+            if (events.size() > 0 ) {
+                LogPrintf("DHTTorrentNetwork -- Bootstrap successful.\n");
+                return;
+            }
+        }
+    }
+    LogPrintf("DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
 }
 
 std::string GetSessionStatePath()
@@ -162,7 +107,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 {
     LogPrintf("DHTTorrentNetwork -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("dht-torrent-network");
+    RenameThread("dht-session");
     
     try {
         CDHTSettings settings;
@@ -177,33 +122,18 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
         } while (true);
 
-        // boot strap the DHT LibTorrent network
         // with current peers and Dynodes
-        unsigned int iCounter = 0;
         settings.LoadSettings();
         pTorrentDHTSession = settings.GetSession();
-        Bootstrap(pTorrentDHTSession);
-        SaveSessionState(pTorrentDHTSession);
+        
+        
         if (!pTorrentDHTSession) {
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         }
-        while (!fShutdown) {
-            MilliSleep(1000);
-            iCounter ++;
-            if (!pTorrentDHTSession->is_dht_running()) {
-                LogPrintf("DHTTorrentNetwork -- not running.  Loading from file and restarting bootstrap.\n");
-                LoadSessionState(pTorrentDHTSession);
-                Bootstrap(pTorrentDHTSession);
-                SaveSessionState(pTorrentDHTSession);
-            }
-            else {
-                if (iCounter >= 300) {
-                    // save DHT state every 5 minutes
-                    SaveSessionState(pTorrentDHTSession);
-                    iCounter = 0;
-                }
-            }
-        }
+        StartEventListener(pTorrentDHTSession);
+        // boot strap the DHT LibTorrent network
+        Bootstrap();
+        //SaveSessionState(pTorrentDHTSession);
     }
     catch (const std::runtime_error& e)
     {
@@ -216,8 +146,9 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 void StopTorrentDHTNetwork()
 {
     LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
+    StopEventListener();
     fShutdown = true;
-    MilliSleep(1100);
+    MilliSleep(30);
     if (pDHTTorrentThread != NULL)
     {
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
@@ -254,23 +185,25 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
     }
 
     if (!pTorrentDHTSession->is_dht_running()) {
-        LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        if (!LoadSessionState(pTorrentDHTSession)) {
-            LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
-            Bootstrap(pTorrentDHTSession);
-        }
-        else {
-            LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
-        }
+        return;
+        //LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
+        //if (!LoadSessionState(pTorrentDHTSession)) {
+        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
+        //    Bootstrap();
+        //}
+        //else {
+        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
+        //}
     }
     else {
         LogPrintf("DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
     }
 
     pTorrentDHTSession->post_dht_stats();
-    alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
-    dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
-    vchDHTLookup = dhtStatsAlert->active_requests;
-    vchDHTBuckets = dhtStatsAlert->routing_table;
+    //get alert from map
+    //alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
+    //dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
+    //vchDHTLookup = dhtStatsAlert->active_requests;
+    //vchDHTBuckets = dhtStatsAlert->routing_table;
     stats = pTorrentDHTSession->status();
 }
