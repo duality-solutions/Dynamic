@@ -93,10 +93,10 @@ AC_ARG_ENABLE([wallet],
 
 # Enable GPU miner
 AC_ARG_ENABLE([gpu],
-  [AS_HELP_STRING([--disable-gpu],
-  [disable GPU miner (enabled by default)])],
+  [AS_HELP_STRING([--enable-gpu],
+  [enable GPU miner (disabled by default)])],
   [enable_gpu=$enableval],
-  [enable_gpu=yes])
+  [enable_gpu=no])
 
 # Enable CUDA
 AC_ARG_ENABLE([cuda],
