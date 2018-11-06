@@ -4,8 +4,9 @@
 #include "dht/operations.h"
 
 #include "dht/session.h"
+#include "dht/sessionevents.h"
 #include "util.h"
-
+#include "utiltime.h"
 
 #include <libtorrent/hex.hpp> // for to_hex
 #include <libtorrent/bencode.hpp>
@@ -15,7 +16,7 @@
 
 using namespace libtorrent;
 
-bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, std::string& entryValue, int64_t& lastSequence, bool fWaitForAuthoritative)
+bool SubmitGetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt)
 {
     //TODO: DHT add locks
     LogPrintf("DHTTorrentNetwork -- GetDHTMutableData started.\n");
@@ -29,7 +30,7 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
         LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Restarting DHT.\n");
         if (!LoadSessionState(pTorrentDHTSession)) {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
-            Bootstrap(pTorrentDHTSession);
+            Bootstrap();
         }
         else {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData  setting loaded from file.\n");
@@ -42,32 +43,31 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
     pTorrentDHTSession->dht_get_item(public_key, entrySalt);
     LogPrintf("DHTTorrentNetwork -- MGET: %s, salt = %s\n", aux::to_hex(public_key), entrySalt);
 
-    bool authoritative = false;
-    if (fWaitForAuthoritative) {
-        while (!authoritative)
-        {
-            alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
+    return true;
+}
 
-            dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
-            authoritative = dhtGetAlert->authoritative;
-            entryValue = dhtGetAlert->item.to_string();
-            lastSequence = dhtGetAlert->seq;
-            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
-        }
-    }
-    else {
-        alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_mutable_item_alert::alert_type, public_key, entrySalt);
-        dht_mutable_item_alert* dhtGetAlert = alert_cast<dht_mutable_item_alert>(dhtAlert);
-        authoritative = dhtGetAlert->authoritative;
-        entryValue = dhtGetAlert->item.to_string();
-        lastSequence = dhtGetAlert->seq;
-        LogPrintf("DHTTorrentNetwork -- GetDHTMutableData %s: %s\n", authoritative ? "auth" : "non-auth", entryValue);
-    }
-
-    if (entryValue == "<uninitialized>")
+bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
+                            std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative)
+{
+    if (!SubmitGetDHTMutableData(public_key, entrySalt))
         return false;
 
-    return true;
+    MilliSleep(27);
+    MutableKey mKey = std::make_pair(aux::to_hex(public_key), entrySalt);
+    CMutableGetEvent data;
+    int64_t startTime = GetTimeMillis();
+    while (timeout > GetTimeMillis() - startTime)
+    {
+        if (FindDHTGetEvent(mKey, data)) {
+            entryValue = data.Value();
+            lastSequence = data.SequenceNumber();
+            fAuthoritative = data.Authoritative();
+            //LogPrintf("DHTTorrentNetwork -- GetDHTMutableData: value = %s, seq = %d, auth = %u\n", entryValue, lastSequence, fAuthoritative);
+            return true;
+        }
+        MilliSleep(351);
+    }
+    return false;
 }
 
 static void put_mutable
@@ -96,14 +96,11 @@ static void put_mutable
     }
 }
 
-bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
-                        ,char const* dhtValue, std::string& message)
+bool SubmitPutDHTMutableData(const std::array<char, 32>& public_key, const std::array<char, 64>& private_key, const std::string& entrySalt, const int64_t& lastSequence
+                        ,char const* dhtValue)
 {
-    //TODO: (DHT) add locks
-    LogPrintf("DHTTorrentNetwork -- PutMutableData started.\n");
-
+    LogPrintf("DHTTorrentNetwork -- PutMutableData started, Value = %s, lastSequence = %u\n", std::string(dhtValue), lastSequence);
     if (!pTorrentDHTSession) {
-        message = "DHTTorrentNetwork -- PutDHTMutableData Error. pTorrentDHTSession is null.";
         return false;
     }
 
@@ -111,7 +108,7 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
         LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Restarting DHT.\n");
         if (!LoadSessionState(pTorrentDHTSession)) {
             LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
-            Bootstrap(pTorrentDHTSession);
+            Bootstrap();
         }
         else {
             LogPrintf("DHTTorrentNetwork -- PutDHTMutableData  setting loaded from file.\n");
@@ -125,13 +122,6 @@ bool PutDHTMutableData(const std::array<char, 32>& public_key, const std::array<
                                         std::placeholders::_3, std::placeholders::_4, public_key, private_key, dhtValue, lastSequence), entrySalt);
 
     LogPrintf("DHTTorrentNetwork -- MPUT public key: %s, salt = %s, seq=%d\n", aux::to_hex(public_key), entrySalt, lastSequence);
-    alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_put_alert::alert_type, public_key, entrySalt);
-    dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
-    message = dhtPutAlert->message();
-    LogPrintf("DHTTorrentNetwork -- PutMutableData %s\n", message);
-
-    if (dhtPutAlert->num_success == 0)
-        return false;
-
+    
     return true;
 }
