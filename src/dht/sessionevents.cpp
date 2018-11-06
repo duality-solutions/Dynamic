@@ -3,6 +3,7 @@
 
 #include "dht/sessionevents.h"
 
+#include "dht/operations.h"
 #include "dht/session.h"
 #include "sync.h" // for LOCK and CCriticalSection
 #include "util.h" // for LogPrintf
@@ -27,16 +28,19 @@ typedef std::pair<int64_t, CEvent> EventPair;
 typedef std::multimap<uint32_t, EventPair> EventCategoryMap;
 typedef std::multimap<std::string, CMutableGetEvent> DHTGetEventMap;
 typedef std::multimap<std::string, CMutablePutEvent> DHTPutEventMap;
+typedef std::map<int64_t, CPutRequest> DHTPutRequestMap;
 
 static CCriticalSection cs_EventMap;
 static CCriticalSection cs_DHTGetEventMap;
 static CCriticalSection cs_DHTPutEventMap;
+static CCriticalSection cs_DHTPutRequestMap;
 
 static bool fShutdown;
 static std::shared_ptr<std::thread> pEventListenerThread;
 static EventCategoryMap m_EventCategoryMap;
 static DHTGetEventMap m_DHTGetEventMap;
 static DHTPutEventMap m_DHTPutEventMap;
+static DHTPutRequestMap m_DHTPutRequestMap;
 
 CEvent::CEvent(std::string _message, int _type, uint32_t _category, std::string _what)
 {
@@ -92,6 +96,20 @@ CMutablePutEvent::CMutablePutEvent(std::string _message, int _type, uint32_t _ca
     infohash = GetInfoHash(pubkey, salt);
 }
 
+CPutRequest::CPutRequest(const CKeyEd25519 _key, const std::string _salt, const int64_t _sequence, const std::string _value)
+{
+    key = _key;
+    salt = _salt;
+    sequence = _sequence;
+    value = _value;
+    timestamp = GetTimeMillis();
+}
+
+void CPutRequest::DHTPut()
+{
+    SubmitPutDHTMutableData(key.GetDHTPubKey(), key.GetDHTPrivKey(), salt, sequence, value.c_str());
+}
+
 static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& event) 
 {
     LOCK(cs_DHTGetEventMap);
@@ -139,13 +157,20 @@ static void DHTEventListener(session* dhtSession)
     unsigned int counter = 0;
     while(!fShutdown)
     {
+        if (m_DHTPutRequestMap.size() > 0) {
+            CPutRequest put = m_DHTPutRequestMap.begin()->second;
+            LogPrintf("DHTEventListener -- DHT Processing Put Request: value = %s, salt = %s\n", std::string(put.Value()), put.Salt());
+            put.DHTPut();
+            MilliSleep(31);
+            m_DHTPutRequestMap.erase(m_DHTPutRequestMap.begin()->first);
+        }
+
         dhtSession->wait_for_alert(seconds(1));
         std::vector<alert*> alerts;
         dhtSession->pop_alerts(&alerts);
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
             if ((*iAlert) == nullptr)
                 continue;
-
             const uint32_t category = (*iAlert)->category();
             const std::string strAlertMessage = (*iAlert)->message();
             const int iAlertType = (*iAlert)->type();
@@ -291,4 +316,10 @@ bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
         vchGetEvents.push_back(it->second);
     }
     return true;
+}
+
+void AddPutRequest(CPutRequest& put)
+{
+    LOCK(cs_DHTPutRequestMap);
+    m_DHTPutRequestMap.insert(std::make_pair(put.Timestamp(), put));
 }

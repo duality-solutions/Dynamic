@@ -4,6 +4,8 @@
 #ifndef DYNAMIC_DHT_SESSION_EVENTS_H
 #define DYNAMIC_DHT_SESSION_EVENTS_H
 
+#include "dht/ed25519.h"
+
 #include <string>
 #include <vector>
 
@@ -126,6 +128,35 @@ public:
     }
 };
 
+class CPutRequest {
+private:
+    CKeyEd25519 key;
+    std::string salt;
+    std::int64_t sequence;
+    std::string value;
+    std::int64_t timestamp;
+
+public:
+    CPutRequest(const CKeyEd25519 _key, const std::string _salt, const int64_t _sequence, const std::string _value);
+
+    CKeyEd25519 Key() const { return key; }
+    std::string Salt() const { return salt; }
+    std::int64_t SequenceNumber() const { return sequence; }
+    std::string Value() const { return value; }
+    std::int64_t Timestamp() const { return timestamp; }
+
+    void DHTPut();
+    
+    inline CPutRequest operator=(const CPutRequest& b) {
+        key = b.Key();
+        salt = b.Salt();
+        sequence = b.SequenceNumber();
+        value = b.Value();
+        timestamp = b.Timestamp();
+        return *this;
+    }
+};
+
 void CleanUpEventMap(uint32_t timeout = 300000);  //default to 5 minutes.
 
 void StopEventListener();
@@ -136,5 +167,6 @@ bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event);
 bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event);
 bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
+void AddPutRequest(CPutRequest& put);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

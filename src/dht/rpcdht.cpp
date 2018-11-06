@@ -252,7 +252,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
 
     CharString vchObjectID = vchFromValue(request.params[0]);
-    char const* putValue = request.params[1].get_str().c_str();
+    const std::string strValue = request.params[1].get_str();
     const std::string strOperationType = request.params[2].get_str();
 
     ToLowerCase(vchObjectID);
@@ -288,35 +288,19 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
     //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
-    result.push_back(Pair("entry_key_id", pubKey.GetID().ToString()));
-    result.push_back(Pair("put_key_id", getKey.GetID().ToString()));
-    result.push_back(Pair("entry_key_hash", pubKey.GetHash().ToString()));
-    result.push_back(Pair("put_key_hash", getKey.GetHash().ToString()));
     result.push_back(Pair("put_operation", strOperationType));
 
-    bool fRet = false;
     int64_t iSequence = 0;
-    std::string strPubKey = stringFromVch(getKey.GetPubKey());
-    std::array<char, 32> arrPubKey;
-    libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-
-    std::string strPrivKey = stringFromVch(getKey.GetPrivKey());
-    std::array<char, 64> arrPrivKey;
-    libtorrent::aux::from_hex(strPrivKey, arrPrivKey.data());
-    std::string dhtMessage = "";
-    // we need the last sequence number to update an existing DHT entry.
     bool fAuthoritative = false;
     std::string strGetLastValue;
-    GetDHTMutableData(arrPubKey, strOperationType, 5000, strGetLastValue, iSequence, fAuthoritative);
+    // we need the last sequence number to update an existing DHT entry. 
+    GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
     iSequence++;
-    fRet = SubmitPutDHTMutableData(arrPubKey, arrPrivKey, strOperationType, iSequence, putValue);
-    if (fRet) {
-        result.push_back(Pair("put_seq", iSequence));
-        result.push_back(Pair("put_value", request.params[1].get_str()));
-    }
-    else {
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error putting data in DHT. Check the debug.log for details.\n");
-    }
+    CPutRequest put(getKey, strOperationType, iSequence, strValue);
+    AddPutRequest(put);
+    
+    result.push_back(Pair("put_seq", iSequence));
+    result.push_back(Pair("put_value", strValue));
 
     return result;
 }
