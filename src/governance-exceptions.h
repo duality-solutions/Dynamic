@@ -26,7 +26,7 @@ enum governance_exception_type_enum_t {
 
 inline std::ostream& operator<<(std::ostream& os, governance_exception_type_enum_t eType)
 {
-    switch(eType) {
+    switch (eType) {
     case GOVERNANCE_EXCEPTION_NONE:
         os << "GOVERNANCE_EXCEPTION_NONE";
         break;
@@ -64,8 +64,8 @@ private:
 
 public:
     CGovernanceException(const std::string& strMessageIn = "",
-                         governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
-                         int nNodePenaltyIn = 0)
+        governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
+        int nNodePenaltyIn = 0)
         : strMessage(),
           eType(eTypeIn),
           nNodePenalty(nNodePenaltyIn)
@@ -92,7 +92,8 @@ public:
         return eType;
     }
 
-    int GetNodePenalty() const {
+    int GetNodePenalty() const
+    {
         return nNodePenalty;
     }
 };

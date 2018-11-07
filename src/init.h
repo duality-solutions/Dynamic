@@ -11,9 +11,7 @@
 #include <string>
 
 class CScheduler;
-#ifdef ENABLE_WALLET		
 class CWallet;
-#endif //ENABLE_WALLET		
 
 namespace boost
 {

@@ -16,14 +16,14 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "clientversion.h"
-#include "validation.h"
 #include "net.h"
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "validation.h"
 
-#include "dynodeman.h"
 #include "dynode-sync.h"
+#include "dynodeman.h"
 #include "privatesend-client.h"
 
 #include <stdint.h>
@@ -37,13 +37,12 @@ static const int64_t nClientStartupTime = GetTime();
 static int64_t nLastHeaderTipUpdateNotification = 0;
 static int64_t nLastBlockTipUpdateNotification = 0;
 
-ClientModel::ClientModel(OptionsModel *_optionsModel, QObject *parent) :
-    QObject(parent),
-    optionsModel(_optionsModel),
-    peerTableModel(0),
-    cachedDynodeCountString(""),
-    banTableModel(0),
-    pollTimer(0)
+ClientModel::ClientModel(OptionsModel* _optionsModel, QObject* parent) : QObject(parent),
+                                                                         optionsModel(_optionsModel),
+                                                                         peerTableModel(0),
+                                                                         cachedDynodeCountString(""),
+                                                                         banTableModel(0),
+                                                                         pollTimer(0)
 {
     cachedBestHeaderHeight = -1;
     cachedBestHeaderTime = -1;
@@ -70,15 +69,15 @@ int ClientModel::getNumConnections(unsigned int flags) const
 {
     CConnman::NumConnections connections = CConnman::CONNECTIONS_NONE;
 
-    if(flags == CONNECTIONS_IN)
+    if (flags == CONNECTIONS_IN)
         connections = CConnman::CONNECTIONS_IN;
     else if (flags == CONNECTIONS_OUT)
         connections = CConnman::CONNECTIONS_OUT;
     else if (flags == CONNECTIONS_ALL)
         connections = CConnman::CONNECTIONS_ALL;
 
-    if(g_connman)
-         return g_connman->GetNodeCount(connections);
+    if (g_connman)
+        return g_connman->GetNodeCount(connections);
     return 0;
 }
 
@@ -86,12 +85,12 @@ QString ClientModel::getDynodeCountString() const
 {
     // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)dnodeman.size()))
     return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
-            .arg(QString::number((int)dnodeman.size()))
-            .arg(QString::number((int)dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
-            .arg(QString::number((int)dnodeman.CountEnabled()));
-            // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV4)))
-            // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV6)))
-            // .arg(QString::number((int)dnodeman.CountByIP(NET_TOR)));
+        .arg(QString::number((int)dnodeman.size()))
+        .arg(QString::number((int)dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+        .arg(QString::number((int)dnodeman.CountEnabled()));
+    // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV4)))
+    // .arg(QString::number((int)dnodeman.CountByIP(NET_IPV6)))
+    // .arg(QString::number((int)dnodeman.CountByIP(NET_TOR)));
 }
 
 int ClientModel::getNumBlocks() const
@@ -109,7 +108,7 @@ int ClientModel::getHeaderTipHeight() const
         if (pindexBestHeader) {
             cachedBestHeaderHeight = pindexBestHeader->nHeight;
             cachedBestHeaderTime = pindexBestHeader->GetBlockTime();
-         }
+        }
     }
     return cachedBestHeaderHeight;
 }
@@ -128,14 +127,14 @@ int64_t ClientModel::getHeaderTipTime() const
 
 quint64 ClientModel::getTotalBytesRecv() const
 {
-    if(!g_connman)
+    if (!g_connman)
         return 0;
     return g_connman->GetTotalBytesRecv();
 }
 
 quint64 ClientModel::getTotalBytesSent() const
 {
-    if(!g_connman)
+    if (!g_connman)
         return 0;
     return g_connman->GetTotalBytesSent();
 }
@@ -160,15 +159,14 @@ size_t ClientModel::getMempoolDynamicUsage() const
     return mempool.DynamicMemoryUsage();
 }
 
-double ClientModel::getVerificationProgress(const CBlockIndex *tipIn) const
+double ClientModel::getVerificationProgress(const CBlockIndex* tipIn) const
 {
-    CBlockIndex *tip = const_cast<CBlockIndex *>(tipIn);
-    if (!tip)
-    {
+    CBlockIndex* tip = const_cast<CBlockIndex*>(tipIn);
+    if (!tip) {
         LOCK(cs_main);
         tip = chainActive.Tip();
     }
-    return Checkpoints::GuessVerificationProgress(Params().Checkpoints(), tip);
+    return GuessVerificationProgress(Params().TxData(), tip);
 }
 
 void ClientModel::updateTimer()
@@ -183,8 +181,7 @@ void ClientModel::updateSnTimer()
 {
     QString newDynodeCountString = getDynodeCountString();
 
-    if (cachedDynodeCountString != newDynodeCountString)
-    {
+    if (cachedDynodeCountString != newDynodeCountString) {
         cachedDynodeCountString = newDynodeCountString;
 
         Q_EMIT strDynodesChanged(cachedDynodeCountString);
@@ -196,16 +193,14 @@ void ClientModel::updateNumConnections(int numConnections)
     Q_EMIT numConnectionsChanged(numConnections);
 }
 
-void ClientModel::updateAlert(const QString &hash, int status)
+void ClientModel::updateAlert(const QString& hash, int status)
 {
     // Show error message notification for new alert
-    if(status == CT_NEW)
-    {
+    if (status == CT_NEW) {
         uint256 hash_256;
         hash_256.SetHex(hash.toStdString());
         CAlert alert = CAlert::getAlertByHash(hash_256);
-        if(!alert.IsNull())
-        {
+        if (!alert.IsNull()) {
             Q_EMIT message(tr("Network Alert"), QString::fromStdString(alert.strStatusBar), CClientUIInterface::ICON_ERROR);
         }
     }
@@ -235,17 +230,17 @@ QString ClientModel::getStatusBarWarnings() const
     return QString::fromStdString(GetWarnings("gui"));
 }
 
-OptionsModel *ClientModel::getOptionsModel()
+OptionsModel* ClientModel::getOptionsModel()
 {
     return optionsModel;
 }
 
-PeerTableModel *ClientModel::getPeerTableModel()
+PeerTableModel* ClientModel::getPeerTableModel()
 {
     return peerTableModel;
 }
 
-BanTableModel *ClientModel::getBanTableModel()
+BanTableModel* ClientModel::getBanTableModel()
 {
     return banTableModel;
 }
@@ -281,36 +276,36 @@ void ClientModel::updateBanlist()
 }
 
 // Handlers for core signals
-static void ShowProgress(ClientModel *clientmodel, const std::string &title, int nProgress)
+static void ShowProgress(ClientModel* clientmodel, const std::string& title, int nProgress)
 {
     // emits signal "showProgress"
     QMetaObject::invokeMethod(clientmodel, "showProgress", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::fromStdString(title)),
-                              Q_ARG(int, nProgress));
+        Q_ARG(QString, QString::fromStdString(title)),
+        Q_ARG(int, nProgress));
 }
 
-static void NotifyNumConnectionsChanged(ClientModel *clientmodel, int newNumConnections)
+static void NotifyNumConnectionsChanged(ClientModel* clientmodel, int newNumConnections)
 {
     // Too noisy: qDebug() << "NotifyNumConnectionsChanged: " + QString::number(newNumConnections);
     QMetaObject::invokeMethod(clientmodel, "updateNumConnections", Qt::QueuedConnection,
-                              Q_ARG(int, newNumConnections));
+        Q_ARG(int, newNumConnections));
 }
 
-static void NotifyAlertChanged(ClientModel *clientmodel, const uint256 &hash, ChangeType status)
+static void NotifyAlertChanged(ClientModel* clientmodel, const uint256& hash, ChangeType status)
 {
     qDebug() << "NotifyAlertChanged: " + QString::fromStdString(hash.GetHex()) + " status=" + QString::number(status);
     QMetaObject::invokeMethod(clientmodel, "updateAlert", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::fromStdString(hash.GetHex())),
-                              Q_ARG(int, status));
+        Q_ARG(QString, QString::fromStdString(hash.GetHex())),
+        Q_ARG(int, status));
 }
 
-static void BannedListChanged(ClientModel *clientmodel)
+static void BannedListChanged(ClientModel* clientmodel)
 {
     qDebug() << QString("%1: Requesting update for peer banlist").arg(__func__);
     QMetaObject::invokeMethod(clientmodel, "updateBanlist", Qt::QueuedConnection);
 }
 
-static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, const CBlockIndex *pIndex, bool fHeader)
+static void BlockTipChanged(ClientModel* clientmodel, bool initialSync, const CBlockIndex* pIndex, bool fHeader)
 {
     // lock free async UI updates in case we have a new block tip
     // during initial sync, only update the UI if the last update
@@ -331,19 +326,19 @@ static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, const CB
     if (!initialSync || now - nLastUpdateNotification > MODEL_UPDATE_DELAY) {
         //pass a async signal to the UI thread
         QMetaObject::invokeMethod(clientmodel, "numBlocksChanged", Qt::QueuedConnection,
-                                  Q_ARG(int, pIndex->nHeight),
-                                  Q_ARG(QDateTime, QDateTime::fromTime_t(pIndex->GetBlockTime())),
-                                  Q_ARG(double, clientmodel->getVerificationProgress(pIndex)),
-                                  Q_ARG(bool, fHeader));
+            Q_ARG(int, pIndex->nHeight),
+            Q_ARG(QDateTime, QDateTime::fromTime_t(pIndex->GetBlockTime())),
+            Q_ARG(double, clientmodel->getVerificationProgress(pIndex)),
+            Q_ARG(bool, fHeader));
         nLastUpdateNotification = now;
         nLastBlockTipUpdateNotification = now;
     }
 }
 
-static void NotifyAdditionalDataSyncProgressChanged(ClientModel *clientmodel, double nSyncProgress)
+static void NotifyAdditionalDataSyncProgressChanged(ClientModel* clientmodel, double nSyncProgress)
 {
     QMetaObject::invokeMethod(clientmodel, "additionalDataSyncProgressChanged", Qt::QueuedConnection,
-                              Q_ARG(double, nSyncProgress));
+        Q_ARG(double, nSyncProgress));
 }
 
 void ClientModel::subscribeToCoreSignals()

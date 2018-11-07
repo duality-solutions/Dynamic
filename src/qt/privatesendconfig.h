@@ -10,8 +10,9 @@
 
 #include <QDialog>
 
-namespace Ui {
-    class PrivateSendConfig;
+namespace Ui
+{
+class PrivateSendConfig;
 }
 class WalletModel;
 
@@ -22,16 +23,15 @@ class PrivateSendConfig : public QDialog
     Q_OBJECT
 
 public:
-
-    PrivateSendConfig(QWidget *parent = 0);
+    PrivateSendConfig(QWidget* parent = 0);
     ~PrivateSendConfig();
 
-    void setModel(WalletModel *model);
+    void setModel(WalletModel* model);
 
 
 private:
-    Ui::PrivateSendConfig *ui;
-    WalletModel *model;
+    Ui::PrivateSendConfig* ui;
+    WalletModel* model;
     void configure(bool enabled, int coins, int rounds);
 
 private Q_SLOTS:

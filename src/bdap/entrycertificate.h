@@ -31,7 +31,7 @@ public:
         SetNull();
     }
 
-    CEntryCertificate(const CTransaction& tx) {
+    CEntryCertificate(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
@@ -89,7 +89,7 @@ public:
     inline bool IsNull() const { return (OwnerFullPath.empty()); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
-    bool UnserializeFromTx(const CTransaction &tx);
+    bool UnserializeFromTx(const CTransactionRef& tx);
 
     bool SelfSignedCertificate() const {
         if (OwnerDomainEntry == nullptr || AuthorityDomainEntry == nullptr)

@@ -52,7 +52,7 @@ bool CAuditData::UnserializeFromData(const std::vector<unsigned char>& vchData, 
     return true;
 }
 
-bool CAuditData::UnserializeFromTx(const CTransaction& tx) 
+bool CAuditData::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;

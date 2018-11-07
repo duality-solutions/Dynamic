@@ -376,7 +376,6 @@ HEADERS += \
     src/flat-database.h \
     src/governance-classes.h \
     src/governance-exceptions.h \
-    src/governance-misc.h \
     src/governance-object.h \
     src/governance-vote.h \
     src/governance-votedb.h \

@@ -5,6 +5,7 @@
 #define DYNAMIC_BDAP_LINKING_H
 
 #include "bdap.h"
+#include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
 
@@ -38,7 +39,7 @@ public:
         SetNull();
     }
 
-    CRequestLink(const CTransaction &tx) {
+    CRequestLink(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
@@ -95,13 +96,13 @@ public:
     }
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
-    bool UnserializeFromTx(const CTransaction &tx);
-    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+    bool UnserializeFromTx(const CTransactionRef& tx);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 
     CharString SharedSignPublicKey(); //derive from SharedPrivateKey
     bool ValidateValues(std::string& errorMessage);
-    bool IsMyLinkRequest(const CTransaction& tx);
+    bool IsMyLinkRequest(const CTransactionRef& tx);
 };
 
 // CAcceptLink are stored serilzed and encrypted in a LibTorrent DHT key value pair entry

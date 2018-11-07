@@ -25,17 +25,26 @@
 #include <univalue.h>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend=false);
+extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
 
-opcodetype getOpcodeFromString(std::string input) {
-    if (input == "OP_MINT") return OP_MINT;
-    else if (input == "OP_REWARD_DYNODE") return OP_REWARD_DYNODE;
-    else if (input == "OP_REWARD_MINING") return OP_REWARD_MINING;
-    else if (input == "OP_SWAP_SOVEREIGN_ADDRESS") return OP_SWAP_SOVEREIGN_ADDRESS;
-    else if (input == "OP_UPDATE_FEES") return OP_UPDATE_FEES;
-    else if (input == "OP_FREEZE_ADDRESS") return OP_FREEZE_ADDRESS;
-    else if (input == "OP_RELEASE_ADDRESS") return OP_RELEASE_ADDRESS;
-    else return OP_RETURN;
+opcodetype getOpcodeFromString(std::string input)
+{
+    if (input == "OP_MINT")
+        return OP_MINT;
+    else if (input == "OP_REWARD_DYNODE")
+        return OP_REWARD_DYNODE;
+    else if (input == "OP_REWARD_MINING")
+        return OP_REWARD_MINING;
+    else if (input == "OP_SWAP_SOVEREIGN_ADDRESS")
+        return OP_SWAP_SOVEREIGN_ADDRESS;
+    else if (input == "OP_UPDATE_FEES")
+        return OP_UPDATE_FEES;
+    else if (input == "OP_FREEZE_ADDRESS")
+        return OP_FREEZE_ADDRESS;
+    else if (input == "OP_RELEASE_ADDRESS")
+        return OP_RELEASE_ADDRESS;
+    else
+        return OP_RETURN;
 
     return OP_RETURN;
 };
@@ -48,18 +57,16 @@ UniValue maketoken(const JSONRPCRequest& request)
             "\nConvert String to Hexadecimal Format\n"
             "\nArguments:\n"
             "1. \"string\"         (string, required) String that has to be converted to hex.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("maketoken", "\"Hello World!\"")
-            + HelpExampleRpc("maketoken", "\"Hello World!\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("maketoken", "\"Hello World!\"") + HelpExampleRpc("maketoken", "\"Hello World!\""));
     }
     std::string result;
 
-    for(uint32_t iter = 0; iter != request.params.size(); iter++) {
+    for (uint32_t iter = 0; iter != request.params.size(); iter++) {
         result += request.params[iter].get_str() + SubDelimiter;
     }
 
-    result.pop_back(); 
+    result.pop_back();
     fluid.ConvertToHex(result);
 
     return result;
@@ -71,10 +78,8 @@ UniValue gettime(const JSONRPCRequest& request)
         throw std::runtime_error(
             "gettime\n"
             "\nReturns the current Epoch time (https://www.epochconverter.com).\n"
-            "\nExamples:\n"
-            + HelpExampleCli("gettime", "\"1535543210\"")
-            + HelpExampleRpc("gettime", "\"1535543210\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("gettime", "\"1535543210\"") + HelpExampleRpc("gettime", "\"1535543210\""));
     }
     return GetTime();
 }
@@ -87,17 +92,14 @@ UniValue getrawpubkey(const JSONRPCRequest& request)
             "\nGet (un)compressed raw public key of an address of the wallet\n"
             "\nArguments:\n"
             "1. \"address\"         (string, required) The Dynamic Address from which the pubkey is to recovered.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
-            + HelpExampleRpc("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf") + HelpExampleRpc("getrawpubkey", "D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf"));
     UniValue ret(UniValue::VOBJ);
 
     CDynamicAddress address(request.params[0].get_str());
     bool isValid = address.IsValid();
 
-    if (isValid)
-    {
+    if (isValid) {
         CTxDestination dest = address.Get();
         CScript scriptPubKey = GetScriptForDestination(dest);
         ret.push_back(Pair("pubkey", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
@@ -119,10 +121,8 @@ UniValue burndynamic(const UniValue& params, bool fHelp)
             "\nSend coins to be burnt (destroyed) onto the Dynamic Network\n"
             "\nArguments:\n"
             "1. \"account\"         (numeric or string, required) The amount of coins to be minted.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
-            + HelpExampleRpc("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"") + HelpExampleRpc("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\""));
     CWalletTx wtx;
 
     EnsureWalletIsUnlocked();
@@ -156,10 +156,8 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"opcode\"  (string, required) The Fluid operation to be executed.\n"
             "2. \"hexstring\" (string, required) The token for that opearation.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + HelpExampleRpc("sendfluidtransaction", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
     CScript finalScript;
 
     EnsureWalletIsUnlocked();
@@ -168,22 +166,21 @@ UniValue sendfluidtransaction(const JSONRPCRequest& request)
     if (negatif == opcode)
         throw std::runtime_error("OP_CODE is either not a Fluid OP_CODE or is invalid");
 
-    if(!IsHex(request.params[1].get_str()))
+    if (!IsHex(request.params[1].get_str()))
         throw std::runtime_error("Hex isn't even valid!");
     else
         finalScript = CScript() << opcode << ParseHex(request.params[1].get_str());
 
     std::string message;
 
-    if(!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
+    if (!fluid.CheckIfQuorumExists(ScriptToAsmStr(finalScript), message))
         throw std::runtime_error("Instruction does not meet required quorum for validity");
 
     if (opcode == OP_MINT || opcode == OP_REWARD_MINING || opcode == OP_REWARD_DYNODE) {
         CWalletTx wtx;
         SendCustomTransaction(finalScript, wtx, fluid.FLUID_TRANSACTION_COST, false);
         return wtx.GetHash().GetHex();
-    }
-    else {
+    } else {
         throw std::runtime_error(strprintf("OP_CODE, %s, not implemented yet!", request.params[0].get_str()));
     }
 }
@@ -197,10 +194,8 @@ UniValue signtoken(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"address\"         (string, required) The Dynamic Address which will be used to sign.\n"
             "2. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
-            "\nExamples:\n"
-            + HelpExampleCli("signtoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("signtoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("signtoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + HelpExampleRpc("signtoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
     std::string result;
 
     CDynamicAddress address(request.params[0].get_str());
@@ -215,7 +210,7 @@ UniValue signtoken(const JSONRPCRequest& request)
 
     std::string r = request.params[1].get_str();
 
-    if(!IsHex(r))
+    if (!IsHex(r))
         throw std::runtime_error("Hex isn't even valid! Cannot process ahead...");
 
     fluid.ConvertToString(r);
@@ -234,10 +229,8 @@ UniValue verifyquorum(const JSONRPCRequest& request)
             "\nVerify if the token provided has required quorum\n"
             "\nArguments:\n"
             "1. \"tokenkey\"         (string, required) The token which has to be initially signed\n"
-            "\nExamples:\n"
-            + HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + HelpExampleRpc("verifyquorum", "\"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
     std::string message;
 
     if (!fluid.CheckNonScriptQuorum(request.params[0].get_str(), message, false))
@@ -255,10 +248,8 @@ UniValue consenttoken(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"address\"         (string, required) The Dynamic Address which will be used to give consent.\n"
             "2. \"tokenkey\"         (string, required) The token which has to be been signed by one party\n"
-            "\nExamples:\n"
-            + HelpExampleCli("consenttoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-            + HelpExampleRpc("consenttoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"")
-        );
+            "\nExamples:\n" +
+            HelpExampleCli("consenttoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\"") + HelpExampleRpc("consenttoken", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"3130303030303030303030303a3a313439393336353333363a3a445148697036443655376d46335761795a32747337794478737a71687779367a5a6a20494f42447a557167773\""));
     std::string result;
 
     CDynamicAddress address(request.params[0].get_str());
@@ -295,10 +286,8 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
             "{                   (json array of string)\n"
             "  \"fluid_command\"     (string) The operation code and raw fluid script command\n"
             "}, ...\n"
-            "\nExamples\n"
-            + HelpExampleCli("getfluidhistoryraw", "")
-            + HelpExampleRpc("getfluidhistoryraw", "")
-        );
+            "\nExamples\n" +
+            HelpExampleCli("getfluidhistoryraw", "") + HelpExampleRpc("getfluidhistoryraw", ""));
     UniValue ret(UniValue::VOBJ);
     CAmount totalMintedCoins = 0;
     CAmount totalFluidTxCost = 0;
@@ -308,12 +297,11 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
     // load fluid mint transaction history
     {
         std::vector<CFluidMint> mintEntries;
-        if (!GetAllFluidMintRecords(mintEntries)) { 
+        if (!GetAllFluidMintRecords(mintEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid mint entries"));
         }
         int x = 1;
-        for (const CFluidMint& mintEntry : mintEntries)
-        {
+        for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("fluid_script", StringFromCharVector(mintEntry.FluidScript)));
             std::string addLabel = "mint_" + std::to_string(x);
@@ -329,12 +317,11 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
     UniValue oDynodes(UniValue::VOBJ);
     {
         std::vector<CFluidDynode> dynodeEntries;
-        if (!GetAllFluidDynodeRecords(dynodeEntries)) { 
+        if (!GetAllFluidDynodeRecords(dynodeEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4002 - " + _("Error getting fluid dynode entries"));
         }
         int x = 1;
-        for (const CFluidDynode& dynEntry : dynodeEntries)
-        {
+        for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("fluid_script", StringFromCharVector(dynEntry.FluidScript)));
             std::string addLabel = "reward_update_" + std::to_string(x);
@@ -349,12 +336,11 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
     UniValue oMining(UniValue::VOBJ);
     {
         std::vector<CFluidMining> miningEntries;
-        if (!GetAllFluidMiningRecords(miningEntries)) { 
+        if (!GetAllFluidMiningRecords(miningEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4004 - " + _("Error getting fluid mining entries"));
         }
         int x = 1;
-        for (const CFluidMining& miningEntry : miningEntries)
-        {
+        for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("fluid_script", StringFromCharVector(miningEntry.FluidScript)));
             std::string addLabel = "reward_update_" + std::to_string(x);
@@ -373,7 +359,7 @@ UniValue getfluidhistoryraw(const JSONRPCRequest& request)
         obj.push_back(Pair("total_fluid_fee_cost", FormatMoney(totalFluidTxCost)));
         CAmount dynodeReward = GetFluidDynodeReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_dynode_reward", FormatMoney(dynodeReward)));
-      
+
         CFluidMining lastMiningRecord;
         CAmount miningAmount = GetFluidMiningReward(chainActive.Tip()->nHeight);
         obj.push_back(Pair("current_mining_reward", FormatMoney(miningAmount)));
@@ -403,10 +389,8 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             "  \"sovereign address 3\" (string) Third sovereign signature address used\n"
             "  }, ...\n"
             "]\n"
-            "\nExamples\n"
-            + HelpExampleCli("getfluidhistory", "")
-            + HelpExampleRpc("getfluidhistory", "")
-        );
+            "\nExamples\n" +
+            HelpExampleCli("getfluidhistory", "") + HelpExampleRpc("getfluidhistory", ""));
     UniValue ret(UniValue::VOBJ);
     CAmount totalMintedCoins = 0;
     CAmount totalFluidTxCost = 0;
@@ -416,12 +400,11 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
     // load fluid mint transaction history
     {
         std::vector<CFluidMint> mintEntries;
-        if (!GetAllFluidMintRecords(mintEntries)) { 
+        if (!GetAllFluidMintRecords(mintEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid mint entries"));
         }
         int x = 1;
-        for (const CFluidMint& mintEntry : mintEntries)
-        {
+        for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mint"));
             obj.push_back(Pair("amount", FormatMoney(mintEntry.MintAmount)));
@@ -430,11 +413,10 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             obj.push_back(Pair("txid", mintEntry.txHash.GetHex()));
             obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.DestinationAddress)));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : mintEntry.SovereignAddresses)
-            {
-                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+            for (const std::vector<unsigned char>& vchAddress : mintEntry.SovereignAddresses) {
+                std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
-                index ++;
+                index++;
             }
             std::string addLabel = "mint_" + std::to_string(x);
             oMints.push_back(Pair(addLabel, obj));
@@ -449,12 +431,11 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
     UniValue oDynodes(UniValue::VOBJ);
     {
         std::vector<CFluidDynode> dynodeEntries;
-        if (!GetAllFluidDynodeRecords(dynodeEntries)) { 
+        if (!GetAllFluidDynodeRecords(dynodeEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4002 - " + _("Error getting fluid dynode entries"));
         }
         int x = 1;
-        for (const CFluidDynode& dynEntry : dynodeEntries)
-        {
+        for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Dynode Reward Update"));
             obj.push_back(Pair("amount", FormatMoney(dynEntry.DynodeReward)));
@@ -462,11 +443,10 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             obj.push_back(Pair("block_height", (int)dynEntry.nHeight));
             obj.push_back(Pair("txid", dynEntry.txHash.GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses)
-            {
-                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+            for (const std::vector<unsigned char>& vchAddress : dynEntry.SovereignAddresses) {
+                std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
-                index ++;
+                index++;
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oDynodes.push_back(Pair(addLabel, obj));
@@ -480,12 +460,11 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
     UniValue oMining(UniValue::VOBJ);
     {
         std::vector<CFluidMining> miningEntries;
-        if (!GetAllFluidMiningRecords(miningEntries)) { 
+        if (!GetAllFluidMiningRecords(miningEntries)) {
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4004 - " + _("Error getting fluid mining entries"));
         }
         int x = 1;
-        for (const CFluidMining& miningEntry : miningEntries)
-        {
+        for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mining Reward Update"));
             obj.push_back(Pair("amount", FormatMoney(miningEntry.MiningReward)));
@@ -493,11 +472,10 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             obj.push_back(Pair("block_height", (int)miningEntry.nHeight));
             obj.push_back(Pair("txid", miningEntry.txHash.GetHex()));
             int index = 1;
-            for (const std::vector<unsigned char>& vchAddress : miningEntry.SovereignAddresses)
-            {
-                std::string addLabel = "sovereign_address_"  + std::to_string(index);
+            for (const std::vector<unsigned char>& vchAddress : miningEntry.SovereignAddresses) {
+                std::string addLabel = "sovereign_address_" + std::to_string(index);
                 obj.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
-                index ++;
+                index++;
             }
             std::string addLabel = "reward_update_" + std::to_string(x);
             oMining.push_back(Pair(addLabel, obj));
@@ -535,30 +513,25 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
             "{                         (json array of string)\n"
             "  \"sovereign address\"     (string) A sovereign address with permission to co-sign a fluid command\n"
             "}, ...\n"
-            "\nExamples\n"
-            + HelpExampleCli("getfluidsovereigns", "")
-            + HelpExampleRpc("getfluidsovereigns", "")
-        );
+            "\nExamples\n" +
+            HelpExampleCli("getfluidsovereigns", "") + HelpExampleRpc("getfluidsovereigns", ""));
 
     UniValue ret(UniValue::VOBJ);
     std::vector<CFluidSovereign> sovereignEntries;
-    if (!GetAllFluidSovereignRecords(sovereignEntries))
-    {
+    if (!GetAllFluidSovereignRecords(sovereignEntries)) {
         throw std::runtime_error("GET_FLUID_SOVEREIGN_HISTORY_RPC_ERROR: ERRCODE: 4008 - " + _("Error getting fluid sovereign entries"));
     }
     int x = 1;
     UniValue obj(UniValue::VOBJ);
-    for (const CFluidSovereign& sovereignEntry : sovereignEntries)
-    {
+    for (const CFluidSovereign& sovereignEntry : sovereignEntries) {
         int index = 1;
         UniValue oEntry(UniValue::VOBJ);
-        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.SovereignAddresses)
-        {
-            std::string addLabel = "address_"  + std::to_string(index);
+        for (const std::vector<unsigned char>& vchAddress : sovereignEntry.SovereignAddresses) {
+            std::string addLabel = "address_" + std::to_string(index);
             oEntry.push_back(Pair(addLabel, StringFromCharVector(vchAddress)));
-            index ++;
+            index++;
         }
-        std::string addLabel = "sovereign"  + std::to_string(x);
+        std::string addLabel = "sovereign" + std::to_string(x);
         obj.push_back(Pair(addLabel, oEntry));
         x++;
     }
@@ -568,23 +541,25 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
 }
 
 static const CRPCCommand commands[] =
-{   //  category         name                        actor (function)           okSafeMode
+    {
+        //  category              name                     actor (function)           okSafe argNames
+        //  --------------------- ------------------------ -----------------------    ------ --------------------
 #ifdef ENABLE_WALLET
-    /* Fluid Protocol */
-    { "fluid",           "sendfluidtransaction",     &sendfluidtransaction,     true  },
-    { "fluid",           "signtoken",                &signtoken,                true  },
-    { "fluid",           "consenttoken",             &consenttoken,             true  },
-    { "fluid",           "getrawpubkey",             &getrawpubkey,             true  },
-    { "fluid",           "verifyquorum",             &verifyquorum,             true  },
-    { "fluid",           "maketoken",                &maketoken,                true  },
-    { "fluid",           "getfluidhistory",          &getfluidhistory,          true  },
-    { "fluid",           "getfluidhistoryraw",       &getfluidhistoryraw,       true  },
-    { "fluid",           "getfluidsovereigns",       &getfluidsovereigns,       true  },
-    { "fluid",           "gettime",                  &gettime,                  true  },
+        /* Fluid Protocol */
+        {"fluid", "sendfluidtransaction", &sendfluidtransaction, true, {"opcode", "hexstring"}},
+        {"fluid", "signtoken", &signtoken, true, {"address", "tokenkey"}},
+        {"fluid", "consenttoken", &consenttoken, true, {"address", "tokenkey"}},
+        {"fluid", "getrawpubkey", &getrawpubkey, true, {"address"}},
+        {"fluid", "verifyquorum", &verifyquorum, true, {"tokenkey"}},
+        {"fluid", "maketoken", &maketoken, true, {"string"}},
+        {"fluid", "getfluidhistory", &getfluidhistory, true, {}},
+        {"fluid", "getfluidhistoryraw", &getfluidhistoryraw, true, {}},
+        {"fluid", "getfluidsovereigns", &getfluidsovereigns, true, {}},
+        {"fluid", "gettime", &gettime, true, {}},
 #endif //ENABLE_WALLET
 };
 
-void RegisterFluidRPCCommands(CRPCTable &tableRPC)
+void RegisterFluidRPCCommands(CRPCTable& tableRPC)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         tableRPC.appendCommand(commands[vcidx].name, &commands[vcidx]);

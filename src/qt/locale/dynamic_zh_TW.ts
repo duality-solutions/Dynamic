@@ -3095,6 +3095,10 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>複製金額</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy transaction ID</source>
         <translation>複製交易識別碼</translation>
     </message>
