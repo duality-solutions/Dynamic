@@ -2781,6 +2781,7 @@ extern UniValue importmulti(const JSONRPCRequest& request);
 
 extern UniValue dumphdinfo(const JSONRPCRequest& request);
 extern UniValue dumpbdapkeys(const JSONRPCRequest& request);
+extern UniValue importbdapkeys(const JSONRPCRequest& request);
 
 extern UniValue privatesend(const JSONRPCRequest& request);
 
@@ -2838,6 +2839,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "instantsendtoaddress",     &instantsendtoaddress,     false },
     { "wallet",             "dumphdinfo",               &dumphdinfo,               true  },
     { "wallet",             "dumpbdapkeys",             &dumpbdapkeys,             true  },
+    { "wallet",             "importbdapkeys",           &importbdapkeys,           true  },
 
     { "Dynamic",            "privatesend",              &privatesend,              false },
 };

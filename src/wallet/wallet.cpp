@@ -252,6 +252,14 @@ bool CWallet::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
     return CBasicKeyStore::GetDHTKey(address, keyOut);
 }
 
+bool CWallet::HaveDHTKey(const CKeyID &address) const
+{
+    LOCK(cs_wallet);
+    if (mapHdPubKeys.count(address) > 0)
+        return true;
+    return CCryptoKeyStore::HaveDHTKey(address);
+}
+
 bool CWallet::HaveKey(const CKeyID &address) const
 {
     LOCK(cs_wallet);

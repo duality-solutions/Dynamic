@@ -22,6 +22,7 @@
 #include "wallet.h"
 
 #include <univalue.h>
+#include <libtorrent/hex.hpp> // for to_hex and from_hex
 
 #include <fstream>
 #include <stdint.h>
@@ -143,6 +144,129 @@ UniValue importprivkey(const JSONRPCRequest& request)
 
         if (!pwalletMain->AddKeyPubKey(key, pubkey))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
+
+        // whenever a key is imported, we need to scan the whole chain
+        pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
+
+        if (fRescan) {
+            pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+        }
+    }
+
+    return NullUniValue;
+}
+
+UniValue importbdapkeys(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+    
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
+        throw std::runtime_error(
+            "importbdapkeys \"importbdapkeys\" ( \"label\" rescan )\n"
+            "\nAdds a private keys (as returned by dumpbdapkeys) to your wallet.\n"
+            "\nArguments:\n"
+            "1. \"bdap id\"   (string, required) The BDAP account id (see dumpbdapkeys)\n"
+            "2. \"wallet privkey\"   (string, required) The BDAP account wallet private key (see dumpbdapkeys)\n"
+            "3. \"link privkey\"   (string, required) The BDAP account link address private key (see dumpbdapkeys)\n"
+            "4. \"DHT privkey\"   (string, required) The BDAP account DHT private key (see dumpbdapkeys)\n"
+            "5. rescan               (boolean, optional, default=true) Rescan the wallet for transactions\n"
+            "\nNote: This call can take minutes to complete if rescan is true.\n"
+            "\nExamples:\n"
+            "\nDump a private key\n"
+            + HelpExampleCli("dumpbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            "\nImport the private key with rescan\n"
+            + HelpExampleCli("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\"") +
+            "\nImport using a label and without rescan\n"
+            + HelpExampleCli("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false")
+        );
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    EnsureWalletIsUnlocked();
+ 
+    std::string vchObjectID = request.params[0].get_str();
+    std::string strWalletPrivKey = request.params[1].get_str();
+    std::string strLinkPrivKey = request.params[2].get_str();
+    std::string strDHTPrivKey = request.params[3].get_str();
+    // Whether to perform rescan after import
+    bool fRescan = true;
+    if (request.params.size() > 4)
+        fRescan = request.params[2].get_bool();
+
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.ObjectID = vchFromString(vchObjectID);
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
+        throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
+    }
+
+    if (fRescan && fPruneMode)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Rescan is disabled in pruned mode");
+
+    // Wallet address
+    CDynamicSecret vchWalletSecret;
+    bool fGood = vchWalletSecret.SetString(strWalletPrivKey);
+    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid wallet private key encoding");
+    CKey keyWallet = vchWalletSecret.GetKey();
+    if (!keyWallet.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Wallet private key outside allowed range");
+    CPubKey pubkeyWallet = keyWallet.GetPubKey();
+    assert(keyWallet.VerifyPubKey(pubkeyWallet));
+    CKeyID vchWalletAddress = pubkeyWallet.GetID();
+    // TODO (BDAP): Check if wallet address matches BDAP entry
+
+    // Link address
+    CDynamicSecret vchLinkSecret;
+    fGood = vchLinkSecret.SetString(strLinkPrivKey);
+    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid link private key encoding");
+    CKey keyLink = vchLinkSecret.GetKey();
+    if (!keyLink.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Link private key outside allowed range");
+    CPubKey pubkeyLink = keyLink.GetPubKey();
+    assert(keyLink.VerifyPubKey(pubkeyLink));
+    CKeyID vchLinkAddress = pubkeyLink.GetID();
+    // TODO (BDAP): Check if link address matches BDAP entry
+    
+    // DHT key
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> arrDHTPrivSeedKey;
+    libtorrent::aux::from_hex(strDHTPrivKey, arrDHTPrivSeedKey.data());
+    CKeyEd25519 privDHTKey(arrDHTPrivSeedKey);
+    std::vector<unsigned char> vchDHTPubKey = privDHTKey.GetPubKey();
+    CKeyID dhtKeyID(Hash160(vchDHTPubKey.begin(), vchDHTPubKey.end()));
+
+    // Add keys to local wallet database
+    {
+        pwalletMain->MarkDirty();
+        
+        if (!pwalletMain->HaveDHTKey(dhtKeyID)) {
+            pwalletMain->SetAddressBook(privDHTKey.GetID(), vchObjectID, "bdap-dht-key");
+            if (!pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey)) {
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP DHT key to wallet database");
+            }
+            pwalletMain->mapKeyMetadata[dhtKeyID].nCreateTime = 1;
+        }
+
+        // Don't throw error in case all keys already already there
+        if (pwalletMain->HaveKey(vchWalletAddress) && pwalletMain->HaveKey(vchLinkAddress))
+            return NullUniValue;
+
+        // TODO (BDAP): What is nCreateTime used for?
+        pwalletMain->mapKeyMetadata[vchWalletAddress].nCreateTime = 1;
+        pwalletMain->mapKeyMetadata[vchLinkAddress].nCreateTime = 1;
+        
+        if (!pwalletMain->HaveKey(vchWalletAddress)) {
+            pwalletMain->SetAddressBook(vchWalletAddress, vchObjectID, "bdap-wallet");
+            if (!pwalletMain->AddKeyPubKey(keyWallet, pubkeyWallet))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP wallet key to wallet database");
+        }
+
+        if (!pwalletMain->HaveKey(vchLinkAddress)) {
+            pwalletMain->SetAddressBook(vchLinkAddress, vchObjectID, "bdap-link");
+            if (!pwalletMain->AddKeyPubKey(keyLink, pubkeyLink))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Error adding BDAP link key to wallet database");
+        }
 
         // whenever a key is imported, we need to scan the whole chain
         pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
@@ -563,7 +687,7 @@ UniValue dumpbdapkeys(const JSONRPCRequest& request)
             "\nReveals the private key corresponding to 'BDAP account'.\n"
             "Then the importbdapkeys can be used with this output\n"
             "\nArguments:\n"
-            "1. \"bdap id\"   (string, required) The BDAP account for the private keys\n"
+            "1. \"bdap id\"   (string, required) The BDAP id for the private keys\n"
             "\nResult:\n"
             "\"key\"                (string) The wallet, link and DHT private keys\n"
             "\nExamples:\n"
