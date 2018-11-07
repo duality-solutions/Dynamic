@@ -2780,6 +2780,7 @@ extern UniValue removeprunedfunds(const JSONRPCRequest& request);
 extern UniValue importmulti(const JSONRPCRequest& request);
 
 extern UniValue dumphdinfo(const JSONRPCRequest& request);
+extern UniValue dumpbdapkeys(const JSONRPCRequest& request);
 
 extern UniValue privatesend(const JSONRPCRequest& request);
 
@@ -2833,9 +2834,10 @@ static const CRPCCommand commands[] =
     { "wallet",             "walletpassphrase",         &walletpassphrase,         true  },
     { "wallet",             "removeprunedfunds",        &removeprunedfunds,        true  },
 
-    { "wallet",             "keepass",                  &keepass,                  true },
+    { "wallet",             "keepass",                  &keepass,                  true  },
     { "wallet",             "instantsendtoaddress",     &instantsendtoaddress,     false },
     { "wallet",             "dumphdinfo",               &dumphdinfo,               true  },
+    { "wallet",             "dumpbdapkeys",             &dumpbdapkeys,             true  },
 
     { "Dynamic",            "privatesend",              &privatesend,              false },
 };

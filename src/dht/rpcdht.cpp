@@ -92,7 +92,13 @@ UniValue putmutable(const JSONRPCRequest& request)
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
-    CKeyEd25519 key(pubKey, privKey);
+    
+    CKeyEd25519 key;
+    std::vector<unsigned char> vch = vchFromString(strPubKey);
+    CKeyID keyID(Hash160(vch.begin(), vch.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, key)) {
+        throw std::runtime_error("putmutable: ERRCODE: 5400 - Error getting ed25519 private key for " + strPubKey + "\n");
+    }
 
     if (!fNewEntry) {
         // we need the last sequence number to update an existing DHT entry.

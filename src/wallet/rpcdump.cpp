@@ -6,6 +6,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
+#include "bdap/domainentry.h"
+#include "bdap/domainentrydb.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
@@ -548,6 +550,81 @@ UniValue dumpprivkey(const JSONRPCRequest& request)
     if (!pwalletMain->GetKey(keyID, vchSecret))
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
     return CDynamicSecret(vchSecret).ToString();
+}
+
+UniValue dumpbdapkeys(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+    
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "dumpbdapkeys \"bdap id\"\n"
+            "\nReveals the private key corresponding to 'BDAP account'.\n"
+            "Then the importbdapkeys can be used with this output\n"
+            "\nArguments:\n"
+            "1. \"bdap id\"   (string, required) The BDAP account for the private keys\n"
+            "\nResult:\n"
+            "\"key\"                (string) The wallet, link and DHT private keys\n"
+            "\nExamples:\n"
+            + HelpExampleCli("dumpbdapkeys", "\"myaccount\"")
+            + HelpExampleRpc("dumpbdapkeys", "\"myaccount\"")
+        );
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    UniValue result(UniValue::VOBJ);
+
+    EnsureWalletIsUnlocked();
+
+    CharString vchObjectID = vchFromValue(request.params[0]);
+    ToLowerCase(vchObjectID);
+
+    CDomainEntry entry;
+    entry.DomainComponent = vchDefaultDomainName;
+    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.ObjectID = vchObjectID;
+    if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
+        throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
+    }
+
+    // Get wallet address private key from wallet db.
+    CKeyID walletKeyID;
+    CDynamicAddress address = entry.GetWalletAddress();
+    if (!address.GetKeyID(walletKeyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key " + address.ToString());
+    CKey vchWalletSecret;
+    if (!pwalletMain->GetKey(walletKeyID, vchWalletSecret))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + address.ToString() + " is not known");
+    std::string strWalletPrivKey = CDynamicSecret(vchWalletSecret).ToString();
+
+    // Get link address private key from wallet db.
+    CKeyID linkKeyID;
+    CDynamicAddress linkAddress = entry.GetLinkAddress();
+    if (!linkAddress.GetKeyID(linkKeyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Link address does not refer to a key" + linkAddress.ToString());
+    CKey vchLinkSecret;
+    if (!pwalletMain->GetKey(linkKeyID, vchLinkSecret))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + linkAddress.ToString() + " is not known");
+    std::string strLinkPrivKey = CDynamicSecret(vchLinkSecret).ToString();
+
+    // Get DHT private key from wallet db.
+    CKeyEd25519 keyDHT;
+    std::vector<unsigned char> vchDHTPubKey = vchFromString(entry.DHTPubKeyString());
+    CKeyID dhtKeyID(Hash160(vchDHTPubKey.begin(), vchDHTPubKey.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(dhtKeyID, keyDHT)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error getting ed25519 private key for " + entry.DHTPubKeyString());
+    }
+    std::string strDHTPrivKey = keyDHT.GetPrivSeedString();
+
+    result.push_back(Pair("wallet_address", address.ToString()));
+    result.push_back(Pair("wallet_privkey", strWalletPrivKey));
+    result.push_back(Pair("link_address", linkAddress.ToString()));
+    result.push_back(Pair("link_privkey", strLinkPrivKey));
+    result.push_back(Pair("dht_publickey", entry.DHTPubKeyString()));
+    result.push_back(Pair("dht_privkey", strDHTPrivKey));
+
+    return result;
 }
 
 UniValue dumphdinfo(const JSONRPCRequest& request)
