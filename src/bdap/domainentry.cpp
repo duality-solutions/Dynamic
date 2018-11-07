@@ -247,6 +247,14 @@ CDynamicAddress CDomainEntry::GetWalletAddress() const {
     return CDynamicAddress(stringFromVch(WalletAddress));
 }
 
+CDynamicAddress CDomainEntry::GetLinkAddress() const {
+    return CDynamicAddress(stringFromVch(LinkAddress));
+}
+
+std::string CDomainEntry::DHTPubKeyString() const {
+    return stringFromVch(DHTPublicKey);
+}
+
 std::string CDomainEntry::GetFullObjectPath() const {
     return stringFromVch(ObjectID) + "@" + stringFromVch(OrganizationalUnit) + "." + stringFromVch(DomainComponent);
 }

@@ -30,6 +30,8 @@ void StopTorrentDHTNetwork();
 
 void GetDHTStats(libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
 
+libtorrent::alert* WaitForResponse(libtorrent::session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt);
+
 extern libtorrent::session *pTorrentDHTSession;
 
 #endif // DYNAMIC_DHT_SESSION_H

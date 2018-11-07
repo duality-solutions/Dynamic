@@ -846,6 +846,8 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
+    //! HaveDHTKey implementation that also checks the mapHdPubKeys
+    bool HaveDHTKey(const CKeyID &address) const;
     //! HaveKey implementation that also checks the mapHdPubKeys
     bool HaveKey(const CKeyID& address) const override;
     //! GetPubKey implementation that also checks the mapHdPubKeys

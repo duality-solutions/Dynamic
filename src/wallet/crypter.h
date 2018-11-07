@@ -191,8 +191,17 @@ public:
     virtual bool AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
     bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
-
-    bool HaveKey(const CKeyID& address) const override
+    bool HaveDHTKey(const CKeyID &address) const
+    {
+        {
+            LOCK(cs_KeyStore);
+            if (!IsCrypted())
+                return CBasicKeyStore::HaveDHTKey(address);
+            return mapCryptedKeys.count(address) > 0;
+        }
+        return false;
+    }
+    bool HaveKey(const CKeyID &address) const
     {
         {
             LOCK(cs_KeyStore);

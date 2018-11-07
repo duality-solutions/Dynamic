@@ -33,10 +33,11 @@ public:
     virtual bool AddKey(const CKey& key);
 
     //! Check whether a key corresponding to a given address is present in the store.
-    virtual bool HaveKey(const CKeyID& address) const = 0;
-    virtual bool GetKey(const CKeyID& address, CKey& keyOut) const = 0;
-    virtual void GetKeys(std::set<CKeyID>& setAddress) const = 0;
-    virtual bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const = 0;
+    virtual bool HaveKey(const CKeyID &address) const =0;
+    virtual bool HaveDHTKey(const CKeyID &address) const =0;
+    virtual bool GetKey(const CKeyID &address, CKey& keyOut) const =0;
+    virtual void GetKeys(std::set<CKeyID> &setAddress) const =0;
+    virtual bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const =0;
 
     //! Support for BIP 0013 : see https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki
     virtual bool AddCScript(const CScript& redeemScript) = 0;
@@ -69,9 +70,18 @@ protected:
     CHDChain hdChain;
 
 public:
-    bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
-    bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const override;
-    bool HaveKey(const CKeyID& address) const override
+    bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
+    bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
+    bool HaveDHTKey(const CKeyID &address) const
+    {
+        bool result;
+        {
+            LOCK(cs_KeyStore);
+            result = (mapDHTKeys.count(address) > 0);
+        }
+        return result;
+    }
+    bool HaveKey(const CKeyID &address) const
     {
         bool result;
         {

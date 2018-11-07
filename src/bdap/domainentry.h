@@ -157,6 +157,8 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 
     CDynamicAddress GetWalletAddress() const;
+    CDynamicAddress GetLinkAddress() const;
+    std::string DHTPubKeyString() const;
     std::string GetFullObjectPath() const;
     std::string GetObjectLocation() const;
     std::vector<unsigned char> vchFullObjectPath() const;

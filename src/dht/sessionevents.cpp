@@ -110,7 +110,7 @@ void CPutRequest::DHTPut()
     SubmitPutDHTMutableData(key.GetDHTPubKey(), key.GetDHTPrivKey(), salt, sequence, value.c_str());
 }
 
-static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& event) 
+static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& event)
 {
     LOCK(cs_DHTGetEventMap);
     std::string infoHash = GetInfoHash(mKey.first, mKey.second);
@@ -127,7 +127,7 @@ static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& 
     }
 }
 
-static void AddToDHTPutEventMap(const MutableKey& mKey, const CMutablePutEvent& event) 
+static void AddToDHTPutEventMap(const MutableKey& mKey, const CMutablePutEvent& event)
 {
     LOCK(cs_DHTPutEventMap);
     std::string infoHash = GetInfoHash(mKey.first, mKey.second);
@@ -144,7 +144,7 @@ static void AddToDHTPutEventMap(const MutableKey& mKey, const CMutablePutEvent& 
     }
 }
 
-static void AddToEventMap(const uint32_t category, const CEvent& event) 
+static void AddToEventMap(const uint32_t category, const CEvent& event)
 {
     LOCK(cs_EventMap);
     m_EventCategoryMap.insert(std::make_pair(category, std::make_pair(event.Timestamp(), event)));
@@ -159,9 +159,11 @@ static void DHTEventListener(session* dhtSession)
     {
         if (m_DHTPutRequestMap.size() > 0) {
             CPutRequest put = m_DHTPutRequestMap.begin()->second;
-            LogPrintf("DHTEventListener -- DHT Processing Put Request: value = %s, salt = %s\n", std::string(put.Value()), put.Salt());
             put.DHTPut();
-            MilliSleep(31);
+            alert* dhtAlert = WaitForResponse(dhtSession, dht_put_alert::alert_type, put.Key().GetDHTPubKey(), put.Salt());
+            dht_put_alert* dhtPutAlert = alert_cast<dht_put_alert>(dhtAlert);
+            std::string strMessage = dhtPutAlert->message();
+            LogPrintf("DHTEventListener -- DHT Processing Put Request: value = %s, salt = %s, message = %s\n", put.Value(), put.Salt(), strMessage);
             m_DHTPutRequestMap.erase(m_DHTPutRequestMap.begin()->first);
         }
 
@@ -171,6 +173,7 @@ static void DHTEventListener(session* dhtSession)
         for (std::vector<alert*>::iterator iAlert = alerts.begin(), end(alerts.end()); iAlert != end; ++iAlert) {
             if ((*iAlert) == nullptr)
                 continue;
+
             const uint32_t category = (*iAlert)->category();
             const std::string strAlertMessage = (*iAlert)->message();
             const int iAlertType = (*iAlert)->type();

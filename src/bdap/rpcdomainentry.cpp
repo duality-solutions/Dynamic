@@ -61,7 +61,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
-    pwalletMain->SetAddressBook(keyWalletID, strObjectID, "receive");
+    pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
     CharString vchWalletAddress = vchFromString(walletAddress.ToString());
     txDomainEntry.WalletAddress = vchWalletAddress;
@@ -74,7 +74,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
-    pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "pubkey");
+    pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "bdap-dht-key");
 
     // TODO: Add ability to pass in the link address
     // TODO: Use stealth address for the link address so linking will be private
@@ -86,7 +86,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
-    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "link");
+    pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
     CharString vchLinkAddress = vchFromString(linkAddress.ToString());
     txDomainEntry.LinkAddress = vchLinkAddress;
