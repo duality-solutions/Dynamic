@@ -2864,9 +2864,9 @@ static const CRPCCommand commands[] =
 
         {"wallet", "keepass", &keepass, true, {}},
         {"wallet", "instantsendtoaddress", &instantsendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
-        {"wallet", "dumphdinfo", &dumphdinfo, true, {"bdap_id"}}},
-        {"wallet", "dumpbdapkeys", &dumpbdapkeys, true  {"bdap_id", "wallet_privkey", "link_privkey", "DHT_privkey", "rescan"}},
-        {"wallet", "importbdapkeys", &importbdapkeys,true  {}},
+        {"wallet", "dumphdinfo", &dumphdinfo, true, {"hdseed", "mnemonic", "mnemonicpassphrase"}},
+        {"wallet", "dumpbdapkeys", &dumpbdapkeys, true, {"bdap_id"}},
+        {"wallet", "importbdapkeys", &importbdapkeys,true, {"bdap_id", "wallet_privkey", "link_privkey", "DHT_privkey", "rescan"}},
         {"wallet", "importelectrumwallet", &importelectrumwallet, true, {"filename", "index"}},
 };
 

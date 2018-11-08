@@ -272,7 +272,7 @@ UniValue importbdapkeys(const JSONRPCRequest& request)
         }
 
         // whenever a key is imported, we need to scan the whole chain
-        pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
+        pwalletMain->UpdateTimeFirstKey(1);
 
         if (fRescan) {
             pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
