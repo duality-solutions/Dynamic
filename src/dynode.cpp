@@ -223,7 +223,7 @@ void CDynode::Check(bool fForce)
             return;
         }
 
-        // part 1: expire based on dashd ping
+        // part 1: expire based on dynamicd ping
         bool fSentinelPingActive = dynodeSync.IsSynced() && dnodeman.IsSentinelPingActive();
         bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(DYNODE_SENTINEL_PING_MAX_SECONDS);
         LogPrint("Dynode", "CDynode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
