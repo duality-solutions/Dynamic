@@ -468,7 +468,7 @@ void DynamicGUI::createActions()
 
     // Open configs and backup folder from menu
     connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
-    connect(openSNConfEditorAction, SIGNAL(triggered()), this, SLOT(showSNConfEditor()));
+    connect(openSNConfEditorAction, SIGNAL(triggered()), this, SLOT(showDNConfEditor()));
     connect(showBackupsAction, SIGNAL(triggered()), this, SLOT(showBackups()));
 
     // Get restart command-line parameters and handle restart
