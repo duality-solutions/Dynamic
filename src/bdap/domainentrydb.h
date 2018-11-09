@@ -20,11 +20,11 @@ public:
     bool AddDomainEntry(const CDomainEntry& entry, const int op);
     void AddDomainEntryIndex(const CDomainEntry& entry, const int op);
     bool ReadDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);
-    bool ReadDomainEntryTxId(const uint256& txHash, std::vector<unsigned char>& vchObjectPath);
+    bool ReadDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry);
     bool EraseDomainEntry(const std::vector<unsigned char>& vchObjectPath);
-    bool EraseDomainEntryTxId(const uint256& txHash);
+    bool EraseDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey);
     bool DomainEntryExists(const std::vector<unsigned char>& vchObjectPath);
-    bool DomainEntryExistsTxId(const uint256& txHash);
+    bool DomainEntryExistsPubKey(const std::vector<unsigned char>& vchPubKey);
     bool RemoveExpired(int& entriesRemoved);
     void WriteDomainEntryIndex(const CDomainEntry& entry, const int op);
     void WriteDomainEntryIndexHistory(const CDomainEntry& entry, const int op);
@@ -33,11 +33,10 @@ public:
     bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDomainEntryInfo);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry);
-    //bool GetDomainEntryInfoTxId(const uint256& txHash, CDomainEntry& entry);
-    //bool GetDomainEntryInfoTxId(const uint256& txHash, std::vector<unsigned char>& vchFullObjectPath);
 };
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry);
+bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry);
 bool CheckDomainEntryDB();
 bool FlushLevelDB();
 void CleanupLevelDB(int& nRemoved);

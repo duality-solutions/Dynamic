@@ -1640,6 +1640,14 @@ bool CWallet::GetDecryptedHDChain(CHDChain& hdChainRet)
     return true;
 }
 
+bool CWallet::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const
+{
+    if (IsCrypted())
+        return CCryptoKeyStore::GetDHTPubKeys(vvchDHTPubKeys);
+
+    return CBasicKeyStore::GetDHTPubKeys(vvchDHTPubKeys);
+}
+
 bool CWallet::IsHDEnabled()
 {
     CHDChain hdChainCurrent;

@@ -123,10 +123,13 @@ public:
     virtual bool HaveWatchOnly(const CScript& dest) const override;
     virtual bool HaveWatchOnly() const override;
 
+    virtual bool GetHDChain(CHDChain& hdChainRet) const;
+    
+    // TODO (BDAP): Change to virtual methods
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
     bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey);
     bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
 
-    virtual bool GetHDChain(CHDChain& hdChainRet) const;
 };
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
