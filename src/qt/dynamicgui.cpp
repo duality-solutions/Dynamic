@@ -424,8 +424,8 @@ void DynamicGUI::createActions()
     openRepairAction->setStatusTip(tr("Show wallet repair options"));
     openConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open Wallet &Configuration File"), this);
     openConfEditorAction->setStatusTip(tr("Open configuration file"));
-    openSNConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open &Dynode Configuration File"), this);
-    openSNConfEditorAction->setStatusTip(tr("Open Dynode configuration file"));
+    openDNConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open &Dynode Configuration File"), this);
+    openDNConfEditorAction->setStatusTip(tr("Open Dynode configuration file"));
     showBackupsAction = new QAction(QIcon(":/icons/" + theme + "/browse"), tr("Show Automatic &Backups"), this);
     showBackupsAction->setStatusTip(tr("Show automatically created wallet backups"));
     // initially disable the debug window menu items
@@ -468,7 +468,7 @@ void DynamicGUI::createActions()
 
     // Open configs and backup folder from menu
     connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
-    connect(openSNConfEditorAction, SIGNAL(triggered()), this, SLOT(showSNConfEditor()));
+    connect(openDNConfEditorAction, SIGNAL(triggered()), this, SLOT(showDNConfEditor()));
     connect(showBackupsAction, SIGNAL(triggered()), this, SLOT(showBackups()));
 
     // Get restart command-line parameters and handle restart
@@ -542,7 +542,7 @@ void DynamicGUI::createMenuBar()
         tools->addAction(openRepairAction);
         tools->addSeparator();
         tools->addAction(openConfEditorAction);
-        tools->addAction(openSNConfEditorAction);
+        tools->addAction(openDNConfEditorAction);
         tools->addAction(showBackupsAction);
     }
 
@@ -752,7 +752,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(openRepairAction);
     pmenu->addSeparator();
     pmenu->addAction(openConfEditorAction);
-    pmenu->addAction(openSNConfEditorAction);
+    pmenu->addAction(openDNConfEditorAction);
     pmenu->addAction(showBackupsAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     pmenu->addSeparator();

@@ -146,7 +146,7 @@ private:
     QAction* openPeersAction;
     QAction* openRepairAction;
     QAction* openConfEditorAction;
-    QAction* openSNConfEditorAction;
+    QAction* openDNConfEditorAction;
     QAction* showBackupsAction;
     QAction* openAction;
     QAction* showHelpMessageAction;
