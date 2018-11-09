@@ -14,15 +14,16 @@
 
 class CKeePassIntegrator;
 
-static const unsigned int DEFAULT_KEEPASS_HTTP_PORT     = 19455;
+static const unsigned int DEFAULT_KEEPASS_HTTP_PORT = 19455;
 
 extern CKeePassIntegrator keePassInt;
 
-class CKeePassIntegrator {
+class CKeePassIntegrator
+{
 private:
-    static const int KEEPASS_CRYPTO_KEY_SIZE            = 32;
-    static const int KEEPASS_CRYPTO_BLOCK_SIZE          = 16;
-    static const int KEEPASS_HTTP_CONNECT_TIMEOUT       = 30;
+    static const int KEEPASS_CRYPTO_KEY_SIZE = 32;
+    static const int KEEPASS_CRYPTO_BLOCK_SIZE = 16;
+    static const int KEEPASS_HTTP_CONNECT_TIMEOUT = 30;
     static const char* KEEPASS_HTTP_HOST;
 
     bool bIsActive;
@@ -34,8 +35,8 @@ private:
     std::string strKeePassId;
     std::string strKeePassEntryName;
 
-    class CKeePassRequest {
-
+    class CKeePassRequest
+    {
         UniValue requestObj;
         std::string strType;
         std::string strIV;
@@ -45,7 +46,7 @@ private:
 
     public:
         void addStrParameter(std::string strName, std::string strValue); // Regular
-        void addStrParameter(std::string strName, SecureString sValue); // Encrypt
+        void addStrParameter(std::string strName, SecureString sValue);  // Encrypt
         std::string getJson();
 
         CKeePassRequest(SecureString sKey, std::string strType)
@@ -57,39 +58,42 @@ private:
     };
 
 
-    class CKeePassEntry {
-
+    class CKeePassEntry
+    {
         SecureString sUuid;
         SecureString sName;
         SecureString sLogin;
         SecureString sPassword;
 
     public:
-        CKeePassEntry(SecureString sUuid, SecureString sName, SecureString sLogin, SecureString sPassword) :
-            sUuid(sUuid), sName(sName), sLogin(sLogin), sPassword(sPassword) {
+        CKeePassEntry(SecureString sUuid, SecureString sName, SecureString sLogin, SecureString sPassword) : sUuid(sUuid), sName(sName), sLogin(sLogin), sPassword(sPassword)
+        {
         }
 
-        SecureString getUuid() {
+        SecureString getUuid()
+        {
             return sUuid;
         }
 
-        SecureString getName() {
+        SecureString getName()
+        {
             return sName;
         }
 
-        SecureString getLogin() {
+        SecureString getLogin()
+        {
             return sLogin;
         }
 
-        SecureString getPassword() {
+        SecureString getPassword()
+        {
             return sPassword;
         }
-
     };
 
 
-    class CKeePassResponse {
-
+    class CKeePassResponse
+    {
         bool bSuccess;
         std::string strType;
         std::string strIV;
@@ -99,12 +103,14 @@ private:
 
     public:
         UniValue responseObj;
-        CKeePassResponse(SecureString sKey, std::string strResponse) {
+        CKeePassResponse(SecureString sKey, std::string strResponse)
+        {
             this->sKey = sKey;
             parseResponse(strResponse);
         }
 
-        bool getSuccess() {
+        bool getSuccess()
+        {
             return bSuccess;
         }
 
@@ -113,11 +119,10 @@ private:
         std::vector<CKeePassEntry> getEntries();
 
         SecureString decrypt(std::string strValue); // DecodeBase64 and decrypt arbitrary string value
-
     };
 
     static SecureString generateRandomKey(size_t nSize);
-    static std::string constructHTTPPost(const std::string& strMsg, const std::map<std::string,std::string>& mapRequestHeaders);
+    static std::string constructHTTPPost(const std::string& strMsg, const std::map<std::string, std::string>& mapRequestHeaders);
     void doHTTPPost(const std::string& strRequest, int& nStatus, std::string& strResponse);
     void rpcTestAssociation(bool bTriggerUnlock);
     std::vector<CKeePassEntry> rpcGetLogins();
@@ -130,7 +135,6 @@ public:
     void rpcAssociate(std::string& strId, SecureString& sKeyBase64);
     SecureString retrievePassphrase();
     void updatePassphrase(const SecureString& sWalletPassphrase);
-
 };
 
 #endif // DYNAMIC_KEEPASS_H

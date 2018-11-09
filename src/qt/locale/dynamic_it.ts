@@ -3013,6 +3013,10 @@ Più URL vengono separati da una barra verticale |.</translation>
         <translation>Importo minimo</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Copia l'indirizzo</translation>
     </message>

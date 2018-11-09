@@ -3,6 +3,132 @@
 
 **Dynamic v2.4.0.0**
 
+* Update info for testnet spork key
+* add missing file to makefile
+* Remove bdap from DIST_SUBDIRS in make file
+* Do not check for CUDA as default at configure time
+* Repair Send in ThreadSocketHandler
+* Repair nActiveStatePrev
+* Repair 'GUI: QColor::setRgb: RGB parameters out of range' warning
+* Fix segfault with nRefCount in net
+* Amend Check in dynode.cpp
+* minor things i missed
+* update sync.cpp/h
+* amend some versioning
+* Use unique_ptr for db copy
+* Use unique_ptr for wallet db env
+* Remove dummy constructor
+* Allow users to mix up to 16 rounds
+* Only allow 2.4 nodes to mix with 2.4 nodes or newer
+* remove unused variable from serialization
+* A couple of small fixes for mixing collaterals
+* Add an option to disable popups for PS mixing txes
+* Identify PS collateral payments in transaction list a bit more accurate
+* Add more variance to coin selection in PS mixing
+* Revert Require all participants to submit equal number of inputs
+* Split PS into Manager and Session and allow running multiple mixing sessions in parallel
+* Document Sporks
+* M-of-N-like sporks
+* Update ImportPrivKey command
+* adds rpc calls for and 'setprivatesendamount'
+* Add versioning to spork cache
+* extract sporkmanager from sporkmessage 
+* Save/load spork cache
+* Update HD Feature Base and update build-debian.md
+* Sweep and Update RPC files
+* Tidy chainparams and update block.cpp/h
+* [GPU] Fix debug block info
+* Update rpcwallet.cpp calls and add missing AbandonTransaction bits
+* Update miner code back with new pointers etc.
+* [GPU] Disable GPU info on configure failure 
+* Fix Spork Address for TestNet
+* Improve fee warning colour
+* Update Qt and fix usage of dustRelayFee
+* Fix segfault when sending a Qt transaction
+* Increase fileout version in WriteFeeEstimates
+* Amend Fee Structure
+* Protect CSporkManager with critical section
+* Fix wallet lock check in DoAutomaticDenominating
+* Move block template specific stuff from CBlock to CBlockTemplate
+* Fix activeDynode task scheduler
+* Show some info about the wallet dumped via dumpwallet and show warning
+* Make sure pwalletMain is not null whenever it's used in PS client
+* Update rpcdynode and add helpers
+* Switch RequestGovernanceObjectVotes from pointers to hashes
+* remove/update dns seeders
+* [GPU] Update obsolete macro AC_HELP_STRING
+* [GPU] Prevent crash when changing the slidebar too fast
+* [GPU] Optimise GPU Miner
+* Fix copy elision warning in opencl device.cpp
+* Supress OSX private field warnings
+* Fix comparator and supress warning
+* Supress MacOS build warnings for deprecated code
+* [Qt] Fix styling of PrivateSend option on sendcoinsdialog.ui
+* Increase Min Peer Protocol Version to 70900(v2.3) for Peers/DynodePayments/InstantSend/PrivateSend
+* [GPU] Fix GPU found block nonce before ProcessFoundSolution
+* [GPU] Update README for GPU Mining
+* [GPU] Seperate CPU and GPU miners to fix hashmeters
+* [GPU] Fix Qt mining page layout so it expands
+* [GPU] Fixes to miner UI controls
+* [GPU] Hide slider until sync completes/change batch size
+* [GPU] Split CPU/GPU UI thread allocation
+* [GPU] fix global and order members as they appear in initializer
+* [GPU] fix processingUnit batch size and minor code tweaks
+* [GPU] fix autoreplace
+* [GPU] move implementations out of definitions
+* [GPU] fix const char* instead of std::string
+* [GPU] fix unique_ptr null check
+* [GPU] remove redundant comments and whitespace
+* [GPU] fix thread names
+* [GPU] remove redundant comments and whitespace
+* [GPU] follow pattern and add this->
+* [GPU] remove redundant DynamicMiner function
+* [GPU] explicit boost::none for boost::bind
+* [GPU] fix boost::optional no value_or method error
+* [GPU] reorder constructor initialization
+* [GPU] move constructor code to base
+* [GPU] move hashTarget to protected variables
+* [GPU] fix non-pointer operand
+* [GPU] move protected variables
+* [GPU] fix CPUMiner constructor
+* [GPU] track chain tip
+* [GPU] remove name collison
+* [GPU] add device index to base class
+* [GPU] provide pblock to LoopChecks
+* [GPU] remove unused template from BaseMiner
+* [GPU] remove static from StartLoop
+* [GPU] c++11 compatibility
+* [GPU] cleanup thread constructor
+* [GPU] remove unused assignment
+* [GPU] nullptr comparisons
+* [GPU] use boost::shared_ptr as expected
+* [GPU] move transactionsUdatedLast to base class
+* [GPU] enable_gpu ifdef
+* [GPU] fix miner start loop call
+* [GPU] rename namespace to miners
+* [GPU] move threads to namespace
+* [GPU] fix ptr ptr semantics
+* [GPU] fix count hashes function params
+* [GPU] mark function as override
+* [GPU] bring back enable_gpu ifdef
+* [GPU] rename processing unit
+* [GPU] remove static from thread_group
+* [GPU] fix optional dereference
+* [GPU] rename check function and fix breaks
+* [GPU] use shared_ptr to manage thread_group ptr
+* [GPU] Refactor miners code
+* [GPU] Process hashes in batches
+* [GPU] Remove obvious type hint
+* [GPU] Device get total memory method
+* [GPU] OpenCL kernel static build rule
+* [GPU] Remove unsigned and signed int comparison
+* [GPU] Mac build fix attempt
+* [GPU] Disable CUDA in Travis
+* [GPU] Fix autoconf warnings
+* [GPU] Apple OpenCL linker flags
+* [GPU] Implement GPU Mining for both Daemon/Qt
+* [GPU] Split CUDA and OpenCL libraries
+* [GPU] Add CUDA/OpenCL Libraries for GPU Mining
 * Remove unused serialization method
 * Fix consts in txmempool
 * [depends] upgrade boost to 1.67.0
@@ -92,6 +218,20 @@
 * Use correct protocol when serializing messages in reply to
 * Bump Versioning
 * Update dynamic_qt.m4 (Remove ability to build with Qt4)
+
+
+**Dynamic v2.3.5.0**
+
+* Fix crash bug with duplicate inputs within a transaction
+* Reduces memory usage and blockchain size on disk
+* Bump client version to v2.3.5 and minimum protocol version to 70800 (v2.2)
+* [Fluid] Refactor fluid code and remove index database
+* [Fluid] Add mining update and mint leveldb databases
+* [Fluid] Implement new fluid databases
+* [Fluid] Fix get fluid sovereigns RPC
+* [Fluid] Fixes to get last functions and RPC commands
+* [Fluid] Fix consensus issues with new db code
+* Update changelog and cleanup fluid to do lists/comments
 
 **Dynamic v2.3.0.0**
 
@@ -270,6 +410,7 @@
 * Inline Argon2d code with commit fba7b9a
 * Update CHANGELOG
 
+
 **Dynamic v2.2.0.0**
 
 * Add dynamic address label to request payment QR code
@@ -292,6 +433,7 @@
 * Update secp256k1
 * Fix fixed seeds
 * Update CHANGELOG
+
 
 **Dynamic v2.1.0.0**
 
@@ -377,6 +519,7 @@
 * Fix calls to AcceptToMemoryPool in PS submodules
 * Improve handling of unconnecting headers
 * Update CHANGELOG
+
 
 **Dynamic v2.0.0.0**
 
@@ -649,6 +792,7 @@
 * Optimize CheckOutpoint
 * Update CHANGELOG
 
+
 **Dynamic v1.4.0.0**
 
 * Securely erase potentially sensitive keys/values
@@ -711,6 +855,7 @@
 * Bump Governance/InstantSend/PrivateSend/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.2**
 
 * [Sync] Fix issue with headers first sync
@@ -723,10 +868,12 @@
 * Bump Governance/Core Proto/Versions
 * Update CHANGELOG
 
+
 **Dynamic v1.3.0.1**
 
 * Bump Protocols to lock out nodes at or below v1.2 to prevent any forks
 * Update CHANGELOG
+
 
 **Dynamic v1.3.0.0**
 
@@ -734,6 +881,7 @@
 * InitError instead of throw on failure
 * Hard Fork at block 300,000 for Delta difficulty retarget algorithm
 * Update CHANGELOG
+
 
 **Dynamic v1.2.0.0**
 
@@ -777,6 +925,7 @@
 * Bump protocol versions to 70000
 * Added IPv4 seed nodes to chainparamsseeds.h
 * Update CHANGELOG
+
 
 **Dynamic v1.1.0.0**
 

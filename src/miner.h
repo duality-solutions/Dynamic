@@ -10,9 +10,9 @@
 
 #include "primitives/block.h"
 
-#include <stdint.h>
-#include <memory>
 #include <cstddef>
+#include <memory>
+#include <stdint.h>
 
 class CBlockIndex;
 class CChainParams;
@@ -21,33 +21,53 @@ class CReserveKey;
 class CScript;
 class CWallet;
 
-namespace Consensus { struct Params; };
+namespace Consensus
+{
+struct Params;
+};
 
 static const bool DEFAULT_GENERATE = false;
-static const int DEFAULT_GENERATE_THREADS = 1;
+static const int DEFAULT_GENERATE_THREADS_CPU = -1;
+static const int DEFAULT_GENERATE_THREADS_GPU = -1;
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 
-struct CBlockTemplate
-{
+struct CBlockTemplate {
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOps;
+    CTxOut txoutDynode;                 // dynode payment
+    std::vector<CTxOut> voutSuperblock; // dynode payment
 };
 
 #ifdef ENABLE_WALLET
 /** Check mined block */
 bool CheckWork(const CChainParams& chainparams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connman);
 #endif //ENABLE_WALLET
-/** Run the miner threads */
-void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams, CConnman& connman);
+/** Run the CPU miner thread(s) */
+void GenerateDynamicsCPU(int nCPUThreads, const CChainParams& chainparams, CConnman& connman);
+/** Run the GPU miner thread(s) */
+void GenerateDynamicsGPU(int nGPUThreads, const CChainParams& chainparams, CConnman& connman);
+/** Shuts down all miner threads */
+void ShutdownMiners();
+/** Shuts down all CPU miner threads */
+void ShutdownCPUMiners();
+/** Shuts down all GPU miner threads */
+void ShutdownGPUMiners();
 /** Generate a new block, without valid proof-of-work */
 std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn);
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+/** Gets combined hash rate of GPU and CPU */
+int64_t GetHashRate();
+/** Gets hash rate of CPU */
+int64_t GetCPUHashRate();
+/** Gets hash rate of GPU */
+int64_t GetGPUHashRate();
 
-extern double dHashesPerSec;
+extern double dCPUHashesPerSec;
+extern double dGPUHashesPerSec;
 extern int64_t nHPSTimerStart;
 
 #endif // DYNAMIC_MINER_H

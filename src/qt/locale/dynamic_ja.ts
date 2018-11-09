@@ -2348,6 +2348,10 @@
         <translation>最小の額</translation>
     </message>
     <message>
+        <source>Abandon transaction</source>
+        <translation>Abandon transaction</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>アドレスをコピーする</translation>
     </message>

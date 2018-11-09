@@ -34,14 +34,14 @@ class CUnsignedAlert
 {
 public:
     int nVersion;
-    int64_t nRelayUntil;      // when newer nodes stop relaying to newer nodes
+    int64_t nRelayUntil; // when newer nodes stop relaying to newer nodes
     int64_t nExpiration;
     int nID;
     int nCancel;
     std::set<int> setCancel;
-    int nMinVer;            // lowest version inclusive
-    int nMaxVer;            // highest version inclusive
-    std::set<std::string> setSubVer;  // empty matches all
+    int nMinVer;                     // lowest version inclusive
+    int nMaxVer;                     // highest version inclusive
+    std::set<std::string> setSubVer; // empty matches all
     int nPriority;
 
     // Actions
@@ -52,7 +52,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(nRelayUntil);
         READWRITE(nExpiration);
@@ -89,7 +90,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(vchMsg);
         READWRITE(vchSig);
     }
@@ -110,7 +112,7 @@ public:
     /*
      * Get copy of (active) alert object by hash. Returns a null alert if it is not found.
      */
-    static CAlert getAlertByHash(const uint256 &hash);
+    static CAlert getAlertByHash(const uint256& hash);
 };
 
 #endif // DYNAMIC_ALERT_H
