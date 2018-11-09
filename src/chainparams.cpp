@@ -351,8 +351,8 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        // To import spork key: importprivkey 5hircc1Xgdp9mGaycLTZnWYktbA5q1kGJLusjDzXZRnh4jRSf4r
-        vSporkAddresses = {"DGjj2YB4c988rpgVQbhkLnwthRDbmZF2ie"}; // Must have this converted to an address "04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5";
+        // To import spork key: importprivkey QWUVh41RrhjhnF813U5XLU4S8qYjvDQ5L1n53jC7Qawr8bBCQfFh
+        vSporkAddresses = {"D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL"};
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
