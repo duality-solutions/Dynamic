@@ -295,10 +295,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000e1e0da27"); //
+        consensus.nMinimumChainWork = uint256S("0x"); //
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000e993db635ffbc0449a42da04344c70bbfec5e5c242f43e1b961afa9d4a1"); // 8000
+        consensus.defaultAssumeValid = uint256S("0x"); // 8000
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
