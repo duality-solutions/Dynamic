@@ -231,6 +231,7 @@ public:
 
     bool GetHDChain(CHDChain& hdChainRet) const;
 
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
     /**
      * Wallet status (encrypted, locked) changed.
      * Note: Called without locks held.

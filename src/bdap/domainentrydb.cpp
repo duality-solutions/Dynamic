@@ -28,13 +28,26 @@ bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntr
     return !entry.IsNull();
 }
 
+bool GetDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry)
+{
+    if (!pDomainEntryDB || !pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+        return false;
+    }
+    
+    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime) {
+        entry.SetNull();
+        return false;
+    }
+    return !entry.IsNull();
+}
+
 bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op) 
 { 
     bool writeState = false;
     {
         LOCK(cs_bdap_entry);
-        writeState = Write(make_pair(std::string("dc"), entry.GetFullObjectPath()), entry) 
-                         && Write(make_pair(std::string("txid"), entry.txHash), entry.GetFullObjectPath());
+        writeState = Write(make_pair(std::string("dc"), entry.vchFullObjectPath()), entry) 
+                         && Write(make_pair(std::string("pk"), entry.DHTPubKeyString()), entry);
     }
     if (writeState)
         AddDomainEntryIndex(entry, op);
@@ -58,22 +71,30 @@ bool CDomainEntryDB::ReadDomainEntry(const std::vector<unsigned char>& vchObject
     return CDBWrapper::Read(make_pair(std::string("dc"), vchObjectPath), entry);
 }
 
-bool CDomainEntryDB::ReadDomainEntryTxId(const uint256& txHash, std::vector<unsigned char>& vchObjectPath) 
+bool CDomainEntryDB::ReadDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey, CDomainEntry& entry) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Read(make_pair(std::string("txid"), txHash), vchObjectPath);
+    return CDBWrapper::Read(make_pair(std::string("pk"), vchPubKey), entry);
 }
 
 bool CDomainEntryDB::EraseDomainEntry(const std::vector<unsigned char>& vchObjectPath) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Erase(make_pair(std::string("dc"), vchObjectPath));
+    CDomainEntry entry;
+    if (!ReadDomainEntry(vchObjectPath, entry)) 
+        return false;
+
+    return CDBWrapper::Erase(make_pair(std::string("dc"), vchObjectPath)) && EraseDomainEntryPubKey(entry.DHTPublicKey);
 }
 
-bool CDomainEntryDB::EraseDomainEntryTxId(const uint256& txHash) 
+bool CDomainEntryDB::EraseDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Erase(make_pair(std::string("txid"), txHash));
+    CDomainEntry entry;
+    if (!ReadDomainEntryPubKey(vchPubKey, entry)) 
+        return false;
+
+    return CDBWrapper::Erase(make_pair(std::string("pk"), vchPubKey)) && EraseDomainEntry(entry.vchFullObjectPath());
 }
 
 bool CDomainEntryDB::DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
@@ -82,10 +103,10 @@ bool CDomainEntryDB::DomainEntryExists(const std::vector<unsigned char>& vchObje
     return CDBWrapper::Exists(make_pair(std::string("dc"), vchObjectPath));
 }
 
-bool CDomainEntryDB::DomainEntryExistsTxId(const uint256& txHash) 
+bool CDomainEntryDB::DomainEntryExistsPubKey(const std::vector<unsigned char>& vchPubKey) 
 {
     LOCK(cs_bdap_entry);
-    return CDBWrapper::Exists(make_pair(std::string("txid"), txHash));
+    return CDBWrapper::Exists(make_pair(std::string("pk"), vchPubKey));
 }
 
 bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
@@ -112,9 +133,8 @@ bool CDomainEntryDB::RemoveExpired(int& entriesRemoved)
                 if (GetDomainEntry(value, entry) && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime)
                 {
                     entriesRemoved++;
-                    EraseDomainEntryTxId(entry.txHash);
+                    EraseDomainEntryPubKey(entry.DHTPublicKey);
                 }
-
             }
             pcursor->Next();
         } catch (std::exception &e) {
@@ -152,12 +172,12 @@ bool CDomainEntryDB::UpdateDomainEntry(const std::vector<unsigned char>& vchObje
 {
     LOCK(cs_bdap_entry);
 
-    if (!EraseDomainEntryTxId(entry.txHash))
+    if (!EraseDomainEntry(vchObjectPath))
         return false;
 
     bool writeState = false;
     writeState = Update(make_pair(std::string("dc"), entry.GetFullObjectPath()), entry) 
-                    && Write(make_pair(std::string("txid"), entry.txHash), entry.GetFullObjectPath());
+                    && Update(make_pair(std::string("pk"), entry.DHTPubKeyString()), entry);
     if (writeState)
         AddDomainEntryIndex(entry, OP_BDAP_MODIFY);
 
@@ -183,15 +203,13 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
                     EraseDomainEntry(key.second);
                 }
             }
-            else if (pcursor->GetKey(key) && key.first == "txid") 
+            else if (pcursor->GetKey(key) && key.first == "pk") 
             {
-                std::vector<unsigned char> value;
-                CDomainEntry entry;
-                pcursor->GetValue(value);
-                if (GetDomainEntry(value, entry) && (unsigned int)chainActive.Tip()->GetMedianTimePast() >= entry.nExpireTime)
+                pcursor->GetValue(dirEntry);
+                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= dirEntry.nExpireTime)
                 {
                     nRemoved++;
-                    EraseDomainEntryTxId(entry.txHash);
+                    EraseDomainEntryPubKey(dirEntry.DHTPublicKey);
                 }
             }
             pcursor->Next();
@@ -256,29 +274,7 @@ bool CDomainEntryDB::GetDomainEntryInfo(const std::vector<unsigned char>& vchFul
     
     return true;
 }
-/*
-bool CDomainEntryDB::GetDomainEntryInfoTxId(const uint256& txHash, CDomainEntry& entry)
-{
-    std::vector<unsigned char> vchFullObjectPath;
-    if (!ReadDomainEntryTxId(txHash, vchFullObjectPath)) {
-        return false;
-    }
-    if (!ReadDomainEntry(vchFullObjectPath, entry)) {
-        return false;
-    }
-    
-    return true;
-}
 
-bool CDomainEntryDB::GetDomainEntryInfoTxId(const uint256& txHash, std::vector<unsigned char>& vchFullObjectPath)
-{
-    if (!ReadDomainEntryTxId(txHash, vchFullObjectPath)) {
-        return false;
-    }
-    
-    return true;
-}
-*/
 bool CheckDomainEntryDB()
 {
     if (!pDomainEntryDB)
@@ -308,7 +304,6 @@ void CleanupLevelDB(int& nRemoved)
         pDomainEntryDB->CleanupLevelDB(nRemoved);
     FlushLevelDB();
 }
-
 
 static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvchOpParameters, std::string& errorMessage)
 {

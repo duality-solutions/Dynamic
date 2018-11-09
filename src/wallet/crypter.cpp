@@ -592,3 +592,11 @@ bool CCryptoKeyStore::GetHDChain(CHDChain& hdChainRet) const
     hdChainRet = hdChain;
     return !hdChain.IsNull();
 }
+
+bool CCryptoKeyStore::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const
+{
+    for (const std::pair<CKeyID, CKeyEd25519>& key : mapDHTKeys) {
+        vvchDHTPubKeys.push_back(key.second.GetPubKey());
+    }
+    return (vvchDHTPubKeys.size() > 0);
+}

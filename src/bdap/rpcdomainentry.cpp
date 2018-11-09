@@ -488,7 +488,7 @@ UniValue makekeypair(const JSONRPCRequest& request)
         strPrefix = request.params[0].get_str();
 
     CKey key;
-    int nCount = 0;
+    uint32_t nCount = 0;
     do
     {
         key.MakeNewKey(false);
@@ -521,6 +521,34 @@ UniValue addgroup(const JSONRPCRequest& request)
     return AddDomainEntry(request, bdapType);
 }
 
+UniValue mybdapaccounts(const JSONRPCRequest& request)
+{
+    if (request.params.size() != 0)
+        throw std::runtime_error(
+            "mybdapaccounts\n"
+            "Returns your BDAP accounts.\n");
+
+    std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
+    if (pwalletMain && !pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
+        throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error adding receiving address key wo wallet for BDAP"));
+
+    UniValue result(UniValue::VOBJ);
+    uint32_t nCount = 1;
+    for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
+        //LogPrintf("mybdapaccounts %s \n", stringFromVch(vchPubKey));
+        CDomainEntry entry;
+        if (!pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+            throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3801 - BDAP entry for " + stringFromVch(vchPubKey) + _(" can not be found.  Get info failed!"));
+        }
+        UniValue oAccount(UniValue::VOBJ);
+        if (BuildBDAPJson(entry, oAccount, false)) {
+            result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
+            nCount++;
+        }
+    }
+    return result;
+}
+
 static const CRPCCommand commands[] =
 {   //  category         name                        actor (function)           okSafeMode
 #ifdef ENABLE_WALLET
@@ -535,6 +563,7 @@ static const CRPCCommand commands[] =
     { "bdap",            "deletegroup",              &deletegroup,                  true  },
     { "bdap",            "addgroup",                 &addgroup,                     true  },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true  },
+    { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true  },
 #endif //ENABLE_WALLET
     { "bdap",            "makekeypair",              &makekeypair,                  true  },
 };

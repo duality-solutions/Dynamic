@@ -129,6 +129,8 @@ public:
     bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
 
     bool GetHDChain(CHDChain& hdChainRet) const;
+
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
 };
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
