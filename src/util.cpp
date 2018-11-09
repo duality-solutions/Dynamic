@@ -271,7 +271,7 @@ bool LogAcceptCategory(const char* category)
                 const std::vector<std::string>& categories = mapMultiArgs.at("-debug");
                 ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
                 // thread_specific_ptr automatically deletes the set when the thread ends.
-                // "dynamic" is a composite category enabling all Dash-related debug output
+                // "dynamic" is a composite category enabling all Dynamic-related debug output
                 if (ptrCategory->count(std::string("dynamic"))) {
                     ptrCategory->insert(std::string("privatesend"));
                     ptrCategory->insert(std::string("instantsend"));
