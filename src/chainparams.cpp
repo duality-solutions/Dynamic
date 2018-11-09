@@ -162,7 +162,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000178cc646f309d"); // 190513
+        consensus.nMinimumChainWork = 190513; // 190513
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x000000007c0622b0ace74790759127570d8396f38cab674c959ed4a5c315fb6d"); // 190513
@@ -295,10 +295,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x"); //
+        consensus.nMinimumChainWork = 210; // 210
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x"); // 8000
+        consensus.defaultAssumeValid = uint256S("0x00001a32bc1d6887d29d3847e21fcfb1026e14369df048a7f0666acdd9ccdf0d"); // 210
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
@@ -424,10 +424,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 999999999999ULL;
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S(""); //
+        consensus.nMinimumChainWork = 0; //
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S(""); //
+        consensus.defaultAssumeValid = uint256S("0x000ab751d858e116043e741d097311f2382e600c219483cfda8f25c7f369cc2c"); //
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
