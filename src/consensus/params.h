@@ -79,7 +79,7 @@ struct Params {
     int64_t nPowMaxAdjustUp;
     int64_t nPowMaxAdjustDown;
     int64_t nUpdateDiffAlgoHeight;
-    uint256 nMinimumChainWork;
+    int64_t nMinimumChainWork;
     uint256 defaultAssumeValid;
 
     int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
