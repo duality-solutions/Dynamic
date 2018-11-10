@@ -49,7 +49,7 @@ public:
 
     std::string ToString() const;
 
-    void DoMaintenance() { CheckAndRemove(); }
+    void DoMaintenance();
 };
 
 #endif // DYNAMIC_NETFULFILLEDMAN_H

@@ -10,6 +10,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "init.h"
 #include "key.h"
 #include "messagesigner.h"
 #include "net.h"
@@ -945,6 +946,12 @@ std::string CInstantSend::ToString() const
 {
     LOCK(cs_instantsend);
     return strprintf("Lock Candidates: %llu, Votes %llu", mapTxLockCandidates.size(), mapTxLockVotes.size());
+}
+
+void CInstantSend::DoMaintenance()
+{
+    if (ShutdownRequested()) return;
+     CheckAndRemove();
 }
 
 bool CInstantSend::CanAutoLock()

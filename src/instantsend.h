@@ -151,7 +151,7 @@ public:
 
     std::string ToString() const;
 
-    void DoMaintenance() { CheckAndRemove(); }
+    void DoMaintenance();
 
     /// checks if we can automatically lock "simple" transactions
     static bool CanAutoLock();
@@ -195,7 +195,7 @@ public:
 
     // checks if related transaction is "simple" to lock it automatically
     bool IsSimple() const;
-    
+
     const uint256& GetHash() const
     {
         return tx->GetHash();

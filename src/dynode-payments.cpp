@@ -12,6 +12,7 @@
 #include "dynodeman.h"
 #include "fluid/fluiddb.h"
 #include "governance-classes.h"
+#include "init.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
 #include "netmessagemaker.h"
@@ -1102,4 +1103,10 @@ void CDynodePayments::UpdatedBlockTip(const CBlockIndex* pindex, CConnman& connm
 
     CheckBlockVotes(nFutureBlock - 1);
     ProcessBlock(nFutureBlock, connman);
+}
+
+void CDynodePayments::DoMaintenance()
+{
+    if (ShutdownRequested()) return;
+     CheckAndRemove();
 }

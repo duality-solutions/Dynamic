@@ -236,7 +236,18 @@ void PrepareShutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
+
+    // fRPCInWarmup should be `false` if we completed the loading sequence
+    // before a shutdown request was received
+    std::string statusmessage;
+    bool fRPCInWarmup = RPCIsInWarmup(&statusmessage);
+
 #ifdef ENABLE_WALLET
+    if (!fLiteMode && !fRPCInWarmup) {
+        // Stop PrivateSend, release keys
+        privateSendClient.fEnablePrivateSend = false;
+        privateSendClient.ResetPool();
+    }
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
@@ -246,12 +257,7 @@ void PrepareShutdown()
     peerLogic.reset();
     g_connman.reset();
 
-    if (!fLiteMode) {
-#ifdef ENABLE_WALLET
-        // Stop PrivateSend, release keys
-        privateSendClient.fEnablePrivateSend = false;
-        privateSendClient.ResetPool();
-#endif
+    if (!fLiteMode && !fRPCInWarmup) {
 
         // STORE DATA CACHES INTO SERIALIZED DAT FILES
         CFlatDB<CDynodeMan> flatdb1("dncache.dat", "magicDynodeCache");

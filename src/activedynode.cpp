@@ -10,6 +10,7 @@
 #include "dynode-sync.h"
 #include "dynode.h"
 #include "dynodeman.h"
+#include "init.h"
 #include "netbase.h"
 #include "protocol.h"
 
@@ -19,6 +20,12 @@ extern CWallet* pwalletMain;
 
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
+
+void CActiveDynode::DoMaintenance(CConnman &connman)
+{
+    if (ShutdownRequested()) return;
+     ManageState(connman);
+}
 
 void CActiveDynode::ManageState(CConnman& connman)
 {
