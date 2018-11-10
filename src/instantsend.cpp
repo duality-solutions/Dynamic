@@ -37,6 +37,9 @@ extern CTxMemPool mempool;
 bool fEnableInstantSend = true;
 int nCompleteTXLocks;
 
+std::atomic<bool> CInstantSend::isAutoLockBip9Active{false};
+const double CInstantSend::AUTO_IX_MEMPOOL_THRESHOLD = 0.1;
+
 CInstantSend instantsend;
 const std::string CInstantSend::SERIALIZATION_VERSION_STRING = "CInstantSend-Version-1";
 
@@ -944,6 +947,15 @@ std::string CInstantSend::ToString() const
     return strprintf("Lock Candidates: %llu, Votes %llu", mapTxLockCandidates.size(), mapTxLockVotes.size());
 }
 
+bool CInstantSend::CanAutoLock()
+{
+    if(!isAutoLockBip9Active)
+        return false;
+    if(!sporkManager.IsSporkActive(SPORK_15_INSTANTSEND_AUTOLOCKS))
+        return false;
+    return (mempool.UsedMemoryShare() < AUTO_IX_MEMPOOL_THRESHOLD);
+}
+
 //
 // CTxLockRequest
 //
@@ -995,7 +1007,7 @@ bool CTxLockRequest::IsValid() const
 
     CAmount nValueOut = tx->GetValueOut();
 
-    if (nValueIn - nValueOut < GetMinFee()) {
+    if (nValueIn - nValueOut < GetMinFee(false)) {
         LogPrint("instantsend", "CTxLockRequest::IsValid -- did not include enough fees in transaction: fees=%d, tx=%s", nValueOut - nValueIn, ToString());
         return false;
     }
@@ -1003,8 +1015,11 @@ bool CTxLockRequest::IsValid() const
     return true;
 }
 
-CAmount CTxLockRequest::GetMinFee() const
+CAmount CTxLockRequest::GetMinFee(bool fForceMinFee) const
 {
+    if (!fForceMinFee && CInstantSend::CanAutoLock() && IsSimple()) {
+        return CAmount();
+    }
     CAmount nMinFee = MIN_FEE;
     return std::max(nMinFee, CAmount(tx->vin.size() * nMinFee));
 }
@@ -1012,6 +1027,11 @@ CAmount CTxLockRequest::GetMinFee() const
 int CTxLockRequest::GetMaxSignatures() const
 {
     return tx->vin.size() * COutPointLock::SIGNATURES_TOTAL;
+}
+
+bool CTxLockRequest::IsSimple() const
+{
+    return (tx->vin.size() <= MAX_INPUTS_FOR_AUTO_IX);
 }
 
 //

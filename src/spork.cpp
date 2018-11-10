@@ -29,6 +29,7 @@ std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_10_DYNODE_PAY_UPDATED_NODES, 4070908800ULL},  // OFF
     {SPORK_12_RECONSIDER_BLOCKS, 0},                     // 0 BLOCKS
     {SPORK_14_REQUIRE_SENTINEL_FLAG, 4070908800ULL},     // OFF
+    {SPORK_15_INSTANTSEND_AUTOLOCKS, 4070908800ULL},     // OFF
 };
 
 bool CSporkManager::SporkValueIsActive(int nSporkID, int64_t& nActiveValueRet) const
@@ -284,6 +285,8 @@ int CSporkManager::GetSporkIDByName(std::string strName)
         return SPORK_13_OLD_SUPERBLOCK_FLAG;
     if (strName == "SPORK_14_REQUIRE_SENTINEL_FLAG")
         return SPORK_14_REQUIRE_SENTINEL_FLAG;
+    if (strName == "SPORK_15_INSTANTSEND_AUTOLOCKS")
+        return SPORK_15_INSTANTSEND_AUTOLOCKS;
     LogPrint("spork", "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
 }
@@ -311,6 +314,8 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         return "SPORK_13_OLD_SUPERBLOCK_FLAG";
     case SPORK_14_REQUIRE_SENTINEL_FLAG:
         return "SPORK_14_REQUIRE_SENTINEL_FLAG";
+    case SPORK_15_INSTANTSEND_AUTOLOCKS:
+        return "SPORK_15_INSTANTSEND_AUTOLOCKS";
     default:
         LogPrint("spork", "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
         return "Unknown";
