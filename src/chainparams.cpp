@@ -309,10 +309,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000e1e0da27"); //
+        consensus.nMinimumChainWork = uint256S("0x"); // TODO: Add once testnet is established
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000e993db635ffbc0449a42da04344c70bbfec5e5c242f43e1b961afa9d4a1"); // 8000
+        consensus.defaultAssumeValid = uint256S("0x"); // TODO: Add once testnet is established
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
@@ -440,12 +440,12 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 999999999999ULL;
-        
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S(""); //
+        consensus.nMinimumChainWork = uint256S("");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S(""); //
+        consensus.defaultAssumeValid = uint256S("");
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
