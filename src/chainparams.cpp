@@ -318,8 +318,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        // To import alter key:  importprivkey 6Jjb9DG1cr71VWiwxg97zVEyZUBhFzzGhqE7GY9DrbYYM6gVgxS
-        vAlertPubKey = ParseHex("043d9e8440ea8fe66b0c2639f0a0931c9d7c41132ec9ee04cdf5d9e88ada2c2df52d93a0c1983958d3aea56df9fb3d1a61ca4eb6f72c27456fc313be80cdc70032");
+        vAlertPubKey = ParseHex("04b375643a0b5fe3a9882b412be4046272528ad24576c72a933b44935a8491d52e243e905b1dd6947094984fc8e9f42d17cc1058033036d7940d9078851641a445");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nPruneAfterHeight = 100;
         startNewChain = false;
@@ -365,8 +364,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        // To import spork key: importprivkey 5hircc1Xgdp9mGaycLTZnWYktbA5q1kGJLusjDzXZRnh4jRSf4r
-        vSporkAddresses = {"DGjj2YB4c988rpgVQbhkLnwthRDbmZF2ie"}; // Must have this converted to an address "04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5";
+        vSporkAddresses = {"DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"}; // Must have this converted to an address "04d7e3d70462588ccde4cf2e4e8f29925395ee3ae2ded5244056cc895aab4c158986c702b2ef9665bf8f34450e153a649bdff3b3c784ec707fb637e1ba5ae100f5";
         nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
