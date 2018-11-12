@@ -4325,8 +4325,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>In this mode -genproclimit controls how many blocks are generated immediately.</translation>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
+        <translation>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</translation>
     </message>
     <message>
         <location line="+3"/>
