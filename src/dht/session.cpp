@@ -31,6 +31,8 @@ using namespace libtorrent;
 static std::shared_ptr<std::thread> pDHTTorrentThread;
 
 static bool fShutdown;
+static bool fStarted;
+
 session *pTorrentDHTSession = NULL;
 
 static void empty_public_key(std::array<char, 32>& public_key)
@@ -167,7 +169,7 @@ bool LoadSessionState(session* dhtSession)
 
 void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrintf("DHTTorrentNetwork -- started\n");
+    LogPrintf("DHTTorrentNetwork -- starting\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dht-session");
     
@@ -180,10 +182,12 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
                 break;
             MilliSleep(1000);
             if (fShutdown)
-                break;
+                return;
 
         } while (true);
-
+        
+        fStarted = true;
+        LogPrintf("DHTTorrentNetwork -- started\n");
         // with current peers and Dynodes
         settings.LoadSettings();
         pTorrentDHTSession = settings.GetSession();
@@ -208,17 +212,20 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 void StopTorrentDHTNetwork()
 {
     LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
-    StopEventListener();
     fShutdown = true;
+    MilliSleep(300);
+    StopEventListener();
     MilliSleep(30);
     if (pDHTTorrentThread != NULL)
     {
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
-        libtorrent::session_params params;
-        params.settings.set_bool(settings_pack::enable_dht, false);
-        params.settings.set_int(settings_pack::alert_mask, 0x0);
-        pTorrentDHTSession->apply_settings(params.settings);
-        pTorrentDHTSession->abort();
+        if (fStarted) { 
+            libtorrent::session_params params;
+            params.settings.set_bool(settings_pack::enable_dht, false);
+            params.settings.set_int(settings_pack::alert_mask, 0x0);
+            pTorrentDHTSession->apply_settings(params.settings);
+            pTorrentDHTSession->abort();
+        }
         pDHTTorrentThread->join();
         LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
     }
@@ -232,6 +239,7 @@ void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
     LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", GetSessionStatePath());
     fShutdown = false;
+    fStarted = false;
     if (pDHTTorrentThread != NULL)
          StopTorrentDHTNetwork();
 
