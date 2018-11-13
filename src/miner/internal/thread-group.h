@@ -62,7 +62,10 @@ void ThreadGroup<T, Context>::SyncGroupTarget()
     while ((current = _threads.size()) != real_target) {
         for (size_t device_index = 0; device_index < _devices; device_index++) {
             if (current < real_target) {
-                _threads.push_back(std::make_shared<std::thread>(T(_ctx->MakeChild(), device_index)));
+                auto miner = std::unique_ptr<T>(new T(_ctx->MakeChild(), device_index));
+                _threads.push_back(std::make_shared<std::thread>([miner = std::move(miner)] {
+                    (*miner)();
+                }));
             } else {
                 std::shared_ptr<std::thread> thread = _threads.back();
                 _threads.pop_back();
