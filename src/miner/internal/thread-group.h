@@ -19,10 +19,10 @@ class ThreadGroup
 public:
     ThreadGroup(Context ctx);
 
-    // Starts all miner threads
+    // Starts set amount of target threads
     void Start() { SyncGroupTarget(); };
 
-    // Shuts down all miner threads
+    // Shuts down all threads
     void Shutdown()
     {
         SetNumThreads(0);
