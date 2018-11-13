@@ -7,7 +7,7 @@
 
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
-#include <thread>
+#include <boost/thread/thread.hpp>
 
 /**
  * Miner threads controller.
@@ -43,7 +43,7 @@ protected:
     Context _ctx;
     size_t _devices;
     size_t _target_threads = 0;
-    std::vector<std::shared_ptr<std::thread> > _threads;
+    std::vector<std::shared_ptr<boost::thread> > _threads;
     mutable boost::shared_mutex _mutex;
 };
 
@@ -63,12 +63,13 @@ void ThreadGroup<T, Context>::SyncGroupTarget()
         for (size_t device_index = 0; device_index < _devices; device_index++) {
             if (current < real_target) {
                 auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), device_index));
-                _threads.push_back(std::make_shared<std::thread>([miner] {
+                _threads.push_back(std::make_shared<boost::thread>([miner] {
                     (*miner)();
                 }));
             } else {
-                std::shared_ptr<std::thread> thread = _threads.back();
+                std::shared_ptr<boost::thread> thread = _threads.back();
                 _threads.pop_back();
+                thread->interrupt();
             }
         }
     }
