@@ -1050,7 +1050,7 @@ int CPUMaxThreads()
 {
     int nThreads = boost::thread::hardware_concurrency();
 
-    int nUseThreads = GetArg("-genproclimit", -1);
+    int nUseThreads = GetArg("-genproclimit-cpu", -1);
     if (nUseThreads < 0) {
         nUseThreads = nThreads;
     }

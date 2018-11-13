@@ -3362,8 +3362,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Выполнить команду при появлении нового блока (%s в команде заменяется на хэш блока)</translation>
     </message>
     <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>В этом режиме -genproclimit определяет, сколько блоков генерируется немедленно.</translation>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
+        <translation>В этом режиме -genproclimit-cpu определяет, сколько блоков генерируется немедленно.</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>

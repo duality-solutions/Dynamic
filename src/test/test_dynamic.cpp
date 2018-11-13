@@ -11,7 +11,7 @@
 #include "consensus/validation.h"
 #include "key.h"
 #include "validation.h"
-#include "miner.h"
+#include "miner/miner.h"
 #include "net_processing.h"
 #include "pubkey.h"
 #include "random.h"
@@ -145,7 +145,7 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>&
         block.vtx.push_back(MakeTransactionRef(tx));
     // IncrementExtraNonce creates a valid coinbase and merkleRoot
     unsigned int extraNonce = 0;
-    IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
+    IncrementExtraNonce(block, chainActive.Tip(), extraNonce);
 
     while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
 

@@ -2984,7 +2984,7 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
         bool fInitialDownload;
         {
             LOCK(cs_main);
-            {   // TODO: Tempoarily ensure that mempool removals are notified before
+            { // TODO: Tempoarily ensure that mempool removals are notified before
                 // connected transactions.  This shouldn't matter, but the abandoned
                 // state of transactions in our wallet is currently cleared when we
                 // receive another notification and there is a race condition where
@@ -3466,7 +3466,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
+    if (block.nBits != GetNextWorkRequired(pindexPrev, block, consensusParams)) {
         return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
             REJECT_INVALID, "bad-diffbits");
     }

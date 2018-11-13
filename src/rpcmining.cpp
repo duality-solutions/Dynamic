@@ -15,7 +15,7 @@
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
-#include "miner.h"
+#include "miner/miner.h"
 #include "net.h"
 #include "pow.h"
 #include "rpcserver.h"
@@ -170,7 +170,7 @@ UniValue getgenerate(const JSONRPCRequest& request)
     return GetBoolArg("-gen", DEFAULT_GENERATE);
 }
 
-UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
+UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
 {
     if (!Params().MineBlocksOnDemand())
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "This method can only be used on regtest");
@@ -192,11 +192,11 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
 
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
-        CBlock* pblock = &pblocktemplate->block;
         {
             LOCK(cs_main);
-            IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
+            IncrementExtraNonce(pblocktemplate->block, chainActive.Tip(), nExtraNonce);
         }
+        CBlock* pblock = &pblocktemplate->block;
         while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus())) {
             // Yes, there is a chance every nonce could fail to satisfy the -regtest
             // target -- 1 in 2^(2^32). That ain't gonna happen.
@@ -237,7 +237,7 @@ UniValue generate(const JSONRPCRequest& request)
         nMaxTries = request.params[1].get_int();
     }
 
-    boost::shared_ptr<CReserveScript> coinbaseScript;
+    std::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
 
     // If the keypool is exhausted, no script is returned at all.  Catch this.
@@ -282,7 +282,7 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Error: Invalid address");
 
-    boost::shared_ptr<CReserveScript> coinbaseScript(new CReserveScript());
+    std::shared_ptr<CReserveScript> coinbaseScript(new CReserveScript());
     coinbaseScript->reserveScript = GetScriptForDestination(address.Get());
 
     return generateBlocks(coinbaseScript, nGenerate, nMaxTries, false);
@@ -298,7 +298,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
             "See the getgenerate call for the current setting.\n"
             "\nArguments:\n"
             "1. generate         (boolean, required) Set to true to turn on generation, false to turn off.\n"
-            "2. genproclimit     (numeric, optional) Set the processor limit for when generation is on. Can be -1 for unlimited.\n"
+            "2. genproclimit-cpu (numeric, optional) Set the CPU thread limit for when generation is on. Can be -1 for unlimited.\n"
             "3. genproclimit-gpu (numeric, optional) Set the GPU thread limit for when generation is on. Can be -1 for unlimited.\n"
             "\nExamples:\n"
             "\nSet the generation on with a limit of one CPU processor\n" +
@@ -317,25 +317,27 @@ UniValue setgenerate(const JSONRPCRequest& request)
     if (request.params.size() > 0)
         fGenerate = request.params[0].get_bool();
 
-    int nGenProcLimit = GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU);
+    int nGenProcLimitCPU = GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU);
     if (request.params.size() > 1)
-        nGenProcLimit = request.params[1].get_int();
+        nGenProcLimitCPU = request.params[1].get_int();
 
     int nGenProcLimitGPU = GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU);
     if (request.params.size() > 2)
         nGenProcLimitGPU = request.params[2].get_int();
 
-    if (nGenProcLimit == 0 && nGenProcLimitGPU == 0)
+    if (nGenProcLimitCPU == 0 && nGenProcLimitGPU == 0)
         fGenerate = false;
 
     ForceSetArg("-gen", fGenerate ? "1" : "0");
-    ForceSetArg("-genproclimit", nGenProcLimit);
+    ForceSetArg("-genproclimit-cpu", nGenProcLimitCPU);
     ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
-    LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimit, nGenProcLimitGPU);
+    LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimitCPU, nGenProcLimitGPU);
+
+    SetCPUMinerThreads(nGenProcLimitCPU);
+    SetGPUMinerThreads(nGenProcLimitGPU);
 
     if (fGenerate) {
-        GenerateDynamicsCPU(nGenProcLimit, Params(), *g_connman);
-        GenerateDynamicsGPU(nGenProcLimitGPU, Params(), *g_connman);
+        StartMiners();
     } else {
         ShutdownMiners();
     }
@@ -423,7 +425,7 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.push_back(Pair("currentblocktx", (uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty", (double)GetDifficulty()));
     obj.push_back(Pair("errors", GetWarnings("statusbar")));
-    obj.push_back(Pair("genproclimit", (int)GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU)));
+    obj.push_back(Pair("genproclimit-cpu", (int)GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU)));
     obj.push_back(Pair("genproclimit-gpu", (int)GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU)));
     obj.push_back(Pair("networkhashps", getnetworkhashps(request)));
     obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
@@ -727,11 +729,13 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         // Need to update only after we know CreateNewBlock succeeded
         pindexPrev = pindexPrevNew;
     }
-    CBlock* pblock = &pblocktemplate->block; // pointer for convenience
+
     const Consensus::Params& consensusParams = Params().GetConsensus();
 
     // Update nTime
-    UpdateTime(pblock, consensusParams, pindexPrev);
+    UpdateTime(pblocktemplate->block, consensusParams, pindexPrev);
+
+    CBlock* pblock = &pblocktemplate->block; // pointer for convenience
     pblock->nNonce = 0;
 
     UniValue aCaps(UniValue::VARR);
@@ -1099,7 +1103,7 @@ static const CRPCCommand commands[] =
         {"mining", "submitblock", &submitblock, true, {"hexdata", "parameters"}},
 
         {"generating", "getgenerate", &getgenerate, true, {}},
-        {"generating", "setgenerate", &setgenerate, true, {"generate", "genproclimit", "genproclimit-gpu"}},
+        {"generating", "setgenerate", &setgenerate, true, {"generate", "genproclimit-cpu", "genproclimit-gpu"}},
         {"generating", "generate", &generate, true, {"nblocks", "maxtries"}},
         {"generating", "generatetoaddress", &generatetoaddress, true, {"nblocks", "address", "maxtries"}},
         {"generating", "gethashespersec", &gethashespersec, true, {}},
