@@ -10,6 +10,8 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
+#include <atomic>
+
 class CBlock;
 class CChainParams;
 class CConnman;
@@ -39,17 +41,23 @@ protected:
     void RecreateBlock();
     void InitializeCoinbaseScript();
 
-    CBlockIndex* tip();
-    std::shared_ptr<CBlockTemplate> block_template();
-    std::shared_ptr<CReserveScript> coinbase_script() { return _coinbase_script; }
-    bool has_block() { return !!_block_template; }
+    CBlockIndex* tip() const { return _chain_tip; }
+    uint64_t block_flag() const { return _block_flag; }
+    std::shared_ptr<CReserveScript> coinbase_script() const { return _coinbase_script; }
+    bool has_block() const { return _block_template != nullptr; }
+
+    std::shared_ptr<CBlockTemplate> block_template()
+    {
+        boost::shared_lock<boost::shared_mutex> guard(_mutex);
+        return _block_template;
+    }
 
 private:
-    // curent blockchain tip
-    // updated with block recreation
-    CBlockIndex* _tip = nullptr;
+    // current block chain tip
+    std::atomic<CBlockIndex*> _chain_tip{nullptr};
+    // atomic flag incremented on recreated block
+    std::atomic<std::uint64_t> _block_flag{0};
     // shared block template for miners
-    // they have to randomize (...)
     std::shared_ptr<CBlockTemplate> _block_template{nullptr};
     // coinbase script for all miners
     std::shared_ptr<CReserveScript> _coinbase_script{nullptr};
@@ -90,6 +98,7 @@ public:
     CConnman& connman() const { return shared->connman; }
     const CChainParams& chainparams() const { return shared->chainparams; }
     CBlockIndex* tip() const { return shared->tip(); }
+    uint64_t block_flag() const { return shared->block_flag(); }
     std::shared_ptr<CBlockTemplate> block_template() const { return shared->block_template(); }
     std::shared_ptr<CReserveScript> coinbase_script() const { return shared->coinbase_script(); }
     bool has_block() const { return shared->has_block(); }

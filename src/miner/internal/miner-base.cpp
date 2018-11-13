@@ -25,27 +25,28 @@ void MinerBase::Loop()
     RenameThread(tfm::format("dynamic-%s-miner-%d", DeviceName(), _device_index).data());
 
     CBlock block;
-    CBlockIndex* current_tip = nullptr;
+    CBlockIndex* chain_tip = nullptr;
+    std::uint64_t block_flag = 0;
     std::shared_ptr<CBlockTemplate> block_template = {nullptr};
 
     try {
         while (true) {
-            // Get blockchain tip
-            CBlockIndex* next_tip = _ctx->tip();
-            // Get shared block template
-            auto next_template = _ctx->block_template();
-            assert(next_template != nullptr);
-            CBlock& next_block = next_template->block;
             // Update block and tip if changed
-            if (current_tip != next_tip || (next_block.nBits != block.nBits && next_block.nTime > block.nTime)) {
-                block = next_block;
-                block_template = next_template;
-                current_tip = next_tip;
+            if (block_flag != _ctx->block_flag()) {
+                // set new block template
+                block_template = _ctx->block_template();
+                block = block_template->block;
+                // set block flag only after template
+                // so we've waited for RecreateBlock
+                block_flag = _ctx->block_flag();
+                // block chain tip
+                chain_tip = _ctx->tip();
             }
             // Make sure we have a tip
-            assert(current_tip != nullptr);
+            assert(chain_tip != nullptr);
+            assert(block_template != nullptr);
             // Increment nonce
-            IncrementExtraNonce(block, current_tip, _extra_nonce);
+            IncrementExtraNonce(block, chain_tip, _extra_nonce);
             LogPrintf("DynamicMiner -- Running miner on device %s#%d with %u transactions in block (%u bytes)\n", DeviceName(), _device_index, block.vtx.size(),
                 GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION));
             // set loop start for counter
@@ -58,12 +59,17 @@ void MinerBase::Loop()
                 _ctx->counter->Increment(hashes);
                 // Check for stop or if block needs to be rebuilt
                 boost::this_thread::interruption_point();
+                // Check if block was recreated
+                if (block_flag != _ctx->block_flag()) {
+                    break;
+                }
+                // Recreate block if nonce too big
                 if (block.nNonce >= 0xffff0000) {
                     _ctx->RecreateBlock();
                     break;
                 }
                 // Update block time
-                if (UpdateTime(block, _ctx->chainparams().GetConsensus(), current_tip) < 0) {
+                if (UpdateTime(block, _ctx->chainparams().GetConsensus(), chain_tip) < 0) {
                     // Recreate the block if the clock has run backwards,
                     // so that we can use the correct time.
                     _ctx->RecreateBlock();

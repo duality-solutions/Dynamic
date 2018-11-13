@@ -6,10 +6,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "miner/internal/miner-context.h"
-#include "chain.h"
 #include "miner/miner-util.h"
-#include "net.h"
-#include "txmempool.h"
 #include "validation.h"
 #include "validationinterface.h"
 
@@ -27,20 +24,12 @@ void MinerSharedContext::InitializeCoinbaseScript()
 
 void MinerSharedContext::RecreateBlock()
 {
+    // First we increment flag
+    // so all miner threads know new block is coming
+    _block_flag += 1;
+    // Then we acquire unique lock so that miners wait
+    // for the new block to be created
     boost::unique_lock<boost::shared_mutex> guard(_mutex);
-
-    _tip = chainActive.Tip();
+    _chain_tip = chainActive.Tip();
     _block_template = CreateNewBlock(chainparams, _coinbase_script->reserveScript);
-}
-
-CBlockIndex* MinerSharedContext::tip()
-{
-    boost::shared_lock<boost::shared_mutex> guard(_mutex);
-    return _tip;
-}
-
-std::shared_ptr<CBlockTemplate> MinerSharedContext::block_template()
-{
-    boost::shared_lock<boost::shared_mutex> guard(_mutex);
-    return _block_template;
 }
