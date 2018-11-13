@@ -10,6 +10,9 @@
 
 #include <univalue.h>
 
+#include <boost/thread.hpp>
+
+
 CDomainEntryDB *pDomainEntryDB = NULL;
 
 bool GetDomainEntry(const std::vector<unsigned char>& vchObjectPath, CDomainEntry& entry)
