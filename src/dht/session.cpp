@@ -95,13 +95,6 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
     return ret;
 }
 
-static alert* WaitForResponse(session* dhtSession, const int alert_type)
-{
-    std::array<char, 32> emptyKey;
-    empty_public_key(emptyKey);
-    return WaitForResponse(dhtSession, alert_type, emptyKey, "");
-}
-
 void Bootstrap()
 {
     LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");

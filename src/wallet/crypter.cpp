@@ -368,12 +368,11 @@ bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsign
 
         std::vector<unsigned char> vchCryptedSecret;
         CKeyingMaterial vchSecret(key.begin(), key.end());
-        uint256 getHash = Hash(pubkey.begin(), pubkey.end());
 
-        if (!EncryptSecret(vMasterKey, vchSecret, getHash, vchCryptedSecret))
+        if (!EncryptSecret(vMasterKey, vchSecret, key.GetHash(), vchCryptedSecret))
             return false;
 
-        if (!AddCryptedKey(key.PubKey(), vchCryptedSecret))
+        if (!AddCryptedDHTKey(key.GetPubKey(), vchCryptedSecret))
             return false;
     }
     return true;
@@ -387,6 +386,19 @@ bool CCryptoKeyStore::AddCryptedKey(const CPubKey& vchPubKey, const std::vector<
             return false;
 
         mapCryptedKeys[vchPubKey.GetID()] = make_pair(vchPubKey, vchCryptedSecret);
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+        
+        CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+        mapCryptedDHTKeys[keyID] = make_pair(vchPubKey, vchCryptedSecret);
     }
     return true;
 }

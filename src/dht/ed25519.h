@@ -108,12 +108,6 @@ public:
 
     int PubKeySize() const { return sizeof(GetPubKey()); }
 
-    void GetPubKey(CPubKey& key) const;
-    CPubKey PubKey() const
-    {
-        return CPubKey(GetPubKey(), false);
-    }
-
     std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> GetDHTPrivSeed() const { return seed; }
     /**
      * Used for the Torrent DHT.

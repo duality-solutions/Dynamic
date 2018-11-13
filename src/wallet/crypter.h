@@ -189,6 +189,8 @@ public:
     bool Lock(bool fAllowMixing = false);
 
     virtual bool AddCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+    virtual bool AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
     bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
     bool HaveDHTKey(const CKeyID &address) const
