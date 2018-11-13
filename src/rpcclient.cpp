@@ -119,6 +119,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"importpubkey", 2, "rescan"},
         {"importmulti", 0, "requests"},
         {"importmulti", 1, "options"},
+        { "importwallet", 1, "forcerescan" },
         {"verifychain", 0, "checklevel"},
         {"verifychain", 1, "nblocks"},
         {"pruneblockchain", 0, "height"},
@@ -148,6 +149,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressdeltas", 0, "addresses"},
         {"getaddressutxos", 0, "addresses"},
         {"getaddressmempool", 0, "addresses"},
+        { "importmnemonic", 1, "begin" },
+        { "importmnemonic", 2, "end" },
+        { "importmnemonic", 3, "forcerescan" },
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},

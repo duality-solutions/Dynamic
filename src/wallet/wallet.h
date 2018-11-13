@@ -18,6 +18,7 @@
 #include "validationinterface.h"
 #include "wallet/crypter.h"
 #include "wallet/rpcwallet.h"
+#include "wallet/mnemonic/mnemonic.h"
 #include "wallet/wallet_ismine.h"
 #include "wallet/walletdb.h"
 
@@ -1130,6 +1131,7 @@ public:
     bool SetHDChain(const CHDChain& chain, bool memonly);
     bool SetCryptedHDChain(const CHDChain& chain, bool memonly);
     bool GetDecryptedHDChain(CHDChain& hdChainRet);
+    void DeriveNewChildKeyBIP44BychainChildKey(CExtKey &chainChildKey, CKey& secret, bool internal,uint32_t *nInternalChainCounter,uint32_t *nExternalChainCounter);
 };
 
 /** A key allocated from the key pool. */

@@ -2790,6 +2790,7 @@ extern UniValue importwallet(const JSONRPCRequest& request);
 extern UniValue importprunedfunds(const JSONRPCRequest& request);
 extern UniValue removeprunedfunds(const JSONRPCRequest& request);
 extern UniValue importmulti(const JSONRPCRequest& request);
+extern UniValue importmnemonic(const JSONRPCRequest& request);
 
 extern UniValue dumphdinfo(const JSONRPCRequest& request);
 extern UniValue importelectrumwallet(const JSONRPCRequest& request);
@@ -2821,7 +2822,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getwalletinfo", &getwalletinfo, false, {}},
         {"wallet", "importmulti", &importmulti, true, {"requests", "options"}},
         {"wallet", "importprivkey", &importprivkey, true, {"privkey", "label", "rescan"}},
-        {"wallet", "importwallet", &importwallet, true, {"filename"}},
+        {"wallet", "importwallet",  &importwallet,  true, {"filename", "forcerescan"}},
         {"wallet", "importaddress", &importaddress, true, {"address", "label", "rescan", "p2sh"}},
         {"wallet", "importprunedfunds", &importprunedfunds, true, {"rawtransaction", "txoutproof"}},
         {"wallet", "importpubkey", &importpubkey, true, {"pubkey", "label", "rescan"}},
@@ -2854,6 +2855,7 @@ static const CRPCCommand commands[] =
         {"wallet", "instantsendtoaddress", &instantsendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
         {"wallet", "dumphdinfo", &dumphdinfo, true, {}},
         {"wallet", "importelectrumwallet", &importelectrumwallet, true, {"filename", "index"}},
+        {"wallet", "importmnemonic", &importmnemonic, true, {"mnemonic", "begin", "end", "forcerescan"}},
 };
 
 void RegisterWalletRPCCommands(CRPCTable& t)

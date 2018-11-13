@@ -211,6 +211,7 @@ DYNAMIC_CORE_H = \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/db.h \
+  wallet/mnemonic/mnemonic.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/wallet_ismine.h \
@@ -331,6 +332,7 @@ libdynamic_wallet_a_SOURCES = \
   privatesend-util.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
+  wallet/mnemonic/mnemonic.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \

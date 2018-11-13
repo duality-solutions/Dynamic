@@ -200,6 +200,27 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
         throw std::runtime_error(std::string(__func__) + ": AddHDPubKey failed");
 }
 
+void CWallet::DeriveNewChildKeyBIP44BychainChildKey(CExtKey &chainChildKey, CKey& secret, bool internal,uint32_t *nInternalChainCounter,uint32_t *nExternalChainCounter)
+{
+    CExtKey childKey;              //key at m/0'/0'/<n>'
+     // derive child key at next index, skip keys already known to the wallet
+    
+    // always derive hardened keys
+    // childIndex | BIP32_HARDENED_KEY_LIMIT = derive childIndex in hardened child-index-range
+    // example: 1 | BIP32_HARDENED_KEY_LIMIT == 0x80000001 == 2147483649
+    if (internal) {
+        chainChildKey.Derive(childKey, *nInternalChainCounter);
+        //metadata.hdKeypath = "m/44'/0'/0'/1/" + std::to_string(hdChain.nInternalChainCounter);
+        (*nInternalChainCounter)++;
+    }
+    else {
+        chainChildKey.Derive(childKey, *nExternalChainCounter);
+        //metadata.hdKeypath = "m/44'/0'/0'/0/" + std::to_string(hdChain.nExternalChainCounter);
+        (*nExternalChainCounter)++;
+    }
+    secret = childKey.key;
+}
+
 bool CWallet::GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const
 {
     LOCK(cs_wallet);
