@@ -42,7 +42,7 @@ protected:
     CBlockIndex* tip();
     std::shared_ptr<CBlockTemplate> block_template();
     std::shared_ptr<CReserveScript> coinbase_script() { return _coinbase_script; }
-    bool has_block() { return !!_block_template; }
+    bool has_block() { return _block_template != nullptr; }
 
 private:
     // curent blockchain tip

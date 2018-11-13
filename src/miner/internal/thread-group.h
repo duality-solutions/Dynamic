@@ -17,7 +17,7 @@ template <class T, class Context>
 class ThreadGroup
 {
 public:
-    ThreadGroup(Context ctx);
+    explicit ThreadGroup(Context ctx);
 
     // Starts set amount of target threads
     void Start() { SyncGroupTarget(); };

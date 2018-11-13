@@ -70,13 +70,13 @@ void MinersController::NotifyNode(const CNode* node)
 
 void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool initial_download)
 {
-    _downloaded = initial_download || _downloaded;
     // Compare with current tip (checks for unexpected behaviour or old block)
     if (index_new != chainActive.Tip())
         return;
     // Create new block template for miners
     _last_sync_time = GetTime();
     _last_txn_time = mempool.GetTransactionsUpdated();
+    _downloaded = initial_download || _downloaded;
     _ctx->RecreateBlock();
     // start miners
     if (can_start()) {
