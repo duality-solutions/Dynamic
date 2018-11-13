@@ -15,6 +15,7 @@
 
 #include <assert.h>
 
+#include <boost/thread.hpp>
 
 MinerBase::MinerBase(MinerContextRef ctx, std::size_t device_index) : _ctx(ctx), _device_index(device_index){};
 
