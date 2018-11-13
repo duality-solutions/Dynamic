@@ -34,8 +34,8 @@ int64_t GetCPUHashRate();
 int64_t GetGPUHashRate();
 
 /** Sets amount of CPU miner threads */
-void SetCPUMinerThreads(int target);
+void SetCPUMinerThreads(uint8_t target);
 /** Sets amount of GPU miner threads */
-void SetGPUMinerThreads(int target);
+void SetGPUMinerThreads(uint8_t target);
 
 #endif // DYNAMIC_MINER_H

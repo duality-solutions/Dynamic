@@ -30,7 +30,7 @@ public:
     };
 
     // Sets amount of threads
-    void SetNumThreads(int target)
+    void SetNumThreads(uint8_t target)
     {
         boost::unique_lock<boost::shared_mutex> guard(_mutex);
         _target_threads = target;
@@ -42,7 +42,7 @@ protected:
 
     Context _ctx;
     size_t _devices;
-    size_t _target_threads = 0;
+    uint8_t _target_threads = 0;
     std::vector<std::shared_ptr<boost::thread> > _threads;
     mutable boost::shared_mutex _mutex;
 };

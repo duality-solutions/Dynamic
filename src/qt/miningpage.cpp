@@ -212,11 +212,11 @@ void MiningPage::changeNumberOfGPUThreads(int i)
 void MiningPage::startMining()
 {
     if (fGPUMinerOn) {
-        SetGPUMinerThreads((int)ui->sliderGPUCores->value());
+        SetGPUMinerThreads(ui->sliderGPUCores->value());
         StartGPUMiners();
     }
     if (fCPUMinerOn) {
-        SetCPUMinerThreads((int)ui->sliderCPUCores->value());
+        SetCPUMinerThreads(ui->sliderCPUCores->value());
         StartCPUMiners();
     }
     updateUI();
