@@ -20,7 +20,12 @@ void StartMiners() { gMiners->Start(); };
 
 void StartCPUMiners() { gMiners->group_cpu().Start(); };
 
-void StartGPUMiners() { gMiners->group_gpu().Start(); };
+void StartGPUMiners()
+{
+#ifdef ENABLE_GPU
+    gMiners->group_gpu().Start();
+#endif // ENABLE_GPU
+};
 
 void ShutdownMiners() { gMiners->Shutdown(); };
 
