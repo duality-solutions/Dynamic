@@ -51,9 +51,9 @@ int64_t GetGPUHashRate()
 #endif // ENABLE_GPU
 };
 
-void SetCPUMinerThreads(int target) { gMiners->group_cpu().SetNumThreads(target); };
+void SetCPUMinerThreads(uint8_t target) { gMiners->group_cpu().SetNumThreads(target); };
 
-void SetGPUMinerThreads(int target)
+void SetGPUMinerThreads(uint8_t target)
 {
 #ifdef ENABLE_GPU
     gMiners->group_gpu().SetNumThreads(target);
