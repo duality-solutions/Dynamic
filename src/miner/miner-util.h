@@ -40,11 +40,6 @@ struct CBlockTemplate {
     std::vector<CTxOut> voutSuperblock; // dynode payment
 };
 
-#ifdef ENABLE_WALLET
-/** Check mined block */
-bool CheckWork(const CChainParams& chainParams, CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, CConnman* connMan);
-#endif // ENABLE_WALLET
-
 /** Generate a new block, without valid proof-of-work */
 std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainParams, const CScript& scriptPubKeyIn);
 /** Called by a miner when new block was found. */

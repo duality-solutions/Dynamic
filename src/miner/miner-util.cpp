@@ -67,41 +67,6 @@ int64_t UpdateTime(CBlockHeader& block, const Consensus::Params& cparams, const 
     return new_time - old_time;
 }
 
-#ifdef ENABLE_WALLET
-bool CheckWork(const CChainParams& chainparams, const CBlock& block, CWallet& wallet, CReserveKey& reservekey, CConnman* connman)
-{
-    uint256 hash = block.GetHash();
-    arith_uint256 hash_target = arith_uint256().SetCompact(block.nBits);
-
-    if (UintToArith256(hash) > hash_target)
-        return false;
-
-    // Found a solution
-    {
-        LOCK(cs_main);
-        if (block.hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("Generated block is stale!");
-
-        // Remove key from key pool
-        reservekey.KeepKey();
-
-        // Track how many getdata requests this block gets
-        {
-            LOCK(wallet.cs_wallet);
-            wallet.mapRequestCount[block.GetHash()] = 0;
-        }
-
-        // Process this block the same as if we had received it from another node
-        CValidationState state;
-        auto block_ = std::make_shared<const CBlock>(block);
-        if (!ProcessNewBlock(chainparams, block_, true, NULL))
-            return error("ProcessBlock, block not accepted");
-    }
-
-    return true;
-}
-#endif // ENABLE_WALLET
-
 class ScoreCompare
 {
 public:
