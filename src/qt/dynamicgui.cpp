@@ -445,7 +445,7 @@ void DynamicGUI::createActions()
     openAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), tr("Open &URI..."), this);
     openAction->setStatusTip(tr("Open a dynamic: URI or payment request"));
 
-    mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("Import..."), this);
+    mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("&Import mnemonic/private key..."), this);
     mnemonicAction->setStatusTip(tr("Import Mnemonic Phrase or Private Key"));
 
     showHelpMessageAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Command-line options"), this);
