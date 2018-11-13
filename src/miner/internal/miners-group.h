@@ -36,7 +36,9 @@ public:
         // Set amount of target threads
         ThreadGroup<T, MinerContextRef>::SetNumThreads(target);
         // Reset hash rate counter
-        this->_ctx->counter->Reset();
+        if (target == 0) {
+            this->_ctx->counter->Reset();
+        }
     };
 
     // Gets hash rate of all threads in the group
