@@ -30,7 +30,6 @@ MinersController::MinersController(MinerContextRef ctx)
       _connected(!_ctx->chainparams().MiningRequiresPeers()),
       _downloaded(!_ctx->chainparams().MiningRequiresPeers())
 {
-    _ctx->InitializeCoinbaseScript();
     ConnectMinerSignals(this);
 };
 
@@ -76,8 +75,7 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
     // Create new block template for miners
     _last_sync_time = GetTime();
     _last_txn_time = mempool.GetTransactionsUpdated();
-    _downloaded = initial_download || _downloaded;
-    _ctx->RecreateBlock();
+    _ctx->shared->RecreateBlock();
     // start miners
     if (can_start()) {
         _group_cpu.Start();
@@ -95,6 +93,6 @@ void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIn
     }
     if (GetTime() - _last_txn_time > 60) {
         _last_txn_time = latest_txn;
-        _ctx->RecreateBlock();
+        _ctx->shared->RecreateBlock();
     }
 };

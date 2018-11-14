@@ -24,25 +24,22 @@ private:
     HashRateCounterRef _parent;
 
 public:
-    HashRateCounter();
-    explicit HashRateCounter(HashRateCounterRef counter);
+    explicit HashRateCounter() : _parent(nullptr){};
+    explicit HashRateCounter(HashRateCounterRef parent) : _parent(parent){};
 
-    /** Returns hash rate per second */
+    // Returns hash rate per second
     operator int64_t() { return _count_per_sec; };
 
-    /** Creates new counter */
-    static HashRateCounterRef Make() { return std::make_shared<HashRateCounter>(); }
-
-    /** Creates new child counter */
+    // Creates new child counter
     HashRateCounterRef MakeChild() { return std::make_shared<HashRateCounter>(shared_from_this()); }
 
-    /** Increments counter */
+    // Increments counter
     void Increment(int64_t amount);
 
-    /** Resets counter and timer */
+    // Resets counter and timer
     void Reset();
 
-    /** Returns start time */
+    // Returns start time
     int64_t start() const { return _timer_start; };
 };
 

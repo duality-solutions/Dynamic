@@ -1,26 +1,17 @@
 // Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "miner/internal/miner-context.h"
 #include "miner/miner-util.h"
 #include "validation.h"
-#include "validationinterface.h"
 
-void MinerSharedContext::InitializeCoinbaseScript()
-{
-    boost::unique_lock<boost::shared_mutex> guard(_mutex);
-    GetMainSignals().ScriptForMining(_coinbase_script);
-    // Throw an error if no script was provided.  This can happen
-    // due to some internal error but also if the keypool is empty.
-    // In the latter case, already the pointer is NULL.
-    if (!_coinbase_script || _coinbase_script->reserveScript.empty()) {
-        throw std::runtime_error("No coinbase script available (mining requires a wallet)");
-    }
-}
+MinerContext::MinerContext(const CChainParams& chainparams_, CConnman& connman_)
+    : counter(std::make_shared<HashRateCounter>()),
+      shared(std::make_shared<MinerSharedContext>(chainparams_, connman_)){};
+
+MinerContext::MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_)
+    : counter(counter_), shared(shared_){};
 
 void MinerSharedContext::RecreateBlock()
 {
@@ -31,5 +22,5 @@ void MinerSharedContext::RecreateBlock()
     // for the new block to be created
     boost::unique_lock<boost::shared_mutex> guard(_mutex);
     _chain_tip = chainActive.Tip();
-    _block_template = CreateNewBlock(chainparams, _coinbase_script->reserveScript);
+    _block_template = CreateNewBlock(chainparams);
 }

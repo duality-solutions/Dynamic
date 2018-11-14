@@ -16,7 +16,6 @@ class CBlock;
 class CChainParams;
 class CConnman;
 class CBlockIndex;
-class CReserveScript;
 struct CBlockTemplate;
 
 class MinerBase;
@@ -34,23 +33,29 @@ public:
     MinerSharedContext(const CChainParams& chainparams_, CConnman& connman_)
         : chainparams(chainparams_), connman(connman_){};
 
-protected:
-    friend class MinerContext;
-
-    // recreates miners block template
-    void RecreateBlock();
-    void InitializeCoinbaseScript();
-
+    // Returns chain tip of current block template
     CBlockIndex* tip() const { return _chain_tip; }
+
+    // Returns miner block flag
+    // It's incremented every time new template is generated
     uint64_t block_flag() const { return _block_flag; }
-    std::shared_ptr<CReserveScript> coinbase_script() const { return _coinbase_script; }
+
+    // Returns true if block was created
     bool has_block() const { return _block_template != nullptr; }
 
+    // Returns miner block template
     std::shared_ptr<CBlockTemplate> block_template()
     {
         boost::shared_lock<boost::shared_mutex> guard(_mutex);
         return _block_template;
     }
+
+protected:
+    friend class MinerBase;
+    friend class MinersController;
+
+    // recreates miners block template
+    void RecreateBlock();
 
 private:
     // current block chain tip
@@ -59,8 +64,6 @@ private:
     std::atomic<std::uint64_t> _block_flag{0};
     // shared block template for miners
     std::shared_ptr<CBlockTemplate> _block_template{nullptr};
-    // coinbase script for all miners
-    std::shared_ptr<CReserveScript> _coinbase_script{nullptr};
     // mutex protecting multiple threads recreating block
     mutable boost::shared_mutex _mutex;
 };
@@ -76,32 +79,21 @@ public:
     HashRateCounterRef counter;
     MinerSharedContextRef shared;
 
-    MinerContext(const CChainParams& chainparams_, CConnman& connman_)
-        : counter(HashRateCounter::Make()), shared(std::make_shared<MinerSharedContext>(chainparams_, connman_)){};
+    MinerContext(const CChainParams& chainparams_, CConnman& connman_);
+    MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_);
 
-    MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_)
-        : counter(counter_), shared(shared_){};
-
-    /* Constructs child context */
+    // Constructs child context
     explicit MinerContext(const MinerContext* ctx_)
         : MinerContext(ctx_->shared, ctx_->counter->MakeChild()){};
 
-    /** Creates child context for group or miner */
+    // Creates child context for group or miner
     MinerContextRef MakeChild() const { return std::make_shared<MinerContext>(this); }
 
-    /** Recreates block for all miners */
-    void RecreateBlock() { shared->RecreateBlock(); }
-
-    /** Initializes coinbase script for all miners */
-    void InitializeCoinbaseScript() { shared->InitializeCoinbaseScript(); }
-
+    // Connection manager
     CConnman& connman() const { return shared->connman; }
+
+    // Chain parameters
     const CChainParams& chainparams() const { return shared->chainparams; }
-    CBlockIndex* tip() const { return shared->tip(); }
-    uint64_t block_flag() const { return shared->block_flag(); }
-    std::shared_ptr<CBlockTemplate> block_template() const { return shared->block_template(); }
-    std::shared_ptr<CReserveScript> coinbase_script() const { return shared->coinbase_script(); }
-    bool has_block() const { return shared->has_block(); }
 };
 
 #endif // DYNAMIC_INTERNAL_MINER_CONTEXT_H
