@@ -14,19 +14,27 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(0, 0, 0);
-color: rgb(255, 255, 255);</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_0">
      <item>
       <widget class="QTabWidget" name="tabWidget">
+       <property name="palette">
+        <palette>
+         <active/>
+         <inactive/>
+         <disabled/>
+        </palette>
+       </property>
        <property name="styleSheet">
-        <string notr="true">#bgWidget { background: rgba(0,0,0,220); }</string>
+        <string notr="true">QTabWidget:tab-bar { alignment: left; }
+QTabBar { alignment: left; }
+</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="CPU">
         <property name="enabled">
@@ -382,7 +390,7 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
                </property>
                <property name="text">
-                <string></string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -608,7 +616,7 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
                </property>
                <property name="text">
-                <string></string>
+                <string/>
                </property>
               </widget>
              </item>
