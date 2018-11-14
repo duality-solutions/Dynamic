@@ -333,10 +333,9 @@ UniValue setgenerate(const JSONRPCRequest& request)
     ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
     LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimitCPU, nGenProcLimitGPU);
 
-    SetCPUMinerThreads(nGenProcLimitCPU);
-    SetGPUMinerThreads(nGenProcLimitGPU);
-
     if (fGenerate) {
+        SetCPUMinerThreads(nGenProcLimitCPU);
+        SetGPUMinerThreads(nGenProcLimitGPU);
         StartMiners();
     } else {
         ShutdownMiners();

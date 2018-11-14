@@ -69,7 +69,6 @@ void MinersController::NotifyNode(const CNode* node)
 
 void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool initial_download)
 {
-    _downloaded = initial_download || _downloaded;
     // Compare with current tip (checks for unexpected behaviour or old block)
     if (index_new != chainActive.Tip())
         return;

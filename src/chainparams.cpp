@@ -309,10 +309,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = 101; // 100 blocks
+        consensus.nMinimumChainWork = 702; // 702 blocks
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000ad8c5b094f7d6e63c658f8b29dfb2fbe49bb395bd41751d70e73e1f765b"); // Block 101
+        consensus.defaultAssumeValid = uint256S("0x000004ca904b66049dbb93c7f129dec1c9e42213d42a5983a4b6ff7f4f88a912"); // Block 702
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;
@@ -371,11 +371,12 @@ public:
             boost::assign::map_list_of
             (0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))
             (101, uint256S("0x00000ad8c5b094f7d6e63c658f8b29dfb2fbe49bb395bd41751d70e73e1f765b"))
+            (702, uint256S("0x000004ca904b66049dbb93c7f129dec1c9e42213d42a5983a4b6ff7f4f88a912"))
         };
 
         chainTxData = ChainTxData{
-            1541946336,  // * UNIX timestamp of last known number of transactions
-            102,  // * total number of transactions between genesis and that timestamp
+            1542024850,  // * UNIX timestamp of last known number of transactions
+            703,  // * total number of transactions between genesis and that timestamp
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
