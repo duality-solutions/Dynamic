@@ -79,11 +79,8 @@ public:
     HashRateCounterRef counter;
     MinerSharedContextRef shared;
 
-    MinerContext(const CChainParams& chainparams_, CConnman& connman_)
-        : counter(HashRateCounter::Make()), shared(std::make_shared<MinerSharedContext>(chainparams_, connman_)){};
-
-    MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_)
-        : counter(counter_), shared(shared_){};
+    MinerContext(const CChainParams& chainparams_, CConnman& connman_);
+    MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_);
 
     // Constructs child context
     explicit MinerContext(const MinerContext* ctx_)

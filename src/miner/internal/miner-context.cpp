@@ -6,6 +6,13 @@
 #include "miner/miner-util.h"
 #include "validation.h"
 
+MinerContext::MinerContext(const CChainParams& chainparams_, CConnman& connman_)
+    : counter(std::make_shared<HashRateCounter>()),
+      shared(std::make_shared<MinerSharedContext>(chainparams_, connman_)){};
+
+MinerContext::MinerContext(MinerSharedContextRef shared_, HashRateCounterRef counter_)
+    : counter(counter_), shared(shared_){};
+
 void MinerSharedContext::RecreateBlock()
 {
     // First we increment flag

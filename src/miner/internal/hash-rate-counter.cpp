@@ -7,9 +7,6 @@
 #include "utiltime.h"
 
 
-HashRateCounter::HashRateCounter() : _parent(nullptr){};
-HashRateCounter::HashRateCounter(HashRateCounterRef parent) : _parent(parent){};
-
 void HashRateCounter::Increment(int64_t amount)
 {
     // Set start time if not set and return
