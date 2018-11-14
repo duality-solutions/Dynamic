@@ -241,8 +241,7 @@ bool CWallet::GetKey(const CKeyID& address, CKey& keyOut) const
 bool CWallet::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
 {
     LOCK(cs_wallet);
-    //TODO: (DHT) Support mapHdPubKeys for keys derived by a common seed
-    return CBasicKeyStore::GetDHTKey(address, keyOut);
+    return CCryptoKeyStore::GetDHTKey(address, keyOut);
 }
 
 bool CWallet::HaveDHTKey(const CKeyID &address) const
@@ -335,9 +334,30 @@ bool CWallet::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>
         CKeyID keyID(Hash160(pubkey.begin(), pubkey.end()));
         return CWalletDB(strWalletFile).WriteDHTKey(key, pubkey, mapKeyMetadata[keyID]);
     }
-    //LogPrintf("CWallet::AddDHTKey \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
-    //                    StringFromVch(pubkey), key.GetPrivKeyString(), key.GetPrivSeedString());
+    LogPrint("dht", "CWallet::AddDHTKey \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                    key.GetPubKeyString(), key.GetPrivKeyString(), key.GetPrivSeedString());
     return true;
+}
+
+bool CWallet::AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
+{
+    if (!CCryptoKeyStore::AddCryptedDHTKey(vchPubKey, vchCryptedSecret)) {
+        LogPrint("dht", "CWallet::AddCryptedDHTKey AddCryptedDHTKey failed.\n");
+        return false;
+    }
+    if (!fFileBacked)
+        return true;
+    {
+        LOCK(cs_wallet);
+        CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+        if (pwalletdbEncryption) {
+            return pwalletdbEncryption->WriteCryptedDHTKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[keyID]);
+        }
+        else {
+            return CWalletDB(strWalletFile).WriteCryptedDHTKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[keyID]);
+        }
+    }
+    return false;
 }
 
 bool CWallet::AddCryptedKey(const CPubKey& vchPubKey,
@@ -371,6 +391,11 @@ bool CWallet::LoadKeyMetadata(const CTxDestination& keyID, const CKeyMetadata& m
 bool CWallet::LoadCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
 {
     return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
+}
+
+bool CWallet::LoadCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret)
+{
+    return CCryptoKeyStore::AddCryptedDHTKey(vchPubKey, vchCryptedSecret);
 }
 
 void CWallet::UpdateTimeFirstKey(int64_t nCreateTime)
@@ -452,7 +477,6 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
 
     if (!IsLocked()) // was already fully unlocked, not only for mixing
         return true;
-
     // Verify KeePassIntegration
     if (strWalletPassphrase == "keepass" && GetBoolArg("-keepass", false)) {
         try {
@@ -470,7 +494,7 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
 
     {
         LOCK(cs_wallet);
-        BOOST_FOREACH (const MasterKeyMap::value_type& pMasterKey, mapMasterKeys) {
+        for (const MasterKeyMap::value_type& pMasterKey : mapMasterKeys) {
             if (!crypter.SetKeyFromPassphrase(strWalletPassphraseFinal, pMasterKey.second.vchSalt, pMasterKey.second.nDeriveIterations, pMasterKey.second.nDerivationMethod))
                 return false;
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))

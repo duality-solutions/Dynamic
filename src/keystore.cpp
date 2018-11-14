@@ -46,13 +46,12 @@ bool CBasicKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigne
     LOCK(cs_KeyStore);
 
     CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-    //LogPrintf("CBasicKeyStore::AddDHTKey, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
-    //                                      keyID.ToString(), StringFromVch(vchPubKey), 
-    //                                      key.GetPrivKeyString(), key.GetPrivSeedString());
-
+    LogPrint("dht", "CBasicKeyStore::AddDHTKey, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                                                keyID.ToString(), key.GetPubKeyString(), 
+                                                key.GetPrivKeyString(), key.GetPrivSeedString());
     if (keyID != key.GetID()) {
-        //LogPrintf("CBasicKeyStore::AddDHTKey GetID does't match \nvchPubKey.GetID() = %s, \nkey.GetID() = %s\n", 
-        //                                                         keyID.ToString(), key.GetID().ToString());
+        LogPrint("dht", "CBasicKeyStore::AddDHTKey GetID does't match \nvchPubKey.GetID() = %s, \nkey.GetID() = %s\n", 
+                                                                keyID.ToString(), key.GetID().ToString());
         return false;
     }
     mapDHTKeys[keyID] = key;
@@ -158,6 +157,7 @@ bool CBasicKeyStore::GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvch
 {
     for (const std::pair<CKeyID, CKeyEd25519>& key : mapDHTKeys) {
         vvchDHTPubKeys.push_back(key.second.GetPubKey());
+        LogPrint("dht", "CBasicKeyStore::GetDHTPubKeys -- pubkey = %s\n", key.second.GetPubKeyString());
     }
     return (vvchDHTPubKeys.size() > 0);
 }

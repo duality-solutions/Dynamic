@@ -267,24 +267,15 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
         throw std::runtime_error("putbdapdata: ERRCODE: 5502 - " + strFullObjectPath + _(" can not be found.  Get BDAP info failed!\n"));
 
-    CPubKey pubKey(entry.DHTPublicKey, false);
     CKeyEd25519 getKey;
     std::vector<unsigned char> vch = entry.DHTPublicKey;
     CKeyID keyID(Hash160(vch.begin(), vch.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey)) {
-        //throw std::runtime_error("putbdapdata: ERRCODE: 5503 - Error getting ed25519 private key for the " + strFullObjectPath + _(" BDAP entry.\n"));
-        result.push_back(Pair("entry_key_id", keyID.ToString()));
-        result.push_back(Pair("error", "Failed to get private key."));
-        return result;
-    }
-    if (getKey.GetPubKey() != entry.DHTPublicKey) {
-        //throw std::runtime_error("putbdapdata: ERRCODE: 5504 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
-        result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
-        result.push_back(Pair("wallet_pubkey", stringFromVch(getKey.GetPubKey())));
-        result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
-        result.push_back(Pair("error", "Wallet public key doesn't match BDAP entry."));
-        return result;
-    }
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+        throw std::runtime_error("putbdapdata: ERRCODE: 5503 - Error getting ed25519 private key for the " + strFullObjectPath + _(" BDAP entry.\n"));
+
+    if (getKey.GetPubKey() != entry.DHTPublicKey)
+        throw std::runtime_error("putbdapdata: ERRCODE: 5504 - Error getting ed25519. Public key from wallet doesn't match entry for " + strFullObjectPath + _(" BDAP entry.\n"));
+
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));

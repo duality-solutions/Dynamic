@@ -86,16 +86,6 @@ void CKeyEd25519::MakeNewKeyPair()
     }
 }
 
-/*
-void CKeyEd25519::SetMaster(const unsigned char* seed, unsigned int nSeedLen) 
-{
-    assert(nSeedLen == 32); // TODO: (BDAP) Allow larger seed size with 64 max
-    ed25519_context* ctx = new ed25519_context(reinterpret_cast<const char*>(seed));
-    assert(ctx != NULL);
-    ed25519_context_sign = ctx;
-    return;
-}
-*/
 std::string CKeyEd25519::GetPrivKeyString() const
 {
     return aux::to_hex(privateKey);
@@ -129,17 +119,6 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeed() const
     return std::vector<unsigned char>(strPrivateSeedKey.begin(), strPrivateSeedKey.end());
 }
 
-void CKeyEd25519::GetPubKey(CPubKey& key) const
-{
-    key = new CPubKey(GetPubKey(), false);
-}
-/*
-std::shared_ptr<CPubKey> CKeyEd25519::PubKey() const
-{
-    std::shared_ptr<CPubKey> pubKey(new CPubKey(GetPubKey(), false));
-    return pubKey;
-}
-*/
 void ECC_Ed25519_Start() 
 {
     assert(ed25519_context_sign == NULL);

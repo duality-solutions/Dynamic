@@ -74,7 +74,6 @@ bool CWalletDB::EraseTx(uint256 hash)
 bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta)
 {
     CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-
     if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta, false))
         return false;
 
@@ -86,9 +85,9 @@ bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned c
     vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
     vchKey.insert(vchKey.end(), vchPrivKeySeed.begin(), vchPrivKeySeed.end());
 
-    //LogPrintf("CWalletDB::WriteDHTKey \nvchKey = %s, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
-    //                    StringFromVch(vchKey), keyID.ToString(), 
-    //                    StringFromVch(vchPubKey), StringFromVch(key.GetPrivKey()), StringFromVch(key.GetPrivSeed()));
+    LogPrint("dht", "CWalletDB::WriteDHTKey \nvchKey = %s, \nkeyID = %s, \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                    stringFromVch(vchKey), keyID.ToString(), 
+                    key.GetPubKeyString(), key.GetPrivKeyString(), key.GetPrivSeedString());
 
     return Write(std::make_pair(std::string("dhtkey"), vchPubKey), std::make_pair(vchPrivKeySeed, Hash(vchKey.begin(), vchKey.end())), false);
 }
@@ -108,6 +107,36 @@ bool CWalletDB::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, c
     vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
 
     return Write(std::make_pair(std::string("key"), vchPubKey), std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
+}
+
+bool CWalletDB::WriteCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, 
+    const std::vector<unsigned char>& vchCryptedSecret, 
+    const CKeyMetadata& keyMeta)
+{
+    const bool fEraseUnencryptedKey = true;
+    nWalletDBUpdateCounter++;
+
+    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+    if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta)) {
+        LogPrint("dht", "CWalletDB::WriteCryptedDHTKey Write keymeta failed.\n");
+        return false;
+    }
+
+    // hash pubkey/privkey to accelerate wallet load
+    std::vector<unsigned char> vchKey;
+    vchKey.reserve(vchPubKey.size() + vchCryptedSecret.size());
+    vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
+    vchKey.insert(vchKey.end(), vchCryptedSecret.begin(), vchCryptedSecret.end());
+
+    if (!Write(std::make_pair(std::string("cdhtkey"), vchPubKey), vchCryptedSecret, false)) {
+        LogPrint("dht", "CWalletDB::WriteCryptedDHTKey Write cdhtkey failed.\n");
+        return false;
+    }
+
+    if (fEraseUnencryptedKey) {
+        Erase(std::make_pair(std::string("dhtkey"), vchPubKey));
+    }
+    return true;
 }
 
 bool CWalletDB::WriteCryptedKey(const CPubKey& vchPubKey,
@@ -488,6 +517,19 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 return false;
             }
             wss.fIsEncrypted = true;
+        } else if (strType == "cdhtkey") {
+            std::vector<unsigned char> vchPubKey;
+            ssKey >> vchPubKey;
+            
+            std::vector<unsigned char> vchPrivKey;
+            ssValue >> vchPrivKey;
+            wss.nCKeys++;
+
+            if (!pwallet->LoadCryptedDHTKey(vchPubKey, vchPrivKey)) {
+                strErr = "Error reading wallet database: LoadCryptedKey failed";
+                return false;
+            }
+            wss.fIsEncrypted = true;
         } else if (strType == "keymeta" || strType == "watchmeta") {
             CTxDestination keyID;
             if (strType == "keymeta") {
@@ -577,7 +619,8 @@ static bool IsKeyType(std::string strType)
 {
     return (strType == "key" || strType == "wkey" ||
             strType == "mkey" || strType == "ckey" ||
-            strType == "hdchain" || strType == "chdchain");
+            strType == "hdchain" || strType == "chdchain" ||
+            strType == "dhtkey" || strType == "cdhtkey");
 }
 
 DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
