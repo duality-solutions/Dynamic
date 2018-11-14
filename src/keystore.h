@@ -134,6 +134,6 @@ public:
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
 typedef std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char> > > CryptedKeyMap;
-typedef std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char> > > CryptedDHTKeyMap;
+typedef std::map<CKeyID, std::pair<std::vector<unsigned char>, std::vector<unsigned char> > > CryptedDHTKeyMap;
 
 #endif // DYNAMIC_KEYSTORE_H

@@ -280,6 +280,8 @@ bool LogAcceptCategory(const char* category)
                     ptrCategory->insert(std::string("keepass"));
                     ptrCategory->insert(std::string("dnpayments"));
                     ptrCategory->insert(std::string("gobject"));
+                    ptrCategory->insert(std::string("dht"));
+                    ptrCategory->insert(std::string("bdap"));
                 }
             } else {
                 ptrCategory.reset(new std::set<std::string>());
