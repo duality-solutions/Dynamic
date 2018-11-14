@@ -85,7 +85,7 @@ public:
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 
-std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
+std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript* scriptPubKeyIn)
 {
     // Create new block
     std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
@@ -279,7 +279,10 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         bool areWeMinting = GetMintingInstructions(nHeight, fluidMint);
 
         // Compute regular coinbase transaction.
-        txNew.vout[0].scriptPubKey = scriptPubKeyIn;
+        // HACK: move outside for split-miner
+        if (scriptPubKeyIn) {
+            txNew.vout[0].scriptPubKey = *scriptPubKeyIn;
+        }
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
         if (areWeMinting) {
@@ -340,6 +343,11 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
     return pblocktemplate;
 }
 
+std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
+{
+    return CreateNewBlock(chainparams, &scriptPubKeyIn);
+}
+
 void IncrementExtraNonce(CBlock& block, const CBlockIndex* indexPrev, unsigned int& nExtraNonce)
 {
     // Update nExtraNonce
@@ -348,13 +356,29 @@ void IncrementExtraNonce(CBlock& block, const CBlockIndex* indexPrev, unsigned i
         nExtraNonce = 0;
         hashPrevBlock = block.hashPrevBlock;
     }
+    // Increment extra nonce
     ++nExtraNonce;
-    unsigned int nHeight = indexPrev->nHeight + 1; // Height first in coinbase required for block.version=2
-    // TODO: ...
+    // Height first in coinbase required for block.version=2
+    unsigned int nHeight = indexPrev->nHeight + 1;
+    // Create copied transaction
     CMutableTransaction txCoinbase(*block.vtx[0]);
+    // Set extra nonce in script
     txCoinbase.vin[0].scriptSig = (CScript() << nHeight << CScriptNum(nExtraNonce)) + COINBASE_FLAGS;
+    // Make sure script size is correct
+    // NOTE: `100` should be a constant
     assert(txCoinbase.vin[0].scriptSig.size() <= 100);
-
+    // Set new transaction in block
     block.vtx[0] = MakeTransactionRef(std::move(txCoinbase));
+    // Generate merkle root hash
+    block.hashMerkleRoot = BlockMerkleRoot(block);
+}
+
+void SetBlockPubkeyScript(CBlock& block, const CScript& scriptPubKeyIn)
+{
+    // Create copied transaction
+    CMutableTransaction txCoinbase(*block.vtx[0]);
+    // Set coinbase out address
+    txCoinbase.vout[0].scriptPubKey = scriptPubKeyIn;
+    // Generate merkle root hash
     block.hashMerkleRoot = BlockMerkleRoot(block);
 }

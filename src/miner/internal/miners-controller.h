@@ -68,10 +68,9 @@ public:
 
 private:
     void StartIfEnabled();
-    void InitializeCoinbaseScript();
 
     /** Returns true if can start */
-    bool can_start() const { return _connected && _downloaded && _enable_start && _ctx->has_block(); }
+    bool can_start() const { return _connected && _downloaded && _enable_start && _ctx->shared->has_block(); }
 
 protected:
     /** Returns shared miner context */

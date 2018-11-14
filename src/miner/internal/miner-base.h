@@ -11,6 +11,7 @@
 #include <cstddef>
 
 class CBlock;
+class CReserveScript;
 
 /**
  * Base miner class for CPU and GPU miner.
@@ -49,6 +50,10 @@ private:
 
     // Extra block nonce
     unsigned int _extra_nonce = 0;
+
+    // Miner coinbase script
+    // Includes wallet payout key
+    std::shared_ptr<CReserveScript> _coinbase_script{nullptr};
 };
 
 #endif // DYNAMIC_INTERNAL_MINER_BASE_H
