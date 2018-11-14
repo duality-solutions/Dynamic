@@ -181,6 +181,7 @@ RES_ICONS = \
   qt/res/icons/drk/about_qt.png \
   qt/res/icons/drk/add.png \
   qt/res/icons/drk/address-book.png \
+  qt/res/icons/drk/bdap.png \
   qt/res/icons/drk/browse.png \
   qt/res/icons/drk/chevron.png \
   qt/res/icons/drk/clock1.png \
