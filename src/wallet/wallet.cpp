@@ -241,8 +241,7 @@ bool CWallet::GetKey(const CKeyID& address, CKey& keyOut) const
 bool CWallet::GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const
 {
     LOCK(cs_wallet);
-    //TODO: (DHT) Support mapHdPubKeys for keys derived by a common seed
-    return CBasicKeyStore::GetDHTKey(address, keyOut);
+    return CCryptoKeyStore::GetDHTKey(address, keyOut);
 }
 
 bool CWallet::HaveDHTKey(const CKeyID &address) const
