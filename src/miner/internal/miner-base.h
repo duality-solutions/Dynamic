@@ -22,20 +22,20 @@ public:
     MinerBase(MinerContextRef ctx, std::size_t device_index);
     virtual ~MinerBase() = default;
 
-    /** Starts miner loop */
+    // Starts miner loop
     void Loop();
 
-    /** Starts miner loop */
+    // Starts miner loop
     void operator()() { Loop(); };
 
-    /** Returns miner device name */
+    // Returns miner device name
     virtual const char* DeviceName() = 0;
 
 protected:
-    /** Processes a new found solution */
+    // Processes a new found solution
     void ProcessFoundSolution(const CBlock& block, const uint256& hash);
 
-    /** tries to mine a block */
+    // tries to mine a block
     virtual int64_t TryMineBlock(CBlock& block) = 0;
 
     // Solution must be lower or equal to

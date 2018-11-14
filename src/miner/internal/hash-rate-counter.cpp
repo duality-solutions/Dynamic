@@ -10,7 +10,6 @@
 HashRateCounter::HashRateCounter() : _parent(nullptr){};
 HashRateCounter::HashRateCounter(HashRateCounterRef parent) : _parent(parent){};
 
-/** Hash rate counter increment implementation. */
 void HashRateCounter::Increment(int64_t amount)
 {
     // Set start time if not set and return
