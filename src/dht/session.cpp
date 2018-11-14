@@ -99,21 +99,22 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
 
 void Bootstrap()
 {
-    LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- bootstrapping.\n");
     const int64_t timeout = 30000; // 30 seconds
     const int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
         std::vector<CEvent> events;
-        if (GetLastCategoryEvents(BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
+        MilliSleep(789);
+        if (GetLastTypeEvent(BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
         {
             if (events.size() > 0 ) {
-                LogPrintf("DHTTorrentNetwork -- Bootstrap successful.\n");
+                LogPrint("dht", "DHTTorrentNetwork -- Bootstrap successful.\n");
                 return;
             }
         }
     }
-    LogPrintf("DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
 }
 
 std::string GetSessionStatePath()
@@ -130,7 +131,7 @@ int SaveSessionState(session* dhtSession)
     bencode(std::back_inserter(state), torrentEntry);
     std::fstream f(GetSessionStatePath().c_str(), std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     f.write(state.data(), state.size());
-    LogPrintf("DHTTorrentNetwork -- SaveSessionState complete.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- SaveSessionState complete.\n");
     return 0;
 }
 
@@ -148,7 +149,7 @@ bool LoadSessionState(session* dhtSession)
     f.read(state.data(), state.size());
     if (f.fail())
     {
-        LogPrintf("DHTTorrentNetwork -- LoadSessionState failed to read dht-state.log\n");
+        LogPrint("dht", "DHTTorrentNetwork -- LoadSessionState failed to read dht-state.log\n");
         return false;
     }
 
@@ -156,12 +157,12 @@ bool LoadSessionState(session* dhtSession)
     error_code ec;
     bdecode(state.data(), state.data() + state.size(), e, ec);
     if (ec) {
-        LogPrintf("DHTTorrentNetwork -- LoadSessionState failed to parse dht-state.log file: (%d) %s\n", ec.value(), ec.message());
+        LogPrint("dht", "DHTTorrentNetwork -- LoadSessionState failed to parse dht-state.log file: (%d) %s\n", ec.value(), ec.message());
         return false;
     }
     else
     {
-        LogPrintf("DHTTorrentNetwork -- LoadSessionState load dht state from dht-state.log\n");
+        LogPrint("dht", "DHTTorrentNetwork -- LoadSessionState load dht state from dht-state.log\n");
         dhtSession->load_state(e);
     }
     return true;
@@ -211,14 +212,14 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
-    LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
     fShutdown = true;
     MilliSleep(300);
     StopEventListener();
     MilliSleep(30);
     if (pDHTTorrentThread != NULL)
     {
-        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
+        LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork trying to stop.\n");
         if (fStarted) { 
             libtorrent::session_params params;
             params.settings.set_bool(settings_pack::enable_dht, false);
@@ -227,17 +228,18 @@ void StopTorrentDHTNetwork()
             pTorrentDHTSession->abort();
         }
         pDHTTorrentThread->join();
-        LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
+        LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
     }
     else {
-        LogPrintf("DHTTorrentNetwork --StopTorrentDHTNetwork pDHTTorrentThreads is null.  Stop not needed.\n");
+        LogPrint("dht", "DHTTorrentNetwork --StopTorrentDHTNetwork pDHTTorrentThreads is null.  Stop not needed.\n");
     }
     pDHTTorrentThread = NULL;
+    LogPrintf("DHTTorrentNetwork -- Stopped.\n");
 }
 
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrintf("DHTTorrentNetwork -- Log file = %s.\n", GetSessionStatePath());
+    LogPrint("dht", "DHTTorrentNetwork -- Log file = %s.\n", GetSessionStatePath());
     fShutdown = false;
     fStarted = false;
     if (pDHTTorrentThread != NULL)
@@ -248,7 +250,7 @@ void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman)
 
 void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, std::vector<dht_routing_bucket>& vchDHTBuckets)
 {
-    LogPrintf("DHTTorrentNetwork -- GetDHTStats started.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats started.\n");
 
     if (!pTorrentDHTSession) {
         return;
@@ -256,13 +258,13 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
 
     if (!pTorrentDHTSession->is_dht_running()) {
         return;
-        //LogPrintf("DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
+        //LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
         //if (!LoadSessionState(pTorrentDHTSession)) {
         //    LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
         //    Bootstrap();
         //}
         //else {
-        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
+        //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats setting loaded from file.\n");
         //}
     }
     else {
