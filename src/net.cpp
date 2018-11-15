@@ -1110,6 +1110,7 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket)
     {
         LOCK(cs_vNodes);
         vNodes.push_back(pnode);
+        signalNode(pnode);
     }
 }
 
@@ -1954,6 +1955,7 @@ bool CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFai
     {
         LOCK(cs_vNodes);
         vNodes.push_back(pnode);
+        signalNode(pnode);
     }
 
     return true;

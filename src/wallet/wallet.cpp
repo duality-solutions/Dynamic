@@ -2816,20 +2816,23 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
                 for (const auto& out : vCoins) {
                     // Make sure it's the denom we're looking for, round the amount up to current max fee
                     if (out.tx->tx->vout[out.i].nValue == nDenom && nValueRet + nDenom < nTargetValue + nMaxPSFee) {
-                        COutPoint outpoint = COutPoint(out.tx->GetHash(),out.i);
+                        COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
                         int nRounds = GetRealOutpointPrivateSendRounds(outpoint);
                         // Make sure it's actually anonymized
-                        if (nRounds < privateSendClient.nPrivateSendRounds) continue;
+                        if (nRounds < privateSendClient.nPrivateSendRounds)
+                            continue;
                         nValueRet += nDenom;
                         setCoinsRet.insert(std::make_pair(out.tx, out.i));
-                        if (nValueRet >= nTargetValue) return true; // Done, no need to look any further
+                        if (nValueRet >= nTargetValue)
+                            return true; // Done, no need to look any further
                     }
                 }
             }
             // No luck, try next denom as current max fee
             setCoinsRet.clear();
             // but only if current denom doesn't exceed the global max fee already
-            if (nDenomAsAFee >= maxTxFee) return false;
+            if (nDenomAsAFee >= maxTxFee)
+                return false;
         }
         // should never get here, just in case denom vector is empty for some reason
         return false;
@@ -4521,9 +4524,9 @@ bool CWallet::UpdatedTransaction(const uint256& hashTx)
     return false;
 }
 
-void CWallet::GetScriptForMining(boost::shared_ptr<CReserveScript>& script)
+void CWallet::GetScriptForMining(std::shared_ptr<CReserveScript>& script)
 {
-    boost::shared_ptr<CReserveKey> rKey(new CReserveKey(this));
+    std::shared_ptr<CReserveKey> rKey(new CReserveKey(this));
     CPubKey pubkey;
     if (!rKey->GetReservedKey(pubkey, false))
         return;

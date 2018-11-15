@@ -48,6 +48,7 @@ private Q_SLOTS:
 
     void changeNumberOfCPUThreads(int i);
     void changeNumberOfGPUThreads(int i);
+    void startMining();
     void switchMining(bool fGPU);
     void switchCPUMining();
     void switchGPUMining();

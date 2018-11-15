@@ -34,7 +34,8 @@
 #include "instantsend.h"
 #include "key.h"
 #include "messagesigner.h"
-#include "miner.h"
+#include "miner/internal/miners-controller.h"
+#include "miner/miner.h"
 #include "net.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
@@ -258,7 +259,6 @@ void PrepareShutdown()
     g_connman.reset();
 
     if (!fLiteMode && !fRPCInWarmup) {
-
         // STORE DATA CACHES INTO SERIALIZED DAT FILES
         CFlatDB<CDynodeMan> flatdb1("dncache.dat", "magicDynodeCache");
         flatdb1.Dump(dnodeman);
@@ -2014,10 +2014,14 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
 
+    // Create a miner controller
+    gMiners.reset(new MinersController(chainparams, connman));
+    SetCPUMinerThreads(GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
+    SetGPUMinerThreads(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
+
     // Generate coins in the background
     if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
-        GenerateDynamicsCPU(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), chainparams, connman);
-        GenerateDynamicsGPU(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
+        StartMiners();
     }
 
     // ********************************************************* Step 13: finished

@@ -142,8 +142,16 @@ DYNAMIC_CORE_H = \
   memusage.h \
   merkleblock.h \
   messagesigner.h \
-  miner-gpu.h \
-  miner.h \
+  miner/impl/miner-cpu.h \
+  miner/impl/miner-gpu.h \
+  miner/internal/hash-rate-counter.h \
+  miner/internal/miner-base.h \
+  miner/internal/miner-context.h \
+  miner/internal/miners-controller.h \
+  miner/internal/miners-group.h \
+  miner/internal/thread-group.h \
+  miner/miner-util.h \
+  miner/miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
@@ -274,7 +282,14 @@ libdynamic_server_a_SOURCES = \
   instantsend.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
-  miner.cpp \
+  miner/impl/miner-cpu.cpp \
+  miner/impl/miner-gpu.cpp \
+  miner/internal/hash-rate-counter.cpp \
+  miner/internal/miner-base.cpp \
+  miner/internal/miner-context.cpp \
+  miner/internal/miners-controller.cpp \
+  miner/miner-util.cpp \
+  miner/miner.cpp \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
@@ -344,21 +359,23 @@ libdynamic_wallet_a_SOURCES = \
 crypto_libdynamic_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_CONFIG_INCLUDES) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(PIC_FLAGS)
 crypto_libdynamic_crypto_a_SOURCES = \
-  crypto/common.h \
-  crypto/argon2d/argon2.h \
-  crypto/argon2d/core.h \
-  crypto/argon2d/encoding.h \
-  crypto/argon2d/thread.h \
   crypto/argon2d/argon2.c \
+  crypto/argon2d/argon2.h \
   crypto/argon2d/core.c \
+  crypto/argon2d/core.h \
   crypto/argon2d/encoding.c \
+  crypto/argon2d/encoding.h \
   crypto/argon2d/opt.c \
   crypto/argon2d/thread.c \
-  crypto/blake2/blake2b.c \
-  crypto/blake2/blake2.h \
+  crypto/argon2d/thread.h \
   crypto/blake2/blake2-impl.h \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blake2b.c \
   crypto/blake2/blamka-round-opt.h \
   crypto/blake2/blamka-round-ref.h \
+  crypto/chacha20.cpp \
+  crypto/chacha20.h \
+  crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
   crypto/hmac_sha512.cpp \
@@ -369,6 +386,10 @@ crypto_libdynamic_crypto_a_SOURCES = \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
+  crypto/sha256_avx2.cpp \
+  crypto/sha256_shani.cpp \
+  crypto/sha256_sse4.cpp \
+  crypto/sha256_sse41.cpp \
   crypto/sha512.cpp \
   crypto/sha512.h
 
@@ -547,6 +568,7 @@ CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
 CLEANFILES += fluid/*.gcda fluid/*.gcno
+CLEANFILES += miner/*.gcda miner/*.gcno
 CLEANFILES += policy/*.gcda policy/*.gcno
 CLEANFILES += primitives/*.gcda primitives/*.gcno
 CLEANFILES += script/*.gcda script/*.gcno

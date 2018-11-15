@@ -3362,8 +3362,8 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Befehl ausführen wenn der beste Block wechselt (%s im Befehl wird durch den Hash des Blocks ersetzt)</translation>
     </message>
     <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>In diesem Modus legt -genproclimit fest, wie viele Blöcke sofort erzeugt werden.</translation>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
+        <translation>In diesem Modus legt -genproclimit-cpu fest, wie viele Blöcke sofort erzeugt werden.</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
