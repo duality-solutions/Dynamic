@@ -13,7 +13,7 @@ static CCriticalSection cs_bdap_entry;
 
 class CDomainEntryDB : public CDBWrapper {
 public:
-    CDomainEntryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "bdap", nCacheSize, fMemory, fWipe, obfuscate) {
+    CDomainEntryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-entries", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
     // Add, Read, Modify, ModifyRDN, Delete, List, Search, Bind, and Compare
