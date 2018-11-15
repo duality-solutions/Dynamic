@@ -2694,8 +2694,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Exekvera kommandot när det bästa blocket ändras (%s i cmd ersätts av blockhash)</translation>
     </message>
     <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
-        <translation>I detta läge kontrollerar -genproclimit hur många block som genereras omedelbart.</translation>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
+        <translation>I detta läge kontrollerar -genproclimit-cpu hur många block som genereras omedelbart.</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>

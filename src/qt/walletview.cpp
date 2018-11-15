@@ -382,6 +382,7 @@ void WalletView::showProgress(const QString& title, int nProgress)
 {
     if (nProgress == 0) {
         progressDialog = new QProgressDialog(title, "", 0, 100);
+        progressDialog->setWindowTitle(tr(PACKAGE_NAME));
         progressDialog->setWindowModality(Qt::ApplicationModal);
         progressDialog->setMinimumDuration(0);
         progressDialog->setCancelButton(0);

@@ -13,6 +13,7 @@
 #include "governance-object.h"
 #include "governance-validators.h"
 #include "governance-vote.h"
+#include "init.h"
 #include "messagesigner.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
@@ -573,7 +574,7 @@ struct sortProposalsByVotes {
 
 void CGovernanceManager::DoMaintenance(CConnman& connman)
 {
-    if (fLiteMode || !dynodeSync.IsSynced())
+    if (fLiteMode || !dynodeSync.IsSynced() || ShutdownRequested()) 
         return;
 
     // CHECK OBJECTS WE'VE ASKED FOR, REMOVE OLD ENTRIES

@@ -11,6 +11,7 @@
 #include "dynode.h"
 #include "dynodeman.h"
 #include "governance.h"
+#include "init.h"
 #include "netfulfilledman.h"
 #include "netmessagemaker.h"
 #include "spork.h"
@@ -511,4 +512,10 @@ void CDynodeSync::UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDow
         // We must be at the tip already, let's move to the next asset.
         SwitchToNextAsset(connman);
     }
+}
+
+void CDynodeSync::DoMaintenance(CConnman &connman)
+{
+    if (ShutdownRequested()) return;
+     ProcessTick(connman);
 }

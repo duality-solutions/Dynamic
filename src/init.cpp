@@ -38,7 +38,8 @@
 #include "instantsend.h"
 #include "key.h"
 #include "messagesigner.h"
-#include "miner.h"
+#include "miner/internal/miners-controller.h"
+#include "miner/miner.h"
 #include "net.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
@@ -241,7 +242,18 @@ void PrepareShutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
+
+    // fRPCInWarmup should be `false` if we completed the loading sequence
+    // before a shutdown request was received
+    std::string statusmessage;
+    bool fRPCInWarmup = RPCIsInWarmup(&statusmessage);
+
 #ifdef ENABLE_WALLET
+    if (!fLiteMode && !fRPCInWarmup) {
+        // Stop PrivateSend, release keys
+        privateSendClient.fEnablePrivateSend = false;
+        privateSendClient.ResetPool();
+    }
     if (pwalletMain)
         pwalletMain->Flush(false);
 #endif
@@ -251,13 +263,7 @@ void PrepareShutdown()
     peerLogic.reset();
     g_connman.reset();
 
-    if (!fLiteMode) {
-#ifdef ENABLE_WALLET
-        // Stop PrivateSend, release keys
-        privateSendClient.fEnablePrivateSend = false;
-        privateSendClient.ResetPool();
-#endif
-
+    if (!fLiteMode && !fRPCInWarmup) {
         // STORE DATA CACHES INTO SERIALIZED DAT FILES
         CFlatDB<CDynodeMan> flatdb1("dncache.dat", "magicDynodeCache");
         flatdb1.Dump(dnodeman);
@@ -512,9 +518,11 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-zmqpubhashtxlock=<address>", _("Enable publish hash transaction (locked via InstantSend) in <address>"));
     strUsage += HelpMessageOpt("-zmqpubhashgovernancevote=<address>", _("Enable publish hash of governance votes in <address>"));
     strUsage += HelpMessageOpt("-zmqpubhashgovernanceobject=<address>", _("Enable publish hash of governance objects (like proposals) in <address>"));
+    strUsage += HelpMessageOpt("-zmqpubhashinstantsenddoublespend=<address>", _("Enable publish transaction hashes of attempted InstantSend double spend in <address>"));
     strUsage += HelpMessageOpt("-zmqpubrawblock=<address>", _("Enable publish raw block in <address>"));
     strUsage += HelpMessageOpt("-zmqpubrawtx=<address>", _("Enable publish raw transaction in <address>"));
     strUsage += HelpMessageOpt("-zmqpubrawtxlock=<address>", _("Enable publish raw transaction (locked via InstantSend) in <address>"));
+    strUsage += HelpMessageOpt("-zmqpubrawinstantsenddoublespend=<address>", _("Enable publish raw transactions of attempted InstantSend double spend in <address>"));
 #endif
 
     strUsage += HelpMessageGroup(_("Debugging/Testing options:"));
@@ -589,7 +597,6 @@ std::string HelpMessage(HelpMessageMode mode)
 
     strUsage += HelpMessageGroup(_("InstantSend options:"));
     strUsage += HelpMessageOpt("-enableinstantsend=<n>", strprintf(_("Enable InstantSend, show confirmations for locked transactions (0-1, default: %u)"), 1));
-    strUsage += HelpMessageOpt("-instantsenddepth=<n>", strprintf(_("Show N confirmations for a successfully locked transaction (0-9999, default: %u)"), DEFAULT_INSTANTSEND_DEPTH));
     strUsage += HelpMessageOpt("-instantsendnotify=<cmd>", _("Execute command when a wallet InstantSend transaction is successfully locked (%s in cmd is replaced by TxID)"));
 
 
@@ -1884,11 +1891,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 #endif // ENABLE_WALLET
 
     fEnableInstantSend = GetBoolArg("-enableinstantsend", 1);
-    nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
-    nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
-    LogPrintf("nInstantSendDepth %d\n", nInstantSendDepth);
 #ifdef ENABLE_WALLET
     LogPrintf("PrivateSend liquidityprovider: %d\n", privateSendClient.nLiquidityProvider);
     LogPrintf("PrivateSend rounds: %d\n", privateSendClient.nPrivateSendRounds);
@@ -2022,10 +2026,14 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
 
+    // Create a miner controller
+    gMiners.reset(new MinersController(chainparams, connman));
+    SetCPUMinerThreads(GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
+    SetGPUMinerThreads(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
+
     // Generate coins in the background
     if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
-        GenerateDynamicsCPU(GetArg("-genproclimit", DEFAULT_GENERATE_THREADS_CPU), chainparams, connman);
-        GenerateDynamicsGPU(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU), chainparams, connman);
+        StartMiners();
     }
 
     // Start the DHT Torrent network in the background

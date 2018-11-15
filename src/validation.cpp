@@ -1386,7 +1386,7 @@ bool IsInitialBlockDownload()
     const CChainParams& chainParams = Params();
     if (chainActive.Tip() == NULL)
         return true;
-    if (chainActive.Tip()->nChainWork < chainParams.GetConsensus().nMinimumChainWork)
+    if (chainActive.Tip()->nChainWork < int64_t(chainParams.GetConsensus().nMinimumChainWork))
         return true;
     if (chainActive.Tip()->GetBlockTime() < (GetTime() - nMaxTipAge))
         return true;
@@ -2076,7 +2076,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (it != mapBlockIndex.end()) {
             if (it->second->GetAncestor(pindex->nHeight) == pindex &&
                 pindexBestHeader->GetAncestor(pindex->nHeight) == pindex &&
-                pindexBestHeader->nChainWork >= chainparams.GetConsensus().nMinimumChainWork) {
+                pindexBestHeader->nChainWork >= int64_t(chainparams.GetConsensus().nMinimumChainWork)) {
+
                 // This block is a member of the assumed verified chain and an ancestor of the best header.
                 // The equivalent time check discourages hashpower from extorting the network via DOS attack
                 // into accepting an invalid block through telling users they must manually set assumevalid.
@@ -2981,7 +2982,7 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
         bool fInitialDownload;
         {
             LOCK(cs_main);
-            {   // TODO: Tempoarily ensure that mempool removals are notified before
+            { // TODO: Tempoarily ensure that mempool removals are notified before
                 // connected transactions.  This shouldn't matter, but the abandoned
                 // state of transactions in our wallet is currently cleared when we
                 // receive another notification and there is a race condition where
@@ -3463,7 +3464,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
+    if (block.nBits != GetNextWorkRequired(pindexPrev, block, consensusParams)) {
         return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
             REJECT_INVALID, "bad-diffbits");
     }

@@ -39,6 +39,10 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex* pindexNew, con
 
     dynodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 
+    // update instantsend autolock activation flag
+    instantsend.isAutoLockBip9Active =
+            (VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ISAUTOLOCKS) == THRESHOLD_ACTIVE);
+
     if (fInitialDownload)
         return;
 

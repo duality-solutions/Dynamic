@@ -149,6 +149,7 @@ private:
     QAction* openDNConfEditorAction;
     QAction* showBackupsAction;
     QAction* openAction;
+    QAction *mnemonicAction;
     QAction* showHelpMessageAction;
     QAction* showPrivateSendHelpAction;
 
@@ -253,6 +254,7 @@ private Q_SLOTS:
 
     /** Show open dialog */
     void openClicked();
+    void mnemonicClicked();
 #endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();

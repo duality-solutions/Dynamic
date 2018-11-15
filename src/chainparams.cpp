@@ -161,11 +161,18 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of InstantSend autolocks
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1533945600; // Aug 11th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 1565481600; // Aug 11th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 4032;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 3226; // 80% of 4032
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = 190513; // 190513
+        consensus.nMinimumChainWork = 215493;
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000000007c0622b0ace74790759127570d8396f38cab674c959ed4a5c315fb6d"); // 190513
+        consensus.defaultAssumeValid = uint256S("0x00000000261e02ae2148505c0265b5f57c34a26b0958a21c1b2bb5a3d8c746ea"); // 215493
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -294,6 +301,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of InstantSend autolocks
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1532476800; // Jul 25th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 1564012800; // Jul 25th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nWindowSize = 100;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nThreshold = 50; // 50% of 100
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = 210; // 210
 
@@ -304,8 +318,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
-        // To import alter key:  importprivkey 6Jjb9DG1cr71VWiwxg97zVEyZUBhFzzGhqE7GY9DrbYYM6gVgxS
-        vAlertPubKey = ParseHex("043d9e8440ea8fe66b0c2639f0a0931c9d7c41132ec9ee04cdf5d9e88ada2c2df52d93a0c1983958d3aea56df9fb3d1a61ca4eb6f72c27456fc313be80cdc70032");
+        vAlertPubKey = ParseHex("04b375643a0b5fe3a9882b412be4046272528ad24576c72a933b44935a8491d52e243e905b1dd6947094984fc8e9f42d17cc1058033036d7940d9078851641a445");
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nPruneAfterHeight = 100;
         startNewChain = false;
@@ -356,11 +369,15 @@ public:
         nMinSporkKeys = 2;
 
         checkpointData = (CCheckpointData){
-            boost::assign::map_list_of(0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))};
+            boost::assign::map_list_of
+            (0, uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"))
+            (101, uint256S("0x00000ad8c5b094f7d6e63c658f8b29dfb2fbe49bb395bd41751d70e73e1f765b"))
+            (702, uint256S("0x000004ca904b66049dbb93c7f129dec1c9e42213d42a5983a4b6ff7f4f88a912"))
+        };
 
         chainTxData = ChainTxData{
-            0,  // * UNIX timestamp of last known number of transactions
-            0,  // * total number of transactions between genesis and that timestamp
+            1542024850,  // * UNIX timestamp of last known number of transactions
+            703,  // * total number of transactions between genesis and that timestamp
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
@@ -423,11 +440,15 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 999999999999ULL;
 
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nTimeout = 999999999999ULL;
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = 0; //
+        consensus.nMinimumChainWork = 0;
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000ab751d858e116043e741d097311f2382e600c219483cfda8f25c7f369cc2c"); //
+        consensus.defaultAssumeValid = uint256S("0x");
 
         pchMessageStart[0] = 0x2f;
         pchMessageStart[1] = 0x32;

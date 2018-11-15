@@ -10,6 +10,7 @@
 #include "dynode-sync.h"
 #include "dynode.h"
 #include "dynodeman.h"
+#include "init.h"
 #include "netbase.h"
 #include "protocol.h"
 
@@ -19,6 +20,12 @@ extern CWallet* pwalletMain;
 
 // Keep track of the active Dynode
 CActiveDynode activeDynode;
+
+void CActiveDynode::DoMaintenance(CConnman &connman)
+{
+    if (ShutdownRequested()) return;
+     ManageState(connman);
+}
 
 void CActiveDynode::ManageState(CConnman& connman)
 {
@@ -186,14 +193,15 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     }
 
     int mainnetDefaultPort = Params(CBaseChainParams::MAIN).GetDefaultPort();
-    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
+    
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) { 
         if (service.GetPort() != mainnetDefaultPort) {
             nState = ACTIVE_DYNODE_NOT_CAPABLE;
             strNotCapableReason = strprintf("Invalid port: %u - only %d is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
             LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
-    } else if (service.GetPort() == mainnetDefaultPort) {
+    } else if (Params().NetworkIDString() != CBaseChainParams::MAIN && service.GetPort() == mainnetDefaultPort) {
         nState = ACTIVE_DYNODE_NOT_CAPABLE;
         strNotCapableReason = strprintf("Invalid port: %u - %d is only supported on mainnet.", service.GetPort(), mainnetDefaultPort);
         LogPrintf("CActiveDynode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);

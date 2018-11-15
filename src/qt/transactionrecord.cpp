@@ -307,6 +307,7 @@ void TransactionRecord::updateStatus(const CWalletTx& wtx)
             status.status = TransactionStatus::Confirmed;
         }
     } else {
+        status.lockedByInstantSend = wtx.IsLockedByInstantSend();
         if (status.depth < 0) {
             status.status = TransactionStatus::Conflicted;
         } else if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0) {

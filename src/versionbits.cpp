@@ -19,6 +19,11 @@ const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION
         /*.name =*/"csv",
         /*.gbt_force =*/true,
         /*.check_dn_protocol =*/false,
+    },
+    {
+        /*.name =*/ "autoix",
+        /*.gbt_force =*/ true,
+        /*.check_mn_protocol =*/ true,
     }};
 
 ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const

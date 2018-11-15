@@ -3,7 +3,7 @@
 
 #include "dynode-sync.h"
 #include "guiutil.h"
-#include "miner.h"
+#include "miner/miner.h"
 #include "net.h"
 #include "util.h"
 #include "utiltime.h"
@@ -75,6 +75,8 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 
     connect(ui->sliderCPUCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCPUThreads(int)));
     connect(ui->sliderGPUCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfGPUThreads(int)));
+    connect(ui->sliderCPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
+    connect(ui->sliderGPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
     connect(ui->sliderCPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeCPUSampleTime(int)));
     connect(ui->sliderGPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeGPUSampleTime(int)));
     connect(ui->pushSwitchCPUMining, SIGNAL(clicked()), this, SLOT(switchCPUMining()));
@@ -175,18 +177,12 @@ void MiningPage::updatePushSwitch(bool fGPU)
 
 void MiningPage::StartMiner(bool fGPU)
 {
-    int nGPUThreads = 0;
-    int nCPUThreads = 0;
     if (fGPU) {
         fGPUMinerOn = true;
-        nGPUThreads = (int)ui->sliderGPUCores->value();
-        GenerateDynamicsGPU(nGPUThreads, Params(), *g_connman);
     } else {
         fCPUMinerOn = true;
-        nCPUThreads = (int)ui->sliderCPUCores->value();
-        GenerateDynamicsCPU(nCPUThreads, Params(), *g_connman);
     }
-    updateUI();
+    startMining();
 }
 
 void MiningPage::StopMiner(bool fGPU)
@@ -203,22 +199,27 @@ void MiningPage::StopMiner(bool fGPU)
 
 void MiningPage::changeNumberOfCPUThreads(int i)
 {
+    fCPUMinerOn = (i > 0);
     ui->labelNCPUCores->setText(QString("%1").arg(i));
-    if (fCPUMinerOn) {
-        if (i > 0) {
-            StartMiner(false);
-        }
-    }
 }
 
 void MiningPage::changeNumberOfGPUThreads(int i)
 {
+    fGPUMinerOn = (i > 0);
     ui->labelNGPUCores->setText(QString("%1").arg(i));
+}
+
+void MiningPage::startMining()
+{
     if (fGPUMinerOn) {
-        if (i > 0) {
-            StartMiner(true);
-        }
+        SetGPUMinerThreads(ui->sliderGPUCores->value());
+        StartGPUMiners();
     }
+    if (fCPUMinerOn) {
+        SetCPUMinerThreads(ui->sliderCPUCores->value());
+        StartCPUMiners();
+    }
+    updateUI();
 }
 
 void MiningPage::switchCPUMining()

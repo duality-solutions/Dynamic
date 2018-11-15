@@ -138,7 +138,7 @@ debug Categories are "addrman, alert, bench, coindb, db, http, libevent, lock, m
         ("If [category] is not supplied or if [category] = 1, output all debugging information.") + ("[category] can be:")
 * "-nodebug" ("Turn off debugging messages, same as -debug=0")
 * "-gen" ("Generate coins")
-* "-genproclimit=[n]" ("Set the number of threads for coin generation if enabled (-1 = all cores)")
+* "-genproclimit-cpu=[n]" ("Set the number of threads for coin generation if enabled (-1 = all cores)")
 * "-help-debug" ("Show all debugging options (usage: --help -help-debug)")
 * "-logips" ("Include IP addresses in debug output")
 * "-logtimestamps" ("Prepend debug output with timestamp")

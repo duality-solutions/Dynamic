@@ -309,6 +309,9 @@ public:
         ForEachNodeThen(FullyConnectedOnly, pre, post);
     }
 
+    /** Connect node signal callback. */
+    boost::signals2::connection ConnectSignalNode(boost::function<void(const CNode*)> callback) { return signalNode.connect(callback); };
+
     std::vector<CNode*> CopyNodeVector(std::function<bool(const CNode* pnode)> cond);
     std::vector<CNode*> CopyNodeVector();
     void ReleaseNodeVector(const std::vector<CNode*>& vecNodes);
@@ -490,6 +493,9 @@ private:
     std::list<CNode*> vNodesDisconnected;
     mutable CCriticalSection cs_vNodes;
     std::atomic<NodeId> nLastNodeId;
+
+    /** Connection signal */
+    boost::signals2::signal<void(const CNode*)> signalNode;
 
     /** Services this instance offers */
     ServiceFlags nLocalServices;

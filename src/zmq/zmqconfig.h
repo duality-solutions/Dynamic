@@ -22,6 +22,8 @@
 #include "governance-object.h"
 #include "governance-vote.h"
 
+#include "instantsend.h"
+
 void zmqError(const char *str);
 
 #endif // DYNAMIC_ZMQ_ZMQCONFIG_H
