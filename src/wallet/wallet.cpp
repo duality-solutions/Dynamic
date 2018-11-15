@@ -322,7 +322,6 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey& pubkey)
 bool CWallet::AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-
     if (!CCryptoKeyStore::AddDHTKey(key, pubkey)) {
         return false;
     }
