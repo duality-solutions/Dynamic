@@ -114,8 +114,7 @@ For the versions used in the release, see [release-process.md](release-process.m
 System requirements
 --------------------
 
-C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
-memory available when compiling Dynamic.
+C++ compilers are memory-hungry. It is recommended to have at least 3 GB of memory available when compiling Dynamic.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
@@ -123,15 +122,14 @@ Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
     
-for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
+For Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
 
- db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
- You can add the repository using the following command:
+db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).  You can add the repository using the following command:
 
-        sudo add-apt-repository ppa:bitcoin/bitcoin
-        sudo apt-get update
+    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo apt-get update
 
  Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
  but using these will break binary wallet compatibility, and is not recommended.
@@ -162,10 +160,7 @@ ZMQ dependencies (provides ZMQ API 4.x):
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
-If you want to build Dynamic-Qt, make sure that the required packages for Qt development
-are installed. Qt 5 is necessary to build the GUI.
-If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
-To build without GUI pass `--without-gui`.
+If you want to build Dynamic-Qt, make sure that the required packages for Qt development are installed. Qt 5 is necessary to build the GUI. If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5. To build without GUI pass `--without-gui`.
 
 For Qt 5 you need the following:
 
@@ -186,6 +181,8 @@ symbols, which reduces the executable size by about 90%.
 miniupnpc
 ---------
 
+The dependencies for miniupnpc are included above within the 'Dependency Build Instructions: Ubuntu & Debian' section, however, for any reason you wish to build the source, please follow these instructions.
+
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  See the configure options for upnp behavior desired:
@@ -204,38 +201,41 @@ To build:
 
 Berkeley DB
 -----------
-It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+It is recommended to use Berkeley DB 4.8 and is included in the dependencies above in the 'Dependency Build Instructions: Ubuntu & Debian' section.
 
-```bash
-DYNAMIC_ROOT=$(pwd)
+If you have to, or wish to build Berkeley DB 4.8 yourself:
 
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${DYNAMIC_ROOT}/db4"
-mkdir -p $BDB_PREFIX
+``` 
+    bash
+    DYNAMIC_ROOT=$(pwd)
 
-# Fetch the source and verify that it is not tampered with
-wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
-echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
-# -> db-4.8.30.NC.tar.gz: OK
-tar -xzvf db-4.8.30.NC.tar.gz
+    # Pick some path to install BDB to, here we create a directory within the dynamic directory
+    BDB_PREFIX="${DYNAMIC_ROOT}/db4"
+    mkdir -p $BDB_PREFIX
 
-# Build the library and install to our prefix
-cd db-4.8.30.NC/build_unix/
-#  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
-../dist/configure --prefix=/usr/local --enable-cxx
-make 
-sudo make install
+    # Fetch the source and verify that it is not tampered with
+    wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+    echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+    # -> db-4.8.30.NC.tar.gz: OK
+    tar -xzvf db-4.8.30.NC.tar.gz
 
-# Configure Dynamic to use our own-built instance of BDB
-cd $DYNAMIC_ROOT
-./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
+    # Build the library and install to our prefix
+    cd db-4.8.30.NC/build_unix/
+    #  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
+    ../dist/configure --prefix=/usr/local --enable-cxx
+    make 
+    sudo make install
+
+    # Configure Dynamic to use our own-built instance of BDB
+    cd $DYNAMIC_ROOT
+    ./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
 ```
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
 
 Boost
 -----
-If you need to build Boost yourself:
+If you need to build Boost yourself, in terminal enter:
 
     sudo su
     ./bootstrap.sh
@@ -244,8 +244,8 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your Dynamic installation more secure by making certain attacks impossible to
-exploit even if a vulnerability is found, binaries are hardened by default.
+To help make your Dynamic installation more secure by making certain attacks impossible to exploit even if a vulnerability is found, binaries are hardened by default.
+
 This can be disabled with:
 
 Hardening Flags:
@@ -268,10 +268,12 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-        scanelf -e ./dynamicd
+    scanelf -e ./dynamicd
 
+    
     The output should contain:
-     TYPE
+    
+    TYPE
     ET_DYN
 
 * Non-executable Stack
