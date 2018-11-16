@@ -201,7 +201,7 @@ To build:
 
 Berkeley DB
 -----------
-It is recommended to use Berkeley DB 4.8 and is included in the dependencies above in the Dependency Build Instructions: Ubuntu & Debian section.
+It is recommended to use Berkeley DB 4.8 and is included in the dependencies above in the 'Dependency Build Instructions: Ubuntu & Debian' section.
 
 If you have to, or wish to build Berkeley DB 4.8 yourself:
 
