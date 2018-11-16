@@ -204,7 +204,9 @@ To build:
 
 Berkeley DB
 -----------
-It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+It is recommended to use Berkeley DB 4.8 and is included above in the #Dependency Build Instructions: Ubuntu & Debian section.
+
+If you have to build it yourself:
 
 ```bash
 DYNAMIC_ROOT=$(pwd)
