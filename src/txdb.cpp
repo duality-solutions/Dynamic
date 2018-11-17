@@ -185,6 +185,7 @@ bool CCoinsViewDBCursor::Valid() const
 
 void CCoinsViewDBCursor::Next()
 {
+    pcursor->Next();
     CoinEntry entry(&keyTmp.second);
     if (!pcursor->Valid() || !pcursor->GetKey(entry)) {
         keyTmp.first = 0; // Invalidate cached key after last record so that Valid() and GetKey() return false
