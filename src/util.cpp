@@ -577,27 +577,22 @@ static boost::filesystem::path pathCached;
 static boost::filesystem::path pathCachedNetSpecific;
 static CCriticalSection csPathCached;
 
-std::string GenerateRandomString(unsigned int len)
-{
-    if (len == 0)
+std::string GenerateRandomString(unsigned int len) {
+    if (len == 0){
         len = 24;
-
+    }
     srand(time(NULL) + len); //seed srand before using
-    char s[len];
-
-    static const char alphanum[] =
+    std::vector<unsigned char> vchRandString;
+    static const unsigned char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
 
     for (unsigned int i = 0; i < len; ++i) {
-        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+        vchRandString.push_back(alphanum[rand() % (sizeof(alphanum) - 1)]);
     }
-
-    s[len] = 0;
-    std::string sPassword(s);
-
-    return sPassword;
+    std::string strPassword(vchRandString.begin(), vchRandString.end());
+    return strPassword;
 }
 
 static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
