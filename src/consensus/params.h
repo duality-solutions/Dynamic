@@ -16,6 +16,7 @@ namespace Consensus
 enum DeploymentPos {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV,              // Deployment of BIP68, BIP112, and BIP113.
+    DEPLOYMENT_BIP147, // Deployment of BIP147 (NULLDUMMY)
     DEPLOYMENT_ISAUTOLOCKS, // Deployment of automatic IS locks for simple transactions
     MAX_VERSION_BITS_DEPLOYMENTS // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
 };

@@ -161,6 +161,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of BIP147
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 1533945600; // Aug 11th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 1565481600; // Aug 11th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nWindowSize = 4032;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nThreshold = 3226; // 80% of 4032
+
         // Deployment of InstantSend autolocks
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1533945600; // Aug 11th, 2018
@@ -301,6 +308,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of BIP147
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 1517792400; // Feb 5th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 1549328400; // Feb 5th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nWindowSize = 100;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nThreshold = 50; // 50% of 100
+
         // Deployment of InstantSend autolocks
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1532476800; // Jul 25th, 2018
@@ -438,6 +452,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 999999999999ULL;
+
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 999999999999ULL;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;
