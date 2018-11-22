@@ -101,7 +101,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
                 }
             }
 
-            int nThreshold = infoDn.nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION) / 5;
+            int nThreshold = infoDn.nLastPsq + dnodeman.CountDynodes() / 5;
             LogPrint("privatesend", "PSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", infoDn.nLastPsq, nThreshold, dnodeman.nPsqCount);
             //don't allow a few nodes to dominate the queuing process
             if (infoDn.nLastPsq != 0 && nThreshold > dnodeman.nPsqCount) {
