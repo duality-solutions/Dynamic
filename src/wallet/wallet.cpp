@@ -2808,7 +2808,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
 
 bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet, const CCoinControl* coinControl, AvailableCoinsType nCoinType, bool fUseInstantSend) const
 {
-    // Note: this function should never be used for "always free" tx types like dstx
+    // Note: this function should never be used for "always free" tx types like pstx
 
     std::vector<COutput> vCoins(vAvailableCoins);
 

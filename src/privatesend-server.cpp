@@ -345,16 +345,16 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
         }
     }
 
-    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING DSTX\n");
+    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING PSTX\n");
 
-    // create and sign dynode dstx transaction
+    // create and sign dynode pstx transaction
     if (!CPrivateSend::GetPSTX(hashTx)) {
-        CPrivateSendBroadcastTx dstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
-        dstxNew.Sign();
-        CPrivateSend::AddPSTX(dstxNew);
+        CPrivateSendBroadcastTx pstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
+        pstxNew.Sign();
+        CPrivateSend::AddPSTX(pstxNew);
     }
 
-    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING DSTX\n");
+    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING PSTX\n");
 
     CInv inv(MSG_PSTX, hashTx);
     connman.RelayInv(inv);
