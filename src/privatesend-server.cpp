@@ -306,8 +306,8 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
         for (const auto& txout : vecEntries[i].vecTxOut)
             txNew.vout.push_back(txout);
 
-        for (const auto& txdsin : vecEntries[i].vecTxPSIn)
-            txNew.vin.push_back(txdsin);
+        for (const auto& txpsin : vecEntries[i].vecTxPSIn)
+            txNew.vin.push_back(txpsin);
     }
 
     sort(txNew.vin.begin(), txNew.vin.end(), CompareInputBIP69());
@@ -411,8 +411,8 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
     if (nState == POOL_STATE_SIGNING) {
         // who didn't sign?
         for (const auto& entry : vecEntries) {
-            for (const auto& txdsin : entry.vecTxPSIn) {
-                if (!txdsin.fHasSig) {
+            for (const auto& txpsin : entry.vecTxPSIn) {
+                if (!txpsin.fHasSig) {
                     LogPrintf("CPrivateSendServer::ChargeFees -- found uncooperative node (didn't sign), found offence\n");
                     vecOffendersCollaterals.push_back(entry.txCollateral);
                 }
@@ -541,12 +541,12 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
         for (const auto& txout : entry.vecTxOut)
             txNew.vout.push_back(txout);
 
-        for (const auto& txdsin : entry.vecTxPSIn) {
-            txNew.vin.push_back(txdsin);
+        for (const auto& txpsin : entry.vecTxPSIn) {
+            txNew.vin.push_back(txpsin);
 
-            if (txdsin.prevout == txin.prevout) {
+            if (txpsin.prevout == txin.prevout) {
                 nTxInIndex = i;
-                sigPubKey = txdsin.prevPubKey;
+                sigPubKey = txpsin.prevPubKey;
             }
             i++;
         }
@@ -599,8 +599,8 @@ bool CPrivateSendServer::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage
     for (const auto& txin : entryNew.vecTxPSIn) {
         LogPrint("privatesend", "looking for txin -- %s\n", txin.ToString());
         for (const auto& entry : vecEntries) {
-            for (const auto& txdsin : entry.vecTxPSIn) {
-                if (txdsin.prevout == txin.prevout) {
+            for (const auto& txpsin : entry.vecTxPSIn) {
+                if (txpsin.prevout == txin.prevout) {
                     LogPrint("privatesend", "CPrivateSendServer::AddEntry -- found in txin\n");
                     nMessageIDRet = ERR_ALREADY_HAVE;
                     return false;
@@ -623,8 +623,8 @@ bool CPrivateSendServer::AddScriptSig(const CTxIn& txinNew)
     LogPrint("privatesend", "CPrivateSendServer::AddScriptSig -- scriptSig=%s\n", ScriptToAsmStr(txinNew.scriptSig).substr(0, 24));
 
     for (const auto& entry : vecEntries) {
-        for (const auto& txdsin : entry.vecTxPSIn) {
-            if (txdsin.scriptSig == txinNew.scriptSig) {
+        for (const auto& txpsin : entry.vecTxPSIn) {
+            if (txpsin.scriptSig == txinNew.scriptSig) {
                 LogPrint("privatesend", "CPrivateSendServer::AddScriptSig -- already exists\n");
                 return false;
             }
@@ -659,8 +659,8 @@ bool CPrivateSendServer::AddScriptSig(const CTxIn& txinNew)
 bool CPrivateSendServer::IsSignaturesComplete()
 {
     for (const auto& entry : vecEntries)
-        for (const auto& txdsin : entry.vecTxPSIn)
-            if (!txdsin.fHasSig)
+        for (const auto& txpsin : entry.vecTxPSIn)
+            if (!txpsin.fHasSig)
                 return false;
 
     return true;

@@ -495,8 +495,8 @@ bool CPrivateSendClientSession::SendDenominate(const std::vector<CTxPSIn>& vecTx
     for (const auto& txin : txMyCollateral.vin)
         vecOutPointLocked.push_back(txin.prevout);
 
-    for (const auto& txdsin : vecTxPSIn)
-        vecOutPointLocked.push_back(txdsin.prevout);
+    for (const auto& txpsin : vecTxPSIn)
+        vecOutPointLocked.push_back(txpsin.prevout);
 
     // we should already be connected to a Dynode
     if (!nSessionID) {
@@ -525,9 +525,9 @@ bool CPrivateSendClientSession::SendDenominate(const std::vector<CTxPSIn>& vecTx
 
         CMutableTransaction tx;
 
-        for (const auto& txdsin : vecTxPSIn) {
-            LogPrint("privatesend", "CPrivateSendClientSession::SendDenominate -- txdsin=%s\n", txdsin.ToString());
-            tx.vin.push_back(txdsin);
+        for (const auto& txpsin : vecTxPSIn) {
+            LogPrint("privatesend", "CPrivateSendClientSession::SendDenominate -- txpsin=%s\n", txpsin.ToString());
+            tx.vin.push_back(txpsin);
         }
 
         for (const CTxOut& txout : vecTxOut) {
@@ -622,17 +622,17 @@ bool CPrivateSendClientSession::SignFinalTransaction(const CTransaction& finalTr
 
     //make sure my inputs/outputs are present, otherwise refuse to sign
     for (const auto& entry : vecEntries) {
-        for (const auto& txdsin : entry.vecTxPSIn) {
+        for (const auto& txpsin : entry.vecTxPSIn) {
             /* Sign my transaction and all outputs */
             int nMyInputIndex = -1;
             CScript prevPubKey = CScript();
             CTxIn txin = CTxIn();
 
             for (unsigned int i = 0; i < finalMutableTransaction.vin.size(); i++) {
-                if (finalMutableTransaction.vin[i] == txdsin) {
+                if (finalMutableTransaction.vin[i] == txpsin) {
                     nMyInputIndex = i;
-                    prevPubKey = txdsin.prevPubKey;
-                    txin = txdsin;
+                    prevPubKey = txpsin.prevPubKey;
+                    txin = txpsin;
                 }
             }
 

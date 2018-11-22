@@ -3296,7 +3296,7 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
 
     // pay collateral charge in fees
     // NOTE: no need for protobump patch here,
-    // CPrivateSend::IsCollateralAmount in GetCollateralTxDSIn should already take care of this
+    // CPrivateSend::IsCollateralAmount in GetCollateralTxPSIn should already take care of this
     if (nValue >= CPrivateSend::GetCollateralAmount() * 2) {
         // make our change address
         CScript scriptChange;
