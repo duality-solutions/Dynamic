@@ -52,10 +52,10 @@ ClientModel::ClientModel(OptionsModel* _optionsModel, QObject* parent) : QObject
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     pollTimer->start(MODEL_UPDATE_DELAY);
 
-    pollSnTimer = new QTimer(this);
-    connect(pollSnTimer, SIGNAL(timeout()), this, SLOT(updateSnTimer()));
+    pollDnTimer = new QTimer(this);
+    connect(pollDnTimer, SIGNAL(timeout()), this, SLOT(updateDnTimer()));
     // no need to update as frequent as data for balances/txes/blocks
-    pollSnTimer->start(MODEL_UPDATE_DELAY * 4);
+    pollDnTimer->start(MODEL_UPDATE_DELAY * 4);
 
     subscribeToCoreSignals();
 }
@@ -177,7 +177,7 @@ void ClientModel::updateTimer()
     Q_EMIT bytesChanged(getTotalBytesRecv(), getTotalBytesSent());
 }
 
-void ClientModel::updateSnTimer()
+void ClientModel::updateDnTimer()
 {
     QString newDynodeCountString = getDynodeCountString();
 
