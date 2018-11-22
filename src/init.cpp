@@ -794,6 +794,12 @@ void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
             StartShutdown();
         }
     } // End scope of CImportingNow
+
+    // force UpdatedBlockTip to initialize nCachedBlockHeight for PS, DN payments and budgets
+    // but don't call it directly to prevent triggering of other listeners like zmq etc.
+    // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
+    ppsNotificationInterface->InitializeCurrentBlockTip();
+
     LoadMempool();
     fDumpMempoolLater = !fRequestShutdown;
 }
@@ -1942,13 +1948,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("Failed to load sporks cache from") + "\n" + (pathDB / strDBName).string());
         }
     }
-
-    // ********************************************************* Step 11c: update block tip in Dynamic modules
-
-    // force UpdatedBlockTip to initialize nCachedBlockHeight for PS, DN payments and budgets
-    // but don't call it directly to prevent triggering of other listeners like zmq etc.
-    // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
-    ppsNotificationInterface->InitializeCurrentBlockTip();
 
     // ********************************************************* Step 11d: start dynamic-ps-<smth> threads
 
