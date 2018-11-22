@@ -1099,7 +1099,7 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
     // ** find the coins we'll use
     std::vector<CTxIn> vecTxIn;
     CAmount nValueInTmp = 0;
-    if (!pwalletMain->SelectCoinsMix(nValueMin, nBalanceNeedsAnonymized, vecTxIn, nValueInTmp, 0, privateSendClient.nPrivateSendRounds)) {
+    if (!pwalletMain->SelectPrivateCoins(nValueMin, nBalanceNeedsAnonymized, vecTxIn, nValueInTmp, 0, privateSendClient.nPrivateSendRounds)) {
         // this should never happen
         LogPrintf("CPrivateSendClientSession::StartNewQueue -- Can't mix: no compatible inputs found!\n");
         strAutoDenomResult = _("Can't mix: no compatible inputs found!");
