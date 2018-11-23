@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Łukasz Kurowski <crackcomm@gmail.com>
+ * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
  * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or

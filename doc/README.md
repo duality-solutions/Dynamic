@@ -1,56 +1,52 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Build Status](https://travis-ci.org/Duality-Solutions/Dynamic.png?branch=master)](https://travis-ci.org/Duality-Solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/Duality-Solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/Duality-Solutions/Dynamic)
+[![Build Status](https://travis-ci.org/duality-solutions/Dynamic.png?branch=master)](https://travis-ci.org/duality-solutions/Dynamic)
+[![Stories in Ready](https://badge.waffle.io/duality-solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/duality-solutions/Dynamic)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/Duality-Solutions/Dynamic/throughput.svg)](https://waffle.io/Duality-Solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/duality-solutions/Dynamic/throughput.svg)](https://waffle.io/duality-solutions/Dynamic/metrics/throughput)  
 
-# **Dynamic (DYN) v1.4.0.0**
+# **Dynamic (DYN) v2.4.0.0**
 
-![DYN logo](https://github.com/Duality-Solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
+![DYN logo](https://github.com/duality-solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
 
-**Copyright (c) 2016-2018 Duality Blockchain Solutions**
+**Copyright (c) 2016-2019 [Duality Blockchain Solutions](https://duality.solutions/)**
 
-What is Dynamic?
+What is [Dynamic](https://duality.solutions/dynamic)?
 ----------------
 * Coin Suffix: DYN
-* PoW Algorithm: Argon2d
+* PoW Mining Algorithm: Argon2d
+* PoW Difficulty Algorithm: Digishield V3
 * PoW Period: Unlimited
 * PoW Target Spacing: 128 Seconds
-* PoW Reward per Block: 1 DYN
-* PoW Reward Start Height: Block 20,546
+* PoW Reward per Block: Controlled via Fluid Protocol
+* PoW Reward Start Height: Block 5,137
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
 * Dynode Collateral Amount: 1000 DYN
-* Dynode Min Confirmation: 10 Blocks
-* Dynode Reward: 0.382 DYN Static Reward (38.2% of a PoW reward)
-* Dynode Reward Start Height: Block 20,546
-* Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
-* Budget Proposal Fee: 100 DYN, 20 confirmations (~30 minutes)
+* Dynode Min Confirmation: 17 Blocks
+* Dynode Reward: Controlled via Fluid Protocol
+* Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
 
 
-The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
+[Dynamic(DYN)](https://duality.solutions/dynamic) is [Duality](https://duality.solutions/)’s tokenized-currency provided with supply elasticity to ensure price stability for day to day transactions of end-users. [Duality](https://duality.solutions/) uses company proceeds to place buy back orders on the [Dynamic(DYN)](https://duality.solutions/dynamic) market to keep inflation within acceptable bounds.
 
-Dynamic utilises Dynodes, PrivateSend and InstantSend to provide anonymous and near instant transaction confirmations.
+[Dynamic(DYN)](https://duality.solutions/dynamic) lays the groundwork for offering BaaS(Blockchain as a Service) by hosting a multitude of second tier nodes called Dynodes. Rewards can be adjusted through the 'Fluid Protocol' created by [Duality](https://duality.solutions/) to adjust to a maturing market.
 
-Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
+As a modern currency [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) will be actively maintained to keep up with the latest market trends. [Dynamic(DYN)](https://github.com/duality-solutions/dynamic) features fast and InstantSend transactions at an affordable rate, also end-users that care for consumer privacy are able to anonymously transact using PrivateSend.
 
+[Dynamic(DYN)](https://github.com/duality-solutions/dynamic) utilises Dynodes which are the 2nd tier of security, processing InstantSend transactions and providing fungibility via PrivateSend.
 
-**Dynode/PrivateSend Network Information**
-Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend ported and rebranded as PrivateSend.
-Utilisation of InstantSend for near-instant transactions.
 
 **MainNet Parameters**
 P2P Port = 33300
 RPC Port = 33350
 Dynodes = 33300
-Magic Bytes: 0x3f 0x42 0x55 0x61
+Magic Bytes: 0x5e 0x61 0x74 0x80
 
 **TestNet Parameters**
 P2P Port = 33400
@@ -67,7 +63,7 @@ Magic Bytes = 0x2f 0x32 0x15 0x3f
 
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Dynamic in Unix. 
+Some notes on how to build [Dynamic](https://duality.solutions/dynamic) in Unix. 
 
 Note
 ---------------------
@@ -100,7 +96,8 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
- libevent    | Networking   | OS independent asynchronous networking
+ libevent    | Networking       | OS independent asynchronous networking
+ 
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -117,8 +114,7 @@ For the versions used in the release, see [release-process.md](release-process.m
 System requirements
 --------------------
 
-C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
-memory available when compiling Dynamic.
+C++ compilers are memory-hungry. It is recommended to have at least 3 GB of memory available when compiling Dynamic.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
@@ -126,15 +122,14 @@ Build requirements:
 
     sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
     
-for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
+For Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
 
- db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
- You can add the repository using the following command:
+db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).  You can add the repository using the following command:
 
-        sudo add-apt-repository ppa:bitcoin/bitcoin
-        sudo apt-get update
+    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo apt-get update
 
  Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
  but using these will break binary wallet compatibility, and is not recommended.
@@ -165,10 +160,7 @@ ZMQ dependencies (provides ZMQ API 4.x):
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
-If you want to build Dynamic-Qt, make sure that the required packages for Qt development
-are installed. Qt 5 is necessary to build the GUI.
-If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
-To build without GUI pass `--without-gui`.
+If you want to build Dynamic-Qt, make sure that the required packages for Qt development are installed. Qt 5 is necessary to build the GUI. If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5. To build without GUI pass `--without-gui`.
 
 For Qt 5 you need the following:
 
@@ -189,6 +181,8 @@ symbols, which reduces the executable size by about 90%.
 miniupnpc
 ---------
 
+The dependencies for miniupnpc are included above within the 'Dependency Build Instructions: Ubuntu & Debian' section, however, for any reason you wish to build the source, please follow these instructions.
+
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  See the configure options for upnp behavior desired:
@@ -207,38 +201,41 @@ To build:
 
 Berkeley DB
 -----------
-It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+It is recommended to use Berkeley DB 4.8 and is included in the dependencies above in the 'Dependency Build Instructions: Ubuntu & Debian' section.
 
-```bash
-DYNAMIC_ROOT=$(pwd)
+If you have to, or wish to build Berkeley DB 4.8 yourself:
 
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${DYNAMIC_ROOT}/db4"
-mkdir -p $BDB_PREFIX
+``` 
+    bash
+    DYNAMIC_ROOT=$(pwd)
 
-# Fetch the source and verify that it is not tampered with
-wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
-echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
-# -> db-4.8.30.NC.tar.gz: OK
-tar -xzvf db-4.8.30.NC.tar.gz
+    # Pick some path to install BDB to, here we create a directory within the dynamic directory
+    BDB_PREFIX="${DYNAMIC_ROOT}/db4"
+    mkdir -p $BDB_PREFIX
 
-# Build the library and install to our prefix
-cd db-4.8.30.NC/build_unix/
-#  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
-../dist/configure --prefix=/usr/local --enable-cxx
-make 
-sudo make install
+    # Fetch the source and verify that it is not tampered with
+    wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+    echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+    # -> db-4.8.30.NC.tar.gz: OK
+    tar -xzvf db-4.8.30.NC.tar.gz
 
-# Configure Dynamic to use our own-built instance of BDB
-cd $DYNAMIC_ROOT
-./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
+    # Build the library and install to our prefix
+    cd db-4.8.30.NC/build_unix/
+    #  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
+    ../dist/configure --prefix=/usr/local --enable-cxx
+    make 
+    sudo make install
+
+    # Configure Dynamic to use our own-built instance of BDB
+    cd $DYNAMIC_ROOT
+    ./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
 ```
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
 
 Boost
 -----
-If you need to build Boost yourself:
+If you need to build Boost yourself, in terminal enter:
 
     sudo su
     ./bootstrap.sh
@@ -247,8 +244,8 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your Dynamic installation more secure by making certain attacks impossible to
-exploit even if a vulnerability is found, binaries are hardened by default.
+To help make your Dynamic installation more secure by making certain attacks impossible to exploit even if a vulnerability is found, binaries are hardened by default.
+
 This can be disabled with:
 
 Hardening Flags:
@@ -271,10 +268,12 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-        scanelf -e ./dynamicd
+    scanelf -e ./dynamicd
 
+    
     The output should contain:
-     TYPE
+    
+    TYPE
     ET_DYN
 
 * Non-executable Stack
@@ -305,12 +304,70 @@ In this case there is no dependency on Berkeley DB 4.8.
 Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
 call not `getwork`.
 
+AVX2 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX2 optimisations can be enabled. 
+
+At configure time:
+
+    --enable-avx2
+    
+CPU's with AVX2 support:
+
+    Intel
+        Haswell processor, Q2 2013
+        Haswell E processor, Q3 2014
+        Broadwell processor, Q4 2014
+        Broadwell E processor, Q3 2016
+        Skylake processor, Q3 2015
+        Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
+        Coffee Lake processor, expected in 2017
+        Cannonlake processor, expected in 2018
+    AMD
+        Carrizo processor, Q2 2015
+        Ryzen processor, Q1 2017
+
+AVX512 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX512 optimisations can be enabled. 
+
+At configure time:
+
+    --enable-avx512f
+    
+CPU's with AVX512 support:
+
+    Intel
+        Xeon Phi x200/Knights Landing processor, 2016
+        Knights Mill processor, 2017
+        Skylake-SP processor, 2017
+        Skylake-X processor, 2017
+        Cannonlake processor, expected in 2018
+        Ice Lake processor, expected in 2018
+       
+GPU Mining
+----------
+To build Dynamic without GPU support:
+
+    --disable-gpu
+
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. 
+(Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer)
+
+At configure time for non-Nvidia GPU's:
+
+    --enable-gpu --disable-cuda 
+
+At configure time for Nvidia GPU's:
+
+    --enable-gpu --enable-cuda
+
 Example Build Command
 --------------------
-Qt Wallet and Deamon, CLI version build:
+Qt Wallet and Deamon, CLI version build without GPU support:
 
-    ./autogen.sh && ./configure --with-gui && make
+    ./autogen.sh && ./configure --with-gui --disable-gpu && make
 
-CLI and Deamon Only Buld:
+CLI and Deamon Only build without GPU support:
 
-    ./autogen.sh && ./configure --without-gui && make
+    ./autogen.sh && ./configure --without-gui --disable-gpu && make
