@@ -86,14 +86,14 @@ std::string COutput::ToString() const
 
 int COutput::Priority() const
 {
-    for (const auto& d : CPrivateSend::GetStandardDenominations())
-        if (tx->tx->vout[i].nValue == d)
-            return 10000;
-    if (tx->tx->vout[i].nValue < 1 * COIN)
-        return 20000;
+    for (const auto& d : CPrivateSend::GetStandardDenominations()) {
+        // large denoms have lower value
+        if(tx->tx->vout[i].nValue == d) return (float)COIN / d * 10000;
+    }
+    if(tx->tx->vout[i].nValue < 1*COIN) return 20000;
 
     //nondenom return largest first
-    return -(tx->tx->vout[i].nValue / COIN);
+    return -(tx->tx->vout[i].nValue/COIN);
 }
 
 const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
@@ -2943,64 +2943,52 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool ov
     return true;
 }
 
-bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector<CTxPSIn>& vecTxPSInRet, std::vector<COutput>& vCoinsRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax, bool fNoDuplicateTxIds)
+bool CWallet::SelectPSInOutPairsByDenominations(int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector< std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet)
 {
+    CAmount nValueTotal{0};
+    int nDenomResult{0};
+
     std::set<uint256> setRecentTxIds;
-
-    vecTxPSInRet.clear();
-    vCoinsRet.clear();
-    nValueRet = 0;
-
     std::vector<COutput> vCoins;
-    AvailableCoins(vCoins, true, NULL, false, ONLY_DENOMINATED);
 
-    std::random_shuffle(vCoins.rbegin(), vCoins.rend(), GetRandInt);
-
-    // ( bit on if present )
-    // bit 0 - 100DYN+1
-    // bit 1 - 10DYN+1
-    // bit 2 - 1DYN+1
-    // bit 3 - .1DYN+1
+    vecPSInOutPairsRet.clear();
 
     std::vector<int> vecBits;
     if (!CPrivateSend::GetDenominationsBits(nDenom, vecBits)) {
         return false;
     }
 
-    int nDenomResult = 0;
+    AvailableCoins(vCoins, true, NULL, false, ONLY_DENOMINATED);
+    LogPrintf("CWallet::%s -- vCoins.size(): %d\n", __func__, vCoins.size());
+
+    std::random_shuffle(vCoins.rbegin(), vCoins.rend(), GetRandInt);
 
     std::vector<CAmount> vecPrivateSendDenominations = CPrivateSend::GetStandardDenominations();
-    FastRandomContext insecure_rand;
-    BOOST_FOREACH (const COutput& out, vCoins) {
-        // dynode-like input should not be selected by AvailableCoins now anyway
-        //if(out.tx->vout[out.i].nValue == 1000*COIN) continue;
-        if (fNoDuplicateTxIds && setRecentTxIds.find(out.tx->GetHash()) != setRecentTxIds.end())
-            continue;
-        if (nValueRet + out.tx->tx->vout[out.i].nValue <= nValueMax) {
-            CTxIn txin = CTxIn(out.tx->GetHash(), out.i);
+    for (const auto& out : vCoins) {
+        uint256 txHash = out.tx->GetHash();
+        int nValue = out.tx->tx->vout[out.i].nValue;
+        if (setRecentTxIds.find(txHash) != setRecentTxIds.end()) continue; // no duplicate txids
+        if (nValueTotal + nValue > nValueMax) continue;
 
-            int nRounds = GetOutpointPrivateSendRounds(txin.prevout);
-            if (nRounds >= nPrivateSendRoundsMax)
-                continue;
-            if (nRounds < nPrivateSendRoundsMin)
-                continue;
+        CTxIn txin = CTxIn(txHash, out.i);
+        CScript scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
+        int nRounds = GetRealOutpointPrivateSendRounds(txin.prevout);
+        if (nRounds >= privateSendClient.nPrivateSendRounds) continue;
 
-            for (const auto& nBit : vecBits) {
-                if (out.tx->tx->vout[out.i].nValue == vecPrivateSendDenominations[nBit]) {
-                    nValueRet += out.tx->tx->vout[out.i].nValue;
-                    vecTxPSInRet.push_back(CTxPSIn(txin, out.tx->tx->vout[out.i].scriptPubKey));
-                    vCoinsRet.push_back(out);
-                    nDenomResult |= 1 << nBit;
-                    setRecentTxIds.emplace(out.tx->GetHash());
-                    LogPrint("privatesend", "CWallet::SelectCoinsByDenominations -- hash %s nValue %d\n", out.tx->GetHash().ToString(), out.tx->tx->vout[out.i].nValue);
-                }
-            }
+        for (const auto& nBit : vecBits) {
+            if (nValue != vecPrivateSendDenominations[nBit]) continue;
+            nValueTotal += nValue;
+            vecPSInOutPairsRet.emplace_back(CTxPSIn(txin, scriptPubKey), CTxOut(nValue, scriptPubKey, nRounds));
+            setRecentTxIds.emplace(txHash);
+            nDenomResult |= 1 << nBit;
+            LogPrint("privatesend", "CWallet::%s -- hash: %s, nValue: %d.%08d, nRounds: %d\n",
+                            __func__, txHash.ToString(), nValue / COIN, nValue % COIN, nRounds);
         }
     }
 
-    LogPrintf("CWallet::SelectCoinsByDenominations -- setRecentTxIds.size() %d\n", setRecentTxIds.size());
+    LogPrintf("CWallet::%s -- setRecentTxIds.size(): %d\n", __func__, setRecentTxIds.size());
 
-    return nValueRet >= nValueMin && nDenom == nDenomResult;
+    return nValueTotal >= nValueMin && nDenom == nDenomResult;
 }
 
 struct CompareByAmount {
@@ -3164,6 +3152,8 @@ bool CWallet::SelectPrivateCoins(CAmount nValueMin, CAmount nValueMax, std::vect
 
 bool CWallet::GetCollateralTxPSIn(CTxPSIn& txpsinRet, CAmount& nValueRet) const
 {
+    LOCK2(cs_main, cs_wallet);
+
     std::vector<COutput> vCoins;
 
     AvailableCoins(vCoins);
@@ -3964,6 +3954,20 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
     uiInterface.LoadWallet(this);
 
     return DB_LOAD_OK;
+}
+
+// Goes through all wallet transactions and checks if they are dynode collaterals, in which case these are locked
+// This avoids accidential spending of collaterals. They can still be unlocked manually if a spend is really intended.
+void CWallet::AutoLockDynodeCollaterals()
+{
+    LOCK2(cs_main, cs_wallet);
+    for (const auto& pair : mapWallet) {
+        for (unsigned int i = 0; i < pair.second.tx->vout.size(); ++i) {
+            if (IsMine(pair.second.tx->vout[i]) && !IsSpent(pair.first, i)) {
+                    LockCoin(COutPoint(pair.first, i));
+            }
+        }
+    }
 }
 
 DBErrors CWallet::ZapSelectTx(std::vector<uint256>& vHashIn, std::vector<uint256>& vHashOut)
