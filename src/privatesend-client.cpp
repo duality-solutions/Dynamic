@@ -968,10 +968,10 @@ bool CPrivateSendClientManager::DoAutomaticDenominating(CConnman& connman, bool 
         return false;
     }
 
-    int nDnCountEnabled = dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
+    int nDnCount = dnodeman.CountDynodes();
 
     // If we've used 90% of the Dynode list then drop the oldest first ~30%
-    int nThreshold_high = nDnCountEnabled * 0.9;
+    int nThreshold_high = nDnCount * 0.9;
     int nThreshold_low = nThreshold_high * 0.7;
     LogPrint("privatesend", "Checking vecDynodesUsed: size: %d, threshold: %d\n", (int)vecDynodesUsed.size(), nThreshold_high);
 
@@ -1086,7 +1086,7 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
         return false;
 
     int nTries = 0;
-    int nDnCountEnabled = dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
+    int nDnCount = dnodeman.CountDynodes();
 
     // ** find the coins we'll use
     std::vector<CTxIn> vecTxIn;
@@ -1117,11 +1117,11 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
             continue;
         }
 
-        if (infoDn.nLastPsq != 0 && infoDn.nLastPsq + nDnCountEnabled / 5 > dnodeman.nPsqCount) {
+        if (infoDn.nLastPsq != 0 && infoDn.nLastPsq + nDnCount / 5 > dnodeman.nPsqCount) {
             LogPrintf("CPrivateSendClientSession::StartNewQueue -- Too early to mix on this dynode!"
                       " dynode=%s  addr=%s  nLastPsq=%d  CountEnabled/5=%d  nPsqCount=%d\n",
                 infoDn.outpoint.ToStringShort(), infoDn.addr.ToString(), infoDn.nLastPsq,
-                nDnCountEnabled / 5, dnodeman.nPsqCount);
+                nDnCount / 5, dnodeman.nPsqCount);
             nTries++;
             continue;
         }
