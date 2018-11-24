@@ -302,8 +302,8 @@ private:
     bool fAttacked = false;
 
 public:
-    static const int SIGNATURES_REQUIRED = 6;
-    static const int SIGNATURES_TOTAL = 10;
+    static const int SIGNATURES_REQUIRED = 10;
+    static const int SIGNATURES_TOTAL = 15;
 
     COutPointLock() {}
 
