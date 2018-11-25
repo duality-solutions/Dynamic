@@ -5,6 +5,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
+
 #include "utilitydialog.h"
 
 #include "ui_helpmessagedialog.h"
