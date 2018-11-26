@@ -54,23 +54,26 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
             return;
         }
 
-        {
-            TRY_LOCK(cs_vecqueue, lockRecv);
-            if (!lockRecv) return;
-             for (const auto& q : vecPrivateSendQueue) {
-                if (q.dynodeOutpoint == activeDynode.outpoint) {
-                    // refuse to create another queue this often
-                    LogPrint("privatesend", "DSACCEPT -- last psq is still in queue, refuse to mix\n");
-                    return;
+        if (vecSessionCollaterals.size() == 0) {
+            {
+                TRY_LOCK(cs_vecqueue, lockRecv);
+                if (!lockRecv) return;
+
+                for (const auto& q : vecPrivateSendQueue) {
+                    if (q.dynodeOutpoint == activeDynode.outpoint) {
+                        // refuse to create another queue this often
+                        LogPrint("privatesend", "PSACCEPT -- last psq is still in queue, refuse to mix\n");
+                        PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                        return;
+                    }
                 }
             }
-        }
 
-        if (vecSessionCollaterals.size() == 0 && dnInfo.nLastPsq != 0 &&
-            dnInfo.nLastPsq + dnodeman.CountDynodes() / 5 > dnodeman.nPsqCount) {
-            LogPrintf("PSACCEPT -- last psq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
-            PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
-            return;
+            if (dnInfo.nLastPsq != 0 && dnInfo.nLastPsq + dnodeman.CountDynodes() / 5 > dnodeman.nPsqCount) {
+                LogPrintf("PSACCEPT -- last psq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
+                PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                return;
+            }
         }
 
         PoolMessage nMessageID = MSG_NOERR;

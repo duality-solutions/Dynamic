@@ -464,9 +464,12 @@ void CPrivateSendClientManager::CheckTimeout()
 {
     if (fDynodeMode)
         return;
+
+    CheckQueue();
+
     if (!fEnablePrivateSend)
         return;
-    CheckQueue();
+    
     LOCK(cs_peqsessions);
     for (auto& session : peqSessions) {
         if (session.CheckTimeout()) {
