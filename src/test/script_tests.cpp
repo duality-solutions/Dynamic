@@ -149,10 +149,14 @@ void DoTest(const CScript& scriptPubKey, const CScript& scriptSig, int flags, co
     CMutableTransaction tx2 = tx;
     BOOST_CHECK_MESSAGE(VerifyScript(scriptSig, scriptPubKey, flags, MutableTransactionSignatureChecker(&tx, 0), &err) == expect, message);
     BOOST_CHECK_MESSAGE(err == scriptError, std::string(FormatScriptError(err)) + " where " + std::string(FormatScriptError((ScriptError_t)scriptError)) + " expected: " + message);
+
 #if defined(HAVE_CONSENSUS_LIB)
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << tx2;
-    BOOST_CHECK_MESSAGE(dynamicconsensus_verify_script(scriptPubKey.data(), scriptPubKey.size(), (const unsigned char*)&stream[0], stream.size(), 0, flags, NULL) == expect,message);
+    int libconsensus_flags = flags & dynamicconsensus_SCRIPT_FLAGS_VERIFY_ALL;
+    if (libconsensus_flags == flags) {
+        BOOST_CHECK_MESSAGE(dynamicconsensus_verify_script(scriptPubKey.data(), scriptPubKey.size(), (const unsigned char*)&stream[0], stream.size(), 0, libconsensus_flags, NULL) == expect,message);
+    }
 #endif
 }
 

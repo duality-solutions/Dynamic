@@ -34,13 +34,16 @@
 #include <boost/thread.hpp>
 
 std::unique_ptr<CConnman> g_connman;
+
 FastRandomContext insecure_rand_ctx(true);
+uint256 insecure_rand_seed = GetRandHash();
 
 extern bool fPrintToConsole;
 extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 {
+        RandomInit();
         ECC_Start();
         SetupEnvironment();
         SetupNetworking();
