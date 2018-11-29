@@ -1305,7 +1305,7 @@ static bool LockDataDirectory(bool probeOnly)
 bool AppInitSanityChecks()
 {
     // ********************************************************* Step 4: sanity checks
-
+    RandomInit();
     // Initialize elliptic curve code
     ECC_Start();
     ECC_Ed25519_Start();
@@ -1996,8 +1996,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if (!strErrors.str().empty())
         return InitError(strErrors.str());
-
-    RandAddSeedPerfmon();
 
     //// debug print
     LogPrintf("mapBlockIndex.size() = %u\n", mapBlockIndex.size());
