@@ -8,6 +8,8 @@
 #include "operations.h"
 #include "script/script.h"
 
+#include <boost/thread.hpp>
+
 CFluidSovereignDB* pFluidSovereignDB = NULL;
 
 bool GetFluidSovereignData(const CScript& scriptPubKey, CFluidSovereign& entry)
