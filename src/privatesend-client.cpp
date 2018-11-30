@@ -971,10 +971,10 @@ bool CPrivateSendClientManager::DoAutomaticDenominating(CConnman& connman, bool 
         return false;
     }
 
-    int nDnCount = dnodeman.CountDynodes();
+    int nDnCountEnabled = dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
     // If we've used 90% of the Dynode list then drop the oldest first ~30%
-    int nThreshold_high = nDnCount * 0.9;
+    int nThreshold_high = nDnCountEnabled * 0.9;
     int nThreshold_low = nThreshold_high * 0.7;
     LogPrint("privatesend", "Checking vecDynodesUsed: size: %d, threshold: %d\n", (int)vecDynodesUsed.size(), nThreshold_high);
 
@@ -1371,6 +1371,11 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(CConnman& connman)
         return false;
     }
 
+    // Start from smallest balances first to consume tiny amounts and cleanup UTXO a bit
+    std::sort(vecTally.begin(), vecTally.end(), [](const CompactTallyItem& a, const CompactTallyItem& b) {
+        return a.nAmount < b.nAmount;
+    });
+
     // First try to use only non-denominated funds
     for (const auto& item : vecTally) {
         if (!MakeCollateralAmounts(item, false, connman))
@@ -1483,6 +1488,11 @@ bool CPrivateSendClientSession::CreateDenominated(CConnman& connman)
         return false;
     }
 
+    // Start from largest balances first to speed things up by creating txes with larger/largest denoms included
+    std::sort(vecTally.begin(), vecTally.end(), [](const CompactTallyItem& a, const CompactTallyItem& b) {
+        return a.nAmount > b.nAmount;
+    });
+    
     bool fCreateMixingCollaterals = !pwalletMain->HasCollateralInputs();
 
     for (const auto& item : vecTally) {
