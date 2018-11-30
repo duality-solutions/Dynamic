@@ -4,11 +4,11 @@
 
 #include "bdap/linking.h"
 
-#include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/utils.h"
 #include "hash.h"
 #include "key.h"
+#include "key_io.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "streams.h"

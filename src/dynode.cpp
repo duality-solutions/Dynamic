@@ -6,7 +6,6 @@
 #include "dynode.h"
 
 #include "activedynode.h"
-#include "base58.h"
 #include "chain.h"
 #include "clientversion.h"
 #include "dynode-payments.h"
@@ -14,6 +13,7 @@
 #include "dynodeman.h"
 #include "fluid/fluiddb.h"
 #include "init.h"
+#include "key_io.h"
 #include "messagesigner.h"
 #include "netbase.h"
 #include "script/standard.h"

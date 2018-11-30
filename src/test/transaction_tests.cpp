@@ -11,6 +11,8 @@
 #include "core_io.h"
 #include "key.h"
 #include "keystore.h"
+#include "key/extkey.h"
+#include "key/stealth.h"
 #include "validation.h" // For CheckTransaction
 #include "policy/policy.h"
 #include "script/script.h"

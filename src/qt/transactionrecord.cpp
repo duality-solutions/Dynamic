@@ -7,13 +7,14 @@
 
 #include "transactionrecord.h"
 
-#include "base58.h"
+#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/utils.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
 #include "policy/policy.h"
+#include "key_io.h"
 #include "privatesend.h"
 #include "timedata.h"
 #include "validation.h"

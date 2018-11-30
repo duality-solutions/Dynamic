@@ -5,7 +5,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "base58.h"
 #include "chain.h"
 #include "coins.h"
 #include "consensus/validation.h"
@@ -13,6 +12,7 @@
 #include "init.h"
 #include "instantsend.h"
 #include "keystore.h"
+#include "key_io.h"
 #include "merkleblock.h"
 #include "net.h"
 #include "policy/policy.h"

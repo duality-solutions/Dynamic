@@ -7,7 +7,6 @@
 
 #include "wallet/wallet.h"
 
-#include "base58.h"
 #include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
@@ -23,7 +22,9 @@
 #include "instantsend.h"
 #include "keepass.h"
 #include "key.h"
+#include "key_io.h"
 #include "keystore.h"
+#include "key/extkey.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "primitives/block.h"
@@ -200,7 +201,7 @@ void CWallet::DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, u
             throw std::runtime_error(std::string(__func__) + ": SetHDChain failed");
     }
 
-    if (!AddHDPubKey(childKey.Neuter(), fInternal))
+    if (!AddHDPubKey(childKey.Neutered(), fInternal))
         throw std::runtime_error(std::string(__func__) + ": AddHDPubKey failed");
 }
 
@@ -5076,6 +5077,11 @@ public:
     }
 
     void operator()(const CNoDestination& none) {}
+    void operator()(const CExtKeyPair& none) {}
+    void operator()(const CStealthAddress& sxAddr) {}
+
+    template<typename X>
+    void operator()(const X &none) {}
 };
 
 void CWallet::GetKeyBirthTimes(std::map<CTxDestination, int64_t>& mapKeyBirth) const

@@ -65,6 +65,31 @@ int64_t atoi64(const std::string& str);
 int atoi(const std::string& str);
 
 /**
+ * Tests if the given character is a decimal digit.
+ * @param[in] c     character to test
+ * @return          true if the argument is a decimal digit; otherwise false.
+ */
+constexpr bool IsDigit(char c)
+{
+    return c >= '0' && c <= '9';
+}
+
+/**
+ * Tests if the given character is a whitespace character. The whitespace characters
+ * are: space, form-feed ('\f'), newline ('\n'), carriage return ('\r'), horizontal
+ * tab ('\t'), and vertical tab ('\v').
+ *
+ * This function is locale independent. Under the C locale this function gives the
+ * same result as std::isspace.
+ *
+ * @param[in] c     character to test
+ * @return          true if the argument is a whitespace character; otherwise false
+ */
+constexpr inline bool IsSpace(char c) noexcept {
+    return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+}
+
+/**
  * Convert string to signed 32-bit integer with strict parse error feedback.
  * @returns true if the entire string could be parsed as valid integer,
  *   false if not the entire string could be parsed or when overflow or underflow occurred.
@@ -151,5 +176,29 @@ bool TimingResistantEqual(const T& a, const T& b)
  * @note The result must be in the range (-10^18,10^18), otherwise an overflow error will trigger.
  */
 bool ParseFixedPoint(const std::string& val, int decimals, int64_t* amount_out);
+
+/** Convert from one power-of-2 number base to another. */
+template<int frombits, int tobits, bool pad, typename O, typename I>
+bool ConvertBits(const O& outfn, I it, I end) {
+    size_t acc = 0;
+    size_t bits = 0;
+    constexpr size_t maxv = (1 << tobits) - 1;
+    constexpr size_t max_acc = (1 << (frombits + tobits - 1)) - 1;
+    while (it != end) {
+        acc = ((acc << frombits) | *it) & max_acc;
+        bits += frombits;
+        while (bits >= tobits) {
+            bits -= tobits;
+            outfn((acc >> bits) & maxv);
+        }
+        ++it;
+    }
+    if (pad) {
+        if (bits) outfn((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+        return false;
+    }
+    return true;
+}
 
 #endif // DYNAMIC_UTILSTRENCODINGS_H

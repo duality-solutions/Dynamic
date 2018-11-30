@@ -5,6 +5,7 @@
 #include "operations.h"
 #include "validation.h"
 
+#include "key_io.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 

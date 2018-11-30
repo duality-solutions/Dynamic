@@ -6,7 +6,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "amount.h"
-#include "base58.h"
 #include "chain.h"
 #include "chainparams.h"
 #include "consensus/consensus.h"
@@ -15,6 +14,7 @@
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
+#include "key_io.h"
 #include "miner/miner.h"
 #include "net.h"
 #include "pow.h"

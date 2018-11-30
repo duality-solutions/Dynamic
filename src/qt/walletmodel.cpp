@@ -15,9 +15,9 @@
 #include "recentrequeststablemodel.h"
 #include "transactiontablemodel.h"
 
-#include "base58.h"
 #include "instantsend.h"
 #include "keystore.h"
+#include "key_io.h"
 #include "net.h" // for g_connman
 #include "privatesend-client.h"
 #include "spork.h"

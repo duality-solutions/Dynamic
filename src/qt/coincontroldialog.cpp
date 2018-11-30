@@ -17,6 +17,7 @@
 
 #include "init.h"
 #include "instantsend.h"
+#include "key_io.h"
 #include "policy/policy.h"
 #include "privatesend-client.h"
 #include "txmempool.h"

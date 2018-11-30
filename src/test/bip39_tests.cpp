@@ -5,6 +5,8 @@
 #include "base58.h"
 #include "data/bip39_vectors.json.h"
 #include "key.h"
+#include "key_io.h"
+#include "key/extkey.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #include "test/test_dynamic.h"
@@ -55,7 +57,7 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
         CExtPubKey pubkey;
 
         key.SetMaster(&seed[0], 64);
-        pubkey = key.Neuter();
+        pubkey = key.Neutered();
 
         CDynamicExtKey b58key;
         b58key.SetKey(key);

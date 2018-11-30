@@ -2,12 +2,12 @@
 
 #include "fluiddb.h"
 
-#include "base58.h"
 #include "fluid.h"
 #include "fluiddynode.h"
 #include "fluidmining.h"
 #include "fluidmint.h"
 #include "fluidsovereign.h"
+#include "key_io.h"
 
 CAmount GetFluidDynodeReward(const int nHeight)
 {

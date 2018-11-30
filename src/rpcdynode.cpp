@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "activedynode.h"
-#include "base58.h"
+#include "key_io.h"
 #include "clientversion.h"
 #include "dynode-payments.h"
 #include "dynode-sync.h"

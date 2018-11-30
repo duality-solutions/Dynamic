@@ -13,6 +13,7 @@
 #include "fluid/fluiddb.h"
 #include "governance-classes.h"
 #include "init.h"
+#include "key_io.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
 #include "netmessagemaker.h"

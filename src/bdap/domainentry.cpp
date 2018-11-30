@@ -4,8 +4,11 @@
 
 #include "bdap/domainentry.h"
 
-#include "base58.h"
 #include "bdap/utils.h"
+#include "chainparams.h"
+#include "coins.h"
+#include "key_io.h"
+#include "policy/policy.h"
 #include "rpcclient.h"
 #include "rpcserver.h"
 #include "txmempool.h"

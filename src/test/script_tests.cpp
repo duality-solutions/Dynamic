@@ -7,6 +7,8 @@
 #include "core_io.h"
 #include "key.h"
 #include "keystore.h"
+#include "key/extkey.h"
+#include "key/stealth.h"
 #include "script/script.h"
 #include "script/script_error.h"
 #include "script/sign.h"

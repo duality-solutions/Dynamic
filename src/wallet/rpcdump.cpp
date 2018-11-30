@@ -5,13 +5,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/utils.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
+#include "key_io.h"
 #include "merkleblock.h"
 #include "rpcserver.h"
 #include "script/script.h"
@@ -1110,7 +1110,7 @@ UniValue dumpwallet(const JSONRPCRequest& request)
         file << "# extended private masterkey: " << b58extkey.ToString() << "\n";
 
         CExtPubKey masterPubkey;
-        masterPubkey = masterKey.Neuter();
+        masterPubkey = masterKey.Neutered();
 
         CDynamicExtPubKey b58extpubkey;
         b58extpubkey.SetKey(masterPubkey);

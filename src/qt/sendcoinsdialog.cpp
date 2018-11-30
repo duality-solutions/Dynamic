@@ -18,7 +18,7 @@
 #include "sendcoinsentry.h"
 #include "walletmodel.h"
 
-#include "base58.h"
+#include "key_io.h"
 #include "privatesend-client.h"
 #include "txmempool.h"
 #include "ui_interface.h"

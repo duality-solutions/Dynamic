@@ -5,6 +5,8 @@
 
 #include "script/standard.h"
 
+#include "key/extkey.h"
+#include "key/stealth.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "util.h"
@@ -246,6 +248,19 @@ public:
         *script << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
         return true;
     }
+
+    bool operator()(const CStealthAddress &ek) const {
+        script->clear();
+        LogPrintf("CScriptVisitor(CStealthAddress) TODO\n");
+        return false;
+    }
+
+    bool operator()(const CExtKeyPair &ek) const {
+        script->clear();
+        LogPrintf("CScriptVisitor(CExtKeyPair) TODO\n");
+        return false;
+    }
+
 };
 } // namespace
 
@@ -271,4 +286,8 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys)
         script << ToByteVector(key);
     script << CScript::EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
     return script;
+}
+
+bool IsValidDestination(const CTxDestination& dest) {
+    return dest.which() != 0;
 }

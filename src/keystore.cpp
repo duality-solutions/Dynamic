@@ -34,6 +34,18 @@ bool CBasicKeyStore::GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) con
     return true;
 }
 
+isminetype CBasicKeyStore::IsMine(const CKeyID &address) const
+{
+    LOCK(cs_KeyStore);
+    if (mapKeys.count(address) > 0)
+        return ISMINE_SPENDABLE;
+     if (mapDHTKeys.count(address) > 0)
+        return ISMINE_BDAP;
+    if (mapWatchKeys.count(address) > 0)
+        return ISMINE_WATCH_ONLY;
+    return ISMINE_NO;
+};
+
 bool CBasicKeyStore::AddKeyPubKey(const CKey& key, const CPubKey& pubkey)
 {
     LOCK(cs_KeyStore);

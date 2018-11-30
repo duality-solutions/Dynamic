@@ -4,9 +4,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "hdchain.h"
-#include "base58.h"
+
 #include "bip39.h"
 #include "chainparams.h"
+#include "key_io.h"
 #include "tinyformat.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -62,7 +63,7 @@ void CHDChain::Debug(std::string strName) const
             std::cout << "extended private masterkey: " << b58extkey.ToString().c_str() << std::endl;
 
             CExtPubKey extpubkey;
-            extpubkey = extkey.Neuter();
+            extpubkey = extkey.Neutered();
 
             CDynamicExtPubKey b58extpubkey;
             b58extpubkey.SetKey(extpubkey);

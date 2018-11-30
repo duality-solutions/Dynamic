@@ -3,6 +3,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "hash.h"
+
+#include "key/extkey.h"
+#include "key/stealth.h"
 #include "utilstrencodings.h"
 #include "test/test_dynamic.h"
 
@@ -47,6 +50,7 @@ BOOST_AUTO_TEST_CASE(murmurhash3)
 
 BOOST_AUTO_TEST_CASE(siphash)
 {
+    
     CSipHasher hasher(0x0706050403020100ULL, 0x0F0E0D0C0B0A0908ULL);
     BOOST_CHECK_EQUAL(hasher.Finalize(),  0x726fdb47dd0e0e31ull);
     hasher.Write(0x0706050403020100ULL);
@@ -65,8 +69,7 @@ BOOST_AUTO_TEST_CASE(siphash)
     BOOST_CHECK_EQUAL(SipHashUint256(0x0706050403020100ULL, 0x0F0E0D0C0B0A0908ULL, uint256S("1f1e1d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100")), 0x7127512f72f27cceull);
 
     // Check consistency between CSipHasher and SipHashUint256[Extra].
-    // TODO reenable when backporting Bitcoin #10321
-    /*FastRandomContext ctx;
+    FastRandomContext ctx;
     for (int i = 0; i < 16; ++i) {
         uint64_t k1 = ctx.rand64();
         uint64_t k2 = ctx.rand64();
@@ -80,7 +83,7 @@ BOOST_AUTO_TEST_CASE(siphash)
         sip288.Write(nb, 4);
         BOOST_CHECK_EQUAL(SipHashUint256(k1, k2, x), sip256.Finalize());
         BOOST_CHECK_EQUAL(SipHashUint256Extra(k1, k2, x, n), sip288.Finalize());
-    }*/
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

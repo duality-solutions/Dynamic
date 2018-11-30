@@ -11,6 +11,7 @@
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
+#include "key_io.h"
 #include "protocol.h"
 #include "serialize.h"
 #include "sync.h"

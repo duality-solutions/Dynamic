@@ -3,6 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "consensus/merkle.h"
+#include "key/extkey.h"
+#include "key/stealth.h"
 #include "merkleblock.h"
 #include "serialize.h"
 #include "streams.h"

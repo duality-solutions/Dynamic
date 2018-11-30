@@ -7,6 +7,7 @@
 #define DYNAMIC_HDCHAIN_H
 
 #include "key.h"
+#include "key/extkey.h"
 #include "sync.h"
 
 /* hd account data model */

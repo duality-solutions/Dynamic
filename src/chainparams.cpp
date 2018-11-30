@@ -190,6 +190,7 @@ public:
         pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x74;
         pchMessageStart[3] = 0x80;
+        nBIP44ID = 0x80000d35; //https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         vAlertPubKey = ParseHex("04bf1391ff0c61a5d9a02cd2e997b707ced89bb48514e26d89f2464c98295ffef3f587263c94e6024d4e455802ad73e1e9694f3e482ff6e074736cb2327f9cd3e7");
         nDefaultPort = DEFAULT_P2P_PORT;
         nPruneAfterHeight = 20545;
@@ -219,6 +220,10 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         // Dynamic BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
+        // From Particl
+        base58Prefixes[STEALTH_ADDRESS]    = {0x14};
+        base58Prefixes[EXT_KEY_HASH]       = {0x4b}; // X
+        base58Prefixes[EXT_ACC_HASH]       = {0x17}; // A
         // Dynamic BIP44 coin type is '5'
         nExtCoinType = 5;
 
@@ -332,7 +337,11 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x40;
+
         vAlertPubKey = ParseHex("04b375643a0b5fe3a9882b412be4046272528ad24576c72a933b44935a8491d52e243e905b1dd6947094984fc8e9f42d17cc1058033036d7940d9078851641a445");
+
+        nBIP44ID = 0x80000001; // testnet BIP44
+
         nDefaultPort = DEFAULT_P2P_PORT + 100;
         nPruneAfterHeight = 100;
         startNewChain = false;
@@ -363,6 +372,10 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Testnet Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // From Particl
+        base58Prefixes[STEALTH_ADDRESS]    = {0x15};
+        base58Prefixes[EXT_KEY_HASH]       = {0x4c}; 
+        base58Prefixes[EXT_ACC_HASH]       = {0x18};
         // Testnet Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
@@ -471,6 +484,7 @@ public:
         pchMessageStart[1] = 0x32;
         pchMessageStart[2] = 0x15;
         pchMessageStart[3] = 0x3f;
+        nBIP44ID = 0x80000001; // testnet BIP44
         vAlertPubKey = ParseHex("04e8118b469667861157f3b2b28056ae92581ce61ce2db80d04a701f5ec5391b751e6136bafdcca7b8d0b564a5afce213e8069bdd1d17131f61d116b73dbf7e2d6");
         nDefaultPort = DEFAULT_P2P_PORT + 200;
         nPruneAfterHeight = 100;
@@ -524,6 +538,10 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x35)(0x87)(0xCF).convert_to_container<std::vector<unsigned char> >();
         // Regtest Dynamic BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x35)(0x83)(0x94).convert_to_container<std::vector<unsigned char> >();
+        // From Particl
+        base58Prefixes[STEALTH_ADDRESS]    = {0x16};
+        base58Prefixes[EXT_KEY_HASH]       = {0x4d}; 
+        base58Prefixes[EXT_ACC_HASH]       = {0x19};
         // Regtest Dynamic BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
     }

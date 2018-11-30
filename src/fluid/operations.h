@@ -5,12 +5,12 @@
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
 
-#include "base58.h"
-
 #include <algorithm>
 #include <stdint.h>
-#include <string.h>
+#include <string>
 #include <vector>
+
+class CDynamicAddress;
 
 class HexFunctions
 {

@@ -10,6 +10,7 @@
 #include "chainparams.h"
 #include "hash.h"
 #include "init.h"
+#include "key_io.h"
 #include "pow.h"
 #include "ui_interface.h"
 #include "uint256.h"

@@ -12,7 +12,7 @@
 #include "paymentserver.h"
 #include "transactionrecord.h"
 
-#include "base58.h"
+#include "key_io.h"
 #include "consensus/consensus.h"
 #include "instantsend.h"
 #include "script/script.h"

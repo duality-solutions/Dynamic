@@ -13,7 +13,7 @@
 #include "platformstyle.h"
 #include "walletmodel.h"
 
-#include "base58.h"
+#include "key_io.h"
 #include "init.h"
 #include "validation.h" // For strMessageMagic
 #include "wallet/wallet.h"

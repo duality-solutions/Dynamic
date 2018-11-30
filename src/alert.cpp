@@ -9,6 +9,7 @@
 
 #include "base58.h"
 #include "clientversion.h"
+#include "key_io.h"
 #include "net.h"
 #include "netmessagemaker.h"
 #include "pubkey.h"

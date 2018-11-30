@@ -12,6 +12,12 @@
 #include "amount.h"
 #include "uint256.h"
 
+enum AddressIndexType {
+    ADDR_INDT_UNKNOWN                = 0,
+    ADDR_INDT_PUBKEY_ADDRESS         = 1,
+    ADDR_INDT_SCRIPT_ADDRESS         = 2,
+};
+
 struct CMempoolAddressDelta {
     int64_t time;
     CAmount amount;

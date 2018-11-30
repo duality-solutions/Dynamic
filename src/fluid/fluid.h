@@ -4,9 +4,9 @@
 #define FLUID_PROTOCOL_H
 
 #include "amount.h"
-#include "base58.h"
 #include "chain.h"
 #include "consensus/validation.h"
+#include "key_io.h"
 #include "operations.h"
 #include "script/script.h"
 #include "utilstrencodings.h"

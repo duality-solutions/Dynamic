@@ -13,6 +13,7 @@
 #include "init.h"
 #include "instantsend.h"
 #include "keepass.h"
+#include "key_io.h"
 #include "net.h"
 #include "netbase.h"
 #include "policy/rbf.h"

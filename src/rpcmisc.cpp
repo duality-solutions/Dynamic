@@ -5,10 +5,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "base58.h"
 #include "clientversion.h"
 #include "dynode-sync.h"
 #include "init.h"
+#include "key_io.h"
 #include "net.h"
 #include "netbase.h"
 #include "rpcserver.h"
@@ -216,6 +216,21 @@ public:
         }
         return obj;
     }
+
+    UniValue operator()(const CExtKeyPair &ekp) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isextkey", true);
+        return obj;
+    }
+
+    UniValue operator()(const CStealthAddress &sxAddr) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isstealthaddress", true);
+        obj.pushKV("prefix_num_bits", sxAddr.prefix.number_bits);
+        obj.pushKV("prefix_bitfield", strprintf("0x%04x", sxAddr.prefix.bitfield));
+        return obj;
+    }
+
 };
 #endif
 

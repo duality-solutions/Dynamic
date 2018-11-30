@@ -8,10 +8,10 @@
 
 //#define ENABLE_DYNAMIC_DEBUG
 
-#include "base58.h"
 #include "chainparams.h"
 #include "governance.h"
 #include "key.h"
+#include "key_io.h"
 #include "script/standard.h"
 #include "util.h"
 
