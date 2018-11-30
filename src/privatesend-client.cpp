@@ -1221,8 +1221,6 @@ bool CPrivateSendClientSession::SubmitDenominate(CConnman& connman)
         }
     }
 
-    //lambda error?
-    
     // more inputs first, for equal input count prefer the one with less rounds
     std::sort(vecInputsByRounds.begin(), vecInputsByRounds.end(), [](const auto& a, const auto& b) {
         return a.second > b.second || (a.second == b.second && a.first < b.first);
@@ -1492,7 +1490,7 @@ bool CPrivateSendClientSession::CreateDenominated(CConnman& connman)
     std::sort(vecTally.begin(), vecTally.end(), [](const CompactTallyItem& a, const CompactTallyItem& b) {
         return a.nAmount > b.nAmount;
     });
-    
+
     bool fCreateMixingCollaterals = !pwalletMain->HasCollateralInputs();
 
     for (const auto& item : vecTally) {
