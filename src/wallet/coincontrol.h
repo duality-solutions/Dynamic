@@ -15,7 +15,6 @@ class CCoinControl
 {
 public:
     CTxDestination destChange;
-    bool fUsePrivateSend;
     bool fUseInstantSend;
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
@@ -42,7 +41,6 @@ public:
         fAllowWatchOnly = false;
         setSelected.clear();
         fUseInstantSend = false;
-        fUsePrivateSend = true;
         nMinimumTotalFee = 0;
         nFeeRate = CFeeRate(0);
         fOverrideFeeRate = false;

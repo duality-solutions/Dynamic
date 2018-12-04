@@ -276,7 +276,6 @@ HEADERS += \
     src/qt/signverifymessagedialog.h \
     src/qt/sendcoinsentry.h \
     src/qt/sendcoinsdialog.h \
-    src/qt/privatesendconfig.h \
     src/qt/rpcconsole.h \
     src/qt/recentrequeststablemodel.h \
     src/qt/receiverequestdialog.h \
@@ -480,7 +479,6 @@ SOURCES += \
     src/qt/receiverequestdialog.cpp \
     src/qt/recentrequeststablemodel.cpp \
     src/qt/rpcconsole.cpp \
-    src/qt/privatesendconfig.cpp \
     src/qt/sendcoinsdialog.cpp \
     src/qt/sendcoinsentry.cpp \
     src/qt/signverifymessagedialog.cpp \
@@ -638,7 +636,6 @@ FORMS += \
     src/qt/forms/receivecoinsdialog.ui \
     src/qt/forms/receiverequestdialog.ui \
     src/qt/forms/rpcconsole.ui \
-    src/qt/forms/privatesendconfig.ui \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/signverifymessagedialog.ui \

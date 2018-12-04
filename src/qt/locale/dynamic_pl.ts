@@ -594,7 +594,7 @@ Adres: %4
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <source>Total: %1 (IS compatible: %2 / Enabled: %3)</source>
         <translation>Całość: %1 (zgodne z PS: %2 / włączone: %3)</translation>
     </message>
     <message>

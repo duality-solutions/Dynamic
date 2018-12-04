@@ -594,7 +594,7 @@ Kiểu: %3
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <source>Total: %1 (IS compatible: %2 / Enabled: %3)</source>
         <translation>Tổng số: %1 (Tương thích với PS: %2 / Sẵn sàng: %3)</translation>
     </message>
     <message>

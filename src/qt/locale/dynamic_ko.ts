@@ -648,7 +648,7 @@ Address: %4
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <source>Total: %1 (IS compatible: %2 / Enabled: %3)</source>
         <translation>합계: %1 (PS 호환 가능한
 : %2 / 사용: %3)</translation>
     </message>

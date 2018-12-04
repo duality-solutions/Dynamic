@@ -16,7 +16,6 @@
 #include "net.h"
 #include "netbase.h"
 #include "policy/rbf.h"
-#include "privatesend-client.h"
 #include "rpcserver.h"
 #include "timedata.h"
 #include "util.h"
@@ -320,7 +319,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
     return ret;
 }
 
-static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, bool fUseInstantSend = false, bool fUsePrivateSend = false)
+static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, bool fUseInstantSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -346,7 +345,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     CRecipient recipient = {scriptPubKey, nValue, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet,
-            strError, NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend)) {
+            strError, NULL, true, ALL_COINS, fUseInstantSend)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -440,7 +439,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 7)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 6)
         throw std::runtime_error(
             "sendtoaddress \"dynamicaddress\" amount ( \"comment\" \"comment-to\" subtractfeefromamount use_is use_ps )\n"
             "\nSend an amount to a given address.\n" +
@@ -457,7 +456,6 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
                             "5. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
                             "                             The recipient will receive less Dynamic than you enter in the amount field.\n"
                             "6. \"use_is\"      (bool, optional) Send this transaction as InstantSend (default: false)\n"
-                            "7. \"use_ps\"      (bool, optional) Use anonymized funds only (default: false)\n"
                             "\nResult:\n"
                             "\"transactionid\"  (string) The transaction id.\n"
                             "\nExamples:\n" +
@@ -486,15 +484,12 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
         fSubtractFeeFromAmount = request.params[4].get_bool();
 
     bool fUseInstantSend = false;
-    bool fUsePrivateSend = false;
     if (request.params.size() > 5)
         fUseInstantSend = request.params[5].get_bool();
-    if (request.params.size() > 6)
-        fUsePrivateSend = request.params[6].get_bool();
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend, fUsePrivateSend);
+    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx, fUseInstantSend);
 
     return wtx.GetHash().GetHex();
 }
@@ -1004,7 +999,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     if (!EnsureWalletIsAvailable(request.fHelp))
         return NullUniValue;
 
-    if (request.fHelp || request.params.size() < 2 || request.params.size() > 8)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 7)
         throw std::runtime_error(
             "sendmany \"fromaccount\" {\"address\":amount,...} ( minconf addlocked \"comment\" [\"address\",...] subtractfeefromamount use_is use_ps )\n"
             "\nSend multiple times. Amounts are double-precision floating point numbers." +
@@ -1029,7 +1024,6 @@ UniValue sendmany(const JSONRPCRequest& request)
                             "      ,...\n"
                             "    ]\n"
                             "7. \"use_is\"                (bool, optional) Send this transaction as InstantSend (default: false)\n"
-                            "8. \"use_ps\"                (bool, optional) Use anonymized funds only (default: false)\n"
                             "\nResult:\n"
                             "\"transactionid\"            (string) The transaction id for the send. Only 1 transaction is created regardless of \n"
                             "                                    the number of addresses.\n"
@@ -1104,14 +1098,11 @@ UniValue sendmany(const JSONRPCRequest& request)
     int nChangePosRet = -1;
     std::string strFailReason;
     bool fUseInstantSend = false;
-    bool fUsePrivateSend = false;
     if (request.params.size() > 6)
         fUseInstantSend = request.params[6].get_bool();
-    if (request.params.size() > 7)
-        fUsePrivateSend = request.params[7].get_bool();
 
     bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-        NULL, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS, fUseInstantSend);
+        NULL, true, ALL_COINS, fUseInstantSend);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
@@ -1404,8 +1395,7 @@ void ListTransactions(const CWalletTx& wtx, const std::string& strAccount, int n
                 entry.push_back(Pair("involvesWatchonly", true));
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.destination);
-            std::map<std::string, std::string>::const_iterator it = wtx.mapValue.find("PS");
-            entry.push_back(Pair("category", (it != wtx.mapValue.end() && it->second == "1") ? "privatesend" : "send"));
+            entry.push_back(Pair("category", "send"));
             entry.push_back(Pair("amount", ValueFromAmount(-s.amount)));
             if (pwalletMain->mapAddressBook.count(s.destination))
                 entry.push_back(Pair("label", pwalletMain->mapAddressBook[s.destination].name));
@@ -1982,7 +1972,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
             "\nExamples:\n"
             "\nUnlock the wallet for 60 seconds\n" +
             HelpExampleCli("walletpassphrase", "\"my pass phrase\" 60") +
-            "\nUnlock the wallet for 60 seconds but allow PrivateSend mixing only\n" + HelpExampleCli("walletpassphrase", "\"my pass phrase\" 60 true") +
+            "\nUnlock the wallet for 60 seconds\n" + HelpExampleCli("walletpassphrase", "\"my pass phrase\" 60 true") +
             "\nLock the wallet again (before 60 seconds)\n" + HelpExampleCli("walletlock", "") +
             "\nAs json rpc call\n" + HelpExampleRpc("walletpassphrase", "\"my pass phrase\", 60"));
 
@@ -2102,7 +2092,6 @@ UniValue walletlock(const JSONRPCRequest& request)
 
     return NullUniValue;
 }
-
 
 UniValue encryptwallet(const JSONRPCRequest& request)
 {
@@ -2310,46 +2299,6 @@ UniValue settxfee(const JSONRPCRequest& request)
     return true;
 }
 
-UniValue setprivatesendrounds(const JSONRPCRequest& request)
-{
-    if (!EnsureWalletIsAvailable(request.fHelp))
-        return NullUniValue;
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "setprivatesendrounds rounds\n"
-            "\nSet the number of rounds for PrivateSend mixing.\n"
-            "\nArguments:\n"
-            "1. rounds         (numeric, required) The default number of rounds is " +
-            std::to_string(DEFAULT_PRIVATESEND_ROUNDS) +
-            " Cannot be more than " + std::to_string(MAX_PRIVATESEND_ROUNDS) + " nor less than " + std::to_string(MIN_PRIVATESEND_ROUNDS) +
-            "\nExamples:\n" + HelpExampleCli("setprivatesendrounds", "4") + HelpExampleRpc("setprivatesendrounds", "16"));
-    int nRounds = request.params[0].get_int();
-    if (nRounds > MAX_PRIVATESEND_ROUNDS || nRounds < MIN_PRIVATESEND_ROUNDS)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid number of rounds");
-    privateSendClient.nPrivateSendRounds = nRounds;
-    return NullUniValue;
-}
-UniValue setprivatesendamount(const JSONRPCRequest& request)
-{
-    if (!EnsureWalletIsAvailable(request.fHelp))
-        return NullUniValue;
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "setprivatesendamount amount\n"
-            "\nSet the goal amount in " +
-            CURRENCY_UNIT + " for PrivateSend mixing.\n"
-                            "\nArguments:\n"
-                            "1. amount         (numeric, required) The default amount is " +
-            std::to_string(DEFAULT_PRIVATESEND_AMOUNT) +
-            " Cannot be more than " + std::to_string(MAX_PRIVATESEND_AMOUNT) + " nor less than " + std::to_string(MIN_PRIVATESEND_AMOUNT) +
-            "\nExamples:\n" + HelpExampleCli("setprivatesendamount", "500") + HelpExampleRpc("setprivatesendamount", "208"));
-    int nAmount = request.params[0].get_int();
-    if (nAmount > MAX_PRIVATESEND_AMOUNT || nAmount < MIN_PRIVATESEND_AMOUNT)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount of " + CURRENCY_UNIT + " as mixing goal amount");
-    privateSendClient.nPrivateSendAmount = nAmount;
-    return NullUniValue;
-}
-
 UniValue getwalletinfo(const JSONRPCRequest& request)
 {
     if (!EnsureWalletIsAvailable(request.fHelp))
@@ -2363,18 +2312,16 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
             "{\n"
             "  \"walletversion\": xxxxx,     (numeric) the wallet version\n"
             "  \"balance\": xxxxxxx,         (numeric) the total confirmed balance of the wallet in " +
-            CURRENCY_UNIT + "\n" + (!fLiteMode ? "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized dash balance of the wallet in " + CURRENCY_UNIT + "\n" : "") +
-            "  \"unconfirmed_balance\": xxx, (numeric) the total unconfirmed balance of the wallet in " + CURRENCY_UNIT + "\n"
-                                                                                                                          "  \"immature_balance\": xxxxxx, (numeric) the total immature balance of the wallet in " +
-            CURRENCY_UNIT + "\n"
+            CURRENCY_UNIT + "\n" + 
+            "  \"unconfirmed_balance\": xxx, (numeric) the total unconfirmed balance of the wallet in " + CURRENCY_UNIT + "\n" 
+            "  \"immature_balance\": xxxxxx, (numeric) the total immature balance of the wallet in " + CURRENCY_UNIT + "\n"
                             "  \"txcount\": xxxxxxx,         (numeric) the total number of transactions in the wallet\n"
                             "  \"keypoololdest\": xxxxxx,    (numeric) the timestamp (seconds since Unix epoch) of the oldest pre-generated key in the key pool\n"
                             "  \"keypoolsize\": xxxx,        (numeric) how many new keys are pre-generated (only counts external keys)\n"
                             "  \"keypoolsize_hd_internal\": xxxx, (numeric) how many new keys are pre-generated for internal use (used for change outputs, only appears if the wallet is using this feature, otherwise external keys are used)\n"
                             "  \"keys_left\": xxxx,          (numeric) how many new keys are left since last automatic backup\n"
                             "  \"unlocked_until\": ttt,      (numeric) the timestamp in seconds since epoch (midnight Jan 1 1970 GMT) that the wallet is unlocked for transfers, or 0 if the wallet is locked\n"
-                            "  \"paytxfee\": x.xxxx,         (numeric) the transaction fee configuration, set in " +
-            CURRENCY_UNIT + "/kB\n"
+                            "  \"paytxfee\": x.xxxx,         (numeric) the transaction fee configuration, set in " + CURRENCY_UNIT + "/kB\n"
                             "  \"hdchainid\": \"<hash>\",      (string) the ID of the HD chain\n"
                             "  \"hdaccountcount\": xxx,      (numeric) how many accounts of the HD chain are in this wallet\n"
                             "    [\n"
@@ -2396,8 +2343,6 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
     obj.push_back(Pair("balance", ValueFromAmount(pwalletMain->GetBalance())));
-    if (!fLiteMode)
-        obj.push_back(Pair("privatesend_balance", ValueFromAmount(pwalletMain->GetAnonymizedBalance())));
     obj.push_back(Pair("unconfirmed_balance", ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("immature_balance", ValueFromAmount(pwalletMain->GetImmatureBalance())));
     obj.push_back(Pair("txcount", (int)pwalletMain->mapWallet.size()));
@@ -2623,7 +2568,6 @@ UniValue listunspent(const JSONRPCRequest& request)
         entry.push_back(Pair("confirmations", out.nDepth));
         entry.push_back(Pair("spendable", out.fSpendable));
         entry.push_back(Pair("solvable", out.fSolvable));
-        entry.push_back(Pair("ps_rounds", pwalletMain->GetOutpointPrivateSendRounds(COutPoint(out.tx->GetHash(), out.i))));
         results.push_back(entry);
     }
 
@@ -2794,8 +2738,6 @@ extern UniValue importmulti(const JSONRPCRequest& request);
 extern UniValue dumphdinfo(const JSONRPCRequest& request);
 extern UniValue importelectrumwallet(const JSONRPCRequest& request);
 
-extern UniValue privatesend(const JSONRPCRequest& request);
-
 static const CRPCCommand commands[] =
     {
         //  category              name                        actor (function)           okSafe  argNames
@@ -2841,8 +2783,6 @@ static const CRPCCommand commands[] =
         {"wallet", "sendmany", &sendmany, false, {"fromaccount", "amounts", "minconf", "addlocked", "comment", "subtractfeefrom"}},
         {"wallet", "sendtoaddress", &sendtoaddress, false, {"address", "amount", "comment", "comment_to", "subtractfeefromamount"}},
         {"wallet", "setaccount", &setaccount, true, {"address", "account"}},
-        {"wallet", "setprivatesendrounds", &setprivatesendrounds, true, {"rounds"}},
-        {"wallet", "setprivatesendamount", &setprivatesendamount, true, {"amount"}},
         {"wallet", "settxfee", &settxfee, true, {"amount"}},
         {"wallet", "signmessage", &signmessage, true, {"address", "message"}},
         {"wallet", "walletlock", &walletlock, true, {}},

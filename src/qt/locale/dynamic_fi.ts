@@ -594,7 +594,7 @@ Osoite: %4
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <source>Total: %1 (IS compatible: %2 / Enabled: %3)</source>
         <translation>Yhteensä: %1 (PS yht.sopivia: %2 / Käytössä: %3)</translation>
     </message>
     <message>

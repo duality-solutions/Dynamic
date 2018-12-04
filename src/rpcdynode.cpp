@@ -14,9 +14,8 @@
 #include "netbase.h"
 #include "validation.h"
 #ifdef ENABLE_WALLET
-#include "privatesend-client.h"
+#include "instantsend.h"
 #endif // ENABLE_WALLET
-#include "privatesend-server.h"
 #include "rpcserver.h"
 #include "util.h"
 #include "utilmoneystr.h"
@@ -29,97 +28,6 @@
 UniValue dynodelist(const JSONRPCRequest& request);
 
 bool EnsureWalletIsAvailable(bool avoidException);
-
-#ifdef ENABLE_WALLET
-void EnsureWalletIsUnlocked();
-
-UniValue privatesend(const JSONRPCRequest& request)
-{
-    if (!EnsureWalletIsAvailable(request.fHelp))
-        return NullUniValue;
-
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "privatesend \"command\"\n"
-            "\nArguments:\n"
-            "1. \"command\"        (string or set of strings, required) The command to execute\n"
-            "\nAvailable commands:\n"
-            "  start       - Start mixing\n"
-            "  stop        - Stop mixing\n"
-            "  reset       - Reset mixing\n");
-
-    if (fDynodeMode)
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Client-side mixing is not supported on dynodes");
-
-    if (request.params[0].get_str() == "start") {
-        {
-            LOCK(pwalletMain->cs_wallet);
-            if (pwalletMain->IsLocked(true))
-                throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
-        }
-
-        privateSendClient.fEnablePrivateSend = true;
-        bool result = privateSendClient.DoAutomaticDenominating(*g_connman);
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + privateSendClient.GetStatuses() + ", will retry"));
-    }
-
-    if (request.params[0].get_str() == "stop") {
-        privateSendClient.fEnablePrivateSend = false;
-        return "Mixing was stopped";
-    }
-
-    if (request.params[0].get_str() == "reset") {
-        privateSendClient.ResetPool();
-        return "Mixing was reset";
-    }
-
-    return "Unknown command, please see \"help privatesend\"";
-}
-#endif // ENABLE_WALLET
-
-UniValue getpoolinfo(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 0)
-        throw std::runtime_error(
-            "getpoolinfo\n"
-            "Returns an object containing mixing pool related information.\n");
-
-#ifdef ENABLE_WALLET
-    CPrivateSendBaseManager* pprivateSendBaseManager = fDynodeMode ? (CPrivateSendBaseManager*)&privateSendServer : (CPrivateSendBaseManager*)&privateSendClient;
-
-    UniValue obj(UniValue::VOBJ);
-    // TODO:
-    // obj.push_back(Pair("state",              pprivateSendBase->GetStateString()));
-    obj.push_back(Pair("queue", pprivateSendBaseManager->GetQueueSize()));
-    // obj.push_back(Pair("entries",            pprivateSendBase->GetEntriesCount()));
-    obj.push_back(Pair("status", privateSendClient.GetStatuses()));
-
-    std::vector<dynode_info_t> vecDnInfo;
-    if (privateSendClient.GetMixingDynodesInfo(vecDnInfo)) {
-        UniValue pools(UniValue::VARR);
-        for (const auto& dnInfo : vecDnInfo) {
-            UniValue pool(UniValue::VOBJ);
-            pool.push_back(Pair("outpoint", dnInfo.outpoint.ToStringShort()));
-            pool.push_back(Pair("addr", dnInfo.addr.ToString()));
-            pools.push_back(pool);
-        }
-        obj.push_back(Pair("pools", pools));
-    }
-
-    if (pwalletMain) {
-        obj.push_back(Pair("keys_left", pwalletMain->nKeysLeftSinceAutoBackup));
-        obj.push_back(Pair("warnings", pwalletMain->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING ? "WARNING: keypool is almost depleted!" : ""));
-    }
-#else  // ENABLE_WALLET
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("state", privateSendServer.GetStateString()));
-    obj.push_back(Pair("queue", privateSendServer.GetQueueSize()));
-    obj.push_back(Pair("entries", privateSendServer.GetEntriesCount()));
-#endif // ENABLE_WALLET
-
-    return obj;
-}
-
 
 UniValue dynode(const JSONRPCRequest& request)
 {
@@ -148,7 +56,7 @@ UniValue dynode(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"command\"        (string or set of strings, required) The command to execute\n"
             "\nAvailable commands:\n"
-            "  count        - Get information about number of dynodes (DEPRECATED options: 'total', 'ps', 'enabled', 'qualify', 'all')\n"
+            "  count        - Get information about number of dynodes (DEPRECATED options: 'total', 'is', 'enabled', 'qualify', 'all')\n"
             "  current      - Print info on current dynode winner to be paid the next block (calculated locally)\n"
             "  genkey       - Generate new dynodepairingkey\n"
 #ifdef ENABLE_WALLET
@@ -199,14 +107,14 @@ UniValue dynode(const JSONRPCRequest& request)
         dnodeman.GetNextDynodeInQueueForPayment(true, nCount, dnInfo);
 
         int total = dnodeman.size();
-        int ps = dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
+        int is = dnodeman.CountEnabled(MIN_INSTANTSEND_PROTO_VERSION);
         int enabled = dnodeman.CountEnabled();
 
         if (request.params.size() == 1) {
             UniValue obj(UniValue::VOBJ);
 
             obj.push_back(Pair("total", total));
-            obj.push_back(Pair("ps_compatible", ps));
+            obj.push_back(Pair("is_compatible", is));
             obj.push_back(Pair("enabled", enabled));
             obj.push_back(Pair("qualify", nCount));
 
@@ -218,8 +126,8 @@ UniValue dynode(const JSONRPCRequest& request)
         if (strMode == "total")
             return total;
 
-        if (strMode == "ps")
-            return ps;
+        if (strMode == "is")
+            return is;
 
         if (strMode == "enabled")
             return enabled;
@@ -228,8 +136,8 @@ UniValue dynode(const JSONRPCRequest& request)
             return nCount;
 
         if (strMode == "all")
-            return strprintf("Total: %d (PS Compatible: %d / Enabled: %d / Qualify: %d)",
-                total, ps, enabled, nCount);
+            return strprintf("Total: %d (IS Compatible: %d / Enabled: %d / Qualify: %d)",
+                total, is, enabled, nCount);
     }
 
     if (strCommand == "current" || strCommand == "winner") {
@@ -816,7 +724,6 @@ UniValue dynodebroadcast(const JSONRPCRequest& request)
                 resultObj.push_back(Pair("vchSig", EncodeBase64(&dnb.vchSig[0], dnb.vchSig.size())));
                 resultObj.push_back(Pair("sigTime", dnb.sigTime));
                 resultObj.push_back(Pair("protocolVersion", dnb.nProtocolVersion));
-                resultObj.push_back(Pair("nLastPsq", dnb.nLastPsq));
 
                 UniValue lastPingObj(UniValue::VOBJ);
                 lastPingObj.push_back(Pair("outpoint", dnb.lastPing.dynodeOutpoint.ToStringShort()));
@@ -913,11 +820,7 @@ static const CRPCCommand commands[] =
         {"dynamic", "dynode", &dynode, true, {}},
         {"dynamic", "dynodelist", &dynodelist, true, {}},
         {"dynamic", "dynodebroadcast", &dynodebroadcast, true, {}},
-        {"dynamic", "getpoolinfo", &getpoolinfo, true, {}},
         {"dynamic", "sentinelping", &sentinelping, true, {}},
-#ifdef ENABLE_WALLET
-        {"dynamic", "privatesend", &privatesend, false, {}},
-#endif // ENABLE_WALLET
 };
 
 void RegisterDynodeRPCCommands(CRPCTable& t)

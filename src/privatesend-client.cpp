@@ -834,121 +834,6 @@ bool CPrivateSendClientSession::DoAutomaticDenominating(CConnman& connman, bool 
         return false;
     }
 
-    CAmount nBalanceNeedsAnonymized;
-    CAmount nValueMin = CPrivateSend::GetSmallestDenomination();
-    {
-        LOCK2(cs_main, pwalletMain->cs_wallet);
-
-        if (!fDryRun && pwalletMain->IsLocked(true)) {
-            strAutoDenomResult = _("Wallet is locked.");
-            return false;
-        }
-
-        if (GetEntriesCount() > 0) {
-            strAutoDenomResult = _("Mixing in progress...");
-            return false;
-        }
-
-        TRY_LOCK(cs_privatesend, lockPS);
-        if (!lockPS) {
-            strAutoDenomResult = _("Lock is already in place.");
-            return false;
-        }
-
-        if (dnodeman.size() == 0) {
-            LogPrint("privatesend", "CPrivateSendClientSession::DoAutomaticDenominating -- No Dynodes detected\n");
-            strAutoDenomResult = _("No Dynodes detected.");
-            return false;
-        }
-
-        // if there are no confirmed PS collateral inputs yet
-        if (!pwalletMain->HasCollateralInputs()) {
-            // should have some additional amount for them
-            nValueMin += CPrivateSend::GetMaxCollateralAmount();
-        }
-
-        // including denoms but applying some restrictions
-        nBalanceNeedsAnonymized = pwalletMain->GetNeedsToBeAnonymizedBalance(nValueMin);
-
-        // anonymizable balance is way too small
-        if (nBalanceNeedsAnonymized < nValueMin) {
-            LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- Not enough funds to anonymize\n");
-            strAutoDenomResult = _("Not enough funds to anonymize.");
-            return false;
-        }
-
-        // excluding denoms
-        CAmount nBalanceAnonimizableNonDenom = pwalletMain->GetAnonymizableBalance(true);
-        // denoms
-        CAmount nBalanceDenominatedConf = pwalletMain->GetDenominatedBalance();
-        CAmount nBalanceDenominatedUnconf = pwalletMain->GetDenominatedBalance(true);
-        CAmount nBalanceDenominated = nBalanceDenominatedConf + nBalanceDenominatedUnconf;
-
-        LogPrint("privatesend", "CPrivateSendClientSession::DoAutomaticDenominating -- nValueMin: %f, nBalanceNeedsAnonymized: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominatedConf: %f, nBalanceDenominatedUnconf: %f, nBalanceDenominated: %f\n",
-            (float)nValueMin / COIN,
-            (float)nBalanceNeedsAnonymized / COIN,
-            (float)nBalanceAnonimizableNonDenom / COIN,
-            (float)nBalanceDenominatedConf / COIN,
-            (float)nBalanceDenominatedUnconf / COIN,
-            (float)nBalanceDenominated / COIN);
-
-        if (fDryRun)
-            return true;
-
-        // Check if we have should create more denominated inputs i.e.
-        // there are funds to denominate and denominated balance does not exceed
-        // max amount to mix yet.
-        if (nBalanceAnonimizableNonDenom >= nValueMin + CPrivateSend::GetCollateralAmount() && nBalanceDenominated < privateSendClient.nPrivateSendAmount * COIN)
-            return CreateDenominated(connman);
-
-        //check if we have the collateral sized inputs
-        if (!pwalletMain->HasCollateralInputs())
-            return !pwalletMain->HasCollateralInputs(false) && MakeCollateralAmounts(connman);
-
-        if (nSessionID) {
-            strAutoDenomResult = _("Mixing in progress...");
-            return false;
-        }
-
-        // Initial phase, find a Dynode
-        // Clean if there is anything left from previous session
-        UnlockCoins();
-        keyHolderStorage.ReturnAll();
-        SetNull();
-
-        // should be no unconfirmed denoms in non-multi-session mode
-        if (!privateSendClient.fPrivateSendMultiSession && nBalanceDenominatedUnconf > 0) {
-            LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- Found unconfirmed denominated outputs, will wait till they confirm to continue.\n");
-            strAutoDenomResult = _("Found unconfirmed denominated outputs, will wait till they confirm to continue.");
-            return false;
-        }
-
-        //check our collateral and create new if needed
-        std::string strReason;
-        if (txMyCollateral == CMutableTransaction()) {
-            if (!pwalletMain->CreateCollateralTransaction(txMyCollateral, strReason)) {
-                LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- create collateral error:%s\n", strReason);
-                return false;
-            }
-        } else {
-            if (!CPrivateSend::IsCollateralValid(txMyCollateral)) {
-                LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- invalid collateral, recreating...\n");
-                if (!pwalletMain->CreateCollateralTransaction(txMyCollateral, strReason)) {
-                    LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- create collateral error: %s\n", strReason);
-                    return false;
-                }
-            }
-        }
-    } // LOCK2(cs_main, pwalletMain->cs_wallet);
-    bool fUseQueue = GetRandInt(100) > 33;
-    // don't use the queues all of the time for mixing unless we are a liquidity provider
-    if ((privateSendClient.nLiquidityProvider || fUseQueue) && JoinExistingQueue(nBalanceNeedsAnonymized, connman))
-        return true;
-    // do not initiate queue if we are a liquidity provider to avoid useless inter-mixing
-    if (privateSendClient.nLiquidityProvider)
-        return false;
-    if (StartNewQueue(nValueMin, nBalanceNeedsAnonymized, connman))
-        return true;
     strAutoDenomResult = _("No compatible Dynode found.");
     return false;
 }
@@ -1481,7 +1366,7 @@ bool CPrivateSendClientSession::CreateDenominated(CConnman& connman)
     // Knowing that each CTxIn is at least 148b big, 400 inputs should take 400 x ~148b = ~60kB.
     // This still leaves more than enough room for another data of typical CreateDenominated tx.
     std::vector<CompactTallyItem> vecTally;
-    if (!pwalletMain->SelectCoinsGroupedByAddresses(vecTally, true, true, true, 400)) {
+    if (!pwalletMain->SelectCoinsGroupedByAddresses(vecTally, true, true, 400)) {
         LogPrint("privatesend", "CPrivateSendClientSession::CreateDenominated -- SelectCoinsGroupedByAddresses can't find any inputs!\n");
         return false;
     }

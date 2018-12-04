@@ -594,7 +594,7 @@ Address: %4
 <context>
     <name>ClientModel</name>
     <message>
-        <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
+        <source>Total: %1 (IS compatible: %2 / Enabled: %3)</source>
         <translation>Общо: %1 (PS съвместими: %2 / Позволени: %3)</translation>
     </message>
     <message>

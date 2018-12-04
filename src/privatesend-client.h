@@ -18,15 +18,15 @@ static const int DENOMS_COUNT_MAX = 100;
 
 static const int MIN_PRIVATESEND_SESSIONS = 1;
 static const int MIN_PRIVATESEND_ROUNDS = 2;
-static const int MIN_PRIVATESEND_AMOUNT = 2;
+static const int MIN_PRIVATESEND_AMOUNT = 0;
 static const int MIN_PRIVATESEND_LIQUIDITY = 0;
 static const int MAX_PRIVATESEND_SESSIONS = 10;
 static const int MAX_PRIVATESEND_ROUNDS = 16;
-static const int MAX_PRIVATESEND_AMOUNT = 1000;
+static const int MAX_PRIVATESEND_AMOUNT = 0;
 static const int MAX_PRIVATESEND_LIQUIDITY = 100;
 static const int DEFAULT_PRIVATESEND_SESSIONS = 4;
 static const int DEFAULT_PRIVATESEND_ROUNDS = 4;
-static const int DEFAULT_PRIVATESEND_AMOUNT = 1000;
+static const int DEFAULT_PRIVATESEND_AMOUNT = 0;
 static const int DEFAULT_PRIVATESEND_LIQUIDITY = 0;
 
 static const bool DEFAULT_PRIVATESEND_MULTISESSION = false;
