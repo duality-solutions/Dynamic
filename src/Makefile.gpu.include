@@ -49,6 +49,12 @@ nvcc_FLAGS = -I. $(CUDA_CFLAGS) $(NVCCFLAGS)
 .cu.o:
 	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
 
+crypto/argon2gpu/cuda/blake2b-kernels.cu.o: crypto/argon2gpu/cuda/blake2b-kernels.cu
+	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
+
+crypto/argon2gpu/cuda/blake2b-kernels.o: crypto/argon2gpu/cuda/blake2b-kernels.cu.o
+	$(NVCC) $(nvcc_FLAGS) -dlink -o $@ $<
+	
 crypto/argon2gpu/cuda/kernels.cu.o: crypto/argon2gpu/cuda/kernels.cu
 	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
 
