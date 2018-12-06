@@ -336,9 +336,9 @@ __global__ void argon2_initialize_kernel(struct block* memory, uint32_t startNon
 
 	const uint32_t nonce = 0; //(blockIdx.x*blockDim.y+threadIdx.y) + startNonce;
 
-	computeInitialHash_1w(d_data, buffer, nonce);
+	computeInitialHash(d_data, buffer, nonce);
 
-	fillFirstBlock_1w(memory, buffer);
+	fillFirstBlock(memory, buffer);
 
 }
 
@@ -391,7 +391,7 @@ __global__ void argon2_finalize_kernel(
 
 }
 
-__host__ void setData(const void* data) {
+__host__ void set_data(const void* data) {
 
 	cudaMemcpyToSymbol(d_data, data, INPUT_LEN);
 

@@ -5,6 +5,9 @@
 
 #include "crypto/argon2gpu/cuda/cuda-exception.h"
 #include "crypto/argon2gpu/cuda/kernels.h"
+#include "crypto/argon2gpu/cuda/blake2b-kernels.h"
+
+#include <limits>
 
 #include <stdexcept>
 #ifndef NDEBUG
@@ -808,7 +811,8 @@ KernelRunner::KernelRunner(uint32_t type, uint32_t version, uint32_t passes, uin
     : type(type), version(version), passes(passes), lanes(lanes),
       segmentBlocks(segmentBlocks), batchSize(batchSize), bySegment(bySegment), deviceIndex(deviceIndex),
       precompute(precompute), stream(nullptr), memory(nullptr),
-      refs(nullptr), start(nullptr), end(nullptr)
+      refs(nullptr), start(nullptr), end(nullptr),
+      res_nonce(0), d_res_nonce(nullptr)
 {
     setCudaDevice(deviceIndex);
 
@@ -1064,6 +1068,43 @@ void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
                     memory_blocks, passes, lanes, segmentBlocks);
         }
     }
+}
+
+
+void KernelRunner::init(const void* input){
+
+	setCudaDevice(deviceIndex);
+	CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
+    CudaException::check(cudaMemset(d_res_nonce, std::numeric_limits<uint32_t>::max(), sizeof(uint32_t)));
+
+    set_data(input);
+}
+
+void KernelRunner::fillFirstBlocks(uint32_t startNonce)
+{
+    uint32_t jobsPerBlock = (batchSize<16) ? 1 : 16;
+    dim3 blocks = dim3(batchSize / jobsPerBlock, 1, 1);
+    dim3 threads = dim3(lanes*2, jobsPerBlock, 1);
+
+    argon2_initialize_kernel<<<blocks,threads>>>((struct block*)memory, startNonce);
+
+}
+
+void KernelRunner::finalize(const uint32_t startNonce, const uint32_t target)
+{
+    argon2_finalize_kernel<<<batchSize,4>>>((struct block*)memory, startNonce, target, d_res_nonce);
+
+    CudaException::check(cudaDeviceSynchronize());
+
+
+
+}
+
+
+uint32_t KernelRunner::readResultNonce()
+{
+    CudaException::check(cudaMemcpy(&res_nonce, d_res_nonce, sizeof(uint32_t), cudaMemcpyDeviceToHost));
+    return res_nonce;
 }
 
 void KernelRunner::run(uint32_t lanesPerBlock, uint32_t jobsPerBlock)

@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2018-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>,
+ * 						   Alireza Jahandideh <ar.jahandideh@gmail.com>
  * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
  * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
  *
@@ -47,6 +49,9 @@ class KernelRunner
     void *memory;
     void *refs;
 
+    std::uint32_t res_nonce;
+    std::uint32_t *d_res_nonce;
+
     void precomputeRefs();
 
     void runKernelSegment(std::uint32_t lanesPerBlock,
@@ -75,6 +80,12 @@ class KernelRunner
 
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
     float finish();
+
+    void init(const void* input);
+	void fillFirstBlocks(const std::uint32_t start_nonce);
+	void finalize(const std::uint32_t startNonce, const std::uint32_t target);
+	std::uint32_t readResultNonce();
+
 };
 
 } // namespace cuda
