@@ -795,6 +795,17 @@ __global__ void argon2_kernel_oneshot(
         }
         mem_curr = mem_lane;
     }
+
+    // xor last column and store the result for the finalize step
+    __syncthreads();
+    thread = threadIdx.x + threadIdx.y * THREADS_PER_LANE;
+    uint32_t* mem_last_col = (uint32_t*)(memory + lanes * ( lane_blocks - 1 ));
+    uint32_t buf = 0;
+    for (uint32_t i=0; i<lanes; i++){
+        buf ^= mem_last_col[thread+i*256];
+    }
+
+    ((uint32_t*)memory)[thread] = buf;
 }
 
 
@@ -825,6 +836,7 @@ KernelRunner::KernelRunner(uint32_t type, uint32_t version, uint32_t passes, uin
 #endif
 
     CudaException::check(cudaMalloc(&memory, memorySize));
+	CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
 
     CudaException::check(cudaEventCreate(&start));
     CudaException::check(cudaEventCreate(&end));
@@ -1072,11 +1084,8 @@ void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
 
 
 void KernelRunner::init(const void* input){
-
 	setCudaDevice(deviceIndex);
-	CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
     CudaException::check(cudaMemset(d_res_nonce, std::numeric_limits<uint32_t>::max(), sizeof(uint32_t)));
-
     set_data(input);
 }
 
@@ -1090,13 +1099,14 @@ void KernelRunner::fillFirstBlocks(uint32_t startNonce)
 
 }
 
-void KernelRunner::finalize(const uint32_t startNonce, const uint32_t target)
+void KernelRunner::finalize(const uint32_t startNonce, const uint64_t target)
 {
-    argon2_finalize_kernel<<<batchSize,4>>>((struct block*)memory, startNonce, target, d_res_nonce);
+	uint32_t jobsPerBlock = (batchSize<16) ? 1 : 16;
+	dim3 blocks = dim3(batchSize / jobsPerBlock, 1, 1);
+	dim3 threads = dim3(4, jobsPerBlock, 1);
+    argon2_finalize_kernel<<<blocks, threads, jobsPerBlock * 258 * sizeof(uint32_t)>>>((struct block*)memory, startNonce, target, d_res_nonce);
 
     CudaException::check(cudaDeviceSynchronize());
-
-
 
 }
 
@@ -1109,7 +1119,7 @@ uint32_t KernelRunner::readResultNonce()
 
 void KernelRunner::run(uint32_t lanesPerBlock, uint32_t jobsPerBlock)
 {
-    setCudaDevice(deviceIndex);
+	setCudaDevice(deviceIndex);
     CudaException::check(cudaEventRecord(start, stream));
 
     if (bySegment) {

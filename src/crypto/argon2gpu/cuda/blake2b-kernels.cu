@@ -67,8 +67,8 @@ __device__ void load_block(uint32_t* dest, uint32_t* src, uint32_t idx) {
 __device__
 void blake2b_compress_1w(
 		uint64x8* state, const uint64_t* m,
-		const uint32_t step, const bool lastChunk,
-		const size_t lastChunkSize)
+		const uint32_t step, const bool lastChunk = false,
+		const size_t lastChunkSize = 0)
 {
 
 	uint64_t v0, v1, v2, v3, v4, v5, v6,
@@ -132,7 +132,7 @@ void blake2b_compress_1w(
 __device__ void blake2b_compress_4w(
 		struct partialState* state, uint64_t* m,
 		uint32_t step, uint32_t idx,
-		bool lastChunk, size_t lastChunkSize)
+		bool lastChunk = false, size_t lastChunkSize = 0)
 {
 
 	uint64_t a, b, c, d;
@@ -217,22 +217,21 @@ __device__ void computeInitialHash(
 	for (int i = 0; i < 19; i++)
 		buffer[7 + i] = input[i];
 
-	enc32(&buffer[26], nonce);
-
+    buffer[26] = nonce;
 	buffer[27] = 80;
 
 #pragma unroll
 	for (int i = 0; i < 4; i++)
 		buffer[28 + i] = input[i];
 
-	blake2b_compress_1w(&state, (uint64_t*) buffer, 1, false, 72);
+	blake2b_compress_1w(&state, (uint64_t*) buffer, 1);
 
 
 #pragma unroll
 	for (int i = 0; i < 15; i++)
 		buffer[i] = input[i + 4];
 
-	enc32(&buffer[15], nonce);
+	buffer[15] = nonce;
 
 #pragma unroll
 	for (int i = 16; i < 32; i++)
@@ -273,7 +272,7 @@ __device__ void fillFirstBlock(struct block* memory, uint32_t* buffer) {
 	buffer[17] = row;
 	buffer[18] = column;
 
-	blake2b_compress_1w(&state, (uint64_t*) buffer, 1, true, 76);
+	blake2b_compress_1w(&state, buffer_64, 1, true, 76);
 
 	memCell->data[0] = state.s0;
 	memCell->data[1] = state.s1;
@@ -304,7 +303,7 @@ __device__ void fillFirstBlock(struct block* memory, uint32_t* buffer) {
 		state.s6 = blake2b_Init[6];
 		state.s7 = blake2b_Init[7];
 
-		blake2b_compress_1w(&state, (uint64_t*) buffer, 1, true, 64);
+		blake2b_compress_1w(&state, buffer_64, 1, true, 64);
 
 		buffer_64[0] = state.s0;
 		buffer_64[1] = state.s1;
@@ -315,10 +314,10 @@ __device__ void fillFirstBlock(struct block* memory, uint32_t* buffer) {
 		buffer_64[6] = state.s6;
 		buffer_64[7] = state.s7;
 
-		memCell->data[i << 2 + 0] = state.s0;
-		memCell->data[i << 2 + 1] = state.s1;
-		memCell->data[i << 2 + 2] = state.s2;
-		memCell->data[i << 2 + 3] = state.s3;
+		memCell->data[(i << 2) + 0] = state.s0;
+		memCell->data[(i << 2) + 1] = state.s1;
+		memCell->data[(i << 2) + 2] = state.s2;
+		memCell->data[(i << 2) + 3] = state.s3;
 
 	}
 
@@ -333,59 +332,56 @@ __global__ void argon2_initialize_kernel(struct block* memory, uint32_t startNon
 {
 
 	uint32_t buffer[32];
-
-	const uint32_t nonce = 0; //(blockIdx.x*blockDim.y+threadIdx.y) + startNonce;
+	const uint32_t nonce = (blockIdx.x*blockDim.y+threadIdx.y) + startNonce;
 
 	computeInitialHash(d_data, buffer, nonce);
-
 	fillFirstBlock(memory, buffer);
 
 }
 
 __global__ void argon2_finalize_kernel(
 		block* memory, uint32_t startNonce,
-		uint32_t target, uint32_t* resNonces)
+		uint64_t target, uint32_t* resNonces)
 {
 
-	__shared__ uint32_t input[289];
-	uint64_t* input_64 = (uint64_t*) input;
+	extern __shared__ uint32_t input_t[];
+	uint32_t* input = &(input_t[threadIdx.y*258]);
+	uint64_t* input_64=(uint64_t*)input;
 
 	uint32_t idx = threadIdx.x;
-	const uint32_t nonce = blockIdx.x + startNonce;
+	uint32_t jobId = blockIdx.x * blockDim.y + threadIdx.y;
+	uint32_t nonce = jobId + startNonce;
 
-	uint32_t* memLane = (uint32_t*) ((memory + blockIdx.x * ALGO_TOTAL_BLOCKS)
-			+ ALGO_LANES * (ALGO_LANE_LENGHT - 1));
+	uint32_t* memLane = (uint32_t*) ((memory + jobId * ALGO_TOTAL_BLOCKS));
+	partialState state;
 
 	load_block(&input[1], memLane, idx);
 
-	if (idx == 0)
-		input[0] = 32;
-
-	__syncthreads();
-
-	partialState state;
+	input[0] = 32;
 
 	state.a = blake2b_Init_928[idx];
 	state.b = blake2b_Init_928[idx + 4];
 
-	blake2b_compress_4w(&state, &input_64[0], 1, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[16], 2, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[32], 3, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[48], 4, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[64], 5, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[80], 6, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[96], 7, idx, false, 4);
-	blake2b_compress_4w(&state, &input_64[112], 8, idx, false, 4);
+	blake2b_compress_4w(&state, &input_64[0], 1, idx);
+	blake2b_compress_4w(&state, &input_64[16], 2, idx);
+	blake2b_compress_4w(&state, &input_64[32], 3, idx);
+	blake2b_compress_4w(&state, &input_64[48], 4, idx);
+	blake2b_compress_4w(&state, &input_64[64], 5, idx);
+	blake2b_compress_4w(&state, &input_64[80], 6, idx);
+	blake2b_compress_4w(&state, &input_64[96], 7, idx);
+	blake2b_compress_4w(&state, &input_64[112], 8, idx);
 
-	zero_buffer(&input[257], idx);
+	zero_buffer(&input[0], idx);
+	input[0]=input[256];
 
-	blake2b_compress_4w(&state, &input_64[128], 9, idx, true, 4);
+	blake2b_compress_4w(&state, &input_64[0], 9, idx, true, 4);
 
 	input_64[idx] = state.a;
 
 	__syncthreads();
 
-	if (idx == 0 && input[7] <= target) {
+
+	if (idx == 0 && input_64[3] <= target) {
 		resNonces[0] = nonce;
 	}
 

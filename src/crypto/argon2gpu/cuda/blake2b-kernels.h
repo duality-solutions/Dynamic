@@ -141,7 +141,7 @@ __global__ void argon2_initialize_kernel(
 
 __global__ void argon2_finalize_kernel(
 		block* memory, uint32_t startNonce,
-		uint32_t target, uint32_t* resNonces);
+		uint64_t target, uint32_t* resNonces);
 
 __host__ void set_data(const void* data);
 

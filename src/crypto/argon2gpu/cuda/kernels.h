@@ -83,7 +83,7 @@ class KernelRunner
 
     void init(const void* input);
 	void fillFirstBlocks(const std::uint32_t start_nonce);
-	void finalize(const std::uint32_t startNonce, const std::uint32_t target);
+	void finalize(const std::uint32_t startNonce, const std::uint64_t target);
 	std::uint32_t readResultNonce();
 
 };
