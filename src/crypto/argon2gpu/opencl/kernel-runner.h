@@ -40,7 +40,14 @@ private:
     cl::Buffer memoryBuffer, refsBuffer;
     cl::Event start, end;
 
+    cl::Buffer inputBuffer;
+    cl::Buffer resultBuffer;
+    cl::Kernel kernelInit;
+    cl::Kernel kernelFinal;
+
     std::size_t memorySize;
+
+    std::uint32_t res_nonce = 0;
 
     void precomputeRefs();
 
@@ -71,6 +78,11 @@ public:
 
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
     float finish();
+
+    void init(const void* input);
+	void fillFirstBlocks(const std::uint32_t startNonce);
+	void finalize(const std::uint32_t startNonce, const std::uint64_t target);
+	std::uint32_t readResultNonce();
 };
 
 } // namespace opencl
