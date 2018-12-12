@@ -109,11 +109,10 @@ CLEANFILES += $(GENERATED_KERNEL_FILES)
 	@$(MKDIR_P) $(@D)
 	@echo "namespace argon2gpu { namespace opencl { namespace code {" > $@
 	@echo "static unsigned const char $(*F)[] = {" >> $@
-	@$(HEXDUMP) -v -e '8/1 "0x%02x, "' -e '"\n"' $< | $(SED) -e 's/0x  ,//g' >> $@
+	@$(HEXDUMP) -v -e '16/1 "_x%02X" "\n"' $< | $(SED) -e 's/_/\\/g; s/\\x  //g; s/.*/    "&"/' >> $@
 	@echo "};" >> $@
 	@echo "}}}" >> $@
 	@echo "Generated $@"
-
 endif
 
 dynamicd_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)
