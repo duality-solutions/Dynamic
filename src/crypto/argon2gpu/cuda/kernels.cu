@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2018-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>
+ * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
+ * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation: either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 /* For IDE: */
 #ifndef __CUDACC__
 #define __CUDACC__
@@ -827,60 +845,11 @@ KernelRunner::KernelRunner(uint32_t type, uint32_t version, uint32_t passes, uin
 {
     setCudaDevice(deviceIndex);
 
-    // FIXME: check overflow:
     size_t memorySize = static_cast<size_t>(lanes) * segmentBlocks * ARGON2_SYNC_POINTS * ARGON2_BLOCK_SIZE * batchSize;
-
-#ifndef NDEBUG
-    std::cerr << "[INFO] Allocating " << memorySize << " bytes for memory..."
-              << std::endl;
-#endif
 
     CudaException::check(cudaMalloc(&memory, memorySize));
 	CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
 
-    CudaException::check(cudaEventCreate(&start));
-    CudaException::check(cudaEventCreate(&end));
-
-    CudaException::check(cudaStreamCreate(&stream));
-
-    if ((type == ARGON2_I || type == ARGON2_ID) && precompute) {
-        uint32_t segments =
-            type == ARGON2_ID ? lanes * (ARGON2_SYNC_POINTS / 2) : passes * lanes * ARGON2_SYNC_POINTS;
-
-        size_t refsSize = segments * segmentBlocks * sizeof(struct ref);
-
-#ifndef NDEBUG
-        std::cerr << "[INFO] Allocating " << refsSize << " bytes for refs..."
-                  << std::endl;
-#endif
-
-        CudaException::check(cudaMalloc(&refs, refsSize));
-
-        precomputeRefs();
-        CudaException::check(cudaStreamSynchronize(stream));
-    }
-}
-
-void KernelRunner::precomputeRefs()
-{
-    struct ref* refs = (struct ref*)this->refs;
-
-    uint32_t segmentAddrBlocks = (segmentBlocks + ARGON2_QWORDS_IN_BLOCK - 1) / ARGON2_QWORDS_IN_BLOCK;
-    uint32_t segments =
-        type == ARGON2_ID ? lanes * (ARGON2_SYNC_POINTS / 2) : passes * lanes * ARGON2_SYNC_POINTS;
-
-    dim3 blocks = dim3(1, segments * segmentAddrBlocks);
-    dim3 threads = dim3(THREADS_PER_LANE);
-
-    if (type == ARGON2_I) {
-        argon2_precompute_kernel<ARGON2_I>
-            <<<blocks, threads, 0, stream>>>(
-                refs, passes, lanes, segmentBlocks);
-    } else {
-        argon2_precompute_kernel<ARGON2_ID>
-            <<<blocks, threads, 0, stream>>>(
-                refs, passes, lanes, segmentBlocks);
-    }
 }
 
 KernelRunner::~KernelRunner()
@@ -902,184 +871,24 @@ KernelRunner::~KernelRunner()
     }
 }
 
-void KernelRunner::writeInputMemory(uint32_t jobId, const void* buffer)
-{
-    std::size_t memorySize = static_cast<size_t>(lanes) * segmentBlocks * ARGON2_SYNC_POINTS * ARGON2_BLOCK_SIZE;
-    std::size_t size = static_cast<size_t>(lanes) * 2 * ARGON2_BLOCK_SIZE;
-    std::size_t offset = memorySize * jobId;
-    auto mem = static_cast<uint8_t*>(memory) + offset;
-    CudaException::check(cudaMemcpyAsync(mem, buffer, size,
-        cudaMemcpyHostToDevice, stream));
-    CudaException::check(cudaStreamSynchronize(stream));
-}
-
-void KernelRunner::readOutputMemory(uint32_t jobId, void* buffer)
-{
-    std::size_t memorySize = static_cast<size_t>(lanes) * segmentBlocks * ARGON2_SYNC_POINTS * ARGON2_BLOCK_SIZE;
-    std::size_t size = static_cast<size_t>(lanes) * ARGON2_BLOCK_SIZE;
-    std::size_t offset = memorySize * (jobId + 1) - size;
-    auto mem = static_cast<uint8_t*>(memory) + offset;
-    CudaException::check(cudaMemcpyAsync(buffer, mem, size,
-        cudaMemcpyDeviceToHost, stream));
-    CudaException::check(cudaStreamSynchronize(stream));
-}
-
-void KernelRunner::runKernelSegment(uint32_t lanesPerBlock,
-    uint32_t jobsPerBlock,
-    uint32_t pass,
-    uint32_t slice)
-{
-    if (lanesPerBlock > lanes || lanes % lanesPerBlock != 0) {
-        throw std::logic_error("Invalid lanesPerBlock!");
-    }
-
-    if (jobsPerBlock > batchSize || batchSize % jobsPerBlock != 0) {
-        throw std::logic_error("Invalid jobsPerBlock!");
-    }
-
-    struct block_g* memory_blocks = (struct block_g*)memory;
-    dim3 blocks = dim3(1, lanes / lanesPerBlock, batchSize / jobsPerBlock);
-    dim3 threads = dim3(THREADS_PER_LANE, lanesPerBlock, jobsPerBlock);
-    if (type == ARGON2_I) {
-        if (precompute) {
-            struct ref* refs = (struct ref*)this->refs;
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_segment_precompute<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks,
-                        pass, slice);
-            } else {
-                argon2_kernel_segment_precompute<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks,
-                        pass, slice);
-            }
-        } else {
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_segment<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks,
-                        pass, slice);
-            } else {
-                argon2_kernel_segment<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks,
-                        pass, slice);
-            }
-        }
-    } else if (type == ARGON2_ID) {
-        if (precompute) {
-            struct ref* refs = (struct ref*)this->refs;
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_segment_precompute<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks,
-                        pass, slice);
-            } else {
-                argon2_kernel_segment_precompute<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks,
-                        pass, slice);
-            }
-        } else {
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_segment<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks,
-                        pass, slice);
-            } else {
-                argon2_kernel_segment<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks,
-                        pass, slice);
-            }
-        }
-    } else {
-        if (version == ARGON2_VERSION_10) {
-            argon2_kernel_segment<ARGON2_D, ARGON2_VERSION_10>
-                <<<blocks, threads, 0, stream>>>(
-                    memory_blocks, passes, lanes, segmentBlocks,
-                    pass, slice);
-        } else {
-            argon2_kernel_segment<ARGON2_D, ARGON2_VERSION_13>
-                <<<blocks, threads, 0, stream>>>(
-                    memory_blocks, passes, lanes, segmentBlocks,
-                    pass, slice);
-        }
-    }
-}
-
 void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
     uint32_t jobsPerBlock)
 {
-    if (lanesPerBlock != lanes) {
-        throw std::logic_error("Invalid lanesPerBlock!");
-    }
-
-    if (jobsPerBlock > batchSize || batchSize % jobsPerBlock != 0) {
-        throw std::logic_error("Invalid jobsPerBlock!");
-    }
 
     struct block_g* memory_blocks = (struct block_g*)memory;
     dim3 blocks = dim3(1, 1, batchSize / jobsPerBlock);
     dim3 threads = dim3(THREADS_PER_LANE, lanes, jobsPerBlock);
-    if (type == ARGON2_I) {
-        if (precompute) {
-            struct ref* refs = (struct ref*)this->refs;
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_oneshot_precompute<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks);
-            } else {
-                argon2_kernel_oneshot_precompute<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks);
-            }
-        } else {
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_oneshot<ARGON2_I, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks);
-            } else {
-                argon2_kernel_oneshot<ARGON2_I, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks);
-            }
-        }
-    } else if (type == ARGON2_ID) {
-        if (precompute) {
-            struct ref* refs = (struct ref*)this->refs;
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_oneshot_precompute<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks);
-            } else {
-                argon2_kernel_oneshot_precompute<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, refs, passes, lanes, segmentBlocks);
-            }
-        } else {
-            if (version == ARGON2_VERSION_10) {
-                argon2_kernel_oneshot<ARGON2_ID, ARGON2_VERSION_10>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks);
-            } else {
-                argon2_kernel_oneshot<ARGON2_ID, ARGON2_VERSION_13>
-                    <<<blocks, threads, 0, stream>>>(
-                        memory_blocks, passes, lanes, segmentBlocks);
-            }
-        }
-    } else {
-        if (version == ARGON2_VERSION_10) {
-            argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_10>
-                <<<blocks, threads, 0, stream>>>(
-                    memory_blocks, passes, lanes, segmentBlocks);
-        } else {
-            argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_13>
-                <<<blocks, threads, 0, stream>>>(
-                    memory_blocks, passes, lanes, segmentBlocks);
-        }
-    }
+
+    if (version == ARGON2_VERSION_10) {
+		argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_10>
+			<<<blocks, threads>>>(
+				memory_blocks, passes, lanes, segmentBlocks);
+	} else {
+		argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_13>
+			<<<blocks, threads>>>(
+				memory_blocks, passes, lanes, segmentBlocks);
+	}
+
 }
 
 
@@ -1120,31 +929,9 @@ uint32_t KernelRunner::readResultNonce()
 void KernelRunner::run(uint32_t lanesPerBlock, uint32_t jobsPerBlock)
 {
 	setCudaDevice(deviceIndex);
-    CudaException::check(cudaEventRecord(start, stream));
-
-    if (bySegment) {
-        for (uint32_t pass = 0; pass < passes; pass++) {
-            for (uint32_t slice = 0; slice < ARGON2_SYNC_POINTS; slice++) {
-                runKernelSegment(lanesPerBlock, jobsPerBlock, pass, slice);
-            }
-        }
-    } else {
-        runKernelOneshot(lanesPerBlock, jobsPerBlock);
-    }
-
-    CudaException::check(cudaGetLastError());
-
-    CudaException::check(cudaEventRecord(end, stream));
+	runKernelOneshot(lanesPerBlock, jobsPerBlock);
 }
 
-float KernelRunner::finish()
-{
-    CudaException::check(cudaStreamSynchronize(stream));
-
-    float time = 0.0;
-    CudaException::check(cudaEventElapsedTime(&time, start, end));
-    return time;
-}
 
 } // namespace cuda
 } // namespace argon2gpu
