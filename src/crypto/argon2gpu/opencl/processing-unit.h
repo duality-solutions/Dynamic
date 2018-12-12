@@ -57,6 +57,10 @@ public:
 
     void beginProcessing();
     void endProcessing();
+
+    std::uint32_t scanNonces(
+		const void* input, const std::uint32_t startNonce,
+		const std::uint64_t target);
 };
 
 } // namespace opencl
