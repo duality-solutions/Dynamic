@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2015-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>,
- * 						   Łukasz Kurowski <crackcomm@gmail.com>,
- * 						   Ondrej Mosnacek <omosnacek@gmail.com>
+ * Copyright (C) 2015-2019	Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 
 #ifndef ARGON2_OPENCL_PROCESSINGUNIT_H
 #define ARGON2_OPENCL_PROCESSINGUNIT_H
