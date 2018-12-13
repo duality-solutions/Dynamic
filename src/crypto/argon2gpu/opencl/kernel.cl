@@ -24,13 +24,13 @@
 #define ARGON2_SYNC_POINTS 4
 #define THREADS_PER_LANE 32
 #define QWORDS_PER_THREAD (ARGON2_QWORDS_IN_BLOCK / 32)
-
+#define ALGO_VERSION 0x10
+ 
 enum algo_params {
     ALGO_LANES = 8,
     ALGO_MCOST = 500,
     ALGO_PASSES = 2,
     ALGO_OUTLEN = 32,
-    ALGO_VERSION = 0x10,
     ALGO_TOTAL_BLOCKS = (ALGO_MCOST / (4 * ALGO_LANES)) * 4 * ALGO_LANES,
     ALGO_LANE_LENGHT = ALGO_TOTAL_BLOCKS / ALGO_LANES,
     ALGO_SEGMENT_BLOCKS = ALGO_LANE_LENGHT / 4
@@ -1554,8 +1554,24 @@ void argon2_core(
 {
     __global struct block_g *mem_ref;
     mem_ref = memory + ref_index * lanes + ref_lane;
+
+#if ALGO_VERSION == 0x10
     load_block_xor(prev, mem_ref, thread);
     move_block(tmp, prev);
+#else
+    if (pass != 0)
+    {
+        load_block(tmp, mem_curr, thread);
+        load_block_xor(prev, mem_ref, thread);
+        xor_block(tmp, prev);
+    }
+    else
+    {
+        load_block_xor(prev, mem_ref, thread);
+        move_block(tmp, prev);
+    }
+#endif
+
     shuffle_block(prev, thread, shuffle_buf);
     xor_block(prev, tmp);
     store_block(mem_curr, prev, thread);
