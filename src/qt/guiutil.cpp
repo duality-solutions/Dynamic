@@ -22,6 +22,8 @@
 #include "util.h"
 #include "validation.h" // For minRelayTxFee
 
+#include "miner/impl/miner-gpu.h"
+
 #ifdef WIN32
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
@@ -1059,9 +1061,11 @@ int CPUMaxThreads()
 
 int GPUMaxThreads()
 {
-    int nUseThreads = 8;
+    int nThreads = GPUMiner::TotalDevices();
+
+    int nUseThreads = GetArg("-genproclimit-gpu", -1);
     if (nUseThreads < 0) {
-        nUseThreads = 1;
+        nUseThreads = nThreads;
     }
     return nUseThreads;
 }
