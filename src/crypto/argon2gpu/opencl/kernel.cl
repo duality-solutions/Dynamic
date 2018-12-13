@@ -15,20 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
  
+
 #define ARGON2_BLOCK_SIZE 1024
 #define ARGON2_QWORDS_IN_BLOCK (ARGON2_BLOCK_SIZE / 8)
-#define ALGO_LANES 8
-#define ALGO_TOTAL_BLOCKS 480
 #define BLAKE2B_BLOCKBYTES 128
 #define BLAKE2B_OUTBYTES 64
 #define ARGON2_PREHASH_DIGEST_LENGTH 64
 #define ARGON2_SYNC_POINTS 4
 #define THREADS_PER_LANE 32
 #define QWORDS_PER_THREAD (ARGON2_QWORDS_IN_BLOCK / 32)
-#define ALGO_LANE_LENGHT 60
+
+enum algo_params {
+    ALGO_LANES = 8,
+    ALGO_MCOST = 500,
+    ALGO_PASSES = 2,
+    ALGO_OUTLEN = 32,
+    ALGO_VERSION = 0x10,
+    ALGO_TOTAL_BLOCKS = (ALGO_MCOST / (4 * ALGO_LANES)) * 4 * ALGO_LANES,
+    ALGO_LANE_LENGHT = ALGO_TOTAL_BLOCKS / ALGO_LANES,
+    ALGO_SEGMENT_BLOCKS = ALGO_LANE_LENGHT / 4
+};
+
 typedef unsigned int uint32_t;
 typedef unsigned long uint64_t;
 typedef unsigned char uint8_t;
+
 struct block {
     uint64_t v[ARGON2_QWORDS_IN_BLOCK];
 };
@@ -1232,12 +1243,14 @@ void computeInitialHash(
     initState(state);
     for (int i=0;i<16;i++)
         buffer[i]=0;
-    buffer[0] = 8;
-    buffer[1] = 32;
-    buffer[2] = 500;
-    buffer[3] = 2;
-    buffer[4] = 16;
+
+    buffer[0] = ALGO_LANES;
+    buffer[1] = ALGO_OUTLEN;
+    buffer[2] = ALGO_MCOST;
+    buffer[3] = ALGO_PASSES;
+    buffer[4] = ALGO_VERSION;
     buffer[6] = 80;
+    
     for (int i=0;i<19;i++)
         buffer[7+i]=input[i];
     buffer[26] = nonce;
