@@ -65,7 +65,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->sliderGPUGraphSampleTime->setMaximum(6);
 
     ui->sliderCPUCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
-    ui->sliderGPUCores->setToolTip(tr("Use the slider to select the amount of GPU threads to use"));
+    ui->sliderGPUCores->setToolTip(tr("Use the slider to select the amount of GPU devices to use"));
     ui->labelCPUMinerHashRate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
     ui->labelGPUMinerHashRate->setToolTip(tr("This shows the hashrate of your GPU whilst mining"));
     ui->labelNetHashRateCPU->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
