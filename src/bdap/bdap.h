@@ -43,6 +43,7 @@ static constexpr unsigned int MAX_KEY_LENGTH              = 156;
 static constexpr unsigned int MAX_DESCRIPTION_LENGTH      = 256;
 static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
+static constexpr unsigned int MAX_CERTIFICATE_CATEGORY    = 32;
 static constexpr unsigned int MAX_SIGNATURE_LENGTH        = 65; // https://bitcoin.stackexchange.com/questions/12554/why-the-signature-is-always-65-13232-bytes-long
 static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 25; // Pay per byte for hosting on chain

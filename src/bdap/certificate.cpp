@@ -3,20 +3,20 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bdap/entrycertificate.h"
+#include "bdap/certificate.h"
 
 #include "hash.h"
 #include "script/script.h"
 #include "streams.h"
 
-void CEntryCertificate::Serialize(std::vector<unsigned char>& vchData) 
+void CCertificate::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsEntryCertificate(SER_NETWORK, PROTOCOL_VERSION);
     dsEntryCertificate << *this;
     vchData = std::vector<unsigned char>(dsEntryCertificate.begin(), dsEntryCertificate.end());
 }
 
-bool CEntryCertificate::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
+bool CCertificate::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
 {
     try {
         CDataStream dsEntryCertificate(vchData, SER_NETWORK, PROTOCOL_VERSION);
@@ -38,7 +38,7 @@ bool CEntryCertificate::UnserializeFromData(const std::vector<unsigned char>& vc
     return true;
 }
 
-bool CEntryCertificate::UnserializeFromTx(const CTransactionRef& tx) 
+bool CCertificate::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
@@ -55,7 +55,7 @@ bool CEntryCertificate::UnserializeFromTx(const CTransactionRef& tx)
     return true;
 }
 
-bool CEntryCertificate::ValidateValues(std::string& errorMessage)
+bool CCertificate::ValidateValues(std::string& errorMessage)
 {
     // check certificate owner path
     std::string strOwnerFullPath = stringFromVch(OwnerFullPath);
@@ -70,6 +70,14 @@ bool CEntryCertificate::ValidateValues(std::string& errorMessage)
     if (strName.length() > MAX_CERTIFICATE_NAME) 
     {
         errorMessage = "Invalid BDAP Certificate name. Can not have more than " + std::to_string(MAX_CERTIFICATE_NAME) + " characters.";
+        return false;
+    }
+
+    // check category length
+    std::string strCategory = stringFromVch(Category);
+    if (strCategory.length() > MAX_CERTIFICATE_CATEGORY) 
+    {
+        errorMessage = "Invalid BDAP Certificate name. Can not have more than " + std::to_string(MAX_CERTIFICATE_CATEGORY) + " characters.";
         return false;
     }
 
