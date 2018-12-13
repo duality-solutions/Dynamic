@@ -848,7 +848,7 @@ KernelRunner::KernelRunner(uint32_t type, uint32_t version, uint32_t passes, uin
     size_t memorySize = static_cast<size_t>(lanes) * segmentBlocks * ARGON2_SYNC_POINTS * ARGON2_BLOCK_SIZE * batchSize;
 
     CudaException::check(cudaMalloc(&memory, memorySize));
-	CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
+    CudaException::check(cudaMalloc((void**) &d_res_nonce, sizeof(uint32_t)));
 
 }
 
@@ -870,9 +870,8 @@ KernelRunner::~KernelRunner()
         cudaFree(refs);
     }
     if (d_res_nonce != nullptr) {
-		cudaFree(d_res_nonce);
-	}
-
+        cudaFree(d_res_nonce);
+    }
     cudaDeviceReset();
 
 }
@@ -886,20 +885,20 @@ void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
     dim3 threads = dim3(THREADS_PER_LANE, lanes, jobsPerBlock);
 
     if (version == ARGON2_VERSION_10) {
-		argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_10>
-			<<<blocks, threads>>>(
-				memory_blocks, passes, lanes, segmentBlocks);
-	} else {
-		argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_13>
-			<<<blocks, threads>>>(
-				memory_blocks, passes, lanes, segmentBlocks);
-	}
+        argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_10>
+            <<<blocks, threads>>>(
+                memory_blocks, passes, lanes, segmentBlocks);
+    } else {
+        argon2_kernel_oneshot<ARGON2_D, ARGON2_VERSION_13>
+            <<<blocks, threads>>>(
+                memory_blocks, passes, lanes, segmentBlocks);
+    }
 
 }
 
 
 void KernelRunner::init(const void* input){
-	setCudaDevice(deviceIndex);
+    setCudaDevice(deviceIndex);
     CudaException::check(cudaMemset(d_res_nonce, std::numeric_limits<uint32_t>::max(), sizeof(uint32_t)));
     set_data(input);
 }
@@ -916,9 +915,9 @@ void KernelRunner::fillFirstBlocks(uint32_t startNonce)
 
 void KernelRunner::finalize(const uint32_t startNonce, const uint64_t target)
 {
-	uint32_t jobsPerBlock = (batchSize<16) ? 1 : 16;
-	dim3 blocks = dim3(batchSize / jobsPerBlock, 1, 1);
-	dim3 threads = dim3(4, jobsPerBlock, 1);
+    uint32_t jobsPerBlock = (batchSize<16) ? 1 : 16;
+    dim3 blocks = dim3(batchSize / jobsPerBlock, 1, 1);
+    dim3 threads = dim3(4, jobsPerBlock, 1);
     argon2_finalize_kernel<<<blocks, threads, jobsPerBlock * 258 * sizeof(uint32_t)>>>((struct block*)memory, startNonce, target, d_res_nonce);
 
     CudaException::check(cudaDeviceSynchronize());
@@ -934,8 +933,8 @@ uint32_t KernelRunner::readResultNonce()
 
 void KernelRunner::run(uint32_t lanesPerBlock, uint32_t jobsPerBlock)
 {
-	setCudaDevice(deviceIndex);
-	runKernelOneshot(lanesPerBlock, jobsPerBlock);
+    setCudaDevice(deviceIndex);
+    runKernelOneshot(lanesPerBlock, jobsPerBlock);
 }
 
 

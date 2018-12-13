@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2019	Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
+ * Copyright (C) 2015-2019  Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,10 +37,10 @@ ProcessingUnit::ProcessingUnit(
 
 
 std::uint32_t ProcessingUnit::scanNonces(
-		const void* input, const std::uint32_t startNonce,
-		const std::uint64_t target)
+    const void* input, const std::uint32_t startNonce,
+    const std::uint64_t target)
 {
-	runner.init(input);
+    runner.init(input);
     runner.fillFirstBlocks(startNonce);
     runner.run(bestLanesPerBlock, bestJobsPerBlock);
     runner.finalize(startNonce, target);

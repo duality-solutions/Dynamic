@@ -71,9 +71,9 @@ class KernelRunner
 
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
     void init(const void* input);
-	void fillFirstBlocks(const std::uint32_t start_nonce);
-	void finalize(const std::uint32_t startNonce, const std::uint64_t target);
-	std::uint32_t readResultNonce();
+    void fillFirstBlocks(const std::uint32_t start_nonce);
+    void finalize(const std::uint32_t startNonce, const std::uint64_t target);
+    std::uint32_t readResultNonce();
 
 };
 

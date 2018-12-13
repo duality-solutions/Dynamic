@@ -49,10 +49,10 @@ ProcessingUnit::ProcessingUnit(
 
 
 std::uint32_t ProcessingUnit::scanNonces(
-		const void* input, const std::uint32_t startNonce,
-		const std::uint64_t target)
+    const void* input, const std::uint32_t startNonce,
+    const std::uint64_t target)
 {
-	runner.init(input);
+    runner.init(input);
     runner.fillFirstBlocks(startNonce);
     runner.run(bestLanesPerBlock, bestJobsPerBlock);
     runner.finalize(startNonce, target);

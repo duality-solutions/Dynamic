@@ -24,23 +24,23 @@ int64_t GPUMiner::TryMineBlock(CBlock& block)
 {
     static unsigned char pblank[1];
     const auto _begin = BEGIN(block.nVersion);
-	const auto _end = END(block.nNonce);
-	const void* input = (_begin == _end ? pblank : static_cast<const void*>(&_begin[0]));
-	const std::uint64_t device_target = ArithToUint256(_hash_target).GetUint64(3);
+    const auto _end = END(block.nNonce);
+    const void* input = (_begin == _end ? pblank : static_cast<const void*>(&_begin[0]));
+    const std::uint64_t device_target = ArithToUint256(_hash_target).GetUint64(3);
 
-	std::uint32_t result_nonce = _processing_unit.scanNonces(input, block.nNonce, device_target);
+    std::uint32_t result_nonce = _processing_unit.scanNonces(input, block.nNonce, device_target);
 
-	if ( result_nonce < std::numeric_limits<uint32_t>::max()){
-		block.nNonce = result_nonce;
-		uint256 cpuHash = block.GetHash();
-		 if (UintToArith256(cpuHash) <= _hash_target) {
-			 LogPrintf("Dynamic GPU Miner Found Nonce %u \n", block.nNonce);
-			 this->ProcessFoundSolution(block, cpuHash);
-		 }else{
-			 LogPrintf("Dynamic GPU Miner False Nonce %u \n", block.nNonce);
-		 }
+    if ( result_nonce < std::numeric_limits<uint32_t>::max()){
+        block.nNonce = result_nonce;
+        uint256 cpuHash = block.GetHash();
+         if (UintToArith256(cpuHash) <= _hash_target) {
+             LogPrintf("Dynamic GPU Miner Found Nonce %u \n", block.nNonce);
+             this->ProcessFoundSolution(block, cpuHash);
+         }else{
+             LogPrintf("Dynamic GPU Miner False Nonce %u \n", block.nNonce);
+         }
 
-	}
+    }
     return _batch_size_target;
 }
 

@@ -59,17 +59,17 @@ void ThreadGroup<T, Context>::SyncGroupTarget()
 
     size_t current;
     while ((current = _threads.size()) != _target_threads) {
-		if (current < _target_threads) {
-			auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), current % _devices));
-			_threads.push_back(std::make_shared<boost::thread>([miner] {
-				(*miner)();
-			}));
-		} else {
-			std::shared_ptr<boost::thread> thread = _threads.back();
-			_threads.pop_back();
-			thread->interrupt();
-		}
-	}
+        if (current < _target_threads) {
+            auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), current % _devices));
+            _threads.push_back(std::make_shared<boost::thread>([miner] {
+                (*miner)();
+            }));
+        } else {
+            std::shared_ptr<boost::thread> thread = _threads.back();
+            _threads.pop_back();
+            thread->interrupt();
+        }
+    }
 };
 
 #endif // DYNAMIC_INTERNAL_THREAD_GROUP_H

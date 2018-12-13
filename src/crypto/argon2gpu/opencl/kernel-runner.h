@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2019	Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
+ * Copyright (C) 2015-2019  Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -70,9 +70,9 @@ public:
 
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
     void init(const void* input);
-	void fillFirstBlocks(const std::uint32_t startNonce);
-	void finalize(const std::uint32_t startNonce, const std::uint64_t target);
-	std::uint32_t readResultNonce();
+    void fillFirstBlocks(const std::uint32_t startNonce);
+    void finalize(const std::uint32_t startNonce, const std::uint64_t target);
+    std::uint32_t readResultNonce();
 };
 
 } // namespace opencl
