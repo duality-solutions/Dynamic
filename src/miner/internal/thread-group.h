@@ -58,21 +58,18 @@ void ThreadGroup<T, Context>::SyncGroupTarget()
     boost::unique_lock<boost::shared_mutex> guard(_mutex);
 
     size_t current;
-    size_t real_target = _target_threads * _devices;
-    while ((current = _threads.size()) != real_target) {
-        for (size_t device_index = 0; device_index < _devices; device_index++) {
-            if (current < real_target) {
-                auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), device_index));
-                _threads.push_back(std::make_shared<boost::thread>([miner] {
-                    (*miner)();
-                }));
-            } else {
-                std::shared_ptr<boost::thread> thread = _threads.back();
-                _threads.pop_back();
-                thread->interrupt();
-            }
-        }
-    }
+    while ((current = _threads.size()) != _target_threads) {
+		if (current < _target_threads) {
+			auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), current % _devices));
+			_threads.push_back(std::make_shared<boost::thread>([miner] {
+				(*miner)();
+			}));
+		} else {
+			std::shared_ptr<boost::thread> thread = _threads.back();
+			_threads.pop_back();
+			thread->interrupt();
+		}
+	}
 };
 
 #endif // DYNAMIC_INTERNAL_THREAD_GROUP_H
