@@ -206,11 +206,11 @@ __device__ void computeInitialHash(
     state.s6 = blake2b_Init[6];
     state.s7 = blake2b_Init[7];
 
-    buffer[0] = 8;
-    buffer[1] = 32;
-    buffer[2] = 500;
-    buffer[3] = 2;
-    buffer[4] = 16;
+    buffer[0] = ALGO_LANES;
+    buffer[1] = ALGO_OUTLEN;
+    buffer[2] = ALGO_MCOST;
+    buffer[3] = ALGO_PASSES;
+    buffer[4] = ALGO_VERSION;
     buffer[6] = 80;
 
 #pragma unroll
