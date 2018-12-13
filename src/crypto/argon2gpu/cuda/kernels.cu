@@ -869,6 +869,12 @@ KernelRunner::~KernelRunner()
     if (refs != nullptr) {
         cudaFree(refs);
     }
+    if (d_res_nonce != nullptr) {
+		cudaFree(d_res_nonce);
+	}
+
+    cudaDeviceReset();
+
 }
 
 void KernelRunner::runKernelOneshot(uint32_t lanesPerBlock,
