@@ -11,6 +11,11 @@
 
 class CTransaction;
 
+
+// Entry linking is a type of DAP binding operation.  This class is used to
+// manage domain entry link requests. When linking entries, we want 
+// to use stealth addresses so the linkage requests are not public.
+
 // CRequestLink are stored serilzed and encrypted in a BDAP OP_RETURN transaction.
 // The link request recipient can decrypt the BDAP OP_RETURN transaction 
 // and get the needed information to accept the link request
@@ -26,16 +31,13 @@ public:
     int nVersion;
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path
-    // The SharedPrivateKey will allow both parties to update mutable entries on DHT torrent network 
-    CharString SharedPrivateKey; // ed25519 derived key new/unique for this link
-    CharString RequestorPublicKey; // ed25519 derived public key new/unique for this link
-    CharString SharedSymmetricPrivKey; // AES symmetric private key unique to this link request
+    CharString RequestorPublicKey; // ed25519 public key new/unique for this link
 
     unsigned int nHeight;
     uint64_t nExpireTime;
     uint256 txHash;
 
-    CRequestLink() { 
+    CRequestLink() {
         SetNull();
     }
 
@@ -49,9 +51,7 @@ public:
         nVersion = CRequestLink::CURRENT_VERSION;
         RequestorFullObjectPath.clear();
         RecipientFullObjectPath.clear();
-        SharedPrivateKey.clear();
         RequestorPublicKey.clear();
-        SharedSymmetricPrivKey.clear();
         nHeight = 0;
         nExpireTime = 0;
         txHash.SetNull();
@@ -64,9 +64,7 @@ public:
         READWRITE(this->nVersion);
         READWRITE(RequestorFullObjectPath);
         READWRITE(RecipientFullObjectPath);
-        READWRITE(SharedPrivateKey);
         READWRITE(RequestorPublicKey);
-        READWRITE(SharedSymmetricPrivKey);
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
@@ -74,8 +72,7 @@ public:
 
     inline friend bool operator==(const CRequestLink &a, const CRequestLink &b) {
         return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath 
-                    && a.SharedPrivateKey == b.SharedPrivateKey && a.RequestorPublicKey == b.RequestorPublicKey
-                    && a.SharedSymmetricPrivKey == b.SharedSymmetricPrivKey);
+                    && a.RequestorPublicKey == b.RequestorPublicKey);
     }
 
     inline friend bool operator!=(const CRequestLink &a, const CRequestLink &b) {
@@ -86,9 +83,7 @@ public:
         nVersion = b.nVersion;
         RequestorFullObjectPath = b.RequestorFullObjectPath;
         RecipientFullObjectPath = b.RecipientFullObjectPath;
-        SharedPrivateKey = b.SharedPrivateKey;
         RequestorPublicKey = b.RequestorPublicKey;
-        SharedSymmetricPrivKey = b.SharedSymmetricPrivKey;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
         txHash = b.txHash;
@@ -100,7 +95,6 @@ public:
     bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 
-    CharString SharedSignPublicKey(); //derive from SharedPrivateKey
     bool ValidateValues(std::string& errorMessage);
     bool IsMyLinkRequest(const CTransactionRef& tx);
 };
@@ -119,7 +113,13 @@ public:
     int nVersion;
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path
-    CharString RecipientPublicKey; // ed25519 derived public key new/unique for this link
+    uint256 txLinkRequestHash; // transaction hash for the link request.
+    CharString RecipientPublicKey; // ed25519 public key new/unique for this link
+    CharString SharedPublicKey; // ed25519 shared public key using the requestor and recipient keys
+
+    unsigned int nHeight;
+    uint64_t nExpireTime;
+    uint256 txHash;
 
     CAcceptLink() {
         SetNull();
@@ -130,7 +130,12 @@ public:
         nVersion = CAcceptLink::CURRENT_VERSION;
         RequestorFullObjectPath.clear();
         RecipientFullObjectPath.clear();
+        txLinkRequestHash.SetNull();
         RecipientPublicKey.clear();
+        SharedPublicKey.clear();
+        nHeight = 0;
+        nExpireTime = 0;
+        txHash.SetNull();
     }
 
     ADD_SERIALIZE_METHODS;
@@ -140,12 +145,17 @@ public:
         READWRITE(this->nVersion);
         READWRITE(RequestorFullObjectPath);
         READWRITE(RecipientFullObjectPath);
+        READWRITE(txLinkRequestHash);
         READWRITE(RecipientPublicKey);
+        READWRITE(SharedPublicKey);
+        READWRITE(VARINT(nHeight));
+        READWRITE(VARINT(nExpireTime));
+        READWRITE(txHash);
     }
 
     inline friend bool operator==(const CAcceptLink &a, const CAcceptLink &b) {
         return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath
-                    && a.RecipientPublicKey == b.RecipientPublicKey);
+                    && a.txLinkRequestHash == b.txLinkRequestHash && a.RecipientPublicKey == b.RecipientPublicKey && a.SharedPublicKey == b.SharedPublicKey);
     }
 
     inline friend bool operator!=(const CAcceptLink &a, const CAcceptLink &b) {
@@ -157,6 +167,8 @@ public:
         RequestorFullObjectPath = b.RequestorFullObjectPath;
         RecipientFullObjectPath = b.RecipientFullObjectPath;
         RecipientPublicKey = b.RecipientPublicKey;
+        SharedPublicKey = b.SharedPublicKey;
+        txLinkRequestHash = b.txLinkRequestHash;
         return *this;
     }
  

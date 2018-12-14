@@ -54,12 +54,6 @@ bool CRequestLink::UnserializeFromData(const std::vector<unsigned char>& vchData
     return true;
 }
 
-CharString CRequestLink::SharedSignPublicKey()
-{
-    CharString vchReturn;
-    return vchReturn;
-}
-
 bool CRequestLink::ValidateValues(std::string& errorMessage)
 {
     return true;

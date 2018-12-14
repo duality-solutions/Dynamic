@@ -84,7 +84,6 @@ DYNAMIC_CORE_H = \
   bdap/certificate.h \
   bdap/entrychannel.h \
   bdap/entrycheckpoints.h \
-  bdap/entrylink.h \
   bdap/identity.h \
   bip39_english.h \
   bip39.h \
@@ -258,7 +257,6 @@ libdynamic_server_a_SOURCES = \
   bdap/certificate.cpp \
   bdap/entrychannel.cpp \
   bdap/entrycheckpoints.cpp \
-  bdap/entrylink.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
   bdap/rpcdomainentry.cpp \
