@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2019 Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
+ * Copyright (C) 2015-2019  Ehsan Dalvand <dalvand.ehsan@gmail.com>, Łukasz Kurowski <crackcomm@gmail.com>, Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,9 +40,13 @@ private:
     cl::Buffer memoryBuffer, refsBuffer;
     cl::Event start, end;
 
-    std::size_t memorySize;
+    cl::Buffer inputBuffer;
+    cl::Buffer resultBuffer;
+    cl::Kernel kernelInit;
+    cl::Kernel kernelFinal;
 
-    void precomputeRefs();
+    std::size_t memorySize;
+    std::uint32_t res_nonce;
 
 public:
     std::uint32_t getMinLanesPerBlock() const
@@ -63,14 +67,12 @@ public:
         bool bySegment,
         bool precompute);
 
-    void* mapInputMemory(std::uint32_t jobId);
-    void unmapInputMemory(void* memory);
-
-    void* mapOutputMemory(std::uint32_t jobId);
-    void unmapOutputMemory(void* memory);
 
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
-    float finish();
+    void init(const void* input);
+    void fillFirstBlocks(const std::uint32_t startNonce);
+    void finalize(const std::uint32_t startNonce, const std::uint64_t target);
+    std::uint32_t readResultNonce();
 };
 
 } // namespace opencl
