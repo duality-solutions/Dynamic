@@ -85,6 +85,8 @@ DYNAMIC_CORE_H = \
   bdap/entrychannel.h \
   bdap/entrycheckpoints.h \
   bdap/identity.h \
+  bdap/linking.h \
+  bdap/linkingdb.h \
   bip39_english.h \
   bip39.h \
   blockencodings.h \
@@ -259,7 +261,9 @@ libdynamic_server_a_SOURCES = \
   bdap/entrycheckpoints.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
+  bdap/linkingdb.cpp \
   bdap/rpcdomainentry.cpp \
+  bdap/rpclinking.cpp \
   dbwrapper.cpp \
   dht/curve25519.cpp \
   dht/mutable.cpp \

@@ -20,10 +20,10 @@ namespace BDAP {
         BDAP_AUDIT = 7,
         BDAP_CHANNEL = 8,
         BDAP_CHECKPOINT = 9,
-        BDAP_BINDING_LINK = 10,
-        BDAP_IDENTITY = 11,
-        BDAP_IDENTITY_VERIFICATION = 12,
-        BDAP_SMART_CONTRACT = 13
+        BDAP_LINK_REQUEST = 10,
+        BDAP_LINK_ACCEPT = 11,
+        BDAP_IDENTITY = 12,
+        BDAP_IDENTITY_VERIFICATION = 13
     };
 }
 
@@ -49,6 +49,7 @@ static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte
 static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 25; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_CHECKPOINT_HASH_LENGTH  = 64;
 static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
+static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubkeys are 32 bytes and 64 bytes when hex encoded.
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_PUBLIC_USER_OU           = "users";

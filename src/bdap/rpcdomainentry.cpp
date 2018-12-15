@@ -14,7 +14,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue);
 
 static constexpr bool fPrintDebug = true;
 

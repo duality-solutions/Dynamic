@@ -200,8 +200,8 @@ enum opcodetype {
     OP_BDAP_REVOKE = 0x04,             // = BDAP delete using fluid protocol
     OP_BDAP_MODIFY = 0x05,             // = BDAP update entry
     OP_BDAP_MODIFY_RDN = 0x06,         // = move BDAP entry
-    OP_BDAP_EXECUTE_CODE = 0x07,       // = BDAP smart contract
-    OP_BDAP_BIND = 0x08,               // = BDAP entry link request
+    OP_BDAP_LINK_REQUEST = 0x07,       // = BDAP link request
+    OP_BDAP_LINK_ACCEPT = 0x08,        // = BDAP link accept
     OP_BDAP_AUDIT = 0x09,              // = BDAP entry audit entry
     OP_BDAP_CERTIFICATE = 0x0a,        // = BDAP entry certificate
     OP_BDAP_IDENTITY = 0x0b,           // = BDAP entry identity
@@ -228,8 +228,8 @@ enum ProtocolCodes {
     BDAP_REVOKE_TX = 7,
     BDAP_MODIFY_TX = 8,
     BDAP_MODIFY_RDN_TX = 9,
-    BDAP_EXECUTE_CODE_TX = 10,
-    BDAP_BIND_TX = 11,
+    BDAP_LINK_REQUEST = 10,
+    BDAP_LINK_ACCEPT = 11,
     BDAP_AUDIT_TX = 12,
     BDAP_CERTIFICATE_TX = 13,
     BDAP_IDENTITY_TX = 14,
@@ -705,11 +705,11 @@ public:
         case BDAP_MODIFY_RDN_TX:
             return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
             break;
-        case BDAP_EXECUTE_CODE_TX:
-            return (size() > 0 && *begin() == OP_BDAP_EXECUTE_CODE);
+        case BDAP_LINK_REQUEST:
+            return (size() > 0 && *begin() == OP_BDAP_LINK_REQUEST);
             break;
-        case BDAP_BIND_TX:
-            return (size() > 0 && *begin() == OP_BDAP_BIND);
+        case BDAP_LINK_ACCEPT:
+            return (size() > 0 && *begin() == OP_BDAP_LINK_ACCEPT);
             break;
         case BDAP_AUDIT_TX:
             return (size() > 0 && *begin() == OP_BDAP_AUDIT);
