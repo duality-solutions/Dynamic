@@ -87,6 +87,7 @@ DYNAMIC_CORE_H = \
   bdap/identity.h \
   bdap/linking.h \
   bdap/linkingdb.h \
+  bdap/utils.h \
   bip39_english.h \
   bip39.h \
   blockencodings.h \
@@ -264,6 +265,7 @@ libdynamic_server_a_SOURCES = \
   bdap/linkingdb.cpp \
   bdap/rpcdomainentry.cpp \
   bdap/rpclinking.cpp \
+  bdap/utils.cpp \
   dbwrapper.cpp \
   dht/curve25519.cpp \
   dht/mutable.cpp \

@@ -4,6 +4,7 @@
 #include "bdap/linking.h"
 
 #include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "hash.h"
 #include "script/script.h"
 #include "streams.h"

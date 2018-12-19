@@ -5,8 +5,8 @@
 #ifndef DYNAMIC_BDAP_H
 #define DYNAMIC_BDAP_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace BDAP {
     enum ObjectType {

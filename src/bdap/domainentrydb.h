@@ -9,6 +9,8 @@
 #include "dbwrapper.h"
 #include "sync.h"
 
+class CCoinsViewCache;
+
 static CCriticalSection cs_bdap_entry;
 
 class CDomainEntryDB : public CDBWrapper {

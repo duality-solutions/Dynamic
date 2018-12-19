@@ -8,7 +8,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
-#include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "consensus/validation.h"
 #include "protocol.h"

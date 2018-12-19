@@ -2,10 +2,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
+#include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "rpcprotocol.h"
@@ -112,11 +114,10 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4003 - Recipient " + strRecipientFQDN + _(" not found."));
 
     uint64_t nDays = 1461;  //default to 4 years.
-/*
     if (request.params.size() >= 3) {
         nDays = request.params[3].get_int();
     }
-*/
+
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
@@ -160,6 +161,7 @@ UniValue link(const JSONRPCRequest& request)
     std::string strCommand;
     if (request.params.size() >= 1) {
         strCommand = request.params[0].get_str();
+        ToLowerCase(strCommand);
     }
     if (strCommand == "send") {
         return SendLinkRequest(request);
@@ -179,6 +181,9 @@ UniValue link(const JSONRPCRequest& request)
     }
     if (strCommand == "cancel") {
         //return CancelLinkRequest(request);
+    }
+    else {
+        throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 4010 - " + strCommand + _(" is an unknown link command."));
     }
     return NullUniValue;
 }

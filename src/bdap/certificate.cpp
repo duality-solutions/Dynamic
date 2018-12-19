@@ -5,6 +5,7 @@
 
 #include "bdap/certificate.h"
 
+#include "bdap/utils.h"
 #include "hash.h"
 #include "script/script.h"
 #include "streams.h"

@@ -10,6 +10,7 @@
 #include "alert.h"
 #include "arith_uint256.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "blockencodings.h"
 #include "chainparams.h"
 #include "checkpoints.h"

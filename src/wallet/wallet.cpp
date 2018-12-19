@@ -8,7 +8,9 @@
 #include "wallet/wallet.h"
 
 #include "base58.h"
+#include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "chain.h"
 #include "checkpoints.h"
 #include "consensus/consensus.h"
