@@ -297,26 +297,3 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
     }
     return true;
 }
-
-bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType) 
-{
-    for (const CRecipient& rec : vecSend) {
-        CScript bdapScript = rec.scriptPubKey;
-        if (bdapScript.IsUnspendable()) {
-            std::vector<unsigned char> vchData;
-            std::vector<unsigned char> vchHash;
-            if (!GetBDAPData(bdapScript, vchData, vchHash)) 
-            {
-                return false;
-            }
-            entry.UnserializeFromData(vchData, vchHash);
-        }
-        else {
-            strOpType = GetBDAPOpTypeString(bdapScript);
-        }
-    }
-    if (!entry.IsNull() && strOpType.size() > 0) {
-        return true;
-    }
-    return false;
-}

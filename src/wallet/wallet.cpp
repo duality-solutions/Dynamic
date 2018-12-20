@@ -3486,22 +3486,31 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
             int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
             if (fIsBDAP) {
-                CDomainEntry entry;
-                CDomainEntry prevEntry;
                 std::string strOpType;
-                if (!GetDomainEntryFromRecipient(vecSend, entry, strOpType)) {
-                    strFailReason = _("GetDomainEntryFromRecipient failed to find BDAP scripts in the recipient array.");
+                std::vector<unsigned char> vchValue;
+                CScript bdapOperationScript;
+                if (!GetScriptOpTypeValue(vecSend, bdapOperationScript, strOpType, vchValue)) {
+                    strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new") {
+                if (strOpType == "bdap_new_entry") {
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
-                } else if (strOpType == "bdap_update" || strOpType == "bdap_delete") {
-                    //LogPrintf("CreateTransaction for BDAP entry %s , operation type = %s\n", entry.GetFullObjectPath(), strOpType);
+                }
+                else if (strOpType == "bdap_update_entry" || strOpType == "bdap_delete_entry") {
+                    CDomainEntry prevEntry;
                     if (CheckDomainEntryDB()) {
-                        if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                        if (!pDomainEntryDB->GetDomainEntryInfo(vchValue, prevEntry)) {
                             strFailReason = _("GetDomainEntryInfo failed to find previous domanin entry.");
                             return false;
                         }
+                        if (prevEntry.ObjectID.size() == 0) {
+                            strFailReason = _("GetDomainEntryInfo returned a blank domanin entry.");
+                            return false;
+                        }
+                    }
+                    else {
+                        strFailReason = _("CheckDomainEntryDB failed.");
+                        return false;
                     }
                     CTransactionRef prevTx;
                     uint256 hashBlock;
@@ -3512,6 +3521,30 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     CScript prevScriptPubKey;
                     GetBDAPOpScript(prevTx, prevScriptPubKey);
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+                else if (strOpType == "bdap_new_link_request") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
+                }
+                else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
+                }
+                else if (strOpType == "bdap_new_link_accept") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
+                }
+                else if (strOpType == "bdap_update_link_accept") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
+                }
+                else if (strOpType == "bdap_delete_link_accept") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
+                }
+                else {
+                    strFailReason = strOpType + _(" is an uknown BDAP operation.");
+                    return false;
                 }
             } else {
                 AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);

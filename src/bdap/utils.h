@@ -24,6 +24,8 @@ namespace Consensus {
     class Params;
 }
 
+
+
 std::string BDAPFromOp(const int op);
 bool IsBDAPDataOutput(const CTxOut& out);
 int GetBDAPDataOutput(const CTransactionRef& tx);
@@ -52,5 +54,7 @@ bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut
 CDynamicAddress GetScriptAddress(const CScript& pubScript);
 int GetBDAPOpCodeFromOutput(const CTxOut& out);
 std::string GetBDAPOpStringFromOutput(const CTxOut& out);
+bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vector<unsigned char>& vchValue);
+bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 
 #endif // DYNAMIC_BDAP_UTILS_H

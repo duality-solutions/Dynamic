@@ -169,6 +169,5 @@ public:
 };
 
 bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged = false);
-bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType);
 
 #endif // DYNAMIC_BDAP_DOMAINENTRY_H

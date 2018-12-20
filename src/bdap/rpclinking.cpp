@@ -114,9 +114,10 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4003 - Recipient " + strRecipientFQDN + _(" not found."));
 
     uint64_t nDays = 1461;  //default to 4 years.
-    if (request.params.size() >= 3) {
-        nDays = request.params[3].get_int();
-    }
+// TODO (bdap): fix invalid int error when passing registration days.
+//    if (request.params.size() >= 3) {
+//        nDays = request.params[3].get_int();
+//    }
 
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;

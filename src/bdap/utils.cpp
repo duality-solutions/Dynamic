@@ -6,6 +6,7 @@
 
 #include "chainparams.h"
 #include "coins.h"
+#include "core_io.h"
 #include "policy/policy.h"
 #include "serialize.h"
 #include "uint256.h"
@@ -419,4 +420,92 @@ CDynamicAddress GetScriptAddress(const CScript& pubScript)
     ExtractDestination(pubScript, txDestination);
     CDynamicAddress entryAddress(txDestination);
     return entryAddress;
+}
+
+bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vector<unsigned char>& vchValue)
+{
+    LogPrint("bdap", "%s -- Script = %s\n", __func__, ScriptToAsmStr(script));
+    opcodetype opcode;
+    std::string strPrefix;
+    uint8_t i = 1;
+    CScript::const_iterator itScript = script.begin();
+    while (itScript < script.end()) {
+        std::vector<unsigned char> vch;
+        if (!script.GetOp(itScript, opcode, vch))
+            return false;
+        if (!(0 <= opcode && opcode <= OP_PUSHDATA4)) {
+            strPrefix += GetOpName(opcode);
+            if (i == 1)
+                strPrefix += " ";
+        }
+        else {
+            vchValue = vch;
+        }
+        if (i > 2)
+            break;
+        i++;
+    }
+    if (strPrefix.empty() || strPrefix.size() != 3) {
+        LogPrintf("%s -- Error, incorrect prefix length. Script = %s\n", __func__, ScriptToAsmStr(script));
+        return false;
+    }
+    else if (strPrefix == ("1 2")) {
+        strOpType = "bdap_new_entry";
+    }
+    else if (strPrefix == "1 3") {
+        strOpType = "bdap_delete_entry";
+    }
+    else if (strPrefix == "1 4") {
+        strOpType = "bdap_revoke_entry";
+    }
+    else if (strPrefix == "1 5") {
+        strOpType = "bdap_update_entry";
+    }
+    else if (strPrefix == "2 8") {
+        strOpType = "bdap_new_link_request";
+    }
+    else if (strPrefix == "3 8") {
+        strOpType = "bdap_delete_link_request";
+    }
+    else if (strPrefix == "4 8") {
+        strOpType = "bdap_revoke_link_request";
+    }
+    else if (strPrefix == "5 8") {
+        strOpType = "bdap_update_link_request";
+    }
+    else if (strPrefix == "2 9") {
+        strOpType = "bdap_new_link_accept";
+    }
+    else if (strPrefix == "3 9") {
+        strOpType = "bdap_delete_link_accept";
+    }
+    else if (strPrefix == "4 9") {
+        strOpType = "bdap_revoke_link_accept";
+    }
+    else if (strPrefix == "5 9") {
+        strOpType = "bdap_update_link_accept";
+    }
+    else {
+        return false;
+    }
+    LogPrintf("%s -- strOpType = %s, strPrefix = %s, vchValue = %s\n", __func__, strOpType, strPrefix, stringFromVch(vchValue));
+    return true;
+}
+
+bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue)
+{
+    LogPrint("bdap", "%s -- vecSend size = %u \n", __func__, vecSend.size());
+    for (const CRecipient& rec : vecSend) {
+        CScript script = rec.scriptPubKey;
+        if (!script.IsUnspendable()) {
+            if (ExtractOpTypeValue(script, strOpType, vchValue)) {
+                bdapOpScript = script;
+                break;
+            }
+        }
+    }
+    if (strOpType.size() > 0) {
+        return true;
+    }
+    return false;
 }
