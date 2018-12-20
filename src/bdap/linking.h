@@ -32,6 +32,7 @@ public:
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path
     CharString RequestorPubKey; // ed25519 public key new/unique for this link
+    CharString InviteMessage; // Link message to recipient
 
     unsigned int nHeight;
     uint64_t nExpireTime;
@@ -52,6 +53,7 @@ public:
         RequestorFullObjectPath.clear();
         RecipientFullObjectPath.clear();
         RequestorPubKey.clear();
+        InviteMessage.clear();
         nHeight = 0;
         nExpireTime = 0;
         txHash.SetNull();
@@ -65,6 +67,7 @@ public:
         READWRITE(RequestorFullObjectPath);
         READWRITE(RecipientFullObjectPath);
         READWRITE(RequestorPubKey);
+        READWRITE(InviteMessage);
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
@@ -72,7 +75,7 @@ public:
 
     inline friend bool operator==(const CLinkRequest &a, const CLinkRequest &b) {
         return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath 
-                    && a.RequestorPubKey == b.RequestorPubKey);
+                    && a.RequestorPubKey == b.RequestorPubKey && b.InviteMessage == b.InviteMessage);
     }
 
     inline friend bool operator!=(const CLinkRequest &a, const CLinkRequest &b) {
@@ -84,6 +87,7 @@ public:
         RequestorFullObjectPath = b.RequestorFullObjectPath;
         RecipientFullObjectPath = b.RecipientFullObjectPath;
         RequestorPubKey = b.RequestorPubKey;
+        InviteMessage = b.InviteMessage;
         nHeight = b.nHeight;
         nExpireTime = b.nExpireTime;
         txHash = b.txHash;

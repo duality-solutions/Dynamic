@@ -75,6 +75,12 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid BDAP link requestor public key. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
+    // check requestor pubkey
+    if (InviteMessage.size() > MAX_BDAP_INVITE_MESSAGE) 
+    {
+        errorMessage = "Invalid invite message length. The maximum invite message length is " + std::to_string(MAX_BDAP_INVITE_MESSAGE) + " characters.";
+        return false;
+    }
     return true;
 }
 
