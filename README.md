@@ -342,10 +342,6 @@ CPU's with AVX512 support:
        
 GPU Mining
 ----------
-To build Dynamic without GPU support:
-
-    --disable-gpu
-
 To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. 
 (Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer)
 
