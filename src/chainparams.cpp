@@ -364,9 +364,8 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5 * 60; // fulfilled requests expire in 5 minutes
-        // To import spork key (D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL): importprivkey QWUVh41RrhjhnF813U5XLU4S8qYjvDQ5L1n53jC7Qawr8bBCQfFh
-        vSporkAddresses = {"D777Y4eMXrf1NgDSY1Q7kjoZuVso1ed7HL", "DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"};
-        nMinSporkKeys = 2;
+        vSporkAddresses = {"DBUPr7TYK8auydiK22QYXP1mHDJ71h2G7N"};
+        nMinSporkKeys = 1;
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
