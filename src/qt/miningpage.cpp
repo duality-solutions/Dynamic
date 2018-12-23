@@ -95,10 +95,6 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #ifdef ENABLE_GPU
     connect(ui->sliderGPUCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfGPUThreads(int)));
 #endif
-    connect(ui->sliderCPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
-#ifdef ENABLE_GPU
-    connect(ui->sliderGPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
-#endif
     connect(ui->sliderCPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeCPUSampleTime(int)));
 #ifdef ENABLE_GPU
     connect(ui->sliderGPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeGPUSampleTime(int)));
