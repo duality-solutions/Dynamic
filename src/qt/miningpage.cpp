@@ -59,6 +59,13 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->sliderGPUCores->setMinimum(1);
     ui->sliderGPUCores->setMaximum(nGPUMaxUseThreads);
     ui->sliderGPUCores->setValue(nGPUMaxUseThreads);
+    ui->pushSwitchGPUMining->setVisible(true);
+    ui->checkBoxShowGPUGraph->setVisible(true);
+#else
+    ui->sliderGPUCores->setVisible(false);
+    ui->labelNGPUCores->setText(QString("GPU mining is not supported in this version of Dynamic"));
+    ui->pushSwitchGPUMining->setVisible(false);
+    ui->checkBoxShowGPUGraph->setVisible(false);
 #endif
 
     ui->sliderCPUGraphSampleTime->setMaximum(0);
@@ -78,9 +85,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->labelGPUMinerHashRate->setToolTip(tr("This shows the hashrate of your GPU whilst mining"));
 #endif
     ui->labelNetHashRateCPU->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
-#ifdef ENABLE_GPU
     ui->labelNetHashRateGPU->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
-#endif
     ui->labelNextCPUBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
 #ifdef ENABLE_GPU
     ui->labelNextGPUBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
@@ -157,9 +162,7 @@ void MiningPage::updateUI()
     qint64 hashrate = GetHashRate();
 
     ui->labelNetHashRateCPU->setText(GUIUtil::FormatHashRate(networkHashrate));
-#ifdef ENABLE_GPU
     ui->labelNetHashRateGPU->setText(GUIUtil::FormatHashRate(networkHashrate));
-#endif
     ui->labelCPUMinerHashRate->setText(GUIUtil::FormatHashRate(GetCPUHashRate()));
 #ifdef ENABLE_GPU
     ui->labelGPUMinerHashRate->setText(GUIUtil::FormatHashRate(GetGPUHashRate()));
