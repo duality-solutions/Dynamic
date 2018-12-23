@@ -89,6 +89,10 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
 
 void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
 {
+    // If blockchain hasn't synced do not allow miners to recreate blocks
+    if (IsInitialBlockDownload())
+        return;
+    
     const int64_t latest_txn = mempool.GetTransactionsUpdated();
     if (latest_txn == _last_txn_time) {
         return;
