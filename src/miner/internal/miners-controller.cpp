@@ -46,6 +46,8 @@ void MinersController::Start()
 
 void MinersController::Shutdown()
 {
+    _enable_start = false;
+
     _group_cpu.Shutdown();
 #ifdef ENABLE_GPU
     _group_gpu.Shutdown();
