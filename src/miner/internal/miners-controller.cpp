@@ -63,8 +63,11 @@ int64_t MinersController::GetHashRate() const
 
 void MinersController::NotifyNode(const CNode* node)
 {
-    _connected = true;
-    Start();
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) > 1) {
+        _connected = true;
+    }
+    else
+        _connected = false;
 };
 
 void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool fInitialDownload)
