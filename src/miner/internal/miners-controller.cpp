@@ -67,8 +67,10 @@ void MinersController::NotifyNode(const CNode* node)
     Start();
 };
 
-void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool initial_download)
+void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool fInitialDownload)
 {
+    if (fInitialDownload)
+        return;
     // Compare with current tip (checks for unexpected behaviour or old block)
     if (index_new != chainActive.Tip())
         return;
@@ -85,7 +87,7 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
     }
 };
 
-void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int pos_in_block)
+void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
 {
     const int64_t latest_txn = mempool.GetTransactionsUpdated();
     if (latest_txn == _last_txn_time) {
