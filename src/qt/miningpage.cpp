@@ -185,14 +185,20 @@ void MiningPage::updateUI()
 
 void MiningPage::updatePushSwitch(bool fGPU)
 {
+#ifdef ENABLE_GPU
     QPushButton* pushSwitch = fGPU ? ui->pushSwitchGPUMining : ui->pushSwitchCPUMining;
+#else
+    QPushButton* pushSwitch = ui->pushSwitchCPUMining;
+
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         pushSwitch->setToolTip(tr("Blockchain/Dynodes are not synced, please wait until fully synced before mining!"));
         pushSwitch->setText(tr("Disabled"));
         pushSwitch->setEnabled(false);
         return;
     }
-
+#endif
+    
+#ifdef ENABLE_GPU
     if (fGPU && fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
         pushSwitch->setText(tr("Stop mining"));
@@ -207,6 +213,16 @@ void MiningPage::updatePushSwitch(bool fGPU)
         pushSwitch->setText(tr("Start mining"));
     }
     pushSwitch->setEnabled(true);
+#else
+    if (fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
+        pushSwitch->setText(tr("Stop mining"));
+    } else if (!fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
+        pushSwitch->setText(tr("Start mining"));
+    }
+    pushSwitch->setEnabled(true);
+#endif
 }
 
 void MiningPage::StartMiner(bool fGPU)
