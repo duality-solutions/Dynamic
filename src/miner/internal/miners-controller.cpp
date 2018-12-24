@@ -95,7 +95,7 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
 void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
 {
     // check if blockchain has synced, has more than 1 peer and is enabled before recreating blocks
-    if (IsInitialBlockDownload() && !can_start())
+    if (IsInitialBlockDownload() || !can_start())
         return;
     
     const int64_t latest_txn = mempool.GetTransactionsUpdated();
