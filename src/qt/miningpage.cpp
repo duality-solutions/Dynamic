@@ -268,11 +268,17 @@ void MiningPage::switchGPUMining()
 
 void MiningPage::switchMining(bool fGPU)
 {
+#ifdef ENABLE_GPU
     QPushButton* pushSwitch = fGPU ? ui->pushSwitchGPUMining : ui->pushSwitchCPUMining;
     QSlider* coreSlider = fGPU ? ui->sliderGPUCores : ui->sliderCPUCores;
     QLabel* labelCores = fGPU ? ui->labelNGPUCores : ui->labelNCPUCores;
     int nThreads = (int)(fGPU ? ui->sliderGPUCores->value() : ui->sliderCPUCores->value());
+#else
+    int64_t hashRate = GetCPUHashRate();
+    int nThreads = (int)ui->sliderCPUCores->value();
+#endif
 
+#ifdef ENABLE_GPU
     if (fGPU && !fGPUMinerOn) {
         if (nThreads == 0)
             coreSlider->setValue(1);
@@ -296,6 +302,21 @@ void MiningPage::switchMining(bool fGPU)
         coreSlider->setVisible(false);
         StopMiner(fGPU);
     }
+#else
+    if (hashRate > 0) {
+        ui->pushSwitchCPUMining->setText(tr("Stopping"));
+        StopMiner(fGPU);
+    }
+    else if (nThreads == 0 && hashRate == 0){
+        ui->sliderCPUCores->setValue(1);
+        ui->pushSwitchCPUMining->setText(tr("Starting"));
+        StartMiner(fGPU);
+    }
+    else {
+        ui->pushSwitchCPUMining->setText(tr("Starting"));
+        StartMiner(fGPU);
+    }
+#endif
 }
 
 void MiningPage::timerEvent(QTimerEvent*)
