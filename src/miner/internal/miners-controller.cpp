@@ -27,8 +27,7 @@ MinersController::MinersController(MinerContextRef ctx)
 #ifdef ENABLE_GPU
       _group_gpu(_ctx->MakeChild()),
 #endif // ENABLE_GPU
-      _connected(!_ctx->chainparams().MiningRequiresPeers()),
-      _downloaded(!_ctx->chainparams().MiningRequiresPeers())
+      _connected(!_ctx->chainparams().MiningRequiresPeers())
 {
     ConnectMinerSignals(this);
 };
