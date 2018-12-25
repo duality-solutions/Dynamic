@@ -18,7 +18,7 @@ namespace BDAP {
         ORGANIZATIONAL_UNIT = 5,
         CERTIFICATE = 6,
         AUDIT = 7,
-        CHANNEL = 8,
+        SIDECHAIN = 8,
         CHECKPOINT = 9,
         BINDING_LINK = 10,
         IDENTITY = 11,
