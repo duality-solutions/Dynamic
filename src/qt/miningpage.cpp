@@ -180,6 +180,7 @@ void MiningPage::updateUI()
 #endif
 
     updatePushSwitch(true);
+    updatePushSwitch(false);
 }
 
 void MiningPage::updatePushSwitch(bool fGPU)
@@ -196,7 +197,7 @@ void MiningPage::updatePushSwitch(bool fGPU)
         pushSwitch->setEnabled(false);
         return;
     }
-
+    
 #ifdef ENABLE_GPU
     if (fGPU && fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
