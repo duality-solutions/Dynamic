@@ -46,14 +46,14 @@ namespace BDAP {
                 return "Channel Entry";
             case BDAP::ObjectType::BDAP_CHECKPOINT:
                 return "Channel Checkpoint Entry";
-            case BDAP::ObjectType::BDAP_BINDING_LINK:
-                return "Binding Link Entry";
+            case BDAP::ObjectType::BDAP_LINK_REQUEST:
+                return "Link Request Entry";
+            case BDAP::ObjectType::BDAP_LINK_ACCEPT:
+                return "Link Accept Entry";
             case BDAP::ObjectType::BDAP_IDENTITY:
                 return "Identity Entry";
             case BDAP::ObjectType::BDAP_IDENTITY_VERIFICATION:
                 return "Identity Verification Entry";
-            case BDAP::ObjectType::BDAP_SMART_CONTRACT:
-                return "Smart Contract Entry";
             default:
                 return "Unknown";
         }
@@ -83,10 +83,10 @@ std::string BDAPFromOp(const int op)
             return "bdap_update";
         case OP_BDAP_MODIFY_RDN:
             return "bdap_move";
-        case OP_BDAP_EXECUTE_CODE:
-            return "bdap_execute";
-        case OP_BDAP_BIND:
-            return "bdap_link";
+        case OP_BDAP_LINK_REQUEST:
+            return "bdap_link_request";
+        case OP_BDAP_LINK_ACCEPT:
+            return "bdap_link_accept";
         case OP_BDAP_AUDIT:
             return "bdap_audit";
         case OP_BDAP_CERTIFICATE:
@@ -583,7 +583,12 @@ int GetBDAPOpType(const CScript& script)
         {
             if (script.GetOp2(it, op1, &vch)) 
             {
-                if (op1 - OP_1NEGATE - 1 == OP_BDAP)
+                if ((op1 - OP_1NEGATE - 1 == OP_BDAP_NEW) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_DELETE) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_REVOKE) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY) ||
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY_RDN)
+                )
                 {
                     continue;
                 }
@@ -597,7 +602,7 @@ int GetBDAPOpType(const CScript& script)
         {
             if (script.GetOp2(it, op2, &vch)) 
             {
-                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
+                if (op2 - OP_1NEGATE - 1  > OP_BDAP_NEW && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
                 {
                     return (int)op2 - OP_1NEGATE - 1;
                 }

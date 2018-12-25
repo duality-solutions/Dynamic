@@ -20,10 +20,10 @@ namespace BDAP {
         BDAP_AUDIT = 7,
         BDAP_CHANNEL = 8,
         BDAP_CHECKPOINT = 9,
-        BDAP_BINDING_LINK = 10,
-        BDAP_IDENTITY = 11,
-        BDAP_IDENTITY_VERIFICATION = 12,
-        BDAP_SMART_CONTRACT = 13
+        BDAP_LINK_REQUEST = 10,
+        BDAP_LINK_ACCEPT = 11,
+        BDAP_IDENTITY = 12,
+        BDAP_IDENTITY_VERIFICATION = 13
     };
 }
 
