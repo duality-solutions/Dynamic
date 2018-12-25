@@ -177,9 +177,8 @@ void MiningPage::updateUI()
     ui->labelNextCPUBlock->setText(nextBlockTime);
 #ifdef ENABLE_GPU
     ui->labelNextGPUBlock->setText(nextBlockTime);
-#endif
-
     updatePushSwitch(true);
+#endif
     updatePushSwitch(false);
 }
 
@@ -260,15 +259,17 @@ void MiningPage::StopMiner(bool fGPU)
 
 void MiningPage::changeNumberOfCPUThreads(int i)
 {
-    fCPUMinerOn = (i > 0);
     ui->labelNCPUCores->setText(QString("%1").arg(i));
+    if (fCPUMinerOn)
+       StartMiner(false); 
 }
 
 #ifdef ENABLE_GPU
 void MiningPage::changeNumberOfGPUThreads(int i)
 {
-    fGPUMinerOn = (i > 0);
     ui->labelNGPUCores->setText(QString("%1").arg(i));
+    if (fGPUMinerOn)
+       StartMiner(true); 
 }
 #endif
 
