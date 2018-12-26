@@ -185,12 +185,12 @@ void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
-bool DecodeBDAPTx(const CTransactionRef& tx, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
 int GetBDAPOpType(const CScript& script);
 int GetBDAPOpType(const CTxOut& out);
-std::string GetBDAPOpTypeString(const CScript& script);
-bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op);
+std::string GetBDAPOpTypeString(int& op1, int& op2);
+bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op1, int& op2);
 bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp);
 bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData);
 bool IsBDAPOperationOutput(const CTxOut& out);
@@ -200,5 +200,4 @@ bool GetBDAPTransaction(int nHeight, const uint256& hash, CTransactionRef &txOut
 bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomainEntry& entry, std::string& strOpType);
 CDynamicAddress GetScriptAddress(const CScript& pubScript);
 int GetBDAPOpCodeFromOutput(const CTxOut& out);
-std::string GetBDAPOpStringFromOutput(const CTxOut& out);
 #endif // DYNAMIC_BDAP_DOMAINENTRY_H

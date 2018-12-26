@@ -316,7 +316,7 @@ bool IsBDAPOp(int op)
     op == OP_BDAP_IDENTITY || op == OP_BDAP_ID_VERIFICATION || op == OP_BDAP_CHANNEL || op == OP_BDAP_CHANNEL_CHECKPOINT;
 }
 
-bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc)
+bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc)
 {
     opcodetype opcode;
     vvch.clear();
@@ -324,15 +324,16 @@ bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<un
         return false;
     if (opcode < OP_1 || opcode > OP_16)
         return false;
-    op = CScript::DecodeOP_N(opcode);
-    if (op != OP_BDAP_NEW && op != OP_BDAP_DELETE && op != OP_BDAP_REVOKE && op != OP_BDAP_MODIFY && op != OP_BDAP_MODIFY_RDN)
+
+    op1 = CScript::DecodeOP_N(opcode);
+    if (op1 != OP_BDAP_NEW && op1 != OP_BDAP_DELETE && op1 != OP_BDAP_REVOKE && op1 != OP_BDAP_MODIFY && op1 != OP_BDAP_MODIFY_RDN)
         return false;
     if (!script.GetOp(pc, opcode))
         return false;
     if (opcode < OP_1 || opcode > OP_16)
         return false;
-    op = CScript::DecodeOP_N(opcode);
-    if (!IsBDAPOp(op))
+    op2 = CScript::DecodeOP_N(opcode);
+    if (!IsBDAPOp(op2))
         return false;
     bool found = false;
     for (;;) {
@@ -347,7 +348,6 @@ bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<un
             return false;
         vvch.push_back(vch);
     }
-
     // move the pc to after any DROP or NOP
     while (opcode == OP_DROP || opcode == OP_2DROP) {
         if (!script.GetOp(pc, opcode))
@@ -358,19 +358,19 @@ bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<un
     return found;
 }
 
-bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch)
+bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch)
 {
     CScript::const_iterator pc = script.begin();
-    return DecodeBDAPScript(script, op, vvch, pc);
+    return DecodeBDAPScript(script, op1, op2, vvch, pc);
 }
 
 bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut)
 {
-    int op;
+    int op1, op2;
     std::vector<std::vector<unsigned char> > vvch;
     CScript::const_iterator pc = scriptIn.begin();
 
-    if (!DecodeBDAPScript(scriptIn, op, vvch, pc))
+    if (!DecodeBDAPScript(scriptIn, op1, op2, vvch, pc))
         return false;
     scriptOut = CScript(pc, scriptIn.end());
     return true;

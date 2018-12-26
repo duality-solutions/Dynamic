@@ -523,7 +523,7 @@ bool CheckRevokeDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
 }
 
 bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
-                            int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+                         int op1, int op2, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
@@ -532,18 +532,18 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
     }
 
     //if (fDebug && !bSanityCheck)
-        LogPrintf("*** BDAP nHeight=%d, chainActive.Tip()=%d, op=%s, hash=%s justcheck=%s\n", nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+        LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
     CScript scriptOp;
     vchCharString vvchOpParameters;
-    if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op))
+    if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op1, op2))
     {
         errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("Transaction does not contain BDAP operation script!");
         return error(errorMessage.c_str());
     }
-    const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
-    if (fDebug)
-        LogPrintf("CheckDomainEntryTxInputs, strOperationType= %s \n", strOperationType);
+    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+    //if (fDebug)
+        LogPrintf("%s --, strOperationType= %s \n", __func__, strOperationType);
     
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
@@ -555,31 +555,29 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
     if(bData && !entry.UnserializeFromData(vchData, vchHash))
     {
         errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
+        LogPrintf("%s -- %s \n", __func__, errorMessage);
         return error(errorMessage.c_str());
     }
 
     if(!entry.ValidateValues(errorMessage))
     {
         errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
+        LogPrintf("%s -- %s \n", __func__, errorMessage);
         return error(errorMessage.c_str());
     }
 
     entry.txHash = tx->GetHash();
     entry.nHeight = nHeight;
 
-    if (strOperationType == "bdap_new")
+    if (strOperationType == "bdap_new_account")
         return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_delete")
+    else if (strOperationType == "bdap_delete_account")
         return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_update")
+    else if (strOperationType == "bdap_update_account")
         return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_move")
+    else if (strOperationType == "bdap_move_account")
         return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_execute")
-        return CheckExecuteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_bind")
-        return CheckBindDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_revoke")
+    else if (strOperationType == "bdap_revoke_account")
         return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
 
     return false;
