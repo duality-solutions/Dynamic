@@ -332,22 +332,22 @@ static bool CommonDataCheck(const CDomainEntry& entry, const vchCharString& vvch
         errorMessage = "CommonDataCheck failed! Script operation parameter does not match entry entry object.";
         return false;
     }
-    
+
     if (entry.DomainComponent != vchDefaultDomainName)
     {
         errorMessage = "CommonDataCheck failed! Must use default domain.";
         return false;
     }
 
-    if (entry.OrganizationalUnit != vchDefaultPublicOU && entry.OrganizationalUnit != vchDefaultUserOU && entry.OrganizationalUnit != vchDefaultGroupOU)
-    {
-        errorMessage = "CommonDataCheck failed! Must use default organizational units.";
-        return false;
-    }
-
     if (entry.OrganizationalUnit == vchDefaultAdminOU)
     {
         errorMessage = "CommonDataCheck failed! Can not use default admin domain.";
+        return false;
+    }
+
+    if (entry.OrganizationalUnit != vchDefaultPublicOU)
+    {
+        errorMessage = "CommonDataCheck failed! Must use default public organizational unit.";
         return false;
     }
 

@@ -50,8 +50,6 @@ static constexpr unsigned int MAX_CHECKPOINT_HASH_LENGTH  = 64;
 static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
-static const std::string DEFAULT_PUBLIC_USER_OU           = "users";
-static const std::string DEFAULT_PUBLIC_GROUP_OU          = "groups";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";
 static const std::string DEFAULT_ORGANIZATION_NAME        = "Duality Blockchain Solutions";
 static const std::string DEFAULT_OID_PREFIX               = "0.0.0"; //TODO (bdap): get real OID prefix
@@ -64,8 +62,6 @@ inline const CharString ConvertConstantToCharString (const std::string strConver
 
 static const CharString vchDefaultDomainName = ConvertConstantToCharString(DEFAULT_PUBLIC_DOMAIN);
 static const CharString vchDefaultPublicOU = ConvertConstantToCharString(DEFAULT_PUBLIC_OU);
-static const CharString vchDefaultUserOU = ConvertConstantToCharString(DEFAULT_PUBLIC_USER_OU);
-static const CharString vchDefaultGroupOU = ConvertConstantToCharString(DEFAULT_PUBLIC_GROUP_OU);
 static const CharString vchDefaultAdminOU = ConvertConstantToCharString(DEFAULT_ADMIN_OU);
 static const CharString vchDefaultOrganizationName = ConvertConstantToCharString(DEFAULT_ORGANIZATION_NAME);
 static const CharString vchDefaultOIDPrefix = ConvertConstantToCharString(DEFAULT_OID_PREFIX);
