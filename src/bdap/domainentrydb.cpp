@@ -47,7 +47,7 @@ bool CDomainEntryDB::AddDomainEntry(const CDomainEntry& entry, const int op)
     {
         LOCK(cs_bdap_entry);
         writeState = Write(make_pair(std::string("dc"), entry.vchFullObjectPath()), entry) 
-                         && Write(make_pair(std::string("pk"), entry.DHTPubKeyString()), entry);
+                         && Write(make_pair(std::string("pk"), entry.DHTPublicKey), entry);
     }
     if (writeState)
         AddDomainEntryIndex(entry, op);
@@ -81,10 +81,12 @@ bool CDomainEntryDB::EraseDomainEntry(const std::vector<unsigned char>& vchObjec
 {
     LOCK(cs_bdap_entry);
     CDomainEntry entry;
-    if (!ReadDomainEntry(vchObjectPath, entry)) 
+    if (!ReadDomainEntry(vchObjectPath, entry)) {
+        LogPrintf("CDomainEntryDB::%s -- ReadDomainEntry failed. vchObjectPath = %s\n", __func__, stringFromVch(vchObjectPath));
         return false;
+    }
 
-    return CDBWrapper::Erase(make_pair(std::string("dc"), vchObjectPath)) && EraseDomainEntryPubKey(entry.DHTPublicKey);
+    return CDBWrapper::Erase(make_pair(std::string("dc"), vchObjectPath));
 }
 
 bool CDomainEntryDB::EraseDomainEntryPubKey(const std::vector<unsigned char>& vchPubKey) 
@@ -94,7 +96,7 @@ bool CDomainEntryDB::EraseDomainEntryPubKey(const std::vector<unsigned char>& vc
     if (!ReadDomainEntryPubKey(vchPubKey, entry)) 
         return false;
 
-    return CDBWrapper::Erase(make_pair(std::string("pk"), vchPubKey)) && EraseDomainEntry(entry.vchFullObjectPath());
+    return CDBWrapper::Erase(make_pair(std::string("pk"), vchPubKey));
 }
 
 bool CDomainEntryDB::DomainEntryExists(const std::vector<unsigned char>& vchObjectPath)
@@ -172,12 +174,18 @@ bool CDomainEntryDB::UpdateDomainEntry(const std::vector<unsigned char>& vchObje
 {
     LOCK(cs_bdap_entry);
 
-    if (!EraseDomainEntry(vchObjectPath))
+    if (!EraseDomainEntry(vchObjectPath)) {
+        LogPrintf("CDomainEntryDB::%s -- EraseDomainEntry failed. vchObjectPath = %s\n", __func__, stringFromVch(vchObjectPath));
         return false;
+    }
+    if (!EraseDomainEntryPubKey(entry.DHTPublicKey)) {
+        LogPrintf("CDomainEntryDB::%s -- EraseDomainEntryPubKey failed. vchObjectPath = %s\n", __func__, stringFromVch(entry.DHTPublicKey));
+        return false;
+    }
 
     bool writeState = false;
-    writeState = Update(make_pair(std::string("dc"), entry.GetFullObjectPath()), entry) 
-                    && Update(make_pair(std::string("pk"), entry.DHTPubKeyString()), entry);
+    writeState = Update(make_pair(std::string("dc"), entry.vchFullObjectPath()), entry) 
+                    && Update(make_pair(std::string("pk"), entry.DHTPublicKey), entry);
     if (writeState)
         AddDomainEntryIndex(entry, OP_BDAP_MODIFY);
 
@@ -478,7 +486,7 @@ bool CheckUpdateDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
 
     if (!pDomainEntryDB->UpdateDomainEntry(entry.vchFullObjectPath(), entry))
     {
-        errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry entry in LevelDB; this update operation failed!";
+        errorMessage = "CheckUpdateDomainEntryTxInputs: - Error updating entry in LevelDB; this update operation failed!";
         return error(errorMessage.c_str());
     }
 
