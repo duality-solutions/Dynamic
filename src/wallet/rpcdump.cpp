@@ -201,7 +201,7 @@ UniValue importbdapkeys(const JSONRPCRequest& request)
 
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchFromString(vchObjectID);
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
@@ -814,7 +814,7 @@ UniValue dumpbdapkeys(const JSONRPCRequest& request)
 
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());

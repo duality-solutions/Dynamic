@@ -55,7 +55,7 @@ bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& en
 bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);
 bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
-                            int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
+                            int op1, int op2, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
 extern CDomainEntryDB *pDomainEntryDB;
 

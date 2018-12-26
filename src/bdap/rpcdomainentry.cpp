@@ -34,12 +34,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CDomainEntry txDomainEntry;
     txDomainEntry.OID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::BDAP_USER) {
-        txDomainEntry.OrganizationalUnit = vchDefaultUserOU;
-    }
-    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
-        txDomainEntry.OrganizationalUnit = vchDefaultGroupOU;
-    }
+    txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
     
     txDomainEntry.CommonName = vchCommonName;
     txDomainEntry.OrganizationName = vchDefaultOrganizationName;
@@ -104,7 +99,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_NEW) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -176,7 +171,7 @@ UniValue getusers(const JSONRPCRequest& request)
         nPage = request.params[1].get_int();
     
     // only return entries from the default public domain OU
-    std::string strObjectLocation = DEFAULT_PUBLIC_USER_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
 
     UniValue oDomainEntryList(UniValue::VARR);
@@ -202,7 +197,7 @@ UniValue getgroups(const JSONRPCRequest& request)
         nPage = request.params[1].get_int();
     
     // only return entries from the default public domain OU
-    std::string strObjectLocation = DEFAULT_PUBLIC_GROUP_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    std::string strObjectLocation = DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     CharString vchObjectLocation(strObjectLocation.begin(), strObjectLocation.end());
 
     UniValue oDomainEntryList(UniValue::VARR);
@@ -224,7 +219,7 @@ UniValue getuserinfo(const JSONRPCRequest& request)
 
     CDomainEntry directory;
     directory.DomainComponent = vchDefaultDomainName;
-    directory.OrganizationalUnit = vchDefaultUserOU;
+    directory.OrganizationalUnit = vchDefaultPublicOU;
     directory.ObjectID = vchObjectID;
     
     UniValue oDomainEntryInfo(UniValue::VOBJ);
@@ -252,7 +247,7 @@ UniValue getgroupinfo(const JSONRPCRequest& request)
 
     CDomainEntry directory;
     directory.DomainComponent = vchDefaultDomainName;
-    directory.OrganizationalUnit = vchDefaultGroupOU;
+    directory.OrganizationalUnit = vchDefaultPublicOU;
     directory.ObjectID = vchObjectID;
     
     UniValue oDomainEntryInfo(UniValue::VOBJ);
@@ -278,12 +273,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     
     CDomainEntry txPreviousEntry;
     txPreviousEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::BDAP_USER) {
-        txPreviousEntry.OrganizationalUnit = vchDefaultUserOU;
-    }
-    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
-        txPreviousEntry.OrganizationalUnit = vchDefaultGroupOU;
-    }
+    txPreviousEntry.OrganizationalUnit = vchDefaultPublicOU;
     txPreviousEntry.ObjectID = vchObjectID;
 
     // Check if name already exists
@@ -313,7 +303,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_MODIFY) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;
@@ -388,12 +378,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     
     CDomainEntry txSearchEntry;
     txSearchEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::BDAP_USER) {
-        txSearchEntry.OrganizationalUnit = vchDefaultUserOU;
-    }
-    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
-        txSearchEntry.OrganizationalUnit = vchDefaultGroupOU;
-    }
+    txSearchEntry.OrganizationalUnit = vchDefaultPublicOU;
     txSearchEntry.ObjectID = vchObjectID;
     CDomainEntry txDeletedEntry = txSearchEntry;
     
@@ -416,7 +401,7 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDeletedEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP) << CScript::EncodeOP_N(OP_BDAP_DELETE) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txDeletedEntry.WalletAddress));
     CScript scriptDestination;

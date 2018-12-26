@@ -46,14 +46,14 @@ namespace BDAP {
                 return "Channel Entry";
             case BDAP::ObjectType::BDAP_CHECKPOINT:
                 return "Channel Checkpoint Entry";
-            case BDAP::ObjectType::BDAP_BINDING_LINK:
-                return "Binding Link Entry";
+            case BDAP::ObjectType::BDAP_LINK_REQUEST:
+                return "Link Request Entry";
+            case BDAP::ObjectType::BDAP_LINK_ACCEPT:
+                return "Link Accept Entry";
             case BDAP::ObjectType::BDAP_IDENTITY:
                 return "Identity Entry";
             case BDAP::ObjectType::BDAP_IDENTITY_VERIFICATION:
                 return "Identity Verification Entry";
-            case BDAP::ObjectType::BDAP_SMART_CONTRACT:
-                return "Smart Contract Entry";
             default:
                 return "Unknown";
         }
@@ -83,10 +83,10 @@ std::string BDAPFromOp(const int op)
             return "bdap_update";
         case OP_BDAP_MODIFY_RDN:
             return "bdap_move";
-        case OP_BDAP_EXECUTE_CODE:
-            return "bdap_execute";
-        case OP_BDAP_BIND:
-            return "bdap_link";
+        case OP_BDAP_LINK_REQUEST:
+            return "bdap_link_request";
+        case OP_BDAP_LINK_ACCEPT:
+            return "bdap_link_accept";
         case OP_BDAP_AUDIT:
             return "bdap_audit";
         case OP_BDAP_CERTIFICATE:
@@ -537,14 +537,14 @@ CAmount GetBDAPFee(const CScript& scriptPubKey)
     return recp.nAmount;
 }
 
-bool DecodeBDAPTx(const CTransactionRef& tx, int& op, std::vector<std::vector<unsigned char> >& vvch) 
+bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch) 
 {
     bool found = false;
 
     for (unsigned int i = 0; i < tx->vout.size(); i++) {
         const CTxOut& out = tx->vout[i];
         vchCharString vvchRead;
-        if (DecodeBDAPScript(out.scriptPubKey, op, vvchRead)) {
+        if (DecodeBDAPScript(out.scriptPubKey, op1, op2, vvchRead)) {
             found = true;
             vvch = vvchRead;
             break;
@@ -564,8 +564,8 @@ bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::ve
             continue;
         }
         // check unspent input for consensus before adding to a block
-        int op;
-        if (DecodeBDAPScript(prevCoins.out.scriptPubKey, op, vvch)) {
+        int op1, op2;
+        if (DecodeBDAPScript(prevCoins.out.scriptPubKey, op1, op2, vvch)) {
             return true;
         }
     }
@@ -583,7 +583,12 @@ int GetBDAPOpType(const CScript& script)
         {
             if (script.GetOp2(it, op1, &vch)) 
             {
-                if (op1 - OP_1NEGATE - 1 == OP_BDAP)
+                if ((op1 - OP_1NEGATE - 1 == OP_BDAP_NEW) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_DELETE) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_REVOKE) || 
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY) ||
+                    (op1 - OP_1NEGATE - 1 == OP_BDAP_MODIFY_RDN)
+                )
                 {
                     continue;
                 }
@@ -597,7 +602,7 @@ int GetBDAPOpType(const CScript& script)
         {
             if (script.GetOp2(it, op2, &vch)) 
             {
-                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
+                if (op2 - OP_1NEGATE - 1  > OP_BDAP_NEW && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
                 {
                     return (int)op2 - OP_1NEGATE - 1;
                 }
@@ -616,17 +621,34 @@ int GetBDAPOpType(const CTxOut& out)
     return GetBDAPOpType(out.scriptPubKey);
 }
 
-std::string GetBDAPOpTypeString(const CScript& script)
+std::string GetBDAPOpTypeString(int& op1, int& op2)
 {
-    return BDAPFromOp(GetBDAPOpType(script));
+    if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+        return "bdap_new_account";
+    }
+    else if (op1 == OP_BDAP_DELETE && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+        return "bdap_delete_account";
+    }
+    else if (op1 == OP_BDAP_REVOKE && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+        return "bdap_revoke_account";
+    }
+    else if (op1 == OP_BDAP_MODIFY && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+        return "bdap_update_account";
+    }
+    else if (op1 == OP_BDAP_MODIFY_RDN && op2 == OP_BDAP_ACCOUNT_ENTRY) {
+        return "bdap_move_account";
+    }
+    else {
+        return "unknown";
+    }
 }
 
-bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op)
+bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op1, int& op2)
 {
     for (unsigned int i = 0; i < tx->vout.size(); i++) 
     {
         const CTxOut& out = tx->vout[i];
-        if (DecodeBDAPScript(out.scriptPubKey, op, vvchOpParameters)) 
+        if (DecodeBDAPScript(out.scriptPubKey, op1, op2, vvchOpParameters)) 
         {
             scriptBDAPOp = out.scriptPubKey;
             return true;
@@ -637,9 +659,9 @@ bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharSt
 
 bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp)
 {
-    int op;
+    int op1, op2;
     vchCharString vvchOpParameters;
-    return GetBDAPOpScript(tx, scriptBDAPOp, vvchOpParameters, op);
+    return GetBDAPOpScript(tx, scriptBDAPOp, vvchOpParameters, op1, op2);
 }
 
 bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData)
@@ -670,11 +692,6 @@ int GetBDAPOpCodeFromOutput(const CTxOut& out)
     }
 
     return GetBDAPOpType(out.scriptPubKey);
-}
-
-std::string GetBDAPOpStringFromOutput(const CTxOut& out)
-{
-    return GetBDAPOpTypeString(out.scriptPubKey);
 }
 
 int GetBDAPOperationOutIndex(const CTransactionRef& tx) 
@@ -711,7 +728,12 @@ bool GetDomainEntryFromRecipient(const std::vector<CRecipient>& vecSend, CDomain
             entry.UnserializeFromData(vchData, vchHash);
         }
         else {
-            strOpType = GetBDAPOpTypeString(bdapScript);
+            int op1, op2;
+            std::vector<std::vector<unsigned char> > vvch;
+            if (!DecodeBDAPScript(bdapScript, op1, op2, vvch)) {
+                break;
+            }
+            strOpType = GetBDAPOpTypeString(op1, op2);
         }
     }
     if (!entry.IsNull() && strOpType.size() > 0) {
