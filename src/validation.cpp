@@ -633,17 +633,16 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
         return true;
 
     std::vector<std::vector<unsigned char> > vvchBDAPArgs;
-
-    int op = -1;
+    int op1 = -1;
+    int op2 = -1;
     if (nHeight == 0) {
         nHeight = chainActive.Height() + 1;
     }
-
     bool bValid = false;
     if (tx->nVersion == BDAP_TX_VERSION) {
-        if (DecodeBDAPTx(tx, op, vvchBDAPArgs)) {
+        if (DecodeBDAPTx(tx, op1, op2, vvchBDAPArgs)) {
             std::string errorMessage;
-            bValid = CheckDomainEntryTxInputs(inputs, tx, op, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+            bValid = CheckDomainEntryTxInputs(inputs, tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
             if (!bValid) {
                 errorMessage = "ValidateBDAPInputs: " + errorMessage;
                 return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -694,14 +693,14 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         if (domainEntry.CheckIfExistsInMemPool(pool, strErrorMessage)) {
             return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-txn-already-in-mempool " + strErrorMessage);
         }
-        int op;
+        int op1, op2;
         CScript scriptOp;
         vchCharString vvchOpParameters;
-        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op)) {
+        if (!GetBDAPOpScript(ptx, scriptOp, vvchOpParameters, op1, op2)) {
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-get-op-failed" + strErrorMessage);
         }
-        const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
-        if (strOperationType == "bdap_update" || strOperationType == "bdap_delete") {
+        const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+        if (strOperationType == "bdap_update_account" || strOperationType == "bdap_delete_account") {
             CDomainEntry entry;
             CDomainEntry prevEntry;
             std::vector<unsigned char> vchData;

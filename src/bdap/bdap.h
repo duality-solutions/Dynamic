@@ -53,8 +53,6 @@ static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubke
 static constexpr unsigned int MAX_BDAP_INVITE_MESSAGE     = 256;
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
-static const std::string DEFAULT_PUBLIC_USER_OU           = "users";
-static const std::string DEFAULT_PUBLIC_GROUP_OU          = "groups";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";
 static const std::string DEFAULT_ORGANIZATION_NAME        = "Duality Blockchain Solutions";
 static const std::string DEFAULT_OID_PREFIX               = "0.0.0"; //TODO (bdap): get real OID prefix
@@ -67,8 +65,6 @@ inline const CharString ConvertConstantToCharString (const std::string strConver
 
 static const CharString vchDefaultDomainName = ConvertConstantToCharString(DEFAULT_PUBLIC_DOMAIN);
 static const CharString vchDefaultPublicOU = ConvertConstantToCharString(DEFAULT_PUBLIC_OU);
-static const CharString vchDefaultUserOU = ConvertConstantToCharString(DEFAULT_PUBLIC_USER_OU);
-static const CharString vchDefaultGroupOU = ConvertConstantToCharString(DEFAULT_PUBLIC_GROUP_OU);
 static const CharString vchDefaultAdminOU = ConvertConstantToCharString(DEFAULT_ADMIN_OU);
 static const CharString vchDefaultOrganizationName = ConvertConstantToCharString(DEFAULT_ORGANIZATION_NAME);
 static const CharString vchDefaultOIDPrefix = ConvertConstantToCharString(DEFAULT_OID_PREFIX);

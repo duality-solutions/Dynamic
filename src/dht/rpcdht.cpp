@@ -262,7 +262,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
@@ -318,7 +318,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
