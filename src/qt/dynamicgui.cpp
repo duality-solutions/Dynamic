@@ -102,6 +102,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  receiveCoinsMenuAction(0),
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
+                                                                                                                 miningAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
                                                                                                                  usedReceivingAddressesAction(0),
@@ -379,6 +380,7 @@ void DynamicGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
+    connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
 
 #endif // ENABLE_WALLET
@@ -711,6 +713,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
+    miningAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -747,6 +750,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(receiveCoinsAction);
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
+    pmenu->addAction(miningAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
