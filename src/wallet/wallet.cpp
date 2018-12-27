@@ -3493,10 +3493,10 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     strFailReason = _("Failed to find BDAP operation script in the recipient array.");
                     return false;
                 }
-                if (strOpType == "bdap_new_entry") {
+                if (strOpType == "bdap_new_account") {
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_entry" || strOpType == "bdap_delete_entry") {
+                else if (strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
                     CDomainEntry prevEntry;
                     if (CheckDomainEntryDB()) {
                         if (!pDomainEntryDB->GetDomainEntryInfo(vchValue, prevEntry)) {

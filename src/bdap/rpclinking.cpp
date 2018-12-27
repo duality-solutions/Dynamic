@@ -81,11 +81,11 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     std::string strRequestorFQDN = request.params[1].get_str();
     ToLowerCase(strRequestorFQDN);
-    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN + "@" + stringFromVch(vchDefaultUserOU) + "." + stringFromVch(vchDefaultDomainName));
+    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN + "@" + stringFromVch(vchDefaultPublicOU) + "." + stringFromVch(vchDefaultDomainName));
 
     std::string strRecipientFQDN = request.params[2].get_str();
     ToLowerCase(strRecipientFQDN);
-    CharString vchRecipientFQDN = vchFromString(strRequestorFQDN + "@" + stringFromVch(vchDefaultUserOU) + "." + stringFromVch(vchDefaultDomainName));
+    CharString vchRecipientFQDN = vchFromString(strRequestorFQDN + "@" + stringFromVch(vchDefaultPublicOU) + "." + stringFromVch(vchDefaultDomainName));
     
     CLinkRequest txLink;
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
