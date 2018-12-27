@@ -3,9 +3,11 @@
 
 #include "dht/mutable.h"
 
-#include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "hash.h"
 #include "streams.h"
+
+#include <univalue.h>
 
 void CMutableData::Serialize(std::vector<unsigned char>& vchData) 
 {

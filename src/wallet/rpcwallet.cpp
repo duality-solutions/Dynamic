@@ -358,7 +358,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScript, CWalletTx& wtxNew, CAmount nOPValue, CAmount nDataValue)
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -379,11 +379,51 @@ void SendBDAPTransaction(const CScript bdapDataScript, const CScript bdapOPScrip
     LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    CRecipient recDataScript = {bdapDataScript, DEFAULT_MIN_RELAY_TX_FEE, false};
+    CRecipient recDataScript = {bdapDataScript, 0, false};
     vecSend.push_back(recDataScript);
     CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recOPScript);
 
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
+            strError, NULL, true, ALL_COINS, false, true)) {
+        if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+}
+
+void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
+                                CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue)
+{
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nOPValue <= 0 || nDataValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "SendLinkingTransaction invalid amount");
+
+    if (nOPValue + nDataValue > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "SendLinkingTransaction insufficient funds");
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosInOut = 0;
+
+    LogPrintf("Sending BDAP Linking Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
+    LogPrintf("Sending BDAP Linking OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
+
+    CRecipient recDataScript = {bdapDataScript, 0, false};
+    vecSend.push_back(recDataScript);
+    CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
+    vecSend.push_back(recOPScript);
+    // TODO (bdap) Make sure sendAddress is used to fund the transaction.
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
             strError, NULL, true, ALL_COINS, false, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())

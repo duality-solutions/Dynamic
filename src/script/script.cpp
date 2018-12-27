@@ -314,6 +314,7 @@ bool IsBDAPOp(int op)
     return op == OP_BDAP_NEW || op == OP_BDAP_DELETE || op == OP_BDAP_REVOKE || op == OP_BDAP_MODIFY || op == OP_BDAP_MODIFY_RDN || 
     op == OP_BDAP_ACCOUNT_ENTRY || op == OP_BDAP_LINK_REQUEST || op == OP_BDAP_LINK_ACCEPT || op == OP_BDAP_AUDIT || op == OP_BDAP_CERTIFICATE || 
     op == OP_BDAP_IDENTITY || op == OP_BDAP_ID_VERIFICATION || op == OP_BDAP_CHANNEL || op == OP_BDAP_CHANNEL_CHECKPOINT;
+
 }
 
 bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc)

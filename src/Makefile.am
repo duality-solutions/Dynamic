@@ -81,11 +81,13 @@ DYNAMIC_CORE_H = \
   bdap/bdap.h \
   bdap/domainentry.h \
   bdap/domainentrydb.h \
-  bdap/entrycertificate.h \
+  bdap/certificate.h \
   bdap/entrychannel.h \
   bdap/entrycheckpoints.h \
-  bdap/entrylink.h \
   bdap/identity.h \
+  bdap/linking.h \
+  bdap/linkingdb.h \
+  bdap/utils.h \
   bip39_english.h \
   bip39.h \
   blockencodings.h \
@@ -255,13 +257,15 @@ libdynamic_server_a_SOURCES = \
   bdap/auditdata.cpp \
   bdap/domainentry.cpp \
   bdap/domainentrydb.cpp \
-  bdap/entrycertificate.cpp \
+  bdap/certificate.cpp \
   bdap/entrychannel.cpp \
   bdap/entrycheckpoints.cpp \
-  bdap/entrylink.cpp \
   bdap/identity.cpp \
   bdap/linking.cpp \
+  bdap/linkingdb.cpp \
   bdap/rpcdomainentry.cpp \
+  bdap/rpclinking.cpp \
+  bdap/utils.cpp \
   dbwrapper.cpp \
   dht/curve25519.cpp \
   dht/mutable.cpp \

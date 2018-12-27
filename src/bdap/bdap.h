@@ -5,8 +5,8 @@
 #ifndef DYNAMIC_BDAP_H
 #define DYNAMIC_BDAP_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace BDAP {
     enum ObjectType {
@@ -43,11 +43,14 @@ static constexpr unsigned int MAX_KEY_LENGTH              = 156;
 static constexpr unsigned int MAX_DESCRIPTION_LENGTH      = 256;
 static constexpr unsigned int MAX_CERTIFICATE_LENGTH      = 512;
 static constexpr unsigned int MAX_CERTIFICATE_NAME        = 63;
+static constexpr unsigned int MAX_CERTIFICATE_CATEGORY    = 32;
 static constexpr unsigned int MAX_SIGNATURE_LENGTH        = 65; // https://bitcoin.stackexchange.com/questions/12554/why-the-signature-is-always-65-13232-bytes-long
 static constexpr unsigned int MAX_PRIVATE_DATA_LENGTH     = 512; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_NUMBER_CHECKPOINTS      = 25; // Pay per byte for hosting on chain
 static constexpr unsigned int MAX_CHECKPOINT_HASH_LENGTH  = 64;
 static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of seconds per day.
+static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubkeys are 32 bytes and 64 bytes when hex encoded.
+static constexpr unsigned int MAX_BDAP_INVITE_MESSAGE     = 256;
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";

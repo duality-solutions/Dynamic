@@ -5,6 +5,8 @@
 #include "bdap/domainentrydb.h"
 
 #include "base58.h"
+#include "coins.h"
+#include "bdap/utils.h"
 #include "validation.h"
 #include "validationinterface.h"
 
