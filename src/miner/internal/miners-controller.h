@@ -34,8 +34,7 @@ private:
     MinersThreadGroup<GPUMiner> _group_gpu;
 #endif // ENABLE_GPU
 
-    bool _connected;
-    bool _downloaded;
+    bool _connected = false;
     bool _enable_start = false;
 
     int64_t _last_txn_time = 0;
@@ -70,7 +69,7 @@ private:
     void StartIfEnabled();
 
     // Returns true if can start
-    bool can_start() const { return _connected && _downloaded && _enable_start && _ctx->shared->has_block(); }
+    bool can_start() const { return _connected && _enable_start && _ctx->shared->has_block(); }
 
 protected:
     // Returns shared miner context

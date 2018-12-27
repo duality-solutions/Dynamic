@@ -3698,7 +3698,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>Form</translation>
     </message>
     <message>
-        <source>Number of threads to use:</source>
+        <source>Number of CPU threads to use:</source>
         <translation>사용할 스레드 수:</translation>
     </message>
     <message>

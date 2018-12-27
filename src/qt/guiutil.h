@@ -267,7 +267,9 @@ typedef ClickableProgressBar ProgressBar;
 
 // utility functions for mining UI
 int CPUMaxThreads();
+#ifdef ENABLE_GPU
 int GPUMaxThreads();
+#endif
 QString FormatHashRate(qint64 n);
 int64_t GetNetworkHashPS(int lookup, int height);
 QString FormatTimeInterval(arith_uint256 time);

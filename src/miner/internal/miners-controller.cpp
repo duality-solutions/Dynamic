@@ -27,8 +27,7 @@ MinersController::MinersController(MinerContextRef ctx)
 #ifdef ENABLE_GPU
       _group_gpu(_ctx->MakeChild()),
 #endif // ENABLE_GPU
-      _connected(!_ctx->chainparams().MiningRequiresPeers()),
-      _downloaded(!_ctx->chainparams().MiningRequiresPeers())
+      _connected(!_ctx->chainparams().MiningRequiresPeers())
 {
     ConnectMinerSignals(this);
 };
@@ -46,6 +45,8 @@ void MinersController::Start()
 
 void MinersController::Shutdown()
 {
+    _enable_start = false;
+
     _group_cpu.Shutdown();
 #ifdef ENABLE_GPU
     _group_gpu.Shutdown();
@@ -63,12 +64,18 @@ int64_t MinersController::GetHashRate() const
 
 void MinersController::NotifyNode(const CNode* node)
 {
-    _connected = true;
-    Start();
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
+        _connected = true;
+    }
+    else if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
+        _connected = false;
+    }
 };
 
-void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool initial_download)
+void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool fInitialDownload)
 {
+    if (fInitialDownload)
+        return;
     // Compare with current tip (checks for unexpected behaviour or old block)
     if (index_new != chainActive.Tip())
         return;
@@ -85,8 +92,12 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
     }
 };
 
-void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int pos_in_block)
+void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
 {
+    // check if blockchain has synced, has more than 1 peer and is enabled before recreating blocks
+    if (IsInitialBlockDownload() || !can_start())
+        return;
+    
     const int64_t latest_txn = mempool.GetTransactionsUpdated();
     if (latest_txn == _last_txn_time) {
         return;

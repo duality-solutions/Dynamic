@@ -46,20 +46,25 @@ private:
 
 private Q_SLOTS:
 
-    void changeNumberOfCPUThreads(int i);
-    void changeNumberOfGPUThreads(int i);
     void startMining();
     void switchMining(bool fGPU);
-    void switchCPUMining();
-    void switchGPUMining();
-    void showCPUHashRate(int i);
-    void showGPUHashRate(int i);
     void showHashRate(int i, bool fGPU);
-    void changeCPUSampleTime(int i);
-    void changeGPUSampleTime(int i);
     void changeSampleTime(int i, bool fGPU);
+
+    void changeNumberOfCPUThreads(int i);
+    void switchCPUMining();
+    void showCPUHashRate(int i);
+    void changeCPUSampleTime(int i);
     void clearCPUHashRateData();
+
+
+#ifdef ENABLE_GPU
+    void changeNumberOfGPUThreads(int i);
+    void switchGPUMining();
+    void showGPUHashRate(int i);
+    void changeGPUSampleTime(int i);
     void clearGPUHashRateData();
+#endif
 };
 
 #endif // MININGPAGE_H

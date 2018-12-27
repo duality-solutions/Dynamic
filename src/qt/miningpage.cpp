@@ -20,8 +20,9 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->setupUi(this);
 
     int nCPUMaxUseThreads = GUIUtil::CPUMaxThreads();
+#ifdef ENABLE_GPU
     int nGPUMaxUseThreads = GUIUtil::GPUMaxThreads();
-
+#endif
     std::string PrivAddress = GetArg("-miningprivkey", "");
     if (!PrivAddress.empty()) {
         CDynamicSecret Secret;
@@ -46,6 +47,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->sliderCPUCores->setMaximum(nCPUMaxUseThreads);
     ui->sliderCPUCores->setValue(nCPUMaxUseThreads);
 
+#ifdef ENABLE_GPU
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         ui->sliderGPUCores->setVisible(false);
         ui->labelNGPUCores->setText(QString("Slider will show once Dynamic has finished syncing"));
@@ -57,40 +59,66 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     ui->sliderGPUCores->setMinimum(1);
     ui->sliderGPUCores->setMaximum(nGPUMaxUseThreads);
     ui->sliderGPUCores->setValue(nGPUMaxUseThreads);
+    ui->pushSwitchGPUMining->setVisible(true);
+    ui->checkBoxShowGPUGraph->setVisible(true);
+#else
+    ui->sliderGPUCores->setVisible(false);
+    ui->labelNGPUCores->setText(QString("GPU mining is not supported in this version of Dynamic"));
+    ui->pushSwitchGPUMining->setVisible(false);
+    ui->checkBoxShowGPUGraph->setVisible(false);
+#endif
 
     ui->sliderCPUGraphSampleTime->setMaximum(0);
     ui->sliderCPUGraphSampleTime->setMaximum(6);
 
+#ifdef ENABLE_GPU
     ui->sliderGPUGraphSampleTime->setMaximum(0);
     ui->sliderGPUGraphSampleTime->setMaximum(6);
+#endif
 
     ui->sliderCPUCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
+#ifdef ENABLE_GPU
     ui->sliderGPUCores->setToolTip(tr("Use the slider to select the amount of GPU devices to use"));
+#endif
     ui->labelCPUMinerHashRate->setToolTip(tr("This shows the hashrate of your CPU whilst mining"));
+#ifdef ENABLE_GPU
     ui->labelGPUMinerHashRate->setToolTip(tr("This shows the hashrate of your GPU whilst mining"));
+#endif
     ui->labelNetHashRateCPU->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
     ui->labelNetHashRateGPU->setToolTip(tr("This shows the overall hashrate of the Dynamic network"));
     ui->labelNextCPUBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
+#ifdef ENABLE_GPU
     ui->labelNextGPUBlock->setToolTip(tr("This shows the average time between the blocks you have mined"));
+#endif
 
     connect(ui->sliderCPUCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfCPUThreads(int)));
+#ifdef ENABLE_GPU
     connect(ui->sliderGPUCores, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfGPUThreads(int)));
-    connect(ui->sliderCPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
-    connect(ui->sliderGPUCores, SIGNAL(sliderReleased()), this, SLOT(startMining()));
+#endif
     connect(ui->sliderCPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeCPUSampleTime(int)));
+#ifdef ENABLE_GPU
     connect(ui->sliderGPUGraphSampleTime, SIGNAL(valueChanged(int)), this, SLOT(changeGPUSampleTime(int)));
+#endif
     connect(ui->pushSwitchCPUMining, SIGNAL(clicked()), this, SLOT(switchCPUMining()));
+#ifdef ENABLE_GPU
     connect(ui->pushSwitchGPUMining, SIGNAL(clicked()), this, SLOT(switchGPUMining()));
+#endif
     connect(ui->pushButtonClearCPUData, SIGNAL(clicked()), this, SLOT(clearCPUHashRateData()));
+#ifdef ENABLE_GPU
     connect(ui->pushButtonClearGPUData, SIGNAL(clicked()), this, SLOT(clearGPUHashRateData()));
+#endif
     connect(ui->checkBoxShowCPUGraph, SIGNAL(stateChanged(int)), this, SLOT(showCPUHashRate(int)));
+#ifdef ENABLE_GPU
     connect(ui->checkBoxShowGPUGraph, SIGNAL(stateChanged(int)), this, SLOT(showGPUHashRate(int)));
+#endif
 
     ui->minerCPUHashRateWidget->graphType = HashRateGraphWidget::GraphType::MINER_CPU_HASHRATE;
     ui->minerCPUHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
 
+#ifdef ENABLE_GPU
     ui->minerGPUHashRateWidget->graphType = HashRateGraphWidget::GraphType::MINER_GPU_HASHRATE;
     ui->minerGPUHashRateWidget->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
+#endif
 
     showHashMeterControls(false, false);
     showHashMeterControls(false, true);
@@ -113,11 +141,13 @@ void MiningPage::setModel(WalletModel* model)
 void MiningPage::updateUI()
 {
     if (dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced()) {
+#ifdef ENABLE_GPU
         if (ui->sliderGPUCores->isHidden()) {
             int nThreads = ui->sliderGPUCores->value();
             ui->sliderGPUCores->setVisible(true);
             ui->labelNGPUCores->setText(QString("%1").arg(nThreads));
         }
+#endif
         if (ui->sliderCPUCores->isHidden()) {
             int nThreads = ui->sliderCPUCores->value();
             ui->sliderCPUCores->setVisible(true);
@@ -130,7 +160,9 @@ void MiningPage::updateUI()
     ui->labelNetHashRateCPU->setText(GUIUtil::FormatHashRate(networkHashrate));
     ui->labelNetHashRateGPU->setText(GUIUtil::FormatHashRate(networkHashrate));
     ui->labelCPUMinerHashRate->setText(GUIUtil::FormatHashRate(GetCPUHashRate()));
+#ifdef ENABLE_GPU
     ui->labelGPUMinerHashRate->setText(GUIUtil::FormatHashRate(GetGPUHashRate()));
+#endif
 
     QString nextBlockTime;
     if (hashrate == 0) {
@@ -143,22 +175,29 @@ void MiningPage::updateUI()
     }
 
     ui->labelNextCPUBlock->setText(nextBlockTime);
+#ifdef ENABLE_GPU
     ui->labelNextGPUBlock->setText(nextBlockTime);
-
     updatePushSwitch(true);
+#endif
     updatePushSwitch(false);
 }
 
 void MiningPage::updatePushSwitch(bool fGPU)
 {
+#ifdef ENABLE_GPU
     QPushButton* pushSwitch = fGPU ? ui->pushSwitchGPUMining : ui->pushSwitchCPUMining;
+#else
+    QPushButton* pushSwitch = ui->pushSwitchCPUMining;
+#endif
+
     if (!dynodeSync.IsSynced() || !dynodeSync.IsBlockchainSynced()) {
         pushSwitch->setToolTip(tr("Blockchain/Dynodes are not synced, please wait until fully synced before mining!"));
         pushSwitch->setText(tr("Disabled"));
         pushSwitch->setEnabled(false);
         return;
     }
-
+    
+#ifdef ENABLE_GPU
     if (fGPU && fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
         pushSwitch->setText(tr("Stop mining"));
@@ -173,20 +212,36 @@ void MiningPage::updatePushSwitch(bool fGPU)
         pushSwitch->setText(tr("Start mining"));
     }
     pushSwitch->setEnabled(true);
+#else
+    if (fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
+        pushSwitch->setText(tr("Stop mining"));
+    } else if (!fCPUMinerOn) {
+        pushSwitch->setToolTip(tr("Click 'Start mining' to begin mining!"));
+        pushSwitch->setText(tr("Start mining"));
+    }
+    pushSwitch->setEnabled(true);
+#endif
 }
 
 void MiningPage::StartMiner(bool fGPU)
 {
+#ifdef ENABLE_GPU
     if (fGPU) {
         fGPUMinerOn = true;
     } else {
         fCPUMinerOn = true;
     }
     startMining();
+#else
+    fCPUMinerOn = true;
+    startMining();
+#endif
 }
 
 void MiningPage::StopMiner(bool fGPU)
 {
+#ifdef ENABLE_GPU
     if (fGPU) {
         fGPUMinerOn = false;
         ShutdownGPUMiners();
@@ -195,26 +250,37 @@ void MiningPage::StopMiner(bool fGPU)
         ShutdownCPUMiners();
     }
     updateUI();
+#else
+    fCPUMinerOn = false;
+    ShutdownCPUMiners();
+    updateUI();
+#endif
 }
 
 void MiningPage::changeNumberOfCPUThreads(int i)
 {
-    fCPUMinerOn = (i > 0);
     ui->labelNCPUCores->setText(QString("%1").arg(i));
+    if (fCPUMinerOn)
+       StartMiner(false); 
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::changeNumberOfGPUThreads(int i)
 {
-    fGPUMinerOn = (i > 0);
     ui->labelNGPUCores->setText(QString("%1").arg(i));
+    if (fGPUMinerOn)
+       StartMiner(true); 
 }
+#endif
 
 void MiningPage::startMining()
 {
+#ifdef ENABLE_GPU
     if (fGPUMinerOn) {
         SetGPUMinerThreads(ui->sliderGPUCores->value());
         StartGPUMiners();
     }
+#endif
     if (fCPUMinerOn) {
         SetCPUMinerThreads(ui->sliderCPUCores->value());
         StartCPUMiners();
@@ -227,18 +293,26 @@ void MiningPage::switchCPUMining()
     switchMining(false);
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::switchGPUMining()
 {
     switchMining(true);
 }
+#endif
 
 void MiningPage::switchMining(bool fGPU)
 {
+#ifdef ENABLE_GPU
     QPushButton* pushSwitch = fGPU ? ui->pushSwitchGPUMining : ui->pushSwitchCPUMining;
     QSlider* coreSlider = fGPU ? ui->sliderGPUCores : ui->sliderCPUCores;
     QLabel* labelCores = fGPU ? ui->labelNGPUCores : ui->labelNCPUCores;
     int nThreads = (int)(fGPU ? ui->sliderGPUCores->value() : ui->sliderCPUCores->value());
+#else
+    int64_t hashRate = GetCPUHashRate();
+    int nThreads = (int)ui->sliderCPUCores->value();
+#endif
 
+#ifdef ENABLE_GPU
     if (fGPU && !fGPUMinerOn) {
         if (nThreads == 0)
             coreSlider->setValue(1);
@@ -262,6 +336,21 @@ void MiningPage::switchMining(bool fGPU)
         coreSlider->setVisible(false);
         StopMiner(fGPU);
     }
+#else
+    if (hashRate > 0) {
+        ui->pushSwitchCPUMining->setText(tr("Stopping"));
+        StopMiner(fGPU);
+    }
+    else if (nThreads == 0 && hashRate == 0){
+        ui->sliderCPUCores->setValue(1);
+        ui->pushSwitchCPUMining->setText(tr("Starting"));
+        StartMiner(fGPU);
+    }
+    else {
+        ui->pushSwitchCPUMining->setText(tr("Starting"));
+        StartMiner(fGPU);
+    }
+#endif
 }
 
 void MiningPage::timerEvent(QTimerEvent*)
@@ -274,10 +363,12 @@ void MiningPage::showCPUHashRate(int i)
     showHashRate(i, false);
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::showGPUHashRate(int i)
 {
     showHashRate(i, true);
 }
+#endif
 
 void MiningPage::showHashRate(int i, bool fGPU)
 {
@@ -309,15 +400,22 @@ void MiningPage::changeCPUSampleTime(int i)
     changeSampleTime(i, false);
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::changeGPUSampleTime(int i)
 {
     changeSampleTime(i, true);
 }
+#endif
 
 void MiningPage::changeSampleTime(int i, bool fGPU)
 {
+#ifdef ENABLE_GPU
     QLabel* labelSize = fGPU ? ui->labelGPUGraphSampleSize : ui->labelCPUGraphSampleSize;
     HashRateGraphWidget* hashRate = fGPU ? ui->minerGPUHashRateWidget : ui->minerCPUHashRateWidget;
+#else
+    QLabel* labelSize = ui->labelCPUGraphSampleSize;
+    HashRateGraphWidget* hashRate = ui->minerCPUHashRateWidget;
+#endif
     switch (i) {
     case 0:
         hashRate->UpdateSampleTime(HashRateGraphWidget::SampleTime::FIVE_MINUTES);
@@ -359,7 +457,9 @@ void MiningPage::clearCPUHashRateData()
     ui->minerCPUHashRateWidget->clear();
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::clearGPUHashRateData()
 {
     ui->minerGPUHashRateWidget->clear();
 }
+#endif

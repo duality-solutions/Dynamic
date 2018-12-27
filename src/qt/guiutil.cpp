@@ -1059,6 +1059,7 @@ int CPUMaxThreads()
     return nUseThreads;
 }
 
+#ifdef ENABLE_GPU
 int GPUMaxThreads()
 {
     int nThreads = GPUMiner::TotalDevices();
@@ -1069,6 +1070,7 @@ int GPUMaxThreads()
     }
     return nUseThreads;
 }
+#endif
 
 QString FormatHashRate(qint64 n)
 {
