@@ -20,10 +20,9 @@ libtorrent_librasterbar_a_CPPFLAGS = $(CPPFLAGS) $(LIBTORRENT_CPPFLAGS_INT) $(LI
 libtorrent_librasterbar_a_CXXFLAGS = $(CXXFLAGS) $(PIE_FLAGS)
 
 libtorrent_librasterbar_a_SOURCES= \
-  libtorrent/src/web_connection_base.cpp            \
+  libtorrent/src/add_torrent_params.cpp             \
   libtorrent/src/alert.cpp                          \
   libtorrent/src/alert_manager.cpp                  \
-  libtorrent/src/allocator.cpp                      \
   libtorrent/src/announce_entry.cpp                 \
   libtorrent/src/assert.cpp                         \
   libtorrent/src/bandwidth_limit.cpp                \
@@ -31,9 +30,9 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/bandwidth_queue_entry.cpp          \
   libtorrent/src/bdecode.cpp                        \
   libtorrent/src/bitfield.cpp                       \
+  libtorrent/src/block_cache.cpp                    \
   libtorrent/src/bloom_filter.cpp                   \
   libtorrent/src/broadcast_socket.cpp               \
-  libtorrent/src/block_cache.cpp                    \
   libtorrent/src/bt_peer_connection.cpp             \
   libtorrent/src/chained_buffer.cpp                 \
   libtorrent/src/choker.cpp                         \
@@ -53,9 +52,10 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/enum_net.cpp                       \
   libtorrent/src/error_code.cpp                     \
   libtorrent/src/escape_string.cpp                  \
+  libtorrent/src/ffs.cpp                            \
   libtorrent/src/file.cpp                           \
-  libtorrent/src/path.cpp                           \
   libtorrent/src/file_pool.cpp                      \
+  libtorrent/src/file_progress.cpp                  \
   libtorrent/src/file_storage.cpp                   \
   libtorrent/src/fingerprint.cpp                    \
   libtorrent/src/generate_peer_id.cpp               \
@@ -80,24 +80,26 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/magnet_uri.cpp                     \
   libtorrent/src/merkle.cpp                         \
   libtorrent/src/natpmp.cpp                         \
+  libtorrent/src/packet_buffer.cpp                  \
   libtorrent/src/parse_url.cpp                      \
   libtorrent/src/part_file.cpp                      \
+  libtorrent/src/path.cpp                           \
   libtorrent/src/pe_crypto.cpp                      \
-  libtorrent/src/performance_counters.cpp           \
-  libtorrent/src/peer_connection.cpp                \
-  libtorrent/src/peer_connection_handle.cpp         \
   libtorrent/src/peer_class.cpp                     \
   libtorrent/src/peer_class_set.cpp                 \
+  libtorrent/src/peer_connection.cpp                \
+  libtorrent/src/peer_connection_handle.cpp         \
+  libtorrent/src/peer_info.cpp                      \
+  libtorrent/src/peer_list.cpp                      \
+  libtorrent/src/performance_counters.cpp           \
   libtorrent/src/piece_picker.cpp                   \
   libtorrent/src/platform_util.cpp                  \
-  libtorrent/src/packet_buffer.cpp                  \
   libtorrent/src/proxy_base.cpp                     \
-  libtorrent/src/peer_list.cpp                      \
+  libtorrent/src/proxy_settings.cpp                 \
   libtorrent/src/puff.cpp                           \
   libtorrent/src/random.cpp                         \
-  libtorrent/src/receive_buffer.cpp                 \
   libtorrent/src/read_resume_data.cpp               \
-  libtorrent/src/write_resume_data.cpp              \
+  libtorrent/src/receive_buffer.cpp                 \
   libtorrent/src/request_blocks.cpp                 \
   libtorrent/src/resolve_links.cpp                  \
   libtorrent/src/resolver.cpp                       \
@@ -106,8 +108,8 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/session_handle.cpp                 \
   libtorrent/src/session_impl.cpp                   \
   libtorrent/src/session_settings.cpp               \
+  libtorrent/src/session_stats.cpp                  \
   libtorrent/src/session_udp_sockets.cpp            \
-  libtorrent/src/proxy_settings.cpp                 \
   libtorrent/src/settings_pack.cpp                  \
   libtorrent/src/sha1.cpp                           \
   libtorrent/src/sha1_hash.cpp                      \
@@ -116,21 +118,21 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/socket_io.cpp                      \
   libtorrent/src/socket_type.cpp                    \
   libtorrent/src/socks5_stream.cpp                  \
+  libtorrent/src/stack_allocator.cpp                \
   libtorrent/src/stat.cpp                           \
   libtorrent/src/stat_cache.cpp                     \
   libtorrent/src/storage.cpp                        \
   libtorrent/src/storage_piece_set.cpp              \
   libtorrent/src/storage_utils.cpp                  \
-  libtorrent/src/session_stats.cpp                  \
   libtorrent/src/string_util.cpp                    \
+  libtorrent/src/time.cpp                           \
+  libtorrent/src/timestamp_history.cpp              \
   libtorrent/src/torrent.cpp                        \
   libtorrent/src/torrent_handle.cpp                 \
   libtorrent/src/torrent_info.cpp                   \
   libtorrent/src/torrent_peer.cpp                   \
   libtorrent/src/torrent_peer_allocator.cpp         \
   libtorrent/src/torrent_status.cpp                 \
-  libtorrent/src/time.cpp                           \
-  libtorrent/src/timestamp_history.cpp              \
   libtorrent/src/tracker_manager.cpp                \
   libtorrent/src/udp_socket.cpp                     \
   libtorrent/src/udp_tracker_connection.cpp         \
@@ -140,34 +142,31 @@ libtorrent_librasterbar_a_SOURCES= \
   libtorrent/src/utf8.cpp                           \
   libtorrent/src/utp_socket_manager.cpp             \
   libtorrent/src/utp_stream.cpp                     \
-  libtorrent/src/web_peer_connection.cpp            \
-  libtorrent/src/xml_parse.cpp                      \
   libtorrent/src/version.cpp                        \
-  libtorrent/src/file_progress.cpp                  \
-  libtorrent/src/ffs.cpp                            \
-  libtorrent/src/add_torrent_params.cpp             \
-  libtorrent/src/peer_info.cpp                      \
-  libtorrent/src/stack_allocator.cpp                \
+  libtorrent/src/web_connection_base.cpp            \
+  libtorrent/src/web_peer_connection.cpp            \
+  libtorrent/src/write_resume_data.cpp              \
+  libtorrent/src/xml_parse.cpp                      \
+  libtorrent/src/kademlia/dht_settings.cpp          \
   libtorrent/src/kademlia/dht_state.cpp             \
   libtorrent/src/kademlia/dht_storage.cpp           \
   libtorrent/src/kademlia/dht_tracker.cpp           \
+  libtorrent/src/kademlia/dos_blocker.cpp           \
+  libtorrent/src/kademlia/ed25519.cpp               \
   libtorrent/src/kademlia/find_data.cpp             \
-  libtorrent/src/kademlia/put_data.cpp              \
+  libtorrent/src/kademlia/get_item.cpp              \
+  libtorrent/src/kademlia/get_peers.cpp             \
+  libtorrent/src/kademlia/item.cpp                  \
   libtorrent/src/kademlia/msg.cpp                   \
   libtorrent/src/kademlia/node.cpp                  \
   libtorrent/src/kademlia/node_entry.cpp            \
   libtorrent/src/kademlia/node_id.cpp               \
+  libtorrent/src/kademlia/put_data.cpp              \
   libtorrent/src/kademlia/refresh.cpp               \
   libtorrent/src/kademlia/routing_table.cpp         \
   libtorrent/src/kademlia/rpc_manager.cpp           \
-  libtorrent/src/kademlia/traversal_algorithm.cpp   \
-  libtorrent/src/kademlia/dos_blocker.cpp           \
-  libtorrent/src/kademlia/get_peers.cpp             \
-  libtorrent/src/kademlia/get_item.cpp              \
-  libtorrent/src/kademlia/item.cpp                  \
-  libtorrent/src/kademlia/ed25519.cpp               \
   libtorrent/src/kademlia/sample_infohashes.cpp     \
-  libtorrent/src/kademlia/dht_settings.cpp          \
+  libtorrent/src/kademlia/traversal_algorithm.cpp   \
   libtorrent/ed25519/src/add_scalar.cpp             \
   libtorrent/ed25519/src/fe.cpp                     \
   libtorrent/ed25519/src/ge.cpp                     \
