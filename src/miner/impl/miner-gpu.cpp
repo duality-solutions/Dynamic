@@ -27,8 +27,12 @@ int64_t GPUMiner::TryMineBlock(CBlock& block)
     const auto _end = END(block.nNonce);
     const void* input = (_begin == _end ? pblank : static_cast<const void*>(&_begin[0]));
     const std::uint64_t device_target = ArithToUint256(_hash_target).GetUint64(3);
+    std::uint32_t start_nonce = block.nNonce;
 
-    std::uint32_t result_nonce = _processing_unit.scanNonces(input, block.nNonce, device_target);
+    //Increase nNonce for the next batch
+    block.nNonce += _batch_size_target;
+
+    std::uint32_t result_nonce = _processing_unit.scanNonces(input, start_nonce, device_target);
 
     if ( result_nonce < std::numeric_limits<uint32_t>::max()){
         block.nNonce = result_nonce;
