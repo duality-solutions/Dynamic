@@ -379,6 +379,8 @@ void SetBlockPubkeyScript(CBlock& block, const CScript& scriptPubKeyIn)
     CMutableTransaction txCoinbase(*block.vtx[0]);
     // Set coinbase out address
     txCoinbase.vout[0].scriptPubKey = scriptPubKeyIn;
+    //It should be added to the block
+    block.vtx[0] = MakeTransactionRef(std::move(txCoinbase));
     // Generate merkle root hash
     block.hashMerkleRoot = BlockMerkleRoot(block);
 }
