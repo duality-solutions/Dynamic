@@ -24,21 +24,21 @@ void InitMiners(const CChainParams& chainparams, CConnman& connman)
 
 void StartMiners()
 {
-    if (gMiners)
-        gMiners->Start();
+    assert(gMiners);
+    gMiners->Start();
 };
 
 void StartCPUMiners()
 {
-    if (gMiners)
-        gMiners->group_cpu().Start();
+    assert(gMiners);
+    gMiners->group_cpu().Start();
 };
 
 void StartGPUMiners()
 {
 #ifdef ENABLE_GPU
-    if (gMiners)
-        gMiners->group_gpu().Start();
+    assert(gMiners);
+    gMiners->group_gpu().Start();
 #endif // ENABLE_GPU
 };
 
@@ -87,15 +87,15 @@ int64_t GetGPUHashRate()
 
 void SetCPUMinerThreads(uint8_t target)
 {
-    if (gMiners)
-        gMiners->group_cpu().SetSize(target);
+    assert(gMiners);
+    gMiners->group_cpu().SetSize(target);
 };
 
 void SetGPUMinerThreads(uint8_t target)
 {
 #ifdef ENABLE_GPU
-    if (gMiners)
-        gMiners->group_gpu().SetSize(target);
+    assert(gMiners);
+    gMiners->group_gpu().SetSize(target);
 #endif // ENABLE_GPU
 };
 
