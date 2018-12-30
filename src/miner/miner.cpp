@@ -16,47 +16,72 @@
 #include "validation.h"
 #include "validationinterface.h"
 
-void StartMiners() { gMiners->Start(); };
-
-void StartCPUMiners() { gMiners->group_cpu().Start(); };
-
-void StartGPUMiners()
+void InitMiners(const CChainParams& chainparams, CConnman& connman)
 {
-#ifdef ENABLE_GPU
-    gMiners->group_gpu().Start();
-#endif // ENABLE_GPU
+    if (!gMiners)
+        gMiners.reset(new MinersController(chainparams, connman));
+}
+
+void StartMiners()
+{
+    assert(gMiners);
+    gMiners->Start();
 };
 
-void ShutdownMiners() { gMiners->Shutdown(); };
+void ShutdownMiners()
+{
+    if (gMiners)
+        gMiners->Shutdown();
+};
 
-void ShutdownCPUMiners() { gMiners->group_cpu().Shutdown(); };
+void ShutdownCPUMiners()
+{
+    if (gMiners)
+        SetCPUMinerThreads(0);
+};
 
 void ShutdownGPUMiners()
 {
 #ifdef ENABLE_GPU
-    gMiners->group_gpu().Shutdown();
+    if (gMiners)
+        SetGPUMinerThreads(0);
 #endif // ENABLE_GPU
 };
 
-int64_t GetHashRate() { return gMiners->GetHashRate(); };
+int64_t GetHashRate()
+{
+    if (gMiners)
+        return gMiners->GetHashRate();
+    return 0;
+};
 
-int64_t GetCPUHashRate() { return gMiners->group_cpu().GetHashRate(); };
+int64_t GetCPUHashRate()
+{
+    if (gMiners)
+        return gMiners->group_cpu().GetHashRate();
+    return 0;
+};
 
 int64_t GetGPUHashRate()
 {
 #ifdef ENABLE_GPU
-    return gMiners->group_gpu().GetHashRate();
-#else
-    return 0;
+    if (gMiners)
+        return gMiners->group_gpu().GetHashRate();
 #endif // ENABLE_GPU
+    return 0;
 };
 
-void SetCPUMinerThreads(uint8_t target) { gMiners->group_cpu().SetNumThreads(target); };
+void SetCPUMinerThreads(uint8_t target)
+{
+    assert(gMiners);
+    gMiners->group_cpu().SetSize(target);
+};
 
 void SetGPUMinerThreads(uint8_t target)
 {
 #ifdef ENABLE_GPU
-    gMiners->group_gpu().SetNumThreads(target);
+    assert(gMiners);
+    gMiners->group_gpu().SetSize(target);
 #endif // ENABLE_GPU
 };
 

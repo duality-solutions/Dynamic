@@ -38,13 +38,13 @@ void MinerBase::Loop()
 
     CBlock block;
     CBlockIndex* chain_tip = nullptr;
-    std::uint64_t block_flag = 0;
+    int64_t block_time = 0;
     std::shared_ptr<CBlockTemplate> block_template = {nullptr};
 
     try {
         while (true) {
             // Update block and tip if changed
-            if (block_flag != _ctx->shared->block_flag()) {
+            if (block_time != _ctx->shared->block_time()) {
                 // set new block template
                 block_template = _ctx->shared->block_template();
                 block = block_template->block;
@@ -52,7 +52,7 @@ void MinerBase::Loop()
                 SetBlockPubkeyScript(block, _coinbase_script->reserveScript);
                 // set block flag only after template
                 // so we've waited for RecreateBlock
-                block_flag = _ctx->shared->block_flag();
+                block_time = _ctx->shared->block_time();
                 // block template chain tip
                 chain_tip = _ctx->shared->tip();
             }
@@ -74,7 +74,7 @@ void MinerBase::Loop()
                 // Check for stop or if block needs to be rebuilt
                 boost::this_thread::interruption_point();
                 // Check if block was recreated
-                if (block_flag != _ctx->shared->block_flag()) {
+                if (block_time != _ctx->shared->block_time()) {
                     break;
                 }
                 // Recreate block if nonce too big

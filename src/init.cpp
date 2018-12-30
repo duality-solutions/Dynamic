@@ -2008,13 +2008,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (!connman.Start(scheduler, strNodeError, connOptions))
         return InitError(strNodeError);
 
-    // Create a miner controller
-    gMiners.reset(new MinersController(chainparams, connman));
-    SetCPUMinerThreads(GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
-    SetGPUMinerThreads(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
-
     // Generate coins in the background
     if (GetBoolArg("-gen", DEFAULT_GENERATE)) {
+        InitMiners(chainparams, connman);
+        SetCPUMinerThreads(GetArg("-genproclimit-cpu", DEFAULT_GENERATE_THREADS_CPU));
+        SetGPUMinerThreads(GetArg("-genproclimit-gpu", DEFAULT_GENERATE_THREADS_GPU));
         StartMiners();
     }
 

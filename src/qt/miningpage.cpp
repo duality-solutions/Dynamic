@@ -196,7 +196,7 @@ void MiningPage::updatePushSwitch(bool fGPU)
         pushSwitch->setEnabled(false);
         return;
     }
-    
+
 #ifdef ENABLE_GPU
     if (fGPU && fGPUMinerOn) {
         pushSwitch->setToolTip(tr("Click 'Stop mining' to stop mining!"));
@@ -261,7 +261,7 @@ void MiningPage::changeNumberOfCPUThreads(int i)
 {
     ui->labelNCPUCores->setText(QString("%1").arg(i));
     if (fCPUMinerOn)
-       StartMiner(false); 
+        StartMiner(false);
 }
 
 #ifdef ENABLE_GPU
@@ -269,22 +269,26 @@ void MiningPage::changeNumberOfGPUThreads(int i)
 {
     ui->labelNGPUCores->setText(QString("%1").arg(i));
     if (fGPUMinerOn)
-       StartMiner(true); 
+        StartMiner(true);
 }
 #endif
 
 void MiningPage::startMining()
 {
+    // init miners
+    if (fCPUMinerOn || fGPUMinerOn)
+        InitMiners(Params(), *g_connman);
 #ifdef ENABLE_GPU
-    if (fGPUMinerOn) {
+    // set GPU threads
+    if (fGPUMinerOn)
         SetGPUMinerThreads(ui->sliderGPUCores->value());
-        StartGPUMiners();
-    }
 #endif
-    if (fCPUMinerOn) {
+    // set CPU threads
+    if (fCPUMinerOn)
         SetCPUMinerThreads(ui->sliderCPUCores->value());
-        StartCPUMiners();
-    }
+    // start miners
+    if (fCPUMinerOn || fGPUMinerOn)
+        StartMiners();
     updateUI();
 }
 
@@ -340,13 +344,11 @@ void MiningPage::switchMining(bool fGPU)
     if (hashRate > 0) {
         ui->pushSwitchCPUMining->setText(tr("Stopping"));
         StopMiner(fGPU);
-    }
-    else if (nThreads == 0 && hashRate == 0){
+    } else if (nThreads == 0 && hashRate == 0) {
         ui->sliderCPUCores->setValue(1);
         ui->pushSwitchCPUMining->setText(tr("Starting"));
         StartMiner(fGPU);
-    }
-    else {
+    } else {
         ui->pushSwitchCPUMining->setText(tr("Starting"));
         StartMiner(fGPU);
     }

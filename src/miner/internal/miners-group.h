@@ -23,7 +23,7 @@ public:
     void Shutdown()
     {
         // Shutdown all threads
-        ThreadGroup<T, MinerContextRef>::Shutdown();
+        SetSize(0);
         // It's not updated and instead of reading
         // system time and comparing with last update
         // it is just reset when all threads are shut
@@ -31,12 +31,12 @@ public:
     };
 
     // Sets amount of threads
-    void SetNumThreads(uint8_t target)
+    void SetSize(uint8_t size)
     {
-        // Set amount of target threads
-        ThreadGroup<T, MinerContextRef>::SetNumThreads(target);
+        // Set thread group size
+        ThreadGroup<T, MinerContextRef>::SetSize(size);
         // Reset hash rate counter
-        if (target == 0) {
+        if (size == 0) {
             this->_ctx->counter->Reset();
         }
     };
