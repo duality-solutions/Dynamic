@@ -16,47 +16,86 @@
 #include "validation.h"
 #include "validationinterface.h"
 
-void StartMiners() { gMiners->Start(); };
+void InitMiners(const CChainParams& chainparams, CConnman& connman)
+{
+    if (!gMiners)
+        gMiners.reset(new MinersController(chainparams, connman));
+}
 
-void StartCPUMiners() { gMiners->group_cpu().Start(); };
+void StartMiners()
+{
+    if (gMiners)
+        gMiners->Start();
+};
+
+void StartCPUMiners()
+{
+    if (gMiners)
+        gMiners->group_cpu().Start();
+};
 
 void StartGPUMiners()
 {
 #ifdef ENABLE_GPU
-    gMiners->group_gpu().Start();
+    if (gMiners)
+        gMiners->group_gpu().Start();
 #endif // ENABLE_GPU
 };
 
-void ShutdownMiners() { gMiners->Shutdown(); };
+void ShutdownMiners()
+{
+    if (gMiners)
+        gMiners->Shutdown();
+};
 
-void ShutdownCPUMiners() { gMiners->group_cpu().Shutdown(); };
+void ShutdownCPUMiners()
+{
+    if (gMiners)
+        gMiners->group_cpu().Shutdown();
+};
 
 void ShutdownGPUMiners()
 {
 #ifdef ENABLE_GPU
-    gMiners->group_gpu().Shutdown();
+    if (gMiners)
+        gMiners->group_gpu().Shutdown();
 #endif // ENABLE_GPU
 };
 
-int64_t GetHashRate() { return gMiners->GetHashRate(); };
+int64_t GetHashRate()
+{
+    if (gMiners)
+        return gMiners->GetHashRate();
+    return 0;
+};
 
-int64_t GetCPUHashRate() { return gMiners->group_cpu().GetHashRate(); };
+int64_t GetCPUHashRate()
+{
+    if (gMiners)
+        return gMiners->group_cpu().GetHashRate();
+    return 0;
+};
 
 int64_t GetGPUHashRate()
 {
 #ifdef ENABLE_GPU
-    return gMiners->group_gpu().GetHashRate();
-#else
-    return 0;
+    if (gMiners)
+        return gMiners->group_gpu().GetHashRate();
 #endif // ENABLE_GPU
+    return 0;
 };
 
-void SetCPUMinerThreads(uint8_t target) { gMiners->group_cpu().SetNumThreads(target); };
+void SetCPUMinerThreads(uint8_t target)
+{
+    if (gMiners)
+        gMiners->group_cpu().SetSize(target);
+};
 
 void SetGPUMinerThreads(uint8_t target)
 {
 #ifdef ENABLE_GPU
-    gMiners->group_gpu().SetNumThreads(target);
+    if (gMiners)
+        gMiners->group_gpu().SetSize(target);
 #endif // ENABLE_GPU
 };
 

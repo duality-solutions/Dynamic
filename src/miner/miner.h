@@ -7,11 +7,16 @@
 
 #include "miner-util.h" // IWYU pragma: keep
 
+class CConnman;
+class CChainParams;
+
 class MinersController;
 
 /** It's constructed and set in init.cpp */
 extern std::unique_ptr<MinersController> gMiners;
 
+/** Initializes miners controller */
+void InitMiners(const CChainParams& chainparams, CConnman& connman);
 /** Start all miner threads */
 void StartMiners();
 /** Starts all CPU miner threads */

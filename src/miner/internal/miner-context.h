@@ -20,6 +20,7 @@ struct CBlockTemplate;
 
 class MinerBase;
 class MinerContext;
+class MinerSignals;
 class MinersController;
 
 /** Miner context shared_ptr */
@@ -52,6 +53,7 @@ public:
 
 protected:
     friend class MinerBase;
+    friend class MinerSignals;
     friend class MinersController;
 
     // recreates miners block template

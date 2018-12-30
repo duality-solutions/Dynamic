@@ -25,16 +25,19 @@ public:
     // Shuts down all threads
     void Shutdown()
     {
-        SetNumThreads(0);
+        SetSize(0);
         SyncGroupTarget();
     };
 
     // Sets amount of threads
-    void SetNumThreads(uint8_t target)
+    void SetSize(uint8_t size)
     {
         boost::unique_lock<boost::shared_mutex> guard(_mutex);
-        _target_threads = target;
+        _target_threads = size;
     };
+
+    // Size of a thread group
+    uint8_t size() const { return _target_threads; }
 
 protected:
     // Starts or shutdowns threads to meet the target

@@ -11,12 +11,6 @@
 #include "validation.h"
 #include "validationinterface.h"
 
-void ConnectMinerSignals(MinersController* miners_)
-{
-    miners_->ctx()->connman().ConnectSignalNode(boost::bind(&MinersController::NotifyNode, miners_, _1));
-    GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinersController::NotifyBlock, miners_, _1, _2, _3));
-    GetMainSignals().SyncTransaction.connect(boost::bind(&MinersController::NotifyTransaction, miners_, _1, _2, _3));
-}
 
 MinersController::MinersController(const CChainParams& chainparams, CConnman& connman)
     : MinersController(std::make_shared<MinerContext>(chainparams, connman)){};
@@ -27,14 +21,12 @@ MinersController::MinersController(MinerContextRef ctx)
 #ifdef ENABLE_GPU
       _group_gpu(_ctx->MakeChild()),
 #endif // ENABLE_GPU
-      _connected(!_ctx->chainparams().MiningRequiresPeers())
-{
-    ConnectMinerSignals(this);
-};
+      _connected(!_ctx->chainparams().MiningRequiresPeers()){};
 
 void MinersController::Start()
 {
     _enable_start = true;
+    _signals = std::make_shared<MinerSignals>(this);
     if (can_start()) {
         _group_cpu.Start();
 #ifdef ENABLE_GPU
@@ -46,6 +38,7 @@ void MinersController::Start()
 void MinersController::Shutdown()
 {
     _enable_start = false;
+    _signals = nullptr; // remove signals receiver
 
     _group_cpu.Shutdown();
 #ifdef ENABLE_GPU
@@ -62,17 +55,22 @@ int64_t MinersController::GetHashRate() const
 #endif // ENABLE_GPU
 }
 
-void MinersController::NotifyNode(const CNode* node)
+MinerSignals::MinerSignals(MinersController* ctr)
+    : _ctr(ctr),
+      _node(_ctr->ctx()->connman().ConnectSignalNode(boost::bind(&MinerSignals::NotifyNode, this, _1))),
+      _block(GetMainSignals().UpdatedBlockTip.connect(boost::bind(&MinerSignals::NotifyBlock, this, _1, _2, _3))),
+      _txn(GetMainSignals().SyncTransaction.connect(boost::bind(&MinerSignals::NotifyTransaction, this, _1, _2, _3))){};
+
+void MinerSignals::NotifyNode(const CNode* node)
 {
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
-        _connected = true;
-    }
-    else if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
-        _connected = false;
+        _ctr->_connected = true;
+    } else if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
+        _ctr->_connected = false;
     }
 };
 
-void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool fInitialDownload)
+void MinerSignals::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* index_fork, bool fInitialDownload)
 {
     if (fInitialDownload)
         return;
@@ -80,30 +78,30 @@ void MinersController::NotifyBlock(const CBlockIndex* index_new, const CBlockInd
     if (index_new != chainActive.Tip())
         return;
     // Create new block template for miners
-    _last_sync_time = GetTime();
-    _last_txn_time = mempool.GetTransactionsUpdated();
-    _ctx->shared->RecreateBlock();
+    _ctr->_last_sync_time = GetTime();
+    _ctr->_last_txn_time = mempool.GetTransactionsUpdated();
+    _ctr->_ctx->shared->RecreateBlock();
     // start miners
-    if (can_start()) {
-        _group_cpu.Start();
+    if (_ctr->can_start()) {
+        _ctr->_group_cpu.Start();
 #ifdef ENABLE_GPU
-        _group_gpu.Start();
+        _ctr->_group_gpu.Start();
 #endif // ENABLE_GPU
     }
 };
 
-void MinersController::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
+void MinerSignals::NotifyTransaction(const CTransaction& txn, const CBlockIndex* index, int posInBlock)
 {
     // check if blockchain has synced, has more than 1 peer and is enabled before recreating blocks
-    if (IsInitialBlockDownload() || !can_start())
+    if (IsInitialBlockDownload() || !_ctr->can_start())
         return;
-    
+
     const int64_t latest_txn = mempool.GetTransactionsUpdated();
-    if (latest_txn == _last_txn_time) {
+    if (latest_txn == _ctr->_last_txn_time) {
         return;
     }
-    if (GetTime() - _last_txn_time > 60) {
-        _last_txn_time = latest_txn;
-        _ctx->shared->RecreateBlock();
+    if (GetTime() - _ctr->_last_txn_time > 60) {
+        _ctr->_last_txn_time = latest_txn;
+        _ctr->_ctx->shared->RecreateBlock();
     }
 };
