@@ -7,7 +7,6 @@
 #include "miner/internal/miner-context.h"
 #include "miner/miner-util.h"
 #include "net.h"
-#include "txmempool.h"
 #include "validation.h"
 #include "validationinterface.h"
 
@@ -27,6 +26,9 @@ void MinersController::Start()
 {
     _enable_start = true;
     _signals = std::make_shared<MinerSignals>(this);
+    // initialize block template
+    _ctx->shared->RecreateBlock();
+
     if (can_start()) {
         _group_cpu.Start();
 #ifdef ENABLE_GPU
@@ -78,8 +80,6 @@ void MinerSignals::NotifyBlock(const CBlockIndex* index_new, const CBlockIndex* 
     if (index_new != chainActive.Tip())
         return;
     // Create new block template for miners
-    _ctr->_last_sync_time = GetTime();
-    _ctr->_last_txn_time = mempool.GetTransactionsUpdated();
     _ctr->_ctx->shared->RecreateBlock();
     // start miners
     if (_ctr->can_start()) {
@@ -95,13 +95,7 @@ void MinerSignals::NotifyTransaction(const CTransaction& txn, const CBlockIndex*
     // check if blockchain has synced, has more than 1 peer and is enabled before recreating blocks
     if (IsInitialBlockDownload() || !_ctr->can_start())
         return;
-
-    const int64_t latest_txn = mempool.GetTransactionsUpdated();
-    if (latest_txn == _ctr->_last_txn_time) {
-        return;
-    }
-    if (GetTime() - _ctr->_last_txn_time > 60) {
-        _ctr->_last_txn_time = latest_txn;
+    if (GetTime() - _ctr->_ctx->shared->last_txn() > 60) {
         _ctr->_ctx->shared->RecreateBlock();
     }
 };

@@ -4,6 +4,7 @@
 
 #include "miner/internal/miner-context.h"
 #include "miner/miner-util.h"
+#include "txmempool.h"
 #include "validation.h"
 
 MinerContext::MinerContext(const CChainParams& chainparams_, CConnman& connman_)
@@ -15,12 +16,15 @@ MinerContext::MinerContext(MinerSharedContextRef shared_, HashRateCounterRef cou
 
 void MinerSharedContext::RecreateBlock()
 {
-    // First we increment flag
-    // so all miner threads know new block is coming
-    _block_flag += 1;
     // Then we acquire unique lock so that miners wait
     // for the new block to be created
     boost::unique_lock<boost::shared_mutex> guard(_mutex);
+    uint32_t txn_time = mempool.GetTransactionsUpdated();
+    // pass if nothing changed
+    if (_chain_tip == chainActive.Tip() && _last_txn == txn_time)
+        return;
     _chain_tip = chainActive.Tip();
+    _block_time = GetTime();
     _block_template = CreateNewBlock(chainparams);
+    _last_txn = txn_time;
 }

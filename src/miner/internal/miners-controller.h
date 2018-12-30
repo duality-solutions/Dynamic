@@ -63,7 +63,7 @@ protected:
     void StartIfEnabled();
 
     // Returns true if enabled, connected and has block.
-    bool can_start() const { return _connected && _enable_start && _ctx->shared->has_block(); }
+    bool can_start() const { return _connected && _enable_start && _ctx->shared->block_template(); }
 
     // Miner signals class
     friend class MinerSignals;
