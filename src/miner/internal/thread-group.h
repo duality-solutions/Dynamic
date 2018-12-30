@@ -20,30 +20,40 @@ public:
     explicit ThreadGroup(Context ctx);
 
     // Starts set amount of target threads
-    void Start() { SyncGroupTarget(); };
-
-    // Shuts down all threads
-    void Shutdown()
+    void Start()
     {
-        SetSize(0);
+        boost::unique_lock<boost::shared_mutex> guard(_mutex);
         SyncGroupTarget();
     };
+
+    // Shuts down all threads
+    void Shutdown() { SetSize(0); };
 
     // Sets amount of threads
     void SetSize(uint8_t size)
     {
         boost::unique_lock<boost::shared_mutex> guard(_mutex);
-        _target_threads = size;
+        // sync only if lowering
+        // requires sync if higher
+        if (_threads.size() > size) {
+            SyncGroupTarget();
+            _target_threads = size;
+        } else {
+            _target_threads = size;
+        }
     };
 
     // Size of a thread group
     uint8_t size() const { return _target_threads; }
 
 protected:
+    Context _ctx;
+
+private:
     // Starts or shutdowns threads to meet the target
+    // Requires a mutex lock before call
     void SyncGroupTarget();
 
-    Context _ctx;
     size_t _devices;
     uint8_t _target_threads = 0;
     std::vector<std::shared_ptr<boost::thread> > _threads;
@@ -58,8 +68,6 @@ ThreadGroup<T, Context>::ThreadGroup(Context ctx)
 template <class T, class Context>
 void ThreadGroup<T, Context>::SyncGroupTarget()
 {
-    boost::unique_lock<boost::shared_mutex> guard(_mutex);
-
     size_t current;
     while ((current = _threads.size()) != _target_threads) {
         if (current < _target_threads) {

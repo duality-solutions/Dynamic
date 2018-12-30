@@ -28,20 +28,6 @@ void StartMiners()
     gMiners->Start();
 };
 
-void StartCPUMiners()
-{
-    assert(gMiners);
-    gMiners->group_cpu().Start();
-};
-
-void StartGPUMiners()
-{
-#ifdef ENABLE_GPU
-    assert(gMiners);
-    gMiners->group_gpu().Start();
-#endif // ENABLE_GPU
-};
-
 void ShutdownMiners()
 {
     if (gMiners)
@@ -51,14 +37,14 @@ void ShutdownMiners()
 void ShutdownCPUMiners()
 {
     if (gMiners)
-        gMiners->group_cpu().Shutdown();
+        SetCPUMinerThreads(0);
 };
 
 void ShutdownGPUMiners()
 {
 #ifdef ENABLE_GPU
     if (gMiners)
-        gMiners->group_gpu().Shutdown();
+        SetGPUMinerThreads(0);
 #endif // ENABLE_GPU
 };
 

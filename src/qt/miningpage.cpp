@@ -275,18 +275,20 @@ void MiningPage::changeNumberOfGPUThreads(int i)
 
 void MiningPage::startMining()
 {
+    // init miners
     if (fCPUMinerOn || fGPUMinerOn)
         InitMiners(Params(), *g_connman);
 #ifdef ENABLE_GPU
-    if (fGPUMinerOn) {
+    // set GPU threads
+    if (fGPUMinerOn)
         SetGPUMinerThreads(ui->sliderGPUCores->value());
-        StartGPUMiners();
-    }
 #endif
-    if (fCPUMinerOn) {
+    // set CPU threads
+    if (fCPUMinerOn)
         SetCPUMinerThreads(ui->sliderCPUCores->value());
-        StartCPUMiners();
-    }
+    // start miners
+    if (fCPUMinerOn || fGPUMinerOn)
+        StartMiners();
     updateUI();
 }
 

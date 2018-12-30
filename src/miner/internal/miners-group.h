@@ -23,7 +23,7 @@ public:
     void Shutdown()
     {
         // Shutdown all threads
-        ThreadGroup<T, MinerContextRef>::Shutdown();
+        SetSize(0);
         // It's not updated and instead of reading
         // system time and comparing with last update
         // it is just reset when all threads are shut
