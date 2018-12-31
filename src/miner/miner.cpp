@@ -37,14 +37,14 @@ void ShutdownMiners()
 void ShutdownCPUMiners()
 {
     if (gMiners)
-        SetCPUMinerThreads(0);
+        gMiners->group_cpu().Shutdown();
 };
 
 void ShutdownGPUMiners()
 {
 #ifdef ENABLE_GPU
     if (gMiners)
-        SetGPUMinerThreads(0);
+        gMiners->group_gpu().Shutdown();
 #endif // ENABLE_GPU
 };
 
