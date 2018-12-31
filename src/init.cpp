@@ -20,6 +20,7 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/linkingdb.h"
 #include "dht/ed25519.h"
 #include "dht/session.h"
 #include "dht/mutabledb.h"
@@ -1627,6 +1628,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pFluidSovereignDB;
                 // BDAP Services DB's
                 delete pDomainEntryDB;
+                delete pLinkRequestDB;
+                delete pLinkAcceptDB;
                 // LibTorrent DHT Netowrk Services
                 delete pTorrentDHTSession;
                 delete pMutableDataDB;
@@ -1645,6 +1648,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 // Init BDAP Services DBs 
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pLinkAcceptDB = new CLinkAcceptDB(nTotalCache * 35, false, fReindex, obfuscate);
                 // Init DHT Services DB
                 pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);
 

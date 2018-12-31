@@ -10,6 +10,8 @@
 #include "alert.h"
 #include "arith_uint256.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/linking.h"
+#include "bdap/linkingdb.h"
 #include "bdap/utils.h"
 #include "blockencodings.h"
 #include "chainparams.h"
@@ -641,14 +643,30 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
     bool bValid = false;
     if (tx->nVersion == BDAP_TX_VERSION) {
         if (DecodeBDAPTx(tx, op1, op2, vvchBDAPArgs)) {
-            std::string errorMessage;
-            bValid = CheckDomainEntryTxInputs(inputs, tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
-            if (!bValid) {
-                errorMessage = "ValidateBDAPInputs: " + errorMessage;
-                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            std::string strOpType = GetBDAPOpTypeString(op1, op2);
+            if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
+                std::string errorMessage;
+                bValid = CheckDomainEntryTxInputs(inputs, tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                if (!errorMessage.empty())
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
-            if (!errorMessage.empty())
-                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            else if (strOpType == "bdap_new_link_request") {
+                if (vvchBDAPArgs.size() < 1)
+                    return false;
+                std::string errorMessage;
+                std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
+                LogPrint("bdap", "%s -- New Link Request vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
+                CLinkRequest link;
+                if (GetLinkRequest(vchPubKey, link)) {
+                    errorMessage = "Public key already used for a link request.";
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                return true;
+            }
         }
     }
     return true;

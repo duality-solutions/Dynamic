@@ -10,6 +10,7 @@
 #include "base58.h"
 #include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/linkingdb.h"
 #include "bdap/utils.h"
 #include "chain.h"
 #include "checkpoints.h"
@@ -3416,6 +3417,7 @@ bool CWallet::ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecA
 bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut, std::string& strFailReason, const CCoinControl* coinControl, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend, bool fIsBDAP)
 {
     CAmount nFeePay = fUseInstantSend ? CTxLockRequest().GetMinFee() : 0;
+    std::string strOpType;
 
     CAmount nValue = 0;
     int nChangePosRequest = nChangePosInOut;
@@ -3475,7 +3477,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
 
     assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
     assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
-
+    
     {
         std::set<std::pair<const CWalletTx*, unsigned int> > setCoins;
         std::vector<CTxPSIn> vecTxPSInTmp;
@@ -3486,7 +3488,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
             int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
             if (fIsBDAP) {
-                std::string strOpType;
+                
                 std::vector<unsigned char> vchValue;
                 CScript bdapOperationScript;
                 if (!GetScriptOpTypeValue(vecSend, bdapOperationScript, strOpType, vchValue)) {
@@ -3523,8 +3525,12 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
                 else if (strOpType == "bdap_new_link_request") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
+                    CLinkRequest link;
+                    if (GetLinkRequest(vchValue, link)) {
+                        strFailReason = _("Public key already used for a link request.");
+                        return false;
+                    }
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
                 else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
                     strFailReason = strOpType + _(" not implemented yet.");
@@ -3568,7 +3574,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 // vouts to the payees
                 for (const auto& recipient : vecSend) {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
-
+                    
                     if (IsTransactionFluid(recipient.scriptPubKey)) {
                         // Check if fluid transaction is already in the mempool
                         if (fluid.CheckIfExistsInMemPool(mempool, recipient.scriptPubKey, strFailReason)) {
@@ -3782,11 +3788,13 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 }
 
                 if (fIsBDAP) {
-                    // Check the memory pool for a pending tranaction for the same domain entry
-                    CTransactionRef pTxNew = MakeTransactionRef(txNew);
-                    CDomainEntry domainEntry(pTxNew);
-                    if (domainEntry.CheckIfExistsInMemPool(mempool, strFailReason)) {
-                        return false;
+                    if (strOpType == "bdap_new_account" || strOpType == "bdap_delete_account" || strOpType == "bdap_update_account") {
+                        // Check the memory pool for a pending tranaction for the same domain entry
+                        CTransactionRef pTxNew = MakeTransactionRef(txNew);
+                        CDomainEntry domainEntry(pTxNew);
+                        if (domainEntry.CheckIfExistsInMemPool(mempool, strFailReason)) {
+                            return false;
+                        }
                     }
                 }
 

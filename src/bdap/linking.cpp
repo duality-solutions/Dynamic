@@ -76,11 +76,18 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
         return false;
     }
     // check requestor pubkey
-    if (InviteMessage.size() > MAX_BDAP_INVITE_MESSAGE) 
+    if (LinkMessage.size() > MAX_BDAP_LINK_MESSAGE) 
     {
-        errorMessage = "Invalid invite message length. The maximum invite message length is " + std::to_string(MAX_BDAP_INVITE_MESSAGE) + " characters.";
+        errorMessage = "Invalid invite message length. The maximum invite message length is " + std::to_string(MAX_BDAP_LINK_MESSAGE) + " characters.";
         return false;
     }
+    // check signature proof size
+    if (SignatureProof.size() > MAX_BDAP_SIGNATURE_PROOF) 
+    {
+        errorMessage = "Invalid signature proof length. The maximum signature proofe length is " + std::to_string(MAX_BDAP_SIGNATURE_PROOF) + " characters.";
+        return false;
+    }
+    // TODO (bdap): test SignatureProof
     return true;
 }
 
