@@ -9,6 +9,7 @@
 #include "serialize.h"
 #include "uint256.h"
 
+class CTxMemPool;
 class CTransaction;
 
 
@@ -21,10 +22,7 @@ class CTransaction;
 // and get the needed information to accept the link request
 // It is used to bootstrap the linkage relationship with a new set of public keys
 
-// OP_RETURN Format:
-// CLinkAccept.RecipientPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + space +
-// CLinkRequest.RequestorPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + spcae + 
-// CLinkRequest.SharedSymmetricPrivKey.Encrypt(Serialize(CLinkRequest)).ToHex()
+// OP_RETURN Format: std::vector<unsigned char> GetEncryptedRequestMessage(Serialize(CLinkRequest))
 class CLinkRequest {
 public:
     static const int CURRENT_VERSION=1;
@@ -106,7 +104,6 @@ public:
     bool ValidateValues(std::string& errorMessage);
     bool IsMyLinkRequest(const CTransactionRef& tx);
     std::string RequestorPubKeyString() const;
-
 };
 
 // CLinkAccept are stored serilzed and encrypted in a LibTorrent DHT key value pair entry
@@ -191,6 +188,7 @@ public:
     std::string SharedPubKeyString() const;
 };
 
+bool LinkRequestExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage);
 // TODO (BDAP): Implement
 CharString GetEncryptedRequestMessage(const CLinkRequest& requestLink); // stored in an OP_RETURN transaction
 CharString GetEncryptedAcceptMessage(const CLinkRequest& requestLink, const CLinkAccept& acceptLink); // stored on BitTorrent DHT network
