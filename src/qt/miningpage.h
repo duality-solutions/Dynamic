@@ -58,7 +58,7 @@ private:
 
 private Q_SLOTS:
 
-    void changeNumberOfCPUThreads(int i);
+    void changeNumberOfCPUThreads(int i, bool shutdown = false);
     void switchCPUMining();
     void showCPUHashRate(int i);
     void changeCPUSampleTime(int i);
@@ -66,7 +66,7 @@ private Q_SLOTS:
 
 
 #ifdef ENABLE_GPU
-    void changeNumberOfGPUThreads(int i);
+    void changeNumberOfGPUThreads(int i, bool shutdown = false);
     void switchGPUMining();
     void showGPUHashRate(int i);
     void changeGPUSampleTime(int i);

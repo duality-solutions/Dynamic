@@ -43,7 +43,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
         ui->labelNCPUCores->setText(QString("%1").arg(nCPUMaxUseThreads));
     }
 
-    ui->sliderCPUCores->setMinimum(1);
+    ui->sliderCPUCores->setMinimum(0);
     ui->sliderCPUCores->setMaximum(nCPUMaxUseThreads);
     ui->sliderCPUCores->setValue(nCPUMaxUseThreads);
 
@@ -56,7 +56,7 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
         ui->labelNGPUCores->setText(QString("%1").arg(nGPUMaxUseThreads));
     }
 
-    ui->sliderGPUCores->setMinimum(1);
+    ui->sliderGPUCores->setMinimum(0);
     ui->sliderGPUCores->setMaximum(nGPUMaxUseThreads);
     ui->sliderGPUCores->setValue(nGPUMaxUseThreads);
     ui->pushSwitchGPUMining->setVisible(true);
@@ -233,7 +233,7 @@ void MiningPage::StopCPUMiner()
 {
     LogPrintf("StopCPUMiner %d (%s)", ui->sliderCPUCores->value(), fCPUMinerOn);
     fCPUMinerOn = false;
-    changeNumberOfCPUThreads(ui->sliderCPUCores->value());
+    changeNumberOfCPUThreads(0, true);
     ShutdownCPUMiners();
     updateUI();
 }
@@ -241,7 +241,7 @@ void MiningPage::StopCPUMiner()
 void MiningPage::StopGPUMiner()
 {
     fGPUMinerOn = false;
-    changeNumberOfGPUThreads(ui->sliderGPUCores->value());
+    changeNumberOfGPUThreads(0, true);
     ShutdownGPUMiners();
     updateUI();
 }
@@ -255,22 +255,26 @@ bool MiningPage::isMinerOn()
 #endif
 }
 
-void MiningPage::changeNumberOfCPUThreads(int i)
+void MiningPage::changeNumberOfCPUThreads(int i, bool shutdown)
 {
-    ui->labelNCPUCores->setText(QString("%1").arg(i));
+    if (!shutdown)
+        ui->labelNCPUCores->setText(QString("%1").arg(i));
     ForceSetArg("-gen", isMinerOn() ? "1" : "0");
     ForceSetArg("-genproclimit-cpu", isMinerOn() ? i : 0);
+    InitMiners(Params(), *g_connman);
     SetCPUMinerThreads(i);
     if (fCPUMinerOn)
         StartMiners();
 }
 
 #ifdef ENABLE_GPU
-void MiningPage::changeNumberOfGPUThreads(int i)
+void MiningPage::changeNumberOfGPUThreads(int i, bool shutdown)
 {
-    ui->labelNGPUCores->setText(QString("%1").arg(i));
+    if (!shutdown)
+        ui->labelNGPUCores->setText(QString("%1").arg(i));
     ForceSetArg("-gen", isMinerOn() ? "1" : "0");
     ForceSetArg("-genproclimit-gpu", isMinerOn() ? i : 0);
+    InitMiners(Params(), *g_connman);
     SetGPUMinerThreads(i);
     if (fGPUMinerOn)
         StartMiners();
@@ -279,32 +283,24 @@ void MiningPage::changeNumberOfGPUThreads(int i)
 
 void MiningPage::switchCPUMining()
 {
-    int nThreads = (int)ui->sliderCPUCores->value();
+    fCPUMinerOn = !fCPUMinerOn;
+    updateCPUPushSwitch();
     if (fCPUMinerOn) {
-        ui->sliderCPUCores->setValue(0);
-        ui->pushSwitchCPUMining->setText(tr("Stopping"));
-        StopCPUMiner();
-    } else {
-        if (nThreads == 0)
-            ui->sliderCPUCores->setValue(1);
-        ui->pushSwitchCPUMining->setText(tr("Starting"));
         StartCPUMiner();
+    } else {
+        StopCPUMiner();
     }
 }
 
 #ifdef ENABLE_GPU
 void MiningPage::switchGPUMining()
 {
-    int nThreads = (int)ui->sliderGPUCores->value();
+    fGPUMinerOn = !fGPUMinerOn;
+    updateGPUPushSwitch();
     if (fGPUMinerOn) {
-        ui->sliderGPUCores->setValue(0);
-        ui->pushSwitchGPUMining->setText(tr("Stopping"));
-        StopGPUMiner();
-    } else {
-        if (nThreads == 0)
-            ui->sliderGPUCores->setValue(1);
-        ui->pushSwitchGPUMining->setText(tr("Starting"));
         StartGPUMiner();
+    } else {
+        StopGPUMiner();
     }
 }
 #endif
