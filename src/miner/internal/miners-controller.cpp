@@ -24,10 +24,12 @@ MinersController::MinersController(MinerContextRef ctx)
 
 void MinersController::Start()
 {
+    _connected = _ctx->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2;
     _enable_start = true;
     _signals = std::make_shared<MinerSignals>(this);
     // initialize block template
     _ctx->shared->RecreateBlock();
+    LogPrintf("MinersController::Start can_start = %v\n", can_start());
 
     if (can_start()) {
         _group_cpu.Start();
@@ -65,9 +67,9 @@ MinerSignals::MinerSignals(MinersController* ctr)
 
 void MinerSignals::NotifyNode(const CNode* node)
 {
-    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
+    if (_ctr->ctx()->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) >= 2) {
         _ctr->_connected = true;
-    } else if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
+    } else if (_ctr->ctx()->connman().GetNodeCount(CConnman::CONNECTIONS_ALL) <= 1) {
         _ctr->_connected = false;
     }
 };
