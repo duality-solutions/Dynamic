@@ -331,7 +331,6 @@ UniValue setgenerate(const JSONRPCRequest& request)
     ForceSetArg("-gen", fGenerate ? "1" : "0");
     ForceSetArg("-genproclimit-cpu", nGenProcLimitCPU);
     ForceSetArg("-genproclimit-gpu", nGenProcLimitGPU);
-    LogPrintf("setgenerate cpu = %u, gpu = %u \n", nGenProcLimitCPU, nGenProcLimitGPU);
 
     if (fGenerate) {
         InitMiners(Params(), *g_connman);
