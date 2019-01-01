@@ -76,6 +76,12 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid BDAP link requestor public key. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
+    // check shared pubkey
+    if (SharedPubKey.size() != DHT_HEX_PUBLIC_KEY_LENGTH) 
+    {
+        errorMessage = "Invalid BDAP link shared public key. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
+        return false;
+    }
     // check requestor pubkey
     if (LinkMessage.size() > MAX_BDAP_LINK_MESSAGE) 
     {
@@ -100,6 +106,11 @@ bool CLinkRequest::IsMyLinkRequest(const CTransactionRef& tx)
 std::string CLinkRequest::RequestorPubKeyString() const
 {
     return stringFromVch(RequestorPubKey);
+}
+
+std::string CLinkRequest::SharedPubKeyString() const
+{
+    return stringFromVch(SharedPubKey);
 }
 
 void CLinkAccept::Serialize(std::vector<unsigned char>& vchData) 

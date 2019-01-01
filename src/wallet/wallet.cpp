@@ -1213,6 +1213,64 @@ bool CWallet::LoadToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
+bool CWallet::IsLinkRequestFromMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey)
+{
+    if (tx.nVersion != BDAP_TX_VERSION)
+        return false;
+
+    CScript bdapOpScript;
+    std::string strOpType;
+    if (GetTransactionOpTypeValue(tx, bdapOpScript, strOpType, vchPubKey)) {
+        if (strOpType == "bdap_new_link_request") {
+            CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+            CKeyEd25519 keyOut;
+            if (GetDHTKey(keyID, keyOut))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool CWallet::IsLinkRequestForMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey, std::vector<unsigned char>& vchSharedPubKey)
+{
+    if (tx.nVersion != BDAP_TX_VERSION)
+        return false;
+
+    std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
+    if (!GetDHTPubKeys(vvchDHTPubKeys) )
+        return false;
+
+    if (vvchDHTPubKeys.size() == 0)
+        return false;
+
+    const CTransactionRef ptx = MakeTransactionRef(tx);
+    CScript bdapOpScript;
+    int op1, op2;
+    std::vector<std::vector<unsigned char>> vvchOpParameters;
+    if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
+        std::string strOpType = GetBDAPOpTypeString(op1, op2);
+        if (strOpType == "bdap_new_link_request") {
+            if (vvchOpParameters.size() >= 2) {
+                vchPubKey = vvchOpParameters[0];
+                vchSharedPubKey = vvchOpParameters[1];
+                for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
+                    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+                    CKeyEd25519 keyOut;
+                    if (GetDHTKey(keyID, keyOut)) {
+                        std::vector<unsigned char> vchGetSharedPubKey = GetLinkRequestSharedPubKey(keyOut, vchPubKey);
+                        if (vchGetSharedPubKey == vchSharedPubKey)
+                            return true;
+                    }
+                }
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
 /**
  * Add a transaction to the wallet, or update it.  pIndex and posInBlock should
  * be set when the transaction was known to be included in a block.  When
@@ -1247,9 +1305,43 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         bool fExisted = mapWallet.count(tx.GetHash()) != 0;
         if (fExisted && !fUpdate)
             return false;
-        if (fExisted || IsMine(tx) || IsFromMe(tx)) {
-            CWalletTx wtx(this, MakeTransactionRef(tx));
 
+        if (fExisted || IsMine(tx) || IsFromMe(tx)) {
+            if (tx.nVersion == BDAP_TX_VERSION) {
+                std::vector<unsigned char> vchPubKey;
+                bool fIsLinkRequestFromMe = IsLinkRequestFromMe(tx, vchPubKey);
+                if (fIsLinkRequestFromMe) {
+                    const CTransactionRef ptx = MakeTransactionRef(tx);
+                    int nOut;
+                    std::vector<unsigned char> vchData, vchHash;
+                    if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                        //TODO (bdap): Decrypt vchData before storing in local wallet
+                        CWalletDB walletdb(strWalletFile);
+                        if (!walletdb.AddSentLinkRequest(vchPubKey, vchData))
+                            return false;
+
+                        LogPrintf("%s -- IsLinkRequestFromMe vchPubKey = %s, vchData = %s\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchData));
+                    }
+                }
+                std::vector<unsigned char> vchSharedPubKey;
+                bool fIsLinkRequestForMe = IsLinkRequestForMe(tx, vchPubKey, vchSharedPubKey);
+                if (fIsLinkRequestForMe) {
+                    const CTransactionRef ptx = MakeTransactionRef(tx);
+                    int nOut;
+                    std::vector<unsigned char> vchData, vchHash;
+                    if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                        //TODO (bdap): Decrypt vchData before storing in local wallet
+                        CWalletDB walletdb(strWalletFile);
+                        if (!walletdb.AddReceiveLinkRequest(vchSharedPubKey, vchData))
+                            return false;
+
+                        LogPrintf("%s -- IsLinkRequestForMe vchPubKey = %s, vchSharedPubKey = %s, vchData = %s\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchSharedPubKey), stringFromVch(vchData));
+                    }
+                }
+            }
+
+            CWalletTx wtx(this, MakeTransactionRef(tx));
+                
             // Get merkle branch if transaction was found in a block
             if (posInBlock != -1)
                 wtx.SetMerkleBranch(pIndex, posInBlock);

@@ -1142,6 +1142,8 @@ public:
 
     // Returns local BDAP DHT Public keys
     bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
+    bool IsLinkRequestFromMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey);
+    bool IsLinkRequestForMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey, std::vector<unsigned char>& vchSharedPubKey);
 };
 
 /** A key allocated from the key pool. */

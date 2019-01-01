@@ -135,6 +135,8 @@ private:
 
 };
 
+std::vector<unsigned char> GetLinkRequestSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey);
+
 bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();
 void ECC_Ed25519_Stop();

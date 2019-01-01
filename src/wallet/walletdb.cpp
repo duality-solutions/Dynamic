@@ -1029,3 +1029,13 @@ unsigned int CWalletDB::GetUpdateCounter()
 {
     return nWalletDBUpdateCounter;
 }
+
+bool CWalletDB::AddSentLinkRequest(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchData)
+{
+    return Write(std::make_pair(std::string("sentlinkreq"), vchPubKey), vchData);
+}
+
+bool CWalletDB::AddReceiveLinkRequest(const std::vector<unsigned char>& vchSharedPubKey, const std::vector<unsigned char>& vchData)
+{
+    return Write(std::make_pair(std::string("reclinkreq"), vchSharedPubKey), vchData);
+}

@@ -103,7 +103,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
     if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4000 - " + _("Error adding ed25519 key to wallet for BDAP link"));
-
+ 
     txLink.RequestorPubKey = vchDHTPubKey;
 
     pwalletMain->SetAddressBook(privReqDHTKey.GetID(), strRequestorFQDN, "bdap-dht-key");
@@ -146,13 +146,15 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     //    if (request.params.size() >= 4) {
     //        nDays = request.params[4].get_int();
     //    }
-
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
-
+    CKeyEd25519 dhtKey;
+    std::vector<unsigned char> vchSharedPubKey = GetLinkRequestSharedPubKey(privReqDHTKey, entryRequestor.DHTPublicKey);
+    txLink.SharedPubKey = vchSharedPubKey;
+    LogPrintf("%s -- vchSharedPubKey = %s\n", __func__, stringFromVch(vchSharedPubKey));
     // Create BDAP operation script
     CScript scriptPubKey;
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) << vchDHTPubKey << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) << vchDHTPubKey << vchSharedPubKey << OP_2DROP << OP_2DROP;
     CScript scriptDest = GetScriptForDestination(CPubKey(entryRecipient.LinkAddress).GetID());
     scriptPubKey += scriptDest;
     CScript scriptSend = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());

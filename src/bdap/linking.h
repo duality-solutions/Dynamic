@@ -30,6 +30,7 @@ public:
     CharString RequestorFullObjectPath; // Requestor's BDAP object path
     CharString RecipientFullObjectPath; // Recipient's BDAP object path
     CharString RequestorPubKey; // ed25519 public key new/unique for this link
+    CharString SharedPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
     CharString LinkMessage; // Link message to recipient
     CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their DHT pub key.
 
@@ -52,6 +53,7 @@ public:
         RequestorFullObjectPath.clear();
         RecipientFullObjectPath.clear();
         RequestorPubKey.clear();
+        SharedPubKey.clear();
         LinkMessage.clear();
         SignatureProof.clear();
         nHeight = 0;
@@ -67,6 +69,7 @@ public:
         READWRITE(RequestorFullObjectPath);
         READWRITE(RecipientFullObjectPath);
         READWRITE(RequestorPubKey);
+        READWRITE(SharedPubKey);
         READWRITE(LinkMessage);
         READWRITE(SignatureProof);
         READWRITE(VARINT(nHeight));
@@ -75,8 +78,7 @@ public:
     }
 
     inline friend bool operator==(const CLinkRequest &a, const CLinkRequest &b) {
-        return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath 
-                    && a.RequestorPubKey == b.RequestorPubKey && b.LinkMessage == b.LinkMessage);
+        return (a.RequestorPubKey == b.RequestorPubKey && a.SharedPubKey == b.SharedPubKey && a.LinkMessage == b.LinkMessage);
     }
 
     inline friend bool operator!=(const CLinkRequest &a, const CLinkRequest &b) {
@@ -88,6 +90,7 @@ public:
         RequestorFullObjectPath = b.RequestorFullObjectPath;
         RecipientFullObjectPath = b.RecipientFullObjectPath;
         RequestorPubKey = b.RequestorPubKey;
+        SharedPubKey = b.SharedPubKey;
         LinkMessage = b.LinkMessage;
         SignatureProof = b.SignatureProof;
         nHeight = b.nHeight;
@@ -104,6 +107,7 @@ public:
     bool ValidateValues(std::string& errorMessage);
     bool IsMyLinkRequest(const CTransactionRef& tx);
     std::string RequestorPubKeyString() const;
+    std::string SharedPubKeyString() const;
 };
 
 // CLinkAccept are stored serilzed and encrypted in a LibTorrent DHT key value pair entry

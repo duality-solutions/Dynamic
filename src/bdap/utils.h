@@ -55,5 +55,6 @@ CDynamicAddress GetScriptAddress(const CScript& pubScript);
 int GetBDAPOpCodeFromOutput(const CTxOut& out);
 bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vector<unsigned char>& vchValue);
 bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
+bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 
 #endif // DYNAMIC_BDAP_UTILS_H
