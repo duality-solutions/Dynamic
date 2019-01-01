@@ -21,6 +21,10 @@
 #include "crypto/argon2gpu/common.h"
 #include "crypto/argon2gpu/opencl/program-context.h"
 
+#if defined(MAC_OSX)
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
 namespace argon2gpu
 {
 namespace opencl
