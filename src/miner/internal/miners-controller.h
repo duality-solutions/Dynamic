@@ -104,6 +104,7 @@ private:
 
 public:
     MinerSignals(MinersController* _ctr);
+    virtual ~MinerSignals() = default;
 
 private:
     // Handles new node connection
