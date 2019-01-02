@@ -121,7 +121,9 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #endif
 
     showCPUHashMeterControls(false);
+#ifdef ENABLE_GPU
     showGPUHashMeterControls(false);
+#endif
     fCPUMinerOn = false;
     fGPUMinerOn = false;
     updateUI();
@@ -205,10 +207,12 @@ void MiningPage::updateCPUPushSwitch()
     updatePushSwitch(ui->pushSwitchCPUMining, fCPUMinerOn);
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::updateGPUPushSwitch()
 {
     updatePushSwitch(ui->pushSwitchGPUMining, fGPUMinerOn);
 }
+#endif
 
 void MiningPage::StartCPUMiner()
 {
@@ -238,6 +242,7 @@ void MiningPage::StopCPUMiner()
     updateUI();
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::StopGPUMiner()
 {
     fGPUMinerOn = false;
@@ -245,6 +250,7 @@ void MiningPage::StopGPUMiner()
     ShutdownGPUMiners();
     updateUI();
 }
+#endif
 
 bool MiningPage::isMinerOn()
 {
@@ -341,12 +347,14 @@ void MiningPage::showCPUHashMeterControls(bool show)
     ui->pushButtonClearCPUData->setVisible(show);
 }
 
+#ifdef ENABLE_GPU
 void MiningPage::showGPUHashMeterControls(bool show)
 {
     ui->sliderGPUGraphSampleTime->setVisible(show);
     ui->labelGPUGraphSampleSize->setVisible(show);
     ui->pushButtonClearGPUData->setVisible(show);
 }
+#endif
 
 void MiningPage::clearCPUHashRateData()
 {
