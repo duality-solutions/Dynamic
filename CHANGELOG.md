@@ -3,6 +3,58 @@
 
 **Dynamic v2.4.0.0**
 
+* Fixes for PS and UTXO sorting
+* Cleanup fee section
+* Increase Signatures Required and Total
+* Fix psq/psa conditions
+* Amend GetCollateralAmount and GetMaxCollateralAmount
+* Update denom info in locale
+* c++14 for travis
+* Increade skip DNS Thread
+* Use IN6ADDR_ANY_INIT instead of in6addr_any
+* Update select coin methods
+* Call InitializeCurrentBlockTip after importing has finished
+* Fix crash bug with duplicate inputs within a transaction
+* Add instantlock field to getrawtransaction rpc output
+* Use VersionBitsState instead of VersionBitsTipState to avoid cs_main lock
+* Remove unused instantsenddepth from init
+* Do not hold cs_main while emitting messages in WalletModel::prepareTransaction
+* Base psq/pstx thresholold on the total number of up to date dynodes
+* Workaround for MacOS Mojave Dark Mode
+* Rename SnTimer to DnTimer
+* BIP147
+* Fix gettxoutsetinfo RPC command
+* Update README.md
+* Fix frameFeeSelection CSS
+* Fix Mining Page Colour
+* Remove auto entry of ports to config file
+* Remove unused CheckWork function
+* Fix ZMQAbstractNotifier
+* Update Icons and Splashscreen
+* Update TestNet checkpoint and minchainwork
+* Light Purple for LockedbyInstantSend
+* Update TestNet seed IP's
+* Update Alert/Spork for TestNet
+* Update mainnet minchainwork
+* Add a column for IS lock status on Transactions tab
+* fixes for shutdown sequence
+* Automatic InstantSend locks for simple transactions and some fixes
+* [ZMQ] Notify when an IS double spend is attempted
+* Remove dummy confirmations in RPC API and GUI for InstantSend transactions
+* Update showSNConfEditor -> showDNConfEditor
+* Change default build to disable GPU miner
+* Do not ignore patches in depends
+* Force fvisibility=hidden when compiling on macos
+* PrivateSend spending txes should have "outgoing" icon on overview screen
+* Relay txes through DN network faster than through regular nodes
+* Update XTHIN code
+* Reduce Memory Imprint on DB
+* Add protected distructor for CValidationInterface
+* Amend DEFAULT_TRANSACTION_MAXFEE
+* Fix ' warning: delete called on non-final 'PeerLogicValidation' that has virtual functions but non-virtual destructor'
+* Add WakeMessageHandler call to UpdateBlockTip
+* Cleanup from changing "boost::lexical_cast<int>" with atoi
+* clang-format
 * Update info for testnet spork key
 * add missing file to makefile
 * Remove bdap from DIST_SUBDIRS in make file

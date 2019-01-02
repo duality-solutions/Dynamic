@@ -1256,6 +1256,11 @@ color:#818181;
 background-color:transparent;
 }
 
+QDialog#SendCoinsDialog .QFrame#frameFee .QFrame#frameFeeSelection .QRadioButton#radioCustomAtLeast {
+color:#818181;
+background-color:transparent;
+}
+
 QDialog#SendCoinsDialog .QCheckBox#checkUsePrivateSend { /* PrivateSend Checkbox */
 color:#FFFFFF;
 background: #000000;

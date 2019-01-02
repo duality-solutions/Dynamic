@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -542,7 +542,7 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
         return error(errorMessage.c_str());
     }
     const std::string strOperationType = GetBDAPOpTypeString(scriptOp);
-    if (fDebug)
+    //if (fDebug)
         LogPrintf("CheckDomainEntryTxInputs, strOperationType= %s \n", strOperationType);
     
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry

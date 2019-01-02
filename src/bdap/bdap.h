@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,8 +18,8 @@ namespace BDAP {
         BDAP_ORGANIZATIONAL_UNIT = 5,
         BDAP_CERTIFICATE = 6,
         BDAP_AUDIT = 7,
-        BDAP_CHANNEL = 8,
-        BDAP_CHECKPOINT = 9,
+        BDAP_SIDECHAIN = 8,
+        BDAP_SIDECHAIN_CHECKPOINT = 9,
         BDAP_BINDING_LINK = 10,
         BDAP_IDENTITY = 11,
         BDAP_IDENTITY_VERIFICATION = 12,

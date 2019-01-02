@@ -1,9 +1,11 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_INTERNAL_MINERS_CONTROLLER_H
 #define DYNAMIC_INTERNAL_MINERS_CONTROLLER_H
+
+#include <boost/signals2.hpp>
 
 #include "chainparams.h"
 #include "miner/impl/miner-cpu.h"
@@ -18,6 +20,7 @@ class CBlockIndex;
 class CTransaction;
 struct CBlockTemplate;
 
+class MinerSignals;
 class MinersController;
 
 void ConnectMinerSignals(MinersController*);
@@ -27,20 +30,6 @@ void ConnectMinerSignals(MinersController*);
  */
 class MinersController
 {
-private:
-    MinerContextRef _ctx;
-    MinersThreadGroup<CPUMiner> _group_cpu;
-#ifdef ENABLE_GPU
-    MinersThreadGroup<GPUMiner> _group_gpu;
-#endif // ENABLE_GPU
-
-    bool _connected;
-    bool _downloaded;
-    bool _enable_start = false;
-
-    int64_t _last_txn_time = 0;
-    int64_t _last_sync_time = 0;
-
 public:
     MinersController(const CChainParams& chainparams, CConnman& connman);
     MinersController(MinerContextRef ctx);
@@ -66,16 +55,58 @@ public:
     }
 #endif // ENABLE_GPU
 
-private:
-    void StartIfEnabled();
-
-    // Returns true if can start
-    bool can_start() const { return _connected && _downloaded && _enable_start && _ctx->shared->has_block(); }
-
 protected:
     // Returns shared miner context
     MinerContextRef ctx() const { return _ctx; }
 
+    // Starts miner only if can
+    void StartIfEnabled();
+
+    // Returns true if enabled, connected and has block.
+    bool can_start() const { return _connected && _enable_start && _ctx->shared->block_template(); }
+
+    // Miner signals class
+    friend class MinerSignals;
+
+    // Optional miner signals
+    // It can be empty when miner is shutdown
+    std::shared_ptr<MinerSignals> _signals{nullptr};
+
+    // Miner context
+    MinerContextRef _ctx;
+    // Miner CPU Thread group
+    MinersThreadGroup<CPUMiner> _group_cpu;
+#ifdef ENABLE_GPU
+    // Miner GPU Thread group
+    MinersThreadGroup<GPUMiner> _group_gpu;
+#endif // ENABLE_GPU
+
+    // Set to true when at least one node is connected
+    bool _connected = false;
+
+    // Set to true when user requested start
+    bool _enable_start = false;
+
+    // Time of last transaction signal
+    int64_t _last_txn_time = 0;
+    // Time of last time block template was created
+    int64_t _last_sync_time = 0;
+};
+
+class MinerSignals
+{
+private:
+    MinersController* _ctr;
+
+    boost::signals2::scoped_connection _node;
+    boost::signals2::scoped_connection _block;
+    boost::signals2::scoped_connection _txn;
+
+public:
+    MinerSignals(MinersController* _ctr);
+    virtual ~MinerSignals() = default;
+
+private:
     // Handles new node connection
     virtual void NotifyNode(const CNode* node);
 
@@ -83,10 +114,7 @@ protected:
     virtual void NotifyBlock(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload);
 
     // Handles new transaction
-    virtual void NotifyTransaction(const CTransaction& tx, const CBlockIndex* pindex, int posInBlock);
-
-    // Connects signals to controller
-    friend void ConnectMinerSignals(MinersController*);
+    virtual void NotifyTransaction(const CTransaction& txn, const CBlockIndex* pindex, int posInBlock);
 };
 
 #endif // DYNAMIC_INTERNAL_MINERS_CONTROLLER_H

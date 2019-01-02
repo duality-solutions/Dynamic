@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -42,10 +42,10 @@ namespace BDAP {
                 return "Certificate Entry";
             case BDAP::ObjectType::BDAP_AUDIT:
                 return "Audit Entry";
-            case BDAP::ObjectType::BDAP_CHANNEL:
-                return "Channel Entry";
-            case BDAP::ObjectType::BDAP_CHECKPOINT:
-                return "Channel Checkpoint Entry";
+            case BDAP::ObjectType::BDAP_SIDECHAIN:
+                return "Sidechain Entry";
+            case BDAP::ObjectType::BDAP_SIDECHAIN_CHECKPOINT:
+                return "Sidechain Checkpoint Entry";
             case BDAP::ObjectType::BDAP_BINDING_LINK:
                 return "Binding Link Entry";
             case BDAP::ObjectType::BDAP_IDENTITY:
@@ -95,10 +95,10 @@ std::string BDAPFromOp(const int op)
             return "bdap_identity";
         case OP_BDAP_ID_VERIFICATION:
             return "bdap_identity_verification";
-        case OP_BDAP_CHANNEL:
-            return "bdap_new_channel";
-        case OP_BDAP_CHANNEL_CHECKPOINT:
-            return "bdap_channel_checkpoint";
+        case OP_BDAP_SIDECHAIN:
+            return "bdap_new_sidechain";
+        case OP_BDAP_SIDECHAIN_CHECKPOINT:
+            return "bdap_sidechain_checkpoint";
         default:
             return "<unknown bdap op>";
     }
@@ -597,7 +597,7 @@ int GetBDAPOpType(const CScript& script)
         {
             if (script.GetOp2(it, op2, &vch)) 
             {
-                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_CHANNEL_CHECKPOINT)
+                if (op2 - OP_1NEGATE - 1  > OP_BDAP && op2 - OP_1NEGATE - 1 <= OP_BDAP_SIDECHAIN_CHECKPOINT)
                 {
                     return (int)op2 - OP_1NEGATE - 1;
                 }

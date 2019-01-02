@@ -1,5 +1,5 @@
 
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -379,6 +379,8 @@ void SetBlockPubkeyScript(CBlock& block, const CScript& scriptPubKeyIn)
     CMutableTransaction txCoinbase(*block.vtx[0]);
     // Set coinbase out address
     txCoinbase.vout[0].scriptPubKey = scriptPubKeyIn;
+    //It should be added to the block
+    block.vtx[0] = MakeTransactionRef(std::move(txCoinbase));
     // Generate merkle root hash
     block.hashMerkleRoot = BlockMerkleRoot(block);
 }

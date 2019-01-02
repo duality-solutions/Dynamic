@@ -1,8 +1,8 @@
-// Copyright (c) 2009-2018 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2019 The Bitcoin Developers
 // Copyright (c) 2013-2017 Emercoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -51,11 +51,11 @@ std::string CTxIn::ToString() const
     return str;
 }
 
-CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
+CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn)
 {
     nValue = nValueIn;
     scriptPubKey = scriptPubKeyIn;
-    nRounds = -10;
+    nRounds = nRoundsIn;
 }
 
 std::string CTxOut::ToString() const

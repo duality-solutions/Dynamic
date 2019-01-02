@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -534,7 +534,7 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
 }
 
 
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs)
+bool CheckTransaction(const CTransaction& tx, CValidationState& state)
 {
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -563,13 +563,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fChe
         }
     }
 
-    // Check for duplicate inputs - note that this check is slow so we skip it in CheckBlock
-    if (fCheckDuplicateInputs) {
-        std::set<COutPoint> vInOutPoints;
-        for (const auto& txin : tx.vin) {
-            if (!vInOutPoints.insert(txin.prevout).second)
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
-        }
+    // Check for duplicate inputs
+    std::set<COutPoint> vInOutPoints;
+    for (const auto& txin : tx.vin)
+    {
+        if (!vInOutPoints.insert(txin.prevout).second)
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
     }
 
     if (tx.IsCoinBase()) {
@@ -2115,6 +2114,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
     nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
 
+    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
+        flags |= SCRIPT_VERIFY_NULLDUMMY;
+    }
+    
     int64_t nTime2 = GetTimeMicros();
     nTimeForks += nTime2 - nTime1;
     LogPrint("bench", "    - Fork checks: %.2fms [%.2fs]\n", 0.001 * (nTime2 - nTime1), nTimeForks * 0.000001);
@@ -3408,7 +3411,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check transactions
     for (const auto& tx : block.vtx) {
-        if (!CheckTransaction(*tx, state, false))
+        if (!CheckTransaction(*tx, state))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                 strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
 

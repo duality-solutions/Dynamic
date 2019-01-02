@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
 // Copyright (c) 2009-2017 The Syscoin Core developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -195,19 +195,19 @@ enum opcodetype {
 
     // BDAP directory access, user identity and certificate system
     OP_BDAP = 0x01,
-    OP_BDAP_NEW = 0x02,                // = BDAP create new entry
-    OP_BDAP_DELETE = 0x03,             // = BDAP user delete entry
-    OP_BDAP_REVOKE = 0x04,             // = BDAP delete using fluid protocol
-    OP_BDAP_MODIFY = 0x05,             // = BDAP update entry
-    OP_BDAP_MODIFY_RDN = 0x06,         // = move BDAP entry
-    OP_BDAP_EXECUTE_CODE = 0x07,       // = BDAP smart contract
-    OP_BDAP_BIND = 0x08,               // = BDAP entry link request
-    OP_BDAP_AUDIT = 0x09,              // = BDAP entry audit entry
-    OP_BDAP_CERTIFICATE = 0x0a,        // = BDAP entry certificate
-    OP_BDAP_IDENTITY = 0x0b,           // = BDAP entry identity
-    OP_BDAP_ID_VERIFICATION = 0x0c,    // = BDAP identity verification
-    OP_BDAP_CHANNEL = 0x0d,            // = BDAP sub chain
-    OP_BDAP_CHANNEL_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
+    OP_BDAP_NEW = 0x02,                  // = BDAP create new entry
+    OP_BDAP_DELETE = 0x03,               // = BDAP user delete entry
+    OP_BDAP_REVOKE = 0x04,               // = BDAP delete using fluid protocol
+    OP_BDAP_MODIFY = 0x05,               // = BDAP update entry
+    OP_BDAP_MODIFY_RDN = 0x06,           // = move BDAP entry
+    OP_BDAP_EXECUTE_CODE = 0x07,         // = BDAP smart contract
+    OP_BDAP_BIND = 0x08,                 // = BDAP entry link request
+    OP_BDAP_AUDIT = 0x09,                // = BDAP entry audit entry
+    OP_BDAP_CERTIFICATE = 0x0a,          // = BDAP entry certificate
+    OP_BDAP_IDENTITY = 0x0b,             // = BDAP entry identity
+    OP_BDAP_ID_VERIFICATION = 0x0c,      // = BDAP identity verification
+    OP_BDAP_SIDECHAIN = 0x0d,            // = BDAP sub chain
+    OP_BDAP_SIDECHAIN_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -234,8 +234,8 @@ enum ProtocolCodes {
     BDAP_CERTIFICATE_TX = 13,
     BDAP_IDENTITY_TX = 14,
     BDAP_ID_VERIFICATION_TX = 15,
-    BDAP_CHANNEL_TX = 16,
-    BDAP_CHANNEL_CHECKPOINT = 17,
+    BDAP_SIDECHAIN_TX = 16,
+    BDAP_SIDECHAIN_CHECKPOINT = 17,
     NO_TX = 0
 };
 
@@ -723,11 +723,11 @@ public:
         case BDAP_ID_VERIFICATION_TX:
             return (size() > 0 && *begin() == OP_BDAP_ID_VERIFICATION);
             break;
-        case BDAP_CHANNEL_TX:
-            return (size() > 0 && *begin() == OP_BDAP_CHANNEL);
+        case BDAP_SIDECHAIN_TX:
+            return (size() > 0 && *begin() == OP_BDAP_SIDECHAIN);
             break;
-        case BDAP_CHANNEL_CHECKPOINT:
-            return (size() > 0 && *begin() == OP_BDAP_CHANNEL_CHECKPOINT);
+        case BDAP_SIDECHAIN_CHECKPOINT:
+            return (size() > 0 && *begin() == OP_BDAP_SIDECHAIN_CHECKPOINT);
             break;
         default:
             throw std::runtime_error("BDAP code is invalid!");

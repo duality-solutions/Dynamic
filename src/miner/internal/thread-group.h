@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,27 +20,40 @@ public:
     explicit ThreadGroup(Context ctx);
 
     // Starts set amount of target threads
-    void Start() { SyncGroupTarget(); };
-
-    // Shuts down all threads
-    void Shutdown()
+    void Start()
     {
-        SetNumThreads(0);
+        boost::unique_lock<boost::shared_mutex> guard(_mutex);
         SyncGroupTarget();
     };
 
+    // Shuts down all threads
+    void Shutdown() { SetSize(0); };
+
     // Sets amount of threads
-    void SetNumThreads(uint8_t target)
+    void SetSize(uint8_t size)
     {
         boost::unique_lock<boost::shared_mutex> guard(_mutex);
-        _target_threads = target;
+        // sync only if lowering
+        // requires sync if higher
+        if (_threads.size() > size) {
+            SyncGroupTarget();
+            _target_threads = size;
+        } else {
+            _target_threads = size;
+        }
     };
 
+    // Size of a thread group
+    uint8_t size() const { return _target_threads; }
+
 protected:
+    Context _ctx;
+
+private:
     // Starts or shutdowns threads to meet the target
+    // Requires a mutex lock before call
     void SyncGroupTarget();
 
-    Context _ctx;
     size_t _devices;
     uint8_t _target_threads = 0;
     std::vector<std::shared_ptr<boost::thread> > _threads;
@@ -55,22 +68,17 @@ ThreadGroup<T, Context>::ThreadGroup(Context ctx)
 template <class T, class Context>
 void ThreadGroup<T, Context>::SyncGroupTarget()
 {
-    boost::unique_lock<boost::shared_mutex> guard(_mutex);
-
     size_t current;
-    size_t real_target = _target_threads * _devices;
-    while ((current = _threads.size()) != real_target) {
-        for (size_t device_index = 0; device_index < _devices; device_index++) {
-            if (current < real_target) {
-                auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), device_index));
-                _threads.push_back(std::make_shared<boost::thread>([miner] {
-                    (*miner)();
-                }));
-            } else {
-                std::shared_ptr<boost::thread> thread = _threads.back();
-                _threads.pop_back();
-                thread->interrupt();
-            }
+    while ((current = _threads.size()) != _target_threads) {
+        if (current < _target_threads) {
+            auto miner = std::shared_ptr<T>(new T(_ctx->MakeChild(), current % _devices));
+            _threads.push_back(std::make_shared<boost::thread>([miner] {
+                (*miner)();
+            }));
+        } else {
+            std::shared_ptr<boost::thread> thread = _threads.back();
+            _threads.pop_back();
+            thread->interrupt();
         }
     }
 };

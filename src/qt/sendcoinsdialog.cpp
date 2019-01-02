@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +26,7 @@
 #include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 
+#include <QFontMetrics>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -129,8 +130,6 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle* _platformStyle, QWidget* p
         settings.setValue("nTransactionFee", (qint64)DEFAULT_TRANSACTION_FEE);
     if (!settings.contains("fPayOnlyMinFee"))
         settings.setValue("fPayOnlyMinFee", false);
-    if (!settings.contains("fSendFreeTransactions"))
-        settings.setValue("fSendFreeTransactions", false);
 
     ui->groupFee->setId(ui->radioSmartFee, 0);
     ui->groupFee->setId(ui->radioCustomFee, 1);
@@ -730,7 +729,8 @@ void SendCoinsDialog::updateSmartFeeLabel()
         ui->labelSmartFee2->show(); // (Smart fee not initialized yet. This usually takes a few blocks...)
         ui->labelFeeEstimation->setText("");
         ui->fallbackFeeWarningLabel->setVisible(true);
-        QColor warning_colour(221, 37, 13);
+        int lightness = ui->fallbackFeeWarningLabel->palette().color(QPalette::WindowText).lightness();
+        QColor warning_colour(221 - (lightness / 5), 37 - (lightness / 3), 13 - (lightness / 14));
         ui->fallbackFeeWarningLabel->setStyleSheet("QLabel { color: " + warning_colour.name() + "; }");
         ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
     } else {

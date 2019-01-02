@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2018 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -161,6 +161,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of BIP147
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 1533945600; // Aug 11th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 1565481600; // Aug 11th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nWindowSize = 4032;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nThreshold = 3226; // 80% of 4032
+
         // Deployment of InstantSend autolocks
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1533945600; // Aug 11th, 2018
@@ -200,7 +207,7 @@ public:
             assert(genesis.hashMerkleRoot == uint256S("0xfa0e753db5a853ebbc52594eb62fa8219155547b426fba8789fa96dbf07e6ed5"));
         }
 
-        vSeeds.push_back(CDNSSeedData("quasar.servies", "dnsseeder-dyn.quasar.services"));
+        vSeeds.push_back(CDNSSeedData("", ""));
 
         // Dynamic addresses start with 'D'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 30);
@@ -301,6 +308,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1513591800; // Dec 18th 2017 10:10:00
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1545134400;   // Dec 18th 2018 12:00:00
 
+        // Deployment of BIP147
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 1517792400; // Feb 5th, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 1549328400; // Feb 5th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nWindowSize = 100;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nThreshold = 50; // 50% of 100
+
         // Deployment of InstantSend autolocks
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 1532476800; // Jul 25th, 2018
@@ -375,8 +389,8 @@ public:
         };
 
         chainTxData = ChainTxData{
-            1542024850,  // * UNIX timestamp of last known number of transactions
-            703,  // * total number of transactions between genesis and that timestamp
+            0,  // * UNIX timestamp of last known number of transactions
+            0,  // * total number of transactions between genesis and that timestamp
                 //   (the tx=... number in the SetBestChain debug.log lines)
             0.1 // * estimated number of transactions per second after that timestamp
         };
@@ -438,6 +452,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 999999999999ULL;
+
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].bit = 2;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_BIP147].nTimeout = 999999999999ULL;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].bit = 4;
         consensus.vDeployments[Consensus::DEPLOYMENT_ISAUTOLOCKS].nStartTime = 0;

@@ -1,9 +1,13 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
 
 #include "dynamicgui.h"
 
@@ -99,6 +103,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  receiveCoinsMenuAction(0),
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
+                                                                                                                 miningAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
                                                                                                                  usedReceivingAddressesAction(0),
@@ -377,6 +382,7 @@ void DynamicGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
+    connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
 
 #endif // ENABLE_WALLET
@@ -714,6 +720,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
+    miningAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -751,6 +758,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(receiveCoinsAction);
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
+    pmenu->addAction(miningAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);

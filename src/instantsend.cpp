@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -987,6 +987,7 @@ bool CTxLockRequest::IsValid() const
     int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
     for (const auto& txin : tx->vin) {
+
         Coin coin;
 
         if (!GetUTXOCoin(txin.prevout, coin)) {
@@ -1007,7 +1008,7 @@ bool CTxLockRequest::IsValid() const
         nValueIn += coin.out.nValue;
     }
 
-    if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE) * COIN) {
+    if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
         LogPrint("instantsend", "CTxLockRequest::IsValid -- Transaction value too high: nValueIn=%d, tx=%s", nValueIn, ToString());
         return false;
     }

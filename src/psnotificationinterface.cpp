@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -41,7 +41,7 @@ void CPSNotificationInterface::UpdatedBlockTip(const CBlockIndex* pindexNew, con
 
     // update instantsend autolock activation flag
     instantsend.isAutoLockBip9Active =
-            (VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ISAUTOLOCKS) == THRESHOLD_ACTIVE);
+            (VersionBitsState(pindexNew->pprev, Params().GetConsensus(), Consensus::DEPLOYMENT_ISAUTOLOCKS, versionbitscache) == THRESHOLD_ACTIVE);
 
     if (fInitialDownload)
         return;

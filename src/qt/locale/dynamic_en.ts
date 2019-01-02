@@ -1322,7 +1322,7 @@ You retain control of your money at all times.&lt;hr&gt;
 &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;
 &lt;ol type=&#39;1&#39;&gt;
 &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations.
-These denominations are 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
+These denominations are 0.001, 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- sort of like the paper money you use every day.&lt;/li&gt;
 &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &#39;Dynodes&#39;.
 These Dynodes are informed then that you are interested in mixing a certain denomination.
 No identifiable information is sent to the Dynodes, so they never know &#39;who&#39; you are.&lt;/li&gt;

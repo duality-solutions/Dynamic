@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,6 +20,7 @@ struct CBlockTemplate;
 
 class MinerBase;
 class MinerContext;
+class MinerSignals;
 class MinersController;
 
 /** Miner context shared_ptr */
@@ -36,12 +37,11 @@ public:
     // Returns chain tip of current block template
     CBlockIndex* tip() const { return _chain_tip; }
 
-    // Returns miner block flag
-    // It's incremented every time new template is generated
-    uint64_t block_flag() const { return _block_flag; }
+    // Returns miner block template creation time
+    int64_t block_time() const { return _block_time; }
 
-    // Returns true if block was created
-    bool has_block() const { return _block_template != nullptr; }
+    // Returns time of last transaction in the block
+    uint32_t last_txn() const { return _last_txn; }
 
     // Returns miner block template
     std::shared_ptr<CBlockTemplate> block_template()
@@ -52,6 +52,7 @@ public:
 
 protected:
     friend class MinerBase;
+    friend class MinerSignals;
     friend class MinersController;
 
     // recreates miners block template
@@ -61,7 +62,9 @@ private:
     // current block chain tip
     std::atomic<CBlockIndex*> _chain_tip{nullptr};
     // atomic flag incremented on recreated block
-    std::atomic<std::uint64_t> _block_flag{0};
+    std::atomic<int64_t> _block_time{0};
+    // last transaction update time
+    std::atomic<uint32_t> _last_txn{0};
     // shared block template for miners
     std::shared_ptr<CBlockTemplate> _block_template{nullptr};
     // mutex protecting multiple threads recreating block

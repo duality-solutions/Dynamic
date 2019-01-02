@@ -34,7 +34,7 @@ QTabBar { alignment: left; }
 </string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="CPU">
         <property name="enabled">
@@ -434,7 +434,7 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
                </property>
                <property name="text">
-                <string>Number of threads to use:</string>
+                <string>Number of CPU threads to use:</string>
                </property>
               </widget>
              </item>
@@ -660,7 +660,7 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
                </property>
                <property name="text">
-                <string>Number of threads to use:</string>
+                <string>Number of GPU devices to use:</string>
                </property>
               </widget>
              </item>

@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,6 +21,8 @@
 #include "script/standard.h"
 #include "util.h"
 #include "validation.h" // For minRelayTxFee
+
+#include "miner/impl/miner-gpu.h"
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
@@ -1057,14 +1059,18 @@ int CPUMaxThreads()
     return nUseThreads;
 }
 
+#ifdef ENABLE_GPU
 int GPUMaxThreads()
 {
-    int nUseThreads = 8;
+    int nThreads = GPUMiner::TotalDevices();
+
+    int nUseThreads = GetArg("-genproclimit-gpu", -1);
     if (nUseThreads < 0) {
-        nUseThreads = 1;
+        nUseThreads = nThreads;
     }
     return nUseThreads;
 }
+#endif
 
 QString FormatHashRate(qint64 n)
 {
