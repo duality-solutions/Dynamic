@@ -74,6 +74,14 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
 #ifdef ENABLE_GPU
     ui->sliderGPUGraphSampleTime->setMaximum(0);
     ui->sliderGPUGraphSampleTime->setMaximum(6);
+#else
+    ui->sliderGPUGraphSampleTime->setVisible(false);
+#endif
+
+#ifdef ENABLE_GPU
+    ui->labelGPUGraphSampleSize->setVisible(true);
+#else
+    ui->labelGPUGraphSampleSize->setVisible(false);
 #endif
 
     ui->sliderCPUCores->setToolTip(tr("Use the slider to select the amount of CPU threads to use"));
@@ -106,6 +114,8 @@ MiningPage::MiningPage(const PlatformStyle* platformStyle, QWidget* parent) : QW
     connect(ui->pushButtonClearCPUData, SIGNAL(clicked()), this, SLOT(clearCPUHashRateData()));
 #ifdef ENABLE_GPU
     connect(ui->pushButtonClearGPUData, SIGNAL(clicked()), this, SLOT(clearGPUHashRateData()));
+#else
+    ui->pushButtonClearGPUData->setVisible(false);
 #endif
     connect(ui->checkBoxShowCPUGraph, SIGNAL(stateChanged(int)), this, SLOT(showCPUHashRate(int)));
 #ifdef ENABLE_GPU

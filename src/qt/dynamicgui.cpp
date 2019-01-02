@@ -349,9 +349,9 @@ void DynamicGUI::createActions()
     dynodeAction->setToolTip(dynodeAction->statusTip());
     dynodeAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    dynodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
+    dynodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
 #else
-    dynodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    dynodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
 #endif
     tabGroup->addAction(dynodeAction);
 
@@ -360,9 +360,9 @@ void DynamicGUI::createActions()
     miningAction->setToolTip(miningAction->statusTip());
     miningAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    miningAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
+    miningAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
 #else
-    miningAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    miningAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
 #endif
     tabGroup->addAction(miningAction);
 
