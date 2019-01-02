@@ -849,7 +849,7 @@ public:
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
     //! HaveDHTKey implementation that also checks the mapHdPubKeys
-    bool HaveDHTKey(const CKeyID &address) const;
+    bool HaveDHTKey(const CKeyID &address) const override;
     //! HaveKey implementation that also checks the mapHdPubKeys
     bool HaveKey(const CKeyID& address) const override;
     //! GetPubKey implementation that also checks the mapHdPubKeys
@@ -857,7 +857,7 @@ public:
     //! GetKey implementation that can derive a HD private key on the fly
     bool GetKey(const CKeyID& address, CKey& keyOut) const override;
     //! Gets Ed25519 private key from the wallet(database)
-    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const override;
     //! Adds a HDPubKey into the wallet(database)
     bool AddHDPubKey(const CExtPubKey& extPubKey, bool fInternal);
     //! loads a HDPubKey into the wallets memory
@@ -865,7 +865,7 @@ public:
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
     //! Adds an ed25519 keypair and saves it to disk.
-    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) override;
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key, const CPubKey& pubkey) { return CCryptoKeyStore::AddKeyPubKey(key, pubkey); }
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
@@ -1145,7 +1145,7 @@ public:
     // Support mnemonic sub-chains
     void DeriveNewChildKeyBIP44BychainChildKey(CExtKey& chainChildKey, CKey& secret, bool internal, uint32_t* nInternalChainCounter, uint32_t* nExternalChainCounter);
     // Returns local BDAP DHT Public keys
-    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
     bool IsLinkRequestFromMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey);
     bool IsLinkRequestForMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey, std::vector<unsigned char>& vchSharedPubKey);
 
