@@ -481,7 +481,7 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
             break;
         i++;
     }
-    if (strPrefix.empty() || strPrefix.size() != 3) {
+    if (strPrefix.empty() || !(strPrefix.size() >= 3)) {
         LogPrintf("%s -- Error, incorrect prefix length. Script = %s\n", __func__, ScriptToAsmStr(script));
         return false;
     }
@@ -530,6 +530,24 @@ bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapO
         if (!script.IsUnspendable()) {
             if (ExtractOpTypeValue(script, strOpType, vchValue)) {
                 bdapOpScript = script;
+                break;
+            }
+        }
+    }
+    if (strOpType.size() > 0) {
+        return true;
+    }
+    return false;
+}
+
+bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue)
+{
+    for (const CTxOut& out : tx.vout)
+    {
+        if (!out.scriptPubKey.IsUnspendable()) 
+        {
+            if (ExtractOpTypeValue(out.scriptPubKey, strOpType, vchValue)) {
+                bdapOpScript = out.scriptPubKey;
                 break;
             }
         }
