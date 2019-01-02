@@ -37,8 +37,11 @@ public:
     virtual bool HaveDHTKey(const CKeyID &address) const =0;
     virtual bool GetKey(const CKeyID &address, CKey& keyOut) const =0;
     virtual void GetKeys(std::set<CKeyID> &setAddress) const =0;
-    virtual bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const =0;
-
+    virtual bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const =0;
+    virtual bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const =0;
+    virtual bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const =0;
+    virtual bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey) =0;
+    
     //! Support for BIP 0013 : see https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki
     virtual bool AddCScript(const CScript& redeemScript) = 0;
     virtual bool HaveCScript(const CScriptID& hash) const = 0;
@@ -70,9 +73,9 @@ protected:
     CHDChain hdChain;
 
 public:
-    bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey);
-    bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const;
-    bool HaveDHTKey(const CKeyID &address) const
+    bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
+    bool GetPubKey(const CKeyID& address, CPubKey& vchPubKeyOut) const override;
+    bool HaveDHTKey(const CKeyID &address) const override
     {
         bool result;
         {
@@ -81,7 +84,7 @@ public:
         }
         return result;
     }
-    bool HaveKey(const CKeyID &address) const
+    bool HaveKey(const CKeyID &address) const override
     {
         bool result;
         {
@@ -124,11 +127,10 @@ public:
     virtual bool HaveWatchOnly() const override;
 
     virtual bool GetHDChain(CHDChain& hdChainRet) const;
-    
-    // TODO (BDAP): Change to virtual methods
-    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
-    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey);
-    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
+
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey) override;
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const override;
 
 };
 

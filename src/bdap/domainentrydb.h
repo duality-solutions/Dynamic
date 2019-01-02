@@ -9,11 +9,13 @@
 #include "dbwrapper.h"
 #include "sync.h"
 
+class CCoinsViewCache;
+
 static CCriticalSection cs_bdap_entry;
 
 class CDomainEntryDB : public CDBWrapper {
 public:
-    CDomainEntryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "bdap", nCacheSize, fMemory, fWipe, obfuscate) {
+    CDomainEntryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-entries", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
     // Add, Read, Modify, ModifyRDN, Delete, List, Search, Bind, and Compare
@@ -55,7 +57,7 @@ bool CheckBindDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& en
 bool CheckRevokeDomainEntryTxInputs(const CTransaction& tx, const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck);
 bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
-                            int op, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
+                            int op1, int op2, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
 extern CDomainEntryDB *pDomainEntryDB;
 

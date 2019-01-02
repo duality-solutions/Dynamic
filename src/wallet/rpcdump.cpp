@@ -8,6 +8,7 @@
 #include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
@@ -204,7 +205,7 @@ UniValue importbdapkeys(const JSONRPCRequest& request)
 
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchFromString(vchObjectID);
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());
@@ -943,7 +944,7 @@ UniValue dumpbdapkeys(const JSONRPCRequest& request)
 
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Can not find BDAP entry " + entry.GetFullObjectPath());

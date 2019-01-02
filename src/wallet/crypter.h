@@ -192,8 +192,8 @@ public:
     virtual bool AddCryptedDHTKey(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret);
 
     bool AddKeyPubKey(const CKey& key, const CPubKey& pubkey) override;
-    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey);
-    bool HaveDHTKey(const CKeyID &address) const
+    bool AddDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& pubkey) override;
+    bool HaveDHTKey(const CKeyID &address) const override
     {
         {
             LOCK(cs_KeyStore);
@@ -203,7 +203,7 @@ public:
         }
         return false;
     }
-    bool HaveKey(const CKeyID &address) const
+    bool HaveKey(const CKeyID &address) const override
     {
         {
             LOCK(cs_KeyStore);
@@ -229,11 +229,11 @@ public:
         }
     }
 
-    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const;
+    bool GetDHTKey(const CKeyID& address, CKeyEd25519& keyOut) const override;
 
     virtual bool GetHDChain(CHDChain& hdChainRet) const override;
 
-    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const;
+    bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
     /**
      * Wallet status (encrypted, locked) changed.
      * Note: Called without locks held.

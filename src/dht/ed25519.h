@@ -94,11 +94,6 @@ public:
     {
     }
 
-    //! Simple read-only vector-like interface.
-    int size() const { return (int)seed.size(); }
-    const unsigned char* begin() const { return GetPrivSeed().data(); }
-    const unsigned char* end() const { return GetPrivSeed().data() + size(); }
-
     std::vector<unsigned char> GetPrivKey() const;
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
@@ -139,6 +134,8 @@ private:
     void MakeNewKeyPair();
 
 };
+
+std::vector<unsigned char> GetLinkRequestSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey);
 
 bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();

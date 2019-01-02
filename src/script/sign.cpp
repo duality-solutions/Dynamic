@@ -69,7 +69,8 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
     CKeyID keyID;
     switch (whichTypeRet) {
     case TX_NONSTANDARD:
-    case TX_NULL_DATA:;
+    case TX_NULL_DATA:
+        return false;
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
         return Sign1(keyID, creator, scriptPubKey, scriptSigRet);
@@ -208,6 +209,7 @@ static CScript CombineSignatures(const CScript& scriptPubKey, const BaseSignatur
     switch (txType) {
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
+        return false;
     case TX_PUBKEY:
     case TX_PUBKEYHASH:
         // Signatures are bigger than placeholders or empty scripts:

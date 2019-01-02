@@ -194,20 +194,21 @@ enum opcodetype {
     OP_RELEASE_ADDRESS = 0xc8,
 
     // BDAP directory access, user identity and certificate system
-    OP_BDAP = 0x01,
-    OP_BDAP_NEW = 0x02,                  // = BDAP create new entry
-    OP_BDAP_DELETE = 0x03,               // = BDAP user delete entry
-    OP_BDAP_REVOKE = 0x04,               // = BDAP delete using fluid protocol
-    OP_BDAP_MODIFY = 0x05,               // = BDAP update entry
-    OP_BDAP_MODIFY_RDN = 0x06,           // = move BDAP entry
-    OP_BDAP_EXECUTE_CODE = 0x07,         // = BDAP smart contract
-    OP_BDAP_BIND = 0x08,                 // = BDAP entry link request
+    OP_BDAP_NEW = 0x01,                  // = BDAP create new entry
+    OP_BDAP_DELETE = 0x02,               // = BDAP user delete entry
+    OP_BDAP_REVOKE = 0x03,               // = BDAP delete using fluid protocol
+    OP_BDAP_MODIFY = 0x04,               // = BDAP update entry
+    OP_BDAP_MODIFY_RDN = 0x05,           // = move BDAP entry
+    OP_BDAP_ACCOUNT_ENTRY  = 0x06,       // = BDAP domain account entry (users and groups) 
+    OP_BDAP_LINK_REQUEST = 0x07,         // = BDAP link request
+    OP_BDAP_LINK_ACCEPT = 0x08,          // = BDAP link accept
     OP_BDAP_AUDIT = 0x09,                // = BDAP entry audit entry
     OP_BDAP_CERTIFICATE = 0x0a,          // = BDAP entry certificate
     OP_BDAP_IDENTITY = 0x0b,             // = BDAP entry identity
     OP_BDAP_ID_VERIFICATION = 0x0c,      // = BDAP identity verification
     OP_BDAP_SIDECHAIN = 0x0d,            // = BDAP sub chain
     OP_BDAP_SIDECHAIN_CHECKPOINT = 0x0e, // = BDAP sub chain checkpoint
+
     // dynamic extended reserved
     OP_DYNAMIC_EXTENDED = 0x10,
 
@@ -222,14 +223,14 @@ enum ProtocolCodes {
     MINT_TX = 1,
     DYNODE_MODFIY_TX = 2,
     MINING_MODIFY_TX = 3,
-    BDAP_START = 4,
-    BDAP_NEW_TX = 5,
-    BDAP_DELETE_TX = 6,
-    BDAP_REVOKE_TX = 7,
-    BDAP_MODIFY_TX = 8,
-    BDAP_MODIFY_RDN_TX = 9,
-    BDAP_EXECUTE_CODE_TX = 10,
-    BDAP_BIND_TX = 11,
+    BDAP_NEW_TX = 4,
+    BDAP_DELETE_TX = 5,
+    BDAP_REVOKE_TX = 6,
+    BDAP_MODIFY_TX = 7,
+    BDAP_MODIFY_RDN_TX = 8,
+    BDAP_ACCOUNT_ENTRY = 9,
+    BDAP_LINK_REQUEST = 10,
+    BDAP_LINK_ACCEPT = 11,
     BDAP_AUDIT_TX = 12,
     BDAP_CERTIFICATE_TX = 13,
     BDAP_IDENTITY_TX = 14,
@@ -687,9 +688,6 @@ public:
     bool IsBDAPScript(ProtocolCodes code) const
     {
         switch (code) {
-        case BDAP_START:
-            return (size() > 0 && *begin() == OP_BDAP);
-            break;
         case BDAP_NEW_TX:
             return (size() > 0 && *begin() == OP_BDAP_NEW);
             break;
@@ -705,11 +703,14 @@ public:
         case BDAP_MODIFY_RDN_TX:
             return (size() > 0 && *begin() == OP_BDAP_MODIFY_RDN);
             break;
-        case BDAP_EXECUTE_CODE_TX:
-            return (size() > 0 && *begin() == OP_BDAP_EXECUTE_CODE);
+        case BDAP_ACCOUNT_ENTRY:
+            return (size() > 0 && *begin() == OP_BDAP_ACCOUNT_ENTRY);
             break;
-        case BDAP_BIND_TX:
-            return (size() > 0 && *begin() == OP_BDAP_BIND);
+        case BDAP_LINK_REQUEST:
+            return (size() > 0 && *begin() == OP_BDAP_LINK_REQUEST);
+            break;
+        case BDAP_LINK_ACCEPT:
+            return (size() > 0 && *begin() == OP_BDAP_LINK_ACCEPT);
             break;
         case BDAP_AUDIT_TX:
             return (size() > 0 && *begin() == OP_BDAP_AUDIT);
@@ -753,8 +754,8 @@ public:
 
 // TODO: Use a seperate code file for these BDAP functions
 bool IsDirectoryOp(int op);
-bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
-bool DecodeBDAPScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> >& vvch);
+bool DecodeBDAPScript(const CScript& script, int& op, int& op2, std::vector<std::vector<unsigned char> >& vvch, CScript::const_iterator& pc);
+bool DecodeBDAPScript(const CScript& script, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool RemoveBDAPScript(const CScript& scriptIn, CScript& scriptOut);
 
 #endif // DYNAMIC_SCRIPT_SCRIPT_H

@@ -392,13 +392,21 @@ bool CCryptoKeyStore::AddDHTKey(const CKeyEd25519& key, const std::vector<unsign
         if (IsLocked(true))
             return false;
 
-        std::vector<unsigned char> vchCryptedSecret;
-        CKeyingMaterial vchSecret(key.begin(), key.end());
-        if (!EncryptSecret(vMasterKey, vchSecret, key.GetHash(), vchCryptedSecret))
-            return false;
+        LogPrint("dht", "CCryptoKeyStore::AddDHTKey \npubkey = %s, \nprivkey = %s, \nprivseed = %s\n", 
+                    key.GetPubKeyString(), key.GetPrivKeyString(), key.GetPrivSeedString());
 
-        if (!AddCryptedDHTKey(key.GetPubKey(), vchCryptedSecret))
+        std::vector<unsigned char> vchDHTPrivSeed = key.GetPrivSeed();
+        std::vector<unsigned char> vchCryptedSecret;
+        CKeyingMaterial vchSecret(vchDHTPrivSeed.begin(), vchDHTPrivSeed.end());
+        if (!EncryptSecret(vMasterKey, vchSecret, key.GetHash(), vchCryptedSecret)) {
+            LogPrint("dht", "CCryptoKeyStore::AddDHTKey -- Error after EncryptSecret\n");
             return false;
+        }
+
+        if (!AddCryptedDHTKey(key.GetPubKey(), vchCryptedSecret)) {
+            LogPrint("dht", "CCryptoKeyStore::AddDHTKey -- Error after AddCryptedDHTKey\n");
+            return false;
+        }
     }
     return true;
 }

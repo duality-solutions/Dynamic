@@ -4,6 +4,7 @@
 
 #include "bdap/auditdata.h"
 
+#include "bdap/utils.h"
 #include "hash.h"
 #include "streams.h"
 

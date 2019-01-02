@@ -3,6 +3,7 @@
 
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
@@ -261,7 +262,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))
@@ -317,7 +318,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
     entry.DomainComponent = vchDefaultDomainName;
-    entry.OrganizationalUnit = vchDefaultUserOU;
+    entry.OrganizationalUnit = vchDefaultPublicOU;
     entry.ObjectID = vchObjectID;
     std::string strFullObjectPath = entry.GetFullObjectPath();
     if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), entry))

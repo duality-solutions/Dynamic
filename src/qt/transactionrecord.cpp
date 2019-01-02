@@ -8,8 +8,8 @@
 #include "transactionrecord.h"
 
 #include "base58.h"
-#include "bdap/bdap.h"
 #include "bdap/domainentry.h"
+#include "bdap/utils.h"
 #include "consensus/consensus.h"
 #include "fluid/fluid.h"
 #include "instantsend.h"
