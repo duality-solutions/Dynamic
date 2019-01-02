@@ -44,11 +44,11 @@ private:
     void StartCPUMiner();
     void StopCPUMiner();
     void showCPUHashMeterControls(bool show);
-    void showGPUHashMeterControls(bool show);
     void updateCPUPushSwitch();
 #ifdef ENABLE_GPU
     void StartGPUMiner();
     void StopGPUMiner();
+    void showGPUHashMeterControls(bool show);
     void updateGPUPushSwitch();
 #endif
 
