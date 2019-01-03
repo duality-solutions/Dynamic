@@ -1,8 +1,12 @@
-// Copyright (c) 2009-2018 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
 
 #include "rpcconsole.h"
 #include "ui_rpcconsole.h"
@@ -18,9 +22,9 @@
 #include "util.h"
 #include "validation.h"
 
-#include <univalue.h>
-
 #include <openssl/crypto.h>
+
+#include <univalue.h>
 
 #ifdef ENABLE_WALLET
 #include <db_cxx.h>

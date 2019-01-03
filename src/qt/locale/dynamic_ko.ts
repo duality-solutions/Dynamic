@@ -3698,7 +3698,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>Form</translation>
     </message>
     <message>
-        <source>Number of threads to use:</source>
+        <source>Number of CPU threads to use:</source>
         <translation>사용할 스레드 수:</translation>
     </message>
     <message>
@@ -3908,7 +3908,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>가장 좋은 블록이 변경되면 명령을 실행합니다 (cmd의 %s 는 블록 해시로 대체됩니다)</translation>
     </message>
     <message>
-        <source>In this mode -genproclimit controls how many blocks are generated immediately.</source>
+        <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
         <translation>이 모드에서 -genproclimit은 즉시 생성되는 블록 수를 제어합니다.</translation>
     </message>
     <message>

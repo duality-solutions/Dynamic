@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -38,6 +38,13 @@ public:
         WatchOnlyFilter_No
     };
 
+    enum InstantSendFilter
+    {
+        InstantSendFilter_All,
+        InstantSendFilter_Yes,
+        InstantSendFilter_No
+    };
+
     void setDateRange(const QDateTime& from, const QDateTime& to);
     void setAddressPrefix(const QString& addrPrefix);
     /**
@@ -46,6 +53,7 @@ public:
     void setTypeFilter(quint32 modes);
     void setMinAmount(const CAmount& minimum);
     void setWatchOnlyFilter(WatchOnlyFilter filter);
+    void setInstantSendFilter(InstantSendFilter filter);
 
     /** Set maximum number of rows returned, -1 if unlimited. */
     void setLimit(int limit);
@@ -64,6 +72,7 @@ private:
     QString addrPrefix;
     quint32 typeFilter;
     WatchOnlyFilter watchOnlyFilter;
+    InstantSendFilter instantsendFilter;
     CAmount minAmount;
     int limitRows;
     bool showInactive;

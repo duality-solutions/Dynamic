@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -12,6 +12,7 @@
 #include "dynodeman.h"
 #include "fluid/fluiddb.h"
 #include "governance-classes.h"
+#include "init.h"
 #include "messagesigner.h"
 #include "netfulfilledman.h"
 #include "netmessagemaker.h"
@@ -1102,4 +1103,10 @@ void CDynodePayments::UpdatedBlockTip(const CBlockIndex* pindex, CConnman& connm
 
     CheckBlockVotes(nFutureBlock - 1);
     ProcessBlock(nFutureBlock, connman);
+}
+
+void CDynodePayments::DoMaintenance()
+{
+    if (ShutdownRequested()) return;
+     CheckAndRemove();
 }

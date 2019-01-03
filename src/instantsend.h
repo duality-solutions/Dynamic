@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -28,15 +28,9 @@ extern CInstantSend instantsend;
     (1000/2900.0)**5 = 0.004875397277841433
 */
 
-// The INSTANTSEND_DEPTH is the "pseudo block depth" level assigned to locked
-// txs to indicate the degree of confidence in their eventual confirmation and
-// inability to be double-spent (adjustable via command line argument)
-static const int MIN_INSTANTSEND_DEPTH = 0;
-static const int MAX_INSTANTSEND_DEPTH = 60;
-/// Default number of "pseudo-confirmations" for an InstantSend tx
-static const int DEFAULT_INSTANTSEND_DEPTH = 10;
+static const int MIN_INSTANTSEND_PROTO_VERSION = 71000;
 
-static const int MIN_INSTANTSEND_PROTO_VERSION = 70900;
+static const int MIN_INSTANTSEND_WITHOUT_FEE_PROTO_VERSION = 71000;
 
 // For how long we are going to accept votes/locks
 // after we saw the first one for a specific transaction
@@ -46,13 +40,15 @@ static const int INSTANTSEND_LOCK_TIMEOUT_SECONDS = 15;
 static const int INSTANTSEND_FAILED_TIMEOUT_SECONDS = 60;
 
 extern bool fEnableInstantSend;
-extern int nInstantSendDepth;
 extern int nCompleteTXLocks;
 
 class CInstantSend
 {
 private:
     static const std::string SERIALIZATION_VERSION_STRING;
+    /// Automatic locks of "simple" transactions are only allowed
+    /// when mempool usage is lower than this threshold
+    static const double AUTO_IX_MEMPOOL_THRESHOLD;
 
     // Keep track of current block height
     int nCachedBlockHeight;
@@ -88,8 +84,6 @@ private:
     /// Update UI and notify external script if any
     void UpdateLockedTransaction(const CTxLockCandidate& txLockCandidate);
     bool ResolveConflicts(const CTxLockCandidate& txLockCandidate);
-
-    bool IsInstantSendReadyToLock(const uint256& txHash);
 
 public:
     mutable CCriticalSection cs_instantsend;
@@ -144,8 +138,6 @@ public:
     bool IsLockedInstantSendTransaction(const uint256& txHash);
     /// Get the actual number of accepted lock signatures
     int GetTransactionLockSignatures(const uint256& txHash);
-    /// Get instantsend confirmations (only)
-    int GetConfirmations(const uint256& nTXHash);
 
     /// Remove expired entries from maps
     void CheckAndRemove();
@@ -159,7 +151,12 @@ public:
 
     std::string ToString() const;
 
-    void DoMaintenance() { CheckAndRemove(); }
+    void DoMaintenance();
+
+    /// checks if we can automatically lock "simple" transactions
+    static bool CanAutoLock();
+     /// flag of the AutoLock Bip9 activation
+    static std::atomic<bool> isAutoLockBip9Active;
 };
 
 /**
@@ -169,6 +166,9 @@ class CTxLockRequest
 {
 private:
     static const CAmount MIN_FEE = 0.0001 * COIN;
+    /// If transaction has less or equal inputs than MAX_INPUTS_FOR_AUTO_IX,
+    /// it will be automatically locked
+    static const int MAX_INPUTS_FOR_AUTO_IX = 4;
 
 public:
     /// Warn for a large number of inputs to an IS tx - fees could be substantial
@@ -179,6 +179,7 @@ public:
 
     CTxLockRequest() : tx(MakeTransactionRef()) {}
     CTxLockRequest(const CTransaction& _tx) : tx(MakeTransactionRef(_tx)){};
+    CTxLockRequest(const CTransactionRef& _tx) : tx(_tx) {};
 
     ADD_SERIALIZE_METHODS;
 
@@ -189,8 +190,11 @@ public:
     }
 
     bool IsValid() const;
-    CAmount GetMinFee() const;
+    CAmount GetMinFee(bool fForceMinFee) const;
     int GetMaxSignatures() const;
+
+    // checks if related transaction is "simple" to lock it automatically
+    bool IsSimple() const;
 
     const uint256& GetHash() const
     {
@@ -298,8 +302,8 @@ private:
     bool fAttacked = false;
 
 public:
-    static const int SIGNATURES_REQUIRED = 6;
-    static const int SIGNATURES_TOTAL = 10;
+    static const int SIGNATURES_REQUIRED = 10;
+    static const int SIGNATURES_TOTAL = 15;
 
     COutPointLock() {}
 

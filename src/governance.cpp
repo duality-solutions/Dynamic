@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -13,6 +13,7 @@
 #include "governance-object.h"
 #include "governance-validators.h"
 #include "governance-vote.h"
+#include "init.h"
 #include "messagesigner.h"
 #include "net_processing.h"
 #include "netfulfilledman.h"
@@ -573,7 +574,7 @@ struct sortProposalsByVotes {
 
 void CGovernanceManager::DoMaintenance(CConnman& connman)
 {
-    if (fLiteMode || !dynodeSync.IsSynced())
+    if (fLiteMode || !dynodeSync.IsSynced() || ShutdownRequested()) 
         return;
 
     // CHECK OBJECTS WE'VE ASKED FOR, REMOVE OLD ENTRIES

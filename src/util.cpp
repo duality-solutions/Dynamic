@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -579,27 +579,22 @@ static boost::filesystem::path pathCached;
 static boost::filesystem::path pathCachedNetSpecific;
 static CCriticalSection csPathCached;
 
-std::string GenerateRandomString(unsigned int len)
-{
-    if (len == 0)
+std::string GenerateRandomString(unsigned int len) {
+    if (len == 0){
         len = 24;
-
+    }
     srand(time(NULL) + len); //seed srand before using
-    char s[len];
-
-    static const char alphanum[] =
+    std::vector<unsigned char> vchRandString;
+    static const unsigned char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
 
     for (unsigned int i = 0; i < len; ++i) {
-        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+        vchRandString.push_back(alphanum[rand() % (sizeof(alphanum) - 1)]);
     }
-
-    s[len] = 0;
-    std::string sPassword(s);
-
-    return sPassword;
+    std::string strPassword(vchRandString.begin(), vchRandString.end());
+    return strPassword;
 }
 
 static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
@@ -610,22 +605,11 @@ static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
 
 static void WriteConfigFile(FILE* configFile)
 {
-    // Gets RPC Port
-    std::stringstream streamRPCPort;
-    streamRPCPort << "rpcport=" << BaseParams(CBaseChainParams::MAIN).RPCPort() << "\n";
-    std::string rpcPort = streamRPCPort.str();
-    // Gets Default Protocol Port
-    std::stringstream streamPort;
-    streamPort << "port=" << DEFAULT_P2P_PORT << "\n";
-    std::string port = streamPort.str();
-
     fputs("#Do not use special characters with username/password\n", configFile);
     std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
     std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
     fputs(sUserID.c_str(), configFile);
     fputs(sRPCpassword.c_str(), configFile);
-    fputs(rpcPort.c_str(), configFile);
-    fputs(port.c_str(), configFile);
     fclose(configFile);
     ReadConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
 }

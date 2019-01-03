@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -10,6 +10,7 @@
 #include "dynode-payments.h"
 #include "dynode-sync.h"
 #include "dynodeman.h"
+#include "init.h"
 #include "key.h"
 #include "messagesigner.h"
 #include "net.h"
@@ -35,8 +36,10 @@ extern CWallet* pwalletMain;
 extern CTxMemPool mempool;
 
 bool fEnableInstantSend = true;
-int nInstantSendDepth = DEFAULT_INSTANTSEND_DEPTH;
 int nCompleteTXLocks;
+
+std::atomic<bool> CInstantSend::isAutoLockBip9Active{false};
+const double CInstantSend::AUTO_IX_MEMPOOL_THRESHOLD = 0.1;
 
 CInstantSend instantsend;
 const std::string CInstantSend::SERIALIZATION_VERSION_STRING = "CInstantSend-Version-1";
@@ -123,7 +126,13 @@ bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest, CCo
                 if (hash != txLockRequest.GetHash()) {
                     LogPrint("instantsend", "CInstantSend::ProcessTxLockRequest -- Double spend attempt! %s\n", txin.prevout.ToStringShort());
                     // do not fail here, let it go and see which one will get the votes to be locked
-                    // TODO: notify zmq+script
+                    // NOTIFY ZMQ
+                    CTransaction txCurrent = *txLockRequest.tx; // currently processed tx
+                    auto itPrevious = mapTxLockCandidates.find(hash);
+                    if (itPrevious != mapTxLockCandidates.end() && itPrevious->second.txLockRequest) {
+                        CTransaction txPrevious = *itPrevious->second.txLockRequest.tx; // previously locked one
+                        GetMainSignals().NotifyInstantSendDoubleSpendAttempt(txCurrent, txPrevious);
+                    }
                 }
             }
         }
@@ -793,19 +802,6 @@ bool CInstantSend::GetTxLockVote(const uint256& hash, CTxLockVote& txLockVoteRet
     return true;
 }
 
-bool CInstantSend::IsInstantSendReadyToLock(const uint256& txHash)
-{
-    if (!fEnableInstantSend || GetfLargeWorkForkFound() || GetfLargeWorkInvalidChainFound() ||
-        !sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED))
-        return false;
-
-    LOCK(cs_instantsend);
-    // There must be a successfully verified lock request
-    // and all outputs must be locked (i.e. have enough signatures)
-    std::map<uint256, CTxLockCandidate>::iterator it = mapTxLockCandidates.find(txHash);
-    return it != mapTxLockCandidates.end() && it->second.IsAllOutPointsReady();
-}
-
 void CInstantSend::Clear()
 {
     LOCK(cs_instantsend);
@@ -865,11 +861,6 @@ int CInstantSend::GetTransactionLockSignatures(const uint256& txHash)
     }
 
     return -1;
-}
-
-int CInstantSend::GetConfirmations(const uint256& nTXHash)
-{
-    return IsLockedInstantSendTransaction(nTXHash) ? nInstantSendDepth : 0;
 }
 
 bool CInstantSend::IsTxLockCandidateTimedOut(const uint256& txHash)
@@ -957,6 +948,21 @@ std::string CInstantSend::ToString() const
     return strprintf("Lock Candidates: %llu, Votes %llu", mapTxLockCandidates.size(), mapTxLockVotes.size());
 }
 
+void CInstantSend::DoMaintenance()
+{
+    if (ShutdownRequested()) return;
+     CheckAndRemove();
+}
+
+bool CInstantSend::CanAutoLock()
+{
+    if(!isAutoLockBip9Active)
+        return false;
+    if(!sporkManager.IsSporkActive(SPORK_15_INSTANTSEND_AUTOLOCKS))
+        return false;
+    return (mempool.UsedMemoryShare() < AUTO_IX_MEMPOOL_THRESHOLD);
+}
+
 //
 // CTxLockRequest
 //
@@ -981,6 +987,7 @@ bool CTxLockRequest::IsValid() const
     int nInstantSendConfirmationsRequired = Params().GetConsensus().nInstantSendConfirmationsRequired;
 
     for (const auto& txin : tx->vin) {
+
         Coin coin;
 
         if (!GetUTXOCoin(txin.prevout, coin)) {
@@ -1001,14 +1008,14 @@ bool CTxLockRequest::IsValid() const
         nValueIn += coin.out.nValue;
     }
 
-    if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE) * COIN) {
+    if (nValueIn > sporkManager.GetSporkValue(SPORK_5_INSTANTSEND_MAX_VALUE)*COIN) {
         LogPrint("instantsend", "CTxLockRequest::IsValid -- Transaction value too high: nValueIn=%d, tx=%s", nValueIn, ToString());
         return false;
     }
 
     CAmount nValueOut = tx->GetValueOut();
 
-    if (nValueIn - nValueOut < GetMinFee()) {
+    if (nValueIn - nValueOut < GetMinFee(false)) {
         LogPrint("instantsend", "CTxLockRequest::IsValid -- did not include enough fees in transaction: fees=%d, tx=%s", nValueOut - nValueIn, ToString());
         return false;
     }
@@ -1016,8 +1023,11 @@ bool CTxLockRequest::IsValid() const
     return true;
 }
 
-CAmount CTxLockRequest::GetMinFee() const
+CAmount CTxLockRequest::GetMinFee(bool fForceMinFee) const
 {
+    if (!fForceMinFee && CInstantSend::CanAutoLock() && IsSimple()) {
+        return CAmount();
+    }
     CAmount nMinFee = MIN_FEE;
     return std::max(nMinFee, CAmount(tx->vin.size() * nMinFee));
 }
@@ -1025,6 +1035,11 @@ CAmount CTxLockRequest::GetMinFee() const
 int CTxLockRequest::GetMaxSignatures() const
 {
     return tx->vin.size() * COutPointLock::SIGNATURES_TOTAL;
+}
+
+bool CTxLockRequest::IsSimple() const
+{
+    return (tx->vin.size() <= MAX_INPUTS_FOR_AUTO_IX);
 }
 
 //

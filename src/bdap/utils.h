@@ -21,7 +21,7 @@ class CTransaction;
 class uint256;
 class UniValue;
 namespace Consensus {
-    class Params;
+    struct Params;
 }
 
 

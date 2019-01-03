@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,7 +28,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     {
         {"setmocktime", 0, "timestamp"},
         {"setgenerate", 0, "generate"},
-        {"setgenerate", 1, "genproclimit"},
+        {"setgenerate", 1, "genproclimit-cpu"},
         {"setgenerate", 2, "genproclimit-gpu"},
         {"generate", 0, "nblocks"},
         {"generate", 1, "maxtries"},
@@ -119,6 +119,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"importpubkey", 2, "rescan"},
         {"importmulti", 0, "requests"},
         {"importmulti", 1, "options"},
+        { "importwallet", 1, "forcerescan" },
         {"verifychain", 0, "checklevel"},
         {"verifychain", 1, "nblocks"},
         {"pruneblockchain", 0, "height"},
@@ -148,6 +149,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"getaddressdeltas", 0, "addresses"},
         {"getaddressutxos", 0, "addresses"},
         {"getaddressmempool", 0, "addresses"},
+        { "importmnemonic", 1, "begin" },
+        { "importmnemonic", 2, "end" },
+        { "importmnemonic", 3, "forcerescan" },
         // Echo with conversion (For testing only)
         {"echojson", 0, "arg0"},
         {"echojson", 1, "arg1"},

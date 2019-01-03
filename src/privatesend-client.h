@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -52,12 +52,14 @@ private:
 public:
     CPendingPsaRequest() : addr(CService()),
                            psa(CPrivateSendAccept()),
-                           nTimeCreated(0){};
+                           nTimeCreated(0)
+    {
+    }
 
     CPendingPsaRequest(const CService& addr_, const CPrivateSendAccept& psa_) : addr(addr_),
-                                                                                psa(psa_)
+                                                                                psa(psa_),
+                                                                                nTimeCreated(GetTime())
     {
-        nTimeCreated = GetTime();
     }
 
     CService GetAddr() { return addr; }
@@ -106,10 +108,12 @@ private:
     bool JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CConnman& connman);
     bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman& connman);
 
+    /// step 0: select denominated inputs and txouts
+    bool SelectDenominate(std::string& strErrorRet, std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet);
     /// step 1: prepare denominated inputs and outputs
-    bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, std::vector<CTxPSIn>& vecTxPSInRet, std::vector<CTxOut>& vecTxOutRet);
+    bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsRet, bool fDryRun = false);
     /// step 2: send denominated inputs and outputs prepared in step 1
-    bool SendDenominate(const std::vector<CTxPSIn>& vecTxPSIn, const std::vector<CTxOut>& vecTxOut, CConnman& connman);
+    bool SendDenominate(const std::vector<std::pair<CTxPSIn, CTxOut> >& vecPSInOutPairsIn, CConnman& connman);
 
     /// Get Dynodes updates about the progress of mixing
     bool CheckPoolStateUpdate(PoolState nStateNew, int nEntriesCountNew, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, int nSessionIDNew = 0);
@@ -138,10 +142,6 @@ public:
                                   pendingPsaRequest(),
                                   keyHolderStorage()
     {
-    }
-    CPrivateSendClientSession(const CPrivateSendClientSession& other)
-    { /* dummy copy constructor*/
-        SetNull();
     }
 
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
@@ -243,6 +243,7 @@ public:
 
     void AddUsedDynode(const COutPoint& outpointDn);
     dynode_info_t GetNotUsedDynode();
+
     void UpdatedSuccessBlock();
 
     void UpdatedBlockTip(const CBlockIndex* pindex);

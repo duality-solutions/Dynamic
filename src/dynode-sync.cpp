@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -11,6 +11,7 @@
 #include "dynode.h"
 #include "dynodeman.h"
 #include "governance.h"
+#include "init.h"
 #include "netfulfilledman.h"
 #include "netmessagemaker.h"
 #include "spork.h"
@@ -511,4 +512,10 @@ void CDynodeSync::UpdatedBlockTip(const CBlockIndex* pindexNew, bool fInitialDow
         // We must be at the tip already, let's move to the next asset.
         SwitchToNextAsset(connman);
     }
+}
+
+void CDynodeSync::DoMaintenance(CConnman &connman)
+{
+    if (ShutdownRequested()) return;
+     ProcessTick(connman);
 }

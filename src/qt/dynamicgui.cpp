@@ -1,9 +1,13 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#if defined(HAVE_CONFIG_H)
+#include "config/dynamic-config.h"
+#endif
 
 #include "dynamicgui.h"
 
@@ -11,6 +15,7 @@
 #include "dynamicunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
+#include "mnemonicdialog.h"
 #include "modaloverlay.h"
 #include "networkstyle.h"
 #include "notificator.h"
@@ -98,6 +103,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  receiveCoinsMenuAction(0),
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
+                                                                                                                 miningAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
                                                                                                                  usedReceivingAddressesAction(0),
@@ -112,6 +118,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  aboutQtAction(0),
                                                                                                                  openRPCConsoleAction(0),
                                                                                                                  openAction(0),
+                                                                                                                 mnemonicAction(0),
                                                                                                                  showHelpMessageAction(0),
                                                                                                                  showPrivateSendHelpAction(0),
                                                                                                                  trayIcon(0),
@@ -342,9 +349,9 @@ void DynamicGUI::createActions()
     dynodeAction->setToolTip(dynodeAction->statusTip());
     dynodeAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    dynodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
+    dynodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
 #else
-    dynodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    dynodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
 #endif
     tabGroup->addAction(dynodeAction);
 
@@ -353,9 +360,9 @@ void DynamicGUI::createActions()
     miningAction->setToolTip(miningAction->statusTip());
     miningAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    miningAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
+    miningAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_6));
 #else
-    miningAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    miningAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
 #endif
     tabGroup->addAction(miningAction);
 
@@ -375,6 +382,7 @@ void DynamicGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
+    connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
 
 #endif // ENABLE_WALLET
@@ -443,6 +451,9 @@ void DynamicGUI::createActions()
     openAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), tr("Open &URI..."), this);
     openAction->setStatusTip(tr("Open a dynamic: URI or payment request"));
 
+    mnemonicAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("&Import mnemonic/private key..."), this);
+    mnemonicAction->setStatusTip(tr("Import Mnemonic Phrase or Private Key"));
+
     showHelpMessageAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Command-line options"), this);
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the Dynamic help message to get a list with possible Dynamic command-line options"));
@@ -489,6 +500,7 @@ void DynamicGUI::createActions()
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+        connect(mnemonicAction, SIGNAL(triggered()), this, SLOT(mnemonicClicked()));
     }
 #endif // ENABLE_WALLET
 
@@ -517,6 +529,7 @@ void DynamicGUI::createMenuBar()
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
         file->addSeparator();
+        file->addAction(mnemonicAction);
         file->addAction(usedSendingAddressesAction);
         file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
@@ -707,6 +720,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
+    miningAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -715,6 +729,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     usedSendingAddressesAction->setEnabled(enabled);
     usedReceivingAddressesAction->setEnabled(enabled);
     openAction->setEnabled(enabled);
+    mnemonicAction->setEnabled(enabled);
 }
 
 void DynamicGUI::createTrayIcon(const NetworkStyle* networkStyle)
@@ -743,6 +758,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(receiveCoinsAction);
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
+    pmenu->addAction(miningAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
@@ -857,6 +873,13 @@ void DynamicGUI::showPrivateSendHelpClicked()
 }
 
 #ifdef ENABLE_WALLET
+void DynamicGUI::mnemonicClicked()
+{
+    MnemonicDialog dlg(this);
+    connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
+    dlg.exec();
+}
+
 void DynamicGUI::openClicked()
 {
     OpenURIDialog dlg(this);
@@ -1375,6 +1398,7 @@ void DynamicGUI::showProgress(const QString& title, int nProgress)
 {
     if (nProgress == 0) {
         progressDialog = new QProgressDialog(title, "", 0, 100);
+        progressDialog->setWindowTitle(tr(PACKAGE_NAME));
         progressDialog->setWindowModality(Qt::ApplicationModal);
         progressDialog->setMinimumDuration(0);
         progressDialog->setCancelButton(0);

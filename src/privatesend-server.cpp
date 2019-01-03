@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -54,11 +54,26 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
             return;
         }
 
-        if (vecSessionCollaterals.size() == 0 && dnInfo.nLastPsq != 0 &&
-            dnInfo.nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION) / 5 > dnodeman.nPsqCount) {
-            LogPrintf("PSACCEPT -- last psq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
-            PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
-            return;
+        if (vecSessionCollaterals.size() == 0) {
+            {
+                TRY_LOCK(cs_vecqueue, lockRecv);
+                if (!lockRecv) return;
+
+                for (const auto& q : vecPrivateSendQueue) {
+                    if (q.dynodeOutpoint == activeDynode.outpoint) {
+                        // refuse to create another queue this often
+                        LogPrint("privatesend", "PSACCEPT -- last psq is still in queue, refuse to mix\n");
+                        PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                        return;
+                    }
+                }
+            }
+
+            if (dnInfo.nLastPsq != 0 && dnInfo.nLastPsq + dnodeman.CountDynodes() / 5 > dnodeman.nPsqCount) {
+                LogPrintf("PSACCEPT -- last psq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
+                PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                return;
+            }
         }
 
         PoolMessage nMessageID = MSG_NOERR;
@@ -120,7 +135,7 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
                 }
             }
 
-            int nThreshold = dnInfo.nLastPsq + dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION) / 5;
+            int nThreshold = dnInfo.nLastPsq + dnodeman.CountDynodes() / 5;
             LogPrint("privatesend", "PSQUEUE -- nLastPsq: %d  threshold: %d  nPsqCount: %d\n", dnInfo.nLastPsq, nThreshold, dnodeman.nPsqCount);
             //don't allow a few nodes to dominate the queuing process
             if (dnInfo.nLastPsq != 0 && nThreshold > dnodeman.nPsqCount) {
@@ -306,8 +321,8 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
         for (const auto& txout : vecEntries[i].vecTxOut)
             txNew.vout.push_back(txout);
 
-        for (const auto& txdsin : vecEntries[i].vecTxPSIn)
-            txNew.vin.push_back(txdsin);
+        for (const auto& txpsin : vecEntries[i].vecTxPSIn)
+            txNew.vin.push_back(txpsin);
     }
 
     sort(txNew.vin.begin(), txNew.vin.end(), CompareInputBIP69());
@@ -345,16 +360,16 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
         }
     }
 
-    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING DSTX\n");
+    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- CREATING PSTX\n");
 
-    // create and sign dynode dstx transaction
+    // create and sign dynode pstx transaction
     if (!CPrivateSend::GetPSTX(hashTx)) {
-        CPrivateSendBroadcastTx dstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
-        dstxNew.Sign();
-        CPrivateSend::AddPSTX(dstxNew);
+        CPrivateSendBroadcastTx pstxNew(finalTransaction, activeDynode.outpoint, GetAdjustedTime());
+        pstxNew.Sign();
+        CPrivateSend::AddPSTX(pstxNew);
     }
 
-    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING DSTX\n");
+    LogPrintf("CPrivateSendServer::CommitFinalTransaction -- TRANSMITTING PSTX\n");
 
     CInv inv(MSG_PSTX, hashTx);
     connman.RelayInv(inv);
@@ -411,8 +426,8 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
     if (nState == POOL_STATE_SIGNING) {
         // who didn't sign?
         for (const auto& entry : vecEntries) {
-            for (const auto& txdsin : entry.vecTxPSIn) {
-                if (!txdsin.fHasSig) {
+            for (const auto& txpsin : entry.vecTxPSIn) {
+                if (!txpsin.fHasSig) {
                     LogPrintf("CPrivateSendServer::ChargeFees -- found uncooperative node (didn't sign), found offence\n");
                     vecOffendersCollaterals.push_back(entry.txCollateral);
                 }
@@ -541,12 +556,12 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
         for (const auto& txout : entry.vecTxOut)
             txNew.vout.push_back(txout);
 
-        for (const auto& txdsin : entry.vecTxPSIn) {
-            txNew.vin.push_back(txdsin);
+        for (const auto& txpsin : entry.vecTxPSIn) {
+            txNew.vin.push_back(txpsin);
 
-            if (txdsin.prevout == txin.prevout) {
+            if (txpsin.prevout == txin.prevout) {
                 nTxInIndex = i;
-                sigPubKey = txdsin.prevPubKey;
+                sigPubKey = txpsin.prevPubKey;
             }
             i++;
         }
@@ -599,8 +614,8 @@ bool CPrivateSendServer::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage
     for (const auto& txin : entryNew.vecTxPSIn) {
         LogPrint("privatesend", "looking for txin -- %s\n", txin.ToString());
         for (const auto& entry : vecEntries) {
-            for (const auto& txdsin : entry.vecTxPSIn) {
-                if (txdsin.prevout == txin.prevout) {
+            for (const auto& txpsin : entry.vecTxPSIn) {
+                if (txpsin.prevout == txin.prevout) {
                     LogPrint("privatesend", "CPrivateSendServer::AddEntry -- found in txin\n");
                     nMessageIDRet = ERR_ALREADY_HAVE;
                     return false;
@@ -623,8 +638,8 @@ bool CPrivateSendServer::AddScriptSig(const CTxIn& txinNew)
     LogPrint("privatesend", "CPrivateSendServer::AddScriptSig -- scriptSig=%s\n", ScriptToAsmStr(txinNew.scriptSig).substr(0, 24));
 
     for (const auto& entry : vecEntries) {
-        for (const auto& txdsin : entry.vecTxPSIn) {
-            if (txdsin.scriptSig == txinNew.scriptSig) {
+        for (const auto& txpsin : entry.vecTxPSIn) {
+            if (txpsin.scriptSig == txinNew.scriptSig) {
                 LogPrint("privatesend", "CPrivateSendServer::AddScriptSig -- already exists\n");
                 return false;
             }
@@ -659,8 +674,8 @@ bool CPrivateSendServer::AddScriptSig(const CTxIn& txinNew)
 bool CPrivateSendServer::IsSignaturesComplete()
 {
     for (const auto& entry : vecEntries)
-        for (const auto& txdsin : entry.vecTxPSIn)
-            if (!txdsin.fHasSig)
+        for (const auto& txpsin : entry.vecTxPSIn)
+            if (!txpsin.fHasSig)
                 return false;
 
     return true;

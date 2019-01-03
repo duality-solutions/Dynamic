@@ -1,7 +1,7 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +9,7 @@
 #define DYNAMIC_QT_GUIUTIL_H
 
 #include "amount.h"
-#include "miner.h"
+#include "miner/miner.h"
 
 #include <QEvent>
 #include <QHeaderView>
@@ -267,7 +267,9 @@ typedef ClickableProgressBar ProgressBar;
 
 // utility functions for mining UI
 int CPUMaxThreads();
+#ifdef ENABLE_GPU
 int GPUMaxThreads();
+#endif
 QString FormatHashRate(qint64 n);
 int64_t GetNetworkHashPS(int lookup, int height);
 QString FormatTimeInterval(arith_uint256 time);

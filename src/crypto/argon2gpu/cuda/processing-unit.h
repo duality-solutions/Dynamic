@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2017-2018 Łukasz Kurowski <crackcomm@gmail.com>
+ * Copyright (C) 2018-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>
+ * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
  * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
@@ -51,11 +52,9 @@ public:
         bool bySegment = true,
         bool precomputeRefs = false);
 
-    void setInputAndSalt(std::size_t index, const void* input, const std::size_t inputSize);
-    void getHash(std::size_t index, void* hash);
-
-    void beginProcessing();
-    void endProcessing();
+    std::uint32_t scanNonces(
+        const void* input, const std::uint32_t startNonce,
+        const std::uint64_t target);
 };
 
 } // namespace cuda

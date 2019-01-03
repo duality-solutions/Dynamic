@@ -30,6 +30,7 @@ crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_LIBADD = $(CUDA_LDLIBS)
 crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_CPPFLAGS = $(DYNAMIC_INCLUDES)
 crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_LIBADD += \
+	crypto/argon2gpu/cuda/blake2b-kernels.cu.o \
 	crypto/argon2gpu/cuda/kernels.cu.o
 crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_SOURCES = \
 	crypto/argon2gpu/cuda/cuda-exception.h \
@@ -40,6 +41,7 @@ crypto_argon2gpu_cuda_libdynamic_gpu_cuda_a_SOURCES = \
 	crypto/argon2gpu/cuda/program-context.h \
 	crypto/argon2gpu/cuda/device.cpp \
 	crypto/argon2gpu/cuda/global-context.cpp \
+	crypto/argon2gpu/cuda/blake2b-kernels.cu \
 	crypto/argon2gpu/cuda/kernels.cu \
 	crypto/argon2gpu/cuda/processing-unit.cpp \
 	crypto/argon2gpu/cuda/program-context.cpp
@@ -49,11 +51,19 @@ nvcc_FLAGS = -I. $(CUDA_CFLAGS) $(NVCCFLAGS)
 .cu.o:
 	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
 
+
+crypto/argon2gpu/cuda/blake2b-kernels.cu.o: crypto/argon2gpu/cuda/blake2b-kernels.cu
+	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
+
+crypto/argon2gpu/cuda/blake2b-kernels.o: crypto/argon2gpu/cuda/blake2b-kernels.cu.o
+	$(NVCC) $(nvcc_FLAGS) -dlink -o $@ $<
+	
 crypto/argon2gpu/cuda/kernels.cu.o: crypto/argon2gpu/cuda/kernels.cu
 	$(NVCC) $(nvcc_FLAGS) -dc -o $@ -c $<
 
 crypto/argon2gpu/cuda/kernels.o: crypto/argon2gpu/cuda/kernels.cu.o
 	$(NVCC) $(nvcc_FLAGS) -dlink -o $@ $<
+
 
 else
 LIBDYNAMIC_GPU_OPENCL = crypto/argon2gpu/opencl/libdynamic_gpu_opencl.a
@@ -99,11 +109,10 @@ CLEANFILES += $(GENERATED_KERNEL_FILES)
 	@$(MKDIR_P) $(@D)
 	@echo "namespace argon2gpu { namespace opencl { namespace code {" > $@
 	@echo "static unsigned const char $(*F)[] = {" >> $@
-	@$(HEXDUMP) -v -e '8/1 "0x%02x, "' -e '"\n"' $< | $(SED) -e 's/0x  ,//g' >> $@
+	@$(HEXDUMP) -v -e '16/1 "_x%02X" "\n"' $< | $(SED) -e 's/_/\\/g; s/\\x  //g; s/.*/    "&"/' >> $@
 	@echo "};" >> $@
 	@echo "}}}" >> $@
 	@echo "Generated $@"
-
 endif
 
 dynamicd_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)

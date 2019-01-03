@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2017-2018 Łukasz Kurowski <crackcomm@gmail.com>
+ * Copyright (C) 2018-2019 Ehsan Dalvand <dalvand.ehsan@gmail.com>
+ * Copyright (C) 2017-2019 Łukasz Kurowski <crackcomm@gmail.com>
  * Copyright (C) 2015 Ondrej Mosnacek <omosnacek@gmail.com>
  *
  * This program is free software: you can redistribute it and/or
@@ -47,11 +48,9 @@ class KernelRunner
     void *memory;
     void *refs;
 
-    void precomputeRefs();
+    std::uint32_t res_nonce;
+    std::uint32_t *d_res_nonce;
 
-    void runKernelSegment(std::uint32_t lanesPerBlock,
-                          std::uint32_t jobsPerBlock,
-                          std::uint32_t pass, std::uint32_t slice);
     void runKernelOneshot(std::uint32_t lanesPerBlock,
                           std::uint32_t jobsPerBlock);
 
@@ -70,11 +69,12 @@ class KernelRunner
                  bool bySegment, bool precompute, int deviceIndex);
     ~KernelRunner();
 
-    void writeInputMemory(std::uint32_t jobId, const void *buffer);
-    void readOutputMemory(std::uint32_t jobId, void *buffer);
-
     void run(std::uint32_t lanesPerBlock, std::uint32_t jobsPerBlock);
-    float finish();
+    void init(const void* input);
+    void fillFirstBlocks(const std::uint32_t start_nonce);
+    void finalize(const std::uint32_t startNonce, const std::uint64_t target);
+    std::uint32_t readResultNonce();
+
 };
 
 } // namespace cuda

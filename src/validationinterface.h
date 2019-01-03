@@ -1,6 +1,6 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -43,12 +43,13 @@ protected:
     virtual void NotifyTransactionLock(const CTransaction& tx) {}
     virtual void NotifyGovernanceVote(const CGovernanceVote& vote) {}
     virtual void NotifyGovernanceObject(const CGovernanceObject& object) {}
+    virtual void NotifyInstantSendDoubleSpendAttempt(const CTransaction& currentTx, const CTransaction& previousTx) {}
     virtual void SetBestChain(const CBlockLocator& locator) {}
     virtual bool UpdatedTransaction(const uint256& hash) { return false; }
     virtual void Inventory(const uint256& hash) {}
     virtual void ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman) {}
     virtual void BlockChecked(const CBlock&, const CValidationState&) {}
-    virtual void GetScriptForMining(boost::shared_ptr<CReserveScript>&){};
+    virtual void GetScriptForMining(std::shared_ptr<CReserveScript>&){};
     virtual void ResetRequestCount(const uint256& hash){};
     virtual void NewPoWValidBlock(const CBlockIndex* pindex, const std::shared_ptr<const CBlock>& block) {}
     virtual void NotifyBDAPUpdate(const char* value, const char* action) {}
@@ -81,6 +82,8 @@ struct CMainSignals {
     boost::signals2::signal<void(const CGovernanceVote&)> NotifyGovernanceVote;
     /** Notifies listeners of a new governance object. */
     boost::signals2::signal<void(const CGovernanceObject&)> NotifyGovernanceObject;
+    /** Notifies listeners of a attempted InstantSend double spend*/
+    boost::signals2::signal<void(const CTransaction& currentTx, const CTransaction& previousTx)> NotifyInstantSendDoubleSpendAttempt;
     /** Notifies listeners of an updated transaction without new data (for now: a coinbase potentially becoming visible). */
     boost::signals2::signal<bool(const uint256&)> UpdatedTransaction;
     /** Notifies listeners of a new active block chain. */
@@ -92,7 +95,7 @@ struct CMainSignals {
     /** Notifies listeners of a block validation result */
     boost::signals2::signal<void(const CBlock&, const CValidationState&)> BlockChecked;
     /** Notifies listeners that a key for mining is required (coinbase) */
-    boost::signals2::signal<void(boost::shared_ptr<CReserveScript>&)> ScriptForMining;
+    boost::signals2::signal<void(std::shared_ptr<CReserveScript>&)> ScriptForMining;
     /** Notifies listeners that a block has been successfully mined */
     boost::signals2::signal<void(const uint256&)> BlockFound;
     /**

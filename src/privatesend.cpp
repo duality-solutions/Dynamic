@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -24,7 +24,7 @@
 
 bool CPrivateSendEntry::AddScriptSig(const CTxIn& txin)
 {
-    BOOST_FOREACH (CTxPSIn& txpsin, vecTxPSIn) {
+    for (auto& txpsin : vecTxPSIn) {
         if (txpsin.prevout == txin.prevout && txpsin.nSequence == txin.nSequence) {
             if (txpsin.fHasSig)
                 return false;
@@ -277,19 +277,17 @@ void CPrivateSend::InitStandardDenominations()
         is convertable to another.
 
         For example:
-        1DRK+1000 == (.1DRK+100)*10
-        10DRK+10000 == (1DRK+1000)*10
+        1DYN+1000 == (.1DYN+100)*10
+        10DYN+10000 == (1DYN+1000)*10
     */
     /* Disabled
-    vecStandardDenominations.push_back( (100      * COIN)+100000 );
+    vecStandardDenominations.push_back( (100 * COIN)+100000 );
     */
     vecStandardDenominations.push_back((10 * COIN) + 10000);
     vecStandardDenominations.push_back((1 * COIN) + 1000);
     vecStandardDenominations.push_back((.1 * COIN) + 100);
     vecStandardDenominations.push_back((.01 * COIN) + 10);
-    /* Disabled till we need them
-    vecStandardDenominations.push_back( (.001     * COIN)+1 );
-    */
+    vecStandardDenominations.push_back((.001 * COIN) + 1);
 }
 
 // check to make sure the collateral provided by the client is valid
@@ -457,13 +455,14 @@ int CPrivateSend::GetDenominationsByAmounts(const std::vector<CAmount>& vecAmoun
     CScript scriptTmp = CScript();
     std::vector<CTxOut> vecTxOut;
 
-    BOOST_REVERSE_FOREACH (CAmount nAmount, vecAmount) {
-        CTxOut txout(nAmount, scriptTmp);
+    for (auto it = vecAmount.rbegin(); it != vecAmount.rend(); ++it) {
+        CTxOut txout((*it), scriptTmp);
         vecTxOut.push_back(txout);
     }
 
     return GetDenominations(vecTxOut, true);
 }
+
 
 bool CPrivateSend::IsDenominatedAmount(CAmount nInputAmount)
 {
