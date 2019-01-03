@@ -342,7 +342,7 @@ CPU's with AVX512 support:
        
 GPU Mining
 ----------
-To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.1 or newer and ensure you have graphics drivers installed.
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
 
 For OpenCL you need the following:
 
