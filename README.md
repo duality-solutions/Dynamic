@@ -342,14 +342,19 @@ CPU's with AVX512 support:
        
 GPU Mining
 ----------
-To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. 
-(Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer)
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use NVCC 9.2 or newer and ensure you have graphics drivers installed.
 
-At configure time for non-Nvidia GPU's:
+For OpenCL you need the following:
 
-    --enable-gpu --disable-cuda 
+    sudo apt-get install ocl-icd-opencl-dev
+    
+For CUDA please visit: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+    
+At configure time for OpenCL(Nvidia/AMD):
 
-At configure time for Nvidia GPU's:
+    --enable-gpu 
+
+At configure time for CUDA(Nvidia):
 
     --enable-gpu --enable-cuda
 
@@ -362,3 +367,21 @@ Qt Wallet and Deamon, CLI version build without GPU support:
 CLI and Deamon Only build without GPU support:
 
     ./autogen.sh && ./configure --without-gui --disable-gpu && make
+    
+Use Qt Creator as IDE
+------------------------
+You can use Qt Creator as IDE, for debugging and for manipulating forms, etc.
+Download Qt Creator from http://www.qt.io/download/. Download the "community edition" and only install Qt Creator (uncheck the rest during the installation process).
+
+1. Make sure you installed everything through homebrew mentioned above 
+2. Do a proper ./configure --with-gui=qt5 --enable-debug
+3. In Qt Creator do "New Project" -> Import Project -> Import Existing Project
+4. Enter "dynamic-qt" as project name, enter src/qt as location
+5. Leave the file selection as it is
+6. Confirm the "summary page"
+7. In the "Projects" tab select "Manage Kits..."
+8. Select the default "Desktop" kit and select "Clang (x86 64bit in /usr/bin)" as compiler
+9. Select LLDB as debugger (you might need to set the path to your installtion)
+10. Start debugging with Qt Creator
+
+
