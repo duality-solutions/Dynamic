@@ -1146,8 +1146,8 @@ public:
     void DeriveNewChildKeyBIP44BychainChildKey(CExtKey& chainChildKey, CKey& secret, bool internal, uint32_t* nInternalChainCounter, uint32_t* nExternalChainCounter);
     // Returns local BDAP DHT Public keys
     bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
-    bool IsLinkRequestFromMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey);
-    bool IsLinkRequestForMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey, std::vector<unsigned char>& vchSharedPubKey);
+    bool IsLinkRequestFromMe(const std::vector<unsigned char>& vchLinkPubKey);
+    bool IsLinkRequestForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey);
 
 };
 
