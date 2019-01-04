@@ -219,15 +219,16 @@ UniValue link(const JSONRPCRequest& request)
     return NullUniValue;
 }
 #endif // ENABLE_WALLET
+
 static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe argNames
   //  --------------------- ------------------------ -----------------------        ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "link",                     &link,                         true, {"opration","common name", "registration days"} },
+    { "bdap",            "link",                     &link,                         true, {"operation","common name", "registration days"} },
+#endif // ENABLE_WALLET
 
 };
-#endif // ENABLE_WALLET
 void RegisterLinkingRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
