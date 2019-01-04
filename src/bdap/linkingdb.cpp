@@ -4,6 +4,7 @@
 
 #include "bdap/linkingdb.h"
 
+#include "bdap/utils.h"
 #include "base58.h"
 #include "validation.h"
 #include "validationinterface.h"
@@ -95,7 +96,7 @@ bool CLinkRequestDB::GetLinkRequestInfo(const std::vector<unsigned char>& vchPub
     return true;
 }
 
-bool CLinkAcceptDB::AddAcceptLink(const CLinkAccept& link, const int op) 
+bool CLinkAcceptDB::AddLinkAccept(const CLinkAccept& link, const int op) 
 { 
     bool writeState = false;
     {
@@ -107,7 +108,7 @@ bool CLinkAcceptDB::AddAcceptLink(const CLinkAccept& link, const int op)
     return writeState;
 }
 
-bool CLinkAcceptDB::ReadAcceptLink(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link) 
+bool CLinkAcceptDB::ReadLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link) 
 {
     LOCK(cs_link_accept);
     bool ret = CDBWrapper::Read(make_pair(std::string("rpk"), vchPubKey), link);
@@ -117,17 +118,17 @@ bool CLinkAcceptDB::ReadAcceptLink(const std::vector<unsigned char>& vchPubKey, 
     return ret;
 }
 
-bool CLinkAcceptDB::EraseAcceptLink(const std::vector<unsigned char>& vchAcceptPubKey, const std::vector<unsigned char>& vchSharedPubKey) 
+bool CLinkAcceptDB::EraseLinkAccept(const std::vector<unsigned char>& vchAcceptPubKey, const std::vector<unsigned char>& vchSharedPubKey) 
 {
     LOCK(cs_link_accept);
-    if (!AcceptLinkExists(vchAcceptPubKey)) 
+    if (!LinkAcceptExists(vchAcceptPubKey)) 
         return false;
 
     return CDBWrapper::Erase(make_pair(std::string("rpk"), vchAcceptPubKey)) 
             && CDBWrapper::Erase(make_pair(std::string("spk"), vchSharedPubKey));
 }
 
-bool CLinkAcceptDB::AcceptLinkExists(const std::vector<unsigned char>& vchPubKey)
+bool CLinkAcceptDB::LinkAcceptExists(const std::vector<unsigned char>& vchPubKey)
 {
     LOCK(cs_link_accept);
     bool ret = CDBWrapper::Exists(make_pair(std::string("rpk"), vchPubKey));
@@ -137,11 +138,11 @@ bool CLinkAcceptDB::AcceptLinkExists(const std::vector<unsigned char>& vchPubKey
     return ret;
 }
 
-bool CLinkAcceptDB::UpdateAcceptLink(const CLinkAccept& link)
+bool CLinkAcceptDB::UpdateLinkAccept(const CLinkAccept& link)
 {
     LOCK(cs_link_accept);
 
-    if (!EraseAcceptLink(link.RecipientPubKey, link.RecipientPubKey))
+    if (!EraseLinkAccept(link.RecipientPubKey, link.RecipientPubKey))
         return false;
 
     bool writeState = false;
@@ -152,7 +153,7 @@ bool CLinkAcceptDB::UpdateAcceptLink(const CLinkAccept& link)
 }
 
 // Removes expired records from databases.
-bool CLinkAcceptDB::CleanupAcceptLinkDB(int& nRemoved)
+bool CLinkAcceptDB::CleanupLinkAcceptDB(int& nRemoved)
 {
     LOCK(cs_link_accept);
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
@@ -167,7 +168,7 @@ bool CLinkAcceptDB::CleanupAcceptLinkDB(int& nRemoved)
                 if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
                 {
                     nRemoved++;
-                    EraseAcceptLink(link.RecipientPubKey, link.SharedPubKey);
+                    EraseLinkAccept(link.RecipientPubKey, link.SharedPubKey);
                 }
             }
             pcursor->Next();
@@ -178,10 +179,10 @@ bool CLinkAcceptDB::CleanupAcceptLinkDB(int& nRemoved)
     return true;
 }
 
-bool CLinkAcceptDB::GetAcceptLinkInfo(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
+bool CLinkAcceptDB::GetLinkAcceptInfo(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
 {
     LOCK(cs_link_accept);
-    if (!ReadAcceptLink(vchPubKey, link)) {
+    if (!ReadLinkAccept(vchPubKey, link)) {
         return false;
     }
     
@@ -199,4 +200,96 @@ bool GetLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& l
         return false;
     }
     return !link.IsNull();
+}
+
+bool CheckLinkRequestDB()
+{
+    if (!pLinkRequestDB)
+        return false;
+
+    return true;
+}
+
+bool CheckLinkAcceptDB()
+{
+    if (!pLinkAcceptDB)
+        return false;
+
+    return true;
+}
+
+bool CheckLinkDBs()
+{
+    return CheckLinkAcceptDB() && CheckLinkRequestDB();
+}
+
+bool FlushLinkRequestDB() 
+{
+    {
+        LOCK(cs_link_request);
+        if (pLinkRequestDB != NULL)
+        {
+            if (!pLinkRequestDB->Flush()) {
+                LogPrintf("Failed to flush link request leveldb!");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool FlushLinkAcceptDB() 
+{
+    {
+        LOCK(cs_link_accept);
+        if (pLinkAcceptDB != NULL)
+        {
+            if (!pLinkAcceptDB->Flush()) {
+                LogPrintf("Failed to flush link accept leveldb!");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void CleanupLinkRequestDB(int& nRemoved)
+{
+    if(pLinkRequestDB != NULL)
+        pLinkRequestDB->CleanupLinkRequestDB(nRemoved);
+    FlushLinkRequestDB();
+}
+
+void CleanupLinkAcceptDB(int& nRemoved)
+{
+    if(pLinkAcceptDB != NULL)
+        pLinkAcceptDB->CleanupLinkAcceptDB(nRemoved);
+    FlushLinkAcceptDB();
+}
+
+bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
+                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+{
+
+    if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck) {
+        LogPrintf("*Trying to add BDAP link in coinbase transaction, skipping...");
+        return true;
+    }
+
+    //if (fDebug && !bSanityCheck)
+        LogPrintf("%s -- *** BDAP link nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+
+    CScript scriptData;
+    if (!GetBDAPDataScript(tx, scriptData))
+        return false;
+
+    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+    /*
+    if (strOperationType == "bdap_new_link_request")
+        return CheckNewLinkAcceptTx(entry, scriptData, vvchOpParameters, errorMessage, fJustCheck);
+    else if (strOperationType == "bdap_new_link_accept")
+        return CheckNewLinkAcceptTx(entry, scriptData, vvchOpParameters, errorMessage, fJustCheck);
+    */
+    return false;
+
 }

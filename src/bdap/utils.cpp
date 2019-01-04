@@ -339,7 +339,7 @@ int GetBDAPOpType(const CTxOut& out)
 }
 
 
-std::string GetBDAPOpTypeString(int& op1, int& op2)
+std::string GetBDAPOpTypeString(const int& op1, const int& op2)
 {
     if (op1 == OP_BDAP_NEW && op2 == OP_BDAP_ACCOUNT_ENTRY) {
         return "bdap_new_account";
@@ -402,9 +402,14 @@ bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp)
 
 bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData)
 {
-    for (unsigned int i = 0; i < tx.vout.size(); i++) 
+    CTransactionRef ptx = MakeTransactionRef(tx);
+    return GetBDAPDataScript(ptx, scriptBDAPData);
+}
+
+bool GetBDAPDataScript(const CTransactionRef& ptx, CScript& scriptBDAPData)
+{
+    for (const CTxOut& out : ptx->vout) 
     {
-        const CTxOut& out = tx.vout[i];
         if (out.scriptPubKey.IsUnspendable()) 
         {
             scriptBDAPData = out.scriptPubKey;
