@@ -283,7 +283,6 @@ void CleanupLinkAcceptDB(int& nRemoved)
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
                                 bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
-
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck) {
         LogPrintf("*Trying to add BDAP link in coinbase transaction, skipping...");
         return true;
@@ -297,12 +296,17 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
         return false;
 
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-    /*
-    if (strOperationType == "bdap_new_link_request")
-        return CheckNewLinkAcceptTx(entry, scriptData, vvchOpParameters, errorMessage, fJustCheck);
-    else if (strOperationType == "bdap_new_link_accept")
-        return CheckNewLinkAcceptTx(entry, scriptData, vvchOpParameters, errorMessage, fJustCheck);
-    */
-    return false;
 
+    if (strOperationType == "bdap_new_link_request") {
+        // TODO (bdap): implement CheckNewLinkRequestTx
+        //return CheckNewLinkRequestTx(link, scriptData, vvchOpParameters, errorMessage, fJustCheck);
+        return true;
+    }
+    else if (strOperationType == "bdap_new_link_accept") {
+        // TODO (bdap): implement CheckNewLinkAcceptTx
+        //return CheckNewLinkAcceptTx(link, scriptData, vvchOpParameters, errorMessage, fJustCheck);
+        return true;
+    }
+
+    return false;
 }

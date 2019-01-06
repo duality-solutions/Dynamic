@@ -188,7 +188,7 @@ std::string CLinkAccept::SharedPubKeyString() const
 }
 
 /** Checks if BDAP link request pubkey exists in the memory pool */
-bool LinkRequestExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransactionRef& tx = e.GetSharedTx();
