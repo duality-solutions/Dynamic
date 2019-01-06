@@ -168,6 +168,12 @@ bool CLinkAccept::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid BDAP link shared pubkey. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
+    // check signature proof size
+    if (SignatureProof.size() > MAX_BDAP_SIGNATURE_PROOF) 
+    {
+        errorMessage = "Invalid signature proof length. The maximum signature proof length is " + std::to_string(MAX_BDAP_SIGNATURE_PROOF) + " characters.";
+        return false;
+    }
     return true;
 }
 

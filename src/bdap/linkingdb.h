@@ -41,6 +41,7 @@ public:
 };
 
 bool GetLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
+bool GetLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
 bool CheckLinkRequestDB();
 bool CheckLinkAcceptDB();
 bool CheckLinkDBs();

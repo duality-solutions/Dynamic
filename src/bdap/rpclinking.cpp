@@ -24,7 +24,7 @@
 extern void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
                                     CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue);
 
-static bool BuildJsonLinkInfo(const CLinkRequest& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
+static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
 {
     bool expired = false;
     int64_t expired_time = 0;
@@ -55,11 +55,41 @@ static bool BuildJsonLinkInfo(const CLinkRequest& link, const CDomainEntry& requ
     return true;
 }
 
+static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
+{
+    bool expired = false;
+    int64_t expired_time = 0;
+    int64_t nTime = 0;
+    oLink.push_back(Pair("requestor_fqdn", requestor.GetFullObjectPath()));
+    oLink.push_back(Pair("recipient_fqdn", recipient.GetFullObjectPath()));
+    oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
+    oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
+    oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
+    oLink.push_back(Pair("signature_proof", stringFromVch(link.SignatureProof)));
+    oLink.push_back(Pair("txid", link.txHash.GetHex()));
+    if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
+        CBlockIndex *pindex = chainActive[link.nHeight-1];
+        if (pindex) {
+            nTime = pindex->GetMedianTimePast();
+        }
+    }
+    oLink.push_back(Pair("time", nTime));
+    expired_time = link.nExpireTime;
+    if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+    {
+        expired = true;
+    }
+    oLink.push_back(Pair("expires_on", expired_time));
+    oLink.push_back(Pair("expired", expired));
+    
+    return true;
+}
+
 static UniValue SendLinkRequest(const JSONRPCRequest& request)
 {
      if (request.fHelp || request.params.size() != 4)
         throw std::runtime_error(
-            "link send userid-from userid-to\n"
+            "link send userid-from userid-to message\n"
             "Creates a link request transaction on the blockchain."
             + HelpRequiringPassphrase() +
             "\nLink Send Arguments:\n"
@@ -85,13 +115,13 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link send", "superman batman"));
 
-    std::string strRequestorFQDN = request.params[1].get_str();
+    std::string strRequestorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRequestorFQDN);
-    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN + "@" + stringFromVch(vchDefaultPublicOU) + "." + stringFromVch(vchDefaultDomainName));
+    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
 
-    std::string strRecipientFQDN = request.params[2].get_str();
+    std::string strRecipientFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
     ToLowerCase(strRecipientFQDN);
-    CharString vchRecipientFQDN = vchFromString(strRecipientFQDN + "@" + stringFromVch(vchDefaultPublicOU) + "." + stringFromVch(vchDefaultDomainName));
+    CharString vchRecipientFQDN = vchFromString(strRecipientFQDN);
     
     std::string strLinkMessage = request.params[3].get_str();
 
@@ -149,12 +179,13 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
     CKeyEd25519 dhtKey;
-    std::vector<unsigned char> vchSharedPubKey = GetLinkRequestSharedPubKey(privReqDHTKey, entryRequestor.DHTPublicKey);
+    std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privReqDHTKey, entryRecipient.DHTPublicKey);
     txLink.SharedPubKey = vchSharedPubKey;
-    LogPrintf("%s -- vchSharedPubKey = %s\n", __func__, stringFromVch(vchSharedPubKey));
+
     // Create BDAP operation script
     CScript scriptPubKey;
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) << vchDHTPubKey << vchSharedPubKey << OP_2DROP << OP_2DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) 
+                 << vchDHTPubKey << vchSharedPubKey << txLink.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
     CScript scriptDest = GetScriptForDestination(CPubKey(entryRecipient.LinkAddress).GetID());
     scriptPubKey += scriptDest;
     CScript scriptSend = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
@@ -181,7 +212,137 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
-    if(!BuildJsonLinkInfo(txLink, entryRequestor, entryRecipient, oLink))
+    if(!BuildJsonLinkRequestInfo(txLink, entryRequestor, entryRecipient, oLink))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - " + _("Failed to build BDAP link JSON object"));
+
+    return oLink;
+}
+
+static UniValue SendLinkAccept(const JSONRPCRequest& request)
+{
+     if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "link accept userid-from userid-to\n"
+            "Creates a link accept transaction on the blockchain."
+            + HelpRequiringPassphrase() +
+            "\nLink Send Arguments:\n"
+            "1. accept account          (string)             BDAP account accepting the link\n"
+            "2. requestor account       (string)             Link requestor's BDAP account.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Requestor FQDN\"             (string)  Requestor's BDAP full BDAP path\n"
+            "  \"Recipient FQDN\"             (string)  Recipient's BDAP full BDAP path\n"
+            "  \"Recipient Link Address\"     (string)  Recipient's link address\n"
+            "  \"Requestor Link Pubkey\"      (string)  Requestor's link pubkey used for DHT storage\n"
+            "  \"Requestor Link Address\"     (string)  Requestor's link address\n"
+            "  \"Link Message\"               (string)  Message from requestor to recipient.\n"
+            "  \"Signature Proof\"            (string)  Encoded signature to prove it is from the requestor\n"
+            "  \"Link Request TxID\"          (string)  Transaction ID for the link request\n"
+            "  \"Time\"                       (int)     Transaction time\n"
+            "  \"Expires On\"                 (int)     Link request expiration\n"
+            "  \"Expired\"                    (boolean) Is link request expired\n"
+            "  }\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link send", "superman batman") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link send", "superman batman"));
+
+    std::string strAcceptorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strAcceptorFQDN);
+    CharString vchAcceptorFQDN = vchFromString(strAcceptorFQDN);
+
+    std::string strRequestorFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRequestorFQDN);
+    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
+    
+    CLinkAccept txLinkAccept;
+    txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
+    txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
+
+    CKeyEd25519 privAcceptDHTKey;
+    CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
+    if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4100 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+ 
+    txLinkAccept.RecipientPubKey = vchDHTPubKey;
+
+    pwalletMain->SetAddressBook(privAcceptDHTKey.GetID(), strAcceptorFQDN, "bdap-dht-key");
+
+    // Check if name already exists
+    if (GetLinkAccept(txLinkAccept.RecipientPubKey, txLinkAccept))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4101 - " + txLinkAccept.RecipientPubKeyString() + _(" entry already exists.  Can not add duplicate."));
+
+    // Get link accepting address
+    CDomainEntry entryAcceptor;
+    if (!GetDomainEntry(vchAcceptorFQDN, entryAcceptor))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4102 - Acceptor " + strAcceptorFQDN + _(" not found."));
+
+    // Get requestor link address
+    CDomainEntry entryRequestor;
+    if (!GetDomainEntry(vchRequestorFQDN, entryRequestor))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4103 - Requestor " + strRequestorFQDN + _(" not found."));
+
+    CDynamicAddress addressAcceptor = entryAcceptor.GetWalletAddress();
+    CKeyID keyID;
+    if (!addressAcceptor.GetKeyID(keyID))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - Could not get " + strAcceptorFQDN + _("'s wallet address key ") + addressAcceptor.ToString());
+
+    CKey key;
+    if (pwalletMain && !pwalletMain->GetKey(keyID, key))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4105 - Could not get " + strAcceptorFQDN + _("'s private key ") + addressAcceptor.ToString());
+    
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << strRequestorFQDN;
+    std::vector<unsigned char> vchSig;
+    if (!key.SignCompact(ss.GetHash(), vchSig))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4106 - Error signing " + strRequestorFQDN + _("'s signature proof."));
+
+    std::vector<unsigned char> vchSignatureProof = vchFromString(EncodeBase64(&vchSig[0], vchSig.size()));
+    txLinkAccept.SignatureProof = vchSignatureProof;
+
+    uint64_t nDays = 1461;  //default to 4 years.
+    // TODO (bdap): fix invalid int error when passing registration days.
+    //    if (request.params.size() >= 4) {
+    //        nDays = request.params[4].get_int();
+    //    }
+    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    txLinkAccept.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
+    CKeyEd25519 dhtKey;
+    std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privAcceptDHTKey, entryRequestor.DHTPublicKey);
+    txLinkAccept.SharedPubKey = vchSharedPubKey;
+
+    // Create BDAP operation script
+    CScript scriptPubKey;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
+                 << vchDHTPubKey << vchSharedPubKey << txLinkAccept.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
+    CScript scriptDest = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
+    scriptPubKey += scriptDest;
+    CScript scriptSend = GetScriptForDestination(CPubKey(entryAcceptor.LinkAddress).GetID());
+
+    // check BDAP values
+    std::string strMessage;
+    if (!txLinkAccept.ValidateValues(strMessage))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Error validating link request values: " + strMessage);
+
+    // TODO (bdap): encrypt data before adding it to OP_RETURN.
+    // Create BDAP OP_RETURN script
+    CharString data;
+    txLinkAccept.Serialize(data);
+    CScript scriptData;
+    scriptData << OP_RETURN << data;
+
+    // Send the transaction
+    CWalletTx wtx;
+    float fYears = ((float)nDays/365.25);
+    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
+    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee);
+    txLinkAccept.txHash = wtx.GetHash();
+
+    UniValue oLink(UniValue::VOBJ);
+    if(!BuildJsonLinkAcceptInfo(txLinkAccept, entryRequestor, entryAcceptor, oLink))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - " + _("Failed to build BDAP link JSON object"));
 
     return oLink;
@@ -197,10 +358,10 @@ UniValue link(const JSONRPCRequest& request)
     if (strCommand == "send") {
         return SendLinkRequest(request);
     }
-    // TODO (bdap): implement link RPC commands below
     if (strCommand == "accept") {
-        //return AcceptLinkRequest(request);
+        return SendLinkAccept(request);
     }
+    // TODO (bdap): implement link RPC commands below
     if (strCommand == "pending") {
         //return ListPendingLinks(request);
     }

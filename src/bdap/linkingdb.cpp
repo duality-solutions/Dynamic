@@ -202,6 +202,19 @@ bool GetLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& l
     return !link.IsNull();
 }
 
+bool GetLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
+{
+    if (!pLinkAcceptDB || !pLinkAcceptDB->ReadLinkAccept(vchPubKey, link)) {
+        return false;
+    }
+    
+    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime) {
+        link.SetNull();
+        return false;
+    }
+    return !link.IsNull();
+}
+
 bool CheckLinkRequestDB()
 {
     if (!pLinkRequestDB)

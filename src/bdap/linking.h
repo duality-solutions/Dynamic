@@ -32,7 +32,7 @@ public:
     CharString RequestorPubKey; // ed25519 public key new/unique for this link
     CharString SharedPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
     CharString LinkMessage; // Link message to recipient
-    CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their DHT pub key.
+    CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their wallet pub key.
 
     unsigned int nHeight;
     uint64_t nExpireTime;
@@ -127,6 +127,7 @@ public:
     uint256 txLinkRequestHash; // transaction hash for the link request.
     CharString RecipientPubKey; // ed25519 public key new/unique for this link
     CharString SharedPubKey; // ed25519 shared public key using the requestor and recipient keys
+    CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing the requestor's object path with their wallet pub key.
 
     unsigned int nHeight;
     uint64_t nExpireTime;
@@ -144,6 +145,7 @@ public:
         txLinkRequestHash.SetNull();
         RecipientPubKey.clear();
         SharedPubKey.clear();
+        SignatureProof.clear();
         nHeight = 0;
         nExpireTime = 0;
         txHash.SetNull();
@@ -159,14 +161,14 @@ public:
         READWRITE(txLinkRequestHash);
         READWRITE(RecipientPubKey);
         READWRITE(SharedPubKey);
+        READWRITE(SignatureProof);
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
     }
 
     inline friend bool operator==(const CLinkAccept &a, const CLinkAccept &b) {
-        return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath
-                    && a.txLinkRequestHash == b.txLinkRequestHash && a.RecipientPubKey == b.RecipientPubKey && a.SharedPubKey == b.SharedPubKey);
+        return (a.SignatureProof == b.SignatureProof && a.RecipientPubKey == b.RecipientPubKey && a.SharedPubKey == b.SharedPubKey);
     }
 
     inline friend bool operator!=(const CLinkAccept &a, const CLinkAccept &b) {
@@ -179,6 +181,7 @@ public:
         RecipientFullObjectPath = b.RecipientFullObjectPath;
         RecipientPubKey = b.RecipientPubKey;
         SharedPubKey = b.SharedPubKey;
+        SignatureProof = b.SignatureProof;
         txLinkRequestHash = b.txLinkRequestHash;
         return *this;
     }

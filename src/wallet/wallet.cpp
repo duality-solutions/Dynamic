@@ -1257,7 +1257,7 @@ bool CWallet::IsLinkRequestForMe(const std::vector<unsigned char>& vchLinkPubKey
         CKeyID keyID(Hash160(vchMyDHTPubKey.begin(), vchMyDHTPubKey.end()));
         CKeyEd25519 dhtKey;
         if (GetDHTKey(keyID, dhtKey)) {
-            std::vector<unsigned char> vchGetSharedPubKey = GetLinkRequestSharedPubKey(dhtKey, vchLinkPubKey);
+            std::vector<unsigned char> vchGetSharedPubKey = GetLinkSharedPubKey(dhtKey, vchLinkPubKey);
             if (vchGetSharedPubKey == vchSharedPubKey)
                 return true;
         }
@@ -3651,10 +3651,14 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
                 else if (strOpType == "bdap_new_link_accept") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
+                    CLinkAccept link;
+                    if (GetLinkAccept(vchValue, link)) {
+                        strFailReason = _("Public key already used for an accepted link.");
+                        return false;
+                    }
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_accept") {
+                else if (strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }
