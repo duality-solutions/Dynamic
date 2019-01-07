@@ -60,12 +60,6 @@ struct ed25519_context
  * unsigned char shared_secret[32];
  */
 
-/**
- * secure_allocator is defined in support/allocators/secure.h and uses std::allocator
- * CPrivKeyEd25519 is a serialized private key, with all parameters included
- */
-typedef std::vector<unsigned char, secure_allocator<unsigned char> > CPrivKeyEd25519;
-
 /** An encapsulated ed25519 private key. */
 class CKeyEd25519
 {
@@ -74,9 +68,7 @@ public:
      * ed25519:
      */
     std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> seed;
-    //TODO (DHT): store privateKey in a secure allocator:
     std::array<char, ED25519_PRIVATE_KEY_BYTE_LENGTH> privateKey;
-    //std::vector<unsigned char, secure_allocator<unsigned char> > keyData;
     std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> publicKey;
 
 public:
@@ -89,12 +81,15 @@ public:
     CKeyEd25519(const std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH>& _seed);
     CKeyEd25519(const std::vector<unsigned char>& _seed);
 
-    //! Destructor (necessary because of memlocking). ??
+    // TODO (dht): Make sure private keys are destroyed correctly.
     ~CKeyEd25519()
     {
+        // fill private key std arrays with all zeros
+        seed.fill(0);
+        privateKey.fill(0);
     }
-
-    std::vector<unsigned char> GetPrivKey() const;
+    // TODO (dht): use SecureVector and SecureString below:
+    std::vector<unsigned char> GetPrivKey() const; 
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
     std::string GetPrivKeyString() const;
