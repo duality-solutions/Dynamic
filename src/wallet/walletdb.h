@@ -144,8 +144,7 @@ public:
     bool WriteHDChain(const CHDChain& chain);
     bool WriteCryptedHDChain(const CHDChain& chain);
     bool WriteHDPubKey(const CHDPubKey& hdPubKey, const CKeyMetadata& keyMeta);
-    bool AddSentLinkRequest(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchData);
-    bool AddReceiveLinkRequest(const std::vector<unsigned char>& vchSharedPubKey, const std::vector<unsigned char>& vchData);
+
     static void IncrementUpdateCounter();
     static unsigned int GetUpdateCounter();
 

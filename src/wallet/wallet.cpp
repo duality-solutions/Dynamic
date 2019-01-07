@@ -1318,11 +1318,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                 int nOut;
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    //TODO (bdap): Decrypt vchData before storing in local wallet
-                                    CWalletDB walletdb(strWalletFile);
-                                    if (!walletdb.AddSentLinkRequest(vchLinkPubKey, vchData))
-                                        return false;
-
+                                    // version 0 is public and unencrypted
+                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                    CLinkRequest link(MakeTransactionRef(tx));
+                                    //TODO (bdap): Verify SignatureProof
+                                    pLinkRequestDB->AddMyLinkRecipient(link);
+                                    pLinkRequestDB->AddMyLinkRequest(link);
                                     LogPrintf("%s -- Link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                 }
                             }
@@ -1336,12 +1337,11 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
                                     // version 0 is public and unencrypted
-                                    //TODO (bdap): If version 1 or above, decrypt vchData before storing in local wallet
+                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                    CLinkAccept link(MakeTransactionRef(tx));
                                     //TODO (bdap): Verify SignatureProof
-                                    CWalletDB walletdb(strWalletFile);
-                                    if (!walletdb.AddReceiveLinkRequest(vchSharedPubKey, vchData))
-                                        return false;
-
+                                    pLinkAcceptDB->AddMyLinkSender(link);
+                                    pLinkAcceptDB->AddMyLinkAccept(link);
                                     LogPrintf("%s -- Link request for me found! vchLinkPubKey = %s, vchSharedPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey), stringFromVch(vchSharedPubKey));
                                 }
                             }
@@ -3639,8 +3639,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
                 else if (strOpType == "bdap_new_link_request") {
-                    CLinkRequest link;
-                    if (GetLinkRequest(vchValue, link)) {
+                    uint256 txid;
+                    if (GetLinkRequestIndex(vchValue, txid)) {
                         strFailReason = _("Public key already used for a link request.");
                         return false;
                     }
@@ -3651,8 +3651,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
                 else if (strOpType == "bdap_new_link_accept") {
-                    CLinkAccept link;
-                    if (GetLinkAccept(vchValue, link)) {
+                    uint256 txid;
+                    if (GetLinkAcceptIndex(vchValue, txid)) {
                         strFailReason = _("Public key already used for an accepted link.");
                         return false;
                     }

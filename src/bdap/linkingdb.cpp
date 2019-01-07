@@ -14,53 +14,46 @@
 CLinkRequestDB *pLinkRequestDB = NULL;
 CLinkAcceptDB *pLinkAcceptDB = NULL;
 
-bool CLinkRequestDB::AddLinkRequest(const CLinkRequest& link, const int op) 
-{ 
-    bool writeState = false;
-    {
-        LOCK(cs_link_request);
-        writeState = Write(make_pair(std::string("pk"), link.RequestorPubKey), link);
-    }
-
-    return writeState;
-}
-
-bool CLinkRequestDB::ReadLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link) 
+bool CLinkRequestDB::AddMyLinkRecipient(const CLinkRequest& link)
 {
     LOCK(cs_link_request);
-    return CDBWrapper::Read(make_pair(std::string("pk"), vchPubKey), link);
+    return Write(make_pair(std::string("recipient"), link.RecipientFullObjectPath), link.RequestorPubKey);
 }
 
-bool CLinkRequestDB::EraseLinkRequest(const std::vector<unsigned char>& vchPubKey) 
+bool CLinkRequestDB::AddMyLinkRequest(const CLinkRequest& link)
 {
     LOCK(cs_link_request);
-    if (!LinkRequestExists(vchPubKey)) 
+    return Write(make_pair(std::string("mylink"), link.RequestorPubKey), link);
+}
+
+bool CLinkRequestDB::ReadMyLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link)
+{
+    LOCK(cs_link_request);
+    return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
+}
+
+bool CLinkRequestDB::EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey)
+{
+    if (!MyLinkRequestExists(vchPubKey))
         return false;
 
-    return CDBWrapper::Erase(make_pair(std::string("pk"), vchPubKey));
-}
-
-bool CLinkRequestDB::LinkRequestExists(const std::vector<unsigned char>& vchPubKey)
-{
-    LOCK(cs_link_request);
-    return CDBWrapper::Exists(make_pair(std::string("pk"), vchPubKey));
-}
-
-bool CLinkRequestDB::UpdateLinkRequest(const std::vector<unsigned char>& vchPubKey, const CLinkRequest& link)
-{
-    LOCK(cs_link_request);
-
-    if (!EraseLinkRequest(vchPubKey))
+    CLinkRequest link;
+    if (!ReadMyLinkRequest(vchPubKey, link))
         return false;
 
-    bool writeState = false;
-    writeState = Update(make_pair(std::string("pk"), link.RequestorPubKey), link);
+    LOCK(cs_link_request);
+    return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
+           CDBWrapper::Erase(make_pair(std::string("recipient"), link.RecipientFullObjectPath));
+}
 
-    return writeState;
+bool CLinkRequestDB::MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey)
+{
+    LOCK(cs_link_request);
+    return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
 }
 
 // Removes expired records from databases.
-bool CLinkRequestDB::CleanupLinkRequestDB(int& nRemoved)
+bool CLinkRequestDB::CleanupMyLinkRequestDB(int& nRemoved)
 {
     LOCK(cs_link_request);
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
@@ -70,12 +63,12 @@ bool CLinkRequestDB::CleanupLinkRequestDB(int& nRemoved)
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         try {
-            if (pcursor->GetKey(key) && key.first == "pk") {
+            if (pcursor->GetKey(key) && key.first == "mylink") {
                 pcursor->GetValue(link);
                 if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
                 {
                     nRemoved++;
-                    EraseLinkRequest(link.RequestorPubKey);
+                    EraseMyLinkRequest(link.RequestorPubKey);
                 }
             }
             pcursor->Next();
@@ -86,133 +79,167 @@ bool CLinkRequestDB::CleanupLinkRequestDB(int& nRemoved)
     return true;
 }
 
-bool CLinkRequestDB::GetLinkRequestInfo(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link)
-{
-    LOCK(cs_link_request);
-    if (!ReadLinkRequest(vchPubKey, link)) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool CLinkAcceptDB::AddLinkAccept(const CLinkAccept& link, const int op) 
+bool CLinkRequestDB::AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid)
 { 
     bool writeState = false;
     {
-        LOCK(cs_link_accept);
-        writeState = Write(make_pair(std::string("rpk"), link.RecipientPubKey), link) 
-            && Write(make_pair(std::string("spk"), link.SharedPubKey), link);
+        LOCK(cs_link_request);
+        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid) && 
+                     Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
     }
 
     return writeState;
 }
 
-bool CLinkAcceptDB::ReadLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link) 
+bool CLinkRequestDB::ReadLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
 {
-    LOCK(cs_link_accept);
-    bool ret = CDBWrapper::Read(make_pair(std::string("rpk"), vchPubKey), link);
-    if (!ret) {
-        ret = CDBWrapper::Read(make_pair(std::string("spk"), vchPubKey), link);
-    }
-    return ret;
+    LOCK(cs_link_request);
+    return CDBWrapper::Read(make_pair(std::string("pubkey"), vchPubKey), txid);
 }
 
-bool CLinkAcceptDB::EraseLinkAccept(const std::vector<unsigned char>& vchAcceptPubKey, const std::vector<unsigned char>& vchSharedPubKey) 
+bool CLinkRequestDB::EraseLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey)
 {
-    LOCK(cs_link_accept);
-    if (!LinkAcceptExists(vchAcceptPubKey)) 
+    if (!LinkRequestExists(vchPubKey)) 
+        return false;
+    if (!LinkRequestExists(vchSharedPubKey)) 
         return false;
 
-    return CDBWrapper::Erase(make_pair(std::string("rpk"), vchAcceptPubKey)) 
-            && CDBWrapper::Erase(make_pair(std::string("spk"), vchSharedPubKey));
+    bool result = false;
+    LOCK(cs_link_request);
+    result = CDBWrapper::Erase(make_pair(std::string("pubkey"), vchPubKey));
+    if (!result)
+        return false;
+
+    return CDBWrapper::Erase(make_pair(std::string("pubkey"), vchSharedPubKey));
+}
+
+bool CLinkRequestDB::LinkRequestExists(const std::vector<unsigned char>& vchPubKey)
+{
+    LOCK(cs_link_request);
+    return CDBWrapper::Exists(make_pair(std::string("pubkey"), vchPubKey));
+}
+
+bool CLinkAcceptDB::AddMyLinkSender(const CLinkAccept& link)
+{
+    LOCK(cs_link_accept);
+    return Write(make_pair(std::string("sender"), link.RequestorFullObjectPath), link.RecipientPubKey);
+}
+
+bool CLinkAcceptDB::AddMyLinkAccept(const CLinkAccept& link)
+{
+    LOCK(cs_link_accept);
+    return Write(make_pair(std::string("mylink"), link.RecipientPubKey), link);
+}
+
+bool CLinkAcceptDB::ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
+{
+    LOCK(cs_link_accept);
+    return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
+}
+
+bool CLinkAcceptDB::EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey)
+{
+    if (!MyLinkAcceptExists(vchPubKey))
+        return false;
+
+    CLinkAccept link;
+    if (!ReadMyLinkAccept(vchPubKey, link))
+        return false;
+
+    LOCK(cs_link_accept);
+    return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
+           CDBWrapper::Erase(make_pair(std::string("sender"), link.RequestorFullObjectPath));
+}
+
+bool CLinkAcceptDB::MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey)
+{
+    LOCK(cs_link_accept);
+    return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
+}
+
+// Removes expired records from databases.
+bool CLinkAcceptDB::CleanupMyLinkAcceptDB(int& nRemoved)
+{
+    LOCK(cs_link_accept);
+    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    CLinkRequest link;
+    std::pair<std::string, std::vector<unsigned char> > key;
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        try {
+            if (pcursor->GetKey(key) && key.first == "mylink") {
+                pcursor->GetValue(link);
+                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
+                {
+                    nRemoved++;
+                    EraseMyLinkAccept(link.RequestorPubKey);
+                }
+            }
+            pcursor->Next();
+        } catch (std::exception &e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
+bool CLinkAcceptDB::AddLinkAcceptIndex(const vchCharString& vvchOpParameters, const uint256& txid)
+{ 
+    bool writeState = false;
+    {
+        LOCK(cs_link_accept);
+        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid) && 
+                     Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
+    }
+
+    return writeState;
+}
+
+bool CLinkAcceptDB::ReadLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
+{
+    LOCK(cs_link_accept);
+    return CDBWrapper::Read(make_pair(std::string("pubkey"), vchPubKey), txid);
+}
+
+bool CLinkAcceptDB::EraseLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey)
+{
+    if (!LinkAcceptExists(vchPubKey)) 
+        return false;
+    if (!LinkAcceptExists(vchSharedPubKey)) 
+        return false;
+
+    bool result = false;
+    LOCK(cs_link_accept);
+    result = CDBWrapper::Erase(make_pair(std::string("pubkey"), vchPubKey));
+    if (!result)
+        return false;
+
+    return CDBWrapper::Erase(make_pair(std::string("pubkey"), vchSharedPubKey));
 }
 
 bool CLinkAcceptDB::LinkAcceptExists(const std::vector<unsigned char>& vchPubKey)
 {
     LOCK(cs_link_accept);
-    bool ret = CDBWrapper::Exists(make_pair(std::string("rpk"), vchPubKey));
-    if (!ret) {
-        ret = CDBWrapper::Exists(make_pair(std::string("spk"), vchPubKey));
-    }
-    return ret;
+    return CDBWrapper::Exists(make_pair(std::string("pubkey"), vchPubKey));
 }
 
-bool CLinkAcceptDB::UpdateLinkAccept(const CLinkAccept& link)
+bool GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
 {
-    LOCK(cs_link_accept);
-
-    if (!EraseLinkAccept(link.RecipientPubKey, link.RecipientPubKey))
-        return false;
-
-    bool writeState = false;
-    writeState = Update(make_pair(std::string("rpk"), link.RecipientPubKey), link)
-        & Update(make_pair(std::string("spk"), link.SharedPubKey), link);
-
-    return writeState;
-}
-
-// Removes expired records from databases.
-bool CLinkAcceptDB::CleanupLinkAcceptDB(int& nRemoved)
-{
-    LOCK(cs_link_accept);
-    boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
-    pcursor->SeekToFirst();
-    CLinkAccept link;
-    std::pair<std::string, std::vector<unsigned char> > key;
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        try {
-            if (pcursor->GetKey(key) && key.first == "rpk") {
-                pcursor->GetValue(link);
-                if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
-                {
-                    nRemoved++;
-                    EraseLinkAccept(link.RecipientPubKey, link.SharedPubKey);
-                }
-            }
-            pcursor->Next();
-        } catch (std::exception &e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
-    }
-    return true;
-}
-
-bool CLinkAcceptDB::GetLinkAcceptInfo(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
-{
-    LOCK(cs_link_accept);
-    if (!ReadLinkAccept(vchPubKey, link)) {
+    if (!pLinkRequestDB || !pLinkRequestDB->ReadLinkRequestIndex(vchPubKey, txid)) {
         return false;
     }
     
-    return true;
+    return !txid.IsNull();
 }
 
-bool GetLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link)
+bool GetLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
 {
-    if (!pLinkRequestDB || !pLinkRequestDB->ReadLinkRequest(vchPubKey, link)) {
+    if (!pLinkAcceptDB || !pLinkAcceptDB->ReadLinkAcceptIndex(vchPubKey, txid)) {
         return false;
     }
     
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime) {
-        link.SetNull();
-        return false;
-    }
-    return !link.IsNull();
-}
-
-bool GetLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link)
-{
-    if (!pLinkAcceptDB || !pLinkAcceptDB->ReadLinkAccept(vchPubKey, link)) {
-        return false;
-    }
-    
-    if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime) {
-        link.SetNull();
-        return false;
-    }
-    return !link.IsNull();
+    return !txid.IsNull();
 }
 
 bool CheckLinkRequestDB()
@@ -269,15 +296,116 @@ bool FlushLinkAcceptDB()
 void CleanupLinkRequestDB(int& nRemoved)
 {
     if(pLinkRequestDB != NULL)
-        pLinkRequestDB->CleanupLinkRequestDB(nRemoved);
+        pLinkRequestDB->CleanupMyLinkRequestDB(nRemoved);
     FlushLinkRequestDB();
 }
 
 void CleanupLinkAcceptDB(int& nRemoved)
 {
     if(pLinkAcceptDB != NULL)
-        pLinkAcceptDB->CleanupLinkAcceptDB(nRemoved);
+        pLinkAcceptDB->CleanupMyLinkAcceptDB(nRemoved);
     FlushLinkAcceptDB();
+}
+
+static bool CommonLinkParameterCheck(const vchCharString& vvchOpParameters, std::string& errorMessage)
+{
+    if (vvchOpParameters.size() > 4)
+    {
+        errorMessage = "CommonLinkParameterCheck failed! Invalid parameters.";
+        return false;
+    }
+    // check pubkey size
+    if (vvchOpParameters[0].size() != DHT_HEX_PUBLIC_KEY_LENGTH)
+    {
+        errorMessage = "CommonLinkParameterCheck failed! Incorrect pubkey size.";
+        return false;
+    }
+    // check shared pubkey size
+    if (vvchOpParameters[1].size() != DHT_HEX_PUBLIC_KEY_LENGTH)
+    {
+        errorMessage = "CommonLinkParameterCheck failed! Incorrect shared pubkey size.";
+        return false;
+    }
+    // check expiration time is not greater than 10 digits
+    if (vvchOpParameters[2].size() > 10)
+    {
+        errorMessage = "CommonLinkParameterCheck failed! Incorrect expiration time.";
+        return false;
+    }
+    
+    return true;
+}
+
+static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
+{
+    if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
+        return error(errorMessage.c_str());
+
+    if (!scriptData.IsUnspendable()) {
+        errorMessage = "CheckNewLinkRequestTx failed! Data script should be unspendable.";
+        return error(errorMessage.c_str());
+    }
+    
+    CTxOut txout(0, scriptData);
+    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
+    LogPrint("bdap", "%s -- scriptData.size() = %u, nSize = %u \n", __func__, scriptData.size(), nSize);
+    if (nSize > MAX_BDAP_LINK_DATA_SIZE) {
+        errorMessage = "CheckNewLinkRequestTx failed! Data script is too large.";
+        return error(errorMessage.c_str());
+    }
+
+    if (fJustCheck)
+        return true;
+
+    if (!pLinkRequestDB)
+    {
+        errorMessage = "CheckNewLinkRequestTx failed! Can not open LevelDB BDAP link request database.";
+        return error(errorMessage.c_str());
+    }
+
+    if (!pLinkRequestDB->AddLinkRequestIndex(vvchOpParameters, txid))
+    {
+        errorMessage = "CheckNewLinkRequestTx failed! Error adding link request index to LevelDB.";
+        return error(errorMessage.c_str());
+    }
+
+    return FlushLinkRequestDB();
+}
+
+static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
+{
+    if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
+        return error(errorMessage.c_str());
+
+    if (!scriptData.IsUnspendable()) {
+        errorMessage = "CheckNewLinkAcceptTx failed! Data script should be unspendable.";
+        return error(errorMessage.c_str());
+    }
+    
+    CTxOut txout(0, scriptData);
+    size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
+    LogPrint("bdap", "%s -- scriptData.size() = %u, nSize = %u \n", __func__, scriptData.size(), nSize);
+    if (nSize > 1000) {
+        errorMessage = "CheckNewLinkAcceptTx failed! Data script is too large.";
+        return error(errorMessage.c_str());
+    }
+
+    if (fJustCheck)
+        return true;
+
+    if (!pLinkAcceptDB)
+    {
+        errorMessage = "CheckNewLinkAcceptTx failed! Can not open LevelDB BDAP link accept database.";
+        return error(errorMessage.c_str());
+    }
+
+    if (!pLinkAcceptDB->AddLinkAcceptIndex(vvchOpParameters, txid))
+    {
+        errorMessage = "CheckNewLinkAcceptTx failed! Error adding link accept index to LevelDB.";
+        return error(errorMessage.c_str());
+    }
+
+    return FlushLinkAcceptDB();
 }
 
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
@@ -298,14 +426,10 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
 
     if (strOperationType == "bdap_new_link_request") {
-        // TODO (bdap): implement CheckNewLinkRequestTx
-        //return CheckNewLinkRequestTx(link, scriptData, vvchOpParameters, errorMessage, fJustCheck);
-        return true;
+        return CheckNewLinkRequestTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
     else if (strOperationType == "bdap_new_link_accept") {
-        // TODO (bdap): implement CheckNewLinkAcceptTx
-        //return CheckNewLinkAcceptTx(link, scriptData, vvchOpParameters, errorMessage, fJustCheck);
-        return true;
+        return CheckNewLinkAcceptTx(scriptData, vvchArgs, tx->GetHash(), errorMessage, fJustCheck);
     }
 
     return false;

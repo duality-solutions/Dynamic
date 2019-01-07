@@ -22,7 +22,7 @@ class CTransaction;
 // and get the needed information to accept the link request
 // It is used to bootstrap the linkage relationship with a new set of public keys
 
-// OP_RETURN Format: std::vector<unsigned char> GetEncryptedRequestMessage(Serialize(CLinkRequest))
+// OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkRequest))
 class CLinkRequest {
 public:
     static const int CURRENT_VERSION=1;
@@ -110,14 +110,7 @@ public:
     std::string SharedPubKeyString() const;
 };
 
-// CLinkAccept are stored serilzed and encrypted in a LibTorrent DHT key value pair entry
-// Stored in the Torrent DHT for a limited time.
-// This is only used when the link recipient wants to accepts the request.
-
-// DHT Data Format (must be under 1000 bytes):
-// CLinkRequest.RequestorPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + spcae + 
-// CLinkAccept.RecipientPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + space +
-// CLinkRequest.SharedSymmetricPrivKey.Encrypt(Serialize(CLinkAccept)).ToHex()
+// OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkAccept))
 class CLinkAccept {
 public:
     static const int CURRENT_VERSION=1;
@@ -135,6 +128,11 @@ public:
 
     CLinkAccept() {
         SetNull();
+    }
+
+    CLinkAccept(const CTransactionRef& tx) {
+        SetNull();
+        UnserializeFromTx(tx);
     }
 
     inline void SetNull()
@@ -187,6 +185,7 @@ public:
     }
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
+    bool UnserializeFromTx(const CTransactionRef& tx);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 

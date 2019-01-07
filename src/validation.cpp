@@ -671,8 +671,8 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
-                CLinkRequest link;
-                if (GetLinkRequest(vchPubKey, link)) {
+                uint256 txid;
+                if (GetLinkRequestIndex(vchPubKey, txid)) {
                     errorMessage = "Public key already used for a link request.";
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
@@ -686,8 +686,8 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }
-                CLinkAccept link;
-                if (GetLinkAccept(vchPubKey, link)) {
+                uint256 txid;
+                if (GetLinkAcceptIndex(vchPubKey, txid)) {
                     errorMessage = "Public key already used for a link request.";
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
                 }

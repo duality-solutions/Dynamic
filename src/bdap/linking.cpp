@@ -113,6 +113,23 @@ std::string CLinkRequest::SharedPubKeyString() const
     return stringFromVch(SharedPubKey);
 }
 
+bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
+{
+    std::vector<unsigned char> vchData;
+    std::vector<unsigned char> vchHash;
+    int nOut;
+    if(!GetBDAPData(tx, vchData, vchHash, nOut))
+    {
+        SetNull();
+        return false;
+    }
+    if(!UnserializeFromData(vchData, vchHash))
+    {
+        return false;
+    }
+    return true;
+}
+
 void CLinkAccept::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsAcceptLink(SER_NETWORK, PROTOCOL_VERSION);

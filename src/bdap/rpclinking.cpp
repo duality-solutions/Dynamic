@@ -15,6 +15,7 @@
 #include "rpcserver.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
+#include "uint256.h"
 #include "validation.h"
 
 #include <univalue.h>
@@ -138,8 +139,10 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     pwalletMain->SetAddressBook(privReqDHTKey.GetID(), strRequestorFQDN, "bdap-dht-key");
 
-    // Check if name already exists
-    if (GetLinkRequest(txLink.RequestorPubKey, txLink))
+    // Check if pubkey already exists
+    uint256 prevTxID;
+    //GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
+    if (GetLinkRequestIndex(txLink.RequestorPubKey, prevTxID))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get requestor link address
@@ -268,8 +271,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
 
     pwalletMain->SetAddressBook(privAcceptDHTKey.GetID(), strAcceptorFQDN, "bdap-dht-key");
 
-    // Check if name already exists
-    if (GetLinkAccept(txLinkAccept.RecipientPubKey, txLinkAccept))
+    // Check if pubkey already exists
+    uint256 prevTxID;
+    if (GetLinkAcceptIndex(txLinkAccept.RecipientPubKey, prevTxID))
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4101 - " + txLinkAccept.RecipientPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get link accepting address
