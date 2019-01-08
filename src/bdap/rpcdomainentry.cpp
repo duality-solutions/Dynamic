@@ -540,18 +540,20 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     if (pwalletMain && !pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
+    LogPrint("bdap", "%s -- pubkey size = %u\n", __func__, vvchDHTPubKeys.size());
+
     UniValue result(UniValue::VOBJ);
     uint32_t nCount = 1;
     for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
-        //LogPrintf("mybdapaccounts %s \n", stringFromVch(vchPubKey));
         CDomainEntry entry;
-        if (!pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
-            throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3801 - BDAP entry for " + stringFromVch(vchPubKey) + _(" can not be found.  Get info failed!"));
-        }
-        UniValue oAccount(UniValue::VOBJ);
-        if (BuildBDAPJson(entry, oAccount, false)) {
-            result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
-            nCount++;
+        LogPrint("bdap", "%s -- pubkey = %s\n", __func__, stringFromVch(vchPubKey));
+        if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+            LogPrint("bdap", "%s -- entry = %s\n", __func__, entry.GetFullObjectPath());
+            UniValue oAccount(UniValue::VOBJ);
+            if (BuildBDAPJson(entry, oAccount, false)) {
+                result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
+                nCount++;
+            }
         }
     }
     return result;
