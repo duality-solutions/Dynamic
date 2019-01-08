@@ -16,7 +16,7 @@ static CCriticalSection cs_link_accept;
 
 class CLinkRequestDB : public CDBWrapper {
 public:
-    CLinkRequestDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkreqs", nCacheSize, fMemory, fWipe, obfuscate) {
+    CLinkRequestDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkrequest", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
     bool AddMyLinkRecipient(const CLinkRequest& link);
@@ -35,7 +35,7 @@ public:
 
 class CLinkAcceptDB : public CDBWrapper {
 public:
-    CLinkAcceptDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkaccs", nCacheSize, fMemory, fWipe, obfuscate) {
+    CLinkAcceptDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkaccept", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
     bool AddMyLinkSender(const CLinkAccept& link);

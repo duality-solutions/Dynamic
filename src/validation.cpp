@@ -673,8 +673,11 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 uint256 txid;
                 if (GetLinkRequestIndex(vchPubKey, txid)) {
-                    errorMessage = "Public key already used for a link request.";
-                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link request public key already used.";
+                        LogPrintf("%s -- %s\n", __func__, errorMessage);
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
                 }
                 return true;
             }
@@ -688,8 +691,11 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 }
                 uint256 txid;
                 if (GetLinkAcceptIndex(vchPubKey, txid)) {
-                    errorMessage = "Public key already used for a link request.";
-                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link accept public key already used.";
+                        LogPrintf("%s -- %s\n", __func__, errorMessage);
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
                 }
                 return true;
             }
@@ -1182,7 +1188,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 __func__, hash.ToString(), FormatStateMessage(state));
         }
 
-        if (!ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
             return false;
         }
 
@@ -2326,7 +2332,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         CCoinsViewCache viewCoinCache(pcoinsTip);
         CTransactionRef ptx = MakeTransactionRef(tx);
-        if (!ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
             return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
         }
 

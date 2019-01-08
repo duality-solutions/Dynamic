@@ -84,8 +84,9 @@ bool CLinkRequestDB::AddLinkRequestIndex(const vchCharString& vvchOpParameters, 
     bool writeState = false;
     {
         LOCK(cs_link_request);
-        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid) && 
-                     Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
+        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid);
+        if (writeState && vvchOpParameters.size() > 1)
+            writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
     }
 
     return writeState;
@@ -189,8 +190,9 @@ bool CLinkAcceptDB::AddLinkAcceptIndex(const vchCharString& vvchOpParameters, co
     bool writeState = false;
     {
         LOCK(cs_link_accept);
-        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid) && 
-                     Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
+        writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[0])), txid);
+        if (writeState && vvchOpParameters.size() > 1)
+            writeState = Write(make_pair(std::string("pubkey"), stringFromVch(vvchOpParameters[1])), txid);
     }
 
     return writeState;
@@ -226,15 +228,16 @@ bool CLinkAcceptDB::LinkAcceptExists(const std::vector<unsigned char>& vchPubKey
 
 bool GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
 {
+    txid.SetNull();
     if (!pLinkRequestDB || !pLinkRequestDB->ReadLinkRequestIndex(vchPubKey, txid)) {
         return false;
     }
-    
     return !txid.IsNull();
 }
 
 bool GetLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
 {
+    txid.SetNull();
     if (!pLinkAcceptDB || !pLinkAcceptDB->ReadLinkAcceptIndex(vchPubKey, txid)) {
         return false;
     }
@@ -270,7 +273,7 @@ bool FlushLinkRequestDB()
         if (pLinkRequestDB != NULL)
         {
             if (!pLinkRequestDB->Flush()) {
-                LogPrintf("Failed to flush link request leveldb!");
+                LogPrintf("%s -- Failed to flush link request leveldb!\n", __func__);
                 return false;
             }
         }
@@ -285,7 +288,7 @@ bool FlushLinkAcceptDB()
         if (pLinkAcceptDB != NULL)
         {
             if (!pLinkAcceptDB->Flush()) {
-                LogPrintf("Failed to flush link accept leveldb!");
+                LogPrintf("%s -- Failed to flush link accept leveldb!\n", __func__);
                 return false;
             }
         }
@@ -309,25 +312,25 @@ void CleanupLinkAcceptDB(int& nRemoved)
 
 static bool CommonLinkParameterCheck(const vchCharString& vvchOpParameters, std::string& errorMessage)
 {
-    if (vvchOpParameters.size() > 4)
+    if (vvchOpParameters.size() > 3)
     {
         errorMessage = "CommonLinkParameterCheck failed! Invalid parameters.";
         return false;
     }
     // check pubkey size
-    if (vvchOpParameters[0].size() != DHT_HEX_PUBLIC_KEY_LENGTH)
+    if (vvchOpParameters[0].size() > DHT_HEX_PUBLIC_KEY_LENGTH)
     {
         errorMessage = "CommonLinkParameterCheck failed! Incorrect pubkey size.";
         return false;
     }
     // check shared pubkey size
-    if (vvchOpParameters[1].size() != DHT_HEX_PUBLIC_KEY_LENGTH)
+    if (vvchOpParameters.size() > 1 && vvchOpParameters[1].size() > DHT_HEX_PUBLIC_KEY_LENGTH)
     {
         errorMessage = "CommonLinkParameterCheck failed! Incorrect shared pubkey size.";
         return false;
     }
     // check expiration time is not greater than 10 digits
-    if (vvchOpParameters[2].size() > 10)
+    if (vvchOpParameters.size() > 2 && vvchOpParameters[2].size() > 10)
     {
         errorMessage = "CommonLinkParameterCheck failed! Incorrect expiration time.";
         return false;
@@ -338,6 +341,7 @@ static bool CommonLinkParameterCheck(const vchCharString& vvchOpParameters, std:
 
 static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
 {
+    LogPrint("bdap", "%s -- start\n", __func__);
     if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
         return error(errorMessage.c_str());
 
@@ -345,7 +349,6 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
         errorMessage = "CheckNewLinkRequestTx failed! Data script should be unspendable.";
         return error(errorMessage.c_str());
     }
-    
     CTxOut txout(0, scriptData);
     size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
     LogPrint("bdap", "%s -- scriptData.size() = %u, nSize = %u \n", __func__, scriptData.size(), nSize);
@@ -353,7 +356,6 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
         errorMessage = "CheckNewLinkRequestTx failed! Data script is too large.";
         return error(errorMessage.c_str());
     }
-
     if (fJustCheck)
         return true;
 
@@ -362,18 +364,22 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
         errorMessage = "CheckNewLinkRequestTx failed! Can not open LevelDB BDAP link request database.";
         return error(errorMessage.c_str());
     }
-
     if (!pLinkRequestDB->AddLinkRequestIndex(vvchOpParameters, txid))
     {
         errorMessage = "CheckNewLinkRequestTx failed! Error adding link request index to LevelDB.";
         return error(errorMessage.c_str());
     }
-
-    return FlushLinkRequestDB();
+    if (!FlushLinkRequestDB())
+    {
+        errorMessage = "CheckNewLinkRequestTx failed! Error flushing LevelDB.";
+        return error(errorMessage.c_str());
+    }
+    return true;
 }
 
 static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString& vvchOpParameters, const uint256& txid, std::string& errorMessage, bool fJustCheck)
 {
+    LogPrint("bdap", "%s -- start\n", __func__);
     if (!CommonLinkParameterCheck(vvchOpParameters, errorMessage))
         return error(errorMessage.c_str());
 
@@ -404,15 +410,19 @@ static bool CheckNewLinkAcceptTx(const CScript& scriptData, const vchCharString&
         errorMessage = "CheckNewLinkAcceptTx failed! Error adding link accept index to LevelDB.";
         return error(errorMessage.c_str());
     }
-
-    return FlushLinkAcceptDB();
+    if (!FlushLinkAcceptDB()) 
+    {
+        errorMessage = "CheckNewLinkAcceptTx failed! Error flushing LevelDB.";
+        return error(errorMessage.c_str());
+    }
+    return true;
 }
 
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
                                 bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck) {
-        LogPrintf("*Trying to add BDAP link in coinbase transaction, skipping...");
+        LogPrintf("%s -- Trying to add BDAP link in coinbase transaction, skipping...\n", __func__);
         return true;
     }
 
