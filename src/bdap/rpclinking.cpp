@@ -10,6 +10,7 @@
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
+#include "dynodeman.h"
 #include "hash.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
@@ -23,7 +24,7 @@
 #ifdef ENABLE_WALLET
 
 extern void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
-                                    CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue);
+                                    CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
 
 static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntry& requestor, const CDomainEntry& recipient, UniValue& oLink)
 {
@@ -211,7 +212,14 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -341,8 +349,14 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     float fYears = ((float)nDays/365.25);
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
-
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txLinkAccept.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);

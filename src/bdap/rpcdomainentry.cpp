@@ -7,6 +7,7 @@
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
+#include "dynodeman.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "primitives/transaction.h"
@@ -15,7 +16,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
 
 static constexpr bool fPrintDebug = true;
 
@@ -121,7 +122,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -326,7 +334,14 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (!txUpdatedEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -419,7 +434,14 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
