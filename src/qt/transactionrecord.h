@@ -94,6 +94,8 @@ public:
         UpdateDomainGroup,
         DeleteDomainGroup,
         RevokeDomainGroup,
+        LinkRequest,
+        LinkAccept,
         RecvWithPrivateSend,
         PrivateSendDenominate,
         PrivateSendCollateralPayment,
