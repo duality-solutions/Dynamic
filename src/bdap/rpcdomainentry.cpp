@@ -33,10 +33,10 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CDomainEntry txDomainEntry;
     txDomainEntry.OID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+    if (bdapType == BDAP::ObjectType::BDAP_USER) {
         txDomainEntry.OrganizationalUnit = vchDefaultUserOU;
     }
-    else if (bdapType == BDAP::ObjectType::GROUP) {
+    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
         txDomainEntry.OrganizationalUnit = vchDefaultGroupOU;
     }
     
@@ -153,7 +153,7 @@ UniValue adddomainentry(const JSONRPCRequest& request)
     {
         throw std::runtime_error("adddomainentry <userid> <common name> <registration days>\nAdd public name entry to blockchain directory.\n");
     }
-    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return AddDomainEntry(request, bdapType);
 }
 
@@ -275,10 +275,10 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     
     CDomainEntry txPreviousEntry;
     txPreviousEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+    if (bdapType == BDAP::ObjectType::BDAP_USER) {
         txPreviousEntry.OrganizationalUnit = vchDefaultUserOU;
     }
-    else if (bdapType == BDAP::ObjectType::GROUP) {
+    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
         txPreviousEntry.OrganizationalUnit = vchDefaultGroupOU;
     }
     txPreviousEntry.ObjectID = vchObjectID;
@@ -360,7 +360,7 @@ UniValue updatedomainuser(const JSONRPCRequest& request) {
         throw std::runtime_error("updatedomainuser <userid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
-    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return UpdateDomainEntry(request, bdapType);
 }
 
@@ -370,7 +370,7 @@ UniValue updatedomaingroup(const JSONRPCRequest& request) {
         throw std::runtime_error("updatedomaingroup <groupid> <common name> <registration days>\nUpdate an existing public name blockchain directory entry.\n");
     }
 
-    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return UpdateDomainEntry(request, bdapType);
 }
 
@@ -385,10 +385,10 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     
     CDomainEntry txSearchEntry;
     txSearchEntry.DomainComponent = vchDefaultDomainName;
-    if (bdapType == BDAP::ObjectType::USER_ACCOUNT) {
+    if (bdapType == BDAP::ObjectType::BDAP_USER) {
         txSearchEntry.OrganizationalUnit = vchDefaultUserOU;
     }
-    else if (bdapType == BDAP::ObjectType::GROUP) {
+    else if (bdapType == BDAP::ObjectType::BDAP_GROUP) {
         txSearchEntry.OrganizationalUnit = vchDefaultGroupOU;
     }
     txSearchEntry.ObjectID = vchObjectID;
@@ -458,7 +458,7 @@ UniValue deletedomainuser(const JSONRPCRequest& request) {
         throw std::runtime_error("deletedomainuser <userid>\nDelete an existing public name blockchain directory entry.\n");
     }
 
-    BDAP::ObjectType bdapType = BDAP::ObjectType::USER_ACCOUNT;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return DeleteDomainEntry(request, bdapType);
 }
 
@@ -468,7 +468,7 @@ UniValue deletedomaingroup(const JSONRPCRequest& request) {
         throw std::runtime_error("deletedomaingroup <groupid>\nDelete an existing public name blockchain directory entry.\n");
     }
 
-    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return DeleteDomainEntry(request, bdapType);
 }
 
@@ -514,7 +514,7 @@ UniValue adddomaingroup(const JSONRPCRequest& request)
         throw std::runtime_error("adddomaingroup <groupid> <common name> <registration days>\nAdd public group entry to blockchain directory.\n");
     }
 
-    BDAP::ObjectType bdapType = BDAP::ObjectType::GROUP;
+    BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return AddDomainEntry(request, bdapType);
 }
 
