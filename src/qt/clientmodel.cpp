@@ -274,11 +274,11 @@ QString ClientModel::GPUMode() const
 QString ClientModel::GPUState() const
 {
 #if defined(ENABLE_GPU)
-    return QString("Enabled");
+    return QString("Supported");
 #elif !defined(ENABLE_GPU)
-    return QString("Disabled");
+    return QString("Unsupported");
 #else
-    return QString("Disabled");
+    return QString("Unsupported");
 #endif
 }
 
