@@ -245,6 +245,43 @@ BanTableModel* ClientModel::getBanTableModel()
     return banTableModel;
 }
 
+QString ClientModel::CPUAVXMode() const
+{
+#if defined(__AVX512F__)
+    return QString("AVX512");
+#elif defined(__AVX2__)
+    return QString("AVX2");
+#elif !defined(__AVX2__) && !defined(__AVX512F__)
+    return QString("Normal");
+#else
+    return QString("Normal");
+#endif
+}
+
+QString ClientModel::GPUMode() const
+{
+#if defined(HAVE_CUDA)
+    return QString("CUDA");
+#elif !defined(HAVE_CUDA) && defined(ENABLE_GPU)
+    return QString("OpenCL");
+#elif !defined(HAVE_CUDA) && !defined(ENABLE_GPU)
+    return QString("N/A");
+#else
+    return QString("N/A");
+#endif
+}
+
+QString ClientModel::GPUState() const
+{
+#if defined(ENABLE_GPU)
+    return QString("Enabled");
+#elif !defined(ENABLE_GPU)
+    return QString("Disabled");
+#else
+    return QString("Disabled");
+#endif
+}
+
 QString ClientModel::formatFullVersion() const
 {
     return QString::fromStdString(FormatFullVersion());
