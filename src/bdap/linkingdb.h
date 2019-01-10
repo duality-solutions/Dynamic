@@ -22,6 +22,7 @@ public:
     bool AddMyLinkRecipient(const CLinkRequest& link);
     bool AddMyLinkRequest(const CLinkRequest& link);
     bool ReadMyLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
+    bool ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests);
     bool EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey);
     bool CleanupMyLinkRequestDB(int& nRemoved);
@@ -41,6 +42,7 @@ public:
     bool AddMyLinkSender(const CLinkAccept& link);
     bool AddMyLinkAccept(const CLinkAccept& link);
     bool ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
+    bool ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts);
     bool EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey);
     bool CleanupMyLinkAcceptDB(int& nRemoved);

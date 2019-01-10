@@ -32,6 +32,31 @@ bool CLinkRequestDB::ReadMyLinkRequest(const std::vector<unsigned char>& vchPubK
     return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
 }
 
+// Lists active pending link requests.
+bool CLinkRequestDB::ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests)
+{
+    int index = 0;
+    std::pair<std::string, CharString> key;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        try {
+            if (pcursor->GetKey(key) && key.first == "mylink") {
+                CLinkRequest link;
+                pcursor->GetValue(link);
+                vchLinkRequests.push_back(link);
+                index++;
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
 bool CLinkRequestDB::EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey)
 {
     if (!MyLinkRequestExists(vchPubKey))
@@ -58,12 +83,12 @@ bool CLinkRequestDB::CleanupMyLinkRequestDB(int& nRemoved)
     LOCK(cs_link_request);
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
-    CLinkRequest link;
     std::pair<std::string, std::vector<unsigned char> > key;
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         try {
             if (pcursor->GetKey(key) && key.first == "mylink") {
+                CLinkRequest link;
                 pcursor->GetValue(link);
                 if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
                 {
@@ -138,6 +163,31 @@ bool CLinkAcceptDB::ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey
     return CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link);
 }
 
+// Lists my active links pending accept tx.
+bool CLinkAcceptDB::ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts)
+{
+    int index = 0;
+    std::pair<std::string, CharString> key;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->SeekToFirst();
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        try {
+            if (pcursor->GetKey(key) && key.first == "mylink") {
+                CLinkAccept link;
+                pcursor->GetValue(link);
+                vchLinkAccepts.push_back(link);
+                index++;
+            }
+            pcursor->Next();
+        }
+        catch (std::exception& e) {
+            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+        }
+    }
+    return true;
+}
+
 bool CLinkAcceptDB::EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey)
 {
     if (!MyLinkAcceptExists(vchPubKey))
@@ -164,12 +214,12 @@ bool CLinkAcceptDB::CleanupMyLinkAcceptDB(int& nRemoved)
     LOCK(cs_link_accept);
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
     pcursor->SeekToFirst();
-    CLinkRequest link;
     std::pair<std::string, std::vector<unsigned char> > key;
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         try {
             if (pcursor->GetKey(key) && key.first == "mylink") {
+                CLinkRequest link;
                 pcursor->GetValue(link);
                 if ((unsigned int)chainActive.Tip()->GetMedianTimePast() >= link.nExpireTime)
                 {
