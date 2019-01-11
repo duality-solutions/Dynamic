@@ -36,7 +36,6 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     txDomainEntry.OID = vchDefaultOIDPrefix;
     txDomainEntry.DomainComponent = vchDefaultDomainName;
     txDomainEntry.OrganizationalUnit = vchDefaultPublicOU;
-    
     txDomainEntry.CommonName = vchCommonName;
     txDomainEntry.OrganizationName = vchDefaultOrganizationName;
     txDomainEntry.ObjectID = vchObjectID;

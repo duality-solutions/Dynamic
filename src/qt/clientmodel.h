@@ -77,6 +77,11 @@ public:
     //! Return warnings to be displayed in status bar
     QString getStatusBarWarnings() const;
 
+    //! Return CPU and GPU states
+    QString CPUAVXMode() const;
+    QString GPUMode() const;
+    QString GPUState() const;
+
     QString formatFullVersion() const;
     QString formatSubVersion() const;
     bool isReleaseVersion() const;

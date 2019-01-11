@@ -296,4 +296,5 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("dht_publickey", stringFromVch(entry.DHTPublicKey)));
     }
     return true;
+
 }

@@ -21,7 +21,7 @@
 QTabBar { alignment: left; }</string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_info">
       <attribute name="title">
@@ -31,6 +31,16 @@ QTabBar { alignment: left; }</string>
        <property name="horizontalSpacing">
         <number>12</number>
        </property>
+       <item row="5" column="0">
+        <widget class="QLabel" name="labelClientUserAgent">
+         <property name="text">
+          <string>User Agent</string>
+         </property>
+         <property name="indent">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label_9">
          <property name="font">
@@ -44,40 +54,7 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Client version</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" colspan="2">
-        <widget class="QLabel" name="clientVersion">
-         <property name="cursor">
-          <cursorShape>IBeamCursor</cursorShape>
-         </property>
-         <property name="text">
-          <string>N/A</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::PlainText</enum>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelClientUserAgent">
-         <property name="text">
-          <string>User Agent</string>
-         </property>
-         <property name="indent">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" colspan="2">
+       <item row="5" column="1" colspan="2">
         <widget class="QLabel" name="clientUserAgent">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -93,40 +70,7 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_berkeleyDBVersion">
-         <property name="text">
-          <string>Using BerkeleyDB version</string>
-         </property>
-         <property name="indent">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" colspan="2">
-        <widget class="QLabel" name="berkeleyDBVersion">
-         <property name="cursor">
-          <cursorShape>IBeamCursor</cursorShape>
-         </property>
-         <property name="text">
-          <string>N/A</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::PlainText</enum>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_12">
-         <property name="text">
-          <string>Datadir</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1" colspan="2">
+       <item row="7" column="1" colspan="2">
         <widget class="QLabel" name="dataDir">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -145,14 +89,47 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="1" colspan="2">
+        <widget class="QLabel" name="berkeleyDBVersion">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Datadir</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_berkeleyDBVersion">
+         <property name="text">
+          <string>Using BerkeleyDB version</string>
+         </property>
+         <property name="indent">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
         <widget class="QLabel" name="label_13">
          <property name="text">
           <string>Startup time</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1" colspan="2">
+       <item row="8" column="1" colspan="2">
         <widget class="QLabel" name="startupTime">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -168,7 +145,7 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="labelNetwork">
          <property name="font">
           <font>
@@ -181,14 +158,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="10" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Name</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1" colspan="2">
+       <item row="10" column="1" colspan="2">
         <widget class="QLabel" name="networkName">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -204,14 +181,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="11" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Number of connections</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="1" colspan="2">
+       <item row="11" column="1" colspan="2">
         <widget class="QLabel" name="numberOfConnections">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -227,21 +204,21 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="12" column="0">
         <widget class="QLabel" name="dynodeCountLabel">
          <property name="text">
           <string>Number of Dynodes</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
+       <item row="12" column="1">
         <widget class="QLabel" name="dynodeCount">
          <property name="text">
           <string>N/A</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
+       <item row="13" column="0">
         <widget class="QLabel" name="label_10">
          <property name="font">
           <font>
@@ -254,14 +231,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="0">
+       <item row="14" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
           <string>Current number of blocks</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="1" colspan="2">
+       <item row="14" column="1" colspan="2">
         <widget class="QLabel" name="numberOfBlocks">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -277,14 +254,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="12" column="0">
+       <item row="15" column="0">
         <widget class="QLabel" name="labelLastBlockTime">
          <property name="text">
           <string>Last block time</string>
          </property>
         </widget>
        </item>
-       <item row="12" column="1" colspan="2">
+       <item row="15" column="1" colspan="2">
         <widget class="QLabel" name="lastBlockTime">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -300,7 +277,7 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="13" column="0">
+       <item row="16" column="0">
         <widget class="QLabel" name="labelMempoolTitle">
          <property name="font">
           <font>
@@ -313,14 +290,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="14" column="0">
+       <item row="17" column="0">
         <widget class="QLabel" name="labelNumberOfTransactions">
          <property name="text">
           <string>Current number of transactions</string>
          </property>
         </widget>
        </item>
-       <item row="14" column="1">
+       <item row="17" column="1">
         <widget class="QLabel" name="mempoolNumberTxs">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -336,14 +313,14 @@ QTabBar { alignment: left; }</string>
          </property>
         </widget>
        </item>
-       <item row="15" column="0">
+       <item row="19" column="0">
         <widget class="QLabel" name="labelMemoryUsage">
          <property name="text">
           <string>Memory usage</string>
          </property>
         </widget>
        </item>
-       <item row="15" column="1">
+       <item row="19" column="1">
         <widget class="QLabel" name="mempoolSize">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
@@ -399,7 +376,99 @@ QTabBar { alignment: left; }</string>
          </item>
         </layout>
        </item>
-       <item row="17" column="0">
+       <item row="3" column="1" colspan="2">
+        <widget class="QLabel" name="gpuMining">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>GPU Mining:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QLabel" name="gpuMode">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QLabel" name="cpuMode">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>CPU Mode:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>GPU Mode:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Client version</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QLabel" name="clientVersion">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>N/A</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="20" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -458,7 +527,7 @@ QTabBar { alignment: left; }</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../dynamic.qrc">  
+            <iconset>
              <normaloff>:/icons/fontsmaller</normaloff>:/icons/fontsmaller</iconset>
            </property>
            <property name="iconSize">
@@ -490,7 +559,7 @@ QTabBar { alignment: left; }</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../dynamic.qrc">  
+            <iconset>
              <normaloff>:/icons/fontbigger</normaloff>:/icons/fontbigger</iconset>
            </property>
            <property name="iconSize">
