@@ -605,6 +605,9 @@ void RPCConsole::setClientModel(ClientModel* model)
         showOrHideBanTableIfRequired();
 
         // Provide initial values
+        ui->cpuMode->setText(model->CPUAVXMode());
+        ui->gpuMode->setText(model->GPUMode());
+        ui->gpuMining->setText(model->GPUState());
         ui->clientVersion->setText(model->formatFullVersion());
         ui->clientUserAgent->setText(model->formatSubVersion());
         ui->dataDir->setText(model->dataDir());
