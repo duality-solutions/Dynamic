@@ -43,10 +43,11 @@ bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
 int GetBDAPOpType(const CScript& script);
 int GetBDAPOpType(const CTxOut& out);
-std::string GetBDAPOpTypeString(int& op1, int& op2);
+std::string GetBDAPOpTypeString(const int& op1, const int& op2);
 bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp, vchCharString& vvchOpParameters, int& op1, int& op2);
 bool GetBDAPOpScript(const CTransactionRef& tx, CScript& scriptBDAPOp);
 bool GetBDAPDataScript(const CTransaction& tx, CScript& scriptBDAPData);
+bool GetBDAPDataScript(const CTransactionRef& ptx, CScript& scriptBDAPData);
 bool IsBDAPOperationOutput(const CTxOut& out);
 int GetBDAPOperationOutIndex(const CTransactionRef& tx);
 int GetBDAPOperationOutIndex(int nHeight, const uint256& txHash);

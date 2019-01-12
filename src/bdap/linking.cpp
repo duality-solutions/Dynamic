@@ -113,6 +113,23 @@ std::string CLinkRequest::SharedPubKeyString() const
     return stringFromVch(SharedPubKey);
 }
 
+bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
+{
+    std::vector<unsigned char> vchData;
+    std::vector<unsigned char> vchHash;
+    int nOut;
+    if(!GetBDAPData(tx, vchData, vchHash, nOut))
+    {
+        SetNull();
+        return false;
+    }
+    if(!UnserializeFromData(vchData, vchHash))
+    {
+        return false;
+    }
+    return true;
+}
+
 void CLinkAccept::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsAcceptLink(SER_NETWORK, PROTOCOL_VERSION);
@@ -168,6 +185,12 @@ bool CLinkAccept::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid BDAP link shared pubkey. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
+    // check signature proof size
+    if (SignatureProof.size() > MAX_BDAP_SIGNATURE_PROOF) 
+    {
+        errorMessage = "Invalid signature proof length. The maximum signature proof length is " + std::to_string(MAX_BDAP_SIGNATURE_PROOF) + " characters.";
+        return false;
+    }
     return true;
 }
 
@@ -182,7 +205,7 @@ std::string CLinkAccept::SharedPubKeyString() const
 }
 
 /** Checks if BDAP link request pubkey exists in the memory pool */
-bool LinkRequestExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransactionRef& tx = e.GetSharedTx();

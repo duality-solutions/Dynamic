@@ -52,6 +52,7 @@ static constexpr unsigned int SECONDS_PER_DAY             = 86400; // Number of 
 static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubkeys are 32 bytes and 64 bytes when hex encoded.
 static constexpr unsigned int MAX_BDAP_LINK_MESSAGE       = 256;
 static constexpr unsigned int MAX_BDAP_SIGNATURE_PROOF    = 90;
+static constexpr unsigned int MAX_BDAP_LINK_DATA_SIZE     = 640;
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";

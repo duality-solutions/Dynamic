@@ -7,6 +7,7 @@
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
 #include "core_io.h" // needed for ScriptToAsmStr
+#include "dynodeman.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "primitives/transaction.h"
@@ -15,7 +16,7 @@
 
 #include <univalue.h>
 
-extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue);
+extern void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend);
 
 static constexpr bool fPrintDebug = true;
 
@@ -99,7 +100,8 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
+                 << vchFullObjectPath << txDomainEntry.DHTPublicKey << txDomainEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
 
     CScript scriptDestination;
     scriptDestination = GetScriptForDestination(walletAddress.Get());
@@ -120,7 +122,14 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     if (!txDomainEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -303,7 +312,8 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txUpdatedEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_MODIFY) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
+                 << vchFullObjectPath << txUpdatedEntry.DHTPublicKey << txUpdatedEntry.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txUpdatedEntry.WalletAddress));
     CScript scriptDestination;
@@ -325,7 +335,14 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     if (!txUpdatedEntry.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -401,7 +418,8 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDeletedEntry.vchFullObjectPath();
-    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) << vchFullObjectPath << OP_2DROP << OP_DROP;
+    scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_ACCOUNT_ENTRY) 
+                 << vchFullObjectPath << txDeletedEntry.DHTPublicKey << OP_2DROP << OP_2DROP;
 
     CDynamicAddress walletAddress(stringFromVch(txDeletedEntry.WalletAddress));
     CScript scriptDestination;
@@ -418,7 +436,14 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee);
+    bool fUseInstantSend = false;
+    int enabled = dnodeman.CountEnabled();
+    if (enabled > 5) {
+        // TODO (bdap): calculate cost for instant send.
+        nOperationFee = nOperationFee * 2;
+        fUseInstantSend = true;
+    }
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -517,18 +542,20 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     if (pwalletMain && !pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
+    LogPrint("bdap", "%s -- pubkey size = %u\n", __func__, vvchDHTPubKeys.size());
+
     UniValue result(UniValue::VOBJ);
     uint32_t nCount = 1;
     for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
-        //LogPrintf("mybdapaccounts %s \n", stringFromVch(vchPubKey));
         CDomainEntry entry;
-        if (!pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
-            throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3801 - BDAP entry for " + stringFromVch(vchPubKey) + _(" can not be found.  Get info failed!"));
-        }
-        UniValue oAccount(UniValue::VOBJ);
-        if (BuildBDAPJson(entry, oAccount, false)) {
-            result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
-            nCount++;
+        LogPrint("bdap", "%s -- pubkey = %s\n", __func__, stringFromVch(vchPubKey));
+        if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+            LogPrint("bdap", "%s -- entry = %s\n", __func__, entry.GetFullObjectPath());
+            UniValue oAccount(UniValue::VOBJ);
+            if (BuildBDAPJson(entry, oAccount, false)) {
+                result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
+                nCount++;
+            }
         }
     }
     return result;

@@ -171,7 +171,7 @@ static std::array<char, 32> ArrayPtrToStandardArray32(const unsigned char* pArra
     return arr32;
 }
 
-std::vector<unsigned char> GetLinkRequestSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey)
+std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey)
 {
     // convert private key
     unsigned char const* private_key = StardardArrayToArrayPtr64(dhtKey.privateKey);

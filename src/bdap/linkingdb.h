@@ -9,38 +9,63 @@
 #include "dbwrapper.h"
 #include "sync.h"
 
+class uint256;
+
 static CCriticalSection cs_link_request;
 static CCriticalSection cs_link_accept;
 
 class CLinkRequestDB : public CDBWrapper {
 public:
-    CLinkRequestDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkreqs", nCacheSize, fMemory, fWipe, obfuscate) {
+    CLinkRequestDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkrequest", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
-    bool AddLinkRequest(const CLinkRequest& link, const int op);
-    bool ReadLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
-    bool EraseLinkRequest(const std::vector<unsigned char>& vchPubKey);
+    bool AddMyLinkRecipient(const CLinkRequest& link);
+    bool AddMyLinkRequest(const CLinkRequest& link);
+    bool ReadMyLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
+    bool ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests);
+    bool EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey);
+    bool MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey);
+    bool CleanupMyLinkRequestDB(int& nRemoved);
+
+    bool AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid);
+    bool ReadLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
+    bool EraseLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey);
     bool LinkRequestExists(const std::vector<unsigned char>& vchPubKey);
-    bool UpdateLinkRequest(const std::vector<unsigned char>& vchPubKey, const CLinkRequest& link);
-    bool CleanupLinkRequestDB(int& nRemoved);
-    bool GetLinkRequestInfo(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
+    //bool CleanupIndexLinkRequestDB(int& nRemoved);
 };
 
 class CLinkAcceptDB : public CDBWrapper {
 public:
-    CLinkAcceptDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkaccs", nCacheSize, fMemory, fWipe, obfuscate) {
+    CLinkAcceptDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkaccept", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
-    bool AddAcceptLink(const CLinkAccept& link, const int op);
-    bool ReadAcceptLink(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
-    bool EraseAcceptLink(const std::vector<unsigned char>& vchAcceptPubKey, const std::vector<unsigned char>& vchSharedPubKey) ;
-    bool AcceptLinkExists(const std::vector<unsigned char>& vchPubKey);
-    bool UpdateAcceptLink(const CLinkAccept& link);
-    bool CleanupAcceptLinkDB(int& nRemoved);
-    bool GetAcceptLinkInfo(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
+    bool AddMyLinkSender(const CLinkAccept& link);
+    bool AddMyLinkAccept(const CLinkAccept& link);
+    bool ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
+    bool ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts);
+    bool EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey);
+    bool MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey);
+    bool CleanupMyLinkAcceptDB(int& nRemoved);
+
+    bool AddLinkAcceptIndex(const vchCharString& vvchOpParameters, const uint256& txid);
+    bool ReadLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
+    bool EraseLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedPubKey);
+    bool LinkAcceptExists(const std::vector<unsigned char>& vchPubKey);
+    //bool CleanupIndexLinkAcceptDB(int& nRemoved);
 };
 
-bool GetLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
+bool GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
+bool GetLinkAcceptIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid);
+bool CheckLinkRequestDB();
+bool CheckLinkAcceptDB();
+bool CheckLinkDBs();
+bool FlushLinkRequestDB();
+bool FlushLinkAcceptDB();
+void CleanupLinkRequestDB(int& nRemoved);
+void CleanupLinkAcceptDB(int& nRemoved);
+bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
+                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
+
 
 extern CLinkRequestDB *pLinkRequestDB;
 extern CLinkAcceptDB *pLinkAcceptDB;

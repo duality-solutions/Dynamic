@@ -1234,61 +1234,35 @@ bool CWallet::LoadToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
-bool CWallet::IsLinkRequestFromMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey)
+bool CWallet::IsLinkRequestFromMe(const std::vector<unsigned char>& vchLinkPubKey)
 {
-    if (tx.nVersion != BDAP_TX_VERSION)
-        return false;
+    CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+    CKeyEd25519 keyOut;
+    if (GetDHTKey(keyID, keyOut))
+        return true;
 
-    CScript bdapOpScript;
-    std::string strOpType;
-    if (GetTransactionOpTypeValue(tx, bdapOpScript, strOpType, vchPubKey)) {
-        if (strOpType == "bdap_new_link_request") {
-            CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-            CKeyEd25519 keyOut;
-            if (GetDHTKey(keyID, keyOut))
-                return true;
-        }
-    }
     return false;
 }
 
-bool CWallet::IsLinkRequestForMe(const CTransaction& tx, std::vector<unsigned char>& vchPubKey, std::vector<unsigned char>& vchSharedPubKey)
+bool CWallet::IsLinkRequestForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey)
 {
-    if (tx.nVersion != BDAP_TX_VERSION)
+    std::vector<std::vector<unsigned char>> vvchMyDHTPubKeys;
+    if (!GetDHTPubKeys(vvchMyDHTPubKeys) )
         return false;
 
-    std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
-    if (!GetDHTPubKeys(vvchDHTPubKeys) )
+    if (vvchMyDHTPubKeys.size() == 0)
         return false;
 
-    if (vvchDHTPubKeys.size() == 0)
-        return false;
-
-    const CTransactionRef ptx = MakeTransactionRef(tx);
-    CScript bdapOpScript;
-    int op1, op2;
-    std::vector<std::vector<unsigned char>> vvchOpParameters;
-    if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
-        std::string strOpType = GetBDAPOpTypeString(op1, op2);
-        if (strOpType == "bdap_new_link_request") {
-            if (vvchOpParameters.size() >= 2) {
-                vchPubKey = vvchOpParameters[0];
-                vchSharedPubKey = vvchOpParameters[1];
-                for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
-                    CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-                    CKeyEd25519 keyOut;
-                    if (GetDHTKey(keyID, keyOut)) {
-                        std::vector<unsigned char> vchGetSharedPubKey = GetLinkRequestSharedPubKey(keyOut, vchPubKey);
-                        if (vchGetSharedPubKey == vchSharedPubKey)
-                            return true;
-                    }
-                }
-            }
-            else {
-                return false;
-            }
+    for (const std::vector<unsigned char>& vchMyDHTPubKey : vvchMyDHTPubKeys) {
+        CKeyID keyID(Hash160(vchMyDHTPubKey.begin(), vchMyDHTPubKey.end()));
+        CKeyEd25519 dhtKey;
+        if (GetDHTKey(keyID, dhtKey)) {
+            std::vector<unsigned char> vchGetSharedPubKey = GetLinkSharedPubKey(dhtKey, vchLinkPubKey);
+            if (vchGetSharedPubKey == vchSharedPubKey)
+                return true;
         }
     }
+
     return false;
 }
 
@@ -1328,40 +1302,55 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
             return false;
 
         if (fExisted || IsMine(tx) || IsFromMe(tx)) {
+            const CTransactionRef ptx = MakeTransactionRef(tx);
             if (tx.nVersion == BDAP_TX_VERSION) {
-                std::vector<unsigned char> vchPubKey;
-                bool fIsLinkRequestFromMe = IsLinkRequestFromMe(tx, vchPubKey);
-                if (fIsLinkRequestFromMe) {
-                    const CTransactionRef ptx = MakeTransactionRef(tx);
-                    int nOut;
-                    std::vector<unsigned char> vchData, vchHash;
-                    if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                        //TODO (bdap): Decrypt vchData before storing in local wallet
-                        CWalletDB walletdb(strWalletFile);
-                        if (!walletdb.AddSentLinkRequest(vchPubKey, vchData))
-                            return false;
-
-                        LogPrintf("%s -- IsLinkRequestFromMe vchPubKey = %s, vchData = %s\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchData));
-                    }
-                }
-                std::vector<unsigned char> vchSharedPubKey;
-                bool fIsLinkRequestForMe = IsLinkRequestForMe(tx, vchPubKey, vchSharedPubKey);
-                if (fIsLinkRequestForMe) {
-                    const CTransactionRef ptx = MakeTransactionRef(tx);
-                    int nOut;
-                    std::vector<unsigned char> vchData, vchHash;
-                    if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                        //TODO (bdap): Decrypt vchData before storing in local wallet
-                        CWalletDB walletdb(strWalletFile);
-                        if (!walletdb.AddReceiveLinkRequest(vchSharedPubKey, vchData))
-                            return false;
-
-                        LogPrintf("%s -- IsLinkRequestForMe vchPubKey = %s, vchSharedPubKey = %s, vchData = %s\n", __func__, stringFromVch(vchPubKey), stringFromVch(vchSharedPubKey), stringFromVch(vchData));
+                CScript bdapOpScript;
+                int op1, op2;
+                std::vector<std::vector<unsigned char>> vvchOpParameters;
+                if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
+                    std::string strOpType = GetBDAPOpTypeString(op1, op2);
+                    if (strOpType == "bdap_new_link_request" && vvchOpParameters.size() > 1) {
+                        std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
+                        // Check to see if this link request is from one of my BDAP accounts.
+                        {
+                            bool fIsLinkRequestFromMe = IsLinkRequestFromMe(vchLinkPubKey);
+                            if (fIsLinkRequestFromMe) {
+                                int nOut;
+                                std::vector<unsigned char> vchData, vchHash;
+                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                    // version 0 is public and unencrypted
+                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                    CLinkRequest link(MakeTransactionRef(tx));
+                                    //TODO (bdap): Verify SignatureProof
+                                    pLinkRequestDB->AddMyLinkRecipient(link);
+                                    pLinkRequestDB->AddMyLinkRequest(link);
+                                    LogPrintf("%s -- Link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                }
+                            }
+                        }
+                        // Check to see if this link request is for one of my BDAP accounts.
+                        {
+                            std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
+                            bool fIsLinkRequestForMe = IsLinkRequestForMe(vchLinkPubKey, vchSharedPubKey);
+                            if (fIsLinkRequestForMe) {
+                                int nOut;
+                                std::vector<unsigned char> vchData, vchHash;
+                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                    // version 0 is public and unencrypted
+                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                    CLinkAccept link(MakeTransactionRef(tx));
+                                    //TODO (bdap): Verify SignatureProof
+                                    pLinkAcceptDB->AddMyLinkSender(link);
+                                    pLinkAcceptDB->AddMyLinkAccept(link);
+                                    LogPrintf("%s -- Link request for me found! vchLinkPubKey = %s, vchSharedPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey), stringFromVch(vchSharedPubKey));
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            CWalletTx wtx(this, MakeTransactionRef(tx));
+            CWalletTx wtx(this, ptx);
                 
             // Get merkle branch if transaction was found in a block
             if (posInBlock != -1)
@@ -3650,8 +3639,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
                 }
                 else if (strOpType == "bdap_new_link_request") {
-                    CLinkRequest link;
-                    if (GetLinkRequest(vchValue, link)) {
+                    uint256 txid;
+                    if (GetLinkRequestIndex(vchValue, txid)) {
                         strFailReason = _("Public key already used for a link request.");
                         return false;
                     }
@@ -3662,10 +3651,14 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     return false;
                 }
                 else if (strOpType == "bdap_new_link_accept") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
+                    uint256 txid;
+                    if (GetLinkAcceptIndex(vchValue, txid)) {
+                        strFailReason = _("Public key already used for an accepted link.");
+                        return false;
+                    }
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_accept") {
+                else if (strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }

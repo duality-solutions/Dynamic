@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_BDAP_ENTRYCHANNEL_H
-#define DYNAMIC_BDAP_ENTRYCHANNEL_H
+#ifndef DYNAMIC_BDAP_SIDECHAIN_H
+#define DYNAMIC_BDAP_SIDECHAIN_H
 
 #include "amount.h"
 #include "bdap.h"
@@ -20,7 +20,7 @@ enum ResourcePointerType {
     CLOUDSTORAGE = 3
 };
 
-class CEntryChannel {
+class CSideChain {
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
@@ -40,18 +40,18 @@ public:
 
     CDomainEntry* OwnerDomainEntry;
 
-    CEntryChannel() {
+    CSideChain() {
         SetNull();
     }
 
-    CEntryChannel(const CTransactionRef& tx) {
+    CSideChain(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
     }
 
     inline void SetNull()
     {
-        nVersion = CEntryChannel::CURRENT_VERSION;
+        nVersion = CSideChain::CURRENT_VERSION;
         OwnerFullPath.clear();
         Description.clear();
         ResourcePointer.clear();
@@ -84,15 +84,15 @@ public:
         READWRITE(txHash);
     }
 
-    inline friend bool operator==(const CEntryChannel& a, const CEntryChannel& b) {
+    inline friend bool operator==(const CSideChain& a, const CSideChain& b) {
         return (a.OwnerFullPath == b.OwnerFullPath && a.ResourcePointer == b.ResourcePointer && a.Description == b.Description && a.nHeight == b.nHeight);
     }
 
-    inline friend bool operator!=(const CEntryChannel& a, const CEntryChannel& b) {
+    inline friend bool operator!=(const CSideChain& a, const CSideChain& b) {
         return !(a == b);
     }
 
-    inline CEntryChannel operator=(const CEntryChannel& b) {
+    inline CSideChain operator=(const CSideChain& b) {
         OwnerFullPath = b.OwnerFullPath;
         Description = b.Description;
         ResourcePointer = b.ResourcePointer;
@@ -115,4 +115,4 @@ public:
     bool ValidateValues(std::string& errorMessage);
 };
 
-#endif // DYNAMIC_BDAP_ENTRYCHANNEL_H
+#endif // DYNAMIC_BDAP_SIDECHAIN_H

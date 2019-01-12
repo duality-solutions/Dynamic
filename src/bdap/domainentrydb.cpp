@@ -532,8 +532,8 @@ bool CheckRevokeDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
     return false;
 }
 
-bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionRef& tx, 
-                         int op1, int op2, const std::vector<std::vector<unsigned char> >& vvchArgs, bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
+bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
+                                bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck) 
 {
     if (tx->IsCoinBase() && !fJustCheck && !bSanityCheck)
     {
@@ -541,21 +541,8 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
         return true;
     }
 
-    //if (fDebug && !bSanityCheck)
-        LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
-    CScript scriptOp;
-    vchCharString vvchOpParameters;
-    if (!GetBDAPOpScript(tx, scriptOp, vvchOpParameters, op1, op2))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3600 - " + _("Transaction does not contain BDAP operation script!");
-        return error(errorMessage.c_str());
-    }
-
-    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-    //if (fDebug)
-        LogPrintf("%s --, strOperationType= %s \n", __func__, strOperationType);
-
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
     std::vector<unsigned char> vchData;
@@ -580,16 +567,17 @@ bool CheckDomainEntryTxInputs(const CCoinsViewCache& inputs, const CTransactionR
     entry.txHash = tx->GetHash();
     entry.nHeight = nHeight;
 
+    const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
     if (strOperationType == "bdap_new_account")
-        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete_account")
-        return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckDeleteDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_update_account")
-        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckUpdateDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_move_account")
-        return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckMoveDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_revoke_account")
-        return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchOpParameters, errorMessage, fJustCheck);
+        return CheckRevokeDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
 
     return false;
 }

@@ -22,7 +22,7 @@ class CTransaction;
 // and get the needed information to accept the link request
 // It is used to bootstrap the linkage relationship with a new set of public keys
 
-// OP_RETURN Format: std::vector<unsigned char> GetEncryptedRequestMessage(Serialize(CLinkRequest))
+// OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkRequest))
 class CLinkRequest {
 public:
     static const int CURRENT_VERSION=1;
@@ -32,7 +32,7 @@ public:
     CharString RequestorPubKey; // ed25519 public key new/unique for this link
     CharString SharedPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
     CharString LinkMessage; // Link message to recipient
-    CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their DHT pub key.
+    CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their wallet pub key.
 
     unsigned int nHeight;
     uint64_t nExpireTime;
@@ -110,14 +110,7 @@ public:
     std::string SharedPubKeyString() const;
 };
 
-// CLinkAccept are stored serilzed and encrypted in a LibTorrent DHT key value pair entry
-// Stored in the Torrent DHT for a limited time.
-// This is only used when the link recipient wants to accepts the request.
-
-// DHT Data Format (must be under 1000 bytes):
-// CLinkRequest.RequestorPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + spcae + 
-// CLinkAccept.RecipientPubKey.Encrypt(CLinkRequest.SharedSymmetricPrivKey).ToHex() + space +
-// CLinkRequest.SharedSymmetricPrivKey.Encrypt(Serialize(CLinkAccept)).ToHex()
+// OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkAccept))
 class CLinkAccept {
 public:
     static const int CURRENT_VERSION=1;
@@ -127,6 +120,7 @@ public:
     uint256 txLinkRequestHash; // transaction hash for the link request.
     CharString RecipientPubKey; // ed25519 public key new/unique for this link
     CharString SharedPubKey; // ed25519 shared public key using the requestor and recipient keys
+    CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing the requestor's object path with their wallet pub key.
 
     unsigned int nHeight;
     uint64_t nExpireTime;
@@ -134,6 +128,11 @@ public:
 
     CLinkAccept() {
         SetNull();
+    }
+
+    CLinkAccept(const CTransactionRef& tx) {
+        SetNull();
+        UnserializeFromTx(tx);
     }
 
     inline void SetNull()
@@ -144,6 +143,7 @@ public:
         txLinkRequestHash.SetNull();
         RecipientPubKey.clear();
         SharedPubKey.clear();
+        SignatureProof.clear();
         nHeight = 0;
         nExpireTime = 0;
         txHash.SetNull();
@@ -159,14 +159,14 @@ public:
         READWRITE(txLinkRequestHash);
         READWRITE(RecipientPubKey);
         READWRITE(SharedPubKey);
+        READWRITE(SignatureProof);
         READWRITE(VARINT(nHeight));
         READWRITE(VARINT(nExpireTime));
         READWRITE(txHash);
     }
 
     inline friend bool operator==(const CLinkAccept &a, const CLinkAccept &b) {
-        return (a.RequestorFullObjectPath == b.RequestorFullObjectPath && a.RecipientFullObjectPath == b.RecipientFullObjectPath
-                    && a.txLinkRequestHash == b.txLinkRequestHash && a.RecipientPubKey == b.RecipientPubKey && a.SharedPubKey == b.SharedPubKey);
+        return (a.SignatureProof == b.SignatureProof && a.RecipientPubKey == b.RecipientPubKey && a.SharedPubKey == b.SharedPubKey);
     }
 
     inline friend bool operator!=(const CLinkAccept &a, const CLinkAccept &b) {
@@ -179,11 +179,13 @@ public:
         RecipientFullObjectPath = b.RecipientFullObjectPath;
         RecipientPubKey = b.RecipientPubKey;
         SharedPubKey = b.SharedPubKey;
+        SignatureProof = b.SignatureProof;
         txLinkRequestHash = b.txLinkRequestHash;
         return *this;
     }
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
+    bool UnserializeFromTx(const CTransactionRef& tx);
     bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
     void Serialize(std::vector<unsigned char>& vchData);
 
@@ -192,7 +194,7 @@ public:
     std::string SharedPubKeyString() const;
 };
 
-bool LinkRequestExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage);
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage);
 // TODO (BDAP): Implement
 CharString GetEncryptedRequestMessage(const CLinkRequest& requestLink); // stored in an OP_RETURN transaction
 CharString GetEncryptedAcceptMessage(const CLinkRequest& requestLink, const CLinkAccept& acceptLink); // stored on BitTorrent DHT network

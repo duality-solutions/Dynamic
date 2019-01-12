@@ -358,7 +358,7 @@ static void SendMoney(const CTxDestination& address, CAmount nValue, bool fSubtr
     }
 }
 
-void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue)
+void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -385,7 +385,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     vecSend.push_back(recOPScript);
 
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, false, true)) {
+            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -398,7 +398,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
 }
 
 void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOPScript, const CScript& sendAddress, 
-                                CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue)
+                                CWalletTx& wtxNew, const CAmount& nOPValue, const CAmount& nDataValue, const bool fUseInstantSend)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -425,7 +425,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     vecSend.push_back(recOPScript);
     // TODO (bdap) Make sure sendAddress is used to fund the transaction.
     if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosInOut,
-            strError, NULL, true, ALL_COINS, false, true)) {
+            strError, NULL, true, ALL_COINS, fUseInstantSend, true)) {
         if (DEFAULT_MIN_RELAY_TX_FEE + DEFAULT_MIN_RELAY_TX_FEE + nFeeRequired > pwalletMain->GetBalance())
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);

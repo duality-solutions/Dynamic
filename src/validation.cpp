@@ -641,11 +641,21 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
     }
     bool bValid = false;
     if (tx->nVersion == BDAP_TX_VERSION) {
-        if (DecodeBDAPTx(tx, op1, op2, vvchBDAPArgs)) {
+        CScript scriptOp;
+        if (GetBDAPOpScript(tx, scriptOp, vvchBDAPArgs, op1, op2)) {
+            std::string errorMessage;
+            if (vvchBDAPArgs.size() > 3) {
+                errorMessage = "Too many BDAP parameters in operation transactions.";
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+            if (vvchBDAPArgs.size() < 1) {
+                errorMessage = "Not enough BDAP parameters in operation transactions.";
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+
             std::string strOpType = GetBDAPOpTypeString(op1, op2);
             if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
-                std::string errorMessage;
-                bValid = CheckDomainEntryTxInputs(inputs, tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                bValid = CheckDomainEntryTx(tx, scriptOp, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
                 if (!bValid) {
                     errorMessage = "ValidateBDAPInputs: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
@@ -654,15 +664,38 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
             else if (strOpType == "bdap_new_link_request") {
-                if (vvchBDAPArgs.size() < 1)
-                    return false;
-                std::string errorMessage;
                 std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
                 LogPrint("bdap", "%s -- New Link Request vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
-                CLinkRequest link;
-                if (GetLinkRequest(vchPubKey, link)) {
-                    errorMessage = "Public key already used for a link request.";
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
                     return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                uint256 txid;
+                if (GetLinkRequestIndex(vchPubKey, txid)) {
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link request public key already used.";
+                        LogPrintf("%s -- %s\n", __func__, errorMessage);
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
+                }
+                return true;
+            }
+            else if (strOpType == "bdap_new_link_accept") {
+                std::vector<unsigned char> vchPubKey = vvchBDAPArgs[0];
+                LogPrint("bdap", "%s -- New Link Accept vchPubKey = %s\n", __func__, stringFromVch(vchPubKey));
+                bValid = CheckLinkTx(tx, op1, op2, vvchBDAPArgs, fJustCheck, nHeight, errorMessage, bSanity);
+                if (!bValid) {
+                    errorMessage = "ValidateBDAPInputs: CheckLinkTx failed: " + errorMessage;
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                uint256 txid;
+                if (GetLinkAcceptIndex(vchPubKey, txid)) {
+                    if (txid != tx->GetHash()) {
+                        errorMessage = "Link accept public key already used.";
+                        LogPrintf("%s -- %s\n", __func__, errorMessage);
+                        return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                    }
                 }
                 return true;
             }
@@ -755,12 +788,15 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
             }
         }
-        else if (strOpType == "bdap_new_link_request") {
+        else if (strOpType == "bdap_new_link_request" || strOpType == "bdap_new_link_accept") {
             if (vvch.size() < 1)
-                return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-value-failed");
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
+            if (vvch.size() > 3)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
+
             std::vector<unsigned char> vchPubKey = vvch[0];
-            if (LinkRequestExistsInMemPool(pool, vchPubKey, strErrorMessage))
-                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-req-txn-already-in-mempool");
+            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strErrorMessage))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
         }
         else {
             return state.Invalid(false, REJECT_INVALID, "bdap-unknown-unsupported-operation");
@@ -1152,7 +1188,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 __func__, hash.ToString(), FormatStateMessage(state));
         }
 
-        if (!ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, view, CBlock(), true, chainActive.Height())) {
             return false;
         }
 
@@ -2296,7 +2332,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         CCoinsViewCache viewCoinCache(pcoinsTip);
         CTransactionRef ptx = MakeTransactionRef(tx);
-        if (!ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
+        if (tx.nVersion == BDAP_TX_VERSION && !ValidateBDAPInputs(ptx, state, viewCoinCache, block, fJustCheck, pindex->nHeight)) {
             return error("ConnectBlock(): ValidateBDAPInputs on block %s failed\n", block.GetHash().ToString());
         }
 
