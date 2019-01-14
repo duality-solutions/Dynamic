@@ -248,37 +248,37 @@ BanTableModel* ClientModel::getBanTableModel()
 QString ClientModel::CPUAVXMode() const
 {
 #if defined(__AVX512F__)
-    return QString("AVX512");
+    return tr("AVX512");
 #elif defined(__AVX2__)
-    return QString("AVX2");
+    return tr("AVX2");
 #elif !defined(__AVX2__) && !defined(__AVX512F__)
-    return QString("Normal");
+    return tr("Normal");
 #else
-    return QString("Normal");
+    return tr("Normal");
 #endif
 }
 
 QString ClientModel::GPUMode() const
 {
 #if defined(HAVE_CUDA)
-    return QString("CUDA");
+    return tr("CUDA");
 #elif !defined(HAVE_CUDA) && defined(ENABLE_GPU)
-    return QString("OpenCL");
+    return tr("OpenCL");
 #elif !defined(HAVE_CUDA) && !defined(ENABLE_GPU)
-    return QString("N/A");
+    return tr("N/A");
 #else
-    return QString("N/A");
+    return tr("N/A");
 #endif
 }
 
 QString ClientModel::GPUState() const
 {
 #if defined(ENABLE_GPU)
-    return QString("Supported");
+    return tr("Supported");
 #elif !defined(ENABLE_GPU)
-    return QString("Unsupported");
+    return tr("Unsupported");
 #else
-    return QString("Unsupported");
+    return tr("Unsupported");
 #endif
 }
 

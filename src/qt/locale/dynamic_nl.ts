@@ -3722,6 +3722,10 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
         <translation>Aantal CPU-threads dat moet worden gebruikt:</translation>
     </message>
     <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Aantal GPU-devices dat moet worden gebruikt:</translation>
+    </message>
+    <message>
         <source>Your hashrate (built-in miner):</source>
         <translation>Uw hashrate (geïntegreerde  miner):</translation>
     </message>
