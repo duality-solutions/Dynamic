@@ -4105,7 +4105,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Do you want to rebuild the block database now?</source>
-        <translation>Wilt u de blocksdatabase nu opnieuw opbouwen??</translation>
+        <translation>Wilt u de blocksdatabase nu opnieuw opbouwen?</translation>
     </message>
     <message>
         <source>Done loading</source>
