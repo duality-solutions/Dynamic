@@ -88,7 +88,14 @@ DYNAMIC_CORE_H = \
   bdap/linkingdb.h \
   bdap/sidechain.h \
   bdap/utils.h \
+  bip39_chinese_simplified.h \
+  bip39_chinese_traditional.h \
   bip39_english.h \
+  bip39_french.h \
+  bip39_italian.h \
+  bip39_japanese.h \
+  bip39_korean.h \
+  bip39_spanish.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
