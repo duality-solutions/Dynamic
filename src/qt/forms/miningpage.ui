@@ -400,19 +400,8 @@ border-radius: 4px;
                </item>
               </layout>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(0, 0, 0);
-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt; font-weight:600; color:#cc0000;&quot;&gt;Please be aware that mining on CPU at the same time as GPU will impact GPU mining performance.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_3">
+              <widget class="QLabel" name="label_1">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -423,7 +412,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_3">
+              <widget class="QLabel" name="label_2">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -434,7 +423,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="label_3">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -456,7 +445,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="0" column="0">
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="label_5">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -626,19 +615,8 @@ border-radius: 4px;
                </item>
               </layout>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(0, 0, 0);
-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt; font-weight:600; color:#cc0000;&quot;&gt;Please be aware that mining on CPU at the same time as GPU will impact GPU mining performance.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_3">
+              <widget class="QLabel" name="label_6">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -649,7 +627,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="label_7">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -660,7 +638,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_6">
+              <widget class="QLabel" name="label_8">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -671,7 +649,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="label_9">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>
@@ -682,7 +660,7 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item row="0" column="0">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="label_10">
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);</string>

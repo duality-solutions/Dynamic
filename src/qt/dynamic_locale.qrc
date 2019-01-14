@@ -9,6 +9,7 @@
         <file alias="it">locale/dynamic_it.qm</file>
         <file alias="ja">locale/dynamic_ja.qm</file>
         <file alias="ko">locale/dynamic_ko.qm</file>
+        <file alias="nl">locale/dynamic_nl.qm</file>
         <file alias="pl">locale/dynamic_pl.qm</file>
         <file alias="pt">locale/dynamic_pt.qm</file>
         <file alias="ru">locale/dynamic_ru.qm</file>
