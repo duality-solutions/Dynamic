@@ -294,7 +294,8 @@ bool BuildBDAPJson(const CDomainEntry& entry, UniValue& oName, bool fAbridged)
         oName.push_back(Pair("object_full_path", stringFromVch(entry.vchFullObjectPath())));
         oName.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
         oName.push_back(Pair("dht_publickey", stringFromVch(entry.DHTPublicKey)));
+        oName.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
+        oName.push_back(Pair("object_type", entry.ObjectTypeString()));
     }
     return true;
-
 }

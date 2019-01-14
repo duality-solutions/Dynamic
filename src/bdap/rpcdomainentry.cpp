@@ -55,7 +55,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key to wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
@@ -80,7 +80,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key to wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
@@ -538,11 +538,28 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     if (request.params.size() != 0)
         throw std::runtime_error(
             "mybdapaccounts\n"
-            "Returns your BDAP accounts.\n");
+            + HelpRequiringPassphrase() +
+            "\nReturns a list of your BDAP accounts.\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"common_name\"                (string)  BDAP account common name\n"
+            "  \"object_full_path\"           (string)  BDAP account full path\n"
+            "  \"wallet_address\"             (string)  BDAP account wallet address\n"
+            "  \"dht_publickey\"              (string)  BDAP account DHT pubkey\n"
+            "  \"link_address\"               (string)  BDAP account link address\n"
+            "  \"object_type\"                (string)  Type of object (User or Group)\n"
+            "  },...n \n"
+            "\nExamples:\n"
+            + HelpExampleCli("mybdapaccounts", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("mybdapaccounts", ""));
+
+    if (!pwalletMain)
+        throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
     std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
-    if (pwalletMain && !pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
-        throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error adding receiving address key wo wallet for BDAP"));
+    if (!pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
+        return NullUniValue;
 
     LogPrint("bdap", "%s -- pubkey size = %u\n", __func__, vvchDHTPubKeys.size());
 
@@ -554,7 +571,7 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
         if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
             LogPrint("bdap", "%s -- entry = %s\n", __func__, entry.GetFullObjectPath());
             UniValue oAccount(UniValue::VOBJ);
-            if (BuildBDAPJson(entry, oAccount, false)) {
+            if (BuildBDAPJson(entry, oAccount, true)) {
                 result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
                 nCount++;
             }
@@ -568,15 +585,15 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------ -----------------------        ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "adduser",                  &adduser,                      true, {"userid","common name", "registration days"} },
-    { "bdap",            "getusers",                 &getusers,                     true, {"records per page","page returned"} },
-    { "bdap",            "getgroups",                &getgroups,                    true, {"records per page","page returned"} },
+    { "bdap",            "adduser",                  &adduser,                      true, {"userid", "common name", "registration days"} },
+    { "bdap",            "getusers",                 &getusers,                     true, {"records per page", "page returned"} },
+    { "bdap",            "getgroups",                &getgroups,                    true, {"records per page", "page returned"} },
     { "bdap",            "getuserinfo",              &getuserinfo,                  true, {"public name"} },
-    { "bdap",            "updateuser",               &updateuser,                   true, {"userid","common name", "registration days"} },
-    { "bdap",            "updategroup",              &updategroup,                  true, {"groupid","common name", "registration days"} },
+    { "bdap",            "updateuser",               &updateuser,                   true, {"userid", "common name", "registration days"} },
+    { "bdap",            "updategroup",              &updategroup,                  true, {"groupid", "common name", "registration days"} },
     { "bdap",            "deleteuser",               &deleteuser,                   true, {"userid"} },
     { "bdap",            "deletegroup",              &deletegroup,                  true, {"groupid"} },
-    { "bdap",            "addgroup",                 &addgroup,                     true, {"groupid","common name"} },
+    { "bdap",            "addgroup",                 &addgroup,                     true, {"groupid", "common name"} },
     { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"groupid"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
 #endif //ENABLE_WALLET
