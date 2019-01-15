@@ -1258,7 +1258,7 @@ bool AcceptToMemoryPoolWithTime(CTxMemPool& pool, CValidationState& state, const
 
     if (!res || fDryRun || !fluidTimestampCheck) {
         if (!res)
-            LogPrint("mempool", "%s: %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason(), state.GetDebugMessage());
+            LogPrint("mempool", "%s: %s %s %s\n", __func__, tx->GetHash().ToString(), state.GetRejectReason(), state.GetDebugMessage());
         BOOST_FOREACH (const COutPoint& hashTx, coins_to_uncache)
             pcoinsTip->Uncache(hashTx);
     }
