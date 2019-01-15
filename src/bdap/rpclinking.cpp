@@ -142,7 +142,6 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     // Check if pubkey already exists
     uint256 prevTxID;
-    //GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
     if (GetLinkRequestIndex(txLink.RequestorPubKey, prevTxID))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
@@ -180,6 +179,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     //    if (request.params.size() >= 4) {
     //        nDays = request.params[4].get_int();
     //    }
+
+
     uint64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
     CKeyEd25519 dhtKey;
@@ -190,9 +191,9 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) 
                  << vchDHTPubKey << vchSharedPubKey << txLink.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(CPubKey(entryRecipient.LinkAddress).GetID());
+    CScript scriptDest = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
+    CScript scriptSend = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
 
     // check BDAP values
     std::string strMessage;
@@ -328,9 +329,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
                  << vchDHTPubKey << vchSharedPubKey << txLinkAccept.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
+    CScript scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(CPubKey(entryAcceptor.LinkAddress).GetID());
+    CScript scriptSend = GetScriptForDestination(entryAcceptor.GetLinkAddress().Get());
 
     // check BDAP values
     std::string strMessage;
