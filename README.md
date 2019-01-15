@@ -316,8 +316,8 @@ CPU's with AVX2 support:
         Broadwell E processor, Q3 2016
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
-        Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2018
+        Coffee Lake processor, Q4 2017
+
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
@@ -337,9 +337,10 @@ CPU's with AVX512 support:
         Knights Mill processor, 2017
         Skylake-SP processor, 2017
         Skylake-X processor, 2017
-        Cannonlake processor, expected in 2018
-        Ice Lake processor, expected in 2018
+        Cannonlake processor, expected in 2019
+        Ice Lake processor, expected in 2019
        
+
 GPU Mining
 ----------
 To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
@@ -360,14 +361,14 @@ At configure time for CUDA(Nvidia):
 
 Example Build Command
 --------------------
-Qt Wallet and Deamon, CLI version build without GPU support:
+Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
 
     ./autogen.sh && ./configure --with-gui --disable-gpu && make
 
-CLI and Deamon Only build without GPU support:
+CLI and Deamon Only build without GPU support and without AVX support:
 
     ./autogen.sh && ./configure --without-gui --disable-gpu && make
-    
+
 Use Qt Creator as IDE
 ------------------------
 You can use Qt Creator as IDE, for debugging and for manipulating forms, etc.

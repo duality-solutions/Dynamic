@@ -249,9 +249,9 @@ AVX2 Mining Optimisations
 -------------------------
 For increased performance when mining, AVX2 optimisations can be enabled. 
 
-Prior to running the build commands:
+At configure time:
 
-    CPPFLAGS=-march=native
+    --enable-avx2
     
 CPU's with AVX2 support:
 
@@ -262,8 +262,56 @@ CPU's with AVX2 support:
         Broadwell E processor, Q3 2016
         Skylake processor, Q3 2015
         Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
-        Coffee Lake processor, expected in 2017
-        Cannonlake processor, expected in 2017
+        Coffee Lake processor, Q4 2017
+
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
+
+AVX512 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX512 optimisations can be enabled. 
+
+At configure time:
+
+    --enable-avx512f
+    
+CPU's with AVX512 support:
+
+    Intel
+        Xeon Phi x200/Knights Landing processor, 2016
+        Knights Mill processor, 2017
+        Skylake-SP processor, 2017
+        Skylake-X processor, 2017
+        Cannonlake processor, expected in 2019
+        Ice Lake processor, expected in 2019
+       
+
+GPU Mining
+----------
+To enable GPU mining within the wallet, OpenCL or CUDA can be utilised. Please use GCC/G++ 6.4 or newer and for CUDA to be utilised please use CUDA 9.1 or newer and ensure you have graphics drivers installed.
+
+For OpenCL you need the following:
+
+    sudo apt-get install ocl-icd-opencl-dev
+    
+For CUDA please visit: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+    
+At configure time for OpenCL(Nvidia/AMD):
+
+    --enable-gpu 
+
+At configure time for CUDA(Nvidia):
+
+    --enable-gpu --enable-cuda
+
+Example Build Command
+--------------------
+Qt Wallet and Deamon, CLI version build without GPU support and without AVX support:
+
+    ./autogen.sh && ./configure --with-gui --disable-gpu && make
+
+CLI and Deamon Only build without GPU support and without AVX support:
+
+    ./autogen.sh && ./configure --without-gui --disable-gpu && make
+    
