@@ -87,11 +87,12 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchLinkAddress = vchFromString(linkAddress.ToString());
     txDomainEntry.LinkAddress = vchLinkAddress;
 
-    uint64_t nDays = 1461;  //default to 4 years.
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() >= 3) {
-        nDays = request.params[2].get_int();
+        if (!ParseInt64(request.params[2].get_str(), &nDays))
+            throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
     }
-    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
@@ -120,7 +121,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     // check BDAP values
     std::string strMessage;
     if (!txDomainEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + strMessage);
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + strMessage);
 
     bool fUseInstantSend = false;
     int enabled = dnodeman.CountEnabled();
@@ -134,7 +135,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txDomainEntry, oName))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3507 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
@@ -299,11 +300,12 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    uint64_t nDays = 1461;  //default to 4 years.
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() >= 3) {
-        nDays = request.params[2].get_int();
+        if (!ParseInt64(request.params[2].get_str(), &nDays))
+            throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));
     }
-    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txUpdatedEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
 
     CharString data;
@@ -333,7 +335,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     // check BDAP values
     std::string strMessage;
     if (!txUpdatedEntry.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + strMessage);
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + strMessage);
 
     bool fUseInstantSend = false;
     int enabled = dnodeman.CountEnabled();
@@ -347,7 +349,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
 
     UniValue oName(UniValue::VOBJ);
     if(!BuildBDAPJson(txUpdatedEntry, oName))
-        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + _("Failed to read from BDAP JSON object"));
+        throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3704 - " + _("Failed to read from BDAP JSON object"));
     
     if (fPrintDebug) {
         // make sure we can deserialize the transaction from the scriptData and get a valid CDomainEntry class
