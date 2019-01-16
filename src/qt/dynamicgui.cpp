@@ -104,6 +104,7 @@ DynamicGUI::DynamicGUI(const PlatformStyle* _platformStyle, const NetworkStyle* 
                                                                                                                  historyAction(0),
                                                                                                                  dynodeAction(0),
                                                                                                                  miningAction(0),
+                                                                                                                 bdapAction(0),
                                                                                                                  quitAction(0),
                                                                                                                  usedSendingAddressesAction(0),
                                                                                                                  usedReceivingAddressesAction(0),
@@ -366,6 +367,17 @@ void DynamicGUI::createActions()
 #endif
     tabGroup->addAction(miningAction);
 
+    bdapAction = new QAction(QIcon(":/icons/" + theme + "/decentralised"), tr("&BDAP"), this);
+    bdapAction->setStatusTip(tr("BDAP"));
+    bdapAction->setToolTip(bdapAction->statusTip());
+    bdapAction->setCheckable(true);
+#ifdef Q_OS_MAC
+    bdapAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
+#else
+    bdapAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+#endif
+    tabGroup->addAction(bdapAction);    
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -384,6 +396,8 @@ void DynamicGUI::createActions()
     connect(dynodeAction, SIGNAL(triggered()), this, SLOT(gotoDynodePage()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
+    connect(bdapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(bdapAction, SIGNAL(triggered()), this, SLOT(gotoBdapPage()));
 
 #endif // ENABLE_WALLET
 
@@ -579,6 +593,7 @@ void DynamicGUI::createToolBars()
         toolbar->addAction(historyAction);
         toolbar->addAction(dynodeAction);
         toolbar->addAction(miningAction);
+        toolbar->addAction(bdapAction);
 
         /** Create additional container for toolbar and walletFrame and make it the central widget.
             This is a workaround mostly for toolbar styling on Mac OS but should work fine for every other OSes too.
@@ -721,6 +736,7 @@ void DynamicGUI::setWalletActionsEnabled(bool enabled)
     historyAction->setEnabled(enabled);
     dynodeAction->setEnabled(enabled);
     miningAction->setEnabled(enabled);
+    bdapAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -759,6 +775,7 @@ void DynamicGUI::createIconMenu(QMenu* pmenu)
     pmenu->addAction(historyAction);
     pmenu->addAction(dynodeAction);
     pmenu->addAction(miningAction);
+    pmenu->addAction(bdapAction);
     pmenu->addSeparator();
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
@@ -928,6 +945,13 @@ void DynamicGUI::gotoMiningPage()
     miningAction->setChecked(true);
     if (walletFrame)
         walletFrame->gotoMiningPage();
+}
+
+void DynamicGUI::gotoBdapPage()
+{
+    bdapAction->setChecked(true);
+    if (walletFrame)
+        walletFrame->gotoBdapPage();
 }
 
 void DynamicGUI::gotoSignMessageTab(QString addr)

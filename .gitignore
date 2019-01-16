@@ -171,3 +171,6 @@ install_manifest.txt
 # Qt Creator
 *.user
 *.autosave
+
+# Visual Studio Code
+.vscode/
