@@ -15,9 +15,11 @@ class CKeyEd25519;
 
 static constexpr int DHT_GET_ALERT_TYPE_CODE = 75;
 static constexpr int DHT_PUT_ALERT_TYPE_CODE = 76;
-static constexpr int BOOTSTRAP_ALERT_TYPE_CODE = 62;
+static constexpr int DHT_BOOTSTRAP_ALERT_TYPE_CODE = 62;
+static constexpr int DHT_STATS_ALERT_TYPE_CODE = 83;
+static constexpr int DHT_ERROR_ALERT_TYPE_CODE = 73;
 
-void Bootstrap();
+bool Bootstrap();
 bool LoadSessionState(libtorrent::session* dhtSession);
 int SaveSessionState(libtorrent::session* dhtSession);
 std::string GetSessionStatePath();
@@ -30,7 +32,7 @@ void StopTorrentDHTNetwork();
 
 void GetDHTStats(libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
 
-libtorrent::alert* WaitForResponse(libtorrent::session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt);
+libtorrent::alert* WaitForResponse(libtorrent::session* dhtSession, const int alert_type, const std::array<char, 32>& public_key, const std::string& strSalt);
 
 extern libtorrent::session *pTorrentDHTSession;
 

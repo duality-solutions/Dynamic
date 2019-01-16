@@ -42,7 +42,7 @@ static void empty_public_key(std::array<char, 32>& public_key)
     }
 }
 
-alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32> public_key, const std::string strSalt)
+alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32>& public_key, const std::string& strSalt)
 {
     LogPrintf("DHTTorrentNetwork -- WaitForResponse start.\n");
     alert* ret = nullptr;
@@ -97,24 +97,25 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
     return ret;
 }
 
-void Bootstrap()
+bool Bootstrap()
 {
-    LogPrint("dht", "DHTTorrentNetwork -- bootstrapping.\n");
+    LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
     const int64_t timeout = 30000; // 30 seconds
     const int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
     {
         std::vector<CEvent> events;
-        MilliSleep(789);
-        if (GetLastTypeEvent(BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
+        MilliSleep(1500);
+        if (GetLastTypeEvent(DHT_BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
         {
             if (events.size() > 0 ) {
-                LogPrint("dht", "DHTTorrentNetwork -- Bootstrap successful.\n");
-                return;
+                LogPrintf("DHTTorrentNetwork -- Bootstrap successful.\n");
+                return true;
             }
         }
     }
-    LogPrint("dht", "DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
+    LogPrintf("DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
+    return false;
 }
 
 std::string GetSessionStatePath()
@@ -193,14 +194,10 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         settings.LoadSettings();
         pTorrentDHTSession = settings.GetSession();
         
-        
-        if (!pTorrentDHTSession) {
+        if (!pTorrentDHTSession)
             throw std::runtime_error("DHT Torrent network bootstraping error.");
-        }
+        
         StartEventListener(pTorrentDHTSession);
-        // boot strap the DHT LibTorrent network
-        Bootstrap();
-        //SaveSessionState(pTorrentDHTSession);
     }
     catch (const std::runtime_error& e)
     {
