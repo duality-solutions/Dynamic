@@ -170,3 +170,4 @@ install_manifest.txt
 
 # Qt Creator
 *.user
+*.autosave
