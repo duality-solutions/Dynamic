@@ -30,7 +30,8 @@ bool SubmitGetDHTMutableData(const std::array<char, 32>& public_key, const std::
         LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Restarting DHT.\n");
         if (!LoadSessionState(pTorrentDHTSession)) {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
-            Bootstrap();
+            if (!Bootstrap())
+                return false;
         }
         else {
             LogPrintf("DHTTorrentNetwork -- GetDHTMutableData  setting loaded from file.\n");
@@ -108,7 +109,8 @@ bool SubmitPutDHTMutableData(const std::array<char, 32>& public_key, const std::
         LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Restarting DHT.\n");
         if (!LoadSessionState(pTorrentDHTSession)) {
             LogPrintf("DHTTorrentNetwork -- PutDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
-            Bootstrap();
+            if (!Bootstrap())
+                return false;
         }
         else {
             LogPrintf("DHTTorrentNetwork -- PutDHTMutableData  setting loaded from file.\n");

@@ -19,8 +19,6 @@
 #include <libtorrent/time.hpp>
 
 #include <map>
-#include <mutex>
-#include <thread>
 
 using namespace libtorrent;
 
@@ -36,7 +34,6 @@ static CCriticalSection cs_DHTPutEventMap;
 static CCriticalSection cs_DHTPutRequestMap;
 
 static bool fShutdown;
-static std::shared_ptr<std::thread> pEventListenerThread;
 static EventTypeMap m_EventTypeMap;
 static DHTGetEventMap m_DHTGetEventMap;
 static DHTPutEventMap m_DHTPutEventMap;
@@ -157,6 +154,11 @@ static void DHTEventListener(session* dhtSession)
     unsigned int counter = 0;
     while(!fShutdown)
     {
+        if (!dhtSession->is_dht_running()) {
+            LogPrintf("%s -- DHT is not running yet\n", __func__);
+            MilliSleep(2000);
+            continue;
+        }
         if (m_DHTPutRequestMap.size() > 0) {
             CPutRequest put = m_DHTPutRequestMap.begin()->second;
             put.DHTPut();
@@ -177,8 +179,9 @@ static void DHTEventListener(session* dhtSession)
             const uint32_t iAlertCategory = (*iAlert)->category();
             const std::string strAlertMessage = (*iAlert)->message();
             const int iAlertType = (*iAlert)->type();
+            const std::string strAlertTypeName = alert_name(iAlertType);
             if (iAlertType == DHT_GET_ALERT_TYPE_CODE || iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
-                LogPrint("dht", "DHTEventListener -- DHT Alert Message = %s, Alert Type =%d, Alert Category = %u\n", strAlertMessage, iAlertType, iAlertCategory);
+                LogPrint("dht", "DHTEventListener -- DHT Alert Message = %s, Alert Type =%s, Alert Category = %u\n", strAlertMessage, strAlertTypeName, iAlertCategory);
                 MutableKey mKey;
                 if (iAlertType == DHT_GET_ALERT_TYPE_CODE) {
                     // DHT Get Mutable Event
@@ -186,7 +189,7 @@ static void DHTEventListener(session* dhtSession)
                     if (pGet == nullptr)
                         continue;
 
-                    const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, std::string(pGet->what()), 
+                    const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
                     mKey = std::make_pair(event.PublicKey(), event.Salt());
@@ -194,19 +197,25 @@ static void DHTEventListener(session* dhtSession)
                 }
                 else if (iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
                     // DHT Put Mutable Event
+                    LogPrint("dht", "DHTEventListener -- DHT Alert Message = %s, Alert Type =%s, Alert Category = %u\n", strAlertMessage, strAlertTypeName, iAlertCategory);
                     dht_put_alert* pPut = alert_cast<dht_put_alert>((*iAlert));
                     if (pPut == nullptr)
                         continue;
 
-                    const CMutablePutEvent event(strAlertMessage, iAlertType, iAlertCategory, std::string(pPut->what()), 
+                    const CMutablePutEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pPut->public_key), pPut->salt, pPut->seq, aux::to_hex(pPut->signature), pPut->num_success);
 
                     mKey = std::make_pair(event.PublicKey(), event.Salt());
                     AddToDHTPutEventMap(mKey, event);
                 }
             }
+            else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
+                // TODO (dht): handle stats 
+                //dht_stats_alert* pAlert = alert_cast<dht_stats_alert>((*iAlert));
+                LogPrintf("%s -- DHT Alert Message: AlertType = %s\n", __func__, strAlertTypeName); 
+            }
             else {
-                const CEvent event(strAlertMessage, iAlertType, iAlertCategory, std::string((*iAlert)->what()));
+                const CEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName);
                 AddToEventMap(iAlertType, event);
             }
         }
@@ -245,26 +254,19 @@ void StopEventListener()
 {
 	fShutdown = true;
     LogPrint("dht", "DHTEventListener -- stopping.\n");
-    MilliSleep(1100);
-    if (pEventListenerThread != nullptr) {
-        pEventListenerThread->join();
-        pEventListenerThread = nullptr;
-    }
+    MilliSleep(2100);
 }
 
 void StartEventListener(session* dhtSession)
 {
-    LogPrint("dht", "DHTEventListener -- start\n");
+    LogPrint("dht", "StartEventListener -- start\n");
     fShutdown = false;
-    if (pEventListenerThread != nullptr)
-         StopEventListener();
-
-    pEventListenerThread = std::make_shared<std::thread>(std::bind(&DHTEventListener, std::ref(dhtSession)));
+    DHTEventListener(dhtSession);
 }
 
 bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events)
 {
-    LOCK(cs_EventMap);
+    //LOCK(cs_EventMap);
     LogPrint("dht", "GetLastTypeEvent -- m_EventTypeMap.size = %u, type = %u.\n", m_EventTypeMap.size(), type);
     std::multimap<int, EventPair>::iterator iEvents = m_EventTypeMap.find(type);
     while (iEvents != m_EventTypeMap.end()) {
@@ -279,7 +281,7 @@ bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEv
 
 bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event)
 {
-    LOCK(cs_DHTGetEventMap);
+    //LOCK(cs_DHTGetEventMap);
     std::string infoHash = GetInfoHash(mKey.first, mKey.second);
     std::multimap<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent != m_DHTGetEventMap.end()) {
@@ -294,7 +296,7 @@ bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event)
 
 bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event)
 {
-    LOCK(cs_DHTPutEventMap);
+    //LOCK(cs_DHTPutEventMap);
     std::string infoHash = GetInfoHash(mKey.first, mKey.second);
     std::multimap<std::string, CMutablePutEvent>::iterator iMutableEvent = m_DHTPutEventMap.find(infoHash);
     if (iMutableEvent != m_DHTPutEventMap.end()) {
@@ -308,7 +310,7 @@ bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event)
 
 bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents)
 {
-    LOCK(cs_DHTPutEventMap);
+    //LOCK(cs_DHTPutEventMap);
     for (std::multimap<std::string, CMutablePutEvent>::iterator it=m_DHTPutEventMap.begin(); it!=m_DHTPutEventMap.end(); ++it) {
         vchPutEvents.push_back(it->second);
     }
@@ -317,7 +319,7 @@ bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents)
 
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
 {
-    LOCK(cs_DHTGetEventMap);
+    //LOCK(cs_DHTGetEventMap);
     for (std::multimap<std::string, CMutableGetEvent>::iterator it=m_DHTGetEventMap.begin(); it!=m_DHTGetEventMap.end(); ++it) {
         vchGetEvents.push_back(it->second);
     }
