@@ -38,6 +38,15 @@ private:
 
 private Q_SLOTS:
 
+    void listAllUsers();
+    void listMyUsers();
+    void addUser();
+    void deleteUser();
+
+    void listAllGroups();
+    void listMyGroups();
+    void addGroup();
+    void deleteGroup();
 
 };
 

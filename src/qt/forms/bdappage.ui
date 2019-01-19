@@ -13,300 +13,361 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QTabWidget" name="tabWidget">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>20</y>
-     <width>891</width>
-     <height>441</height>
-    </rect>
-   </property>
-   <property name="accessibleDescription">
-    <string/>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tabUsers">
-    <attribute name="title">
-     <string>Users</string>
-    </attribute>
-    <widget class="QPushButton" name="pushButton_All">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="accessibleDescription">
+      <string/>
      </property>
-     <property name="text">
-      <string>List All BDAP Users</string>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-    </widget>
-    <widget class="QLabel" name="label_Users">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="text">
-      <string>BDAP Users</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_My">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>List My BDAP Users</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_UserSearch">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>180</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Search">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Search:</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="addUser">
-     <property name="geometry">
-      <rect>
-       <x>270</x>
-       <y>370</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Create a new address</string>
-     </property>
-     <property name="text">
-      <string>Add User</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../dynamic.qrc">
-       <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="deleteUser">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>370</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Delete the currently selected address from the list</string>
-     </property>
-     <property name="text">
-      <string>Delete User</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../dynamic.qrc">
-       <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QScrollArea" name="scrollArea_Users">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>20</y>
-       <width>431</width>
-       <height>331</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>415</width>
-        <height>329</height>
-       </rect>
-      </property>
+     <widget class="QWidget" name="tabUsers">
+      <attribute name="title">
+       <string>Users</string>
+      </attribute>
+      <widget class="QPushButton" name="pushButton_All">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>List All Users</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_Users">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>BDAP Users</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_My">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>List My Users</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_UserSearch">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_Search">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>160</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Search:</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="addUser">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>370</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Add a user</string>
+       </property>
+       <property name="text">
+        <string>Add User</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../dynamic.qrc">
+         <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="deleteUser">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>370</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Delete the currently selected user from the list</string>
+       </property>
+       <property name="text">
+        <string>Delete User</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../dynamic.qrc">
+         <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QScrollArea" name="scrollArea_Users">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>20</y>
+         <width>431</width>
+         <height>331</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustIgnored</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>415</width>
+          <height>329</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>650</x>
+         <y>10</y>
+         <width>211</width>
+         <height>401</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_Groups">
+      <attribute name="title">
+       <string>Groups</string>
+      </attribute>
+      <widget class="QLabel" name="label_Groups">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>BDAP Groups</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_AllGroups">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>List All Groups</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_MyGroups">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>List My Groups</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_Search_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>160</y>
+         <width>101</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Search:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_GroupSearch">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QScrollArea" name="scrollArea_2">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>20</y>
+         <width>431</width>
+         <height>331</height>
+        </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>415</width>
+          <height>329</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QPushButton" name="addGroup">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>370</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Add a new group</string>
+       </property>
+       <property name="text">
+        <string>Add Group</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../dynamic.qrc">
+         <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="deleteGroup">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>370</y>
+         <width>151</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Delete the currently selected group from the list</string>
+       </property>
+       <property name="text">
+        <string>&amp;Delete Group</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../dynamic.qrc">
+         <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>649</x>
+         <y>10</y>
+         <width>211</width>
+         <height>391</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
-   </widget>
-   <widget class="QWidget" name="tab_Groups">
-    <attribute name="title">
-     <string>Groups</string>
-    </attribute>
-    <widget class="QLabel" name="label_Groups">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>BDAP Groups</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_AllGroups">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>List All BDAP Groups</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_MyGroups">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>List My BDAP Groups</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Search_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Search:</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_GroupSearch">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>180</y>
-       <width>151</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QScrollArea" name="scrollArea_2">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>20</y>
-       <width>431</width>
-       <height>331</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>415</width>
-        <height>329</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QPushButton" name="newGroup">
-     <property name="geometry">
-      <rect>
-       <x>270</x>
-       <y>370</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Create a new address</string>
-     </property>
-     <property name="text">
-      <string>Add Group</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../dynamic.qrc">
-       <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="deleteGroup">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>370</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Delete the currently selected address from the list</string>
-     </property>
-     <property name="text">
-      <string>&amp;Delete Group</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../dynamic.qrc">
-       <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </widget>
-  </widget>
+   </item>
+  </layout>
  </widget>
  <resources>
   <include location="../dynamic.qrc"/>

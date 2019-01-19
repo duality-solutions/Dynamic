@@ -25,6 +25,7 @@ QT_TS = \
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
+  qt/forms/bdapadduserdialog.ui \
   qt/forms/bdappage.ui \
   qt/forms/coincontroldialog.ui \
   qt/forms/dynodelist.ui \
@@ -51,6 +52,7 @@ QT_MOC_CPP = \
   qt/moc_addresstablemodel.cpp \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_bantablemodel.cpp \
+  qt/moc_bdapadduserdialog.cpp \
   qt/moc_bdappage.cpp \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
@@ -124,6 +126,7 @@ DYNAMIC_QT_H = \
   qt/addresstablemodel.h \
   qt/askpassphrasedialog.h \
   qt/bantablemodel.h \
+  qt/bdapadduserdialog.h \
   qt/bdappage.h \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
@@ -285,6 +288,7 @@ DYNAMIC_QT_CPP += \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \
+  qt/bdapadduserdialog.cpp \
   qt/bdappage.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \

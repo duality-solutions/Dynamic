@@ -1,42 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>BdapAddUserDialog</class>
+ <widget class="QDialog" name="BdapAddUserDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>664</width>
-    <height>329</height>
+    <height>246</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Add BDAP User</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <widget class="QLabel" name="label_addUsers">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>40</y>
-     <width>101</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="text">
-    <string>Add User</string>
-   </property>
-  </widget>
   <widget class="QWidget" name="formLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>90</y>
+     <x>100</x>
+     <y>20</y>
      <width>421</width>
      <height>141</height>
     </rect>
@@ -46,7 +30,7 @@
      <widget class="QLineEdit" name="lineEdit_userID"/>
     </item>
     <item row="1" column="0">
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="labelCommonName">
       <property name="text">
        <string>Common name:</string>
       </property>
@@ -56,7 +40,7 @@
      <widget class="QLineEdit" name="lineEdit_commonName"/>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="labelRegistrationDays">
       <property name="text">
        <string>Registration days:</string>
       </property>
@@ -66,7 +50,7 @@
      <widget class="QLineEdit" name="lineEdit_registrationDays"/>
     </item>
     <item row="0" column="0">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="labelUserId">
       <property name="text">
        <string>User ID:</string>
       </property>
@@ -80,9 +64,9 @@
   <widget class="QPushButton" name="addUser">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>260</y>
-     <width>111</width>
+     <x>150</x>
+     <y>190</y>
+     <width>131</width>
      <height>25</height>
     </rect>
    </property>
@@ -106,9 +90,9 @@
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>320</x>
-     <y>260</y>
-     <width>111</width>
+     <x>340</x>
+     <y>190</y>
+     <width>131</width>
      <height>25</height>
     </rect>
    </property>
