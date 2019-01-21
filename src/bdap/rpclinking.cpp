@@ -89,7 +89,7 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
 
 static UniValue SendLinkRequest(const JSONRPCRequest& request)
 {
-     if (request.fHelp || request.params.size() != 4)
+    if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
         throw std::runtime_error(
             "link request userid-from userid-to message\n"
             "Creates a link request transaction on the blockchain."
@@ -98,6 +98,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
             "1. requestor          (string)             BDAP account requesting the link\n"
             "2. recipient          (string)             Link recipient's BDAP account.\n"
             "3. invite message     (string)             Message from requestor to recipient.\n"
+            "4. registration days  (int, optional)      Number of days to keep the link request on the blockchain before pruning.\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -142,7 +143,6 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     // Check if pubkey already exists
     uint256 prevTxID;
-    //GetLinkRequestIndex(const std::vector<unsigned char>& vchPubKey, uint256& txid)
     if (GetLinkRequestIndex(txLink.RequestorPubKey, prevTxID))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
@@ -175,12 +175,13 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     std::vector<unsigned char> vchSignatureProof = vchFromString(EncodeBase64(&vchSig[0], vchSig.size()));
     txLink.SignatureProof = vchSignatureProof;
 
-    uint64_t nDays = 1461;  //default to 4 years.
-    // TODO (bdap): fix invalid int error when passing registration days.
-    //    if (request.params.size() >= 4) {
-    //        nDays = request.params[4].get_int();
-    //    }
-    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
+    if (request.params.size() > 4) {
+         if (!ParseInt64(request.params[4].get_str(), &nDays))
+            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Error parsing registration days parameter = " + request.params[4].get_str());
+    }
+
+    int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
     CKeyEd25519 dhtKey;
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privReqDHTKey, entryRecipient.DHTPublicKey);
@@ -190,9 +191,9 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) 
                  << vchDHTPubKey << vchSharedPubKey << txLink.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(CPubKey(entryRecipient.LinkAddress).GetID());
+    CScript scriptDest = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
+    CScript scriptSend = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
 
     // check BDAP values
     std::string strMessage;
@@ -231,7 +232,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
 static UniValue SendLinkAccept(const JSONRPCRequest& request)
 {
-     if (request.fHelp || request.params.size() != 3)
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 4)
         throw std::runtime_error(
             "link accept userid-from userid-to\n"
             "Creates a link accept transaction on the blockchain."
@@ -239,6 +240,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
             "\nLink Send Arguments:\n"
             "1. accept account          (string)             BDAP account accepting the link\n"
             "2. requestor account       (string)             Link requestor's BDAP account.\n"
+            "3. registration days       (int, optional)      Number of days to keep the link accept on the blockchain before pruning.\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
@@ -313,12 +315,12 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     std::vector<unsigned char> vchSignatureProof = vchFromString(EncodeBase64(&vchSig[0], vchSig.size()));
     txLinkAccept.SignatureProof = vchSignatureProof;
 
-    uint64_t nDays = 1461;  //default to 4 years.
-    // TODO (bdap): fix invalid int error when passing registration days.
-    //    if (request.params.size() >= 4) {
-    //        nDays = request.params[4].get_int();
-    //    }
-    uint64_t nSeconds = nDays * SECONDS_PER_DAY;
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
+    if (request.params.size() > 3) {
+        if (!ParseInt64(request.params[3].get_str(), &nDays))
+            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4107 - Error parsing registration days parameter = " + request.params[3].get_str());
+    }
+    int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLinkAccept.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
     CKeyEd25519 dhtKey;
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privAcceptDHTKey, entryRequestor.DHTPublicKey);
@@ -328,9 +330,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CScript scriptPubKey;
     scriptPubKey << CScript::EncodeOP_N(OP_BDAP_NEW) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
                  << vchDHTPubKey << vchSharedPubKey << txLinkAccept.nExpireTime << OP_2DROP << OP_2DROP << OP_DROP;
-    CScript scriptDest = GetScriptForDestination(CPubKey(entryRequestor.LinkAddress).GetID());
+    CScript scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
     scriptPubKey += scriptDest;
-    CScript scriptSend = GetScriptForDestination(CPubKey(entryAcceptor.LinkAddress).GetID());
+    CScript scriptSend = GetScriptForDestination(entryAcceptor.GetLinkAddress().Get());
 
     // check BDAP values
     std::string strMessage;
@@ -618,7 +620,7 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------ -----------------------        ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "link",                     &link,                         true, {"operation","common name", "registration days"} },
+    { "bdap",            "link",                     &link,                         true, {"operation", "command", "from", "to", "days"} },
 #endif // ENABLE_WALLET
 
 };

@@ -53,6 +53,7 @@ static constexpr unsigned int DHT_HEX_PUBLIC_KEY_LENGTH   = 64; // Ed25519 pubke
 static constexpr unsigned int MAX_BDAP_LINK_MESSAGE       = 256;
 static constexpr unsigned int MAX_BDAP_SIGNATURE_PROOF    = 90;
 static constexpr unsigned int MAX_BDAP_LINK_DATA_SIZE     = 640;
+static constexpr unsigned int DEFAULT_REGISTRATION_DAYS   = 1461; // 4 years
 static const std::string DEFAULT_PUBLIC_DOMAIN            = "bdap.io";
 static const std::string DEFAULT_PUBLIC_OU                = "public";
 static const std::string DEFAULT_ADMIN_OU                 = "admin";
