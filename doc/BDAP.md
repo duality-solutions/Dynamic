@@ -2,11 +2,11 @@
 
 ## Abstract
 
-BDAP gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of [Dynamic](https://github.com/duality-solutions/dynamic) and [Sequence](https://github.com/duality-solutions/sequence).
+[BDAP](https://duality.solutions/bdap) gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of [Dynamic](https://github.com/duality-solutions/dynamic) and [Sequence](https://github.com/duality-solutions/sequence).
 
 ## Technical Information
 
-BDAP is used to create and amend entries on a DHT (Distributed Hash Table), and utilizes the [libtorrent](https://github.com/arvidn/libtorrent) library.
+[BDAP](https://duality.solutions/bdap) is used to create and amend entries on a DHT (Distributed Hash Table), and utilizes the [libtorrent](https://github.com/arvidn/libtorrent) library.
 
 ### BDAP Entry Creation
 
@@ -14,7 +14,7 @@ BDAP is used to create and amend entries on a DHT (Distributed Hash Table), and 
 
 ### BDAP Entry Linking 
 
-Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private. Link requests are stored, serialized and encrypted in a BDAP ```OP_RETURN``` transaction. The link request recipient can decrypt the BDAP ```OP_RETURN``` transaction and get the needed information to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
+Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private. Link requests are stored, serialized and encrypted in a [BDAP](https://duality.solutions/bdap) ```OP_RETURN``` transaction. The link request recipient can decrypt the [BDAP](https://duality.solutions/bdap) ```OP_RETURN``` transaction and get the needed information to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
 
 ```
 CharString RequestorFullObjectPath; // Requestor's BDAP object path
@@ -57,7 +57,7 @@ CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing
 
 ### BDAP Code
 
-All of the code for BDAP can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
+All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
 
 ### DHT RPC Calls
 
