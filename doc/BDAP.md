@@ -79,4 +79,4 @@ All of the code for BDAP can be found in the [/src/bdap/](https://github.com/dua
 
 ### DHT Code
 
-All of the code for the DHT can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/dht) directory of Dynamic (DYN).
+All of the code for the DHT can be found in the [/src/dht/](https://github.com/duality-solutions/Dynamic/tree/master/src/dht) directory of Dynamic (DYN).
