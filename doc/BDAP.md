@@ -84,8 +84,8 @@ Entry linking is a type of DAP binding operation and is used to manage domain en
 
 ### BDAP Code
 
-All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
+All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of [Dynamic](https://github.com/duality-solutions/dynamic).
 
 ### DHT Code
 
-All of the code for the DHT can be found in the [/src/dht/](https://github.com/duality-solutions/Dynamic/tree/master/src/dht) directory of Dynamic (DYN).
+All of the code for the DHT can be found in the [/src/dht/](https://github.com/duality-solutions/Dynamic/tree/master/src/dht) directory of [Dynamic](https://github.com/duality-solutions/dynamic).
