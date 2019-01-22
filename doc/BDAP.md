@@ -4,7 +4,9 @@
 
 BDAP gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of Dynamic and Sequence.
 
-## Technical Documentation
+## Technical Information
+
+BDAP is used to create and amend entries on a DHT (Distributed Hash Table), and utilizes the [libtorrent](https://github.com/arvidn/libtorrent) library.
 
 ### BDAP Entry Linking 
 
