@@ -2,9 +2,9 @@
 
 ## Abstract
 
-[BDAP](https://duality.solutions/bdap) gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of [Dynamic](https://github.com/duality-solutions/dynamic) and [Sequence](https://github.com/duality-solutions/sequence). This design allows user controlled nodes to securely connect, privately share data without a third-party intermediary, and to scale the database up indefinitely.
+[BDAP (Blockchain Directory Access Protocol](https://duality.solutions/bdap) gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of [Dynamic](https://github.com/duality-solutions/dynamic) and [Sequence](https://github.com/duality-solutions/sequence). This design allows user controlled nodes to securely connect, privately share data without a third-party intermediary, and to scale the database up indefinitely.
 
-BDAP enables the creation of applications across the spectrum of industry, drastically reducing the costs involved with core information systems. Removing the requirement for the majority of administration roles and the need for trusted third parties. Rendering current centralized database systems such as LDAP (Lightweight Directory Access Protocol) a thing of the past.
+BDAP enables the creation of applications across the spectrum of industry, drastically reducing the costs involved with core information systems. Removing the requirement for the majority of administration roles and the need for trusted third parties. Rendering current centralized database systems such as [LDAP (Lightweight Directory Access Protocol)](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol) a thing of the past.
 
 ## Technical Information
 
