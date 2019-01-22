@@ -221,7 +221,7 @@ UniValue getuserinfo(const JSONRPCRequest& request)
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getuserinfo <public name>\nList BDAP entry.\n");
+        throw std::runtime_error("getuserinfo <public name>\nList BDAP user entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
@@ -249,7 +249,7 @@ UniValue getgroupinfo(const JSONRPCRequest& request)
 {
     if (request.params.size() != 1) 
     {
-        throw std::runtime_error("getgroupinfo <public group>\nList BDAP entry.\n");
+        throw std::runtime_error("getgroupinfo <public group>\nList BDAP group entry.\n");
     }
 
     CharString vchObjectID = vchFromValue(request.params[0]);
