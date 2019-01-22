@@ -1,0 +1,57 @@
+#**BDAP - Blockchain Directory Access Protocol**
+
+##Abstract
+
+BDAP gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of Dynamic and Sequence.
+
+##Technical Documentation
+
+### BDAP Entry Linking 
+
+Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private.
+
+Link requests are stored, serialized and encrypted in a BDAP ```OP_RETURN``` transaction. The link request recipient can decrypt the BDAP OP_RETURN transaction and get the needed information to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
+
+```
+CharString RequestorFullObjectPath; // Requestor's BDAP object path
+CharString RecipientFullObjectPath; // Recipient's BDAP object path
+CharString RequestorPubKey; // ed25519 public key new/unique for this link
+CharString SharedPubKey; // ed25519 shared public key. RequestorPubKey + Recipient's BDAP DHT PubKey
+CharString LinkMessage; // Link message to recipient
+CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their wallet pub key
+uint256 txLinkRequestHash; // transaction hash for the link request.
+CharString RecipientPubKey; // ed25519 public key new/unique for this link
+CharString SharedPubKey; // ed25519 shared public key using the requestor and recipient keys
+CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing the requestor's object path with their wallet pub key.
+```
+
+### BDAP RPC Calls
+
+```adduser``` - adds a public name entry to blockchain directory:```adduser "userid" "common name" "registration days"```
+
+```getusers``` - list all BDAP public users:```getusers "records per page" "page returned"```
+
+```getgroups``` - list all BDAP public groups:```getgroups "records per page" "page returned"```
+
+```getuserinfo``` - list BDAP entry:```getuserinfo "public name"```
+
+```updateuser``` - update an existing public name blockchain directory entry:```updateuser "userid" "common name" "registration days"```
+
+```updategroup``` - update an existing public group blockchain directory entry:```updategroup "groupid" "common name" "registration days"```
+
+```deleteuser``` - delete an existing public name blockchain directory entry:```deleteuser "userid"```
+
+```deletegroup``` - delete an existing public name blockchain directory entry:```deletegroup "groupid"```
+
+```addgroup``` - add public group entry to blockchain directory:```addgroup "groupid" "common name"```
+
+```getgroupinfo``` - list BDAP entry:```getgroupinfo "groupid"```
+
+```mybdapaccounts``` - returns your BDAP accounts: ```mybdapaccounts```
+
+```link``` - link commands are request, accept, pending, complete, and delete:```link "operation" "common name" "registration days"```
+
+### BDAP Protocol Code
+
+All of the code for BDAP can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
+
