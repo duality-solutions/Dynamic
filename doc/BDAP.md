@@ -2,7 +2,7 @@
 
 ## Abstract
 
-BDAP gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of Dynamic and Sequence.
+BDAP gives programmable access control and direct communication with users on the network, adding a layer of resource hierarchy and providing a distributed database with account linking, making it possible to develop core information systems using the blockchain technology of [Dynamic](https://github.com/duality-solutions/dynamic) and [Sequence](https://github.com/duality-solutions/sequence).
 
 ## Technical Information
 
