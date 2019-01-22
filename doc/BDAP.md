@@ -14,9 +14,7 @@ BDAP is used to create and amend entries on a DHT (Distributed Hash Table), and 
 
 ### BDAP Entry Linking 
 
-Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private.
-
-Link requests are stored, serialized and encrypted in a BDAP ```OP_RETURN``` transaction. The link request recipient can decrypt the BDAP ```OP_RETURN``` transaction and get the needed information to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
+Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private. Link requests are stored, serialized and encrypted in a BDAP ```OP_RETURN``` transaction. The link request recipient can decrypt the BDAP ```OP_RETURN``` transaction and get the needed information to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
 
 ```
 CharString RequestorFullObjectPath; // Requestor's BDAP object path
