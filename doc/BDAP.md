@@ -8,7 +8,7 @@ BDAP enables the creation of applications across the spectrum of industry, drast
 
 ## Technical Information
 
-[BDAP](https://duality.solutions/bdap) is used to create and amend entries on a DHT (Distributed Hash Table), utilizing the [libtorrent](https://github.com/arvidn/libtorrent) library and blockchain of [Dynamic](https://github.com/duality-solutions/dynamic) providing decentralization.
+[BDAP](https://duality.solutions/bdap) is used to create and amend entries on a [libtorrent](https://github.com/arvidn/libtorrent) based DHT (Distributed Hash Table), and utilizes the blockchain of [Dynamic](https://github.com/duality-solutions/dynamic) to provide decentralization.
 
 ### BDAP Entry Creation
 
