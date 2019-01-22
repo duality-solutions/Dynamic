@@ -8,6 +8,10 @@ BDAP gives programmable access control and direct communication with users on th
 
 BDAP is used to create and amend entries on a DHT (Distributed Hash Table), and utilizes the [libtorrent](https://github.com/arvidn/libtorrent) library.
 
+### BDAP Entry Creation
+
+### BDAP Entry Updating
+
 ### BDAP Entry Linking 
 
 Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private.
@@ -53,7 +57,28 @@ CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing
 
 ```link``` - link commands are request, accept, pending, complete, and delete:```link "operation" "common name" "registration days"```
 
-### BDAP Protocol Code
+### BDAP Code
 
 All of the code for BDAP can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
 
+### DHT RPC Calls
+
+```getmutable``` - gets mutable data from the DHT - ```getmutable "pubkey" "operation"```
+
+```putmutable``` - saves mutable data in the DHT - ```putmutable "dht value" "operation" "pubkey" "privkey"```
+
+```dhtinfo``` - gets DHT network stats and info - ```dhtinfo```
+
+```dhtdb``` - gets the local DHT cache database contents - ```dhtdb```
+
+```putbdapdata``` - saves mutable data in the DHT for a BDAP entry - ```putbdapdata "bdap id" "dht value" "operation"```
+
+```getbdapdata``` - gets the mutable data from the DHT for a BDAP entry - ```getbdapdata "bdap id" "operation"```
+
+```dhtputmessages``` - gets all DHT put messages in memory - ```dhtputmessages```
+
+```dhtgetmessages``` - gets all DHT get messages in memory - ```dhtgetmessages```
+
+### DHT Code
+
+All of the code for the DHT can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/dht) directory of Dynamic (DYN).
