@@ -562,3 +562,12 @@ bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, st
     }
     return false;
 }
+
+// The version number for link data is always the first position.
+int GetLinkVersionFromData(const std::vector<unsigned char>& vchData)
+{
+    if (!(vchData.size() > 0))
+        return -1;
+
+    return (int)vchData[0];
+}

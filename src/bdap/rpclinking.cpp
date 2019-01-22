@@ -129,6 +129,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     std::string strLinkMessage = request.params[3].get_str();
 
     CLinkRequest txLink;
+    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated. 
+    txLink.nVersion = 0; // version 0 = unencrytped or a public link.
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
     txLink.LinkMessage = vchFromString(strLinkMessage);
@@ -269,6 +271,8 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
     
     CLinkAccept txLinkAccept;
+    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated. 
+    txLinkAccept.nVersion = 0; // version 0 = unencrytped or a public link.
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
