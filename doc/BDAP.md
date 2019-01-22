@@ -1,4 +1,4 @@
-# **BDAP - Blockchain Directory Access Protocol**
+# BDAP - Blockchain Directory Access Protocol
 
 ## Abstract
 
@@ -64,10 +64,6 @@ Entry linking is a type of DAP binding operation and is used to manage domain en
 
 ```link``` - link commands are request, accept, pending, complete, and delete:```link "operation" "common name" "registration days"```
 
-### BDAP Code
-
-All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
-
 ### DHT RPC Calls
 
 ```getmutable``` - gets mutable data from the DHT - ```getmutable "pubkey" "operation"```
@@ -85,6 +81,10 @@ All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [
 ```dhtputmessages``` - gets all DHT put messages in memory - ```dhtputmessages```
 
 ```dhtgetmessages``` - gets all DHT get messages in memory - ```dhtgetmessages```
+
+### BDAP Code
+
+All of the code for [BDAP](https://duality.solutions/bdap) can be found in the [/src/bdap/](https://github.com/duality-solutions/Dynamic/tree/master/src/bdap) directory of Dynamic (DYN).
 
 ### DHT Code
 
