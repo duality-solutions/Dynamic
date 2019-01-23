@@ -16,11 +16,19 @@ Developers can build their own BDAP based dApps (decentralised applications) by 
 
 ### BDAP Domain Entry Database
 
+Needs content.
+
 ### BDAP Data Auditing
+
+Needs content.
 
 ### BDAP Entry Creation
 
+Needs content.
+
 ### BDAP Entry Updating
+
+Needs content.
 
 ### BDAP Entry Linking 
 
@@ -59,6 +67,8 @@ CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing
 ```
 
 ### BDAP Sidechaining
+
+Needs content.
 
 ### BDAP RPC Calls
 
