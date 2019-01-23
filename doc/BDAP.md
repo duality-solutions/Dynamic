@@ -14,6 +14,10 @@ BDAP enables the creation of applications across the spectrum of industry, drast
 
 Developers can build their own BDAP based dApps (decentralised applications) by using the BDAP Development Kit (BDK).
 
+### BDAP Domain Entry Database
+
+### BDAP Data Auditing
+
 ### BDAP Entry Creation
 
 ### BDAP Entry Updating
@@ -54,49 +58,51 @@ CharString SharedPubKey; // ed25519 shared public key using the requestor and re
 CharString SignatureProof; // Acceptor's BDAP account ownership proof by signing the requestor's object path with their wallet public key.
 ```
 
+### BDAP Sidechaining
+
 ### BDAP RPC Calls
 
-* ```adduser``` - adds a public name entry to blockchain directory:```adduser "userid" "common name" "registration days"```
+* **adduser** - adds a public name entry to blockchain directory:```adduser "userid" "common name" "registration days"```
 
-* ```getusers``` - list all BDAP public users:```getusers "records per page" "page returned"```
+* **getusers** - list all BDAP public users:```getusers "records per page" "page returned"```
 
-* ```getgroups``` - list all BDAP public groups:```getgroups "records per page" "page returned"```
+* **getgroups** - list all BDAP public groups:```getgroups "records per page" "page returned"```
 
-* ```getuserinfo``` - list BDAP entry:```getuserinfo "public name"```
+* **getuserinfo** - list BDAP entry:```getuserinfo "public name"```
 
-* ```updateuser``` - update an existing public name blockchain directory entry:```updateuser "userid" "common name" "registration days"```
+* **updateuser** - update an existing public name blockchain directory entry:```updateuser "userid" "common name" "registration days"```
 
-* ```updategroup``` - update an existing public group blockchain directory entry:```updategroup "groupid" "common name" "registration days"```
+* **updategroup** - update an existing public group blockchain directory entry:```updategroup "groupid" "common name" "registration days"```
 
-* ```deleteuser``` - delete an existing public name blockchain directory entry:```deleteuser "userid"```
+* **deleteuser** - delete an existing public name blockchain directory entry:```deleteuser "userid"```
 
-* ```deletegroup``` - delete an existing public name blockchain directory entry:```deletegroup "groupid"```
+* **deletegroup** - delete an existing public name blockchain directory entry:```deletegroup "groupid"```
 
-* ```addgroup``` - add public group entry to blockchain directory:```addgroup "groupid" "common name"```
+* **addgroup** - add public group entry to blockchain directory:```addgroup "groupid" "common name"```
 
-* ```getgroupinfo``` - list BDAP entry:```getgroupinfo "groupid"```
+* **getgroupinfo** - list BDAP entry:```getgroupinfo "groupid"```
 
-* ```mybdapaccounts``` - returns your BDAP accounts: ```mybdapaccounts```
+* **mybdapaccounts** - returns your BDAP accounts: ```mybdapaccounts```
 
-* ```link``` - link commands are request, accept, pending, complete, and delete:```link "operation" "common name" "registration days"```
+* **link** - link commands are request, accept, pending, complete, and delete:```link "operation" "common name" "registration days"```
 
 ### DHT RPC Calls
 
-* ```getmutable``` - gets mutable data from the DHT - ```getmutable "pubkey" "operation"```
+* **getmutable** - gets mutable data from the DHT - ```getmutable "pubkey" "operation"```
 
-* ```putmutable``` - saves mutable data in the DHT - ```putmutable "dht value" "operation" "pubkey" "privkey"```
+* **putmutable** - saves mutable data in the DHT - ```putmutable "dht value" "operation" "pubkey" "privkey"```
 
-* ```dhtinfo``` - gets DHT network stats and info - ```dhtinfo```
+* **dhtinfo** - gets DHT network stats and info - ```dhtinfo```
 
-* ```dhtdb``` - gets the local DHT cache database contents - ```dhtdb```
+* **dhtdb** - gets the local DHT cache database contents - ```dhtdb```
 
-* ```putbdapdata``` - saves mutable data in the DHT for a BDAP entry - ```putbdapdata "bdap id" "dht value" "operation"```
+* **putbdapdata** - saves mutable data in the DHT for a BDAP entry - ```putbdapdata "bdap id" "dht value" "operation"```
 
-* ```getbdapdata``` - gets the mutable data from the DHT for a BDAP entry - ```getbdapdata "bdap id" "operation"```
+* **getbdapdata** - gets the mutable data from the DHT for a BDAP entry - ```getbdapdata "bdap id" "operation"```
 
-* ```dhtputmessages``` - gets all DHT put messages in memory - ```dhtputmessages```
+* **dhtputmessages**` - gets all DHT put messages in memory - ```dhtputmessages```
 
-* ```dhtgetmessages``` - gets all DHT get messages in memory - ```dhtgetmessages```
+* **dhtgetmessages** - gets all DHT get messages in memory - ```dhtgetmessages```
 
 ### BDAP Code
 
