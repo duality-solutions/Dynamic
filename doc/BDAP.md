@@ -22,7 +22,8 @@ Developers can build their own BDAP based dApps (decentralised applications) by 
 
 Entry linking is a type of DAP binding operation and is used to manage domain entry link requests. When linking entries, we use stealth addresses so the linkage requests remain private. Link requests (class CLinkRequest) are stored, serialized and encrypted in a [BDAP](https://duality.solutions/bdap) ```OP_RETURN``` transaction. The link request recipient can decrypt the [BDAP](https://duality.solutions/bdap) ```OP_RETURN``` transaction and get the needed information (class CLinkAccept) to accept the link request. It is used to bootstrap the linkage relationship with a new set of public keys.
 
-#####class CLinkRequest
+##### class CLinkRequest
+
 ```
 CharString RequestorFullObjectPath; // Requestor's BDAP object path
 
@@ -37,7 +38,7 @@ CharString LinkMessage // Link message to recipient
 CharString SignatureProof; // Requestor's BDAP account ownership proof by signing the recipient's object path with their wallet public key
 ```
 
-#####class CLinkAccept
+##### class CLinkAccept
 
 ```
 CharString RequestorFullObjectPath; // Requestor's BDAP object path
