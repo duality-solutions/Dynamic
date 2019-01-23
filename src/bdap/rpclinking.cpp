@@ -37,7 +37,7 @@ static bool BuildJsonLinkRequestInfo(const CLinkRequest& link, const CDomainEntr
     oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
     oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
     oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
-    oLink.push_back(Pair("signature_proof", stringFromVch(link.SignatureProof)));
+    oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
         CBlockIndex *pindex = chainActive[link.nHeight-1];
@@ -67,7 +67,7 @@ static bool BuildJsonLinkAcceptInfo(const CLinkAccept& link, const CDomainEntry&
     oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
     oLink.push_back(Pair("requestor_link_address", stringFromVch(requestor.LinkAddress)));
     oLink.push_back(Pair("recipient_link_address", stringFromVch(recipient.LinkAddress)));
-    oLink.push_back(Pair("signature_proof", stringFromVch(link.SignatureProof)));
+    oLink.push_back(Pair("signature_proof", link.SignatureProofString()));
     oLink.push_back(Pair("txid", link.txHash.GetHex()));
     if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
         CBlockIndex *pindex = chainActive[link.nHeight-1];
@@ -167,15 +167,8 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     if (pwalletMain && !pwalletMain->GetKey(keyID, key))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - Could not get " + strRequestorFQDN + _("'s private key ") + addressRequestor.ToString());
     
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << strRecipientFQDN;
-    std::vector<unsigned char> vchSig;
-    if (!key.SignCompact(ss.GetHash(), vchSig))
+    if (!CreateSignatureProof(key, strRecipientFQDN, txLink.SignatureProof))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4006 - Error signing " + strRequestorFQDN + _("'s signature proof."));
-
-    std::vector<unsigned char> vchSignatureProof = vchFromString(EncodeBase64(&vchSig[0], vchSig.size()));
-    txLink.SignatureProof = vchSignatureProof;
 
     int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() > 4) {
@@ -308,16 +301,9 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CKey key;
     if (pwalletMain && !pwalletMain->GetKey(keyID, key))
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4105 - Could not get " + strAcceptorFQDN + _("'s private key ") + addressAcceptor.ToString());
-    
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << strMessageMagic;
-    ss << strRequestorFQDN;
-    std::vector<unsigned char> vchSig;
-    if (!key.SignCompact(ss.GetHash(), vchSig))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4106 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
-    std::vector<unsigned char> vchSignatureProof = vchFromString(EncodeBase64(&vchSig[0], vchSig.size()));
-    txLinkAccept.SignatureProof = vchSignatureProof;
+    if (!CreateSignatureProof(key, strRequestorFQDN, txLinkAccept.SignatureProof))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4106 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
     int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() > 3) {

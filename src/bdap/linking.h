@@ -9,9 +9,10 @@
 #include "serialize.h"
 #include "uint256.h"
 
+class CDynamicAddress;
+class CKey;
 class CTxMemPool;
 class CTransaction;
-
 
 // Entry linking is a type of DAP binding operation.  This class is used to
 // manage domain entry link requests. When linking entries, we want 
@@ -108,6 +109,10 @@ public:
     bool IsMyLinkRequest(const CTransactionRef& tx);
     std::string RequestorPubKeyString() const;
     std::string SharedPubKeyString() const;
+    std::string SignatureProofString() const;
+    std::string RequestorFQDN() const;
+    std::string RecipientFQDN() const;
+
 };
 
 // OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkAccept))
@@ -192,9 +197,15 @@ public:
     bool ValidateValues(std::string& errorMessage);
     std::string RecipientPubKeyString() const;
     std::string SharedPubKeyString() const;
+    std::string SignatureProofString() const;
+    std::string RequestorFQDN() const;
+    std::string RecipientFQDN() const;
+
 };
 
 bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage);
+bool CreateSignatureProof(const CKey& key, const std::string& strFQDN, std::vector<unsigned char>& vchSignatureProof);
+bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strFQDN, const std::vector<unsigned char>& vchSig);
 // TODO (BDAP): Implement
 CharString GetEncryptedRequestMessage(const CLinkRequest& requestLink); // stored in an OP_RETURN transaction
 CharString GetEncryptedAcceptMessage(const CLinkRequest& requestLink, const CLinkAccept& acceptLink); // stored on BitTorrent DHT network
