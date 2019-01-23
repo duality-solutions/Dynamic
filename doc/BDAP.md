@@ -110,7 +110,7 @@ Needs content.
 
 * **getbdapdata** - gets the mutable data from the DHT for a BDAP entry:```getbdapdata "bdap id" "operation"```
 
-* **dhtputmessages**` - gets all DHT put messages in memory:```dhtputmessages```
+* **dhtputmessages** - gets all DHT put messages in memory:```dhtputmessages```
 
 * **dhtgetmessages** - gets all DHT get messages in memory:```dhtgetmessages```
 
