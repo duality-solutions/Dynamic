@@ -74,7 +74,7 @@ bool CWalletDB::EraseTx(uint256 hash)
 bool CWalletDB::WriteDHTKey(const CKeyEd25519& key, const std::vector<unsigned char>& vchPubKey, const CKeyMetadata& keyMeta)
 {
     CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-    if (!Write(std::make_pair(std::string("keymeta"), keyID), keyMeta, false))
+    if (!Write(std::make_pair(std::string("dhtkeymeta"), keyID), keyMeta, false))
         return false;
 
     nWalletDBUpdated++;
@@ -610,7 +610,8 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
             }
         }
     } catch (...) {
-        return false;
+        if (strType != "keymeta")
+            return false;
     }
     return true;
 }
