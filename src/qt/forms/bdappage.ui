@@ -20,7 +20,9 @@
       <string/>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">QTabWidget:tab-bar { alignment: left; }
+QTabBar { alignment: left; }
+</string>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -97,7 +99,7 @@
       <widget class="QPushButton" name="addUser">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>330</x>
          <y>370</y>
          <width>151</width>
          <height>25</height>
@@ -120,7 +122,7 @@
       <widget class="QPushButton" name="deleteUser">
        <property name="geometry">
         <rect>
-         <x>420</x>
+         <x>550</x>
          <y>370</y>
          <width>151</width>
          <height>25</height>
@@ -140,47 +142,12 @@
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QScrollArea" name="scrollArea_Users">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>20</y>
-         <width>431</width>
-         <height>331</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOn</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustIgnored</enum>
-       </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>415</width>
-          <height>329</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
       <widget class="QWidget" name="horizontalLayoutWidget_2">
        <property name="geometry">
         <rect>
-         <x>650</x>
+         <x>840</x>
          <y>10</y>
-         <width>211</width>
+         <width>21</width>
          <height>401</height>
         </rect>
        </property>
@@ -199,6 +166,19 @@
          </spacer>
         </item>
        </layout>
+      </widget>
+      <widget class="QTableWidget" name="tableWidget_Users">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>20</y>
+         <width>651</width>
+         <height>331</height>
+        </rect>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_Groups">
@@ -267,36 +247,10 @@
         </rect>
        </property>
       </widget>
-      <widget class="QScrollArea" name="scrollArea_2">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>20</y>
-         <width>431</width>
-         <height>331</height>
-        </rect>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOn</enum>
-       </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents_2">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>415</width>
-          <height>329</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
       <widget class="QPushButton" name="addGroup">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>330</x>
          <y>370</y>
          <width>151</width>
          <height>25</height>
@@ -319,7 +273,7 @@
       <widget class="QPushButton" name="deleteGroup">
        <property name="geometry">
         <rect>
-         <x>420</x>
+         <x>550</x>
          <y>370</y>
          <width>151</width>
          <height>25</height>
@@ -342,27 +296,26 @@
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>649</x>
+         <x>840</x>
          <y>10</y>
-         <width>211</width>
+         <width>20</width>
          <height>391</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+      </widget>
+      <widget class="QTableWidget" name="tableWidget_Groups">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>20</y>
+         <width>651</width>
+         <height>331</height>
+        </rect>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
       </widget>
      </widget>
     </widget>

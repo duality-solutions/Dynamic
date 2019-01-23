@@ -32,7 +32,7 @@ void BdapAddUserDialog::goCancel()
 {
     ui->lineEdit_userID->setPlaceholderText("Cancel");
     QDialog::reject(); //cancelled
-} //goAddUser
+} //goCancel
 
 
 

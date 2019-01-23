@@ -52,6 +52,7 @@ QT_MOC_CPP = \
   qt/moc_addresstablemodel.cpp \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_bantablemodel.cpp \
+  qt/moc_bdapaccounttablemodel.cpp \
   qt/moc_bdapadduserdialog.cpp \
   qt/moc_bdappage.cpp \
   qt/moc_clientmodel.cpp \
@@ -126,6 +127,7 @@ DYNAMIC_QT_H = \
   qt/addresstablemodel.h \
   qt/askpassphrasedialog.h \
   qt/bantablemodel.h \
+  qt/bdapaccounttablemodel.h \
   qt/bdapadduserdialog.h \
   qt/bdappage.h \
   qt/clientmodel.h \
@@ -256,6 +258,7 @@ RES_ICONS = \
 
 DYNAMIC_QT_CPP = \
   qt/bantablemodel.cpp \
+  qt/bdapaccounttablemodel.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
   qt/dynamicaddressvalidator.cpp \

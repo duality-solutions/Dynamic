@@ -6,13 +6,16 @@
 #define BDAPPAGE_H
 
 #include "platformstyle.h"
-
 #include "walletmodel.h"
 
 #include <QPushButton>
 #include <QWidget>
-
 #include <memory>
+
+
+class BdapAccountTableModel;
+class QTableWidget;
+
 
 namespace Ui
 {
@@ -28,11 +31,15 @@ public:
     ~BdapPage();
 
     void setModel(WalletModel* model);
+    BdapAccountTableModel* getBdapAccountTableModel();
+    QTableWidget* getUserTable();
+
 
 private:
     Ui::BdapPage* ui;
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
+    BdapAccountTableModel* bdapAccountTableModel;
 
 
 

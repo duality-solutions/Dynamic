@@ -1,16 +1,20 @@
 #include "bdappage.h"
 #include "ui_bdappage.h"
-
 #include "bdapadduserdialog.h"
-
 #include "guiutil.h"
 #include "walletmodel.h"
+#include "bdapaccounttablemodel.h"
+
+#include "rpcregister.h" //NEED TO MOVE
+#include "rpcserver.h" //NEED TO MOVE
+#include "rpcclient.h" //NEED TO MOVE
 
 #include <stdio.h>
-
+#include <QTableWidget>
 
 BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
-                                                                            ui(new Ui::BdapPage)
+                                                                            ui(new Ui::BdapPage),
+                                                                            bdapAccountTableModel(0)
 {
     ui->setupUi(this);
     
@@ -25,6 +29,14 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->pushButton_MyGroups, SIGNAL(clicked()), this, SLOT(listMyGroups()));
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
     connect(ui->deleteGroup, SIGNAL(clicked()), this, SLOT(deleteGroup()));
+
+
+   LogPrintf("DEBUGGER TABLE --%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
+
+
+    bdapAccountTableModel = new BdapAccountTableModel(this);
+
+
 
 }
 
@@ -42,6 +54,9 @@ void BdapPage::setModel(WalletModel* model)
 void BdapPage::listAllGroups()
 {
     ui->lineEdit_GroupSearch->setPlaceholderText("All Groups");
+
+    LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
+
 } //listAllGroups
 
 void BdapPage::listMyGroups()
@@ -65,6 +80,10 @@ void BdapPage::deleteGroup()
 void BdapPage::listAllUsers()
 {
     ui->lineEdit_UserSearch->setPlaceholderText("All Users");
+
+    LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
+
+
 } //listAllUsers
 
 void BdapPage::listMyUsers()
@@ -84,6 +103,17 @@ void BdapPage::deleteUser()
 {
     ui->lineEdit_UserSearch->setPlaceholderText("Delete User");
 } //deleteUser
+
+BdapAccountTableModel* BdapPage::getBdapAccountTableModel()
+{
+    return bdapAccountTableModel;
+}
+
+
+QTableWidget* BdapPage::getUserTable() 
+{ 
+    return ui->tableWidget_Users; 
+}
 
 
 

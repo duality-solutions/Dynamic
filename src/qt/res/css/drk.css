@@ -2048,7 +2048,8 @@ QWidget#BdapPage .QTabWidget#tabWidget {
 }
 
 QWidget#BdapPage .QTabWidget#tabWidget::pane {
-    background-color:#ffffff;
+    background-color:#000000;
+    border:1px solid white;
 }
 
 
