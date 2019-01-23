@@ -98,21 +98,21 @@ Needs content.
 
 ### DHT RPC Calls
 
-* **getmutable** - gets mutable data from the DHT - ```getmutable "pubkey" "operation"```
+* **getmutable** - gets mutable data from the DHT:```getmutable "pubkey" "operation"```
 
-* **putmutable** - saves mutable data in the DHT - ```putmutable "dht value" "operation" "pubkey" "privkey"```
+* **putmutable** - saves mutable data in the DHT:```putmutable "dht value" "operation" "pubkey" "privkey"```
 
-* **dhtinfo** - gets DHT network stats and info - ```dhtinfo```
+* **dhtinfo** - gets DHT network stats and info:```dhtinfo```
 
-* **dhtdb** - gets the local DHT cache database contents - ```dhtdb```
+* **dhtdb** - gets the local DHT cache database contents:```dhtdb```
 
-* **putbdapdata** - saves mutable data in the DHT for a BDAP entry - ```putbdapdata "bdap id" "dht value" "operation"```
+* **putbdapdata** - saves mutable data in the DHT for a BDAP entry:```putbdapdata "bdap id" "dht value" "operation"```
 
-* **getbdapdata** - gets the mutable data from the DHT for a BDAP entry - ```getbdapdata "bdap id" "operation"```
+* **getbdapdata** - gets the mutable data from the DHT for a BDAP entry:```getbdapdata "bdap id" "operation"```
 
-* **dhtputmessages**` - gets all DHT put messages in memory - ```dhtputmessages```
+* **dhtputmessages**` - gets all DHT put messages in memory:```dhtputmessages```
 
-* **dhtgetmessages** - gets all DHT get messages in memory - ```dhtgetmessages```
+* **dhtgetmessages** - gets all DHT get messages in memory:```dhtgetmessages```
 
 ### BDAP Code
 
