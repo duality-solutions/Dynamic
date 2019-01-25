@@ -1318,13 +1318,25 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                 int nOut;
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    // version 0 is public and unencrypted
-                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                    CLinkRequest link(MakeTransactionRef(tx));
-                                    //TODO (bdap): Verify SignatureProof
-                                    pLinkRequestDB->AddMyLinkRecipient(link);
-                                    pLinkRequestDB->AddMyLinkRequest(link);
-                                    LogPrintf("%s -- Link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkRequest link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkRequestDB->AddMyLinkRequest(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- Error. Link request from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
                                 }
                             }
                         }
@@ -1336,13 +1348,25 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                 int nOut;
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    // version 0 is public and unencrypted
-                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                    CLinkAccept link(MakeTransactionRef(tx));
-                                    //TODO (bdap): Verify SignatureProof
-                                    pLinkAcceptDB->AddMyLinkSender(link);
-                                    pLinkAcceptDB->AddMyLinkAccept(link);
-                                    LogPrintf("%s -- Link request for me found! vchLinkPubKey = %s, vchSharedPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey), stringFromVch(vchSharedPubKey));
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkRequest link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link request for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkRequestDB->AddMyLinkRequest(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- ***** Warning. Link request for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
                                 }
                             }
                         }
