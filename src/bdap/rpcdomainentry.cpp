@@ -185,7 +185,7 @@ UniValue getusers(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_USER);
 
     return oDomainEntryList;
 }
@@ -211,7 +211,7 @@ UniValue getgroups(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_GROUP);
 
     return oDomainEntryList;
 }
