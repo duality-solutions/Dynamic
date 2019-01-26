@@ -46,6 +46,7 @@ public:
     CLinkRequest(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
+        txHash = tx->GetHash();
     }
 
     inline void SetNull()
@@ -139,6 +140,7 @@ public:
     CLinkAccept(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
+        txHash = tx->GetHash();
     }
 
     inline void SetNull()

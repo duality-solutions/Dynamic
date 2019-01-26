@@ -447,6 +447,7 @@ static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
     if (!CheckLinkRequestDB())
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4200 - Can not open link request leveldb database");
 
+    // TODO (bdap): only show where requestor is owned by this wallet and remove accepted links
     std::vector<CLinkRequest> vchLinkRequests;
     if (!pLinkRequestDB->ListMyLinkRequests(vchLinkRequests))
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4201 - Error listing link requests from leveldb");
@@ -456,43 +457,6 @@ static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4202 - Error creating JSON link requests.");
 
     return oLinks;
-}
-
-static bool BuildJsonMyListAccepts(const std::vector<CLinkAccept>& vchLinkAccepts, const std::string& strFromAccount, const std::string& strToAccount, UniValue& oLinkAccepts)
-{
-    int nCount = 1;
-    for (const CLinkAccept& link : vchLinkAccepts) {
-        UniValue oLink(UniValue::VOBJ);
-        bool expired = false;
-        int64_t expired_time = 0;
-        int64_t nTime = 0;
-        if (strFromAccount.empty() || strFromAccount == stringFromVch(link.RequestorFullObjectPath)) {
-            if (strToAccount.empty() || strToAccount == stringFromVch(link.RecipientFullObjectPath)) {
-                oLink.push_back(Pair("requestor_fqdn", stringFromVch(link.RequestorFullObjectPath)));
-                oLink.push_back(Pair("recipient_fqdn", stringFromVch(link.RecipientFullObjectPath)));
-                oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
-                oLink.push_back(Pair("txid", link.txHash.GetHex()));
-                if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
-                    CBlockIndex *pindex = chainActive[link.nHeight-1];
-                    if (pindex) {
-                        nTime = pindex->GetMedianTimePast();
-                    }
-                }
-                oLink.push_back(Pair("time", nTime));
-                expired_time = link.nExpireTime;
-                if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
-                {
-                    expired = true;
-                }
-                oLink.push_back(Pair("expires_on", expired_time));
-                oLink.push_back(Pair("expired", expired));
-                oLinkAccepts.push_back(Pair("link_accept-" + std::to_string(nCount) , oLink));
-                nCount ++;
-            }
-        }
-    }
-    
-    return true;
 }
 
 static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
@@ -530,16 +494,87 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
         ToLowerCase(strToAccountFQDN);
     }
     
-    if (!CheckLinkAcceptDB())
+    if (!CheckLinkRequestDB())
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4200 - Can not open link request leveldb database");
 
-    std::vector<CLinkAccept> vchLinkAccepts;
-    if (!pLinkAcceptDB->ListMyLinkAccepts(vchLinkAccepts))
+    // TODO (bdap): only show where recipient is owned by this wallet and remove accepted links
+    std::vector<CLinkRequest> vchLinkRequests;
+    if (!pLinkRequestDB->ListMyLinkRequests(vchLinkRequests))
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4201 - Error listing link requests from leveldb");
 
     UniValue oLinks(UniValue::VOBJ);
-    if (!BuildJsonMyListAccepts(vchLinkAccepts, strFromAccountFQDN, strToAccountFQDN, oLinks))
+    if (!BuildJsonMyListRequests(vchLinkRequests, strFromAccountFQDN, strToAccountFQDN, oLinks))
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_RPC_ERROR: ERRCODE: 4202 - Error creating JSON link requests.");
+
+    return oLinks;
+}
+
+static bool BuildJsonMyCompletedLinks(const std::vector<CLinkAccept>& vchLinkAccepts, UniValue& oLinkAccepts)
+{
+    int nCount = 1;
+    for (const CLinkAccept& link : vchLinkAccepts) {
+        UniValue oLink(UniValue::VOBJ);
+        bool expired = false;
+        int64_t expired_time = 0;
+        int64_t nTime = 0;
+
+        oLink.push_back(Pair("requestor_fqdn", stringFromVch(link.RequestorFullObjectPath)));
+        oLink.push_back(Pair("recipient_fqdn", stringFromVch(link.RecipientFullObjectPath)));
+        oLink.push_back(Pair("recipient_link_pubkey", link.RecipientPubKeyString()));
+        oLink.push_back(Pair("txid", link.txHash.GetHex()));
+        if ((unsigned int)chainActive.Height() >= link.nHeight-1) {
+            CBlockIndex *pindex = chainActive[link.nHeight-1];
+            if (pindex) {
+                nTime = pindex->GetMedianTimePast();
+            }
+        }
+        oLink.push_back(Pair("time", nTime));
+        expired_time = link.nExpireTime;
+        if(expired_time <= (unsigned int)chainActive.Tip()->GetMedianTimePast())
+        {
+            expired = true;
+        }
+        oLink.push_back(Pair("expires_on", expired_time));
+        oLink.push_back(Pair("expired", expired));
+        oLinkAccepts.push_back(Pair("link_completed-" + std::to_string(nCount) , oLink));
+        nCount ++;
+    }
+
+    return true;
+}
+
+static UniValue ListCompletedLinks(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 2)
+        throw std::runtime_error(
+            "lists completed links\n"
+            "\nLink Complete Arguments: {none}\n"
+            + HelpRequiringPassphrase() +
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"From Account\"               (string)  Requestor's BDAP full path\n"
+            "  \"To Account\"                 (string)  Recipient's BDAP full path\n"
+            "  \"Link Message\"               (string)  Message from requestor to recipient.\n"
+            "  \"Link Request TxID\"          (string)  Transaction ID for the link request\n"
+            "  \"Time\"                       (int)     Transaction time\n"
+            "  \"Expires On\"                 (int)     Link request expiration\n"
+            "  \"Expired\"                    (boolean) Is link request expired\n"
+            "  },...n \n"
+            "\nExamples:\n"
+            + HelpExampleCli("link complete", "") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link complete", ""));
+
+    if (!CheckLinkAcceptDB())
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4300 - Can not open link request leveldb database");
+
+    std::vector<CLinkAccept> vchLinkAccepts;
+    if (!pLinkAcceptDB->ListMyLinkAccepts(vchLinkAccepts))
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4301 - Error listing link requests from leveldb");
+
+    UniValue oLinks(UniValue::VOBJ);
+    if (!BuildJsonMyCompletedLinks(vchLinkAccepts, oLinks))
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4302 - Error creating JSON link requests.");
 
     return oLinks;
 }
@@ -547,7 +582,7 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
 UniValue link(const JSONRPCRequest& request) 
 {
     std::string strCommand;
-    if (request.params.size() >= 2) {
+    if (request.params.size() >= 1) {
         strCommand = request.params[0].get_str();
         ToLowerCase(strCommand);
     }
@@ -567,15 +602,30 @@ UniValue link(const JSONRPCRequest& request)
     else if (strCommand == "accept") {
         return SendLinkAccept(request);
     }
+    else if (strCommand == "complete") {
+        return ListCompletedLinks(request);
+    }
     else if (strCommand == "pending") {
-        std::string strSubCommand = request.params[1].get_str();
-        ToLowerCase(strSubCommand);
-        LogPrintf("%s -- strCommand = %s, strSubCommand = %s\n", __func__, strCommand, strSubCommand);
-        if (strSubCommand == "request") {
-            return ListPendingLinkRequests(request);
-        }
-        else if (strSubCommand == "accept") {
-            return ListPendingLinkAccepts(request);
+        if (request.params.size() >= 2) {
+            std::string strSubCommand = request.params[1].get_str();
+            ToLowerCase(strSubCommand);
+            LogPrintf("%s -- strCommand = %s, strSubCommand = %s\n", __func__, strCommand, strSubCommand);
+            if (strSubCommand == "request") {
+                return ListPendingLinkRequests(request);
+            }
+            else if (strSubCommand == "accept") {
+                return ListPendingLinkAccepts(request);
+            }
+            else {
+                throw std::runtime_error(
+                "link pending\n"
+                + HelpRequiringPassphrase() +
+                "\nLink Pending sub-commands are request or accept.\n"
+                "\nExamples:\n"
+                + HelpExampleCli("link pending request", "") +
+                "\nAs a JSON-RPC call\n"
+                + HelpExampleRpc("link pending request", ""));
+            }
         }
         else {
             throw std::runtime_error(
