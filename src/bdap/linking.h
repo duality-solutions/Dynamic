@@ -106,12 +106,13 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);
-    bool IsMyLinkRequest(const CTransactionRef& tx);
     std::string RequestorPubKeyString() const;
     std::string SharedPubKeyString() const;
     std::string SignatureProofString() const;
     std::string RequestorFQDN() const;
     std::string RecipientFQDN() const;
+    std::set<std::string> SortedAccounts() const;
+    bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
 
 };
 
@@ -200,6 +201,8 @@ public:
     std::string SignatureProofString() const;
     std::string RequestorFQDN() const;
     std::string RecipientFQDN() const;
+    std::set<std::string> SortedAccounts() const;
+    bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
 
 };
 

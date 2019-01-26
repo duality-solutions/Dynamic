@@ -128,8 +128,15 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     
     std::string strLinkMessage = request.params[3].get_str();
 
+    // Check if link request or accept already exists
+    if (!CheckLinkRequestDB())
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4000 - Can not open link request leveldb database");
+
+    if (CheckLinkageRequestExists(strRequestorFQDN, strRecipientFQDN))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - Link request or accept already exists for these accounts.");
+
     CLinkRequest txLink;
-    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated. 
+    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated.
     txLink.nVersion = 0; // version 0 = unencrytped or a public link.
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
@@ -137,7 +144,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CKeyEd25519 privReqDHTKey;
     CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
     if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4000 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
  
     txLink.RequestorPubKey = vchDHTPubKey;
 
@@ -146,34 +153,34 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     // Check if pubkey already exists
     uint256 prevTxID;
     if (GetLinkRequestIndex(txLink.RequestorPubKey, prevTxID))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4003 - " + txLink.RequestorPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get requestor link address
     CDomainEntry entryRequestor;
     if (!GetDomainEntry(vchRequestorFQDN, entryRequestor))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - Requestor " + strRequestorFQDN + _(" not found."));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4004 - Requestor " + strRequestorFQDN + _(" not found."));
 
     // Get recipient link address
     CDomainEntry entryRecipient;
     if (!GetDomainEntry(vchRecipientFQDN, entryRecipient))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4003 - Recipient " + strRecipientFQDN + _(" not found."));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - Recipient " + strRecipientFQDN + _(" not found."));
 
     CDynamicAddress addressRequestor = entryRequestor.GetWalletAddress();
     CKeyID keyID;
     if (!addressRequestor.GetKeyID(keyID))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4004 - Could not get " + strRequestorFQDN + _("'s wallet address key ") + addressRequestor.ToString());
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4006 - Could not get " + strRequestorFQDN + _("'s wallet address key ") + addressRequestor.ToString());
 
     CKey key;
     if (pwalletMain && !pwalletMain->GetKey(keyID, key))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - Could not get " + strRequestorFQDN + _("'s private key ") + addressRequestor.ToString());
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Could not get " + strRequestorFQDN + _("'s private key ") + addressRequestor.ToString());
     
     if (!CreateSignatureProof(key, strRecipientFQDN, txLink.SignatureProof))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4006 - Error signing " + strRequestorFQDN + _("'s signature proof."));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4008 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
     int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() > 4) {
          if (!ParseInt64(request.params[4].get_str(), &nDays))
-            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Error parsing registration days parameter = " + request.params[4].get_str());
+            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4009 - Error parsing registration days parameter = " + request.params[4].get_str());
     }
 
     int64_t nSeconds = nDays * SECONDS_PER_DAY;
@@ -193,7 +200,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     // check BDAP values
     std::string strMessage;
     if (!txLink.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Error validating link request values: " + strMessage);
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4010 - Error validating link request values: " + strMessage);
 
     // TODO (bdap): encrypt data before adding it to OP_RETURN.
     // Create BDAP OP_RETURN script
@@ -220,7 +227,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     UniValue oLink(UniValue::VOBJ);
     if(!BuildJsonLinkRequestInfo(txLink, entryRequestor, entryRecipient, oLink))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - " + _("Failed to build BDAP link JSON object"));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - " + _("Failed to build BDAP link JSON object"));
 
     return oLink;
 }
@@ -263,6 +270,13 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     ToLowerCase(strRequestorFQDN);
     CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
     
+    // Check if link accept already exists
+    if (!CheckLinkRequestDB())
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4100 - Can not open link request leveldb database");
+
+    if (CheckLinkageAcceptExists(strRequestorFQDN, strAcceptorFQDN))
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4101 - Accept link already exists for these accounts.");
+
     CLinkAccept txLinkAccept;
     // TODO (BDAP): Update to version 1 when BDAP encryption is integrated. 
     txLinkAccept.nVersion = 0; // version 0 = unencrytped or a public link.
@@ -272,7 +286,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CKeyEd25519 privAcceptDHTKey;
     CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
     if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4100 - " + _("Error adding ed25519 key to wallet for BDAP link"));
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4102 - " + _("Error adding ed25519 key to wallet for BDAP link"));
  
     txLinkAccept.RecipientPubKey = vchDHTPubKey;
 
@@ -281,34 +295,34 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     // Check if pubkey already exists
     uint256 prevTxID;
     if (GetLinkAcceptIndex(txLinkAccept.RecipientPubKey, prevTxID))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4101 - " + txLinkAccept.RecipientPubKeyString() + _(" entry already exists.  Can not add duplicate."));
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4103 - " + txLinkAccept.RecipientPubKeyString() + _(" entry already exists.  Can not add duplicate."));
 
     // Get link accepting address
     CDomainEntry entryAcceptor;
     if (!GetDomainEntry(vchAcceptorFQDN, entryAcceptor))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4102 - Acceptor " + strAcceptorFQDN + _(" not found."));
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - Acceptor " + strAcceptorFQDN + _(" not found."));
 
     // Get requestor link address
     CDomainEntry entryRequestor;
     if (!GetDomainEntry(vchRequestorFQDN, entryRequestor))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4103 - Requestor " + strRequestorFQDN + _(" not found."));
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4105 - Requestor " + strRequestorFQDN + _(" not found."));
 
     CDynamicAddress addressAcceptor = entryAcceptor.GetWalletAddress();
     CKeyID keyID;
     if (!addressAcceptor.GetKeyID(keyID))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - Could not get " + strAcceptorFQDN + _("'s wallet address key ") + addressAcceptor.ToString());
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4106 - Could not get " + strAcceptorFQDN + _("'s wallet address key ") + addressAcceptor.ToString());
 
     CKey key;
     if (pwalletMain && !pwalletMain->GetKey(keyID, key))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4105 - Could not get " + strAcceptorFQDN + _("'s private key ") + addressAcceptor.ToString());
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4107 - Could not get " + strAcceptorFQDN + _("'s private key ") + addressAcceptor.ToString());
 
     if (!CreateSignatureProof(key, strRequestorFQDN, txLinkAccept.SignatureProof))
-        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4106 - Error signing " + strRequestorFQDN + _("'s signature proof."));
+        throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4108 - Error signing " + strRequestorFQDN + _("'s signature proof."));
 
     int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
     if (request.params.size() > 3) {
         if (!ParseInt64(request.params[3].get_str(), &nDays))
-            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4107 - Error parsing registration days parameter = " + request.params[3].get_str());
+            throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4109 - Error parsing registration days parameter = " + request.params[3].get_str());
     }
     int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLinkAccept.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
@@ -327,7 +341,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     // check BDAP values
     std::string strMessage;
     if (!txLinkAccept.ValidateValues(strMessage))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4007 - Error validating link request values: " + strMessage);
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4010 - Error validating link request values: " + strMessage);
 
     // TODO (bdap): encrypt data before adding it to OP_RETURN.
     // Create BDAP OP_RETURN script
@@ -353,7 +367,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
 
     UniValue oLink(UniValue::VOBJ);
     if(!BuildJsonLinkAcceptInfo(txLinkAccept, entryRequestor, entryAcceptor, oLink))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4005 - " + _("Failed to build BDAP link JSON object"));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - " + _("Failed to build BDAP link JSON object"));
 
     return oLink;
 }

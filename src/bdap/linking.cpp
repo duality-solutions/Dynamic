@@ -102,11 +102,6 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
     return true;
 }
 
-bool CLinkRequest::IsMyLinkRequest(const CTransactionRef& tx)
-{
-    return false;
-}
-
 std::string CLinkRequest::RequestorPubKeyString() const
 {
     return stringFromVch(RequestorPubKey);
@@ -130,6 +125,25 @@ std::string CLinkRequest::RequestorFQDN() const
 std::string CLinkRequest::RecipientFQDN() const
 {
     return stringFromVch(RecipientFullObjectPath);
+}
+
+std::set<std::string> CLinkRequest::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkRequest::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
 }
 
 bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
@@ -236,6 +250,25 @@ std::string CLinkAccept::RequestorFQDN() const
 std::string CLinkAccept::RecipientFQDN() const
 {
     return stringFromVch(RecipientFullObjectPath);
+}
+
+std::set<std::string> CLinkAccept::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkAccept::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
 }
 
 /** Checks if BDAP link request pubkey exists in the memory pool */

@@ -19,12 +19,12 @@ public:
     CLinkRequestDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkrequest", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
-    bool AddMyLinkRecipient(const CLinkRequest& link);
     bool AddMyLinkRequest(const CLinkRequest& link);
     bool ReadMyLinkRequest(const std::vector<unsigned char>& vchPubKey, CLinkRequest& link);
     bool ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests);
     bool EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey);
+    bool LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
     bool CleanupMyLinkRequestDB(int& nRemoved);
 
     bool AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid);
@@ -39,12 +39,12 @@ public:
     CLinkAcceptDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "linkaccept", nCacheSize, fMemory, fWipe, obfuscate) {
     }
 
-    bool AddMyLinkSender(const CLinkAccept& link);
     bool AddMyLinkAccept(const CLinkAccept& link);
     bool ReadMyLinkAccept(const std::vector<unsigned char>& vchPubKey, CLinkAccept& link);
     bool ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts);
     bool EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey);
+    bool LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
     bool CleanupMyLinkAcceptDB(int& nRemoved);
 
     bool AddLinkAcceptIndex(const vchCharString& vvchOpParameters, const uint256& txid);
@@ -66,6 +66,8 @@ void CleanupLinkAcceptDB(int& nRemoved);
 bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, const std::vector<std::vector<unsigned char> >& vvchArgs, 
                                 bool fJustCheck, int nHeight, std::string& errorMessage, bool bSanityCheck);
 
+bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
 
 extern CLinkRequestDB *pLinkRequestDB;
 extern CLinkAcceptDB *pLinkAcceptDB;
