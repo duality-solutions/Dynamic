@@ -17,8 +17,7 @@ CLinkAcceptDB *pLinkAcceptDB = NULL;
 bool CLinkRequestDB::AddMyLinkRequest(const CLinkRequest& link)
 {
     LOCK(cs_link_request);
-    return Write(make_pair(std::string("requestor"), link.RequestorFullObjectPath), link.RequestorPubKey)
-            && Write(make_pair(std::string("recipient"), link.RecipientFullObjectPath), link.RequestorPubKey)
+    return Write(make_pair(std::string("path"), link.LinkPath()), link.RequestorPubKey)
             && Write(make_pair(std::string("mylink"), link.RequestorPubKey), link);
 }
 
@@ -64,8 +63,7 @@ bool CLinkRequestDB::EraseMyLinkRequest(const std::vector<unsigned char>& vchPub
 
     LOCK(cs_link_request);
     return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
-           CDBWrapper::Erase(make_pair(std::string("recipient"), link.RecipientFullObjectPath)) &&
-           CDBWrapper::Erase(make_pair(std::string("requestor"), link.RequestorFullObjectPath));
+           CDBWrapper::Erase(make_pair(std::string("path"), link.LinkPath()));
 }
 
 bool CLinkRequestDB::MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey)
@@ -74,45 +72,30 @@ bool CLinkRequestDB::MyLinkRequestExists(const std::vector<unsigned char>& vchPu
     return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
 }
 
-bool CLinkRequestDB::LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
+bool CLinkRequestDB::MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
 {
-    std::vector<unsigned char> vchRequestorFQDN = vchFromString(strRequestorFQDN);
-    std::vector<unsigned char> vchRecipientFQDN = vchFromString(strRecipientFQDN);
+    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
     LOCK(cs_link_request);
-    if (CDBWrapper::Exists(make_pair(std::string("recipient"), vchRequestorFQDN))) {
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
+        return true;
+    }
+    std::vector<unsigned char> vchReverseLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchReverseLinkPath))) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CLinkRequestDB::GetMyLinkRequest(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& link)
+{
+    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("recipient"), vchRequestorFQDN), vchPubKey)) {
+        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
             CLinkRequest link;
             if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
-    }
-    if (CDBWrapper::Exists(make_pair(std::string("recipient"), vchRecipientFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("recipient"), vchRecipientFQDN), vchPubKey)) {
-            CLinkRequest link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) 
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
-    }
-    if (CDBWrapper::Exists(make_pair(std::string("requestor"), vchRequestorFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("requestor"), vchRequestorFQDN), vchPubKey)) {
-            CLinkRequest link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
-    }
-    if (CDBWrapper::Exists(make_pair(std::string("requestor"), vchRecipientFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("requestor"), vchRecipientFQDN), vchPubKey)) {
-            CLinkRequest link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
+                return true;
         }
     }
 
@@ -191,8 +174,7 @@ bool CLinkRequestDB::LinkRequestExists(const std::vector<unsigned char>& vchPubK
 bool CLinkAcceptDB::AddMyLinkAccept(const CLinkAccept& link)
 {
     LOCK(cs_link_accept);
-    return Write(make_pair(std::string("requestor"), link.RequestorFullObjectPath), link.RecipientPubKey)
-            && Write(make_pair(std::string("recipient"), link.RecipientFullObjectPath), link.RecipientPubKey)
+    return Write(make_pair(std::string("path"), link.LinkPath()), link.RecipientPubKey)
             && Write(make_pair(std::string("mylink"), link.RecipientPubKey), link);
 }
 
@@ -238,8 +220,7 @@ bool CLinkAcceptDB::EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKe
 
     LOCK(cs_link_accept);
     return CDBWrapper::Erase(make_pair(std::string("mylink"), vchPubKey)) &&
-           CDBWrapper::Erase(make_pair(std::string("recipient"), link.RecipientFullObjectPath)) &&
-           CDBWrapper::Erase(make_pair(std::string("requestor"), link.RequestorFullObjectPath));
+           CDBWrapper::Erase(make_pair(std::string("path"), link.LinkPath()));
 }
 
 bool CLinkAcceptDB::MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey)
@@ -248,45 +229,30 @@ bool CLinkAcceptDB::MyLinkAcceptExists(const std::vector<unsigned char>& vchPubK
     return CDBWrapper::Exists(make_pair(std::string("mylink"), vchPubKey));
 }
 
-bool CLinkAcceptDB::LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
+bool CLinkAcceptDB::MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
 {
-    std::vector<unsigned char> vchRequestorFQDN = vchFromString(strRequestorFQDN);
-    std::vector<unsigned char> vchRecipientFQDN = vchFromString(strRecipientFQDN);
+    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
     LOCK(cs_link_request);
-    if (CDBWrapper::Exists(make_pair(std::string("recipient"), vchRequestorFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("recipient"), vchRequestorFQDN), vchPubKey)) {
-            CLinkAccept link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
+        return true;
     }
-    if (CDBWrapper::Exists(make_pair(std::string("recipient"), vchRecipientFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("recipient"), vchRecipientFQDN), vchPubKey)) {
-            CLinkAccept link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) 
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
+    std::vector<unsigned char> vchReverseLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchReverseLinkPath))) {
+        return true;
     }
-    if (CDBWrapper::Exists(make_pair(std::string("requestor"), vchRequestorFQDN))) {
+
+    return false;
+}
+
+bool CLinkAcceptDB::GetMyLinkAccept(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkAccept& link)
+{
+    std::vector<unsigned char> vchLinkPath = vchFromString(strRequestorFQDN + ":" + strRecipientFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("requestor"), vchRequestorFQDN), vchPubKey)) {
-            CLinkAccept link;
+        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
+            CLinkRequest link;
             if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
-        }
-    }
-    if (CDBWrapper::Exists(make_pair(std::string("requestor"), vchRecipientFQDN))) {
-        std::vector<unsigned char> vchPubKey;
-        if (CDBWrapper::Read(make_pair(std::string("requestor"), vchRecipientFQDN), vchPubKey)) {
-            CLinkAccept link;
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
-                if (link.Matches(strRequestorFQDN, strRecipientFQDN))
-                    return true;
+                return true;
         }
     }
 
@@ -586,7 +552,7 @@ bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::s
     if (CheckLinkageAcceptExists(strRequestorFQDN, strRecipientFQDN))
         return true;
 
-    if (pLinkRequestDB->LinkageExists(strRequestorFQDN, strRecipientFQDN))
+    if (pLinkRequestDB->MyLinkageExists(strRequestorFQDN, strRecipientFQDN))
         return true;
 
     return false;
@@ -594,7 +560,7 @@ bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::s
 
 bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN)
 {
-    if (pLinkAcceptDB->LinkageExists(strRequestorFQDN, strRecipientFQDN))
+    if (pLinkAcceptDB->MyLinkageExists(strRequestorFQDN, strRecipientFQDN))
         return true;
 
     return false;

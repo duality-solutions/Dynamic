@@ -24,7 +24,8 @@ public:
     bool ListMyLinkRequests(std::vector<CLinkRequest>& vchLinkRequests);
     bool EraseMyLinkRequest(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkRequestExists(const std::vector<unsigned char>& vchPubKey);
-    bool LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+    bool MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+    bool GetMyLinkRequest(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& link);
     bool CleanupMyLinkRequestDB(int& nRemoved);
 
     bool AddLinkRequestIndex(const vchCharString& vvchOpParameters, const uint256& txid);
@@ -44,7 +45,8 @@ public:
     bool ListMyLinkAccepts(std::vector<CLinkAccept>& vchLinkAccepts);
     bool EraseMyLinkAccept(const std::vector<unsigned char>& vchPubKey);
     bool MyLinkAcceptExists(const std::vector<unsigned char>& vchPubKey);
-    bool LinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+    bool MyLinkageExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+    bool GetMyLinkAccept(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkAccept& link);
     bool CleanupMyLinkAcceptDB(int& nRemoved);
 
     bool AddLinkAcceptIndex(const vchCharString& vvchOpParameters, const uint256& txid);

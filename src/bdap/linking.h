@@ -114,6 +114,8 @@ public:
     std::string RecipientFQDN() const;
     std::set<std::string> SortedAccounts() const;
     bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
+    CharString LinkPath() const;
+    std::string LinkPathString() const;
 
 };
 
@@ -205,6 +207,8 @@ public:
     std::string RecipientFQDN() const;
     std::set<std::string> SortedAccounts() const;
     bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
+    CharString LinkPath() const;
+    std::string LinkPathString() const;
 
 };
 

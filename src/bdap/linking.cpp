@@ -146,6 +146,20 @@ bool CLinkRequest::Matches(const std::string& strRequestorFQDN, const std::strin
     return false;
 }
 
+CharString CLinkRequest::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkRequest::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
+}
+
 bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
@@ -269,6 +283,20 @@ bool CLinkAccept::Matches(const std::string& strRequestorFQDN, const std::string
         return true;
 
     return false;
+}
+
+CharString CLinkAccept::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkAccept::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
 }
 
 /** Checks if BDAP link request pubkey exists in the memory pool */
