@@ -363,7 +363,7 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     CAmount curBalance = pwalletMain->GetBalance();
 
     // Check amount
-    if (nOPValue <= 0 || nDataValue <= 0)
+    if (nOPValue <= 0)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "SendBDAPTransaction invalid amount");
 
     if (nOPValue + nDataValue > curBalance)
@@ -379,8 +379,10 @@ void SendBDAPTransaction(const CScript& bdapDataScript, const CScript& bdapOPScr
     LogPrintf("Sending BDAP Data Script: %s\n", ScriptToAsmStr(bdapDataScript));
     LogPrintf("Sending BDAP OP Script: %s\n", ScriptToAsmStr(bdapOPScript));
 
-    CRecipient recDataScript = {bdapDataScript, 0, false};
-    vecSend.push_back(recDataScript);
+    if (nDataValue > 0) {
+        CRecipient recDataScript = {bdapDataScript, 0, false};
+        vecSend.push_back(recDataScript);
+    }
     CRecipient recOPScript = {bdapOPScript, DEFAULT_MIN_RELAY_TX_FEE, false};
     vecSend.push_back(recOPScript);
 
