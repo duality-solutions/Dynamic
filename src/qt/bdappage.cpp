@@ -18,6 +18,13 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 {
     ui->setupUi(this);
     
+    //Initialize QWidgetTable names
+    // if (ui->tableWidget_Users->objectName().isEmpty())
+    //     ui->tableWidget_Users->setObjectName(QStringLiteral("BDAPUsersTable"));
+
+    // if (ui->tableWidget_Groups->objectName().isEmpty())
+    //     ui->tableWidget_Groups->setObjectName(QStringLiteral("BDAPGroupsTable"));
+
     //Users tab
     connect(ui->pushButton_All, SIGNAL(clicked()), this, SLOT(listAllUsers()));
     connect(ui->pushButton_My, SIGNAL(clicked()), this, SLOT(listMyUsers()));
@@ -31,10 +38,11 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->deleteGroup, SIGNAL(clicked()), this, SLOT(deleteGroup()));
 
 
-   LogPrintf("DEBUGGER TABLE --%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
+   LogPrintf("DEBUGGER TABLE 1--%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
+   LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
 
 
-    bdapAccountTableModel = new BdapAccountTableModel(this);
+    //bdapAccountTableModel = new BdapAccountTableModel(this);
 
 
 
@@ -54,6 +62,8 @@ void BdapPage::setModel(WalletModel* model)
 void BdapPage::listAllGroups()
 {
     ui->lineEdit_GroupSearch->setPlaceholderText("All Groups");
+
+    bdapAccountTableModel = new BdapAccountTableModel(this);
 
     LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
 
@@ -80,6 +90,8 @@ void BdapPage::deleteGroup()
 void BdapPage::listAllUsers()
 {
     ui->lineEdit_UserSearch->setPlaceholderText("All Users");
+
+    bdapAccountTableModel = new BdapAccountTableModel(this);
 
     LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
 
@@ -113,6 +125,18 @@ BdapAccountTableModel* BdapPage::getBdapAccountTableModel()
 QTableWidget* BdapPage::getUserTable() 
 { 
     return ui->tableWidget_Users; 
+}
+
+
+QTableWidget* BdapPage::getGroupTable() 
+{ 
+    return ui->tableWidget_Groups; 
+}
+
+
+int BdapPage::getCurrentIndex() 
+{ 
+    return ui->tabWidget->currentIndex(); 
 }
 
 

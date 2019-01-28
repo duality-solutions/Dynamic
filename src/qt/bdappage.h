@@ -33,6 +33,8 @@ public:
     void setModel(WalletModel* model);
     BdapAccountTableModel* getBdapAccountTableModel();
     QTableWidget* getUserTable();
+    QTableWidget* getGroupTable();
+    int getCurrentIndex();
 
 
 private:

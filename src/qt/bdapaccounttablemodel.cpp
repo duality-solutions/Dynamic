@@ -42,17 +42,28 @@ public:
         std::string getName {""};
         std::string getPath {""};
         std::string getExpirationDate {""};
+        std::string tableWidgetName {""};
+
+
+        if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
         //Execute RPC call (List All Users)
-        jreq.params = RPCConvertValues("getusers", params);
-        jreq.strMethod = "getusers";
+        if (tableWidgetName == "tableWidget_Groups") {
+            jreq.params = RPCConvertValues("getgroups", params);
+            jreq.strMethod = "getgroups";
+        } else {
+            jreq.params = RPCConvertValues("getusers", params);
+            jreq.strMethod = "getusers";
+        }
         UniValue result = tableRPC.execute(jreq);
 
+        inputtable->clear();
+        inputtable->setRowCount(0);
         inputtable->setSortingEnabled(true);
         inputtable->setColumnCount(3);
         inputtable->setColumnWidth(0, 275); //Common Name (fixed)
         inputtable->setColumnWidth(1, 200); //Object Full Path (fixed)
-        inputtable->setColumnWidth(2, 175);
+        //inputtable->setColumnWidth(2, 175);
 
         inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QString::fromStdString("Common Name")));
         inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QString::fromStdString("Object Full Path")));
@@ -105,6 +116,11 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
                                                       bdapPage(parent),
                                                       timer(0)
 {
+    
+    int currentIndex = bdapPage->getCurrentIndex();
+
+    
+    
     columns << tr("Common Name") << tr("Object Full Path") << tr("Expiration Date");
     priv.reset(new BdapAccountTablePriv());
     // default to unsorted
@@ -112,11 +128,22 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
 
     // set up timer for auto refresh
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getUserTable())));
+    if (currentIndex == 1) {
+        connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getGroupTable())));
+    } else {
+        connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getUserTable())));
+    };
     timer->setInterval(MODEL_UPDATE_DELAY);
 
     // load initial data
-    refresh(bdapPage->getUserTable());
+    if (currentIndex == 1) {
+        refresh(bdapPage->getGroupTable());
+    } else {
+        refresh(bdapPage->getUserTable());
+    };
+
+
+    //refresh(bdapPage->getUserTable());
 
     //LogPrintf("DEBUGGER TABLE --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
         LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
