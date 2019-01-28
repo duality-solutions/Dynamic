@@ -3732,9 +3732,17 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
+                else if (strOpType == "bdap_update_link_request") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
+                }
+                else if (strOpType == "bdap_delete_link_request") {
+                    uint256 txid;
+                    if (!GetLinkRequestIndex(vchValue, txid)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
@@ -3744,13 +3752,17 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
+                else if (strOpType == "bdap_update_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }
                 else if (strOpType == "bdap_delete_link_accept") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
+                    uint256 txid;
+                    if (!GetLinkAcceptIndex(vchValue, txid)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
                 else {
                     strFailReason = strOpType + _(" is an uknown BDAP operation.");

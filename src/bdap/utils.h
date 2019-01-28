@@ -38,6 +38,7 @@ std::vector<unsigned char> vchFromString(const std::string& str);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
+CAmount GetDataFee(const CScript& scriptPubKey);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
 bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);

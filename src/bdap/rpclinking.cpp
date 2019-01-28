@@ -222,7 +222,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -371,7 +371,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nDataFee, nOperationFee, fUseInstantSend);
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLinkAccept.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
@@ -619,17 +619,113 @@ static UniValue ListCompletedLinks(const JSONRPCRequest& request)
             + HelpExampleRpc("link complete", ""));
 
     if (!CheckLinkAcceptDB())
-        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4300 - Can not open link request leveldb database");
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4220 - Can not open link request leveldb database");
 
     std::vector<CLinkAccept> vchLinkAccepts;
     if (!pLinkAcceptDB->ListMyLinkAccepts(vchLinkAccepts))
-        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4301 - Error listing link requests from leveldb");
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4221 - Error listing link requests from leveldb");
 
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyCompletedLinks(vchLinkAccepts, oLinks))
-        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4302 - Error creating JSON link requests.");
+        throw std::runtime_error("BDAP_LINK_COMPLETED_RPC_ERROR: ERRCODE: 4222 - Error creating JSON link requests.");
 
     return oLinks;
+}
+
+static UniValue DeleteLink(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "link delete userid-from userid-to\n"
+            "Creates a deletes link request or link accepted transaction on the blockchain."
+            + HelpRequiringPassphrase() +
+            "\nLink Send Arguments:\n"
+            "1. requestor          (string)             BDAP account requesting the link\n"
+            "2. recipient          (string)             Link recipient's BDAP account.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
+            "  \"Recipient FQDN\"             (string)  Recipient's BDAP full path\n"
+            "  \"Recipient Link Address\"     (string)  Recipient's link address\n"
+            "  \"Requestor Link Pubkey\"      (string)  Requestor's link pubkey used for DHT storage\n"
+            "  \"Requestor Link Address\"     (string)  Requestor's link address\n"
+            "  \"Link Message\"               (string)  Message from requestor to recipient.\n"
+            "  \"Signature Proof\"            (string)  Encoded signature to prove it is from the requestor\n"
+            "  \"Link Request TxID\"          (string)  Transaction ID for the link request\n"
+            "  \"Time\"                       (int)     Transaction time\n"
+            "  \"Expires On\"                 (int)     Link request expiration\n"
+            "  \"Expired\"                    (boolean) Is link request expired\n"
+            "  }\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link delete", "superman batman") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link delete", "superman batman"));
+
+    std::string strRequestorFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRequestorFQDN);
+    CharString vchRequestorFQDN = vchFromString(strRequestorFQDN);
+
+    std::string strRecipientFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipientFQDN);
+    CharString vchRecipientFQDN = vchFromString(strRecipientFQDN);
+
+    if (!CheckLinkAcceptDB())
+        throw std::runtime_error("BDAP_DELETE_LINK_RPC_ERROR: ERRCODE: 4230 - Can not open link request leveldb database");
+
+    bool fLinkFound = false;
+    CScript scriptPubKey, scriptSend, scriptDest, scriptData;
+    UniValue oLink(UniValue::VOBJ);
+
+    // Try to find accepted link entry
+    CLinkAccept linkAccept;
+    if (pLinkAcceptDB->GetMyLinkAccept(strRequestorFQDN, strRecipientFQDN, linkAccept)){
+        CDomainEntry entryRequestor, entryRecipient;
+        if (GetDomainEntry(linkAccept.RequestorFullObjectPath, entryRequestor) && GetDomainEntry(linkAccept.RecipientFullObjectPath, entryRecipient)) {
+            // Create BDAP operation script
+            scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_LINK_ACCEPT) 
+                         << linkAccept.RecipientPubKey << linkAccept.SharedPubKey << OP_2DROP << OP_2DROP;
+            scriptDest = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
+            scriptPubKey += scriptDest;
+            scriptSend = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
+            if(!BuildJsonLinkAcceptInfo(linkAccept, entryRequestor, entryRecipient, oLink))
+                throw std::runtime_error("BDAP_DELETE_LINK_RPC_ERROR: ERRCODE: 4231 - " + _("Failed to build BDAP link JSON object"));
+            fLinkFound = true;
+        }
+    }
+
+    if (!fLinkFound) {
+        if (!CheckLinkRequestDB())
+            throw std::runtime_error("BDAP_DELETE_LINK_RPC_ERROR: ERRCODE: 4232 - Can not open link request leveldb database");
+        // Try to find link request entry
+        CLinkRequest linkRequest;
+        if (pLinkRequestDB->GetMyLinkRequest(strRequestorFQDN, strRecipientFQDN, linkRequest)){
+            CDomainEntry entryRequestor, entryRecipient;
+            if (GetDomainEntry(linkRequest.RecipientFullObjectPath, entryRecipient) && GetDomainEntry(linkRequest.RequestorFullObjectPath, entryRequestor)) {
+                // Create BDAP operation script
+                scriptPubKey << CScript::EncodeOP_N(OP_BDAP_DELETE) << CScript::EncodeOP_N(OP_BDAP_LINK_REQUEST) 
+                             << linkRequest.RequestorPubKey << linkRequest.SharedPubKey << OP_2DROP << OP_2DROP;
+                scriptDest = GetScriptForDestination(entryRecipient.GetLinkAddress().Get());
+                scriptPubKey += scriptDest;
+                scriptSend = GetScriptForDestination(entryRequestor.GetLinkAddress().Get());
+                if(!BuildJsonLinkRequestInfo(linkRequest, entryRequestor, entryRecipient, oLink))
+                    throw std::runtime_error("BDAP_DELETE_LINK_RPC_ERROR: ERRCODE: 4233 - " + _("Failed to build BDAP link JSON object"));
+                fLinkFound = true;
+            }
+        }
+    }
+
+    if (!fLinkFound)
+        throw std::runtime_error("BDAP_DELETE_LINK_RPC_ERROR: ERRCODE: 4234 - Can not find link request or link accept in database.");
+
+    // Send the transaction
+    CWalletTx wtx;
+    CAmount nOperationFee = (GetBDAPFee(scriptPubKey) * powf(3.1, 1)) + GetDataFee(scriptPubKey);
+    CAmount nDataFee = 0; // No OP_RETURN data needed for deleted account transactions
+
+    bool fUseInstantSend = false;
+    SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
+
+    return oLink;
 }
 
 UniValue link(const JSONRPCRequest& request) 
@@ -658,11 +754,13 @@ UniValue link(const JSONRPCRequest& request)
     else if (strCommand == "complete") {
         return ListCompletedLinks(request);
     }
+    else if (strCommand == "delete") {
+        return DeleteLink(request);
+    }
     else if (strCommand == "pending") {
         if (request.params.size() >= 2) {
             std::string strSubCommand = request.params[1].get_str();
             ToLowerCase(strSubCommand);
-            LogPrintf("%s -- strCommand = %s, strSubCommand = %s\n", __func__, strCommand, strSubCommand);
             if (strSubCommand == "request") {
                 return ListPendingLinkRequests(request);
             }
@@ -691,30 +789,6 @@ UniValue link(const JSONRPCRequest& request)
             + HelpExampleRpc("link pending request", ""));
         }
     }
-    /*
-    else if (strCommand == "complete") {
-        return ListCompletedLinks(request);
-    }
-    else if (strCommand == "delete") {
-        std::string strSubCommand = request.params[1].get_str();
-        if (strSubCommand == "request") {
-            return DeletePendingLinkRequest(request);
-        }
-        else if (strSubCommand == "accept") {
-            return DeletePendingLinkAccept(request);
-        }
-        else {
-            throw std::runtime_error(
-            "link delete\n"
-            + HelpRequiringPassphrase() +
-            "\nDelete Link sub-commands are request or accept.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("link delete request", "superman batman") +
-            "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("link delete request", "superman batman"));
-        }
-    }
-    */
     else {
         throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 4010 - " + strCommand + _(" is an unknown link command."));
     }

@@ -93,7 +93,6 @@ bool CLinkRequestDB::GetMyLinkRequest(const std::string& strRequestorFQDN, const
     if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
         if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            CLinkRequest link;
             if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
                 return true;
         }
@@ -250,7 +249,6 @@ bool CLinkAcceptDB::GetMyLinkAccept(const std::string& strRequestorFQDN, const s
     if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
         if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            CLinkRequest link;
             if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
                 return true;
         }
