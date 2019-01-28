@@ -87,7 +87,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     CharString vchLinkAddress = vchFromString(linkAddress.ToString());
     txDomainEntry.LinkAddress = vchLinkAddress;
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
     if (request.params.size() >= 3) {
         if (!ParseInt64(request.params[2].get_str(), &nDays))
             throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3505 - " + _("Error converting registration days to int"));
@@ -300,7 +300,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txUpdatedEntry.CommonName = vchCommonName;
     txUpdatedEntry.nObjectType = GetObjectTypeInt(bdapType);
 
-    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  //default to 4 years.
+    int64_t nDays = DEFAULT_REGISTRATION_DAYS;  // default to 2 years.
     if (request.params.size() >= 3) {
         if (!ParseInt64(request.params[2].get_str(), &nDays))
             throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3702 - " + _("Error converting registration days to int"));

@@ -280,6 +280,7 @@ libdynamic_server_a_SOURCES = \
   bdap/linkingdb.cpp \
   bdap/rpcdomainentry.cpp \
   bdap/rpclinking.cpp \
+  bdap/rpcrawbdap.cpp \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
   dbwrapper.cpp \

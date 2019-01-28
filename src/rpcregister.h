@@ -32,6 +32,8 @@ void RegisterDomainEntryRPCCommands(CRPCTable &tableRPC);
 void RegisterDHTRPCCommands(CRPCTable &tableRPC);
 /** Register BDAP Linking RPC commands */
 void RegisterLinkingRPCCommands(CRPCTable &tableRPC);
+/** Register Raw BDAP Account RPC commands */
+void RegisterRawBDAPAccountRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
 {
@@ -46,6 +48,7 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable& t)
     RegisterDomainEntryRPCCommands(t);
     RegisterDHTRPCCommands(t);
     RegisterLinkingRPCCommands(t);
+    RegisterRawBDAPAccountRPCCommands(t);
 }
 
 #endif // DYNAMIC_RPCREGISTER_H
