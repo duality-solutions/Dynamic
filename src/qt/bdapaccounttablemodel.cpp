@@ -86,6 +86,9 @@ public:
                 // "common_name", "object_full_path"
                 if (keyName == "common_name") getName = result[i].getValues()[j].get_str();
                 if (keyName == "object_full_path") getPath = result[i].getValues()[j].get_str();
+                //if (keyName == "expires_on") getExpirationDate = std::to_string(result[i].getValues()[j].get_int64());
+                if (keyName == "expires_on") getExpirationDate = DateTimeStrFormat("%Y-%m-%d", result[i].getValues()[j].get_int64());
+
                 //LogPrintf("DEBUGGER LOOP --%s %s: %s-- \n", __func__, result[i].getKeys()[j], result[i].getValues()[j].get_str());
             }
             QTableWidgetItem* commonNameItem = new QTableWidgetItem(QString::fromStdString(getName));

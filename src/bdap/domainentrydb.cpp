@@ -231,7 +231,7 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
 }
 
 // Lists active entries by domain name with paging support
-bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList, BDAP::ObjectType accountType)
+bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType)
 {
     // TODO: (bdap) implement paging
     // if vchObjectLocation is empty, list entries from all domains
@@ -250,7 +250,7 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
                     if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
                     {
                         UniValue oDomainEntryEntry(UniValue::VOBJ);
-                        BuildBDAPJson(entry, oDomainEntryEntry, true);
+                        BuildBDAPJson(entry, oDomainEntryEntry, false);
                         oDomainEntryList.push_back(oDomainEntryEntry);
                         index++;
                     }
