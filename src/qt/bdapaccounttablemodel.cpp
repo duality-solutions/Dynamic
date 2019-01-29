@@ -57,8 +57,9 @@ public:
         }
         UniValue result = tableRPC.execute(jreq);
 
-        inputtable->clear();
+        inputtable->clearContents();
         inputtable->setRowCount(0);
+        inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
         inputtable->setColumnCount(3);
         inputtable->setColumnWidth(0, 275); //Common Name (fixed)
