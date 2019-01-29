@@ -61,6 +61,7 @@ public:
 
 public Q_SLOTS:
     void refresh(QTableWidget* inputtable = 0);
+    void getDetails(int row, int column);
 
 private:
     BdapPage* bdapPage;

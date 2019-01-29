@@ -129,9 +129,10 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
 
     // set up timer for auto refresh
     timer = new QTimer(this);
-    if (currentIndex == 1) {
+    if (currentIndex == 1) { //Groups Table
         connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getGroupTable())));
-    } else {
+    } else { //Users Table
+        connect(bdapPage->getUserTable(), SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getDetails(int,int)));
         connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getUserTable())));
     };
     timer->setInterval(MODEL_UPDATE_DELAY);
@@ -243,5 +244,16 @@ void BdapAccountTableModel::sort(int column, Qt::SortOrder order)
     priv->sortOrder = order;
     refresh(bdapPage->getUserTable());
 }
+
+
+void BdapAccountTableModel::getDetails(int row, int column)
+{
+    //QObject* obj = sender();
+    QTableWidget* inputtable = qobject_cast<QTableWidget*>(sender());
+
+
+    LogPrintf("DEBUGGER TABLE SELECT --%s %s %s %s-- \n", __func__, row, column, inputtable->item(row,column)->text().toStdString());
+
+} //getDetails
 
 
