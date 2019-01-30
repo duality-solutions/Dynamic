@@ -31,7 +31,7 @@ public:
     std::map<NodeId, int> mapNodeRows;
 
     /** Populate tableWidget_Users via RPC call */
-    void refreshAccounts(QTableWidget* inputtable)
+    void refreshAccounts(QTableWidget* inputtable, bool filterOn = false)
     {
 
         JSONRPCRequest jreq;
@@ -44,7 +44,8 @@ public:
         std::string getExpirationDate {""};
         std::string tableWidgetName {""};
 
-
+        LogPrintf("DEBUGGER CHECKBOX --%s %s-- \n", __func__, filterOn);
+    
         if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
         //Execute RPC call (List All Users)
@@ -52,8 +53,13 @@ public:
             jreq.params = RPCConvertValues("getgroups", params);
             jreq.strMethod = "getgroups";
         } else {
-            jreq.params = RPCConvertValues("getusers", params);
-            jreq.strMethod = "getusers";
+            if (filterOn) {
+                jreq.params = RPCConvertValues("mybdapaccounts", params);
+                jreq.strMethod = "mybdapaccounts";
+            } else {
+                jreq.params = RPCConvertValues("getusers", params);
+                jreq.strMethod = "getusers";
+            } //(filterOn)
         }
         UniValue result = tableRPC.execute(jreq);
 
@@ -121,15 +127,24 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
                                                       timer(0)
 {
     
-    int currentIndex = bdapPage->getCurrentIndex();
+    currentIndex = bdapPage->getCurrentIndex();
+    userTable = bdapPage->getUserTable();
+    groupTable = bdapPage->getGroupTable();
 
-    
-    
+        
     columns << tr("Common Name") << tr("Object Full Path") << tr("Expiration Date");
     priv.reset(new BdapAccountTablePriv());
     // default to unsorted
     priv->sortColumn = -1;
 
+    //refresh();
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), SLOT(refresh()));
+    timer->setInterval(25000); //MODEL_UPDATE_DELAY originally
+    startAutoRefresh();
+
+
+/*
     // set up timer for auto refresh
     timer = new QTimer(this);
     if (currentIndex == 1) { //Groups Table
@@ -146,13 +161,13 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     } else {
         refresh(bdapPage->getUserTable());
     };
-
+*/
 
     //refresh(bdapPage->getUserTable());
 
     //LogPrintf("DEBUGGER TABLE --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
-        LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
-        LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->columnCount());
+        //LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
+        //LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->columnCount());
 
 }
 
@@ -225,12 +240,32 @@ const CNodeCombinedStats* BdapAccountTableModel::getNodeStats(int idx)
     return priv->index(idx);
 }
 
-void BdapAccountTableModel::refresh(QTableWidget* inputtable)
+void BdapAccountTableModel::refresh()
 {
+    myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
+
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(inputtable);
+    priv->refreshAccounts(userTable,myUsersChecked);
+    priv->refreshAccounts(groupTable);
     Q_EMIT layoutChanged();
 }
+
+void BdapAccountTableModel::refreshUsers()
+{
+    myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
+
+    Q_EMIT layoutAboutToBeChanged();
+    priv->refreshAccounts(userTable,myUsersChecked);
+    Q_EMIT layoutChanged();
+}
+
+void BdapAccountTableModel::refreshGroups()
+{
+    Q_EMIT layoutAboutToBeChanged();
+    priv->refreshAccounts(groupTable);
+    Q_EMIT layoutChanged();
+}
+
 
 int BdapAccountTableModel::getRowByNodeId(NodeId nodeid)
 {
@@ -245,7 +280,7 @@ void BdapAccountTableModel::sort(int column, Qt::SortOrder order)
 {
     priv->sortColumn = column;
     priv->sortOrder = order;
-    refresh(bdapPage->getUserTable());
+    refresh();
 }
 
 

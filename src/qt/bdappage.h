@@ -34,6 +34,7 @@ public:
     BdapAccountTableModel* getBdapAccountTableModel();
     QTableWidget* getUserTable();
     QTableWidget* getGroupTable();
+    bool getMyUserCheckBoxChecked();
     int getCurrentIndex();
 
 

@@ -41,6 +41,8 @@ public:
     int getRowByNodeId(NodeId nodeid);
     void startAutoRefresh();
     void stopAutoRefresh();
+    void refreshUsers();
+    void refreshGroups();
 
     enum ColumnIndex {
         CommonName = 0,
@@ -60,7 +62,7 @@ public:
     /*@}*/
 
 public Q_SLOTS:
-    void refresh(QTableWidget* inputtable = 0);
+    void refresh();
     void getDetails(int row, int column);
 
 private:
@@ -68,6 +70,12 @@ private:
     QStringList columns;
     std::unique_ptr<BdapAccountTablePriv> priv;
     QTimer* timer;
+    int currentIndex;
+    QTableWidget* userTable;
+    QTableWidget* groupTable;
+    bool myUsersChecked;
+    bool myGroupsChecked;
+    
 };
 
 #endif // DYNAMIC_QT_BDAPACCOUNTTABLEMODEL_H

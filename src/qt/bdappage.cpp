@@ -26,6 +26,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     //     ui->tableWidget_Groups->setObjectName(QStringLiteral("BDAPGroupsTable"));
 
 
+    bdapAccountTableModel = new BdapAccountTableModel(this);
 
     ui->lineEditUserCommonNameSearch->setFixedWidth(275);
     ui->lineEditUserFullPathSearch->setFixedWidth(200);
@@ -42,6 +43,9 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->addUser, SIGNAL(clicked()), this, SLOT(addUser()));
     connect(ui->deleteUser, SIGNAL(clicked()), this, SLOT(deleteUser()));
 
+    connect(ui->checkBoxMyUsers, SIGNAL(clicked()), this, SLOT(listAllUsers()));
+
+
     //Groups tab
     connect(ui->pushButton_AllGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
@@ -52,7 +56,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
    LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
 
 
-    //bdapAccountTableModel = new BdapAccountTableModel(this);
 
 
 
@@ -73,7 +76,9 @@ void BdapPage::listAllGroups()
 {
     //ui->lineEdit_GroupSearch->setPlaceholderText("All Groups");
 
-    bdapAccountTableModel = new BdapAccountTableModel(this);
+    //bdapAccountTableModel = new BdapAccountTableModel(this);
+
+    bdapAccountTableModel->refreshGroups();
 
     LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
 
@@ -101,7 +106,9 @@ void BdapPage::listAllUsers()
 {
     //ui->lineEdit_UserSearch->setPlaceholderText("All Users");
 
-    bdapAccountTableModel = new BdapAccountTableModel(this);
+    //bdapAccountTableModel = new BdapAccountTableModel(this);
+
+    bdapAccountTableModel->refreshUsers();
 
     LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
 
@@ -150,8 +157,10 @@ int BdapPage::getCurrentIndex()
 }
 
 
-
-
+bool BdapPage::getMyUserCheckBoxChecked() 
+{ 
+    return ui->checkBoxMyUsers->isChecked(); 
+}
 
 
 
