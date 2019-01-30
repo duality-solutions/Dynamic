@@ -50,16 +50,21 @@ public:
 
         //Execute RPC call (List All Users)
         if (tableWidgetName == "tableWidget_Groups") {
-            jreq.params = RPCConvertValues("getgroups", params);
-            jreq.strMethod = "getgroups";
-        } else {
+            if (filterOn) {
+                jreq.params = RPCConvertValues("mybdapaccounts", params);
+                jreq.strMethod = "mybdapaccounts";
+            } else {
+                jreq.params = RPCConvertValues("getgroups", params);
+                jreq.strMethod = "getgroups";
+            } //(filterOn Groups)
+        } else { 
             if (filterOn) {
                 jreq.params = RPCConvertValues("mybdapaccounts", params);
                 jreq.strMethod = "mybdapaccounts";
             } else {
                 jreq.params = RPCConvertValues("getusers", params);
                 jreq.strMethod = "getusers";
-            } //(filterOn)
+            } //(filterOn Users)
         }
         UniValue result = tableRPC.execute(jreq);
 
@@ -68,8 +73,8 @@ public:
         inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
         inputtable->setColumnCount(3);
-        inputtable->setColumnWidth(0, 275); //Common Name (fixed)
-        inputtable->setColumnWidth(1, 200); //Object Full Path (fixed)
+        inputtable->setColumnWidth(0, COMMONNAME_COLWIDTH); //Common Name (fixed)
+        inputtable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
         //inputtable->setColumnWidth(2, 175);
 
         inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QString::fromStdString("Common Name")));
@@ -243,10 +248,11 @@ const CNodeCombinedStats* BdapAccountTableModel::getNodeStats(int idx)
 void BdapAccountTableModel::refresh()
 {
     myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
+    myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
 
     Q_EMIT layoutAboutToBeChanged();
     priv->refreshAccounts(userTable,myUsersChecked);
-    priv->refreshAccounts(groupTable);
+    priv->refreshAccounts(groupTable,myGroupsChecked);
     Q_EMIT layoutChanged();
 }
 
@@ -261,8 +267,10 @@ void BdapAccountTableModel::refreshUsers()
 
 void BdapAccountTableModel::refreshGroups()
 {
+    myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
+
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(groupTable);
+    priv->refreshAccounts(groupTable,myGroupsChecked);
     Q_EMIT layoutChanged();
 }
 

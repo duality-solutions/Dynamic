@@ -28,13 +28,13 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     bdapAccountTableModel = new BdapAccountTableModel(this);
 
-    ui->lineEditUserCommonNameSearch->setFixedWidth(275);
-    ui->lineEditUserFullPathSearch->setFixedWidth(200);
+    ui->lineEditUserCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
+    ui->lineEditUserFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
     ui->lineEditUserCommonNameSearch->setPlaceholderText("Enter common name to search");
     ui->lineEditUserFullPathSearch->setPlaceholderText("Enter full object path to search");
 
-    ui->lineEditGroupCommonNameSearch->setFixedWidth(275);
-    ui->lineEditGroupFullPathSearch->setFixedWidth(200);
+    ui->lineEditGroupCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
+    ui->lineEditGroupFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
     ui->lineEditGroupCommonNameSearch->setPlaceholderText("Enter common name to search");
     ui->lineEditGroupFullPathSearch->setPlaceholderText("Enter full object path to search");
 
@@ -44,6 +44,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->deleteUser, SIGNAL(clicked()), this, SLOT(deleteUser()));
 
     connect(ui->checkBoxMyUsers, SIGNAL(clicked()), this, SLOT(listAllUsers()));
+    connect(ui->checkBoxMyGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
 
 
     //Groups tab
@@ -162,6 +163,9 @@ bool BdapPage::getMyUserCheckBoxChecked()
     return ui->checkBoxMyUsers->isChecked(); 
 }
 
-
+bool BdapPage::getMyGroupCheckBoxChecked() 
+{ 
+    return ui->checkBoxMyGroups->isChecked(); 
+}
 
 

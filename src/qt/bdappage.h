@@ -16,6 +16,9 @@
 class BdapAccountTableModel;
 class QTableWidget;
 
+const int COMMONNAME_COLWIDTH = 400;
+const int FULLPATH_COLWIDTH = 300;
+
 
 namespace Ui
 {
@@ -35,7 +38,9 @@ public:
     QTableWidget* getUserTable();
     QTableWidget* getGroupTable();
     bool getMyUserCheckBoxChecked();
+    bool getMyGroupCheckBoxChecked();
     int getCurrentIndex();
+
 
 
 private:
