@@ -533,9 +533,22 @@ UniValue addgroup(const JSONRPCRequest& request)
 
 UniValue mybdapaccounts(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.params.size() > 1)
         throw std::runtime_error(
             "mybdapaccounts\n"
+            "mybdapaccounts users\n"
+            "mybdapaccounts groups\n"
+            "Returns your BDAP accounts.\n");
+
+    std::string accountType {""};
+
+    if (request.params.size() == 1) accountType = request.params[0].get_str();
+
+    if (!((accountType == "users") || (accountType == "groups") || (accountType == "")))
+            throw std::runtime_error(
+            "mybdapaccounts\n"
+            "mybdapaccounts users\n"
+            "mybdapaccounts groups\n"
             "Returns your BDAP accounts.\n");
 
     std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
@@ -553,8 +566,10 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
             LogPrint("bdap", "%s -- entry = %s\n", __func__, entry.GetFullObjectPath());
             UniValue oAccount(UniValue::VOBJ);
             if (BuildBDAPJson(entry, oAccount, false)) {
-                result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
-                nCount++;
+                if ( (accountType == "") || ((accountType == "users") && (entry.nObjectType == GetObjectTypeInt(BDAP::ObjectType::BDAP_USER))) || ((accountType == "groups") && (entry.nObjectType == GetObjectTypeInt(BDAP::ObjectType::BDAP_GROUP))) ) {
+                    result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
+                    nCount++;
+                } //if accountType
             }
         }
     }

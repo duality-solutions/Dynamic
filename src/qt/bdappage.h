@@ -16,8 +16,8 @@
 class BdapAccountTableModel;
 class QTableWidget;
 
-const int COMMONNAME_COLWIDTH = 400;
-const int FULLPATH_COLWIDTH = 300;
+const int COMMONNAME_COLWIDTH = 450;
+const int FULLPATH_COLWIDTH = 350;
 
 
 namespace Ui

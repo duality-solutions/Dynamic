@@ -51,6 +51,7 @@ public:
         //Execute RPC call (List All Users)
         if (tableWidgetName == "tableWidget_Groups") {
             if (filterOn) {
+                params.push_back("groups");
                 jreq.params = RPCConvertValues("mybdapaccounts", params);
                 jreq.strMethod = "mybdapaccounts";
             } else {
@@ -59,6 +60,7 @@ public:
             } //(filterOn Groups)
         } else { 
             if (filterOn) {
+                params.push_back("users");
                 jreq.params = RPCConvertValues("mybdapaccounts", params);
                 jreq.strMethod = "mybdapaccounts";
             } else {
