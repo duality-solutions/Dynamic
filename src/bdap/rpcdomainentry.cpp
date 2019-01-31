@@ -130,7 +130,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txDomainEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -456,7 +456,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
     }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txUpdatedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);
@@ -585,9 +585,6 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     txDeletedEntry.WalletAddress = txSearchEntry.WalletAddress;
     txDeletedEntry.CommonName = txSearchEntry.CommonName;
     txDeletedEntry.nObjectType = GetObjectTypeInt(bdapType);
-
-    CharString data;
-    txDeletedEntry.Serialize(data);
     
     // Create BDAP operation script
     CScript scriptPubKey;
@@ -600,24 +597,16 @@ static UniValue DeleteDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
 
-    // Create BDAP OP_RETURN script
+    // Create empty BDAP OP_RETURN script
     CScript scriptData;
-    scriptData << OP_RETURN << data;
 
     // Send the transaction
     CWalletTx wtx;
-    float fYears = ((float)1/365.25);
-    CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
-    CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
+    CAmount nOperationFee = (GetBDAPFee(scriptPubKey) * powf(3.1, 1)) + GetDataFee(scriptPubKey);
+    CAmount nDataFee = 0; // No OP_RETURN data needed for deleted account transactions
 
     bool fUseInstantSend = false;
-    int enabled = dnodeman.CountEnabled();
-    if (enabled > 5) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
-        fUseInstantSend = true;
-    }
-    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nDataFee, nOperationFee, fUseInstantSend);
+    SendBDAPTransaction(scriptData, scriptPubKey, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txDeletedEntry.txHash = wtx.GetHash();
 
     UniValue oName(UniValue::VOBJ);

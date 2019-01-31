@@ -46,6 +46,7 @@ public:
     CLinkRequest(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
+        txHash = tx->GetHash();
     }
 
     inline void SetNull()
@@ -106,12 +107,15 @@ public:
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);
-    bool IsMyLinkRequest(const CTransactionRef& tx);
     std::string RequestorPubKeyString() const;
     std::string SharedPubKeyString() const;
     std::string SignatureProofString() const;
     std::string RequestorFQDN() const;
     std::string RecipientFQDN() const;
+    std::set<std::string> SortedAccounts() const;
+    bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
+    CharString LinkPath() const;
+    std::string LinkPathString() const;
 
 };
 
@@ -138,6 +142,7 @@ public:
     CLinkAccept(const CTransactionRef& tx) {
         SetNull();
         UnserializeFromTx(tx);
+        txHash = tx->GetHash();
     }
 
     inline void SetNull()
@@ -200,10 +205,14 @@ public:
     std::string SignatureProofString() const;
     std::string RequestorFQDN() const;
     std::string RecipientFQDN() const;
+    std::set<std::string> SortedAccounts() const;
+    bool Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const;
+    CharString LinkPath() const;
+    std::string LinkPathString() const;
 
 };
 
-bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage);
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage);
 bool CreateSignatureProof(const CKey& key, const std::string& strFQDN, std::vector<unsigned char>& vchSignatureProof);
 bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strFQDN, const std::vector<unsigned char>& vchSig);
 // TODO (BDAP): Implement

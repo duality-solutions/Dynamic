@@ -102,11 +102,6 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
     return true;
 }
 
-bool CLinkRequest::IsMyLinkRequest(const CTransactionRef& tx)
-{
-    return false;
-}
-
 std::string CLinkRequest::RequestorPubKeyString() const
 {
     return stringFromVch(RequestorPubKey);
@@ -130,6 +125,39 @@ std::string CLinkRequest::RequestorFQDN() const
 std::string CLinkRequest::RecipientFQDN() const
 {
     return stringFromVch(RecipientFullObjectPath);
+}
+
+std::set<std::string> CLinkRequest::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkRequest::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
+}
+
+CharString CLinkRequest::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkRequest::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
 }
 
 bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
@@ -238,18 +266,51 @@ std::string CLinkAccept::RecipientFQDN() const
     return stringFromVch(RecipientFullObjectPath);
 }
 
+std::set<std::string> CLinkAccept::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkAccept::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
+}
+
+CharString CLinkAccept::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkAccept::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
+}
+
 /** Checks if BDAP link request pubkey exists in the memory pool */
-bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransactionRef& tx = e.GetSharedTx();
         for (const CTxOut& txOut : tx->vout) {
             if (IsBDAPDataOutput(txOut)) {
                 std::vector<unsigned char> vchMemPoolPubKey;
-                std::string strOpType;
-                if (!ExtractOpTypeValue(txOut.scriptPubKey, strOpType, vchMemPoolPubKey))
+                std::string strGetOpType;
+                if (!ExtractOpTypeValue(txOut.scriptPubKey, strGetOpType, vchMemPoolPubKey))
                     continue;
-                if (vchPubKey == vchMemPoolPubKey) {
+                if (vchPubKey == vchMemPoolPubKey && strOpType == strGetOpType) {
                     errorMessage = "CheckIfExistsInMemPool: A BDAP link request public key " + stringFromVch(vchPubKey) + " transaction is already in the memory pool!";
                     return true;
                 }
