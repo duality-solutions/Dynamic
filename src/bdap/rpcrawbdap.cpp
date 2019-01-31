@@ -81,6 +81,10 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     txDomainEntry.nObjectType = GetObjectTypeInt(bdapType);
     // Add an extra 8 hours or 28,800 seconds to expire time.
     txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds + 28800;
+    
+    // Check if name already exists
+    if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4503 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address
     CKey privWalletKey;
@@ -90,7 +94,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4504 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
@@ -102,7 +106,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString vchDHTPubKey = privDHTKey.GetPubKey();
     
     if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4505 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
     pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "bdap-dht-key");
@@ -115,7 +119,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4506 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
