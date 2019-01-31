@@ -563,3 +563,66 @@ bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::st
 
     return false;
 }
+
+bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck)
+{
+    // finds the previous link txid and makes sure this operation is coming from the same wallet address as the new or update entry
+    CTxDestination bdapDest;
+    if (!ExtractDestination(scriptOp, bdapDest))
+    {
+        errorMessage = "CheckPreviousLinkInputs: - " + _("Cannot extract destination of BDAP input; this delete operation failed!");
+        return error(errorMessage.c_str());
+    }
+    else
+    {
+        std::vector<unsigned char> vchPubKey = vvchOpParameters[0];
+        uint256 prevTxId;
+        if (strOpType == "bdap_delete_link_request") {
+            if (!GetLinkRequestIndex(vchPubKey, prevTxId)) {
+                errorMessage = "CheckPreviousLinkInputs: - " + _("Cannot get previous link request txid; this delete operation failed!");
+                return error(errorMessage.c_str());
+            }
+        }
+        else if (strOpType == "bdap_delete_link_accept") {
+            if (!GetLinkAcceptIndex(vchPubKey, prevTxId)) {
+                errorMessage = "CheckPreviousLinkInputs: - " + _("Cannot get previous link accept txid; this delete operation failed!");
+                return error(errorMessage.c_str());
+            }
+        }
+        CTransactionRef prevTx;
+        if (!GetPreviousTxRefById(prevTxId, prevTx)) {
+            errorMessage = "CheckPreviousLinkInputs: - " + _("Cannot extract previous transaction from BDAP link output; this delete operation failed!");
+            return error(errorMessage.c_str());
+        }
+        // Get current wallet address used for BDAP tx
+        CDynamicAddress txAddress = GetScriptAddress(scriptOp);
+        // Get previous wallet address used for BDAP tx
+        CScript prevScriptPubKey;
+        GetBDAPOpScript(prevTx, prevScriptPubKey);
+        CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+        if (txAddress.ToString() != prevAddress.ToString())
+        {
+            //check if previous wallet address is used for update and delete txs
+            errorMessage = "CheckPreviousLinkInputs: - " + _("Changes to link data must use the previous wallet address; this delete operation failed!");
+            return error(errorMessage.c_str());
+        }
+        if (fJustCheck)
+            return true;
+
+        if (strOpType == "bdap_delete_link_request") {
+            if (!pLinkRequestDB->EraseMyLinkRequest(vchPubKey))
+            {
+                errorMessage = "CheckPreviousLinkInputs: - Error deleting link request entry from LevelDB; this delete operation failed!";
+                return error(errorMessage.c_str());
+            }
+        }
+        else if (strOpType == "bdap_delete_link_accept") {
+            if (!pLinkAcceptDB->EraseMyLinkAccept(vchPubKey))
+            {
+                errorMessage = "CheckPreviousLinkInputs: - Error deleting link accept entry from LevelDB; this delete operation failed!";
+                return error(errorMessage.c_str());
+            }
+        }
+    }
+    return true;
+}

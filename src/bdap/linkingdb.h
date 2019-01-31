@@ -70,6 +70,7 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
 
 bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
 bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
+bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck);
 
 extern CLinkRequestDB *pLinkRequestDB;
 extern CLinkAcceptDB *pLinkAcceptDB;

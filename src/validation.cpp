@@ -693,11 +693,28 @@ bool ValidateBDAPInputs(const CTransactionRef& tx, CValidationState& state, cons
                 if (GetLinkAcceptIndex(vchPubKey, txid)) {
                     if (txid != tx->GetHash()) {
                         errorMessage = "Link accept public key already used.";
-                        LogPrintf("%s -- %s\n", __func__, errorMessage);
                         return state.DoS(100, false, REJECT_INVALID, errorMessage);
                     }
                 }
                 return true;
+            }
+            else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+                if (!CheckPreviousLinkInputs(strOpType, scriptOp, vvchBDAPArgs, errorMessage, fJustCheck)) {
+                    errorMessage = "ValidateBDAPInputs: Delete link failed" + errorMessage;
+                    LogPrintf("%s -- delete link failed. %s\n", __func__, errorMessage);
+                    return state.DoS(100, false, REJECT_INVALID, errorMessage);
+                }
+                return true;
+            }
+            else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_update_link_accept") {
+                errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is not implemented yet." + errorMessage;
+                LogPrintf("%s -- Unknown operation failed. %s\n", __func__, errorMessage);
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
+            }
+            else {
+                errorMessage = "ValidateBDAPInputs: Failed because " + strOpType + " is an unknown BDAP operation. " + errorMessage;
+                LogPrintf("%s -- Unknown operation failed. %s\n", __func__, errorMessage);
+                return state.DoS(100, false, REJECT_INVALID, errorMessage);
             }
         }
     }
@@ -795,7 +812,17 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
 
             std::vector<unsigned char> vchPubKey = vvch[0];
-            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strErrorMessage))
+            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strOpType, strErrorMessage))
+                return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
+        }
+        else if (strOpType == "bdap_delete_link_request" || strOpType == "bdap_delete_link_accept") {
+            if (vvch.size() < 1)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-pubkey-parameter-not-found");
+            if (vvch.size() > 2)
+                return state.Invalid(false, REJECT_INVALID, "bdap-txn-too-many-parameters");
+
+            std::vector<unsigned char> vchPubKey = vvch[0];
+            if (LinkPubKeyExistsInMemPool(pool, vchPubKey, strOpType, strErrorMessage))
                 return state.Invalid(false, REJECT_ALREADY_KNOWN, "bdap-link-pubkey-txn-already-in-mempool");
         }
         else {

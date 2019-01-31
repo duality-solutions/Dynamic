@@ -3732,18 +3732,6 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_request") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
-                }
-                else if (strOpType == "bdap_delete_link_request") {
-                    uint256 txid;
-                    if (!GetLinkRequestIndex(vchValue, txid)) {
-                        strFailReason = _("Link accept pubkey could not be found.");
-                        return false;
-                    }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
-                }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
                     if (GetLinkAcceptIndex(vchValue, txid)) {
@@ -3752,17 +3740,43 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
+                else if (strOpType == "bdap_delete_link_request") {
+                    uint256 prevTxId;
+                    if (!GetLinkRequestIndex(vchValue, prevTxId)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    CTransactionRef prevTx;
+                    if (!GetPreviousTxRefById(prevTxId, prevTx)) {
+                        strFailReason = _("Previous delete link request transaction could not be found.");
+                        return false;
+                    }
+                    CScript prevScriptPubKey;
+                    GetBDAPOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+                else if (strOpType == "bdap_delete_link_accept") {
+                    uint256 prevTxId;
+                    if (!GetLinkAcceptIndex(vchValue, prevTxId)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    CTransactionRef prevTx;
+                    if (!GetPreviousTxRefById(prevTxId, prevTx)) {
+                        strFailReason = _("Previous delete link accept transaction could not be found.");
+                        return false;
+                    }
+                    CScript prevScriptPubKey;
+                    GetBDAPOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
                 else if (strOpType == "bdap_update_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }
-                else if (strOpType == "bdap_delete_link_accept") {
-                    uint256 txid;
-                    if (!GetLinkAcceptIndex(vchValue, txid)) {
-                        strFailReason = _("Link accept pubkey could not be found.");
-                        return false;
-                    }
-                    AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
+                else if (strOpType == "bdap_update_link_request") {
+                    strFailReason = strOpType + _(" not implemented yet.");
+                    return false;
                 }
                 else {
                     strFailReason = strOpType + _(" is an uknown BDAP operation.");

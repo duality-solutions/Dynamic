@@ -59,5 +59,6 @@ bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vect
 bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 int GetLinkVersionFromData(const std::vector<unsigned char>& vchData);
+bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx);
 
 #endif // DYNAMIC_BDAP_UTILS_H

@@ -571,3 +571,13 @@ int GetLinkVersionFromData(const std::vector<unsigned char>& vchData)
 
     return (int)vchData[0];
 }
+
+bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx)
+{
+    prevTx = MakeTransactionRef();
+    uint256 hashBlock;
+    if (!GetTransaction(prevTxId, prevTx, Params().GetConsensus(), hashBlock, true))
+        return false;
+
+    return true;
+}
