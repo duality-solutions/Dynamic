@@ -81,6 +81,10 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     txDomainEntry.nObjectType = GetObjectTypeInt(bdapType);
     // Add an extra 8 hours or 28,800 seconds to expire time.
     txDomainEntry.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds + 28800;
+    
+    // Check if name already exists
+    if (GetDomainEntry(txDomainEntry.vchFullObjectPath(), txDomainEntry))
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4503 - " + txDomainEntry.GetFullObjectPath() + _(" entry already exists.  Can not add duplicate."));
 
     // TODO: Add ability to pass in the wallet address
     CKey privWalletKey;
@@ -90,7 +94,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CDynamicAddress walletAddress = CDynamicAddress(keyWalletID);
 
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privWalletKey, pubWalletKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3502 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4504 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyWalletID, strObjectID, "bdap-wallet");
     
@@ -102,7 +106,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CharString vchDHTPubKey = privDHTKey.GetPubKey();
     
     if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4505 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
     txDomainEntry.DHTPublicKey = vchDHTPubKey;
     pwalletMain->SetAddressBook(privDHTKey.GetID(), strObjectID, "bdap-dht-key");
@@ -115,7 +119,7 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     CKeyID keyLinkID = pubLinkKey.GetID();
     CDynamicAddress linkAddress = CDynamicAddress(keyLinkID);
     if (pwalletMain && !pwalletMain->AddKeyPubKey(privLinkKey, pubLinkKey))
-        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3504 - " + _("Error adding receiving address key wo wallet for BDAP"));
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4506 - " + _("Error adding receiving address key wo wallet for BDAP"));
 
     pwalletMain->SetAddressBook(keyLinkID, strObjectID, "bdap-link");
     
@@ -149,12 +153,87 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     return EncodeHexTx(rawTx);
 }
 
+UniValue ConvertParameterValues(const std::vector<std::string>& strParams)
+{
+    UniValue params(UniValue::VARR);
+
+    for (unsigned int idx = 0; idx < strParams.size(); idx++) {
+        const std::string& strVal = strParams[idx];
+        // insert string value directly
+        params.push_back(strVal);
+    }
+
+    return params;
+}
+
+UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "sendrawbdapaccount"
+            "\nArguments:\n"
+            "1. hexstring        (string)             The hex string of the raw BDAP transaction\n"
+            "\nPays for BDAP account by adding utxos, signs the inputs, and broadcasts the resulting transaction.\n"
+            "\nCall createrawbdapaccount to get the hex encoded BDAP transaction string\n"
+            "\nResult:\n"
+            "\"transaction id\"   (string) \n"
+            "\nExamples\n" +
+           HelpExampleCli("sendrawbdapaccount", "<hexstring>") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("sendrawbdapaccount", "<hexstring>"));
+
+    CMutableTransaction mtx;
+    std::string strHexIn = request.params[0].get_str();
+    if (!DecodeHexTx(mtx, strHexIn))
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+
+    EnsureWalletIsUnlocked();
+
+    // Funded BDAP transaction with utxos
+    JSONRPCRequest jreqFund;
+    jreqFund.strMethod = "fundrawtransaction";
+    std::vector<std::string> vchFundParams;
+    vchFundParams.push_back(strHexIn);
+    jreqFund.params = ConvertParameterValues(vchFundParams);
+    UniValue resultFund = tableRPC.execute(jreqFund);
+    if (resultFund.isNull())
+        throw std::runtime_error("BDAP_SEND_RAW_TX_RPC_ERROR: ERRCODE: 4510 - " + _("Error funding raw BDAP transaction."));
+    UniValue oHexFund = resultFund.get_obj();
+    std::string strHexFund =  oHexFund[0].get_str();
+
+    // Sign funded BDAP transaction
+    JSONRPCRequest jreqSign;
+    jreqSign.strMethod = "signrawtransaction";
+    std::vector<std::string> vchSignParams;
+    vchSignParams.push_back(strHexFund);
+    jreqSign.params = ConvertParameterValues(vchSignParams);
+    UniValue resultSign = tableRPC.execute(jreqSign);
+    if (resultSign.isNull())
+        throw std::runtime_error("BDAP_SEND_RAW_TX_RPC_ERROR: ERRCODE: 4510 - " + _("Error signing funded raw BDAP transaction."));
+    UniValue oHexSign = resultSign.get_obj();
+    std::string strHexSign =  oHexSign[0].get_str();
+
+    // Send funded and signed BDAP transaction
+    JSONRPCRequest jreqSend;
+    jreqSend.strMethod = "sendrawtransaction";
+    std::vector<std::string> vchSendParams;
+    vchSendParams.push_back(strHexSign);
+    jreqSend.params = ConvertParameterValues(vchSendParams);
+    UniValue resultSend = tableRPC.execute(jreqSend);
+    if (resultSend.isNull())
+        throw std::runtime_error("BDAP_SEND_RAW_TX_RPC_ERROR: ERRCODE: 4510 - " + _("Error sending raw funded & signed BDAP transaction."));
+    std::string strTxId =  resultSend.get_str();
+
+    return strTxId;
+}
+
 static const CRPCCommand commands[] =
-{ //  category              name                          actor (function)        okSafe argNames
-  //  --------------------- ----------------------------- ----------------------- ------ --------------------
+{ //  category              name                          actor (function)           okSafe argNames
+  //  --------------------- ----------------------------- -------------------------- ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,  true, {"userid", "common name", "registration days", "object type"} },
+    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,      true, {"userid", "common name", "registration days", "object type"} },
+    { "bdap",               "sendandpayrawbdapaccount",   &sendandpayrawbdapaccount,  true, {"hexstring"} },
 #endif //ENABLE_WALLET
 };
 

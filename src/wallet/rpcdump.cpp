@@ -777,13 +777,13 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "importmnemonic \"mnemonic\"\n"
             "\nImports mnemonic\n"
             "\nArguments:\n"
-            "1. \"mnemonic\"    (string, required) mnemonic\n"
-            "2. \"begin\"    (int, optional) begin\n"
-            "3. \"end\"    (int, optional) end\n"
+            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-)\n"
+            "2. \"begin\"       (int, optional) begin\n"
+            "3. \"end\"         (int, optional) end\n"
             "4. forcerescan               (boolean, optional, default=true) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
-            + HelpExampleCli("importmnemonic", "\"inflict,witness,off,property,target,faint,gather,match,outdoor,weapon,wide,mix\"")
+            + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
     if (fPruneMode)
         throw JSONRPCError(RPC_WALLET_ERROR, "Importing wallets is disabled in pruned mode");
