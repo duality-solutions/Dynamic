@@ -16,6 +16,7 @@
 #include <QList>
 #include <QTimer>
 #include <QTableWidget>
+#include <boost/algorithm/string.hpp>
 
 // private implementation
 class BdapAccountTablePriv
@@ -31,7 +32,7 @@ public:
     std::map<NodeId, int> mapNodeRows;
 
     /** Populate tableWidget_Users via RPC call */
-    void refreshAccounts(QTableWidget* inputtable, bool filterOn = false)
+    void refreshAccounts(QTableWidget* inputtable, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "")
     {
 
         JSONRPCRequest jreq;
@@ -44,11 +45,24 @@ public:
         std::string getExpirationDate {""};
         std::string tableWidgetName {""};
 
+        bool hasValues = false;
+
         LogPrintf("DEBUGGER CHECKBOX --%s %s-- \n", __func__, filterOn);
     
         if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
-        //Execute RPC call (List All Users)
+        //check if table has been previously sorted
+        if (!inputtable->objectName().isEmpty()){
+            if (inputtable->rowCount() > 0) {
+                hasValues = true;
+                LogPrintf("DEBUGGER SORT --%s %s %s-- \n", __func__, inputtable->horizontalHeader()->sortIndicatorOrder(), inputtable->horizontalHeader()->sortIndicatorSection());
+                sortColumn = inputtable->horizontalHeader()->sortIndicatorSection();
+                sortOrder = inputtable->horizontalHeader()->sortIndicatorOrder();
+            } //if rowcount
+        } //if not isempty
+
+
+        //Execute proper RPC call 
         if (tableWidgetName == "tableWidget_Groups") {
             if (filterOn) {
                 params.push_back("groups");
@@ -89,8 +103,6 @@ public:
             getPath = "";
             getExpirationDate = "";
 
-            nNewRow = inputtable->rowCount();
-            inputtable->insertRow(nNewRow);
 
             for (size_t j {0} ; j < result[i].size() ; ++j) {
                 keyName = "";
@@ -104,14 +116,31 @@ public:
 
                 //LogPrintf("DEBUGGER LOOP --%s %s: %s-- \n", __func__, result[i].getKeys()[j], result[i].getValues()[j].get_str());
             }
-            QTableWidgetItem* commonNameItem = new QTableWidgetItem(QString::fromStdString(getName));
-            QTableWidgetItem* fullPathItem = new QTableWidgetItem(QString::fromStdString(getPath));
-            QTableWidgetItem* expirationDateItem = new QTableWidgetItem(QString::fromStdString(getExpirationDate));
-            inputtable->setItem(nNewRow, 0, commonNameItem);
-            inputtable->setItem(nNewRow, 1, fullPathItem);
-            inputtable->setItem(nNewRow, 2, expirationDateItem);
 
-        };
+
+            //LogPrintf("DEBUGGER SEARCH 1--%s %s: %s-- \n", __func__, searchCommon, getName);
+            //LogPrintf("DEBUGGER SEARCH 2--%s %s: %s-- \n", __func__, searchPath, getPath);
+
+            //add row if all criteria have been met
+            if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
+                nNewRow = inputtable->rowCount();
+                inputtable->insertRow(nNewRow);
+                QTableWidgetItem* commonNameItem = new QTableWidgetItem(QString::fromStdString(getName));
+                QTableWidgetItem* fullPathItem = new QTableWidgetItem(QString::fromStdString(getPath));
+                QTableWidgetItem* expirationDateItem = new QTableWidgetItem(QString::fromStdString(getExpirationDate));
+                inputtable->setItem(nNewRow, 0, commonNameItem);
+                inputtable->setItem(nNewRow, 1, fullPathItem);
+                inputtable->setItem(nNewRow, 2, expirationDateItem);
+
+            } //if searchcommon
+
+
+        }; //for loop
+
+        //if we saved the previous state, apply to current results
+        if (hasValues) {
+            inputtable->horizontalHeader()->setSortIndicator(sortColumn, sortOrder);
+        }
 
     }
 
@@ -251,28 +280,36 @@ void BdapAccountTableModel::refresh()
 {
     myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
     myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
+    searchUserCommon = bdapPage->getCommonUserSearch();
+    searchUserPath = bdapPage->getPathUserSearch();
+    searchGroupCommon = bdapPage->getCommonGroupSearch();
+    searchGroupPath = bdapPage->getPathGroupSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable,myUsersChecked);
-    priv->refreshAccounts(groupTable,myGroupsChecked);
+    priv->refreshAccounts(userTable,myUsersChecked,searchUserCommon,searchUserPath);
+    priv->refreshAccounts(groupTable,myGroupsChecked,searchGroupCommon,searchGroupPath);
     Q_EMIT layoutChanged();
 }
 
 void BdapAccountTableModel::refreshUsers()
 {
     myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
+    searchUserCommon = bdapPage->getCommonUserSearch();
+    searchUserPath = bdapPage->getPathUserSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable,myUsersChecked);
+    priv->refreshAccounts(userTable,myUsersChecked,searchUserCommon,searchUserPath);
     Q_EMIT layoutChanged();
 }
 
 void BdapAccountTableModel::refreshGroups()
 {
     myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
+    searchGroupCommon = bdapPage->getCommonGroupSearch();
+    searchGroupPath = bdapPage->getPathGroupSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(groupTable,myGroupsChecked);
+    priv->refreshAccounts(groupTable,myGroupsChecked,searchGroupCommon,searchGroupPath);
     Q_EMIT layoutChanged();
 }
 

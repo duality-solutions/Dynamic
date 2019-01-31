@@ -75,6 +75,10 @@ private:
     QTableWidget* groupTable;
     bool myUsersChecked;
     bool myGroupsChecked;
+    std::string searchUserCommon;
+    std::string searchUserPath;
+    std::string searchGroupCommon;
+    std::string searchGroupPath;
     
 };
 

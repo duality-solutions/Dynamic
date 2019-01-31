@@ -40,6 +40,11 @@ public:
     bool getMyUserCheckBoxChecked();
     bool getMyGroupCheckBoxChecked();
     int getCurrentIndex();
+    std::string getCommonUserSearch();
+    std::string getPathUserSearch();
+    std::string getCommonGroupSearch();
+    std::string getPathGroupSearch();
+
 
 
 

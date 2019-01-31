@@ -44,7 +44,8 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->deleteUser, SIGNAL(clicked()), this, SLOT(deleteUser()));
 
     connect(ui->checkBoxMyUsers, SIGNAL(clicked()), this, SLOT(listAllUsers()));
-    connect(ui->checkBoxMyGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
+    connect(ui->lineEditUserCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllUsers()));
+    connect(ui->lineEditUserFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllUsers()));
 
 
     //Groups tab
@@ -52,6 +53,10 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
     connect(ui->deleteGroup, SIGNAL(clicked()), this, SLOT(deleteGroup()));
 
+    connect(ui->checkBoxMyGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
+    connect(ui->lineEditGroupCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
+    connect(ui->lineEditGroupFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
+    
 
    LogPrintf("DEBUGGER TABLE 1--%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
    LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
@@ -167,5 +172,30 @@ bool BdapPage::getMyGroupCheckBoxChecked()
 { 
     return ui->checkBoxMyGroups->isChecked(); 
 }
+
+std::string BdapPage::getCommonUserSearch()
+{
+    return ui->lineEditUserCommonNameSearch->text().toStdString();
+}
+
+std::string BdapPage::getPathUserSearch()
+{
+    return ui->lineEditUserFullPathSearch->text().toStdString();
+}
+
+std::string BdapPage::getCommonGroupSearch()
+{
+    return ui->lineEditGroupCommonNameSearch->text().toStdString();
+}
+
+std::string BdapPage::getPathGroupSearch()
+{
+    return ui->lineEditGroupFullPathSearch->text().toStdString();
+}
+
+
+
+
+
 
 
