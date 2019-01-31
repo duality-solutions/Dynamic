@@ -159,9 +159,9 @@ UniValue adduser(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "adduser"
+            "adduser \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. userid             (string)             The account userid\n"
+            "1. account id         (string)             The account userid\n"
             "2. common name        (string)             The account common name used for searching\n"
             "3. registration days  (int, optional)      Number of days to register account\n"
             "\nAdds a new bdap.io public name account entry to the blockchain directory.\n"
@@ -199,7 +199,7 @@ UniValue getusers(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
-            "getusers"
+            "getusers \"records per page\" \"page returned\"\n"
             "\nArguments:\n"
             "1. records per page     (int, optional)  If paging, the number of records per page\n"
             "2. page returned        (int, optional)  If paging, the page number to return\n"
@@ -239,7 +239,7 @@ UniValue getgroups(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
-            "getgroups"
+            "getgroups \"records per page\" \"page returned\"\n"
             "\nArguments:\n"
             "1. records per page     (int, optional)  If paging, the number of records per page\n"
             "2. page returned        (int, optional)  If paging, the page number to return\n"
@@ -279,9 +279,9 @@ UniValue getuserinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "getuserinfo"
+            "getuserinfo \"account id\"\n"
             "\nArguments:\n"
-            "1. user id              (string)  Account object ID (aka UserID)\n"
+            "1. account id            (string)  Account object ID (aka UserID)\n"
             "\nShows detailed user account information.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -334,9 +334,9 @@ UniValue getgroupinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "getgroupinfo"
+            "getgroupinfo \"account id\"\n"
             "\nArguments:\n"
-            "1. user id              (string)  Account object ID (aka UserID)\n"
+            "1. account id            (string)  Account object ID (aka UserID)\n"
             "\nShows detailed group account information.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -482,9 +482,9 @@ UniValue updateuser(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "updateuser"
+            "updateuser \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
-            "1. userid             (string)             The account objectid within public.bdap.io\n"
+            "1. account id         (string)             The account objectid within public.bdap.io\n"
             "2. common name        (string)             The account common name used for searching\n"
             "3. registration days  (int, optional)      Number of additional days to register account\n"
             "\nUpdates an existing bdap.io public name account entry in the blockchain directory.\n"
@@ -522,7 +522,7 @@ UniValue updategroup(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "updategroup"
+            "updategroup \"account id\"  \"common name\"  \"registration days\"\n"
             "\nArguments:\n"
             "1. groupid            (string)             The account objectid within public.bdap.io\n"
             "2. common name        (string)             The account common name used for searching\n"
@@ -644,8 +644,9 @@ UniValue deleteuser(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "deleteuser"
+            "deleteuser \"account id\"\n"
             "\nArguments:\n"
-            "1. userid              (string)             The account objectid within public.bdap.io\n"
+            "1. account id         (string)             The account objectid within public.bdap.io\n"
             "\nDeletes an existing bdap.io public user account entry from the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -681,9 +682,9 @@ UniValue deletegroup(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "deletegroup"
+            "deletegroup \"account id\"\n"
             "\nArguments:\n"
-            "1. groupid            (string)             The account objectid within public.bdap.io\n"
+            "1. account id        (string)              The account objectid within public.bdap.io\n"
             "\nDeletes an existing bdap.io public group account entry from the blockchain directory.\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -719,7 +720,7 @@ UniValue makekeypair(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
-            "makekeypair"
+            "makekeypair \"prefix\"\n"
             "\nArguments:\n"
             "1. prefix                (string, optional)     preferred prefix for the public key\n"
             "\nCreates a new public/private key pair without adding them to the local wallet.\n"
@@ -766,9 +767,9 @@ UniValue addgroup(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "addgroup"
+            "addgroup \"account id\" \"common name\" \"registration days\"\n"
             "\nArguments:\n"
-            "1. accountid          (string)             The new group account id\n"
+            "1. account id         (string)             The new group account id\n"
             "2. common name        (string)             The group account common name used for searching\n"
             "3. registration days  (int, optional)      Number of days to register the account\n"
             "\nAdds a new bdap.io public group account entry to the blockchain directory.\n"
@@ -850,19 +851,19 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------ -----------------------        ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",            "adduser",                  &adduser,                      true, {"userid", "common name", "registration days"} },
+    { "bdap",            "adduser",                  &adduser,                      true, {"account id", "common name", "registration days"} },
     { "bdap",            "getusers",                 &getusers,                     true, {"records per page", "page returned"} },
     { "bdap",            "getgroups",                &getgroups,                    true, {"records per page", "page returned"} },
-    { "bdap",            "getuserinfo",              &getuserinfo,                  true, {"public name"} },
-    { "bdap",            "updateuser",               &updateuser,                   true, {"userid", "common name", "registration days"} },
-    { "bdap",            "updategroup",              &updategroup,                  true, {"groupid", "common name", "registration days"} },
-    { "bdap",            "deleteuser",               &deleteuser,                   true, {"userid"} },
-    { "bdap",            "deletegroup",              &deletegroup,                  true, {"groupid"} },
-    { "bdap",            "addgroup",                 &addgroup,                     true, {"groupid", "common name", "registration days"} },
-    { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"groupid"} },
+    { "bdap",            "getuserinfo",              &getuserinfo,                  true, {"account id"} },
+    { "bdap",            "updateuser",               &updateuser,                   true, {"account id", "common name", "registration days"} },
+    { "bdap",            "updategroup",              &updategroup,                  true, {"account id", "common name", "registration days"} },
+    { "bdap",            "deleteuser",               &deleteuser,                   true, {"account id"} },
+    { "bdap",            "deletegroup",              &deletegroup,                  true, {"account id"} },
+    { "bdap",            "addgroup",                 &addgroup,                     true, {"account id", "common name", "registration days"} },
+    { "bdap",            "getgroupinfo",             &getgroupinfo,                 true, {"account id"} },
     { "bdap",            "mybdapaccounts",           &mybdapaccounts,               true, {} },
 #endif //ENABLE_WALLET
-    { "bdap",            "makekeypair",              &makekeypair,                  true, {} },
+    { "bdap",            "makekeypair",              &makekeypair,                  true, {"prefix"} },
 };
 
 void RegisterDomainEntryRPCCommands(CRPCTable &t)

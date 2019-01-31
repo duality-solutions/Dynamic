@@ -27,7 +27,7 @@ UniValue getmutable(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "getmutable"
+            "getmutable \"pubkey\" \"operation\"\n"
             "\nArguments:\n"
             "1. pubkey             (string)             DHT public key\n"
             "2. operation          (string)             DHT data operation\n"
@@ -77,12 +77,12 @@ UniValue putmutable(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putmutable"
+            "putmutable \"data value\" \"operation\" \"pubkey\" \"privkey\"\n"
             "\nArguments:\n"
-            "1. dht value          (string)          Put data value\n"
-            "2. operation          (string)          DHT data operation\n"
-            "3. pubkey             (string)          Base64 encoded DHT public key\n"
-            "4. privkey            (string)          Base64 encoded DHT private key\n"
+            "1. data value                    (string)  Put data value for the DHT entry\n"
+            "2. operation                     (string)  DHT data operation\n"
+            "3. pubkey                        (string)  Base64 encoded DHT public key\n"
+            "4. privkey                       (string)  Base64 encoded DHT private key\n"
             "\nPuts or saves mutable data on the DHT for a pubkey/salt pair\n"
             "\nResult:\n"
             "{(json object)\n"
@@ -328,12 +328,12 @@ UniValue putbdapdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "putbdapdata"
+            "putbdapdata \"account id\" \"data value\" \"operation\"\n"
             "\nSaves mutable data in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account id             (string)      BDAP account id\n"
-            "2. value                  (string)      Mutable data value\n"
-            "3. operation              (string)      Mutable data operation\n"
+            "2. data value             (string)      Mutable data value to save in the DHT\n"
+            "3. operation              (string)      Mutable data operation used for DHT entry\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"entry_path\"          (string)      BDAP account FQDN\n"
@@ -407,7 +407,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "getbdapdata"
+            "getbdapdata \"account id\" \"operation\"\n"
             "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account id             (string)      BDAP account id\n"
@@ -581,11 +581,11 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------ -----------------------        ------   --------------------
     /* DHT */
     { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey","operation"}  },
-    { "dht",             "putmutable",               &putmutable,                   true,    {"dht value","operation", "pubkey", "privkey"} },
+    { "dht",             "putmutable",               &putmutable,                   true,    {"data value","operation", "pubkey", "privkey"} },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true,    {} },
     { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
-    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"bdap id","dht value", "operation"} },
-    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"bdap id","operation"} },
+    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"account id","data value", "operation"} },
+    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"account id","operation"} },
     { "dht",             "dhtputmessages",           &dhtputmessages,               true,    {} },
     { "dht",             "dhtgetmessages",           &dhtgetmessages,               true,    {} },
 };

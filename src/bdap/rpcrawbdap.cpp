@@ -25,9 +25,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-            "createrawbdapaccount"
+            "createrawbdapaccount \"account id\" \"common name\" \"registration days\" \"object type\"\n"
             "\nArguments:\n"
-            "1. userid             (string)             BDAP account requesting the link\n"
+            "1. account id         (string)             BDAP account id requesting the link\n"
             "2. common name        (string)             Free text comman name for BDAP account with a max length of 95 characters\n"
             "3. registration days  (int, optional)      Number of registration days for the new account.  Defaults to 2 years.\n"
             "4. object type        (int, optional)      Type of BDAP account to create. 1 = user and 2 = group.  Default to 1 for user.\n"
@@ -170,7 +170,7 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "sendrawbdapaccount"
+            "sendandpayrawbdapaccount \"hexstring\"\n"
             "\nArguments:\n"
             "1. hexstring        (string)             The hex string of the raw BDAP transaction\n"
             "\nPays for BDAP account by adding utxos, signs the inputs, and broadcasts the resulting transaction.\n"
@@ -178,9 +178,9 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
             "\nResult:\n"
             "\"transaction id\"   (string) \n"
             "\nExamples\n" +
-           HelpExampleCli("sendrawbdapaccount", "<hexstring>") +
+           HelpExampleCli("sendandpayrawbdapaccount", "<hexstring>") +
            "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("sendrawbdapaccount", "<hexstring>"));
+           HelpExampleRpc("sendandpayrawbdapaccount", "<hexstring>"));
 
     CMutableTransaction mtx;
     std::string strHexIn = request.params[0].get_str();
@@ -232,7 +232,7 @@ static const CRPCCommand commands[] =
   //  --------------------- ----------------------------- -------------------------- ------ --------------------
 #ifdef ENABLE_WALLET
     /* BDAP */
-    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,      true, {"userid", "common name", "registration days", "object type"} },
+    { "bdap",               "createrawbdapaccount",       &createrawbdapaccount,      true, {"account id", "common name", "registration days", "object type"} },
     { "bdap",               "sendandpayrawbdapaccount",   &sendandpayrawbdapaccount,  true, {"hexstring"} },
 #endif //ENABLE_WALLET
 };
