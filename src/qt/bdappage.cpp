@@ -1,6 +1,7 @@
 #include "bdappage.h"
 #include "ui_bdappage.h"
 #include "bdapadduserdialog.h"
+#include "bdapuserdetaildialog.h"
 #include "guiutil.h"
 #include "walletmodel.h"
 #include "bdapaccounttablemodel.h"
@@ -47,6 +48,8 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->lineEditUserCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllUsers()));
     connect(ui->lineEditUserFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllUsers()));
 
+    connect(ui->tableWidget_Users, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getUserDetails(int,int)));
+
 
     //Groups tab
     connect(ui->pushButton_AllGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
@@ -56,7 +59,10 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->checkBoxMyGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
     connect(ui->lineEditGroupCommonNameSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
     connect(ui->lineEditGroupFullPathSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listAllGroups()));
-    
+
+
+    connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
+
 
    LogPrintf("DEBUGGER TABLE 1--%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
    LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
@@ -105,6 +111,15 @@ void BdapPage::deleteGroup()
     //ui->lineEdit_GroupSearch->setPlaceholderText("Delete Group");
 } //deleteGroup
 
+void BdapPage::getGroupDetails(int row, int column)
+{
+    //LogPrintf("DEBUGGER USERDETAIL --%s made it here-- \n", __func__);
+
+    BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,ui->tableWidget_Groups->item(row,1)->text().toStdString());
+    dlg.setWindowTitle(QString::fromStdString("BDAP Group Detail"));
+    dlg.exec();
+} //getGroupDetails
+
 
 
 //Users tab =========================================================================
@@ -133,6 +148,18 @@ void BdapPage::addUser()
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
 } //addUser
+
+
+void BdapPage::getUserDetails(int row, int column)
+{
+    LogPrintf("DEBUGGER USERDETAIL --%s made it here-- \n", __func__);
+
+    BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_USER,ui->tableWidget_Users->item(row,1)->text().toStdString());
+    dlg.setWindowTitle(QString::fromStdString("BDAP User Detail"));
+    dlg.exec();
+} //getUserDetails
+
+
 
 void BdapPage::deleteUser()
 {

@@ -7,6 +7,7 @@
 
 #include "platformstyle.h"
 #include "walletmodel.h"
+#include "bdap/bdap.h"
 
 #include <QPushButton>
 #include <QWidget>
@@ -62,6 +63,8 @@ private Q_SLOTS:
     void listMyUsers();
     void addUser();
     void deleteUser();
+    void getUserDetails(int row, int column);
+    void getGroupDetails(int row, int column);
 
     void listAllGroups();
     void listMyGroups();

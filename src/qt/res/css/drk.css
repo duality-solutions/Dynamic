@@ -2059,3 +2059,11 @@ QDialog#BdapAddUserDialog {
     background-color:#000000;
     border:2px solid white;
 }
+
+
+/*******************************************************/
+/* BDAPUSERDETAILDIALOG */
+QDialog#BdapUserDetailDialog {
+    background-color:#000000;
+    border:2px solid white;
+}
