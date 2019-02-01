@@ -610,18 +610,10 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
             return true;
 
         if (strOpType == "bdap_delete_link_request") {
-            if (!pLinkRequestDB->EraseMyLinkRequest(vchPubKey))
-            {
-                errorMessage = "CheckPreviousLinkInputs: - Error deleting link request entry from LevelDB; this delete operation failed!";
-                return error(errorMessage.c_str());
-            }
+            pLinkRequestDB->EraseMyLinkRequest(vchPubKey);
         }
         else if (strOpType == "bdap_delete_link_accept") {
-            if (!pLinkAcceptDB->EraseMyLinkAccept(vchPubKey))
-            {
-                errorMessage = "CheckPreviousLinkInputs: - Error deleting link accept entry from LevelDB; this delete operation failed!";
-                return error(errorMessage.c_str());
-            }
+            pLinkAcceptDB->EraseMyLinkAccept(vchPubKey);
         }
     }
     return true;
