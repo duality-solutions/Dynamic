@@ -44,7 +44,7 @@ static void empty_public_key(std::array<char, 32>& public_key)
 
 alert* WaitForResponse(session* dhtSession, const int alert_type, const std::array<char, 32>& public_key, const std::string& strSalt)
 {
-    LogPrintf("DHTTorrentNetwork -- WaitForResponse start.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- WaitForResponse start.\n");
     alert* ret = nullptr;
     bool found = false;
     std::array<char, 32> emptyKey;
@@ -64,19 +64,19 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
             std::string strAlertMessage = (*iAlert)->message();
             int iAlertType = (*iAlert)->type();
             if ((*iAlert)->category() == 0x1) {
-                LogPrintf("DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- error alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
             else if ((*iAlert)->category() == 0x80) {
-                LogPrintf("DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- progress alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
             else if ((*iAlert)->category() == 0x200) {
-                LogPrintf("DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- performance warning alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
             else if ((*iAlert)->category() == 0x400) {
-                LogPrintf("DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- dht alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
             else {
-                LogPrintf("DHTTorrentNetwork -- dht other alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- dht other alert message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
             }
             if (iAlertType != alert_type)
             {
@@ -86,7 +86,7 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
             size_t posKey = strAlertMessage.find("key=" + strPublicKey);
             size_t posSalt = strAlertMessage.find("salt=" + strSalt);
             if (strPublicKey == strEmpty || (posKey != std::string::npos && posSalt != std::string::npos)) {
-                LogPrintf("DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
+                LogPrint("dht", "DHTTorrentNetwork -- wait alert complete. message = %s, alert_type =%d\n", strAlertMessage, iAlertType);
                 ret = *iAlert;
                 found = true;
             }
@@ -99,7 +99,7 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
 
 bool Bootstrap()
 {
-    LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- bootstrapping.\n");
     const int64_t timeout = 30000; // 30 seconds
     const int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)
@@ -109,12 +109,12 @@ bool Bootstrap()
         if (GetLastTypeEvent(DHT_BOOTSTRAP_ALERT_TYPE_CODE, startTime, events)) 
         {
             if (events.size() > 0 ) {
-                LogPrintf("DHTTorrentNetwork -- Bootstrap successful.\n");
+                LogPrint("dht", "DHTTorrentNetwork -- Bootstrap successful.\n");
                 return true;
             }
         }
     }
-    LogPrintf("DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
+    LogPrint("dht", "DHTTorrentNetwork -- Bootstrap failed after 30 second timeout.\n");
     return false;
 }
 
@@ -171,7 +171,7 @@ bool LoadSessionState(session* dhtSession)
 
 void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman)
 {
-    LogPrintf("DHTTorrentNetwork -- starting\n");
+    LogPrint("dht", "DHTTorrentNetwork -- starting\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     RenameThread("dht-session");
     
@@ -209,7 +209,7 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
 
 void StopTorrentDHTNetwork()
 {
-    LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
+    LogPrintf("DHTTorrentNetwork -- StopTorrentDHTNetwork begin.\n");
     fShutdown = true;
     MilliSleep(300);
     StopEventListener();
@@ -257,7 +257,7 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
         return;
         //LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
         //if (!LoadSessionState(pTorrentDHTSession)) {
-        //    LogPrintf("DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
+        //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
         //    Bootstrap();
         //}
         //else {
@@ -265,7 +265,7 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
         //}
     }
     else {
-        LogPrintf("DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
+        LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
     }
 
     pTorrentDHTSession->post_dht_stats();

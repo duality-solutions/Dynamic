@@ -75,25 +75,25 @@ void CDynodeSync::SwitchToNextAsset(CConnman& connman)
         break;
     case (DYNODE_SYNC_INITIAL):
         nRequestedDynodeAssets = DYNODE_SYNC_WAITING;
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
         break;
     case (DYNODE_SYNC_WAITING):
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
         nRequestedDynodeAssets = DYNODE_SYNC_LIST;
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
         break;
     case (DYNODE_SYNC_LIST):
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
         nRequestedDynodeAssets = DYNODE_SYNC_DNW;
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
         break;
     case (DYNODE_SYNC_DNW):
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
         nRequestedDynodeAssets = DYNODE_SYNC_GOVERNANCE;
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Starting %s\n", GetAssetName());
         break;
     case (DYNODE_SYNC_GOVERNANCE):
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
         nRequestedDynodeAssets = DYNODE_SYNC_FINISHED;
         uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
         //try to activate our dynode if possible
@@ -106,7 +106,7 @@ void CDynodeSync::SwitchToNextAsset(CConnman& connman)
         connman.ForEachNode(CConnman::AllNodes, [](CNode* pnode) {
             netfulfilledman.AddFulfilledRequest(pnode->addr, "full-sync");
         });
-        LogPrintf("CDynodeSync::SwitchToNextAsset -- Sync has finished\n");
+        LogPrint("dynode", "CDynodeSync::SwitchToNextAsset -- Sync has finished\n");
 
         break;
     }
@@ -149,7 +149,7 @@ void CDynodeSync::ProcessMessage(CNode* pfrom, const std::string& strCommand, CD
         int nCount;
         vRecv >> nItemID >> nCount;
 
-        LogPrintf("SYNCSTATUSCOUNT -- got inventory count: nItemID=%d  nCount=%d  peer=%d\n", nItemID, nCount, pfrom->id);
+        LogPrint("dynode", "SYNCSTATUSCOUNT -- got inventory count: nItemID=%d  nCount=%d  peer=%d\n", nItemID, nCount, pfrom->id);
     }
 }
 
@@ -189,7 +189,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
 
     // Calculate "progress" for LOG reporting / GUI notification
     double nSyncProgress = double(nRequestedDynodeAttempt + (nRequestedDynodeAssets - 1) * 8) / (8 * 4);
-    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nRequestedDynodeAttempt %d nSyncProgress %f\n", nTick, nRequestedDynodeAssets, nRequestedDynodeAttempt, nSyncProgress);
+    LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nRequestedDynodeAttempt %d nSyncProgress %f\n", nTick, nRequestedDynodeAssets, nRequestedDynodeAttempt, nSyncProgress);
     uiInterface.NotifyAdditionalDataSyncProgressChanged(nSyncProgress);
 
     std::vector<CNode*> vNodesCopy = connman.CopyNodeVector(CConnman::FullyConnectedOnly);
@@ -230,7 +230,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 // We already fully synced from this node recently,
                 // disconnect to free this connection slot for another peer.
                 pnode->fDisconnect = true;
-                LogPrintf("CDynodeSync::ProcessTick -- disconnecting from recently synced peer %d\n", pnode->id);
+                LogPrint("dynode", "CDynodeSync::ProcessTick -- disconnecting from recently synced peer %d\n", pnode->id);
                 continue;
             }
 
@@ -241,7 +241,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "spork-sync");
                 // get current network sporks
                 connman.PushMessage(pnode, msgMaker.Make(NetMsgType::GETSPORKS));
-                LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- requesting sporks from peer %d\n", nTick, nRequestedDynodeAssets, pnode->id);
+                LogPrint("dynode", "dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- requesting sporks from peer %d\n", nTick, nRequestedDynodeAssets, pnode->id);
             }
 
             // INITIAL TIMEOUT
@@ -266,7 +266,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d nTimeLastBumped %lld GetTime() %lld diff %lld\n", nTick, nRequestedDynodeAssets, nTimeLastBumped, GetTime(), GetTime() - nTimeLastBumped);
                 // check for timeout first
                 if (GetTime() - nTimeLastBumped > DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                    LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
                     if (nRequestedDynodeAttempt == 0) {
                         LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // there is no way we can continue without Dynode list, fail here and try later
@@ -308,7 +308,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 // This might take a lot longer than DYNODE_SYNC_TIMEOUT_SECONDS due to new blocks,
                 // but that should be OK and it should timeout eventually.
                 if (GetTime() - nTimeLastBumped > DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                    LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
                     if (nRequestedDynodeAttempt == 0) {
                         LogPrintf("CDynodeSync::ProcessTick -- ERROR: failed to sync %s\n", GetAssetName());
                         // probably not a good idea to proceed without winner list
@@ -324,7 +324,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                 // if dnpayments already has enough blocks and votes, switch to the next asset
                 // try to fetch data from at least two peers though
                 if (nRequestedDynodeAttempt > 1 && dnpayments.IsEnoughData()) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- found enough data\n", nTick, nRequestedDynodeAssets);
+                    LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- found enough data\n", nTick, nRequestedDynodeAssets);
                     SwitchToNextAsset(connman);
                     connman.ReleaseNodeVector(vNodesCopy);
                     return;
@@ -364,7 +364,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
 
                 // check for timeout first
                 if (GetTime() - nTimeLastBumped > DYNODE_SYNC_TIMEOUT_SECONDS) {
-                    LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
+                    LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- timeout\n", nTick, nRequestedDynodeAssets);
                     if (nRequestedDynodeAttempt == 0) {
                         LogPrintf("CDynodeSync::ProcessTick -- WARNING: failed to sync %s\n", GetAssetName());
                         // it's kind of ok to skip this for now, hopefully we'll catch up later?
@@ -395,7 +395,7 @@ void CDynodeSync::ProcessTick(CConnman& connman)
                             // after that and less then 0.01% or DYNODE_SYNC_TICK_SECONDS
                             // (i.e. 1 per second) votes were recieved during the last tick.
                             // We can be pretty sure that we are done syncing.
-                            LogPrintf("CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedDynodeAssets);
+                            LogPrint("dynode", "CDynodeSync::ProcessTick -- nTick %d nRequestedDynodeAssets %d -- asked for all objects, nothing to do\n", nTick, nRequestedDynodeAssets);
                             // reset nTimeNoObjectsLeft to be able to use the same condition on resync
                             nTimeNoObjectsLeft = 0;
                             SwitchToNextAsset(connman);

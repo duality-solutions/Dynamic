@@ -608,7 +608,7 @@ CAmount GetStandardPoWBlockPayment(const int nHeight)
 CAmount GetStandardDynodePayment(const int nHeight)
 {
     if (nHeight > Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrintf("GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
+        LogPrint("fluid", "GetStandardDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
         return PHASE_2_DYNODE_PAYMENT; // 1.618 DYN
     } else {
         return BLOCKCHAIN_INIT_REWARD; // 0 DYN

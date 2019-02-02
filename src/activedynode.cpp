@@ -29,9 +29,9 @@ void CActiveDynode::DoMaintenance(CConnman &connman)
 
 void CActiveDynode::ManageState(CConnman& connman)
 {
-    LogPrint("Dynode", "CActiveDynode::ManageState -- Start\n");
+    LogPrint("dynode", "CActiveDynode::ManageState -- Start\n");
     if (!fDynodeMode) {
-        LogPrint("Dynode", "CActiveDynode::ManageState -- Not a Dynode, returning\n");
+        LogPrint("dynode", "CActiveDynode::ManageState -- Not a Dynode, returning\n");
         return;
     }
 
@@ -45,7 +45,7 @@ void CActiveDynode::ManageState(CConnman& connman)
         nState = ACTIVE_DYNODE_INITIAL;
     }
 
-    LogPrint("Dynode", "CActiveDynode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("dynode", "CActiveDynode::ManageState -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 
     if (eType == DYNODE_UNKNOWN) {
         ManageStateInitial(connman);
@@ -111,7 +111,7 @@ std::string CActiveDynode::GetTypeString() const
 bool CActiveDynode::SendDynodePing(CConnman& connman)
 {
     if (!fPingerEnabled) {
-        LogPrint("Dynode", "CActiveDynode::SendDynodePing -- %s: Dynode ping service is disabled, skipping...\n", GetStateString());
+        LogPrint("dynode", "CActiveDynode::SendDynodePing -- %s: Dynode ping service is disabled, skipping...\n", GetStateString());
         return false;
     }
 
@@ -155,7 +155,7 @@ bool CActiveDynode::UpdateSentinelPing(int version)
 
 void CActiveDynode::ManageStateInitial(CConnman& connman)
 {
-    LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("dynode", "CActiveDynode::ManageStateInitial -- status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
     // Check that our local network configuration is correct
     if (!fListen) {
         // listen option is probably overwritten by smth else, no good
@@ -224,12 +224,12 @@ void CActiveDynode::ManageStateInitial(CConnman& connman)
     // Default to REMOTE
     eType = DYNODE_REMOTE;
 
-    LogPrint("Dynode", "CActiveDynode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
+    LogPrint("dynode", "CActiveDynode::ManageStateInitial -- End status = %s, type = %s, pinger enabled = %d\n", GetStatus(), GetTypeString(), fPingerEnabled);
 }
 
 void CActiveDynode::ManageStateRemote()
 {
-    LogPrint("Dynode", "CActiveDynode::ManageStateRemote -- Start status = %s, type = %s, pinger enabled = %d, pubKeyDynode.GetID() = %s\n",
+    LogPrint("dynode", "CActiveDynode::ManageStateRemote -- Start status = %s, type = %s, pinger enabled = %d, pubKeyDynode.GetID() = %s\n",
         GetStatus(), fPingerEnabled, GetTypeString(), pubKeyDynode.GetID().ToString());
 
     dnodeman.CheckDynode(pubKeyDynode, true);

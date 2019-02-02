@@ -45,7 +45,6 @@ unsigned char *Mnemonic::MnemonicToSeed()
 
     LogPrintf("!!!!size%d,mnemoichar:%s\n",mnemoics.length(),mnemoichar);
     
-    LogPrintf("\n");
     if(PKCS5_PBKDF2_HMAC(mnemoichar, mnemoics.length(), salt_value, sizeof(salt_value), PBKDF2_ROUNDS,EVP_sha512() ,SEED_KEY_SIZE, out) == 0 )
     {
         LogPrintf("PKCS5_PBKDF2_HMAC_SHA1 failed\n");
