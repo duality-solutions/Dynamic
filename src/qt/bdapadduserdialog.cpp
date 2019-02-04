@@ -8,6 +8,7 @@
 #include "util.h"
 
 #include <stdio.h>
+#include <boost/algorithm/string.hpp>
 
 
 BdapAddUserDialog::BdapAddUserDialog(QWidget *parent) : QDialog(parent),
@@ -21,7 +22,7 @@ BdapAddUserDialog::BdapAddUserDialog(QWidget *parent) : QDialog(parent),
 
     
  
-    ui->textEditResults->setVisible(false);
+    ui->labelErrorMsg->setVisible(false);
     ui->pushButtonOK->setVisible(false);
 
     
@@ -66,7 +67,7 @@ void BdapAddUserDialog::goAddUser()
 
     //ui->lineEdit_registrationDays->setText(QString::fromStdString(accountID));
 
-    ui->textEditResults->setVisible(true);
+    ui->labelErrorMsg->setVisible(true);
     ui->pushButtonOK->setVisible(true);
 
     ui->addUser->setVisible(false);
@@ -100,16 +101,18 @@ void BdapAddUserDialog::goAddUser()
         //jreq.parse(req);
 
         UniValue result = tableRPC.execute(jreq);
-        rpc_result = JSONRPCReplyObj(result, NullUniValue, jreq.id);
-        LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, rpc_result.size());
-        outputmessage = rpc_result.getValues()[0].get_str();  //std::to_string(rpc_result.size());
-        LogPrintf("DEBUGGER ADDUSER 3--%s -- \n", __func__);
+
+        outputmessage = result.getValues()[0].get_str();
+        //rpc_result = JSONRPCReplyObj(result, NullUniValue, jreq.id);
+        //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, rpc_result.size());
+        //outputmessage = rpc_result.getValues()[0].get_str();  //std::to_string(rpc_result.size());
+        //LogPrintf("DEBUGGER ADDUSER 3--%s -- \n", __func__);
     } catch (const UniValue& objError) {
         rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
         LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
         std::string message = find_value(objError, "message").get_str();
         LogPrintf("DEBUGGER ADDUSER ERROR1--%s %s-- \n", __func__, message);
-        outputmessage = message;
+        outputmessage = ignoreErrorCode(message);
     } catch (const std::exception& e) {
         rpc_result = JSONRPCReplyObj(NullUniValue,
             JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
@@ -120,7 +123,12 @@ void BdapAddUserDialog::goAddUser()
 
 
     //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, result.size());
-    ui->textEditResults->setText(QString::fromStdString(outputmessage));
+
+
+
+
+    ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
+
 
     //ui->textEditResults->setText(QString::fromStdString(std::to_string(result.size())));
 
@@ -137,6 +145,24 @@ void BdapAddUserDialog::goClose()
 {
     QDialog::accept(); //accepted
 } //goClose
+
+std::string BdapAddUserDialog::ignoreErrorCode(const std::string input)
+{
+    //assuming error code is in the following format: ERROR CODE - ERROR MESSAGE
+    
+    std::vector<std::string> results;
+    std::string returnvalue = "";
+
+    boost::split(results, input, [](char c){return c == '-';});
+
+    if (results.size() > 1) {
+        returnvalue = results[1];
+    }
+
+    return returnvalue;
+
+
+} //ignoreErrorCode
 
 
 

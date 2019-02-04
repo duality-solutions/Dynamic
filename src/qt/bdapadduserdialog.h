@@ -30,6 +30,7 @@ public:
 
 private:
     Ui::BdapAddUserDialog* ui;
+    std::string ignoreErrorCode(const std::string input);
 
 
 

@@ -2060,6 +2060,15 @@ QDialog#BdapAddUserDialog {
     border:2px solid white;
 }
 
+QDialog#BdapAddUserDialog .QLabel#labelErrorMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
+    margin-top: 10px;
+}
 
 /*******************************************************/
 /* BDAPUSERDETAILDIALOG */
