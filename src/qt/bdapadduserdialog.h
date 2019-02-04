@@ -38,6 +38,7 @@ private Q_SLOTS:
 
     void goAddUser();
     void goCancel();
+    void goClose();
 
 };
 
