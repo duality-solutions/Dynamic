@@ -1226,14 +1226,17 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     return obj;
 }
 
-static int GetMaxStartingHeightFromPeers()
+static int GetMaxStartingHeightFromPeers(int& nPeerCount)
 {
+    nPeerCount = 0;
     std::vector<CNodeStats> vstats;
     g_connman->GetNodeStats(vstats);
     int nMaxHeight = 0;
     for (const CNodeStats& stats : vstats) {
         if (stats.nStartingHeight > nMaxHeight)
             nMaxHeight = stats.nStartingHeight;
+
+        nPeerCount++;
     }
     return nMaxHeight;
 }
@@ -1248,6 +1251,7 @@ UniValue syncstatus(const JSONRPCRequest& request)
             "{\n"
             "  \"chain_name\": \"xxxx\",          (string)  Current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"version\": xxxxxx,               (numeric) The wallet client version\n"
+            "  \"peers\": xxxxxx,                 (numeric) Number of peers connect to this node\n"
             "  \"headers\": xxxxxx,               (numeric) The current number of headers we have validated\n"
             "  \"blocks\": xxxxxx,                (numeric) The current number of blocks processed in the server\n"
             "  \"current_block_height\": xxxxxx,  (numeric) Maximum starting height from peers when headers are not fully synced.\n"
@@ -1263,23 +1267,25 @@ UniValue syncstatus(const JSONRPCRequest& request)
     LOCK(cs_main);
 
     int nHeaderCount = pindexBestHeader ? pindexBestHeader->nHeight : -1;
-    int nMaxChainHeight = GetMaxStartingHeightFromPeers();
+    int nPeerCount;
+    int nMaxChainHeight = GetMaxStartingHeightFromPeers(nPeerCount);
     int nBlockHeight = (int)chainActive.Height();
     double nChainProgress = 0;
     std::string strSyncStatus;
     if (nHeaderCount > nMaxChainHeight)
         nMaxChainHeight = nHeaderCount;
 
-    if (nMaxChainHeight == 0) {
+    if (nPeerCount == 0) {
         strSyncStatus = "Connecting to peers";
         nChainProgress = GuessVerificationProgress(Params().TxData(), chainActive.Tip());
     }
-    else if ((nMaxChainHeight - nHeaderCount) > 100) {
+    else if ((nMaxChainHeight > 0) && ((nMaxChainHeight - nHeaderCount) >= 100)) {
         // This assumes headers takes 10%  of the total download time.
         strSyncStatus = "Synchronizing block headers";
-        nChainProgress = (double)nHeaderCount/(double)nMaxChainHeight * 0.1;
+        nChainProgress = ((double)nHeaderCount/(double)nMaxChainHeight * 0.1) + ((double)nBlockHeight/(double)nMaxChainHeight * 0.8);
     }
-    else {
+    else if ((nMaxChainHeight > 0) && ((nMaxChainHeight - nHeaderCount) < 100)) {
+        // Headers completed, add block and Dynode sync percent
         strSyncStatus = dynodeSync.GetSyncStatus();
         if (strSyncStatus == "Synchronizing blockchain...") {
             nChainProgress = ((double)nBlockHeight/(double)nMaxChainHeight * 0.8) + 0.1;
@@ -1289,12 +1295,17 @@ UniValue syncstatus(const JSONRPCRequest& request)
             nChainProgress = 0.9 + (dynodeSync.SyncProgress() * 0.1);
         }
     }
+    else {
+        strSyncStatus = "Unknown status.";
+        nChainProgress = GuessVerificationProgress(Params().TxData(), chainActive.Tip());
+    }
     if (nChainProgress > 1)
         nChainProgress = 1;
 
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("chain_name", Params().NetworkIDString()));
     obj.push_back(Pair("version", CLIENT_VERSION));
+    obj.push_back(Pair("peers", nPeerCount));
     obj.push_back(Pair("headers", nHeaderCount));
     obj.push_back(Pair("blocks", nBlockHeight));
     obj.push_back(Pair("current_block_height", nMaxChainHeight));
