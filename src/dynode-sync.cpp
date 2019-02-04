@@ -119,7 +119,7 @@ std::string CDynodeSync::GetSyncStatus()
 {
     switch (dynodeSync.nRequestedDynodeAssets) {
     case DYNODE_SYNC_INITIAL:
-        return _("Synchroning blockchain...");
+        return _("Synchronizing blockchain...");
     case DYNODE_SYNC_WAITING:
         return _("Synchronization pending...");
     case DYNODE_SYNC_LIST:
@@ -151,6 +151,19 @@ void CDynodeSync::ProcessMessage(CNode* pfrom, const std::string& strCommand, CD
 
         LogPrint("dynode", "SYNCSTATUSCOUNT -- got inventory count: nItemID=%d  nCount=%d  peer=%d\n", nItemID, nCount, pfrom->id);
     }
+}
+
+double CDynodeSync::SyncProgress()
+{
+    // Calculate additional data "progress" for syncstatus RPC call
+    double nSyncProgress = double(nRequestedDynodeAttempt + (nRequestedDynodeAssets - 1) * 8) / (8 * 4);
+    if (nSyncProgress < 0)
+        nSyncProgress = 0;
+
+    if (nSyncProgress > 1)
+        nSyncProgress = 1;
+
+    return nSyncProgress;
 }
 
 void CDynodeSync::ProcessTick(CConnman& connman)
