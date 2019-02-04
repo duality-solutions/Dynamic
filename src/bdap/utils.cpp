@@ -562,3 +562,22 @@ bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, st
     }
     return false;
 }
+
+// The version number for link data is always the first position.
+int GetLinkVersionFromData(const std::vector<unsigned char>& vchData)
+{
+    if (!(vchData.size() > 0))
+        return -1;
+
+    return (int)vchData[0];
+}
+
+bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx)
+{
+    prevTx = MakeTransactionRef();
+    uint256 hashBlock;
+    if (!GetTransaction(prevTxId, prevTx, Params().GetConsensus(), hashBlock, true))
+        return false;
+
+    return true;
+}

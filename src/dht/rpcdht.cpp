@@ -25,10 +25,25 @@
 
 UniValue getmutable(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "getmutable <pubkey> <operation>\nGets mutable data from the DHT.\n"
-            "\n");
+            "getmutable \"pubkey\" \"operation\"\n"
+            "\nArguments:\n"
+            "1. pubkey             (string)             DHT public key\n"
+            "2. operation          (string)             DHT data operation\n"
+            "\nGets mutable data from the DHT.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Public Key\"                 (string)  Mutable entry public key\n"
+            "  \"Salt\"                       (string)  Mutable entry salt\n"
+            "  \"Sequence Number\"            (int)     Mutable entry sequence Number\n"
+            "  \"Authoritative\"              (bool)    Response authoritative\n"
+            "  \"DHT Entry Value\"            (string)  Mutable entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
@@ -45,11 +60,11 @@ UniValue getmutable(const JSONRPCRequest& request)
     bool fAuthoritative;
     fRet = GetDHTMutableData(pubKey, strSalt, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
-        result.push_back(Pair("Get_PubKey", strPubKey));
-        result.push_back(Pair("Get_Salt", strSalt));
-        result.push_back(Pair("Get_Seq", iSequence));
-        result.push_back(Pair("Get_Authoritative", fAuthoritative ? "True" : "False"));
-        result.push_back(Pair("Get_Value", strValue));
+        result.push_back(Pair("Public Key", strPubKey));
+        result.push_back(Pair("Salt", strSalt));
+        result.push_back(Pair("Sequence Number", iSequence));
+        result.push_back(Pair("Authoritative", fAuthoritative ? "True" : "False"));
+        result.push_back(Pair("DHT Entry Value", strValue));
     }
     else {
         throw std::runtime_error("getmutable failed.  Check the debug.log for details.\n");
@@ -60,10 +75,27 @@ UniValue getmutable(const JSONRPCRequest& request)
 
 UniValue putmutable(const JSONRPCRequest& request)
 {
-    if (request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 4 || request.params.size() == 3)
         throw std::runtime_error(
-            "putmutable <dht value> <operation> <pubkey> <privkey>\nSaves mutable data in the DHT.\n"
-            "\n");
+            "putmutable \"data value\" \"operation\" \"pubkey\" \"privkey\"\n"
+            "\nArguments:\n"
+            "1. data value                    (string)  Put data value for the DHT entry\n"
+            "2. operation                     (string)  DHT data operation\n"
+            "3. pubkey                        (string)  Base64 encoded DHT public key\n"
+            "4. privkey                       (string)  Base64 encoded DHT private key\n"
+            "\nPuts or saves mutable data on the DHT for a pubkey/salt pair\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Public Key\"                 (string)  Mutable entry public key\n"
+            "  \"Salt\"                       (string)  Mutable entry salt\n"
+            "  \"Sequence Number\"            (int)     Mutable entry sequence Number\n"
+            "  \"Authoritative\"              (bool)    Response authoritative\n"
+            "  \"DHT Entry Value\"            (string)  Mutable entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("putmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("getmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0"));
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
@@ -110,21 +142,61 @@ UniValue putmutable(const JSONRPCRequest& request)
     CPutRequest put(key, strOperationType, iSequence, strValue);
     AddPutRequest(put);
 
-    result.push_back(Pair("Put_PubKey", strPubKey));
+    result.push_back(Pair("Public Key", strPubKey));
     //result.push_back(Pair("Put_PrivKey", strPrivKey));
-    result.push_back(Pair("Put_Salt", strOperationType));
-    result.push_back(Pair("Put_Seq", iSequence));
-    result.push_back(Pair("Put_Value", request.params[0].get_str()));
+    result.push_back(Pair("Salt", strOperationType));
+    result.push_back(Pair("Sequence Number", iSequence));
+    result.push_back(Pair("DHT Entry Value", request.params[0].get_str()));
     
     return result;
 }
 
 UniValue dhtinfo(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
-            "dhtinfo\nGets DHT network stats and info.\n"
-            "\n");
+            "dhtinfo"
+            "\nGets DHT network stats and info.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"num_peers\"                     (int)      Number of torrent peers\n"
+            "  \"peerlist_size\"                 (int)      Torrent peer list size\n"
+            "  \"active_request_size\"           (int)      Active request size\n"
+            "  \"dht_node_cache\"                (int)      DHT node cache\n"
+            "  \"dht_global_nodes\"              (int)      DHT global nodes\n"
+            "  \"dht_download_rate\"             (int)      DHT download rate\n"
+            "  \"dht_upload_rate\"               (int)      DHT upload rate\n"
+            "  \"dht_total_allocations\"         (int)      DHT total allocations\n"
+            "  \"download_rate\"                 (decimal)  Torrent download rate\n"
+            "  \"upload_rate\"                   (decimal)  Torrent upload rate\n"
+            "  \"total_download\"                (int)      Total torrent downloads\n"
+            "  \"total_upload\"                  (int)      Total torrent uploads\n"
+            "  \"total_dht_download\"            (int)      Total DHT downloads\n"
+            "  \"total_dht_upload\"              (int)      Total DHT uploads\n"
+            "  \"total_ip_overhead_download\"    (int)      Total torrent IP overhead for downloads\n"
+            "  \"total_ip_overhead_upload\"      (int)      Total torrent IP overhead for uploads\n"
+            "  \"total_payload_download\"        (int)      Total torrent payload for downloads\n"
+            "  \"total_payload_upload\"          (int)      Total torrent payload for uploads\n"
+            "  \"dht_nodes\"                     (int)      Number of DHT nodes\n"
+            "  {(dht_bucket)\n"
+            "    \"num_nodes\"                   (int)      Number of nodes in DHT bucket\n"
+            "    \"num_replacements\"            (int)      Number of replacements in DHT bucket\n"
+            "    \"last_active\"                 (int)      DHT bucket last active\n"
+            "  }\n"
+            "  {(dht_lookup)\n"
+            "    \"outstanding_requests\"        (int)      DHT lookup outstanding requests\n"
+            "    \"timeouts\"                    (int)      DHT lookup timeouts\n"
+            "    \"responses\"                   (int)      DHT lookup responses\n"
+            "    \"branch_factor\"               (int)      DHT lookup branch factor\n"
+            "    \"nodes_left\"                  (int)      DHT lookup nodes left\n"
+            "    \"last_sent\"                   (int)      DHT lookup last sent\n"
+            "    \"first_timeout\"               (int)      DHT lookup first timeouts\n"
+            "  }\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("dhtinfo", "") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dhtinfo", ""));
 
     if (!pTorrentDHTSession)
         throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
@@ -206,10 +278,23 @@ UniValue dhtinfo(const JSONRPCRequest& request)
 
 UniValue dhtdb(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
-            "dhtdb\nGets the local DHT cache database contents.\n"
-            "\n");
+            "dhtdb"
+            "\nGets the local DHT cache database contents.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"info_hash\"                  (string)      Mutable data info hash\n"
+            "  \"public_key\"                 (string)      Mutable data public key\n"
+            "  \"signature\"                  (string)      Mutable data entry signature\n"
+            "  \"seq_num\"                    (int)         Mutable data sequsence number\n"
+            "  \"salt\"                       (string)      Mutable data entry salt or operation code\n"
+            "  \"value\"                      (string)      Mutable data entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("dhtdb", "") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dhtdb", ""));
 
     UniValue result(UniValue::VOBJ);
 
@@ -241,10 +326,29 @@ UniValue dhtdb(const JSONRPCRequest& request)
 
 UniValue putbdapdata(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 3)
+    if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-            "putbdapdata <id> <dht value> <operation>\nSaves mutable data in the DHT for a BDAP entry.\n"
-            "\n");
+            "putbdapdata \"account id\" \"data value\" \"operation\"\n"
+            "\nSaves mutable data in the DHT for a BDAP entry and operation code.\n"
+            "\nArguments:\n"
+            "1. account id             (string)      BDAP account id\n"
+            "2. data value             (string)      Mutable data value to save in the DHT\n"
+            "3. operation              (string)      Mutable data operation used for DHT entry\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"entry_path\"          (string)      BDAP account FQDN\n"
+            "  \"wallet_address\"      (string)      BDAP account wallet address\n"
+            "  \"link_address\"        (string)      BDAP account link address\n"
+            "  \"put_pubkey\"          (string)      BDAP account DHT public key\n"
+            "  \"put_operation\"       (string)      Mutable data put operation or salt\n"
+            "  \"put_seq\"             (string)      Mutable data sequence number\n"
+            "  \"put_value\"           (string)      Mutable data entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("putbdapdata", "Duality \"https://duality.solutions/duality/graphics/header/bdap.png\" avatar") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("putbdapdata", "Duality \"https://duality.solutions/duality/graphics/header/bdap.png\" avatar"));
+
     UniValue result(UniValue::VOBJ);
    
     EnsureWalletIsUnlocked();
@@ -280,7 +384,6 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("entry_path", strFullObjectPath));
     result.push_back(Pair("wallet_address", stringFromVch(entry.WalletAddress)));
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
-    result.push_back(Pair("entry_pubkey", stringFromVch(entry.DHTPublicKey)));
     result.push_back(Pair("put_pubkey", stringFromVch(getKey.GetPubKey())));
     //result.push_back(Pair("wallet_privkey", stringFromVch(getKey.GetPrivKey())));
     result.push_back(Pair("put_operation", strOperationType));
@@ -302,10 +405,28 @@ UniValue putbdapdata(const JSONRPCRequest& request)
 
 UniValue getbdapdata(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 2)
+    if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "getbdapdata <bdap id> <operation>\nGets the mutable data from the DHT for a BDAP entry.\n"
-            "\n");
+            "getbdapdata \"account id\" \"operation\"\n"
+            "\nGets mutable data from the DHT for a BDAP entry and operation code.\n"
+            "\nArguments:\n"
+            "1. account id             (string)      BDAP account id\n"
+            "2. operation              (string)      Mutable data operation\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"entry_path\"          (string)      BDAP account FQDN\n"
+            "  \"wallet_address\"      (string)      BDAP account wallet address\n"
+            "  \"link_address\"        (string)      BDAP account link address\n"
+            "  \"get_pubkey\"          (string)      BDAP account DHT public key\n"
+            "  \"get_operation\"       (string)      Mutable data operation code or salt\n"
+            "  \"get_seq\"             (string)      Mutable data sequence number\n"
+            "  \"get_value\"           (string)      Mutable data entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("getbdapdata", "Duality avatar") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("getbdapdata", "Duality avatar"));
+
     UniValue result(UniValue::VOBJ);
    
     if (!pTorrentDHTSession)
@@ -353,10 +474,25 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 
 UniValue dhtputmessages(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
-            "dhtputmessages\nGets all DHT put messages in memory.\n"
-            "\n");
+            "dhtputmessages"
+            "\nGets all DHT put messages in memory.\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"info_hash\"          (string)      Put entry info hash\n"
+            "  \"public_key\"         (string)      Put entry public key\n"
+            "  \"salt\"               (string)      Put entry salt or operation code\n"
+            "  \"seq_num\"            (string)      Put entry sequence number\n"
+            "  \"success_count\"      (string)      Put entry success count\n"
+            "  \"message\"            (string)      Put entry message\n"
+            "  \"what\"               (string)      Type of DHT alert event\n"
+            "  \"timestamp\"          (string)      Put entry timestamp\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("dhtputmessages", "") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dhtputmessages", ""));
 
     UniValue result(UniValue::VOBJ);
 
@@ -389,10 +525,26 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
 
 UniValue dhtgetmessages(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
-            "dhtgetmessages\nGets all DHT get messages in memory.\n"
-            "\n");
+            "dhtgetmessages"
+            "\nGets all DHT get messages in memory.\n"
+            "\nResult:\n"
+            "{(json objects)\n"
+            "  \"info_hash\"          (string)      Get entry info hash\n"
+            "  \"public_key\"         (string)      Get entry public key\n"
+            "  \"salt\"               (string)      Get entry salt or operation code\n"
+            "  \"seq_num\"            (string)      Get entry sequence number\n"
+            "  \"authoritative\"      (string)      Get entry value is authoritative\n"
+            "  \"message\"            (string)      Get entry message\n"
+            "  \"what\"               (string)      Type of DHT alert event\n"
+            "  \"timestamp\"          (string)      Get entry timestamp\n"
+            "  \"value\"              (string)      Get entry value\n"
+            "  }\n"
+            "\nExamples\n" +
+           HelpExampleCli("dhtgetmessages", "") +
+           "\nAs a JSON-RPC call\n" + 
+           HelpExampleRpc("dhtgetmessages", ""));
 
     UniValue result(UniValue::VOBJ);
 
@@ -429,11 +581,11 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------ -----------------------        ------   --------------------
     /* DHT */
     { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey","operation"}  },
-    { "dht",             "putmutable",               &putmutable,                   true,    {"dht value","operation", "pubkey", "privkey"} },
+    { "dht",             "putmutable",               &putmutable,                   true,    {"data value","operation", "pubkey", "privkey"} },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true,    {} },
     { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
-    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"bdap id","dht value", "operation"} },
-    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"bdap id","operation"} },
+    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"account id","data value", "operation"} },
+    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"account id","operation"} },
     { "dht",             "dhtputmessages",           &dhtputmessages,               true,    {} },
     { "dht",             "dhtgetmessages",           &dhtgetmessages,               true,    {} },
 };

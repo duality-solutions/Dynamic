@@ -155,7 +155,7 @@ static void DHTEventListener(session* dhtSession)
     while(!fShutdown)
     {
         if (!dhtSession->is_dht_running()) {
-            LogPrintf("%s -- DHT is not running yet\n", __func__);
+            LogPrint("dht", "%s -- DHT is not running yet\n", __func__);
             MilliSleep(2000);
             continue;
         }

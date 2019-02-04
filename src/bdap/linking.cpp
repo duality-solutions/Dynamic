@@ -3,12 +3,17 @@
 
 #include "bdap/linking.h"
 
+#include "base58.h"
 #include "bdap/domainentry.h"
 #include "bdap/utils.h"
 #include "hash.h"
+#include "key.h"
+#include "pubkey.h"
 #include "script/script.h"
 #include "streams.h"
 #include "txmempool.h"
+#include "utilstrencodings.h" // For EncodeBase64
+#include "validation.h" // For strMessageMagic
 
 bool CLinkRequest::UnserializeFromTx(const CTransactionRef& tx) 
 {
@@ -58,31 +63,31 @@ bool CLinkRequest::UnserializeFromData(const std::vector<unsigned char>& vchData
 
 bool CLinkRequest::ValidateValues(std::string& errorMessage)
 {
-    // check object requestor FQDN
+    // check object requestor FQDN size
     if (RequestorFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid BDAP link requestor FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
-    // check object recipient FQDN
+    // check object recipient FQDN size
     if (RecipientFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid BDAP link recipient FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
-    // check requestor pubkey
+    // check requestor pubkey size
     if (RequestorPubKey.size() != DHT_HEX_PUBLIC_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP link requestor public key. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
-    // check shared pubkey
+    // check shared pubkey size
     if (SharedPubKey.size() != DHT_HEX_PUBLIC_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP link shared public key. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
-    // check requestor pubkey
+    // check link message size
     if (LinkMessage.size() > MAX_BDAP_LINK_MESSAGE) 
     {
         errorMessage = "Invalid invite message length. The maximum invite message length is " + std::to_string(MAX_BDAP_LINK_MESSAGE) + " characters.";
@@ -94,13 +99,7 @@ bool CLinkRequest::ValidateValues(std::string& errorMessage)
         errorMessage = "Invalid signature proof length. The maximum signature proof length is " + std::to_string(MAX_BDAP_SIGNATURE_PROOF) + " characters.";
         return false;
     }
-    // TODO (bdap): test SignatureProof
     return true;
-}
-
-bool CLinkRequest::IsMyLinkRequest(const CTransactionRef& tx)
-{
-    return false;
 }
 
 std::string CLinkRequest::RequestorPubKeyString() const
@@ -111,6 +110,54 @@ std::string CLinkRequest::RequestorPubKeyString() const
 std::string CLinkRequest::SharedPubKeyString() const
 {
     return stringFromVch(SharedPubKey);
+}
+
+std::string CLinkRequest::SignatureProofString() const
+{
+    return EncodeBase64(&SignatureProof[0], SignatureProof.size());
+}
+
+std::string CLinkRequest::RequestorFQDN() const
+{
+    return stringFromVch(RequestorFullObjectPath);
+}
+
+std::string CLinkRequest::RecipientFQDN() const
+{
+    return stringFromVch(RecipientFullObjectPath);
+}
+
+std::set<std::string> CLinkRequest::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkRequest::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
+}
+
+CharString CLinkRequest::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkRequest::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
 }
 
 bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx) 
@@ -161,25 +208,25 @@ bool CLinkAccept::UnserializeFromData(const std::vector<unsigned char>& vchData,
 
 bool CLinkAccept::ValidateValues(std::string& errorMessage)
 {
-    // check object requestor FQDN
+    // check object requestor FQDN size
     if (RequestorFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid BDAP link requestor FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
-    // check object recipient FQDN
+    // check object recipient FQDN size
     if (RecipientFullObjectPath.size() > MAX_OBJECT_FULL_PATH_LENGTH) 
     {
         errorMessage = "Invalid BDAP link recipient FQDN. Can not have more than " + std::to_string(MAX_OBJECT_FULL_PATH_LENGTH) + " characters.";
         return false;
     }
-    // check recipient pubkey
+    // check recipient pubkey size
     if (RecipientPubKey.size() != DHT_HEX_PUBLIC_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP link recipient pubkey. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
         return false;
     }
-    // check shared pubkey
+    // check shared pubkey size
     if (SharedPubKey.size() != DHT_HEX_PUBLIC_KEY_LENGTH) 
     {
         errorMessage = "Invalid BDAP link shared pubkey. DHT pubkey are " + std::to_string(DHT_HEX_PUBLIC_KEY_LENGTH) + " characters.";
@@ -204,18 +251,66 @@ std::string CLinkAccept::SharedPubKeyString() const
     return stringFromVch(SharedPubKey);
 }
 
+std::string CLinkAccept::SignatureProofString() const
+{
+    return EncodeBase64(&SignatureProof[0], SignatureProof.size());
+}
+
+std::string CLinkAccept::RequestorFQDN() const
+{
+    return stringFromVch(RequestorFullObjectPath);
+}
+
+std::string CLinkAccept::RecipientFQDN() const
+{
+    return stringFromVch(RecipientFullObjectPath);
+}
+
+std::set<std::string> CLinkAccept::SortedAccounts() const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(RequestorFQDN());
+    sortedAccounts.insert(RecipientFQDN());
+    return sortedAccounts;
+}
+
+bool CLinkAccept::Matches(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN) const
+{
+    std::set<std::string> sortedAccounts;
+    sortedAccounts.insert(strRequestorFQDN);
+    sortedAccounts.insert(strRecipientFQDN);
+    if (sortedAccounts == SortedAccounts())
+        return true;
+
+    return false;
+}
+
+CharString CLinkAccept::LinkPath() const
+{
+    std::vector<unsigned char> vchSeparator = {':'};
+    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
+    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
+    return vchLinkPath;
+}
+
+std::string CLinkAccept::LinkPathString() const
+{
+    return stringFromVch(LinkPath());
+}
+
 /** Checks if BDAP link request pubkey exists in the memory pool */
-bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, std::string& errorMessage)
+bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage)
 {
     for (const CTxMemPoolEntry& e : pool.mapTx) {
         const CTransactionRef& tx = e.GetSharedTx();
         for (const CTxOut& txOut : tx->vout) {
             if (IsBDAPDataOutput(txOut)) {
                 std::vector<unsigned char> vchMemPoolPubKey;
-                std::string strOpType;
-                if (!ExtractOpTypeValue(txOut.scriptPubKey, strOpType, vchMemPoolPubKey))
+                std::string strGetOpType;
+                if (!ExtractOpTypeValue(txOut.scriptPubKey, strGetOpType, vchMemPoolPubKey))
                     continue;
-                if (vchPubKey == vchMemPoolPubKey) {
+                if (vchPubKey == vchMemPoolPubKey && strOpType == strGetOpType) {
                     errorMessage = "CheckIfExistsInMemPool: A BDAP link request public key " + stringFromVch(vchPubKey) + " transaction is already in the memory pool!";
                     return true;
                 }
@@ -223,6 +318,42 @@ bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigne
         }
     }
     return false;
+}
+
+// Signs the FQDN with the input private key
+bool CreateSignatureProof(const CKey& key, const std::string& strFQDN, std::vector<unsigned char>& vchSignatureProof)
+{
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << strFQDN;
+
+    if (!key.SignCompact(ss.GetHash(), vchSignatureProof)) {
+        CDynamicAddress addr(key.GetPubKey().GetID());
+        LogPrint("bdap", "%s -- Failed to sign BDAP account %s with the %s wallet address\n", __func__, strFQDN, addr.ToString());
+        return false;
+    }
+    return true;
+}
+
+// Verifies that the signature for the FQDN matches the input address 
+bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strFQDN, const std::vector<unsigned char>& vchSig)
+{
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << strFQDN;
+
+    CPubKey pubkey;
+    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+        LogPrint("bdap", "%s -- Failed to get pubkey from signature data. Address = %s, vchSig size = %u\n", __func__, addr.ToString(), vchSig.size());
+        return false;
+    }
+
+    if (!(CDynamicAddress(pubkey.GetID()) == addr)) {
+        CDynamicAddress sigAddress(pubkey.GetID());
+        LogPrint("bdap", "%s -- Signature address %s does not match input address = %s\n", __func__, sigAddress.ToString(), addr.ToString());
+        return false;
+    }
+    return true;
 }
 
 // TODO: (BDAP) implement BDAP encryption by converting ed25519 private key to curve25519

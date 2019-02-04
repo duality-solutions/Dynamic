@@ -1186,7 +1186,7 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
     }
 
     //// debug print
-    LogPrintf("AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
+    LogPrint("wallet", "AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
 
     // Write to disk
     if (fInsertedNew || fUpdated)
@@ -1234,7 +1234,7 @@ bool CWallet::LoadToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
-bool CWallet::IsLinkRequestFromMe(const std::vector<unsigned char>& vchLinkPubKey)
+bool CWallet::IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey)
 {
     CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
     CKeyEd25519 keyOut;
@@ -1244,7 +1244,7 @@ bool CWallet::IsLinkRequestFromMe(const std::vector<unsigned char>& vchLinkPubKe
     return false;
 }
 
-bool CWallet::IsLinkRequestForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey)
+bool CWallet::IsLinkForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey)
 {
     std::vector<std::vector<unsigned char>> vvchMyDHTPubKeys;
     if (!GetDHTPubKeys(vvchMyDHTPubKeys) )
@@ -1313,36 +1313,122 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
                         // Check to see if this link request is from one of my BDAP accounts.
                         {
-                            bool fIsLinkRequestFromMe = IsLinkRequestFromMe(vchLinkPubKey);
+                            bool fIsLinkRequestFromMe = IsLinkFromMe(vchLinkPubKey);
                             if (fIsLinkRequestFromMe) {
                                 int nOut;
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    // version 0 is public and unencrypted
-                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                    CLinkRequest link(MakeTransactionRef(tx));
-                                    //TODO (bdap): Verify SignatureProof
-                                    pLinkRequestDB->AddMyLinkRecipient(link);
-                                    pLinkRequestDB->AddMyLinkRequest(link);
-                                    LogPrintf("%s -- Link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkRequest link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkRequestDB->AddMyLinkRequest(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- Error. Link request from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
                                 }
                             }
                         }
                         // Check to see if this link request is for one of my BDAP accounts.
                         {
                             std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
-                            bool fIsLinkRequestForMe = IsLinkRequestForMe(vchLinkPubKey, vchSharedPubKey);
+                            bool fIsLinkRequestForMe = IsLinkForMe(vchLinkPubKey, vchSharedPubKey);
                             if (fIsLinkRequestForMe) {
                                 int nOut;
                                 std::vector<unsigned char> vchData, vchHash;
                                 if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    // version 0 is public and unencrypted
-                                    //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                    CLinkAccept link(MakeTransactionRef(tx));
-                                    //TODO (bdap): Verify SignatureProof
-                                    pLinkAcceptDB->AddMyLinkSender(link);
-                                    pLinkAcceptDB->AddMyLinkAccept(link);
-                                    LogPrintf("%s -- Link request for me found! vchLinkPubKey = %s, vchSharedPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey), stringFromVch(vchSharedPubKey));
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkRequest link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link request for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkRequestDB->AddMyLinkRequest(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- ***** Warning. Link request for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (strOpType == "bdap_new_link_accept" && vvchOpParameters.size() > 1) {
+                        std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
+                        // Check to see if this link accept is from one of my BDAP accounts.
+                        {
+                            bool fIsLinkAcceptFromMe = IsLinkFromMe(vchLinkPubKey);
+                            if (fIsLinkAcceptFromMe) {
+                                int nOut;
+                                std::vector<unsigned char> vchData, vchHash;
+                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkAccept link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkAcceptDB->AddMyLinkAccept(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- Error. Link accept from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
+                                }
+                            }
+                        }
+                        // Check to see if this link accept is for one of my BDAP accounts.
+                        {
+                            std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
+                            bool fIsLinkAcceptForMe = IsLinkForMe(vchLinkPubKey, vchSharedPubKey);
+                            if (fIsLinkAcceptForMe) {
+                                int nOut;
+                                std::vector<unsigned char> vchData, vchHash;
+                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                    int nVersion = GetLinkVersionFromData(vchData);
+                                    if (nVersion == 0) {
+                                        if (nVersion == 0) { // version 0 is public and unencrypted
+                                            CLinkAccept link(MakeTransactionRef(tx));
+                                            CDomainEntry entry;
+                                            if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
+                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
+                                                    LogPrintf("%s -- Link accept for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    pLinkAcceptDB->AddMyLinkAccept(link);
+                                                }
+                                                else
+                                                    LogPrintf("%s -- ***** Warning. Link accept for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                            }
+                                        }
+                                    }
+                                    else if (nVersion == 1) {
+                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        LogPrintf("%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                    }
                                 }
                             }
                         }
@@ -3646,10 +3732,6 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_request" || strOpType == "bdap_delete_link_request") {
-                    strFailReason = strOpType + _(" not implemented yet.");
-                    return false;
-                }
                 else if (strOpType == "bdap_new_link_accept") {
                     uint256 txid;
                     if (GetLinkAcceptIndex(vchValue, txid)) {
@@ -3658,11 +3740,41 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                     }
                     AvailableCoins(vAvailableCoins, true, coinControl, false, nCoinType, fUseInstantSend);
                 }
-                else if (strOpType == "bdap_update_link_accept" || strOpType == "bdap_delete_link_accept") {
+                else if (strOpType == "bdap_delete_link_request") {
+                    uint256 prevTxId;
+                    if (!GetLinkRequestIndex(vchValue, prevTxId)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    CTransactionRef prevTx;
+                    if (!GetPreviousTxRefById(prevTxId, prevTx)) {
+                        strFailReason = _("Previous delete link request transaction could not be found.");
+                        return false;
+                    }
+                    CScript prevScriptPubKey;
+                    GetBDAPOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+                else if (strOpType == "bdap_delete_link_accept") {
+                    uint256 prevTxId;
+                    if (!GetLinkAcceptIndex(vchValue, prevTxId)) {
+                        strFailReason = _("Link accept pubkey could not be found.");
+                        return false;
+                    }
+                    CTransactionRef prevTx;
+                    if (!GetPreviousTxRefById(prevTxId, prevTx)) {
+                        strFailReason = _("Previous delete link accept transaction could not be found.");
+                        return false;
+                    }
+                    CScript prevScriptPubKey;
+                    GetBDAPOpScript(prevTx, prevScriptPubKey);
+                    GetBDAPCoins(vAvailableCoins, prevScriptPubKey);
+                }
+                else if (strOpType == "bdap_update_link_accept") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }
-                else if (strOpType == "bdap_delete_link_accept") {
+                else if (strOpType == "bdap_update_link_request") {
                     strFailReason = strOpType + _(" not implemented yet.");
                     return false;
                 }

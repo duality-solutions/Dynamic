@@ -38,6 +38,7 @@ std::vector<unsigned char> vchFromString(const std::string& str);
 void CreateRecipient(const CScript& scriptPubKey, CRecipient& recipient);
 void ToLowerCase(CharString& vchValue);
 void ToLowerCase(std::string& strValue);
+CAmount GetDataFee(const CScript& scriptPubKey);
 CAmount GetBDAPFee(const CScript& scriptPubKey);
 bool DecodeBDAPTx(const CTransactionRef& tx, int& op1, int& op2, std::vector<std::vector<unsigned char> >& vvch);
 bool FindBDAPInTx(const CCoinsViewCache &inputs, const CTransaction& tx, std::vector<std::vector<unsigned char> >& vvch);
@@ -57,5 +58,7 @@ int GetBDAPOpCodeFromOutput(const CTxOut& out);
 bool ExtractOpTypeValue(const CScript& script, std::string& strOpType, std::vector<unsigned char>& vchValue);
 bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
+int GetLinkVersionFromData(const std::vector<unsigned char>& vchData);
+bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx);
 
 #endif // DYNAMIC_BDAP_UTILS_H

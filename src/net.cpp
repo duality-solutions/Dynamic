@@ -1127,7 +1127,7 @@ void CConnman::ThreadSocketHandler()
             std::vector<CNode*> vNodesCopy = vNodes;
             BOOST_FOREACH (CNode* pnode, vNodesCopy) {
                 if (pnode->fDisconnect) {
-                    LogPrintf("ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fInbound=%d fDynode=%d\n",
+                    LogPrint("net", "ThreadSocketHandler -- removing node: peer=%d addr=%s nRefCount=%d fInbound=%d fDynode=%d\n",
                         pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fInbound, pnode->fDynode);
 
                     // remove from vNodes
@@ -1332,7 +1332,7 @@ void CConnman::ThreadSocketHandler()
                             int nErr = WSAGetLastError();
                             if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS) {
                                 if (!pnode->fDisconnect)
-                                    LogPrintf("socket recv error %s\n", NetworkErrorString(nErr));
+                                    LogPrint("net", "socket recv error %s\n", NetworkErrorString(nErr));
                                 pnode->CloseSocketDisconnect();
                             }
                         }

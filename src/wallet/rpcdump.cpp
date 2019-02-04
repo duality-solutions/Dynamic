@@ -170,24 +170,24 @@ UniValue importbdapkeys(const JSONRPCRequest& request)
     
     if (request.fHelp || request.params.size() < 4 || request.params.size() > 5)
         throw std::runtime_error(
-            "importbdapkeys \"importbdapkeys\" ( \"label\" rescan )\n"
+            "importbdapkeys \"account id\" \"wallet privkey\" \"link privkey\" \"DHT privkey\" \"rescan\"\n"
             "\nAdds a private keys (as returned by dumpbdapkeys) to your wallet.\n"
             "\nArguments:\n"
-            "1. \"bdap id\"   (string, required) The BDAP account id (see dumpbdapkeys)\n"
+            "1. \"account id\"       (string, required) The BDAP account id (see dumpbdapkeys)\n"
             "2. \"wallet privkey\"   (string, required) The BDAP account wallet private key (see dumpbdapkeys)\n"
-            "3. \"link privkey\"   (string, required) The BDAP account link address private key (see dumpbdapkeys)\n"
-            "4. \"DHT privkey\"   (string, required) The BDAP account DHT private key (see dumpbdapkeys)\n"
-            "5. rescan               (boolean, optional, default=true) Rescan the wallet for transactions\n"
+            "3. \"link privkey\"     (string, required) The BDAP account link address private key (see dumpbdapkeys)\n"
+            "4. \"DHT privkey\"      (string, required) The BDAP account DHT private key (see dumpbdapkeys)\n"
+            "5. \"rescan\"           (boolean, optional, default=true) Rescan the wallet for transactions\n"
             "\nNote: This call can take minutes to complete if rescan is true.\n"
             "\nExamples:\n"
             "\nDump a private key\n"
-            + HelpExampleCli("dumpbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            + HelpExampleCli("dumpbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
             "\nImport the private key with rescan\n"
-            + HelpExampleCli("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\"") +
+            + HelpExampleCli("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\"") +
             "\nImport using a label and without rescan\n"
-            + HelpExampleCli("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
+            + HelpExampleCli("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false") +
             "\nAs a JSON-RPC call\n"
-            + HelpExampleRpc("importbdapkeys", "\"myaccount\" \"wallet_key\" \"link_key\" \"dht_key\" false")
+            + HelpExampleRpc("importbdapkeys", "\"account id\" \"wallet_key\" \"link_key\" \"dht_key\" false")
         );
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
@@ -777,13 +777,13 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "importmnemonic \"mnemonic\"\n"
             "\nImports mnemonic\n"
             "\nArguments:\n"
-            "1. \"mnemonic\"    (string, required) mnemonic\n"
-            "2. \"begin\"    (int, optional) begin\n"
-            "3. \"end\"    (int, optional) end\n"
+            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-)\n"
+            "2. \"begin\"       (int, optional) begin\n"
+            "3. \"end\"         (int, optional) end\n"
             "4. forcerescan               (boolean, optional, default=true) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
-            + HelpExampleCli("importmnemonic", "\"inflict,witness,off,property,target,faint,gather,match,outdoor,weapon,wide,mix\"")
+            + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
     if (fPruneMode)
         throw JSONRPCError(RPC_WALLET_ERROR, "Importing wallets is disabled in pruned mode");
@@ -921,16 +921,21 @@ UniValue dumpbdapkeys(const JSONRPCRequest& request)
     
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "dumpbdapkeys \"bdap id\"\n"
+            "dumpbdapkeys \"account id\"\n"
             "\nReveals the private key corresponding to 'BDAP account'.\n"
             "Then the importbdapkeys can be used with this output\n"
             "\nArguments:\n"
-            "1. \"bdap id\"   (string, required) The BDAP id for the private keys\n"
+            "1. \"account id\"      (string, required) The BDAP id for the private keys\n"
             "\nResult:\n"
-            "\"key\"                (string) The wallet, link and DHT private keys\n"
+            "\"wallet_address\"     (string) The wallet address\n"
+            "\"wallet_privkey\"     (string) The wallet address private key\n"
+            "\"link_address\"       (string) The link address\n"
+            "\"link_privkey\"       (string) The link address private keys\n"
+            "\"dht_publickey\"      (string) The DHT public key\n"
+            "\"dht_privkey\"        (string) The DHT private key\n"
             "\nExamples:\n"
-            + HelpExampleCli("dumpbdapkeys", "\"myaccount\"")
-            + HelpExampleRpc("dumpbdapkeys", "\"myaccount\"")
+            + HelpExampleCli("dumpbdapkeys", "\"Alice\"")
+            + HelpExampleRpc("dumpbdapkeys", "\"Alice\"")
         );
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
