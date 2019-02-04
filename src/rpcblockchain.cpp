@@ -11,6 +11,7 @@
 #include "checkpoints.h"
 #include "coins.h"
 #include "consensus/validation.h"
+#include "dynode-sync.h"
 #include "hash.h"
 #include "instantsend.h"
 #include "policy/policy.h"
@@ -1225,6 +1226,86 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     return obj;
 }
 
+static int GetMaxStartingHeightFromPeers()
+{
+    std::vector<CNodeStats> vstats;
+    g_connman->GetNodeStats(vstats);
+    int nMaxHeight = 0;
+    for (const CNodeStats& stats : vstats) {
+        if (stats.nStartingHeight > nMaxHeight)
+            nMaxHeight = stats.nStartingHeight;
+    }
+    return nMaxHeight;
+}
+
+UniValue syncstatus(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "syncstatus\n"
+            "Returns an object containing blockchain, spork and Dynode sync status.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"chain_name\": \"xxxx\",          (string)  Current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"version\": xxxxxx,               (numeric) The wallet client version\n"
+            "  \"headers\": xxxxxx,               (numeric) The current number of headers we have validated\n"
+            "  \"blocks\": xxxxxx,                (numeric) The current number of blocks processed in the server\n"
+            "  \"current_block_height\": xxxxxx,  (numeric) Maximum starting height from peers when headers are not fully synced.\n"
+            "  \"sync_progress\": xxxx,           (numeric) Estimated blockchain synchronization completion percentage including headers, blocks and Dynodes\n"
+            "  \"status_description\": \"xxxx\",  (string)  Displays the current sync step description\n"
+            "  \"fully_synced\": xxxx,            (boolean) Returns true when the blockchain and Dynodes are completely synced.\n"
+            "  \"failed\": xxxx,                  (boolean) True if sync failed.\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("syncstatus", "") + 
+            HelpExampleRpc("syncstatus", ""));
+
+    LOCK(cs_main);
+
+    int nHeaderCount = pindexBestHeader ? pindexBestHeader->nHeight : -1;
+    int nMaxChainHeight = GetMaxStartingHeightFromPeers();
+    int nBlockHeight = (int)chainActive.Height();
+    double nChainProgress = 0;
+    std::string strSyncStatus;
+    if (nHeaderCount > nMaxChainHeight)
+        nMaxChainHeight = nHeaderCount;
+
+    if (nMaxChainHeight == 0) {
+        strSyncStatus = "Connecting to peers";
+        nChainProgress = GuessVerificationProgress(Params().TxData(), chainActive.Tip());
+    }
+    else if ((nMaxChainHeight - nHeaderCount) > 100) {
+        // This assumes headers takes 10%  of the total download time.
+        strSyncStatus = "Synchronizing block headers";
+        nChainProgress = (double)nHeaderCount/(double)nMaxChainHeight * 0.1;
+    }
+    else {
+        strSyncStatus = dynodeSync.GetSyncStatus();
+        if (strSyncStatus == "Synchronizing blockchain...") {
+            nChainProgress = ((double)nBlockHeight/(double)nMaxChainHeight * 0.8) + 0.1;
+        }
+        else {
+            // This assumes Dynode sync takes 10%  of the total download time.
+            nChainProgress = 0.9 + (dynodeSync.SyncProgress() * 0.1);
+        }
+    }
+    if (nChainProgress > 1)
+        nChainProgress = 1;
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("chain_name", Params().NetworkIDString()));
+    obj.push_back(Pair("version", CLIENT_VERSION));
+    obj.push_back(Pair("headers", nHeaderCount));
+    obj.push_back(Pair("blocks", nBlockHeight));
+    obj.push_back(Pair("current_block_height", nMaxChainHeight));
+    obj.push_back(Pair("sync_progress", nChainProgress));
+    obj.push_back(Pair("status_description", strSyncStatus));
+    obj.push_back(Pair("fully_synced", dynodeSync.IsSynced()));
+    obj.push_back(Pair("failed", dynodeSync.IsFailed()));
+
+    return obj;
+}
+
 /** Comparison function for sorting the getchaintips heads.  */
 struct CompareBlocksByHeight {
     bool operator()(const CBlockIndex* a, const CBlockIndex* b) const
@@ -1527,8 +1608,9 @@ static const CRPCCommand commands[] =
         {"blockchain", "gettxoutsetinfo", &gettxoutsetinfo, true, {}},
         {"blockchain", "pruneblockchain", &pruneblockchain, true, {"height"}},
         {"blockchain", "verifychain", &verifychain, true, {"checklevel", "nblocks"}},
+        {"blockchain", "verifychain", &verifychain, true, {"checklevel", "nblocks"}},
 
-        {"blockchain", "preciousblock", &preciousblock, true, {"blockhash"}},
+        {"blockchain", "syncstatus", &syncstatus, true, {""}},
 
         /* Not shown in help */
         {"hidden", "invalidateblock", &invalidateblock, true, {"blockhash"}},
