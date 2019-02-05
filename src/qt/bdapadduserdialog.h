@@ -6,7 +6,7 @@
 #define BDAPADDUSERDIALOG_H
 
 #include "platformstyle.h"
-
+#include "bdap/bdap.h"
 
 #include <QPushButton>
 #include <QDialog>
@@ -23,7 +23,7 @@ class BdapAddUserDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BdapAddUserDialog(QWidget *parent = 0);
+    explicit BdapAddUserDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER);
     ~BdapAddUserDialog();
 
 
@@ -31,6 +31,7 @@ public:
 private:
     Ui::BdapAddUserDialog* ui;
     std::string ignoreErrorCode(const std::string input);
+    BDAP::ObjectType inputAccountType;
 
 
 

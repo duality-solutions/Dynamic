@@ -12,10 +12,20 @@
 #include <boost/algorithm/string.hpp>
 
 
-BdapAddUserDialog::BdapAddUserDialog(QWidget *parent) : QDialog(parent),
+BdapAddUserDialog::BdapAddUserDialog(QWidget *parent, BDAP::ObjectType accountType) : QDialog(parent),
                                                         ui(new Ui::BdapAddUserDialog)
 {
+    //By default, accountType is USER. so only change stuff if different
+    
     ui->setupUi(this);
+    inputAccountType = accountType;
+
+    if (inputAccountType == BDAP::ObjectType::BDAP_GROUP) {
+
+        ui->labelUserId->setText(QString::fromStdString("Group ID:"));
+        ui->addUser->setText(QString::fromStdString("Add Group"));
+
+    } //if inputAccountType
 
     connect(ui->addUser, SIGNAL(clicked()), this, SLOT(goAddUser()));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(goCancel()));
@@ -41,6 +51,7 @@ void BdapAddUserDialog::goAddUser()
 {
     std::string accountID = "";
     std::string commonName = "";
+    std::string registrationDays = "";
     JSONRPCRequest jreq;
     std::vector<std::string> params;
 
@@ -48,6 +59,7 @@ void BdapAddUserDialog::goAddUser()
 
     accountID = ui->lineEdit_userID->text().toStdString();
     commonName = ui->lineEdit_commonName->text().toStdString();
+    registrationDays = ui->lineEdit_registrationDays->text().toStdString();
 
     ui->lineEdit_userID->setReadOnly(true);
     ui->lineEdit_commonName->setReadOnly(true);
@@ -77,39 +89,38 @@ void BdapAddUserDialog::goAddUser()
     
     params.push_back(accountID);
     params.push_back(commonName);
-    jreq.params = RPCConvertValues("adduser", params);
-    jreq.strMethod = "adduser";
+    if (registrationDays.length() >> 0) params.push_back(registrationDays);
+
+    if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
+        jreq.params = RPCConvertValues("adduser", params);
+        jreq.strMethod = "adduser";
+
+    } else { //only other option for now is group
+        jreq.params = RPCConvertValues("addgroup", params);
+        jreq.strMethod = "addgroup";
+
+    }; //end inputAccountType if
+
 
 
     LogPrintf("DEBUGGER ADDUSER 1--%s -- \n", __func__);
 
 
-/* VERSION1
-    try {
-        UniValue result = tableRPC.execute(jreq);
-    } catch (const std::exception& e) {
-        //return error("%s: Deserialize or I/O error - %s", __func__, e.what());
-        error = e.what();
-        LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, error);
-        return;
-    }
-*/
-
-
     UniValue rpc_result(UniValue::VOBJ);
 
     try {
-        //jreq.parse(req);
-
         UniValue result = tableRPC.execute(jreq);
 
         outputmessage = result.getValues()[0].get_str();
-        //rpc_result = JSONRPCReplyObj(result, NullUniValue, jreq.id);
-        //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, rpc_result.size());
-        //outputmessage = rpc_result.getValues()[0].get_str();  //std::to_string(rpc_result.size());
-        //LogPrintf("DEBUGGER ADDUSER 3--%s -- \n", __func__);
-        BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_USER,"",result);
-        dlg.setWindowTitle(QString::fromStdString("Successfully added user"));
+        BdapUserDetailDialog dlg(this,inputAccountType,"",result);
+
+        if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
+            dlg.setWindowTitle(QString::fromStdString("Successfully added user"));
+        } else  { //only other option for now is group
+           dlg.setWindowTitle(QString::fromStdString("Successfully added group"));
+        }; //end inputAccountType if
+
+
         dlg.exec();
         goClose();
     } catch (const UniValue& objError) {
@@ -125,17 +136,11 @@ void BdapAddUserDialog::goAddUser()
         outputmessage = e.what();
     }
 
-
-
     //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, result.size());
-
-
-
 
     ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
 
 
-    //ui->textEditResults->setText(QString::fromStdString(std::to_string(result.size())));
 
 } //goAddUser
 

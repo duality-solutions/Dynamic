@@ -101,10 +101,14 @@ void BdapPage::listMyGroups()
     //ui->lineEdit_GroupSearch->setPlaceholderText("My Groups");
 } //listMyGroups
 
+
 void BdapPage::addGroup()
 {
-    //ui->lineEdit_GroupSearch->setPlaceholderText("Add Group");
+    BdapAddUserDialog dlg(this,BDAP::ObjectType::BDAP_GROUP);
+    dlg.setWindowTitle(QString::fromStdString("Add BDAP Group"));
+    dlg.exec();
 } //addGroup
+
 
 void BdapPage::deleteGroup()
 {
@@ -125,9 +129,6 @@ void BdapPage::getGroupDetails(int row, int column)
 //Users tab =========================================================================
 void BdapPage::listAllUsers()
 {
-    //ui->lineEdit_UserSearch->setPlaceholderText("All Users");
-
-    //bdapAccountTableModel = new BdapAccountTableModel(this);
 
     bdapAccountTableModel->refreshUsers();
 
@@ -138,16 +139,17 @@ void BdapPage::listAllUsers()
 
 void BdapPage::listMyUsers()
 {
-    //ui->lineEdit_UserSearch->setPlaceholderText("My Users");
+
 } //listMyUsers
 
 void BdapPage::addUser()
 {
-    //ui->lineEdit_UserSearch->setPlaceholderText("Add User");
     BdapAddUserDialog dlg(this);
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
 } //addUser
+
+
 
 
 void BdapPage::getUserDetails(int row, int column)
