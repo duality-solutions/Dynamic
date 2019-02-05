@@ -7,6 +7,7 @@
 
 #include "platformstyle.h"
 #include "bdap/bdap.h"
+#include <univalue.h>
 
 
 #include <QPushButton>
@@ -24,7 +25,7 @@ class BdapUserDetailDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BdapUserDetailDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, const std::string& accountID = "");
+    explicit BdapUserDetailDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, const std::string& accountID = "", const UniValue& resultinput = UniValue(UniValue::VOBJ));
     ~BdapUserDetailDialog();
 
 
@@ -32,7 +33,7 @@ public:
 private:
     Ui::BdapUserDetailDialog* ui;
 
-    void populateValues(BDAP::ObjectType accountType, const std::string& accountID);
+    void populateValues(BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput);
 
 
 

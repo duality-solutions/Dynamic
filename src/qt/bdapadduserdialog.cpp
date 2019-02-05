@@ -1,5 +1,6 @@
 #include "bdapadduserdialog.h"
 #include "ui_bdapadduserdialog.h"
+#include "bdapuserdetaildialog.h"
 
 #include "guiutil.h"
 #include "rpcregister.h"
@@ -107,6 +108,10 @@ void BdapAddUserDialog::goAddUser()
         //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, rpc_result.size());
         //outputmessage = rpc_result.getValues()[0].get_str();  //std::to_string(rpc_result.size());
         //LogPrintf("DEBUGGER ADDUSER 3--%s -- \n", __func__);
+        BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_USER,"",result);
+        dlg.setWindowTitle(QString::fromStdString("Successfully added user"));
+        dlg.exec();
+        goClose();
     } catch (const UniValue& objError) {
         rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
         LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
@@ -151,7 +156,7 @@ std::string BdapAddUserDialog::ignoreErrorCode(const std::string input)
     //assuming error code is in the following format: ERROR CODE - ERROR MESSAGE
     
     std::vector<std::string> results;
-    std::string returnvalue = "";
+    std::string returnvalue = input;
 
     boost::split(results, input, [](char c){return c == '-';});
 

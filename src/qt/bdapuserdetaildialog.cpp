@@ -11,14 +11,16 @@
 #include <boost/algorithm/string.hpp>
 
 
-BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType accountType, const std::string& accountID) : QDialog(parent),
+BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput) : QDialog(parent),
                                                         ui(new Ui::BdapUserDetailDialog)
 {
     ui->setupUi(this);
 
+    LogPrintf("DEBUGGER USERDETAIL univalue--%s %s-- \n", __func__, resultinput.size());
+
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
 
-    populateValues(accountType,accountID);
+    populateValues(accountType,accountID,resultinput);
 
 }
 
@@ -28,7 +30,7 @@ BdapUserDetailDialog::~BdapUserDetailDialog()
 }
 
 
-void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const std::string& accountID)
+void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput)
 {
     std::vector<std::string> results;
     std::string objectID = "";
@@ -41,35 +43,46 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     std::string expirationDate = "";
     std::string expired = "";
     std::string timeValue = "";
+    std::string fullPath = "";
+
+    UniValue result = UniValue(UniValue::VOBJ);
  
-    JSONRPCRequest jreq;
-    std::vector<std::string> params;
+    if (resultinput.size() == 0) {
+        JSONRPCRequest jreq;
+        std::vector<std::string> params;
 
-    boost::split(results, accountID, [](char c){return c == '@';});
+        boost::split(results, accountID, [](char c){return c == '@';});
 
-    if (results.size() > 0) {
-        objectID = results[0];
-        //ui->lineEditCommonName->setText(QString::fromStdString(results[0]));
+        if (results.size() > 0) {
+            objectID = results[0];
+            //ui->lineEditCommonName->setText(QString::fromStdString(results[0]));
+        }
+
+        params.push_back(objectID);
+
+        switch (accountType) {
+            case (BDAP::ObjectType::BDAP_USER):
+                jreq.params = RPCConvertValues("getuserinfo", params);
+                jreq.strMethod = "getuserinfo";
+                break;
+            case (BDAP::ObjectType::BDAP_GROUP):
+                jreq.params = RPCConvertValues("getgroupinfo", params);
+                jreq.strMethod = "getgroupinfo";
+                break;
+            default:
+                jreq.params = RPCConvertValues("getuserinfo", params);
+                jreq.strMethod = "getuserinfo";
+                break;
+        } //end switch
+
+        result = tableRPC.execute(jreq);
+
+    } //if resultinput.size() = 0
+    else {
+        result = resultinput;
     }
 
-    params.push_back(objectID);
 
-    switch (accountType) {
-        case (BDAP::ObjectType::BDAP_USER):
-            jreq.params = RPCConvertValues("getuserinfo", params);
-            jreq.strMethod = "getuserinfo";
-            break;
-        case (BDAP::ObjectType::BDAP_GROUP):
-            jreq.params = RPCConvertValues("getgroupinfo", params);
-            jreq.strMethod = "getgroupinfo";
-            break;
-        default:
-            jreq.params = RPCConvertValues("getuserinfo", params);
-            jreq.strMethod = "getuserinfo";
-            break;
-    } //end switch
-
-    UniValue result = tableRPC.execute(jreq);
 
     LogPrintf("DEBUGGER USERDETAIL --%s %s %s-- \n", __func__, objectID, result.size());
 
@@ -77,6 +90,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
         keyName = "";
         keyName = result.getKeys()[i];
         if (keyName == "common_name") commonName = result.getValues()[i].get_str();
+        if (keyName == "object_full_path") fullPath = result.getValues()[i].get_str();
         if (keyName == "wallet_address") walletAddress = result.getValues()[i].get_str();
         if (keyName == "dht_publickey") publicKey = result.getValues()[i].get_str();
         if (keyName == "link_address") linkAddress = result.getValues()[i].get_str();
@@ -87,7 +101,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     } //for i
 
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
-    ui->lineEditPath->setText(QString::fromStdString(accountID));
+    ui->lineEditPath->setText(QString::fromStdString(fullPath));
     ui->lineEditWalletAddress->setText(QString::fromStdString(walletAddress));
     ui->lineEditPublicKey->setText(QString::fromStdString(publicKey));
     ui->lineEditLinkAddress->setText(QString::fromStdString(linkAddress));
