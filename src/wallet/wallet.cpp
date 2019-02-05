@@ -1325,17 +1325,17 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
-                                                    LogPrintf("%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrint("bdap", "%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                                     pLinkRequestDB->AddMyLinkRequest(link);
                                                 }
                                                 else
-                                                    LogPrintf("%s -- Error. Link request from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrintf("%s ***** Warning. Link request from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                             }
                                         }
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        LogPrint("bdap", "%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                     }
                                 }
                             }
@@ -1355,17 +1355,17 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
-                                                    LogPrintf("%s -- Link request for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrint("bdap", "%s -- Link request for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                                     pLinkRequestDB->AddMyLinkRequest(link);
                                                 }
                                                 else
-                                                    LogPrintf("%s -- ***** Warning. Link request for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrintf("%s -- ***** Alert. Link request for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                             }
                                         }
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrintf("%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                     }
                                 }
                             }
@@ -1387,17 +1387,17 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
-                                                    LogPrintf("%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrint("bdap", "%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                                     pLinkAcceptDB->AddMyLinkAccept(link);
                                                 }
                                                 else
-                                                    LogPrintf("%s -- Error. Link accept from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrintf("%s -- Warning! Link accept from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                             }
                                         }
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrintf("%s -- Version 1 link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        LogPrint("bdap", "%s -- Version 1 link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                     }
                                 }
                             }
@@ -1417,17 +1417,17 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
-                                                    LogPrintf("%s -- Link accept for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrint("bdap", "%s -- Link accept for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                                     pLinkAcceptDB->AddMyLinkAccept(link);
                                                 }
                                                 else
-                                                    LogPrintf("%s -- ***** Warning. Link accept for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
+                                                    LogPrintf("%s -- ***** Alert. Link accept for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
                                             }
                                         }
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrintf("%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        LogPrint("bdap", "%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                     }
                                 }
                             }
