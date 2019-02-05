@@ -32,12 +32,13 @@ public:
     std::map<NodeId, int> mapNodeRows;
 
     /** Populate tableWidget_Users via RPC call */
-    void refreshAccounts(QTableWidget* inputtable, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "")
+    void refreshAccounts(QTableWidget* inputtable, QLabel* statusDisplay, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "")
     {
 
         JSONRPCRequest jreq;
         std::vector<std::string> params;
         int nNewRow = 0;
+        int recordsFound = 0;
     
         std::string keyName {""};
         std::string getName {""};
@@ -131,6 +132,7 @@ public:
                 inputtable->setItem(nNewRow, 0, commonNameItem);
                 inputtable->setItem(nNewRow, 1, fullPathItem);
                 inputtable->setItem(nNewRow, 2, expirationDateItem);
+                recordsFound++;
 
             } //if searchcommon
 
@@ -142,7 +144,9 @@ public:
             inputtable->horizontalHeader()->setSortIndicator(sortColumn, sortOrder);
         }
 
-    }
+        statusDisplay->setText(QString::fromStdString(("Records found: " + std::to_string(recordsFound))));
+
+    } //refreshAccounts
 
     int size() const
     {
@@ -156,7 +160,8 @@ public:
 
         return 0;
     }
-};
+
+}; //BdapAccountTablePriv
 
 BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableModel(parent),
                                                       bdapPage(parent),
@@ -166,6 +171,8 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     currentIndex = bdapPage->getCurrentIndex();
     userTable = bdapPage->getUserTable();
     groupTable = bdapPage->getGroupTable();
+    userStatus = bdapPage->getUserStatus();
+    groupStatus = bdapPage->getGroupStatus();
 
         
     columns << tr("Common Name") << tr("Object Full Path") << tr("Expiration Date");
@@ -278,17 +285,8 @@ const CNodeCombinedStats* BdapAccountTableModel::getNodeStats(int idx)
 
 void BdapAccountTableModel::refresh()
 {
-    myUsersChecked = bdapPage->getMyUserCheckBoxChecked();
-    myGroupsChecked = bdapPage->getMyGroupCheckBoxChecked();
-    searchUserCommon = bdapPage->getCommonUserSearch();
-    searchUserPath = bdapPage->getPathUserSearch();
-    searchGroupCommon = bdapPage->getCommonGroupSearch();
-    searchGroupPath = bdapPage->getPathGroupSearch();
-
-    Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable,myUsersChecked,searchUserCommon,searchUserPath);
-    priv->refreshAccounts(groupTable,myGroupsChecked,searchGroupCommon,searchGroupPath);
-    Q_EMIT layoutChanged();
+    refreshUsers();
+    refreshGroups();
 }
 
 void BdapAccountTableModel::refreshUsers()
@@ -298,7 +296,7 @@ void BdapAccountTableModel::refreshUsers()
     searchUserPath = bdapPage->getPathUserSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(userTable,myUsersChecked,searchUserCommon,searchUserPath);
+    priv->refreshAccounts(userTable,userStatus,myUsersChecked,searchUserCommon,searchUserPath);
     Q_EMIT layoutChanged();
 }
 
@@ -309,7 +307,7 @@ void BdapAccountTableModel::refreshGroups()
     searchGroupPath = bdapPage->getPathGroupSearch();
 
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshAccounts(groupTable,myGroupsChecked,searchGroupCommon,searchGroupPath);
+    priv->refreshAccounts(groupTable,groupStatus,myGroupsChecked,searchGroupCommon,searchGroupPath);
     Q_EMIT layoutChanged();
 }
 

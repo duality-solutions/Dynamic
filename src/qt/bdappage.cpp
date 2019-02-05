@@ -183,6 +183,16 @@ QTableWidget* BdapPage::getGroupTable()
     return ui->tableWidget_Groups; 
 }
 
+QLabel* BdapPage::getUserStatus()
+{
+    return ui->labelUserStatus;
+}
+
+QLabel* BdapPage::getGroupStatus()
+{
+    return ui->labelGroupStatus;
+}
+
 
 int BdapPage::getCurrentIndex() 
 { 

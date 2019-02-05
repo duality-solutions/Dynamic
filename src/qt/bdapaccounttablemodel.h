@@ -11,6 +11,7 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 #include <QTableWidget>
+#include <QLabel>
 
 class BdapPage;
 class BdapAccountTablePriv;
@@ -73,6 +74,8 @@ private:
     int currentIndex;
     QTableWidget* userTable;
     QTableWidget* groupTable;
+    QLabel* userStatus;
+    QLabel* groupStatus;
     bool myUsersChecked;
     bool myGroupsChecked;
     std::string searchUserCommon;

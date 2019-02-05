@@ -16,6 +16,7 @@
 
 class BdapAccountTableModel;
 class QTableWidget;
+class QLabel;
 
 const int COMMONNAME_COLWIDTH = 450;
 const int FULLPATH_COLWIDTH = 350;
@@ -38,6 +39,8 @@ public:
     BdapAccountTableModel* getBdapAccountTableModel();
     QTableWidget* getUserTable();
     QTableWidget* getGroupTable();
+    QLabel* getUserStatus();
+    QLabel* getGroupStatus();
     bool getMyUserCheckBoxChecked();
     bool getMyGroupCheckBoxChecked();
     int getCurrentIndex();
