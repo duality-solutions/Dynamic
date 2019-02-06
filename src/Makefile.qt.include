@@ -27,6 +27,7 @@ QT_FORMS_UI = \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/bdapadduserdialog.ui \
   qt/forms/bdappage.ui \
+  qt/forms/bdapupdateaccountdialog.ui \
   qt/forms/bdapuserdetaildialog.ui \
   qt/forms/coincontroldialog.ui \
   qt/forms/dynodelist.ui \
@@ -56,6 +57,7 @@ QT_MOC_CPP = \
   qt/moc_bdapaccounttablemodel.cpp \
   qt/moc_bdapadduserdialog.cpp \
   qt/moc_bdappage.cpp \
+  qt/moc_bdapupdateaccountdialog.cpp \
   qt/moc_bdapuserdetaildialog.cpp \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
@@ -132,6 +134,7 @@ DYNAMIC_QT_H = \
   qt/bdapaccounttablemodel.h \
   qt/bdapadduserdialog.h \
   qt/bdappage.h \
+  qt/bdapupdateaccountdialog.h \
   qt/bdapuserdetaildialog.h \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
@@ -296,6 +299,7 @@ DYNAMIC_QT_CPP += \
   qt/askpassphrasedialog.cpp \
   qt/bdapadduserdialog.cpp \
   qt/bdappage.cpp \
+  qt/bdapupdateaccountdialog.cpp \
   qt/bdapuserdetaildialog.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \

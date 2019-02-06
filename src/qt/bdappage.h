@@ -67,6 +67,7 @@ private Q_SLOTS:
     void listMyUsers();
     void addUser();
     void deleteUser();
+    void updateUser();
     void getUserDetails(int row, int column);
     void getGroupDetails(int row, int column);
 
@@ -74,6 +75,7 @@ private Q_SLOTS:
     void listMyGroups();
     void addGroup();
     void deleteGroup();
+    void updateGroup();
 
 };
 

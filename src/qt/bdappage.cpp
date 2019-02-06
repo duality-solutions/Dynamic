@@ -1,6 +1,7 @@
 #include "bdappage.h"
 #include "ui_bdappage.h"
 #include "bdapadduserdialog.h"
+#include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
 #include "guiutil.h"
 #include "walletmodel.h"
@@ -44,6 +45,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     //Users tab
     connect(ui->pushButton_All, SIGNAL(clicked()), this, SLOT(listAllUsers()));
     connect(ui->addUser, SIGNAL(clicked()), this, SLOT(addUser()));
+    connect(ui->pushButtonUpdateUser, SIGNAL(clicked()), this, SLOT(updateUser()));
     connect(ui->deleteUser, SIGNAL(clicked()), this, SLOT(deleteUser()));
 
     connect(ui->checkBoxMyUsers, SIGNAL(clicked()), this, SLOT(listAllUsers()));
@@ -56,6 +58,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     //Groups tab
     connect(ui->pushButton_AllGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
     connect(ui->addGroup, SIGNAL(clicked()), this, SLOT(addGroup()));
+    connect(ui->pushButtonUpdateGroup, SIGNAL(clicked()), this, SLOT(updateGroup()));
     connect(ui->deleteGroup, SIGNAL(clicked()), this, SLOT(deleteGroup()));
 
     connect(ui->checkBoxMyGroups, SIGNAL(clicked()), this, SLOT(listAllGroups()));
@@ -131,6 +134,30 @@ void BdapPage::deleteGroup()
     };
 } //deleteGroup
 
+void BdapPage::updateGroup()
+{
+    std::string account = "";
+    std::string commonName = "";
+    std::string expirationDate = "";
+    
+    QItemSelectionModel* selectionModel = ui->tableWidget_Groups->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : -1;
+
+    if (nSelectedRow == -1) return; //do nothing if no rows are selected
+
+    account = ui->tableWidget_Groups->item(nSelectedRow,1)->text().toStdString();
+    commonName = ui->tableWidget_Groups->item(nSelectedRow,0)->text().toStdString();
+    expirationDate = ui->tableWidget_Groups->item(nSelectedRow,2)->text().toStdString();
+
+    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,account,commonName,expirationDate);
+    dlg.setWindowTitle(QString::fromStdString("Update BDAP Group"));
+    
+    dlg.exec();
+
+} //updateGroup
+
+
 void BdapPage::getGroupDetails(int row, int column)
 {
     //LogPrintf("DEBUGGER USERDETAIL --%s made it here-- \n", __func__);
@@ -202,6 +229,29 @@ void BdapPage::deleteUser()
     };
 
 } //deleteUser
+
+void BdapPage::updateUser()
+{
+    std::string account = "";
+    std::string commonName = "";
+    std::string expirationDate = "";
+    
+    QItemSelectionModel* selectionModel = ui->tableWidget_Users->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : -1;
+
+    if (nSelectedRow == -1) return; //do nothing if no rows are selected
+
+    account = ui->tableWidget_Users->item(nSelectedRow,1)->text().toStdString();
+    commonName = ui->tableWidget_Users->item(nSelectedRow,0)->text().toStdString();
+    expirationDate = ui->tableWidget_Users->item(nSelectedRow,2)->text().toStdString();
+
+    BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_USER,account,commonName,expirationDate);
+    dlg.setWindowTitle(QString::fromStdString("Update BDAP User"));
+    
+    dlg.exec();
+
+} //updateUser
 
 
 void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accountType) {
