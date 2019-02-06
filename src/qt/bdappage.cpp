@@ -11,6 +11,8 @@
 #include "rpcclient.h" //NEED TO MOVE
 
 #include <stdio.h>
+#include <boost/algorithm/string.hpp>
+
 #include <QTableWidget>
 
 BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidget(parent),
@@ -63,12 +65,8 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
 
-
    LogPrintf("DEBUGGER TABLE 1--%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
    LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
-
-
-
 
 
 }
@@ -112,7 +110,25 @@ void BdapPage::addGroup()
 
 void BdapPage::deleteGroup()
 {
-    //ui->lineEdit_GroupSearch->setPlaceholderText("Delete Group");
+    QMessageBox::StandardButton reply;
+    std::string account = "";
+    std::string displayedMessage = "";
+
+    QItemSelectionModel* selectionModel = ui->tableWidget_Groups->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : -1;
+
+    if (nSelectedRow == -1) return; //do nothing if no rows are selected
+
+    account = ui->tableWidget_Groups->item(nSelectedRow,1)->text().toStdString();
+    displayedMessage = "Are you sure you want to delete \"" + account + "\""; //std::to_string(nSelectedRow);
+
+    reply = QMessageBox::question(this, "Confirm Delete Account", QString::fromStdString(displayedMessage), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        executeDeleteAccount(account, BDAP::ObjectType::BDAP_GROUP);
+
+    };
 } //deleteGroup
 
 void BdapPage::getGroupDetails(int row, int column)
@@ -165,8 +181,95 @@ void BdapPage::getUserDetails(int row, int column)
 
 void BdapPage::deleteUser()
 {
-    //ui->lineEdit_UserSearch->setPlaceholderText("Delete User");
+    QMessageBox::StandardButton reply;
+    std::string account = "";
+    std::string displayedMessage = "";
+
+    QItemSelectionModel* selectionModel = ui->tableWidget_Users->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : -1;
+
+    if (nSelectedRow == -1) return; //do nothing if no rows are selected
+
+    account = ui->tableWidget_Users->item(nSelectedRow,1)->text().toStdString();
+    displayedMessage = "Are you sure you want to delete \"" + account + "\""; //std::to_string(nSelectedRow);
+
+    reply = QMessageBox::question(this, "Confirm Delete Account", QString::fromStdString(displayedMessage), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        executeDeleteAccount(account, BDAP::ObjectType::BDAP_USER);
+
+    };
+
 } //deleteUser
+
+
+void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accountType) {
+
+    std::string objectID = "";
+    std::vector<std::string> results;
+    std::string outputmessage = "";
+
+    boost::split(results, account, [](char c){return c == '@';});
+
+    if (results.size() > 0) {
+        objectID = results[0];
+    }
+
+    JSONRPCRequest jreq;
+    std::vector<std::string> params;
+
+    params.push_back(objectID);
+
+        switch (accountType) {
+            case (BDAP::ObjectType::BDAP_USER):
+                jreq.params = RPCConvertValues("deleteuser", params);
+                jreq.strMethod = "deleteuser";
+                break;
+            case (BDAP::ObjectType::BDAP_GROUP):
+                jreq.params = RPCConvertValues("deletegroup", params);
+                jreq.strMethod = "deletegroup";
+                break;
+            default:
+                jreq.params = RPCConvertValues("deleteuser", params);
+                jreq.strMethod = "deleteuser";
+                break;
+        } //end switch
+
+
+        UniValue rpc_result(UniValue::VOBJ);
+
+        try {
+            UniValue result = tableRPC.execute(jreq);
+
+            outputmessage = result.getValues()[0].get_str();
+            BdapUserDetailDialog dlg(this,accountType,"",result);
+
+            if (accountType == BDAP::ObjectType::BDAP_USER) {
+                dlg.setWindowTitle(QString::fromStdString("Successfully deleted user"));
+            } else  { //only other option for now is group
+                dlg.setWindowTitle(QString::fromStdString("Successfully deleted group"));
+            }; //end accountType if
+
+            dlg.exec();
+            return;
+        } catch (const UniValue& objError) {
+            rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
+            LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
+            std::string message = find_value(objError, "message").get_str();
+            LogPrintf("DEBUGGER ADDUSER ERROR1--%s %s-- \n", __func__, message);
+            outputmessage = message;
+        } catch (const std::exception& e) {
+            rpc_result = JSONRPCReplyObj(NullUniValue,
+            JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
+            LogPrintf("DEBUGGER ADDUSER ERROR2--%s-- \n", __func__);
+            outputmessage = e.what();
+        }
+
+        QMessageBox::critical(this, "BDAP Error", QString::fromStdString(outputmessage));
+
+} //executeDeleteAccount
+
 
 BdapAccountTableModel* BdapPage::getBdapAccountTableModel()
 {

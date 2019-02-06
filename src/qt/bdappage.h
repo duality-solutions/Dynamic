@@ -57,6 +57,7 @@ private:
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     BdapAccountTableModel* bdapAccountTableModel;
+    void executeDeleteAccount(std::string account, BDAP::ObjectType accountType);
 
 
 
