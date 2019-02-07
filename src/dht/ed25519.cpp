@@ -218,7 +218,13 @@ std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const 
 
 std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey)
 {
+    // TODO (bdap): Use a more efficient way to convert the hex encoded pubkey to bytes
     std::vector<unsigned char> vchPubKeyBytes;
-
+    std::string strEncodedPubKey = StringFromVch(vchEncodedPubKey);
+    std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> pubkey;
+    aux::from_hex(strEncodedPubKey, pubkey.data());
+    for(unsigned int i = 0; i < sizeof(pubkey); i++) {
+        vchPubKeyBytes.push_back(pubkey[i]);
+    }
     return vchPubKeyBytes;
 }

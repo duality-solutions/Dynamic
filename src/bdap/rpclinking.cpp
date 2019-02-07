@@ -212,7 +212,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     strMessage = "";
     vvchPubKeys.push_back(privReqDHTKey.GetPubKeyBytes());
-    //vvchPubKeys.push_back(EncodedPubKeyToBytes(vchSharedPubKey));
+    vvchPubKeys.push_back(EncodedPubKeyToBytes(vchSharedPubKey));
     std::vector<unsigned char> dataEncrypted;
     if (!EncryptBDAPData(vvchPubKeys, data, dataEncrypted, strMessage))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - Error encrypting link data: " + strMessage);
