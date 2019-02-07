@@ -72,11 +72,7 @@ void BdapUpdateAccountDialog::updateAccount()
     ui->lineEditRegistrationDays->setReadOnly(true);
 
     QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Background,Qt::gray);
     palette->setColor(QPalette::Text,Qt::darkGray);
-    ui->lineEditID->setAutoFillBackground(true);
-    ui->lineEditCommonName->setAutoFillBackground(true);
-    ui->lineEditRegistrationDays->setAutoFillBackground(true);
     ui->lineEditID->setPalette(*palette);
     ui->lineEditCommonName->setPalette(*palette);
     ui->lineEditRegistrationDays->setPalette(*palette);
@@ -104,16 +100,11 @@ void BdapUpdateAccountDialog::updateAccount()
     }; //end inputAccountType if
 
 
-
-
-
-    UniValue rpc_result(UniValue::VOBJ);
-
     try {
         UniValue result = tableRPC.execute(jreq);
 
         outputmessage = result.getValues()[0].get_str();
-        BdapUserDetailDialog dlg(this,inputAccountType,"",result);
+        BdapUserDetailDialog dlg(this,inputAccountType,"",result,true);
 
         if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
             dlg.setWindowTitle(QString::fromStdString("Successfully updated user"));
@@ -121,23 +112,15 @@ void BdapUpdateAccountDialog::updateAccount()
            dlg.setWindowTitle(QString::fromStdString("Successfully updated group"));
         }; //end inputAccountType if
 
-
         dlg.exec();
         goClose();
+        return;
     } catch (const UniValue& objError) {
-        rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
-        LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
         std::string message = find_value(objError, "message").get_str();
-        LogPrintf("DEBUGGER ADDUSER ERROR1--%s %s-- \n", __func__, message);
         outputmessage = ignoreErrorCode(message);
     } catch (const std::exception& e) {
-        rpc_result = JSONRPCReplyObj(NullUniValue,
-            JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
-        LogPrintf("DEBUGGER ADDUSER ERROR2--%s-- \n", __func__);
         outputmessage = e.what();
     }
-
-    //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, result.size());
 
     ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
 } //updateAccount

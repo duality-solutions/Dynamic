@@ -14,6 +14,8 @@
 
 #include <memory>
 
+const std::string TRANSACTION_MESSAGE = "Please note that your transaction will not be reflected until the next block.";
+
 namespace Ui
 {
 class BdapUserDetailDialog;
@@ -24,7 +26,7 @@ class BdapUserDetailDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BdapUserDetailDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, const std::string& accountID = "", const UniValue& resultinput = UniValue(UniValue::VOBJ));
+    explicit BdapUserDetailDialog(QWidget *parent = 0, BDAP::ObjectType accountType = BDAP::ObjectType::BDAP_USER, const std::string& accountID = "", const UniValue& resultinput = UniValue(UniValue::VOBJ), bool displayInfo = false);
     ~BdapUserDetailDialog();
 
 

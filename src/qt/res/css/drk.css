@@ -2077,6 +2077,11 @@ QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog {
     border:2px solid white;
 }
 
+QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader {
+    color: rgb(56, 255, 56);
+    font-weight: bold;
+}
+
 QDialog#BdapUpdateAccountDialog .QLineEdit#lineEditID {
     background-color: rgb(139, 139, 139);
 }

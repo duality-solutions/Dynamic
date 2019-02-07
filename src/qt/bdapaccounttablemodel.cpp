@@ -45,10 +45,10 @@ public:
         std::string getPath {""};
         std::string getExpirationDate {""};
         std::string tableWidgetName {""};
+        std::string outputmessage = "";
 
         bool hasValues = false;
 
-        LogPrintf("DEBUGGER CHECKBOX --%s %s-- \n", __func__, filterOn);
     
         if (!inputtable->objectName().isEmpty()) tableWidgetName = inputtable->objectName().toStdString();
 
@@ -56,7 +56,6 @@ public:
         if (!inputtable->objectName().isEmpty()){
             if (inputtable->rowCount() > 0) {
                 hasValues = true;
-                LogPrintf("DEBUGGER SORT --%s %s %s-- \n", __func__, inputtable->horizontalHeader()->sortIndicatorOrder(), inputtable->horizontalHeader()->sortIndicatorSection());
                 sortColumn = inputtable->horizontalHeader()->sortIndicatorSection();
                 sortOrder = inputtable->horizontalHeader()->sortIndicatorOrder();
             } //if rowcount
@@ -83,7 +82,22 @@ public:
                 jreq.strMethod = "getusers";
             } //(filterOn Users)
         }
-        UniValue result = tableRPC.execute(jreq);
+        
+        UniValue result = UniValue(UniValue::VOBJ);
+
+        //Handle RPC errors
+        try {
+            result = tableRPC.execute(jreq);
+        } catch (const UniValue& objError) {
+            std::string message = find_value(objError, "message").get_str();
+            outputmessage = message;
+            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            return;
+        } catch (const std::exception& e) {
+            outputmessage = e.what();
+            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            return;
+        }
 
         inputtable->clearContents();
         inputtable->setRowCount(0);
@@ -115,12 +129,9 @@ public:
                 //if (keyName == "expires_on") getExpirationDate = std::to_string(result[i].getValues()[j].get_int64());
                 if (keyName == "expires_on") getExpirationDate = DateTimeStrFormat("%Y-%m-%d", result[i].getValues()[j].get_int64());
 
-                //LogPrintf("DEBUGGER LOOP --%s %s: %s-- \n", __func__, result[i].getKeys()[j], result[i].getValues()[j].get_str());
             }
 
 
-            //LogPrintf("DEBUGGER SEARCH 1--%s %s: %s-- \n", __func__, searchCommon, getName);
-            //LogPrintf("DEBUGGER SEARCH 2--%s %s: %s-- \n", __func__, searchPath, getPath);
 
             //add row if all criteria have been met
             if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
@@ -183,34 +194,9 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     //refresh();
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
-    timer->setInterval(25000); //MODEL_UPDATE_DELAY originally
+    timer->setInterval(60000); //MODEL_UPDATE_DELAY originally
     startAutoRefresh();
 
-
-/*
-    // set up timer for auto refresh
-    timer = new QTimer(this);
-    if (currentIndex == 1) { //Groups Table
-        connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getGroupTable())));
-    } else { //Users Table
-        connect(bdapPage->getUserTable(), SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getDetails(int,int)));
-        connect(timer, SIGNAL(timeout()), SLOT(refresh(bdapPage->getUserTable())));
-    };
-    timer->setInterval(MODEL_UPDATE_DELAY);
-
-    // load initial data
-    if (currentIndex == 1) {
-        refresh(bdapPage->getGroupTable());
-    } else {
-        refresh(bdapPage->getUserTable());
-    };
-*/
-
-    //refresh(bdapPage->getUserTable());
-
-    //LogPrintf("DEBUGGER TABLE --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
-        //LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->rowCount());
-        //LogPrintf("DEBUGGER TABLE OUT --%s %s-- \n", __func__, bdapPage->getUserTable()->columnCount());
 
 }
 
@@ -332,10 +318,7 @@ void BdapAccountTableModel::sort(int column, Qt::SortOrder order)
 void BdapAccountTableModel::getDetails(int row, int column)
 {
     //QObject* obj = sender();
-    QTableWidget* inputtable = qobject_cast<QTableWidget*>(sender());
-
-
-    LogPrintf("DEBUGGER TABLE SELECT --%s %s %s %s-- \n", __func__, row, column, inputtable->item(row,column)->text().toStdString());
+    //QTableWidget* inputtable = qobject_cast<QTableWidget*>(sender());
 
 } //getDetails
 

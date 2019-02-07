@@ -30,14 +30,9 @@ BdapAddUserDialog::BdapAddUserDialog(QWidget *parent, BDAP::ObjectType accountTy
     connect(ui->addUser, SIGNAL(clicked()), this, SLOT(goAddUser()));
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(goCancel()));
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
-
-    
  
     ui->labelErrorMsg->setVisible(false);
     ui->pushButtonOK->setVisible(false);
-
-    
-
 
 }
 
@@ -66,19 +61,10 @@ void BdapAddUserDialog::goAddUser()
     ui->lineEdit_registrationDays->setReadOnly(true);
 
     QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Background,Qt::gray);
     palette->setColor(QPalette::Text,Qt::darkGray);
-    ui->lineEdit_userID->setAutoFillBackground(true);
-    ui->lineEdit_commonName->setAutoFillBackground(true);
-    ui->lineEdit_registrationDays->setAutoFillBackground(true);
     ui->lineEdit_userID->setPalette(*palette);
     ui->lineEdit_commonName->setPalette(*palette);
     ui->lineEdit_registrationDays->setPalette(*palette);
-    
-
-
-
-    //ui->lineEdit_registrationDays->setText(QString::fromStdString(accountID));
 
     ui->labelErrorMsg->setVisible(true);
     ui->pushButtonOK->setVisible(true);
@@ -103,16 +89,13 @@ void BdapAddUserDialog::goAddUser()
 
 
 
-    LogPrintf("DEBUGGER ADDUSER 1--%s -- \n", __func__);
-
-
-    UniValue rpc_result(UniValue::VOBJ);
+    //UniValue rpc_result(UniValue::VOBJ);
 
     try {
         UniValue result = tableRPC.execute(jreq);
 
         outputmessage = result.getValues()[0].get_str();
-        BdapUserDetailDialog dlg(this,inputAccountType,"",result);
+        BdapUserDetailDialog dlg(this,inputAccountType,"",result,true);
 
         if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
             dlg.setWindowTitle(QString::fromStdString("Successfully added user"));
@@ -124,19 +107,15 @@ void BdapAddUserDialog::goAddUser()
         dlg.exec();
         goClose();
     } catch (const UniValue& objError) {
-        rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
-        LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
+        //rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
         std::string message = find_value(objError, "message").get_str();
-        LogPrintf("DEBUGGER ADDUSER ERROR1--%s %s-- \n", __func__, message);
         outputmessage = ignoreErrorCode(message);
     } catch (const std::exception& e) {
-        rpc_result = JSONRPCReplyObj(NullUniValue,
-            JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
-        LogPrintf("DEBUGGER ADDUSER ERROR2--%s-- \n", __func__);
+        //rpc_result = JSONRPCReplyObj(NullUniValue,
+        //JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
         outputmessage = e.what();
     }
 
-    //LogPrintf("DEBUGGER ADDUSER 2--%s %s-- \n", __func__, result.size());
 
     ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
 

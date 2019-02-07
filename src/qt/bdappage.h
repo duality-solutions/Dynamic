@@ -48,6 +48,7 @@ public:
     std::string getPathUserSearch();
     std::string getCommonGroupSearch();
     std::string getPathGroupSearch();
+    void evaluateTransactionButtons();
 
 
 
@@ -64,18 +65,16 @@ private:
 private Q_SLOTS:
 
     void listAllUsers();
-    void listMyUsers();
     void addUser();
     void deleteUser();
     void updateUser();
     void getUserDetails(int row, int column);
-    void getGroupDetails(int row, int column);
 
     void listAllGroups();
-    void listMyGroups();
     void addGroup();
     void deleteGroup();
     void updateGroup();
+    void getGroupDetails(int row, int column);
 
 };
 

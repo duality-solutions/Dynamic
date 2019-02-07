@@ -22,6 +22,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 {
     ui->setupUi(this);
     
+    evaluateTransactionButtons();
     //Initialize QWidgetTable names
     // if (ui->tableWidget_Users->objectName().isEmpty())
     //     ui->tableWidget_Users->setObjectName(QStringLiteral("BDAPUsersTable"));
@@ -68,10 +69,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
 
-   LogPrintf("DEBUGGER TABLE 1--%s %s-- \n", __func__, ui->tableWidget_Users->rowCount());
-   LogPrintf("DEBUGGER TABLENAME 1--%s %s-- \n", __func__, ui->tableWidget_Users->objectName().toStdString());
-
-
 }
 
 BdapPage::~BdapPage()
@@ -84,23 +81,35 @@ void BdapPage::setModel(WalletModel* model)
     this->model = model;
 }
 
+void BdapPage::evaluateTransactionButtons()
+{
+    int currentIndex = ui->tabWidget->currentIndex();
+    bool myUsersChecked = ui->checkBoxMyUsers->isChecked(); 
+    bool myGroupsChecked = ui->checkBoxMyGroups->isChecked();
+
+    switch (currentIndex) {
+        case 0: //Users
+            ui->pushButtonUpdateUser->setVisible(myUsersChecked);
+            ui->deleteUser->setVisible(myUsersChecked);   
+            break;
+        case 1: //Groups
+            ui->pushButtonUpdateGroup->setVisible(myGroupsChecked);
+            ui->deleteGroup->setVisible(myGroupsChecked);
+            break;
+
+    }; //end switch
+
+
+} //evaluateTransactionButtons
+
+
 //Groups tab ========================================================================
 void BdapPage::listAllGroups()
 {
-    //ui->lineEdit_GroupSearch->setPlaceholderText("All Groups");
-
-    //bdapAccountTableModel = new BdapAccountTableModel(this);
+    evaluateTransactionButtons();
 
     bdapAccountTableModel->refreshGroups();
-
-    LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
-
 } //listAllGroups
-
-void BdapPage::listMyGroups()
-{
-    //ui->lineEdit_GroupSearch->setPlaceholderText("My Groups");
-} //listMyGroups
 
 
 void BdapPage::addGroup()
@@ -160,8 +169,6 @@ void BdapPage::updateGroup()
 
 void BdapPage::getGroupDetails(int row, int column)
 {
-    //LogPrintf("DEBUGGER USERDETAIL --%s made it here-- \n", __func__);
-
     BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,ui->tableWidget_Groups->item(row,1)->text().toStdString());
     dlg.setWindowTitle(QString::fromStdString("BDAP Group Detail"));
     dlg.exec();
@@ -172,18 +179,12 @@ void BdapPage::getGroupDetails(int row, int column)
 //Users tab =========================================================================
 void BdapPage::listAllUsers()
 {
+    evaluateTransactionButtons();
 
     bdapAccountTableModel->refreshUsers();
 
-    LogPrintf("DEBUGGER TAB --%s %s-- \n", __func__, ui->tabWidget->currentIndex());
-
-
 } //listAllUsers
 
-void BdapPage::listMyUsers()
-{
-
-} //listMyUsers
 
 void BdapPage::addUser()
 {
@@ -194,11 +195,8 @@ void BdapPage::addUser()
 
 
 
-
 void BdapPage::getUserDetails(int row, int column)
 {
-    LogPrintf("DEBUGGER USERDETAIL --%s made it here-- \n", __func__);
-
     BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_USER,ui->tableWidget_Users->item(row,1)->text().toStdString());
     dlg.setWindowTitle(QString::fromStdString("BDAP User Detail"));
     dlg.exec();
@@ -286,14 +284,11 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
                 break;
         } //end switch
 
-
-        UniValue rpc_result(UniValue::VOBJ);
-
         try {
             UniValue result = tableRPC.execute(jreq);
 
             outputmessage = result.getValues()[0].get_str();
-            BdapUserDetailDialog dlg(this,accountType,"",result);
+            BdapUserDetailDialog dlg(this,accountType,"",result,true);
 
             if (accountType == BDAP::ObjectType::BDAP_USER) {
                 dlg.setWindowTitle(QString::fromStdString("Successfully deleted user"));
@@ -304,15 +299,9 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
             dlg.exec();
             return;
         } catch (const UniValue& objError) {
-            rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
-            LogPrintf("DEBUGGER ADDUSER ERROR1--%s-- \n", __func__);
             std::string message = find_value(objError, "message").get_str();
-            LogPrintf("DEBUGGER ADDUSER ERROR1--%s %s-- \n", __func__, message);
             outputmessage = message;
         } catch (const std::exception& e) {
-            rpc_result = JSONRPCReplyObj(NullUniValue,
-            JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
-            LogPrintf("DEBUGGER ADDUSER ERROR2--%s-- \n", __func__);
             outputmessage = e.what();
         }
 

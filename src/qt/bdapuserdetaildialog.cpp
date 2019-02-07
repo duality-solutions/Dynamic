@@ -11,12 +11,13 @@
 #include <boost/algorithm/string.hpp>
 
 
-BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput) : QDialog(parent),
+BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType accountType, const std::string& accountID, const UniValue& resultinput, bool displayInfo) : QDialog(parent),
                                                         ui(new Ui::BdapUserDetailDialog)
 {
     ui->setupUi(this);
 
-    LogPrintf("DEBUGGER USERDETAIL univalue--%s %s-- \n", __func__, resultinput.size());
+    ui->labelinfoHeader->setVisible(displayInfo);
+    ui->labelinfoHeader->setText(QString::fromStdString(TRANSACTION_MESSAGE));
 
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
 
@@ -44,6 +45,7 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     std::string expired = "";
     std::string timeValue = "";
     std::string fullPath = "";
+    std::string outputmessage = "";
 
     UniValue result = UniValue(UniValue::VOBJ);
  
@@ -75,7 +77,19 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
                 break;
         } //end switch
 
-        result = tableRPC.execute(jreq);
+        //Handle RPC errors
+        try {
+            result = tableRPC.execute(jreq);
+        } catch (const UniValue& objError) {
+            std::string message = find_value(objError, "message").get_str();
+            outputmessage = message;
+            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            return;
+        } catch (const std::exception& e) {
+            outputmessage = e.what();
+            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            return;
+        }        
 
     } //if resultinput.size() = 0
     else {
@@ -83,8 +97,6 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
     }
 
 
-
-    LogPrintf("DEBUGGER USERDETAIL --%s %s %s-- \n", __func__, objectID, result.size());
 
     for (size_t i {0} ; i < result.size() ; ++i) {
         keyName = "";
