@@ -637,10 +637,3 @@ std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned 
     vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
     return vchDataWithoutVersion;
 }
-
-int GetVersionFromData(const std::vector<unsigned char>& vchData)
-{
-    if (vchData.size() == 0)
-        return -1;
-    return (int)vchData[0];
-}
