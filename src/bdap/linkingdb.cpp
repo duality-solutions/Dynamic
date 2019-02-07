@@ -450,7 +450,7 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
     }
     CTxOut txout(0, scriptData);
     size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
-    LogPrint("bdap", "%s -- scriptData.size() = %u, nSize = %u \n", __func__, scriptData.size(), nSize);
+    LogPrint("bdap", "%s -- scriptData.size() = %u, Serialize Size = %u \n", __func__, scriptData.size(), nSize);
     if (nSize > MAX_BDAP_LINK_DATA_SIZE) {
         errorMessage = "CheckNewLinkRequestTx failed! Data script is too large.";
         return error(errorMessage.c_str());
@@ -617,4 +617,23 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
         }
     }
     return true;
+}
+
+std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithVersion = vchData;
+    vchDataWithVersion.push_back(nVersion);
+    std::rotate(vchDataWithVersion.rbegin(), vchDataWithVersion.rbegin() + 1, vchDataWithVersion.rend());
+    return vchDataWithVersion;
+}
+
+std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithoutVersion = vchData;
+    if (vchData.size() == 0)
+        return vchDataWithoutVersion;
+
+    nVersion = (int)vchData[0];
+    vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
+    return vchDataWithoutVersion;
 }

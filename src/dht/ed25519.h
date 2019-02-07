@@ -92,6 +92,9 @@ public:
     std::vector<unsigned char> GetPrivKey() const; 
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
+    std::vector<unsigned char> GetPrivKeyBytes() const; 
+    std::vector<unsigned char> GetPubKeyBytes() const;
+    std::vector<unsigned char> GetPrivSeedBytes() const;
     std::string GetPrivKeyString() const;
     std::string GetPubKeyString() const;
     std::string GetPrivSeedString() const;
@@ -131,6 +134,7 @@ private:
 };
 
 std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey);
+std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey);
 
 bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();

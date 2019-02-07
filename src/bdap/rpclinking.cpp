@@ -5,6 +5,7 @@
 #include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
+#include "encryption.h"
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
@@ -136,8 +137,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4001 - Link request or accept already exists for these accounts.");
 
     CLinkRequest txLink;
-    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated.
-    txLink.nVersion = 0; // version 0 = unencrytped or a public link.
+    txLink.nVersion = 1; // version 1 = encrytped or a private link.
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
     txLink.LinkMessage = vchFromString(strLinkMessage);
@@ -206,8 +206,21 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     // Create BDAP OP_RETURN script
     CharString data;
     txLink.Serialize(data);
+
+    // Encrypt serialized data for the sender and recipient
+    strMessage = "";
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(privReqDHTKey.GetPubKeyBytes()); // do we need to add the sender's pubkey?
+    vvchPubKeys.push_back(EncodedPubKeyToBytes(vchSharedPubKey));
+    std::vector<unsigned char> dataEncrypted;
+    if (!EncryptBDAPData(vvchPubKeys, data, dataEncrypted, strMessage))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - Error encrypting link data: " + strMessage);
+
+    dataEncrypted = AddVersionToLinkData(dataEncrypted, 1);
+
+    // Create BDAP OP_RETURN script
     CScript scriptData;
-    scriptData << OP_RETURN << data;
+    scriptData << OP_RETURN << dataEncrypted;
 
     // Send the transaction
     CWalletTx wtx;
@@ -216,18 +229,12 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
 
     bool fUseInstantSend = false;
-    int enabled = dnodeman.CountEnabled();
-    if (enabled > 5) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
-        fUseInstantSend = true;
-    }
     SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLink.txHash = wtx.GetHash();
 
     UniValue oLink(UniValue::VOBJ);
     if(!BuildJsonLinkRequestInfo(txLink, entryRequestor, entryRecipient, oLink))
-        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - " + _("Failed to build BDAP link JSON object"));
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4014 - " + _("Failed to build BDAP link JSON object"));
 
     return oLink;
 }
@@ -287,8 +294,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4103 - Initial link request not found.");
 
     CLinkAccept txLinkAccept;
-    // TODO (BDAP): Update to version 1 when BDAP encryption is integrated. 
-    txLinkAccept.nVersion = 0; // version 0 = unencrytped or a public link.
+    txLinkAccept.nVersion = 1; // version 1 = encrytped or a private link.
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
@@ -352,12 +358,22 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     if (!txLinkAccept.ValidateValues(strMessage))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4012 - Error validating link request values: " + strMessage);
 
-    // TODO (bdap): encrypt data before adding it to OP_RETURN.
-    // Create BDAP OP_RETURN script
     CharString data;
     txLinkAccept.Serialize(data);
+    // Encrypt serialized data for the sender and recipient
+    strMessage = "";
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(privAcceptDHTKey.GetPubKeyBytes()); // do we need to add the recipient's pubkey?
+    vvchPubKeys.push_back(EncodedPubKeyToBytes(vchSharedPubKey));
+    std::vector<unsigned char> dataEncrypted;
+    if (!EncryptBDAPData(vvchPubKeys, data, dataEncrypted, strMessage))
+        throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4011 - Error encrypting link data: " + strMessage);
+
+    dataEncrypted = AddVersionToLinkData(dataEncrypted, 1);
+
+    // Create BDAP OP_RETURN script
     CScript scriptData;
-    scriptData << OP_RETURN << data;
+    scriptData << OP_RETURN << dataEncrypted;
 
     // Send the transaction
     CWalletTx wtx;
@@ -365,12 +381,6 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     CAmount nOperationFee = GetBDAPFee(scriptPubKey) * powf(3.1, fYears);
     CAmount nDataFee = GetBDAPFee(scriptData) * powf(3.1, fYears);
     bool fUseInstantSend = false;
-    int enabled = dnodeman.CountEnabled();
-    if (enabled > 5) {
-        // TODO (bdap): calculate cost for instant send.
-        nOperationFee = nOperationFee * 2;
-        fUseInstantSend = true;
-    }
     SendLinkingTransaction(scriptData, scriptPubKey, scriptSend, wtx, nOperationFee, nDataFee, fUseInstantSend);
     txLinkAccept.txHash = wtx.GetHash();
 

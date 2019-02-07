@@ -16,6 +16,7 @@
 #include "checkpoints.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
+#include "encryption.h" // for VGP E2E encryption
 #include "fluid/fluid.h"
 #include "governance.h"
 #include "init.h"
@@ -1335,7 +1336,33 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrint("bdap", "%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        bool fDecrypted = false;
+                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        CKeyEd25519 privDHTKey;
+                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                            int nDataVersion;
+                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
+                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
+                                            if (nDataVersion == nVersion) {
+                                                std::string strMessage = "";
+                                                std::vector<unsigned char> dataDecrypted;
+                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                    std::vector<unsigned char> vchData, vchHash;
+                                                    CScript scriptData;
+                                                    scriptData << OP_RETURN << dataDecrypted;
+                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
+                                                        CLinkRequest link;
+                                                        link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        pLinkRequestDB->AddMyLinkRequest(link);
+                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
+                                                        fDecrypted = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!fDecrypted)
+                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
                                     }
                                 }
                             }
@@ -1365,7 +1392,33 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
+                                        bool fDecrypted = false;
                                         LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        CKeyEd25519 privDHTKey;
+                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                            int nDataVersion;
+                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
+                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
+                                            if (nDataVersion == nVersion) {
+                                                std::string strMessage = "";
+                                                std::vector<unsigned char> dataDecrypted;
+                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                    std::vector<unsigned char> vchData, vchHash;
+                                                    CScript scriptData;
+                                                    scriptData << OP_RETURN << dataDecrypted;
+                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
+                                                        CLinkRequest link;
+                                                        link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        pLinkRequestDB->AddMyLinkRequest(link);
+                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
+                                                        fDecrypted = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!fDecrypted)
+                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
                                     }
                                 }
                             }
@@ -1397,7 +1450,33 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrint("bdap", "%s -- Version 1 link accept from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        bool fDecrypted = false;
+                                        LogPrint("bdap", "%s -- Version 1 encrypted link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        CKeyEd25519 privDHTKey;
+                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                            int nDataVersion;
+                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
+                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
+                                            if (nDataVersion == nVersion) {
+                                                std::string strMessage = "";
+                                                std::vector<unsigned char> dataDecrypted;
+                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                    std::vector<unsigned char> vchData, vchHash;
+                                                    CScript scriptData;
+                                                    scriptData << OP_RETURN << dataDecrypted;
+                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
+                                                        CLinkAccept link;
+                                                        link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        pLinkAcceptDB->AddMyLinkAccept(link);
+                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
+                                                        fDecrypted = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!fDecrypted)
+                                            LogPrint("bdap", "%s -- DecryptBDAPData failed.\n", __func__);
                                     }
                                 }
                             }
@@ -1427,7 +1506,33 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     }
                                     else if (nVersion == 1) {
                                         //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
-                                        LogPrint("bdap", "%s -- Version 1 link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        bool fDecrypted = false;
+                                        LogPrint("bdap", "%s -- Version 1 encrypted link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        CKeyEd25519 privDHTKey;
+                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
+                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                            int nDataVersion;
+                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
+                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
+                                            if (nDataVersion == nVersion) {
+                                                std::string strMessage = "";
+                                                std::vector<unsigned char> dataDecrypted;
+                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                    std::vector<unsigned char> vchData, vchHash;
+                                                    CScript scriptData;
+                                                    scriptData << OP_RETURN << dataDecrypted;
+                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
+                                                        CLinkAccept link;
+                                                        link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        pLinkAcceptDB->AddMyLinkAccept(link);
+                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
+                                                        fDecrypted = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!fDecrypted)
+                                            LogPrint("bdap", "%s -- DecryptBDAPData failed.\n", __func__);
                                     }
                                 }
                             }

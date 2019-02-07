@@ -1,3 +1,7 @@
 [submodule "src/libtorrent"]
 	path = src/libtorrent
 	url = https://github.com/duality-solutions/libbdaptorrent.git
+[submodule "src/bdap/vgp"]
+	path = src/bdap/vgp
+	url = https://github.com/duality-solutions/VGP.git
+	branch = master
