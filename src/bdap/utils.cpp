@@ -77,6 +77,8 @@ std::string BDAPFromOp(const int op)
             return "bdap_update";
         case OP_BDAP_MODIFY_RDN:
             return "bdap_move";
+        case OP_BDAP_ACCOUNT_ENTRY:
+            return "bdap_account_entry";
         case OP_BDAP_LINK_REQUEST:
             return "bdap_link_request";
         case OP_BDAP_LINK_ACCEPT:
