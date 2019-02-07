@@ -450,7 +450,7 @@ static bool CheckNewLinkRequestTx(const CScript& scriptData, const vchCharString
     }
     CTxOut txout(0, scriptData);
     size_t nSize = GetSerializeSize(txout, SER_DISK,0)+148u;
-    LogPrint("bdap", "%s -- scriptData.size() = %u, nSize = %u \n", __func__, scriptData.size(), nSize);
+    LogPrint("bdap", "%s -- scriptData.size() = %u, Serialize Size = %u \n", __func__, scriptData.size(), nSize);
     if (nSize > MAX_BDAP_LINK_DATA_SIZE) {
         errorMessage = "CheckNewLinkRequestTx failed! Data script is too large.";
         return error(errorMessage.c_str());
