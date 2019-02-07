@@ -6,7 +6,7 @@ AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
 DYNAMIC_CONFIG_INCLUDES=-I$(builddir)/config
-DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(LIBTORRENT_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(LIBTORRENT_CPPFLAGS) $(LIBVGP_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
@@ -26,10 +26,6 @@ $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 
 $(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
-if EMBEDDED_LIBTORRENT
-include Makefile.libtorrent.include
-endif
 
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
@@ -122,7 +118,6 @@ DYNAMIC_CORE_H = \
   core_memusage.h \
   cuckoocache.h \
   dbwrapper.h \
-  dht/curve25519.h \
   dht/ed25519.h \
   dht/mutable.h \
   dht/mutabledb.h \
@@ -284,7 +279,6 @@ libdynamic_server_a_SOURCES = \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
   dbwrapper.cpp \
-  dht/curve25519.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/operations.cpp \
@@ -515,6 +509,7 @@ dynamicd_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
+  $(LIBVGP) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
@@ -563,6 +558,7 @@ dynamic_tx_LDADD = \
   $(LIBDYNAMIC_COMMON) \
   $(LIBDYNAMIC_UTIL) \
   $(LIBDYNAMIC_CRYPTO) \
+  $(LIBVGP) \
   $(LIBSECP256K1)  \
   $(LIBTORRENT)
 
@@ -602,9 +598,11 @@ endif
 CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a
 CLEANFILES += *.gcda *.gcno
 CLEANFILES += bdap/*.gcda bdap/*.gcno
+CLEANFILES += bdap/vgp/*.gcda bdap/vgp/*.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
 CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
+CLEANFILES += dht/*.gcda dht/*.gcno
 CLEANFILES += fluid/*.gcda fluid/*.gcno
 CLEANFILES += miner/*.gcda miner/*.gcno
 CLEANFILES += policy/*.gcda policy/*.gcno
@@ -654,6 +652,12 @@ endif
 if EMBEDDED_LEVELDB
 include Makefile.leveldb.include
 endif
+
+if EMBEDDED_LIBTORRENT
+include Makefile.libtorrent.include
+endif
+
+include Makefile.vgp.include
 
 if ENABLE_GPU
 include Makefile.gpu.include
