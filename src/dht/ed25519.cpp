@@ -119,6 +119,32 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeed() const
     return std::vector<unsigned char>(strPrivateSeedKey.begin(), strPrivateSeedKey.end());
 }
 
+std::vector<unsigned char> CKeyEd25519::GetPrivKeyBytes() const
+{
+    std::vector<unsigned char> vchRawPrivKey;
+    for(unsigned int i = 0; i < sizeof(privateKey); i++) {
+        vchRawPrivKey.push_back(privateKey[i]);
+    }
+    return vchRawPrivKey;
+}
+
+std::vector<unsigned char> CKeyEd25519::GetPubKeyBytes() const
+{
+    std::vector<unsigned char> vchRawPubKey;
+    for(unsigned int i = 0; i < sizeof(publicKey); i++) {
+        vchRawPubKey.push_back(publicKey[i]);
+    }
+    return vchRawPubKey;
+}
+
+std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
+{
+    std::vector<unsigned char> vchRawPrivSeed;
+    for(unsigned int i = 0; i < sizeof(seed); i++) {
+        vchRawPrivSeed.push_back(seed[i]);
+    }
+    return vchRawPrivSeed;
+}
 void ECC_Ed25519_Start() 
 {
     assert(ed25519_context_sign == NULL);
@@ -188,4 +214,11 @@ std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const 
     std::array<char, 32> sharedSeed = ArrayPtrToStandardArray32(shared_secret);
     CKeyEd25519 keyShared(sharedSeed);
     return keyShared.GetPubKey();
+}
+
+std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey)
+{
+    std::vector<unsigned char> vchPubKeyBytes;
+
+    return vchPubKeyBytes;
 }
