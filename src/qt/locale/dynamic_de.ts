@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de">
+<TS language="de" version="2.0">
 <context>
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>Rechts-Klick um Adresse oder Bezeichnung zu bearbeiten</translation>
+        <translation>Rechtsklick um die Adresse oder die Bezeichnung zu bearbeiten</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -17,7 +15,7 @@
     </message>
     <message>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>Ausgewählte Adresse in die Zwischenablage kopieren</translation>
+        <translation>Ausgewählte Adresse in die Zwischenablage des Systems kopieren</translation>
     </message>
     <message>
         <source>&amp;Copy</source>
@@ -25,7 +23,7 @@
     </message>
     <message>
         <source>Delete the currently selected address from the list</source>
-        <translation>Ausgewählte Adresse aus der Liste entfernen</translation>
+        <translation>Ausgewählte Adresse von der Liste löschen</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
@@ -41,19 +39,19 @@
     </message>
     <message>
         <source>C&amp;lose</source>
-        <translation>&amp;Schließen</translation>
+        <translation>S&amp;chliessen</translation>
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>Wählen Sie die Adresse aus, an die Sie DYN überweisen möchten</translation>
+        <translation>Adresse zum Senden der Münzen auswählen</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>Wählen Sie die Adresse aus, über die Sie DYN empfangen wollen</translation>
+        <translation>Empfangsadresse zum Empfangen der Münzen auswählen</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
-        <translation>&amp;Auswählen</translation>
+        <translation>W&amp;ählen</translation>
     </message>
     <message>
         <source>Sending addresses</source>
@@ -64,12 +62,12 @@
         <translation>Empfangsadressen</translation>
     </message>
     <message>
-        <source>These are your DYN addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Dies sind ihre DYN-Adressen zum Tätigen von Überweisungen. Bitte prüfen Sie den Betrag und die Empfangsadresse, bevor Sie DYN überweisen.</translation>
+        <source>These are your Dynamic addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Das sind Ihre Dynamic Adressen zum Durchführen von Überweisungen. Überprüfen Sie immer den Betrag und die Empfangsadresse, bevor Sie die Münzen versenden</translation>
     </message>
     <message>
-        <source>These are your DYN addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Dies sind ihre DYN-Adressen zum Empfangen von Zahlungen. Es wird empfohlen für jede Transaktion eine neue Empfangsadresse zu verwenden.</translation>
+        <source>These are your Dynamic addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Das sind Ihre Dynamic Adressen zum Empfangen von Zahlungen. Es wird empfohlen, für jede Transaktion eine neue Empfangsadresse zu verwenden.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -77,11 +75,11 @@
     </message>
     <message>
         <source>Copy &amp;Label</source>
-        <translation>&amp;Bezeichnung kopieren</translation>
+        <translation>Bezeichnung &amp;kopieren</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation>&amp;Editieren</translation>
+        <translation>&amp;Bearbeiten</translation>
     </message>
     <message>
         <source>Export Address List</source>
@@ -89,15 +87,15 @@
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
-        <translation>Kommagetrennte-Datei (*.csv)</translation>
+        <translation>Komma getrennte Datei (*.csv)</translation>
     </message>
     <message>
         <source>Exporting Failed</source>
-        <translation>Exportieren fehlgeschlagen</translation>
+        <translation>Export fehlgeschlagen</translation>
     </message>
     <message>
         <source>There was an error trying to save the address list to %1. Please try again.</source>
-        <translation>Beim Speichern der Adressliste nach %1 ist ein Fehler aufgetreten. Bitte noch einmal versuchen</translation>
+        <translation>Beim Versuch die Adressliste auf %1 zu speichern, ist ein Fehler aufgetreten. Bitte wiederholen.</translation>
     </message>
 </context>
 <context>
@@ -119,7 +117,7 @@
     <name>AskPassphraseDialog</name>
     <message>
         <source>Passphrase Dialog</source>
-        <translation>Passphrasendialog</translation>
+        <translation>Passphrase Dialog</translation>
     </message>
     <message>
         <source>Enter passphrase</source>
@@ -131,11 +129,7 @@
     </message>
     <message>
         <source>Repeat new passphrase</source>
-        <translation>Neue Passphrase wiederholen</translation>
-    </message>
-    <message>
-        <source>Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.</source>
-        <translation>Verhindert das einfache Überweisen von Geld, falls das Systemkonto kompromittiert wurde. Bietet keine wirkliche Sicherheit.</translation>
+        <translation>Neue Passphrase bestätigen</translation>
     </message>
     <message>
         <source>For anonymization only</source>
@@ -143,27 +137,27 @@
     </message>
     <message>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
-        <translation>Geben Sie die neue Passphrase für die Wallet ein.&lt;br&gt;Bitte benutzen Sie eine Passphrase bestehend aus &lt;b&gt;10 oder mehr zufälligen Zeichen&lt;/b&gt; oder &lt;b&gt;8 oder mehr Wörtern&lt;/b&gt;.</translation>
+        <translation>Geben Sie die neue Passphrase Ihrer Geldbörse ein. &lt;br/&gt; Verwenden Sie bitte eine Passphrase bestehend aus &lt;b&gt; zehn oder mehr beliebigen Zeichen &lt;/b&gt;, oder &lt;b&gt; 8 oder mehr Wörtern;/b&gt;.</translation>
     </message>
     <message>
         <source>Encrypt wallet</source>
-        <translation>Wallet verschlüsseln</translation>
+        <translation>Geldbörse verschlüsseln.</translation>
     </message>
     <message>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
-        <translation>Dieser Vorgang benötigt ihre Passphrase, um die Wallet zu entsperren.</translation>
+        <translation>Diese Operation benötigt Ihre Passphrase um die Geldbörse zu entsperren</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
-        <translation>Wallet entsperren</translation>
+        <translation>Geldbörse entsperren</translation>
     </message>
     <message>
         <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
-        <translation>Dieser Vorgang benötigt ihre Passphrase, um die Wallet zu entschlüsseln.</translation>
+        <translation>Diese Operation benötigt Ihre  Passphrase um die Geldbörse zu entschlüsseln.</translation>
     </message>
     <message>
         <source>Decrypt wallet</source>
-        <translation>Wallet entschlüsseln</translation>
+        <translation>Geldbörse entschlüsseln</translation>
     </message>
     <message>
         <source>Change passphrase</source>
@@ -171,74 +165,74 @@
     </message>
     <message>
         <source>Enter the old and new passphrase to the wallet.</source>
-        <translation>Geben Sie die alte und neue Wallet-Passphrase ein.</translation>
+        <translation>Alte und neue Passphrase der Geldbörse eingeben.</translation>
     </message>
     <message>
         <source>Confirm wallet encryption</source>
-        <translation>Wallet-Verschlüsselung bestätigen</translation>
+        <translation>Verschlüsselung der Geldbörse bestätigen</translation>
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DYN&lt;/b&gt;!</source>
-        <translation>Warnung: Wenn Sie ihre Wallet verschlüsseln und ihre Passphrase verlieren werden Sie &lt;b&gt;alle ihre DYN verlieren&lt;/b&gt;!</translation>
+        <translation>Warnung: Wenn Sie Ihre Geldbörse verschlüsseln und Ihre Passphrase verlieren,&lt;b&gt;VERLIEREN SIE IHRE GESAMTEN DYN&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
-        <translation>Sind Sie sich sicher, dass Sie ihre Wallet verschlüsseln möchten?</translation>
+        <translation>Möchten Sie Ihre Geldbörse wirklich verschlüsseln?</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
-        <translation>Wallet verschlüsselt</translation>
+        <translation>Geldbörse verschlüsselt</translation>
     </message>
     <message>
         <source>Dynamic will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your Dynamic from being stolen by malware infecting your computer.</source>
-        <translation>DYN wird jetzt beendet, um den Verschlüsselungsprozess abzuschließen. Bitte beachten Sie, dass die Wallet-Verschlüsselung nicht vollständig vor Diebstahl ihrer DYN durch Schadsoftware schützt, die ihren Computer befällt.</translation>
+        <translation>Dynamic wird nun geschlossen um den Verschlüsselungsprozess zu beenden. Beachten Sie, daß eine Verschlüsselung Ihrer Geldbörse kein vollständiger Schutz Ihrer Dynamic vor Diebstal, durch Malware infizierten Computer, bietet.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
-        <translation>WICHTIG: Alle vorherigen Wallet-Sicherungen sollten durch die neu erzeugte, verschlüsselte Wallet ersetzt werden. Aus Sicherheitsgründen werden vorherige Sicherungen der unverschlüsselten Wallet nutzlos, sobald Sie die neue, verschlüsselte Wallet verwenden.</translation>
+        <translation>WICHTIG:Alle früheren Sicherungen, die Sie von Ihrer Gelbörsendatei angefertigt haben, sollten durch die neu erzeugte, verschlüsselte Gebörsendatei ersetzt werden. Sobald Sie die neue, verschlüsselte Gelbörse verwenden, werden frühere Sicherungen der unverschlüsselten Datei der Geldbörse aus Sicherheitsgründen nutzlos, </translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
-        <translation>Wallet-Verschlüsselung fehlgeschlagen</translation>
+        <translation>Verschlüsselung der Geldbörse fehlgeschlagen</translation>
     </message>
     <message>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation>Die Wallet-Verschlüsselung ist aufgrund eines internen Fehlers fehlgeschlagen. Ihre Wallet wurde nicht verschlüsselt.</translation>
+        <translation>Verschlüsselung der Geldbörseaufgrund aufgrund eines internen Fehlers fehlgeschlagen. Ihre Geldbörse wurde nicht verschlüsselt.</translation>
     </message>
     <message>
         <source>The supplied passphrases do not match.</source>
-        <translation>Die eingegebenen Passphrasen stimmen nicht überein.</translation>
+        <translation>Die bereitgestellten Passphrasen stimmen nicht überein.</translation>
     </message>
     <message>
         <source>Wallet unlock failed</source>
-        <translation>Wallet-Entsperrung fehlgeschlagen</translation>
+        <translation>Entsperren der Geldbörse fehlgeschlagen</translation>
     </message>
     <message>
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
-        <translation>Die eingegebene Passphrase zur Wallet-Entschlüsselung war nicht korrekt.</translation>
+        <translation>Die eingegebene Passphrase für die Entschlüsselung der Geldbörse war nicht richtig.</translation>
     </message>
     <message>
         <source>Wallet decryption failed</source>
-        <translation>Wallet-Entschlüsselung fehlgeschlagen</translation>
+        <translation>Entschlüsselung der Geldbörse fehlgeschlagen</translation>
     </message>
     <message>
         <source>Wallet passphrase was successfully changed.</source>
-        <translation>Die Wallet-Passphrase wurde erfolgreich geändert.</translation>
+        <translation>Die Passphrase für die Wallet wurde erfolgreich geändert.</translation>
     </message>
     <message>
         <source>Warning: The Caps Lock key is on!</source>
-        <translation>Warnung: Die Feststelltaste ist aktiviert!</translation>
+        <translation>Warnung: Die Feststelltaste is aktiviert</translation>
     </message>
 </context>
 <context>
     <name>DynamicGUI</name>
     <message>
-        <source>DYN Core</source>
-        <translation>DYN Core</translation>
+        <source>Dynamic</source>
+        <translation>Dynamic</translation>
     </message>
     <message>
         <source>Wallet</source>
-        <translation>Wallet</translation>
+        <translation>Geldbörse</translation>
     </message>
     <message>
         <source>Node</source>
@@ -250,15 +244,15 @@
     </message>
     <message>
         <source>Show general overview of wallet</source>
-        <translation>Allgemeine Wallet-Übersicht anzeigen</translation>
+        <translation>Generelle Übersicht der Geldbörse anzeigen</translation>
     </message>
     <message>
         <source>&amp;Send</source>
-        <translation>&amp;Überweisen</translation>
+        <translation>&amp;Senden</translation>
     </message>
     <message>
-        <source>Send coins to a DYN address</source>
-        <translation>DYN an eine DYN-Adresse überweisen</translation>
+        <source>Send coins to a Dynamic address</source>
+        <translation>Münzen an eine Dynamic Adresse senden</translation>
     </message>
     <message>
         <source>&amp;Receive</source>
@@ -266,31 +260,47 @@
     </message>
     <message>
         <source>Request payments (generates QR codes and dynamic: URIs)</source>
-        <translation>Zahlungen anfordern (erzeugt QR-Codes und "dynamic:"-URIs)</translation>
+        <translation>Zahlungen anfordern (generiert QR codes und Dynamic: URIs)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
         <translation>&amp;Transaktionen</translation>
     </message>
     <message>
+        <source>&amp;Dynodes</source>
+        <translation>&amp;Dynodes</translation>
+    </message>
+    <message>
+        <source>&amp;Mining</source>
+        <translation>&amp;Mining</translation>
+    </message>
+    <message>
         <source>Browse transaction history</source>
-        <translation>Transaktionsverlauf durchsehen</translation>
+        <translation>Transaktionsverlauf durchsuchen</translation>
+    </message>
+    <message>
+        <source>Browse Dynodes</source>
+        <translation>Dynodes durchsuchen</translation>
+    </message>
+    <message>
+        <source>Mine Dynamic(DYN)</source>
+        <translation>Dynamic(DYN) minen</translation>
     </message>
     <message>
         <source>E&amp;xit</source>
-        <translation>&amp;Beenden</translation>
+        <translation>B&amp;eenden</translation>
     </message>
     <message>
         <source>Quit application</source>
-        <translation>Anwendung beenden</translation>
+        <translation>Programm schließen</translation>
     </message>
     <message>
-        <source>&amp;About DYN Core</source>
-        <translation>&amp;Über DYN Core</translation>
+        <source>&amp;About Dynamic</source>
+        <translation>&amp;Über Dynamic</translation>
     </message>
     <message>
-        <source>Show information about DYN Core</source>
-        <translation>Informationen über DYN Core anzeigen</translation>
+        <source>Show information about Dynamic</source>
+        <translation>Informationen über Dynamic anzeigen</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -302,135 +312,151 @@
     </message>
     <message>
         <source>&amp;Options...</source>
-        <translation>&amp;Konfiguration...</translation>
+        <translation>&amp;Optionen...</translation>
     </message>
     <message>
-        <source>Modify configuration options for DYN</source>
-        <translation>Die Konfiguration des Clients bearbeiten</translation>
+        <source>Modify configuration options for Dynamic</source>
+        <translation>Konfigurationsoptionen verändern für Dynamic</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
-        <translation>&amp;Anzeigen / Verstecken</translation>
+        <translation>&amp;Zeigen / Verstecken</translation>
     </message>
     <message>
         <source>Show or hide the main Window</source>
-        <translation>Das Hauptfenster anzeigen oder verstecken</translation>
+        <translation>Zeigen oder verstecken des Hauptfensters</translation>
     </message>
     <message>
         <source>&amp;Encrypt Wallet...</source>
-        <translation>Wallet &amp;verschlüsseln...</translation>
+        <translation>&amp;Gelbörse verschlüsseln...</translation>
     </message>
     <message>
         <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Verschlüsselt die zu ihrer Wallet gehörenden privaten Schlüssel</translation>
+        <translation>Verschlüsselt die privaten Schlüsseln der Geldbörse</translation>
     </message>
     <message>
         <source>&amp;Backup Wallet...</source>
-        <translation>Wallet &amp;sichern...</translation>
+        <translation>&amp;Gelbörse sichern...</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
-        <translation>Eine Wallet-Sicherungskopie erstellen und abspeichern</translation>
+        <translation>Geldbörse an einem anderem Ort sichern</translation>
     </message>
     <message>
         <source>&amp;Change Passphrase...</source>
-        <translation>Passphrase &amp;ändern...</translation>
+        <translation>&amp;Passphrase ändern...</translation>
     </message>
     <message>
         <source>Change the passphrase used for wallet encryption</source>
-        <translation>Ändert die Passphrase, die für die Wallet-Verschlüsselung benutzt wird</translation>
+        <translation>Passphrase ändern, welche zur Verschlüsselung der Geldbörse verwendet wurde</translation>
     </message>
     <message>
         <source>&amp;Unlock Wallet...</source>
-        <translation>Wallet &amp;entsperren</translation>
+        <translation>&amp;Geldbörse entsperren...</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
-        <translation>Wallet entsperren</translation>
+        <translation>Geldbörse entsperren</translation>
     </message>
     <message>
         <source>&amp;Lock Wallet</source>
-        <translation>Wallet &amp;sperren</translation>
+        <translation>&amp;Geldbörse sperren</translation>
     </message>
     <message>
         <source>Sign &amp;message...</source>
-        <translation>Nachricht s&amp;ignieren...</translation>
+        <translation>Nachricht &amp;signieren...</translation>
     </message>
     <message>
-        <source>Sign messages with your DYN addresses to prove you own them</source>
-        <translation>Nachrichten signieren, um den Besitz ihrer DYN-Adressen zu beweisen</translation>
+        <source>Sign messages with your Dynamic addresses to prove you own them</source>
+        <translation>Signieren der Nachricht mit Ihrer Dynamic Adresse um zeigen, daß Sie der Inhaber sind</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
-        <translation>Nachricht &amp;verifizieren...</translation>
+        <translation>&amp;Nachricht verifizieren...</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified DYN addresses</source>
-        <translation>Nachrichten verifizieren, um sicherzustellen, dass diese mit den angegebenen DYN-Adressen signiert wurden</translation>
+        <source>Verify messages to ensure they were signed with specified Dynamic addresses</source>
+        <translation>Nachrichten verifizieren um sicherzustellen, dass diese mit spezifizierten Dynamic Adressen signiert worden sind</translation>
     </message>
     <message>
         <source>&amp;Information</source>
-        <translation>&amp;Information</translation>
+        <translation>Information</translation>
     </message>
     <message>
         <source>Show diagnostic information</source>
-        <translation>Diagnoseinformation anzeigen</translation>
+        <translation>Anzeigen der Diagnoseinformationen</translation>
     </message>
     <message>
         <source>&amp;Debug console</source>
-        <translation>&amp;Debugkonsole</translation>
+        <translation>&amp;Debug Konsole</translation>
     </message>
     <message>
         <source>Open debugging console</source>
-        <translation>Debugkonsole öffnen</translation>
+        <translation>Debug Konsole öffnen</translation>
     </message>
     <message>
         <source>&amp;Network Monitor</source>
-        <translation>&amp;Netzwerkmonitor</translation>
+        <translation>&amp;Netzwerk Monitor</translation>
     </message>
     <message>
         <source>Show network monitor</source>
-        <translation>Netzwerkmonitor anzeigen</translation>
+        <translation>Netzwerk Monitor anzeigen</translation>
     </message>
     <message>
         <source>&amp;Peers list</source>
-        <translation>&amp;Gegenstellen-Liste</translation>
+        <translation>&amp;Liste der Gegenstellen</translation>
     </message>
     <message>
         <source>Show peers info</source>
-        <translation>Informationen zu Gegenstellen anzeigen</translation>
+        <translation>Info der Gegenstellen anzeigen</translation>
     </message>
     <message>
         <source>Wallet &amp;Repair</source>
-        <translation>Wallet-&amp;Reparatur</translation>
+        <translation>Gelbörse &amp;Reparieren</translation>
     </message>
     <message>
         <source>Show wallet repair options</source>
-        <translation>Optionen zur Wallet-Reparatur anzeigen</translation>
+        <translation>Geldbörsen Reparatur Optionen anzeigen</translation>
     </message>
     <message>
-        <source>Open &amp;Configuration File</source>
-        <translation>&amp;Konfigurationsdatei öffnen</translation>
+        <source>Open Wallet &amp;Configuration File</source>
+        <translation>Konfigurationsdatei &amp;der Geldbörse öffnen</translation>
     </message>
     <message>
         <source>Open configuration file</source>
         <translation>Konfigurationsdatei öffnen</translation>
     </message>
     <message>
+        <source>Open &amp;Dynode Configuration File</source>
+        <translation>Dynode &amp;Konfigurationsdatei öffnen</translation>
+    </message>
+    <message>
+        <source>Open Dynode configuration file</source>
+        <translation>Dynode Konfigurationsdatei öffnen</translation>
+    </message>
+    <message>
+        <source>Open &amp;Configuration File</source>
+        <translation>Konfigurationsdatei &amp;öffnen</translation>
+    </message>
+    <message>
         <source>Show Automatic &amp;Backups</source>
-        <translation>Automatische &amp;Sicherheitskopien anzeigen</translation>
+        <translation>Automatische &amp;Sicherungen anzeigen</translation>
     </message>
     <message>
         <source>Show automatically created wallet backups</source>
-        <translation>Automatisch erzeugte Wallet-Sicherheitskopien anzeigen</translation>
+        <translation>Automatisch erstellte Sicherungen der Geldbörse anzeigen</translation>
     </message>
     <message>
         <source>&amp;Sending addresses...</source>
         <translation>&amp;Zahlungsadressen...</translation>
     </message>
     <message>
+        <source>Connecting to peers...</source>
+        <translation>Mit der Gegenstelle verbinden...</translation>
+    </message>
+    <message>
         <source>Show the list of used sending addresses and labels</source>
-        <translation>Liste verwendeter Zahlungsadressen und Bezeichnungen anzeigen</translation>
+        <translation>Zeigt eine Liste aller verwendenden Zahlungsadressen und Bezeichnungen an</translation>
     </message>
     <message>
         <source>&amp;Receiving addresses...</source>
@@ -438,35 +464,41 @@
     </message>
     <message>
         <source>Show the list of used receiving addresses and labels</source>
-        <translation>Liste verwendeter Empfangsadressen und Bezeichnungen anzeigen</translation>
+        <translation>Zeigt eine Liste aller verwendeten Empfangsadressen und Bezeichnungen an</translation>
     </message>
     <message>
         <source>Open &amp;URI...</source>
-        <translation>&amp;URI öffnen...</translation>
+        <translation>Öffne &amp;URI...</translation>
     </message>
     <message>
         <source>Open a dynamic: URI or payment request</source>
-        <translation>Eine "dynamic:"-URI oder Zahlungsanforderung öffnen</translation>
+        <translation>Öffnen eine dynamic: URI oder Zahlungsanforderung</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
-        <translation>&amp;Kommandozeilenoptionen</translation>
+        <translation>Kommandozeilenoptionen</translation>
     </message>
     <message>
-        <source>DYN Core client</source>
-        <translation>DYN Core Client</translation>
+        <source>&amp;PrivateSend information</source>
+        <translation>&amp;PrivateSend Information</translation>
+    </message>
+    <message>
+        <source>Dynamic client</source>
+        <translation>Dynamic Client</translation>
     </message>
     <message numerus="yes">
-        <source>Processed %n blocks of transaction history.</source>
-        <translation><numerusform>%n Block des Transaktionsverlaufs verarbeitet.</numerusform><numerusform>%n Blöcke des Transaktionsverlaufs verarbeitet.</numerusform></translation>
+        <source>Processed %n block(s) of transaction history.</source>
+        <translation>
+            <numerusform>%n Block(e) des Transaktionsverlauf verarbeitet.</numerusform>
+        </translation>
     </message>
     <message>
         <source>Synchronizing additional data: %p%</source>
-        <translation>Synchronisiere zusätzliche Daten:  %p%</translation>
+        <translation>Synchronisierung zusätzlicher Daten: %p%</translation>
     </message>
     <message>
-        <source>Show the DYN Core help message to get a list with possible DYN command-line options</source>
-        <translation>Zeige den "DYN Core"-Hilfetext, um eine Liste mit möglichen Kommandozeilenoptionen zu erhalten</translation>
+        <source>Show the Dynamic help message to get a list with possible Dynamic command-line options</source>
+        <translation>Zeigt die Dynamic Hilfsnachrichten an, um eine Liste mit möglichen Dynamic Kommandozeilenoptionen zu erhalten.</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -486,23 +518,29 @@
     </message>
     <message>
         <source>Tabs toolbar</source>
-        <translation>Registerkartenleiste</translation>
+        <translation>Tabs Werkzeugleiste</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to DYN network</source>
-        <translation><numerusform>%n aktive Verbindung zum DYN-Netzwerk</numerusform><numerusform>%n aktive Verbindungen zum DYN-Netzwerk</numerusform></translation>
+        <source>%n active connection(s) to Dynamic network</source>
+        <translation>
+            <numerusform>%n aktive Verbindung(en) zum Dynamic Neztwerk</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Sychronisierung der Kopfzeilen (%1%)...</translation>
     </message>
     <message>
         <source>Synchronizing with network...</source>
-        <translation>Synchronisiere mit Netzwerk...</translation>
+        <translation>Synchronizierung mit dem Netzwerk...</translation>
     </message>
     <message>
         <source>Importing blocks from disk...</source>
-        <translation>Importiere Blöcke von Datenträger...</translation>
+        <translation>Importierung der Blöcke von der Festplatte...</translation>
     </message>
     <message>
         <source>Reindexing blocks on disk...</source>
-        <translation>Reindiziere Blöcke auf Datenträger...</translation>
+        <translation>Reindexierung der Blocke auf der Festplatte...</translation>
     </message>
     <message>
         <source>No block source available...</source>
@@ -510,19 +548,25 @@
     </message>
     <message>
         <source>Up to date</source>
-        <translation>Auf aktuellem Stand</translation>
+        <translation>Auf den aktuellesten Stand</translation>
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
-        <translation><numerusform>%n Stunde</numerusform><numerusform>%n Stunden</numerusform></translation>
+        <translation>
+            <numerusform>%n Stunde(n)</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation><numerusform>%n Tag</numerusform><numerusform>%n Tage</numerusform></translation>
+        <translation>
+            <numerusform>%n Tage(n)</numerusform>
+        </translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation><numerusform>%n Woche</numerusform><numerusform>%n Wochen</numerusform></translation>
+        <translation>
+            <numerusform>%n Woche(n)</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 and %2</source>
@@ -530,11 +574,13 @@
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
-        <translation><numerusform>%n Jahr</numerusform><numerusform>%n Jahre</numerusform></translation>
+        <translation>
+            <numerusform>%n Jahr(e)</numerusform>
+        </translation>
     </message>
     <message>
         <source>%1 behind</source>
-        <translation>%1 im Rückstand</translation>
+        <translation>%1 zurück</translation>
     </message>
     <message>
         <source>Catching up...</source>
@@ -542,11 +588,11 @@
     </message>
     <message>
         <source>Last received block was generated %1 ago.</source>
-        <translation>Der letzte empfangene Block ist %1 alt.</translation>
+        <translation>Letzter empfangener Block wurde vor %1 generiert.</translation>
     </message>
     <message>
         <source>Transactions after this will not yet be visible.</source>
-        <translation>Transaktionen hiernach werden noch nicht angezeigt.</translation>
+        <translation>Transaktionen danach werden noch nicht ersichtlich sein.</translation>
     </message>
     <message>
         <source>Error</source>
@@ -558,7 +604,7 @@
     </message>
     <message>
         <source>Information</source>
-        <translation>Hinweis</translation>
+        <translation>Information</translation>
     </message>
     <message>
         <source>Sent transaction</source>
@@ -575,43 +621,68 @@ Type: %3
 Address: %4
 </source>
         <translation>Datum: %1
-Betrag: %2
-Typ: %3
-Adresse: %4</translation>
+Summe: %2
+Art: %3
+Adresse: %4
+</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>HD Schlüssel Generierung ist &lt;b&gt;aktive&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>HD Schlüssel Generierung ist &lt;b&gt;deaktiviert&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Wallet ist &lt;b&gt;verschlüsselt&lt;/b&gt; und aktuell &lt;b&gt;entsperrt&lt;/b&gt;</translation>
+        <translation>Die Geldbörse ist &lt;b&gt;verschlüsselto&lt;/b&gt; und derzeit &lt;b&gt;entsperrt</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt; for anonimization only</source>
-        <translation>Wallet ist &lt;b&gt;verschlüsselt&lt;/b&gt; und aktuell nur zum Anonymisieren &lt;b&gt;entsperrt&lt;/b&gt;</translation>
+        <translation>Die Geldbörse ist &lt;b&gt;verschlüsselt&lt;/b&gt; und derzeit &lt;b&gt;entsperrt&lt;/b&gt; nur für die Anonymizierung</translation>
     </message>
     <message>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Wallet ist &lt;b&gt;verschlüsselt&lt;/b&gt; und aktuell &lt;b&gt;gesperrt&lt;/b&gt;</translation>
+        <translation>Die Geldbörse ist &lt;b&gt;verschlüsselt&lt;/b&gt;und derzeit &lt;b&gt;gesperrt&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
     <name>ClientModel</name>
     <message>
         <source>Total: %1 (PS compatible: %2 / Enabled: %3)</source>
-        <translation>Gesamt: %1 (PS kompatibel: %2 / Aktiviert: %3)</translation>
+        <translation>Gesamt: %1 (PS compatible: %2 / Aktiviert: %3)</translation>
     </message>
     <message>
         <source>Network Alert</source>
-        <translation>Netzwerkalarm</translation>
+        <translation>Netzwerk Warnung</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation>N/A</translation>
+    </message>
+    <message>
+        <source>Supported</source>
+        <translation>Unterstützt</translation>
+    </message>
+    <message>
+        <source>Unsupported</source>
+        <translation>Nicht unterstützt</translation>
     </message>
 </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
         <source>Quantity:</source>
-        <translation>Anzahl:</translation>
+        <translation>Menge:</translation>
     </message>
     <message>
         <source>Bytes:</source>
-        <translation>Byte:</translation>
+        <translation>Bytes:</translation>
     </message>
     <message>
         <source>Amount:</source>
@@ -627,19 +698,23 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Coin Selection</source>
-        <translation>"Coin Control"-Auswahl</translation>
+        <translation>Münzauswahl</translation>
     </message>
     <message>
         <source>Dust:</source>
-        <translation>"Dust"</translation>
+        <translation>Dust:</translation>
     </message>
     <message>
         <source>After Fee:</source>
-        <translation>Abzüglich Gebühr:</translation>
+        <translation>Nach der Gebühr:</translation>
     </message>
     <message>
         <source>Change:</source>
         <translation>Wechselgeld:</translation>
+    </message>
+    <message>
+        <source>toggle lock state</source>
+        <translation>Sperrzustand wechseln</translation>
     </message>
     <message>
         <source>(un)select all</source>
@@ -663,11 +738,11 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Received with label</source>
-        <translation>Empfangen über Bezeichner</translation>
+        <translation>Empfangen mit der Bezeichnung</translation>
     </message>
     <message>
         <source>Received with address</source>
-        <translation>Empfangen über Adresse</translation>
+        <translation>Empfangen über die Adresse</translation>
     </message>
     <message>
         <source>PS Rounds</source>
@@ -727,7 +802,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Copy bytes</source>
-        <translation>Byte kopieren</translation>
+        <translation>Bytes kopieren</translation>
     </message>
     <message>
         <source>Copy priority</source>
@@ -735,19 +810,23 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Copy dust</source>
-        <translation>"Dust" Betrag kopieren</translation>
+        <translation>Dust kopieren</translation>
     </message>
     <message>
         <source>Copy change</source>
-        <translation>Wechselgeld kopieren</translation>
+        <translation>Änderung kopieren</translation>
     </message>
     <message>
-        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again.</source>
-        <translation>Nicht-anonymisierter Input ausgewählt. &lt;b&gt;PrivateSend wird deaktiviert.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem PrivateSend verwenden wollen, müssen Sie zuerst alle nicht-anonymisierten Inputs entmarkieren und  das Ankreuzfeld "PrivateSend" erneut auswählen.</translation>
+        <source>Please switch to &apos;List mode&apos; to use this function.</source>
+        <translation>Wechseln Sie bitte zum &apos;Listenmodus&apos; um diese Funktion zu vewenden.</translation>
+    </message>
+    <message>
+        <source>Non-anonymized input selected. &lt;b&gt;PrivateSend will be disabled.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If you still want to use PrivateSend, please deselect all non-anonymized inputs first and then check PrivateSend checkbox again.</source>
+        <translation>Nicht anonymisierten Eingang ausgewählt . &lt;b&gt;PrivateSend wird deaktiviert.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Wenn Sie  PrivateSend dennoch verwenden wollen, deselektieren Sie bitte zuerst alle nicht anonymisierten Eingänge und klicken Sie die PrivateSend Kontrollbox wieder an.</translation>
     </message>
     <message>
         <source>highest</source>
-        <translation>am höchsten</translation>
+        <translation>höchste</translation>
     </message>
     <message>
         <source>higher</source>
@@ -759,15 +838,15 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>medium-high</source>
-        <translation>mittel-hoch</translation>
+        <translation>mittelhoch</translation>
     </message>
     <message>
-        <source>Can vary +/- %1 duff(s) per input.</source>
-        <translation>Kann um +/- %1 duff(s) pro Eingabe variieren.</translation>
+        <source>Can vary +/- %1 satoshi(s) per input.</source>
+        <translation>Kann variieren +/- %1 satoshi(s) pro Eingang.</translation>
     </message>
     <message>
-        <source>n/a</source>
-        <translation>k.A.</translation>
+        <source>N/A</source>
+        <translation>N/A</translation>
     </message>
     <message>
         <source>medium</source>
@@ -795,7 +874,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>none</source>
-        <translation>keine</translation>
+        <translation>keines</translation>
     </message>
     <message>
         <source>yes</source>
@@ -806,28 +885,32 @@ Adresse: %4</translation>
         <translation>nein</translation>
     </message>
     <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>Diese Bezeichnung wird rot, wenn ein Empfänger einen Betrag erhält, der unter dem aktuellen Restlimit des Dust liegt.</translation>
+    </message>
+    <message>
         <source>This label turns red, if the transaction size is greater than 1000 bytes.</source>
-        <translation>Diese Bezeichnung wird rot, wenn die Transaktion größer als 1000 Byte ist.</translation>
+        <translation>Diese Bezeichnung wird rot, wenn die Transaktionsgröße größer als 1000 bytes beträgt.</translation>
     </message>
     <message>
         <source>This means a fee of at least %1 per kB is required.</source>
-        <translation>Das bedeutet, dass eine Gebühr von mindestens %1 pro kB erforderlich ist.</translation>
+        <translation>Das bedeutet, daß eine Gebühr von zumindest %1 per kB erforderlich ist.</translation>
     </message>
     <message>
         <source>Can vary +/- 1 byte per input.</source>
-        <translation>Kann um +/- 1 Byte pro Eingabe variieren.</translation>
+        <translation>Kann variieren +/- 1 byte pro Eingang.</translation>
     </message>
     <message>
         <source>Transactions with higher priority are more likely to get included into a block.</source>
-        <translation>Transaktionen mit höherer Priorität haben eine größere Chance in einen Block aufgenommen zu werden.</translation>
+        <translation>Transaktionen mit höherer Priorität werden eher in einem Block aufgenommen</translation>
     </message>
     <message>
-        <source>This label turns red, if the priority is smaller than "medium".</source>
-        <translation>Diese Bezeichnung wird rot, wenn die Priorität niedriger als "mittel" ist.</translation>
+        <source>This label turns red, if the priority is smaller than &quot;medium&quot;.</source>
+        <translation>Diese Bezeichnung wird rot, wenn die Priorität kleiner als &quot;mittel&quot; ist.</translation>
     </message>
     <message>
         <source>This label turns red, if any recipient receives an amount smaller than %1.</source>
-        <translation>Diese Bezeichnung wird rot, wenn irgendein Empfänger einen Betrag kleiner als %1 erhält.</translation>
+        <translation>Diese Bezeichnung wird rot, wenn beliebiger Empfänger einen Betrag erhält, der kleiner als %1 ist.</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -835,11 +918,11 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>change from %1 (%2)</source>
-        <translation>Wechselgeld von %1 (%2)</translation>
+        <translation>Ändern von %1 (%2)</translation>
     </message>
     <message>
         <source>(change)</source>
-        <translation>(Wechselgeld)</translation>
+        <translation>(ändern)</translation>
     </message>
 </context>
 <context>
@@ -850,7 +933,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Basic Privacy</source>
-        <translation>Einfacher Datenschutz</translation>
+        <translation>Grundlegender Datenschutz</translation>
     </message>
     <message>
         <source>High Privacy</source>
@@ -858,55 +941,55 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Maximum Privacy</source>
-        <translation>Maximaler Datenschutz</translation>
+        <translation>Höchster Datenschutz</translation>
     </message>
     <message>
         <source>Please select a privacy level.</source>
-        <translation>Bitten wählen Sie eine Datenschutz-Stufe.</translation>
+        <translation>Wählen Sie bitte einen Level für den Datenschutz aus.</translation>
     </message>
     <message>
-        <source>Use 2 separate dynodes to mix funds up to 1000 DYN</source>
-        <translation>Benutze 2 separate dynodes um bis zu 1000 DYN zu mixen</translation>
+        <source>Use 2 separate Dynodes to mix funds up to 1000 DYN</source>
+        <translation>Verwenden Sie 2 separate Dynodes, um die Mittel mit bis zu 1000 DYN zu vermischen</translation>
     </message>
     <message>
-        <source>Use 8 separate dynodes to mix funds up to 1000 DYN</source>
-        <translation>Benutze 8 separate dynodes um bis zu 1000 DYN zu mixen</translation>
+        <source>Use 8 separate Dynodes to mix funds up to 1000 DYN</source>
+        <translation>Verwenden Sie 8 separate Dynodes, um die Mittel mit bis zu 1000 DYN zu vermischen</translation>
     </message>
     <message>
-        <source>Use 16 separate dynodes</source>
-        <translation>Benutze 16 separate dynodes</translation>
+        <source>Use 16 separate Dynodes to mix funds up to 1000 DYN</source>
+        <translation>Verwenden Sie 16 separate Dynodes, um die Mittel mit bis zu 1000 DYN zu vermischen</translation>
     </message>
     <message>
         <source>This option is the quickest and will cost about ~0.025 DYN to anonymize 1000 DYN</source>
-        <translation>Diese Option ist am Schnellsten und kostet ungefähr 0,025 DYN, um 1000 DYN zu anonymisieren</translation>
+        <translation>Diese Option ist die schnellste und wird etwa ~0,025 DYN kosten um 1000 DYN zu anonymisieren</translation>
     </message>
     <message>
         <source>This option is moderately fast and will cost about 0.05 DYN to anonymize 1000 DYN</source>
-        <translation>Diese Option ist einigermaßen schnell und kostet ungefähr 0,05 DYN, um 1000 DYN zu anonymisieren</translation>
+        <translation>Diese Option ist mässig schnell und wir etwa 0,05 DYN kosten um 1000 DYN zu anonymisieren</translation>
     </message>
     <message>
         <source>0.1 DYN per 1000 DYN you anonymize.</source>
-        <translation>0,1 DYN pro 1000 zu anonymisierende DYN.</translation>
+        <translation>0.1 DYN pro 1000 DYN, die Sie anonymisierst.</translation>
     </message>
     <message>
         <source>This is the slowest and most secure option. Using maximum anonymity will cost</source>
-        <translation>Dies ist die langsamste und sicherste Option. Maximale Anonymität kostet</translation>
+        <translation>Das ist die langsamste und die sicherste Option. Die Verwendung maximaler Anonymität kostet</translation>
     </message>
     <message>
         <source>PrivateSend Configuration</source>
-        <translation>PrivateSend-Konfiguration</translation>
+        <translation>PrivateSend Konfiguration</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>PrivateSend wurde erfolgreich auf einfachen Datenschutz (%1 und 2 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf die Basiseinstellungen gesetzt  (% 1 u 2 Runden).Sie können dies jederzeit ändern, indem Sie den Dynamics Konfigurationsschirm öffnen.</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>PrivateSend wurde erfolgreich auf hohen Datenschutz (%1 und 8 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf hoch gesetzt (% 1 und 8 Runden). Sie können dies jederzeit ändern, indem Sie den Dynamics Konfigurationsschirm öffnen.</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening DYN's configuration screen.</source>
-        <translation>PrivateSend wurde erfolgreich auf maximalen Datenschutz (%1 und 16 Runden) gesetzt. Sie können dies jederzeit im Konfigurationsfenster von DYN ändern.</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Dynamic&apos;s configuration screen.</source>
+        <translation>PrivateSend wurde erfolgreich auf maximum gesetzt (% 1 u 16 Runden). Sie können dies jederzeit ändern, indem Sie den Dynamics Konfigurationsschirm öffnen.</translation>
     </message>
 </context>
 <context>
@@ -921,7 +1004,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>The label associated with this address list entry</source>
-        <translation>Bezeichnung, die dem Adresslisteneintrag zugeordnet ist.</translation>
+        <translation>Die Bezeichnung, die diesem Adresslisteneintrag zugeordnet ist</translation>
     </message>
     <message>
         <source>&amp;Address</source>
@@ -929,7 +1012,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>The address associated with this address list entry. This can only be modified for sending addresses.</source>
-        <translation>Adresse, die dem Adresslisteneintrag zugeordnet ist. Diese kann nur bei Zahlungsadressen verändert werden.</translation>
+        <translation>Die Adresse, die diesem Adresslisteneintrag zugeordnet ist. Diese kann nur für Zahlungsadressen geändert werden.</translation>
     </message>
     <message>
         <source>New receiving address</source>
@@ -948,27 +1031,27 @@ Adresse: %4</translation>
         <translation>Zahlungsadresse bearbeiten</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid DYN address.</source>
-        <translation>Die eingegebene Adresse "%1" ist keine gültige DYN-Adresse.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid Dynamic address.</source>
+        <translation>Die eingegebene Adresse &quot;%1&quot; ist keine gültige Dynamic Adresse.</translation>
     </message>
     <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>Die eingegebene Adresse "%1" befindet sich bereits im Adressbuch.</translation>
+        <source>The entered address &quot;%1&quot; is already in the address book.</source>
+        <translation>Die eingegebene Adresse &quot;%1&quot; ist bereits im Adressbuch vorhanden.</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
-        <translation>Wallet konnte nicht entsperrt werden.</translation>
+        <translation>Geldbörse konnte nicht entsperrt werden.</translation>
     </message>
     <message>
         <source>New key generation failed.</source>
-        <translation>Erzeugung eines neuen Schlüssels fehlgeschlagen.</translation>
+        <translation>Erstellung eines neuen Schlüssel fehlgeschlagen.</translation>
     </message>
 </context>
 <context>
     <name>FreespaceChecker</name>
     <message>
         <source>A new data directory will be created.</source>
-        <translation>Es wird ein neues Datenverzeichnis angelegt.</translation>
+        <translation>Ein neues Datenverzeichnis wird erstellt.</translation>
     </message>
     <message>
         <source>name</source>
@@ -976,7 +1059,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Directory already exists. Add %1 if you intend to create a new directory here.</source>
-        <translation>Verzeichnis existiert bereits. Fügen Sie %1 an, wenn Sie beabsichtigen hier ein neues Verzeichnis anzulegen.</translation>
+        <translation>Verzeichnis bereits vorhanden. Fügen Sie %1, wenn Sie hier ein neues Verzeichnis erstellen wollen.</translation>
     </message>
     <message>
         <source>Path already exists, and is not a directory.</source>
@@ -984,26 +1067,26 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Cannot create data directory here.</source>
-        <translation>Datenverzeichnis kann hier nicht angelegt werden.</translation>
+        <translation>Datenverzeichnis kann hier nicht erstellt werden.</translation>
     </message>
 </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>DYN Core</source>
-        <translation>DYN Core</translation>
+        <source>Dynamic</source>
+        <translation>Dynamic</translation>
     </message>
     <message>
         <source>version</source>
-        <translation>Version</translation>
+        <translation>version</translation>
     </message>
     <message>
         <source>(%1-bit)</source>
-        <translation>(%1-Bit)</translation>
+        <translation>(%1-bit)</translation>
     </message>
     <message>
-        <source>About DYN Core</source>
-        <translation>Über DYN Core</translation>
+        <source>About Dynamic</source>
+        <translation>Über Dynamic</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1011,7 +1094,7 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Usage:</source>
-        <translation>Benutzung:</translation>
+        <translation>Verwendung:</translation>
     </message>
     <message>
         <source>command-line options</source>
@@ -1019,15 +1102,15 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>UI options</source>
-        <translation>UI-Optionen</translation>
+        <translation>UI Optionen</translation>
     </message>
     <message>
         <source>Choose data directory on startup (default: 0)</source>
-        <translation>Datenverzeichnis beim Starten auswählen (Standard: 0)</translation>
+        <translation>Wählen Sie beim Start ein Datenverzeichnis aus (Standard: 0)</translation>
     </message>
     <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
-        <translation>Sprache festlegen, z.B. "de_DE" (Standard: Systemstandard)</translation>
+        <source>Set language, for example &quot;de_DE&quot; (default: system locale)</source>
+        <translation>Sprache einstellen, zum beispiel &quot;de_DE&quot; (Standard: Lokales System)</translation>
     </message>
     <message>
         <source>Start minimized</source>
@@ -1035,11 +1118,52 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Set SSL root certificates for payment request (default: -system-)</source>
-        <translation>SSL-Wurzelzertifikate für Zahlungsanforderungen festlegen (Standard: Systemstandard)</translation>
+        <translation>SSL-Stammzertifikate für die Zahlungsanforderung festlegen (Standard: -system-)</translation>
     </message>
     <message>
         <source>Show splash screen on startup (default: 1)</source>
-        <translation>Startbildschirm beim Starten anzeigen (Standard: 1)</translation>
+        <translation>Willkommensbildschirm beim Start anzeigen (Standard: 1)</translation>
+    </message>
+    <message>
+        <source>PrivateSend information</source>
+        <translation>PrivateSend Information</translation>
+    </message>
+    <message>
+        <source>PrivateSend-LongText</source>
+         <translation>
+&lt;h3&gt;PrivateSend Basisinformationen&lt;/h3&gt;
+PrivateSend bietet richtigen finanziellen Datenschutz, indem die Herkunft Ihres Guthabens verschleiert wird. Die Dynamics in Ihrer Geldbörse setzen sich aus unterschiedlichen &#39;Inputs&#39; zusammen; welche man sich als voneinander getrennte, diskrete Münzen vorstellen kann.&lt;br&gt;
+PrivateSend verwendet einen innovativen Prozess um Ihre Inputs mit denen von 2 anderen Personen zu mixem, ohne dass Ihre Münzen jemals Ihre Geldbörse verlassen muß.Sie behalten zu jederzeit die Kontrolle über Ihr Geld.&lt;hr&gt;
+&lt;b&gt;Der PrivateSend Prozess funktioniert folgendermaßen:&lt;/b&gt;
+&lt;ol type=&#39;1&#39;&gt;
+&lt;li&gt;PrivateSend beginnt mit der Stückelung Ihrer Transaktionseingängen in standardisierten Nennwerte.
+Diese Nennwerte sind 0.001, 0.01 DYN, 0.1 DYN, 1 DYN, 10 DYN -- in der Art ähnlich dem Papiergeld, welches Sie täglich verwenden.&lt;/li&gt;
+&lt;li&gt;Ihre Wallet sendet dann entsprechende Anfragen an speziell konfigurierte Software Knoten im Netzwerk, sogenannte &#39;Dynodes&#39;.
+Dadurch werden diese Dynodes darüber informiert, dass Sie an einem Mixing Ihrer gestückelten DYN interessiert sind. Es werden dabei keine persönlichen Informationen an die Dynodes weitergegeben, sie können so niemals wissen &#39;wer&#39; hinter der Anforderung steckt.&lt;/li&gt;
+&lt;li&gt;Senden zwei andere Personen die gleiche Anforderungen mit der gleichen Menge gestückelter DYN, startet das Mixing.
+Die Dynodes mixt die gestückelten DYN und instruiert alle drei Geldbörsen&#39; der Benutzer, die aktuell tranformierten Eingänge sich selbst wieder gutzuschreiben.
+Ihre Geldbörse überweist sich diese Stückelungen wieder direkt selbst aber an einer anderen Adresse (wird Wechselgeld Adresse genannt).&lt;/li&gt;
+&lt;li&gt;Um Ihre Gelder vollständig zu verschleiern, muß Ihre Geldbörse diesen Prozess mehrmals mit den Stückelungen wiederholen.
+Jedes mal, wenn der Prozess fertiggestellt wird, wird&#39;es als eine &#39;Runde&#39; bezeichnet;. Mit jeder Runde von PrivateSend erschweren und verschleiern Sie exponentiell die Herkunft Ihres Guthabens.&lt;/li&gt;
+&lt;li&gt;Der Mixing-Prozeß läuft im Hintergrund, ohne daß ein Eingriff von Ihnen mehr erforderlich ist. Wenn Sie eine Transaktion durchführen möchten, ist Ihr Guthaben bereits anonymisiert. Kein zusätzliches Warten ist mehr erforderlich.&lt;/li&gt;
+&lt;/ol&gt; &lt;hr&gt;
+&lt;b&gt;WICHTIG:&lt;/b&gt; Ihre Geldbörse hat nur 2000 von diesen &#39;Wechsel Adressen&#39; zur Verfügung. Mit jedem Mixing werden bis zu 9 dieser Adressen verwendet.
+Das bedeutet, daß diese 2000 Adressen für etwa 200 Mixing Vorgängen reichen. Wenn 1900 von diesen bereits verwendet wurden, muss Ihre Geldbörse mehr Adressen erzeugen.
+Dies funktioniert jedoch nur, wenn Sie die automatische Sicherung aktiviert haben.&lt;br&gt;
+Folglich ist bei Benutzer, die automatische Sicherung deaktiviert haben, auch PrivateSend deaktiviert. &lt;hr&gt;
+                </translation>
+    </message>
+    <message>
+        <source>Choose data directory on startup (default: %n)</source>
+        <translation>Wählen Sie beim Start ein Datenverzeichnis aus (Standard: %n)</translation>
+    </message>
+    <message>
+        <source>Show splash screen on startup (default: %u)</source>
+        <translation>Willkommensbildschirm beim Start anzeigen (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Reset all settings changes made over the GUI</source>
+        <translation>Alle über die GUI vorgenommen Einstellungen zurücksetzen</translation>
     </message>
 </context>
 <context>
@@ -1049,32 +1173,32 @@ Adresse: %4</translation>
         <translation>Willkommen</translation>
     </message>
     <message>
-        <source>Welcome to DYN Core.</source>
-        <translation>Willkommen zu DYN Core.</translation>
+        <source>Welcome to Dynamic.</source>
+        <translation>Willkommen bei Dynamic.</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where DYN Core will store its data.</source>
-        <translation>Da dies das erste Mal ist, dass Sie DYN Core starten, legen Sie jetzt bitte fest, an welchem Ort die Daten gespeichert werden sollen.</translation>
+        <source>As this is the first time the program is launched, you can choose where Dynamic will store its data.</source>
+        <translation>Da das Programm zum ersten Mal gestartet wurde, wählen Sie bitte aus, wo Dynamic seine Daten speichern soll.</translation>
     </message>
     <message>
-        <source>DYN Core will download and store a copy of the DYN block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>DYN Core wird jetzt die Blockchain laden und lokal speichern. Dafür sind mindestens %1GB freier Speicherplatz erforderlich. Der Speicherbedarf wird mit der Zeit anwachsen. Das Wallet wird ebenfalls in diesem Verzeichnis gespeichert.</translation>
+        <source>Dynamic will download and store a copy of the Dynamic block chain. At least %1GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
+        <translation>Dynamic wird eine Kopie der Dynamic Blockchain herunterladen und speichern. Es werden mindestens %1GB an Daten in diesem Verzeichnis gespeichert. Die Geldbörse wird genauso in diesem Verzeichnis gespeichert.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
-        <translation>Standard-Datenverzeichnis verwenden</translation>
+        <translation>Verwenden des Standard Datenverzeichnis</translation>
     </message>
     <message>
         <source>Use a custom data directory:</source>
-        <translation>Ein benutzerdefiniertes Datenverzeichnis verwenden:</translation>
+        <translation>Verwenden eines benutzerdefiniertes Datenverzeichnis:</translation>
     </message>
     <message>
-        <source>DYN Core</source>
-        <translation>DYN Core</translation>
+        <source>Dynamic</source>
+        <translation>Dynamic</translation>
     </message>
     <message>
-        <source>Error: Specified data directory "%1" cannot be created.</source>
-        <translation>Fehler: Angegebenes Datenverzeichnis "%1" kann nicht angelegt werden.</translation>
+        <source>Error: Specified data directory &quot;%1&quot; cannot be created.</source>
+        <translation>Fehler: Angegebenes Datenverzeichnis &quot;%1&quot; kann nicht erstellt werden.</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1082,22 +1206,22 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>%1 GB of free space available</source>
-        <translation>%1 GB freier Speicherplatz verfügbar</translation>
+        <translation>%1 GB freier Speicher verfügbar</translation>
     </message>
     <message>
         <source>(of %1 GB needed)</source>
-        <translation>(von benötigten %1 GB)</translation>
+        <translation>(von %1 GB benötigt)</translation>
     </message>
 </context>
 <context>
     <name>OpenURIDialog</name>
     <message>
         <source>Open URI</source>
-        <translation>URI öffnen</translation>
+        <translation>URI Öffnen</translation>
     </message>
     <message>
         <source>Open payment request from URI or file</source>
-        <translation>Zahlungsanforderung über URI oder aus Datei öffnen</translation>
+        <translation>Zahlungsanforderung über URI oder über Datei öffnen</translation>
     </message>
     <message>
         <source>URI:</source>
@@ -1109,30 +1233,30 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Select payment request file to open</source>
-        <translation>Zu öffnende Zahlungsanforderungsdatei auswählen</translation>
+        <translation>Zahlungsanforderungsdatei auswählen um zu öffnen</translation>
     </message>
 </context>
 <context>
     <name>OptionsDialog</name>
     <message>
         <source>Options</source>
-        <translation>Konfiguration</translation>
+        <translation>Optionen</translation>
     </message>
     <message>
         <source>&amp;Main</source>
-        <translation>&amp;Allgemein</translation>
+        <translation>&amp;Haupt</translation>
     </message>
     <message>
-        <source>Automatically start DYN after logging in to the system.</source>
-        <translation>DYN nach der Anmeldung am System automatisch starten.</translation>
+        <source>Automatically start Dynamic after logging in to the system.</source>
+        <translation>Dynamic automatisch nach Systemlogin starten.</translation>
     </message>
     <message>
-        <source>&amp;Start DYN on system login</source>
-        <translation>&amp;Starte DYN automatisch nach Systemanmeldung</translation>
+        <source>&amp;Start Dynamic on system login</source>
+        <translation>&amp;Dynamic mit Systemlogin starten</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
-        <translation>Größe des &amp;Datenbankcaches</translation>
+        <translation>Größe des &amp; Datenbankspeichers</translation>
     </message>
     <message>
         <source>MB</source>
@@ -1140,63 +1264,117 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Number of script &amp;verification threads</source>
-        <translation>Anzahl an Skript-&amp;Verifizierungs-Threads</translation>
+        <translation>Anzahl der Script &amp;Verfifizierungsthread</translation>
     </message>
     <message>
         <source>(0 = auto, &lt;0 = leave that many cores free)</source>
-        <translation>(0 = automatisch, &lt;0 = so viele Kerne frei lassen)</translation>
+        <translation>(0 = auto, &lt;0 = soviele Kerne werden ausgelassen)</translation>
     </message>
     <message>
         <source>PrivateSend rounds to use</source>
-        <translation>PrivateSend Runden</translation>
+        <translation>PrivateSend Runden in Verwendung </translation>
     </message>
     <message>
-        <source>This amount acts as a threshold to turn off PrivateSend once it's reached.</source>
-        <translation>Beim Erreichen dieses Betrages wird PrivateSend ausgeschaltet.</translation>
+        <source>Amount of Dynamic to keep anonymized</source>
+        <translation>Dynamic Betrag um anonymisiert zu bleiben</translation>
     </message>
     <message>
-        <source>Amount of DYN to keep anonymized</source>
-        <translation>Anzahl anonymisierter DYN</translation>
+        <source>This amount acts as a threshold to turn off PrivateSend once it&apos;s reached.</source>
+        <translation>Dieser Betrag dient als Grenzwert für das Deaktivieren von PrivateSend, sobald der Betrag erreicht ist.</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
-        <translation>W&amp;allet</translation>
+        <translation>Geldbörse</translation>
     </message>
     <message>
         <source>If you disable the spending of unconfirmed change, the change from a transaction&lt;br/&gt;cannot be used until that transaction has at least one confirmation.&lt;br/&gt;This also affects how your balance is computed.</source>
-        <translation>Wenn Sie das Ausgeben von unbestätigtem Wechselgeld deaktivieren, kann das Wechselgeld einer &lt;br/&gt; Transaktion nicht verwendet werden, bis es mindestens eine Bestätigung erhalten hat.&lt;br/&gt;Dies wirkt sich auf die Berechnung des Kontostands aus.</translation>
+        <translation>Sofern die Ausgabe eines nicht bestätigten Wechselgeld deaktivieren wird, kann die Änderung einer Transaktion nicht verwendet werden,&lt;br/&gt;bis diese Transaktion zumindest eine Bestätigung hat. &lt;br/&gt;Dies beeinflußt auch die Berechnung Ihres Kontostandes.</translation>
     </message>
     <message>
         <source>Accept connections from outside</source>
-        <translation>Eingehende Verbindungen annehmen</translation>
+        <translation>Verbindungen von außen akzeptieren.</translation>
     </message>
     <message>
         <source>Allow incoming connections</source>
         <translation>Eingehende Verbindungen erlauben</translation>
     </message>
     <message>
-        <source>Connect to the DYN network through a SOCKS5 proxy.</source>
-        <translation>Über einen SOCKS5-Proxy mit dem DYN-Netzwerk verbinden.</translation>
+        <source>Connect to the Dynamic network through a SOCKS5 proxy.</source>
+        <translation>Verbindung zum Dynamic Netzwerk über einen SOCKS5 proxy.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
-        <translation>Über einen SOCKS5-Proxy &amp;verbinden (Standardproxy):</translation>
+        <translation>&amp;Verbindung über SOCKS5 Proxy (Standard Proxy):</translation>
+    </message>
+    <message>
+        <source>Used for reaching peers via:</source>
+        <translation>Wird verwendet, um Gegenstellen zu erreichen über:</translation>
+    </message>
+    <message>
+        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
+        <translation>Zeigt an, ob der vorgegebene Standard SOCKS5 Proxy verwendet wird, um Gegenstellen über diesen Netzwerktyp zu erreichen.</translation>
+    </message>
+    <message>
+        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
+        <translation>Verwendet einen separaten SOCKS5 Proxy um Gegenstellen über versteckte Tor Dienste zu erreichen:</translation>
+    </message>
+    <message>
+        <source>Connect to the Dynamic network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Verbindet zum Dynamic Netzwerk über einen separaten SOCKS5 Proxy für versteckte Tor Dienste.</translation>
+    </message>
+    <message>
+        <source>Language missing or translation incomplete? Help contributing translations here:
+https://www.transifex.com/projects/p/dynamic/</source>
+        <translation>Fehlt eine Sprache oder ist diese unvollständig übersetzt? Unterstützen Sie uns hier mit Übersetzungen:
+https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Expert</source>
-        <translation>Erweiterte Wallet-Optionen</translation>
+        <translation>Experte</translation>
     </message>
     <message>
-        <source>This setting determines the amount of individual dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
-        <translation>Diese Einstellung setzt fest, durch wie viele dynodes ein Input anonymisiert wird. &lt;br/&gt; Eine höhere Anzahl bedeutet höhere Anonymität, verursacht allerdings auch höhere Gebühren.</translation>
+        <source>This setting determines the amount of individual Dynodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</source>
+        <translation>Diese Einstellung ermittelt die Anzahl der individuellen Dynodes, durch die eine Eingabe anonymisiert wird. &lt;br/&gt;Mehr Runden der Anonymisierung führen zwar zu einem höheren Grad an Datenschutz, aber auch zu höheren Gebühren.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
-        <translation>Legt fest, ob die "Coin Control"-Funktionen angezeigt werden.</translation>
+        <translation>Ob die Coin Control Funktionen angezeigt werden sollen oder nicht.</translation>
     </message>
     <message>
         <source>Enable coin &amp;control features</source>
-        <translation>"&amp;Coin Control"-Funktionen aktivieren</translation>
+        <translation>Aktiviert die Coin Control Funktionen</translation>
+    </message>
+    <message>
+        <source>Show Dynodes Tab</source>
+        <translation>Zeigt die Dynodes Registerkarte an</translation>
+    </message>
+    <message>
+        <source>Show additional tab listing all your Dynodes in first sub-tab&lt;br/&gt;and all Dynodes on the network in second sub-tab.</source>
+        <translation>Zeigt eine zusätzliche Registerkarte an, in welcher alle Ihre Dynodes im ersten Unterregister &lt;br/&gt;und alle Dynodes im zweiten Unterregister im Netzwerk aufgereiht sind.</translation>
+    </message>
+    <message>
+        <source>Enable advanced PrivateSend interface</source>
+        <translation>Aktiviert die erweiterte PrivateSend Schnitstelle</translation>
+    </message>
+    <message>
+        <source>Show additional information and buttons for PrivateSend on overview screen.</source>
+        <translation>Zeigt auf einem Übersichtsschirm zusätzliche Informationen und Schaltflächen für PrivateSend an.</translation>
+    </message>
+    <message>
+        <source>Warn if PrivateSend is running out of keys</source>
+        <translation>Warnen, wenn PrivateSend über keine Schlüsseln mehr verfügt</translation>
+    </message>
+    <message>
+        <source>Show warning dialog when PrivateSend detects that your wallet has very low number of keys left.</source>
+        <translation>Warndialogfeld anzeigen, wenn PrivateSend feststellt, dass in Ihrer Geldbörse nur noch wenige Schlüssel verfügbar sind.</translation>
+    </message>
+    <message>
+        <source>Enable PrivateSend &amp;multi-session</source>
+        <translation>PrivateSend Multi-Session &amp;aktivieren</translation>
+    </message>
+    <message>
+        <source>Whether to use experimental PrivateSend mode with multiple mixing sessions per block.&lt;br/&gt;Note: You must use this feature carefully.&lt;br/&gt;Make sure you always have recent wallet (auto)backup in a safe place!</source>
+        <translation>Zeigt an, ob der experimentelle PrivateSend Modus mit mehrfachen Mixing Sitzungen pro Block verwenden werden soll. &lt;br/&gt;Anmerkung: Verwenden Sie dieses Feature mit Vorsicht. &lt;br/&gt;Stellen Sie immer sicher, dass Sie über eine aktuelle (automatische) Sicherung Ihrer Geldbörsen an einem sicheren Ort verfügen!</translation>
     </message>
     <message>
         <source>&amp;Spend unconfirmed change</source>
@@ -1207,20 +1385,20 @@ Adresse: %4</translation>
         <translation>&amp;Netzwerk</translation>
     </message>
     <message>
-        <source>Automatically open the DYN client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automatisch den DYN-Clientport auf dem Router öffnen. Dies funktioniert nur, wenn Ihr Router UPnP unterstützt und dies aktiviert ist.</translation>
+        <source>Automatically open the Dynamic client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automatisches Öffnen des Dynamic Client Port auf den Router. Diese Funktion ist nur verfügbar, wenn Ihr Router UPnP unterstützt und der Dienst aktiviert ist.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
-        <translation>Portweiterleitung via &amp;UPnP</translation>
+        <translation>Port Verbindung durch &amp;UPnP</translation>
     </message>
     <message>
         <source>Proxy &amp;IP:</source>
-        <translation>Proxy-&amp;IP:</translation>
+        <translation>Proxy &amp;IP:</translation>
     </message>
     <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
-        <translation>IP-Adresse des Proxies (z.B. IPv4: 127.0.0.1 / IPv6: ::1)</translation>
+        <translation>IP Adresse vom Proxy (ej. IPv4: 127.0.0.1 / IPv6: ::1)</translation>
     </message>
     <message>
         <source>&amp;Port:</source>
@@ -1228,57 +1406,57 @@ Adresse: %4</translation>
     </message>
     <message>
         <source>Port of the proxy (e.g. 9050)</source>
-        <translation>Port des Proxies (z.B. 9050)</translation>
+        <translation>Port des Proxy (ej. 9050)</translation>
     </message>
     <message>
         <source>&amp;Window</source>
-        <translation>&amp;Programmfenster</translation>
+        <translation>&amp;Fenster</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
-        <translation>Nur ein Symbol im Infobereich anzeigen, nachdem das Programmfenster minimiert wurde.</translation>
+        <translation>Benachrichtigungssymbol anzeigen, nachdem das Fenster minimiert wurde.</translation>
     </message>
     <message>
         <source>&amp;Minimize to the tray instead of the taskbar</source>
-        <translation>In den Infobereich anstatt in die Taskleiste &amp;minimieren</translation>
+        <translation>&amp;In den Infobereich anstatt in die Taskleiste minimieren</translation>
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation>Minimiert die Anwendung anstatt sie zu beenden wenn das Fenster geschlossen wird. Wenn dies aktiviert ist, müssen Sie das Programm über "Beenden" im Menü schließen.</translation>
+        <translation>Beim Schließen des Programmes, das Fenster minimieren. Wenn diese Option aktiviert ist, wird das Programm nur geschlossen, wenn Beenden im Menü ausgewählt wird.</translation>
     </message>
     <message>
         <source>M&amp;inimize on close</source>
-        <translation>Beim Schließen m&amp;inimieren</translation>
+        <translation>B&amp;eim Schließen minimieren</translation>
     </message>
     <message>
         <source>&amp;Display</source>
-        <translation>Anzei&amp;ge</translation>
+        <translation>&amp;Anzeigen</translation>
     </message>
     <message>
         <source>User Interface &amp;language:</source>
-        <translation>&amp;Sprache der Benutzeroberfläche:</translation>
+        <translation>Sprache der &amp;Benutzeroberfläche:</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting DYN.</source>
-        <translation>Legt die Sprache der Benutzeroberfläche fest. Diese Einstellung wird erst nach einem Neustart von DYN aktiv.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting Dynamic.</source> 
+        <translation>Die Sprache der Benutzeroberfläche kann hier festgelegt werden. Diese Einstellung tritt erst nach einem Neustart von Dynamic in Kraft.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/dynamic/</source>
-        <translation>Fehlt eine Sprache oder ist unvollständig übersetzt? Hier können Sie helfen:
-https://www.transifex.com/projects/p/dynamic/</translation>
+https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</source>
+        <translation>Fehlt eine Sprache oder ist diese unvollständig übersetzt? Unterstützen Sie uns hier mit Übersetzungen:
+https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
-        <translation>Design/Thema der Benutzeroberfläche:</translation>
+        <translation>Benutzeroberflächen Design:</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
-        <translation>&amp;Einheit der Beträge:</translation>
+        <translation>&amp;Einheit der Beträge anzeigen in:</translation>
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Wählen Sie die standardmäßige Untereinheit, die in der Benutzeroberfläche und beim Überweisen von DYN angezeigt werden soll.</translation>
+        <translation>Wählen Sie die Einheit aus, die in der Benutzeroberfläche und beim Senden von Münzen standardmäßig angezeigt werden soll.</translation>
     </message>
     <message>
         <source>Decimal digits</source>
@@ -1286,23 +1464,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
-        <translation>Externe URLs (z.B. ein Block-Explorer), die im Kontextmenü des Transaktionsverlaufs eingefügt werden. In der URL wird %s durch den Transaktionshash ersetzt. Bei Angabe mehrerer URLs müssen diese durch "|" voneinander getrennt werden.</translation>
+        <translation>URLs von Drittanbieter  (z. B. ein Block-Explorer), die auf der Registerkarte "Transaktionen" als Kontextmenü angezeigt werden. %s in der URL wird durch einen Transaktionshash ersetzt. Mehrfache URLs werden durch einen vertikalen Balken getrennt |.</translation>
+    </message>
+    <message>
+        <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items.&lt;br/&gt;%s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
+        <translation>URLs von Drittanbieter  (z. B. ein Block-Explorer), die auf der Registerkarte "Transaktionen" als Kontextmenü angezeigt werden. &lt;br/&gt; %s in der URL wird durch einen Transaktionshash ersetzt. Mehrfache URLs werden durch einen vertikalen Balken getrennt |.</translation>
     </message>
     <message>
         <source>Third party transaction URLs</source>
-        <translation>Externe Transaktions-URLs</translation>
+        <translation>Transaktions-URLs von Drittanbieter</translation>
     </message>
     <message>
         <source>Active command-line options that override above options:</source>
-        <translation>Aktive Kommandozeilenoptionen, die obige Konfiguration überschreiben:</translation>
+        <translation>Aktive Kommandozeilenoptionen, welche die obigen Optionen überschreiben :</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
-        <translation>Setzt die Clientkonfiguration auf Standardwerte zurück.</translation>
+        <translation>Setzt alle Optionen des Clients auf Standard zurück.</translation>
     </message>
     <message>
         <source>&amp;Reset Options</source>
-        <translation>Konfiguration &amp;zurücksetzen</translation>
+        <translation>&amp;Optionen zurücksetzen</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1310,7 +1492,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation>A&amp;bbrechen</translation>
+        <translation>&amp;Abbrechen</translation>
     </message>
     <message>
         <source>default</source>
@@ -1318,27 +1500,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>none</source>
-        <translation>keine</translation>
+        <translation>keines</translation>
     </message>
     <message>
         <source>Confirm options reset</source>
-        <translation>Zurücksetzen der Konfiguration bestätigen</translation>
+        <translation>Zurücksetzen der Optionen bestätigen</translation>
     </message>
     <message>
         <source>Client restart required to activate changes.</source>
-        <translation>Clientneustart nötig, um die Änderungen zu aktivieren.</translation>
+        <translation>Um die Änderungen zu übernehmen, ist ein Neustart des Clients notwenig.</translation>
     </message>
     <message>
         <source>Client will be shutdown, do you want to proceed?</source>
-        <translation>Client wird beendet, wollen Sie fortfahren?</translation>
+        <translation>Der Client wird geschlossen, möchten Sie fortfahren?</translation>
     </message>
     <message>
         <source>This change would require a client restart.</source>
-        <translation>Diese Änderung würde einen Clientneustart benötigen.</translation>
+        <translation>Diese Änderung würde einen Neustart des Clients benötigen.</translation>
     </message>
     <message>
         <source>The supplied proxy address is invalid.</source>
-        <translation>Die eingegebene Proxyadresse ist ungültig.</translation>
+        <translation>Die bereitgestellte Proxy Adresse ist ungültig.</translation>
     </message>
 </context>
 <context>
@@ -1348,8 +1530,8 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Formular</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the DYN network after a connection is established, but this process has not completed yet.</source>
-        <translation>Die angezeigten Informationen sind möglicherweise nicht mehr aktuell. Ihre Wallet wird automatisch synchronisiert, nachdem eine Verbindung zum DYN-Netzwerk hergestellt wurde. Dieser Prozess ist jedoch derzeit noch nicht abgeschlossen.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet.</source>
+        <translation>Die angezeigten Informationen sind möglicherweise nicht mehr aktuell. Ihre Wallet synchronisiert automitsch mit dem Dymamic Netzwerk, nachdem eine Verbindung hergestellt worden ist. Dieser Prozess ist jedoch noch nicht abgeschlossen.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1357,15 +1539,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Your current spendable balance</source>
-        <translation>Ihr aktuell verfügbarer Kontostand</translation>
+        <translation>Ihr aktuell verfügbarer Kontostand </translation>
     </message>
     <message>
         <source>Pending:</source>
-        <translation>Ausstehend:</translation>
+        <translation>Anstehend:</translation>
     </message>
     <message>
         <source>Total of transactions that have yet to be confirmed, and do not yet count toward the spendable balance</source>
-        <translation>Betrag aus unbestätigten Transaktionen, der noch nicht im aktuell verfügbaren Kontostand enthalten ist</translation>
+        <translation>Summe aller noch zu bestätigenden Transaktionen, welche noch nicht zum Guthaben dazugezählt werden</translation>
     </message>
     <message>
         <source>Immature:</source>
@@ -1373,39 +1555,39 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Mined balance that has not yet matured</source>
-        <translation>Erarbeiteter Betrag der noch nicht gereift ist</translation>
+        <translation>Durch mining erarbeitetes Guthaben, welche noch nicht gereift ist</translation>
     </message>
     <message>
         <source>Balances</source>
-        <translation>Kontostände</translation>
+        <translation>Kontostand</translation>
     </message>
     <message>
         <source>Unconfirmed transactions to watch-only addresses</source>
-        <translation>Unbestätigte Transaktionen  zu beobachteten Adressen</translation>
+        <translation>Unbestätigte Transaktionen der Adressen, die zur Beobachtung dienen</translation>
     </message>
     <message>
         <source>Mined balance in watch-only addresses that has not yet matured</source>
-        <translation>Erarbeiteter Betrag der beobachteten Adressen der noch nicht gereift ist</translation>
+        <translation>Unreifes und durch mining erarbeitetes Guthaben der Adressen, welcher nur zur Beobachtung dienen</translation>
     </message>
     <message>
         <source>Total:</source>
-        <translation>Gesamtbetrag:</translation>
+        <translation>Total:</translation>
     </message>
     <message>
         <source>Your current total balance</source>
-        <translation>Aktueller Gesamtbetrag aus obigen Kategorien</translation>
+        <translation>Ihr aktueller Kontostand</translation>
     </message>
     <message>
         <source>Current total balance in watch-only addresses</source>
-        <translation>Kontostand der beobachteten Adressen</translation>
+        <translation>Aktueller Kontostand der Adressen, welche nur zur Beobachtung dienen</translation>
     </message>
     <message>
         <source>Watch-only:</source>
-        <translation>Beobachtet:</translation>
+        <translation>Nur zur Beobachtung</translation>
     </message>
     <message>
         <source>Your current balance in watch-only addresses</source>
-        <translation>Aktueller Kontostand der beobachteten Adressen</translation>
+        <translation>Ihr aktueller Kontostand der nur zur Beobachtung dienenden Adressen</translation>
     </message>
     <message>
         <source>Spendable:</source>
@@ -1420,8 +1602,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aktiviert/Deaktiviert</translation>
     </message>
     <message>
+        <source>keys left: %1</source>
+        <translation>Schlüsseln übrig: %1</translation>
+    </message>
+    <message>
         <source>Completion:</source>
-        <translation>Vollendet:</translation>
+        <translation>Fertigstellung:</translation>
     </message>
     <message>
         <source>PrivateSend Balance:</source>
@@ -1429,7 +1615,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Amount and Rounds:</source>
-        <translation>Betrag und Runden:</translation>
+        <translation>Anzahl und Runden:</translation>
     </message>
     <message>
         <source>0 DYN / 0 Rounds</source>
@@ -1437,11 +1623,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Submitted Denom:</source>
-        <translation>Stückelung des Betrages:</translation>
+        <translation>Übermittelte Stückelungen:</translation>
     </message>
     <message>
         <source>n/a</source>
-        <translation>k.A.</translation>
+        <translation>n/a</translation>
     </message>
     <message>
         <source>PrivateSend</source>
@@ -1453,11 +1639,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Start/Stop Mixing</source>
-        <translation>Starte/Stoppe das Mixen</translation>
+        <translation>Mixen Starten/Beenden</translation>
+    </message>
+    <message>
+        <source>Start Mixing</source>
+        <translation>Mixen Starten </translation>
+    </message>
+    <message>
+        <source>Stop Mixing</source>
+        <translation>Mixen Stoppen</translation>
     </message>
     <message>
         <source>The denominations you submitted to the Dynode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation>Die gestückelten Beträge, die Sie zu dem dynode gesendet haben.&lt;br&gt; Zum Erfolgreichen Mixen müssen andere Benutzer exakt gleich gestückelte Beträge senden.</translation>
+        <translation>An die Dynode übermittelten Stückelungen . &lt;br&gt;Um mixen zu können, müssen andere Benutzer die exakt gleiche Stückelungen übermitteln.</translation>
     </message>
     <message>
         <source>(Last Message)</source>
@@ -1465,15 +1659,23 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Try to manually submit a PrivateSend request.</source>
-        <translation>Versuche eine PrivateSendanfrage manuell abzusetzen.</translation>
+        <translation>Versuchen Sie manuell eine PrivateSend Anforderung zu versenden.</translation>
     </message>
     <message>
         <source>Try Mix</source>
-        <translation>Versuche zu Mixen</translation>
+        <translation>Mixen versuchen</translation>
     </message>
     <message>
-        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</source>
-        <translation>Aktuellen PrivateSend Status zurücksetzen (wenn der Prozess des Mixens bereits begonnen hat kann es passieren, dass PrivateSend unterbrochen wird. Bereits gezahlte Gebühren werden einbehalten!) </translation>
+        <source>Info</source>
+        <translation>Info</translation>
+    </message>
+    <message>
+        <source>Information about PrivateSend and Mixing</source>
+        <translation>Information über PrivateSend und Mixen.</translation>
+    </message>
+    <message>
+        <source>Reset the current status of PrivateSend (can interrupt PrivateSend if it&apos;s in the process of Mixing, which can cost you money!)</source>
+        <translation>Aktuellen Status von PrivateSend zurücksetzen(kann PrivateSend unterbrechen, wenn akutell gemixt wird und Sie Geld kosten kann!)</translation>
     </message>
     <message>
         <source>Reset</source>
@@ -1481,7 +1683,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>out of sync</source>
-        <translation>nicht synchron</translation>
+        <translation>Nicht Synchron</translation>
     </message>
     <message>
         <source>Disabled</source>
@@ -1489,27 +1691,29 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Start PrivateSend Mixing</source>
-        <translation>Starte PrivateSend Mixen</translation>
+        <translation>PrivateSend Mixen starten</translation>
     </message>
     <message>
         <source>Stop PrivateSend Mixing</source>
-        <translation>Stoppe PrivateSend Mixen</translation>
+        <translation>PrivateSend Mixen stoppen</translation>
     </message>
     <message>
         <source>No inputs detected</source>
-        <translation>Keine Inputs gefunden</translation>
+        <translation>Keine Eingänge erkannt</translation>
     </message>
     <message numerus="yes">
         <source>%n Rounds</source>
-        <translation><numerusform>%n Runde</numerusform><numerusform>%n Runden</numerusform></translation>
+        <translation>
+            <numerusform>%n Runden</numerusform>
+        </translation>
     </message>
     <message>
-        <source>Not enough compatible inputs to anonymize &lt;span style='color:red;'&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style='color:red;'&gt;%2&lt;/span&gt; instead</source>
-        <translation>Nicht genug kompatible Inputs zum Anonymisieren von &lt;span style='color:red;'&gt;%1&lt;/span&gt; gefunden,&lt;br/&gt;&lt;span style='color:red;'&gt;%2&lt;/span&gt; wird stattdessen anonymisiert</translation>
+        <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
+        <translation>Keine ausreichenden kompatiblen Eingänge um zu anonymisieren &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br/&gt;wird stattdessen &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; anonymisieren</translation>
     </message>
     <message>
         <source>Overall progress</source>
-        <translation>Fortschritt</translation>
+        <translation>Gesamtfortschritt</translation>
     </message>
     <message>
         <source>Denominated</source>
@@ -1521,11 +1725,13 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message numerus="yes">
         <source>Denominated inputs have %5 of %n rounds on average</source>
-        <translation><numerusform>Gestückelte Inputs haben im Durchschnitt %5 von %n Runde</numerusform><numerusform>Gestückelte Inputs haben im Durchschnitt %5 von %n Runden</numerusform></translation>
+        <translation>
+            <numerusform>Die gestückelten Eingänge haben im Durchschnitt %5 von %n Runden</numerusform>
+        </translation>
     </message>
     <message>
         <source>Found enough compatible inputs to anonymize %1</source>
-        <translation>Genug kompatible Inputs zum Anonymisieren von %1 gefunden</translation>
+        <translation>Es wurden ausreichende kompatible Eingänge gefunden, um zu anonymisieren %1</translation>
     </message>
     <message>
         <source>Mixed</source>
@@ -1536,61 +1742,60 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Aktiviert</translation>
     </message>
     <message>
-        <source>Last PrivateSend message:
-</source>
-        <translation>Letzter PrivateSend Status:
-</translation>
+        <source>Last PrivateSend message:</source>
+        <translation>Letzte PrivateSend Nachricht:</translation>
     </message>
     <message>
         <source>N/A</source>
-        <translation>k.A.</translation>
+        <translation>N/A</translation>
     </message>
     <message>
         <source>PrivateSend was successfully reset.</source>
         <translation>PrivateSend wurde erfolgreich zurückgesetzt.</translation>
     </message>
     <message>
-        <source>If you don't want to see internal PrivateSend fees/transactions select "Most Common" as Type on the "Transactions" tab.</source>
-        <translation>Wenn Sie keine internen PrivateSend-Gebühren oder -Transaktionen sehen wollen wählen Sie "Gängigste" als Typ auf der "Transaktionen" Karteikarte.</translation>
+        <source>If you don&apos;t want to see internal PrivateSend fees/transactions select &quot;Am Häufigsten &quot; as Type on the &quot;Transactions&quot; tab.</source>
+        <translation>Falls Sie die die internen PrivateSend Gebühren/Transaktionen nicht sehen wollen, wählen Sie &quot;Mas comunes&quot; como Art en la pestaña &quot;Transacciones&quot;</translation>
     </message>
     <message>
         <source>PrivateSend requires at least %1 to use.</source>
-        <translation>Zur Benutzung von PrivateSend benötigt man mindestens %1</translation>
+        <translation>Für PrivateSend wird mindestens %1 benötigt.</translation>
     </message>
     <message>
         <source>Wallet is locked and user declined to unlock. Disabling PrivateSend.</source>
-        <translation>Das Wallet ist gesperrt und der Benutzer hat abgelehnt, es zu entsperren. PrivateSend wird deaktiviert.</translation>
+        <translation>Die Geldbörse ist gesperrt und der Benutzer hat die Entsperrung abgelehnt. PrivateSend wird deaktiviert.</translation>
     </message>
 </context>
 <context>
     <name>PaymentServer</name>
+	
     <message>
         <source>Payment request error</source>
-        <translation>Fehlerhafte Zahlungsanforderung</translation>
+        <translation>Fehler in der Zahlungsanforderung</translation>
     </message>
     <message>
         <source>Cannot start dynamic: click-to-pay handler</source>
-        <translation>DYN kann nicht gestartet werden: click-to-pay handler</translation>
+        <translation>Dynamic kann nicht gestartet werden: Click-to-pay Handler</translation>
     </message>
     <message>
         <source>URI handling</source>
-        <translation>URI-Verarbeitung</translation>
+        <translation>URI Handhabung</translation>
     </message>
     <message>
         <source>Payment request fetch URL is invalid: %1</source>
-        <translation>Abruf-URL der Zahlungsanforderung ist ungültig: %1</translation>
+        <translation>Die URL der Zahlungsanforderung ist ungültig: %1</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
-        <translation>Zahlungsanforderungsdatei-Verarbeitung</translation>
+        <translation>Zahlungsanforderungsdatei Handhabung</translation>
     </message>
     <message>
         <source>Invalid payment address %1</source>
         <translation>Ungültige Zahlungsadresse %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid DYN address or malformed URI parameters.</source>
-        <translation>URI konnte nicht erfolgreich verarbeitet werden. Höchstwahrscheinlich ist dies entweder keine gültige DYN-Adresse oder die URI-Parameter sind falsch gesetzt. </translation>
+        <source>URI cannot be parsed! This can be caused by an invalid Dynamic address or malformed URI parameters.</source>
+        <translation>URI kann nicht zugeordnet werden! Dies kann durch eine ungültige Dynamic Adresse oder durch fehlerhafte URI Parameter verursacht werden.</translation>
     </message>
     <message>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
@@ -1601,12 +1806,12 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Zahlungsanforderung abgelehnt</translation>
     </message>
     <message>
-        <source>Payment request network doesn't match client network.</source>
-        <translation>Netzwerk der Zahlungsanforderung passt nicht zum Client-Netzwerk.</translation>
+        <source>Payment request network doesn&apos;t match client network.</source>
+        <translation>Das Neztwerk für die Zahlungsanforderung stimmt nicht mit dem Client Netzwerk überein.</translation>
     </message>
     <message>
         <source>Payment request has expired.</source>
-        <translation>Zahlungsanforderung ist abgelaufen</translation>
+        <translation>Die Zahlungsanforderung ist abgelaufen.</translation>
     </message>
     <message>
         <source>Payment request is not initialized.</source>
@@ -1614,39 +1819,39 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Unverified payment requests to custom payment scripts are unsupported.</source>
-        <translation>Unverifizierte Zahlungsanforderungen an benutzerdefinierte Zahlungsskripte werden nicht unterstützt.</translation>
+        <translation>Nichtverifizierte Zahlungsanforderungen an benutzerdefinierte Zahlungsscripts werden nicht unterstützt.</translation>
     </message>
     <message>
         <source>Requested payment amount of %1 is too small (considered dust).</source>
-        <translation>Angeforderter Zahlungsbetrag in Höhe von %1 ist zu niedrig und wurde als "Dust" eingestuft.</translation>
+        <translation>Angeforderte Zahlungssumme von %1 ist zu klein (Dust berücksichtigt).</translation>
     </message>
     <message>
         <source>Refund from %1</source>
-        <translation>Rücküberweisung von %1</translation>
+        <translation>Rückzahlung von %1</translation>
     </message>
     <message>
         <source>Payment request %1 is too large (%2 bytes, allowed %3 bytes).</source>
-        <translation>Zahlungsanforderung %1 ist zu groß (%2 Bytes, erlaubt sind %3 Bytes).</translation>
+        <translation>Zahlungsanforderung %1 ist zu groß (%2 bytes, erlaubt %3 bytes).</translation>
     </message>
     <message>
         <source>Payment request DoS protection</source>
-        <translation>Überlastungs-Schutz Zahlungsanforderung</translation>
+        <translation>Zahlungsanforderung DoS Schutz</translation>
     </message>
     <message>
         <source>Error communicating with %1: %2</source>
-        <translation>Kommunikationsfehler mit %1: %2</translation>
+        <translation>Fehler in der Kommunikation mit %1: %2</translation>
     </message>
     <message>
         <source>Payment request cannot be parsed!</source>
-        <translation>Zahlungsanforderung kann nicht analysiert werden!</translation>
+        <translation>Zahlungsanforderung kann nicht zugeordnet werden!</translation>
     </message>
     <message>
         <source>Bad response from server %1</source>
-        <translation>Fehlerhafte Antwort vom Server: %1</translation>
+        <translation>Negative Rückmeldung vom Server %1</translation>
     </message>
     <message>
         <source>Network request error</source>
-        <translation>fehlerhafte Netzwerkanfrage</translation>
+        <translation>Fehler bei der Netzwerkanforderung</translation>
     </message>
     <message>
         <source>Payment acknowledged</source>
@@ -1656,16 +1861,28 @@ https://www.transifex.com/projects/p/dynamic/</translation>
 <context>
     <name>PeerTableModel</name>
     <message>
+        <source>NodeId</source>
+        <translation>KnotenId</translation>
+    </message>
+    <message>
+        <source>Node/Service</source>
+        <translation>Knoten/Service</translation>
+    </message>
+    <message>
+        <source>Ping</source>
+        <translation>Ping</translation>
+    </message>
+    <message>
         <source>Address/Hostname</source>
-        <translation>Adresse/Rechnername</translation>
+        <translation>Adresse/Hostname</translation>
     </message>
     <message>
         <source>User Agent</source>
-        <translation>Benutzerprogramm</translation>
+        <translation>Benutzeragent</translation>
     </message>
     <message>
         <source>Ping Time</source>
-        <translation>Ping-Antwort-Zeit</translation>
+        <translation>Ping Zeit</translation>
     </message>
 </context>
 <context>
@@ -1675,24 +1892,24 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Betrag</translation>
     </message>
     <message>
-        <source>Enter a DYN address (e.g. %1)</source>
-        <translation>DYN-Adresse eingeben (z.B. %1)</translation>
+        <source>Enter a Dynamic address (e.g. %1)</source>
+        <translation>Dynamic Adresse eingeben (zB. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
-        <translation>%1 T</translation>
+        <translation>%1 d</translation>
     </message>
     <message>
         <source>%1 h</source>
-        <translation>%1 St.</translation>
+        <translation>%1 h</translation>
     </message>
     <message>
         <source>%1 m</source>
-        <translation>%1 Min.</translation>
+        <translation>%1 m</translation>
     </message>
     <message>
         <source>%1 s</source>
-        <translation>%1  S</translation>
+        <translation>%1 s</translation>
     </message>
     <message>
         <source>NETWORK</source>
@@ -1704,49 +1921,49 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>None</source>
-        <translation>Keine</translation>
+        <translation>Kein</translation>
     </message>
     <message>
         <source>N/A</source>
-        <translation>k.A.</translation>
+        <translation>N/A</translation>
     </message>
     <message>
         <source>%1 ms</source>
-        <translation>%1 Ms</translation>
+        <translation>%1 ms</translation>
     </message>
 </context>
 <context>
     <name>QRImageWidget</name>
     <message>
         <source>&amp;Save Image...</source>
-        <translation>Grafik &amp;speichern...</translation>
+        <translation>&amp;Bild speichern...</translation>
     </message>
     <message>
         <source>&amp;Copy Image</source>
-        <translation>Grafik &amp;kopieren</translation>
+        <translation>&amp;Bild kopieren</translation>
     </message>
     <message>
         <source>Save QR Code</source>
-        <translation>QR-Code speichern</translation>
+        <translation>QR Code speichern</translation>
     </message>
     <message>
         <source>PNG Image (*.png)</source>
-        <translation>PNG-Grafik (*.png)</translation>
+        <translation>PNG Bild (*.png)</translation>
     </message>
 </context>
 <context>
     <name>RPCConsole</name>
     <message>
         <source>Tools window</source>
-        <translation>Werkzeuge</translation>
+        <translation>Werkzeug Fenster</translation>
     </message>
     <message>
         <source>&amp;Information</source>
-        <translation>&amp;Information</translation>
+        <translation>Information</translation>
     </message>
     <message>
         <source>General</source>
-        <translation>Allgemein</translation>
+        <translation>Generell</translation>
     </message>
     <message>
         <source>Name</source>
@@ -1754,19 +1971,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Client name</source>
-        <translation>Clientname</translation>
+        <translation>Name des Clients</translation>
     </message>
     <message>
         <source>N/A</source>
-        <translation>k.A.</translation>
+        <translation>N/A</translation>
     </message>
     <message>
         <source>Number of connections</source>
-        <translation>Anzahl Verbindungen</translation>
+        <translation>Zahl der Verbindungen</translation>
     </message>
     <message>
-        <source>Open the DYN debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Öffnet die DYN-Debugprotokolldatei aus dem aktuellen Datenverzeichnis. Dies kann bei großen Protokolldateien einige Sekunden dauern.</translation>
+        <source>Open the Dynamic debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Öffnet die Dynamic Debug Log Datei aus dem aktuellen Datenverzeichnis. Bei großen Logdateien kann dies einige Sekunden dauern.</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -1782,15 +1999,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Last block time</source>
-        <translation>Letzte Blockzeit</translation>
+        <translation>Letzte Block Zeit</translation>
+    </message>
+    <message>
+        <source>Memory Pool</source>
+        <translation>Speicherpool</translation>
+    </message>
+    <message>
+        <source>Current number of transactions</source>
+        <translation>Anzahl der aktuellen Transaktionen</translation>
+    </message>
+    <message>
+        <source>Memory usage</source>
+        <translation>Speicherverbrauch</translation>
     </message>
     <message>
         <source>Debug log file</source>
-        <translation>Debugprotokolldatei</translation>
+        <translation>Debug Logdatei</translation>
     </message>
     <message>
         <source>Using OpenSSL version</source>
-        <translation>Verwendete OpenSSL-Version</translation>
+        <translation>OpenSSL Version verwenden</translation>
     </message>
     <message>
         <source>Build date</source>
@@ -1798,23 +2027,39 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Current number of blocks</source>
-        <translation>Aktuelle Anzahl Blöcke</translation>
+        <translation>Anzahl der aktuellen Blocks</translation>
+    </message>
+    <message>
+        <source>CPU Mode:</source>
+        <translation>CPU Modus:</translation>
+    </message>
+    <message>
+        <source>GPU Mode:</source>
+        <translation>GPU Modus:</translation>
+    </message>
+    <message>
+        <source>GPU Mining:</source>
+        <translation>GPU Mining</translation>
     </message>
     <message>
         <source>Client version</source>
-        <translation>Clientversion</translation>
+        <translation>Client Version</translation>
     </message>
     <message>
         <source>Using BerkeleyDB version</source>
-        <translation>Verwendete BerkeleyDB-Version</translation>
+        <translation>Verwendung der BerkeleyDB Version</translation>
+    </message>
+    <message>
+        <source>Datadir</source>
+        <translation>Datenverzeichnis</translation>
     </message>
     <message>
         <source>Block chain</source>
-        <translation>Blockkette</translation>
+        <translation>Blockchain</translation>
     </message>
     <message>
-        <source>Number of dynodes</source>
-        <translation>Anzahl dynodes</translation>
+        <source>Number of Dynodes</source>
+        <translation>Anzahl der Dynodes</translation>
     </message>
     <message>
         <source>&amp;Console</source>
@@ -1822,27 +2067,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Clear console</source>
-        <translation>Konsole zurücksetzen</translation>
+        <translation>Konsole leeren</translation>
     </message>
     <message>
         <source>&amp;Network Traffic</source>
-        <translation>&amp;Netzwerkauslastung</translation>
+        <translation>&amp;Netzwerkverkehr</translation>
     </message>
     <message>
         <source>&amp;Clear</source>
-        <translation>&amp;Zurücksetzen</translation>
+        <translation>&amp;Löschen</translation>
     </message>
     <message>
         <source>Totals</source>
-        <translation>Summen</translation>
+        <translation>Gesamt</translation>
     </message>
     <message>
         <source>Received</source>
-        <translation>Empfangen</translation>
+        <translation>Erhalten</translation>
     </message>
     <message>
         <source>Sent</source>
-        <translation>Überwiesen</translation>
+        <translation>Gesendet</translation>
     </message>
     <message>
         <source>&amp;Peers</source>
@@ -1862,7 +2107,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>User Agent</source>
-        <translation>Benutzerprogramm</translation>
+        <translation>Benutzeragent</translation>
     </message>
     <message>
         <source>Services</source>
@@ -1870,15 +2115,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Starting Height</source>
-        <translation>Ausgangs-Blocknummer</translation>
+        <translation>Starthöhe</translation>
     </message>
     <message>
         <source>Sync Height</source>
-        <translation>Synchronisierte Blocknummer</translation>
+        <translation>Synchöhe</translation>
     </message>
     <message>
         <source>Ban Score</source>
-        <translation>Ausschluss-Punktzahl</translation>
+        <translation>Sperrstand</translation>
     </message>
     <message>
         <source>Connection Time</source>
@@ -1886,75 +2131,76 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Last Send</source>
-        <translation>Letzte Überweisung</translation>
+        <translation>Zuletzt gesendet</translation>
     </message>
     <message>
         <source>Last Receive</source>
-        <translation>Letzter Empfang</translation>
+        <translation>Zuletzt empfangen</translation>
     </message>
     <message>
         <source>Bytes Sent</source>
-        <translation>Bytes gesendet:</translation>
+        <translation>Gesendete Bytes</translation>
     </message>
     <message>
         <source>Bytes Received</source>
-        <translation>Bytes empfangen</translation>
+        <translation>Empfangene Bytes</translation>
     </message>
     <message>
         <source>Ping Time</source>
-        <translation>Ping-Antwort-Zeit</translation>
+        <translation>Pingzeit</translation>
     </message>
     <message>
         <source>&amp;Wallet Repair</source>
-        <translation>&amp;Wallet-Reparatur</translation>
+        <translation>&amp;Gelbörse Reparatur</translation>
     </message>
     <message>
         <source>Salvage wallet</source>
-        <translation>Wallet Datenwiederherstellungen</translation>
+        <translation>Wiederherstellung der Geldbörse</translation>
     </message>
     <message>
         <source>Rescan blockchain files</source>
-        <translation>Dateien der Blockkette erneut durchsuchen</translation>
+        <translation>Dateien der Blockchain erneut scannen</translation>
     </message>
     <message>
         <source>Recover transactions 1</source>
-        <translation>Transaktion wiederherstellen 1</translation>
+        <translation>Transaktionen wiederherstellen 1</translation>
     </message>
     <message>
         <source>Recover transactions 2</source>
-        <translation>Transaktion wiederherstellen 2</translation>
+        <translation>Transaktionen wiederherstellen 2</translation>
     </message>
     <message>
         <source>Upgrade wallet format</source>
-        <translation>Wallet-Format aktualisieren</translation>
+        <translation>Format der Geldbörse aktualisieren</translation>
     </message>
     <message>
         <source>The buttons below will restart the wallet with command-line options to repair the wallet, fix issues with corrupt blockhain files or missing/obsolete transactions.</source>
-        <translation>Diese Buttons starten die Wallet mit Kommandozeilen-Parametern zur Reparatur von etwaigen  Fehlern.</translation>
+        <translation>Die unten angeführten Schaltflächen starten die Geldbörse mit Kommandozeilenoptionen um entweder die Geldbörse zu reparieren, Probleme mit korrupten Blockchain Dateien oder fehlenden/obsoleten Transaktionen zu beheben.</translation>
     </message>
     <message>
         <source>-salvagewallet: Attempt to recover private keys from a corrupt wallet.dat.</source>
-        <translation>-salvagewallet: versucht private Schlüssel aus einer beschädigten wallet.dat wiederherzustellen</translation>
+        <translation>-salvagewallet: Versucht die Wiederherstellung privater Schlüsseln aus einer defekten wallet.dat.</translation>
     </message>
     <message>
         <source>-rescan: Rescan the block chain for missing wallet transactions.</source>
-        <translation>-rescan: Blockkette erneut nach fehlenden Wallet-Transaktionen durchsuchen</translation>
+        <translation>-rescan: Führt einen Rescan der Blockchain nach fehlenden Transaktionen der Geldbörse durch.</translation>
     </message>
     <message>
         <source>-zapwallettxes=1: Recover transactions from blockchain (keep meta-data, e.g. account owner).</source>
-        <translation>-zapwallettxes=1: Transaktion wiederherstellen (Metadaten, z.B. Kontoinhaber, behalten)</translation>
+        <translation>-zapwallettxes=1: Stellt Transaktionen aus der Blockchain wieder her (behält Meta-Daten bei, zB. Kontoinhaber).</translation>
     </message>
     <message>
         <source>-zapwallettxes=2: Recover transactions from blockchain (drop meta-data).</source>
-        <translation>-zapwallettxes=2: Transaktion wiederherstellen (Metadaten verwerfen)</translation>
+        <translation>-zapwallettxes=2: Stellt Transaktionen aus der Blockchain wieder her (entfernt Meta-Daten).</translation>
     </message>
     <message>
+	
         <source>-upgradewallet: Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
-        <translation>Wallet-Format aktualisieren. (dies ist KEINE Aktualisierung des Wallet)</translation>
+        <translation>-upgradewallet: Wallet beim Starten auf das letzte Format aktualisieren. (Info: Das ist keine Aktualisierung der Geldbörse!)</translation>
     </message>
     <message>
         <source>Wallet repair options.</source>
-        <translation>Optionen zur Wallet-Reparatur.</translation>
+        <translation>Optionen zur Reparatur der Gelbörse.</translation>
     </message>
     <message>
         <source>Rebuild index</source>
@@ -1962,31 +2208,31 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>-reindex: Rebuild block chain index from current blk000??.dat files.</source>
-        <translation>-reindex: Blockkettenindex aus aktuellen Dateien blk000??.dat wieder aufbauen</translation>
+        <translation>-reindex: Blockchain Index aus der aktuellen blk000??.dat neu aufbauen.</translation>
     </message>
     <message>
         <source>In:</source>
-        <translation>eingehend:</translation>
+        <translation>Ein:</translation>
     </message>
     <message>
         <source>Out:</source>
-        <translation>ausgehend:</translation>
+        <translation>Aus:</translation>
     </message>
     <message>
-        <source>Welcome to the DYN RPC console.</source>
-        <translation>Willkommen in der DYN RPC-Console.</translation>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>Willkommen bei der %1 RPC Konsole.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Pfeiltaste hoch und runter, um den Verlauf durchzublättern und &lt;b&gt;Strg-L&lt;/b&gt;, um die Konsole zurückzusetzen.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Verwenden Sie die Pfeiltasten rauf und runter, um im Verlauf zu navigieren und %1 um den Schirm zu leeren.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
-        <translation>Bitte &lt;b&gt;help&lt;/b&gt; eingeben, um eine Übersicht verfügbarer Befehle zu erhalten.</translation>
+        <translation>Geben Sie &lt;b&gt;hilfe&lt;/b&gt;ein,  um eine Übersicht aller verfügbaren Befehlseingaben zu erhalten.</translation>
     </message>
     <message>
         <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
-        <translation>WARNUNG: Betrüger versuchen aktiv Nutzer dazu zu bringen Kommandos hier auszuführen um die Wallet Inhalte zu stehlen. Diese Konsole sollte nicht benutzt werden ausser man kennt die möglichen Folgen des Kommandos.</translation>
+        <translation>WARNUNG: Betrüger waren am Werk! Sie versuchen Nutzer dazu zu bringen Kommandos hier auszuführen, um die Inhalte der Geldbörse zu stehlen. Verwenden Sie diese Konsole nicht, ohne die Folgen einer Befehlseingabe zu kennen.</translation>
     </message>
     <message>
         <source>%1 B</source>
@@ -2006,11 +2252,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>via %1</source>
-        <translation>über %1</translation>
+        <translation>via %1</translation>
     </message>
     <message>
         <source>never</source>
-        <translation>niemals</translation>
+        <translation>nie</translation>
     </message>
     <message>
         <source>Inbound</source>
@@ -2026,22 +2272,22 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Fetching...</source>
-        <translation>Am Abrufen...</translation>
+        <translation>Rufe ab...</translation>
     </message>
 </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>Reuse one of the previously used receiving addresses.&lt;br&gt;Reusing addresses has security and privacy issues.&lt;br&gt;Do not use this unless re-generating a payment request made before.</source>
-        <translation>Eine der bereits verwendeten Empfangsadressen wiederverwenden.&lt;br&gt; Addressen wiederzuverwenden birgt Sicherheits- und Datenschutzrisiken.&lt;br&gt; Außer zum Neuerstellen einer bereits erzeugten Zahlungsanforderung sollten Sie dies nicht nutzen.</translation>
+        <translation>Eine der zuvor verwendete Empfangsadressen erneut gebrauchen.&lt;br&gt;Die Wiederverwendung einer Adresse birgt Schwierigkeiten bei der Sicherheit und Datenschutz mit.&lt;br&gt;Verwenden Sie diese Adresse nicht, sofern Sie zuvor eine neue Zahlungsanforderung generiert haben.</translation>
     </message>
     <message>
         <source>R&amp;euse an existing receiving address (not recommended)</source>
-        <translation>Vorhandene Empfangsadresse &amp;wiederverwenden (nicht empfohlen)</translation>
+        <translation>E&amp;ine zuvor verwendete Empfangsadresse gebrauchen (Nicht Empfohlen)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the DYN network.</source>
-        <translation>Eine optionale Nachricht, die an die Zahlungsanforderung angehängt wird. Sie wird angezeigt, wenn die Anforderung geöffnet wird. Hinweis: Diese Nachricht wird nicht mit der Zahlung über das DYN-Netzwerk gesendet.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dynamic network.</source>
+        <translation>Eine optionale Nachricht an die Zahlungsanforderung anhängen, welche angezeigt wird, wenn die Anforderung geöffnet wird. Info: Die Nachricht wird nicht mit der Zahlung über das Dynamic Netzwerk gesendet.</translation>
     </message>
     <message>
         <source>&amp;Message:</source>
@@ -2049,15 +2295,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
-        <translation>Eine optionale Bezeichnung, die der neuen Empfangsadresse zugeordnet wird.</translation>
+        <translation>Eine optionale Bezeichnung, welche  der neuen Empfangsadresse zugeordnet wird.</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the DYN network.</source>
-        <translation>Eine optionale Nachricht, die an die Zahlungsanforderung angehängt wird. Sie wird angezeigt, wenn die Anforderung geöffnet wird.&lt;br&gt; Hinweis: Diese Nachricht wird nicht mit der Zahlung über das DYN-Netzwerk gesendet.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the Dynamic network.</source>
+        <translation>Eine optionale Nachricht an die Zahlungsanforderung anhängen, welche angezeigt wird, wenn die Anforderung geöffnet wird. &lt;br&gt;Info: Die Nachricht wird nicht mit der Zahlung über das Dynamic Netzwerk gesendet.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
-        <translation>Verwenden Sie dieses Formular, um Zahlungen anzufordern. Alle Felder sind &lt;b&gt;optional&lt;/b&gt;.</translation>
+        <translation>Vewenden Sie diese Formular um Zahlungen anzufordern. Alle Felder sind &lt;b&gt;optional&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2065,11 +2311,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>An optional amount to request. Leave this empty or zero to not request a specific amount.</source>
-        <translation>Ein optional angeforderte Betrag. Lassen Sie dieses Feld leer oder setzen Sie es auf 0, um keinen spezifischen Betrag anzufordern.</translation>
+        <translation>Ein optionalen Betrag anfordern. Lassen sie es leer oder auf Null, um keinen bestimmten Betrag anzufordern.</translation>
     </message>
     <message>
         <source>&amp;Amount:</source>
         <translation>&amp;Betrag:</translation>
+    </message>
+    <message>
+        <source>Request InstantSend</source>
+        <translation>InstantSend anfordern</translation>
     </message>
     <message>
         <source>&amp;Request payment</source>
@@ -2077,27 +2327,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Clear all fields of the form.</source>
-        <translation>Alle Formularfelder zurücksetzen.</translation>
+        <translation>Formular zurücksetzen.</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation>Zurücksetzen</translation>
+        <translation>Löschen</translation>
     </message>
     <message>
         <source>Requested payments history</source>
-        <translation>Verlauf der angeforderten Zahlungen</translation>
+        <translation>Zahlungsverlauf anfordern</translation>
     </message>
     <message>
         <source>Show the selected request (does the same as double clicking an entry)</source>
-        <translation>Ausgewählte Zahlungsanforderungen anzeigen (entspricht einem Doppelklick auf einen Eintrag)</translation>
+        <translation>Anzeigen der ausgewählten Anforderungen (macht das selbe wie ein Doppelklick auf einen Eintrag)</translation>
     </message>
     <message>
         <source>Show</source>
-        <translation>Anzeigen</translation>
+        <translation>Zeige</translation>
     </message>
     <message>
         <source>Remove the selected entries from the list</source>
-        <translation>Ausgewählte Einträge aus der Liste entfernen</translation>
+        <translation>Entfernt die ausgewählten Einträge aus der Liste.</translation>
     </message>
     <message>
         <source>Remove</source>
@@ -2120,27 +2370,27 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <name>ReceiveRequestDialog</name>
     <message>
         <source>QR Code</source>
-        <translation>QR-Code</translation>
+        <translation>QR Code</translation>
     </message>
     <message>
         <source>Copy &amp;URI</source>
-        <translation>&amp;URI kopieren</translation>
+        <translation>URI &amp;kopieren</translation>
     </message>
     <message>
         <source>Copy &amp;Address</source>
-        <translation>&amp;Addresse kopieren</translation>
+        <translation>Adresse &amp;kopieren</translation>
     </message>
     <message>
         <source>&amp;Save Image...</source>
-        <translation>Grafik &amp;speichern...</translation>
+        <translation>&amp;Bild speichern...</translation>
     </message>
     <message>
         <source>Request payment to %1</source>
-        <translation>Zahlung anfordern an %1</translation>
+        <translation>Zahlungsanforderung an %1</translation>
     </message>
     <message>
         <source>Payment information</source>
-        <translation>Zahlungsinformationen</translation>
+        <translation>Zahlungsinformation</translation>
     </message>
     <message>
         <source>URI</source>
@@ -2164,11 +2414,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Resulting URI too long, try to reduce the text for label / message.</source>
-        <translation>Resultierende URI ist zu lang, bitte den Text für Bezeichnung/Nachricht kürzen.</translation>
+        <translation>Generierte URI zu lang, versuchen Sie den Text die Bezeichnung / Nachricht zu kürzen.</translation>
     </message>
     <message>
         <source>Error encoding URI into QR Code.</source>
-        <translation>Beim Enkodieren der URI in den QR-Code ist ein Fehler aufgetreten.</translation>
+        <translation>Fehler beim Kodieren der URI in einem QR Code.</translation>
     </message>
 </context>
 <context>
@@ -2180,6 +2430,14 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     <message>
         <source>Label</source>
         <translation>Bezeichnung</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Requested</source>
+        <translation>Angefordert</translation>
     </message>
     <message>
         <source>Message</source>
@@ -2201,20 +2459,36 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <source>(no amount)</source>
         <translation>(kein Betrag)</translation>
     </message>
+    <message>
+        <source>(no amount requested)</source>
+        <translation>(kein Betrag angefordert)</translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsDialog</name>
     <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Warnung: Die Schätzung der Gebühr ist derzeit nicht möglich.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Nur die benötige Gebühr von %1 bezahlen</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Zielsetzung der Bestätigungszeit:</translation>
+    </message>
+    <message>
         <source>Send Coins</source>
-        <translation>DYN überweisen</translation>
+        <translation>Münzen senden</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
-        <translation>"Coin Control"-Funktionen</translation>
+        <translation>Coin Control Funktionen  </translation>
     </message>
     <message>
         <source>Inputs...</source>
-        <translation>Inputs...</translation>
+        <translation>Eingänge...</translation>
     </message>
     <message>
         <source>automatically selected</source>
@@ -2222,15 +2496,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Insufficient funds!</source>
-        <translation>Unzureichender Kontostand!</translation>
+        <translation>Keine ausreichenden Mittel!</translation>
     </message>
     <message>
         <source>Quantity:</source>
-        <translation>Anzahl:</translation>
+        <translation>Menge:</translation>
     </message>
     <message>
         <source>Bytes:</source>
-        <translation>Byte:</translation>
+        <translation>Bytes:</translation>
     </message>
     <message>
         <source>Amount:</source>
@@ -2246,11 +2520,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Fee:</source>
-        <translation>Gebühr:</translation>
+        <translation>Gebühren:</translation>
     </message>
     <message>
         <source>Dust:</source>
-        <translation>"Dust"</translation>
+        <translation>Dust:</translation>
     </message>
     <message>
         <source>no</source>
@@ -2258,7 +2532,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>After Fee:</source>
-        <translation>Abzüglich Gebühr:</translation>
+        <translation>Abzüglich Gebühren:</translation>
     </message>
     <message>
         <source>Change:</source>
@@ -2266,11 +2540,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
-        <translation>Wenn dies aktivert, und die Wechselgeld-Adresse leer oder ungültig ist, wird das Wechselgeld einer neu erzeugten Adresse gutgeschrieben.</translation>
+        <translation>Wenn das aktiviert ist, aber die Adresse des Wecheslgeldes leer oder ungültig ist, wird das Wechselgeld an einer neu generierten Adresse gesendet.</translation>
     </message>
     <message>
         <source>Custom change address</source>
-        <translation>Benutzerdefinierte Wechselgeld-Adresse</translation>
+        <translation>Benutzerdefinierte Wechselgeld Adresse</translation>
     </message>
     <message>
         <source>Transaction Fee:</source>
@@ -2278,7 +2552,11 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Choose...</source>
-        <translation>Auswählen...</translation>
+        <translation>Wählen...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verstecken</translation>
     </message>
     <message>
         <source>collapse fee-settings</source>
@@ -2289,20 +2567,20 @@ https://www.transifex.com/projects/p/dynamic/</translation>
         <translation>Minimieren</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Wenn die benutzerdefinierten Gebühren auf 1000 satoshis gesetzt sind und eine Transaktion hat nur 250 Bytes, dann kostet "pro Kilobyte" nur 250 satoshis Gebühren,&lt;br/&gt; während "mindestens" 1000 satoshis kostet. Transaktionen größer als 1 Kilobyte werden immer pro Kilobyte bezahlt.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 Satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Wenn die Benutzerdefinierte Gebühr auf 1000 festgelegt wird und die Transaktion nur 250 bytes groß ist, werden  &quot;per kilobyte&quot; nur 250 Satoshis an Gebühr fällig;br /&gt;während&quot;mindestens&quot; 1000 satoshis bezahlt werden müssen. Für Transaktionen, die größer als 1 Kilobyte bezahlen beide per Kilobyte.</translation>
     </message>
     <message>
-        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee,&lt;br /&gt;while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Wenn die benutzerdefinierten Gebühren auf 1000 satoshis gesetzt sind und eine Transaktion hat nur 250 Bytes, dann kostet "pro Kilobyte" nur 250 satoshis Gebühren, während "mindestens" 1000 satoshis kostet. Transaktionen größer als 1 Kilobyte werden immer pro Kilobyte bezahlt.</translation>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Wenn die Benutzerdefinierte Gebühr auf 1000 festgelegt wird und die Transaktion nur 250 bytes groß ist, werden ,&quot;per kilobyte&quot; nur 250 Satoshis an Gebühr fällig,&lt;br /&gt;während&quot;mindestens 1000 satoshis satoshis bezahlt werden müssen. Für Transaktionen, die größer als 1 Kilobyte bezahlen beide per Kilobyte.</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for dynamic transactions than the network can process.</source>
-        <translation>Nur die minimalen Gebühren zu zahlen ist völlig ausreichend so lange in einem neuen Block der Blockkette noch genug Platz für neue Transaktionen ist.&lt;br /&gt; Bitte beachten Sie dass wenn dies in der Zukunft nicht mehr der Fall sein sollte Ihre Transaktion eventuell niemals in einen neuen Block aufgenommen werden wird, also niemals bestätigt wird.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for Dynamic transactions than the network can process.</source>
+        <translation>Nur das Minimum an Gebühren zu bezahlen ist solange in Orndung, sofern das Transaktionsvolumen kleiner ist als es Speicher in den Blocken gibt.&lt;br /&gt;Geben Sie acht! Sofern es zu mehr Anfragen für Dynamic Transaktionen kommt, kann es passieren, dass die Transaktion niemals bestätigt wird .</translation>
     </message>
     <message>
         <source>per kilobyte</source>
-        <translation>pro Kilobyte</translation>
+        <translation>pro kilobyte</translation>
     </message>
     <message>
         <source>total at least</source>
@@ -2310,7 +2588,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>(read the tooltip)</source>
-        <translation>(Kurzinfo lesen)</translation>
+        <translation>(Kurzinfo beachten)</translation>
     </message>
     <message>
         <source>Recommended:</source>
@@ -2322,7 +2600,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
-        <translation>("Intelligente" Gebühren sind noch nicht initialisiert. Dies dauert normalerweise ein paar Blöcke...)</translation>
+        <translation>(Intelligende Gebühren wurden noch nicht initialisiert. Dies dauert gewöhlich ein paar Blöcke...)</translation>
     </message>
     <message>
         <source>Confirmation time:</source>
@@ -2338,7 +2616,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Send as zero-fee transaction if possible</source>
-        <translation>Wenn möglich als gebührenfreie Transaktion versenden</translation>
+        <translation>Wenn möglich, als gebührenfreie Transaktion versenden</translation>
     </message>
     <message>
         <source>(confirmation may take longer)</source>
@@ -2350,19 +2628,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>S&amp;end</source>
-        <translation>&amp;Überweisen</translation>
+        <translation>S&amp;enden</translation>
     </message>
     <message>
         <source>Clear all fields of the form.</source>
-        <translation>Alle Formularfelder zurücksetzen.</translation>
+        <translation>Formular zurücksetzen.</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
-        <translation>&amp;Zurücksetzen</translation>
+        <translation>Alles &amp;zurücksetzen</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
-        <translation>An mehrere Empfänger auf einmal überweisen</translation>
+        <translation>An mehreren Empfängern gleichzeitig senden</translation>
     </message>
     <message>
         <source>Add &amp;Recipient</source>
@@ -2382,7 +2660,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Copy quantity</source>
-        <translation>Anzahl kopieren</translation>
+        <translation>Menge kopieren</translation>
     </message>
     <message>
         <source>Copy amount</source>
@@ -2390,7 +2668,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Copy fee</source>
-        <translation>Gebühr kopieren</translation>
+        <translation>Copiar comisión</translation>
     </message>
     <message>
         <source>Copy after fee</source>
@@ -2398,7 +2676,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Copy bytes</source>
-        <translation>Byte kopieren</translation>
+        <translation>Bytes kopieren</translation>
     </message>
     <message>
         <source>Copy priority</source>
@@ -2406,7 +2684,7 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Copy dust</source>
-        <translation>"Dust" Betrag kopieren</translation>
+        <translation>Dust kopieren</translation>
     </message>
     <message>
         <source>Copy change</source>
@@ -2414,19 +2692,19 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>using</source>
-        <translation>mittels</translation>
+        <translation>Gebrauch</translation>
     </message>
     <message>
         <source>anonymous funds</source>
-        <translation>anonymisierte Coins</translation>
+        <translation>Anonyme Mittel</translation>
     </message>
     <message>
         <source>(privatesend requires this amount to be rounded up to the nearest %1).</source>
-        <translation>(PrivateSend verlangt, dass dieser Betrag auf den nächsten %1 aufgerundet wird)</translation>
+        <translation>(privatesend benötigt eine Aufrundung dieses Betrags auf die nächsten %1).</translation>
     </message>
     <message>
         <source>any available funds (not recommended)</source>
-        <translation>beliebiger verfügbarer Coins (nicht empfohlen)</translation>
+        <translation>Alle verfügbaren Mittel (nicht empfohlen)</translation>
     </message>
     <message>
         <source>and InstantSend</source>
@@ -2434,15 +2712,15 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>%1 to %2</source>
-        <translation>%1 an %2</translation>
+        <translation>%1 a %2</translation>
     </message>
     <message>
         <source>Are you sure you want to send?</source>
-        <translation>Wollen Sie die Überweisung ausführen?</translation>
+        <translation>Wollen Sie die Überweisung wirklich durchführen?</translation>
     </message>
     <message>
         <source>are added as transaction fee</source>
-        <translation>werden als Transaktionsgebühr hinzugefügt</translation>
+        <translation>sind als Transaktionsgebühr hinzugefügt</translation>
     </message>
     <message>
         <source>Total Amount = &lt;b&gt;%1&lt;/b&gt;&lt;br /&gt;= %2</source>
@@ -2450,64 +2728,65 @@ https://www.transifex.com/projects/p/dynamic/</translation>
     </message>
     <message>
         <source>Confirm send coins</source>
-        <translation>Überweisung bestätigen</translation>
+        <translation>Senden der Münzen bestätigen</translation>
     </message>
     <message>
         <source>A fee %1 times higher than %2 per kB is considered an insanely high fee.</source>
-        <translation>Gebühren %1 x höher als %2 pro Kilobyte sind wahnsinnig überhöht.</translation>
+        <translation>Eine Gebühr, die %1 höher als %2 per kB ist, gilt als eine viel zu hohe Gebühr</translation>
     </message>
     <message numerus="yes">
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>Geschätzter Beginn der Bestätigung in %n Block.</numerusform><numerusform>Geschätzter Beginn der Bestätigung in %n Blocks.</numerusform></translation>
+        <translation>
+            <numerusform>Geschätzer Beginn der Bestätigung innerhalb von %n Blocke(n).</numerusform>
+        </translation>
     </message>
     <message>
         <source>The recipient address is not valid, please recheck.</source>
-        <translation>Die Zahlungsadresse ist ungültig, bitte nochmals überprüfen.</translation>
+        <translation>Die Empfangsadresse ist nicht gültig, bitte Überprüfen.</translation>
     </message>
     <message>
         <source>&lt;b&gt;(%1 of %2 entries displayed)&lt;/b&gt;</source>
-        <translation>&lt;b&gt;(%1 von %2 Einträgen angezeigt)&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;(%1 de %2 Einträge angezeigt)&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The amount to pay must be larger than 0.</source>
-        <translation>Der zu zahlende Betrag muss größer als 0 sein.</translation>
+        <translation>Der zu bezahlende Betrag muss grösser als 0 sein.</translation>
     </message>
     <message>
         <source>The amount exceeds your balance.</source>
-        <translation>Der angegebene Betrag übersteigt ihren Kontostand.</translation>
+        <translation>Der Betrag ist höher als Ihr Kontostand .</translation>
     </message>
     <message>
         <source>The total exceeds your balance when the %1 transaction fee is included.</source>
-        <translation>Der angegebene Betrag übersteigt aufgrund der Transaktionsgebühr in Höhe von %1 ihren Kontostand.</translation>
+        <translation>Die Summe ist höher als Ihr Kontostand, wenn die %1 Transaktionsgebühr inkludiert sind.</translation>
     </message>
     <message>
         <source>Duplicate address found, can only send to each address once per send operation.</source>
-        <translation>Doppelte Zahlungsadresse gefunden, pro Überweisung kann an jede Adresse nur einmalig etwas überwiesen werden.</translation>
+        <translation>Doppelte Adressen gefunden, kann nur einmal pro Sendevorgang an jede Adresse gesendet werden .</translation>
     </message>
     <message>
         <source>Transaction creation failed!</source>
-        <translation>Transaktionserstellung fehlgeschlagen!</translation>
+        <translation>Erstellung der Transaktion fehlgeschlagen!</translation>
     </message>
     <message>
         <source>The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation>Die Transaktion wurde abgelehnt! 
-Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden. Beispielsweise weil Sie eine Kopie ihrer wallet.dat nutzten und die DYN dort ausgegeben haben. Diese Ausgaben sind in diesem Fall in der derzeit aktiven Wallet nicht vermerkt.</translation>
+        <translation>Die Transaktion wurde zurückgewiesen! Dies kann passieren, wenn Münzen aus Ihrer Geldbörse bereits ausgegeben wurden. Wenn Sie zum Beispiel eine Kopie der wallet.dat verwendet haben, wurden die Münzen zwar in der Kopie ausgegeben, jedoch hier nicht als ausgegeben markiert </translation>
     </message>
     <message>
         <source>Error: The wallet was unlocked only to anonymize coins.</source>
-        <translation>Fehler: das Wallet wurde nur zum Anonymisieren entsperrt.</translation>
+        <translation>Fehler: Die Geldbörse wurde nur zur Anonymisierung der Münzen entsperrt.</translation>
     </message>
     <message>
         <source>Pay only the minimum fee of %1</source>
-        <translation>Nur die minimalen Gebühren von %1 zahlen</translation>
+        <translation>Nur die minimalen Gebühren von %1 bezahlen</translation>
     </message>
     <message>
-        <source>Warning: Invalid DYN address</source>
-        <translation>Warnung: ungültige DYN-Adresse</translation>
+        <source>Warning: Invalid Dynamic address</source>
+        <translation>Warnung: Ungültige Dynamic Adresse</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
-        <translation>Warnung: Unbekannte Wechselgeld-Adresse</translation>
+        <translation>Warnung: Unbekannte Wechselgeld Adresse</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -2517,16 +2796,20 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
 <context>
     <name>SendCoinsEntry</name>
     <message>
+        <source>S&amp;ubtract fee from amount</source>
+        <translation>G&amp;ebühren vom Betrag abziehen</translation>
+    </message>
+    <message>
         <source>This is a normal payment.</source>
-        <translation>Dies ist eine normale Überweisung.</translation>
+        <translation>Das ist eine normale Zahlung.</translation>
     </message>
     <message>
         <source>Pay &amp;To:</source>
-        <translation>E&amp;mpfänger:</translation>
+        <translation>Zahlungsempfänger:</translation>
     </message>
     <message>
-        <source>The DYN address to send the payment to</source>
-        <translation>DYN-Adresse, an die überwiesen werden soll</translation>
+        <source>The Dynamic address to send the payment to</source>
+        <translation>Die Dynamic Adresse, an welcher überwiesen werden soll</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2537,7 +2820,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Alt+A</translation>
     </message>
     <message>
-        <source>Paste address from clipboard</source>
+        <source>Paste address frAdresse aus der Zwischenablage einfügenom clipboard</source>
         <translation>Adresse aus der Zwischenablage einfügen</translation>
     </message>
     <message>
@@ -2554,27 +2837,31 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Enter a label for this address to add it to the list of used addresses</source>
-        <translation>Adressbezeichnung eingeben, die dann zusammen mit der Adresse der Liste bereits verwendeter Adressen hinzugefügt wird.</translation>
+        <translation>Geben Sie eine Bezeichnung für die Adresse ein, um sie zu der Liste der verwendeten Adressen hinzuzufügen</translation>
     </message>
     <message>
         <source>A&amp;mount:</source>
-        <translation>Betra&amp;g:</translation>
+        <translation>B&amp;etrag:</translation>
     </message>
     <message>
         <source>Message:</source>
         <translation>Nachricht:</translation>
     </message>
     <message>
-        <source>A message that was attached to the dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the DYN network.</source>
-        <translation>Eine an die "dynamic:"-URI angefügte Nachricht, die zusammen mit der Transaktion gespeichert wird. Hinweis: Diese Nachricht wird nicht über das DYN-Netzwerk gesendet.</translation>
+        <source>A message that was attached to the dynamic: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dynamic network.</source>
+        <translation>Eine Nachricht wurde an Dymamic : URI angehängt, welche mit der Transaktion als Referez gespeichert wird. Info: Die Nachricht wird nicht über das Dynamic Netzwerk gesendet.</translation>
+    </message>
+    <message>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Dynamic than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>Die Gebühr wird vom gesendeten Betrag abgezogen. Der Empfänger wird einen niedrigeren Betrag erhalten, als im Betragfeld eingegeben worden ist. Wenn mehrere Empfänger ausgewählt wurden, wird die Gebühr gleichmäßig aufgeteilt.</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 satoshis in fee,&lt;br /&gt;while &quot;at least&quot; pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Wenn die Benutzerdefinierte Gebühr auf 1000 festgelegt wird und die Transaktion nur 250 bytes groß ist, werden&quot;per kilobyte&quot; nur 250 Satoshis an Gebühr fällig,&lt;br /&gt;während &quot;mindestens&quot; 1000 satoshis bezahlt werden müssen. Für Transaktionen, die größer als 1 Kilobyte bezahlen beide per Kilobyte.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
-        <translation>Dies is eine unverifizierte Zahlungsanforderung.</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>Empfänger:</translation>
+        <translation>Das ist eine nicht verifizierte Zahlungsanforderung.</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2582,41 +2869,55 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>This is a verified payment request.</source>
-        <translation>Dies is eine verifizierte Zahlungsanforderung.</translation>
+        <translation>Das ist eine verifizierte Zahlungsanforderung.</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
-        <translation>Adressbezeichnung eingeben (diese wird zusammen mit der Adresse dem Adressbuch hinzugefügt)</translation>
+        <translation>Geben Sie eine Bezeichnung für die Adresse ein, um sie zum Adressbuch hinzuzufügen</translation>
+    </message>
+</context>
+<context>
+    <name>payToLabel_is</name>
+    <message>
+        <source>Pay &amp;To:</source>
+        <translation>Zahlungsempfänger:</translation>
+    </message>
+</context>
+<context>
+    <name>payToLabel_s</name>
+    <message>
+        <source>Pay &amp;To:</source>
+        <translation>Zahlungsempfänger:</translation>
     </message>
 </context>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>DYN Core is shutting down...</source>
-        <translation>DYN-Core wird herunter gefahren...</translation>
+        <source>Dynamic is shutting down...</source>
+        <translation>Dynamic wird heruntergefahren... </translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
-        <translation>Fahren Sie den Computer nicht herunter, bevor dieses Fenster verschwindet.</translation>
+        <translation>Schalten Sie Ihren Computer nicht aus, bevor sich dieses Fenster nicht schließt.</translation>
     </message>
 </context>
 <context>
     <name>SignVerifyMessageDialog</name>
     <message>
         <source>Signatures - Sign / Verify a Message</source>
-        <translation>Signaturen - eine Nachricht signieren / verifizieren</translation>
+        <translation>Signaturen - Signieren / Eine Nachricht verifizieren</translation>
     </message>
     <message>
         <source>&amp;Sign Message</source>
-        <translation>Nachricht &amp;signieren</translation>
+        <translation>&amp;Nachricht signieren</translation>
     </message>
     <message>
         <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Sie können Nachrichten mit ihren Adressen signieren, um den Besitz dieser Adressen zu beweisen. Bitte nutzen Sie diese Funktion mit Vorsicht und nehmen Sie sich vor Phishingangriffen in Acht. Signieren Sie nur Nachrichten, mit denen Sie vollständig einverstanden sind.</translation>
+        <translation>Sie können Nachrichten mit Ihren Adressen signieren, um Ihren Besitz nachzuweisen . Seien Sie vorsichtig und signieren Sie nichts Unbekanntes, da Pishingangriffe versuchen Sie auszutricksen, um mit Ihrer Identität zu signieren . Signieren Sie nur vollständige und detailierte Statements, mit denen Sie einverstanden sind.</translation>
     </message>
     <message>
-        <source>The DYN address to sign the message with</source>
-        <translation>DYN-Adresse, mit der die Nachricht signiert werden soll</translation>
+        <source>The Dynamic address to sign the message with</source>
+        <translation>Die Dynamic Adresse, mit welcher die Nachricht signiert werden soll</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2636,7 +2937,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Enter the message you want to sign here</source>
-        <translation>Zu signierende Nachricht hier eingeben</translation>
+        <translation>Geben Sie hier die Nachricht ein, die Sie signieren möchten</translation>
     </message>
     <message>
         <source>Signature</source>
@@ -2644,55 +2945,55 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Copy the current signature to the system clipboard</source>
-        <translation>Aktuelle Signatur in die Zwischenablage kopieren</translation>
+        <translation>Kopieren der aktuellen Signatur in den Zwischenspeicher des Systems.</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this DYN address</source>
-        <translation>Die Nachricht signieren, um den Besitz dieser DYN-Adresse zu belegen</translation>
+        <source>Sign the message to prove you own this Dynamic address</source>
+        <translation>Signieren der Nachricht um zu beweisen, dass Sie der Besitzer sind </translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
-        <translation>&amp;Nachricht signieren</translation>
+        <translation>Nachricht &amp;signieren</translation>
     </message>
     <message>
         <source>Reset all sign message fields</source>
-        <translation>Alle "Nachricht signieren"-Felder zurücksetzen</translation>
+        <translation>Alle Signaturfelder zurücksetzen</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
-        <translation>&amp;Zurücksetzen</translation>
+        <translation>ALLES &amp;löschen</translation>
     </message>
     <message>
         <source>&amp;Verify Message</source>
-        <translation>Nachricht &amp;verifizieren</translation>
-    </message>
-    <message>
-        <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation>Geben Sie die signierende Adresse, Nachricht (achten Sie darauf Zeilenumbrüche, Leerzeichen, Tabulatoren usw. exakt zu kopieren) und Signatur unten ein, um die Nachricht zu verifizieren. Vorsicht, interpretieren Sie nicht mehr in die Signatur hinein, als in der signierten Nachricht selber enthalten ist, um nicht von einem Man-in-the-middle-Angriff hinters Licht geführt zu werden.</translation>
-    </message>
-    <message>
-        <source>The DYN address the message was signed with</source>
-        <translation>DYN-Adresse, mit der die Nachricht signiert worden ist</translation>
-    </message>
-    <message>
-        <source>Verify the message to ensure it was signed with the specified DYN address</source>
-        <translation>Die Nachricht verifizieren, um sicherzustellen, dass diese mit der angegebenen DYN-Adresse signiert wurde</translation>
-    </message>
-    <message>
-        <source>Verify &amp;Message</source>
         <translation>&amp;Nachricht verifizieren</translation>
     </message>
     <message>
-        <source>Reset all verify message fields</source>
-        <translation>Alle "Nachricht verifizieren"-Felder zurücksetzen</translation>
+        <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
+        <translation>Signierte Adresse, Nachricht (Sicherstellen, daß Sie Zeilenumbrüche, Leerzeichen, Tabulatoren usw. genau kopieren.) und Signatur unterhalb einfügen um die Nachricht zu verifizieren. Beachten Sie nicht mehr in der Signatur einzulesen, als in der signierten Nachricht selbst enthalten ist, um nicht von man-in-the-middle Angriffe ausgetrickst zu werden</translation>
     </message>
     <message>
-        <source>Click "Sign Message" to generate signature</source>
-        <translation>Auf "Nachricht signieren" klicken, um die Signatur zu erzeugen</translation>
+        <source>The Dynamic address the message was signed with</source>
+        <translation>Die Dynamic Adresse, mit welcher die Nachricht signiert wurde</translation>
+    </message>
+    <message>
+        <source>Verify the message to ensure it was signed with the specified Dynamic address</source>
+        <translation>Verifizieren der Nachricht, um sicherzustellen, dass sie mit der spezifischen Dynamic Adresse signiert wurde</translation>
+    </message>
+    <message>
+        <source>Verify &amp;Message</source>
+        <translation>Nachricht &amp;verifizieren</translation>
+    </message>
+    <message>
+        <source>Reset all verify message fields</source>
+        <translation>Alle verifizierte Nachrichtfelder löschen</translation>
+    </message>
+    <message>
+        <source>Click &quot;Sign Message&quot; to generate signature</source>
+        <translation>Nachricht signieren en&quot;klicken&quot;um eine Signatur zu generieren</translation>
     </message>
     <message>
         <source>The entered address is invalid.</source>
-        <translation>Die eingegebene Adresse ist ungültig.</translation>
+        <translation>Die eingebene Adresse is ungültig.</translation>
     </message>
     <message>
         <source>Please check the address and try again.</source>
@@ -2700,19 +3001,19 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>The entered address does not refer to a key.</source>
-        <translation>Die eingegebene Adresse verweist nicht auf einen Schlüssel.</translation>
+        <translation>Die eingegebene Adresse bezieht sich nicht auf einen Schlüssel.</translation>
     </message>
     <message>
         <source>Wallet unlock was cancelled.</source>
-        <translation>Wallet-Entsperrung wurde abgebrochen.</translation>
+        <translation>Die Entsperrung der Geldbörse wurde abgebrochen.</translation>
     </message>
     <message>
         <source>Private key for the entered address is not available.</source>
-        <translation>Privater Schlüssel zur eingegebenen Adresse ist nicht verfügbar.</translation>
+        <translation>Der private Schlüssel der eingegeben Adresse ist nicht verfügbar.</translation>
     </message>
     <message>
         <source>Message signing failed.</source>
-        <translation>Signierung der Nachricht fehlgeschlagen.</translation>
+        <translation>Signieren der Nachricht fehlgeschlagen.</translation>
     </message>
     <message>
         <source>Message signed.</source>
@@ -2720,7 +3021,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>The signature could not be decoded.</source>
-        <translation>Die Signatur konnte nicht dekodiert werden.</translation>
+        <translation>Die Signatur konnte nicht entschlüsselt werden.</translation>
     </message>
     <message>
         <source>Please check the signature and try again.</source>
@@ -2728,11 +3029,11 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>The signature did not match the message digest.</source>
-        <translation>Die Signatur entspricht nicht dem "Message Digest".</translation>
+        <translation>Die Signatur stimmt nicht mit dem Hashwert der Nachricht überein .</translation>
     </message>
     <message>
         <source>Message verification failed.</source>
-        <translation>Verifikation der Nachricht fehlgeschlagen.</translation>
+        <translation>Sie Verifizierung der Nachricht ist fehlgeschlagen.</translation>
     </message>
     <message>
         <source>Message verified.</source>
@@ -2742,24 +3043,24 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>DYN Core</source>
-        <translation>DYN Core</translation>
+        <source>Dynamic</source>
+        <translation>Dynamic</translation>
     </message>
     <message>
         <source>Version %1</source>
         <translation>Version %1</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Die "Bitcoin Core"-Entwickler</translation>
+        <source>The Dynamic developers</source>
+        <translation>Die Dynamic Entwickler</translation>
     </message>
     <message>
-        <source>The DYN Core developers</source>
-        <translation>Die "DYN Core"-Entwickler</translation>
+        <source>The Bitcoin Core developers</source>
+        <translation>Die Bitcoin Core Entwickler</translation>
     </message>
     <message>
         <source>[testnet]</source>
-        <translation>[Testnetz]</translation>
+        <translation>[testnet]</translation>
     </message>
 </context>
 <context>
@@ -2773,27 +3074,29 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Geöffnet für %n weiteren Block</numerusform><numerusform>Geöffnet für %n weitere Blöcke</numerusform></translation>
+        <translation>
+            <numerusform>Offen für %n mehr Block(e)</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
-        <translation>Offen bis %1</translation>
+        <translation>Offen bis um %1</translation>
     </message>
     <message>
         <source>conflicted</source>
-        <translation>in Konflikt stehend</translation>
+        <translation>Im Konflikt</translation>
     </message>
     <message>
         <source>%1/offline (verified via instantsend)</source>
-        <translation>%1/offline (Überprüft durch InstantSend)</translation>
+        <translation>%1/offline (über instantsend verifiziert)</translation>
     </message>
     <message>
         <source>%1/confirmed (verified via instantsend)</source>
-        <translation>%1/bestätigt (Überprüft durch InstantSend)</translation>
+        <translation>%1/bestätigt (über instantsend verifiziert)</translation>
     </message>
     <message>
         <source>%1 confirmations (verified via instantsend)</source>
-        <translation>%1 Bestätigungen (Überprüft durch InstantSend)</translation>
+        <translation>%1 Bestätigungen (über instantsend verifiziert)</translation>
     </message>
     <message>
         <source>%1/offline</source>
@@ -2809,35 +3112,37 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>%1/offline (InstantSend verification in progress - %2 of %3 signatures)</source>
-        <translation>%1/offline (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
+        <translation>%1/offline (InstantSend Verifikation in Bearbeitung) - %2 von %3 Signaturen)</translation>
     </message>
     <message>
         <source>%1/confirmed (InstantSend verification in progress - %2 of %3 signatures )</source>
-        <translation>%1/bestätigt (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
+        <translation>%1/bestätigt (InstantSend Verifikation in Bearbeitung) - %2 von %3 Signaturen)</translation>
     </message>
     <message>
         <source>%1 confirmations (InstantSend verification in progress - %2 of %3 signatures)</source>
-        <translation>%1 Bestätigungen (Überprüfung durch InstantSend - %2 von %3 Signaturen)</translation>
+        <translation>%1 Bestätigungen (InstantSend Verifikation in Bearbeitun) - %2 von %3 Signaturen)</translation>
     </message>
     <message>
         <source>%1/offline (InstantSend verification failed)</source>
-        <translation>%1/offline (Überprüfung durch InstantSend fehlgeschlagen)</translation>
+        <translation>%1/offline  (InstantSend Verifikation fehlgeschlagen)</translation>
     </message>
     <message>
         <source>%1/confirmed (InstantSend verification failed)</source>
-        <translation>%1/bestätigt (Überprüfung durch InstantSend fehlgeschlagen)</translation>
+        <translation>%1/bestätigt (InstantSend Verifikation fehlgeschlagen)</translation>
     </message>
     <message>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <source>, has not been successfully broadcast yet</source>
-        <translation>, wurde noch nicht erfolgreich übertragen</translation>
+        <source>has not been successfully broadcast yet</source>
+        <translation>wurde noch nicht erfolgreich übertragen </translation>
     </message>
     <message numerus="yes">
         <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>, über %n Knoten übertragen</numerusform><numerusform>, über %n Knoten übertragen</numerusform></translation>
+        <translation>
+            <numerusform>, übermittelt über %n Knoten</numerusform>
+        </translation>
     </message>
     <message>
         <source>Date</source>
@@ -2849,7 +3154,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Generated</source>
-        <translation>Erzeugt</translation>
+        <translation>Generiert</translation>
     </message>
     <message>
         <source>From</source>
@@ -2869,7 +3174,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>watch-only</source>
-        <translation>beobachtet</translation>
+        <translation>Nur zur Beobachtung</translation>
     </message>
     <message>
         <source>label</source>
@@ -2881,11 +3186,13 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message numerus="yes">
         <source>matures in %n more block(s)</source>
-        <translation><numerusform>reift noch %n Block</numerusform><numerusform>reift noch %n weitere Blöcke</numerusform></translation>
+        <translation>
+            <numerusform>Reifung in %n Block(e)</numerusform>
+        </translation>
     </message>
     <message>
         <source>not accepted</source>
-        <translation>nicht angenommen</translation>
+        <translation>nicht akzeptiert</translation>
     </message>
     <message>
         <source>Debit</source>
@@ -2893,11 +3200,11 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Total debit</source>
-        <translation>Gesamtbelastung</translation>
+        <translation>Gesamte Belastung</translation>
     </message>
     <message>
         <source>Total credit</source>
-        <translation>Gesamtgutschrift</translation>
+        <translation>Gesamte Gutschrift</translation>
     </message>
     <message>
         <source>Transaction fee</source>
@@ -2920,16 +3227,24 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
         <translation>Transaktions-ID</translation>
     </message>
     <message>
+        <source>Output index</source>
+        <translation>Ausgabeindex</translation>
+    </message>
+    <message>
+        <source>Transaction total size</source>
+        <translation>Gesamtgröße der Transaktion</translation>
+    </message>
+    <message>
         <source>Merchant</source>
         <translation>Händler</translation>
     </message>
     <message>
-        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to "not accepted" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>Erzeugte DYN müssen %1 Blöcke lang reifen, bevor sie ausgegeben werden können. Als Sie diesen Block erzeugten, wurde er an das Netzwerk übertragen, um ihn der Blockkette hinzuzufügen. Falls dies fehlschlägt wird der Status in "nicht angenommen" geändert und Sie werden keine DYN gutgeschrieben bekommen. Das kann gelegentlich passieren, wenn ein anderer Knoten einen Block fast zeitgleich erzeugt.</translation>
+        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <translation>Generierte Münzen müssen %1 Blöcke reifen, bevor sie ausgegeben werden können. Wenn Sie diesen Block generiert haben, wurde dieser an das Netzwerk übermittelt um zu der Blockchain hinzugefügt zu werden. Falls die Übermittlung fehlschlägt, wird dessen Status geändert auf &quot;nicht akzeptiert&quot; und es wird nicht möglich sein ihn auszugeben. Dies passiert gelegentlich, wenn ein anderer Knoten innerhalb weniger Sekunden auch einen Block erzeugt.</translation>
     </message>
     <message>
         <source>Debug information</source>
-        <translation>Debuginformationen</translation>
+        <translation>Debug Information</translation>
     </message>
     <message>
         <source>Transaction</source>
@@ -2937,7 +3252,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Inputs</source>
-        <translation>Eingaben</translation>
+        <translation>Eingehende</translation>
     </message>
     <message>
         <source>Amount</source>
@@ -2945,7 +3260,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>true</source>
-        <translation>wahr</translation>
+        <translation>richtig</translation>
     </message>
     <message>
         <source>false</source>
@@ -2955,12 +3270,16 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
 <context>
     <name>TransactionDescDialog</name>
     <message>
+        <source>Details for %1</source>
+        <translation>Details für %1</translation>
+    </message>
+    <message>
         <source>Transaction details</source>
         <translation>Transaktionsdetails</translation>
     </message>
     <message>
         <source>This pane shows a detailed description of the transaction</source>
-        <translation>Dieser Bereich zeigt eine detaillierte Beschreibung der Transaktion an</translation>
+        <translation>Dieses Feld zeigt eine detailierte Beschreibung der Transaktion an.</translation>
     </message>
 </context>
 <context>
@@ -2971,19 +3290,25 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Type</source>
-        <translation>Typ</translation>
+        <translation>Art</translation>
     </message>
     <message>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
+    <message>
+        <source>Address / Label</source>
+        <translation>Adresse / Bezeichnung</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Geöffnet für %n weiteren Block</numerusform><numerusform>Geöffnet für %n weitere Blöcke</numerusform></translation>
+        <translation>
+            <numerusform>Offen für %n mehr Block(e)</numerusform>
+        </translation>
     </message>
     <message>
         <source>Open until %1</source>
-        <translation>Offen bis %1</translation>
+        <translation>Offen bis um %1 </translation>
     </message>
     <message>
         <source>Offline</source>
@@ -2995,7 +3320,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Confirming (%1 of %2 recommended confirmations)</source>
-        <translation>Wird bestätigt (%1 von %2 empfohlenen Bestätigungen)</translation>
+        <translation>Bestätige (%1 von %2 empfohlene Bestätigungen)</translation>
     </message>
     <message>
         <source>Confirmed (%1 confirmations)</source>
@@ -3003,23 +3328,23 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Conflicted</source>
-        <translation>in Konflikt stehend</translation>
+        <translation>Im Konflikt</translation>
     </message>
     <message>
         <source>Immature (%1 confirmations, will be available after %2)</source>
-        <translation>Unreif (%1 Bestätigungen, wird verfügbar sein nach %2)</translation>
+        <translation>Unreif (%1 Bestätigungen, wird nach %2 verfügbar)</translation>
     </message>
     <message>
         <source>This block was not received by any other nodes and will probably not be accepted!</source>
-        <translation>Dieser Block wurde von keinem anderen Knoten empfangen und wird wahrscheinlich nicht angenommen werden!</translation>
+        <translation>Dieser Block wurde nicht von anderen Knoten empfangen und wird wahrscheinlich nicht akzeptiert!</translation>
     </message>
     <message>
         <source>Generated but not accepted</source>
-        <translation>Erzeugt, jedoch nicht angenommen</translation>
+        <translation>Generiert aber nicht akzeptiert</translation>
     </message>
     <message>
         <source>Received with</source>
-        <translation>Empfangen über</translation>
+        <translation>Empfangen mit</translation>
     </message>
     <message>
         <source>Received from</source>
@@ -3027,11 +3352,11 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Received via PrivateSend</source>
-        <translation>über/durch PrivateSend empfangen</translation>
+        <translation>Empfangen über PrivateSend</translation>
     </message>
     <message>
         <source>Sent to</source>
-        <translation>Überwiesen an</translation>
+        <translation>Senden an</translation>
     </message>
     <message>
         <source>Payment to yourself</source>
@@ -3039,7 +3364,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Mined</source>
-        <translation>Erarbeitet</translation>
+        <translation>Mined</translation>
     </message>
     <message>
         <source>PrivateSend Denominate</source>
@@ -3047,51 +3372,55 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>PrivateSend Collateral Payment</source>
-        <translation>PrivateSend Sicherheits-Zahlung</translation>
+        <translation>PrivateSend Deckungszahlungs</translation>
     </message>
     <message>
         <source>PrivateSend Make Collateral Inputs</source>
-        <translation>PrivateSend Sicherheits-Eingänge machen</translation>
+        <translation>PrivateSend Deckungsangaben machen</translation>
     </message>
     <message>
         <source>PrivateSend Create Denominations</source>
-        <translation>PrivateSend Stückelungs-Gebühr</translation>
+        <translation>PrivateSend Erstellen von Stückelungen</translation>
     </message>
     <message>
         <source>PrivateSended</source>
-        <translation>PrivateSended</translation>
+        <translation>Gesendet mit PrivateSend</translation>
     </message>
     <message>
         <source>watch-only</source>
-        <translation>beobachtet</translation>
+        <translation>nur zur Beobachtung</translation>
     </message>
     <message>
         <source>(n/a)</source>
-        <translation>(k.A.)</translation>
+        <translation>(n/a)</translation>
+    </message>
+    <message>
+        <source>User-defined intent/purpose of the transaction.</source>
+        <translation>Benutzerdefinierter Zweck/Grund der Transaktion.</translation>
     </message>
     <message>
         <source>Transaction status. Hover over this field to show number of confirmations.</source>
-        <translation>Transaktionsstatus, fahren Sie mit der Maus über dieses Feld, um die Anzahl der Bestätigungen zu sehen.</translation>
+        <translation>Transaktionsstatus. Fahren sie mit dem Mauszeiger über dieses Feld, um die Anzahl der Bestätigungen anzuzeigen.</translation>
     </message>
     <message>
         <source>Date and time that the transaction was received.</source>
-        <translation>Datum und Uhrzeit zu der die Transaktion empfangen wurde.</translation>
+        <translation>Datum und Uhrzeit der eingehenden Transaktion.</translation>
     </message>
     <message>
         <source>Type of transaction.</source>
-        <translation>Art der Transaktion</translation>
+        <translation>Art der Transaktion.</translation>
     </message>
     <message>
         <source>Whether or not a watch-only address is involved in this transaction.</source>
-        <translation>Zeigt ob eine beobachtete Adresse in dieser Transaktion beteiligt ist.</translation>
+        <translation>Entweder ist eine oder keine Adresse zur Beobachtung in dieser Transaktion involviert.</translation>
     </message>
     <message>
         <source>Destination address of transaction.</source>
-        <translation>Zieladresse der Transaktion</translation>
+        <translation>Zieladresse der Transaktion.</translation>
     </message>
     <message>
         <source>Amount removed from or added to balance.</source>
-        <translation>Der Betrag, der dem Kontostand abgezogen oder hinzugefügt wurde.</translation>
+        <translation>Ein vom Guthaben agezogener oder hinzugefügter Betrag.</translation>
     </message>
 </context>
 <context>
@@ -3122,31 +3451,31 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Range...</source>
-        <translation>Zeitraum...</translation>
+        <translation>Umfang...</translation>
     </message>
     <message>
         <source>Most Common</source>
-        <translation>Gängigste</translation>
+        <translation>Am häufigsten</translation>
     </message>
     <message>
         <source>Received with</source>
-        <translation>Empfangen über</translation>
+        <translation>Erhalten mit</translation>
     </message>
     <message>
         <source>Sent to</source>
-        <translation>Überwiesen an</translation>
+        <translation>Gesendet an</translation>
     </message>
     <message>
         <source>PrivateSended</source>
-        <translation>PrivateSend</translation>
+        <translation>Gesendet mit PrivateSend</translation>
     </message>
     <message>
         <source>PrivateSend Make Collateral Inputs</source>
-        <translation>PrivateSend Sicherheits-Eingänge machen</translation>
+        <translation>PrivateSend Deckungsangaben machen</translation>
     </message>
     <message>
         <source>PrivateSend Create Denominations</source>
-        <translation>PrivateSend Stückelungs-Gebühr</translation>
+        <translation>PrivateSend Stückelungen erstellen</translation>
     </message>
     <message>
         <source>PrivateSend Denominate</source>
@@ -3154,15 +3483,15 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>PrivateSend Collateral Payment</source>
-        <translation>PrivateSend Sicherheits-Zahlung</translation>
+        <translation>PrivateSend Deckungszahlung</translation>
     </message>
     <message>
         <source>To yourself</source>
-        <translation>Eigenüberweisung</translation>
+        <translation>An mich selbst</translation>
     </message>
     <message>
         <source>Mined</source>
-        <translation>Erarbeitet</translation>
+        <translation>Mined</translation>
     </message>
     <message>
         <source>Other</source>
@@ -3170,15 +3499,15 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Enter address or label to search</source>
-        <translation>Zu suchende Adresse oder Bezeichnung eingeben</translation>
+        <translation>Zum Suchen Adresse oder Bezeichnung eingeben</translation>
     </message>
     <message>
         <source>Min amount</source>
-        <translation>Minimaler Betrag</translation>
+        <translation>Mindestbetrag</translation>
     </message>
     <message>
         <source>Abandon transaction</source>
-        <translation>Abandon transaction</translation>
+        <translation>Transaktion abbrechen</translation>
     </message>
     <message>
         <source>Copy address</source>
@@ -3194,7 +3523,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Copy transaction ID</source>
-        <translation>Transaktions-ID kopieren</translation>
+        <translation>Transaktions ID kopieren</translation>
     </message>
     <message>
         <source>Edit label</source>
@@ -3210,15 +3539,15 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Comma separated file (*.csv)</source>
-        <translation>Kommagetrennte-Datei (*.csv)</translation>
+        <translation>Komma getrennte Datei (*.csv)</translation>
     </message>
     <message>
         <source>Confirmed</source>
         <translation>Bestätigt</translation>
     </message>
-    <message>
+      <message>
         <source>Watch-only</source>
-        <translation>Beobachtet</translation>
+        <translation>Nur zur Beobachtung</translation>
     </message>
     <message>
         <source>Date</source>
@@ -3226,7 +3555,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Type</source>
-        <translation>Typ</translation>
+        <translation>Art</translation>
     </message>
     <message>
         <source>Label</source>
@@ -3242,59 +3571,324 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Exporting Failed</source>
-        <translation>Exportieren fehlgeschlagen</translation>
+        <translation>Export fehlgeschlagen</translation>
     </message>
     <message>
         <source>There was an error trying to save the transaction history to %1.</source>
-        <translation>Beim Speichern des Transaktionsverlaufs nach %1 ist ein Fehler aufgetreten.</translation>
+        <translation>Beim Versuch den Transaktionsverlauf auf %1 zu speichern, ist ein Fehler aufgetreten.</translation>
     </message>
     <message>
         <source>Exporting Successful</source>
-        <translation>Exportieren erfolgreich</translation>
+        <translation>Export erfolgreich</translation>
     </message>
     <message>
         <source>The transaction history was successfully saved to %1.</source>
-        <translation>Speichern des Transaktionsverlaufs nach %1 war erfolgreich.</translation>
+        <translation>Der Transaktionsverlauf wurde erfolgreich auf %1 gespeichert.</translation>
     </message>
     <message>
         <source>Range:</source>
-        <translation>Zeitraum:</translation>
+        <translation>Umfang:</translation>
     </message>
     <message>
         <source>to</source>
-        <translation>bis</translation>
+        <translation>an</translation>
+    </message>
+</context>
+<context>
+    <name>DynodeList</name>
+    <message>
+        <source>Form</source>
+        <translation>Formular</translation>
+    </message>
+    <message>
+        <source>Filter List:</source>
+        <translation>Ansicht filtern:</translation>
+    </message>
+    <message>
+        <source>Node Count:</source>
+        <translation>Anzahl der Knoten:</translation>
+    </message>
+    <message>
+        <source>My Dynodes</source>
+        <translation>Meine Dynodes</translation>
+    </message>
+    <message>
+        <source>All Dynodes</source>
+        <translation>Alle Dynodes</translation>
+    </message>
+    <message>
+        <source>Note: Status of your Dynodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your Dynode should be running but you still do not see &quot;ENABLED&quot; in &quot;Status&quot; field.</source>
+        <translation>Info: Der Status Ihres Dynodes der lokalen Geldbörse kann möglicherweise leicht abweichen.&lt;br /&gt; Warten Sie immer darauf, bis die Geldbörse zusätzliche Daten synchronisiert hat und überprüfen sie den Status dann ein weiteres mal bei anderen Knoten &lt;br /&gt;falls Ihr Dynode laufen sollte aber Sie Ihn immer noch nicht als &quot;AKTIV&quot; in &quot;Status&quot; Feld sehen.</translation>
+    </message>
+    <message>
+        <source>Start &amp;all</source>
+        <translation>Alle &amp; Starten</translation>
+    </message>
+    <message>
+        <source>S&amp;tart alias</source>
+        <translation>A&amp;lias starten</translation>
+    </message>
+    <message>
+        <source>Start &amp;MISSING</source>
+        <translation>FEHLENDE &amp;starten</translation>
+    </message>
+    <message>
+        <source>&amp;Update status</source>
+        <translation>&amp; Status aktualisieren</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <translation>Alias</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokoll</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Atkive</translation>
+    </message>
+    <message>
+        <source>Last Seen</source>
+        <translation>Zuletzt gesehen</translation>
+    </message>
+    <message>
+        <source>Payee</source>
+        <translation>Begünstigter</translation>
+    </message>
+    <message>
+        <source>ENABLED</source>
+        <translation>AKTIV</translation>
+    </message>
+    <message>
+        <source>MISSING</source>
+        <translation>FEHLENDE</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start ALL Dynodes?</source>
+        <translation>Sind Sie sich sicher, daß Sie ALLE Dynodes starten möchten?</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start MISSING Dynodes?</source>
+        <translation>Sind Sie sich sicher, daß Sie die FEHLENDEN Dynodes starten möchten?</translation>
+    </message>
+    <message>
+        <source>Confirm missing Dynodes start</source>
+        <translation>Bestätigung des Starts fehlender Dynodes </translation>
+    </message>
+    <message>
+        <source>Status will be updated automatically in (sec):</source>
+        <translation>Der Status wird automatisch aktualisiert in (sec): </translation>
+    </message>
+    <message>
+        <source>Command is not available right now</source>
+        <translation>Die Befehlseingabe ist zur Zeit nicht verfügbar</translation>
+    </message>
+    <message>
+        <source>You can&apos;t use this command until Dynode list is synced</source>
+        <translation>Sie können diese Befehlseingabe nicht verwenden bis die Dynodeliste synchronisiert worden ist</translation>
+    </message>
+    <message>
+        <source>Confirm Dynode start</source>
+        <translation>Start des Dynode bestätigen</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to start Dynode %1?</source>
+        <translation>Sind Sie sich sicher, dass Sie Dynode starten möchten %1?</translation>
+    </message>
+    <message>
+        <source>Please wait...</source>
+        <translation>Bitte warten...</translation>
+    </message>
+    <message>
+        <source>Updating...</source>
+        <translation>Aktualisiere...</translation>
+    </message>
+    <message>
+        <source>Successfully started Dynode.</source>
+        <translation>Dynode erfolgreich gestartet.</translation>
+    </message>
+    <message>
+        <source>Successfully started %d Dynodes, failed to start %d, total %d</source>
+        <translation>%d Dynodes erfolgreich gestartet, Start von %d fehlgeschlagen, Gesamt: %d</translation>
+    </message>
+</context>
+<context>
+    <name>MiningPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Formular</translation>
+    </message>
+    <message>
+        <source>Number of CPU threads to use:</source>
+        <translation>Anzahl der CPU Threads zu verwenden:</translation>
+    </message>
+    <message>
+        <source>Number of GPU devices to use:</source>
+        <translation>Anzahl der zu verwendeten GPU Geräte:</translation>
+    </message>
+    <message>
+        <source>Your hashrate (built-in miner):</source>
+        <translation>Ihre Hashrate (integrierter Miner):</translation>
+    </message>
+    <message>
+        <source>Network hashrate:</source>
+        <translation>Netzwerk Hashrate:</translation>
+    </message>
+    <message>
+        <source>Average spacing between your blocks:</source>
+        <translation>Durchschnittlicher Abstand zwischen den Blöcken:</translation>
+    </message>
+    <message>
+        <source>Start mining</source>
+        <translation>Mining starten</translation>
+    </message>
+    <message>
+        <source>Stop mining</source>
+        <translation>Mining stoppen</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Deaktiviert</translation>
+    </message>
+    <message>
+        <source>Show Hash Meter Graph</source>
+        <translation>Anzeigen der Hash Meter Grafik</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of CPU threads to use</source>
+        <translation>Verwenden des Schieberegler, um die Anzahl der CPU Threads festzulegen, die verwendet werden sollen</translation>
+    </message>
+    <message>
+        <source>Use the slider to select the amount of GPU devices to use</source>
+        <translation>Verwenden des Schieberegler, um die Anzahl der GPU Geräte festzulegen, die verwendet werden sollen</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your CPU whilst mining</source>
+        <translation>Zeigt die Hashrate Ihrer CPU an, während das Mining läuft</translation>
+    </message>
+    <message>
+        <source>This shows the hashrate of your GPU whilst mining</source>
+        <translation>Zeigt die Hashrate Ihrer GPU an, während das Mining läuft</translation>
+    </message>
+    <message>
+        <source>This shows the overall hashrate of the Dynamic network</source>
+        <translation>Zeigt die gesamte Hashrate vom Dynamic Netzwerk an</translation>
+    </message>
+    <message>
+        <source>This shows the average time between the blocks you have mined</source>
+        <translation>Zeigt die durchschittliche Zeit zwischen den Blöcken an, die Sie gemined haben</translation>
+    </message>
+    <message>
+        <source>Blockchain/Dynodes are not synced, please wait until fully synced before mining!</source>
+        <translation>Blockchain/Dynodes sind nicht synchronisiert, bitte auf die vollständige Sychronisierung warten, bevor das Mining gestartet wird!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Start mining&apos; to begin mining!</source>
+        <translation>Klicken Sie auf &apos;Mining starten&apos; um mit dem Mining zu starten!</translation>
+    </message>
+    <message>
+        <source>Click &apos;Stop mining&apos; to finish mining!</source>
+        <translation>Klicken Sie auf &apos;Mining stoppen&apos; um das Mining zu beenden</translation>
+    </message>
+    <message>
+        <source>Stopping</source>
+        <translation>Stoppen</translation>
+    </message>
+    <message>
+        <source>Starting</source>
+        <translation>Starten</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>Deaktiviert</translation>
+    </message>
+    <message>
+        <source>All mined coins will go to %1</source>
+        <translation>Alle Münzen die gemined wurden gehen an %1</translation>
+    </message>
+    <message>
+        <source>Slider will show once Dynamic has finished syncing</source>
+        <translation>Der Schieberegler wird angezeigt, sobald Dynamic die Sychronisierung fertiggestellt hat</translation>
+    </message>
+    <message>
+        <source>GPU mining is not supported in this version of Dynamic</source>
+        <translation>GPU Mining wird in dieser Dynamic Version nicht unterstützt</translation>
+    </message>
+</context>
+<context>
+    <name>HashRateGraphWidget</name>
+    <message>
+        <source>5 minutes</source>
+        <translation>5 Minuten</translation>
+    </message>
+    <message>
+        <source>10 minutes</source>
+        <translation>10 Minuten</translation>
+    </message>
+    <message>
+        <source>30 minutes</source>
+        <translation>30 Minuten</translation>
+    </message>
+    <message>
+        <source>1 hour</source>
+        <translation>1 Stunde</translation>
+    </message>
+    <message>
+        <source>8 hours</source>
+        <translation>8 Stunden</translation>
+    </message>
+    <message>
+        <source>12 hours</source>
+        <translation>12 Stunden</translation>
+    </message>
+    <message>
+        <source>1 day</source>
+        <translation>1 Tag</translation>
     </message>
 </context>
 <context>
     <name>UnitDisplayStatusBarControl</name>
     <message>
         <source>Unit to show amounts in. Click to select another unit.</source>
-        <translation>Angezeigte Einheit. Anklicken, um andere Einheit zu wählen.</translation>
+        <translation>Angezeigte Einheit der Beträge. Anklicken um andere Einheit auszuwählen</translation>
     </message>
 </context>
 <context>
     <name>WalletFrame</name>
     <message>
         <source>No wallet has been loaded.</source>
-        <translation>Es wurde keine Wallet geladen.</translation>
+        <translation>Es wurde keine Geldbörse geladen.</translation>
     </message>
 </context>
 <context>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>DYN überweisen</translation>
+        <translation>Gesendete Münzen</translation>
     </message>
     <message>
-        <source>InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
-        <translation>InstantSend unterstützt das Versenden von Beträgen dieser Höhe noch nicht. Transaktionen sind zur Zeit auf maximal %1 DYN begrenzt.</translation>
+        <source>InstantSend doesn&apos;t support sending values that high yet. Transactions are currently limited to %1 DYN.</source>
+        <translation> InstantSend unterstützt zurzeit nicht das Senden von Beträgen in dieser Höhe. Transaktionen sind derzeit auf %1 DYN limitiert.</translation>
     </message>
 </context>
 <context>
     <name>WalletView</name>
     <message>
         <source>&amp;Export</source>
-        <translation>E&amp;xportieren</translation>
+        <translation>&amp;Exportieren</translation>
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
@@ -3302,15 +3896,15 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Selected amount:</source>
-        <translation>Ausgewählter Betrag:</translation>
+        <translation>Betrag auswählen:</translation>
     </message>
     <message>
         <source>Backup Wallet</source>
-        <translation>Wallet sichern</translation>
+        <translation>Gelbörse sichern</translation>
     </message>
     <message>
         <source>Wallet Data (*.dat)</source>
-        <translation>Wallet-Daten (*.dat)</translation>
+        <translation>Datei der Geldbörse (* .dat)</translation>
     </message>
     <message>
         <source>Backup Failed</source>
@@ -3318,7 +3912,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>There was an error trying to save the wallet data to %1.</source>
-        <translation>Beim Speichern der Wallet-Daten nach %1 ist ein Fehler aufgetreten.</translation>
+        <translation>Beim Versuch die Datei der Gelbörse auf %1 zu speichern, ist ein ein Fehler aufgetreten</translation>
     </message>
     <message>
         <source>Backup Successful</source>
@@ -3326,106 +3920,110 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>The wallet data was successfully saved to %1.</source>
-        <translation>Speichern der Wallet-Daten nach %1 war erfolgreich.</translation>
+        <translation>Die Datei der Geldbörse wurde erfolgreich auf %1 gespeichert.</translation>
     </message>
 </context>
 <context>
     <name>dynamic</name>
     <message>
-        <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
-        <translation>An die angegebene Adresse binden und immer abhören. Für IPv6 "[Host]:Port"-Schreibweise verwenden</translation>
+        <source>Failed to create backup, file already exists! This could happen if you restarted wallet in less than 60 seconds. You can continue if you are ok with this.</source>
+        <translation>Erstellung einer Sicherung fehlgeschlagen, Datei existiert bereits! Das kann passieren, sofern Sie die Geldbörse innerhalb von weniger als 60 Sekunden neu starten. Sie können fortfahren, wenn Sie damit einverstanden sind.</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. DYN Core is probably already running.</source>
-        <translation>Das Programm kann das Daten-Verzeichnis %s nicht als "in Verwendung" markieren. Wahrscheinlich läuft das Programm bereits.</translation>
+        <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
+        <translation>An die angegebene Adresse binden und immer abhörbereit sein. Verwenden von [Host]:Port Darstellung für IPv6</translation>
+    </message>
+    <message>
+        <source>Cannot obtain a lock on data directory %s. Dynamic is probably already running.</source>
+        <translation>Es kann keine Datensperre auf das Verzeichnis %s gesetzt werden. Dynamic läuft wahrscheinlich bereits</translation>
     </message>
     <message>
         <source>PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.</source>
-        <translation>PrivateSend benutzt exakt gestückelte Beträge zum Versenden, Sie müssen dafür möglicherweise noch mehr DYN anonymisieren.</translation>
+        <translation>PrivateSend verwendet exakt gestückelte Beträge um Mittel zu senden, wahrscheinlich müssen Sie	einfach mehr Münzen anonymisieren.</translation>
     </message>
     <message>
         <source>Enter regression test mode, which uses a special chain in which blocks can be solved instantly.</source>
-        <translation>Regressionstest-Modus aktivieren, der eine spezielle Blockkette nutzt, in der Blöcke sofort gelöst werden können.</translation>
+        <translation>Regressions Testmodus beitreten, der einen speziellen Chain verwendet, in welchen Blocks augenblicklich gelöst werden können.</translation>
     </message>
     <message>
         <source>Error: Listening for incoming connections failed (listen returned error %s)</source>
-        <translation>Fehler: Abhören nach eingehenden Verbindungen fehlgeschlagen (Fehler %s)</translation>
+        <translation>Fehler: Abhören der eingehende Verbindungen fehlgeschlagen (Abzuhörende Verbindung gibt Fehler %s aus)</translation>
     </message>
     <message>
-        <source>Execute command when a relevant alert is received or we see a really long fork (%s in cmd is replaced by message)</source>
-        <translation>Befehl ausführen wenn ein relevanter Alarm empfangen wird oder wir einen wirklich langen Fork entdecken (%s im Befehl wird durch die Nachricht ersetzt)</translation>
+        <source>Execute command when a relevant alert is received or we see a really long fork (%s wird in cmd is replaced by message)</source>
+        <translation>Befehl ausführen, wenn ein relevanter Alarm erhalten wird oder wir einen wirklich langen Fork sehen (%s in cmd durch Nachricht ersetzt)</translation>
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>
-        <translation>Befehl ausführen wenn sich eine Wallet-Transaktion verändert (%s im Befehl wird durch die TxID ersetzt)</translation>
+        <translation>Befehl ausführen, wenn sich eine Transaktion der Gelbörse ändert (%s wird in cmd durch TxID ersetzt)</translation>
     </message>
     <message>
         <source>Execute command when the best block changes (%s in cmd is replaced by block hash)</source>
-        <translation>Befehl ausführen wenn der beste Block wechselt (%s im Befehl wird durch den Hash des Blocks ersetzt)</translation>
+        <translation>Befehl ausführen, wenn der beste Block sich ändert (%s wird in cmd durch Blockhash ersetzt)</translation>
     </message>
     <message>
         <source>In this mode -genproclimit-cpu controls how many blocks are generated immediately.</source>
-        <translation>In diesem Modus legt -genproclimit-cpu fest, wie viele Blöcke sofort erzeugt werden.</translation>
+        <translation>In diesem Modus kontrolliert -genproclimit-cpu wieviele Blocks sofort generniert werden.</translation>
     </message>
     <message>
         <source>InstantSend requires inputs with at least 10 confirmations, you might need to wait a few minutes and try again.</source>
-        <translation>InstantSend benötigt Zahlungseingänge mit mindestens 10 Bestätigungen, warten Sie also ein paar Minuten und versuchen Sie es dann erneut.</translation>
+        <translation>InstantSend benötig Eingänge mit zumindest 10 Bestätigungen, Sie müssen wahrscheinlich noch ein paar Minuten warten und es dann nocheinmal versuchen.</translation>
     </message>
     <message>
         <source>Name to construct url for KeePass entry that stores the wallet passphrase</source>
-        <translation>Name, um eine URL für den KeyPass-Eintrag zu erzeugen, der die Wallet-Passphrase speichert.</translation>
+        <translation>Name, um eine URL für den KeePass-Eintrag zu erstellen, in welchen die Passphrase für die Geldbörse gespeichert wird</translation>
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect)</source>
-        <translation>Abfrage der Peer-Adressen über DNS, falls es wenige Adressen gibt (Standard: 1, außer wenn -connect konfiguriert wurde)</translation>
+        <translation>Abfrage von Adressen der Gegenstellen über DNS Suche, wenn zu wenige Adressen vorhanden sind  (Standard: 1 sofern nicht: -connect)</translation>
     </message>
     <message>
         <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>Maximale Größe in Byte von Transaktionen hoher Priorität/mit niedrigen Gebühren festlegen (Standard: %d)</translation>
+        <translation>Maximale Größe der Transaktionen bei hoher Prioriät/niedrige Gebühren in bytes festlegen (Standard: %d)</translation>
     </message>
     <message>
         <source>Set the number of script verification threads (%u to %d, 0 = auto, &lt;0 = leave that many cores free, default: %d)</source>
-        <translation>Maximale Anzahl an Skript-Verifizierungs-Threads festlegen (%u bis %d, 0 = automatisch, &lt;0 = so viele Kerne frei lassen, Standard: %d)</translation>
+        <translation>Anzahl der scriptverifizierten Threads setzen (%u a %d, 0 = auto, &lt;0 = soviele Kerne frei lassen, Standard: %d)</translation>
     </message>
     <message>
         <source>This is a pre-release test build - use at your own risk - do not use for mining or merchant applications</source>
-        <translation>Dies ist eine Vorab-Testversion - Verwendung auf eigene Gefahr - nicht für Mining- oder Handelsanwendungen nutzen!</translation>
+        <translation>Das ist eine Vorabversion - Verwendung auf eigener Gefahr - Nicht für Mining oder den Handel verwenden</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. DYN Core is probably already running.</source>
-        <translation>DYN Core den Prozess %s auf dem Computer nicht an sich binden. Wahrscheinlich läuft das Programm bereits.</translation>
+        <source>Unable to bind to %s on this computer. Dynamic is probably already running.</source>
+        <translation>Verbindung zu %s an diesem Computer nicht möglich. Dynamic läuft wahrscheinlich bereits.</translation>
     </message>
     <message>
         <source>Unable to locate enough PrivateSend denominated funds for this transaction.</source>
-        <translation>Für diese Transaktion konnten nicht genug mit PrivateSend gestückelte Beträge gefunden werden.</translation>
+        <translation>Es können nicht genügend PrivateSend gestückelte Mittel für diese Transaktion gefunden werden.</translation>
     </message>
     <message>
         <source>Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Für diese Transaktion konnten nicht genug nicht mit PrivateSend gestückelte Beträge gefunden werden, die ungleich 1000 DYN sind.</translation>
+        <translation>Es können nicht genügend PrivateSend ungestückelte Mittel für diese Transaktion gefunden werden, die nicht gleich 1000 DYN sind.</translation>
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
-        <translation>Warnung: -paytxfee ist auf einen sehr hohen Wert festgelegt! Dies ist die Gebühr die beim Senden einer Transaktion fällig wird.</translation>
+        <translation>Warnung: -paytxfee ist zu hoch gesetzt! Das sind die Transaktionsgebühren die Sie bezahlen, wenn Sie die Transaktion senden.</translation>
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
-        <translation>Warnung: Das Netzwerk scheint nicht vollständig übereinzustimmen! Einige Miner scheinen Probleme zu haben.</translation>
+        <translation>Warnung: Das Netzwerk schein nicht zu übereinstimmen! Einige Miner scheinen Probleme zu haben.</translation>
     </message>
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>Warnung: Wir scheinen nicht vollständig mit unseren Gegenstellen übereinzustimmen! Sie oder die anderen Knoten müssen unter Umständen ihre Client-Software aktualisieren.</translation>
+        <translation>Warnung: Wir scheinen nicht vollständig mit unseren Gegenstellen zu übereinstimmen! Wahrscheinlich müssen Sie aktualisieren oder andere Knoten müssen aktualisieren.</translation>
     </message>
     <message>
         <source>Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
-        <translation>Warnung: Lesen von wallet.dat fehlgeschlagen! Alle Schlüssel wurden korrekt gelesen, Transaktionsdaten bzw. Adressbucheinträge fehlen aber möglicherweise oder sind inkorrekt.</translation>
+        <translation>Warning: Fehler beim lesen der wallet.dat! Zwar konnten alle Schlüsseln richtig gelesen werden, aber die Transaktionsdaten oder Einträge im Adressbuch könnten fehlen oder falsch sein.</translation>
     </message>
     <message>
         <source>Warning: wallet.dat corrupt, data salvaged! Original wallet.dat saved as wallet.{timestamp}.bak in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
-        <translation>Warnung: wallet.dat beschädigt, Datenrettung erfolgreich! Original wallet.dat wurde als wallet.{Zeitstempel}.dat in %s gespeichert. Falls ihr Kontostand oder Transaktionen nicht korrekt sind, sollten Sie dem vorangegangenen Zustand durch die Datensicherung wiederherstellen.</translation>
+        <translation>Warnung: wallet.dat ist defekt, Daten gerettet! Die original wallet.dat wurde als wallet.{Timestamp}.bak in %s; sollte Ihr Guthaben oder Transaktionen nicht korrekt sein, sollten Sie von einem Backup wiederherstellen.</translation>
     </message>
     <message>
         <source>You must specify a dynodepairingkey in the configuration. Please see documentation for help.</source>
-        <translation>Es muss ein dynode-Geheimschlüssel (dynodepairingkey) in der Konfiguration angegeben werden. Für weitere Informationen siehe Dokumentation.</translation>
+        <translation>Sie müssen einen dynodepairingkey in der Konfiguration angeben. Für Hilfe schauen Sie in der Dokumentation nach.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -3433,47 +4031,47 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Accept command line and JSON-RPC commands</source>
-        <translation>Kommandozeilen- und JSON-RPC-Befehle annehmen</translation>
+        <translation>Kommandozeilen und JSON-RPC Befehle akzeptieren</translation>
     </message>
     <message>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>
-        <translation>Eingehende Verbindungen annehmen (Standard: 1, wenn nicht -proxy oder -connect)</translation>
+        <translation>Verbindungen von Außen akzeptieren (Standard: 1, wenn nicht -proxy oder -connect)</translation>
     </message>
     <message>
         <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Mit dem angegebenen Knoten verbinden und versuchen die Verbindung aufrecht zu erhalten</translation>
+        <translation>Einen Knoten hinzufügen um sich hinzuverbinden und um zu versuchen diese Verbindung aufrecht zu erhalten</translation>
     </message>
     <message>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
-        <translation>Erlaube DNS-Abfragen für -addnode, -seednode und -connect</translation>
+        <translation>DNS Suche für -addnode, -seednode y -connect erlauben</translation>
     </message>
     <message>
         <source>Already have that input.</source>
-        <translation>Haben diesen Eintrag bereits.</translation>
+        <translation>Eintrag bereits enthalten</translation>
     </message>
     <message>
         <source>Attempt to recover private keys from a corrupt wallet.dat</source>
-        <translation>Versuchen, private Schlüssel aus einer beschädigten wallet.dat wiederherzustellen</translation>
+        <translation>Versuche die privaten Schlüsseln aus einer defekten wallet.dat wiederherzustellen</translation>
     </message>
     <message>
         <source>Block creation options:</source>
-        <translation>Blockerzeugungsoptionen:</translation>
+        <translation>Optionen für die Block Erstellung:</translation>
     </message>
     <message>
-        <source>Can't denominate: no compatible inputs left.</source>
-        <translation>Kann nicht zerstückeln: keine kompatiblen Eingänge übrig.</translation>
+        <source>Can&apos;t denominate: no compatible inputs left.</source>
+        <translation>Stückelung nicht möglich : keine kompatiblen Eingänge übrig .</translation>
     </message>
     <message>
         <source>Cannot downgrade wallet</source>
-        <translation>Wallet kann nicht auf eine ältere Version herabgestuft werden</translation>
+        <translation>Geldbörse kann nicht herabgestuft werden</translation>
     </message>
     <message>
-        <source>Cannot resolve -bind address: '%s'</source>
-        <translation>Kann Adresse in -bind nicht auflösen: '%s'</translation>
+        <source>Cannot resolve -bind address: &apos;%s&apos;</source>
+        <translation>Auflösen der -bind Adresse nicht möglich: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Cannot resolve -externalip address: '%s'</source>
-        <translation>Kann Adresse in -externalip nicht auflösen: '%s'</translation>
+        <source>Cannot resolve -externalip address: &apos;%s&apos;</source>
+        <translation>Auflösen der -externalip Adresse nicht möglich: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Cannot write default address</source>
@@ -3481,15 +4079,15 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Collateral not valid.</source>
-        <translation>Sicherheitszahlung nicht gültig.</translation>
+        <translation>Die Deckung ist nicht gültig.</translation>
     </message>
     <message>
         <source>Connect only to the specified node(s)</source>
-        <translation>Mit nur dem oder den angegebenen Knoten verbinden</translation>
+        <translation>Nur mit den angegebenen Knoten verbinden</translation>
     </message>
     <message>
         <source>Connect to a node to retrieve peer addresses, and disconnect</source>
-        <translation>Mit dem angegebenen Knoten verbinden, um Adressen von Gegenstellen abzufragen, danach trennen</translation>
+        <translation>Zu einem Knoten verbinden um Adressen der Gegenstellen abzurufen und wieder zu trennen </translation>
     </message>
     <message>
         <source>Connection options:</source>
@@ -3497,7 +4095,7 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Corrupted block database detected</source>
-        <translation>Beschädigte Blockdatenbank erkannt</translation>
+        <translation>Defekte Blockdatenbank gefunden</translation>
     </message>
     <message>
         <source>PrivateSend options:</source>
@@ -3505,35 +4103,35 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Debugging/Testing options:</source>
-        <translation>Debugging-/Testoptionen:</translation>
+        <translation>Debugging/Test Optionen:</translation>
     </message>
     <message>
         <source>Discover own IP address (default: 1 when listening and no -externalip)</source>
-        <translation>Eigene IP-Adresse erkennen (Standard: 1, wenn abgehört wird und nicht -externalip)</translation>
+        <translation>Eigene IP Adresse feststellen (Standard: 1 wenn abhören und kein -externalip)</translation>
     </message>
     <message>
         <source>Do not load the wallet and disable wallet RPC calls</source>
-        <translation>Die Wallet nicht laden und Wallet-RPC-Aufrufe deaktivieren</translation>
+        <translation>Wallet nicht laden und RPC Aufrufe deaktivieren</translation>
     </message>
     <message>
         <source>Do you want to rebuild the block database now?</source>
-        <translation>Möchten Sie die Blockdatenbank jetzt neu aufbauen?</translation>
+        <translation>Möchten Sie jetzt die Blockdatenbank neu aufbauen?</translation>
     </message>
     <message>
         <source>Done loading</source>
-        <translation>Laden abgeschlossen</translation>
+        <translation>Laden fertiggestellt</translation>
     </message>
     <message>
         <source>Entries are full.</source>
-        <translation>Warteschlange ist voll.</translation>
+        <translation>Die Einträge sind voll.</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
-        <translation>Fehler beim Initialisieren der Blockdatenbank</translation>
+        <translation>Fehler beim Inizialisieren der Blockdatenbank</translation>
     </message>
     <message>
         <source>Error initializing wallet database environment %s!</source>
-        <translation>Fehler beim Initialisieren der Wallet-Datenbankumgebung %s!</translation>
+        <translation>Fehler beim Inizialisieren der Umgebung der Geldbörsendatenbank %s!</translation>
     </message>
     <message>
         <source>Error loading block database</source>
@@ -3541,11 +4139,11 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Error loading wallet.dat</source>
-        <translation>Fehler beim Laden von wallet.dat</translation>
+        <translation>Fehler beim Laden der wallet.dat</translation>
     </message>
     <message>
         <source>Error loading wallet.dat: Wallet corrupted</source>
-        <translation>Fehler beim Laden von wallet.dat: Wallet beschädigt</translation>
+        <translation>Fehler beim Laden der wallet.dat: Geldbörse defekt</translation>
     </message>
     <message>
         <source>Error opening block database</source>
@@ -3553,171 +4151,167 @@ Dies kann passieren, wenn einige DYN aus ihrer Wallet bereits ausgegeben wurden.
     </message>
     <message>
         <source>Error reading from database, shutting down.</source>
-        <translation>Fehler beim Lesen der Datenbank, Anwendung wird heruntergefahren.</translation>
+        <translation>Fehler beim Lesen der Datenbank, wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Error recovering public key.</source>
-        <translation>Fehler bei der Wiederherstellung des öffentlichen Schlüssels.</translation>
+        <translation>Fehler beim Wiederherstellen des öffentlichen Schlüssels.</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation>Fehler</translation>
+        <translation>Error</translation>
     </message>
     <message>
         <source>Error: Disk space is low!</source>
-        <translation>Fehler: Zu wenig freier Speicherplatz auf dem Datenträger!</translation>
+        <translation>Fehler: Festplattenspeicher is niedrig!</translation>
     </message>
     <message>
         <source>Error: Wallet locked, unable to create transaction!</source>
-        <translation>Fehler: Wallet gesperrt, Transaktion kann nicht erstellt werden!</translation>
+        <translation>Fehler: Geldbörse gesperrt, Transaktion kann nicht erstellt werden!</translation>
     </message>
     <message>
         <source>Error: You already have pending entries in the PrivateSend pool</source>
-        <translation>Fehler: Es sind bereits anstehende Einträge im PrivateSend-Pool</translation>
+        <translation>Fehler: Sie haben bereits schwebende Einträge im PrivateSend Pool</translation>
     </message>
     <message>
         <source>Failed to listen on any port. Use -listen=0 if you want this.</source>
-        <translation>Fehler, es konnte kein Port abgehört werden. Wenn dies so gewünscht wird -listen=0 verwenden.</translation>
+        <translation>Fehler beim Abhören auf jeden Ports. Verwenden Sie -listen = 0 wenn Sie das möchten.</translation>
     </message>
     <message>
         <source>Failed to read block</source>
-        <translation>Lesen des Blocks fehlgeschlagen</translation>
+        <translation>Fehler beim lesen des Blocks</translation>
     </message>
     <message>
         <source>If &lt;category&gt; is not supplied, output all debugging information.</source>
-        <translation>Wenn &lt;category&gt; nicht angegeben wird, jegliche Debugginginformationen ausgeben.</translation>
+        <translation>Wenn &lt;Kategorie&gt; nicht bereitgestellt ist, werden alle Debugging Informationen ausgegeben.</translation>
     </message>
     <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
-        <translation>(1 = Transaktions-Metadaten wie z.B. Kontoinhaber behalten, 2 = Metadaten verwerfen)</translation>
+        <translation>(1 = TX Meta Daten beibehalten z.B Kontoinhaber und Informationen zu Zahlungsanforderungen, 2 = TX Meta Daten verwerfen)</translation>
     </message>
     <message>
         <source>Allow JSON-RPC connections from specified source. Valid for &lt;ip&gt; are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times</source>
-        <translation>JSON-RPC Verbindungen von einer bestimmten Quelle zulassen. Für &lt;ip&gt; sind einzelne IPs (z.B. 1.2.3.4), Netzwerk/Netzmasken (z.B. 1.2.3.4/255.255.255.0) oder Netzwerk/CIDR (z.B. 1.2.3.4/24) erlaubt. Diese Option kann mehrmals eingetragen werden.</translation>
+        <translation>JSON-RPC Verbindungen von angegebenen Quellen erlauben. Gültig für &lt;ip&gt; ist eine einzelne IP (zB. 1.2.3.4), ein Netzwerk/Netzmaske (zB. 1.2.3.4/255.255.255.0) oder ein Netzwerk/CIDR (zB. 1.2.3.4/24). Diese Option kann mehrfach festgelegt werden</translation>
     </message>
     <message>
         <source>An error occurred while setting up the RPC address %s port %u for listening: %s</source>
-        <translation>Beim Einrichten der RPC-Adresse %s, Port %u zum Abhören von %s ist ein Fehler aufgetreten</translation>
+        <translation>Beim Einrichten der RPC Adresse des %s Port %u für abzuhörende Verbindugen ist ein Fehler aufgetreten: %s</translation>
     </message>
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
-        <translation>An die angegebene Adresse binden und Gegenstellen in die Liste der erlaubten Gegenstellen aufnehmen. Für IPv6 "[Host]:Port"-Schreibweise verwenden</translation>
+        <translation>An die angegebene Adresse binden und die mit ihr verbundene Gegenstellen auf die Whitelist setzen. Verwenden von [Host]:Port Darstellung für IPv6</translation>
     </message>
     <message>
         <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>Für JSON-RPC Verbindugen an die angegebene Adresse binden. Für IPv6 "[Host]:Port"-Schreibweise verwenden. Diese Option kann mehrmals eingetragen werden. (Standard: an alle verbinden)</translation>
+        <translation>An die angebene Adresse binden, um  JSON-RPC Verbindungen abzuhörenden. Verwenden von [Host]:Port Darstellung für IPv6. Diese Option kann mehrfach festgelegt werden (Standard: An alle Schnittstellen binden)</translation>
     </message>
     <message>
         <source>Change automatic finalized budget voting behavior. mode=auto: Vote for only exact finalized budget match to my generated budget. (string, default: auto)</source>
-        <translation>Wahlverhalten für Abschlussbudget ändern. mode=auto: nur wählen, wenn Abschlussbudget genau meinem generierten Budget entspricht. (Standard: auto)</translation>
+        <translation>Handlungsweise der endgültigen Budgetabstimmung automatischen ändern. mode = auto: Nur für das exakte endgültige Budget stimmen, welches zu meinem generierten Budget passt. (string, Standard: auto)</translation>
     </message>
     <message>
-        <source>Continuously rate-limit free transactions to &lt;n&gt;*1000 bytes per minute (default:%u)</source>
-        <translation>Anzahl der freien Transaktionen auf &lt;n&gt; * 1000 Byte pro Minute begrenzen (Standard: %u)</translation>
+        <source>Continuously rate-limit free transactions to &lt;n&gt;*1000 bytes per minute (standaard:%u)</source>
+        <translation>Kontinuierlich Tariffreie Transaktionen auf &lt;n&gt;*1000 Bytes pro Minute limitieren(Standard: %u)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
-        <translation>Neue Dateien mit den System-Standardberechtigungen (anstatt 077) erzeugen (nur bei deaktiviertem Wallet möglich)</translation>
+        <translation>Neue Dateien mit Standard Systemberechtigungen erstellen, anstelle von umask 077 (funktioniert nur mit deaktivierter Funktionalität der Geldbörsen )</translation>
     </message>
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
-        <translation>Lösche alle Wallet-Transaktionen stelle nur diese mittels -rescan beim nächsten Start des Wallets wieder her.</translation>
+        <translation>Alle Transaktionen der Geldbörse löschen und beim Starten nur die Teile der Blockchain über -rescan wiederherstellen</translation>
     </message>
     <message>
-        <source>Disable all DYN specific functionality (dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
-        <translation>Deaktiviere all DYN-spezifischen Funktionen (dynodes, PrivateSend, InstantSend, Budgeting) (0-1, Standard: %u)</translation>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, default: %u)</source>
+        <translation>Alle Dynamic spezifischen Funktionen deaktivieren (Dynodes, PrivateSend, InstantSend, Budgeting) (0-1, Standard: %u).</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file COPYING or &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</source>
-        <translation>Unter MIT Software Lizenz zur Verfügung gestellt, siehe beigefügte Datei COPYING oder &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
+        <translation>Unter MIT Software Lizenz zur Verfügung gestellt, siehe beigefügte Datei COPYING oder unter &lt;http://www.opensource.org/licenses/mit-license.php&gt;.</translation>
     </message>
     <message>
         <source>Enable instantsend, show confirmations for locked transactions (bool, default: %s)</source>
-        <translation>Aktiviere InstantSend, zeige Bestätigungen für gesperrte Transaktionen an (bool, Standard: %s)</translation>
+        <translation>InstantSend aktivieren, zeige Bestätigungen für gesperrte Transaktionen an (bool, Standard: %s)</translation>
     </message>
     <message>
         <source>Enable use of automated privatesend for funds stored in this wallet (0-1, default: %u)</source>
-        <translation>Aktiviere PrivateSend automatisch (0-1, Standard: %u)</translation>
+        <translation>Die Verwendung von automatisierten PrivateSend für die in dieser Geldbörse gespeicherte Mittel aktivieren (0-1, Standard: %u)</translation>
     </message>
     <message>
-        <source>Error: Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
-        <translation>Fehler: Parameter -socks wird nicht mehr unterstützt. Setzen der SOCKS-Version ist nicht mehr möglich, es werden nur noch SOCKS5 Proxies unterstützt.</translation>
+        <source>Error: Unsupported argument -socks found. Setting SOCKS version isn&apos;t possible anymore, only SOCKS5 proxies are supported.</source>
+        <translation>Error: Nicht unterstütztes Argument -socks gefunden. Setzen der SOCKS Version ist nicht mehr möglich, nur SOCKS5 Proxies werden unterstützt.</translation>
     </message>
     <message>
         <source>Fees (in DYN/Kb) smaller than this are considered zero fee for relaying (default: %s)</source>
-        <translation>Niedrigere Gebühren (in DYN pro Kb) als diese werden bei der Vermittlung als gebührenfrei angesehen (Standard: %s)</translation>
-    </message>
-    <message>
-        <source>Fees (in DYN/Kb) smaller than this are considered zero fee for transaction creation (default: %s)</source>
-        <translation>Niedrigere Gebühren (in DYN pro Kb) als diese werden bei der Transaktionserzeugung als gebührenfrei angesehen (Standard: %s)</translation>
+        <translation>Gebühren (in DYN/Kb) die kleiner sind als diese, werden als Nullgebühr für die Weiterleitung angesehen (Standard: %s)</translation>
     </message>
     <message>
         <source>Flush database activity from memory pool to disk log every &lt;n&gt; megabytes (default: %u)</source>
-        <translation>Datenbankaktivitäten vom Arbeitsspeicher-Pool alle &lt;n&gt; Megabyte auf den Datenträger schreiben (Standard: %u)</translation>
+        <translation>Abgleichen der Datenbankaktivitäten vom Memory Pool auf den Speicherlog jeden &lt;n&gt; megabytes (Standard: %u)</translation>
     </message>
     <message>
         <source>Found unconfirmed denominated outputs, will wait till they confirm to continue.</source>
-        <translation>Unbestätigte für PrivateSend vorbereitete Ausgabebeträge gefunden, warte bis sie bestätigt sind bevor weitergemacht wird.</translation>
+        <translation>Unbestätigte gestückelte Ausgänge gefunden, warte bis diese Bestätigt sind um fortzufahren.</translation>
     </message>
     <message>
         <source>How thorough the block verification of -checkblocks is (0-4, default: %u)</source>
-        <translation>Legt fest, wie gründlich die Blockverifikation von -checkblocks ist (0-4, Standard: %u)</translation>
+        <translation>Wie gründlich die Blockverifizierung von -checkblocks ist (0-4, Standard: %u)</translation>
     </message>
     <message>
         <source>If paytxfee is not set, include enough fee so transactions begin confirmation on average within n blocks (default: %u)</source>
-        <translation>Falls paytxfee  nicht gesetzt wurde automatisch genug Transaktionsgebühren hinzufügen, um die Transaktion durchschnittlich innerhalb n Blöcken zu bestätigen (Standard: %u)</translation>
+        <translation>Wenn paytxfee nicht gesetzt ist, geben Sie genügend Gebühr an, damit Transaktionen mit der durchschnittlichen Bestätigung innerhalb von n Blöcken beginnen können (Standard: %u)</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
-        <translation>Ungültiger Betrag für -maxtxfee=&lt;amount&gt;: '%s' (Betrag muss mindestens minrelay von %s Gebühren sein um "hängende" Transaktionen zu vermeiden)</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least the minrelay fee of %s to prevent stuck transactions)</source>
+        <translation>Ungültiger Betrag für -maxtxfee=&lt;Betrag&gt;: &apos;%s&apos; (muss mindestens die minrely Gebühr von %s sein um hängengebliebene Transaktionen zu vermeiden)</translation>
     </message>
     <message>
         <source>Log transaction priority and fee per kB when mining blocks (default: %u)</source>
-        <translation>Transaktionspriorität und Gebühr pro kB beim Erzeugen von Blöcken protokollieren (Standard: %u)</translation>
+        <translation>Mitloggen von Priorität der Transaktionen und die Gebühr per kB, wenn Blöcke gemined werden. (Standard: %u)</translation>
     </message>
     <message>
         <source>Maintain a full transaction index, used by the getrawtransaction rpc call (default: %u)</source>
-        <translation>Einen vollständigen Transaktionsindex für den getrawtransaction RPC-Aufruf führen (Standard: %u)</translation>
+        <translation>Verwaltung eines vollen Index der Transaktion, welcher durch getrawtransaction rpc call verwendet wird (Standard: %u)</translation>
     </message>
     <message>
         <source>Maximum size of data in data carrier transactions we relay and mine (default: %u)</source>
-        <translation>Maximale Datengröße für von uns weitergegebenen Übermittlungstransaktionen (Standard: %u)</translation>
+        <translation>Maximale Datengröße der Transaktionen am Datenträger, die wir weiterleiten und minen (Standard: %u)</translation>
     </message>
     <message>
         <source>Maximum total fees to use in a single wallet transaction, setting too low may abort large transactions (default: %s)</source>
-        <translation>Maximale Gesamtgebühren für eine einzelne Transaktion.  Sind diese Gebühren zu gering könnten große Transaktionen evtl. abgebrochen werden (Standard: %s)</translation>
+        <translation>Maximum der Gesamtgebühren, welche in einer einzigen Transaktion der Gelbörse zu verwenden ist; eine zu niedrige Einstellung kann große Transaktionen abbrechen (Standard: %s)</translation>
     </message>
     <message>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: %u)</source>
-        <translation>Anzahl Sekunden, während denen sich nicht konform verhaltenden Gegenstellen die Wiederverbindung verweigert wird (Standard: %u)</translation>
+        <translation>Anzahl der Sekunden um nicht richtig funktionierende Gegenstellen vom Wiederverbinden aufzuhalten (Standard: %u)</translation>
     </message>
     <message>
-        <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>Debugging-Informationen ausgeben (Standard: %u, &lt;category&gt; anzugeben ist optional)</translation>
+        <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional). If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information. &lt;category&gt; can be: %u (or specifically: %u)%u.</source>
+        <translation>Ausgabe der Debugging Information (Standard: %u, Bereitstellung &lt;Kategorie&gt; ist optional). Sofern die &lt;Kategorie&gt; nicht Bereitgestellt wird oder wenn &lt;Kategorie&gt; = 1, Ausgabe aller Debugging Information. &lt;Kategorie&gt; kann sein: %u (oder eigens: %u)%u.</translation>
     </message>
     <message>
         <source>Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)</source>
-        <translation>Durch diese Einstellung können Sie dem PrivateSend-Netzwerk zusätzliche Liquidität zur Verfügung stellen in dem Sie von Zeit zu Zeit bereits anonymisierte DYN wieder dem Mixing-Prozess zuführen. (0-100, 0=aus, 1=sehr oft, 100=sehr selten (wenig Gebühren). Standard: %u)</translation>
+        <translation>Ermöglicht PrivateSend Liquidität durch das gelegentliche Mixen der Münzen auf einere regelmäßigen Basis (0-100, Standard: %u, 1=sehr häufig, hohe Gebühren, 100=sehr selten, niedrige Gebühren)</translation>
     </message>
     <message>
         <source>Require high priority for relaying free or low-fee transactions (default:%u)</source>
-        <translation>Verlange hohe Priorität für die Vermittlung von kostenlosen oder mit niedrigen Gebühren versehenen Transaktionen (Standard: %u)</translation>
+        <translation>Benötigt hohe Priorität für das Übertragen von kostenfreien Transaktionen oder Transaktionen mit einer niedrigeren Gebühr (Standard: %u)</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file (default: %u)</source>
-        <translation>Rückverfolgungs- und Debuginformationen an die Konsole senden, anstatt sie in debug.log zu schreiben (Standard: %u)</translation>
+        <translation>Senden der Trace/Debug Infos an die Konsole, anstatt an die debug.log (Standard: %u)</translation>
     </message>
     <message>
         <source>Set the number of threads for coin generation if enabled (-1 = all cores, default: %d)</source>
-        <translation>Legt ein Prozessor-/CPU-Kernlimit fest, wenn CPU-Mining aktiviert ist (-1 = unbegrenzt, Standard: %d)</translation>
+        <translation>Legt die Anzahl der Threads für die Generierung von Münzen fest, sofern es aktiviert ist(-1 = Alle Kerne, Standard: %d)</translation>
     </message>
     <message>
         <source>Show N confirmations for a successfully locked transaction (0-9999, default: %u)</source>
-        <translation>Anzahl Bestätigungen  für eine erfolgreich gesperrte Transaktion (0-9999, voreingestellt: %u)</translation>
+        <translation>Zeigt N Bestätigungen für eine erfolgreich gesperrte Transaktion(0-9999, Standard: %u)</translation>
     </message>
     <message>
         <source>This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit &lt;https://www.openssl.org/&gt; and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard.</source>
-        <translation>Dieses Produkt enthält vom OpenSSL-Projekt entwickelte Software zur Benutzung des OpenSSL Toolkit &lt;https://www.openssl.org/&gt;, kryptographische Software geschrieben von Eric Young und UPnP Software geschrieben von Thomas Bernard.</translation>
+        <translation>Dieses Produkt enthält Software, die vom OpenSSL-Projekt zur Benützung im OpenSSL-Toolkit entwickelt wird &lt;https://www.openssl.org/&gt; und kryptographischer Software, geschrieben von Eric Young und UPnP Software geschrieben von Thomas Bernard.</translation>
     </message>
     <message>
         <source>To use dynamicd, or the -server option to dynamic-qt, you must set an rpcpassword in the configuration file:
@@ -3729,46 +4323,47 @@ rpcpassword=%s
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "DYN Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo.com
 </source>
-        <translation>Um dynamicd (oder dynamic-qt mit dem -server Parameter) zu benutzen müssen Sie ein rpcpasswort in dieser Konfigurationsdatei angeben:
+        <translation>Um dynamicd zu verwenden oder die -server Option bei dynamic-qt, müssen sie ein rpcpassword in der Konfigurationsdatei setzen:
 %s
-Es wird empfohlen das folgende Zufallspasswort zu verwenden:
+Es wird empfohlen folgendes zufälliges Passwort zu verwenden:
 rpcuser=dynamicrpc
 rpcpassword=%s
-(Sie müssen sich dieses Passwort nicht merken!)
-Der Benutzername und das Passwort dürfen NICHT identisch sein.
-Falls die Konfigurationsdatei nicht existiert, erzeugen Sie diese bitte mit Leserechten nur für den Dateibesitzer.
-Es wird ebenfalls empfohlen alertnotify anzugeben, um im Problemfall benachrichtigt zu werden;
-zum Beispiel: alertnotify=echo %%s | mail -s \"DYN Alert\" admin@foo.com</translation>
+(Sie müssen sich das Passwort nicht merken)
+Benutzername und Passwort DÜRFEN NICHT gleichlautend sein.
+Sollte die Datei nicht existieren, erstellen Sie sie mit nur für den Benutzer lesbaren Dateiberechtigungen.
+Es wird genauso empfohlen alertnotify zu setzen, um bei Problemen notifiziert zu werden;
+zum Beispiel: alertnotify=echo %%s | mail -s &quot;Dynamic Alarm&quot; admin@foo.com
+</translation>
     </message>
     <message>
         <source>Unable to locate enough funds for this transaction that are not equal 1000 DYN.</source>
-        <translation>Für diese Transaktion konnten nicht genug Beträge gefunden werden, die ungleich 1000 DYN sind.</translation>
+        <translation>Es können nicht genügend Mittel für diese Transaktion gefunden werden, die nicht gleich 1000 DYN sind.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
-        <translation>Separaten SOCKS5-Proxy verwenden, um Gegenstellen über versteckte Tor-Dienste zu erreichen (Standard: %s)</translation>
+        <translation>Verwendet einen separaten SOCKS5 Proxy um Gegenstellen über versteckte Tor Dienste zu erreichen (Standard: %s)</translation>
     </message>
     <message>
         <source>Warning: -maxtxfee is set very high! Fees this large could be paid on a single transaction.</source>
-        <translation>Warnung: -maxtxfee ist auf einen sehr hohen Wert gesetzt! Diese Gebühr könnte schon beim Senden einer einzelnen Transaktion fällig werden.</translation>
+        <translation>Warnung: -maxtxfee ist zu hoch gesetzt! Gebühren in dieser Höhe, können in einer einzigen Transaktion gezahlt werden.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong DYN Core will not work properly.</source>
-        <translation>Warnung: Bitte überprüfen Sie die Datums- und Uhrzeiteinstellungen ihres Computers, da DYN Core ansonsten nicht ordnungsgemäß funktionieren wird!</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong Dynamic will not work properly.</source>
+        <translation>Warnung: Bitte überprüfen Sie ob das Datum und die Uhrzeit Ihres Computers korrekt sind! Sollte Ihre Uhrzeit falsch sein, wird Dynamic nicht richtig funktionieren.</translation>
     </message>
     <message>
         <source>Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.</source>
-        <translation>Erlaube Gegenstellen mit dieser Netzmaske oder IP-Adresse. Diese Option kann mehrmals eingetragen werden.</translation>
+        <translation>Whitegelistete Gegenstellen, welche sich von einer angegebenen Netmask oder IP Adresse verbinden. Kann mehrfach spezifiziert weden.</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
-        <translation>Erlaubte Gegenstellen können nicht wegen DoS ausgeschlossen werden und ihre Transaktionen werden immer weitergeleitet, sogar wenn sie schon im Memory-Pool sind. Dies ist z.B. für Gateways nützlich.</translation>
+        <translation>Whitegelistete Gegenstellen können nicht durch DoS gesperrt werden und ihre Transaktionen werden immer weitergeleitet, auch wenn sie bereits im Mempool sind, nützlich für z.B ein Gateway </translation>
     </message>
     <message>
         <source>(33300 could be used only on mainnet)</source>
-        <translation>(33300 kann nur im Standardnetz benutzt werden)</translation>
+        <translation>(33300 kann nur für das Mainnet verwendet werden)</translation>
     </message>
     <message>
         <source>(default: %s)</source>
@@ -3777,124 +4372,124 @@ zum Beispiel: alertnotify=echo %%s | mail -s \"DYN Alert\" admin@foo.com</transl
     <message>
         <source>&lt;category&gt; can be:
 </source>
-        <translation>&lt;category&gt; kann sein:
+        <translation>&lt;Kategorie&gt; puede ser:
 </translation>
     </message>
     <message>
         <source>Accept public REST requests (default: %u)</source>
-        <translation>Akzeptiere öffentliche REST-Anforderungen (Standard: %u)</translation>
+        <translation>Öffentliche REST Anforderungen akzeptieren(Standard: %u)</translation>
     </message>
     <message>
         <source>Acceptable ciphers (default: %s)</source>
-        <translation>Akzeptierte Verschlüsselungen (Standard: %s) </translation>
+        <translation>Aktzeptierte Chiffren (Standard: %s)</translation>
     </message>
     <message>
         <source>Always query for peer addresses via DNS lookup (default: %u)</source>
-        <translation>Peer-Adressen immer über DNS abfragen (Standard: %u)</translation>
+        <translation>Immer nach Adressen der Gegenstellen über die DNS Suche abfragen(Standard: %u)</translation>
     </message>
     <message>
-        <source>Cannot resolve -whitebind address: '%s'</source>
-        <translation>Kann Adresse via -whitebind nicht auflösen: '%s'</translation>
+        <source>Cannot resolve -whitebind address: &apos;%s&apos;</source>
+        <translation>Die -whitebind Adresse kann nicht aufgelöst werden: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Connect through SOCKS5 proxy</source>
-        <translation>Über einen SOCKS5-Proxy verbinden</translation>
+        <translation>Verbindung über SOCKS5-proxy</translation>
     </message>
     <message>
         <source>Connect to KeePassHttp on port &lt;port&gt; (default: %u)</source>
-        <translation>Mit KeePassHttp auf &lt;port&gt; verbinden (Standard: %u)</translation>
+        <translation>Verbinden zum KeePassHttp auf dem Port &lt;Port&gt; (Standard: %u)</translation>
     </message>
     <message>
         <source>Copyright (C) 2009-%i The Bitcoin Core Developers</source>
-        <translation>Copyright (C) 2009-%i Die "Bitcoin Core"-Entwickler</translation>
+        <translation>Copyright (C) 2009-%i Die Bitcoin Core Entwickler</translation>
     </message>
     <message>
-        <source>Copyright (C) 2014-%i The DYN Core Developers</source>
-        <translation>Copyright (C) 2014-%i Die "DYN Core"-Entwickler</translation>
+        <source>Copyright (C) 2014-%i The Dynamic Developers</source>
+        <translation>Copyright (C) 2014-%i Die Dynamic Entwickler</translation>
     </message>
     <message>
         <source>Could not parse -rpcbind value %s as network address</source>
-        <translation>-rpcbind Wert %s konnte nicht als Netzwerkadresse erkannt werden</translation>
+        <translation>Zuordnung von -rpcbind Wert %s als Netzwerkadresse nicht möglich</translation>
     </message>
     <message>
         <source>PrivateSend is idle.</source>
-        <translation>PrivateSend ist untätig.</translation>
+        <translation>PrivateSend ist im Leerlauf.</translation>
     </message>
     <message>
         <source>PrivateSend request complete:</source>
-        <translation>PrivateSend-Anfrage vollständig:</translation>
+        <translation>PrivateSend Anforderung vollständig:</translation>
     </message>
     <message>
         <source>PrivateSend request incomplete:</source>
-        <translation>PrivateSend-Anfrage unvollständig:</translation>
+        <translation>PrivateSend Anforderung nicht vollständig:</translation>
     </message>
     <message>
         <source>Disable safemode, override a real safe mode event (default: %u)</source>
-        <translation>Sicherheitsmodus deaktivieren, überschreibt ein echtes Sicherheitsmodusereignis (Standard: %u)</translation>
+        <translation>Safemode deaktivieren, echtes Ereignis im sicheren Modus wird überschreiben (Standard: %u)</translation>
     </message>
     <message>
-        <source>Enable the client to act as a dynode (0-1, default: %u)</source>
-        <translation>dynode-Modus aktivieren. (0=aus, 1=an; Voreinstellung: %u)</translation>
+        <source>Enable the client to act as a Dynode (0-1, default: %u)</source>
+        <translation>Aktivieren des Clients um als Dynode zu agieren (0-1, Standard: %u)</translation>
     </message>
     <message>
-        <source>Error connecting to dynode.</source>
-        <translation>Fehler bei der Verbindung zum dynode.</translation>
+        <source>Error connecting to Dynode.</source>
+        <translation>Fehler bei der Verbindung zu Dynode.</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of DYN Core</source>
-        <translation>Fehler beim Laden von wallet.dat: Wallet benötigt neuere Version von DYN Core</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of Dynamic</source>
+        <translation>Fehler beim Laden der wallet.dat: Gelbörse benötigt eine neuere Version von Dynamic</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occured, see debug.log for details</source>
-        <translation>Fehler: ein interner Fehler ist aufgetreten, Details sind in der Datei debug.log</translation>
+        <translation>Fehler: Ein fataler interner Fehler ist aufgetreten, siehe debug.log für mehr Details</translation>
     </message>
     <message>
-        <source>Error: Can't select current denominated inputs</source>
-        <translation>Fehler: die aktuell gestückelten Inputs können nicht ausgewählt werden</translation>
+        <source>Error: Can&apos;t select current denominated inputs</source>
+        <translation>Fehler: Aktuell gestückelte Eingänge können nicht ausgewählt werden</translation>
     </message>
     <message>
         <source>Error: Unsupported argument -tor found, use -onion.</source>
-        <translation>Fehler: Paramter -tor wird nicht unterstützt, bitte -onion benutzen.</translation>
+        <translation>Fehler: Nicht unterstützes Argument -tor gefunden, Verwenden Sie -onion.</translation>
     </message>
     <message>
         <source>Fee (in DYN/kB) to add to transactions you send (default: %s)</source>
-        <translation>Gebühren (in DYN pro Kb), die gesendeten Transaktionen hinzugefügt werden (Standard: %s)</translation>
+        <translation>Gebühr (in DYN/kB) zu den Transaktionen hinzufügen, die Sie senden (Standard: %s)</translation>
     </message>
     <message>
         <source>Finalizing transaction.</source>
-        <translation>Füge Transaktion zusammen.</translation>
+        <translation>Transaktion wird finaliziert</translation>
     </message>
     <message>
         <source>Force safe mode (default: %u)</source>
-        <translation>Sicherheitsmodus erzwingen (Standard: %u)</translation>
+        <translation>Sicheren Modus erzwingen (Standard: %u)</translation>
     </message>
     <message>
         <source>Found enough users, signing ( waiting %s )</source>
-        <translation>Genug Partner gefunden, signiere ( warte %s )</translation>
+        <translation>Ausreichende Benutzer gefunden, Signiere (Warten %s)</translation>
     </message>
     <message>
         <source>Found enough users, signing ...</source>
-        <translation>Genug Partner gefunden, signiere ... </translation>
+        <translation>Ausreichende Benutzer gefunden, Signiere ...</translation>
     </message>
     <message>
         <source>Generate coins (default: %u)</source>
-        <translation>Coins erzeugen (Standard: %u)</translation>
+        <translation>Münzen generieren (Standard: %u)</translation>
     </message>
     <message>
         <source>How many blocks to check at startup (default: %u, 0 = all)</source>
-        <translation>Wieviele Blöcke beim Starten geprüft werden sollen (Standard: %u, 0 = alle)</translation>
+        <translation>Wieviele Blocks beim Start zu überprüfen (Standard: %u, 0 = Alle)</translation>
     </message>
     <message>
         <source>Importing...</source>
-        <translation>Importiere...</translation>
+        <translation>Importieren...</translation>
     </message>
     <message>
         <source>Imports blocks from external blk000??.dat file</source>
-        <translation>Blöcke aus externer Datei blk000??.dat importieren</translation>
+        <translation>Transaktionen aus der externen blk000??.dat Datei importieren</translation>
     </message>
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
-        <translation>IP-Adressen in die Debug-Ausgabe mit aufnehmen (Standard: %u)</translation>
+        <translation>IP Adresse in der Debug Ausgabe inkludieren (Standard: %u)</translation>
     </message>
     <message>
         <source>Incompatible mode.</source>
@@ -3906,20 +4501,19 @@ zum Beispiel: alertnotify=echo %%s | mail -s \"DYN Alert\" admin@foo.com</transl
     </message>
     <message>
         <source>Incorrect or no genesis block found. Wrong datadir for network?</source>
-        <translation>Fehlerhafter oder kein Genesis-Block gefunden. Falsches Datenverzeichnis für das Netzwerk?</translation>
+        <translation>Inkorrekter oder kein Genesis Block gefunden. Falsches Datenverzeichnis für das Netzwerk?</translation>
     </message>
     <message>
         <source>Information</source>
-        <translation>Hinweis</translation>
+        <translation>Information</translation>
     </message>
     <message>
-        <source>Initialization sanity check failed. DYN Core is shutting down.</source>
-        <translation>Fehler beim Initialisieren (Plausibilitätsprüfung fehlgeschlagen).
-DYN Core wird heruntergefahren.</translation>
+        <source>Initialization sanity check failed. Dynamic is shutting down.</source>
+        <translation>Die Überprüfung der Plausibilitätsprüfung ist fehlgeschlagen. Dynamic wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Input is not valid.</source>
-        <translation>Eintrag ist nicht gültig.</translation>
+        <translation>Eingabe ist nicht gültig.</translation>
     </message>
     <message>
         <source>InstantSend options:</source>
@@ -3927,375 +4521,401 @@ DYN Core wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Insufficient funds.</source>
-        <translation>Unzureichender Kontostand.</translation>
+        <translation>Keine ausreichende Mittel.</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>Ungültige "-onion"-Adresse: '%s'</translation>
+        <source>Invalid -onion address: &apos;%s&apos;</source>
+        <translation>Ungültige -onion Adresse: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Ungültige Adresse in -proxy: '%s'</translation>
+        <source>Invalid -proxy address: &apos;%s&apos;</source>
+        <translation>Ungültige -proxy Adresse: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Ungültiger Betrag für -maxtxfee=&lt;amount&gt;: '%s'</translation>
+        <source>Invalid amount for -maxtxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>Ungültiger Betrag für -maxtxfee=&lt;Betrag&gt;: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Ungültiger Betrag für -minrelaytxfee=&lt;amount&gt;: '%s'</translation>
+        <source>Invalid amount for -minrelaytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>Ungültiger Betrag für -minrelaytxfee=&lt;Betrag&gt;: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -mintxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Ungültiger Betrag für -mintxfee=&lt;amount&gt;: '%s'</translation>
+        <source>Invalid amount for -mintxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>Ungültiger Betrag für -mintxfee=&lt;Betrag&gt;: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
-        <translation>Ungültiger Betrag für -paytxfee=&lt;amount&gt;: '%s' (Betrag muss mindestens %s sein)</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos; (must be at least %s)</source>
+        <translation>Ungültiger Betrag für -paytxfee=&lt;Betrag&gt;: &apos;%s&apos; (muss mindestens %s sein)</translation>
     </message>
     <message>
-        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s'</source>
-        <translation>Ungültiger Betrag für -paytxfee=&lt;amount&gt;: '%s'</translation>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: &apos;%s&apos;</source>
+        <translation>Ungültiger Betrag für -paytxfee=&lt;Betrag&gt;: &apos;%s&apos;.</translation>
     </message>
     <message>
         <source>Last successful PrivateSend action was too recent.</source>
-        <translation>Die letzte erfolgreiche PrivateSend-Transaktion ist noch zu neu.</translation>
+        <translation>Letzte erfolgreiche PrivatSend Aktion war zu aktuell.</translation>
     </message>
     <message>
         <source>Limit size of signature cache to &lt;n&gt; entries (default: %u)</source>
-        <translation>Größe des Signaturcaches auf &lt;n&gt; Einträge begrenzen (Standard: %u)</translation>
+        <translation>Größe des Signature Speichers auf &lt;n&gt; Einträge limitieren(Standard: %u)</translation>
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>&lt;port&gt;nach JSON-RPC-Verbindungen abhören (Standard: %u oder Testnetz: %u)</translation>
+        <translation>Abhören der JSON-RPC Verbindungen auf &lt;Port&gt; (Standard: %u oder Testnet: %u)</translation>
     </message>
     <message>
         <source>Listen for connections on &lt;port&gt; (default: %u or testnet: %u)</source>
-        <translation>&lt;port&gt; nach Verbindungen abhören (Standard: %u oder Testnetz: %u)</translation>
+        <translation>Abhören der Verbindungen auf &lt;Port&gt; (Standard: %u oder Testnet: %u)</translation>
     </message>
     <message>
         <source>Loading budget cache...</source>
-        <translation>Lade Budget-Cache...</translation>
+        <translation>Budgetcache wird geladen...</translation>
     </message>
     <message>
-        <source>Loading dynode cache...</source>
-        <translation>Lade dynode-Cache...</translation>
+        <source>Loading Dynode cache...</source>
+        <translation>Dynodecache wird geladen..</translation>
     </message>
     <message>
-        <source>Loading dynode payment cache...</source>
-        <translation>Lade dynode Zahlungs-Cache...</translation>
+        <source>Loading Dynode payment cache...</source>
+        <translation>Dynode Zahlungscache wird geladen...</translation>
+    </message>
+    <message>
+        <source>Loading governance cache...</source>
+        <translation>Verwaltungscache wird geladen...</translation>
+    </message>
+    <message>
+        <source>Loading fulfilled requests cache...</source>
+        <translation>Cache für fertiggestellte Anforderungen wird geladen...</translation>
     </message>
     <message>
         <source>Lock is already in place.</source>
-        <translation>Schon gesperrt.</translation>
+        <translation>Sperre ist bereits gesetzt.</translation>
     </message>
     <message>
-        <source>Lock dynodes from dynode configuration file (default: %u)</source>
-        <translation>dynodes über dynode-Konfiguration sperren (Standard: %u)</translation>
+        <source>Lock Dynodes from Dynode configuration file (default: %u)</source>
+        <translation>Dynodes der Dynode Konfigurationsdatei sperren (Standard: %u)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
-        <translation>Maximal &lt;n&gt; Verbindungen zu Gegenstellen aufrechterhalten (Standard: %u)</translation>
+        <translation>Verbindungen zu den meisten &lt;n&gt; Gegenstellen aufrechterhalten(Standard: %u)</translation>
     </message>
     <message>
         <source>Maximum per-connection receive buffer, &lt;n&gt;*1000 bytes (default: %u)</source>
-        <translation>Maximale Größe des Empfangspuffers pro Verbindung, &lt;n&gt; * 1000 Byte (Standard: %u)</translation>
+        <translation>Maximum per Verbindung erhaltenen Puffer, &lt;n&gt;*1000 bytes (Standard: %u)</translation>
     </message>
     <message>
         <source>Maximum per-connection send buffer, &lt;n&gt;*1000 bytes (default: %u)</source>
-        <translation>Maximale Größe des Sendepuffers pro Verbindung, &lt;n&gt; * 1000 Byte (Standard: %u)</translation>
+        <translation>Maximaler gesendeter Puffer pro Verbindung, &lt;n&gt;*1000 bytes (Standard: %u)</translation>
     </message>
     <message>
         <source>Mixing in progress...</source>
-        <translation>Am Mixen...</translation>
+        <translation>Mixing wird durchgeführt...</translation>
     </message>
     <message>
-        <source>Need to specify a port with -whitebind: '%s'</source>
-        <translation>Für -whitebind muss eine Portnummer angegeben werden: '%s'</translation>
+        <source>Need to specify a port with -whitebind: &apos;%s&apos;</source>
+        <translation>Angabe eines Port mit -whitebind wird benötigt: &apos;%s&apos;</translation>
     </message>
     <message>
-        <source>No dynodes detected.</source>
-        <translation>Keine dynodes gefunden.</translation>
+        <source>No Dynodes detected.</source>
+        <translation>Keine Dynodes erkannt.</translation>
     </message>
     <message>
-        <source>No compatible dynode found.</source>
-        <translation>Kein kompatibler dynode gefunden.</translation>
+        <source>No compatible Dynode found.</source>
+        <translation>Nicht kompatible Dynodes gefunden.</translation>
     </message>
     <message>
-        <source>Not in the dynode list.</source>
-        <translation>Nicht in der dynode-Liste.</translation>
+        <source>Not in the Dynode list.</source>
+        <translation>Nicht in der Dynode Liste.</translation>
     </message>
     <message>
         <source>Number of automatic wallet backups (default: 10)</source>
-        <translation>Anzahl automatischer Wallet-Sicherungskopien (Standard: 10)</translation>
+        <translation>Anzahl der automatischen Sicherungen der Geldbörsen (Standard: 10)</translation>
     </message>
     <message>
         <source>Only accept block chain matching built-in checkpoints (default: %u)</source>
-        <translation>Blockkette nur als gültig ansehen, wenn sie mit den integrierten Prüfpunkten übereinstimmt (Standard: %u)</translation>
+        <translation>Akzeptieren nur von Blockchain übereinstimmende Kontrollpunkte (Standard: %u)</translation>
     </message>
     <message>
         <source>Only connect to nodes in network &lt;net&gt; (ipv4, ipv6 or onion)</source>
-        <translation>Verbinde nur zu Knoten des Netztyps &lt;net&gt; (ipv4, ipv6 oder onion)</translation>
+        <translation>Nur mit Knoten im Netzwerk verbinden&lt;Netz&gt; (ipv4, ipv6 oder onion)</translation>
     </message>
     <message>
         <source>Prepend debug output with timestamp (default: %u)</source>
-        <translation>Debugausgaben einen Zeitstempel voranstellen (Standard: %u)</translation>
+        <translation>Vorbereitung einer Debugausgabe mit Zeitstempel (Standard: %u)</translation>
     </message>
     <message>
         <source>Run a thread to flush wallet periodically (default: %u)</source>
-        <translation>Einen Thread starten, der periodisch die Wallet auf den Datenträger sichert (Standard: %u)</translation>
+        <translation>Ausführen eines Thread, um die Geldbörse regelmäßig zu spülen (Standard: %u)</translation>
     </message>
     <message>
         <source>Send trace/debug info to debug.log file (default: %u)</source>
-        <translation>Rückverfolgungs- und Debuginformationen in debug.log schreiben (Standard: %u)</translation>
+        <translation>Senden von Trace/Debug Info an die debug.log Datei(Standard: %u)</translation>
     </message>
     <message>
         <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Wenn möglich als gebührenfreie Transaktion versenden (Standard: %u)</translation>
+        <translation>Senden von Transaktionen als gebührenfreie Transaktionen, wenn möglich (Standard: %u)</translation>
     </message>
     <message>
         <source>Server certificate file (default: %s)</source>
-        <translation>Datei mit Serverzertifikat (Standard: %s)</translation>
+        <translation>Zertifizierungsdatei des Servers (Standard: %s)</translation>
     </message>
     <message>
         <source>Server private key (default: %s)</source>
-        <translation>Privater Serverschlüssel (Standard: %s)</translation>
+        <translation>Privater Schlüssel des Servers (Standard: %s)</translation>
     </message>
     <message>
-        <source>Set external address:port to get to this dynode (example: %s)</source>
-        <translation>Setze externe Adresse und Port, um diesen dynode zu erreichen (Beispiel: %s)</translation>
+        <source>Set external address:port to get to this Dynode (example: %s)</source>
+        <translation>Legt externen Adress:Port fest, um an diesen Dynode zu gelangen (ej: %s)</translation>
     </message>
     <message>
         <source>Set key pool size to &lt;n&gt; (default: %u)</source>
-        <translation>Größe des Schlüsselpools festlegen auf &lt;n&gt; (Standard: %u)</translation>
+        <translation>Setzt die Schlüssel Pool Größe fest auf &lt;n&gt; (Standard: %u)</translation>
     </message>
     <message>
         <source>Set minimum block size in bytes (default: %u)</source>
-        <translation>Minimale Blockgröße in Bytes festlegen (Standard: %u)</translation>
+        <translation>Legt die minimale Blockgröße in Bytes fest (Standard: %u)</translation>
     </message>
     <message>
         <source>Set the number of threads to service RPC calls (default: %d)</source>
-        <translation>Maximale Anzahl an Threads zur Verarbeitung von RPC-Anfragen festlegen (Standard: %d)</translation>
+        <translation>Legt die Anzahl der Threads fest, um RPC-Aufrufe auszuführen (Standard:  %d)</translation>
     </message>
     <message>
         <source>Sets the DB_PRIVATE flag in the wallet db environment (default: %u)</source>
-        <translation>DB_PRIVATE-Flag in der Wallet-Datenbankumgebung setzen (Standard: %u)</translation>
+        <translation>Legt das DB_PRIVATE Flag in der Gelbörsen DB Umgebung an(Standard: %u)</translation>
     </message>
     <message>
         <source>Signing timed out.</source>
-        <translation>Zeitüberschreitung der Signierung.</translation>
+        <translation>Zeitüberschreitung beim signieren.</translation>
     </message>
     <message>
         <source>Specify configuration file (default: %s)</source>
-        <translation>Konfigurationsdatei festlegen (Standard: %s)</translation>
+        <translation>Angabe der Konfigurationsdatei (Standard: %s)</translation>
     </message>
     <message>
         <source>Specify connection timeout in milliseconds (minimum: 1, default: %d)</source>
-        <translation>Verbindungzeitüberschreitung in Millisekunden festlegen (Minimum: 1, Standard: %d)</translation>
+        <translation>Angabe der Verbindungsauszeit in Millisekunden (minimum: 1, Standard: %d)</translation>
     </message>
     <message>
-        <source>Specify dynode configuration file (default: %s)</source>
-        <translation>Konfigurationsdatei der dynode-Einstellungen angeben (Standard: %s)</translation>
+        <source>Specify Dynode configuration file (default: %s)</source>
+        <translation>Angabe der Dynode Konfigurationsdatei (Standard: %s)</translation>
     </message>
     <message>
         <source>Specify pid file (default: %s)</source>
-        <translation>pid-Datei angeben (Standard: %s)</translation>
+        <translation>Angabe der PID Datei (Standard: %s)</translation>
     </message>
     <message>
         <source>Spend unconfirmed change when sending transactions (default: %u)</source>
-        <translation>Unbestätigtes Wechselgeld beim Senden von Transaktionen ausgeben (Standard: %u)</translation>
+        <translation>Unbestätiges Wechselgeld ausgeben wenn die Transaktion gesendet wird (Standard: %u)</translation>
     </message>
     <message>
         <source>Stop running after importing blocks from disk (default: %u)</source>
-        <translation>Nach dem Import von Blöcken von der Festplatte Programm beenden (Standard: %u)</translation>
+        <translation>Nach dem Import von Blöcken von der FestFestplatte stoppen (Standard: %u)</translation>
     </message>
     <message>
-        <source>Submitted following entries to dynode: %u / %d</source>
-        <translation>Folgende Einträge wurden an dynode gesendet: %u / %d</translation>
+        <source>Submitted following entries to Dynode: %u / %d</source>
+        <translation>Folgende Einträge an Dynode übermittelt: %u / %d</translation>
     </message>
     <message>
-        <source>Submitted to dynode, waiting for more entries ( %u / %d ) %s</source>
-        <translation>An dynode gesendet, warte auf weitere Einträge ( %u / %d ) %s</translation>
+        <source>Submitted to Dynode, waiting for more entries ( %u / %d ) %s</source>
+        <translation>Weitergeleitet an Dynode, warten auf mehr Eingänge ( %u / %d ) %s</translation>
     </message>
     <message>
-        <source>Submitted to dynode, waiting in queue %s</source>
-        <translation>An dynode übermittelt, wartet in Warteschlange %s</translation>
+        <source>Submitted to Dynode, waiting in queue %s</source>
+        <translation>Weitergeleitet an Dynode, in Warteschlange wartend %s</translation>
     </message>
     <message>
         <source>Synchronization failed</source>
-        <translation>Synchronisation fehlgeschlagen</translation>
+        <translation>Synchronisierung fehlgeschlagen</translation>
     </message>
     <message>
         <source>Synchronization finished</source>
-        <translation>Synchronisation beendet</translation>
+        <translation>Sychronisierung fertiggestellt</translation>
     </message>
     <message>
         <source>Synchronizing budgets...</source>
-        <translation>Synchronisiere Budgets...</translation>
+        <translation>Sycnhronisieren von Budgets...</translation>
     </message>
     <message>
-        <source>Synchronizing dynode winners...</source>
-        <translation>Synchronisiere dynode Gewinner...</translation>
+        <source>Synchronizing Dynode winners...</source>
+        <translation>Synchronisieren von Dynode Gewinnern...</translation>
     </message>
     <message>
-        <source>Synchronizing dynodes...</source>
-        <translation>Synchronisiere dynodes...</translation>
+        <source>Synchronizing Dynode payments...</source>
+        <translation>Sychronisierung von Dynode Zahlungen...</translation>
+    </message>
+    <message>
+        <source>Synchronizing Dynodes...</source>
+        <translation>Sychronisierung von Dynodes...</translation>
+    </message>
+    <message>
+        <source>Synchronizing governance objects...</source>
+        <translation>Synchronisieren von Governance Objekten...</translation>
     </message>
     <message>
         <source>Synchronizing sporks...</source>
-        <translation>Synchronisiere Sporks...</translation>
+        <translation>Synchronisierung der Sporks...</translation>
     </message>
     <message>
-        <source>This is not a dynode.</source>
-        <translation>Dies ist kein dynode.</translation>
+        <source>This is not a Dynode.</source>
+        <translation>Das ist kein Dynode.</translation>
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
-        <translation>Schwellenwert, um Verbindungen zu sich nicht konform verhaltenden Gegenstellen zu beenden (Standard: %u)</translation>
+        <translation>Grenzwert für Trennen von fehlerhaften Gegenstellen (Standard: %u)</translation>
     </message>
     <message>
         <source>Use KeePass 2 integration using KeePassHttp plugin (default: %u)</source>
-        <translation>"KeePass 2"-Integration mit KeePassHttp-plugin (Standard: %u)</translation>
+        <translation>Verwenden von KeePass 2 Integration mit dem KeePassHttp Plugin (Standard: %u)</translation>
     </message>
     <message>
-        <source>Use N separate dynodes to anonymize funds  (2-8, default: %u)</source>
-        <translation>N unterschiedliche dynodes benutzen, um DYN zu anonymisieren (2-8, Standard: %u)</translation>
+        <source>Use N separate Dynodes to anonymize funds  (2-8, default: %u)</source>
+        <translation>Verwenden von N separaten Dynodes um Mittel zu anonymizieren (2-8, Standard: %u)</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
-        <translation>UPnP verwenden, um eine Portweiterleitung einzurichten (Standard: %u)</translation>
+        <translation>Vewenden von UPnP um mit den Überwachungsport zu verbinden(Standard: %u)</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart DYN Core to complete</source>
-        <translation>Die Wallet musste neu geschrieben werden. Bitte das Programm neu starten um den Vorgang abzuschließen</translation>
+        <source>Wallet needed to be rewritten: restart Dynamic to complete</source>
+    </message>
+    <message>
+        <translation>Die Geldbörse muss umgeschrieben werden: Neustart von Dynamic um fertigstellen</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
-        <translation>Warnung: Veraltetes Argument -benchmark wird ignoriert, bitte -debug=bench verwenden.</translation>
+        <translation>Warnung: Nicht unterstützes Argument -benchmark ignoriert, verwenden von -debug=bench.</translation>
     </message>
     <message>
         <source>Warning: Unsupported argument -debugnet ignored, use -debug=net.</source>
-        <translation>Warnung: Veraltetes Argument -debugnet wird ignoriert, bitte -debug=net verwenden.</translation>
+        <translation>Warnung: Nicht unterstützes Argument -debugnet ignoriert, verwenden von -debug=net.</translation>
     </message>
     <message>
         <source>Will retry...</source>
-        <translation>Versuche erneut...</translation>
+        <translation>Wird erneut versucht...</translation>
     </message>
     <message>
         <source>Invalid dynodepairingkey. Please see documenation.</source>
-        <translation>dynode-Geheimschlüssel (dynodepairingkey) ist ungültig. Siehe Dokumentation. </translation>
+        <translation>Dynodepairingkey ist nicht gültig. Bitte sehen Sie in der Dokumentation nach.</translation>
     </message>
     <message>
         <source>(must be 33300 for mainnet)</source>
-        <translation>(muss für Standardnetz 33300 sein)</translation>
+        <translation>(muß 33300 für das Mainnet sein)</translation>
     </message>
     <message>
-        <source>Can't find random dynode.</source>
-        <translation>Kann keinen zufällig ausgewählten dynode finden</translation>
+        <source>Can&apos;t find random Dynode.</source>
+        <translation>Willkürlicher Dynode kann nicht gefunden werden.</translation>
     </message>
     <message>
-        <source>Can't mix while sync in progress.</source>
-        <translation>Währen der Synchronisierung kann nicht gemixt werden.</translation>
+        <source>Can&apos;t mix while sync in progress.</source>
+        <translation>Während der Synchronisierung kann nicht gemixt werden.</translation>
     </message>
     <message>
         <source>Could not parse dynode.conf</source>
-        <translation>dynode.conf konnte nicht analysiert werden</translation>
+        <translation>dynode.conf kann nicht zugeordnet werden </translation>
     </message>
     <message>
-        <source>Invalid netmask specified in -whitelist: '%s'</source>
-        <translation>Ungültige Netzmaske für -whitelist angegeben: '%s'</translation>
+        <source>Invalid netmask specified in -whitelist: &apos;%s&apos;</source>
+        <translation>Ungültige Netzmaske in der -whiteliste angegeben: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Invalid port detected in dynode.conf</source>
-        <translation>Ungültige Portnummer in dynode.conf</translation>
+        <translation>Üngültiger Port in dynode.conf erkannt</translation>
     </message>
     <message>
         <source>Invalid private key.</source>
-        <translation>Fehlerhafter privater Schlüssel.</translation>
+        <translation>Üngültiger privater Schlüssel.</translation>
     </message>
     <message>
         <source>Invalid script detected.</source>
-        <translation>Invalides Zahlskript entdeckt.</translation>
+        <translation>Ungültiges Skript erkannt.</translation>
     </message>
     <message>
         <source>KeePassHttp id for the established association</source>
-        <translation>"KeePassHttp id" für bestehende verknüpfte Verbindungen.</translation>
+        <translation>KeePassHttp ID für die etabllierte Assoziation</translation>
     </message>
     <message>
         <source>KeePassHttp key for AES encrypted communication with KeePass</source>
-        <translation>"KeePassHttp key" für die  AES-verschlüsselte Kommunikation mit "KeePass"</translation>
+        <translation>KeePassHttp Schlüssel für AES verschlüsselte Kommunitkation mit KeePass</translation>
     </message>
     <message>
         <source>Keep N DYN anonymized (default: %u)</source>
-        <translation>Betrag welcher anonymisiert vorgehalten wird. (Voreinstellung: %u)</translation>
+        <translation>Beibehaltung von N DYN anonymisiert (Standard: %u)</translation>
     </message>
     <message>
         <source>Keep at most &lt;n&gt; unconnectable transactions in memory (default: %u)</source>
-        <translation>Maximal &lt;n&gt; (noch) nicht einsortierte Zahlungen zwischenspeichern (Voreinstellung: %u)</translation>
+        <translation>Beibehaltung der &lt;n&gt; nichtverbindbare Transaktionen im Speicher (Standard: %u)</translation>
     </message>
     <message>
         <source>Last PrivateSend was too recent.</source>
-        <translation>Letzte PrivateSend-Transaktion ist noch zu neu.</translation>
+        <translation>Letztes PrivatSend war zu aktuell.</translation>
     </message>
     <message>
         <source>Line: %d</source>
-        <translation>Zeile: %d</translation>
+        <translation>Linie: %d</translation>
     </message>
     <message>
         <source>Loading addresses...</source>
-        <translation>Lade Adressen...</translation>
+        <translation>Laden der Adressen...</translation>
     </message>
     <message>
         <source>Loading block index...</source>
-        <translation>Lade Blockindex...</translation>
+        <translation>Laden des Block Index...</translation>
     </message>
     <message>
         <source>Loading wallet... (%3.2f %%)</source>
-        <translation>Lade Wallet... (%3.2f %%)</translation>
+        <translation>Laden der Geldbörse...(%3.2f %%)</translation>
     </message>
     <message>
         <source>Loading wallet...</source>
-        <translation>Lade Wallet...</translation>
+        <translation>Laden der Geldbörse...</translation>
     </message>
     <message>
-        <source>dynode options:</source>
-        <translation>dynode Optionen:</translation>
+        <source>Loading banlist...</source>
+        <translation>Laden der Banlist...</translation>
     </message>
     <message>
-        <source>dynode queue is full.</source>
-        <translation>Warteschlange der dynode ist voll.</translation>
+        <source>Make sure to encrypt your wallet and delete all non-encrypted backups after you verified that wallet works!</source>
+        <translation>Geldbörsenverschlüsselung und Löschung aller nicht verschlüsselten Sicherungen, nachdem Sie sichergestellt haben, dass Ihre Geldbörse funktioniert!</translation>
     </message>
     <message>
-        <source>dynode:</source>
-        <translation>dynode:</translation>
+        <source>Dynode options:</source>
+        <translation>Dynode optionen:</translation>
+    </message>
+    <message>
+        <source>Dynode queue is full.</source>
+        <translation>Dynode Warteschlange ist voll.</translation>
+    </message>
+    <message>
+        <source>Dynode:</source>
+        <translation>Dynode:</translation>
     </message>
     <message>
         <source>Missing input transaction information.</source>
-        <translation>Fehlende Informationen zur Eingangs-Transaktion.</translation>
+        <translation>Fehlende Informationen für die Eingabetransaktion.</translation>
     </message>
     <message>
         <source>No funds detected in need of denominating.</source>
-        <translation>Kein Kapital gefunden, dass zerstückelt werden muss.</translation>
+        <translation>Keine Mittel gefunden, die Gestückelt werden müssen.</translation>
     </message>
     <message>
         <source>No matching denominations found for mixing.</source>
-        <translation>Keine passende Zerstückelungen zum Mixen gefunden.</translation>
+        <translation>Keine übereinstimmende Stückelungen für das Mixing gefunden.</translation>
     </message>
     <message>
         <source>Node relay options:</source>
-        <translation>Vermittlungs-Optionen für Knoten:</translation>
+        <translation>Optionen für die Knoten Übertragung:</translation>
     </message>
     <message>
         <source>Non-standard public key detected.</source>
-        <translation>nicht Standard öffentlicher Schlüssel erkannt.</translation>
+        <translation>Kein standardisierter öffentlicher Schlüssel erkannt.</translation>
     </message>
     <message>
         <source>Not compatible with existing transactions.</source>
-        <translation>Nicht kompatibel mit existierenden Transaktionen.</translation>
+        <translation>Nicht mit existierenden Transaktionen kompatibel.</translation>
     </message>
     <message>
         <source>Not enough file descriptors available.</source>
-        <translation>Nicht genügend Datei-Deskriptoren verfügbar.</translation>
+        <translation>Nicht genügend File Descriptors verfügbar.</translation>
     </message>
     <message>
         <source>Options:</source>
@@ -4303,127 +4923,349 @@ DYN Core wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Password for JSON-RPC connections</source>
-        <translation>Passwort für JSON-RPC-Verbindungen</translation>
+        <translation>Passwort für JSON-RPC Verbindungen</translation>
     </message>
     <message>
         <source>RPC SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
-        <translation>RPC SSL Optionen: (siehe Bitcoin Wiki für eine Installationsanleitung)</translation>
+        <translation>RPC SSL Optionen: (Sehen Sie in der Bitcoin Wiki für SSL Setup Instruktionen nach)</translation>
     </message>
     <message>
         <source>RPC server options:</source>
-        <translation>RPC-Serveroptionen:</translation>
+        <translation>RPC Server Optionen:</translation>
     </message>
     <message>
         <source>RPC support for HTTP persistent connections (default: %d)</source>
-        <translation>RPC-Unterstützung für persistente HTTP-Verbindungen (default: %d)</translation>
+        <translation>RPC Support für HTTP gleichbleibende Verbindungen (Standard: %d)</translation>
     </message>
     <message>
         <source>Randomly drop 1 of every &lt;n&gt; network messages</source>
-        <translation>Zufällig eine von &lt;n&gt; Netzwerknachrichten verwerfen</translation>
+        <translation>Zufälliges verwerfen von 1 jeder &lt;n&gt; Nachricht des Netzwerks</translation>
     </message>
     <message>
         <source>Randomly fuzz 1 of every &lt;n&gt; network messages</source>
-        <translation>Zufällig eine von &lt;n&gt; Netzwerknachrichten verwürfeln</translation>
+        <translation>Zufälliges Verwischen von 1  jeder  &lt;n&gt; Nachricht des Netzwerks</translation>
     </message>
     <message>
         <source>Rebuild block chain index from current blk000??.dat files</source>
-        <translation>Blockkettenindex aus aktuellen Dateien blk000??.dat wieder aufbauen</translation>
+        <translation>Blockchain Index aus der aktuellen blk000??.dat neu aufbauen.</translation>
+    </message>
+    <message>
+        <source>Print version and exit</source>
+        <translation>Ausgabe der Version und verlassen</translation>
+    </message>
+    <message>
+        <source>Print this help message and exit</source>
+        <translation>Ausgabe dieser Hilfsnachricht und verlassen</translation>
+    </message>
+    <message>
+        <source>Receive and display P2P network alerts (default: true)</source>
+        <translation>Empfangen und Anzeigen von P2P Netzwerk Warnungen (Standard: wahr)</translation>
+    </message>
+    <message>
+        <source>Tell other nodes to filter invs to us by our mempool min fee (default: %u)</source>
+        <translation>Andere Knoten anweisen die Invs anhand unserer Mindestgebühr für den Mempool zu filtern(Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Imports blocks from external blk000??.dat file on startup</source>
+        <translation>Transaktionen aus der externen blk000??.dat Datei beim Start importieren</translation>
+    </message>
+    <message>
+        <source>Keep the transaction memory pool below &lt;n&gt; megabytes (default: %u)</source>
+        <translation>Transaktionen Memory Pool unter &lt;n&gt; megabytes behalten(Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Do not keep transactions in the mempool longer than &lt;n&gt; hours (default: %u)</source>
+        <translation>Transaktionen im Mempool nicht länger als  &lt;n&gt; Stunden behalten (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, &gt;%u = target size in MiB to use for block files)</source>
+        <translation>Reduzieren von Speicheranforderung durch Beschneidung (löschen) alter Blöcke . Dieser Modus ist nicht kompatibel mit  -txindex und -rescan. Warnung: Eine Umänderung dieser Einstellung benötigt einen Wiederaufbau der gesamten Blockchain . (Standard: 0 = Beschneidung der Blöcke deaktivieren, &gt;%u = Zielgröße in MiB verwenden für Blockdateien)</translation>
+    </message>
+    <message>
+        <source>Rebuild chain state from the currently indexed blocks</source>
+        <translation>Wiederaufbau des Chain Status aus den aktuellen indizierten Blöcken </translation>
+    </message>
+    <message>
+        <source>Rebuild chain state and block index from the blk*.dat files on disk</source>
+        <translation>Wiederaufbau des Chain Status und Blockindexs aus der blk*.dat Datei auf der FestFestplatte </translation>
+    </message>
+    <message>
+        <source>Maintain a full address index, used to query for the balance, txids and unspent outputs for addresses (default: %u)</source>
+        <translation>Aufrechterhaltung eines vollen Adressindexes, welches verwendent wird um Kontostand, Txids und nicht verwendete Ausgaben für Adressen abzufragen (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Maintain a timestamp index for block hashes, used to query blocks hashes by a range of timestamps (default: %u)</source>
+        <translation>Aufrechterhaltung eines Zeitstempelindex für Blockhashes, welches verwendet wird um Block hashes über einen Umfang von Zeitstempeln abzufragen (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Maintain a full spent index, used to query the spending txid and input index for an outpoint (default: %u)</source>
+        <translation>Aufrechterhaltung eines vollständigen Index, der zum Abfragen des ausgegebenen txid und des Eingabeindex für einen Outpoint verwendet wird (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
+        <translation>Nur mit den angegebenen Knoten verbinden; -noconnect oder -connect=0 nur um automatische Verbindungen zu deaktivieren</translation>
+    </message>
+    <message>
+        <source>Discover own IP addresses (default: 1 when listening and no -externalip or -proxy)</source>
+        <translation>Eigene IP Adresse feststellen (Standard: 1 wenn abgehört und nicht -externalip o -proxy)</translation>
+    </message>
+    <message>
+        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
+        <translation>Abfragen von Adressen der Gegenstellenüber die DNS-Suche, sofern wenige Adressen vefügbar sind (Standard: 1 außer -connect/-noconnect)</translation>
+    </message>
+    <message>
+        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
+        <translation>Verbindungen von aussen akzeptieren (Standard: 1 wenn nicht -proxy oder -connect/-noconnect)</translation>
+    </message>
+    <message>
+        <source>Automatically create Tor hidden service (default: %d)</source>
+        <translation>Automatisches Erstellen von Tor versteckten Diensten (Standard: %d)</translation>
+    </message>
+    <message>
+        <source>Maintain at most &lt;n&gt; connections to peers (temporary service connections excluded) (default: %u)</source>
+        <translation>Aufrechterhaltung der meisten &lt;n&gt; Verbindungen zu Gegenstellen (temporäre Verbinungen zu Diensten ausgenommen) (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Maximum allowed median peer time offset adjustment. Local perspective of time may be influenced by peers forward or backward by this amount. (default: %u seconds)</source>
+        <translation>Maximal zulässiger mittlerer Ausgleich der Zeitverschiebung der Gegenstelle. Die lokale Zeit kann nach vor oder nach hinten durch Gegenstellen um diesen Zahl beeinflusst werden. (Standard: %u Sekunden)</translation>
+    </message>
+    <message>
+        <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
+        <translation>Unterstützt das Filtern von Blöcken und Transaktionen mit Bloom Filter (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Randomize credentials for every proxy connection. This enables Tor stream isolation (default: %u)</source>
+        <translation>Zufällige Anmeldedaten für jede Proxy Verbindung. Aktiviert die Isolation des Tor flusses (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Tor control port to use if onion listening enabled (default: %s)</source>
+        <translation>Tor kontrolliertes Passwort des Port verwenden, wenn die Onion Abhörung aktiviert ist (Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Tor control port password (default: empty)</source>
+        <translation>Tor kontrolliertes Passwort des Port (Standard: leer)</translation>
+    </message>
+    <message>
+        <source>Accept relayed transactions received from whitelisted peers even when not relaying transactions (default: %d)</source>
+        <translation>Akzeptieren der Übertragung der Transaktionen, die von Gegenstellen auf der Whitelist empfangen werden, auch wenn keine Transaktionen übertragen werden (Standard: %d)</translation>
+    </message>
+    <message>
+        <source>Force relay of transactions from whitelisted peers even they violate local relay policy (default: %d)</source>
+        <translation>Erzwingen der Übertragung der Transaktionen von Gegenstellen auf der Whitelist, auch wenn die lokalen Weiterleitungsrichtlinien verletzt werden (Standard: %d)</translation>
+    </message>
+    <message>
+        <source>Tries to keep outbound traffic under the given target (in MiB per 24h), 0 = no limit (default: %d)</source>
+        <translation>Versucht den ausgehenden Verkehr unter das angegebene Ziel zu halten (in MiB per 24h), 0 = kein Limit (Standard: %d)</translation>
+    </message>
+    <message>
+        <source>A fee rate (in %s/kB) that will be used when fee estimation has insufficient data (default: %s)</source>
+        <translation>Eine Gebührenrate (in %s/kB) die verwendet wird, wenn die Schätzung der Gebühren unzureichende Daten enthält (Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)</source>
+        <translation>Gebühren (in %s/kB) die kleiner sind als diese, werden als Nullgebühr für die Erstellung von Transaktionen erachtet (Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Fees (in %s/kB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: %s)</source>
+        <translation>Gebühren (in %s/kB) die kleiner sind als diese, werden als Nullgebühr für die Weiterleitung, das Mining und die Transaktionserstellung erachtet(Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Fee (in %s/kB) to add to transactions you send (default: %s)</source>
+        <translation>Gebühr (in %s/kB) an die Transaktion anhängen, welche Sie senden(Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Rescan the block chain for missing wallet transactions on startup</source>
+        <translation>Beim Start einen Rescan der Blockchain für fehlende Transaktionen der Geldbörse durchführen</translation>
+    </message>
+    <message>
+        <source>Attempt to recover private keys from a corrupt wallet on startup</source>
+        <translation>Beim Start versuchen, den Privaten Schlüssel aus einer defekten Geldbörse wiederherstellen </translation>
+    </message>
+    <message>
+        <source>Use hierarchical deterministic key generation (HD) after bip39/bip44. Only has effect during wallet creation/first start</source>
+        <translation>Verwenden der Erzeugung hierarchischer deterministischer Schlüssel (HD) nach bip39 / bip44. Hat nur während der Erstellung der Geldbörse einen Effekt/Erster Start</translation>
+    </message>
+    <message>
+        <source>User defined mnemonic for HD wallet (bip39). Only has effect during wallet creation/first start (default: randomly generated)</source>
+        <translation>Benutzerdefiniertes mnemonic für HD Geldbörse (bip39). Hat nur während der Erstellung der Geldbörse einen Effekt/Erster Start (Standard: zufällig generiert)</translation>
+    </message>
+    <message>
+        <source>User defined mnemonic passphrase for HD wallet (bip39). Only has effect during wallet creation/first start (default: empty string)</source>
+        <translation>Benutzerdefiniertes mnemonic Passphrase für HD Geldbörse (bip39). Hat nur während der Erstellung der Geldbörse einen Effekt/Erster Start (Standard: leere Zeichenfolge)</translation>
+    </message>
+    <message>
+        <source>User defined seed for HD wallet (should be in hex). Only has effect during wallet creation/first start (default: randomly generated)</source>
+        <translation>Benutzerdefiniertes Seed für HD Geldbörse (sollte in HEX sein). Hat nur während der Erstellung der Geldbörse einen Effekt/Erster Start (Standard: zufällig generiert)</translation>
+    </message>
+    <message>
+        <source>Upgrade wallet to latest format on startup</source>
+        <translation>Wallet beim Starten auf das letzte Format aktualisieren</translation>
+    </message>
+    <message>
+        <source>Make the wallet broadcast transactions</source>
+        <translation>Übertragen der Geldbörsen Transaktionen</translation>
+    </message>
+    <message>
+        <source>Number of automatic wallet backups (default: %u)</source>
+        <translation>Nummer der automatischen Gelbörsen Sicherung (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Specify full path to directory for automatic wallet backups (must exist)</source>
+        <translation>Pfad zum Verzeichnis für automatische Gelbörsen Sicherung angeben (muss existieren)</translation>
+    </message>
+    <message>
+        <source>Append comment to the user agent string</source>
+        <translation>Anhängen von einem Kommentar an die Benutzeragentenkette</translation>
+    </message>
+    <message>
+        <source>Maximum total fees (in %s) to use in a single wallet transaction or raw transaction; setting this too low may abort large transactions (default: %s)</source>
+        <translation>Maximum der Gesamtgebühren (in %s), welche in einer einzigen Transaktion der Gelbörse oder Raw Transaktion zu verwenden ist; eine zu niedrige Einstellung kann große Transaktionen abbrechen (Standard: %s)</translation>
+    </message>
+    <message>
+        <source>Send trace/debug info to console instead of debug.log file</source>
+        <translation>Senden der Trace/Debug Infos an die Konsole, anstatt an die debug.log</translation>
+    </message>
+    <message>
+        <source>Use the test chain</source>
+        <translation>Verwenden des Test Chain</translation>
+    </message>
+    <message>
+        <source>Disable all Dynamic specific functionality (Dynodes, PrivateSend, InstantSend, Governance) (0-1, default: %u)</source>
+        <translation>Alle Dynamic spezifische Funktionalitäten deaktivieren (Dynodes, PrivateSend, InstantSend, Governance) (0-1, Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)</source>
+        <translation>Die Verwendung von automatisierten PrivateSend für die in dieser Geldbörse gespeicherte Mittel aktivieren(0-1, Standard : %u)</translation>
+    </message>
+    <message>
+        <source>Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)</source>
+        <translation>Aktivieren von mehrfachen PrivatSend Mixsitzungen pro Block, Experiment  (0-1, Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Use N separate Dynodes for each denominated input to mix funds (2-16, default: %u)</source>
+        <translation>Verwenden von N separaten Dynodes für jeden gestückelten Eingang um die Mittel zu mixen (2-16, Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Enable InstantSend, show confirmations for locked transactions (0-1, default: %u)</source>
+        <translation>Aktivieren von InstantSend, Transaktionen für gesperrte Transaktionen anzeigen (0-1, Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Execute command when a wallet InstantSend transaction is successfully locked (%s in cmd is replaced by TxID)</source>
+        <translation>Ausführen eines Befehlseingabe, wenn eine Geldbörsen InstantSend Transaktion erfolgreich gesperrt wurde (%s in cmd durch TxID ersetzt)</translation>
+    </message>
+    <message>
+        <source>Minimum bytes per sigop in transactions we relay and mine (default: %u)</source>
+        <translation>Minimum Bytes pro sigop in Transaktionen, welche wir weiterleiten und minen  (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Enable transaction replacement in the memory pool (default: %u)</source>
+        <translation>Aktivieren des Austausches der Transaktionen im Memory Pool (Standard: %u)</translation>
+    </message>
+    <message>
+        <source>Location of the auth cookie (default: data dir)</source>
+        <translation>Ort des Auth Cookie (Standard: data dir)</translation>
+    </message>
+    <message>
+        <source>Username and hashed password for JSON-RPC connections. The field &lt;userpw&gt; comes in the format: &lt;USERNAME&gt;:&lt;SALT&gt;$&lt;HASH&gt;. A canonical python script is included in share/rpcuser. This option can be specified multiple times</source>
+        <translation>Benutzernamen und gehashtes Kennwort für JSON-RPC Verbindungen. Das Feld &lt;userpw&gt; kommt in den Format: &lt;USERNAME&gt;:&lt;SALT&gt;$&lt;HASH&gt;. Ein kanonisches Python Script ist in share/rpcuser inkludiert. Diese Option kann mehrfach festgelegt werden.</translation>
     </message>
     <message>
         <source>Receive and display P2P network alerts (default: %u)</source>
-        <translation>P2P Netzwerk-Alarme empfangen und anzeigen (Standard: %u)</translation>
+        <translation>Empfangen und Anzeigen von P2P Netzwerk Warnungen (Standard: %u)</translation>
     </message>
     <message>
         <source>Relay and mine data carrier transactions (default: %u)</source>
-        <translation>"Data Carrier"-Transaktionen weiterleiten (Standard: %u)</translation>
+        <translation>Transaktionen der Datenträger für das Weiterleiten und Minen (Standard: %u)</translation>
     </message>
     <message>
         <source>Relay non-P2SH multisig (default: %u)</source>
-        <translation>Nicht-P2SH-Multisig weiterleiten (Standard: %u)</translation>
+        <translation>Weiterleitung von non-P2SH Multisig (Standard: %u)</translation>
     </message>
     <message>
         <source>Rescan the block chain for missing wallet transactions</source>
-        <translation>Blockkette erneut nach fehlenden Wallet-Transaktionen durchsuchen</translation>
+        <translation>Blockchain für fehlende Transaktionen der Geldbörse rescannen</translation>
     </message>
     <message>
         <source>Rescanning...</source>
-        <translation>Durchsuche erneut...</translation>
+        <translation>Scanne erneut...</translation>
     </message>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
-        <translation>Als Hintergrunddienst ausführen und Befehle annehmen</translation>
+        <translation>Im Hintergrund als Daemon laufen lassen und Befehlseingaben akzeptieren</translation>
     </message>
     <message>
         <source>Session not complete!</source>
-        <translation>Sitzung ist nicht vollständig!</translation>
+        <translation>Sitzung nicht fertiggestellt!</translation>
     </message>
     <message>
         <source>Session timed out.</source>
-        <translation>Zeitüberschreitung der Sitzung.</translation>
+        <translation>Sitzung abgelaufen.</translation>
     </message>
     <message>
         <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
-        <translation>Größe des Datenbankcaches in Megabyte festlegen (%d bis %d, Standard: %d)</translation>
+        <translation> Größe des Cache in Megabyte definieren (%d a %d, Standard: %d)
+</translation>
     </message>
     <message>
         <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>Maximale Blockgröße in Byte festlegen (Standard: %d)</translation>
+        <translation>Maximale Größe des Blocks in bytes setzen (Standard: %d)
+</translation>
     </message>
     <message>
-        <source>Set the dynode private key</source>
-        <translation>Privaten dynode-Schlüssel setzen</translation>
+        <source>Set the Dynode private key</source>
+        <translation>Privaten Schlüssel des Dynode setzten</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
-        <translation>Zeige alle Debuggingoptionen (Benutzung: --help -help-debug)</translation>
+        <translation>Anzeigen aller Debug Optionen (uso: --help -help-debug)</translation>
     </message>
     <message>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
-        <translation>Protokolldatei debug.log beim Starten des Clients kürzen (Standard: 1, wenn kein -debug)</translation>
+        <translation>Beim Start des Clients debug.log verkleinern (Standard: 1 wenn nicht -debug)</translation>
     </message>
     <message>
         <source>Signing failed.</source>
-        <translation>Signierung fehlgeschalgen.</translation>
+        <translation>Signieren fehlgeschlagen</translation>
     </message>
     <message>
         <source>Signing transaction failed</source>
-        <translation>Signierung der Transaktion fehlgeschlagen</translation>
+        <translation>Das Signieren der Transaktion ist fehlgeschlagen</translation>
     </message>
     <message>
         <source>Specify data directory</source>
-        <translation>Datenverzeichnis festlegen</translation>
+        <translation>Datenverzeichnis angeben</translation>
     </message>
     <message>
         <source>Specify wallet file (within data directory)</source>
-        <translation>Wallet-Datei angeben (innerhalb des Datenverzeichnisses)</translation>
+        <translation>Geldbörsen Datei angeben (innerhalb des Datenverzeichnisses)</translation>
     </message>
     <message>
         <source>Specify your own public address</source>
-        <translation>Die eigene öffentliche Adresse angeben</translation>
+        <translation>Eigene öffentliche Adresse angeben</translation>
     </message>
     <message>
         <source>Synchronization pending...</source>
-        <translation>Synchronisation steht bevor...</translation>
+        <translation>Die Synchronisierung steht noch aus...</translation>
     </message>
     <message>
         <source>This help message</source>
-        <translation>Dieser Hilfetext</translation>
+        <translation>Diese Hilfsnachrichten</translation>
     </message>
     <message>
         <source>This is experimental software.</source>
-        <translation>Dies ist experimentelle Software.</translation>
+        <translation>Das ist eine experimentelle Software.</translation>
     </message>
     <message>
         <source>This is intended for regression testing tools and app development.</source>
-        <translation>Dies ist für Regressionstest-Tools und Anwendungsentwicklung gedacht.</translation>
+        <translation>Dies ist für Regressionstesttools und Programmentwicklung gedacht.</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
-        <translation>Transaktionsbetrag zu niedrig</translation>
+        <translation>Der Transaktionsbetrag ist zu klein</translation>
     </message>
     <message>
         <source>Transaction amounts must be positive</source>
-        <translation>Transaktionsbeträge müssen positiv sein</translation>
+        <translation>Der Transaktionbetrag muss positive sein</translation>
     </message>
     <message>
         <source>Transaction created successfully.</source>
@@ -4431,15 +5273,15 @@ DYN Core wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Transaction fees are too high.</source>
-        <translation>Transaktionsgebühren sind zu hoch.</translation>
+        <translation>Die Transaktionsgebühren sind zu groß.</translation>
     </message>
     <message>
         <source>Transaction not valid.</source>
-        <translation>Transaktion ungültig.</translation>
+        <translation>Die Transaktion ist ungültig.</translation>
     </message>
     <message>
         <source>Transaction too large for fee policy</source>
-        <translation>Transaktion ist für die Gebührenrichtlinie zu groß</translation>
+        <translation>Die Transaktion ist für die Gebührenrichtlinie zu groß</translation>
     </message>
     <message>
         <source>Transaction too large</source>
@@ -4447,71 +5289,72 @@ DYN Core wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Transmitting final transaction.</source>
-        <translation>Übertrage fertige Transaktion.</translation>
+        <translation>Finale Transaktion wird übermittelt.</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer (bind returned error %s)</source>
-        <translation>Kann auf diesem Computer nicht an %s binden (von bind zurückgegebener Fehler: %s)</translation>
+        <translation>Verbindung zu %s an diesem Computer nicht möglich (Abhören hat einen Fehler gemeldet %s)
+</translation>
     </message>
     <message>
         <source>Unable to sign spork message, wrong key?</source>
-        <translation>Die Spork-Nachricht konnte nicht signiert werden. Wurde der Key falsch gesetzt?</translation>
+        <translation>Signieren der Spork Nachricht nicht möglich, falscher Schlüssel?</translation>
     </message>
     <message>
-        <source>Unknown network specified in -onlynet: '%s'</source>
-        <translation>Unbekannter Netztyp in -onlynet angegeben: '%s'</translation>
+        <source>Unknown network specified in -onlynet: &apos;%s&apos;</source>
+        <translation>Unbekanntes angegebenes Netzwerk  in -onlynet: &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Unknown state: id = %u</source>
-        <translation>Unbekannter Status: id = %u</translation>
+        <translation>Status Unbekannt: id = %u</translation>
     </message>
     <message>
         <source>Upgrade wallet to latest format</source>
-        <translation>Wallet auf das neueste Format aktualisieren</translation>
+        <translation>Geldbörse auf das letzte Format aktualisieren</translation>
     </message>
     <message>
         <source>Use OpenSSL (https) for JSON-RPC connections</source>
-        <translation>OpenSSL (https) für JSON-RPC-Verbindungen verwenden</translation>
+        <translation>Verwenden von OpenSSL (https) für JSON-RPC Verbindungen</translation>
     </message>
     <message>
         <source>Use UPnP to map the listening port (default: 1 when listening)</source>
-        <translation>UPnP verwenden, um eine Portweiterleitung einzurichten (Standard: 1, wenn abgehört wird)</translation>
+        <translation>Verwenden von UPnP zum Verbinden des Überwachungsport (Standard: 1 wenn abhören)</translation>
     </message>
     <message>
         <source>Use the test network</source>
-        <translation>Das Testnetz verwenden</translation>
+        <translation>Verwenden des Test Netzwerk</translation>
     </message>
     <message>
         <source>Username for JSON-RPC connections</source>
-        <translation>Benutzername für JSON-RPC-Verbindungen</translation>
+        <translation>Benutzername für JSON-RPC Verbindung</translation>
     </message>
     <message>
         <source>Value more than PrivateSend pool maximum allows.</source>
-        <translation>Wert größer als der vom PrivateSend Pool maximal erlaubte.</translation>
+        <translation>Der Wert is größer als im PrivateSend Pool maximal erlaubt ist.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
-        <translation>Verifiziere Blöcke...</translation>
+        <translation>Blöcke werden verifiziert...</translation>
     </message>
     <message>
         <source>Verifying wallet...</source>
-        <translation>Verifiziere Wallet...</translation>
+        <translation>Geldbörse wird verifiziert...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
-        <translation>Wallet %s liegt außerhalb des Datenverzeichnisses %s</translation>
+        <translation>Die Gelbörse %s befindet sich ausserhalb des Datenverzeichnisses %s</translation>
     </message>
     <message>
         <source>Wallet is locked.</source>
-        <translation>Wallet gesperrt.</translation>
+        <translation>Die Geldbörse ist gesperrt.</translation>
     </message>
     <message>
         <source>Wallet options:</source>
-        <translation>Wallet-Optionen:</translation>
+        <translation>Geldbörsenoptionen:</translation>
     </message>
     <message>
         <source>Wallet window title</source>
-        <translation>Fensterüberschrift des Wallet</translation>
+        <translation>Fenster Titel der Geldbörse</translation>
     </message>
     <message>
         <source>Warning</source>
@@ -4519,31 +5362,86 @@ DYN Core wird heruntergefahren.</translation>
     </message>
     <message>
         <source>Warning: This version is obsolete, upgrade required!</source>
-        <translation>Warnung: Diese Version is veraltet, Aktualisierung erforderlich!</translation>
+        <translation>Warnung: Diese Version ist veraltet, ein Upgrade ist erforderlich!</translation>
     </message>
     <message>
         <source>You need to rebuild the database using -reindex to change -txindex</source>
-        <translation>Sie müssen die Datenbank mit Hilfe von -reindex neu aufbauen, um -txindex zu verändern</translation>
+        <translation>Sie müssen die Datenbank mit -reindex neu erstellen um -txindex zu ändern</translation>
     </message>
     <message>
         <source>Your entries added successfully.</source>
-        <translation>Ihre Einträge wurden erfolgreich hinzugefügt.</translation>
+        <translation>Ihre Einträge sind erfolgreich hinzügefügt worden.</translation>
     </message>
     <message>
         <source>Your transaction was accepted into the pool!</source>
-        <translation>Ihre Transaktion wurde im Pool akzeptiert!</translation>
+        <translation>Ihre Transaktion wurde vom Pool akzeptiert!</translation>
     </message>
     <message>
         <source>Zapping all transactions from wallet...</source>
-        <translation>Lösche alle Transaktionen aus Wallet...</translation>
+        <translation>Gehe alle Transaktionen der Geldbörse durch...</translation>
     </message>
     <message>
         <source>on startup</source>
-        <translation>beim Starten</translation>
+        <translation>beim start</translation>
     </message>
     <message>
         <source>wallet.dat corrupt, salvage failed</source>
-        <translation>wallet.dat beschädigt, Datenrettung fehlgeschlagen</translation>
+        <translation>wallet.dat ist defekt, Rettung fehlgeschlagen</translation>
+    </message>
+</context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dynamic network after a connection is established, but this process has not completed yet. This means that recent transactions will not be visible, and the balance will not be up-to-date until this process has completed.</source>
+        <translation>Die angezeigten Informationen sind möglicherweise nicht mehr aktuell. Ihre Geld synchronisiert automatisch mit dem Dymamic Netzwerk, nachdem eine Verbindung hergestellt wurde, aber dieser Prozess ist noch nicht fertiggestellt. Dass heißt, dass die letzten Transaktionen nicht sichtbar sein werden und der Kontostand nicht auf den letzten Stand sein wird bis dieser Prozess fertiggestellt worden ist.</translation>
+    </message>
+    <message>
+        <source>Spending DYN may not be possible during that phase!</source>
+        <translation>Während dieser Phase ist das Ausgeben der DYN nicht möglich!</translation>
+    </message>
+    <message>
+        <source>Amount of blocks left</source>
+        <translation>Anzahl der verbleibenden Blöcke</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>unbekannt</translation>
+    </message>
+    <message>
+        <source>Unknown...</source>
+        <translation>Unbekannt...</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>Unbekannt. Sychronisierung der Kopfzeilen (%1)...</translation>
+    </message>
+    <message>
+        <source>Last block time</source>
+        <translation>Letzte Blockzeit</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>Fortschritt</translation>
+    </message>
+    <message>
+        <source>Progress increase per Hour</source>
+        <translation>Stündlicher Fortschritt</translation>
+    </message>
+    <message>
+        <source>calculating...</source>
+        <translation>Berechnung...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>Geschätzte Zeit bis zur Fertigstellung der Sychronisierung</translation>
+    </message>
+    <message>
+        <source>&amp;Hide</source>
+        <translation>&amp;Verstecken</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verstecken</translation>
     </message>
 </context>
 </TS>
