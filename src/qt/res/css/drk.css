@@ -2052,6 +2052,12 @@ QWidget#BdapPage .QTabWidget#tabWidget::pane {
     border:1px solid white;
 }
 
+QWidget#BdapPage .QLabel#labelPA, QWidget#BdapPage .QLabel#labelPR, QWidget#BdapPage .QLabel#labelComplete {
+    font-weight: bold;
+    color: rgb(169, 60, 212);
+    font-size: 12pt;    
+}
+
 
 /*******************************************************/
 /* BDAPADDUSERDIALOG */
