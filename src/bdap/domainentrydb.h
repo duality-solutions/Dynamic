@@ -13,6 +13,8 @@ class CCoinsViewCache;
 
 static CCriticalSection cs_bdap_entry;
 
+const BDAP::ObjectType DEFAULT_ACCOUNT_TYPE = BDAP::ObjectType::BDAP_DEFAULT_TYPE;
+
 class CDomainEntryDB : public CDBWrapper {
 public:
     CDomainEntryDB(size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate) : CDBWrapper(GetDataDir() / "blocks" / "bdap-entries", nCacheSize, fMemory, fWipe, obfuscate) {
@@ -32,7 +34,7 @@ public:
     void WriteDomainEntryIndexHistory(const CDomainEntry& entry, const int op);
     bool UpdateDomainEntry(const std::vector<unsigned char>& vchObjectPath, const CDomainEntry& entry);
     bool CleanupLevelDB(int& nRemoved);
-    bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList);
+    bool ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType = DEFAULT_ACCOUNT_TYPE);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, UniValue& oDomainEntryInfo);
     bool GetDomainEntryInfo(const std::vector<unsigned char>& vchFullObjectPath, CDomainEntry& entry);
 };

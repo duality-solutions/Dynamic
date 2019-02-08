@@ -231,7 +231,7 @@ bool CDomainEntryDB::CleanupLevelDB(int& nRemoved)
 }
 
 // Lists active entries by domain name with paging support
-bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int nResultsPerPage, const unsigned int nPage, UniValue& oDomainEntryList)
+bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObjectLocation, const unsigned int& nResultsPerPage, const unsigned int& nPage, UniValue& oDomainEntryList, const BDAP::ObjectType& accountType)
 {
     // TODO: (bdap) implement paging
     // if vchObjectLocation is empty, list entries from all domains
@@ -245,19 +245,24 @@ bool CDomainEntryDB::ListDirectories(const std::vector<unsigned char>& vchObject
         try {
             if (pcursor->GetKey(key) && key.first == "dc") {
                 pcursor->GetValue(entry);
-                if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
-                {
-                    UniValue oDomainEntryEntry(UniValue::VOBJ);
-                    BuildBDAPJson(entry, oDomainEntryEntry, true);
-                    oDomainEntryList.push_back(oDomainEntryEntry);
-                    index++;
-                }
+                //filter by accountType, unless DEFAULT
+                if ((entry.nObjectType == GetObjectTypeInt(accountType)) ||  (accountType == DEFAULT_ACCOUNT_TYPE)) {
+                    if (vchObjectLocation.empty() || entry.vchObjectLocation() == vchObjectLocation)
+                    {
+                        UniValue oDomainEntryEntry(UniValue::VOBJ);
+                        BuildBDAPJson(entry, oDomainEntryEntry, false);
+                        oDomainEntryList.push_back(oDomainEntryEntry);
+                        index++;
+                    }
+                } //if entry.nObjectType
             }
             pcursor->Next();
         }
         catch (std::exception& e) {
             return error("%s() : deserialize error", __PRETTY_FUNCTION__);
-        }
+        } //try-catch
+
+
     }
     return true;
 }

@@ -2032,3 +2032,66 @@ padding-right:25px;
 padding-top:5px;
 padding-bottom:5px;
 }
+
+
+/*******************************************************/
+/* BDAP MENU */
+QWidget#BdapPage .QLabel#label_Users, QWidget#BdapPage .QLabel#label_Groups {
+    color:#7400A1;
+    font-weight:bold;
+    font-size:14px;
+ 
+}
+
+QWidget#BdapPage .QTabWidget#tabWidget {
+    background-color:#000000;
+}
+
+QWidget#BdapPage .QTabWidget#tabWidget::pane {
+    background-color:#000000;
+    border:1px solid white;
+}
+
+
+/*******************************************************/
+/* BDAPADDUSERDIALOG */
+QDialog#BdapAddUserDialog {
+    background-color:#000000;
+    border:2px solid white;
+}
+
+QDialog#BdapAddUserDialog .QLabel#labelErrorMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
+    margin-top: 10px;
+}
+
+/*******************************************************/
+/* BDAPUSERDETAILDIALOG AND BDAPUPDATEACCOUNTDIALOG*/
+QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog {
+    background-color:#000000;
+    border:2px solid white;
+}
+
+QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader {
+    color: rgb(56, 255, 56);
+    font-weight: bold;
+}
+
+QDialog#BdapUpdateAccountDialog .QLineEdit#lineEditID {
+    background-color: rgb(139, 139, 139);
+}
+
+QDialog#BdapUpdateAccountDialog .QLabel#labelErrorMsg {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+QDialog#BdapUpdateAccountDialog .QPushButton#pushButtonOK {
+    margin-top: 10px;
+}

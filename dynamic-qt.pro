@@ -645,4 +645,8 @@ FORMS += \
     src/qt/forms/dynodelist.ui \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/modaloverlay.ui \
-    src/qt/forms/miningpage.ui
+    src/qt/forms/miningpage.ui \
+    src/qt/forms/bdappage.ui \
+    src/qt/forms/bdapadduserdialog.ui \
+    src/qt/forms/bdapuserdetaildialog.ui \
+    src/qt/forms/bdapupdateaccountdialog.ui

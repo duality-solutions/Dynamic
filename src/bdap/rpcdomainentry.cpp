@@ -230,7 +230,7 @@ UniValue getusers(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_USER);
 
     return oDomainEntryList;
 }
@@ -270,7 +270,7 @@ UniValue getgroups(const JSONRPCRequest& request)
 
     UniValue oDomainEntryList(UniValue::VARR);
     if (CheckDomainEntryDB())
-        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList);
+        pDomainEntryDB->ListDirectories(vchObjectLocation, nRecordsPerPage, nPage, oDomainEntryList, BDAP::ObjectType::BDAP_GROUP);
 
     return oDomainEntryList;
 }
@@ -794,7 +794,7 @@ UniValue addgroup(const JSONRPCRequest& request)
 
 UniValue mybdapaccounts(const JSONRPCRequest& request)
 {
-    if (request.params.size() != 0)
+    if (request.params.size() > 1)
         throw std::runtime_error(
             "mybdapaccounts\n"
             + HelpRequiringPassphrase() +
@@ -816,6 +816,14 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
     if (!pwalletMain)
         throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3800 - " + _("Error accessing wallet."));
 
+    std::string accountType {""};
+
+    if (request.params.size() == 1) 
+        accountType = request.params[0].get_str();
+
+    if (!((accountType == "users") || (accountType == "groups") || (accountType == "")))
+        throw std::runtime_error("MY_BDAP_ACCOUNTS_RPC_ERROR: ERRCODE: 3801 - " + _("Unkown account type"));
+  
     std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
     if (!pwalletMain->GetDHTPubKeys(vvchDHTPubKeys))
         return NullUniValue;
@@ -826,9 +834,11 @@ UniValue mybdapaccounts(const JSONRPCRequest& request)
         CDomainEntry entry;
         if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
             UniValue oAccount(UniValue::VOBJ);
-            if (BuildBDAPJson(entry, oAccount, true)) {
-                result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
-                nCount++;
+            if (BuildBDAPJson(entry, oAccount, false)) {
+                if ( (accountType == "") || ((accountType == "users") && (entry.nObjectType == GetObjectTypeInt(BDAP::ObjectType::BDAP_USER))) || ((accountType == "groups") && (entry.nObjectType == GetObjectTypeInt(BDAP::ObjectType::BDAP_GROUP))) ) {
+                    result.push_back(Pair("account_" + std::to_string(nCount) , oAccount));
+                    nCount++;
+                } //if accountType
             }
         }
     }

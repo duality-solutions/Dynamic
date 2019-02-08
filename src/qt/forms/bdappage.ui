@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BdapPage</class>
+ <widget class="QWidget" name="BdapPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>887</width>
+    <height>457</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="accessibleDescription">
+      <string/>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QTabWidget:tab-bar { alignment: left; }
+QTabBar { alignment: left; }
+</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabUsers">
+      <attribute name="title">
+       <string>Users</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLineEdit" name="lineEditUserCommonNameSearch"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditUserFullPathSearch"/>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxMyUsers">
+             <property name="toolTip">
+              <string>Update and Delete transactions are available when this is checked</string>
+             </property>
+             <property name="text">
+              <string>Only display My Users</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_All">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Refresh</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="tableWidget_Users">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderStretchLastSection">
+            <bool>false</bool>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="addUser">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Add a user</string>
+             </property>
+             <property name="text">
+              <string>Add User</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
+             </property>
+             <property name="autoDefault">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonUpdateUser">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Update User</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/edit</normaloff>:/icons/drk/edit</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="deleteUser">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Delete the currently selected user from the list</string>
+             </property>
+             <property name="text">
+              <string>Delete User</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+             </property>
+             <property name="autoDefault">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelUserStatus">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_Groups">
+      <attribute name="title">
+       <string>Groups</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLineEdit" name="lineEditGroupCommonNameSearch"/>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditGroupFullPathSearch"/>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxMyGroups">
+             <property name="toolTip">
+              <string>Update and Delete transactions are available when this is checked</string>
+             </property>
+             <property name="text">
+              <string>Only display My Groups</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_AllGroups">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Refresh</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="tableWidget_Groups">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QPushButton" name="addGroup">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Add a new group</string>
+               </property>
+               <property name="text">
+                <string>Add Group</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../dynamic.qrc">
+                 <normaloff>:/icons/drk/add</normaloff>:/icons/drk/add</iconset>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButtonUpdateGroup">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Update Group</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../dynamic.qrc">
+                 <normaloff>:/icons/drk/edit</normaloff>:/icons/drk/edit</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="deleteGroup">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Delete the currently selected group from the list</string>
+               </property>
+               <property name="text">
+                <string>&amp;Delete Group</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../dynamic.qrc">
+                 <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelGroupStatus">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../dynamic.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -17,6 +17,7 @@
 class DynamicGUI;
 class ClientModel;
 class MiningPage;
+class BdapPage;
 class OverviewPage;
 class PlatformStyle;
 class SendCoinsDialog;
@@ -74,6 +75,7 @@ private:
     TransactionView* transactionView;
     DynodeList* dynodeListPage;
     MiningPage* miningPage;
+    BdapPage* bdapPage;
 
     QProgressDialog* progressDialog;
     QLabel* transactionSum;
@@ -92,6 +94,8 @@ public Q_SLOTS:
     void gotoDynodePage();
     /** Switch to mining page */
     void gotoMiningPage();
+    /** Switch to bdap page */
+    void gotoBdapPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

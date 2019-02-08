@@ -26,6 +26,7 @@ class ClientModel;
 class DynodeList;
 class HelpMessageDialog;
 class MiningPage;
+class BdapPage;
 class ModalOverlay;
 class NetworkStyle;
 class Notificator;
@@ -126,6 +127,7 @@ private:
     QAction* historyAction;
     QAction* dynodeAction;
     QAction* miningAction;
+    QAction* bdapAction;        
     QAction* quitAction;
     QAction* usedSendingAddressesAction;
     QAction* usedReceivingAddressesAction;
@@ -246,6 +248,8 @@ private Q_SLOTS:
     void gotoDynodePage();
     /** Switch to mining page */
     void gotoMiningPage();
+    /** Switch to BDAP page */
+    void gotoBdapPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
