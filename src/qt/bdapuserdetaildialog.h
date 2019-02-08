@@ -9,6 +9,7 @@
 #include "bdap/bdap.h"
 
 #include <univalue.h>
+
 #include <QPushButton>
 #include <QDialog>
 

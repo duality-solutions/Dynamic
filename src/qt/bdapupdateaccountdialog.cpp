@@ -1,3 +1,7 @@
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "bdapupdateaccountdialog.h"
 #include "ui_bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
@@ -9,6 +13,7 @@
 #include "util.h"
 
 #include <stdio.h>
+
 #include <boost/algorithm/string.hpp>
 
 

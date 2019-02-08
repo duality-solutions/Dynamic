@@ -16,6 +16,7 @@
 #include <QList>
 #include <QTimer>
 #include <QTableWidget>
+
 #include <boost/algorithm/string.hpp>
 
 // private implementation
@@ -313,13 +314,3 @@ void BdapAccountTableModel::sort(int column, Qt::SortOrder order)
     priv->sortOrder = order;
     refresh();
 }
-
-
-void BdapAccountTableModel::getDetails(int row, int column)
-{
-    //QObject* obj = sender();
-    //QTableWidget* inputtable = qobject_cast<QTableWidget*>(sender());
-
-} //getDetails
-
-

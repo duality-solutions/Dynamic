@@ -99,7 +99,7 @@ alert* WaitForResponse(session* dhtSession, const int alert_type, const std::arr
 
 bool Bootstrap()
 {
-    LogPrintf("DHTTorrentNetwork -- bootstrapping.\n");
+    LogPrintf("dht", "DHTTorrentNetwork -- bootstrapping.\n");
     const int64_t timeout = 30000; // 30 seconds
     const int64_t startTime = GetTimeMillis();
     while (timeout > GetTimeMillis() - startTime)

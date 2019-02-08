@@ -1,3 +1,7 @@
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "bdappage.h"
 #include "ui_bdappage.h"
 #include "bdapadduserdialog.h"
@@ -7,11 +11,12 @@
 #include "walletmodel.h"
 #include "bdapaccounttablemodel.h"
 
-#include "rpcregister.h" //NEED TO MOVE
-#include "rpcserver.h" //NEED TO MOVE
-#include "rpcclient.h" //NEED TO MOVE
+#include "rpcregister.h"
+#include "rpcserver.h"
+#include "rpcclient.h"
 
 #include <stdio.h>
+
 #include <boost/algorithm/string.hpp>
 
 #include <QTableWidget>
@@ -23,13 +28,6 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     ui->setupUi(this);
     
     evaluateTransactionButtons();
-    //Initialize QWidgetTable names
-    // if (ui->tableWidget_Users->objectName().isEmpty())
-    //     ui->tableWidget_Users->setObjectName(QStringLiteral("BDAPUsersTable"));
-
-    // if (ui->tableWidget_Groups->objectName().isEmpty())
-    //     ui->tableWidget_Groups->setObjectName(QStringLiteral("BDAPGroupsTable"));
-
 
     bdapAccountTableModel = new BdapAccountTableModel(this);
 

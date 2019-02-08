@@ -64,7 +64,6 @@ public:
 
 public Q_SLOTS:
     void refresh();
-    void getDetails(int row, int column);
 
 private:
     BdapPage* bdapPage;
