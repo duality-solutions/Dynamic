@@ -35,13 +35,13 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     ui->lineEditUserCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
     ui->lineEditUserFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
-    ui->lineEditUserCommonNameSearch->setPlaceholderText("Enter common name to search");
-    ui->lineEditUserFullPathSearch->setPlaceholderText("Enter object full path to search");
+    ui->lineEditUserCommonNameSearch->setPlaceholderText(QObject::tr("Enter common name to search"));
+    ui->lineEditUserFullPathSearch->setPlaceholderText(QObject::tr("Enter object full path to search"));
 
     ui->lineEditGroupCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
     ui->lineEditGroupFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
-    ui->lineEditGroupCommonNameSearch->setPlaceholderText("Enter common name to search");
-    ui->lineEditGroupFullPathSearch->setPlaceholderText("Enter object full path to search");
+    ui->lineEditGroupCommonNameSearch->setPlaceholderText(QObject::tr("Enter common name to search"));
+    ui->lineEditGroupFullPathSearch->setPlaceholderText(QObject::tr("Enter object full path to search"));
 
     //Users tab
     connect(ui->pushButton_All, SIGNAL(clicked()), this, SLOT(listAllUsers()));
