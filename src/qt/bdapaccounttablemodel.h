@@ -5,13 +5,12 @@
 #ifndef DYNAMIC_QT_BDAPACCOUNTTABLEMODEL_H
 #define DYNAMIC_QT_BDAPACCOUNTTABLEMODEL_H
 
-#include "net.h"
-#include "net_processing.h" // For CNodeStateStats
-
 #include <QAbstractTableModel>
 #include <QStringList>
 #include <QTableWidget>
 #include <QLabel>
+
+#include <memory>
 
 class BdapPage;
 class BdapAccountTablePriv;
@@ -20,16 +19,12 @@ QT_BEGIN_NAMESPACE
 class QTimer;
 QT_END_NAMESPACE
 
-struct CNodeCombinedStats {
-    CNodeStats nodeStats;
-    CNodeStateStats nodeStateStats;
-    bool fNodeStateStatsAvailable;
+struct CAccountStats {
+    unsigned int count;
 };
 
-
 /**
-   Qt model providing information about connected peers, similar to the
-   "getpeerinfo" RPC call. Used by the rpc console UI.
+   Qt model providing information about BDAP users and groups.
  */
 class BdapAccountTableModel : public QAbstractTableModel
 {
@@ -38,8 +33,7 @@ class BdapAccountTableModel : public QAbstractTableModel
 public:
     explicit BdapAccountTableModel(BdapPage* parent = 0);
     ~BdapAccountTableModel();
-    const CNodeCombinedStats* getNodeStats(int idx);
-    int getRowByNodeId(NodeId nodeid);
+
     void startAutoRefresh();
     void stopAutoRefresh();
     void refreshUsers();

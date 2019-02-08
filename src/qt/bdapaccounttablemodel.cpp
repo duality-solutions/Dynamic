@@ -24,13 +24,11 @@ class BdapAccountTablePriv
 {
 public:
     /** Local cache of peer information */
-    QList<CNodeCombinedStats> cachedNodeStats;
+    QList<CAccountStats> cachedAccountStats;
     /** Column to sort nodes by */
     int sortColumn;
     /** Order (ascending or descending) to sort nodes by */
     Qt::SortOrder sortOrder;
-    /** Index of rows by node ID */
-    std::map<NodeId, int> mapNodeRows;
 
     /** Populate tableWidget_Users via RPC call */
     void refreshAccounts(QTableWidget* inputtable, QLabel* statusDisplay, bool filterOn = false, std::string searchCommon = "", std::string searchPath = "")
@@ -132,8 +130,6 @@ public:
 
             }
 
-
-
             //add row if all criteria have been met
             if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
                 nNewRow = inputtable->rowCount();
@@ -162,13 +158,13 @@ public:
 
     int size() const
     {
-        return cachedNodeStats.size();
+        return cachedAccountStats.size();
     }
 
-    CNodeCombinedStats* index(int idx)
+    CAccountStats* index(int idx)
     {
-        if (idx >= 0 && idx < cachedNodeStats.size())
-            return &cachedNodeStats[idx];
+        if (idx >= 0 && idx < cachedAccountStats.size())
+            return &cachedAccountStats[idx];
 
         return 0;
     }
@@ -197,7 +193,6 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
     timer->setInterval(60000); //MODEL_UPDATE_DELAY originally
     startAutoRefresh();
-
 
 }
 
@@ -258,16 +253,11 @@ Qt::ItemFlags BdapAccountTableModel::flags(const QModelIndex& index) const
 QModelIndex BdapAccountTableModel::index(int row, int column, const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    CNodeCombinedStats* data = priv->index(row);
+    CAccountStats* data = priv->index(row);
 
     if (data)
         return createIndex(row, column, data);
     return QModelIndex();
-}
-
-const CNodeCombinedStats* BdapAccountTableModel::getNodeStats(int idx)
-{
-    return priv->index(idx);
 }
 
 void BdapAccountTableModel::refresh()
@@ -296,16 +286,6 @@ void BdapAccountTableModel::refreshGroups()
     Q_EMIT layoutAboutToBeChanged();
     priv->refreshAccounts(groupTable,groupStatus,myGroupsChecked,searchGroupCommon,searchGroupPath);
     Q_EMIT layoutChanged();
-}
-
-
-int BdapAccountTableModel::getRowByNodeId(NodeId nodeid)
-{
-    std::map<NodeId, int>::iterator it = priv->mapNodeRows.find(nodeid);
-    if (it == priv->mapNodeRows.end())
-        return -1;
-
-    return it->second;
 }
 
 void BdapAccountTableModel::sort(int column, Qt::SortOrder order)
