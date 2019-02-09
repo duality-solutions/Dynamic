@@ -1,5 +1,6 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers
-// TODO: Add License
+// Copyright (c) 2019 Duality Blockchain Solutions Developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef DYNAMIC_DHT_STORAGE_H
 #define DYNAMIC_DHT_STORAGE_H
