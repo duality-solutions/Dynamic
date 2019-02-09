@@ -395,15 +395,16 @@ bool CheckNewDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scrip
 bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& scriptOp, const vchCharString& vvchOpParameters,
                                   std::string& errorMessage, bool fJustCheck)
 {
-    //if exists, check for owner's signature
-    if (!CommonDataCheck(entry, vvchOpParameters, errorMessage))
+    if (vvchOpParameters.size() == 0) {
+        errorMessage = "CheckDeleteDomainEntryTxInputs: - Invalid delete operation parameters. This delete operation failed!";
         return error(errorMessage.c_str());
-
+    }
     if (fJustCheck)
         return true;
 
+    std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
     CDomainEntry prevDomainEntry;
-    if (!GetDomainEntry(entry.vchFullObjectPath(), prevDomainEntry))
+    if (!GetDomainEntry(vchFullObjectPath, prevDomainEntry))
     {
         errorMessage = "CheckDeleteDomainEntryTxInputs: - Can not find " + prevDomainEntry.GetFullObjectPath() + " entry; this delete operation failed!";
         return error(errorMessage.c_str());
@@ -437,7 +438,7 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
         }
     }
 
-    if (!pDomainEntryDB->EraseDomainEntry(entry.vchFullObjectPath()))
+    if (!pDomainEntryDB->EraseDomainEntry(vchFullObjectPath))
     {
         errorMessage = "CheckDeleteDomainEntryTxInputs: - Error deleting entry entry in LevelDB; this delete operation failed!";
         return error(errorMessage.c_str());
@@ -546,33 +547,33 @@ bool CheckDomainEntryTx(const CTransactionRef& tx, const CScript& scriptOp, cons
         return true;
     }
 
-    LogPrintf("%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
+    LogPrint("bdap", "%s -- *** BDAP nHeight=%d, chainActive.Tip()=%d, op1=%s, op2=%s, hash=%s justcheck=%s\n", __func__, nHeight, chainActive.Tip()->nHeight, BDAPFromOp(op1).c_str(), BDAPFromOp(op2).c_str(), tx->GetHash().ToString().c_str(), fJustCheck ? "JUSTCHECK" : "BLOCK");
     
     // unserialize BDAP from txn, check if the entry is valid and does not conflict with a previous entry
     CDomainEntry entry;
     std::vector<unsigned char> vchData;
     std::vector<unsigned char> vchHash;
     int nDataOut;
-    
-    bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
-    if(bData && !entry.UnserializeFromData(vchData, vchHash))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
-        LogPrintf("%s -- %s \n", __func__, errorMessage);
-        return error(errorMessage.c_str());
-    }
-
-    if(!entry.ValidateValues(errorMessage))
-    {
-        errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
-        LogPrintf("%s -- %s \n", __func__, errorMessage);
-        return error(errorMessage.c_str());
-    }
-
-    entry.txHash = tx->GetHash();
-    entry.nHeight = nHeight;
-
     const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
+    if (strOperationType != "bdap_delete_account") {
+        bool bData = GetBDAPData(tx, vchData, vchHash, nDataOut);
+        if(bData && !entry.UnserializeFromData(vchData, vchHash))
+        {
+            errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3601 - " + _("UnserializeFromData data in tx failed!");
+            LogPrintf("%s -- %s \n", __func__, errorMessage);
+            return error(errorMessage.c_str());
+        }
+
+        if(!entry.ValidateValues(errorMessage))
+        {
+            errorMessage = "BDAP_CONSENSUS_ERROR: ERRCODE: 3602 - " + errorMessage;
+            LogPrintf("%s -- %s \n", __func__, errorMessage);
+            return error(errorMessage.c_str());
+        }
+
+        entry.txHash = tx->GetHash();
+        entry.nHeight = nHeight;
+    }
     if (strOperationType == "bdap_new_account")
         return CheckNewDomainEntryTxInputs(entry, scriptOp, vvchArgs, errorMessage, fJustCheck);
     else if (strOperationType == "bdap_delete_account")

@@ -774,7 +774,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
             }
             const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-            if (strOperationType == "bdap_update_account" || strOperationType == "bdap_delete_account") {
+            if (strOperationType == "bdap_update_account") {
                 CDomainEntry entry;
                 CDomainEntry prevEntry;
                 std::vector<unsigned char> vchData;
@@ -786,6 +786,31 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 }
 
                 if (!pDomainEntryDB->GetDomainEntryInfo(entry.vchFullObjectPath(), prevEntry)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
+                }
+                CTransactionRef pPrevTx;
+                uint256 hashBlock;
+                if (!GetTransaction(prevEntry.txHash, pPrevTx, Params().GetConsensus(), hashBlock, true)) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-tx-failed" + strErrorMessage);
+                }
+                // Get current wallet address used for BDAP tx
+                CScript scriptPubKey = scriptBDAPOp;
+                CDynamicAddress txAddress = GetScriptAddress(scriptPubKey);
+                // Get previous wallet address used for BDAP tx
+                CScript prevScriptPubKey;
+                GetBDAPOpScript(pPrevTx, prevScriptPubKey);
+                CDynamicAddress prevAddress = GetScriptAddress(prevScriptPubKey);
+                if (txAddress.ToString() != prevAddress.ToString()) {
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-incorrect-wallet-address-used" + strErrorMessage);
+                }
+            }
+            else if (strOperationType == "bdap_delete_account") {
+                if (!(vvchOpParameters.size() > 0))
+                    return state.Invalid(false, REJECT_INVALID, "bdap-delete-account-get-object-path" + strErrorMessage);
+
+                std::vector<unsigned char> vchFullObjectPath = vvchOpParameters[0];
+                CDomainEntry prevEntry;
+                if (!pDomainEntryDB->GetDomainEntryInfo(vchFullObjectPath, prevEntry)) {
                     return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-previous-failed" + strErrorMessage);
                 }
                 CTransactionRef pPrevTx;
