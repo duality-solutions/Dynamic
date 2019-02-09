@@ -138,6 +138,7 @@ DYNAMIC_CORE_H = \
   fluid/fluidmining.h \
   fluid/fluidmint.h \
   fluid/fluidsovereign.h \
+  fluid/operations.h \
   governance.h \
   governance-classes.h \
   governance-exceptions.h \
@@ -177,7 +178,6 @@ DYNAMIC_CORE_H = \
   netmessagemaker.h \
   noui.h \
   ntp.h \
-  operations.h \
   policy/fees.h \
   policy/policy.h \
   policy/rbf.h \
@@ -299,6 +299,7 @@ libdynamic_server_a_SOURCES = \
   fluid/fluidmint.cpp \
   fluid/rpcfluid.cpp \
   fluid/fluidsovereign.cpp \
+  fluid/operations.cpp \
   governance.cpp \
   governance-classes.cpp \
   governance-object.cpp \
@@ -324,7 +325,6 @@ libdynamic_server_a_SOURCES = \
   net_processing.cpp \
   noui.cpp \
   ntp.cpp \
-  operations.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   pow.cpp \
