@@ -2059,6 +2059,10 @@ QWidget#BdapPage .QLabel#labelPA, QWidget#BdapPage .QLabel#labelPR, QWidget#Bdap
 }
 
 
+QWidget#BdapPage .QLabel#labelCompleteRecords, QWidget#BdapPage .QLabel#labelPRRecords, QWidget#BdapPage .QLabel#labelPARecords {
+    font-weight: bold;
+}
+
 /*******************************************************/
 /* BDAPADDUSERDIALOG */
 QDialog#BdapAddUserDialog {

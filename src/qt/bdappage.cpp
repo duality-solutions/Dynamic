@@ -10,6 +10,7 @@
 #include "guiutil.h"
 #include "walletmodel.h"
 #include "bdapaccounttablemodel.h"
+#include "bdaplinktablemodel.h"
 
 #include "rpcregister.h"
 #include "rpcserver.h"
@@ -30,6 +31,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     evaluateTransactionButtons();
 
     bdapAccountTableModel = new BdapAccountTableModel(this);
+    bdapLinkTableModel = new BdapLinkTableModel(this);
 
     ui->lineEditUserCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
     ui->lineEditUserFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
@@ -67,6 +69,13 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->tableWidget_Groups, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getGroupDetails(int,int)));
 
+    //Links tab
+    connect(ui->pushButtonRefreshComplete, SIGNAL(clicked()), this, SLOT(listLinksComplete()));
+    connect(ui->pushButtonRefreshPendingAccept, SIGNAL(clicked()), this, SLOT(listPendingAccept()));
+    connect(ui->pushButtonRefreshPendingRequest, SIGNAL(clicked()), this, SLOT(listPendingRequest()));
+
+    
+
 }
 
 BdapPage::~BdapPage()
@@ -100,6 +109,22 @@ void BdapPage::evaluateTransactionButtons()
 
 } //evaluateTransactionButtons
 
+
+//Links tab =========================================================================
+void BdapPage::listLinksComplete()
+{
+    bdapLinkTableModel->refreshComplete();
+} //listLinksComplete
+
+void BdapPage::listPendingAccept()
+{
+    bdapLinkTableModel->refreshPendingAccept();
+} //listPendingAccept
+
+void BdapPage::listPendingRequest()
+{
+    bdapLinkTableModel->refreshPendingRequest();
+} //listPendingRequest
 
 //Groups tab ========================================================================
 void BdapPage::listAllGroups()
@@ -313,6 +338,30 @@ BdapAccountTableModel* BdapPage::getBdapAccountTableModel()
     return bdapAccountTableModel;
 }
 
+BdapLinkTableModel* BdapPage::getBdapLinkTableModel()
+{
+    return bdapLinkTableModel;
+}
+
+
+QTableWidget* BdapPage::getCompleteTable() 
+{ 
+    return ui->tableWidgetComplete; 
+}
+
+
+QTableWidget* BdapPage::getPendingAcceptTable() 
+{ 
+    return ui->tableWidgetPendingAccept; 
+    
+}
+
+QTableWidget* BdapPage::getPendingRequestTable() 
+{ 
+    return ui->tableWidgetPendingRequest; 
+    
+}
+
 
 QTableWidget* BdapPage::getUserTable() 
 { 
@@ -329,6 +378,22 @@ QLabel* BdapPage::getUserStatus()
 {
     return ui->labelUserStatus;
 }
+
+QLabel* BdapPage::getLinkCompleteRecords()
+{
+    return ui->labelCompleteRecords;
+}
+
+QLabel* BdapPage::getPendingAcceptRecords()
+{
+    return ui->labelPARecords;
+}
+
+QLabel* BdapPage::getPendingRequestRecords()
+{
+    return ui->labelPRRecords;
+}
+
 
 QLabel* BdapPage::getGroupStatus()
 {

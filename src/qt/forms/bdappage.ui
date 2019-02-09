@@ -25,7 +25,7 @@ QTabBar { alignment: left; }
 </string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabUsers">
       <attribute name="title">
@@ -403,6 +403,13 @@ QTabBar { alignment: left; }
               </widget>
              </item>
              <item>
+              <widget class="QLabel" name="labelPARecords">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_15">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -416,7 +423,7 @@ QTabBar { alignment: left; }
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="pushButtonRefreshPendingAccept">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -435,7 +442,7 @@ QTabBar { alignment: left; }
              <item>
               <widget class="QLineEdit" name="lineEdit">
                <property name="placeholderText">
-                <string>Requester search</string>
+                <string>Requestor search</string>
                </property>
               </widget>
              </item>
@@ -449,7 +456,17 @@ QTabBar { alignment: left; }
             </layout>
            </item>
            <item>
-            <widget class="QTableWidget" name="tableWidgetPendingAccept"/>
+            <widget class="QTableWidget" name="tableWidgetPendingAccept">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+            </widget>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -529,6 +546,13 @@ QTabBar { alignment: left; }
               </widget>
              </item>
              <item>
+              <widget class="QLabel" name="labelPRRecords">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_16">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -542,7 +566,7 @@ QTabBar { alignment: left; }
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_6">
+              <widget class="QPushButton" name="pushButtonRefreshPendingRequest">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -561,7 +585,7 @@ QTabBar { alignment: left; }
              <item>
               <widget class="QLineEdit" name="lineEdit_3">
                <property name="placeholderText">
-                <string>Requester search</string>
+                <string>Requestor search</string>
                </property>
               </widget>
              </item>
@@ -575,7 +599,17 @@ QTabBar { alignment: left; }
             </layout>
            </item>
            <item>
-            <widget class="QTableWidget" name="tableWidgetPendingRequest"/>
+            <widget class="QTableWidget" name="tableWidgetPendingRequest">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+            </widget>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -638,6 +672,13 @@ QTabBar { alignment: left; }
               </widget>
              </item>
              <item>
+              <widget class="QLabel" name="labelCompleteRecords">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_17">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -651,7 +692,7 @@ QTabBar { alignment: left; }
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_7">
+              <widget class="QPushButton" name="pushButtonRefreshComplete">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -670,7 +711,7 @@ QTabBar { alignment: left; }
              <item>
               <widget class="QLineEdit" name="lineEdit_5">
                <property name="placeholderText">
-                <string>Requester search</string>
+                <string>Requestor search</string>
                </property>
               </widget>
              </item>
@@ -684,7 +725,17 @@ QTabBar { alignment: left; }
             </layout>
            </item>
            <item>
-            <widget class="QTableWidget" name="tableWidgetComplete"/>
+            <widget class="QTableWidget" name="tableWidgetComplete">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+            </widget>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_13">
