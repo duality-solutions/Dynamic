@@ -1148,6 +1148,7 @@ public:
     bool GetDHTPubKeys(std::vector<std::vector<unsigned char>>& vvchDHTPubKeys) const override;
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);
     bool IsLinkForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey);
+    bool GetLinkPrivateKey(const std::vector<unsigned char>& vchSenderPubKey, const std::vector<unsigned char>& vchSharedPubKey, std::array<char, 32>& sharedSeed, std::string& strErrorMessage);
 
 };
 

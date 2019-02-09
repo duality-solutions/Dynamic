@@ -197,14 +197,21 @@ static std::array<char, 32> ArrayPtrToStandardArray32(const unsigned char* pArra
     return arr32;
 }
 
-std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey)
+std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey)
+{
+    std::array<char, 32> sharedSeed = GetLinkSharedPrivateKey(dhtKey, vchOtherPubKey);
+    CKeyEd25519 sharedKey(sharedSeed);
+    return sharedKey.GetPubKey();
+}
+
+std::array<char, 32> GetLinkSharedPrivateKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey)
 {
     // convert private key
     unsigned char const* private_key = StardardArrayToArrayPtr64(dhtKey.privateKey);
     // convert public key
     unsigned char const* public_key;
     std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> arrPubKey;
-    std::string strRecipientPubKey = StringFromVch(vchRecipientPubKey);
+    std::string strRecipientPubKey = StringFromVch(vchOtherPubKey);
     aux::from_hex(strRecipientPubKey, arrPubKey.data());
     public_key = StardardArrayToArrayPtr32(arrPubKey);
     // get shared secret key
@@ -212,8 +219,7 @@ std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const 
     unsigned char* shared_secret = reinterpret_cast<unsigned char*>(secret.data());
     ed25519_key_exchange(shared_secret, public_key, private_key);
     std::array<char, 32> sharedSeed = ArrayPtrToStandardArray32(shared_secret);
-    CKeyEd25519 keyShared(sharedSeed);
-    return keyShared.GetPubKey();
+    return sharedSeed;
 }
 
 std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey)
