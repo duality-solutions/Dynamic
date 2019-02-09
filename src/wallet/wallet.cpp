@@ -1267,6 +1267,33 @@ bool CWallet::IsLinkForMe(const std::vector<unsigned char>& vchLinkPubKey, const
     return false;
 }
 
+bool CWallet::GetLinkPrivateKey(const std::vector<unsigned char>& vchSenderPubKey, const std::vector<unsigned char>& vchSharedPubKey, std::array<char, 32>& sharedSeed, std::string& strErrorMessage)
+{
+    std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
+    if (!GetDHTPubKeys(vvchDHTPubKeys)) {
+        strErrorMessage = "Error getting DHT key vector.";
+        return false;
+    }
+    // loop through each account key to check if it matches the shared key
+    for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
+        CDomainEntry entry;
+        if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
+            CKeyEd25519 dhtKey;
+            CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
+            if (GetDHTKey(keyID, dhtKey)) {
+                if (vchSharedPubKey == GetLinkSharedPubKey(dhtKey, vchSenderPubKey)) {
+                    sharedSeed = GetLinkSharedPrivateKey(dhtKey, vchSenderPubKey);
+                    return true;
+                }
+            }
+            else {
+                strErrorMessage = strErrorMessage + "Error getting DHT private key.\n";
+            }
+        }
+    }
+    return false;
+}
+
 /**
  * Add a transaction to the wallet, or update it.  pIndex and posInBlock should
  * be set when the transaction was known to be included in a block.  When
@@ -1335,7 +1362,6 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                         }
                                     }
                                     else if (nVersion == 1) {
-                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
                                         bool fDecrypted = false;
                                         LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                         CKeyEd25519 privDHTKey;
@@ -1391,19 +1417,20 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                         }
                                     }
                                     else if (nVersion == 1) {
-                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
                                         bool fDecrypted = false;
                                         LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 privDHTKey;
-                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
-                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                        CKeyEd25519 sharedDHTKey;
+                                        std::array<char, 32> sharedSeed;
+                                        std::string strErrorMessage;
+                                        if (GetLinkPrivateKey(vchLinkPubKey, vchSharedPubKey, sharedSeed, strErrorMessage)) {
+                                            CKeyEd25519 sharedKey(sharedSeed);
                                             int nDataVersion;
                                             LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
                                             vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
                                             if (nDataVersion == nVersion) {
                                                 std::string strMessage = "";
                                                 std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                if (DecryptBDAPData(sharedKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
                                                     std::vector<unsigned char> vchData, vchHash;
                                                     CScript scriptData;
                                                     scriptData << OP_RETURN << dataDecrypted;
@@ -1449,7 +1476,6 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                         }
                                     }
                                     else if (nVersion == 1) {
-                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
                                         bool fDecrypted = false;
                                         LogPrint("bdap", "%s -- Version 1 encrypted link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                         CKeyEd25519 privDHTKey;
@@ -1505,20 +1531,21 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                         }
                                     }
                                     else if (nVersion == 1) {
-                                        //TODO (bdap): If version 1 or above, decrypt vchData before serialized to a class object
                                         bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 encrypted link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 privDHTKey;
-                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
-                                        if (GetDHTKey(keyID, privDHTKey)) {
+                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        CKeyEd25519 sharedDHTKey;
+                                        std::array<char, 32> sharedSeed;
+                                        std::string strErrorMessage;
+                                        if (GetLinkPrivateKey(vchLinkPubKey, vchSharedPubKey, sharedSeed, strErrorMessage)) {
+                                            CKeyEd25519 sharedKey(sharedSeed);
                                             int nDataVersion;
                                             LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
                                             vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
                                             if (nDataVersion == nVersion) {
                                                 std::string strMessage = "";
                                                 std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                    std::vector<unsigned char> vchData, vchHash;
+                                                if (DecryptBDAPData(sharedKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
+                                                     std::vector<unsigned char> vchData, vchHash;
                                                     CScript scriptData;
                                                     scriptData << OP_RETURN << dataDecrypted;
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
@@ -1532,7 +1559,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                             }
                                         }
                                         if (!fDecrypted)
-                                            LogPrint("bdap", "%s -- DecryptBDAPData failed.\n", __func__);
+                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
                                     }
                                 }
                             }

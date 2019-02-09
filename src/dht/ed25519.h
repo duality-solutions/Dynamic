@@ -88,6 +88,7 @@ public:
         seed.fill(0);
         privateKey.fill(0);
     }
+
     // TODO (dht): use SecureVector and SecureString below:
     std::vector<unsigned char> GetPrivKey() const; 
     std::vector<unsigned char> GetPubKey() const;
@@ -133,7 +134,8 @@ private:
 
 };
 
-std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchRecipientPubKey);
+std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);
+std::array<char, 32> GetLinkSharedPrivateKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);
 std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey);
 
 bool ECC_Ed25519_InitSanityCheck();
