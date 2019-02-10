@@ -655,7 +655,7 @@ Dirección: %4
     </message>
     <message>
         <source>Network Alert</source>
-        <translation>Alerta de Red/translation>
+        <translation>Alerta de Red</translation>
     </message>
     <message>
         <source>Normal</source>
@@ -1098,7 +1098,7 @@ Dirección: %4
     </message>
     <message>
         <source>command-line options</source>
-        <translation>opciones de línea de comando/translation>
+        <translation>opciones de línea de comando</translation>
     </message>
     <message>
         <source>UI options</source>
@@ -2534,7 +2534,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Custom change address</source>
-        <translation>Dirección de cambio personalizada/translation>
+        <translation>Dirección de cambio personalizada</translation>
     </message>
     <message>
         <source>Transaction Fee:</source>
@@ -2787,7 +2787,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     <name>SendCoinsEntry</name>
     <message>
         <source>S&amp;ubtract fee from amount</source>
-        <translation>S&ustraer la comisión del monto</translation>
+        <translation>S&amp;ustraer la comisión del monto</translation>
     </message>
     <message>
         <source>This is a normal payment.</source>
@@ -3993,7 +3993,7 @@ https://www.transifex.com/duality-blockchain-solutions-llc/dynamic-dyn/</transla
     </message>
     <message>
         <source>Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction.</source>
-        <translation>Advertencia: -paytxfee está establecido muy alto! Ésta es la comisión por transacción que usted pagará si envía una transacción./translation>
+        <translation>Advertencia: -paytxfee está establecido muy alto! Ésta es la comisión por transacción que usted pagará si envía una transacción.</translation>
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
@@ -4766,12 +4766,9 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;Alerta Dynamic&quot; admin@foo
         <translation>Usar UPnP para mapear el puerto de escucha (por defecto: %u)</translation>
     </message>
     <message>
-    <message>
         <source>Wallet needed to be rewritten: restart Dynamic to complete</source>
-    <message>
         <translation>El monedero necesitaba ser reescrito: reiniciar Dynamic para completar</translation>
     </message>
-    <message>
     <message>
         <source>Warning: Unsupported argument -benchmark ignored, use -debug=bench.</source>
         <translation>Advertencia: argumento no admitido -benchmark ignorado, use -debug=bench.</translation>
