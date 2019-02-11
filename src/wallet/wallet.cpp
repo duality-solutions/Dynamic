@@ -12,11 +12,11 @@
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
+#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "chain.h"
 #include "checkpoints.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
-#include "encryption.h" // for VGP E2E encryption
 #include "fluid/fluid.h"
 #include "governance.h"
 #include "init.h"

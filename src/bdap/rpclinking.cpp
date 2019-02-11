@@ -5,7 +5,7 @@
 #include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
-#include "encryption.h"
+#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
