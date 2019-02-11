@@ -589,7 +589,7 @@ public:
         consensus.nMajorityRejectBlockOutdated = 750;
         consensus.nMajorityWindow = 1000;
 
-        consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 5;
         consensus.nPowMaxAdjustUp = 32;
         consensus.nPowMaxAdjustDown = 48;
@@ -627,7 +627,7 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1515641597, 747, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1549926519, 32244, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if (startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
@@ -635,7 +635,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
         if (!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x00ff3a06390940bc3fffb7948cc6d0ede8fde544a5fa9eeeafbc4ac65d21f087"));
+            assert(consensus.hashGenesisBlock == uint256S("0x0000f8b156a85be050a1304d3101bcc7018c1b32909a81abd6ab1d17c5090d63"));
             assert(genesis.hashMerkleRoot == uint256S("0xfa0e753db5a853ebbc52594eb62fa8219155547b426fba8789fa96dbf07e6ed5"));
         }
         vFixedSeeds.clear();
