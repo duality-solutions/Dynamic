@@ -5441,6 +5441,7 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Verbergen</translation>
     </message>
 </context>
+<context>
     <name>BdapAccountTableModel</name>
     <message>
         <source>BDAP Error</source>
@@ -5756,4 +5757,3 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 </TS>
-
