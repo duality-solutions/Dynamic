@@ -540,6 +540,73 @@ UniValue getfluidsovereigns(const JSONRPCRequest& request)
     return ret;
 }
 
+UniValue readfluidtoken(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "readfluidtoken\n"
+            "\nReturns the active sovereign addresses.\n"
+            "\nArguments:\n"
+            "1. \"tokenkey\"             (string, required) The signed or unsigned fluid token.\n"
+            "\nResult:\n"
+            "{                           (json array of string)\n"
+            "  \"sovereign address\"     (string) A sovereign address with permission to co-sign a fluid command\n"
+            "}, ...\n"
+            "\nExamples\n" +
+            HelpExampleCli("readfluidtoken", "tokenkey") + HelpExampleRpc("readfluidtoken", "tokenkey"));
+
+    UniValue ret(UniValue::VOBJ);
+    std::string strFluidToken = request.params[0].get_str();
+    if (IsHex(strFluidToken)) {
+        std::string strAmount;
+        HexFunctions fluidFunctions;
+        std::string strUnHexedFluidOpScript = fluidFunctions.HexToString(strFluidToken);
+        std::vector<std::string> vecSplitScript;
+        SeparateString(strUnHexedFluidOpScript, vecSplitScript, true);
+        if (vecSplitScript.size() > 1) {
+            strAmount = vecSplitScript[0];
+            CAmount fluidAmount;
+            if (ParseFixedPoint(strAmount, 8, &fluidAmount)) {
+                ret.push_back(Pair("amount", FormatMoney(fluidAmount)));
+            }
+            else {
+                throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4100 - " + _("Fluid token amount too high or invalid."));
+            }
+            ret.push_back(Pair("time_stamp", vecSplitScript[1]));
+        } else {
+            throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4101 - " + _("Fluid token does not have enough parameters"));
+        }
+        if (vecSplitScript.size() > 2) {
+            std::string strPayAddress = vecSplitScript[2];
+            std::vector<std::string> vecSplitAddress;
+            SeparateString(strPayAddress, vecSplitAddress, false);
+            if (vecSplitAddress.size() == 1) {
+                ret.push_back(Pair("pay_address", vecSplitScript[2]));
+            }
+            else if (vecSplitAddress.size() == 2) {
+                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+            }
+            else if (vecSplitAddress.size() == 3) {
+                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+            }
+            else if (vecSplitAddress.size() == 4) {
+                ret.push_back(Pair("pay_address", vecSplitAddress[0]));
+                ret.push_back(Pair("signature_1", vecSplitAddress[1]));
+                ret.push_back(Pair("signature_2", vecSplitAddress[2]));
+                ret.push_back(Pair("signature_3", vecSplitAddress[3]));
+            }
+            
+        }
+    } else {
+        throw std::runtime_error("READ_FLUID_TOKEN_RPC_ERROR: ERRCODE: 4102 - " + _("Fluid token is not hex"));
+    }
+
+    return ret;
+}
+
 static const CRPCCommand commands[] =
     {
         //  category              name                     actor (function)           okSafe argNames
@@ -550,13 +617,14 @@ static const CRPCCommand commands[] =
         {"fluid", "signtoken", &signtoken, true, {"address", "tokenkey"}},
         {"fluid", "consenttoken", &consenttoken, true, {"address", "tokenkey"}},
         {"fluid", "getrawpubkey", &getrawpubkey, true, {"address"}},
+#endif //ENABLE_WALLET
         {"fluid", "verifyquorum", &verifyquorum, true, {"tokenkey"}},
         {"fluid", "maketoken", &maketoken, true, {"string"}},
         {"fluid", "getfluidhistory", &getfluidhistory, true, {}},
         {"fluid", "getfluidhistoryraw", &getfluidhistoryraw, true, {}},
         {"fluid", "getfluidsovereigns", &getfluidsovereigns, true, {}},
         {"fluid", "gettime", &gettime, true, {}},
-#endif //ENABLE_WALLET
+        {"fluid", "readfluidtoken", &readfluidtoken, true, {"tokenkey"}},
 };
 
 void RegisterFluidRPCCommands(CRPCTable& tableRPC)
