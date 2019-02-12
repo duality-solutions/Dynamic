@@ -88,11 +88,11 @@ public:
         } catch (const UniValue& objError) {
             std::string message = find_value(objError, "message").get_str();
             outputmessage = message;
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
             return;
         } catch (const std::exception& e) {
             outputmessage = e.what();
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
             return;
         }
 
@@ -101,13 +101,10 @@ public:
         inputtable->setColumnCount(0);
         inputtable->setSortingEnabled(true);
         inputtable->setColumnCount(3);
-        //inputtable->setColumnWidth(0, COMMONNAME_COLWIDTH); //Common Name (fixed)
-        //inputtable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
-        //inputtable->setColumnWidth(2, 100);
 
-        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QString::fromStdString("Requestor")));
-        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QString::fromStdString("Recipient")));
-        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QString::fromStdString("Date")));
+        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QObject::tr("Requestor")));
+        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QObject::tr("Recipient")));
+        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QObject::tr("Date")));
 
         //make columns resize dynamically
         QHeaderView* header = inputtable->horizontalHeader();
@@ -153,7 +150,9 @@ public:
             inputtable->horizontalHeader()->setSortIndicator(sortColumn, sortOrder);
         }
 
-        statusDisplay->setText(QString::fromStdString(("(" + std::to_string(recordsFound) +")")));
+        std::string statusString = "(" + std::to_string(recordsFound) + ")";
+
+        statusDisplay->setText(QObject::tr(statusString.c_str()));
 
     } //refreshLinks
 

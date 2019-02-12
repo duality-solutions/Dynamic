@@ -37,10 +37,18 @@ QTabBar { alignment: left; }
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QLineEdit" name="lineEditUserCommonNameSearch"/>
+            <widget class="QLineEdit" name="lineEditUserCommonNameSearch">
+             <property name="placeholderText">
+              <string>Enter common name to search</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEditUserFullPathSearch"/>
+            <widget class="QLineEdit" name="lineEditUserFullPathSearch">
+             <property name="placeholderText">
+              <string>Enter object full path to search</string>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer">
@@ -215,10 +223,18 @@ QTabBar { alignment: left; }
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
-            <widget class="QLineEdit" name="lineEditGroupCommonNameSearch"/>
+            <widget class="QLineEdit" name="lineEditGroupCommonNameSearch">
+             <property name="placeholderText">
+              <string>Enter common name to search</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEditGroupFullPathSearch"/>
+            <widget class="QLineEdit" name="lineEditGroupFullPathSearch">
+             <property name="placeholderText">
+              <string>Enter object full path to search</string>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="horizontalSpacer_6">
@@ -466,6 +482,9 @@ QTabBar { alignment: left; }
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
+             <property name="columnCount">
+              <number>0</number>
+             </property>
             </widget>
            </item>
            <item>
@@ -609,6 +628,9 @@ QTabBar { alignment: left; }
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
+             <property name="columnCount">
+              <number>0</number>
+             </property>
             </widget>
            </item>
            <item>
@@ -734,6 +756,9 @@ QTabBar { alignment: left; }
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="columnCount">
+              <number>0</number>
              </property>
             </widget>
            </item>

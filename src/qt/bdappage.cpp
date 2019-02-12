@@ -35,13 +35,9 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     ui->lineEditUserCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
     ui->lineEditUserFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
-    ui->lineEditUserCommonNameSearch->setPlaceholderText(QObject::tr("Enter common name to search"));
-    ui->lineEditUserFullPathSearch->setPlaceholderText(QObject::tr("Enter object full path to search"));
 
     ui->lineEditGroupCommonNameSearch->setFixedWidth(COMMONNAME_COLWIDTH);
     ui->lineEditGroupFullPathSearch->setFixedWidth(FULLPATH_COLWIDTH);
-    ui->lineEditGroupCommonNameSearch->setPlaceholderText(QObject::tr("Enter common name to search"));
-    ui->lineEditGroupFullPathSearch->setPlaceholderText(QObject::tr("Enter object full path to search"));
 
     //Users tab
     connect(ui->pushButton_All, SIGNAL(clicked()), this, SLOT(listAllUsers()));
@@ -138,7 +134,7 @@ void BdapPage::listAllGroups()
 void BdapPage::addGroup()
 {
     BdapAddUserDialog dlg(this,BDAP::ObjectType::BDAP_GROUP);
-    dlg.setWindowTitle(QString::fromStdString("Add BDAP Group"));
+    dlg.setWindowTitle(QObject::tr("Add BDAP Group"));
     dlg.exec();
 } //addGroup
 
@@ -158,7 +154,7 @@ void BdapPage::deleteGroup()
     account = ui->tableWidget_Groups->item(nSelectedRow,1)->text().toStdString();
     displayedMessage = "Are you sure you want to delete \"" + account + "\""; //std::to_string(nSelectedRow);
 
-    reply = QMessageBox::question(this, "Confirm Delete Account", QString::fromStdString(displayedMessage), QMessageBox::Yes|QMessageBox::No);
+    reply = QMessageBox::question(this, QObject::tr("Confirm Delete Account"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
         executeDeleteAccount(account, BDAP::ObjectType::BDAP_GROUP);
@@ -183,7 +179,7 @@ void BdapPage::updateGroup()
     expirationDate = ui->tableWidget_Groups->item(nSelectedRow,2)->text().toStdString();
 
     BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,account,commonName,expirationDate);
-    dlg.setWindowTitle(QString::fromStdString("Update BDAP Group"));
+    dlg.setWindowTitle(QObject::tr("Update BDAP Group"));
     
     dlg.exec();
 
@@ -193,7 +189,7 @@ void BdapPage::updateGroup()
 void BdapPage::getGroupDetails(int row, int column)
 {
     BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_GROUP,ui->tableWidget_Groups->item(row,1)->text().toStdString());
-    dlg.setWindowTitle(QString::fromStdString("BDAP Group Detail"));
+    dlg.setWindowTitle(QObject::tr("BDAP Group Detail"));
     dlg.exec();
 } //getGroupDetails
 
@@ -221,7 +217,7 @@ void BdapPage::addUser()
 void BdapPage::getUserDetails(int row, int column)
 {
     BdapUserDetailDialog dlg(this,BDAP::ObjectType::BDAP_USER,ui->tableWidget_Users->item(row,1)->text().toStdString());
-    dlg.setWindowTitle(QString::fromStdString("BDAP User Detail"));
+    dlg.setWindowTitle(QObject::tr("BDAP User Detail"));
     dlg.exec();
 } //getUserDetails
 
@@ -242,7 +238,7 @@ void BdapPage::deleteUser()
     account = ui->tableWidget_Users->item(nSelectedRow,1)->text().toStdString();
     displayedMessage = "Are you sure you want to delete \"" + account + "\""; //std::to_string(nSelectedRow);
 
-    reply = QMessageBox::question(this, "Confirm Delete Account", QString::fromStdString(displayedMessage), QMessageBox::Yes|QMessageBox::No);
+    reply = QMessageBox::question(this, QObject::tr("Confirm Delete Account"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
         executeDeleteAccount(account, BDAP::ObjectType::BDAP_USER);
@@ -268,7 +264,7 @@ void BdapPage::updateUser()
     expirationDate = ui->tableWidget_Users->item(nSelectedRow,2)->text().toStdString();
 
     BdapUpdateAccountDialog dlg(this,BDAP::ObjectType::BDAP_USER,account,commonName,expirationDate);
-    dlg.setWindowTitle(QString::fromStdString("Update BDAP User"));
+    dlg.setWindowTitle(QObject::tr("Update BDAP User"));
     
     dlg.exec();
 
@@ -314,9 +310,9 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
             BdapUserDetailDialog dlg(this,accountType,"",result,true);
 
             if (accountType == BDAP::ObjectType::BDAP_USER) {
-                dlg.setWindowTitle(QString::fromStdString("Successfully deleted user"));
+                dlg.setWindowTitle(QObject::tr("Successfully deleted user"));
             } else  { //only other option for now is group
-                dlg.setWindowTitle(QString::fromStdString("Successfully deleted group"));
+                dlg.setWindowTitle(QObject::tr("Successfully deleted group"));
             }; //end accountType if
 
             dlg.exec();
@@ -328,7 +324,7 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
             outputmessage = e.what();
         }
 
-        QMessageBox::critical(this, "BDAP Error", QString::fromStdString(outputmessage));
+        QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
 
 } //executeDeleteAccount
 
