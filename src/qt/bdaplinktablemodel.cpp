@@ -32,7 +32,7 @@ public:
     Qt::SortOrder sortOrder;
 
     /** Populate tableWidget_Users via RPC call */
-    void refreshLinks(QTableWidget* inputtable, QLabel* statusDisplay)
+    void refreshLinks(QTableWidget* inputtable, QLabel* statusDisplay, std::string searchRequestor = "", std::string searchRecipient = "")
     {
 
         JSONRPCRequest jreq;
@@ -44,6 +44,7 @@ public:
         std::string getRequestor {""};
         std::string getRecipient {""};
         std::string getDate {""};
+        std::string getMessage {""};
         std::string tableWidgetName {""};
         std::string outputmessage = "";
 
@@ -121,26 +122,29 @@ public:
                 keyName = "";
                 keyName = result[i].getKeys()[j];
 
-                // "requestor_fqdn", "recipient_fqdn", "time"
+                // "requestor_fqdn", "recipient_fqdn", "time", "link_message"
                 if (keyName == "requestor_fqdn") getRequestor = result[i].getValues()[j].get_str();
                 if (keyName == "recipient_fqdn") getRecipient = result[i].getValues()[j].get_str();
                 if (keyName == "time") getDate = DateTimeStrFormat("%Y-%m-%d", result[i].getValues()[j].get_int64());
+                if (keyName == "link_message") getMessage = result[i].getValues()[j].get_str();
 
             }
 
             //add row if all criteria have been met
-            //if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
+            if ( ((searchRequestor == "") && (searchRecipient == "")) || (((boost::algorithm::to_lower_copy(getRequestor)).find(boost::algorithm::to_lower_copy(searchRequestor)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getRecipient)).find(boost::algorithm::to_lower_copy(searchRecipient)) != std::string::npos)) ) {
                 nNewRow = inputtable->rowCount();
                 inputtable->insertRow(nNewRow);
                 QTableWidgetItem* requestorItem = new QTableWidgetItem(QString::fromStdString(getIdFromPath(getRequestor)));
                 QTableWidgetItem* recipientItem = new QTableWidgetItem(QString::fromStdString(getIdFromPath(getRecipient)));
                 QTableWidgetItem* dateItem = new QTableWidgetItem(QString::fromStdString(getDate));
+                requestorItem->setToolTip(QString::fromStdString(getMessage));
+                recipientItem->setToolTip(QString::fromStdString(getMessage));
+                dateItem->setToolTip(QString::fromStdString(getMessage));
                 inputtable->setItem(nNewRow, 0, requestorItem);
                 inputtable->setItem(nNewRow, 1, recipientItem);
                 inputtable->setItem(nNewRow, 2, dateItem);
                 recordsFound++;
-
-            //} //if searchcommon
+            } //if searchRequestor...
 
 
         }; //for loop
@@ -201,13 +205,19 @@ BdapLinkTableModel::BdapLinkTableModel(BdapPage* parent) : QAbstractTableModel(p
     pendingRequestTable = bdapPage->getPendingRequestTable();;
     pendingRequestStatus = bdapPage->getPendingRequestRecords();
 
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), SLOT(refresh()));
-    timer->setInterval(60000); //MODEL_UPDATE_DELAY originally    
-
     priv.reset(new BdapLinkTablePriv());
     // default to unsorted
     priv->sortColumn = -1;
+
+    //initialize tables the first time
+    refreshComplete();
+    refreshPendingAccept();
+    refreshPendingRequest();
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), SLOT(refresh()));
+    timer->setInterval(60000); //MODEL_UPDATE_DELAY originally 
+    startAutoRefresh();  
 
 }
 
@@ -215,6 +225,17 @@ BdapLinkTableModel::~BdapLinkTableModel()
 {
     // Intentionally left empty
 }
+
+void BdapLinkTableModel::startAutoRefresh()
+{
+    timer->start();
+}
+
+void BdapLinkTableModel::stopAutoRefresh()
+{
+    timer->stop();
+}
+
 
 int BdapLinkTableModel::rowCount(const QModelIndex& parent) const
 {
@@ -275,15 +296,20 @@ void BdapLinkTableModel::sort(int column, Qt::SortOrder order)
 
 void BdapLinkTableModel::refresh()
 {
-
+    refreshComplete();
+    refreshPendingAccept();
+    refreshPendingRequest();
 
 }
 
 
 void BdapLinkTableModel::refreshComplete()
 {
+    searchCompleteRequestor = bdapPage->getCompleteRequestorSearch();
+    searchCompleteRecipient = bdapPage->getCompleteRecipientSearch();
+
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshLinks(completeTable,completeStatus);
+    priv->refreshLinks(completeTable,completeStatus,searchCompleteRequestor,searchCompleteRecipient);
     Q_EMIT layoutChanged();
 }
 

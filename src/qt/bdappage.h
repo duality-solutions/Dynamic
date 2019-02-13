@@ -60,6 +60,8 @@ public:
     QLabel* getLinkCompleteRecords();
     QLabel* getPendingAcceptRecords();
     QLabel* getPendingRequestRecords();
+    std::string getCompleteRequestorSearch();    
+    std::string getCompleteRecipientSearch();    
 
 
 

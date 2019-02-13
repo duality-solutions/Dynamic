@@ -456,14 +456,14 @@ QTabBar { alignment: left; }
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
-              <widget class="QLineEdit" name="lineEdit">
+              <widget class="QLineEdit" name="lineEditPARequestorSearch">
                <property name="placeholderText">
                 <string>Requestor search</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit_2">
+              <widget class="QLineEdit" name="lineEditPARecipientSearch">
                <property name="placeholderText">
                 <string>Recipient search</string>
                </property>
@@ -520,7 +520,7 @@ QTabBar { alignment: left; }
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pushButtonDeny">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -528,11 +528,28 @@ QTabBar { alignment: left; }
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Delete</string>
+                <string>Deny</string>
                </property>
                <property name="icon">
                 <iconset resource="../dynamic.qrc">
                  <normaloff>:/icons/drk/drkpurple_remove</normaloff>:/icons/drk/drkpurple_remove</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButtonSpam">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Spam</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../dynamic.qrc">
+                 <normaloff>:/icons/drk/transaction_abandoned</normaloff>:/icons/drk/transaction_abandoned</iconset>
                </property>
               </widget>
              </item>
@@ -602,14 +619,14 @@ QTabBar { alignment: left; }
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
-              <widget class="QLineEdit" name="lineEdit_3">
+              <widget class="QLineEdit" name="lineEditPRRequestorSearch">
                <property name="placeholderText">
                 <string>Requestor search</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit_4">
+              <widget class="QLineEdit" name="lineEditPRRecipientSearch">
                <property name="placeholderText">
                 <string>Recipient search</string>
                </property>
@@ -731,14 +748,14 @@ QTabBar { alignment: left; }
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="QLineEdit" name="lineEdit_5">
+              <widget class="QLineEdit" name="lineEditCompleteRequestorSearch">
                <property name="placeholderText">
                 <string>Requestor search</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit_6">
+              <widget class="QLineEdit" name="lineEditCompleteRecipientSearch">
                <property name="placeholderText">
                 <string>Recipient search</string>
                </property>

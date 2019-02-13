@@ -70,6 +70,8 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->pushButtonRefreshPendingAccept, SIGNAL(clicked()), this, SLOT(listPendingAccept()));
     connect(ui->pushButtonRefreshPendingRequest, SIGNAL(clicked()), this, SLOT(listPendingRequest()));
 
+    connect(ui->lineEditCompleteRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
+    connect(ui->lineEditCompleteRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
     
 
 }
@@ -431,6 +433,16 @@ std::string BdapPage::getCommonGroupSearch()
 std::string BdapPage::getPathGroupSearch()
 {
     return ui->lineEditGroupFullPathSearch->text().toStdString();
+}
+
+std::string BdapPage::getCompleteRequestorSearch()
+{
+    return ui->lineEditCompleteRequestorSearch->text().toStdString();
+}
+
+std::string BdapPage::getCompleteRecipientSearch()
+{
+    return ui->lineEditCompleteRecipientSearch->text().toStdString();
 }
 
 

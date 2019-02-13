@@ -37,6 +37,8 @@ public:
     void refreshComplete();
     void refreshPendingAccept();
     void refreshPendingRequest();
+    void startAutoRefresh();
+    void stopAutoRefresh();    
 
     enum ColumnIndex {
         Requestor = 0,
@@ -71,7 +73,10 @@ private:
     QLabel* pendingAcceptStatus;
 
     QTableWidget* pendingRequestTable;
-    QLabel* pendingRequestStatus;       
+    QLabel* pendingRequestStatus;
+
+    std::string searchCompleteRequestor;
+    std::string searchCompleteRecipient;       
     
 };
 

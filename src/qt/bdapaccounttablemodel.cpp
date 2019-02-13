@@ -190,6 +190,10 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     // default to unsorted
     priv->sortColumn = -1;
 
+    //initialize tables the first time
+    refreshUsers();
+    refreshGroups();
+
     //refresh();
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
