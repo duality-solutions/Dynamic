@@ -54,6 +54,7 @@ bool CLinkRequest::UnserializeFromData(const std::vector<unsigned char>& vchData
             SetNull();
             return false;
         }
+        txHash = Hash(vchLinkRequestData.begin(), vchLinkRequestData.end());
     } catch (std::exception &e) {
         SetNull();
         return false;
@@ -199,6 +200,7 @@ bool CLinkAccept::UnserializeFromData(const std::vector<unsigned char>& vchData,
             SetNull();
             return false;
         }
+        txHash = Hash(vchAcceptLinkData.begin(), vchAcceptLinkData.end());
     } catch (std::exception &e) {
         SetNull();
         return false;

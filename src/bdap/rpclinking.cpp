@@ -419,6 +419,7 @@ static bool BuildJsonMyListRequests(const std::vector<CLinkRequest>& vchLinkRequ
                 }
                 oLink.push_back(Pair("expires_on", expired_time));
                 oLink.push_back(Pair("expired", expired));
+                oLink.push_back(Pair("link_message", stringFromVch(link.LinkMessage)));
                 oLinkRequests.push_back(Pair("link-" + std::to_string(nCount) , oLink));
                 nCount ++;
             }

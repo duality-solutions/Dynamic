@@ -191,6 +191,9 @@ public:
         SharedPubKey = b.SharedPubKey;
         SignatureProof = b.SignatureProof;
         txLinkRequestHash = b.txLinkRequestHash;
+        nHeight = b.nHeight;
+        nExpireTime = b.nExpireTime;
+        txHash = b.txHash;
         return *this;
     }
  

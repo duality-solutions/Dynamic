@@ -1350,6 +1350,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     if (nVersion == 0) {
                                         if (nVersion == 0) { // version 0 is public and unencrypted
                                             CLinkRequest link(MakeTransactionRef(tx));
+                                            link.nHeight = pIndex->nHeight;
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
@@ -1380,6 +1381,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkRequest link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        link.nHeight = pIndex->nHeight;
                                                         pLinkRequestDB->AddMyLinkRequest(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1405,6 +1407,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     if (nVersion == 0) {
                                         if (nVersion == 0) { // version 0 is public and unencrypted
                                             CLinkRequest link(MakeTransactionRef(tx));
+                                            link.nHeight = pIndex->nHeight;
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
@@ -1437,6 +1440,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkRequest link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        link.nHeight = pIndex->nHeight;
                                                         pLinkRequestDB->AddMyLinkRequest(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1464,6 +1468,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     if (nVersion == 0) {
                                         if (nVersion == 0) { // version 0 is public and unencrypted
                                             CLinkAccept link(MakeTransactionRef(tx));
+                                            link.nHeight = pIndex->nHeight;
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
@@ -1494,6 +1499,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkAccept link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        link.nHeight = pIndex->nHeight;
                                                         pLinkAcceptDB->AddMyLinkAccept(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1519,6 +1525,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     if (nVersion == 0) {
                                         if (nVersion == 0) { // version 0 is public and unencrypted
                                             CLinkAccept link(MakeTransactionRef(tx));
+                                            link.nHeight = pIndex->nHeight;
                                             CDomainEntry entry;
                                             if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
                                                 if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
@@ -1545,12 +1552,13 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                 std::string strMessage = "";
                                                 std::vector<unsigned char> dataDecrypted;
                                                 if (DecryptBDAPData(sharedKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                     std::vector<unsigned char> vchData, vchHash;
+                                                    std::vector<unsigned char> vchData, vchHash;
                                                     CScript scriptData;
                                                     scriptData << OP_RETURN << dataDecrypted;
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkAccept link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
+                                                        link.nHeight = pIndex->nHeight;
                                                         pLinkAcceptDB->AddMyLinkAccept(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
