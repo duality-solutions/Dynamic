@@ -32,7 +32,7 @@ void ScrubString(std::string& input, bool forInteger)
         input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
 }
 
-void SeparateString(std::string input, std::vector<std::string>& output, bool subDelimiter)
+void SeparateString(const std::string& input, std::vector<std::string>& output, bool subDelimiter)
 {
     if (subDelimiter)
         boost::split(output, input, boost::is_any_of(SubDelimiter));
@@ -90,7 +90,7 @@ std::string GetRidOfScriptStatement(std::string input, int position)
 //
 /////////////////////////////////////////////////////////////
 
-bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress)
+bool COperations::VerifyAddressOwnership(const CDynamicAddress& dynamicAddress)
 {
 #ifdef ENABLE_WALLET
     LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
@@ -112,7 +112,7 @@ bool COperations::VerifyAddressOwnership(CDynamicAddress dynamicAddress)
 }
 
 
-bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
+bool COperations::SignTokenMessage(const CDynamicAddress& address, std::string unsignedMessage, std::string& stitchedMessage, bool stitch)
 {
 #ifdef ENABLE_WALLET
     CHashWriter ss(SER_GETHASH, 0);
@@ -143,7 +143,7 @@ bool COperations::SignTokenMessage(CDynamicAddress address, std::string unsigned
 #endif //ENABLE_WALLET
 }
 
-bool COperations::GenericSignMessage(const std::string message, std::string& signedString, CDynamicAddress signer)
+bool COperations::GenericSignMessage(const std::string& message, std::string& signedString, const CDynamicAddress& signer)
 {
     if (!SignTokenMessage(signer, message, signedString, true))
         return false;
