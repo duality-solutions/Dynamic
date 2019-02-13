@@ -123,8 +123,8 @@ public:
                 keyName = result[i].getKeys()[j];
 
                 // "requestor_fqdn", "recipient_fqdn", "time", "link_message"
-                if (keyName == "requestor_fqdn") getRequestor = result[i].getValues()[j].get_str();
-                if (keyName == "recipient_fqdn") getRecipient = result[i].getValues()[j].get_str();
+                if (keyName == "requestor_fqdn") getRequestor = getIdFromPath(result[i].getValues()[j].get_str());
+                if (keyName == "recipient_fqdn") getRecipient = getIdFromPath(result[i].getValues()[j].get_str());
                 if (keyName == "time") getDate = DateTimeStrFormat("%Y-%m-%d", result[i].getValues()[j].get_int64());
                 if (keyName == "link_message") getMessage = result[i].getValues()[j].get_str();
 
@@ -134,8 +134,8 @@ public:
             if ( ((searchRequestor == "") && (searchRecipient == "")) || (((boost::algorithm::to_lower_copy(getRequestor)).find(boost::algorithm::to_lower_copy(searchRequestor)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getRecipient)).find(boost::algorithm::to_lower_copy(searchRecipient)) != std::string::npos)) ) {
                 nNewRow = inputtable->rowCount();
                 inputtable->insertRow(nNewRow);
-                QTableWidgetItem* requestorItem = new QTableWidgetItem(QString::fromStdString(getIdFromPath(getRequestor)));
-                QTableWidgetItem* recipientItem = new QTableWidgetItem(QString::fromStdString(getIdFromPath(getRecipient)));
+                QTableWidgetItem* requestorItem = new QTableWidgetItem(QString::fromStdString(getRequestor));
+                QTableWidgetItem* recipientItem = new QTableWidgetItem(QString::fromStdString(getRecipient));
                 QTableWidgetItem* dateItem = new QTableWidgetItem(QString::fromStdString(getDate));
                 requestorItem->setToolTip(QString::fromStdString(getMessage));
                 recipientItem->setToolTip(QString::fromStdString(getMessage));
@@ -316,15 +316,21 @@ void BdapLinkTableModel::refreshComplete()
 
 void BdapLinkTableModel::refreshPendingAccept()
 {
+    searchPARequestor = bdapPage->getPARequestorSearch();
+    searchPARecipient = bdapPage->getPARecipientSearch();
+    
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshLinks(pendingAcceptTable,pendingAcceptStatus);
+    priv->refreshLinks(pendingAcceptTable,pendingAcceptStatus,searchPARequestor,searchPARecipient);
     Q_EMIT layoutChanged();
 }
 
 
 void BdapLinkTableModel::refreshPendingRequest()
 {
+    searchPRRequestor = bdapPage->getPRRequestorSearch();
+    searchPRRecipient = bdapPage->getPRRecipientSearch();
+
     Q_EMIT layoutAboutToBeChanged();
-    priv->refreshLinks(pendingRequestTable,pendingRequestStatus);
+    priv->refreshLinks(pendingRequestTable,pendingRequestStatus,searchPRRequestor,searchPRRecipient);
     Q_EMIT layoutChanged();
 }

@@ -62,6 +62,10 @@ public:
     QLabel* getPendingRequestRecords();
     std::string getCompleteRequestorSearch();    
     std::string getCompleteRecipientSearch();    
+    std::string getPARequestorSearch();    
+    std::string getPARecipientSearch();    
+    std::string getPRRequestorSearch();    
+    std::string getPRRecipientSearch();    
 
 
 

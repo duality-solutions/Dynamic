@@ -73,6 +73,12 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->lineEditCompleteRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
     connect(ui->lineEditCompleteRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listLinksComplete()));
     
+    connect(ui->lineEditPARequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingAccept()));
+    connect(ui->lineEditPARecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingAccept()));
+
+    connect(ui->lineEditPRRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
+    connect(ui->lineEditPRRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
+
 
 }
 
@@ -445,8 +451,25 @@ std::string BdapPage::getCompleteRecipientSearch()
     return ui->lineEditCompleteRecipientSearch->text().toStdString();
 }
 
+std::string BdapPage::getPARequestorSearch()
+{
+    return ui->lineEditPARequestorSearch->text().toStdString();
+}
 
+std::string BdapPage::getPARecipientSearch()
+{
+    return ui->lineEditPARecipientSearch->text().toStdString();
+}
 
+std::string BdapPage::getPRRequestorSearch()
+{
+    return ui->lineEditPRRequestorSearch->text().toStdString();
+}
+
+std::string BdapPage::getPRRecipientSearch()
+{
+    return ui->lineEditPRRecipientSearch->text().toStdString();
+}
 
 
 

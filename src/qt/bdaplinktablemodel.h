@@ -76,7 +76,11 @@ private:
     QLabel* pendingRequestStatus;
 
     std::string searchCompleteRequestor;
-    std::string searchCompleteRecipient;       
+    std::string searchCompleteRecipient;  
+    std::string searchPARequestor;
+    std::string searchPARecipient;          
+    std::string searchPRRequestor;
+    std::string searchPRRecipient;          
     
 };
 
