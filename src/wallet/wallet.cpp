@@ -1332,6 +1332,9 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
         if (fExisted || IsMine(tx) || IsFromMe(tx)) {
             const CTransactionRef ptx = MakeTransactionRef(tx);
             if (tx.nVersion == BDAP_TX_VERSION) {
+                if (!pIndex)
+                    LogPrintf("%s -- BDAP transaction with a null pIndex.\n", __func__);
+
                 CScript bdapOpScript;
                 int op1, op2;
                 std::vector<std::vector<unsigned char>> vvchOpParameters;
@@ -1364,7 +1367,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                     }
                                     else if (nVersion == 1) {
                                         bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
+                                        LogPrint("bdap", "%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
                                         CKeyEd25519 privDHTKey;
                                         CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
                                         if (GetDHTKey(keyID, privDHTKey)) {
@@ -1381,7 +1384,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkRequest link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        link.nHeight = pIndex->nHeight;
+                                                        if (pIndex) {
+                                                            link.nHeight = pIndex->nHeight;
+                                                        }
+                                                        else {
+                                                            link.nHeight = chainActive.Height();
+                                                        }
                                                         pLinkRequestDB->AddMyLinkRequest(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1440,7 +1448,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkRequest link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        link.nHeight = pIndex->nHeight;
+                                                        if (pIndex) {
+                                                            link.nHeight = pIndex->nHeight;
+                                                        }
+                                                        else {
+                                                            link.nHeight = chainActive.Height();
+                                                        }
                                                         pLinkRequestDB->AddMyLinkRequest(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1499,7 +1512,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkAccept link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        link.nHeight = pIndex->nHeight;
+                                                        if (pIndex) {
+                                                            link.nHeight = pIndex->nHeight;
+                                                        }
+                                                        else {
+                                                            link.nHeight = chainActive.Height();
+                                                        }
                                                         pLinkAcceptDB->AddMyLinkAccept(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
@@ -1558,7 +1576,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                                                     if (GetBDAPData(scriptData, vchData, vchHash)) {
                                                         CLinkAccept link;
                                                         link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        link.nHeight = pIndex->nHeight;
+                                                        if (pIndex) {
+                                                            link.nHeight = pIndex->nHeight;
+                                                        }
+                                                        else {
+                                                            link.nHeight = chainActive.Height();
+                                                        }
                                                         pLinkAcceptDB->AddMyLinkAccept(link);
                                                         LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
                                                         fDecrypted = true;
