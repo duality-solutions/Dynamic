@@ -5524,6 +5524,48 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 <context>
+    <name>BdapLinkTableModel</name>
+    <message>
+        <source>BDAP User Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+	</context>
+<context>
+    <name>BdapLinkTablePriv</name>
+    <message>
+        <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+	</context>
+	<context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
@@ -5575,6 +5617,10 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>Groups</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Links</source>
         <translation>Needs Translating</translation>
     </message>
     <message>
@@ -5645,7 +5691,63 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <source>BDAP Error</source>
         <translation>Needs Translating</translation>
     </message>
-</context>
+    <message>
+        <source>Enter common name to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Enter object full path to search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Pending Request</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient search</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+	</context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>

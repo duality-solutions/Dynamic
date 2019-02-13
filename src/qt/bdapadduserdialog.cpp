@@ -26,8 +26,8 @@ BdapAddUserDialog::BdapAddUserDialog(QWidget *parent, BDAP::ObjectType accountTy
 
     if (inputAccountType == BDAP::ObjectType::BDAP_GROUP) {
 
-        ui->labelUserId->setText(QString::fromStdString("Group ID:"));
-        ui->addUser->setText(QString::fromStdString("Add Group"));
+        ui->labelUserId->setText(QObject::tr("Group ID:"));
+        ui->addUser->setText(QObject::tr("Add Group"));
 
     } //if inputAccountType
 
@@ -102,9 +102,9 @@ void BdapAddUserDialog::goAddUser()
         BdapUserDetailDialog dlg(this,inputAccountType,"",result,true);
 
         if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
-            dlg.setWindowTitle(QString::fromStdString("Successfully added user"));
+            dlg.setWindowTitle(QObject::tr("Successfully added user"));
         } else  { //only other option for now is group
-           dlg.setWindowTitle(QString::fromStdString("Successfully added group"));
+           dlg.setWindowTitle(QObject::tr("Successfully added group"));
         }; //end inputAccountType if
 
 
@@ -121,7 +121,7 @@ void BdapAddUserDialog::goAddUser()
     }
 
 
-    ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
+    ui->labelErrorMsg->setText(QObject::tr(outputmessage.c_str()));
 
 
 
@@ -129,7 +129,6 @@ void BdapAddUserDialog::goAddUser()
 
 void BdapAddUserDialog::goCancel()
 {
-    ui->lineEdit_userID->setPlaceholderText("Cancel");
     QDialog::reject(); //cancelled
 } //goCancel
 

@@ -649,4 +649,5 @@ FORMS += \
     src/qt/forms/bdappage.ui \
     src/qt/forms/bdapadduserdialog.ui \
     src/qt/forms/bdapuserdetaildialog.ui \
-    src/qt/forms/bdapupdateaccountdialog.ui
+    src/qt/forms/bdapupdateaccountdialog.ui \
+    src/qt/forms/bdaplinkdetaildialog.ui

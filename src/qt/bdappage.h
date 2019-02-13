@@ -16,6 +16,7 @@
 
 
 class BdapAccountTableModel;
+class BdapLinkTableModel;
 class QTableWidget;
 class QLabel;
 
@@ -38,8 +39,14 @@ public:
 
     void setModel(WalletModel* model);
     BdapAccountTableModel* getBdapAccountTableModel();
+    BdapLinkTableModel* getBdapLinkTableModel();
     QTableWidget* getUserTable();
     QTableWidget* getGroupTable();
+
+    QTableWidget* getCompleteTable();
+    QTableWidget* getPendingAcceptTable();
+    QTableWidget* getPendingRequestTable();
+    
     QLabel* getUserStatus();
     QLabel* getGroupStatus();
     bool getMyUserCheckBoxChecked();
@@ -50,6 +57,15 @@ public:
     std::string getCommonGroupSearch();
     std::string getPathGroupSearch();
     void evaluateTransactionButtons();
+    QLabel* getLinkCompleteRecords();
+    QLabel* getPendingAcceptRecords();
+    QLabel* getPendingRequestRecords();
+    std::string getCompleteRequestorSearch();    
+    std::string getCompleteRecipientSearch();    
+    std::string getPARequestorSearch();    
+    std::string getPARecipientSearch();    
+    std::string getPRRequestorSearch();    
+    std::string getPRRecipientSearch();    
 
 
 
@@ -59,6 +75,7 @@ private:
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     BdapAccountTableModel* bdapAccountTableModel;
+    BdapLinkTableModel* bdapLinkTableModel;
     void executeDeleteAccount(std::string account, BDAP::ObjectType accountType);
 
 
@@ -76,6 +93,10 @@ private Q_SLOTS:
     void deleteGroup();
     void updateGroup();
     void getGroupDetails(int row, int column);
+
+    void listLinksComplete();
+    void listPendingAccept();
+    void listPendingRequest();
 
 };
 

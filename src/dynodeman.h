@@ -39,7 +39,8 @@ private:
     static const int DNB_RECOVERY_MAX_ASK_ENTRIES = 10;
     static const int DNB_RECOVERY_WAIT_SECONDS = 60;
     static const int DNB_RECOVERY_RETRY_SECONDS = 3 * 60 * 60;
-
+    // the minimun active Dynodes before using InstandSend
+    static const int INSTANTSEND_MIN_ACTIVE_DYNODE_COUNT = 25;
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
 
@@ -245,6 +246,9 @@ public:
     void NotifyDynodeUpdates(CConnman& connman);
 
     void DoMaintenance(CConnman& connman);
+
+    bool EnoughActiveForInstandSend() { return (CountEnabled() >= INSTANTSEND_MIN_ACTIVE_DYNODE_COUNT); }
+
 };
 
 #endif // DYNAMIC_DYNODEMAN_H

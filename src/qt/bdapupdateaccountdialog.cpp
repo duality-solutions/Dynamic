@@ -27,6 +27,7 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
 
     std::string objectID = "";
     std::vector<std::string> results;
+    std::string registrationDaysString = "";
 
     boost::split(results, account, [](char c){return c == '@';});
 
@@ -40,7 +41,8 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
 
     ui->lineEditID->setText(QString::fromStdString(objectID));
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
-    ui->lineEditRegistrationDays->setPlaceholderText(QString::fromStdString("Expiration date: " + expirationDate));
+    registrationDaysString = "Expiration date: " + expirationDate;
+    ui->lineEditRegistrationDays->setPlaceholderText(QObject::tr(registrationDaysString.c_str()));
 
 
     connect(ui->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(updateAccount()));
@@ -112,9 +114,9 @@ void BdapUpdateAccountDialog::updateAccount()
         BdapUserDetailDialog dlg(this,inputAccountType,"",result,true);
 
         if (inputAccountType == BDAP::ObjectType::BDAP_USER) {
-            dlg.setWindowTitle(QString::fromStdString("Successfully updated user"));
+            dlg.setWindowTitle(QObject::tr("Successfully updated user"));
         } else  { //only other option for now is group
-           dlg.setWindowTitle(QString::fromStdString("Successfully updated group"));
+           dlg.setWindowTitle(QObject::tr("Successfully updated group"));
         }; //end inputAccountType if
 
         dlg.exec();
@@ -127,7 +129,7 @@ void BdapUpdateAccountDialog::updateAccount()
         outputmessage = e.what();
     }
 
-    ui->labelErrorMsg->setText(QString::fromStdString(outputmessage));
+    ui->labelErrorMsg->setText(QObject::tr(outputmessage.c_str()));
 } //updateAccount
 
 
