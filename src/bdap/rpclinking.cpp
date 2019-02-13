@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Duality Blockchain Solutions Developers 
+// Copyright (c) 2019 Duality Blockchain Solutions Developers 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bdap/bdap.h"
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
-#include "encryption.h"
+#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
