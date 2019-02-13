@@ -11,6 +11,7 @@
 #include "rpcprotocol.h"
 #include "rpcserver.h"
 #include "primitives/transaction.h"
+#include "spork.h"
 #include "wallet/wallet.h"
 #include "validation.h"
 
@@ -124,8 +125,7 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3506 - " + strMessage);
 
     bool fUseInstantSend = false;
-    int enabled = dnodeman.CountEnabled();
-    if (enabled > 5) {
+    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
         // TODO (bdap): calculate cost for instant send.
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
@@ -450,8 +450,7 @@ static UniValue UpdateDomainEntry(const JSONRPCRequest& request, BDAP::ObjectTyp
         throw std::runtime_error("BDAP_UPDATE_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3703 - " + strMessage);
 
     bool fUseInstantSend = false;
-    int enabled = dnodeman.CountEnabled();
-    if (enabled > 5) {
+    if (dnodeman.EnoughActiveForInstandSend() && sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) {
         // TODO (bdap): calculate cost for instant send.
         nOperationFee = nOperationFee * 2;
         fUseInstantSend = true;
