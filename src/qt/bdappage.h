@@ -107,6 +107,7 @@ private Q_SLOTS:
     void listPendingAccept();
     void listPendingRequest();
     void acceptLink();
+    void addLink();
     void getLinkDetails(int row, int column);
 
 };

@@ -2063,9 +2063,14 @@ QWidget#BdapPage .QLabel#labelCompleteRecords, QWidget#BdapPage .QLabel#labelPRR
     font-weight: bold;
 }
 
+/*make disabled buttons look disabled*/
+QWidget#BdapPage .QPushButton:disabled {
+    background-color: #c4c4c4;
+}
+
 /*******************************************************/
-/* BDAPADDUSERDIALOG */
-QDialog#BdapAddUserDialog {
+/* BDAPADDUSERDIALOG and BDAPADDLINKDIALOG */
+QDialog#BdapAddUserDialog, QDialog#BdapAddLinkDialog {
     background-color:#000000;
     border:2px solid white;
 }

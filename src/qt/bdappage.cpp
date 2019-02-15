@@ -5,6 +5,7 @@
 #include "bdappage.h"
 #include "ui_bdappage.h"
 #include "bdapadduserdialog.h"
+#include "bdapaddlinkdialog.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
 #include "bdaplinkdetaildialog.h"
@@ -86,6 +87,7 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
     connect(ui->tableWidgetPendingAccept, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
     connect(ui->tableWidgetPendingRequest, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
 
+    connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
 
 
 
@@ -238,6 +240,12 @@ void BdapPage::getUserDetails(int row, int column)
     dlg.exec();
 } //getUserDetails
 
+void BdapPage::addLink()
+{
+    BdapAddLinkDialog dlg(this);
+    //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
+    dlg.exec();
+} //addLink
 
 void BdapPage::acceptLink()
 {
