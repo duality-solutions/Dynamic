@@ -138,6 +138,7 @@ private:
 std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);
 std::array<char, 32> GetLinkSharedPrivateKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);
 std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey);
+std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchData);
 
 bool ECC_Ed25519_InitSanityCheck();
 void ECC_Ed25519_Start();

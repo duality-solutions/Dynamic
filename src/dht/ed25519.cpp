@@ -15,6 +15,7 @@
 
 #include <array>
 #include <assert.h>
+#include <iomanip> // std::setw
 #include <tuple>
 
 using namespace libtorrent;
@@ -233,4 +234,20 @@ std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>
         vchPubKeyBytes.push_back(pubkey[i]);
     }
     return vchPubKeyBytes;
+}
+
+std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchData)
+{
+    if (vchData.size() == 0)
+        return "";
+
+    std::stringstream ss;
+    for(unsigned int i = 0; i < vchData.size(); i++) {
+        ss << std::hex << std::setfill('0');
+        ss  << "0x" << std::setw(2)  << static_cast<unsigned>(vchData[i]) << ",";
+        ss <<  (((i + 1) % 16 == 0) ? "\n" : "");
+    }
+    ss.seekp(-1, std::ios_base::end);
+    ss << "\n";
+    return ss.str();
 }
