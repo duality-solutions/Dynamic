@@ -26,6 +26,7 @@ QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/bdapadduserdialog.ui \
+  qt/forms/bdaplinkdetaildialog.ui \
   qt/forms/bdappage.ui \
   qt/forms/bdapupdateaccountdialog.ui \
   qt/forms/bdapuserdetaildialog.ui \
@@ -56,6 +57,7 @@ QT_MOC_CPP = \
   qt/moc_bantablemodel.cpp \
   qt/moc_bdapaccounttablemodel.cpp \
   qt/moc_bdapadduserdialog.cpp \
+  qt/moc_bdaplinkdetaildialog.cpp \
   qt/moc_bdaplinktablemodel.cpp \
   qt/moc_bdappage.cpp \
   qt/moc_bdapupdateaccountdialog.cpp \
@@ -134,6 +136,7 @@ DYNAMIC_QT_H = \
   qt/bantablemodel.h \
   qt/bdapaccounttablemodel.h \
   qt/bdapadduserdialog.h \
+  qt/bdaplinkdetaildialog.h \
   qt/bdaplinktablemodel.h \
   qt/bdappage.h \
   qt/bdapupdateaccountdialog.h \
@@ -301,6 +304,7 @@ DYNAMIC_QT_CPP += \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \
   qt/bdapadduserdialog.cpp \
+  qt/bdaplinkdetaildialog.cpp \
   qt/bdappage.cpp \
   qt/bdapupdateaccountdialog.cpp \
   qt/bdapuserdetaildialog.cpp \

@@ -2082,12 +2082,12 @@ QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
 
 /*******************************************************/
 /* BDAPUSERDETAILDIALOG AND BDAPUPDATEACCOUNTDIALOG*/
-QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog {
+QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog, QDialog#BdapLinkDetailDialog {
     background-color:#000000;
     border:2px solid white;
 }
 
-QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader {
+QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader, QDialog#BdapLinkDetailDialog .QLabel#labelinfoHeader {
     color: rgb(56, 255, 56);
     font-weight: bold;
 }

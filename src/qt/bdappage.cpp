@@ -7,6 +7,7 @@
 #include "bdapadduserdialog.h"
 #include "bdapupdateaccountdialog.h"
 #include "bdapuserdetaildialog.h"
+#include "bdaplinkdetaildialog.h"
 #include "guiutil.h"
 #include "walletmodel.h"
 #include "bdapaccounttablemodel.h"
@@ -78,6 +79,14 @@ BdapPage::BdapPage(const PlatformStyle* platformStyle, QWidget* parent) : QWidge
 
     connect(ui->lineEditPRRequestorSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
     connect(ui->lineEditPRRecipientSearch, SIGNAL(textChanged(const QString &)), this, SLOT(listPendingRequest()));
+
+
+    connect(ui->pushButtonAccept, SIGNAL(clicked()), this, SLOT(acceptLink()));
+
+    connect(ui->tableWidgetPendingAccept, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
+    connect(ui->tableWidgetPendingRequest, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(getLinkDetails(int,int)));
+
+
 
 
 }
@@ -230,6 +239,57 @@ void BdapPage::getUserDetails(int row, int column)
 } //getUserDetails
 
 
+void BdapPage::acceptLink()
+{
+    QMessageBox::StandardButton reply;
+    std::string requestor = "";
+    std::string recipient = "";
+    std::string displayedMessage = "";
+
+    QItemSelectionModel* selectionModel = ui->tableWidgetPendingAccept->selectionModel();
+    QModelIndexList selected = selectionModel->selectedRows();
+    int nSelectedRow = selected.count() ? selected.at(0).row() : -1;
+
+    if (nSelectedRow == -1) return; //do nothing if no rows are selected
+
+    requestor = ui->tableWidgetPendingAccept->item(nSelectedRow,0)->text().toStdString();
+    recipient = ui->tableWidgetPendingAccept->item(nSelectedRow,1)->text().toStdString();
+    displayedMessage = "Are you sure you want to confirm link from \"" + requestor + "\" to \"" + recipient + "\"?"; //std::to_string(nSelectedRow);
+
+    reply = QMessageBox::question(this, QObject::tr("Confirm Accept Link"), QObject::tr(displayedMessage.c_str()), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        //excuteAcceptLink
+        executeLinkTransaction(LinkActions::LINK_ACCEPT, requestor, recipient);
+
+    };
+
+} //acceptLink
+
+
+void BdapPage::getLinkDetails(int row, int column)
+{
+    std::string requestor = "";
+    std::string recipient = "";
+    std::string displayedMessage = "";
+    LinkActions actionType = LinkActions::LINK_DEFAULT;
+
+    //figure out which table called us
+    QTableWidget* tableSource = qobject_cast<QTableWidget*>(sender());
+
+    requestor = tableSource->item(row,0)->text().toStdString();
+    recipient = tableSource->item(row,1)->text().toStdString();
+
+    if (tableSource == ui->tableWidgetPendingAccept) actionType = LinkActions::LINK_PENDING_ACCEPT_DETAIL;
+    else if (tableSource == ui->tableWidgetPendingRequest) actionType = LinkActions::LINK_PENDING_REQUEST_DETAIL;
+
+
+    //excuteAcceptLink
+    executeLinkTransaction(actionType, requestor, recipient);
+
+
+} //linkDetails
+
 
 void BdapPage::deleteUser()
 {
@@ -254,6 +314,8 @@ void BdapPage::deleteUser()
     };
 
 } //deleteUser
+
+
 
 void BdapPage::updateUser()
 {
@@ -335,6 +397,82 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
         QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
 
 } //executeDeleteAccount
+
+void BdapPage::executeLinkTransaction(LinkActions actionType, std::string requestor, std::string recipient) {
+
+    std::string outputmessage = "";
+    bool displayMessage = false;
+    JSONRPCRequest jreq;
+    std::vector<std::string> params;
+
+    switch (actionType) {
+        case (LinkActions::LINK_ACCEPT):
+            params.push_back("accept");
+            params.push_back(recipient);            
+            params.push_back(requestor);            
+            jreq.params = RPCConvertValues("link", params);
+            jreq.strMethod = "link";
+            displayMessage = true;
+            break;
+        case (LinkActions::LINK_PENDING_ACCEPT_DETAIL):
+            params.push_back("pending");
+            params.push_back("accept");
+            params.push_back(requestor);            
+            params.push_back(recipient);            
+            jreq.params = RPCConvertValues("link", params);
+            jreq.strMethod = "link";
+            break;
+        case (LinkActions::LINK_PENDING_REQUEST_DETAIL):
+            params.push_back("pending");
+            params.push_back("request");
+            params.push_back(requestor);            
+            params.push_back(recipient);            
+            jreq.params = RPCConvertValues("link", params);
+            jreq.strMethod = "link";
+            break;
+        default:
+            params.push_back("complete");
+            jreq.params = RPCConvertValues("link", params);
+            jreq.strMethod = "link";
+            break;
+    } //end switch
+
+    try {
+        UniValue resultToPass = UniValue(UniValue::VOBJ);
+        
+        UniValue result = tableRPC.execute(jreq);
+
+        //NOTE: this payload is a list of details that contains one item for everything (so far) EXCEPT for LINK_ACCEPT
+        if (actionType != LinkActions::LINK_ACCEPT) {
+            resultToPass = result[0];
+        } else {
+            resultToPass = result;
+        }
+
+        BdapLinkDetailDialog dlg(this,actionType,"","",resultToPass,displayMessage);
+
+        if (actionType == LinkActions::LINK_ACCEPT) {
+            dlg.setWindowTitle(QObject::tr("Successfully accepted link"));
+        } else if (actionType == LinkActions::LINK_PENDING_ACCEPT_DETAIL) { 
+            dlg.setWindowTitle(QObject::tr("BDAP Pending Accept Link Detail"));
+        } else if (actionType == LinkActions::LINK_PENDING_REQUEST_DETAIL) {
+            dlg.setWindowTitle(QObject::tr("BDAP Pending Request Link Detail"));
+        }; //end actionType if
+
+        dlg.exec();
+        return;
+    } catch (const UniValue& objError) {
+        std::string message = find_value(objError, "message").get_str();
+        outputmessage = message;
+    } catch (const std::exception& e) {
+        outputmessage = e.what();
+    }
+
+    QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
+
+
+} //executeLinkTransaction
+
 
 
 BdapAccountTableModel* BdapPage::getBdapAccountTableModel()

@@ -23,6 +23,14 @@ class QLabel;
 const int COMMONNAME_COLWIDTH = 450;
 const int FULLPATH_COLWIDTH = 350;
 
+enum LinkActions {
+    LINK_DEFAULT = 0,
+    LINK_ACCEPT = 1,
+    LINK_REQUEST = 2,
+    LINK_PENDING_ACCEPT_DETAIL = 3,
+    LINK_PENDING_REQUEST_DETAIL = 4
+};
+
 
 namespace Ui
 {
@@ -77,6 +85,7 @@ private:
     BdapAccountTableModel* bdapAccountTableModel;
     BdapLinkTableModel* bdapLinkTableModel;
     void executeDeleteAccount(std::string account, BDAP::ObjectType accountType);
+    void executeLinkTransaction(LinkActions actionType, std::string requestor, std::string recipient);
 
 
 
@@ -97,6 +106,8 @@ private Q_SLOTS:
     void listLinksComplete();
     void listPendingAccept();
     void listPendingRequest();
+    void acceptLink();
+    void getLinkDetails(int row, int column);
 
 };
 

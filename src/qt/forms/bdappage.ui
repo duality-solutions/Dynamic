@@ -503,7 +503,7 @@ QTabBar { alignment: left; }
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_8">
+              <widget class="QPushButton" name="pushButtonAccept">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -521,6 +521,9 @@ QTabBar { alignment: left; }
              </item>
              <item>
               <widget class="QPushButton" name="pushButtonDeny">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -538,6 +541,9 @@ QTabBar { alignment: left; }
              </item>
              <item>
               <widget class="QPushButton" name="pushButtonSpam">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -667,6 +673,9 @@ QTabBar { alignment: left; }
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_3">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -796,6 +805,9 @@ QTabBar { alignment: left; }
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_4">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
