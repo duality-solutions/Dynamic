@@ -778,105 +778,92 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "\nImports mnemonic\n"
             "\nArguments:\n"
             "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-)\n"
-            "2. \"begin\"       (int, optional) begin\n"
-            "3. \"end\"         (int, optional) end\n"
-            "4. forcerescan               (boolean, optional, default=true) forcerescan the wallet for transactions\n"
+            "2. \"begin\"       (int, optional, default=0) begin key chain index\n"
+            "3. \"end\"         (int, optional, default=100) end key chain index\n"
+            "4. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
     if (fPruneMode)
-        throw JSONRPCError(RPC_WALLET_ERROR, "Importing wallets is disabled in pruned mode");
-    
-    std::string mnemonicstr = "";
-    
+        throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");
+
+    std::string strMnemonic = "", strMnemonicPassphrase = "";
     if (!request.params[0].isNull())
-        mnemonicstr = request.params[0].get_str();
-    
+        strMnemonic = request.params[0].get_str();
+
+    // Mnemonic can be delimited by dash ('-') or space(' ') character
+    std::replace(strMnemonic.begin(), strMnemonic.end(), '-', ' ');
+
+    if (strMnemonic.size() > 256)
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
+
     uint32_t begin = 0, end = 100;
-    
     if (!request.params[1].isNull())
         begin = (uint32_t)request.params[1].get_int();
-    
+
     if (!request.params[2].isNull())
         end = (uint32_t)request.params[2].get_int();
-    
+
     bool forcerescan = false;
-    
     if(!request.params[3].isNull())
         forcerescan = request.params[3].get_bool();
     
-    Mnemonic mnemonic(mnemonicstr);
-    
-    if(mnemonic.getMnemonic().size() <= 0){
-        entry.push_back(Pair("error", "mnemonic size is error"));
-        return entry;
-    }
-    
-    int64_t nCreationTime = 1230912000;
+    CHDChain newHdChain;
+    SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+    // TODO: Add ability to use mnemonic passphrase
+    SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
+
+    if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true))
+        throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
+
+    newHdChain.Debug(__func__);
+
+    if (!pwalletMain->SetHDChain(newHdChain, false))
+        throw std::runtime_error(std::string(__func__) + ": SetHDChain failed");
+
+    bool fInternal = false;
+    int64_t nCreationTime = 1230912000; // Friday, January 2, 2009 10:00:00 AM GMT-06:00
+    int64_t nStartTime = GetTime();
+    std::string strLabel="";
     uint32_t nInternalChainCounter = begin;
     uint32_t nExternalChainCounter = begin;
-    int skipcount = 0;
     pwalletMain->ShowProgress(_("Importing..."), 0); // show progress dialog in GUI
-    bool intenal = false;
-    unsigned char *seedkey = mnemonic.MnemonicToSeed();
-    
-    // for now we use a fixed keypath scheme of m/44‘/0'/0'/0/k
-    CExtKey masterKey;             //hd master key
-    CExtKey bip44Key;              //bip44 key m/44'
-    CExtKey coinTypeKey;           //coin_type key m/44'/0'
-    CExtKey accountKey;            //key at m/44'/0'/0'
-    CExtKey chainChildKeyexternal;         //key at m/44'/0'/0'/0 (external) or m/44'/0'/0'/1 (internal)
-    CExtKey chainChildKeyinternal;
-    
-    masterKey.SetMaster(seedkey, SEED_KEY_SIZE);
-    
-    // derive purpose m/44'
-    masterKey.Derive(bip44Key, 0x80000000 + 44);
-     // derive coin_type(dynamic) m/44'/0'
-    bip44Key.Derive(coinTypeKey, 0x80000000);
-    // derive account m/44'/0'/0'
-    // use hardened derivation (child keys >= 0x80000000 are hardened after bip32)
-    coinTypeKey.Derive(accountKey, 0x80000000);
-    accountKey.Derive(chainChildKeyexternal, 0);
-    accountKey.Derive(chainChildKeyinternal, 1);
+    int64_t nCount = 0;
     while(nInternalChainCounter <= end || nExternalChainCounter <= end){
-        //pwalletMain->ShowProgress("", std::max(1, std::min(99, (int)(((double)file.tellg() / (double)nFilesize) * 100))));
-        pwalletMain->ShowProgress("", std::max(1, std::min(99,  (int)(((double)(nInternalChainCounter+nExternalChainCounter) / (double)end)* (double)100 / (double)2))));
-        
+        pwalletMain->ShowProgress("", std::max(1, std::min(99, (int)(((double)(nInternalChainCounter + nExternalChainCounter) / (double)end)* (double)100 / (double)2))));
+
         if(nExternalChainCounter > end)
-            intenal = true;
-        
-        CKey key;
-        pwalletMain->DeriveNewChildKeyBIP44BychainChildKey((intenal?chainChildKeyinternal:chainChildKeyexternal),key,intenal,&nInternalChainCounter,&nExternalChainCounter);
-        
-        CPubKey pubkey = key.GetPubKey();
-        assert(key.VerifyPubKey(pubkey));
+            fInternal = true;
+
+        CPubKey pubkey;
+        try {
+            pwalletMain->GetKeyFromPool(pubkey, fInternal);
+        } catch (const std::exception& e) {
+            throw std::runtime_error(std::string(__func__) + ": Error in GetKeyFromPool(). \"" + e.what() + "\"");
+        }
         CKeyID keyid = pubkey.GetID();
-        if (pwalletMain->HaveKey(keyid)) {
-            LogPrintf("Skipping import of %s (key already present)\n", CDynamicAddress(keyid).ToString());
-            skipcount++;
-            continue;
-        }
-        std::string strLabel="";
-        
-        LogPrintf("Importing %s...\n", CDynamicAddress(keyid).ToString());
-        if (!pwalletMain->AddKeyPubKey(key, pubkey)) {
-            
-        }
-        pwalletMain->mapKeyMetadata[keyid].nCreateTime = nCreationTime;
-        
         pwalletMain->SetAddressBook(keyid, strLabel, "receive");
-        //MilliSleep(30);
+        LogPrintf("Imported %s...\n", CDynamicAddress(keyid).ToString());
+
+        nCount++;
+        if (fInternal) {
+            nInternalChainCounter++;
+        }
+        else {
+            nExternalChainCounter++;
+        }
     }
     int64_t nEndTime = GetTime();
     pwalletMain->ShowProgress("", 100); // hide progress dialog in GUI
-    if(skipcount < ((int)end * 2 + 2) || forcerescan ){
+    if(nCount > 0 || forcerescan ){
         pwalletMain->UpdateTimeFirstKey(nCreationTime);
         pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
         pwalletMain->MarkDirty();
     }
-     entry.push_back(Pair("nEndTime", nEndTime - nCreationTime));
+    entry.push_back(Pair("nEndTime", nEndTime - nStartTime));
+    entry.push_back(Pair("imported_keys", nCount));
+
     return entry;
 }
 

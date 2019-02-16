@@ -18,7 +18,6 @@
 #include "validationinterface.h"
 #include "wallet/crypter.h"
 #include "wallet/rpcwallet.h"
-#include "wallet/mnemonic/mnemonic.h"
 #include "wallet/wallet_ismine.h"
 #include "wallet/walletdb.h"
 

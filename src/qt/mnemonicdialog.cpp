@@ -9,7 +9,6 @@
 
 #include "rpcserver.h"
 #include "rpcclient.h"
-#include "wallet/mnemonic/mnemonic.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #include "init.h"
