@@ -754,6 +754,10 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         }
     }
 
+    // Don't relay BDAP transaction until spork is activated
+    if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
+
     if (tx.nVersion == BDAP_TX_VERSION) {
         CScript scriptBDAPOp;
         std::vector<std::vector<unsigned char>> vvch;
@@ -2271,6 +2275,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 REJECT_INVALID, "bad-blk-sigops");
 
         if (!tx.IsCoinBase()) {
+            // Don't connect BDAP transaction until spork is activated
+            if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
+
             if (!view.HaveInputs(tx))
                 return state.DoS(100, error("ConnectBlock(): inputs missing/spent"),
                     REJECT_INVALID, "bad-txns-inputs-missingorspent");

@@ -191,6 +191,9 @@ UniValue adduser(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("adduser", "Alice \"Wonderland, Alice\""));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
+
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return AddDomainEntry(request, bdapType);
 }
@@ -514,6 +517,9 @@ UniValue updateuser(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("updateuser", "Alice \"Updated, Alice\" 365"));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
+
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return UpdateDomainEntry(request, bdapType);
 }
@@ -553,6 +559,9 @@ UniValue updategroup(const JSONRPCRequest& request)
            HelpExampleCli("updategroup", "Duality \"Updated, Duality Blockchain Solutions Group\" 700" ) +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("updategroup", "Duality \"Updated, Duality Blockchain Solutions Group\" 700"));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return UpdateDomainEntry(request, bdapType);
@@ -663,6 +672,9 @@ UniValue deleteuser(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("deleteuser", "Alice"));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
+
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_USER;
     return DeleteDomainEntry(request, bdapType);
 }
@@ -700,6 +712,9 @@ UniValue deletegroup(const JSONRPCRequest& request)
            HelpExampleCli("deletegroup", "GroupName" ) +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("deletegroup", "GroupName"));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return DeleteDomainEntry(request, bdapType);
@@ -787,6 +802,9 @@ UniValue addgroup(const JSONRPCRequest& request)
            HelpExampleCli("addgroup", "Duality \"Duality Blockchain Solutions Group\"") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("addgroup", "Duality \"Duality Blockchain Solutions Group\""));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP transactions until spork is active."));
 
     BDAP::ObjectType bdapType = BDAP::ObjectType::BDAP_GROUP;
     return AddDomainEntry(request, bdapType);
