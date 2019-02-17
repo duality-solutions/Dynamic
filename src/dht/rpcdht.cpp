@@ -114,7 +114,12 @@ UniValue putmutable(const JSONRPCRequest& request)
         strPrivKey = request.params[3].get_str();
     }
     else if (request.params.size() == 2) {
-        CKeyEd25519 newkey;
+        std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+        CKeyEd25519 newkey(seed);
+        CharString vchDHTPubKey = newkey.GetPubKey();
+        if (pwalletMain && !pwalletMain->AddDHTKey(newkey, vchDHTPubKey))
+            throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP"));
+
         strPubKey = stringFromVch(newkey.GetPubKey());
         strPrivKey = stringFromVch(newkey.GetPrivKey());
         fNewEntry = true;

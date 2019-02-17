@@ -45,7 +45,7 @@ public:
         MakeNewKeyPair();
     }
 
-    CKeyEd25519(const std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH>& _seed);
+    CKeyEd25519(const std::array<char, 32>& _seed);
     CKeyEd25519(const std::vector<unsigned char>& _seed);
 
     // TODO (dht): Make sure private keys are destroyed correctly.
@@ -54,6 +54,15 @@ public:
         // fill private key std arrays with all zeros
         seed.fill(0);
         privateKey.fill(0);
+    }
+
+    void Set(const std::array<char, 32>& _seed);
+
+    friend bool operator==(const CKeyEd25519& a, const CKeyEd25519& b)
+    {
+        return a.seed == b.seed &&
+               a.privateKey == b.privateKey &&
+               a.publicKey == b.publicKey;
     }
 
     // TODO (dht): use SecureVector and SecureString below:
@@ -81,8 +90,6 @@ public:
      */
     std::array<char, ED25519_PUBLIC_KEY_BYTE_LENGTH> GetDHTPubKey() const { return publicKey; }
 
-    //void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
-
     //! Get the 256-bit hash of this public key.
     uint256 GetHash() const
     {
@@ -103,6 +110,47 @@ private:
     //! Generate a new private key using LibTorrent's Ed25519 implementation
     void MakeNewKeyPair();
 
+};
+
+struct CEd25519ExtKey {
+    unsigned char nDepth;
+    unsigned char vchFingerprint[4];
+    unsigned int nChild;
+    ChainCode chaincode;
+    CKeyEd25519 key;
+
+    friend bool operator==(const CEd25519ExtKey& a, const CEd25519ExtKey& b)
+    {
+        return a.nDepth == b.nDepth &&
+               memcmp(&a.vchFingerprint[0], &b.vchFingerprint[0], sizeof(vchFingerprint)) == 0 &&
+               a.nChild == b.nChild &&
+               a.chaincode == b.chaincode &&
+               a.key == b.key;
+    }
+
+
+    void Encode(unsigned char code[74]) const;
+    void Decode(const unsigned char code[74]);
+    bool Derive(CEd25519ExtKey& out, unsigned int nChild) const;
+    CExtPubKey Neuter() const;
+    void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
+    template <typename Stream>
+    void Serialize(Stream& s) const
+    {
+        unsigned int len = 74;
+        ::WriteCompactSize(s, len);
+        unsigned char code[74];
+        Encode(code);
+        s.write((const char*)&code[0], len);
+    }
+    template <typename Stream>
+    void Unserialize(Stream& s)
+    {
+        unsigned int len = ::ReadCompactSize(s);
+        unsigned char code[74];
+        s.read((char*)&code[0], len);
+        Decode(code);
+    }
 };
 
 std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);

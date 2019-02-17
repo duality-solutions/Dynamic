@@ -9,6 +9,8 @@
 #include "key.h"
 #include "sync.h"
 
+struct CEd25519ExtKey;
+
 /* hd account data model */
 class CHDAccount
 {
@@ -113,7 +115,8 @@ public:
 
     uint256 GetSeedHash();
     void DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey& extKeyRet);
-
+    void DeriveChildEd25519ExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CEd25519ExtKey& extKeyRet);
+    
     void AddAccount();
     bool GetAccount(uint32_t nAccountIndex, CHDAccount& hdAccountRet);
     bool SetAccount(uint32_t nAccountIndex, const CHDAccount& hdAccount);

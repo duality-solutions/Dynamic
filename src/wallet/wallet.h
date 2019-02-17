@@ -676,7 +676,7 @@ private:
 
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(const CKeyMetadata& metadata, CKey& secretRet, uint32_t nAccountIndex, bool fInternal /*= false*/);
-
+    void DeriveNewChildEd25519Key(const CKeyMetadata& metadata, CKeyEd25519& secretRet, uint32_t nAccountIndex, bool fInternal);
     bool fFileBacked;
 
     std::set<int64_t> setInternalKeyPool;
@@ -847,6 +847,7 @@ public:
      * Generate a new key
      */
     CPubKey GenerateNewKey(uint32_t nAccountIndex, bool fInternal /*= false*/);
+    std::array<char, 32> GenerateNewDHTKey(uint32_t nAccountIndex, bool fInternal); // returns the ed25519 key private seed
     //! HaveDHTKey implementation that also checks the mapHdPubKeys
     bool HaveDHTKey(const CKeyID &address) const override;
     //! HaveKey implementation that also checks the mapHdPubKeys

@@ -4,6 +4,7 @@
 
 #include "ed25519.h"
 
+#include "crypto/hmac_sha512.h"
 #include "hash.h"
 #include "random.h"
 #include "util.h"
@@ -25,16 +26,7 @@ using namespace libtorrent;
 
 CKeyEd25519::CKeyEd25519(const std::array<char, 32>& _seed)
 {
-    seed = _seed;
-    std::tuple<dht::public_key, dht::secret_key> keyPair = dht::ed25519_create_keypair(seed);
-    {
-        dht::secret_key sk = std::get<1>(keyPair);
-        privateKey = sk.bytes;
-    }
-    {
-        dht::public_key pk = std::get<0>(keyPair);
-        publicKey = pk.bytes;
-    }
+    Set(_seed);
 }
 
 static std::string StringFromVch(const std::vector<unsigned char>& vch) {
@@ -56,7 +48,7 @@ CKeyEd25519::CKeyEd25519(const std::vector<unsigned char>& _seed)
             seed[i] = _seed[i];
         }
     }
-    
+
     std::tuple<dht::public_key, dht::secret_key> keyPair = dht::ed25519_create_keypair(seed);
     {
         dht::secret_key sk = std::get<1>(keyPair);
@@ -64,6 +56,21 @@ CKeyEd25519::CKeyEd25519(const std::vector<unsigned char>& _seed)
     }
     {
         dht::public_key pk = std::get<0>(keyPair);
+        publicKey = pk.bytes;
+    }
+}
+
+void CKeyEd25519::Set(const std::array<char, 32>& _seed)
+{
+    seed = _seed;
+    std::tuple<dht::public_key, dht::secret_key> newKeyPair = dht::ed25519_create_keypair(seed); 
+    {
+        dht::secret_key sk = std::get<1>(newKeyPair);
+        privateKey = sk.bytes;
+    }
+    // Load the new ed25519 public key
+    {
+        dht::public_key pk = std::get<0>(newKeyPair);
         publicKey = pk.bytes;
     }
 }
@@ -148,16 +155,82 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
 
 bool CKeyEd25519::Derive(CKeyEd25519& keyChild, const unsigned int nChild, const uint256& cc) const
 {
-    ChainCode ccChild; // ChainCode is typedef for uint256 
+    uint256 ccChild; // ChainCode
     std::vector<unsigned char, secure_allocator<unsigned char> > vout(64);
     BIP32Hash(cc, nChild, 0, begin(), vout.data());
     std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> newSeed = ConvertSecureVector32ToArray(vout);
     CKeyEd25519 newKey(newSeed);
-    // Use Hiffe-Heilman key exchange to derive new key
+    // Use Hiffe-Heilman key exchange to derive new key from current key
     std::array<char, 32> derivedSeed = GetLinkSharedPrivateKey(newKey, GetPubKey());
     CKeyEd25519 derivedKey(derivedSeed);
     keyChild = derivedKey;
     return true;
+}
+
+bool CEd25519ExtKey::Derive(CEd25519ExtKey& out, unsigned int _nChild) const
+{
+    out.nDepth = nDepth + 1;
+    CKeyID id = key.GetID();
+    memcpy(&out.vchFingerprint[0], &id, 4);
+    out.nChild = _nChild;
+    return key.Derive(out.key, _nChild, out.chaincode);
+}
+
+void CEd25519ExtKey::SetMaster(const unsigned char* seed, unsigned int nSeedLen)
+{
+    static const unsigned char hashkey[] = {'B', 'i', 't', 'c', 'o', 'i', 'n', ' ', 's', 'e', 'e', 'd'};
+    std::vector<unsigned char, secure_allocator<unsigned char> > vout(64);
+    CHMAC_SHA512(hashkey, sizeof(hashkey)).Write(seed, nSeedLen).Finalize(vout.data());
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> newSeed = ConvertSecureVector32ToArray(vout);
+    key.Set(newSeed);
+    memcpy(chaincode.begin(), &vout[32], 32);
+    nDepth = 0;
+    nChild = 0;
+    memset(vchFingerprint, 0, sizeof(vchFingerprint));
+}
+/*
+CEd25519ExtPubKey CEd25519ExtKey::Neuter() const
+{
+    CExtPubKey ret;
+    ret.nDepth = nDepth;
+    memcpy(&ret.vchFingerprint[0], &vchFingerprint[0], 4);
+    ret.nChild = nChild;
+    ret.pubkey = key.GetPubKey();
+    ret.chaincode = chaincode;
+    return ret;
+}
+*/
+void CEd25519ExtKey::Encode(unsigned char code[74]) const
+{
+    code[0] = nDepth;
+    memcpy(code + 1, vchFingerprint, 4);
+    code[5] = (nChild >> 24) & 0xFF;
+    code[6] = (nChild >> 16) & 0xFF;
+    code[7] = (nChild >> 8) & 0xFF;
+    code[8] = (nChild >> 0) & 0xFF;
+    memcpy(code + 9, chaincode.begin(), 32);
+    code[41] = 0;
+    memcpy(code + 42, key.begin(), 32);
+}
+
+static std::array<char, 32> Bip32ArrayPtrToStandardArray32(const unsigned char* pArray, const unsigned int nStart)
+{
+    //TODO (bdap): Improve this conversion function
+    std::array<char, 32> arr32;
+    for(unsigned int i = nStart; i < (nStart + 32); i++) {
+         arr32[i] = (char)pArray[i];
+    }
+    return arr32;
+}
+
+void CEd25519ExtKey::Decode(const unsigned char code[74])
+{
+    nDepth = code[0];
+    memcpy(vchFingerprint, code + 1, 4);
+    nChild = (code[5] << 24) | (code[6] << 16) | (code[7] << 8) | code[8];
+    memcpy(chaincode.begin(), code + 9, 32);
+    std::array<char, 32> seed = Bip32ArrayPtrToStandardArray32(code, 42);
+    key.Set(seed);
 }
 
 static unsigned char const* StardardArrayToArrayPtr32(const std::array<char, 32>& stdArray32)

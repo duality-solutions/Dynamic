@@ -141,11 +141,14 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
     txLink.RequestorFullObjectPath = vchRequestorFQDN;
     txLink.RecipientFullObjectPath = vchRecipientFQDN;
     txLink.LinkMessage = vchFromString(strLinkMessage);
-    CKeyEd25519 privReqDHTKey;
+
+    // TODO: Add ability to pass in the DHT public key
+    std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+    CKeyEd25519 privReqDHTKey(seed);
     CharString vchDHTPubKey = privReqDHTKey.GetPubKey();
     if (pwalletMain && !pwalletMain->AddDHTKey(privReqDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_SEND_LINK_RPC_ERROR: ERRCODE: 4002 - " + _("Error adding ed25519 key to wallet for BDAP link"));
- 
+
     txLink.RequestorPubKey = vchDHTPubKey;
 
     pwalletMain->SetAddressBook(privReqDHTKey.GetID(), strRequestorFQDN, "bdap-dht-key");
@@ -185,7 +188,7 @@ static UniValue SendLinkRequest(const JSONRPCRequest& request)
 
     int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLink.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
-    CKeyEd25519 dhtKey;
+
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privReqDHTKey, entryRecipient.DHTPublicKey);
     txLink.SharedPubKey = vchSharedPubKey;
 
@@ -298,11 +301,13 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     txLinkAccept.RequestorFullObjectPath = vchRequestorFQDN;
     txLinkAccept.RecipientFullObjectPath = vchAcceptorFQDN;
 
-    CKeyEd25519 privAcceptDHTKey;
+    // TODO: Add ability to pass in the DHT public key
+    std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+    CKeyEd25519 privAcceptDHTKey(seed);
     CharString vchDHTPubKey = privAcceptDHTKey.GetPubKey();
     if (pwalletMain && !pwalletMain->AddDHTKey(privAcceptDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_ACCEPT_LINK_RPC_ERROR: ERRCODE: 4104 - " + _("Error adding ed25519 key to wallet for BDAP link"));
- 
+
     txLinkAccept.RecipientPubKey = vchDHTPubKey;
 
     pwalletMain->SetAddressBook(privAcceptDHTKey.GetID(), strAcceptorFQDN, "bdap-dht-key");
@@ -341,7 +346,7 @@ static UniValue SendLinkAccept(const JSONRPCRequest& request)
     }
     int64_t nSeconds = nDays * SECONDS_PER_DAY;
     txLinkAccept.nExpireTime = chainActive.Tip()->GetMedianTimePast() + nSeconds;
-    CKeyEd25519 dhtKey;
+
     std::vector<unsigned char> vchSharedPubKey = GetLinkSharedPubKey(privAcceptDHTKey, entryRequestor.DHTPublicKey);
     txLinkAccept.SharedPubKey = vchSharedPubKey;
 

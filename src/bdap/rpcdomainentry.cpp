@@ -63,9 +63,9 @@ static UniValue AddDomainEntry(const JSONRPCRequest& request, BDAP::ObjectType b
     txDomainEntry.WalletAddress = vchWalletAddress;
 
     // TODO: Add ability to pass in the DHT public key
-    CKeyEd25519 privDHTKey;
+    std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+    CKeyEd25519 privDHTKey(seed);
     CharString vchDHTPubKey = privDHTKey.GetPubKey();
-    
     if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_ADD_PUBLIC_ENTRY_RPC_ERROR: ERRCODE: 3503 - " + _("Error adding ed25519 key to wallet for BDAP"));
 

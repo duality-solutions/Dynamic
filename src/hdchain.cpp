@@ -7,6 +7,7 @@
 #include "base58.h"
 #include "bip39.h"
 #include "chainparams.h"
+#include "dht/ed25519.h"
 #include "tinyformat.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -167,6 +168,33 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
     masterKey.Derive(purposeKey, 44 | 0x80000000);
     // derive m/purpose'/coin_type'
     purposeKey.Derive(cointypeKey, Params().ExtCoinType() | 0x80000000);
+    // derive m/purpose'/coin_type'/account'
+    cointypeKey.Derive(accountKey, nAccountIndex | 0x80000000);
+    // derive m/purpose'/coin_type'/account/change
+    accountKey.Derive(changeKey, fInternal ? 1 : 0);
+    // derive m/purpose'/coin_type'/account/change/address_index
+    changeKey.Derive(extKeyRet, nChildIndex);
+}
+
+void CHDChain::DeriveChildEd25519ExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CEd25519ExtKey& extKeyRet)
+{
+    // Use BIP44 keypath scheme i.e. m / purpose' / coin_type' / account' / change / address_index
+    CEd25519ExtKey masterKey;   //hd master key
+    CEd25519ExtKey purposeKey;  //key at m/purpose'
+    CEd25519ExtKey cointypeKey; //key at m/purpose'/coin_type'
+    CEd25519ExtKey accountKey;  //key at m/purpose'/coin_type'/account'
+    CEd25519ExtKey changeKey;   //key at m/purpose'/coin_type'/account'/change
+    CEd25519ExtKey childKey;    //key at m/purpose'/coin_type'/account'/change/address_index
+
+    masterKey.SetMaster(&vchSeed[0], vchSeed.size());
+
+    // Use hardened derivation for purpose, coin_type and account
+    // (keys >= 0x80000000 are hardened after bip32)
+
+    // derive m/purpose'
+    masterKey.Derive(purposeKey, 44 | 0x80000000);
+    // derive m/purpose'/coin_type': https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+    purposeKey.Derive(cointypeKey, 3381 | 0x80000000); //3381  0x80000d35  DYN Dynamic
     // derive m/purpose'/coin_type'/account'
     cointypeKey.Derive(accountKey, nAccountIndex | 0x80000000);
     // derive m/purpose'/coin_type'/account/change

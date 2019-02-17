@@ -102,9 +102,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     txDomainEntry.WalletAddress = vchWalletAddress;
 
     // TODO: Add ability to pass in the DHT public key
-    CKeyEd25519 privDHTKey;
+    std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+    CKeyEd25519 privDHTKey(seed);
     CharString vchDHTPubKey = privDHTKey.GetPubKey();
-    
     if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
         throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4505 - " + _("Error adding ed25519 key to wallet for BDAP"));
 
