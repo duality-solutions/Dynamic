@@ -15,6 +15,7 @@
 #include "pubkey.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
+#include "spork.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #include "wallet/wallet.h"
@@ -45,6 +46,9 @@ UniValue getmutable(const JSONRPCRequest& request)
            HelpExampleCli("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getmutable", "517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a avatar"));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
@@ -97,6 +101,9 @@ UniValue putmutable(const JSONRPCRequest& request)
            HelpExampleCli("putmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getmutable", "\"https://duality.solutions/duality/logos/dual.png\" avatar 517c4242c95214e5eb631e1ddf4e7dac5e815f0578f88491b81fd36df3c2a16a bf8b4f66bdd9e7dc526ddc3637a4edf8e0ac86b7df5e249fc6514a0a1c047cd0"));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
     if (!pTorrentDHTSession)
@@ -198,6 +205,9 @@ UniValue dhtinfo(const JSONRPCRequest& request)
            HelpExampleCli("dhtinfo", "") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtinfo", ""));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     if (!pTorrentDHTSession)
         throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
@@ -350,6 +360,9 @@ UniValue putbdapdata(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("putbdapdata", "Duality \"https://duality.solutions/duality/graphics/header/bdap.png\" avatar"));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+
     UniValue result(UniValue::VOBJ);
    
     EnsureWalletIsUnlocked();
@@ -428,6 +441,9 @@ UniValue getbdapdata(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("getbdapdata", "Duality avatar"));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+
     UniValue result(UniValue::VOBJ);
    
     if (!pTorrentDHTSession)
@@ -495,6 +511,9 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtputmessages", ""));
 
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
+
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutablePutEvent> vchMutableData;
@@ -546,6 +565,9 @@ UniValue dhtgetmessages(const JSONRPCRequest& request)
            HelpExampleCli("dhtgetmessages", "") +
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("dhtgetmessages", ""));
+
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
 

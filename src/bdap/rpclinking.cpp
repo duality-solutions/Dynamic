@@ -15,6 +15,7 @@
 #include "hash.h"
 #include "rpcprotocol.h"
 #include "rpcserver.h"
+#include "spork.h"
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
 #include "uint256.h"
@@ -740,6 +741,9 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
 
 UniValue link(const JSONRPCRequest& request) 
 {
+    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+        throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP link transactions until spork is active."));
+
     std::string strCommand;
     if (request.params.size() >= 1) {
         strCommand = request.params[0].get_str();

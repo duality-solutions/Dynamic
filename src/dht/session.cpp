@@ -9,6 +9,7 @@
 #include "dht/settings.h"
 #include "dynode-sync.h"
 #include "net.h"
+#include "spork.h"
 #include "util.h"
 #include "utiltime.h" // for GetTimeMillis
 #include "validation.h"
@@ -181,8 +182,10 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         // Busy-wait for the network to come online so we get a full list of Dynodes
         do {
             bool fvNodesEmpty = connman.GetNodeCount(CConnman::CONNECTIONS_ALL) == 0;
-            if (!fvNodesEmpty && !IsInitialBlockDownload() && dynodeSync.IsSynced() && dynodeSync.IsBlockchainSynced())
-                break;
+            if (!fvNodesEmpty && !IsInitialBlockDownload() && dynodeSync.IsSynced() && 
+                dynodeSync.IsBlockchainSynced() && sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+                    break;
+
             MilliSleep(1000);
             if (fShutdown)
                 return;
