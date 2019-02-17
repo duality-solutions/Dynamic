@@ -17,10 +17,9 @@
 #include <assert.h>
 #include <iomanip> // std::setw
 #include <tuple>
+#include <vector>
 
 using namespace libtorrent;
-
-static ed25519_context* ed25519_context_sign = NULL;
 
 // TODO (BDAP): Implement check Ed25519 keys
 
@@ -146,36 +145,19 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
     }
     return vchRawPrivSeed;
 }
-void ECC_Ed25519_Start() 
-{
-    assert(ed25519_context_sign == NULL);
-    ed25519_context* ctx = new ed25519_context();
-    assert(ctx != NULL);
-    {
-        ctx->seed = dht::ed25519_create_seed();
-        std::string strSeed = aux::to_hex(ctx->seed);
-    }
-    ed25519_context_sign = ctx;
-}
 
-/*
-bool ECC_Ed25519_InitSanityCheck() 
+bool CKeyEd25519::Derive(CKeyEd25519& keyChild, const unsigned int nChild, const uint256& cc) const
 {
-    CKeyEd25519 key;
-    key.MakeNewKey(true);
-    CPubKeyEd25519 pubkey = key.GetPubKey();
-    return key.VerifyPubKey(pubkey);
-}
-*/
-
-void ECC_Ed25519_Stop() 
-{
-    ed25519_context *ctx = ed25519_context_sign;
-    std::string strSeed = aux::to_hex(ctx->seed);
-    ctx->SetNull();
-    ed25519_context_sign = NULL;
-    strSeed = aux::to_hex(ctx->seed);
-    assert(ed25519_context_sign == NULL);
+    ChainCode ccChild; // ChainCode is typedef for uint256 
+    std::vector<unsigned char, secure_allocator<unsigned char> > vout(64);
+    BIP32Hash(cc, nChild, 0, begin(), vout.data());
+    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> newSeed = ConvertSecureVector32ToArray(vout);
+    CKeyEd25519 newKey(newSeed);
+    // Use Hiffe-Heilman key exchange to derive new key
+    std::array<char, 32> derivedSeed = GetLinkSharedPrivateKey(newKey, GetPubKey());
+    CKeyEd25519 derivedKey(derivedSeed);
+    keyChild = derivedKey;
+    return true;
 }
 
 static unsigned char const* StardardArrayToArrayPtr32(const std::array<char, 32>& stdArray32)
@@ -250,4 +232,13 @@ std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchDat
     ss.seekp(-1, std::ios_base::end);
     ss << "\n";
     return ss.str();
+}
+
+std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char> >& vIn)
+{
+    std::array<char, 32> arrReturn;
+    for(unsigned int i = 0; i < 32; i++) {
+         arrReturn[i] = (char)vIn[i];
+    }
+    return arrReturn;
 }

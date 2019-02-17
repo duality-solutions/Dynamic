@@ -17,40 +17,6 @@ static constexpr unsigned int ED25519_PUBLIC_KEY_BYTE_LENGTH        = 32;
 static constexpr unsigned int ED25519_PRIVATE_SEED_BYTE_LENGTH      = 32;
 static constexpr unsigned int ED25519_SIGTATURE_BYTE_LENGTH         = 64;
 static constexpr unsigned int ED25519_PRIVATE_KEY_BYTE_LENGTH       = 64;
-
-struct ed25519_context
-{
-    ed25519_context() = default;
-
-    explicit ed25519_context(char const* b)
-    { std::copy(b, b + len, seed.begin()); }
-
-    bool operator==(ed25519_context const& rhs) const
-    { return seed == rhs.seed; }
-
-    bool operator!=(ed25519_context const& rhs) const
-    { return seed != rhs.seed; }
-
-    constexpr static int len = ED25519_PRIVATE_SEED_BYTE_LENGTH;
-
-    std::array<char, len> seed;
-    
-    void SetNull() 
-    {
-        std::fill(seed.begin(),seed.end(),0);
-    }
-
-    bool IsNull()
-    {
-        for(int i=0;i<len;i++) {
-            if (seed[i] != 0) {
-                return false;
-            }
-        }
-        return true; 
-    }
-};
-
 /** 
  * ed25519:
  * unsigned char seed[32];
@@ -94,6 +60,8 @@ public:
     std::vector<unsigned char> GetPrivKey() const; 
     std::vector<unsigned char> GetPubKey() const;
     std::vector<unsigned char> GetPrivSeed() const;
+    const unsigned char* begin() const { return GetPrivSeed().data(); }
+    const unsigned char* end() const { return GetPrivSeed().data() + ED25519_PRIVATE_SEED_BYTE_LENGTH; }
     std::vector<unsigned char> GetPrivKeyBytes() const; 
     std::vector<unsigned char> GetPubKeyBytes() const;
     std::vector<unsigned char> GetPrivSeedBytes() const;
@@ -128,6 +96,8 @@ public:
         std::vector<unsigned char> vch = GetPubKey();
         return CKeyID(Hash160(vch.begin(), vch.end()));
     }
+    //! Used for HD wallet
+    bool Derive(CKeyEd25519& keyChild, const unsigned int nChild, const uint256& cc) const;
 
 private:
     //! Generate a new private key using LibTorrent's Ed25519 implementation
@@ -139,9 +109,6 @@ std::vector<unsigned char> GetLinkSharedPubKey(const CKeyEd25519& dhtKey, const 
 std::array<char, 32> GetLinkSharedPrivateKey(const CKeyEd25519& dhtKey, const std::vector<unsigned char>& vchOtherPubKey);
 std::vector<unsigned char> EncodedPubKeyToBytes(const std::vector<unsigned char>& vchEncodedPubKey);
 std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchData);
-
-bool ECC_Ed25519_InitSanityCheck();
-void ECC_Ed25519_Start();
-void ECC_Ed25519_Stop();
+std::array<char, 32> ConvertSecureVector32ToArray(const std::vector<unsigned char, secure_allocator<unsigned char>>& vIn);
 
 #endif // DYNAMIC_DHT_ED25519_H
