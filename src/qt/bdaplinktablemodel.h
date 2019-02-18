@@ -37,6 +37,7 @@ public:
     void refreshComplete();
     void refreshPendingAccept();
     void refreshPendingRequest();
+    void refreshAll();
     void startAutoRefresh();
     void stopAutoRefresh();    
 

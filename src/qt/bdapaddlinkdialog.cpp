@@ -26,6 +26,34 @@ BdapAddLinkDialog::BdapAddLinkDialog(QWidget *parent) : QDialog(parent),
     connect(ui->pushButtonCancel, SIGNAL(clicked()), this, SLOT(goCancel()));
     connect(ui->pushButtonAddLink, SIGNAL(clicked()), this, SLOT(addLink()));
 
+    QStringList fromList;
+    QStringList toList;
+    std::vector<std::string> accountListFrom; 
+    std::vector<std::string> accountListTo; 
+
+    //setup autocomplete for FROM input
+    populateList(accountListFrom,LinkUserType::LINK_REQUESTOR);
+
+    for (size_t i = 0; i < accountListFrom.size(); ++i) {
+        fromList << accountListFrom[i].c_str();
+    }
+
+    autoCompleterFrom = new QCompleter(fromList, this);
+    ui->lineEditRequestor->setCompleter(autoCompleterFrom);
+    autoCompleterFrom->popup()->installEventFilter(this);
+
+
+    //setup autocomplete for TO input
+    populateList(accountListTo,LinkUserType::LINK_RECIPIENT);
+
+    for (size_t i = 0; i < accountListTo.size(); ++i) {
+        toList << accountListTo[i].c_str();
+    }
+
+    autoCompleterTo = new QCompleter(toList, this);
+    ui->lineEditRecipient->setCompleter(autoCompleterTo);
+    autoCompleterTo->popup()->installEventFilter(this);
+
 
 }
 
@@ -33,6 +61,72 @@ BdapAddLinkDialog::~BdapAddLinkDialog()
 {
     delete ui;
 }
+
+void BdapAddLinkDialog::populateList(std::vector<std::string> &inputList, LinkUserType userType) {
+
+    JSONRPCRequest jreq;
+    std::vector<std::string> params;
+    std::string outputmessage = "";
+    std::string getaccountID = "";
+    std::string keyName = "";
+
+    UniValue result = UniValue(UniValue::VOBJ);
+
+    switch (userType) {
+        case LinkUserType::LINK_REQUESTOR:
+            params.push_back("users");
+            jreq.params = RPCConvertValues("mybdapaccounts", params);
+            jreq.strMethod = "mybdapaccounts";
+            break;
+        case LinkUserType::LINK_RECIPIENT:
+            jreq.params = RPCConvertValues("getusers", params);
+            jreq.strMethod = "getusers";
+            break;
+        default:
+            params.push_back("users");
+            jreq.params = RPCConvertValues("mybdapaccounts", params);
+            jreq.strMethod = "mybdapaccounts";
+            break;
+
+    }; //switch userType
+
+    //Handle RPC errors
+    try {
+        result = tableRPC.execute(jreq);
+    } catch (const UniValue& objError) {
+        std::string message = find_value(objError, "message").get_str();
+        outputmessage = message;
+        QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
+        return;
+    } catch (const std::exception& e) {
+        outputmessage = e.what();
+        QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
+        return;
+    }
+
+
+    for (size_t i {0} ; i < result.size() ; ++i) {
+        getaccountID = "";
+
+        for (size_t j {0} ; j < result[i].size() ; ++j) {
+            keyName = "";
+            keyName = result[i].getKeys()[j];
+
+            if (keyName == "object_full_path") getaccountID = getIdFromPath(result[i].getValues()[j].get_str());
+        } //for loop j
+
+        //add row if all criteria have been met
+        //if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
+            inputList.push_back(getaccountID);
+
+        //} //if searchcommon
+
+
+    }; //for loop i
+
+
+
+} //populateList
 
 
 void BdapAddLinkDialog::addLink()
@@ -117,10 +211,21 @@ std::string BdapAddLinkDialog::ignoreErrorCode(const std::string input)
     }
 
     return returnvalue;
-
-
 } //ignoreErrorCode
 
+std::string BdapAddLinkDialog::getIdFromPath(std::string inputstring) {
+        std::string returnvalue = inputstring;
+        std::vector<std::string> results;
+
+        boost::split(results, inputstring, [](char c){return c == '@';});
+
+        if (results.size() > 0) {
+            returnvalue = results[0];
+        }
+
+        return returnvalue;
+
+    } //getIdFromPath
 
 
 

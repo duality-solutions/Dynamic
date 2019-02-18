@@ -155,6 +155,10 @@ void BdapPage::addGroup()
     BdapAddUserDialog dlg(this,BDAP::ObjectType::BDAP_GROUP);
     dlg.setWindowTitle(QObject::tr("Add BDAP Group"));
     dlg.exec();
+    if (dlg.result() == 1) {
+        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
+        bdapAccountTableModel->refreshGroups();
+    }
 } //addGroup
 
 
@@ -201,6 +205,10 @@ void BdapPage::updateGroup()
     dlg.setWindowTitle(QObject::tr("Update BDAP Group"));
     
     dlg.exec();
+    if (dlg.result() == 1) {
+        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
+        bdapAccountTableModel->refreshGroups();
+    }
 
 } //updateGroup
 
@@ -229,6 +237,10 @@ void BdapPage::addUser()
     BdapAddUserDialog dlg(this);
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
+    if (dlg.result() == 1) {
+        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
+        bdapAccountTableModel->refreshUsers();
+    }
 } //addUser
 
 
@@ -245,6 +257,11 @@ void BdapPage::addLink()
     BdapAddLinkDialog dlg(this);
     //connect(&dlg, SIGNAL(cmdToConsole(QString)),rpcConsole, SIGNAL(cmdRequest(QString)));
     dlg.exec();
+
+    if (dlg.result() == 1) {
+        bdapLinkTableModel->refreshAll();
+    }
+    
 } //addLink
 
 void BdapPage::acceptLink()
@@ -269,8 +286,9 @@ void BdapPage::acceptLink()
     if (reply == QMessageBox::Yes) {
         //excuteAcceptLink
         executeLinkTransaction(LinkActions::LINK_ACCEPT, requestor, recipient);
-
     };
+
+
 
 } //acceptLink
 
@@ -345,7 +363,10 @@ void BdapPage::updateUser()
     dlg.setWindowTitle(QObject::tr("Update BDAP User"));
     
     dlg.exec();
-
+    if (dlg.result() == 1) {
+        //QMessageBox::critical(this, "TEST", QObject::tr("Refreshing..."));
+        bdapAccountTableModel->refreshUsers();
+    }
 } //updateUser
 
 
@@ -394,6 +415,9 @@ void BdapPage::executeDeleteAccount(std::string account, BDAP::ObjectType accoun
             }; //end accountType if
 
             dlg.exec();
+            if (accountType == BDAP::ObjectType::BDAP_USER) bdapAccountTableModel->refreshUsers();
+            else if (accountType == BDAP::ObjectType::BDAP_GROUP) bdapAccountTableModel->refreshGroups();
+
             return;
         } catch (const UniValue& objError) {
             std::string message = find_value(objError, "message").get_str();
@@ -468,15 +492,19 @@ void BdapPage::executeLinkTransaction(LinkActions actionType, std::string reques
         }; //end actionType if
 
         dlg.exec();
+
+        if (actionType == LinkActions::LINK_ACCEPT) bdapLinkTableModel->refreshAll();
+
         return;
     } catch (const UniValue& objError) {
         std::string message = find_value(objError, "message").get_str();
         outputmessage = message;
+        QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
     } catch (const std::exception& e) {
         outputmessage = e.what();
+        QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
     }
 
-    QMessageBox::critical(this, "BDAP Error", QObject::tr(outputmessage.c_str()));
 
 
 } //executeLinkTransaction

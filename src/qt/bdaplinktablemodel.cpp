@@ -210,9 +210,7 @@ BdapLinkTableModel::BdapLinkTableModel(BdapPage* parent) : QAbstractTableModel(p
     priv->sortColumn = -1;
 
     //initialize tables the first time
-    refreshComplete();
-    refreshPendingAccept();
-    refreshPendingRequest();
+    refreshAll();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(refresh()));
@@ -296,11 +294,17 @@ void BdapLinkTableModel::sort(int column, Qt::SortOrder order)
 
 void BdapLinkTableModel::refresh()
 {
+    refreshAll();
+
+}
+
+void BdapLinkTableModel::refreshAll()
+{
     refreshComplete();
     refreshPendingAccept();
     refreshPendingRequest();
 
-}
+} //refreshAll
 
 
 void BdapLinkTableModel::refreshComplete()

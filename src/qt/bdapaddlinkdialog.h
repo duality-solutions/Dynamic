@@ -7,10 +7,19 @@
 
 #include "platformstyle.h"
 
+#include <QCompleter>
 #include <QPushButton>
 #include <QDialog>
+#include <QThread>
 
 #include <memory>
+
+
+enum LinkUserType {
+    LINK_REQUESTOR = 0,
+    LINK_RECIPIENT = 1
+};
+
 
 namespace Ui
 {
@@ -31,6 +40,11 @@ private:
     Ui::BdapAddLinkDialog* ui;
     std::string ignoreErrorCode(const std::string input);
 
+    QCompleter* autoCompleterFrom;
+    QCompleter* autoCompleterTo;
+
+    std::string getIdFromPath(std::string inputstring);
+    void populateList(std::vector<std::string> &inputList, LinkUserType userType);
 
 
 
