@@ -143,6 +143,35 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     return CDynamicAddress(keyID).ToString();
 }
 
+UniValue getnewed25519address(const JSONRPCRequest& request)
+{
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() > 0)
+        throw std::runtime_error(
+            "getnewed25519address ( \"account\" )\n"
+            "\nReturns a new Dynamic address for receiving payments.\n"
+            "If 'account' is specified (DEPRECATED), it is added to the address book \n"
+            "so payments received with the address will be credited to 'account'.\n"
+            "\nResult:\n"
+            "\"public key\"    (string) Hex encoded Ed25519 public key\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getnewed25519address", "") + HelpExampleRpc("getnewed25519address", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    if (!pwalletMain->IsLocked(true))
+        pwalletMain->TopUpKeyPool();
+
+    std::array<char, 32> seed = pwalletMain->GenerateNewDHTKey(0, true);
+    CKeyEd25519 privDHTKey(seed);
+    std::vector<unsigned char> vchDHTPubKey = privDHTKey.GetPubKey();
+    if (pwalletMain && !pwalletMain->AddDHTKey(privDHTKey, vchDHTPubKey))
+        throw std::runtime_error("BDAP_CREATE_RAW_TX_RPC_ERROR: ERRCODE: 4505 - " + _("Error adding ed25519 key to wallet for BDAP"));
+
+    return privDHTKey.GetPubKeyString();
+}
 
 CDynamicAddress GetAccountAddress(std::string strAccount, bool bForceNew = false)
 {
@@ -2862,6 +2891,7 @@ static const CRPCCommand commands[] =
         {"wallet", "getaddressesbyaccount", &getaddressesbyaccount, true, {"account"}},
         {"wallet", "getbalance", &getbalance, false, {"account", "minconf", "addlocked", "include_watchonly"}},
         {"wallet", "getnewaddress", &getnewaddress, true, {"account"}},
+        {"wallet", "getnewed25519address", &getnewed25519address, true, {}},
         {"wallet", "getrawchangeaddress", &getrawchangeaddress, true, {}},
         {"wallet", "getreceivedbyaccount", &getreceivedbyaccount, false, {"account", "minconf", "addlocked"}},
         {"wallet", "getreceivedbyaddress", &getreceivedbyaddress, false, {"address", "minconf", "addlocked"}},
