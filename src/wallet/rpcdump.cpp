@@ -772,15 +772,16 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
     UniValue entry(UniValue::VOBJ);
-    if (request.fHelp || request.params.size() > 4)
+    if (request.fHelp || request.params.size() > 5)
         throw std::runtime_error(
             "importmnemonic \"mnemonic\"\n"
             "\nImports mnemonic\n"
             "\nArguments:\n"
-            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-)\n"
-            "2. \"begin\"       (int, optional, default=0) begin key chain index\n"
-            "3. \"end\"         (int, optional, default=100) end key chain index\n"
-            "4. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
+            "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
+            "2. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
+            "3. \"begin\"       (int, optional, default=0) begin key chain index\n"
+            "4. \"end\"         (int, optional, default=100) end key chain index\n"
+            "5. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
@@ -798,16 +799,22 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     if (strMnemonic.size() > 256)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
 
-    uint32_t begin = 0, end = 100;
     if (!request.params[1].isNull())
-        begin = (uint32_t)request.params[1].get_int();
+        strMnemonicPassphrase = request.params[1].get_str();
 
+    if (strMnemonicPassphrase.size() > 24)
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
+
+    uint32_t begin = 0, end = 100;
     if (!request.params[2].isNull())
-        end = (uint32_t)request.params[2].get_int();
+        begin = (uint32_t)request.params[2].get_int();
+
+    if (!request.params[3].isNull())
+        end = (uint32_t)request.params[3].get_int();
 
     bool forcerescan = false;
-    if(!request.params[3].isNull())
-        forcerescan = request.params[3].get_bool();
+    if(!request.params[4].isNull())
+        forcerescan = request.params[4].get_bool();
     
     CHDChain newHdChain;
     SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
