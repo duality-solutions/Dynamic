@@ -9,6 +9,7 @@
 #include "bdap/domainentry.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/utils.h"
+#include "bip39.h"
 #include "chain.h"
 #include "core_io.h"
 #include "init.h"
@@ -799,6 +800,13 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     if (strMnemonic.size() > 256)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
 
+    SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
+    CMnemonic mnemonic;
+    if (!mnemonic.Check(strSecureMnemonic))
+        throw std::runtime_error(std::string(__func__) + ": Mnemonic check failed.");
+
+    SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+
     if (!request.params[1].isNull())
         strMnemonicPassphrase = request.params[1].get_str();
 
@@ -817,10 +825,8 @@ UniValue importmnemonic(const JSONRPCRequest& request)
         forcerescan = request.params[4].get_bool();
     
     CHDChain newHdChain;
-    SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
-    // TODO: Add ability to use mnemonic passphrase
-    SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
 
+    SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
     if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true))
         throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
 
