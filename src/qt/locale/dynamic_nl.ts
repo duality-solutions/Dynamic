@@ -5524,6 +5524,61 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
 </context>
 <context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient):</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Needs Translating</translation>
+    </message>   
+    <message>
+        <source>Expiration Date:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expired:</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
     <name>BdapLinkTableModel</name>
     <message>
         <source>BDAP User Detail</source>
@@ -5760,7 +5815,15 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Needs Translating</translation>
     </message>
     <message>
-        <source>Are you sure you want to confirm link from</source>
+        <source>Successfully accepted link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Request Link Detail</source>
         <translation>Needs Translating</translation>
     </message>
 </context>
