@@ -4767,8 +4767,6 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;Alerta Dynamic&quot; admin@foo
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart Dynamic to complete</source>
-    </message>
-    <message>
         <translation>El monedero necesitaba ser reescrito: reiniciar Dynamic para completar</translation>
     </message>
     <message>
