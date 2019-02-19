@@ -47,6 +47,7 @@ public:
 
     CKeyEd25519(const std::array<char, 32>& _seed);
     CKeyEd25519(const std::vector<unsigned char>& _seed);
+    CKeyEd25519(const std::vector<unsigned char, secure_allocator<unsigned char> >& keyData);
 
     // TODO (dht): Make sure private keys are destroyed correctly.
     ~CKeyEd25519()
@@ -103,8 +104,6 @@ public:
         std::vector<unsigned char> vch = GetPubKey();
         return CKeyID(Hash160(vch.begin(), vch.end()));
     }
-    //! Used for HD wallet
-    bool Derive(CKeyEd25519& keyChild, const unsigned int nChild, const uint256& cc) const;
 
 private:
     //! Generate a new private key using LibTorrent's Ed25519 implementation
@@ -128,11 +127,11 @@ struct CEd25519ExtKey {
                a.key == b.key;
     }
 
+    void Set(const CKeyEd25519& setKey);
 
     void Encode(unsigned char code[74]) const;
     void Decode(const unsigned char code[74]);
-    bool Derive(CEd25519ExtKey& out, unsigned int nChild) const;
-    CExtPubKey Neuter() const;
+
     void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
     template <typename Stream>
     void Serialize(Stream& s) const

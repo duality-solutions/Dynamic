@@ -60,6 +60,13 @@ CKeyEd25519::CKeyEd25519(const std::vector<unsigned char>& _seed)
     }
 }
 
+CKeyEd25519::CKeyEd25519(const std::vector<unsigned char, secure_allocator<unsigned char> >& keyData)
+{
+    // Used to convert a Secp256k1 private key to Ed25519 seed and public/private key pair.
+    assert(keyData.size() == 32);
+    Set(ConvertSecureVector32ToArray(keyData));
+}
+
 void CKeyEd25519::Set(const std::array<char, 32>& _seed)
 {
     seed = _seed;
@@ -153,27 +160,9 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
     return vchRawPrivSeed;
 }
 
-bool CKeyEd25519::Derive(CKeyEd25519& keyChild, const unsigned int nChild, const uint256& cc) const
+void CEd25519ExtKey::Set(const CKeyEd25519& setKey)
 {
-    uint256 ccChild; // ChainCode
-    std::vector<unsigned char, secure_allocator<unsigned char> > vout(64);
-    BIP32Hash(cc, nChild, 0, begin(), vout.data());
-    std::array<char, ED25519_PRIVATE_SEED_BYTE_LENGTH> newSeed = ConvertSecureVector32ToArray(vout);
-    CKeyEd25519 newKey(newSeed);
-    // Use Hiffe-Heilman key exchange to derive new key from current key
-    std::array<char, 32> derivedSeed = GetLinkSharedPrivateKey(newKey, GetPubKey());
-    CKeyEd25519 derivedKey(derivedSeed);
-    keyChild = derivedKey;
-    return true;
-}
-
-bool CEd25519ExtKey::Derive(CEd25519ExtKey& out, unsigned int _nChild) const
-{
-    out.nDepth = nDepth + 1;
-    CKeyID id = key.GetID();
-    memcpy(&out.vchFingerprint[0], &id, 4);
-    out.nChild = _nChild;
-    return key.Derive(out.key, _nChild, out.chaincode);
+    key = setKey;
 }
 
 void CEd25519ExtKey::SetMaster(const unsigned char* seed, unsigned int nSeedLen)

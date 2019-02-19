@@ -89,7 +89,7 @@ public:
     unsigned int size() const { return (fValid ? keydata.size() : 0); }
     const unsigned char* begin() const { return keydata.data(); }
     const unsigned char* end() const { return keydata.data() + size(); }
-
+    std::vector<unsigned char, secure_allocator<unsigned char> > KeyData() const { return keydata; }
 
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }

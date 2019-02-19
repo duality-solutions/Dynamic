@@ -179,15 +179,14 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
 void CHDChain::DeriveChildEd25519ExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CEd25519ExtKey& extKeyRet)
 {
     // Use BIP44 keypath scheme i.e. m / purpose' / coin_type' / account' / change / address_index
-    CEd25519ExtKey masterKey;   //hd master key
-    CEd25519ExtKey purposeKey;  //key at m/purpose'
-    CEd25519ExtKey cointypeKey; //key at m/purpose'/coin_type'
-    CEd25519ExtKey accountKey;  //key at m/purpose'/coin_type'/account'
-    CEd25519ExtKey changeKey;   //key at m/purpose'/coin_type'/account'/change
-    CEd25519ExtKey childKey;    //key at m/purpose'/coin_type'/account'/change/address_index
+    CExtKey masterKey;   //hd master key
+    CExtKey purposeKey;  //key at m/purpose'
+    CExtKey cointypeKey; //key at m/purpose'/coin_type'
+    CExtKey accountKey;  //key at m/purpose'/coin_type'/account'
+    CExtKey changeKey;   //key at m/purpose'/coin_type'/account'/change
+    CExtKey childKey;    //key at m/purpose'/coin_type'/account'/change/address_index
 
     masterKey.SetMaster(&vchSeed[0], vchSeed.size());
-
     // Use hardened derivation for purpose, coin_type and account
     // (keys >= 0x80000000 are hardened after bip32)
 
@@ -200,7 +199,9 @@ void CHDChain::DeriveChildEd25519ExtKey(uint32_t nAccountIndex, bool fInternal, 
     // derive m/purpose'/coin_type'/account/change
     accountKey.Derive(changeKey, fInternal ? 1 : 0);
     // derive m/purpose'/coin_type'/account/change/address_index
-    changeKey.Derive(extKeyRet, nChildIndex);
+    CExtKey extKey;
+    changeKey.Derive(extKey, nChildIndex);
+    extKeyRet.Set(extKey.key.KeyData());
 }
 
 void CHDChain::AddAccount()
