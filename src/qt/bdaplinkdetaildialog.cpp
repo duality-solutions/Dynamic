@@ -25,7 +25,7 @@ BdapLinkDetailDialog::BdapLinkDetailDialog(QWidget *parent, LinkActions actionTy
     ui->labelinfoHeader->setVisible(displayInfo);
     ui->labelinfoHeader->setText(QObject::tr(LINK_TRANSACTION_MESSAGE.c_str()));
 
-    connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
+    connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goClose()));
 
     populateValues(actionType,requestor,recipient,resultinput);
 
@@ -60,59 +60,16 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
  
     if (resultinput.size() == 0) {
         return; //do not use for now
-        // JSONRPCRequest jreq;
-        // std::vector<std::string> params;
-
-        // boost::split(results, accountID, [](char c){return c == '@';});
-
-        // if (results.size() > 0) {
-        //     objectID = results[0];
-        //     //ui->lineEditCommonName->setText(QString::fromStdString(results[0]));
-        // }
-
-        // params.push_back(objectID);
-
-        // switch (accountType) {
-        //     case (BDAP::ObjectType::BDAP_USER):
-        //         jreq.params = RPCConvertValues("getuserinfo", params);
-        //         jreq.strMethod = "getuserinfo";
-        //         break;
-        //     case (BDAP::ObjectType::BDAP_GROUP):
-        //         jreq.params = RPCConvertValues("getgroupinfo", params);
-        //         jreq.strMethod = "getgroupinfo";
-        //         break;
-        //     default:
-        //         jreq.params = RPCConvertValues("getuserinfo", params);
-        //         jreq.strMethod = "getuserinfo";
-        //         break;
-        // } //end switch
-
-        // //Handle RPC errors
-        // try {
-        //     result = tableRPC.execute(jreq);
-        // } catch (const UniValue& objError) {
-        //     std::string message = find_value(objError, "message").get_str();
-        //     outputmessage = message;
-        //     QMessageBox::critical(0, QObject::tr("BDAP Error"), QObject::tr(outputmessage.c_str()));
-        //     return;
-        // } catch (const std::exception& e) {
-        //     outputmessage = e.what();
-        //     QMessageBox::critical(0, QObject::tr("BDAP Error"), QObject::tr(outputmessage.c_str()));
-        //     return;
-        // }        
-
     } //if resultinput.size() = 0
     else {
         result = resultinput;
     }
 
-    //LogPrintf("DEBUGGER %s - %s\n", __func__, result.size());
 
 
     for (size_t i {0} ; i < result.size() ; ++i) {
         keyName = "";
         keyName = result.getKeys()[i];
-        //LogPrintf("DEBUGGER 1 %s - keyname %s\n", __func__, keyName);
         if (keyName == "requestor_fqdn") getRequestor = result.getValues()[i].get_str();
         if (keyName == "recipient_fqdn") getRecipient = result.getValues()[i].get_str();
         if (keyName == "requestor_link_pubkey") linkRequestorPublicKey = result.getValues()[i].get_str();
@@ -147,10 +104,10 @@ void BdapLinkDetailDialog::populateValues(LinkActions accountType, const std::st
 } //populateValues
 
 
-void BdapLinkDetailDialog::goCancel()
+void BdapLinkDetailDialog::goClose()
 {
-    QDialog::reject(); //cancelled
-} //goCancel
+    QDialog::accept(); //accepted
+} //goClose
 
 
 

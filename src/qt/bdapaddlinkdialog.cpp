@@ -111,17 +111,9 @@ void BdapAddLinkDialog::populateList(std::vector<std::string> &inputList, LinkUs
         for (size_t j {0} ; j < result[i].size() ; ++j) {
             keyName = "";
             keyName = result[i].getKeys()[j];
-
             if (keyName == "object_full_path") getaccountID = getIdFromPath(result[i].getValues()[j].get_str());
         } //for loop j
-
-        //add row if all criteria have been met
-        //if ( ((searchCommon == "") && (searchPath == "")) || (((boost::algorithm::to_lower_copy(getName)).find(boost::algorithm::to_lower_copy(searchCommon)) != std::string::npos) && ((boost::algorithm::to_lower_copy(getPath)).find(boost::algorithm::to_lower_copy(searchPath)) != std::string::npos)) ) {
             inputList.push_back(getaccountID);
-
-        //} //if searchcommon
-
-
     }; //for loop i
 
 
@@ -168,19 +160,15 @@ void BdapAddLinkDialog::addLink()
         dlg.exec();
         goClose();
     } catch (const UniValue& objError) {
-        //rpc_result = JSONRPCReplyObj(NullUniValue, objError, jreq.id);
         std::string message = find_value(objError, "message").get_str();
         outputmessage = ignoreErrorCode(message);
         QMessageBox::critical(this, "BDAP Add Link Error", QObject::tr(outputmessage.c_str()));
         return;
     } catch (const std::exception& e) {
-        //rpc_result = JSONRPCReplyObj(NullUniValue,
-        //JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
         outputmessage = e.what();
         QMessageBox::critical(this, "BDAP Add Link Error", QObject::tr(outputmessage.c_str()));
         return;
     }
-
 
 } //addLink
 

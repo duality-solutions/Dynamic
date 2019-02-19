@@ -2085,6 +2085,10 @@ QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
     margin-top: 10px;
 }
 
+QWidget#BdapPage .QPushButton#pushButtonAddLink {
+    margin-top: 5px;
+}
+
 /*******************************************************/
 /* BDAPUSERDETAILDIALOG AND BDAPUPDATEACCOUNTDIALOG*/
 QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog, QDialog#BdapLinkDetailDialog {

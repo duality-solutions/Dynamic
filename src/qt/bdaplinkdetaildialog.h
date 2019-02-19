@@ -45,7 +45,7 @@ private:
 
 
 private Q_SLOTS:
-    void goCancel();
+    void goClose();
 
 
 };

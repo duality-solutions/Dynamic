@@ -5564,8 +5564,8 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <source>Date</source>
         <translation>Needs Translating</translation>
     </message>
-	</context>
-	<context>
+</context>
+<context>
     <name>BdapPage</name>
     <message>
         <source>Common Name</source>
@@ -5747,7 +5747,23 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <source>Add New Link</source>
         <translation>Needs Translating</translation>
     </message>
-	</context>
+    <message>
+        <source>Deny</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Spam</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Confirm Accept Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to confirm link from</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
 <context>
     <name>BdapUpdateAccountDialog</name>
     <message>
@@ -5796,6 +5812,73 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>message</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapLinkDetailDialog</name>
+    <message>
+        <source>BDAP Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Pending Accept Link Detail</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Expiration date: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Requestor): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Public Key (Recipient): </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Recipient Link Address: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Signature Proof: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>TXID: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Time: </source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Please note that your transaction will not be reflected until the next block.</source>
         <translation>Needs Translating</translation>
     </message>
 </context>
@@ -5855,6 +5938,53 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
     </message>
     <message>
         <source>BDAP Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+</context>
+<context>
+    <name>BdapAddLinkDialog</name>
+    <message>
+        <source>BDAP Add New Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(required)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>(optional)</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>From:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>To:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Link Message:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Registration Days:</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Add Link</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>BDAP Add Link Error</source>
+        <translation>Needs Translating</translation>
+    </message>
+    <message>
+        <source>Requestor, Recipient and Link Message are required fields</source>
         <translation>Needs Translating</translation>
     </message>
 </context>
