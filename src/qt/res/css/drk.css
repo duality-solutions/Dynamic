@@ -2052,10 +2052,25 @@ QWidget#BdapPage .QTabWidget#tabWidget::pane {
     border:1px solid white;
 }
 
+QWidget#BdapPage .QLabel#labelPA, QWidget#BdapPage .QLabel#labelPR, QWidget#BdapPage .QLabel#labelComplete {
+    font-weight: bold;
+    color: rgb(169, 60, 212);
+    font-size: 12pt;    
+}
+
+
+QWidget#BdapPage .QLabel#labelCompleteRecords, QWidget#BdapPage .QLabel#labelPRRecords, QWidget#BdapPage .QLabel#labelPARecords {
+    font-weight: bold;
+}
+
+/*make disabled buttons look disabled*/
+QWidget#BdapPage .QPushButton:disabled {
+    background-color: #c4c4c4;
+}
 
 /*******************************************************/
-/* BDAPADDUSERDIALOG */
-QDialog#BdapAddUserDialog {
+/* BDAPADDUSERDIALOG and BDAPADDLINKDIALOG */
+QDialog#BdapAddUserDialog, QDialog#BdapAddLinkDialog {
     background-color:#000000;
     border:2px solid white;
 }
@@ -2070,14 +2085,18 @@ QDialog#BdapAddUserDialog .QPushButton#pushButtonOK {
     margin-top: 10px;
 }
 
+QWidget#BdapPage .QPushButton#pushButtonAddLink {
+    margin-top: 5px;
+}
+
 /*******************************************************/
 /* BDAPUSERDETAILDIALOG AND BDAPUPDATEACCOUNTDIALOG*/
-QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog {
+QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog, QDialog#BdapLinkDetailDialog {
     background-color:#000000;
     border:2px solid white;
 }
 
-QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader {
+QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader, QDialog#BdapLinkDetailDialog .QLabel#labelinfoHeader {
     color: rgb(56, 255, 56);
     font-weight: bold;
 }

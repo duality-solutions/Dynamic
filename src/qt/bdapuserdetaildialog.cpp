@@ -22,7 +22,7 @@ BdapUserDetailDialog::BdapUserDetailDialog(QWidget *parent, BDAP::ObjectType acc
     ui->setupUi(this);
 
     ui->labelinfoHeader->setVisible(displayInfo);
-    ui->labelinfoHeader->setText(QString::fromStdString(TRANSACTION_MESSAGE));
+    ui->labelinfoHeader->setText(QObject::tr(TRANSACTION_MESSAGE.c_str()));
 
     connect(ui->pushButtonOK, SIGNAL(clicked()), this, SLOT(goCancel()));
 
@@ -88,11 +88,11 @@ void BdapUserDetailDialog::populateValues(BDAP::ObjectType accountType, const st
         } catch (const UniValue& objError) {
             std::string message = find_value(objError, "message").get_str();
             outputmessage = message;
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, QObject::tr("BDAP Error"), QObject::tr(outputmessage.c_str()));
             return;
         } catch (const std::exception& e) {
             outputmessage = e.what();
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, QObject::tr("BDAP Error"), QObject::tr(outputmessage.c_str()));
             return;
         }        
 

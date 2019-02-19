@@ -16,11 +16,20 @@
 
 
 class BdapAccountTableModel;
+class BdapLinkTableModel;
 class QTableWidget;
 class QLabel;
 
 const int COMMONNAME_COLWIDTH = 450;
 const int FULLPATH_COLWIDTH = 350;
+
+enum LinkActions {
+    LINK_DEFAULT = 0,
+    LINK_ACCEPT = 1,
+    LINK_REQUEST = 2,
+    LINK_PENDING_ACCEPT_DETAIL = 3,
+    LINK_PENDING_REQUEST_DETAIL = 4
+};
 
 
 namespace Ui
@@ -38,8 +47,14 @@ public:
 
     void setModel(WalletModel* model);
     BdapAccountTableModel* getBdapAccountTableModel();
+    BdapLinkTableModel* getBdapLinkTableModel();
     QTableWidget* getUserTable();
     QTableWidget* getGroupTable();
+
+    QTableWidget* getCompleteTable();
+    QTableWidget* getPendingAcceptTable();
+    QTableWidget* getPendingRequestTable();
+    
     QLabel* getUserStatus();
     QLabel* getGroupStatus();
     bool getMyUserCheckBoxChecked();
@@ -50,6 +65,15 @@ public:
     std::string getCommonGroupSearch();
     std::string getPathGroupSearch();
     void evaluateTransactionButtons();
+    QLabel* getLinkCompleteRecords();
+    QLabel* getPendingAcceptRecords();
+    QLabel* getPendingRequestRecords();
+    std::string getCompleteRequestorSearch();    
+    std::string getCompleteRecipientSearch();    
+    std::string getPARequestorSearch();    
+    std::string getPARecipientSearch();    
+    std::string getPRRequestorSearch();    
+    std::string getPRRecipientSearch();    
 
 
 
@@ -59,7 +83,9 @@ private:
     WalletModel* model;
     std::unique_ptr<WalletModel::UnlockContext> unlockContext;
     BdapAccountTableModel* bdapAccountTableModel;
+    BdapLinkTableModel* bdapLinkTableModel;
     void executeDeleteAccount(std::string account, BDAP::ObjectType accountType);
+    void executeLinkTransaction(LinkActions actionType, std::string requestor, std::string recipient);
 
 
 
@@ -76,6 +102,13 @@ private Q_SLOTS:
     void deleteGroup();
     void updateGroup();
     void getGroupDetails(int row, int column);
+
+    void listLinksComplete();
+    void listPendingAccept();
+    void listPendingRequest();
+    void acceptLink();
+    void addLink();
+    void getLinkDetails(int row, int column);
 
 };
 

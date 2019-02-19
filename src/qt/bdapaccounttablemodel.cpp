@@ -90,11 +90,11 @@ public:
         } catch (const UniValue& objError) {
             std::string message = find_value(objError, "message").get_str();
             outputmessage = message;
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
             return;
         } catch (const std::exception& e) {
             outputmessage = e.what();
-            QMessageBox::critical(0, "BDAP Error", QString::fromStdString(outputmessage));
+            QMessageBox::critical(0, "BDAP Error", QObject::tr(outputmessage.c_str()));
             return;
         }
 
@@ -107,9 +107,9 @@ public:
         inputtable->setColumnWidth(1, FULLPATH_COLWIDTH); //Object Full Path (fixed)
         //inputtable->setColumnWidth(2, 175);
 
-        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QString::fromStdString("Common Name")));
-        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QString::fromStdString("Object Full Path")));
-        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QString::fromStdString("Expiration Date")));
+        inputtable->setHorizontalHeaderItem(0, new QTableWidgetItem(QObject::tr("Common Name")));
+        inputtable->setHorizontalHeaderItem(1, new QTableWidgetItem(QObject::tr("Object Full Path")));
+        inputtable->setHorizontalHeaderItem(2, new QTableWidgetItem(QObject::tr("Expiration Date")));
 
         //Parse results and populate QWidgetTable
         for (size_t i {0} ; i < result.size() ; ++i) {
@@ -152,7 +152,9 @@ public:
             inputtable->horizontalHeader()->setSortIndicator(sortColumn, sortOrder);
         }
 
-        statusDisplay->setText(QString::fromStdString(("Records found: " + std::to_string(recordsFound))));
+        std::string statusString = "Records found: " + std::to_string(recordsFound);
+
+        statusDisplay->setText(QObject::tr(statusString.c_str()));
 
     } //refreshAccounts
 
@@ -187,6 +189,10 @@ BdapAccountTableModel::BdapAccountTableModel(BdapPage* parent) : QAbstractTableM
     priv.reset(new BdapAccountTablePriv());
     // default to unsorted
     priv->sortColumn = -1;
+
+    //initialize tables the first time
+    refreshUsers();
+    refreshGroups();
 
     //refresh();
     timer = new QTimer(this);
