@@ -2097,7 +2097,7 @@ QDialog#BdapUserDetailDialog, QDialog#BdapUpdateAccountDialog, QDialog#BdapLinkD
 }
 
 QDialog#BdapUserDetailDialog  .QLabel#labelinfoHeader, QDialog#BdapLinkDetailDialog .QLabel#labelinfoHeader {
-    color: rgb(56, 255, 56);
+    color: rgb(255, 0, 0);
     font-weight: bold;
 }
 
