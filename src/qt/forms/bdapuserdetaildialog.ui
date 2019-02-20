@@ -199,7 +199,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>OK</string>
+          <string>Done</string>
          </property>
          <property name="icon">
           <iconset resource="../dynamic.qrc">
