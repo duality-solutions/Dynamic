@@ -742,8 +742,6 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
 
 UniValue link(const JSONRPCRequest& request) 
 {
-    if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-        throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP link transactions until spork is active."));
 
     std::string strCommand;
     if (request.params.size() >= 1) {
@@ -760,6 +758,11 @@ UniValue link(const JSONRPCRequest& request)
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("link accept", "superman batman"));
     }
+    if (strCommand == "request" || strCommand == "accept" || strCommand == "delete") {
+        if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+            throw std::runtime_error("BDAP_LINK_RPC_ERROR: ERRCODE: 3000 - " + _("Can not create BDAP link transactions until spork is active."));
+    }
+
     if (strCommand == "request") {
         return SendLinkRequest(request);
     }
