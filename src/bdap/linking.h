@@ -25,6 +25,17 @@ class CTransaction;
 // It is used to bootstrap the linkage relationship with a new set of public keys
 
 // OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkRequest))
+
+namespace BDAP {
+    enum LinkFilterType
+    {
+        BOTH = 0,
+        REQUEST = 1,
+        RECIPIENT = 2
+    };
+
+}
+
 class CLinkRequest {
 public:
     static const int CURRENT_VERSION=1;
