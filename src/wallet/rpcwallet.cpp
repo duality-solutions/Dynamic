@@ -8,6 +8,7 @@
 #include "amount.h"
 #include "base58.h"
 #include "chain.h"
+#include "coincontrol.h"
 #include "consensus/validation.h"
 #include "core_io.h"
 #include "init.h"
@@ -442,7 +443,7 @@ void SendLinkingTransaction(const CScript& bdapDataScript, const CScript& bdapOP
     }
 }
 
-void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false)
+void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -478,6 +479,79 @@ void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAm
         strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
+}
+
+static bool GetCoinControl(const CScript& sendAddressScript, CCoinControl* ccCoins)
+{
+    CTxDestination sendAddress;
+    bool fValidAddress = ExtractDestination(sendAddressScript, sendAddress);
+    if (!fValidAddress)
+        return false;
+
+    unsigned int nCount = 0;
+    ccCoins->SetNull();
+    std::vector<COutput> vecOutputs;
+    pwalletMain->AvailableCoins(vecOutputs, true, NULL, false, ALL_COINS, false);
+    for (const COutput& out : vecOutputs) {
+        CTxDestination outputAddress;
+        const CScript& scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
+        fValidAddress = ExtractDestination(scriptPubKey, outputAddress);
+        if (!fValidAddress)
+            continue;
+
+        if (sendAddress == outputAddress) {
+            COutPoint outPoint(out.tx->GetHash(), out.i);
+            ccCoins->Select(outPoint);
+            nCount++;
+        }
+    }
+    return (nCount > 0);
+}
+
+void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& scriptSendFrom)
+{
+
+    CAmount curBalance = pwalletMain->GetBalance();
+
+    // Check amount
+    if (nValue <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount");
+
+    if (nValue > curBalance)
+        throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+
+    LogPrintf("%s - Script public key to be sent over to the burn transaction processing: %s\n", __func__, ScriptToAsmStr(burnScript));
+
+    // Create and send the transaction
+    CReserveKey reservekey(pwalletMain);
+    CAmount nFeeRequired;
+    std::string strError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosRet = -1;
+    CRecipient recipient = {burnScript, nValue, false};
+    vecSend.push_back(recipient);
+    CCoinControl* ccCoins = new CCoinControl;
+    if (!scriptSendFrom.empty()) {
+        if (!GetCoinControl(scriptSendFrom, ccCoins)) {
+            strError = strprintf("Error: GetCoinControl failed");
+            delete ccCoins;
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+    }
+    bool fUseInstantSend = false;
+    if (!pwalletMain->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strError, ccCoins, true, ALL_COINS, fUseInstantSend)) {
+        if (nValue + nFeeRequired > pwalletMain->GetBalance())
+            strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
+        delete ccCoins;
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    CValidationState state;
+    if (!pwalletMain->CommitTransaction(wtxNew, reservekey, g_connman.get(), state, fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX)) {
+        strError = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        delete ccCoins;
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    delete ccCoins;
 }
 
 UniValue sendtoaddress(const JSONRPCRequest& request)
