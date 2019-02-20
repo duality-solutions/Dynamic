@@ -6,6 +6,7 @@
 #include "bdappage.h"
 #include "guiconstants.h"
 #include "guiutil.h"
+#include "spork.h"
 #include "sync.h"
 #include "validation.h" // for cs_main
 #include "rpcregister.h"
@@ -34,6 +35,8 @@ public:
     /** Populate tableWidget_Users via RPC call */
     void refreshLinks(QTableWidget* inputtable, QLabel* statusDisplay, std::string searchRequestor = "", std::string searchRecipient = "")
     {
+        if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
+            return;
 
         JSONRPCRequest jreq;
         std::vector<std::string> params;
