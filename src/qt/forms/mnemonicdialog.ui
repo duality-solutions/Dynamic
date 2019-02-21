@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>813</width>
-    <height>371</height>
+    <height>448</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
 color: rgb(255, 255, 255);</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QTextBrowser" name="textBrowser">
      <property name="palette">
       <palette>
@@ -208,7 +208,7 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -247,6 +247,46 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButtonImportMnemonic_Paste">
+             <property name="toolTip">
+              <string>Paste from clipboard</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/drkpurple_editpaste</normaloff>:/icons/drk/drkpurple_editpaste</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButtonImportMnemonic_Clear">
+             <property name="toolTip">
+              <string>Clear</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -297,7 +337,10 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_7">
+            <widget class="QLabel" name="labelWarning">
+             <property name="styleSheet">
+              <string notr="true">color: red;</string>
+             </property>
              <property name="text">
               <string>Warning</string>
              </property>
@@ -342,6 +385,9 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <widget class="QPushButton" name="reimportMnemonic">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -350,6 +396,19 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="text">
               <string>Reimport</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonImportMnemonicCancel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Cancel</string>
              </property>
             </widget>
            </item>
@@ -380,14 +439,74 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Create New Recovery Phrase</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayoutzz">
+           <item>
+            <widget class="QLabel" name="labelzz">
+             <property name="text">
+              <string>Create New Recovery Phrase</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButtonCreateMnemonic_Copy">
+             <property name="toolTip">
+              <string>Copy to clipboard</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/editcopy</normaloff>:/icons/drk/editcopy</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButtonCreateMnemonic_Clear">
+             <property name="toolTip">
+              <string>Clear</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../dynamic.qrc">
+               <normaloff>:/icons/drk/remove</normaloff>:/icons/drk/remove</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
-          <widget class="QTextEdit" name="textEdit">
+          <widget class="QTextEdit" name="textEditNewRecoveryPhrase">
            <property name="styleSheet">
             <string notr="true">background-color: #999999;</string>
            </property>
@@ -403,7 +522,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="comboBoxBytesOfEntropy">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -412,7 +531,12 @@ p, li { white-space: pre-wrap; }
              </property>
              <item>
               <property name="text">
-               <string>32</string>
+               <string>256</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>128</string>
               </property>
              </item>
             </widget>
@@ -425,7 +549,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QComboBox" name="comboBox_2">
+            <widget class="QComboBox" name="comboBoxLanguage">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -457,7 +581,7 @@ p, li { white-space: pre-wrap; }
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButtonGenerateMnemonic">
+            <widget class="QPushButton" name="pushButtonCreateMnemonic_Generate">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -470,7 +594,14 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButtonMnemonicCancel">
+            <widget class="QPushButton" name="pushButtonCreateMnemonic_Validate">
+             <property name="text">
+              <string>Validate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonCreateMnemonic_Cancel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -800,6 +931,23 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_12">
+     <property name="text">
+      <string>Wallet already has an HD account loaded.
+By importing another recovery phrase a new account will be created and set as the default.
+The wallet will receive on addresses from the new and existing account(s).
+New addresses will be generated from the new account.
+</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
   </layout>

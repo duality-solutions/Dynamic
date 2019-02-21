@@ -15,8 +15,10 @@
 #include "util.h"
 #include "guiutil.h"
 #include "base58.h"
+#include "bip39.h"
 
 #include <QApplication>
+#include <QClipboard>
 #include <QMessageBox>
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -45,12 +47,15 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
 
     ui->importMnemonic->setStyleSheet(styleSheet);
     ui->reimportMnemonic->setStyleSheet(restyleSheet);
+    ui->reimportMnemonic->setVisible(false);
     ui->importPrivatekey->setStyleSheet(styleSheet);
     ui->reimportPrivatekey->setStyleSheet(restyleSheet);
     ui->importWallet->setStyleSheet(styleSheet);
     ui->reimportWallet->setStyleSheet(restyleSheet);
-    ui->pushButtonGenerateMnemonic->setStyleSheet(styleSheet);
-    ui->pushButtonMnemonicCancel->setStyleSheet(restyleSheet);
+    ui->pushButtonCreateMnemonic_Generate->setStyleSheet(styleSheet);
+    ui->pushButtonCreateMnemonic_Cancel->setStyleSheet(restyleSheet);
+    ui->pushButtonImportMnemonicCancel->setStyleSheet(restyleSheet);
+    ui->pushButtonCreateMnemonic_Validate->setStyleSheet(styleSheet);
 
     ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Reimport' button.")+"</p>");
 }
@@ -72,6 +77,57 @@ void MnemonicDialog::on_importMnemonic_clicked()
 {
     importMnemonic(false);
 }
+
+void MnemonicDialog::on_pushButtonImportMnemonicCancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Cancel_clicked()
+{
+    QDialog::reject(); //cancelled
+}
+
+
+void MnemonicDialog::on_toolButtonCreateMnemonic_Copy_clicked()
+{
+    //QMessageBox::information(this, "TEST", "Copy Test");
+    GUIUtil::setClipboard(ui->textEditNewRecoveryPhrase->toPlainText());
+}
+
+
+void MnemonicDialog::on_toolButtonImportMnemonic_Paste_clicked()
+{
+    //QMessageBox::information(this, "TEST", "Copy Test");
+    ui->mnemonicEdit->setText(QApplication::clipboard()->text());
+}
+
+
+void MnemonicDialog::on_toolButtonImportMnemonic_Clear_clicked()
+{
+    ui->mnemonicEdit->setText("");  
+}
+
+
+
+void MnemonicDialog::on_toolButtonCreateMnemonic_Clear_clicked()
+{
+    //QMessageBox::information(this, "TEST", "Clear Test");
+    ui->textEditNewRecoveryPhrase->setText("");  
+}
+
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Validate_clicked()
+{
+    validateMnemonic();
+}
+
+void MnemonicDialog::on_pushButtonCreateMnemonic_Generate_clicked()
+{
+    createMnemonic();
+}
+
 void MnemonicDialog::on_importWallet_clicked()
 {
     importWallet(false);
@@ -100,10 +156,43 @@ void MnemonicDialog::on_reimportPrivatekey_clicked()
     importPrivatekey(true);
 }
 
+void MnemonicDialog::createMnemonic() {
+    int value = std::stoi(ui->comboBoxBytesOfEntropy->currentText().toStdString());
+    SecureString recoveryPhrase = CMnemonic::Generate(value);
+
+    //QMessageBox::information(this, "Info", value);
+    
+    ui->textEditNewRecoveryPhrase->setText(recoveryPhrase.c_str());
+
+
+} //createMnemonic
+
+
+void MnemonicDialog::validateMnemonic() {
+
+    bool isValid = false;
+
+    std::string mnemonicValue = ui->textEditNewRecoveryPhrase->toPlainText().toStdString();
+
+    isValid = CMnemonic::Check(mnemonicValue.c_str());
+
+    switch (isValid) {
+        case true:
+            QMessageBox::information(this, "Validate Mnemonic", "Mnemonic is valid");
+            break;
+        case false:
+            QMessageBox::critical(this, "Validate Mnemonic", "Mnemonic is invalid");
+            break;
+    } //switch isValid
+
+
+} //createMnemonic
+
 void MnemonicDialog::importMnemonic(bool forceRescan){
     QString mnemonicstr = ui->mnemonicEdit->toPlainText();
     mnemonicstr.replace(QString(" "),QString("-"));
     mnemonicstr.insert(0,QString("importmnemonic "));
+    std::string outputmessage = "";
     
     if(forceRescan)
         mnemonicstr.append(QString(" 0 100 true"));
@@ -117,8 +206,19 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("input correct mnemonics"));
         return;
     }
+
+        try {
+            Q_EMIT cmdToConsole(mnemonicstr);
+        } catch (const std::exception& e) {
+            outputmessage = e.what();
+            QMessageBox::critical(0, "Import Mnemonic Error", QObject::tr(outputmessage.c_str()));
+            return;
+        }
+
+
+    //QMessageBox::information(this, "Import Mnemonic", "Successfully Imported Mnemonic");
     ui->mnemonicEdit->clear();
-    Q_EMIT cmdToConsole(mnemonicstr);
+
 }
 
 void MnemonicDialog::importWallet(bool forceRescan){
