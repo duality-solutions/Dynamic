@@ -130,7 +130,9 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     rawTx.nVersion = BDAP_TX_VERSION;
     CharString data;
     txDomainEntry.Serialize(data);
-    
+
+    // TODO (bdap): calculate real BDAP deposit once fee structure is implemented.
+    CAmount nBDAPDeposit(2 * COIN);
     // Create BDAP operation script
     CScript scriptPubKey;
     std::vector<unsigned char> vchFullObjectPath = txDomainEntry.vchFullObjectPath();
@@ -141,14 +143,28 @@ UniValue createrawbdapaccount(const JSONRPCRequest& request)
     scriptDestination = GetScriptForDestination(walletAddress.Get());
     scriptPubKey += scriptDestination;
 
+    // TODO (bdap): calculate BDAP registration fee once fee structure is implemented.
+    CAmount nBDAPRegistrationFee(3 * COIN);
+
     // Create BDAP OP_RETURN script
     CScript scriptData;
     scriptData << OP_RETURN << data;
 
-    CTxOut outOP(DEFAULT_MIN_RELAY_TX_FEE, scriptPubKey);
+    // Create script to fund link transaction for this account
+    CScript scriptLinkDestination;
+    scriptLinkDestination = GetScriptForDestination(linkAddress.Get());
+    // TODO (bdap): decrease this amount after BDAP fee structure is implemented.
+    CAmount nLinkAmount(30 * COIN);
+
+    // Add the BDAP operation output
+    CTxOut outOP(nBDAPDeposit, scriptPubKey);
     rawTx.vout.push_back(outOP);
-    CTxOut outData(0, scriptData);
+    // Add the BDAP data output
+    CTxOut outData(nBDAPRegistrationFee, scriptData);
     rawTx.vout.push_back(outData);
+    // Add the BDAP link funds output
+    CTxOut outLinkFunds(nLinkAmount, scriptLinkDestination);
+    rawTx.vout.push_back(outLinkFunds);
 
     return EncodeHexTx(rawTx);
 }
