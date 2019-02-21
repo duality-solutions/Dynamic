@@ -25,7 +25,8 @@
 #include <univalue.h>
 
 extern bool EnsureWalletIsAvailable(bool avoidException);
-extern void SendCustomTransaction(const CScript generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
+extern void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
+extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
 
 opcodetype getOpcodeFromString(std::string input)
 {
@@ -110,34 +111,47 @@ UniValue getrawpubkey(const JSONRPCRequest& request)
     return ret;
 }
 
-UniValue burndynamic(const UniValue& params, bool fHelp)
+UniValue burndynamic(const JSONRPCRequest& request)
 {
-    if (!EnsureWalletIsAvailable(fHelp))
-        return NullUniValue;
 
-    if (fHelp || params.size() != 1)
+    if (request.fHelp || request.params.size() > 2 || request.params.size() == 0)
         throw std::runtime_error(
-            "burndynamic \"amount\"\n"
+            "burndynamic \"amount\" \"address\"\n"
             "\nSend coins to be burnt (destroyed) onto the Dynamic Network\n"
             "\nArguments:\n"
-            "1. \"account\"         (numeric or string, required) The amount of coins to be minted.\n"
+            "1. \"amount\"         (numeric, required) The amount of coins to be burned.\n"
+            "2. \"address\"        (string, optional)  The address to burn funds. You must have the address private key in the wallet file.\n"
             "\nExamples:\n" +
             HelpExampleCli("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"") + HelpExampleRpc("burndynamic", "\"123.456\" \"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\""));
+
+    if (!EnsureWalletIsAvailable(request.fHelp))
+        return NullUniValue;
+
     CWalletTx wtx;
 
     EnsureWalletIsUnlocked();
 
-    CAmount nAmount = AmountFromValue(params[0]);
+    CAmount nAmount = AmountFromValue(request.params[0]);
 
     if (nAmount <= 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for destruction");
+
+    CScript scriptSendFrom;
+    std::string strAddress;
+    if (!request.params[1].isNull()) {
+        strAddress = request.params[1].get_str();
+        CDynamicAddress address(strAddress);
+        if (!address.IsValid())
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Dynamic address");
+
+        scriptSendFrom = GetScriptForDestination(address.Get());
+    }
 
     std::string result = std::to_string(nAmount);
     fluid.ConvertToHex(result);
 
     CScript destroyScript = CScript() << OP_RETURN << ParseHex(result);
-
-    SendCustomTransaction(destroyScript, wtx, nAmount, false);
+    SendBurnTransaction(destroyScript, wtx, nAmount, scriptSendFrom);
 
     return wtx.GetHash().GetHex();
 }
@@ -617,6 +631,7 @@ static const CRPCCommand commands[] =
         {"fluid", "signtoken", &signtoken, true, {"address", "tokenkey"}},
         {"fluid", "consenttoken", &consenttoken, true, {"address", "tokenkey"}},
         {"fluid", "getrawpubkey", &getrawpubkey, true, {"address"}},
+        {"fluid", "burndynamic", &burndynamic, true, {"amount", "address"}},
 #endif //ENABLE_WALLET
         {"fluid", "verifyquorum", &verifyquorum, true, {"tokenkey"}},
         {"fluid", "maketoken", &maketoken, true, {"string"}},
