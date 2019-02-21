@@ -3311,7 +3311,7 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
     return res;
 }
 
-bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool overrideEstimatedFeeRate, const CFeeRate& specificFeeRate, int& nChangePosInOut, std::string& strFailReason, bool includeWatching, bool lockUnspents, const std::set<int>& setSubtractFeeFromOutputs, bool keepReserveKey, const CTxDestination& destChange)
+bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool overrideEstimatedFeeRate, const CFeeRate& specificFeeRate, int& nChangePosInOut, std::string& strFailReason, bool includeWatching, bool lockUnspents, const std::set<int>& setSubtractFeeFromOutputs, bool keepReserveKey, const CTxDestination& destChange, bool bdapColor)
 {
     std::vector<CRecipient> vecSend;
 
@@ -3329,7 +3329,7 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool ov
     coinControl.fOverrideFeeRate = overrideEstimatedFeeRate;
     coinControl.nFeeRate = specificFeeRate;
 
-    BOOST_FOREACH (const CTxIn& txin, tx.vin)
+    for (const CTxIn& txin : tx.vin)
         coinControl.Select(txin.prevout);
 
     CReserveKey reservekey(this);
@@ -3345,9 +3345,15 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, bool ov
         tx.vout[idx].nValue = wtx.tx->vout[idx].nValue;
 
     // Add new txins (keeping original txin scriptSig/order)
-    BOOST_FOREACH (const CTxIn& txin, wtx.tx->vin) {
+    for (const CTxIn& txin : wtx.tx->vin) {
         if (!coinControl.IsSelected(txin.prevout)) {
-            tx.vin.push_back(txin);
+            if (bdapColor) {
+                CTxIn bdapTxIn(txin.prevout, txin.scriptSig, (uint32_t)BDAP_TX_VERSION);
+                tx.vin.push_back(bdapTxIn);
+            }
+            else {
+                tx.vin.push_back(txin);
+            }
 
             if (lockUnspents) {
                 LOCK2(cs_main, cs_wallet);

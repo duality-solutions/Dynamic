@@ -198,30 +198,36 @@ UniValue sendandpayrawbdapaccount(const JSONRPCRequest& request)
            "\nAs a JSON-RPC call\n" + 
            HelpExampleRpc("sendandpayrawbdapaccount", "<hexstring>"));
 
+    EnsureWalletIsUnlocked();
+
     CMutableTransaction mtx;
     std::string strHexIn = request.params[0].get_str();
     if (!DecodeHexTx(mtx, strHexIn))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
 
-    EnsureWalletIsUnlocked();
+    CAmount nFeeOut;
+    std::string strFailReason;
+    bool reserveChangeKey = true;
+    bool overrideEstimatedFeerate = false;
+    CFeeRate feeRate = CFeeRate(0);
+    int changePosition = (int)mtx.vout.size();
+    bool includeWatching = false;
+    bool lockUnspents = false;
+    std::set<int> setSubtractFeeFromOutputs;
+    CTxDestination changeAddress = CNoDestination();
+    //TODO (bdap): Turn on input color (nSequence) when consensus code is ready for it.
+    if (!pwalletMain->FundTransaction(mtx, nFeeOut, overrideEstimatedFeerate, feeRate, changePosition, strFailReason, 
+                                        includeWatching, lockUnspents, setSubtractFeeFromOutputs, reserveChangeKey, changeAddress, false)) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, strFailReason);
+    }
 
-    // Funded BDAP transaction with utxos
-    JSONRPCRequest jreqFund;
-    jreqFund.strMethod = "fundrawtransaction";
-    std::vector<std::string> vchFundParams;
-    vchFundParams.push_back(strHexIn);
-    jreqFund.params = ConvertParameterValues(vchFundParams);
-    UniValue resultFund = tableRPC.execute(jreqFund);
-    if (resultFund.isNull())
-        throw std::runtime_error("BDAP_SEND_RAW_TX_RPC_ERROR: ERRCODE: 4510 - " + _("Error funding raw BDAP transaction."));
-    UniValue oHexFund = resultFund.get_obj();
-    std::string strHexFund =  oHexFund[0].get_str();
+    std::string strHexFunded =  EncodeHexTx(mtx);
 
     // Sign funded BDAP transaction
     JSONRPCRequest jreqSign;
     jreqSign.strMethod = "signrawtransaction";
     std::vector<std::string> vchSignParams;
-    vchSignParams.push_back(strHexFund);
+    vchSignParams.push_back(strHexFunded);
     jreqSign.params = ConvertParameterValues(vchSignParams);
     UniValue resultSign = tableRPC.execute(jreqSign);
     if (resultSign.isNull())
