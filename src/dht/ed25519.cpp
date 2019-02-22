@@ -146,6 +146,7 @@ std::vector<unsigned char> CKeyEd25519::GetPrivSeedBytes() const
     }
     return vchRawPrivSeed;
 }
+
 void ECC_Ed25519_Start() 
 {
     assert(ed25519_context_sign == NULL);
@@ -247,7 +248,13 @@ std::string CharVectorToByteArrayString(const std::vector<unsigned char>& vchDat
         ss  << "0x" << std::setw(2)  << static_cast<unsigned>(vchData[i]) << ",";
         ss <<  (((i + 1) % 16 == 0) ? "\n" : "");
     }
-    ss.seekp(-1, std::ios_base::end);
-    ss << "\n";
+    if ((vchData.size()) % 16 == 0) {
+        ss.seekp(-2, std::ios_base::end);
+        ss << "\n";
+    }
+    else {
+        ss.seekp(-1, std::ios_base::end);
+        ss << "\n";
+    }
     return ss.str();
 }
