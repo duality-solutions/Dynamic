@@ -435,7 +435,7 @@ static bool LinkCompleted(const CLinkRequest& link)
     return pLinkAcceptDB->MyLinkageExists(link.RequestorFQDN(), link.RecipientFQDN());
 }
 
-static std::vector<CLinkRequest> GetMyPendingLinks(const std::vector<CLinkRequest>& vchPendingLinks, const bool fLinkRequests)
+static std::vector<CLinkRequest> GetMyPendingLinks(const std::vector<CLinkRequest>& vchPendingLinks, const BDAP::LinkFilterType linkFilterType)
 {
     std::vector<CLinkRequest> vchMyPendingLink;
     CKeyEd25519 key;
@@ -443,7 +443,7 @@ static std::vector<CLinkRequest> GetMyPendingLinks(const std::vector<CLinkReques
         if (LinkCompleted(link))
             continue;
 
-        if (fLinkRequests) {
+        if (linkFilterType == BDAP::LinkFilterType::REQUEST) {
             std::vector<unsigned char> vchRequestorPubKey = link.RequestorPubKey;
             CKeyID keyID(Hash160(vchRequestorPubKey.begin(), vchRequestorPubKey.end()));
             bool fHaveKey = pwalletMain->HaveDHTKey(keyID);
@@ -451,7 +451,7 @@ static std::vector<CLinkRequest> GetMyPendingLinks(const std::vector<CLinkReques
                 vchMyPendingLink.push_back(link);
             }
         }
-        else {
+        else if (linkFilterType == BDAP::LinkFilterType::RECIPIENT) {
             // Get link recipient domain entry
             CDomainEntry entryRecipient;
             if (GetDomainEntry(link.RecipientFullObjectPath, entryRecipient)) {
@@ -463,9 +463,49 @@ static std::vector<CLinkRequest> GetMyPendingLinks(const std::vector<CLinkReques
                 }
             }
         }
+        else if (linkFilterType == BDAP::LinkFilterType::BOTH) {
+            std::vector<unsigned char> vchRequestorPubKey = link.RequestorPubKey;
+            CKeyID keyIDRequest(Hash160(vchRequestorPubKey.begin(), vchRequestorPubKey.end()));
+            bool fHaveKey = pwalletMain->HaveDHTKey(keyIDRequest);
+            if ((fHaveKey)) {
+                vchMyPendingLink.push_back(link);
+            }
+            // TODO: do not add duplicates when you own both accounts
+            // Get link recipient domain entry
+            CDomainEntry entryRecipient;
+            if (GetDomainEntry(link.RecipientFullObjectPath, entryRecipient)) {
+                std::vector<unsigned char> vchRecipientPubKey = entryRecipient.DHTPublicKey;
+                CKeyID keyIDAccept(Hash160(vchRecipientPubKey.begin(), vchRecipientPubKey.end()));
+                bool fHaveKey = pwalletMain->HaveDHTKey(keyIDAccept);
+                if ((fHaveKey)) {
+                    vchMyPendingLink.push_back(link);
+                }
+            }
+        }
     }
 
     return vchMyPendingLink;
+}
+
+static UniValue ListPendingLinks(const JSONRPCRequest& request)
+{
+    if (!CheckLinkRequestDB())
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4200 - Can not open link request leveldb database");
+
+    std::vector<CLinkRequest> vchPendingLinks;
+    if (!pLinkRequestDB->ListMyLinkRequests(vchPendingLinks))
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4201 - Error listing link requests from leveldb");
+
+    if (!pwalletMain)
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4202 - Error using wallet database.");
+
+    std::vector<CLinkRequest> vchAllMyPendingLinks = GetMyPendingLinks(vchPendingLinks, BDAP::LinkFilterType::BOTH);
+
+    UniValue oLinks(UniValue::VOBJ);
+    if (!BuildJsonMyListRequests(vchAllMyPendingLinks, "", "", oLinks))
+        throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4203 - Error creating JSON link requests.");
+
+    return oLinks;
 }
 
 static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
@@ -512,7 +552,7 @@ static UniValue ListPendingLinkRequests(const JSONRPCRequest& request)
     if (!pwalletMain)
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_REQ_RPC_ERROR: ERRCODE: 4202 - Error using wallet database.");
 
-    std::vector<CLinkRequest> vchMyLinkRequests = GetMyPendingLinks(vchPendingLinks, true);
+    std::vector<CLinkRequest> vchMyLinkRequests = GetMyPendingLinks(vchPendingLinks, BDAP::LinkFilterType::REQUEST);
 
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyListRequests(vchMyLinkRequests, strFromAccountFQDN, strToAccountFQDN, oLinks))
@@ -565,7 +605,7 @@ static UniValue ListPendingLinkAccepts(const JSONRPCRequest& request)
     if (!pwalletMain)
         throw std::runtime_error("BDAP_LINK_LIST_PENDING_ACCEPT_RPC_ERROR: ERRCODE: 4212 - Error using wallet database.");
 
-    std::vector<CLinkRequest> vchMyLinkAccepts = GetMyPendingLinks(vchPendingLinks, false);
+    std::vector<CLinkRequest> vchMyLinkAccepts = GetMyPendingLinks(vchPendingLinks, BDAP::LinkFilterType::RECIPIENT);
 
     UniValue oLinks(UniValue::VOBJ);
     if (!BuildJsonMyListRequests(vchMyLinkAccepts, strFromAccountFQDN, strToAccountFQDN, oLinks))
@@ -776,7 +816,10 @@ UniValue link(const JSONRPCRequest& request)
         return DeleteLink(request);
     }
     else if (strCommand == "pending") {
-        if (request.params.size() >= 2) {
+        if (request.params.size() == 1) {
+            return ListPendingLinks(request);
+        }
+        else if (request.params.size() >= 2) {
             std::string strSubCommand = request.params[1].get_str();
             ToLowerCase(strSubCommand);
             if (strSubCommand == "request") {
