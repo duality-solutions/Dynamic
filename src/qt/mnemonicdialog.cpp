@@ -158,7 +158,14 @@ void MnemonicDialog::on_reimportPrivatekey_clicked()
 
 void MnemonicDialog::createMnemonic() {
     int value = std::stoi(ui->comboBoxBytesOfEntropy->currentText().toStdString());
-    SecureString recoveryPhrase = CMnemonic::Generate(value);
+    std::string languageValue = ui->comboBoxLanguage->currentText().toStdString();
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
+
+    if (languageValue == "French") selectLanguage = CMnemonic::Language::FRENCH;
+    else selectLanguage = CMnemonic::Language::ENGLISH; //just to be safe, set as default again
+
+
+    SecureString recoveryPhrase = CMnemonic::Generate(value,selectLanguage);
 
     //QMessageBox::information(this, "Info", value);
     
@@ -202,7 +209,8 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("mnemonics is null"));
         return;
     }
-    if(mnemonicstr.count(QRegExp("-")) < 11 || mnemonicstr.count(QRegExp("-")) >= 24){
+
+    if  (mnemonicstr.count(QRegExp("-")) < 11 || mnemonicstr.count(QRegExp("-")) >= 24){
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("input correct mnemonics"));
         return;
     }
@@ -215,10 +223,7 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
             return;
         }
 
-
-    //QMessageBox::information(this, "Import Mnemonic", "Successfully Imported Mnemonic");
     ui->mnemonicEdit->clear();
-
 }
 
 void MnemonicDialog::importWallet(bool forceRescan){

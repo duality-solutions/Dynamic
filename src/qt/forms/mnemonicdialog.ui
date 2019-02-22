@@ -561,6 +561,11 @@ p, li { white-space: pre-wrap; }
                <string>English</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>French</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
