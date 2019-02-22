@@ -74,6 +74,7 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
 
 std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion);
 std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion);
+bool GetLinkInfo(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& linkRequest, CLinkAccept& linkAccept);
 
 extern CLinkRequestDB *pLinkRequestDB;
 extern CLinkAcceptDB *pLinkAcceptDB;

@@ -93,11 +93,20 @@ bool CLinkRequestDB::GetMyLinkRequest(const std::string& strRequestorFQDN, const
     if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
         if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
+            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
                 return true;
+            }
         }
     }
-
+    vchLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
+        std::vector<unsigned char> vchPubKey;
+        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
+            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -249,11 +258,20 @@ bool CLinkAcceptDB::GetMyLinkAccept(const std::string& strRequestorFQDN, const s
     if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
         std::vector<unsigned char> vchPubKey;
         if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
-            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link))
+            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
                 return true;
+            }
         }
     }
-
+    vchLinkPath = vchFromString(strRecipientFQDN + ":" + strRequestorFQDN);
+    if (CDBWrapper::Exists(make_pair(std::string("path"), vchLinkPath))) {
+        std::vector<unsigned char> vchPubKey;
+        if (CDBWrapper::Read(make_pair(std::string("path"), vchLinkPath), vchPubKey)) {
+            if (CDBWrapper::Read(make_pair(std::string("mylink"), vchPubKey), link)) {
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -636,4 +654,15 @@ std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned 
     nVersion = (int)vchData[0];
     vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
     return vchDataWithoutVersion;
+}
+
+bool GetLinkInfo(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& linkRequest, CLinkAccept& linkAccept)
+{
+    if (!pLinkRequestDB->GetMyLinkRequest(strRequestorFQDN, strRecipientFQDN, linkRequest))
+        return false;
+
+    if (!pLinkAcceptDB->GetMyLinkAccept(strRequestorFQDN, strRecipientFQDN, linkAccept))
+        return false;
+
+    return true;
 }
