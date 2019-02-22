@@ -335,6 +335,7 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
+
 UniValue putbdapdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -343,8 +344,8 @@ UniValue putbdapdata(const JSONRPCRequest& request)
             "\nSaves mutable data in the DHT for a BDAP entry and operation code.\n"
             "\nArguments:\n"
             "1. account id             (string)      BDAP account id\n"
-            "2. data value             (string)      Mutable data value to save in the DHT\n"
-            "3. operation              (string)      Mutable data operation used for DHT entry\n"
+            "2. operation              (string)      Mutable data operation used for DHT entry\n"
+            "3. data value             (string)      Mutable data value to save in the DHT\n"
             "\nResult:\n"
             "{(json object)\n"
             "  \"entry_path\"          (string)      BDAP account FQDN\n"
@@ -356,9 +357,10 @@ UniValue putbdapdata(const JSONRPCRequest& request)
             "  \"put_value\"           (string)      Mutable data entry value\n"
             "  }\n"
             "\nExamples\n" +
-           HelpExampleCli("putbdapdata", "Duality \"https://duality.solutions/duality/graphics/header/bdap.png\" avatar") +
-           "\nAs a JSON-RPC call\n" + 
-           HelpExampleRpc("putbdapdata", "Duality \"https://duality.solutions/duality/graphics/header/bdap.png\" avatar"));
+            HelpExampleCli("putbdapdata", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\"") +
+            "\nAs a JSON-RPC call\n" + 
+            HelpExampleRpc("putbdapdata", "duality avatar \"https://duality.solutions/duality/graphics/header/bdap.png\""));
+
 
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
@@ -374,8 +376,10 @@ UniValue putbdapdata(const JSONRPCRequest& request)
         throw std::runtime_error("putbdapdata: ERRCODE: 5501 - Can not access BDAP domain entry database.\n");
 
     CharString vchObjectID = vchFromValue(request.params[0]);
-    const std::string strValue = request.params[1].get_str();
-    const std::string strOperationType = request.params[2].get_str();
+    std::string strOperationType = request.params[1].get_str();
+    ToLowerCase(strOperationType);
+
+    const std::string strValue = request.params[2].get_str();
 
     ToLowerCase(vchObjectID);
     CDomainEntry entry;
@@ -603,12 +607,12 @@ static const CRPCCommand commands[] =
 { //  category              name                     actor (function)               okSafe   argNames
   //  --------------------- ------------------------ -----------------------        ------   --------------------
     /* DHT */
-    { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey","operation"}  },
-    { "dht",             "putmutable",               &putmutable,                   true,    {"data value","operation", "pubkey", "privkey"} },
+    { "dht",             "getmutable",               &getmutable,                   true,    {"pubkey", "operation"}  },
+    { "dht",             "putmutable",               &putmutable,                   true,    {"data value", "operation", "pubkey", "privkey"} },
     { "dht",             "dhtinfo",                  &dhtinfo,                      true,    {} },
     { "dht",             "dhtdb",                    &dhtdb,                        true,    {} },
-    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"account id","data value", "operation"} },
-    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"account id","operation"} },
+    { "dht",             "putbdapdata",              &putbdapdata,                  true,    {"account id", "operation", "data value"} },
+    { "dht",             "getbdapdata",              &getbdapdata,                  true,    {"account id", "operation"} },
     { "dht",             "dhtputmessages",           &dhtputmessages,               true,    {} },
     { "dht",             "dhtgetmessages",           &dhtgetmessages,               true,    {} },
 };
