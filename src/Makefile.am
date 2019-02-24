@@ -93,6 +93,7 @@ DYNAMIC_CORE_H = \
   bip39_korean.h \
   bip39_russian.h \
   bip39_spanish.h \
+  bip39_ukrainian.h \
   bip39.h \
   blockencodings.h \
   bloom.h \
