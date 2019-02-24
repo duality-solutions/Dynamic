@@ -1654,6 +1654,6 @@ const char* const wordlist_german[] = {
         "Zugvogel",
         "Zündung",
         "Zweck",
-        "Zyklop"
+        "Zyklop",
     0,
 };
