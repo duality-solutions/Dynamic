@@ -31,6 +31,7 @@ What is [Dynamic](https://duality.solutions/dynamic)?
 * Dynode Reward Start Height: Block 10,273
 * Total Coins: 2<sup>63</sup> - 1
 * Min TX Fee: 0.0001 DYN
+* Max Block Size: 4MB
 
 
 [Dynamic(DYN)](https://duality.solutions/dynamic) allows fast, secure, verifiable transfers of data using blockchain technology and enables third-party developers to build low-cost solutions across varied industry using the BDAP protocol. Dynamic can be used to run incentivized Dynodes; the second tier of nodes on the network processing, verifying, validating and storing data.
