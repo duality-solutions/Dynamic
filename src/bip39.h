@@ -45,7 +45,8 @@ public:
         ITALIAN = 4,
         JAPANESE = 5,
         KOREAN = 6,
-        SPANISH = 7
+        RUSSIAN = 7,
+        SPANISH = 8
     };
 
     static SecureString Generate(int strength, Language selectLanguage = Language::ENGLISH); // strength in bits
