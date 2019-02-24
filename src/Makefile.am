@@ -91,6 +91,7 @@ DYNAMIC_CORE_H = \
   bip39_italian.h \
   bip39_japanese.h \
   bip39_korean.h \
+  bip39_russian.h \
   bip39_spanish.h \
   bip39.h \
   blockencodings.h \
