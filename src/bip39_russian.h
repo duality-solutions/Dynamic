@@ -28,7 +28,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const char* const wordlist_korean[] = {
+const char* const wordlist_russian[] = {
     "абажур",
     "абзац",
     "абонент",
