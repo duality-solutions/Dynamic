@@ -42,6 +42,7 @@
 #include "bip39_korean.h"
 #include "bip39_russian.h"
 #include "bip39_spanish.h"
+#include "bip39_ukrainian.h"
 #include "crypto/sha256.h"
 #include "random.h"
 
