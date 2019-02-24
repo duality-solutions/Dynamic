@@ -39,6 +39,7 @@
 #include "bip39_italian.h"
 #include "bip39_japanese.h"
 #include "bip39_korean.h"
+#include "bip39_russian.h"
 #include "bip39_spanish.h"
 #include "crypto/sha256.h"
 #include "random.h"
