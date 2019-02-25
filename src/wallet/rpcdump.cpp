@@ -771,18 +771,20 @@ UniValue importmnemonic(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
+    
     LOCK2(cs_main, pwalletMain->cs_wallet);
     UniValue entry(UniValue::VOBJ);
-    if (request.fHelp || request.params.size() > 5)
+    if (request.fHelp || request.params.size() > 6 || request.params.size() == 0)
         throw std::runtime_error(
             "importmnemonic \"mnemonic\"\n"
             "\nImports mnemonic\n"
             "\nArguments:\n"
             "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
-            "2. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
-            "3. \"begin\"       (int, optional, default=0) begin key chain index\n"
-            "4. \"end\"         (int, optional, default=100) end key chain index\n"
-            "5. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
+            "2. \"language\"    (english|french, optional)\n"
+            "3. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
+            "4. \"begin\"       (int, optional, default=0) begin key chain index\n"
+            "5. \"end\"         (int, optional, default=100) end key chain index\n"
+            "6. forcerescan     (boolean, optional, default=false) forcerescan the wallet for transactions\n"
             "\nExamples:\n"
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
@@ -802,34 +804,50 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
     CMnemonic mnemonic;
-    if (!mnemonic.Check(strSecureMnemonic))
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH;
+
+    std::string compareLanguage = "";
+
+    if (!request.params[1].isNull()) {
+        compareLanguage = request.params[1].get_str();
+
+        if (compareLanguage == "english") selectLanguage = CMnemonic::Language::ENGLISH;
+        else if (compareLanguage == "french") selectLanguage = CMnemonic::Language::FRENCH;
+
+    } //if language
+
+    LogPrintf("DEBUGGER %s - %s\n", __func__, compareLanguage);
+    LogPrintf("DEBUGGER %s - %s\n", __func__, strSecureMnemonic);
+
+
+    if (!mnemonic.Check(strSecureMnemonic,selectLanguage))
         throw std::runtime_error(std::string(__func__) + ": Mnemonic check failed.");
 
     SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
 
-    if (!request.params[1].isNull())
-        strMnemonicPassphrase = request.params[1].get_str();
+    if (!request.params[2].isNull())
+        strMnemonicPassphrase = request.params[2].get_str();
 
     if (strMnemonicPassphrase.size() > 24)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
 
     uint32_t begin = 0, end = 100;
-    if (!request.params[2].isNull())
-        begin = (uint32_t)request.params[2].get_int();
-
     if (!request.params[3].isNull())
-        end = (uint32_t)request.params[3].get_int();
+        begin = (uint32_t)request.params[3].get_int();
+
+    if (!request.params[4].isNull())
+        end = (uint32_t)request.params[4].get_int();
 
     bool forcerescan = false;
-    if(!request.params[4].isNull())
-        forcerescan = request.params[4].get_bool();
+    if(!request.params[5].isNull())
+        forcerescan = request.params[5].get_bool();
     
     CHDChain newHdChain;
 
     SecureVector vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
-    if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true))
+    if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, true, selectLanguage))
         throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
-
+        LogPrintf("DEBUGGER %s - SetMnemonic failed here...\n", __func__);
     newHdChain.Debug(__func__);
 
     if (!pwalletMain->SetHDChain(newHdChain, false))

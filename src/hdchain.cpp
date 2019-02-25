@@ -5,7 +5,7 @@
 
 #include "hdchain.h"
 #include "base58.h"
-#include "bip39.h"
+//#include "bip39.h"
 #include "chainparams.h"
 #include "tinyformat.h"
 #include "util.h"
@@ -70,12 +70,12 @@ void CHDChain::Debug(std::string strName) const
         });
 }
 
-bool CHDChain::SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID)
+bool CHDChain::SetMnemonic(const SecureVector& vchMnemonic, const SecureVector& vchMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage)
 {
-    return SetMnemonic(SecureString(vchMnemonic.begin(), vchMnemonic.end()), SecureString(vchMnemonicPassphrase.begin(), vchMnemonicPassphrase.end()), fUpdateID);
+    return SetMnemonic(SecureString(vchMnemonic.begin(), vchMnemonic.end()), SecureString(vchMnemonicPassphrase.begin(), vchMnemonicPassphrase.end()), fUpdateID, selectLanguage);
 }
 
-bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID)
+bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, bool fUpdateID, CMnemonic::Language selectLanguage)
 {
     SecureString ssMnemonicTmp = ssMnemonic;
     if (fUpdateID) {
@@ -90,7 +90,7 @@ bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& s
         // NOTE: default mnemonic passphrase is an empty string
 
         // printf("mnemonic: %s\n", ssMnemonicTmp.c_str());
-        if (!CMnemonic::Check(ssMnemonicTmp)) {
+        if (!CMnemonic::Check(ssMnemonicTmp,selectLanguage)) {
             throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
         }
 

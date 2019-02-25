@@ -43,7 +43,13 @@
 #include "crypto/sha256.h"
 #include "random.h"
 
+#include "util.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include <openssl/evp.h>
+
+
 
 SecureString CMnemonic::Generate(int strength, Language selectLanguage)
 {
@@ -114,11 +120,23 @@ void CMnemonic::getWordList(const char* const* &input, Language selectLanguage) 
 
 }
 
+CMnemonic::Language CMnemonic::getLanguageEnumFromLabel(const std::string &input) {
+    
+    if (boost::algorithm::to_lower_copy(input) == "english") return CMnemonic::Language::ENGLISH;
+    else if (boost::algorithm::to_lower_copy(input) == "french") return CMnemonic::Language::FRENCH;
+    else return CMnemonic::Language::ENGLISH;
 
+
+} //getLanguageEnumFromLabel
 
 bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
 {
     const char* const* refWordList = nullptr; //initialize
+
+
+    if (selectLanguage == Language::FRENCH) LogPrintf("DEBUGGER %s - FRENCH DETECTED\n", __func__);
+    LogPrintf("DEBUGGER %s - %s\n", __func__, mnemonic);
+
 
     getWordList(refWordList,selectLanguage);
 
@@ -148,7 +166,9 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
     for (size_t i = 0; i < mnemonic.size(); ++i) {
         ssCurrentWord = "";
         while (i + ssCurrentWord.size() < mnemonic.size() && mnemonic[i + ssCurrentWord.size()] != ' ') {
-            if (ssCurrentWord.size() >= 9) {
+            LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
+            LogPrintf("DEBUGGER %s - Wordsize2: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),0)),ssCurrentWord);
+            if (ssCurrentWord.size() >= 25) { //was 9
                 return false;
             }
             ssCurrentWord += mnemonic[i + ssCurrentWord.size()];

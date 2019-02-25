@@ -53,6 +53,7 @@ public:
     static bool Check(SecureString mnemonic, Language selectLanguage = Language::ENGLISH);
     // passphrase must be at most 256 characters or code may crash
     static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
+    static Language getLanguageEnumFromLabel(const std::string &input);
 
 private:
     static void getWordList(const char* const* &input, Language selectLanguage = Language::ENGLISH);
