@@ -36,10 +36,13 @@
 #include "bip39_chinese_simplified.h"
 #include "bip39_chinese_traditional.h"
 #include "bip39_french.h"
+#include "bip39_german.h"
 #include "bip39_italian.h"
 #include "bip39_japanese.h"
 #include "bip39_korean.h"
+#include "bip39_russian.h"
 #include "bip39_spanish.h"
+#include "bip39_ukrainian.h"
 #include "crypto/sha256.h"
 #include "random.h"
 

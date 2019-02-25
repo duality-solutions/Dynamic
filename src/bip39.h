@@ -42,10 +42,13 @@ public:
         CHINESE_SIMPLIFIED = 1,
         CHINESE_TRADITIONAL = 2,
         FRENCH = 3,
-        ITALIAN = 4,
-        JAPANESE = 5,
-        KOREAN = 6,
-        SPANISH = 7
+        GERMAN = 4,
+        ITALIAN = 5,
+        JAPANESE = 6,
+        KOREAN = 7,
+        RUSSIAN = 8,
+        SPANISH = 9,
+        UKRAINIAN = 10
     };
 
     static SecureString Generate(int strength, Language selectLanguage = Language::ENGLISH); // strength in bits
