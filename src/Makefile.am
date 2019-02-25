@@ -88,6 +88,7 @@ DYNAMIC_CORE_H = \
   bip39_chinese_traditional.h \
   bip39_english.h \
   bip39_french.h \
+  bip39_german.h \
   bip39_italian.h \
   bip39_japanese.h \
   bip39_korean.h \
