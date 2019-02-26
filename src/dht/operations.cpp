@@ -61,7 +61,14 @@ bool GetDHTMutableData(const std::array<char, 32>& public_key, const std::string
     while (timeout > GetTimeMillis() - startTime)
     {
         if (FindDHTGetEvent(mKey, data)) {
-            entryValue = data.Value();
+            std::string strData = data.Value();
+            // TODO (DHT): check the last position for the single quote character
+            if (strData.substr(0, 1) == "'") {
+                entryValue = strData.substr(1, strData.size() - 2);
+            }
+            else {
+                entryValue = strData;
+            }
             lastSequence = data.SequenceNumber();
             fAuthoritative = data.Authoritative();
             //LogPrintf("DHTTorrentNetwork -- GetDHTMutableData: value = %s, seq = %d, auth = %u\n", entryValue, lastSequence, fAuthoritative);

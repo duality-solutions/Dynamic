@@ -13,6 +13,7 @@
 #include "dht/storage.h"
 #include "dht/operations.h"
 #include "dht/sessionevents.h"
+#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "hash.h"
 #include "pubkey.h"
 #include "rpcprotocol.h"
@@ -337,6 +338,26 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
+static bool Encrypt(const std::vector<std::vector<unsigned char>>& vvchPubKeys, const std::vector<unsigned char>& vchValue, std::vector<unsigned char>& vchEncrypted, std::string& strErrorMessage) try
+{
+    LogPrintf("%s -- value converted %s \n", __func__, stringFromVch(vchValue));
+    //EncodeBase64
+    if (!EncryptBDAPData(vvchPubKeys, vchValue, vchEncrypted, strErrorMessage))
+        return false;
+
+    if (vchEncrypted.size() > 1277) {
+        LogPrintf("%s -- Ciphertext too large for one DHT entry. %u\n", __func__, vchEncrypted.size());
+        return false;
+    }
+    LogPrintf("%s -- Ciphertext size %u\n", __func__, vchEncrypted.size());
+
+    return true;
+}
+catch (std::bad_alloc const&)
+{
+    LogPrintf("%s -- catch std::bad_alloc\n", __func__);
+    return false;
+}
 
 UniValue putbdapdata(const JSONRPCRequest& request)
 {
@@ -421,6 +442,47 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("put_value", strValue));
 
     return result;
+}
+
+static bool Decrypt(const std::vector<unsigned char>& vchPrivSeedBytes, const std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchDecrypted, std::string& strErrorMessage) try
+{
+    if (!DecryptBDAPData(vchPrivSeedBytes, vchData, vchDecrypted, strErrorMessage))
+        return false;
+
+    return true;
+}
+catch (std::bad_alloc const&)
+{
+    LogPrintf("%s -- catch std::bad_alloc\n", __func__);
+    return false;
+}
+
+static std::string CharVectorToHexString(const std::vector<unsigned char>& vch)
+{
+    std::string strInput = stringFromVch(vch);
+    static const char* const lut = "0123456789abcdef";
+    size_t len = strInput.length();
+    std::string output;
+    output.reserve(2 * len);
+    for (size_t i = 0; i < len; ++i) {
+        const unsigned char c = strInput[i];
+        output.push_back(lut[c >> 4]);
+        output.push_back(lut[c & 15]);
+    }
+
+    return output;
+}
+
+static std::vector<unsigned char> HexStringToCharVector(const std::string& hex)
+{
+    int len = hex.length();
+    std::string newString;
+    for (int i = 0; i < len; i += 2) {
+        std::string byte = hex.substr(i, 2);
+        char chr = (char)(int)strtol(byte.c_str(), nullptr, 16);
+        newString.push_back(chr);
+    }
+    return vchFromString(newString);
 }
 
 UniValue getbdapdata(const JSONRPCRequest& request)
@@ -698,18 +760,24 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
         if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
             throw std::runtime_error("putbdaplinkdata: ERRCODE: 5546 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
 
-        result.push_back(Pair("get_value", strValue));
-        // TODO (DHT): implement decryption
-        //std::string strMessage = "";
-        //std::vector<unsigned char> vchData = vchFromString(DecodeBase64(strValue));
-        //std::vector<unsigned char> dataDecrypted;
-        //result.push_back(Pair("get_value", strValue));
-        //if (DecryptBDAPData(getKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-        //    result.push_back(Pair("get_value", stringFromVch(dataDecrypted)));
-        //}
-        //else {
-        //    throw std::runtime_error("getbdaplinkdata: ERRCODE: 5626 - Decrypting data failed. " +  strMessage + "\n");
-        //}
+        std::string strMessage = "";
+        // TODO: Add version and expire epoch data
+        // TODO: check if the value is hex.
+        // TODO: split ciphertext if it is too large for one DHT entry (max string = 1297 chars)
+        // TODO: Add an index entry
+        std::vector<unsigned char> vchDecodedCipherText = HexStringToCharVector(strValue);
+        std::vector<unsigned char> vchDecrypted;
+        if (vchDecodedCipherText.size() > 32) {
+            if (Decrypt(getKey.GetPrivSeedBytes(), vchDecodedCipherText, vchDecrypted, strMessage)) {
+                result.push_back(Pair("get_value", stringFromVch(vchDecrypted)));
+            }
+            else {
+                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5626 - Decrypting data failed. " +  strMessage + "\n");
+            }
+        }
+        else {
+            result.push_back(Pair("get_value", "Error decoding value"));
+        }
     }
     else {
         result.push_back(Pair("get_value", "Error: not found"));
@@ -808,21 +876,20 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
     iSequence++;
 
-    std::string strValue = request.params[3].get_str();
-    // TODO (DHT): implement encryption
-    //std::string strMessage;
-    //std::vector<std::vector<unsigned char>> vvchPubKeys;
-    //vvchPubKeys.push_back(EncodedPubKeyToBytes(linkRequest.RequestorPubKey));
-    //vvchPubKeys.push_back(EncodedPubKeyToBytes(linkAccept.RecipientPubKey));
-    //std::vector<unsigned char> vchEncrypted;
-    //if (!EncryptBDAPData(vvchPubKeys, vchValue, vchEncrypted, strMessage))
-    //    throw std::runtime_error("putbdaplinkdata: ERRCODE: 5646 - Error encrypting put data: " + strMessage);
+    std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
+    std::string strErrorMessage;
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(EncodedPubKeyToBytes(linkRequest.RequestorPubKey));
+    vvchPubKeys.push_back(EncodedPubKeyToBytes(linkAccept.RecipientPubKey));
+    std::vector<unsigned char> vchEncrypted;
+    if (!Encrypt(vvchPubKeys, vchValue, vchEncrypted, strErrorMessage))
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5646 - Error encrypting put data: " + strErrorMessage);
 
-    CPutRequest put(getKey, strOperationType, iSequence, strValue);
+    std::string strEncodedCipherText = CharVectorToHexString(vchEncrypted);
+    CPutRequest put(getKey, strOperationType, iSequence, strEncodedCipherText);
     AddPutRequest(put);
 
     result.push_back(Pair("put_seq", iSequence));
-    result.push_back(Pair("put_value", strValue));
 
     return result;
 }
