@@ -115,6 +115,9 @@ void CMnemonic::getWordList(const char* const* &input, Language selectLanguage) 
         case Language::FRENCH:
             input = wordlist_french;
             break;
+        case Language::CHINESE_SIMPLIFIED:
+            input = wordlist_chinese_simplified;
+            break;    
         default:
             input = wordlist;
             break;
@@ -127,6 +130,8 @@ CMnemonic::Language CMnemonic::getLanguageEnumFromLabel(const std::string &input
     
     if (boost::algorithm::to_lower_copy(input) == "english") return CMnemonic::Language::ENGLISH;
     else if (boost::algorithm::to_lower_copy(input) == "french") return CMnemonic::Language::FRENCH;
+    else if (boost::algorithm::to_lower_copy(input) == "chinesesimplified") return CMnemonic::Language::CHINESE_SIMPLIFIED;
+
     else return CMnemonic::Language::ENGLISH;
 
 

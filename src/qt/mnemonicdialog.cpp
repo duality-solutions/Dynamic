@@ -60,7 +60,7 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Reimport' button.")+"</p>");
 
     //initialize Language dropdowns
-    std::vector<std::string> languageOptions = {"English", "French"};
+    std::vector<std::string> languageOptions = {"English", "French", "Chinese Simplified"};
 
     //languageOptions.push_back("English");
     //languageOptions.push_back("French");
@@ -176,13 +176,16 @@ void MnemonicDialog::on_reimportPrivatekey_clicked()
 
 void MnemonicDialog::createMnemonic() {
     int value = std::stoi(ui->comboBoxBytesOfEntropy->currentText().toStdString());
-    std::string languageValue = ui->comboBoxLanguage->currentText().toStdString();
+    QString languageValue = ui->comboBoxLanguage->currentText();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
 
     //if (languageValue == "French") selectLanguage = CMnemonic::Language::FRENCH;
     //else selectLanguage = CMnemonic::Language::ENGLISH; //just to be safe, set as default again
 
-    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue);
+    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
 
     SecureString recoveryPhrase = CMnemonic::Generate(value,selectLanguage);
 
@@ -198,15 +201,18 @@ void MnemonicDialog::validateMnemonic() {
 
     bool isValid = false;
 
-    std::string languageValue = ui->comboBoxLanguage->currentText().toStdString();
     std::string mnemonicValue = ui->textEditNewRecoveryPhrase->toPlainText().toStdString();
+    QString languageValue = ui->comboBoxLanguage->currentText();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
 
     //if (languageValue == "French") selectLanguage = CMnemonic::Language::FRENCH;
     //else selectLanguage = CMnemonic::Language::ENGLISH; //just to be safe, set as default again
 
-    QMessageBox::information(this, "TEST", QString::fromStdString(languageValue));
-    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue);
+    //QMessageBox::information(this, "TEST", QString::fromStdString(languageValue));
+    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
 
 
     isValid = CMnemonic::Check(mnemonicValue.c_str(),selectLanguage);
@@ -225,31 +231,51 @@ void MnemonicDialog::validateMnemonic() {
 
 void MnemonicDialog::importMnemonic(bool forceRescan){
     QString mnemonicstr = ui->mnemonicEdit->toPlainText();
-    mnemonicstr.replace(QString(" "),QString("-"));
-    mnemonicstr.insert(0,QString("importmnemonic "));
+    QString RPCstr = (QString("importmnemonic "));
+    QString languageValue = ui->comboBoxImportMnemonic_Language->currentText();
+    languageValue.replace(QString(" "),QString(""));
+    languageValue = languageValue.toLower();
+    forceRescan = ui->checkBoxForceRescan->isChecked();
+
     std::string outputmessage = "";
-    
-    if(forceRescan)
-        mnemonicstr.append(QString(" 0 100 true"));
-    
+    CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
+    bool isValid = false;
+
+   selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
+
+    //QMessageBox::information(0,"mnemonic",mnemonicstr);
+    //QMessageBox::information(0,"language",languageValue);
+
+    isValid = CMnemonic::Check(mnemonicstr.toStdString().c_str(),selectLanguage);
+
     if(mnemonicstr.isEmpty())
     {
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("mnemonics is null"));
         return;
     }
 
-    if  (mnemonicstr.count(QRegExp("-")) < 11 || mnemonicstr.count(QRegExp("-")) >= 24){
+    if  (mnemonicstr.count(QRegExp(" ")) < 11 || mnemonicstr.count(QRegExp(" ")) >= 24 || !isValid){
         QMessageBox::critical(this, "Error", QString("Error: ") + QString::fromStdString("input correct mnemonics"));
         return;
     }
 
-        try {
-            Q_EMIT cmdToConsole(mnemonicstr);
-        } catch (const std::exception& e) {
-            outputmessage = e.what();
-            QMessageBox::critical(0, "Import Mnemonic Error", QObject::tr(outputmessage.c_str()));
-            return;
-        }
+ 
+    mnemonicstr.replace(QString(" "),QString("-"));
+    RPCstr.append(mnemonicstr);
+
+    languageValue.prepend(QString(" "));
+    RPCstr.append(languageValue);
+
+    if(forceRescan)
+        RPCstr.append(QString(" 0 100 true"));
+
+    try {
+        Q_EMIT cmdToConsole(RPCstr);
+    } catch (const std::exception& e) {
+        outputmessage = e.what();
+        QMessageBox::critical(0, "Import Mnemonic Error", QObject::tr(outputmessage.c_str()));
+        return;
+    }
 
     ui->mnemonicEdit->clear();
 }

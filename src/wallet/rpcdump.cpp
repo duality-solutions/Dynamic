@@ -811,8 +811,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     if (!request.params[1].isNull()) {
         compareLanguage = request.params[1].get_str();
 
-        if (compareLanguage == "english") selectLanguage = CMnemonic::Language::ENGLISH;
-        else if (compareLanguage == "french") selectLanguage = CMnemonic::Language::FRENCH;
+        selectLanguage = CMnemonic::getLanguageEnumFromLabel(compareLanguage);
+
+        //if (compareLanguage == "english") selectLanguage = CMnemonic::Language::ENGLISH;
+        //else if (compareLanguage == "french") selectLanguage = CMnemonic::Language::FRENCH;
 
     } //if language
 
