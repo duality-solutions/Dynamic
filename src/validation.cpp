@@ -753,7 +753,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
             }
         }
     }
-
     // Don't relay BDAP transaction until spork is activated
     if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
@@ -764,6 +763,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
         int op1, op2;
         if (!GetBDAPOpScript(ptx, scriptBDAPOp, vvch, op1, op2))
             return state.Invalid(false, REJECT_INVALID, "bdap-txn-script-error");
+
         std::string strErrorMessage;
         std::string strOpType = GetBDAPOpTypeString(op1, op2);
         if (strOpType == "bdap_new_account" || strOpType == "bdap_update_account" || strOpType == "bdap_delete_account") {
@@ -778,7 +778,15 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                 return state.Invalid(false, REJECT_INVALID, "bdap-account-txn-get-op-failed" + strErrorMessage);
             }
             const std::string strOperationType = GetBDAPOpTypeString(op1, op2);
-            if (strOperationType == "bdap_update_account") {
+            if (strOperationType == "bdap_new_account") {
+                CDomainEntry findDomainEntry;
+                if (GetDomainEntry(domainEntry.vchFullObjectPath(), findDomainEntry))
+                {
+                    strErrorMessage = "AcceptToMemoryPoolWorker -- The entry " + findDomainEntry.GetFullObjectPath() + " already exists.  Rejected by the tx memory pool!";
+                    return state.Invalid(false, REJECT_INVALID, "bdap-account-exists " + strErrorMessage);
+                }
+            }
+            else if (strOperationType == "bdap_update_account") {
                 CDomainEntry entry;
                 CDomainEntry prevEntry;
                 std::vector<unsigned char> vchData;
@@ -2275,10 +2283,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 REJECT_INVALID, "bad-blk-sigops");
 
         if (!tx.IsCoinBase()) {
-            // Don't connect BDAP transaction until spork is activated
-            if (tx.nVersion == BDAP_TX_VERSION && !sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
-                return state.DoS(0, false, REJECT_NONSTANDARD, "inactive-spork-bdap-tx");
-
             if (!view.HaveInputs(tx))
                 return state.DoS(100, error("ConnectBlock(): inputs missing/spent"),
                     REJECT_INVALID, "bad-txns-inputs-missingorspent");
@@ -3554,7 +3558,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
                 }
             }
         }
-
         if (!fluid.CheckTransactionToBlock(*tx, block))
             return error("CheckBlock(): Fluid transaction violated filtration rules, offender %s", tx->GetHash().ToString());
     }
