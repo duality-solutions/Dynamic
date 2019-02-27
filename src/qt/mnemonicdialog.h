@@ -45,6 +45,8 @@ private Q_SLOTS:
     void on_importWallet_clicked();
     void on_reimportWallet_clicked();
     void on_fileButton_clicked();
+    void combobox1ItemChanged(int input);
+    void combobox2ItemChanged(int input);
 private:
     Ui::MnemonicDialog *ui;
 };

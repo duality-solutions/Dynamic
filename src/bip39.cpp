@@ -52,7 +52,10 @@
 
 #include <openssl/evp.h>
 
-
+#include <clocale>
+#include <string>
+#include <cstdlib>
+#include <stdexcept>
 
 SecureString CMnemonic::Generate(int strength, Language selectLanguage)
 {
@@ -117,7 +120,31 @@ void CMnemonic::getWordList(const char* const* &input, Language selectLanguage) 
             break;
         case Language::CHINESE_SIMPLIFIED:
             input = wordlist_chinese_simplified;
-            break;    
+            break;
+        case Language::CHINESE_TRADITIONAL:
+            input = wordlist_chinese_traditional;
+            break;
+        case Language::GERMAN:
+            input = wordlist_german;
+            break;
+        case Language::ITALIAN:
+            input = wordlist_italian;
+            break;
+        case Language::JAPANESE:
+            input = wordlist_japanese;
+            break;
+        case Language::KOREAN:
+            input = wordlist_korean;
+            break;
+        case Language::RUSSIAN:
+            input = wordlist_russian;
+            break;
+        case Language::SPANISH:
+            input = wordlist_spanish;
+            break;
+        case Language::UKRAINIAN:
+            input = wordlist_ukrainian;
+            break;
         default:
             input = wordlist;
             break;
@@ -131,11 +158,37 @@ CMnemonic::Language CMnemonic::getLanguageEnumFromLabel(const std::string &input
     if (boost::algorithm::to_lower_copy(input) == "english") return CMnemonic::Language::ENGLISH;
     else if (boost::algorithm::to_lower_copy(input) == "french") return CMnemonic::Language::FRENCH;
     else if (boost::algorithm::to_lower_copy(input) == "chinesesimplified") return CMnemonic::Language::CHINESE_SIMPLIFIED;
-
+    else if (boost::algorithm::to_lower_copy(input) == "chinesetraditional") return CMnemonic::Language::CHINESE_TRADITIONAL;
+    else if (boost::algorithm::to_lower_copy(input) == "german") return CMnemonic::Language::GERMAN;
+    else if (boost::algorithm::to_lower_copy(input) == "italian") return CMnemonic::Language::ITALIAN;
+    else if (boost::algorithm::to_lower_copy(input) == "japanese") return CMnemonic::Language::JAPANESE;
+    else if (boost::algorithm::to_lower_copy(input) == "korean") return CMnemonic::Language::KOREAN;
+    else if (boost::algorithm::to_lower_copy(input) == "russian") return CMnemonic::Language::RUSSIAN;
+    else if (boost::algorithm::to_lower_copy(input) == "spanish") return CMnemonic::Language::SPANISH;
+    else if (boost::algorithm::to_lower_copy(input) == "ukrainian") return CMnemonic::Language::UKRAINIAN;
     else return CMnemonic::Language::ENGLISH;
 
 
 } //getLanguageEnumFromLabel
+
+std::size_t CMnemonic::strlen_mb(const std::string& s)
+{
+    std::size_t result = 0;
+    const char* ptr = s.data();
+    const char* end = ptr + s.size();
+    std::mblen(NULL, 0); // reset the conversion state
+    while (ptr < end) {
+        int next = std::mblen(ptr, end-ptr);
+        if (next == -1) {
+            throw std::runtime_error("strlen_mb(): conversion error");
+        }
+        ptr += next;
+        ++result;
+    }
+    return result;
+}
+
+
 
 bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
 {
@@ -143,6 +196,7 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
 
 
     if (selectLanguage == Language::FRENCH) LogPrintf("DEBUGGER %s - FRENCH DETECTED\n", __func__);
+    if (selectLanguage == Language::GERMAN) LogPrintf("DEBUGGER %s - GERMAN DETECTED\n", __func__);
     LogPrintf("DEBUGGER %s - %s\n", __func__, mnemonic);
 
 
@@ -174,20 +228,35 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
     for (size_t i = 0; i < mnemonic.size(); ++i) {
         ssCurrentWord = "";
         while (i + ssCurrentWord.size() < mnemonic.size() && mnemonic[i + ssCurrentWord.size()] != ' ') {
-            LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
-            LogPrintf("DEBUGGER %s - Wordsize2: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),0)),ssCurrentWord);
-            if (ssCurrentWord.size() >= 25) { //was 9
-                return false;
-            }
+            //std::string teststring = "";
+            //teststring = ssCurrentWord.c_str();
+            //LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
+            //LogPrintf("DEBUGGER %s - Wordsize2: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),0)),ssCurrentWord);
+            //LogPrintf("DEBUGGER %s - Wordsize3: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),ssCurrentWord.size())),ssCurrentWord);
+            //LogPrintf("DEBUGGER %s - Wordsize4: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,teststring.c_str(), teststring.size())),ssCurrentWord);
+            // if (ssCurrentWord.size() >= 26) { //was 9
+            //     return false;
+            // }
             ssCurrentWord += mnemonic[i + ssCurrentWord.size()];
+        }
+        //moved to get count AFTER space
+        std::string teststring = "";
+        teststring = ssCurrentWord.c_str();
+        int characterSize = mbstowcs(NULL,teststring.c_str(), teststring.size());
+        LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
+        LogPrintf("DEBUGGER %s - Wordsize4: %s [%s]\n", __func__, std::to_string(characterSize),ssCurrentWord);
+        if (characterSize >= 25) { //was 9
+            return false;
         }
         i += ssCurrentWord.size();
         nWordIndex = 0;
         for (;;) {
             if (!refWordList[nWordIndex]) { // word not found
+                LogPrintf("DEBUGGER %s - Word not found:  [%s]\n", __func__,ssCurrentWord);
                 return false;
             }
             if (ssCurrentWord == refWordList[nWordIndex]) { // word found on index nWordIndex
+                LogPrintf("DEBUGGER %s - Word found:  [%s]\n", __func__,ssCurrentWord);
                 for (ki = 0; ki < 11; ki++) {
                     if (nWordIndex & (1 << (10 - ki))) {
                         bits[nBitsCount / 8] |= 1 << (7 - (nBitsCount % 8));

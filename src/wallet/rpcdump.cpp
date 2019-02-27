@@ -827,8 +827,13 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
 
+    LogPrintf("DEBUGGER %s - Passphrase before: %s\n", __func__, strMnemonicPassphrase);  
+
+
     if (!request.params[2].isNull())
         strMnemonicPassphrase = request.params[2].get_str();
+
+    LogPrintf("DEBUGGER %s - Passphrase after: %s\n", __func__, strMnemonicPassphrase);    
 
     if (strMnemonicPassphrase.size() > 24)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
