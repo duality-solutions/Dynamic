@@ -146,8 +146,7 @@ std::string stringFromVch(const CharString& vch) {
 
 std::vector<unsigned char> vchFromValue(const UniValue& value) {
     std::string strName = value.get_str();
-    unsigned char *strbeg = (unsigned char*) strName.c_str();
-    return std::vector<unsigned char>(strbeg, strbeg + strName.size());
+    return vchFromString(strName);
 }
 
 std::vector<unsigned char> vchFromString(const std::string& str) 
