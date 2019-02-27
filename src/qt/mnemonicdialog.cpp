@@ -59,8 +59,22 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
 
     ui->textBrowser->setText("<p>"+tr("Tips: if the import process is interrupted(such as a power cut or accidental shutdown), please re-enter the recovery phrase or the private key and click the 'Reimport' button.")+"</p>");
 
+
+
     //initialize Language dropdowns
-    std::vector<std::string> languageOptions = {"English", "French", "Chinese Simplified"};
+    std::vector<std::string> languageOptions = {
+        "English", 
+        "French", 
+        "Chinese Simplified",
+        "Chinese Traditional",
+        "German",
+        "Italian",
+        "Japanese",
+        //"Korean",
+        "Russian",
+        "Spanish"
+        //"Ukrainian",
+        };
 
     //languageOptions.push_back("English");
     //languageOptions.push_back("French");
@@ -71,6 +85,9 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
 
     }
 
+
+    connect(ui->comboBoxImportMnemonic_Language, SIGNAL(currentIndexChanged(int)), this, SLOT(combobox1ItemChanged(int)));
+    connect(ui->comboBoxLanguage, SIGNAL(currentIndexChanged(int)), this, SLOT(combobox2ItemChanged(int)));
 
 
 
@@ -85,6 +102,18 @@ MnemonicDialog::~MnemonicDialog()
     delete ui;
 }
 
+
+void MnemonicDialog::combobox1ItemChanged(int input)
+{
+    ui->comboBoxLanguage->setCurrentIndex(input);
+
+}; //combobox1ItemChanged
+
+void MnemonicDialog::combobox2ItemChanged(int input)
+{
+    ui->comboBoxImportMnemonic_Language->setCurrentIndex(input);
+
+}; //combobox1ItemChanged
 
 void MnemonicDialog::on_importPrivatekey_clicked()
 {
@@ -175,6 +204,8 @@ void MnemonicDialog::on_reimportPrivatekey_clicked()
 }
 
 void MnemonicDialog::createMnemonic() {
+    ui->textEditNewRecoveryPhrase->clear();
+    
     int value = std::stoi(ui->comboBoxBytesOfEntropy->currentText().toStdString());
     QString languageValue = ui->comboBoxLanguage->currentText();
     languageValue.replace(QString(" "),QString(""));
@@ -233,6 +264,7 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
     QString mnemonicstr = ui->mnemonicEdit->toPlainText();
     QString RPCstr = (QString("importmnemonic "));
     QString languageValue = ui->comboBoxImportMnemonic_Language->currentText();
+    QString passPhrase = ui->lineEditPassPhrase->text();
     languageValue.replace(QString(" "),QString(""));
     languageValue = languageValue.toLower();
     forceRescan = ui->checkBoxForceRescan->isChecked();
@@ -259,15 +291,17 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
         return;
     }
 
- 
+
+
     mnemonicstr.replace(QString(" "),QString("-"));
     RPCstr.append(mnemonicstr);
 
     languageValue.prepend(QString(" "));
     RPCstr.append(languageValue);
+    RPCstr.append(QString(" \"") + passPhrase + QString("\" 0 100"));
 
     if(forceRescan)
-        RPCstr.append(QString(" 0 100 true"));
+        RPCstr.append(QString(" true"));
 
     try {
         Q_EMIT cmdToConsole(RPCstr);
