@@ -64,14 +64,14 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     //initialize Language dropdowns
     std::vector<std::string> languageOptions = {
         "English", 
-        "French", 
         "Chinese Simplified",
         "Chinese Traditional",
-        "German",
+        "French", 
+        //"German",
         "Italian",
         "Japanese",
-        //"Korean",
-        "Russian",
+        "Korean",
+        //"Russian",
         "Spanish"
         //"Ukrainian",
         };
@@ -302,6 +302,8 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
 
     if(forceRescan)
         RPCstr.append(QString(" true"));
+
+    QMessageBox::information(0,"RPCCmd",RPCstr);
 
     try {
         Q_EMIT cmdToConsole(RPCstr);
