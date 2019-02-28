@@ -5,10 +5,10 @@
 #include "dht/settings.h"
 
 #include "dht/storage.h"
+#include "chainparams.h"
 #include "clientversion.h"
 #include "dynode.h"
 #include "dynodeman.h"
-#include "net.h"
 #include "primitives/transaction.h"
 #include "util.h"
 
@@ -18,11 +18,10 @@ using namespace libtorrent;
 
 CDHTSettings::CDHTSettings()
 {
+    nPort = Params().GetDefaultPort() + 11;
     user_agent = "Dynamic v" + FormatFullVersion();
-    // Uses UDP ports 33307, 33317, 33327, 33337, 33347 and 33357
-    listen_interfaces = "0.0.0.0:33307,[::]:33307,0.0.0.0:33317,[::]:33317"
-                        "0.0.0.0:33327,[::]:33327,0.0.0.0:33337,[::]:33337"
-                        "0.0.0.0:33347,[::]:33347,0.0.0.0:33357,[::]:33357";
+    // Uses UDP port 33311 for mainnet, 333411 for testnet, 33511 for regtest, or 33611 for privatenet
+    listen_interfaces = "0.0.0.0:" + std::to_string(nPort) + ",[::]:" + std::to_string(nPort);
 }
 
 void CDHTSettings::LoadPeerList()
@@ -41,36 +40,7 @@ void CDHTSettings::LoadPeerList()
             }
             pos = strPeerList.find(strDynodeIP);
             if (pos == std::string::npos) {
-                strPeerList += strDynodeIP + ":33307,";
-                strPeerList += strDynodeIP + ":33317,";
-                strPeerList += strDynodeIP + ":33327,";
-                strPeerList += strDynodeIP + ":33337,";
-                strPeerList += strDynodeIP + ":33347,";
-                strPeerList += strDynodeIP + ":33357,";
-            }
-        }
-    }
-    // get all peers above the minimum protocol version
-    if(g_connman) {
-        std::vector<CNodeStats> vstats;
-        g_connman->GetNodeStats(vstats);
-        for (const CNodeStats& stats : vstats) {
-            if (stats.nVersion >= MIN_DHT_PROTO_VERSION) {
-                std::string strPeerIP = stats.addrName;
-                size_t pos = strPeerIP.find(":");
-                if (pos != std::string::npos && strPeerIP.size() > 5) {
-                    // remove port from IP address string
-                    strPeerIP = strPeerIP.substr(0, pos);
-                }
-                pos = strPeerList.find(strPeerIP);
-                if (pos == std::string::npos) {
-                    strPeerList += strPeerIP + ":33307,";
-                    strPeerList += strPeerIP + ":33317,";
-                    strPeerList += strPeerIP + ":33327,";
-                    strPeerList += strPeerIP + ":33337,";
-                    strPeerList += strPeerIP + ":33347,";
-                    strPeerList += strPeerIP + ":33357,";
-                }
+                strPeerList += strDynodeIP + ":" + std::to_string(nPort) + ",";
             }
         }
     }
