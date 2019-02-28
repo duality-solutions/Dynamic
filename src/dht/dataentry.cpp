@@ -13,16 +13,8 @@
 
 static bool Encrypt(const std::vector<std::vector<unsigned char>>& vvchPubKeys, const std::vector<unsigned char>& vchValue, std::vector<unsigned char>& vchEncrypted, std::string& strErrorMessage) try
 {
-    LogPrintf("%s -- value converted %s \n", __func__, stringFromVch(vchValue));
-    //EncodeBase64
     if (!EncryptBDAPData(vvchPubKeys, vchValue, vchEncrypted, strErrorMessage))
         return false;
-
-    if (vchEncrypted.size() > 1277) {
-        LogPrintf("%s -- Ciphertext too large for one DHT entry. %u\n", __func__, vchEncrypted.size());
-        return false;
-    }
-    LogPrintf("%s -- Ciphertext size %u\n", __func__, vchEncrypted.size());
 
     return true;
 }
@@ -31,7 +23,7 @@ catch (std::bad_alloc const&)
     LogPrintf("%s -- catch std::bad_alloc\n", __func__);
     return false;
 }
-/*
+
 static bool Decrypt(const std::vector<unsigned char>& vchPrivSeedBytes, const std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchDecrypted, std::string& strErrorMessage) try
 {
     if (!DecryptBDAPData(vchPrivSeedBytes, vchData, vchDecrypted, strErrorMessage))
@@ -45,10 +37,9 @@ catch (std::bad_alloc const&)
     return false;
 }
 
-*/
-
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data, const uint16_t version, const DHT::DataFormat format)
-    : strOperationCode(opCode), nTotalSlots(slots), vPubKeys(pubkeys), vchData(data)
+CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, 
+                        const std::vector<unsigned char>& data, const uint16_t version, const uint32_t expire, const DHT::DataFormat format)
+                        : strOperationCode(opCode), nTotalSlots(slots), nMode(DHT::DataMode::Put), vchData(data), vPubKeys(pubkeys)
 {
     if (version > 0 && vPubKeys.size() == 0)
         throw std::runtime_error("Encrypted data entries require at least one public key.\n");
@@ -56,11 +47,12 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
         throw std::runtime_error("Clear text (Version 0) data entries do not need public keys.\n");
 
     dataHeader.nVersion = version;
+    dataHeader.nExpireTime = expire;
     dataHeader.nFormat = (uint32_t)format;
-    Init();
+    InitPut();
 }
 
-bool CDataEntry::Init()
+bool CDataEntry::InitPut()
 {
     std::vector<unsigned char> vchRaw;
     if (dataHeader.nVersion == 1) {
@@ -88,8 +80,8 @@ bool CDataEntry::Init()
             CDataChunk chunk(i, strHexChunk, i + 1);
             vChunks.push_back(chunk);
         }
-        dataHeader.nChunks = 1;
-        dataHeader.nChunkSize = strHexData.size();
+        dataHeader.nChunks = total_chunks;
+        dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
     }
     else {
@@ -100,4 +92,41 @@ bool CDataEntry::Init()
         dataHeader.nIndexLocation = 0;
     }
     return true;
+}
+
+CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CDataHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
+        : strOperationCode(opCode), nTotalSlots(slots),  nMode(DHT::DataMode::Get), dataHeader(header), vChunks(chunks)
+{
+    if (header.nVersion > 0 && privateKey.size() == 0)
+        throw std::runtime_error("Decrypt entry requires a private key seed.\n");
+    if (header.nVersion == 0 && privateKey.size() > 0)
+        throw std::runtime_error("Private key seed not required for clear text data\n");
+
+    InitGet(privateKey);
+}
+
+bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
+{
+    std::string strHexChunks;
+    for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
+        strHexChunks += vChunks[i].strValue;
+    }
+    std::vector<unsigned char> vchUnHex = HexStringToCharVector(strHexChunks);
+    if (dataHeader.nVersion == 0) {
+        vchData = vchUnHex;
+    }
+    else if (dataHeader.nVersion == 1) {
+        if (!Decrypt(privateKey, vchUnHex, vchData, strErrorMessage))
+            return false;
+    }
+    else {
+        strErrorMessage = "Unsupported version.";
+        return false;
+    }
+    return true;
+}
+
+std::string CDataEntry::Value() const
+{
+    return stringFromVch(vchData);
 }
