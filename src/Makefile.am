@@ -118,6 +118,9 @@ DYNAMIC_CORE_H = \
   core_memusage.h \
   cuckoocache.h \
   dbwrapper.h \
+  dht/datachunk.h \
+  dht/dataentry.h \
+  dht/dataheader.h \
   dht/ed25519.h \
   dht/mutable.h \
   dht/mutabledb.h \
@@ -279,6 +282,9 @@ libdynamic_server_a_SOURCES = \
   bdap/sidechain.cpp \
   bdap/utils.cpp \
   dbwrapper.cpp \
+  dht/datachunk.cpp \
+  dht/dataentry.cpp \
+  dht/dataheader.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/operations.cpp \
