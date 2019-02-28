@@ -60,5 +60,7 @@ bool GetScriptOpTypeValue(const std::vector<CRecipient>& vecSend, CScript& bdapO
 bool GetTransactionOpTypeValue(const CTransaction& tx, CScript& bdapOpScript, std::string& strOpType, std::vector<unsigned char>& vchValue);
 int GetLinkVersionFromData(const std::vector<unsigned char>& vchData);
 bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx);
+std::string CharVectorToHexString(const std::vector<unsigned char>& vch);
+std::vector<unsigned char> HexStringToCharVector(const std::string& hex);
 
 #endif // DYNAMIC_BDAP_UTILS_H
