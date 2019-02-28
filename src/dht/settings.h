@@ -16,6 +16,8 @@ private:
     std::string listen_interfaces;
     std::string dht_bootstrap_nodes;
     std::string user_agent;
+    uint16_t nPort;
+
 public:
     CDHTSettings();
 
