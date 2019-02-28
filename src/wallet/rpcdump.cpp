@@ -780,7 +780,7 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "\nImports mnemonic\n"
             "\nArguments:\n"
             "1. \"mnemonic\"    (string, required) mnemonic delimited by the dash charactor (-) or space\n"
-            "2. \"language\"    (english|french, optional)\n"
+            "2. \"language\"    (english|french|chinesesimplified|chinesetraditional|italian|japanese|korean|spanish, optional)\n"
             "3. \"passphrase\"  (string, optional) mnemonic passphrase used as the 13th or 25th word\n"
             "4. \"begin\"       (int, optional, default=0) begin key chain index\n"
             "5. \"end\"         (int, optional, default=100) end key chain index\n"

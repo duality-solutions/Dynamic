@@ -36,7 +36,7 @@
 #include "bip39_chinese_simplified.h"
 #include "bip39_chinese_traditional.h"
 #include "bip39_french.h"
-#include "bip39_german.h"
+//#include "bip39_german.h"  //exclude for now, but include later
 #include "bip39_italian.h"
 #include "bip39_japanese.h"
 #include "bip39_korean.h"
@@ -91,6 +91,12 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
     int mlen = len * 3 / 4;
     SecureString mnemonic;
 
+    //LogPrintf("DEBUGGER %s - Size of German %s\n", __func__, (sizeof(wordlist_german)/sizeof(*wordlist_german)));
+    LogPrintf("DEBUGGER %s - Size of French %s\n", __func__, (sizeof(wordlist_french)/sizeof(*wordlist_french)));
+    LogPrintf("DEBUGGER %s - Size of Italian %s\n", __func__, (sizeof(wordlist_italian)/sizeof(*wordlist_italian)));
+    LogPrintf("DEBUGGER %s - Size of wordlist %s\n", __func__, (sizeof(refWordList)/sizeof(*refWordList)));
+
+
     int i, j, idx;
     for (i = 0; i < mlen; i++) {
         idx = 0;
@@ -98,6 +104,7 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
             idx <<= 1;
             idx += (bits[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
         }
+        LogPrintf("DEBUGGER %s - MnemonicWord %s and pos %s\n", __func__, refWordList[idx], std::to_string(idx));
         mnemonic.append(refWordList[idx]);
         if (i < mlen - 1) {
             mnemonic += ' ';
@@ -105,6 +112,7 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
     }
 
     refWordList = nullptr; //reset
+    LogPrintf("DEBUGGER %s - MnemonicBefore %s\n", __func__, mnemonic);
     return mnemonic;
 }
 
@@ -124,9 +132,10 @@ void CMnemonic::getWordList(const char* const* &input, Language selectLanguage) 
         case Language::CHINESE_TRADITIONAL:
             input = wordlist_chinese_traditional;
             break;
-        case Language::GERMAN:
-            input = wordlist_german;
-            break;
+        //exclude for now but include later    
+        // case Language::GERMAN:
+        //     input = wordlist_german;
+        //     break;
         case Language::ITALIAN:
             input = wordlist_italian;
             break;
@@ -159,7 +168,8 @@ CMnemonic::Language CMnemonic::getLanguageEnumFromLabel(const std::string &input
     else if (boost::algorithm::to_lower_copy(input) == "french") return CMnemonic::Language::FRENCH;
     else if (boost::algorithm::to_lower_copy(input) == "chinesesimplified") return CMnemonic::Language::CHINESE_SIMPLIFIED;
     else if (boost::algorithm::to_lower_copy(input) == "chinesetraditional") return CMnemonic::Language::CHINESE_TRADITIONAL;
-    else if (boost::algorithm::to_lower_copy(input) == "german") return CMnemonic::Language::GERMAN;
+    //exclude for now but include later
+    //else if (boost::algorithm::to_lower_copy(input) == "german") return CMnemonic::Language::GERMAN;
     else if (boost::algorithm::to_lower_copy(input) == "italian") return CMnemonic::Language::ITALIAN;
     else if (boost::algorithm::to_lower_copy(input) == "japanese") return CMnemonic::Language::JAPANESE;
     else if (boost::algorithm::to_lower_copy(input) == "korean") return CMnemonic::Language::KOREAN;
