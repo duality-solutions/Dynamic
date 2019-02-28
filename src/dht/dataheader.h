@@ -29,7 +29,8 @@ Header format:
 3) Number of fragments (uint16_t)
 4) Size per fragment (uint16_t)
 5) Format (uint16_t)
-6) Index Location 
+6) Index Location (uint16_t)
+7) Unlock Epoch Time (uint32_t)
 
 Example Header:
 OpCode: avatar(24):0
@@ -47,13 +48,13 @@ public:
     uint16_t nChunkSize;
     uint32_t nFormat;
     uint16_t nIndexLocation;
+    uint32_t nUnlockTime;
 
     CDataHeader() {
         SetNull();
     }
 
-    CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation) :
-                               nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation){}
+    CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation);
 
     CDataHeader(const std::string strHex);
 
@@ -65,6 +66,7 @@ public:
         nChunkSize = 0;
         nFormat = 0;
         nIndexLocation = 0;
+        nUnlockTime = 0;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -77,11 +79,12 @@ public:
         READWRITE(nChunkSize);
         READWRITE(nFormat);
         READWRITE(nIndexLocation);
+        READWRITE(nUnlockTime);
     }
 
     inline friend bool operator==(const CDataHeader& a, const CDataHeader& b) {
-        return (a.nVersion == b.nVersion && a.nExpireTime == b.nExpireTime && a.nChunks == b.nChunks && 
-                a.nChunkSize == b.nChunkSize && a.nFormat == b.nFormat && a.nIndexLocation == b.nIndexLocation);
+        return (a.nVersion == b.nVersion && a.nExpireTime == b.nExpireTime && a.nChunks == b.nChunks && a.nChunkSize == b.nChunkSize && 
+                a.nFormat == b.nFormat && a.nIndexLocation == b.nIndexLocation && a.nUnlockTime == b.nUnlockTime);
     }
 
     inline friend bool operator!=(const CDataHeader& a, const CDataHeader& b) {
@@ -95,16 +98,19 @@ public:
         nChunkSize = b.nChunkSize;
         nFormat = b.nFormat;
         nIndexLocation = b.nIndexLocation;
+        nUnlockTime = b.nUnlockTime;
         return *this;
     }
  
     inline bool IsNull() const { return (nVersion == 0 && nExpireTime == 0); }
     void Serialize(std::vector<unsigned char>& vchData);
-    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 
     bool Encrypted() const { return (nVersion > 0); }
 
     std::string ToHex();
+    std::string ToString();
+
 };
 
 #endif // DYNAMIC_DHT_DATAHEADER_H
