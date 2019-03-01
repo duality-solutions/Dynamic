@@ -52,10 +52,6 @@
 
 #include <openssl/evp.h>
 
-#include <clocale>
-#include <string>
-#include <cstdlib>
-#include <stdexcept>
 
 SecureString CMnemonic::Generate(int strength, Language selectLanguage)
 {
@@ -91,12 +87,6 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
     int mlen = len * 3 / 4;
     SecureString mnemonic;
 
-    //LogPrintf("DEBUGGER %s - Size of German %s\n", __func__, (sizeof(wordlist_german)/sizeof(*wordlist_german)));
-    LogPrintf("DEBUGGER %s - Size of French %s\n", __func__, (sizeof(wordlist_french)/sizeof(*wordlist_french)));
-    LogPrintf("DEBUGGER %s - Size of Italian %s\n", __func__, (sizeof(wordlist_italian)/sizeof(*wordlist_italian)));
-    LogPrintf("DEBUGGER %s - Size of wordlist %s\n", __func__, (sizeof(refWordList)/sizeof(*refWordList)));
-
-
     int i, j, idx;
     for (i = 0; i < mlen; i++) {
         idx = 0;
@@ -104,7 +94,6 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
             idx <<= 1;
             idx += (bits[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
         }
-        LogPrintf("DEBUGGER %s - MnemonicWord %s and pos %s\n", __func__, refWordList[idx], std::to_string(idx));
         mnemonic.append(refWordList[idx]);
         if (i < mlen - 1) {
             mnemonic += ' ';
@@ -112,7 +101,6 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, Language sel
     }
 
     refWordList = nullptr; //reset
-    LogPrintf("DEBUGGER %s - MnemonicBefore %s\n", __func__, mnemonic);
     return mnemonic;
 }
 
@@ -181,33 +169,11 @@ CMnemonic::Language CMnemonic::getLanguageEnumFromLabel(const std::string &input
 
 } //getLanguageEnumFromLabel
 
-std::size_t CMnemonic::strlen_mb(const std::string& s)
-{
-    std::size_t result = 0;
-    const char* ptr = s.data();
-    const char* end = ptr + s.size();
-    std::mblen(NULL, 0); // reset the conversion state
-    while (ptr < end) {
-        int next = std::mblen(ptr, end-ptr);
-        if (next == -1) {
-            throw std::runtime_error("strlen_mb(): conversion error");
-        }
-        ptr += next;
-        ++result;
-    }
-    return result;
-}
-
 
 
 bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
 {
     const char* const* refWordList = nullptr; //initialize
-
-
-    if (selectLanguage == Language::FRENCH) LogPrintf("DEBUGGER %s - FRENCH DETECTED\n", __func__);
-    if (selectLanguage == Language::GERMAN) LogPrintf("DEBUGGER %s - GERMAN DETECTED\n", __func__);
-    LogPrintf("DEBUGGER %s - %s\n", __func__, mnemonic);
 
 
     getWordList(refWordList,selectLanguage);
@@ -238,12 +204,6 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
     for (size_t i = 0; i < mnemonic.size(); ++i) {
         ssCurrentWord = "";
         while (i + ssCurrentWord.size() < mnemonic.size() && mnemonic[i + ssCurrentWord.size()] != ' ') {
-            //std::string teststring = "";
-            //teststring = ssCurrentWord.c_str();
-            //LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
-            //LogPrintf("DEBUGGER %s - Wordsize2: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),0)),ssCurrentWord);
-            //LogPrintf("DEBUGGER %s - Wordsize3: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,(ssCurrentWord.c_str()),ssCurrentWord.size())),ssCurrentWord);
-            //LogPrintf("DEBUGGER %s - Wordsize4: %s [%s]\n", __func__, std::to_string(mbstowcs(NULL,teststring.c_str(), teststring.size())),ssCurrentWord);
             // if (ssCurrentWord.size() >= 26) { //was 9
             //     return false;
             // }
@@ -253,8 +213,6 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
         std::string teststring = "";
         teststring = ssCurrentWord.c_str();
         int characterSize = mbstowcs(NULL,teststring.c_str(), teststring.size());
-        LogPrintf("DEBUGGER %s - Wordsize: %s [%s]\n", __func__, std::to_string(ssCurrentWord.size()),ssCurrentWord);
-        LogPrintf("DEBUGGER %s - Wordsize4: %s [%s]\n", __func__, std::to_string(characterSize),ssCurrentWord);
         if (characterSize >= 25) { //was 9
             return false;
         }
@@ -262,11 +220,9 @@ bool CMnemonic::Check(SecureString mnemonic, Language selectLanguage)
         nWordIndex = 0;
         for (;;) {
             if (!refWordList[nWordIndex]) { // word not found
-                LogPrintf("DEBUGGER %s - Word not found:  [%s]\n", __func__,ssCurrentWord);
                 return false;
             }
             if (ssCurrentWord == refWordList[nWordIndex]) { // word found on index nWordIndex
-                LogPrintf("DEBUGGER %s - Word found:  [%s]\n", __func__,ssCurrentWord);
                 for (ki = 0; ki < 11; ki++) {
                     if (nWordIndex & (1 << (10 - ki))) {
                         bits[nBitsCount / 8] |= 1 << (7 - (nBitsCount % 8));

@@ -76,9 +76,6 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
         //"Ukrainian",
         };
 
-    //languageOptions.push_back("English");
-    //languageOptions.push_back("French");
-
     for (auto & element : languageOptions) {
         ui->comboBoxImportMnemonic_Language->addItem(QObject::tr(element.c_str()));
         ui->comboBoxLanguage->addItem(QObject::tr(element.c_str()));
@@ -139,14 +136,12 @@ void MnemonicDialog::on_pushButtonCreateMnemonic_Cancel_clicked()
 
 void MnemonicDialog::on_toolButtonCreateMnemonic_Copy_clicked()
 {
-    //QMessageBox::information(this, "TEST", "Copy Test");
     GUIUtil::setClipboard(ui->textEditNewRecoveryPhrase->toPlainText());
 }
 
 
 void MnemonicDialog::on_toolButtonImportMnemonic_Paste_clicked()
 {
-    //QMessageBox::information(this, "TEST", "Copy Test");
     ui->mnemonicEdit->setText(QApplication::clipboard()->text());
 }
 
@@ -160,7 +155,6 @@ void MnemonicDialog::on_toolButtonImportMnemonic_Clear_clicked()
 
 void MnemonicDialog::on_toolButtonCreateMnemonic_Clear_clicked()
 {
-    //QMessageBox::information(this, "TEST", "Clear Test");
     ui->textEditNewRecoveryPhrase->setText("");  
 }
 
@@ -213,14 +207,10 @@ void MnemonicDialog::createMnemonic() {
 
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
 
-    //if (languageValue == "French") selectLanguage = CMnemonic::Language::FRENCH;
-    //else selectLanguage = CMnemonic::Language::ENGLISH; //just to be safe, set as default again
-
     selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
 
     SecureString recoveryPhrase = CMnemonic::Generate(value,selectLanguage);
 
-    //QMessageBox::information(this, "Info", value);
     
     ui->textEditNewRecoveryPhrase->setText(recoveryPhrase.c_str());
 
@@ -239,10 +229,6 @@ void MnemonicDialog::validateMnemonic() {
 
     CMnemonic::Language selectLanguage = CMnemonic::Language::ENGLISH; //initialize default
 
-    //if (languageValue == "French") selectLanguage = CMnemonic::Language::FRENCH;
-    //else selectLanguage = CMnemonic::Language::ENGLISH; //just to be safe, set as default again
-
-    //QMessageBox::information(this, "TEST", QString::fromStdString(languageValue));
     selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
 
 
@@ -274,9 +260,6 @@ void MnemonicDialog::importMnemonic(bool forceRescan){
     bool isValid = false;
 
    selectLanguage = CMnemonic::getLanguageEnumFromLabel(languageValue.toStdString());
-
-    //QMessageBox::information(0,"mnemonic",mnemonicstr);
-    //QMessageBox::information(0,"language",languageValue);
 
     isValid = CMnemonic::Check(mnemonicstr.toStdString().c_str(),selectLanguage);
 

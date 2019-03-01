@@ -60,8 +60,7 @@ public:
 
 private:
     static void getWordList(const char* const* &input, Language selectLanguage = Language::ENGLISH);
-    static std::size_t strlen_mb(const std::string& s);
-    
+  
 
 };
 
