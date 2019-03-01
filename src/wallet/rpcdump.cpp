@@ -789,6 +789,10 @@ UniValue importmnemonic(const JSONRPCRequest& request)
             "\nImports mnemonic\n"
             + HelpExampleCli("importmnemonic", "\"inflict-witness-off-property-target-faint-gather-match-outdoor-weapon-wide-mix\"")
         );
+    
+    
+    LogPrintf("DEBUGGER %s - NUMBER OF PARAMS %s\n", __func__, std::to_string(request.params.size()));
+    
     if (fPruneMode)
         throw std::runtime_error(std::string(__func__) + ": Importing wallets is disabled in pruned mode");
 
@@ -799,7 +803,7 @@ UniValue importmnemonic(const JSONRPCRequest& request)
     // Mnemonic can be delimited by dash ('-') or space(' ') character
     std::replace(strMnemonic.begin(), strMnemonic.end(), '-', ' ');
 
-    if (strMnemonic.size() > 256)
+    if (strMnemonic.size() > 512) //RESTRICTION REMOVED: was 256
         throw std::runtime_error(std::string(__func__) + ": Mnemonic must be less than 256 charactors");
 
     SecureString strSecureMnemonic(strMnemonic.begin(), strMnemonic.end());
@@ -829,9 +833,18 @@ UniValue importmnemonic(const JSONRPCRequest& request)
 
     LogPrintf("DEBUGGER %s - Passphrase before: %s\n", __func__, strMnemonicPassphrase);  
 
+    int paramsCount = 2; //way to handle empty string passphrase
 
-    if (!request.params[2].isNull())
+    if (!request.params[2].isNull()) {
         strMnemonicPassphrase = request.params[2].get_str();
+        if (strMnemonicPassphrase != "") {
+            //if parameter is empty string, don't set as passphrase and don't count as a parameter
+            paramsCount++;
+            LogPrintf("DEBUGGER %s - made it here.params count now: %s\n", __func__, std::to_string(paramsCount));
+        };
+    }
+    else LogPrintf("DEBUGGER %s - Passphrase NOT considered NULL\n", __func__);  
+
 
     LogPrintf("DEBUGGER %s - Passphrase after: %s\n", __func__, strMnemonicPassphrase);    
 
@@ -839,15 +852,20 @@ UniValue importmnemonic(const JSONRPCRequest& request)
         throw std::runtime_error(std::string(__func__) + ": Mnemonic passphase must be 24 charactors or less");
 
     uint32_t begin = 0, end = 100;
-    if (!request.params[3].isNull())
-        begin = (uint32_t)request.params[3].get_int();
+    if (!request.params[paramsCount].isNull()) //was 3
+        begin = (uint32_t)request.params[paramsCount].get_int(); //was 3
 
-    if (!request.params[4].isNull())
-        end = (uint32_t)request.params[4].get_int();
+    paramsCount++;    
 
-    bool forcerescan = false;
-    if(!request.params[5].isNull())
-        forcerescan = request.params[5].get_bool();
+    if (!request.params[paramsCount].isNull()) //was 4
+        end = (uint32_t)request.params[paramsCount].get_int(); //was 4
+
+    paramsCount++;    
+
+
+    bool forcerescan = true; //was false
+    if(!request.params[paramsCount].isNull()) //was 5
+        forcerescan = request.params[paramsCount].get_bool(); //was 5
     
     CHDChain newHdChain;
 

@@ -5316,7 +5316,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
     if (fFirstRun) {
         // Create new keyUser and set as default key
         if (GetBoolArg("-usehd", DEFAULT_USE_HD_WALLET) && !walletInstance->IsHDEnabled()) {
-            if (GetArg("-mnemonicpassphrase", "").size() > 256) {
+            if (GetArg("-mnemonicpassphrase", "").size() > 512) { //RESTRICTION REMOVED: was 256
                 InitError(_("Mnemonic passphrase is too long, must be at most 256 characters"));
                 return NULL;
             }
