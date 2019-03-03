@@ -53,6 +53,7 @@ endif
 bin_PROGRAMS =
 TESTS =
 BENCHMARKS =
+DHT_TESTS =
 
 if BUILD_DYNAMICD
   bin_PROGRAMS += dynamicd
@@ -661,6 +662,7 @@ endif
 
 if EMBEDDED_LIBTORRENT
 include Makefile.libtorrent.include
+include Makefile.dht.test.include
 endif
 
 include Makefile.vgp.include
