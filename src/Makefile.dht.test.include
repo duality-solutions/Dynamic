@@ -26,7 +26,7 @@ nodist_dht_test_data_test_SOURCES = $(GENERATED_DHT_TEST_FILES)
 
 $(DHT_TESTS): $(GENERATED_DHT_TEST_FILES)
 
-CLEAN_DHT_TEST = test/*.gcda test/*.gcno $(GENERATED_DHT_TEST_FILES)
+CLEAN_DHT_TEST = dht/test/*.gcda dht/test/*.gcno $(GENERATED_DHT_TEST_FILES)
 
 CLEANFILES += $(CLEAN_DHT_TEST)
 
