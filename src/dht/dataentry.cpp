@@ -49,7 +49,10 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     dataHeader.nVersion = version;
     dataHeader.nExpireTime = expire;
     dataHeader.nFormat = (uint32_t)format;
+    dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
     InitPut();
+    dataHeader.SetHex();
+    HeaderHex = dataHeader.HexValue();
 }
 
 bool CDataEntry::InitPut()
@@ -76,8 +79,10 @@ bool CDataEntry::InitPut()
         // We need to chunk into many pieces.
         uint16_t total_chunks = (strHexData.size() / DHT_DATA_MAX_CHUNK_SIZE) + 1;
         for(unsigned int i = 0; i < total_chunks; i++) {
+            uint16_t nPlacement = i + 1;
             std::string strHexChunk = strHexData.substr(i * DHT_DATA_MAX_CHUNK_SIZE, DHT_DATA_MAX_CHUNK_SIZE);
-            CDataChunk chunk(i, strHexChunk, i + 1);
+            std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
+            CDataChunk chunk(i, nPlacement, strSalt, strHexChunk);
             vChunks.push_back(chunk);
         }
         dataHeader.nChunks = total_chunks;
@@ -85,7 +90,8 @@ bool CDataEntry::InitPut()
         dataHeader.nIndexLocation = 0;
     }
     else {
-        CDataChunk chunk(1, strHexData, 1);
+        std::string strSalt = strOperationCode + ":" + std::to_string(1);
+        CDataChunk chunk(1, 1, strSalt, strHexData);
         vChunks.push_back(chunk);
         dataHeader.nChunks = 1;
         dataHeader.nChunkSize = strHexData.size();
@@ -109,7 +115,7 @@ bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
 {
     std::string strHexChunks;
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
-        strHexChunks += vChunks[i].strValue;
+        strHexChunks += vChunks[i].Value;
     }
     std::vector<unsigned char> vchUnHex = HexStringToCharVector(strHexChunks);
     if (dataHeader.nVersion == 0) {

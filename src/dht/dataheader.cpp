@@ -15,6 +15,7 @@ CDataHeader::CDataHeader(const uint16_t version, const uint32_t expireTime, cons
                                nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation)
 {
     nUnlockTime = GetTime() + 30; // unlocks in 30 seconds
+    strHex = ToHex();
 }
 
 CDataHeader::CDataHeader(const std::string strHex)
@@ -40,6 +41,13 @@ bool CDataHeader::UnserializeFromData(const std::vector<unsigned char>& vchData)
         return false;
     }
     return true;
+}
+
+void CDataHeader::SetHex()
+{
+    std::vector<unsigned char> vchData;
+    Serialize(vchData);
+    strHex = CharVectorToHexString(vchData);
 }
 
 std::string CDataHeader::ToHex()

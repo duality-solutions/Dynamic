@@ -16,20 +16,21 @@ class CDataChunk
 {
 public:
     uint16_t nOrdinal;
-    std::string strValue;
     uint16_t nPlacement;
+    std::string Salt;
+    std::string Value;
 
-    CDataChunk() {
-        SetNull();
-    }
+    CDataChunk() : nOrdinal(0), nPlacement(0), Salt(""), Value("")  {}
 
-    CDataChunk(const uint16_t ordinal, const std::string& value, const uint16_t placement) : nOrdinal(ordinal), strValue(value), nPlacement(placement) {}
+    CDataChunk(const uint16_t ordinal, const uint16_t placement, const std::string& salt, const std::string& value) : 
+                    nOrdinal(ordinal), nPlacement(placement), Salt(salt), Value(value)  {}
 
     inline void SetNull()
     {
         nOrdinal = 0;
-        strValue = "";
         nPlacement = 0;
+        Salt = "";
+        Value = "";
     }
 
     ADD_SERIALIZE_METHODS;
@@ -37,12 +38,13 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(nOrdinal);
-        READWRITE(strValue);
         READWRITE(nPlacement);
+        READWRITE(Salt);
+        READWRITE(Value);
     }
 
     inline friend bool operator==(const CDataChunk& a, const CDataChunk& b) {
-        return (a.nOrdinal == b.nOrdinal && a.strValue == b.strValue && a.nPlacement == b.nPlacement);
+        return (a.nOrdinal == b.nOrdinal && a.nPlacement == b.nPlacement && a.Salt == b.Salt && a.Value == b.Value);
     }
 
     inline friend bool operator!=(const CDataChunk& a, const CDataChunk& b) {
@@ -51,17 +53,17 @@ public:
 
     inline CDataChunk operator=(const CDataChunk& b) {
         nOrdinal = b.nOrdinal;
-        strValue = b.strValue;
         nPlacement = b.nPlacement;
+        Salt = b.Salt;
+        Value = b.Value;
         return *this;
     }
  
-    inline bool IsNull() const { return (nOrdinal == 0 && strValue == ""); }
+    inline bool IsNull() const { return (nOrdinal == 0 && nPlacement == 0 && Salt == "" && Value == ""); }
 
     void Serialize(std::vector<unsigned char>& vchData);
-    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 
-    std::string Value() const { return strValue; }
 };
 
 #endif // DYNAMIC_DHT_DATACHUNK_H
