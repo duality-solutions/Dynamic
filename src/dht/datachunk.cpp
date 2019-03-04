@@ -17,21 +17,11 @@ void CDataChunk::Serialize(std::vector<unsigned char>& vchData)
     vchData = std::vector<unsigned char>(dsDataChunk.begin(), dsDataChunk.end());
 }
 
-bool CDataChunk::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
+bool CDataChunk::UnserializeFromData(const std::vector<unsigned char>& vchData) 
 {
     try {
         CDataStream dsDataChunk(vchData, SER_NETWORK, PROTOCOL_VERSION);
         dsDataChunk >> *this;
-
-        std::vector<unsigned char> vchDataChunk;
-        Serialize(vchDataChunk);
-        const uint256& calculatedHash = Hash(vchDataChunk.begin(), vchDataChunk.end());
-        const std::vector<unsigned char>& vchRandDataChunk = vchFromString(calculatedHash.GetHex());
-        if(vchRandDataChunk != vchHash)
-        {
-            SetNull();
-            return false;
-        }
     } catch (std::exception& e) {
         SetNull();
         return false;

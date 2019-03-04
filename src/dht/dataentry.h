@@ -32,6 +32,7 @@ private:
     std::vector<CDataChunk> vChunks;
     std::string strErrorMessage;
     std::vector<std::vector<unsigned char>> vPubKeys;
+    
 
 public:
     CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
@@ -47,6 +48,7 @@ public:
     std::string Value() const;
     std::string ErrorMessage() { return strErrorMessage; }
     DHT::DataMode Mode() const { return nMode; }
+    std::string HeaderHex;
 
 private:
     bool InitPut();

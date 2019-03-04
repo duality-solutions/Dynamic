@@ -29,6 +29,45 @@ using namespace std::placeholders;
 using lt::aux::from_hex;
 using lt::aux::to_hex;
 
+std::vector<std::pair<std::string, std::string>> vDynamicValues;
+
+std::string LongString()
+{
+    return (
+    "THROUGH me you pass into the city of woe:\n"
+    "Through me you pass into eternal pain:\n"
+    "Through me among the people lost for aye."    
+    "Justice the founder of my fabric moved:\n"
+    "To rear me was the task of Power divine,\n"
+    "Supremest Wisdom, and primeval Love. \n"
+    "Before me things create were none, save things\n"
+    "Eternal, and eternal I endure.\n"
+    "All hope abandon, ye who enter here.”\n"
+    "Such characters, in color dim, I mark’d\n"
+    "Over a portal’s lofty arch inscribed.\n"
+    "Whereat I thus:\n"
+    "“Master, these words import\n"
+    "Hard meaning.”\n"
+    "He as one prepared replied:\n"
+    "“Here thou must all distrust behind thee leave;\n"
+    "Here be vile fear extinguish’d. We are come\n"
+    "Where I have told thee we shall see the souls\n"
+    "To misery doom’d, who intellectual good\n"
+    "Have lost.”\n"
+    "And when his hand he had stretch’d forth\n"
+    "To mine, with pleasant looks, whence I was cheer’d,\n"
+    "Into that secret place he led me on.\n"
+    "Here sighs, with lamentations and loud moans,\n"
+    "Resounded through the air pierced by no star,\n"
+    "That e’en I wept at entering. Various tongues,\n"
+    "Horrible languages, outcries of woe,\n"
+    "Accents of anger, voices deep and hoarse,\n"
+    "With hands together smote that swell’d the sounds,\n"
+    "Made up a tumult, that forever whirls.\n"
+    "--Dante Alighieri"
+    );
+}
+
 void Usage()
 {
     std::fprintf(stderr,
@@ -42,6 +81,10 @@ void Usage()
         "get <public-key> <salt> -          get a mutable object under the specified\n"
         "                                   public key and salt\n"
         "listen -                           listen for get/put requests\n"
+        "\n"
+        "testput -                          Runs a batch put test\n"
+        "\n"
+        "testget -                          Runs a batch get test\n"
         "\n"
         "stop -                             stops the program. quit and exit will also\n"
         "                                   terminate the application\n\n"
@@ -59,6 +102,42 @@ void PrintAlerts(lt::session& s)
         std::fflush(stdout);
     }
     std::printf("\n");
+}
+
+alert* WaitForGetAlert(lt::session& s, const std::string& strSalt)
+{
+    int alert_type = dht_mutable_item_alert::alert_type;
+    alert* ret = nullptr;
+    bool found = false;
+    while (!found)
+    {
+        s.wait_for_alert(seconds(5));
+
+        std::vector<alert*> alerts;
+        s.pop_alerts(&alerts);
+        for (std::vector<alert*>::iterator i = alerts.begin()
+            , end(alerts.end()); i != end; ++i)
+        {
+            if ((*i)->type() != alert_type)
+            {
+                static int spinner = 0;
+                static const char anim[] = {'-', '\\', '|', '/'};
+                std::printf("\r%c", anim[spinner]);
+                std::fflush(stdout);
+                spinner = (spinner + 1) & 3;
+                continue;
+            }
+            else {
+                dht_mutable_item_alert* item = alert_cast<dht_mutable_item_alert>(*i);
+                if (strSalt == item->salt) {
+                    ret = *i;
+                    found = true;
+                }
+            }
+        }
+    }
+    std::printf("\n");
+    return ret;
 }
 
 alert* WaitForAlert(lt::session& s, int alert_type)
@@ -81,7 +160,6 @@ alert* WaitForAlert(lt::session& s, int alert_type)
                 std::printf("\r%c", anim[spinner]);
                 std::fflush(stdout);
                 spinner = (spinner + 1) & 3;
-                //print some alerts?
                 continue;
             }
             ret = *i;
@@ -92,7 +170,8 @@ alert* WaitForAlert(lt::session& s, int alert_type)
     return ret;
 }
 
-void PutString(entry& e, std::array<char, 64>& sig
+void PutString(entry& e
+    , std::array<char, 64>& sig
     , std::int64_t& seq
     , std::string const& salt
     , std::array<char, 32> const& pk
@@ -106,7 +185,7 @@ void PutString(entry& e, std::array<char, 64>& sig
     bencode(std::back_inserter(buf), e);
     dht::signature sign;
     ++seq;
-    std::printf("PutString salt = %s\n", salt.c_str());
+    //std::printf("\n\nPutString salt = %s, Value = %s\n\n", salt.c_str(), str);
     sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
         , dht::public_key(pk.data())
         , dht::secret_key(sk.data()));
@@ -215,7 +294,7 @@ std::string ConvertPath(const std::string& strPath)
     return strConvertPath;
 }
 
-std::vector<unsigned char> ConvertStringToCharVector(const std::string str)
+std::vector<unsigned char> ConvertStringToCharVector(const std::string& str)
 {
     return std::vector<unsigned char>(str.begin(), str.end());;
 }
@@ -229,13 +308,21 @@ std::vector<unsigned char> GetPubKeyBytes(const public_key& pk)
     return vchRawPubKey;
 }
 
+std::vector<unsigned char> GetPrivateKeySeedBytes(const std::array<char, 32>& seed)
+{
+    std::vector<unsigned char> vchRawKey;
+    for(unsigned int i = 0; i < 32; i++) {
+        vchRawKey.push_back(seed[i]);
+    }
+    return vchRawKey;
+}
+
 int main(int argc, char* argv[])
 {
     // skip pointer to self
     ++argv;
     --argc;
 
-    
     // BDAP LibTorrent Test Nodes
     std::string strListenInterfaces = "0.0.0.0:33444";
     std::string strBootstrapNodes = "159.203.17.98:33444,178.128.144.29:33444,206.189.30.176:33444,178.128.180.138:33444,178.128.63.114:33444,138.197.167.18:33444";
@@ -366,24 +453,12 @@ int main(int argc, char* argv[])
                 }
                 int64_t nStartTime = GetTimeMillis();
                 s.dht_get_item(public_key, vArgs[2]);
-                
 
-                bool authoritative = false;
+                alert* a = WaitForAlert(s, dht_mutable_item_alert::alert_type);
+                dht_mutable_item_alert* item = alert_cast<dht_mutable_item_alert>(a);
+                std::string str = item->item.to_string();
+                std::printf("%s: %s\n", item->authoritative ? "auth" : "non-auth", str.c_str());
 
-                while (!authoritative)
-                {
-                    alert* a = WaitForAlert(s, dht_mutable_item_alert::alert_type);
-
-                    dht_mutable_item_alert* item = alert_cast<dht_mutable_item_alert>(a);
-
-                    authoritative = item->authoritative;
-                    std::string str = item->item.to_string();
-                    std::printf("%s: %s\n", authoritative ? "auth" : "non-auth", str.c_str());
-                    if (!authoritative) {
-                        int64_t nGetNonAuthTime = GetTimeMillis();
-                        std::printf("Non-auth milliseconds = %li\n", nGetNonAuthTime - nStartTime);
-                    }
-                }
                 int64_t nGetAuthTime = GetTimeMillis();
                 std::printf("Auth milliseconds = %li\n", nGetAuthTime - nStartTime);
             }
@@ -410,6 +485,107 @@ int main(int argc, char* argv[])
             }
             else
                 Usage();
+        }
+        else if (strCommand.substr(0, 8) == "testput ")
+        {
+            if (vArgs.size() == 2) {
+                std::string strPath = ConvertPath(vArgs[1]);
+                std::array<char, 32> seed;
+                std::fstream f(strPath.c_str(), std::ios_base::in | std::ios_base::binary);
+                f.read(seed.data(), seed.size());
+                std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                public_key pk;
+                secret_key sk;
+                std::tie(pk, sk) = ed25519_create_keypair(seed);
+                if (fBootStrap == false) {
+                    LoadState(s);
+                    Bootstrap(s);
+                    fBootStrap = true;
+                }
+                int64_t nStartTime = GetTimeMillis();
+
+                std::string strSalt = "chunk";
+                uint16_t nTotalSlots = 24;
+                vDynamicValues.clear();
+                std::vector<std::vector<unsigned char>> vPubKeys;
+                vPubKeys.push_back(GetPubKeyBytes(pk));
+                std::vector<unsigned char> data = ConvertStringToCharVector(LongString());
+                CDataEntry dataEntry(strSalt, nTotalSlots, vPubKeys, data, 1, 1741050000, DHT::DataFormat::BinaryBlob);
+                dataEntry.GetHeader().Salt = strSalt + ":" + std::to_string(0);
+                vDynamicValues.push_back(std::make_pair(dataEntry.GetHeader().Salt, dataEntry.HeaderHex));
+                for(const CDataChunk& chunk: dataEntry.GetChunks()) {
+                    vDynamicValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
+                }
+
+                for(const std::pair<std::string, std::string>& pair: vDynamicValues) {
+                    s.dht_put_item(pk.bytes, std::bind(&PutString, _1, _2, _3, _4, pk.bytes, sk.bytes, pair.second.c_str()), pair.first);
+                    std::printf("putstatic salt: %s, value: %s: \n", pair.first.c_str(), pair.second.c_str());
+                }
+                std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
+                int64_t nEndTime = GetTimeMillis();
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
+            }
+            else
+                Usage();
+            
+        }
+        else if (strCommand.substr(0, 8) == "testget ")
+        {
+            if (vArgs.size() == 2) {
+                std::string strPath = ConvertPath(vArgs[1]);
+                std::array<char, 32> seed;
+                std::fstream f(strPath.c_str(), std::ios_base::in | std::ios_base::binary);
+                f.read(seed.data(), seed.size());
+                std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+                public_key pk;
+                secret_key sk;
+                std::tie(pk, sk) = ed25519_create_keypair(seed);
+                if (fBootStrap == false) {
+                    LoadState(s);
+                    Bootstrap(s);
+                    fBootStrap = true;
+                }
+                int64_t nStartTime = GetTimeMillis();
+
+                std::string strSalt = "chunk";
+                uint16_t nTotalSlots = 24;
+                std::string strHeaderSalt = strSalt + ":" + std::to_string(0);
+                s.dht_get_item(pk.bytes, strHeaderSalt);
+                alert* a = WaitForGetAlert(s, strHeaderSalt);
+                dht_mutable_item_alert* item = alert_cast<dht_mutable_item_alert>(a);
+                std::string strHeaderHex = item->item.to_string();
+                std::printf("%s: %s\n", item->authoritative ? "auth" : "non-auth", strHeaderHex.c_str());
+                if (strHeaderHex.size() > 3) {
+                    strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
+                }
+                std::printf("strHeaderHex: %s\n", strHeaderHex.c_str());
+                CDataHeader header(strHeaderHex);
+                std::printf("header: %s\n", header.ToString().c_str());
+                if (!header.IsNull()) {
+                    std::vector<CDataChunk> vChunks;
+                    for(unsigned int i = 0; i < header.nChunks; i++) {
+                        std::string strChunkSalt = strSalt + ":" + std::to_string(i+1);
+                        s.dht_get_item(pk.bytes, strChunkSalt);
+                        a = WaitForGetAlert(s, strChunkSalt);
+                        dht_mutable_item_alert* itemChunk = alert_cast<dht_mutable_item_alert>(a);
+                        std::string strChunk = itemChunk->item.to_string();
+                        std::printf("%s: %s\n", itemChunk->authoritative ? "auth" : "non-auth", strChunk.c_str());
+                        if (strChunk.size() > 3) {
+                            strChunk = strChunk.substr(1, strChunk.size() -2);
+                        }
+                        CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+                        vChunks.push_back(chunk);
+                    }
+                    CDataEntry entry(strSalt, nTotalSlots, header, vChunks, GetPrivateKeySeedBytes(seed));
+                    std::printf("Value = %s\n", entry.Value().c_str());
+                    std::printf("Data Size = %lu\n", entry.Value().size());
+                }
+                int64_t nEndTime = GetTimeMillis();
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
+            }
+            else
+                Usage();
+            
         }
         else if (strCommand == "stop" || strCommand == "quit" || strCommand == "exit")
         {

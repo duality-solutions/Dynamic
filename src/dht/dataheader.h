@@ -49,6 +49,7 @@ public:
     uint32_t nFormat;
     uint16_t nIndexLocation;
     uint32_t nUnlockTime;
+    std::string Salt;
 
     CDataHeader() {
         SetNull();
@@ -108,9 +109,14 @@ public:
 
     bool Encrypted() const { return (nVersion > 0); }
 
-    std::string ToHex();
+    void SetHex();
+
+    std::string HexValue() const { return strHex; }
     std::string ToString();
 
+private:
+    std::string strHex;
+    std::string ToHex();
 };
 
 #endif // DYNAMIC_DHT_DATAHEADER_H
