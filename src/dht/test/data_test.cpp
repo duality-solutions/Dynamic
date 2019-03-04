@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "dht/dataentry.h"
+#include "utiltime.h"
 
 #include "libtorrent/session.hpp"
 #include "libtorrent/hex.hpp" // for from_hex
@@ -32,18 +33,18 @@ void Usage()
 {
     std::fprintf(stderr,
         "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nCOMMANDS:\n\n"
-        "gen-key <key-file> -           generate ed25519 keypair and save it in\n"
-        "                               the specified file\n"
-        "dump-key <key-file> -          dump ed25519 keypair from the specified key\n"
-        "                               file.\n"
-        "put <key-file> <string> -      puts the specified string as a mutable\n"
-        "                               object under the public key in key-file\n"
-        "get <public-key> -             get a mutable object under the specified\n"
-        "                               public key\n"
-        "listen -                       listen for get/put requests\n"
+        "gen-key <key-file> -               generate ed25519 keypair and save it in\n"
+        "                                   the specified file\n"
+        "dump-key <key-file> -              dump ed25519 keypair from the specified key\n"
+        "                                   file.\n"
+        "put <key-file> <salt> <string> -   puts the specified string as a mutable\n"
+        "                                   object under the public key in key-file\n"
+        "get <public-key> <salt> -          get a mutable object under the specified\n"
+        "                                   public key and salt\n"
+        "listen -                           listen for get/put requests\n"
         "\n"
-        "stop -                         stops the program. quit and exit will also\n"
-        "                               terminate the application\n\n"
+        "stop -                             stops the program. quit and exit will also\n"
+        "                                   terminate the application\n\n"
         );
 }
 
@@ -105,6 +106,7 @@ void PutString(entry& e, std::array<char, 64>& sig
     bencode(std::back_inserter(buf), e);
     dht::signature sign;
     ++seq;
+    std::printf("PutString salt = %s\n", salt.c_str());
     sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
         , dht::public_key(pk.data())
         , dht::secret_key(sk.data()));
@@ -203,14 +205,28 @@ int SaveState(lt::session& s)
 
 std::string ConvertPath(const std::string& strPath)
 {
-	std::string strConvertPath;
-	if (strPath.substr(0,1) == "~") {
+    std::string strConvertPath;
+    if (strPath.substr(0,1) == "~") {
         strConvertPath = getenv("HOME") + strPath.substr(1, strPath.size()-1);
     }
     else {
-    	strConvertPath = strPath;
+        strConvertPath = strPath;
     }
     return strConvertPath;
+}
+
+std::vector<unsigned char> ConvertStringToCharVector(const std::string str)
+{
+    return std::vector<unsigned char>(str.begin(), str.end());;
+}
+
+std::vector<unsigned char> GetPubKeyBytes(const public_key& pk)
+{
+    std::vector<unsigned char> vchRawPubKey;
+    for(unsigned int i = 0; i < pk.bytes.size(); i++) {
+        vchRawPubKey.push_back(pk.bytes[i]);
+    }
+    return vchRawPubKey;
 }
 
 int main(int argc, char* argv[])
@@ -277,8 +293,8 @@ int main(int argc, char* argv[])
         boost::split(vArgs, strCommand, boost::is_any_of(" "), boost::token_compress_on);
         if (strCommand.substr(0, 4) == "put ")
         {
-            if (vArgs.size() == 3) {
-            	std::string strPath = ConvertPath(vArgs[1]);
+            if (vArgs.size() == 4) {
+                std::string strPath = ConvertPath(vArgs[1]);
                 std::array<char, 32> seed;
                 std::fstream f(strPath.c_str(), std::ios_base::in | std::ios_base::binary);
                 f.read(seed.data(), seed.size());
@@ -291,28 +307,33 @@ int main(int argc, char* argv[])
                     Bootstrap(s);
                     fBootStrap = true;
                 }
+                int64_t nStartTime = GetTimeMillis();
                 s.dht_put_item(pk.bytes, std::bind(&PutString, _1, _2, _3, _4
-                    , pk.bytes, sk.bytes, vArgs[2].c_str()));
+                    , pk.bytes, sk.bytes, vArgs[3].c_str()), vArgs[2]);
 
                 std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
 
                 alert* a = WaitForAlert(s, dht_put_alert::alert_type);
                 dht_put_alert* pa = alert_cast<dht_put_alert>(a);
                 std::printf("%s\n", pa->message().c_str());
+                int64_t nEndTime = GetTimeMillis();
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
             }
-            
+            else
+                Usage();
         }
         else if (strCommand.substr(0, 9) == "dump-key ")
         {
             if (vArgs.size() == 2) {
-            	std::string strPath = ConvertPath(vArgs[1]);
+                std::string strPath = ConvertPath(vArgs[1]);
                 std::printf("strPath: %s\n", strPath.c_str());
                 std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 DumpKey(strPath.c_str());
 
             }
+            else
+                Usage();
         }
-
         else if (strCommand.substr(0, 8) == "gen-key ")
         {
             if (vArgs.size() == 2) {
@@ -320,22 +341,22 @@ int main(int argc, char* argv[])
                 std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 GenerateKey(strPath.c_str());
             }
+            else
+                Usage();
         }
         else if (strCommand.substr(0, 4) == "get ")
         {
-           if (vArgs.size() == 2) {
+           if (vArgs.size() == 3) {
                 auto const len = static_cast<std::ptrdiff_t>(strlen(vArgs[1].c_str()));
                 if (len != 64)
                 {
                     std::fprintf(stderr, "ERROR: public key is expected to be 64 hex digits\n");
-                    return 1;
                 }
                 std::array<char, 32> public_key;
                 bool ret = from_hex({vArgs[1].c_str(), len}, &public_key[0]);
                 if (!ret)
                 {
                     std::fprintf(stderr, "ERROR: invalid hex encoding of public key\n");
-                    return 1;
                 }
                 std::printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 if (fBootStrap == false) {
@@ -343,8 +364,9 @@ int main(int argc, char* argv[])
                     Bootstrap(s);
                     fBootStrap = true;
                 }
-                s.dht_get_item(public_key);
-                std::printf("GET %s\n", argv[0]);
+                int64_t nStartTime = GetTimeMillis();
+                s.dht_get_item(public_key, vArgs[2]);
+                
 
                 bool authoritative = false;
 
@@ -357,8 +379,16 @@ int main(int argc, char* argv[])
                     authoritative = item->authoritative;
                     std::string str = item->item.to_string();
                     std::printf("%s: %s\n", authoritative ? "auth" : "non-auth", str.c_str());
+                    if (!authoritative) {
+                        int64_t nGetNonAuthTime = GetTimeMillis();
+                        std::printf("Non-auth milliseconds = %li\n", nGetNonAuthTime - nStartTime);
+                    }
                 }
+                int64_t nGetAuthTime = GetTimeMillis();
+                std::printf("Auth milliseconds = %li\n", nGetAuthTime - nStartTime);
             }
+            else
+                Usage();
         }
         else if (strCommand == "listen")
         {
@@ -378,10 +408,12 @@ int main(int argc, char* argv[])
                     }
                 }
             }
+            else
+                Usage();
         }
         else if (strCommand == "stop" || strCommand == "quit" || strCommand == "exit")
         {
-        	std::printf("Stopping DHT data test listener\n");
+            std::printf("Stopping DHT data test listener\n");
             exit(1);
         }
         else {
