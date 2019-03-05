@@ -145,8 +145,6 @@ public:
     std::int64_t SequenceNumber() const { return sequence; }
     std::string Value() const { return value; }
     std::int64_t Timestamp() const { return timestamp; }
-
-    void DHTPut();
     
     inline CPutRequest operator=(const CPutRequest& b) {
         key = b.Key();
@@ -165,9 +163,6 @@ void StartEventListener(libtorrent::session* dhtSession);
 
 bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
 bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event);
-bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event);
-bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
-void AddPutRequest(CPutRequest& put);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

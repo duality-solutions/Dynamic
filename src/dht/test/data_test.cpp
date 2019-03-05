@@ -120,11 +120,6 @@ alert* WaitForGetAlert(lt::session& s, const std::string& strSalt)
         {
             if ((*i)->type() != alert_type)
             {
-                static int spinner = 0;
-                static const char anim[] = {'-', '\\', '|', '/'};
-                std::printf("\r%c", anim[spinner]);
-                std::fflush(stdout);
-                spinner = (spinner + 1) & 3;
                 continue;
             }
             else {
@@ -356,10 +351,10 @@ int main(int argc, char* argv[])
 
     params.settings.set_bool(settings_pack::enable_natpmp, true);
     params.settings.set_int(settings_pack::dht_announce_interval, (60));
-    params.settings.set_bool(settings_pack::enable_outgoing_utp, false);
-    params.settings.set_bool(settings_pack::enable_incoming_utp, false);
-    params.settings.set_bool(settings_pack::enable_outgoing_tcp, true);
-    params.settings.set_bool(settings_pack::enable_incoming_tcp, true);
+    params.settings.set_bool(settings_pack::enable_outgoing_utp, true);
+    params.settings.set_bool(settings_pack::enable_incoming_utp, true);
+    params.settings.set_bool(settings_pack::enable_outgoing_tcp, false);
+    params.settings.set_bool(settings_pack::enable_incoming_tcp, false);
 
     params.settings.set_bool(settings_pack::enable_dht, false);
     params.settings.set_int(settings_pack::alert_mask, 0x7fffffff);
@@ -519,7 +514,7 @@ int main(int argc, char* argv[])
 
                 for(const std::pair<std::string, std::string>& pair: vDynamicValues) {
                     s.dht_put_item(pk.bytes, std::bind(&PutString, _1, _2, _3, _4, pk.bytes, sk.bytes, pair.second.c_str()), pair.first);
-                    std::printf("putstatic salt: %s, value: %s: \n", pair.first.c_str(), pair.second.c_str());
+                    std::printf("putstatic salt: %s, value: %s\n", pair.first.c_str(), pair.second.c_str());
                 }
                 std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
                 int64_t nEndTime = GetTimeMillis();
@@ -560,7 +555,7 @@ int main(int argc, char* argv[])
                 }
                 std::printf("strHeaderHex: %s\n", strHeaderHex.c_str());
                 CDataHeader header(strHeaderHex);
-                std::printf("header: %s\n", header.ToString().c_str());
+                std::printf("Header: %s\n", header.ToString().c_str());
                 if (!header.IsNull()) {
                     std::vector<CDataChunk> vChunks;
                     for(unsigned int i = 0; i < header.nChunks; i++) {
@@ -569,7 +564,7 @@ int main(int argc, char* argv[])
                         a = WaitForGetAlert(s, strChunkSalt);
                         dht_mutable_item_alert* itemChunk = alert_cast<dht_mutable_item_alert>(a);
                         std::string strChunk = itemChunk->item.to_string();
-                        std::printf("%s: %s\n", itemChunk->authoritative ? "auth" : "non-auth", strChunk.c_str());
+                        //std::printf("%s: %s\n", itemChunk->authoritative ? "auth" : "non-auth", strChunk.c_str());
                         if (strChunk.size() > 3) {
                             strChunk = strChunk.substr(1, strChunk.size() -2);
                         }
@@ -577,7 +572,7 @@ int main(int argc, char* argv[])
                         vChunks.push_back(chunk);
                     }
                     CDataEntry entry(strSalt, nTotalSlots, header, vChunks, GetPrivateKeySeedBytes(seed));
-                    std::printf("Value = %s\n", entry.Value().c_str());
+                    std::printf("Value:\n%s\n", entry.Value().c_str());
                     std::printf("Data Size = %lu\n", entry.Value().size());
                 }
                 int64_t nEndTime = GetTimeMillis();
