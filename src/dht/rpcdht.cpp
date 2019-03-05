@@ -54,7 +54,7 @@ UniValue getmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("getdhtmutable failed. DHT session not started.\n");
 
     const std::string strPubKey = request.params[0].get_str();
@@ -109,7 +109,7 @@ UniValue putmutable(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("putmutable failed. DHT session not started.\n");
 
     //TODO: Check putValue is not > 1000 bytes.
@@ -118,47 +118,47 @@ UniValue putmutable(const JSONRPCRequest& request)
     const std::string strOperationType = request.params[1].get_str();
     std::string strPrivKey;
     std::string strPubKey;
-    
+    CKeyEd25519 key;
     if (request.params.size() == 4) {
         strPubKey = request.params[2].get_str();
         strPrivKey = request.params[3].get_str();
+        std::vector<unsigned char> vch = vchFromString(strPubKey);
+        CKeyID keyID(Hash160(vch.begin(), vch.end()));
+        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, key)) {
+            throw std::runtime_error("putmutable: ERRCODE: 5400 - Error getting ed25519 private key for " + strPubKey + "\n");
+        }
     }
     else if (request.params.size() == 2) {
-        CKeyEd25519 newkey;
-        strPubKey = stringFromVch(newkey.GetPubKey());
-        strPrivKey = stringFromVch(newkey.GetPrivKey());
+        strPubKey = stringFromVch(key.GetPubKey());
+        strPrivKey = stringFromVch(key.GetPrivKey());
         fNewEntry = true;
     }
-
     int64_t iSequence = 0;
-    std::string strPutValue = "";
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     std::array<char, 64> privKey;
     libtorrent::aux::from_hex(strPrivKey, privKey.data());
-    
-    CKeyEd25519 key;
-    std::vector<unsigned char> vch = vchFromString(strPubKey);
-    CKeyID keyID(Hash160(vch.begin(), vch.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, key)) {
-        throw std::runtime_error("putmutable: ERRCODE: 5400 - Error getting ed25519 private key for " + strPubKey + "\n");
-    }
-
+    bool fAuthoritative = false;
     if (!fNewEntry) {
+        std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        bool fAuthoritative;
-        GetDHTMutableData(pubKey, strOperationType, 2000, strPutValue, iSequence, fAuthoritative);
+        GetDHTMutableData(pubKey, strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
-    CPutRequest put(key, strOperationType, iSequence, strValue);
-    AddPutRequest(put);
+    uint16_t nTotalSlots = 24;
+    std::vector<unsigned char> vchValue = vchFromValue(request.params[1]);
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(key.GetPubKeyBytes());
+    uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter to use version 0 (unencrypted)
+    uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
+    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (dataEntry.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
 
-    result.push_back(Pair("Public Key", strPubKey));
-    //result.push_back(Pair("Put_PrivKey", strPrivKey));
-    result.push_back(Pair("Salt", strOperationType));
-    result.push_back(Pair("Sequence Number", iSequence));
-    result.push_back(Pair("DHT Entry Value", request.params[0].get_str()));
-    
+    dataEntry.GetHeader().Salt = strOperationType + ":" + std::to_string(0);
+    pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, dataEntry);
+
+    result.push_back(Pair("put_seq", iSequence));
     return result;
 }
 
@@ -212,7 +212,7 @@ UniValue dhtinfo(const JSONRPCRequest& request)
     if (!sporkManager.IsSporkActive(SPORK_30_ACTIVATE_BDAP))
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("dhtinfo failed. DHT session not started.\n");
 
     libtorrent::session_status stats;
@@ -338,27 +338,6 @@ UniValue dhtdb(const JSONRPCRequest& request)
     return result;
 }
 
-static bool Encrypt(const std::vector<std::vector<unsigned char>>& vvchPubKeys, const std::vector<unsigned char>& vchValue, std::vector<unsigned char>& vchEncrypted, std::string& strErrorMessage) try
-{
-    LogPrintf("%s -- value converted %s \n", __func__, stringFromVch(vchValue));
-    //EncodeBase64
-    if (!EncryptBDAPData(vvchPubKeys, vchValue, vchEncrypted, strErrorMessage))
-        return false;
-
-    if (vchEncrypted.size() > 1277) {
-        LogPrintf("%s -- Ciphertext too large for one DHT entry. %u\n", __func__, vchEncrypted.size());
-        return false;
-    }
-    LogPrintf("%s -- Ciphertext size %u\n", __func__, vchEncrypted.size());
-
-    return true;
-}
-catch (std::bad_alloc const&)
-{
-    LogPrintf("%s -- catch std::bad_alloc\n", __func__);
-    return false;
-}
-
 UniValue putbdapdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -392,7 +371,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
    
     EnsureWalletIsUnlocked();
 
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("putbdapdata: ERRCODE: 5500 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -432,29 +411,27 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     bool fAuthoritative = false;
     std::string strGetLastValue;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
+    GetDHTMutableData(getKey.GetDHTPubKey(), strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative);
     iSequence++;
-    CPutRequest put(getKey, strOperationType, iSequence, strValue);
-    AddPutRequest(put);
-    
+    uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
+    uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
+    uint16_t nTotalSlots = 24;
+    std::vector<unsigned char> vchValue = vchFromValue(request.params[2]);
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (dataEntry.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+
+    dataEntry.GetHeader().Salt = strHeaderSalt;
+    LogPrintf("%s -- Header = %s\n", __func__, dataEntry.GetHeader().ToString());
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
     result.push_back(Pair("put_seq", iSequence));
-    result.push_back(Pair("put_value", strValue));
 
     return result;
-}
-
-static bool Decrypt(const std::vector<unsigned char>& vchPrivSeedBytes, const std::vector<unsigned char>& vchData, std::vector<unsigned char>& vchDecrypted, std::string& strErrorMessage) try
-{
-    if (!DecryptBDAPData(vchPrivSeedBytes, vchData, vchDecrypted, strErrorMessage))
-        return false;
-
-    return true;
-}
-catch (std::bad_alloc const&)
-{
-    LogPrintf("%s -- catch std::bad_alloc\n", __func__);
-    return false;
 }
 
 UniValue getbdapdata(const JSONRPCRequest& request)
@@ -486,7 +463,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("getbdapdata: ERRCODE: 5600 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -509,21 +486,45 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("link_address", stringFromVch(entry.LinkAddress)));
     result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
-    
-    bool fRet = false;
+    std::vector<unsigned char> vchDHTPublicKey = entry.DHTPublicKey;
+    CKeyEd25519 getKey;
+    CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting ed25519 private key for the " + entry.GetFullObjectPath() + _(" BDAP entry.\n"));
+
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-    
-    std::string strValue = "";
-    bool fAuthoritative;
-    fRet = GetDHTMutableData(arrPubKey, strOperationType, 5000, strValue, iSequence, fAuthoritative);
-    if (fRet) {
+    bool fAuthoritative = false;
+    uint16_t nTotalSlots = 24;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    if (!GetDHTMutableData(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
+        throw std::runtime_error("getbdapdata: ERRCODE: 5604 - Failed to get header.");
+    iSequence++;
+    if (strHeaderHex.size() > 3) {
+        strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
+    }
+    CDataHeader header(strHeaderHex);
+    if (!header.IsNull()) {
+        std::vector<CDataChunk> vChunks;
+        for(unsigned int i = 0; i < header.nChunks; i++) {
+            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+            std::string strChunk;
+            if (!GetDHTMutableData(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
+                throw std::runtime_error("getbdapdata: ERRCODE: 5605 - Failed to get chunk.");
+            if (strChunk.size() > 3) {
+                strChunk = strChunk.substr(1, strChunk.size() -2);
+            }
+            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+            vChunks.push_back(chunk);
+        }
+        CDataEntry entry(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
         result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("get_value", strValue));
+        result.push_back(Pair("get_value", entry.Value()));
     }
     else {
-        throw std::runtime_error("getbdapdata: ERRCODE: 5603 - Error getting data from DHT. Check the debug.log for details.\n");
+        throw std::runtime_error("getbdapdata: ERRCODE: 5606 - Header is null.");
     }
 
     return result;
@@ -557,7 +558,7 @@ UniValue dhtputmessages(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
 
     std::vector<CMutablePutEvent> vchMutableData;
-    bool fRet = GetAllDHTPutEvents(vchMutableData);
+    bool fRet = false;//GetAllDHTPutEvents(vchMutableData);
     int nCounter = 0;
     if (fRet) {
         for(const CMutablePutEvent& data : vchMutableData) {
@@ -668,7 +669,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VOBJ);
    
-    if (!pTorrentDHTSession)
+    if (!pHashTableSession->Session)
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5620 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -718,42 +719,46 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
 
-    bool fRet = false;
+    CKeyEd25519 getKey;
+    CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5626 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
+
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
     libtorrent::aux::from_hex(strPubKey, arrPubKey.data());
-    std::string strValue = "";
-    bool fAuthoritative;
-    fRet = GetDHTMutableData(arrPubKey, strOperationType, 1000, strValue, iSequence, fAuthoritative);
-    if (fRet) {
+    bool fAuthoritative = false;
+    uint16_t nTotalSlots = 24;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    if (!GetDHTMutableData(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5627 - Failed to get header.");
+    iSequence++;
+    if (strHeaderHex.size() > 3) {
+        strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
+    }
+    CDataHeader header(strHeaderHex);
+    if (!header.IsNull()) {
+        std::vector<CDataChunk> vChunks;
+        for(unsigned int i = 0; i < header.nChunks; i++) {
+            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+            std::string strChunk;
+            if (!GetDHTMutableData(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
+                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get chunk.");
+            if (strChunk.size() > 3) {
+                strChunk = strChunk.substr(1, strChunk.size() -2);
+            }
+            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+            vChunks.push_back(chunk);
+        }
+        CDataEntry entry(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
         result.push_back(Pair("get_seq", iSequence));
-        CKeyEd25519 getKey;
-        CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
-        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-            throw std::runtime_error("putbdaplinkdata: ERRCODE: 5546 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
-
-        std::string strMessage = "";
-        // TODO: Add version and expire epoch data
-        // TODO: check if the value is hex.
-        // TODO: split ciphertext if it is too large for one DHT entry (max string = 1297 chars)
-        // TODO: Add an index entry
-        std::vector<unsigned char> vchDecodedCipherText = HexStringToCharVector(strValue);
-        std::vector<unsigned char> vchDecrypted;
-        if (vchDecodedCipherText.size() > 32) {
-            if (Decrypt(getKey.GetPrivSeedBytes(), vchDecodedCipherText, vchDecrypted, strMessage)) {
-                result.push_back(Pair("get_value", stringFromVch(vchDecrypted)));
-            }
-            else {
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5626 - Decrypting data failed. " +  strMessage + "\n");
-            }
-        }
-        else {
-            result.push_back(Pair("get_value", "Error decoding value"));
-        }
+        result.push_back(Pair("get_value", entry.Value()));
     }
     else {
-        result.push_back(Pair("get_value", "Error: not found"));
+        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5629 - Header is null.");
     }
+
     return result;
 }
 
@@ -786,8 +791,8 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
         throw std::runtime_error("BDAP_DHT_RPC_ERROR: ERRCODE: 3000 - " + _("Can not use DHT until BDAP spork is active."));
 
     UniValue result(UniValue::VOBJ);
-   
-    if (!pTorrentDHTSession)
+
+    if (!pHashTableSession->Session)
         throw std::runtime_error("putbdaplinkdata: ERRCODE: 5640 - DHT session not started.\n");
 
     if (!CheckDomainEntryDB())
@@ -844,23 +849,24 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     int64_t iSequence = 0;
     bool fAuthoritative = false;
     std::string strGetLastValue;
+
     // we need the last sequence number to update an existing DHT entry. 
     GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
     iSequence++;
 
+    uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
+    uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
+    uint16_t nTotalSlots = 24;
     std::vector<unsigned char> vchValue = vchFromValue(request.params[3]);
-    std::string strErrorMessage;
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(EncodedPubKeyToBytes(linkRequest.RequestorPubKey));
     vvchPubKeys.push_back(EncodedPubKeyToBytes(linkAccept.RecipientPubKey));
-    std::vector<unsigned char> vchEncrypted;
-    if (!Encrypt(vvchPubKeys, vchValue, vchEncrypted, strErrorMessage))
-        throw std::runtime_error("putbdaplinkdata: ERRCODE: 5646 - Error encrypting put data: " + strErrorMessage);
+    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (dataEntry.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5547 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
 
-    std::string strEncodedCipherText = CharVectorToHexString(vchEncrypted);
-    CPutRequest put(getKey, strOperationType, iSequence, strEncodedCipherText);
-    AddPutRequest(put);
-
+    dataEntry.GetHeader().Salt = strOperationType + ":" + std::to_string(0);
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
     result.push_back(Pair("put_seq", iSequence));
 
     return result;

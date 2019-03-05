@@ -59,6 +59,6 @@ std::string CDataHeader::ToHex()
 
 std::string CDataHeader::ToString()
 {
-   return strprintf("CDataHeader(version=%u, expire=%u, chunks=%u, chunk_size=%u, format=%u, index_loc=%u, unlock_time=%u)\n", 
-                                    nVersion, nExpireTime, nChunks, nChunkSize, nFormat, nIndexLocation, nUnlockTime);
+   return strprintf("CDataHeader(version=%u, encrypted=%s, expire=%u, chunks=%u, chunk_size=%u, format=%u, index_loc=%u, unlock_time=%u)\n", 
+                                    nVersion, (nVersion > 0 ? "true": "false"), nExpireTime, nChunks, nChunkSize, nFormat, nIndexLocation, nUnlockTime);
 }

@@ -126,6 +126,7 @@ DYNAMIC_CORE_H = \
   dht/mutable.h \
   dht/mutabledb.h \
   dht/operations.h \
+  dht/putbuffer.h \
   dht/session.h \
   dht/sessionevents.h \
   dht/settings.h \

@@ -60,6 +60,7 @@ bool CDataEntry::InitPut()
     std::vector<unsigned char> vchRaw;
     if (dataHeader.nVersion == 1) {
         if (!Encrypt(vPubKeys, vchData, vchRaw, strErrorMessage)) {
+            LogPrintf("CDataEntry::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
             return false;
         }
     }
@@ -70,6 +71,7 @@ bool CDataEntry::InitPut()
         strErrorMessage = "Unknown and unsupported version.";
         return false;
     }
+
     std::string strHexData = CharVectorToHexString(vchRaw);
     if (strHexData.size() > DHT_DATA_MAX_CHUNK_SIZE * nTotalSlots) {
         strErrorMessage = "Data is too large for this operation code.";

@@ -49,6 +49,7 @@ public:
     std::string ErrorMessage() { return strErrorMessage; }
     DHT::DataMode Mode() const { return nMode; }
     std::string HeaderHex;
+    bool HasError() const { return strErrorMessage.size() > 0; }
 
 private:
     bool InitPut();

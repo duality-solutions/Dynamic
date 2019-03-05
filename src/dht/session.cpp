@@ -6,6 +6,8 @@
 
 #include "dht/sessionevents.h"
 #include "chainparams.h"
+#include "dht/datachunk.h"
+#include "dht/dataheader.h"
 #include "dht/settings.h"
 #include "dynode-sync.h"
 #include "net.h"
@@ -14,10 +16,11 @@
 #include "utiltime.h" // for GetTimeMillis
 #include "validation.h"
 
-#include "libtorrent/hex.hpp" // for to_hex
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/bencode.hpp" // for bencode()
+#include <libtorrent/hex.hpp> // for to_hex
 #include "libtorrent/kademlia/ed25519.hpp"
+#include <libtorrent/kademlia/item.hpp> // for sign_mutable_item
 #include "libtorrent/span.hpp"
 
 #include <boost/filesystem.hpp>
@@ -25,6 +28,7 @@
 #include <cstdio> // for snprintf
 #include <cinttypes> // for PRId64 et.al.
 #include <cstdlib>
+#include <functional>
 #include <fstream>
 #include <thread>
 
@@ -35,7 +39,38 @@ static std::shared_ptr<std::thread> pDHTTorrentThread;
 static bool fShutdown;
 static bool fStarted;
 
-session *pTorrentDHTSession = NULL;
+CHashTableSession* pHashTableSession;
+
+namespace DHT {
+    std::vector<std::pair<std::string, std::string>> vPutValues;
+
+    void put_mutable
+    (
+        libtorrent::entry& e
+        ,std::array<char, 64>& sig
+        ,std::int64_t& seq
+        ,std::string const& salt
+        ,std::array<char, 32> const& pk
+        ,std::array<char, 64> const& sk
+        ,char const* str
+        ,std::int64_t const& iSeq
+    )
+    {
+        using dht::sign_mutable_item;
+        if (str != NULL) {
+            e = std::string(str);
+            std::vector<char> buf;
+            bencode(std::back_inserter(buf), e);
+            dht::signature sign;
+            seq = iSeq;
+            LogPrintf("%s --\nSalt = %s\nValue = %s\nSequence = %li\n", __func__, salt, std::string(str), seq);
+            sign = sign_mutable_item(buf, salt, dht::sequence_number(seq)
+                , dht::public_key(pk.data())
+                , dht::secret_key(sk.data()));
+            sig = sign.bytes;
+        }
+    }
+}
 
 static void empty_public_key(std::array<char, 32>& public_key)
 {
@@ -196,12 +231,12 @@ void static DHTTorrentNetwork(const CChainParams& chainparams, CConnman& connman
         LogPrintf("DHTTorrentNetwork -- started\n");
         // with current peers and Dynodes
         settings.LoadSettings();
-        pTorrentDHTSession = settings.GetSession();
+        pHashTableSession->Session = settings.GetSession();
         
-        if (!pTorrentDHTSession)
+        if (!pHashTableSession->Session)
             throw std::runtime_error("DHT Torrent network bootstraping error.");
         
-        StartEventListener(pTorrentDHTSession);
+        StartEventListener(pHashTableSession->Session);
     }
     catch (const std::runtime_error& e)
     {
@@ -225,8 +260,8 @@ void StopTorrentDHTNetwork()
             libtorrent::session_params params;
             params.settings.set_bool(settings_pack::enable_dht, false);
             params.settings.set_int(settings_pack::alert_mask, 0x0);
-            pTorrentDHTSession->apply_settings(params.settings);
-            pTorrentDHTSession->abort();
+            pHashTableSession->Session->apply_settings(params.settings);
+            pHashTableSession->Session->abort();
         }
         pDHTTorrentThread->join();
         LogPrint("dht", "DHTTorrentNetwork -- StopTorrentDHTNetwork abort.\n");
@@ -253,14 +288,14 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
 {
     LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats started.\n");
 
-    if (!pTorrentDHTSession) {
+    if (!pHashTableSession->Session) {
         return;
     }
 
-    if (!pTorrentDHTSession->is_dht_running()) {
+    if (!pHashTableSession->Session->is_dht_running()) {
         return;
         //LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Restarting DHT.\n");
-        //if (!LoadSessionState(pTorrentDHTSession)) {
+        //if (!LoadSessionState(pHashTableSession->Session)) {
         //    LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats Couldn't load previous settings.  Trying to bootstrap again.\n");
         //    Bootstrap();
         //}
@@ -272,11 +307,34 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
         LogPrint("dht", "DHTTorrentNetwork -- GetDHTStats DHT already running.  Bootstrap not needed.\n");
     }
 
-    pTorrentDHTSession->post_dht_stats();
+    pHashTableSession->Session->post_dht_stats();
     //get alert from map
-    //alert* dhtAlert = WaitForResponse(pTorrentDHTSession, dht_stats_alert::alert_type);
+    //alert* dhtAlert = WaitForResponse(pHashTableSession->Session, dht_stats_alert::alert_type);
     //dht_stats_alert* dhtStatsAlert = alert_cast<dht_stats_alert>(dhtAlert);
     //vchDHTLookup = dhtStatsAlert->active_requests;
     //vchDHTBuckets = dhtStatsAlert->routing_table;
-    stats = pTorrentDHTSession->status();
+    stats = pHashTableSession->Session->status();
+}
+
+bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataEntry entry)
+{
+    vDataEntries.push_back(entry);
+    DHT::vPutValues.clear();
+    std::vector<std::vector<unsigned char>> vPubKeys;
+    std::string strSalt = entry.GetHeader().Salt;
+    DHT::vPutValues.push_back(std::make_pair(strSalt, entry.HeaderHex));
+    //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
+    LogPrintf("CHashTableSession::%s -- PutMutableData started, Salt = %s, Value = %s, lastSequence = %li, vPutValues size = %u\n", __func__, 
+                                                                strSalt, entry.Value(), lastSequence, DHT::vPutValues.size());
+    for(const CDataChunk& chunk: entry.GetChunks()) {
+        DHT::vPutValues.push_back(std::make_pair(chunk.Salt, chunk.Value));
+    }
+
+    for(const std::pair<std::string, std::string>& pair: DHT::vPutValues) {
+        Session->dht_put_item(public_key, std::bind(&DHT::put_mutable, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, 
+                                public_key, private_key, pair.second.c_str(), lastSequence), pair.first);
+        //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
+        LogPrintf("CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
+    }
+    return true;
 }
