@@ -50,7 +50,7 @@ public:
     DHT::DataMode Mode() const { return nMode; }
     std::string HeaderHex;
     bool HasError() const { return strErrorMessage.size() > 0; }
-
+    bool Valid() const { return (dataHeader.nDataSize == vchData.size()); }
 private:
     bool InitPut();
     bool InitGet(const std::vector<unsigned char>& privateKey);

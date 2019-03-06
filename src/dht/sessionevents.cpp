@@ -241,6 +241,13 @@ bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
     return false;
 }
 
+bool RemoveDHTGetEvent(const std::string& infoHash)
+{
+    LOCK(cs_DHTGetEventMap);
+    m_DHTGetEventMap.erase(infoHash);
+    return true;
+}
+
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
 {
     //LOCK(cs_DHTGetEventMap);

@@ -49,13 +49,14 @@ public:
     uint32_t nFormat;
     uint16_t nIndexLocation;
     uint32_t nUnlockTime;
+    uint32_t nDataSize;
     std::string Salt;
 
     CDataHeader() {
         SetNull();
     }
 
-    CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation);
+    CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size);
 
     CDataHeader(const std::string strHex);
 
@@ -68,6 +69,7 @@ public:
         nFormat = 0;
         nIndexLocation = 0;
         nUnlockTime = 0;
+        nDataSize = 0;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -81,11 +83,12 @@ public:
         READWRITE(nFormat);
         READWRITE(nIndexLocation);
         READWRITE(nUnlockTime);
+        READWRITE(nDataSize);
     }
 
     inline friend bool operator==(const CDataHeader& a, const CDataHeader& b) {
         return (a.nVersion == b.nVersion && a.nExpireTime == b.nExpireTime && a.nChunks == b.nChunks && a.nChunkSize == b.nChunkSize && 
-                a.nFormat == b.nFormat && a.nIndexLocation == b.nIndexLocation && a.nUnlockTime == b.nUnlockTime);
+                a.nFormat == b.nFormat && a.nIndexLocation == b.nIndexLocation && a.nUnlockTime == b.nUnlockTime && a.nDataSize == b.nDataSize);
     }
 
     inline friend bool operator!=(const CDataHeader& a, const CDataHeader& b) {
@@ -100,6 +103,7 @@ public:
         nFormat = b.nFormat;
         nIndexLocation = b.nIndexLocation;
         nUnlockTime = b.nUnlockTime;
+        nDataSize = b.nDataSize;
         return *this;
     }
  

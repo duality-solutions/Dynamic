@@ -161,6 +161,7 @@ void StartEventListener(libtorrent::session* dhtSession);
 
 bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
 bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
+bool RemoveDHTGetEvent(const std::string& infoHash);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
 std::string GetInfoHash(const std::string pubkey, const std::string salt);
 

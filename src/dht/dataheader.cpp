@@ -11,8 +11,8 @@
 #include "uint256.h"
 #include "utiltime.h"
 
-CDataHeader::CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation) :
-                               nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation)
+CDataHeader::CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size) :
+                               nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation), nDataSize(size)
 {
     nUnlockTime = GetTime() + 30; // unlocks in 30 seconds
     strHex = ToHex();
@@ -59,6 +59,6 @@ std::string CDataHeader::ToHex()
 
 std::string CDataHeader::ToString()
 {
-   return strprintf("CDataHeader(version=%u, encrypted=%s, expire=%u, chunks=%u, chunk_size=%u, format=%u, index_loc=%u, unlock_time=%u)\n", 
-                                    nVersion, (nVersion > 0 ? "true": "false"), nExpireTime, nChunks, nChunkSize, nFormat, nIndexLocation, nUnlockTime);
+   return strprintf("CDataHeader(version=%u, encrypted=%s, expire=%u, chunks=%u, chunk_size=%u, data_size=%u, format=%u, index_loc=%u, unlock_time=%u)\n", 
+                                    nVersion, (nVersion > 0 ? "true": "false"), nExpireTime, nChunks, nChunkSize, nDataSize, nFormat, nIndexLocation, nUnlockTime);
 }
