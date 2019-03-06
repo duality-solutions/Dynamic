@@ -11,7 +11,7 @@
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
 #include "dht/storage.h"
-#include "dht/operations.h"
+#include "dht/session.h"
 #include "dht/sessionevents.h"
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "hash.h"
@@ -66,7 +66,7 @@ UniValue getmutable(const JSONRPCRequest& request)
     std::array<char, 32> pubKey;
     libtorrent::aux::from_hex(strPubKey, pubKey.data());
     bool fAuthoritative;
-    fRet = GetDHTMutableData(pubKey, strSalt, 5000, strValue, iSequence, fAuthoritative);
+    fRet = pHashTableSession->SubmitGet(pubKey, strSalt, 5000, strValue, iSequence, fAuthoritative);
     if (fRet) {
         result.push_back(Pair("Public Key", strPubKey));
         result.push_back(Pair("Salt", strSalt));
@@ -142,7 +142,7 @@ UniValue putmutable(const JSONRPCRequest& request)
     if (!fNewEntry) {
         std::string strGetLastValue;
         // we need the last sequence number to update an existing DHT entry.
-        GetDHTMutableData(pubKey, strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
+        pHashTableSession->SubmitGet(pubKey, strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
         iSequence++;
     }
     uint16_t nTotalSlots = 24;
@@ -414,7 +414,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
-    GetDHTMutableData(getKey.GetDHTPubKey(), strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative);
+    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative);
     iSequence++;
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
@@ -499,23 +499,17 @@ UniValue getbdapdata(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 24;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    if (!GetDHTMutableData(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
+    if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
         throw std::runtime_error("getbdapdata: ERRCODE: 5604 - Failed to get header.");
     iSequence++;
-    if (strHeaderHex.size() > 3) {
-        strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
-    }
     CDataHeader header(strHeaderHex);
     if (!header.IsNull()) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
-            if (!GetDHTMutableData(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
+            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
                 throw std::runtime_error("getbdapdata: ERRCODE: 5605 - Failed to get chunk.");
-            if (strChunk.size() > 3) {
-                strChunk = strChunk.substr(1, strChunk.size() -2);
-            }
             CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
             vChunks.push_back(chunk);
         }
@@ -731,23 +725,17 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 24;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    if (!GetDHTMutableData(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
+    if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 1200, strHeaderHex, iSequence, fAuthoritative))
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5627 - Failed to get header.");
     iSequence++;
-    if (strHeaderHex.size() > 3) {
-        strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
-    }
     CDataHeader header(strHeaderHex);
     if (!header.IsNull()) {
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
             std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
             std::string strChunk;
-            if (!GetDHTMutableData(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
+            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 1200, strChunk, iSequence, fAuthoritative))
                 throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get chunk.");
-            if (strChunk.size() > 3) {
-                strChunk = strChunk.substr(1, strChunk.size() -2);
-            }
             CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
             vChunks.push_back(chunk);
         }
@@ -851,7 +839,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     std::string strGetLastValue;
 
     // we need the last sequence number to update an existing DHT entry. 
-    GetDHTMutableData(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
+    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strOperationType, 1200, strGetLastValue, iSequence, fAuthoritative);
     iSequence++;
 
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.

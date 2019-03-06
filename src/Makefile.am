@@ -125,7 +125,6 @@ DYNAMIC_CORE_H = \
   dht/ed25519.h \
   dht/mutable.h \
   dht/mutabledb.h \
-  dht/operations.h \
   dht/putbuffer.h \
   dht/session.h \
   dht/sessionevents.h \
@@ -289,7 +288,6 @@ libdynamic_server_a_SOURCES = \
   dht/dataheader.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
-  dht/operations.cpp \
   dht/rpcdht.cpp \
   dht/session.cpp \
   dht/sessionevents.cpp \
