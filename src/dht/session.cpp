@@ -338,3 +338,65 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
     }
     return true;
 }
+
+bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt)
+{
+    //TODO: DHT add locks
+    LogPrintf("CHashTableSession::%s -- started.\n", __func__);
+
+    if (!pHashTableSession->Session) {
+        //message = "DHTTorrentNetwork -- GetDHTMutableData Error. pHashTableSession->Session is null.";
+        return false;
+    }
+
+    if (!pHashTableSession->Session->is_dht_running()) {
+        LogPrintf("CHashTableSession::%s -- GetDHTMutableData Restarting DHT.\n", __func__);
+        if (!LoadSessionState(pHashTableSession->Session)) {
+            LogPrintf("DHTTorrentNetwork -- GetDHTMutableData Couldn't load previous settings.  Trying to Bootstrap again.\n");
+            if (!Bootstrap())
+                return false;
+        }
+        else {
+            LogPrintf("CHashTableSession::%s -- GetDHTMutableData  setting loaded from file.\n", __func__);
+        }
+    }
+    else {
+        LogPrintf("CHashTableSession::%s -- GetDHTMutableData DHT already running.  Bootstrap not needed.\n", __func__);
+    }
+
+    Session->dht_get_item(public_key, entrySalt);
+    LogPrintf("CHashTableSession::%s -- MGET: %s, salt = %s\n", __func__, aux::to_hex(public_key), entrySalt);
+
+    return true;
+}
+
+bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
+                            std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative)
+{
+    if (!SubmitGet(public_key, entrySalt))
+        return false;
+
+    MilliSleep(40);
+    CMutableGetEvent data;
+    int64_t startTime = GetTimeMillis();
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key),entrySalt);
+    while (timeout > GetTimeMillis() - startTime)
+    {
+        if (FindDHTGetEvent(infoHash, data)) {
+            std::string strData = data.Value();
+            // TODO (DHT): check the last position for the single quote character
+            if (strData.substr(0, 1) == "'") {
+                entryValue = strData.substr(1, strData.size() - 2);
+            }
+            else {
+                entryValue = strData;
+            }
+            lastSequence = data.SequenceNumber();
+            fAuthoritative = data.Authoritative();
+            LogPrintf("CHashTableSession::%s -- value = %s, seq = %d, auth = %u\n", __func__, entryValue, lastSequence, fAuthoritative);
+            return true;
+        }
+        MilliSleep(40);
+    }
+    return false;
+}

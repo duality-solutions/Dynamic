@@ -36,6 +36,10 @@ public:
 
     bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataEntry entry);
 
+    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt);
+    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
+                            std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative);
+
 };
 
 bool Bootstrap();

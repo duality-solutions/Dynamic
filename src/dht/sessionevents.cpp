@@ -4,7 +4,6 @@
 
 #include "dht/sessionevents.h"
 
-#include "dht/operations.h"
 #include "dht/session.h"
 #include "sync.h" // for LOCK and CCriticalSection
 #include "util.h" // for LogPrintf
@@ -49,7 +48,7 @@ std::string CEvent::ToString() const
         Message(), Type(), Category(), What(), Timestamp());
 }
 
-static std::string GetInfoHash(const std::string pubkey, const std::string salt)
+std::string GetInfoHash(const std::string pubkey, const std::string salt)
 {
     std::array<char, 32> arrPubKey;
     aux::from_hex(pubkey, arrPubKey.data());
@@ -97,19 +96,18 @@ CPutRequest::CPutRequest(const CKeyEd25519 _key, const std::string _salt, const 
     timestamp = GetTimeMillis();
 }
 
-static void AddToDHTGetEventMap(const MutableKey& mKey, const CMutableGetEvent& event)
+static void AddToDHTGetEventMap(const std::string& infoHash, const CMutableGetEvent& event)
 {
     LOCK(cs_DHTGetEventMap);
-    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
-    std::multimap<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
+    std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent == m_DHTGetEventMap.end()) {
         // event not found. Add a new entry to DHT event map
-        LogPrintf("AddToDHTGetEventMap Not found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+        LogPrintf("AddToDHTGetEventMap Not found -- infohash = %s\n", infoHash);
         m_DHTGetEventMap.insert(std::make_pair(infoHash, event));
     }
     else {
         // event found. Update entry in DHT event map
-        LogPrintf("AddToDHTGetEventMap Found -- infohash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+        LogPrintf("AddToDHTGetEventMap Found -- infohash = %s\n", infoHash);
         iMutableEvent->second = event;
     }
 }
@@ -146,7 +144,6 @@ static void DHTEventListener(session* dhtSession)
             const std::string strAlertTypeName = alert_name(iAlertType);
             if (iAlertType == DHT_GET_ALERT_TYPE_CODE || iAlertType == DHT_PUT_ALERT_TYPE_CODE) {
                 LogPrint("dht", "DHTEventListener -- DHT Alert Message = %s, Alert Type =%s, Alert Category = %u\n", strAlertMessage, strAlertTypeName, iAlertCategory);
-                MutableKey mKey;
                 if (iAlertType == DHT_GET_ALERT_TYPE_CODE) {
                     // DHT Get Mutable Event
                     dht_mutable_item_alert* pGet = alert_cast<dht_mutable_item_alert>((*iAlert));
@@ -156,8 +153,8 @@ static void DHTEventListener(session* dhtSession)
                     const CMutableGetEvent event(strAlertMessage, iAlertType, iAlertCategory, strAlertTypeName, 
                           aux::to_hex(pGet->key), pGet->salt, pGet->seq, pGet->item.to_string(), aux::to_hex(pGet->signature), pGet->authoritative);
 
-                    mKey = std::make_pair(event.PublicKey(), event.Salt());
-                    AddToDHTGetEventMap(mKey, event);
+                    std::string infoHash = GetInfoHash(event.PublicKey(), event.Salt());
+                    AddToDHTGetEventMap(infoHash, event);
                 }
             }
             else if (iAlertType == DHT_STATS_ALERT_TYPE_CODE) {
@@ -230,25 +227,24 @@ bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEv
     return events.size() > 0;
 }
 
-bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event)
+bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
 {
     //LOCK(cs_DHTGetEventMap);
-    std::string infoHash = GetInfoHash(mKey.first, mKey.second);
-    std::multimap<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
+    std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent != m_DHTGetEventMap.end()) {
         // event found.
-        LogPrint("dht", "FindDHTGetEvent -- Found, infoHash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+        LogPrintf("FindDHTGetEvent -- Found, infoHash = %s\n", infoHash);
         event = iMutableEvent->second;
         return true;
     }
-    LogPrint("dht", "FindDHTGetEvent -- Not found, infoHash = %s, pubkey = %s, salt = %s\n", infoHash, mKey.first, mKey.second);
+    LogPrintf("FindDHTGetEvent -- Not found, infoHash = %s\n", infoHash);
     return false;
 }
 
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents)
 {
     //LOCK(cs_DHTGetEventMap);
-    for (std::multimap<std::string, CMutableGetEvent>::iterator it=m_DHTGetEventMap.begin(); it!=m_DHTGetEventMap.end(); ++it) {
+    for (std::map<std::string, CMutableGetEvent>::iterator it=m_DHTGetEventMap.begin(); it!=m_DHTGetEventMap.end(); ++it) {
         vchGetEvents.push_back(it->second);
     }
     return true;

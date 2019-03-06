@@ -15,8 +15,6 @@ namespace libtorrent {
     class alert;
 }
 
-typedef std::pair<std::string, std::string> MutableKey; // <pubkey, salt>
-
 class CEvent {
 private:
     std::string message;
@@ -162,7 +160,8 @@ void StopEventListener();
 void StartEventListener(libtorrent::session* dhtSession);
 
 bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event);
+bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
+std::string GetInfoHash(const std::string pubkey, const std::string salt);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H
