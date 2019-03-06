@@ -49,6 +49,7 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     dataHeader.nVersion = version;
     dataHeader.nExpireTime = expire;
     dataHeader.nFormat = (uint32_t)format;
+    dataHeader.nDataSize = data.size();
     dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
     InitPut();
     dataHeader.SetHex();

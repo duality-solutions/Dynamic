@@ -373,13 +373,14 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
 bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
                             std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative)
 {
+    std::string infoHash = GetInfoHash(aux::to_hex(public_key),entrySalt);
+    RemoveDHTGetEvent(infoHash);
     if (!SubmitGet(public_key, entrySalt))
         return false;
 
     MilliSleep(40);
     CMutableGetEvent data;
     int64_t startTime = GetTimeMillis();
-    std::string infoHash = GetInfoHash(aux::to_hex(public_key),entrySalt);
     while (timeout > GetTimeMillis() - startTime)
     {
         if (FindDHTGetEvent(infoHash, data)) {
