@@ -199,7 +199,7 @@ public:
             LOCK(cs_KeyStore);
             if (!IsCrypted())
                 return CBasicKeyStore::HaveDHTKey(address);
-            return mapCryptedKeys.count(address) > 0;
+            return mapCryptedDHTKeys.count(address) > 0;
         }
         return false;
     }
