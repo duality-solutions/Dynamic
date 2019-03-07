@@ -159,7 +159,7 @@ UniValue putmutable(const JSONRPCRequest& request)
     pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, dataEntry);
 
     result.push_back(Pair("put_seq", iSequence));
-    result.push_back(Pair("put_data_size", vchValue.size()));
+    result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
 
@@ -431,7 +431,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     LogPrintf("%s -- Header = %s\n", __func__, dataEntry.GetHeader().ToString());
     pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
     result.push_back(Pair("put_seq", iSequence));
-    result.push_back(Pair("put_data_size", vchValue.size()));
+    result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
 
@@ -905,7 +905,7 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
     result.push_back(Pair("put_seq", iSequence));
-    result.push_back(Pair("put_data_size", vchValue.size()));
+    result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
     return result;
 }
