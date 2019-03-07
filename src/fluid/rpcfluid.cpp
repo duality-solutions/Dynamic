@@ -28,6 +28,29 @@ extern bool EnsureWalletIsAvailable(bool avoidException);
 extern void SendCustomTransaction(const CScript& generatedScript, CWalletTx& wtxNew, CAmount nValue, bool fUseInstantSend = false);
 extern void SendBurnTransaction(const CScript& burnScript, CWalletTx& wtxNew, const CAmount& nValue, const CScript& sendAddress);
 
+struct DynodeCompareTimeStamp {
+    bool operator()(const CFluidDynode& a, const CFluidDynode& b)
+    {
+    return (a.nTimeStamp < b.nTimeStamp);
+    }
+};
+
+
+struct MintCompareTimeStamp {
+    bool operator()(const CFluidMint& a, const CFluidMint& b)
+    {
+    return (a.nTimeStamp < b.nTimeStamp);
+    }
+};
+
+
+struct MiningCompareTimeStamp {
+    bool operator()(const CFluidMining& a, const CFluidMining& b)
+    {
+    return (a.nTimeStamp < b.nTimeStamp);
+    }
+};
+
 opcodetype getOpcodeFromString(std::string input)
 {
     if (input == "OP_MINT")
@@ -418,11 +441,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4000 - " + _("Error getting fluid mint entries"));
         }
         int x = 1;
+        std::sort(mintEntries.begin(), mintEntries.end(),MintCompareTimeStamp()); //sort entries by TimeStamp
         for (const CFluidMint& mintEntry : mintEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mint"));
             obj.push_back(Pair("amount", FormatMoney(mintEntry.MintAmount)));
             obj.push_back(Pair("timestamp", mintEntry.nTimeStamp));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", mintEntry.nTimeStamp)));
             obj.push_back(Pair("block_height", (int)mintEntry.nHeight));
             obj.push_back(Pair("txid", mintEntry.txHash.GetHex()));
             obj.push_back(Pair("destination_address", StringFromCharVector(mintEntry.DestinationAddress)));
@@ -449,11 +474,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4002 - " + _("Error getting fluid dynode entries"));
         }
         int x = 1;
+        std::sort(dynodeEntries.begin(), dynodeEntries.end(),DynodeCompareTimeStamp()); //sort entries by TimeStamp
         for (const CFluidDynode& dynEntry : dynodeEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Dynode Reward Update"));
             obj.push_back(Pair("amount", FormatMoney(dynEntry.DynodeReward)));
             obj.push_back(Pair("timestamp", dynEntry.nTimeStamp));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", dynEntry.nTimeStamp)));
             obj.push_back(Pair("block_height", (int)dynEntry.nHeight));
             obj.push_back(Pair("txid", dynEntry.txHash.GetHex()));
             int index = 1;
@@ -478,11 +505,13 @@ UniValue getfluidhistory(const JSONRPCRequest& request)
             throw std::runtime_error("GET_FLUID_HISTORY_RPC_ERROR: ERRCODE: 4004 - " + _("Error getting fluid mining entries"));
         }
         int x = 1;
+        std::sort(miningEntries.begin(), miningEntries.end(),MiningCompareTimeStamp()); //sort entries by TimeStamp
         for (const CFluidMining& miningEntry : miningEntries) {
             UniValue obj(UniValue::VOBJ);
             obj.push_back(Pair("operation", "Mining Reward Update"));
             obj.push_back(Pair("amount", FormatMoney(miningEntry.MiningReward)));
             obj.push_back(Pair("timestamp", miningEntry.nTimeStamp));
+            obj.push_back(Pair("display_date", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", miningEntry.nTimeStamp)));
             obj.push_back(Pair("block_height", (int)miningEntry.nHeight));
             obj.push_back(Pair("txid", miningEntry.txHash.GetHex()));
             int index = 1;
