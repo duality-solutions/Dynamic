@@ -7,6 +7,9 @@
 #include "bdap/linking.h"
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
+#include "dht/datachunk.h" // for CDataChunk
+#include "dht/dataentry.h" // for CDataEntry
+#include "dht/dataheader.h" // for CDataHeader
 #include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
@@ -511,7 +514,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
         strHeaderHex = "";
         if (header.IsNull()) {
             if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
-                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get header.");
+                throw std::runtime_error("getbdapdata: ERRCODE: 5628 - Failed to get header.");
 
             CDataHeader headerTemp(strHeaderHex);
             header = headerTemp;
@@ -722,26 +725,39 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
     if (!GetLinkInfo(entry1.GetFullObjectPath(), entry2.GetFullObjectPath(), linkRequest, linkAccept))
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5624 - Link for " + entry1.GetFullObjectPath() + " and " + entry2.GetFullObjectPath() + _(" not found. Get BDAP entry failed!\n"));
 
+    CKeyEd25519 getKey;
     if (entry1.GetFullObjectPath() == linkRequest.RequestorFQDN()) {
         strPubKey = linkRequest.RequestorPubKeyString();
         vchDHTPublicKey = linkRequest.RequestorPubKey;
+        CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey)) {
+            std::vector<unsigned char> vchPublicKey = linkAccept.RecipientPubKey;
+            CKeyID keyID2(Hash160(vchPublicKey.begin(), vchPublicKey.end()));
+            if (pwalletMain && !pwalletMain->GetDHTKey(keyID2, getKey)) {
+                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5625 - DHT link private key for " + entry1.GetFullObjectPath() + " or " + entry2.GetFullObjectPath() +
+                                             _(" not found. Get BDAP link entry failed!\n"));
+            }
+        }
     }
     else if (entry1.GetFullObjectPath() == linkAccept.RecipientFQDN()) {
         strPubKey = linkAccept.RecipientPubKeyString();
         vchDHTPublicKey = linkAccept.RecipientPubKey;
+        CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
+        if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey)) {
+            std::vector<unsigned char> vchPublicKey = linkRequest.RequestorPubKey;
+            CKeyID keyID2(Hash160(vchPublicKey.begin(), vchPublicKey.end()));
+            if (pwalletMain && !pwalletMain->GetDHTKey(keyID2, getKey)) {
+                throw std::runtime_error("getbdaplinkdata: ERRCODE: 5625 - DHT link private key for " + entry1.GetFullObjectPath() + " or " + entry2.GetFullObjectPath() +
+                                             _(" not found. Get BDAP link entry failed!\n"));
+            }
+        }
     }
-    else {
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5625 - DHT link public key for " + entry1.GetFullObjectPath() + _(" not found. Get BDAP entry failed!\n"));
-    }
+
     result.push_back(Pair("link_requestor", linkRequest.RequestorFQDN()));
     result.push_back(Pair("link_acceptor", linkRequest.RecipientFQDN()));
+
     result.push_back(Pair("get_pubkey", strPubKey));
     result.push_back(Pair("get_operation", strOperationType));
-
-    CKeyEd25519 getKey;
-    CKeyID keyID(Hash160(vchDHTPublicKey.begin(), vchDHTPublicKey.end()));
-    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
-        throw std::runtime_error("getbdaplinkdata: ERRCODE: 5626 - Error getting ed25519 private key for the " + entry1.GetFullObjectPath() + _(" BDAP entry.\n"));
 
     int64_t iSequence = 0;
     std::array<char, 32> arrPubKey;
@@ -780,7 +796,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
         }
         CDataEntry dataEntry(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
         if (!dataEntry.Valid())
-            throw std::runtime_error("getbdapdata: ERRCODE: 5630 - Invalid data. Size returned does not match size in header.");
+            throw std::runtime_error("getbdaplinkdata: ERRCODE: 5630 - Invalid data. Size returned does not match size in header.");
 
         result.push_back(Pair("get_seq", iSequence));
         result.push_back(Pair("data_encrypted", dataEntry.GetHeader().Encrypted() ? "true" : "false"));
