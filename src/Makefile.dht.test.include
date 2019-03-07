@@ -19,7 +19,7 @@ dht_test_data_test_LDADD += $(LIBDYNAMIC_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CR
 dht_test_data_test_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-dht_test_data_test_LDADD += $(ZMQ_LIBS)
+dht_test_data_test_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
 endif
 if ENABLE_GPU
 dht_test_data_test_LDADD += $(LIBDYNAMIC_GPU_LDADD_EXTRA)
