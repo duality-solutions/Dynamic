@@ -15,8 +15,6 @@ namespace libtorrent {
     class alert;
 }
 
-typedef std::pair<std::string, std::string> MutableKey; // <pubkey, salt>
-
 class CEvent {
 private:
     std::string message;
@@ -145,8 +143,6 @@ public:
     std::int64_t SequenceNumber() const { return sequence; }
     std::string Value() const { return value; }
     std::int64_t Timestamp() const { return timestamp; }
-
-    void DHTPut();
     
     inline CPutRequest operator=(const CPutRequest& b) {
         key = b.Key();
@@ -164,10 +160,9 @@ void StopEventListener();
 void StartEventListener(libtorrent::session* dhtSession);
 
 bool GetLastTypeEvent(const int& type, const int64_t& startTime, std::vector<CEvent>& events);
-bool FindDHTGetEvent(const MutableKey& mKey, CMutableGetEvent& event);
-bool FindDHTPutEvent(const MutableKey& mKey, CMutablePutEvent& event);
-bool GetAllDHTPutEvents(std::vector<CMutablePutEvent>& vchPutEvents);
+bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event);
+bool RemoveDHTGetEvent(const std::string& infoHash);
 bool GetAllDHTGetEvents(std::vector<CMutableGetEvent>& vchGetEvents);
-void AddPutRequest(CPutRequest& put);
+std::string GetInfoHash(const std::string pubkey, const std::string salt);
 
 #endif // DYNAMIC_DHT_SESSION_EVENTS_H

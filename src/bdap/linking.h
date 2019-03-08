@@ -230,8 +230,5 @@ public:
 bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage);
 bool CreateSignatureProof(const CKey& key, const std::string& strFQDN, std::vector<unsigned char>& vchSignatureProof);
 bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strFQDN, const std::vector<unsigned char>& vchSig);
-// TODO (BDAP): Implement
-CharString GetEncryptedRequestMessage(const CLinkRequest& requestLink); // stored in an OP_RETURN transaction
-CharString GetEncryptedAcceptMessage(const CLinkRequest& requestLink, const CLinkAccept& acceptLink); // stored on BitTorrent DHT network
 
 #endif // DYNAMIC_BDAP_LINKING_H

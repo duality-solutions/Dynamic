@@ -146,8 +146,7 @@ std::string stringFromVch(const CharString& vch) {
 
 std::vector<unsigned char> vchFromValue(const UniValue& value) {
     std::string strName = value.get_str();
-    unsigned char *strbeg = (unsigned char*) strName.c_str();
-    return std::vector<unsigned char>(strbeg, strbeg + strName.size());
+    return vchFromString(strName);
 }
 
 std::vector<unsigned char> vchFromString(const std::string& str) 
@@ -582,4 +581,32 @@ bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx)
         return false;
 
     return true;
+}
+
+std::string CharVectorToHexString(const std::vector<unsigned char>& vch)
+{
+    std::string strInput = stringFromVch(vch);
+    static const char* const lut = "0123456789abcdef";
+    size_t len = strInput.length();
+    std::string output;
+    output.reserve(2 * len);
+    for (size_t i = 0; i < len; ++i) {
+        const unsigned char c = strInput[i];
+        output.push_back(lut[c >> 4]);
+        output.push_back(lut[c & 15]);
+    }
+
+    return output;
+}
+
+std::vector<unsigned char> HexStringToCharVector(const std::string& hex)
+{
+    int len = hex.length();
+    std::string newString;
+    for (int i = 0; i < len; i += 2) {
+        std::string byte = hex.substr(i, 2);
+        char chr = (char)(int)strtol(byte.c_str(), nullptr, 16);
+        newString.push_back(chr);
+    }
+    return vchFromString(newString);
 }
