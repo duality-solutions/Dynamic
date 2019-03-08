@@ -610,3 +610,15 @@ std::vector<unsigned char> HexStringToCharVector(const std::string& hex)
     }
     return vchFromString(newString);
 }
+
+std::vector<unsigned char> ZeroCharVector()
+{
+    std::vector<unsigned char> vchZero;
+    vchZero.push_back(0);
+    return vchZero;
+}
+
+std::string ZeroString()
+{
+    return stringFromVch(ZeroCharVector());
+}

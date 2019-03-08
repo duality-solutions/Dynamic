@@ -51,7 +51,13 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     dataHeader.nFormat = (uint32_t)format;
     dataHeader.nDataSize = data.size();
     dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
-    InitPut();
+
+    if (format != DHT::DataFormat::Null) {
+        InitPut();
+    }
+    else {
+        InitClear();
+    }
     dataHeader.SetHex();
     HeaderHex = dataHeader.HexValue();
 }
@@ -100,6 +106,22 @@ bool CDataEntry::InitPut()
         dataHeader.nChunkSize = strHexData.size();
         dataHeader.nIndexLocation = 0;
     }
+    return true;
+}
+
+bool CDataEntry::InitClear()
+{
+    std::string strNullValue = ZeroString();
+    for(unsigned int i = 0; i < nTotalSlots; i++) {
+        uint16_t nPlacement = i + 1;
+        std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
+        CDataChunk chunk(i, nPlacement, strSalt, strNullValue);
+        vChunks.push_back(chunk);
+    }
+    dataHeader.nChunks = nTotalSlots;
+    dataHeader.nChunkSize = 0;
+    dataHeader.nIndexLocation = 0;
+
     return true;
 }
 

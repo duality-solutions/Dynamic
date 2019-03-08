@@ -53,6 +53,7 @@ public:
     bool Valid() const { return (dataHeader.nDataSize == vchData.size()); }
 private:
     bool InitPut();
+    bool InitClear();
     bool InitGet(const std::vector<unsigned char>& privateKey);
 };
 

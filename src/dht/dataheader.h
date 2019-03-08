@@ -18,7 +18,8 @@ namespace DHT {
       Rows = 3,
       PNG = 4,
       GIF = 5,
-      JPEG = 6
+      JPEG = 6,
+      Null = 7
     };
 }
 
