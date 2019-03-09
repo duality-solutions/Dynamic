@@ -29,10 +29,10 @@ static constexpr int DHT_ERROR_ALERT_TYPE_CODE = 73;
 
 class CHashTableSession {
 public:
-    std::vector<CDataEntry> vDataEntries;
+    CDataEntryBuffer vDataEntries;
     libtorrent::session* Session = NULL;
 
-    CHashTableSession() {};
+    CHashTableSession() : vDataEntries(CDataEntryBuffer(32)) {};
 
     bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataEntry entry);
 
@@ -54,11 +54,6 @@ void StopTorrentDHTNetwork();
 /** Get a mutable entry in the libtorrent DHT */
 
 void GetDHTStats(libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
-
-libtorrent::alert* WaitForResponse(libtorrent::session* dhtSession, const int alert_type, const std::array<char, 32>& public_key, const std::string& strSalt);
-
-void put_mutable(libtorrent::entry& e, std::array<char, 64>& sig, std::int64_t& seq, std::string const& salt, 
-                        std::array<char, 32> const& pk, std::array<char, 64> const& sk, char const* str, std::int64_t const& iSeq);
 
 extern CHashTableSession* pHashTableSession;
 

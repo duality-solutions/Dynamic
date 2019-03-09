@@ -125,7 +125,6 @@ DYNAMIC_CORE_H = \
   dht/ed25519.h \
   dht/mutable.h \
   dht/mutabledb.h \
-  dht/putbuffer.h \
   dht/session.h \
   dht/sessionevents.h \
   dht/settings.h \

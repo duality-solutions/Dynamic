@@ -23,9 +23,9 @@ namespace DHT {
 class CDataEntry
 {
 private:
-    const std::string strOperationCode;
-    const uint16_t nTotalSlots;
-    const DHT::DataMode nMode;
+    std::string strOperationCode;
+    uint16_t nTotalSlots;
+    DHT::DataMode nMode;
 
     std::vector<unsigned char> vchData;
     CDataHeader dataHeader;
@@ -35,6 +35,8 @@ private:
     
 
 public:
+    CDataEntry() {}
+
     CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
                  const uint16_t version, const uint32_t expire, const DHT::DataFormat format);
 
@@ -55,6 +57,19 @@ private:
     bool InitPut();
     bool InitClear();
     bool InitGet(const std::vector<unsigned char>& privateKey);
+};
+
+class CDataEntryBuffer{
+public:
+    CDataEntryBuffer(size_t size);
+    void push_back(const CDataEntry& input);
+    size_t size() const { return buffer.size(); }
+    size_t position() const { return (record % capacity); }
+
+private:
+    std::vector<CDataEntry> buffer;
+    size_t capacity;
+    size_t record;
 };
 
 #endif // DYNAMIC_DHT_DATAENTRY_H

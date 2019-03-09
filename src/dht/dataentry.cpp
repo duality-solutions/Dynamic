@@ -161,3 +161,15 @@ std::string CDataEntry::Value() const
 {
     return stringFromVch(vchData);
 }
+
+CDataEntryBuffer::CDataEntryBuffer(const size_t size) : capacity(size)
+{
+    buffer.resize(size);
+    record = 0;
+}
+
+void CDataEntryBuffer::push_back(const CDataEntry& input)
+{
+    buffer[position()] = input;
+    record++;
+}
