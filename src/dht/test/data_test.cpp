@@ -554,7 +554,7 @@ int main(int argc, char* argv[])
                     strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
                 }
                 std::printf("strHeaderHex: %s\n", strHeaderHex.c_str());
-                CDataHeader header(strHeaderHex);
+                CRecordHeader header(strHeaderHex);
                 std::printf("Header: %s\n", header.ToString().c_str());
                 if (!header.IsNull()) {
                     std::vector<CDataChunk> vChunks;

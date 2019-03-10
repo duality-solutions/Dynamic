@@ -11,27 +11,27 @@
 #include "uint256.h"
 #include "utiltime.h"
 
-CDataHeader::CDataHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size) :
-                               nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation), nDataSize(size)
+CRecordHeader::CRecordHeader(const uint16_t version, const uint32_t expireTime, const uint16_t chunks, const uint16_t chunkSize, const uint32_t format, const uint16_t indexLocation, const uint32_t size, const uint32_t timestamp) :
+                               nVersion(version), nExpireTime(expireTime), nChunks(chunks), nChunkSize(chunkSize), nFormat(format), nIndexLocation(indexLocation), nDataSize(size), nTimeStamp(timestamp)
 {
-    nUnlockTime = GetTime() + 30; // unlocks in 30 seconds
+    nUnlockTime = GetTime() + 30; // unlocks in 30 seconds by default
     strHex = ToHex();
 }
 
-CDataHeader::CDataHeader(const std::string strHex)
+CRecordHeader::CRecordHeader(const std::string strHex)
 {
     std::vector<unsigned char> vchData = HexStringToCharVector(strHex);
     UnserializeFromData(vchData);
 }
 
-void CDataHeader::Serialize(std::vector<unsigned char>& vchData) 
+void CRecordHeader::Serialize(std::vector<unsigned char>& vchData) 
 {
     CDataStream dsDataHeader(SER_NETWORK, PROTOCOL_VERSION);
     dsDataHeader << *this;
     vchData = std::vector<unsigned char>(dsDataHeader.begin(), dsDataHeader.end());
 }
 
-bool CDataHeader::UnserializeFromData(const std::vector<unsigned char>& vchData) 
+bool CRecordHeader::UnserializeFromData(const std::vector<unsigned char>& vchData) 
 {
     try {
         CDataStream dsDataHeader(vchData, SER_NETWORK, PROTOCOL_VERSION);
@@ -43,22 +43,73 @@ bool CDataHeader::UnserializeFromData(const std::vector<unsigned char>& vchData)
     return true;
 }
 
-void CDataHeader::SetHex()
+void CRecordHeader::SetHex()
 {
     std::vector<unsigned char> vchData;
     Serialize(vchData);
     strHex = CharVectorToHexString(vchData);
 }
 
-std::string CDataHeader::ToHex()
+std::string CRecordHeader::ToHex()
 {
     std::vector<unsigned char> vchData;
     Serialize(vchData);
     return CharVectorToHexString(vchData);
 }
 
-std::string CDataHeader::ToString()
+std::string CRecordHeader::ToString()
 {
-   return strprintf("CDataHeader(version=%u, encrypted=%s, expire=%u, chunks=%u, chunk_size=%u, data_size=%u, format=%u, index_loc=%u, unlock_time=%u)\n", 
-                                    nVersion, (nVersion > 0 ? "true": "false"), nExpireTime, nChunks, nChunkSize, nDataSize, nFormat, nIndexLocation, nUnlockTime);
+   return strprintf("CRecordHeader(version=%u, encrypted=%s, expire=%u, chunks=%u, chunk_size=%u, data_size=%u, format=%u, index_loc=%u, unlock_time=%u, time_stamp=%u)\n", 
+                                    nVersion, (nVersion > 0 ? "true": "false"), nExpireTime, nChunks, nChunkSize, nDataSize, nFormat, nIndexLocation, nUnlockTime, nTimeStamp);
+}
+
+CDataSetHeader::CDataSetHeader(const uint16_t version, const uint32_t recordCount, const uint16_t indexCount, const uint32_t unlockTime, const uint32_t updateTime) : 
+                                    nVersion(version), nRecordCount(recordCount), nIndexCount(indexCount), nUnlockTime(unlockTime), nLastUpdateTime(updateTime)
+{
+    nUnlockTime = GetTime() + 30; // unlocks in 30 seconds by default
+    strHex = ToHex();
+}
+
+CDataSetHeader::CDataSetHeader(const std::string strHex)
+{
+    std::vector<unsigned char> vchData = HexStringToCharVector(strHex);
+    UnserializeFromData(vchData);
+}
+
+void CDataSetHeader::Serialize(std::vector<unsigned char>& vchData) 
+{
+    CDataStream dsDataHeader(SER_NETWORK, PROTOCOL_VERSION);
+    dsDataHeader << *this;
+    vchData = std::vector<unsigned char>(dsDataHeader.begin(), dsDataHeader.end());
+}
+
+bool CDataSetHeader::UnserializeFromData(const std::vector<unsigned char>& vchData) 
+{
+    try {
+        CDataStream dsDataHeader(vchData, SER_NETWORK, PROTOCOL_VERSION);
+        dsDataHeader >> *this;
+    } catch (std::exception& e) {
+        SetNull();
+        return false;
+    }
+    return true;
+}
+
+void CDataSetHeader::SetHex()
+{
+    std::vector<unsigned char> vchData;
+    Serialize(vchData);
+    strHex = CharVectorToHexString(vchData);
+}
+
+std::string CDataSetHeader::ToHex()
+{
+    std::vector<unsigned char> vchData;
+    Serialize(vchData);
+    return CharVectorToHexString(vchData);
+}
+
+std::string CDataSetHeader::ToString()
+{
+   return strprintf("CDataSetHeader(version=%u, records=%s, indexes=%u, unlock_time=%u, last_update=%u)\n", nVersion, nRecordCount, nIndexCount, nUnlockTime, nLastUpdateTime);
 }

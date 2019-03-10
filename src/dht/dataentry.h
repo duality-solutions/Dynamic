@@ -28,7 +28,7 @@ private:
     DHT::DataMode nMode;
 
     std::vector<unsigned char> vchData;
-    CDataHeader dataHeader;
+    CRecordHeader dataHeader;
     std::vector<CDataChunk> vChunks;
     std::string strErrorMessage;
     std::vector<std::vector<unsigned char>> vPubKeys;
@@ -40,12 +40,12 @@ public:
     CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
                  const uint16_t version, const uint32_t expire, const DHT::DataFormat format);
 
-    CDataEntry(const std::string& opCode, const uint16_t slots, const CDataHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey);
+    CDataEntry(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey);
 
     std::string OperationCode() const { return strOperationCode; }
     uint16_t TotalSlots() const { return nTotalSlots; }
     std::vector<unsigned char> RawData() const { return vchData; }
-    CDataHeader GetHeader() { return dataHeader; }
+    CRecordHeader GetHeader() { return dataHeader; }
     std::vector<CDataChunk> GetChunks() const { return vChunks; }
     std::string Value() const;
     std::string ErrorMessage() { return strErrorMessage; }

@@ -9,7 +9,7 @@
 #include "bdap/utils.h"
 #include "dht/datachunk.h" // for CDataChunk
 #include "dht/dataentry.h" // for CDataEntry
-#include "dht/dataheader.h" // for CDataHeader
+#include "dht/dataheader.h" // for CRecordHeader
 #include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
@@ -414,11 +414,15 @@ UniValue putbdapdata(const JSONRPCRequest& request)
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
-    std::string strGetLastValue;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    CRecordHeader header(strHeaderHex);
+    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+    if (header.nUnlockTime  > GetTime())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+
     iSequence++;
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
@@ -507,11 +511,15 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
-    std::string strGetLastValue;
     std::string strHeaderHex;
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     // we need the last sequence number to update an existing DHT entry. 
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    CRecordHeader header(strHeaderHex);
+    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+    if (header.nUnlockTime  > GetTime())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+
     iSequence++;
     uint16_t nVersion = 0;
     uint32_t nExpire = 0;
@@ -599,7 +607,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
             throw std::runtime_error("getbdapdata: ERRCODE: 5604 - Failed to get header.");
 
     iSequence++;
-    CDataHeader header(strHeaderHex);
+    CRecordHeader header(strHeaderHex);
     unsigned int i = 0;
     while (i < 5) {
         strHeaderHex = "";
@@ -607,7 +615,7 @@ UniValue getbdapdata(const JSONRPCRequest& request)
             if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
                 throw std::runtime_error("getbdapdata: ERRCODE: 5628 - Failed to get header.");
 
-            CDataHeader headerTemp(strHeaderHex);
+            CRecordHeader headerTemp(strHeaderHex);
             header = headerTemp;
         }
         i++;
@@ -861,7 +869,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
             throw std::runtime_error("getbdaplinkdata: ERRCODE: 5627 - Failed to get header.");
 
     iSequence++;
-    CDataHeader header(strHeaderHex);
+    CRecordHeader header(strHeaderHex);
     unsigned int i = 0;
     while (i < 5) {
         strHeaderHex = "";
@@ -869,7 +877,7 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
             if (!pHashTableSession->SubmitGet(arrPubKey, strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
                 throw std::runtime_error("getbdaplinkdata: ERRCODE: 5628 - Failed to get header.");
 
-            CDataHeader headerTemp(strHeaderHex);
+            CRecordHeader headerTemp(strHeaderHex);
             header = headerTemp;
         }
         i++;
@@ -992,11 +1000,16 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
-    std::string strGetLastValue;
+    std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strGetLastValue, iSequence, fAuthoritative);
+    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    CRecordHeader header(strHeaderHex);
+    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+    if (header.nUnlockTime  > GetTime())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+
     iSequence++;
 
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
@@ -1102,11 +1115,16 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
 
     int64_t iSequence = 0;
     bool fAuthoritative = false;
-    std::string strGetLastValue;
+    std::string strHeaderHex;
 
     // we need the last sequence number to update an existing DHT entry.
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
-    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strGetLastValue, iSequence, fAuthoritative);
+    pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
+    CRecordHeader header(strHeaderHex);
+    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+    if (header.nUnlockTime  > GetTime())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+
     iSequence++;
 
     uint16_t nVersion = 0;

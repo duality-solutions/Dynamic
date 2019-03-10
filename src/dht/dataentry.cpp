@@ -51,7 +51,8 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     dataHeader.nFormat = (uint32_t)format;
     dataHeader.nDataSize = data.size();
     dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
-
+    dataHeader.nUnlockTime = GetTime() + 30; // default to unlocks in 30 seconds
+    dataHeader.nTimeStamp = GetTime(); // unlocks in 30 seconds
     if (format != DHT::DataFormat::Null) {
         InitPut();
     }
@@ -125,7 +126,7 @@ bool CDataEntry::InitClear()
     return true;
 }
 
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CDataHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
+CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
         : strOperationCode(opCode), nTotalSlots(slots),  nMode(DHT::DataMode::Get), dataHeader(header), vChunks(chunks)
 {
     if (header.nVersion > 0 && privateKey.size() == 0)
