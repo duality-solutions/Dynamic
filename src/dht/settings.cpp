@@ -93,6 +93,9 @@ void CDHTSettings::LoadSettings()
         params.settings.set_bool(settings_pack::enable_incoming_utp, true);
         params.settings.set_bool(settings_pack::enable_outgoing_tcp, false);
         params.settings.set_bool(settings_pack::enable_incoming_tcp, false);
+        params.settings.set_bool(settings_pack::prefer_rc4, true);
+        // TODO(DHT) Force RC4 obfuscation and don't allow plain text connections
+        //params.settings.set_bool(settings_pack::allowed_enc_level, settings_pack::pe_rc4);
 
         ses->apply_settings(params.settings);
         ses->set_dht_storage(CDHTStorageConstructor);
@@ -1144,6 +1147,7 @@ void CDHTSettings::LoadSettings()
     // will adjust which encryption scheme is offered to the other peer,
     // as well as which encryption scheme is selected by the client. See
     // enc_level enum for options.
+    //settings_pack::pe_rc4
     //allowed_enc_level,
 
     // the download and upload rate limits for a torrent to be considered
