@@ -122,6 +122,7 @@ DYNAMIC_CORE_H = \
   dht/datachunk.h \
   dht/dataentry.h \
   dht/dataheader.h \
+  dht/dataset.h \
   dht/ed25519.h \
   dht/mutable.h \
   dht/mutabledb.h \
@@ -285,6 +286,7 @@ libdynamic_server_a_SOURCES = \
   dht/datachunk.cpp \
   dht/dataentry.cpp \
   dht/dataheader.cpp \
+  dht/dataset.cpp \
   dht/mutable.cpp \
   dht/mutabledb.cpp \
   dht/rpcdht.cpp \
