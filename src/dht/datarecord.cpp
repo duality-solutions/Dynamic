@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "dht/dataentry.h"
+#include "dht/datarecord.h"
 
 #include "bdap/utils.h"
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
@@ -37,7 +37,7 @@ catch (std::bad_alloc const&)
     return false;
 }
 
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, 
+CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, 
                         const std::vector<unsigned char>& data, const uint16_t version, const uint32_t expire, const DHT::DataFormat format)
                         : strOperationCode(opCode), nTotalSlots(slots), nMode(DHT::DataMode::Put), vchData(data), vPubKeys(pubkeys)
 {
@@ -63,12 +63,12 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     HeaderHex = dataHeader.HexValue();
 }
 
-bool CDataEntry::InitPut()
+bool CDataRecord::InitPut()
 {
     std::vector<unsigned char> vchRaw;
     if (dataHeader.nVersion == 1) {
         if (!Encrypt(vPubKeys, vchData, vchRaw, strErrorMessage)) {
-            LogPrintf("CDataEntry::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
+            LogPrintf("CDataRecord::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
             return false;
         }
     }
@@ -110,7 +110,7 @@ bool CDataEntry::InitPut()
     return true;
 }
 
-bool CDataEntry::InitClear()
+bool CDataRecord::InitClear()
 {
     std::string strNullValue = ZeroString();
     for(unsigned int i = 0; i < nTotalSlots; i++) {
@@ -126,7 +126,7 @@ bool CDataEntry::InitClear()
     return true;
 }
 
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
+CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
         : strOperationCode(opCode), nTotalSlots(slots),  nMode(DHT::DataMode::Get), dataHeader(header), vChunks(chunks)
 {
     if (header.nVersion > 0 && privateKey.size() == 0)
@@ -137,7 +137,7 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CR
     InitGet(privateKey);
 }
 
-bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
+bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
 {
     std::string strHexChunks;
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
@@ -158,18 +158,18 @@ bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
     return true;
 }
 
-std::string CDataEntry::Value() const
+std::string CDataRecord::Value() const
 {
     return stringFromVch(vchData);
 }
 
-CDataEntryBuffer::CDataEntryBuffer(const size_t size) : capacity(size)
+CDataRecordBuffer::CDataRecordBuffer(const size_t size) : capacity(size)
 {
     buffer.resize(size);
     record = 0;
 }
 
-void CDataEntryBuffer::push_back(const CDataEntry& input)
+void CDataRecordBuffer::push_back(const CDataRecord& input)
 {
     buffer[position()] = input;
     record++;

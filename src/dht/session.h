@@ -5,7 +5,7 @@
 #ifndef DYNAMIC_DHT_SESSION_H
 #define DYNAMIC_DHT_SESSION_H
 
-#include "dht/dataentry.h"
+#include "dht/datarecord.h"
 
 #include "libtorrent/alert.hpp"
 #include "libtorrent/alert_types.hpp"
@@ -29,16 +29,16 @@ static constexpr int DHT_ERROR_ALERT_TYPE_CODE = 73;
 
 class CHashTableSession {
 public:
-    CDataEntryBuffer vDataEntries;
+    CDataRecordBuffer vDataEntries;
     libtorrent::session* Session = NULL;
 
-    CHashTableSession() : vDataEntries(CDataEntryBuffer(32)) {};
+    CHashTableSession() : vDataEntries(CDataRecordBuffer(32)) {};
 
-    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataEntry entry);
+    bool SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, const CDataRecord record);
 
-    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt);
-    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& entrySalt, const int64_t& timeout, 
-                            std::string& entryValue, int64_t& lastSequence, bool& fAuthoritative);
+    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt);
+    bool SubmitGet(const std::array<char, 32>& public_key, const std::string& recordSalt, const int64_t& timeout, 
+                            std::string& recordValue, int64_t& lastSequence, bool& fAuthoritative);
 
 };
 
@@ -51,7 +51,7 @@ std::string GetSessionStatePath();
 void StartTorrentDHTNetwork(const CChainParams& chainparams, CConnman& connman);
 /** Stop the DHT libtorrent network threads */
 void StopTorrentDHTNetwork();
-/** Get a mutable entry in the libtorrent DHT */
+/** Get a mutable record in the libtorrent DHT */
 
 void GetDHTStats(libtorrent::session_status& stats, std::vector<libtorrent::dht_lookup>& vchDHTLookup, std::vector<libtorrent::dht_routing_bucket>& vchDHTBuckets);
 

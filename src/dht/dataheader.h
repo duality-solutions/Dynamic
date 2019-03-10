@@ -137,18 +137,19 @@ private:
 };
 
 /****************************
-Table header format:
+Data set header format:
 1) Version (uint16_t) 0 - 65535
 2) Number of records (uint32_t)
 3) Number of indexes (uint16_t)
-4) Unlock Epoch Time (uint32_t)
+4) Unlock epoch Time (uint32_t)
+5) Last epoch update time  (uint32_t)
 
 - index 0 is the root index needed to get the other indexes
 
-Table header DHT Salt format:
-opcode:index
+Data set header DHT Salt format:
+opcode:chunk
 
-Table header DHT salt example:
+Data set header DHT salt example:
 messages:0
 
 **************************/

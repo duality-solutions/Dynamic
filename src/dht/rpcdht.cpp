@@ -8,8 +8,8 @@
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
 #include "dht/datachunk.h" // for CDataChunk
-#include "dht/dataentry.h" // for CDataEntry
 #include "dht/dataheader.h" // for CRecordHeader
+#include "dht/datarecord.h" // for CDataRecord
 #include "dht/ed25519.h"
 #include "dht/mutable.h"
 #include "dht/mutabledb.h"
@@ -154,12 +154,12 @@ UniValue putmutable(const JSONRPCRequest& request)
     vvchPubKeys.push_back(key.GetPubKeyBytes());
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter to use version 0 (unencrypted)
     uint32_t nExpire = GetTime() + 2592000; // TODO (DHT): Default to 30 days but add an expiration date parameter.
-    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
-    if (dataEntry.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+    CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (record.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5401 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    dataEntry.GetHeader().Salt = strOperationType;
-    pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, dataEntry);
+    record.GetHeader().Salt = strOperationType;
+    pHashTableSession->SubmitPut(key.GetDHTPubKey(), key.GetDHTPrivKey(), iSequence, record);
 
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -430,13 +430,13 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     std::vector<unsigned char> vchValue = vchFromValue(request.params[2]);
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(getKey.GetPubKeyBytes());
-    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
-    if (dataEntry.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+    CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (record.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    dataEntry.GetHeader().Salt = strHeaderSalt;
-    LogPrintf("%s -- Header = %s\n", __func__, dataEntry.GetHeader().ToString());
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
+    record.GetHeader().Salt = strHeaderSalt;
+    LogPrintf("%s -- Header = %s\n", __func__, record.GetHeader().ToString());
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
@@ -526,13 +526,13 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 32;
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
-    if (dataEntry.HasError())
-        throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+    CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
+    if (record.HasError())
+        throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    dataEntry.GetHeader().Salt = strHeaderSalt;
-    LogPrintf("%s -- Header = %s\n", __func__, dataEntry.GetHeader().ToString());
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
+    record.GetHeader().Salt = strHeaderSalt;
+    LogPrintf("%s -- Header = %s\n", __func__, record.GetHeader().ToString());
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
@@ -630,16 +630,16 @@ UniValue getbdapdata(const JSONRPCRequest& request)
             CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
             vChunks.push_back(chunk);
         }
-        CDataEntry dataEntry(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
-        if (!dataEntry.Valid())
+        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
+        if (!record.Valid())
             throw std::runtime_error("getbdapdata: ERRCODE: 5607 - Invalid data. Size returned does not match size in header.");
 
         result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("data_encrypted", dataEntry.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", dataEntry.GetHeader().nVersion));
-        result.push_back(Pair("data_chunks", dataEntry.GetHeader().nChunks));
-        result.push_back(Pair("get_value", dataEntry.Value()));
-        result.push_back(Pair("get_value_size", (int)dataEntry.Value().size()));
+        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+        result.push_back(Pair("data_version", record.GetHeader().nVersion));
+        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+        result.push_back(Pair("get_value", record.Value()));
+        result.push_back(Pair("get_value_size", (int)record.Value().size()));
     }
     else {
         throw std::runtime_error("getbdapdata: ERRCODE: 5608 - Header is null.");
@@ -893,16 +893,16 @@ UniValue getbdaplinkdata(const JSONRPCRequest& request)
             CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
             vChunks.push_back(chunk);
         }
-        CDataEntry dataEntry(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
-        if (!dataEntry.Valid())
+        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
+        if (!record.Valid())
             throw std::runtime_error("getbdaplinkdata: ERRCODE: 5630 - Invalid data. Size returned does not match size in header.");
 
         result.push_back(Pair("get_seq", iSequence));
-        result.push_back(Pair("data_encrypted", dataEntry.GetHeader().Encrypted() ? "true" : "false"));
-        result.push_back(Pair("data_version", dataEntry.GetHeader().nVersion));
-        result.push_back(Pair("data_chunks", dataEntry.GetHeader().nChunks));
-        result.push_back(Pair("get_value", dataEntry.Value()));
-        result.push_back(Pair("get_value_size", (int)dataEntry.Value().size()));
+        result.push_back(Pair("data_encrypted", record.GetHeader().Encrypted() ? "true" : "false"));
+        result.push_back(Pair("data_version", record.GetHeader().nVersion));
+        result.push_back(Pair("data_chunks", record.GetHeader().nChunks));
+        result.push_back(Pair("get_value", record.Value()));
+        result.push_back(Pair("get_value_size", (int)record.Value().size()));
     }
     else {
         throw std::runtime_error("getbdaplinkdata: ERRCODE: 5631 - Header is null.");
@@ -1019,11 +1019,11 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     std::vector<std::vector<unsigned char>> vvchPubKeys;
     vvchPubKeys.push_back(EncodedPubKeyToBytes(linkRequest.RequestorPubKey));
     vvchPubKeys.push_back(EncodedPubKeyToBytes(linkAccept.RecipientPubKey));
-    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
-    if (dataEntry.HasError())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5547 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+    CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (record.HasError())
+        throw std::runtime_error("putbdapdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 
@@ -1132,11 +1132,11 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     uint16_t nTotalSlots = 32;
     std::vector<unsigned char> vchValue = ZeroCharVector();
     std::vector<std::vector<unsigned char>> vvchPubKeys;
-    CDataEntry dataEntry(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
-    if (dataEntry.HasError())
-        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + dataEntry.ErrorMessage() + _("\n"));
+    CDataRecord record(strOperationType, nTotalSlots, vvchPubKeys, vchValue, nVersion, nExpire, DHT::DataFormat::Null);
+    if (record.HasError())
+        throw std::runtime_error("clearbdaplinkdata: ERRCODE: 5547 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, dataEntry);
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
 

@@ -20,7 +20,7 @@ namespace DHT {
     };
 }
 
-class CDataEntry
+class CDataRecord
 {
 private:
     std::string strOperationCode;
@@ -35,12 +35,12 @@ private:
     
 
 public:
-    CDataEntry() {}
+    CDataRecord() {}
 
-    CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
+    CDataRecord(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, const std::vector<unsigned char>& data,
                  const uint16_t version, const uint32_t expire, const DHT::DataFormat format);
 
-    CDataEntry(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey);
+    CDataRecord(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey);
 
     std::string OperationCode() const { return strOperationCode; }
     uint16_t TotalSlots() const { return nTotalSlots; }
@@ -59,15 +59,15 @@ private:
     bool InitGet(const std::vector<unsigned char>& privateKey);
 };
 
-class CDataEntryBuffer{
+class CDataRecordBuffer{
 public:
-    CDataEntryBuffer(size_t size);
-    void push_back(const CDataEntry& input);
+    CDataRecordBuffer(size_t size);
+    void push_back(const CDataRecord& input);
     size_t size() const { return buffer.size(); }
     size_t position() const { return (record % capacity); }
 
 private:
-    std::vector<CDataEntry> buffer;
+    std::vector<CDataRecord> buffer;
     size_t capacity;
     size_t record;
 };
