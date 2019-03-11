@@ -82,6 +82,7 @@ public:
         FluidScript = b.FluidScript;
         DynodeReward = b.DynodeReward;
         nTimeStamp = b.nTimeStamp;
+        SovereignAddresses.clear(); //clear out previous entries
         for (const std::vector<unsigned char>& vchAddress : b.SovereignAddresses) {
             SovereignAddresses.push_back(vchAddress);
         }
