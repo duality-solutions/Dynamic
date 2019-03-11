@@ -434,8 +434,6 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    record.GetHeader().Salt = strHeaderSalt;
-    LogPrintf("%s -- Header = %s\n", __func__, record.GetHeader().ToString());
     pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
@@ -530,8 +528,6 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     if (record.HasError())
         throw std::runtime_error("clearbdapdata: ERRCODE: 5515 - Error creating DHT data entry. " + record.ErrorMessage() + _("\n"));
 
-    record.GetHeader().Salt = strHeaderSalt;
-    LogPrintf("%s -- Header = %s\n", __func__, record.GetHeader().ToString());
     pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, record);
     result.push_back(Pair("put_seq", iSequence));
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
