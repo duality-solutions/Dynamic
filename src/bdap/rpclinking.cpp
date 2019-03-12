@@ -836,16 +836,16 @@ static UniValue DenyLink(const JSONRPCRequest& request)
 
     std::vector<unsigned char> vchSerializedList;
     CRecordHeader header(strHeaderHex);
+    int nRecords = 0;
     if (header.IsNull() || fNotFound) {
         // Make new list
-        oLink.push_back(Pair("found", "no"));
         CLinkDenyList denyList;
         denyList.Add(strRequestorFQDN, GetTime());
         denyList.Serialize(vchSerializedList);
+        nRecords = denyList.vDenyAccounts.size();
     }
     else {
         // Get existing list.
-        oLink.push_back(Pair("found", "yes"));
         std::array<char, 32> arrPubKey = getKey.GetDHTPubKey();
         std::vector<CDataChunk> vChunks;
         for(unsigned int i = 0; i < header.nChunks; i++) {
@@ -866,8 +866,10 @@ static UniValue DenyLink(const JSONRPCRequest& request)
 
         denyList.Add(strRequestorFQDN, GetTime());
         denyList.Serialize(vchSerializedList);
+        nRecords = denyList.vDenyAccounts.size();
     }
-    oLink.push_back(Pair("serialized_size", vchSerializedList.size()));
+    oLink.push_back(Pair("list_data_size", vchSerializedList.size()));
+    oLink.push_back(Pair("list_records", nRecords));
     uint16_t nVersion = 1; // VGP encryption version 1
     uint32_t nExpire = 0; // Does not expire.
     std::vector<std::vector<unsigned char>> vvchPubKeys;
@@ -879,9 +881,11 @@ static UniValue DenyLink(const JSONRPCRequest& request)
     if (vchSerializedList.size() > 7000)
         throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
 
-    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord);
+    if (!pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4247 - Put failed. " + pHashTableSession->strPutErrorMessage + _("\n"));
 
     oLink.push_back(Pair("recipient_fqdn", strRecipientFQDN));
+    oLink.push_back(Pair("requestor_fqdn", strRequestorFQDN));
 
     return oLink;
 }

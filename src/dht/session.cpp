@@ -254,8 +254,41 @@ void GetDHTStats(session_status& stats, std::vector<dht_lookup>& vchDHTLookup, s
     stats = pHashTableSession->Session->status();
 }
 
+void CHashTableSession::CleanUpPutCommandMap()
+{
+    int64_t nCurrentTime = GetTime();
+    std::map<HashRecordKey, uint32_t>::iterator it;
+    for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
+        if (nCurrentTime > it->second + DHT_RECORD_LOCK_SECONDS) {
+            //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
+            LogPrintf("CHashTableSession::%s -- Erased %s\n", __func__, it->first.second);
+            mPutCommands.erase(it);
+        }
+    }
+}
+
+uint32_t CHashTableSession::GetLastPutDate(const HashRecordKey& recordKey)
+{
+    if (mPutCommands.find(recordKey) != mPutCommands.end() ) {
+        std::map<HashRecordKey, uint32_t>::iterator it;
+        for (it = mPutCommands.begin(); it != mPutCommands.end(); ++it) {
+            if (it->first == recordKey)
+                return it->second;
+        }     
+    }
+    return 0;
+}
+
 bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const std::array<char, 64> private_key, const int64_t lastSequence, CDataRecord record)
 {
+    strPutErrorMessage = "";
+    HashRecordKey recordKey = std::make_pair(public_key, record.OperationCode());
+    int64_t nLastUpdate = (int64_t)GetLastPutDate(recordKey);
+    if (DHT_RECORD_LOCK_SECONDS > GetTime() - nLastUpdate) {
+        strPutErrorMessage = "Record is locked. You need to wait at least " + std::to_string(DHT_RECORD_LOCK_SECONDS) + " seconds before updating the same record in the DHT.";
+        return false;
+    }
+    mPutCommands[recordKey] = GetTime();
     vDataEntries.push_back(record);
     DHT::vPutValues.clear();
     std::vector<std::vector<unsigned char>> vPubKeys;
@@ -274,6 +307,10 @@ bool CHashTableSession::SubmitPut(const std::array<char, 32> public_key, const s
         //TODO (DHT): Change to LogPrint to make less chatty when not in debug mode.
         LogPrintf("CHashTableSession::%s -- salt: %s, value: %s\n", __func__, pair.first, pair.second);
     }
+    nPutRecords++;
+    if (nPutRecords % 32 == 0)
+        CleanUpPutCommandMap();
+
     return true;
 }
 
@@ -332,7 +369,7 @@ bool CHashTableSession::SubmitGet(const std::array<char, 32>& public_key, const 
             }
             lastSequence = data.SequenceNumber();
             fAuthoritative = data.Authoritative();
-            LogPrintf("CHashTableSession::%s -- value = %s, seq = %d, auth = %u\n", __func__, recordValue, lastSequence, fAuthoritative);
+            LogPrintf("CHashTableSession::%s -- salt = %s, value = %s, seq = %d, auth = %u\n", __func__, recordSalt, recordValue, lastSequence, fAuthoritative);
             return true;
         }
         MilliSleep(40);

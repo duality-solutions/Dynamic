@@ -49,7 +49,6 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
     dataHeader.nVersion = version;
     dataHeader.nExpireTime = expire;
     dataHeader.nFormat = (uint32_t)format;
-    dataHeader.nDataSize = data.size();
     dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
     dataHeader.nUnlockTime = GetTime() + 30; // default to unlocks in 30 seconds
     dataHeader.nTimeStamp = GetTime(); // unlocks in 30 seconds
@@ -61,6 +60,7 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
     }
     dataHeader.SetHex();
     HeaderHex = dataHeader.HexValue();
+    fValid = true;
 }
 
 bool CDataRecord::InitPut()
@@ -87,6 +87,7 @@ bool CDataRecord::InitPut()
     }
     if (strHexData.size() > DHT_DATA_MAX_CHUNK_SIZE) {
         // We need to chunk into many pieces.
+        uint32_t size = 0;
         uint16_t total_chunks = (strHexData.size() / DHT_DATA_MAX_CHUNK_SIZE) + 1;
         for(unsigned int i = 0; i < total_chunks; i++) {
             uint16_t nPlacement = i + 1;
@@ -94,10 +95,12 @@ bool CDataRecord::InitPut()
             std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
             CDataChunk chunk(i, nPlacement, strSalt, strHexChunk);
             vChunks.push_back(chunk);
+            size = size + strHexChunk.size();
         }
         dataHeader.nChunks = total_chunks;
         dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
+        dataHeader.nDataSize = size;
     }
     else {
         std::string strSalt = strOperationCode + ":" + std::to_string(1);
@@ -106,6 +109,7 @@ bool CDataRecord::InitPut()
         dataHeader.nChunks = 1;
         dataHeader.nChunkSize = strHexData.size();
         dataHeader.nIndexLocation = 0;
+        dataHeader.nDataSize = strHexData.size();
     }
     return true;
 }
@@ -131,10 +135,14 @@ CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const 
 {
     if (header.nVersion > 0 && privateKey.size() == 0)
         throw std::runtime_error("Decrypt entry requires a private key seed.\n");
-    if (header.nVersion == 0 && privateKey.size() > 0)
-        throw std::runtime_error("Private key seed not required for clear text data\n");
 
-    InitGet(privateKey);
+    if (header.nChunks != chunks.size())
+        throw std::runtime_error("Number of chunks in header mismatches the data.\n");
+
+    if (!dataHeader.IsNull())
+        InitGet(privateKey);
+
+    fValid = true;
 }
 
 bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
@@ -143,6 +151,10 @@ bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
         strHexChunks += vChunks[i].Value;
     }
+
+    if (strHexChunks.size() != dataHeader.nDataSize)
+        throw std::runtime_error("Data size in header mismatches total size from all chunks.\n");
+
     std::vector<unsigned char> vchUnHex = HexStringToCharVector(strHexChunks);
     if (dataHeader.nVersion == 0) {
         vchData = vchUnHex;

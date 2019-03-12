@@ -32,7 +32,7 @@ private:
     std::vector<CDataChunk> vChunks;
     std::string strErrorMessage;
     std::vector<std::vector<unsigned char>> vPubKeys;
-    
+    bool fValid = false;
 
 public:
     CDataRecord() {}
@@ -52,7 +52,7 @@ public:
     DHT::DataMode Mode() const { return nMode; }
     std::string HeaderHex;
     bool HasError() const { return strErrorMessage.size() > 0; }
-    bool Valid() const { return (dataHeader.nDataSize == vchData.size()); }
+    bool Valid() const { return (fValid); }
 private:
     bool InitPut();
     bool InitClear();

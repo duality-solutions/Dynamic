@@ -120,7 +120,7 @@ public:
         return *this;
     }
  
-    inline bool IsNull() const { return (nVersion == 0 && nTimeStamp == 0); }
+    inline bool IsNull() const { return (nFormat == 7); }
     void Serialize(std::vector<unsigned char>& vchData);
     bool UnserializeFromData(const std::vector<unsigned char>& vchData);
 

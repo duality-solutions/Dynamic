@@ -419,7 +419,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     // we need the last sequence number to update an existing DHT entry. 
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+
     if (header.nUnlockTime  > GetTime())
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
@@ -514,7 +514,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     // we need the last sequence number to update an existing DHT entry. 
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+
     if (header.nUnlockTime  > GetTime())
         throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
@@ -533,6 +533,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     result.push_back(Pair("put_data_size", (int)vchValue.size()));
     return result;
 }
+
 UniValue getbdapdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
