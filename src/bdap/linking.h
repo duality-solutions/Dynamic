@@ -227,6 +227,54 @@ public:
 
 };
 
+class CLinkDenyList
+{
+public:
+    std::vector<std::string> vDenyAccounts;
+    std::vector<uint32_t> vTimestamps;
+
+    CLinkDenyList() {}
+    CLinkDenyList(const std::vector<unsigned char>& vchData);
+
+    inline void SetNull()
+    {
+        vDenyAccounts.clear();
+        vTimestamps.clear();
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(vDenyAccounts);
+        READWRITE(vTimestamps);
+    }
+
+    inline friend bool operator==(const CLinkDenyList& a, const CLinkDenyList& b) {
+        return (a.vDenyAccounts == b.vDenyAccounts && a.vTimestamps == b.vTimestamps);
+    }
+
+    inline friend bool operator!=(const CLinkDenyList& a, const CLinkDenyList& b) {
+        return !(a == b);
+    }
+
+    inline CLinkDenyList operator=(const CLinkDenyList& b) {
+        vDenyAccounts = b.vDenyAccounts;
+        vTimestamps = b.vTimestamps;
+        return *this;
+    }
+ 
+    inline bool IsNull() const { return (vDenyAccounts.size() == 0); }
+
+    void Add(const std::string& addAccount, const uint32_t timestamp);
+    bool Find(const std::string& searchAccount);
+    bool Remove(const std::string& account);
+
+    void Serialize(std::vector<unsigned char>& vchData);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
+
+};
+
 bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage);
 bool CreateSignatureProof(const CKey& key, const std::string& strFQDN, std::vector<unsigned char>& vchSignatureProof);
 bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strFQDN, const std::vector<unsigned char>& vchSig);

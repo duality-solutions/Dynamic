@@ -10,6 +10,8 @@
 #include "bdap/linkingdb.h"
 #include "bdap/utils.h"
 #include "dht/ed25519.h"
+#include "dht/datarecord.h" // for CDataRecord
+#include "dht/session.h" // for CDataRecord
 #include "core_io.h" // needed for ScriptToAsmStr
 #include "dynodeman.h"
 #include "hash.h"
@@ -19,6 +21,7 @@
 #include "primitives/transaction.h"
 #include "wallet/wallet.h"
 #include "uint256.h"
+#include "utiltime.h"
 #include "validation.h"
 
 #include <univalue.h>
@@ -780,9 +783,196 @@ static UniValue DeleteLink(const JSONRPCRequest& request)
     return oLink;
 }
 
+static UniValue DenyLink(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 3)
+        throw std::runtime_error(
+            "link deny userid-from userid-to\n"
+            "Denies a link request and writes it to the DHT."
+            + HelpRequiringPassphrase() +
+            "\nLink Deny Arguments:\n"
+            "1. recipient          (string)             Your BDAP recipient account\n"
+            "2. requestor          (string)             Requesting account that will be denied.\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
+            "  \"Recipient FQDN\"             (string)  Recipient's BDAP full path\n"
+            "  }\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link deny", "superman batman") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link deny", "superman batman"));
+
+    if (!pHashTableSession->Session)
+        throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
+
+    std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipientFQDN);
+    CharString vchRecipientFQDN = vchFromString(strRecipientFQDN);
+
+    UniValue oLink(UniValue::VOBJ);
+
+    CDomainEntry entry;
+    if (!pDomainEntryDB->GetDomainEntryInfo(vchRecipientFQDN, entry))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4240 - " + strRecipientFQDN + _(" can not be found.  Get BDAP info failed!\n"));
+
+    CKeyEd25519 getKey;
+    std::vector<unsigned char> vch = entry.DHTPublicKey;
+    CKeyID keyID(Hash160(vch.begin(), vch.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4241 - Error getting ed25519 private key for the " + strRecipientFQDN + _(" BDAP entry.\n"));
+
+    std::string strRequestorFQDN = request.params[2].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRequestorFQDN);
+    std::string strOperationType = "denylink";
+    uint16_t nTotalSlots = 32;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    int64_t iSequence = 0;
+    bool fAuthoritative = false;
+    bool fNotFound = false;
+    if (!pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
+        fNotFound = true;
+
+    std::vector<unsigned char> vchSerializedList;
+    CRecordHeader header(strHeaderHex);
+    if (header.IsNull() || fNotFound) {
+        // Make new list
+        oLink.push_back(Pair("found", "no"));
+        CLinkDenyList denyList;
+        denyList.Add(strRequestorFQDN, GetTime());
+        denyList.Serialize(vchSerializedList);
+    }
+    else {
+        // Get existing list.
+        oLink.push_back(Pair("found", "yes"));
+        std::array<char, 32> arrPubKey = getKey.GetDHTPubKey();
+        std::vector<CDataChunk> vChunks;
+        for(unsigned int i = 0; i < header.nChunks; i++) {
+            std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+            std::string strChunk;
+            if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative))
+                throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4242 - Failed to get chunk.");
+            CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+            vChunks.push_back(chunk);
+        }
+        CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
+        if (!record.Valid())
+            throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4243 - Invalid data. Size returned does not match size in header.");
+
+        CLinkDenyList denyList(record.RawData());
+        if (denyList.Find(strRequestorFQDN))
+            throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4244 - Link already in list.");
+
+        denyList.Add(strRequestorFQDN, GetTime());
+        denyList.Serialize(vchSerializedList);
+    }
+    oLink.push_back(Pair("serialized_size", vchSerializedList.size()));
+    uint16_t nVersion = 1; // VGP encryption version 1
+    uint32_t nExpire = 0; // Does not expire.
+    std::vector<std::vector<unsigned char>> vvchPubKeys;
+    vvchPubKeys.push_back(getKey.GetPubKeyBytes());
+    CDataRecord newRecord(strOperationType, nTotalSlots, vvchPubKeys, vchSerializedList, nVersion, nExpire, DHT::DataFormat::BinaryBlob);
+    if (newRecord.HasError())
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4245 - Error creating DHT data entry. " + newRecord.ErrorMessage() + _("\n"));
+
+    if (vchSerializedList.size() > 7000)
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4246 - List is too large for one record in the DHT. " + _("\n"));
+
+    pHashTableSession->SubmitPut(getKey.GetDHTPubKey(), getKey.GetDHTPrivKey(), iSequence, newRecord);
+
+    oLink.push_back(Pair("recipient_fqdn", strRecipientFQDN));
+
+    return oLink;
+}
+
+static UniValue DeniedLinkList(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 2)
+        throw std::runtime_error(
+            "link denied recipient\n"
+            "Returns a list of denied link requests for the passed recipient account parameter."
+            + HelpRequiringPassphrase() +
+            "\nLink Denied Arguments:\n"
+            "1. recipient          (string)             Your BDAP recipient account\n"
+            "\nResult:\n"
+            "{(json object)\n"
+            "  \"Requestor FQDN\"             (string)  Requestor's BDAP full path\n"
+            "  }\n"
+            "\nExamples:\n"
+            + HelpExampleCli("link denied", "superman") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("link deny", "superman"));
+
+    if (!pHashTableSession->Session)
+        throw std::runtime_error("ERRORCODE: 5500 - DHT session not started.\n");
+
+    std::string strRecipientFQDN = request.params[1].get_str() + "@" + DEFAULT_PUBLIC_OU + "." + DEFAULT_PUBLIC_DOMAIN;
+    ToLowerCase(strRecipientFQDN);
+    CharString vchRecipientFQDN = vchFromString(strRecipientFQDN);
+
+    UniValue oLink(UniValue::VOBJ);
+
+    CDomainEntry entry;
+    if (!pDomainEntryDB->GetDomainEntryInfo(vchRecipientFQDN, entry))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4240 - " + strRecipientFQDN + _(" can not be found.  Get BDAP info failed!\n"));
+
+    CKeyEd25519 getKey;
+    std::vector<unsigned char> vch = entry.DHTPublicKey;
+    CKeyID keyID(Hash160(vch.begin(), vch.end()));
+    if (pwalletMain && !pwalletMain->GetDHTKey(keyID, getKey))
+        throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4241 - Error getting ed25519 private key for the " + strRecipientFQDN + _(" BDAP entry.\n"));
+
+    std::string strOperationType = "denylink";
+    uint16_t nTotalSlots = 32;
+    std::string strHeaderHex;
+    std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
+    int64_t iSequence = 0;
+    bool fAuthoritative = false;
+    if (pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative))
+    {
+        std::array<char, 32> arrPubKey = getKey.GetDHTPubKey();
+        std::vector<unsigned char> vchSerializedList;
+        CRecordHeader header(strHeaderHex);
+        if (!header.IsNull()) {
+            std::vector<CDataChunk> vChunks;
+            for(unsigned int i = 0; i < header.nChunks; i++) {
+                std::string strChunkSalt = strOperationType + ":" + std::to_string(i+1);
+                std::string strChunk;
+                if (!pHashTableSession->SubmitGet(arrPubKey, strChunkSalt, 2000, strChunk, iSequence, fAuthoritative))
+                    throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4242 - Failed to get chunk.");
+                CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
+                vChunks.push_back(chunk);
+            }
+            CDataRecord record(strOperationType, nTotalSlots, header, vChunks, getKey.GetPrivSeedBytes());
+            if (!record.Valid())
+                throw std::runtime_error("BDAP_DENY_LINK_RPC_ERROR: ERRCODE: 4243 - Invalid data. Size returned does not match size in header.");
+
+            UniValue oDeniedLink(UniValue::VOBJ);
+            CLinkDenyList denyList(record.RawData());
+            int timestamp = 0;
+            int nRecord = 1;
+            for (const std::string& strAccountFQDN : denyList.vDenyAccounts) {
+                UniValue oDenied(UniValue::VOBJ);
+                std::string strKey = "item_" + std::to_string(nRecord);
+                oDenied.push_back(Pair("requestor_fqdn", strAccountFQDN));
+                timestamp = (int)denyList.vTimestamps[nRecord-1];
+                oDenied.push_back(Pair("timestamp_epoch", timestamp));
+                oDenied.push_back(Pair("timestamp", DateTimeStrFormat("%Y-%m-%dT%H:%M:%SZ", timestamp)));
+                oDeniedLink.push_back(Pair(strKey, oDenied));
+                nRecord++;
+            }
+            timestamp = (int)header.nTimeStamp;
+            oLink.push_back(Pair("list_updated_epoch", timestamp));
+            oLink.push_back(Pair("list_updated", DateTimeStrFormat("%Y-%m-%dT%H:%M:%SZ", timestamp)));
+            oLink.push_back(Pair("denied_list", oDeniedLink));
+        }
+    }
+    return oLink;
+}
+
 UniValue link(const JSONRPCRequest& request) 
 {
-
     std::string strCommand;
     if (request.params.size() >= 1) {
         strCommand = request.params[0].get_str();
@@ -814,6 +1004,12 @@ UniValue link(const JSONRPCRequest& request)
     }
     else if (strCommand == "delete") {
         return DeleteLink(request);
+    }
+    else if (strCommand == "deny") {
+        return DenyLink(request);
+    }
+    else if (strCommand == "denied") {
+        return DeniedLinkList(request);
     }
     else if (strCommand == "pending") {
         if (request.params.size() == 1) {
