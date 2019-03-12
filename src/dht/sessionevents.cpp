@@ -233,11 +233,9 @@ bool FindDHTGetEvent(const std::string& infoHash, CMutableGetEvent& event)
     std::map<std::string, CMutableGetEvent>::iterator iMutableEvent = m_DHTGetEventMap.find(infoHash);
     if (iMutableEvent != m_DHTGetEventMap.end()) {
         // event found.
-        LogPrintf("FindDHTGetEvent -- Found, infoHash = %s\n", infoHash);
         event = iMutableEvent->second;
         return true;
     }
-    LogPrintf("FindDHTGetEvent -- Not found, infoHash = %s\n", infoHash);
     return false;
 }
 
