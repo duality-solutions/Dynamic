@@ -27,7 +27,6 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
 
     std::string objectID = "";
     std::vector<std::string> results;
-    std::string registrationDaysString = "";
 
     boost::split(results, account, [](char c){return c == '@';});
 
@@ -41,8 +40,7 @@ BdapUpdateAccountDialog::BdapUpdateAccountDialog(QWidget *parent, BDAP::ObjectTy
 
     ui->lineEditID->setText(QString::fromStdString(objectID));
     ui->lineEditCommonName->setText(QString::fromStdString(commonName));
-    registrationDaysString = "Expiration date: " + expirationDate;
-    ui->lineEditRegistrationDays->setPlaceholderText(QObject::tr(registrationDaysString.c_str()));
+    ui->labelExpirationDateInfo->setText(QString::fromStdString(expirationDate)); 
 
 
     connect(ui->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(updateAccount()));
@@ -94,6 +92,9 @@ void BdapUpdateAccountDialog::updateAccount()
     
     params.push_back(accountID);
     params.push_back(commonName);
+
+    //TODO: Front end GUI changed this parameter to be ADDITIONAL DAYS from current expiration date.
+    //RPC command needs to be updated to reflect this change (so no entry, means expiration date stays the same. Value would mean number of days extended)
     if (registrationDays.length() >> 0) params.push_back(registrationDays);
 
     if (inputAccountType == BDAP::ObjectType::BDAP_USER) {

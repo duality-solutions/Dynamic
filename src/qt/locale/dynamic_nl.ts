@@ -5842,7 +5842,7 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Needs Translating</translation>
     </message>
     <message>
-        <source>Registration Days:</source>
+        <source>Additional Days:</source>
         <translation>Needs Translating</translation>
     </message>
     <message>
@@ -5862,7 +5862,7 @@ Bijvoorbeeld: alertnotify=echo %%s | mail -s &quot;Dynamic Alert&quot; admin@foo
         <translation>Needs Translating</translation>
     </message>
     <message>
-        <source>Expiration date: </source>
+        <source>Expiration Date:</source>
         <translation>Needs Translating</translation>
     </message>
     <message>

@@ -393,7 +393,7 @@ QTabBar { alignment: left; }</string>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="label_81">
          <property name="text">
           <string>GPU Mining:</string>
          </property>
@@ -439,14 +439,14 @@ QTabBar { alignment: left; }</string>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="label_71">
          <property name="text">
           <string>GPU Mode:</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="label_72">
          <property name="text">
           <string>Client version</string>
          </property>
