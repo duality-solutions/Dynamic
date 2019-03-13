@@ -438,6 +438,9 @@ bool CheckDeleteDomainEntryTxInputs(const CDomainEntry& entry, const CScript& sc
         }
     }
 
+    //Remove PubKey entry also (2 records in LevelDB for each domainentry)
+    pDomainEntryDB->EraseDomainEntryPubKey(prevDomainEntry.DHTPublicKey);
+
     if (!pDomainEntryDB->EraseDomainEntry(vchFullObjectPath))
     {
         errorMessage = "CheckDeleteDomainEntryTxInputs: - Error deleting entry entry in LevelDB; this delete operation failed!";
