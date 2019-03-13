@@ -62,5 +62,7 @@ int GetLinkVersionFromData(const std::vector<unsigned char>& vchData);
 bool GetPreviousTxRefById(const uint256& prevTxId, CTransactionRef& prevTx);
 std::string CharVectorToHexString(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> HexStringToCharVector(const std::string& hex);
+std::vector<unsigned char> ZeroCharVector();
+std::string ZeroString();
 
 #endif // DYNAMIC_BDAP_UTILS_H

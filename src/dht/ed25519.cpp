@@ -154,28 +154,15 @@ void ECC_Ed25519_Start()
     assert(ctx != NULL);
     {
         ctx->seed = dht::ed25519_create_seed();
-        std::string strSeed = aux::to_hex(ctx->seed);
     }
     ed25519_context_sign = ctx;
 }
 
-/*
-bool ECC_Ed25519_InitSanityCheck() 
-{
-    CKeyEd25519 key;
-    key.MakeNewKey(true);
-    CPubKeyEd25519 pubkey = key.GetPubKey();
-    return key.VerifyPubKey(pubkey);
-}
-*/
-
 void ECC_Ed25519_Stop() 
 {
     ed25519_context *ctx = ed25519_context_sign;
-    std::string strSeed = aux::to_hex(ctx->seed);
     ctx->SetNull();
     ed25519_context_sign = NULL;
-    strSeed = aux::to_hex(ctx->seed);
     assert(ed25519_context_sign == NULL);
 }
 

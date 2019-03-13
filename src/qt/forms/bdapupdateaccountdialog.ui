@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>623</width>
-    <height>221</height>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,15 +42,29 @@
        <item row="1" column="1">
         <widget class="QLineEdit" name="lineEditCommonName"/>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Registration Days:</string>
+          <string>Additional Days:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEditRegistrationDays"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Expiration Date:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEditRegistrationDays"/>
+        <widget class="QLabel" name="labelExpirationDateInfo">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

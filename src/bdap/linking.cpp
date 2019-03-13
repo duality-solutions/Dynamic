@@ -16,6 +16,8 @@
 #include "utilstrencodings.h" // For EncodeBase64
 #include "validation.h" // For strMessageMagic
 
+#include <algorithm> // For std::find
+
 bool CLinkRequest::UnserializeFromTx(const CTransactionRef& tx) 
 {
     std::vector<unsigned char> vchData;
@@ -302,6 +304,49 @@ std::string CLinkAccept::LinkPathString() const
     return stringFromVch(LinkPath());
 }
 
+CLinkDenyList::CLinkDenyList(const std::vector<unsigned char>& vchData)
+{
+    if (!UnserializeFromData(vchData))
+        throw std::runtime_error("Failed to unserialize from data\n");
+}
+
+void CLinkDenyList::Serialize(std::vector<unsigned char>& vchData) 
+{
+    CDataStream dsLinkDenyList(SER_NETWORK, PROTOCOL_VERSION);
+    dsLinkDenyList << *this;
+    vchData = std::vector<unsigned char>(dsLinkDenyList.begin(), dsLinkDenyList.end());
+}
+
+bool CLinkDenyList::UnserializeFromData(const std::vector<unsigned char>& vchData) 
+{
+    try {
+        CDataStream dsLinkDenyList(vchData, SER_NETWORK, PROTOCOL_VERSION);
+        dsLinkDenyList >> *this;
+    } catch (std::exception& e) {
+        SetNull();
+        return false;
+    }
+    return true;
+}
+
+void CLinkDenyList::Add(const std::string& addAccount, const uint32_t timestamp)
+{
+    vDenyAccounts.push_back(addAccount);
+    vTimestamps.push_back(timestamp);
+}
+
+bool CLinkDenyList::Find(const std::string& searchAccount)
+{
+    return std::find(vDenyAccounts.begin(), vDenyAccounts.end(), searchAccount) != vDenyAccounts.end();
+}
+
+bool CLinkDenyList::Remove(const std::string& account)
+{
+    if (!Find(account))
+        return false;
+    // TODO (BDAP): implement remove account from deny list.
+    return true;
+}
 /** Checks if BDAP link request pubkey exists in the memory pool */
 bool LinkPubKeyExistsInMemPool(const CTxMemPool& pool, const std::vector<unsigned char>& vchPubKey, const std::string& strOpType, std::string& errorMessage)
 {

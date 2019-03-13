@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "dht/dataentry.h"
+#include "dht/datarecord.h"
 #include "utiltime.h"
 
 #include "libtorrent/session.hpp"
@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
                 dht_put_alert* pa = alert_cast<dht_put_alert>(a);
                 std::printf("%s\n", pa->message().c_str());
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
             }
             else
                 Usage();
@@ -455,7 +455,7 @@ int main(int argc, char* argv[])
                 std::printf("%s: %s\n", item->authoritative ? "auth" : "non-auth", str.c_str());
 
                 int64_t nGetAuthTime = GetTimeMillis();
-                std::printf("Auth milliseconds = %li\n", nGetAuthTime - nStartTime);
+                std::printf("Auth milliseconds = %lli\n", nGetAuthTime - nStartTime);
             }
             else
                 Usage();
@@ -505,7 +505,7 @@ int main(int argc, char* argv[])
                 std::vector<std::vector<unsigned char>> vPubKeys;
                 vPubKeys.push_back(GetPubKeyBytes(pk));
                 std::vector<unsigned char> data = ConvertStringToCharVector(LongString());
-                CDataEntry dataEntry(strSalt, nTotalSlots, vPubKeys, data, 1, 1741050000, DHT::DataFormat::BinaryBlob);
+                CDataRecord dataEntry(strSalt, nTotalSlots, vPubKeys, data, 1, 1741050000, DHT::DataFormat::BinaryBlob);
                 dataEntry.GetHeader().Salt = strSalt + ":" + std::to_string(0);
                 vDynamicValues.push_back(std::make_pair(dataEntry.GetHeader().Salt, dataEntry.HeaderHex));
                 for(const CDataChunk& chunk: dataEntry.GetChunks()) {
@@ -518,7 +518,7 @@ int main(int argc, char* argv[])
                 }
                 std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
             }
             else
                 Usage();
@@ -554,7 +554,7 @@ int main(int argc, char* argv[])
                     strHeaderHex = strHeaderHex.substr(1, strHeaderHex.size() - 2);
                 }
                 std::printf("strHeaderHex: %s\n", strHeaderHex.c_str());
-                CDataHeader header(strHeaderHex);
+                CRecordHeader header(strHeaderHex);
                 std::printf("Header: %s\n", header.ToString().c_str());
                 if (!header.IsNull()) {
                     std::vector<CDataChunk> vChunks;
@@ -571,12 +571,12 @@ int main(int argc, char* argv[])
                         CDataChunk chunk(i, i + 1, strChunkSalt, strChunk);
                         vChunks.push_back(chunk);
                     }
-                    CDataEntry entry(strSalt, nTotalSlots, header, vChunks, GetPrivateKeySeedBytes(seed));
+                    CDataRecord entry(strSalt, nTotalSlots, header, vChunks, GetPrivateKeySeedBytes(seed));
                     std::printf("Value:\n%s\n", entry.Value().c_str());
                     std::printf("Data Size = %lu\n", entry.Value().size());
                 }
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
             }
             else
                 Usage();

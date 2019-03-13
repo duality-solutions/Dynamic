@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "dht/dataentry.h"
+#include "dht/datarecord.h"
 
 #include "bdap/utils.h"
 #include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
@@ -37,7 +37,7 @@ catch (std::bad_alloc const&)
     return false;
 }
 
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, 
+CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const std::vector<std::vector<unsigned char>>& pubkeys, 
                         const std::vector<unsigned char>& data, const uint16_t version, const uint32_t expire, const DHT::DataFormat format)
                         : strOperationCode(opCode), nTotalSlots(slots), nMode(DHT::DataMode::Put), vchData(data), vPubKeys(pubkeys)
 {
@@ -49,19 +49,26 @@ CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const st
     dataHeader.nVersion = version;
     dataHeader.nExpireTime = expire;
     dataHeader.nFormat = (uint32_t)format;
-    dataHeader.nDataSize = data.size();
     dataHeader.Salt = strOperationCode + ":" + std::to_string(0);
-    InitPut();
+    dataHeader.nUnlockTime = GetTime() + 30; // default to unlocks in 30 seconds
+    dataHeader.nTimeStamp = GetTime(); // unlocks in 30 seconds
+    if (format != DHT::DataFormat::Null) {
+        InitPut();
+    }
+    else {
+        InitClear();
+    }
     dataHeader.SetHex();
     HeaderHex = dataHeader.HexValue();
+    fValid = true;
 }
 
-bool CDataEntry::InitPut()
+bool CDataRecord::InitPut()
 {
     std::vector<unsigned char> vchRaw;
     if (dataHeader.nVersion == 1) {
         if (!Encrypt(vPubKeys, vchData, vchRaw, strErrorMessage)) {
-            LogPrintf("CDataEntry::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
+            LogPrintf("CDataRecord::%s -- Encrypt failed: %s\n", __func__, strErrorMessage);
             return false;
         }
     }
@@ -80,6 +87,7 @@ bool CDataEntry::InitPut()
     }
     if (strHexData.size() > DHT_DATA_MAX_CHUNK_SIZE) {
         // We need to chunk into many pieces.
+        uint32_t size = 0;
         uint16_t total_chunks = (strHexData.size() / DHT_DATA_MAX_CHUNK_SIZE) + 1;
         for(unsigned int i = 0; i < total_chunks; i++) {
             uint16_t nPlacement = i + 1;
@@ -87,10 +95,12 @@ bool CDataEntry::InitPut()
             std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
             CDataChunk chunk(i, nPlacement, strSalt, strHexChunk);
             vChunks.push_back(chunk);
+            size = size + strHexChunk.size();
         }
         dataHeader.nChunks = total_chunks;
         dataHeader.nChunkSize = DHT_DATA_MAX_CHUNK_SIZE;
         dataHeader.nIndexLocation = 0;
+        dataHeader.nDataSize = size;
     }
     else {
         std::string strSalt = strOperationCode + ":" + std::to_string(1);
@@ -99,27 +109,52 @@ bool CDataEntry::InitPut()
         dataHeader.nChunks = 1;
         dataHeader.nChunkSize = strHexData.size();
         dataHeader.nIndexLocation = 0;
+        dataHeader.nDataSize = strHexData.size();
     }
     return true;
 }
 
-CDataEntry::CDataEntry(const std::string& opCode, const uint16_t slots, const CDataHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
+bool CDataRecord::InitClear()
+{
+    std::string strNullValue = ZeroString();
+    for(unsigned int i = 0; i < nTotalSlots; i++) {
+        uint16_t nPlacement = i + 1;
+        std::string strSalt = strOperationCode + ":" + std::to_string(nPlacement);
+        CDataChunk chunk(i, nPlacement, strSalt, strNullValue);
+        vChunks.push_back(chunk);
+    }
+    dataHeader.nChunks = nTotalSlots;
+    dataHeader.nChunkSize = 0;
+    dataHeader.nIndexLocation = 0;
+
+    return true;
+}
+
+CDataRecord::CDataRecord(const std::string& opCode, const uint16_t slots, const CRecordHeader& header, const std::vector<CDataChunk>& chunks, const std::vector<unsigned char>& privateKey)
         : strOperationCode(opCode), nTotalSlots(slots),  nMode(DHT::DataMode::Get), dataHeader(header), vChunks(chunks)
 {
     if (header.nVersion > 0 && privateKey.size() == 0)
         throw std::runtime_error("Decrypt entry requires a private key seed.\n");
-    if (header.nVersion == 0 && privateKey.size() > 0)
-        throw std::runtime_error("Private key seed not required for clear text data\n");
 
-    InitGet(privateKey);
+    if (header.nChunks != chunks.size())
+        throw std::runtime_error("Number of chunks in header mismatches the data.\n");
+
+    if (!dataHeader.IsNull())
+        InitGet(privateKey);
+
+    fValid = true;
 }
 
-bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
+bool CDataRecord::InitGet(const std::vector<unsigned char>& privateKey)
 {
     std::string strHexChunks;
     for(unsigned int i = 0; i < dataHeader.nChunks; i++) {
         strHexChunks += vChunks[i].Value;
     }
+
+    if (strHexChunks.size() != dataHeader.nDataSize)
+        throw std::runtime_error("Data size in header mismatches total size from all chunks.\n");
+
     std::vector<unsigned char> vchUnHex = HexStringToCharVector(strHexChunks);
     if (dataHeader.nVersion == 0) {
         vchData = vchUnHex;
@@ -135,7 +170,19 @@ bool CDataEntry::InitGet(const std::vector<unsigned char>& privateKey)
     return true;
 }
 
-std::string CDataEntry::Value() const
+std::string CDataRecord::Value() const
 {
     return stringFromVch(vchData);
+}
+
+CDataRecordBuffer::CDataRecordBuffer(const size_t size) : capacity(size)
+{
+    buffer.resize(size);
+    record = 0;
+}
+
+void CDataRecordBuffer::push_back(const CDataRecord& input)
+{
+    buffer[position()] = input;
+    record++;
 }
