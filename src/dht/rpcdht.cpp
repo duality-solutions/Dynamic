@@ -421,7 +421,7 @@ UniValue putbdapdata(const JSONRPCRequest& request)
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %lli seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
     iSequence++;
     uint16_t nVersion = 1; //TODO (DHT): Default is encrypted but add parameter for use cases where we want clear text.
@@ -516,7 +516,7 @@ UniValue clearbdapdata(const JSONRPCRequest& request)
     CRecordHeader header(strHeaderHex);
 
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %lli seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
     iSequence++;
     uint16_t nVersion = 0;
@@ -1003,9 +1003,9 @@ UniValue putbdaplinkdata(const JSONRPCRequest& request)
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %lli seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
     iSequence++;
 
@@ -1118,9 +1118,9 @@ UniValue clearbdaplinkdata(const JSONRPCRequest& request)
     std::string strHeaderSalt = strOperationType + ":" + std::to_string(0);
     pHashTableSession->SubmitGet(getKey.GetDHTPubKey(), strHeaderSalt, 2000, strHeaderHex, iSequence, fAuthoritative);
     CRecordHeader header(strHeaderHex);
-    LogPrintf("%s -- unlock time = %u\n", __func__, header.nUnlockTime);
+
     if (header.nUnlockTime  > GetTime())
-        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %u seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
+        throw std::runtime_error("putbdapdata: ERRCODE: 5505 - DHT data entry is locked for another %lli seconds" + (header.nUnlockTime  - GetTime()) + _("\n"));
 
     iSequence++;
 

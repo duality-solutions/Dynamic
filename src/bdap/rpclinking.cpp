@@ -868,7 +868,7 @@ static UniValue DenyLink(const JSONRPCRequest& request)
         denyList.Serialize(vchSerializedList);
         nRecords = denyList.vDenyAccounts.size();
     }
-    oLink.push_back(Pair("list_data_size", vchSerializedList.size()));
+    oLink.push_back(Pair("list_data_size", (int)vchSerializedList.size()));
     oLink.push_back(Pair("list_records", nRecords));
     uint16_t nVersion = 1; // VGP encryption version 1
     uint32_t nExpire = 0; // Does not expire.
