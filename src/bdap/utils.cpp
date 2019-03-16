@@ -339,6 +339,45 @@ int GetBDAPOpType(const CTxOut& out)
     return GetBDAPOpType(out.scriptPubKey);
 }
 
+std::string GetOpCodeType(const std::string& strOpCode)
+{
+    if (strOpCode == "bdap_new_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_delete_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_revoke_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_update_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_move_account") {
+        return "account";
+    }
+    else if (strOpCode == "bdap_new_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_delete_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_update_link_request") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_new_link_accept") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_delete_link_accept") {
+        return "link";
+    }
+    else if (strOpCode == "bdap_update_link_accept") {
+        return "link";
+    }
+    else {
+        return "unknown";
+    }
+}
 
 std::string GetBDAPOpTypeString(const int& op1, const int& op2)
 {

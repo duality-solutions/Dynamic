@@ -21,6 +21,7 @@
 #include "checkpoints.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
+#include "bdap/linkmanager.h"
 #include "dht/ed25519.h"
 #include "dht/session.h"
 #include "dht/mutabledb.h"
@@ -1638,6 +1639,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pDomainEntryDB;
                 delete pLinkRequestDB;
                 delete pLinkAcceptDB;
+                delete pLinkManager;
                 // LibTorrent DHT Netowrk Services
                 delete pHashTableSession;
                 delete pMutableDataDB;
@@ -1658,6 +1660,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pDomainEntryDB = new CDomainEntryDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkRequestDB = new CLinkRequestDB(nTotalCache * 35, false, fReindex, obfuscate);
                 pLinkAcceptDB = new CLinkAcceptDB(nTotalCache * 35, false, fReindex, obfuscate);
+                pLinkManager = new CLinkManager();
                 // Init DHT Services DB
                 pHashTableSession = new CHashTableSession();
                 pMutableDataDB = new CMutableDataDB(nTotalCache * 35, false, fReindex, obfuscate);

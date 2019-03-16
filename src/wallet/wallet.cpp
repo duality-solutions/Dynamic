@@ -11,8 +11,10 @@
 #include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
+#include "bdap/linkmanager.h"
+#include "bdap/linkstorage.h"
 #include "bdap/utils.h"
-#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
+//#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "chain.h"
 #include "checkpoints.h"
 #include "consensus/consensus.h"
@@ -1235,65 +1237,6 @@ bool CWallet::LoadToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
-bool CWallet::IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey)
-{
-    CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
-    CKeyEd25519 keyOut;
-    if (GetDHTKey(keyID, keyOut))
-        return true;
-
-    return false;
-}
-
-bool CWallet::IsLinkForMe(const std::vector<unsigned char>& vchLinkPubKey, const std::vector<unsigned char>& vchSharedPubKey)
-{
-    std::vector<std::vector<unsigned char>> vvchMyDHTPubKeys;
-    if (!GetDHTPubKeys(vvchMyDHTPubKeys) )
-        return false;
-
-    if (vvchMyDHTPubKeys.size() == 0)
-        return false;
-
-    for (const std::vector<unsigned char>& vchMyDHTPubKey : vvchMyDHTPubKeys) {
-        CKeyID keyID(Hash160(vchMyDHTPubKey.begin(), vchMyDHTPubKey.end()));
-        CKeyEd25519 dhtKey;
-        if (GetDHTKey(keyID, dhtKey)) {
-            std::vector<unsigned char> vchGetSharedPubKey = GetLinkSharedPubKey(dhtKey, vchLinkPubKey);
-            if (vchGetSharedPubKey == vchSharedPubKey)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-bool CWallet::GetLinkPrivateKey(const std::vector<unsigned char>& vchSenderPubKey, const std::vector<unsigned char>& vchSharedPubKey, std::array<char, 32>& sharedSeed, std::string& strErrorMessage)
-{
-    std::vector<std::vector<unsigned char>> vvchDHTPubKeys;
-    if (!GetDHTPubKeys(vvchDHTPubKeys)) {
-        strErrorMessage = "Error getting DHT key vector.";
-        return false;
-    }
-    // loop through each account key to check if it matches the shared key
-    for (const std::vector<unsigned char>& vchPubKey : vvchDHTPubKeys) {
-        CDomainEntry entry;
-        if (pDomainEntryDB->ReadDomainEntryPubKey(vchPubKey, entry)) {
-            CKeyEd25519 dhtKey;
-            CKeyID keyID(Hash160(vchPubKey.begin(), vchPubKey.end()));
-            if (GetDHTKey(keyID, dhtKey)) {
-                if (vchSharedPubKey == GetLinkSharedPubKey(dhtKey, vchSenderPubKey)) {
-                    sharedSeed = GetLinkSharedPrivateKey(dhtKey, vchSenderPubKey);
-                    return true;
-                }
-            }
-            else {
-                strErrorMessage = strErrorMessage + "Error getting DHT private key.\n";
-            }
-        }
-    }
-    return false;
-}
-
 /**
  * Add a transaction to the wallet, or update it.  pIndex and posInBlock should
  * be set when the transaction was known to be included in a block.  When
@@ -1335,267 +1278,55 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                 if (!pIndex)
                     LogPrintf("%s -- BDAP transaction with a null pIndex.\n", __func__);
 
+                uint256 linkID;
                 CScript bdapOpScript;
                 int op1, op2;
                 std::vector<std::vector<unsigned char>> vvchOpParameters;
                 if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
                     std::string strOpType = GetBDAPOpTypeString(op1, op2);
-                    if (strOpType == "bdap_new_link_request" && vvchOpParameters.size() > 1) {
+                    if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
+                        uint64_t nHeight = pIndex ? (uint64_t)pIndex->nHeight : (uint64_t)chainActive.Height();
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
-                        // Check to see if this link request is from one of my BDAP accounts.
-                        {
-                            bool fIsLinkRequestFromMe = IsLinkFromMe(vchLinkPubKey);
-                            if (fIsLinkRequestFromMe) {
-                                int nOut;
-                                std::vector<unsigned char> vchData, vchHash;
-                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    int nVersion = GetLinkVersionFromData(vchData);
-                                    if (nVersion == 0) {
-                                        if (nVersion == 0) { // version 0 is public and unencrypted
-                                            CLinkRequest link(MakeTransactionRef(tx));
-                                            link.nHeight = pIndex->nHeight;
-                                            CDomainEntry entry;
-                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
-                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
-                                                    LogPrint("bdap", "%s -- Link request from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                                    pLinkRequestDB->AddMyLinkRequest(link);
-                                                }
-                                                else
-                                                    LogPrintf("%s ***** Warning. Link request from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                            }
-                                        }
-                                    }
-                                    else if (nVersion == 1) {
-                                        bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 privDHTKey;
-                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
-                                        if (GetDHTKey(keyID, privDHTKey)) {
-                                            int nDataVersion;
-                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
-                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
-                                            if (nDataVersion == nVersion) {
-                                                std::string strMessage = "";
-                                                std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                    std::vector<unsigned char> vchData, vchHash;
-                                                    CScript scriptData;
-                                                    scriptData << OP_RETURN << dataDecrypted;
-                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
-                                                        CLinkRequest link;
-                                                        link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        if (pIndex) {
-                                                            link.nHeight = pIndex->nHeight;
-                                                        }
-                                                        else {
-                                                            link.nHeight = chainActive.Height();
-                                                        }
-                                                        pLinkRequestDB->AddMyLinkRequest(link);
-                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
-                                                        fDecrypted = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!fDecrypted)
-                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
-                                    }
+                        std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
+                        CWalletDB walletdb(strWalletFile);
+                        if (strOpType == "bdap_new_link_request") {
+                            int nOut;
+                            std::vector<unsigned char> vchData, vchHash;
+                            if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::RequestType, nHeight, GetTime(), tx.GetHash());
+                                if (walletdb.WriteLink(link)) {
+                                    LogPrintf("%s -- WriteLinkRequest nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
+                                    //linkID = link.GetHashID();
                                 }
                             }
                         }
-                        // Check to see if this link request is for one of my BDAP accounts.
-                        {
-                            std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
-                            bool fIsLinkRequestForMe = IsLinkForMe(vchLinkPubKey, vchSharedPubKey);
-                            if (fIsLinkRequestForMe) {
-                                int nOut;
-                                std::vector<unsigned char> vchData, vchHash;
-                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    int nVersion = GetLinkVersionFromData(vchData);
-                                    if (nVersion == 0) {
-                                        if (nVersion == 0) { // version 0 is public and unencrypted
-                                            CLinkRequest link(MakeTransactionRef(tx));
-                                            link.nHeight = pIndex->nHeight;
-                                            CDomainEntry entry;
-                                            if (GetDomainEntry(link.RequestorFullObjectPath, entry)) {
-                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RecipientFQDN(), link.SignatureProof)) {
-                                                    LogPrint("bdap", "%s -- Link request for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                                    pLinkRequestDB->AddMyLinkRequest(link);
-                                                }
-                                                else
-                                                    LogPrintf("%s -- ***** Alert. Link request for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                            }
-                                        }
-                                    }
-                                    else if (nVersion == 1) {
-                                        bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 sharedDHTKey;
-                                        std::array<char, 32> sharedSeed;
-                                        std::string strErrorMessage;
-                                        if (GetLinkPrivateKey(vchLinkPubKey, vchSharedPubKey, sharedSeed, strErrorMessage)) {
-                                            CKeyEd25519 sharedKey(sharedSeed);
-                                            int nDataVersion;
-                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
-                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
-                                            if (nDataVersion == nVersion) {
-                                                std::string strMessage = "";
-                                                std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(sharedKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                    std::vector<unsigned char> vchData, vchHash;
-                                                    CScript scriptData;
-                                                    scriptData << OP_RETURN << dataDecrypted;
-                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
-                                                        CLinkRequest link;
-                                                        link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        if (pIndex) {
-                                                            link.nHeight = pIndex->nHeight;
-                                                        }
-                                                        else {
-                                                            link.nHeight = chainActive.Height();
-                                                        }
-                                                        pLinkRequestDB->AddMyLinkRequest(link);
-                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
-                                                        fDecrypted = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!fDecrypted)
-                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
-                                    }
+                        else if (strOpType == "bdap_new_link_accept") {
+                            int nOut;
+                            std::vector<unsigned char> vchData, vchHash;
+                            if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
+                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::AcceptType, nHeight, GetTime(), tx.GetHash());
+                                if (walletdb.WriteLink(link)) {
+                                    LogPrintf("%s -- WriteLinkAccept nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
+                                    //linkID = link.GetHashID();
+                                }
+                            }
+                        }
+                        else if (strOpType == "bdap_delete_link_request" ||  strOpType == "bdap_delete_link_accept") {
+                            if (strOpType == "bdap_delete_link_request") {
+                                if (walletdb.EraseLink(vchLinkPubKey, vchSharedPubKey)) {
+                                    LogPrintf("%s -- ErasePendingLink linkid = %s, nHeight = %llu, txid = %s\n", __func__, linkID.ToString(), nHeight, tx.GetHash().ToString());
+                                }
+                            }
+                            else if (strOpType == "bdap_delete_link_accept") {
+                                if (walletdb.EraseLink(vchLinkPubKey, vchSharedPubKey)) {
+                                    LogPrintf("%s -- EraseCompletedLink linkid = %s, nHeight = %llu, txid = %s\n", __func__, linkID.ToString(), nHeight, tx.GetHash().ToString());
                                 }
                             }
                         }
                     }
-                    else if (strOpType == "bdap_new_link_accept" && vvchOpParameters.size() > 1) {
-                        std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
-                        // Check to see if this link accept is from one of my BDAP accounts.
-                        {
-                            bool fIsLinkAcceptFromMe = IsLinkFromMe(vchLinkPubKey);
-                            if (fIsLinkAcceptFromMe) {
-                                int nOut;
-                                std::vector<unsigned char> vchData, vchHash;
-                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    int nVersion = GetLinkVersionFromData(vchData);
-                                    if (nVersion == 0) {
-                                        if (nVersion == 0) { // version 0 is public and unencrypted
-                                            CLinkAccept link(MakeTransactionRef(tx));
-                                            link.nHeight = pIndex->nHeight;
-                                            CDomainEntry entry;
-                                            if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
-                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
-                                                    LogPrint("bdap", "%s -- Link accept from me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                                    pLinkAcceptDB->AddMyLinkAccept(link);
-                                                }
-                                                else
-                                                    LogPrintf("%s -- Warning! Link accept from me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                            }
-                                        }
-                                    }
-                                    else if (nVersion == 1) {
-                                        bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 encrypted link accept for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 privDHTKey;
-                                        CKeyID keyID(Hash160(vchLinkPubKey.begin(), vchLinkPubKey.end()));
-                                        if (GetDHTKey(keyID, privDHTKey)) {
-                                            int nDataVersion;
-                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
-                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
-                                            if (nDataVersion == nVersion) {
-                                                std::string strMessage = "";
-                                                std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(privDHTKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                    std::vector<unsigned char> vchData, vchHash;
-                                                    CScript scriptData;
-                                                    scriptData << OP_RETURN << dataDecrypted;
-                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
-                                                        CLinkAccept link;
-                                                        link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        if (pIndex) {
-                                                            link.nHeight = pIndex->nHeight;
-                                                        }
-                                                        else {
-                                                            link.nHeight = chainActive.Height();
-                                                        }
-                                                        pLinkAcceptDB->AddMyLinkAccept(link);
-                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
-                                                        fDecrypted = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!fDecrypted)
-                                            LogPrint("bdap", "%s -- DecryptBDAPData failed.\n", __func__);
-                                    }
-                                }
-                            }
-                        }
-                        // Check to see if this link accept is for one of my BDAP accounts.
-                        {
-                            std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
-                            bool fIsLinkAcceptForMe = IsLinkForMe(vchLinkPubKey, vchSharedPubKey);
-                            if (fIsLinkAcceptForMe) {
-                                int nOut;
-                                std::vector<unsigned char> vchData, vchHash;
-                                if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                    int nVersion = GetLinkVersionFromData(vchData);
-                                    if (nVersion == 0) {
-                                        if (nVersion == 0) { // version 0 is public and unencrypted
-                                            CLinkAccept link(MakeTransactionRef(tx));
-                                            link.nHeight = pIndex->nHeight;
-                                            CDomainEntry entry;
-                                            if (GetDomainEntry(link.RecipientFullObjectPath, entry)) {
-                                                if (SignatureProofIsValid(entry.GetWalletAddress(), link.RequestorFQDN(), link.SignatureProof)) {
-                                                    LogPrint("bdap", "%s -- Link accept for me found with a valid signature proof. Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                                    pLinkAcceptDB->AddMyLinkAccept(link);
-                                                }
-                                                else
-                                                    LogPrintf("%s -- ***** Alert. Link accept for me found with an invalid signature proof! Link requestor = %s, recipient = %s, pubkey = %s\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), stringFromVch(vchLinkPubKey));
-                                            }
-                                        }
-                                    }
-                                    else if (nVersion == 1) {
-                                        bool fDecrypted = false;
-                                        LogPrint("bdap", "%s -- Version 1 link request for me found! vchLinkPubKey = %s\n", __func__, stringFromVch(vchLinkPubKey));
-                                        CKeyEd25519 sharedDHTKey;
-                                        std::array<char, 32> sharedSeed;
-                                        std::string strErrorMessage;
-                                        if (GetLinkPrivateKey(vchLinkPubKey, vchSharedPubKey, sharedSeed, strErrorMessage)) {
-                                            CKeyEd25519 sharedKey(sharedSeed);
-                                            int nDataVersion;
-                                            LogPrint("bdap", "%s --  Encrypted data size = %i\n", __func__, vchData.size());
-                                            vchData = RemoveVersionFromLinkData(vchData, nDataVersion);
-                                            if (nDataVersion == nVersion) {
-                                                std::string strMessage = "";
-                                                std::vector<unsigned char> dataDecrypted;
-                                                if (DecryptBDAPData(sharedKey.GetPrivSeedBytes(), vchData, dataDecrypted, strMessage)) {
-                                                    std::vector<unsigned char> vchData, vchHash;
-                                                    CScript scriptData;
-                                                    scriptData << OP_RETURN << dataDecrypted;
-                                                    if (GetBDAPData(scriptData, vchData, vchHash)) {
-                                                        CLinkAccept link;
-                                                        link.UnserializeFromData(dataDecrypted, vchHash);
-                                                        if (pIndex) {
-                                                            link.nHeight = pIndex->nHeight;
-                                                        }
-                                                        else {
-                                                            link.nHeight = chainActive.Height();
-                                                        }
-                                                        pLinkAcceptDB->AddMyLinkAccept(link);
-                                                        LogPrint("bdap", "%s -- DecryptBDAPData RequestorFQDN = %s, RecipientFQDN = %s, dataDecrypted size = %i\n", __func__, link.RequestorFQDN(), link.RecipientFQDN(), dataDecrypted.size());
-                                                        fDecrypted = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!fDecrypted)
-                                            LogPrint("bdap", "%s -- Link request DecryptBDAPData failed.\n", __func__);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                }
+                if (!(IsLocked(true)) && !(linkID.IsNull())) {
+                    LogPrintf("%s -- Process New Links Here %s\n", __func__, linkID.ToString());
                 }
             }
 

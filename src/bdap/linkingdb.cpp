@@ -627,11 +627,16 @@ bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& script
         if (fJustCheck)
             return true;
 
+        std::vector<unsigned char> vchSharedPubKey;
+        // TODO (BDAP): make sure the DHT pubkeys have not changed before allowing a global delete.
+        if (vvchOpParameters.size() > 1)
+            vchSharedPubKey = vvchOpParameters[1];
+
         if (strOpType == "bdap_delete_link_request") {
-            pLinkRequestDB->EraseMyLinkRequest(vchPubKey);
+            pLinkRequestDB->EraseLinkRequestIndex(vchPubKey, vchSharedPubKey);
         }
         else if (strOpType == "bdap_delete_link_accept") {
-            pLinkAcceptDB->EraseMyLinkAccept(vchPubKey);
+            pLinkAcceptDB->EraseLinkAcceptIndex(vchPubKey, vchSharedPubKey);
         }
     }
     return true;

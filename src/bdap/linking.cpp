@@ -403,17 +403,3 @@ bool SignatureProofIsValid(const CDynamicAddress& addr,  const std::string& strF
     }
     return true;
 }
-
-// TODO: (BDAP) implement BDAP encryption by converting ed25519 private key to curve25519
-/*
-CharString GetEncryptedLinkMessage(const CLinkRequest& requestLink)
-{
-
-}
-
-CharString GetEncryptedLinkMessage(const CLinkRequest& requestLink, const CLinkAccept& acceptLink)
-{
-
-
-}
-*/

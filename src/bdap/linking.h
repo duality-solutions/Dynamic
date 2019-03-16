@@ -27,6 +27,7 @@ class CTransaction;
 // OP_RETURN Format: std::vector<unsigned char> GetEncryptedMessage(Serialize(CLinkRequest))
 
 namespace BDAP {
+
     enum LinkFilterType
     {
         BOTH = 0,
@@ -34,6 +35,21 @@ namespace BDAP {
         RECIPIENT = 2
     };
 
+    enum LinkRole : std::uint8_t
+    {
+        unknown_role = 0,
+        requestor_role = 1,
+        recipient_role = 2,
+        both_role = 3
+    };
+
+    enum LinkState : std::uint8_t
+    {
+        unknown_state = 0,
+        pending_state = 1,
+        complete_state = 2,
+        deleted_state = 3
+    };
 }
 
 class CLinkRequest {
