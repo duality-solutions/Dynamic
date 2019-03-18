@@ -34,22 +34,6 @@ namespace BDAP {
         REQUEST = 1,
         RECIPIENT = 2
     };
-
-    enum LinkRole : std::uint8_t
-    {
-        unknown_role = 0,
-        requestor_role = 1,
-        recipient_role = 2,
-        both_role = 3
-    };
-
-    enum LinkState : std::uint8_t
-    {
-        unknown_state = 0,
-        pending_state = 1,
-        complete_state = 2,
-        deleted_state = 3
-    };
 }
 
 class CLinkRequest {
@@ -75,6 +59,12 @@ public:
         SetNull();
         UnserializeFromTx(tx);
         txHash = tx->GetHash();
+    }
+
+    CLinkRequest(const std::vector<unsigned char>& vchData, const uint256& hash) {
+        SetNull();
+        UnserializeFromData(vchData);
+        txHash = hash;
     }
 
     inline void SetNull()
@@ -131,7 +121,7 @@ public:
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
     bool UnserializeFromTx(const CTransactionRef& tx);
-    bool UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);
@@ -171,6 +161,12 @@ public:
         SetNull();
         UnserializeFromTx(tx);
         txHash = tx->GetHash();
+    }
+
+    CLinkAccept(const std::vector<unsigned char>& vchData, const uint256& hash) {
+        SetNull();
+        UnserializeFromData(vchData);
+        txHash = hash;
     }
 
     inline void SetNull()
@@ -227,7 +223,7 @@ public:
  
     inline bool IsNull() const { return (RequestorFullObjectPath.empty()); }
     bool UnserializeFromTx(const CTransactionRef& tx);
-    bool UnserializeFromData(const std::vector<unsigned char> &vchData, const std::vector<unsigned char> &vchHash);
+    bool UnserializeFromData(const std::vector<unsigned char>& vchData);
     void Serialize(std::vector<unsigned char>& vchData);
 
     bool ValidateValues(std::string& errorMessage);

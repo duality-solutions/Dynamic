@@ -661,3 +661,22 @@ std::string ZeroString()
 {
     return stringFromVch(ZeroCharVector());
 }
+
+std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithVersion = vchData;
+    vchDataWithVersion.push_back(nVersion);
+    std::rotate(vchDataWithVersion.rbegin(), vchDataWithVersion.rbegin() + 1, vchDataWithVersion.rend());
+    return vchDataWithVersion;
+}
+
+std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion)
+{
+    std::vector<unsigned char> vchDataWithoutVersion = vchData;
+    if (vchData.size() == 0)
+        return vchDataWithoutVersion;
+
+    nVersion = (int)vchData[0];
+    vchDataWithoutVersion.erase(vchDataWithoutVersion.begin());
+    return vchDataWithoutVersion;
+}

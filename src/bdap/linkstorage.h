@@ -29,13 +29,15 @@ public:
     std::vector<unsigned char> vchSharedPubKey;
     uint8_t nType;
     uint64_t nHeight;
+    uint64_t nExpireTime;
     uint64_t nTime;
     uint256 txHash;
 
     void SetLinkID();
 
-    CLinkStorage(const std::vector<unsigned char>& data, const std::vector<unsigned char>& pubkey, const std::vector<unsigned char>& sharedPubkey, const uint8_t type, const uint64_t& height, const uint64_t& time, const uint256& txid)
-                    : vchRawData(data), vchLinkPubKey(pubkey), vchSharedPubKey(sharedPubkey), nType(type), nHeight(height), nTime(time), txHash(txid) 
+    CLinkStorage(const std::vector<unsigned char>& data, const std::vector<unsigned char>& pubkey, const std::vector<unsigned char>& sharedPubkey, const uint8_t type, 
+                    const uint64_t& height, const uint64_t& expire, const uint64_t& time, const uint256& txid)
+                    : vchRawData(data), vchLinkPubKey(pubkey), vchSharedPubKey(sharedPubkey), nType(type), nHeight(height), nExpireTime(expire), nTime(time), txHash(txid) 
     {
     }
 
@@ -47,6 +49,7 @@ public:
         vchSharedPubKey.clear();
         nType = 0;
         nHeight = 0;
+        nExpireTime = 0;
         nTime = 0;
         txHash.SetNull();
     }
@@ -61,6 +64,7 @@ public:
         READWRITE(vchSharedPubKey);
         READWRITE(VARINT(nType));
         READWRITE(VARINT(nHeight));
+        READWRITE(VARINT(nExpireTime));
         READWRITE(VARINT(nTime));
         READWRITE(txHash);
     }
@@ -80,6 +84,7 @@ public:
         vchSharedPubKey = b.vchSharedPubKey;
         nType = b.nType;
         nHeight = b.nHeight;
+        nExpireTime = b.nExpireTime;
         nTime = b.nTime;
         txHash = b.txHash;
         return *this;
@@ -90,8 +95,10 @@ public:
 
     inline bool IsNull() const { return (vchRawData.empty()); }
     bool Encrypted() const;
-    int Version() const;
+    int DataVersion() const;
 
 };
+
+void ProcessLink(const CLinkStorage& storage);
 
 #endif // DYNAMIC_BDAP_LINKSTORAGE_H

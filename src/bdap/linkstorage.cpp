@@ -4,10 +4,20 @@
 
 #include "bdap/linkstorage.h"
 
+#include "bdap/linkmanager.h"
+#include "bdap/utils.h"
 #include "hash.h"
 #include "serialize.h"
 #include "streams.h"
 #include "version.h"
+
+void ProcessLink(const CLinkStorage& storage)
+{
+    if (!pLinkManager)
+        throw std::runtime_error("pLinkManager is null.\n");
+
+    pLinkManager->ProcessLink(storage);
+}
 
 void CLinkStorage::Serialize(std::vector<unsigned char>& vchData) 
 {
@@ -27,5 +37,21 @@ bool CLinkStorage::UnserializeFromData(const std::vector<unsigned char>& vchData
         SetNull();
         return false;
     }
+    return true;
+}
+
+int CLinkStorage::DataVersion() const
+{
+    if (vchRawData.size() == 0)
+        return -1;
+
+    return GetLinkVersionFromData(vchRawData);
+}
+
+bool CLinkStorage::Encrypted() const
+{
+    if (DataVersion() == 0 || vchRawData.size() == 0)
+        return false;
+
     return true;
 }

@@ -28,7 +28,7 @@ bool CLinkRequest::UnserializeFromTx(const CTransactionRef& tx)
         SetNull();
         return false;
     }
-    if(!UnserializeFromData(vchData, vchHash))
+    if(!UnserializeFromData(vchData))
     {
         return false;
     }
@@ -42,22 +42,11 @@ void CLinkRequest::Serialize(std::vector<unsigned char>& vchData)
     vchData = std::vector<unsigned char>(dsLinkRequest.begin(), dsLinkRequest.end());
 }
 
-bool CLinkRequest::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
+bool CLinkRequest::UnserializeFromData(const std::vector<unsigned char>& vchData) 
 {
     try {
         CDataStream dsLinkRequest(vchData, SER_NETWORK, PROTOCOL_VERSION);
         dsLinkRequest >> *this;
-
-        std::vector<unsigned char> vchLinkRequestData;
-        Serialize(vchLinkRequestData);
-        const uint256 &calculatedHash = Hash(vchLinkRequestData.begin(), vchLinkRequestData.end());
-        const std::vector<unsigned char> &vchRandLinkRequest = vchFromValue(calculatedHash.GetHex());
-        if(vchRandLinkRequest != vchHash)
-        {
-            SetNull();
-            return false;
-        }
-        txHash = Hash(vchLinkRequestData.begin(), vchLinkRequestData.end());
     } catch (std::exception &e) {
         SetNull();
         return false;
@@ -153,10 +142,14 @@ bool CLinkRequest::Matches(const std::string& strRequestorFQDN, const std::strin
 CharString CLinkRequest::LinkPath() const
 {
     std::vector<unsigned char> vchSeparator = {':'};
-    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
-    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
-    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
-    return vchLinkPath;
+    std::set<std::string> sorted = SortedAccounts();
+    std::set<std::string>::iterator it = sorted.begin();
+    std::vector<unsigned char> vchLink1 = vchFromString(*it);
+    std::advance(it, 1);
+    std::vector<unsigned char> vchLink2 = vchFromString(*it);
+    vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
+    return vchLink1;
 }
 
 std::string CLinkRequest::LinkPathString() const
@@ -174,7 +167,7 @@ bool CLinkAccept::UnserializeFromTx(const CTransactionRef& tx)
         SetNull();
         return false;
     }
-    if(!UnserializeFromData(vchData, vchHash))
+    if(!UnserializeFromData(vchData))
     {
         return false;
     }
@@ -188,22 +181,11 @@ void CLinkAccept::Serialize(std::vector<unsigned char>& vchData)
     vchData = std::vector<unsigned char>(dsAcceptLink.begin(), dsAcceptLink.end());
 }
 
-bool CLinkAccept::UnserializeFromData(const std::vector<unsigned char>& vchData, const std::vector<unsigned char>& vchHash) 
+bool CLinkAccept::UnserializeFromData(const std::vector<unsigned char>& vchData) 
 {
     try {
         CDataStream dsAcceptLink(vchData, SER_NETWORK, PROTOCOL_VERSION);
         dsAcceptLink >> *this;
-
-        std::vector<unsigned char> vchAcceptLinkData;
-        Serialize(vchAcceptLinkData);
-        const uint256 &calculatedHash = Hash(vchAcceptLinkData.begin(), vchAcceptLinkData.end());
-        const std::vector<unsigned char> &vchRandAcceptLink = vchFromValue(calculatedHash.GetHex());
-        if(vchRandAcceptLink != vchHash)
-        {
-            SetNull();
-            return false;
-        }
-        txHash = Hash(vchAcceptLinkData.begin(), vchAcceptLinkData.end());
     } catch (std::exception &e) {
         SetNull();
         return false;
@@ -293,10 +275,14 @@ bool CLinkAccept::Matches(const std::string& strRequestorFQDN, const std::string
 CharString CLinkAccept::LinkPath() const
 {
     std::vector<unsigned char> vchSeparator = {':'};
-    std::vector<unsigned char> vchLinkPath = RequestorFullObjectPath;
-    vchLinkPath.insert(vchLinkPath.end(), vchSeparator.begin(), vchSeparator.end());
-    vchLinkPath.insert(vchLinkPath.end(), RecipientFullObjectPath.begin(), RecipientFullObjectPath.end());
-    return vchLinkPath;
+    std::set<std::string> sorted = SortedAccounts();
+    std::set<std::string>::iterator it = sorted.begin();
+    std::vector<unsigned char> vchLink1 = vchFromString(*it);
+    std::advance(it, 1);
+    std::vector<unsigned char> vchLink2 = vchFromString(*it);
+    vchLink1.insert(vchLink1.end(), vchSeparator.begin(), vchSeparator.end());
+    vchLink1.insert(vchLink1.end(), vchLink2.begin(), vchLink2.end());
+    return vchLink1;
 }
 
 std::string CLinkAccept::LinkPathString() const

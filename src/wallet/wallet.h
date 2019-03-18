@@ -10,6 +10,7 @@
 
 #include "amount.h"
 #include "base58.h"
+#include "bdap/linkstorage.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "ui_interface.h"

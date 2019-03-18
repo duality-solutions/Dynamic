@@ -71,9 +71,6 @@ bool CheckLinkTx(const CTransactionRef& tx, const int& op1, const int& op2, cons
 bool CheckLinkageRequestExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
 bool CheckLinkageAcceptExists(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN);
 bool CheckPreviousLinkInputs(const std::string& strOpType, const CScript& scriptOp, const std::vector<std::vector<unsigned char>>& vvchOpParameters, std::string& errorMessage, bool fJustCheck);
-
-std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion);
-std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion);
 bool GetLinkInfo(const std::string& strRequestorFQDN, const std::string& strRecipientFQDN, CLinkRequest& linkRequest, CLinkAccept& linkAccept);
 
 extern CLinkRequestDB *pLinkRequestDB;

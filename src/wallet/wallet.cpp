@@ -11,10 +11,8 @@
 #include "bdap/bdap.h"
 #include "bdap/domainentrydb.h"
 #include "bdap/linkingdb.h"
-#include "bdap/linkmanager.h"
 #include "bdap/linkstorage.h"
 #include "bdap/utils.h"
-//#include "bdap/vgp/include/encryption.h" // for VGP E2E encryption
 #include "chain.h"
 #include "checkpoints.h"
 #include "consensus/consensus.h"
@@ -1285,6 +1283,10 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                 if (GetBDAPOpScript(ptx, bdapOpScript, vvchOpParameters, op1, op2)) {
                     std::string strOpType = GetBDAPOpTypeString(op1, op2);
                     if (GetOpCodeType(strOpType) == "link" && vvchOpParameters.size() > 1) {
+                        uint64_t nExpireTime = 0;
+                        //if (vvchOpParameters.size() > 2)
+                        //    nExpireTime = vvchOpParameters[2];
+
                         uint64_t nHeight = pIndex ? (uint64_t)pIndex->nHeight : (uint64_t)chainActive.Height();
                         std::vector<unsigned char> vchLinkPubKey = vvchOpParameters[0];
                         std::vector<unsigned char> vchSharedPubKey = vvchOpParameters[1];
@@ -1293,10 +1295,10 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                             int nOut;
                             std::vector<unsigned char> vchData, vchHash;
                             if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::RequestType, nHeight, GetTime(), tx.GetHash());
+                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::RequestType, nHeight, nExpireTime, GetTime(), tx.GetHash());
                                 if (walletdb.WriteLink(link)) {
+                                    ProcessLink(link);
                                     LogPrintf("%s -- WriteLinkRequest nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
-                                    //linkID = link.GetHashID();
                                 }
                             }
                         }
@@ -1304,29 +1306,26 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlockIndex
                             int nOut;
                             std::vector<unsigned char> vchData, vchHash;
                             if (GetBDAPData(ptx, vchData, vchHash, nOut)) {
-                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::AcceptType, nHeight, GetTime(), tx.GetHash());
+                                CLinkStorage link(vchData, vchLinkPubKey, vchSharedPubKey, (uint8_t)BDAP::LinkType::AcceptType, nHeight, nExpireTime, GetTime(), tx.GetHash());
                                 if (walletdb.WriteLink(link)) {
+                                    ProcessLink(link);
                                     LogPrintf("%s -- WriteLinkAccept nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
-                                    //linkID = link.GetHashID();
                                 }
                             }
                         }
                         else if (strOpType == "bdap_delete_link_request" ||  strOpType == "bdap_delete_link_accept") {
                             if (strOpType == "bdap_delete_link_request") {
                                 if (walletdb.EraseLink(vchLinkPubKey, vchSharedPubKey)) {
-                                    LogPrintf("%s -- ErasePendingLink linkid = %s, nHeight = %llu, txid = %s\n", __func__, linkID.ToString(), nHeight, tx.GetHash().ToString());
+                                    LogPrintf("%s -- ErasePendingLink nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
                                 }
                             }
                             else if (strOpType == "bdap_delete_link_accept") {
                                 if (walletdb.EraseLink(vchLinkPubKey, vchSharedPubKey)) {
-                                    LogPrintf("%s -- EraseCompletedLink linkid = %s, nHeight = %llu, txid = %s\n", __func__, linkID.ToString(), nHeight, tx.GetHash().ToString());
+                                    LogPrintf("%s -- EraseCompletedLink nHeight = %llu, txid = %s\n", __func__, nHeight, tx.GetHash().ToString());
                                 }
                             }
                         }
                     }
-                }
-                if (!(IsLocked(true)) && !(linkID.IsNull())) {
-                    LogPrintf("%s -- Process New Links Here %s\n", __func__, linkID.ToString());
                 }
             }
 
