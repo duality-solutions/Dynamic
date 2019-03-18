@@ -529,6 +529,10 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                     LogPrintf("Keypool replenished, re-initializing automatic backups.\n");
                     nWalletBackups = GetArg("-createwalletbackups", 10);
                 }
+                if (!fForMixingOnly) {
+                    // Process encrypted links in queue
+                    ProcessLinkQueue();
+                }
                 return true;
             }
         }
@@ -5188,6 +5192,8 @@ bool CWallet::InitLoadWallet()
         return false;
     }
     pwalletMain = pwallet;
+    // Process link queue.
+    ProcessLinkQueue();
 
     return true;
 }

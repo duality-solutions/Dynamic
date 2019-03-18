@@ -9,8 +9,8 @@
 #include "uint256.h"
 
 #include <array>
-#include <forward_list>
 #include <map>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -89,6 +89,7 @@ public:
     inline CLink operator=(const CLink &b) {
         nVersion = b.nVersion;
         LinkID = b.LinkID;
+        nLinkState = b.nLinkState;
         fRequestFromMe = b.fRequestFromMe;
         fAcceptFromMe = b.fAcceptFromMe;
         RequestorFullObjectPath = b.RequestorFullObjectPath;
@@ -107,13 +108,20 @@ public:
         return *this;
     }
  
+    std::string RequestorFQDN() const;
+    std::string RecipientFQDN() const;
+    std::string RequestorPubKeyString() const;
+    std::string RecipientPubKeyString() const;
+
     inline bool IsNull() const { return (nLinkState == 0 && RequestorFullObjectPath.empty() && RecipientFullObjectPath.empty()); }
 
+    std::string LinkState() const;
+    std::string ToString() const;
 };
 
 class CLinkManager {
 private:
-    std::forward_list<std::pair<uint256, CLinkStorage>> linkQueue;
+    std::queue<CLinkStorage> linkQueue;
     std::map<uint256, CLink> m_Links;
 
 public:
@@ -123,11 +131,21 @@ public:
 
     inline void SetNull()
     {
-        linkQueue.clear();
+        std::queue<CLinkStorage> emptyQueue;
+        linkQueue = emptyQueue;
         m_Links.clear();
     }
 
+    std::size_t QueueSize() const { return linkQueue.size(); }
+    std::size_t LinkCount() const { return m_Links.size(); }
+
     bool ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly = false);
+    void ProcessQueue();
+
+    bool FindLink(const uint256& id, CLink& link);
+    bool ListMyPendingRequests(std::vector<CLink>& vchLinks);
+    bool ListMyPendingAccepts(std::vector<CLink>& vchLinks);
+    bool ListMyCompleted(std::vector<CLink>& vchLinks);
 
 private:
     bool IsLinkFromMe(const std::vector<unsigned char>& vchLinkPubKey);
@@ -137,6 +155,7 @@ private:
 
 uint256 GetLinkID(const CLinkRequest& request);
 uint256 GetLinkID(const CLinkAccept& accept);
+uint256 GetLinkID(const std::string& account1, const std::string& account2);
 
 extern CLinkManager* pLinkManager;
 

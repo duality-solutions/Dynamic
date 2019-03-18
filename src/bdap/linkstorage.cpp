@@ -11,12 +11,20 @@
 #include "streams.h"
 #include "version.h"
 
-void ProcessLink(const CLinkStorage& storage)
+void ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly)
 {
     if (!pLinkManager)
         throw std::runtime_error("pLinkManager is null.\n");
 
-    pLinkManager->ProcessLink(storage);
+    pLinkManager->ProcessLink(storage, fStoreInQueueOnly);
+}
+
+void ProcessLinkQueue()
+{
+    if (!pLinkManager)
+        throw std::runtime_error("pLinkManager is null.\n");
+
+    pLinkManager->ProcessQueue();
 }
 
 void CLinkStorage::Serialize(std::vector<unsigned char>& vchData) 

@@ -33,7 +33,10 @@ public:
     uint64_t nTime;
     uint256 txHash;
 
-    void SetLinkID();
+    CLinkStorage() 
+    {
+        SetNull();
+    }
 
     CLinkStorage(const std::vector<unsigned char>& data, const std::vector<unsigned char>& pubkey, const std::vector<unsigned char>& sharedPubkey, const uint8_t type, 
                     const uint64_t& height, const uint64_t& expire, const uint64_t& time, const uint256& txid)
@@ -99,6 +102,7 @@ public:
 
 };
 
-void ProcessLink(const CLinkStorage& storage);
+void ProcessLink(const CLinkStorage& storage, const bool fStoreInQueueOnly = false);
+void ProcessLinkQueue();
 
 #endif // DYNAMIC_BDAP_LINKSTORAGE_H

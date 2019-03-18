@@ -609,6 +609,14 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue, CW
                 strErr = "Error reading wallet database: LoadHDPubKey failed";
                 return false;
             }
+        } else if (strType == "link") {
+            uint256 linkID;
+            ssKey >> linkID;
+
+            CLinkStorage storage;
+            ssValue >> storage;
+
+            ProcessLink(storage, true);
         }
     } catch (...) {
         if (strType != "keymeta")
@@ -1038,7 +1046,6 @@ bool CWalletDB::WriteLink(const CLinkStorage& link)
     std::vector<unsigned char> vchPubKeys = link.vchLinkPubKey;
     vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
-    LogPrintf("%s -- linkID = %s\n", __func__, linkID.ToString());
     return Write(std::make_pair(std::string("link"), linkID), link);
 }
 
@@ -1050,17 +1057,3 @@ bool CWalletDB::EraseLink(const std::vector<unsigned char>& vchPubKey, const std
     LogPrintf("%s -- linkID = %s\n", __func__, linkID.ToString());
     return Erase(std::make_pair(std::string("link"), linkID));
 }
-
-/*
-// Reads decrypted list from memory map
-bool CWalletDB::ReadAllPendingLinks()
-{
-
-}
-
-// Reads decrypted list from memory map
-bool CWalletDB::ReadAllCompletedLinks()
-{
-
-}
-*/
