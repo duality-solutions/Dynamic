@@ -640,7 +640,6 @@ UniValue deleteuser(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "deleteuser"
             "deleteuser \"account id\"\n"
             "\nArguments:\n"
             "1. account id         (string)             The account objectid within public.bdap.io\n"
