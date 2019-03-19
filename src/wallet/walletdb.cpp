@@ -1043,6 +1043,7 @@ unsigned int CWalletDB::GetUpdateCounter()
 // Stores the raw link in the wallet database
 bool CWalletDB::WriteLink(const CLinkStorage& link)
 {
+    ProcessLink(link);
     std::vector<unsigned char> vchPubKeys = link.vchLinkPubKey;
     vchPubKeys.insert(vchPubKeys.end(), link.vchSharedPubKey.begin(), link.vchSharedPubKey.end());
     uint256 linkID = Hash(vchPubKeys.begin(), vchPubKeys.end());
