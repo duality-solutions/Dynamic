@@ -183,13 +183,19 @@ void CLinkManager::ProcessQueue()
     if (pwalletMain->IsLocked())
         return;
 
-    while (!linkQueue.empty())
+    // make sure we are not stuck in an infinite loop
+    size_t size = QueueSize();
+    size_t counter = 0;
+    LogPrintf("CLinkManager::%s -- Start links in queue = %d\n", __func__, size);
+    while (!linkQueue.empty() && size > counter)
     {
         // TODO (BDAP): Do we need to lock the queue while processing?
         CLinkStorage storage = linkQueue.front();
         ProcessLink(storage);
         linkQueue.pop();
+        counter++;
     }
+    LogPrintf("CLinkManager::%s -- Finished links in queue = %d\n", __func__, QueueSize());
 }
 
 bool CLinkManager::ListMyPendingRequests(std::vector<CLink>& vchLinks)
@@ -329,6 +335,12 @@ bool CLinkManager::ProcessLink(const CLinkStorage& storage, const bool fStoreInQ
     {
         bool fIsLinkFromMe = IsLinkFromMe(storage.vchLinkPubKey);
         bool fIsLinkForMe = IsLinkForMe(storage.vchLinkPubKey, storage.vchSharedPubKey);
+        if (!fIsLinkFromMe && !fIsLinkForMe) {
+            // This happens if you lose your DHT private key but have the BDAP account link wallet private key.
+            LogPrintf("%s -- ** Warning: Encrypted link received but can not process it: TxID = %s\n", __func__, storage.txHash.ToString());
+            return false;
+        }
+
         if (storage.nType == 1 && fIsLinkFromMe) // Encrypted link request from me
         {
             LogPrintf("%s -- Version 1 link request from me found! vchLinkPubKey = %s\n", __func__, stringFromVch(storage.vchLinkPubKey));
