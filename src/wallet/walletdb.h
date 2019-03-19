@@ -26,6 +26,7 @@ class CAccountingEntry;
 class CKeyEd25519;
 struct CBlockLocator;
 class CKeyPool;
+class CLinkStorage;
 class CMasterKey;
 class CScript;
 class CWallet;
@@ -147,6 +148,9 @@ public:
 
     static void IncrementUpdateCounter();
     static unsigned int GetUpdateCounter();
+
+    bool WriteLink(const CLinkStorage& link);
+    bool EraseLink(const std::vector<unsigned char>& vchPubKey, const std::vector<unsigned char>& vchSharedKey);
 
 private:
     CWalletDB(const CWalletDB&);

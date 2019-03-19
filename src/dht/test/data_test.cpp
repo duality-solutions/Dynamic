@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
                 dht_put_alert* pa = alert_cast<dht_put_alert>(a);
                 std::printf("%s\n", pa->message().c_str());
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
             }
             else
                 Usage();
@@ -455,7 +455,7 @@ int main(int argc, char* argv[])
                 std::printf("%s: %s\n", item->authoritative ? "auth" : "non-auth", str.c_str());
 
                 int64_t nGetAuthTime = GetTimeMillis();
-                std::printf("Auth milliseconds = %lli\n", nGetAuthTime - nStartTime);
+                std::printf("Auth milliseconds = %li\n", nGetAuthTime - nStartTime);
             }
             else
                 Usage();
@@ -518,7 +518,7 @@ int main(int argc, char* argv[])
                 }
                 std::printf("PUT public key: %s\n", to_hex(pk.bytes).c_str());
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
             }
             else
                 Usage();
@@ -576,7 +576,7 @@ int main(int argc, char* argv[])
                     std::printf("Data Size = %lu\n", entry.Value().size());
                 }
                 int64_t nEndTime = GetTimeMillis();
-                std::printf("Milliseconds = %lli\n", nEndTime - nStartTime);
+                std::printf("Milliseconds = %li\n", nEndTime - nStartTime);
             }
             else
                 Usage();

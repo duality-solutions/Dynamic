@@ -115,7 +115,7 @@ public:
         header->setSectionResizeMode(QHeaderView::Stretch);
 
         //Parse results and populate QWidgetTable
-        for (size_t i {0} ; i < result.size() ; ++i) {
+        for (size_t i {0} ; i < result.size() - 1 ; ++i) {
             getRequestor = "";
             getRecipient = "";
             getDate = "";

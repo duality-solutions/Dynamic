@@ -64,5 +64,8 @@ std::string CharVectorToHexString(const std::vector<unsigned char>& vch);
 std::vector<unsigned char> HexStringToCharVector(const std::string& hex);
 std::vector<unsigned char> ZeroCharVector();
 std::string ZeroString();
+std::string GetOpCodeType(const std::string& strOpCode);
+std::vector<unsigned char> AddVersionToLinkData(const std::vector<unsigned char>& vchData, const int& nVersion);
+std::vector<unsigned char> RemoveVersionFromLinkData(const std::vector<unsigned char>& vchData, int& nVersion);
 
 #endif // DYNAMIC_BDAP_UTILS_H
